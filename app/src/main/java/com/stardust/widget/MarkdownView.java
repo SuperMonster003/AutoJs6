@@ -1,4 +1,4 @@
-package com.stardust.view;
+package com.stardust.widget;
 
 import android.content.Context;
 import android.os.Build;
