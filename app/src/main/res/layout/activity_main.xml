@@ -12,13 +12,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/app_bar"
+        <ImageView
+            android:id="@+id/app_bar_bg"
             android:layout_width="match_parent"
             android:layout_height="128.5dp"
-            android:background="@drawable/toolbar_bg"
+            android:scaleType="fitXY"
+            android:src="@drawable/toolbar_bg"/>
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:clipToPadding="false"
             android:paddingTop="24dp"
             android:theme="@style/AppTheme.AppBarOverlay">
+
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -41,15 +49,21 @@
             <android.support.design.widget.TabLayout
                 android:id="@+id/tab"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 app:tabGravity="fill"
-                app:tabIndicatorColor="#E91E63"
+                app:tabIndicatorColor="@android:color/white"
                 app:tabMode="fixed"
-                app:tabTextColor="@android:color/primary_text_dark"/>
+                app:tabSelectedTextColor="@android:color/primary_text_dark"
+                app:tabTextColor="@android:color/secondary_text_dark"/>
 
         </android.support.design.widget.AppBarLayout>
 
-        <include layout="@layout/content_main"/>
+        <include
+            android:id="@+id/content_main"
+            layout="@layout/content_main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
         <com.stardust.widget.SlidingUpPanel
             android:id="@+id/bottom_menu"
@@ -117,59 +131,6 @@
 
                 </LinearLayout>
 
-
-                <LinearLayout
-                    android:id="@+id/record"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:visibility="gone"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <com.stardust.theme.widget.ThemeColorImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_video_record"/>
-
-                    <com.stardust.theme.widget.ThemeColorTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/text_script_record"
-                        android:textColor="@color/colorPrimary"
-                        android:textSize="16sp"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/root_record"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <com.stardust.theme.widget.ThemeColorImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_video_record"/>
-
-                    <com.stardust.theme.widget.ThemeColorTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/text_root_script_record"
-                        android:textColor="@color/colorPrimary"
-                        android:textSize="16sp"/>
-
-                </LinearLayout>
-
             </LinearLayout>
 
         </com.stardust.widget.SlidingUpPanel>
@@ -182,6 +143,7 @@
         android:layout_width="304dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:fitsSystemWindows="false"
         />
 </android.support.v4.widget.DrawerLayout>
 
