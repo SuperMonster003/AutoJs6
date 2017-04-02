@@ -1,4 +1,4 @@
-package android.bug;
+package android.workground;
 
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
