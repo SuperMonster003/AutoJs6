@@ -9,15 +9,21 @@
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/action_help"
+        android:id="@+id/action_console"
         android:orderInCategory="200"
+        android:title="@string/text_console"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_help"
+        android:orderInCategory="300"
         android:title="@string/text_help"
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/action_console"
-        android:orderInCategory="300"
-        android:title="@string/text_console"
+        android:id="@+id/action_open_by_other_apps"
+        android:orderInCategory="400"
+        android:title="@string/text_open_by_other_apps"
         app:showAsAction="never"/>
 
 </menu>
