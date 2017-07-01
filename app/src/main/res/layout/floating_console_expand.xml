@@ -68,7 +68,7 @@
 
         </LinearLayout>
 
-        <com.stardust.scriptdroid.ui.console.ConsoleView
+        <com.stardust.autojs.runtime.console.ConsoleView
             android:id="@+id/console"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
