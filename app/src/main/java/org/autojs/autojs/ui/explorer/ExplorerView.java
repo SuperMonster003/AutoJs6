@@ -353,7 +353,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
                 break;
             case R.id.action_build_apk:
                 BuildActivity_.intent(getContext())
-                        .extra(BuildActivity.EXTRA_SOURCE, mSelectedItem.getPath())
+                        .extra(BuildActivity.Companion.getEXTRA_SOURCE(), mSelectedItem.getPath())
                         .start();
                 notifyOperated();
                 break;

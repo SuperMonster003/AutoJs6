@@ -27,7 +27,7 @@ import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
     private OnActivityResultDelegate.Mediator mMediator = new OnActivityResultDelegate.Mediator();
     private static final String LOG_TAG = "EditActivity";
 
-    @ViewById(R.id.editor_view)
+    @BindView(R.id.editor_view)
     EditorView mEditorView;
 
 
@@ -116,7 +116,7 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
     }
 
     private void setUpToolbar() {
-        BaseActivity.setToolbarAsBack(this, R.id.toolbar, mEditorView.getName());
+        BaseActivity.Companion.setToolbarAsBack(this, R.id.toolbar, mEditorView.getName());
     }
 
     @Override

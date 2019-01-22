@@ -42,7 +42,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.CheckedChange;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 import org.autojs.autojs.R;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers;
@@ -114,46 +114,46 @@ public class TimedTaskSettingActivity extends BaseActivity {
             .put(R.id.run_on_time_tick, Intent.ACTION_TIME_TICK)
             .build();
 
-    @ViewById(R.id.toolbar)
+    @BindView(R.id.toolbar)
     Toolbar mToolbar;
 
-    @ViewById(R.id.timing_group)
+    @BindView(R.id.timing_group)
     RadioGroup mTimingGroup;
 
-    @ViewById(R.id.disposable_task_radio)
+    @BindView(R.id.disposable_task_radio)
     RadioButton mDisposableTaskRadio;
 
-    @ViewById(R.id.daily_task_radio)
+    @BindView(R.id.daily_task_radio)
     RadioButton mDailyTaskRadio;
 
-    @ViewById(R.id.weekly_task_radio)
+    @BindView(R.id.weekly_task_radio)
     RadioButton mWeeklyTaskRadio;
 
-    @ViewById(R.id.run_on_broadcast)
+    @BindView(R.id.run_on_broadcast)
     RadioButton mRunOnBroadcastRadio;
 
-    @ViewById(R.id.run_on_other_broadcast)
+    @BindView(R.id.run_on_other_broadcast)
     RadioButton mRunOnOtherBroadcast;
 
-    @ViewById(R.id.action)
+    @BindView(R.id.action)
     EditText mOtherBroadcastAction;
 
-    @ViewById(R.id.broadcast_group)
+    @BindView(R.id.broadcast_group)
     RadioGroup mBroadcastGroup;
 
-    @ViewById(R.id.disposable_task_time)
+    @BindView(R.id.disposable_task_time)
     TextView mDisposableTaskTime;
 
-    @ViewById(R.id.disposable_task_date)
+    @BindView(R.id.disposable_task_date)
     TextView mDisposableTaskDate;
 
-    @ViewById(R.id.daily_task_time_picker)
+    @BindView(R.id.daily_task_time_picker)
     TimePicker mDailyTaskTimePicker;
 
-    @ViewById(R.id.weekly_task_time_picker)
+    @BindView(R.id.weekly_task_time_picker)
     TimePicker mWeeklyTaskTimePicker;
 
-    @ViewById(R.id.weekly_task_container)
+    @BindView(R.id.weekly_task_container)
     LinearLayout mWeeklyTaskContainer;
 
     private List<CheckBox> mDayOfWeekCheckBoxes = new ArrayList<>();

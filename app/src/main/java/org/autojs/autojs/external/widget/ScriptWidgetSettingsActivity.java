@@ -36,7 +36,7 @@ public class ScriptWidgetSettingsActivity extends BaseActivity {
 
     @AfterViews
     void setUpViews() {
-        BaseActivity.setToolbarAsBack(this, R.id.toolbar, getString(R.string.text_please_choose_a_script));
+        BaseActivity.Companion.setToolbarAsBack(this, R.id.toolbar, getString(R.string.text_please_choose_a_script));
         initScriptListRecyclerView();
     }
 

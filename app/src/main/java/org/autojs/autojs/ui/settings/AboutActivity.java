@@ -17,7 +17,7 @@ import org.autojs.autojs.R;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 
 /**
  * Created by Stardust on 2017/2/2.
@@ -26,7 +26,7 @@ import org.androidannotations.annotations.ViewById;
 public class AboutActivity extends BaseActivity {
 
     private static final String TAG = "AboutActivity";
-    @ViewById(R.id.version)
+    @BindView(R.id.version)
     TextView mVersion;
 
     private int mLolClickCount = 0;

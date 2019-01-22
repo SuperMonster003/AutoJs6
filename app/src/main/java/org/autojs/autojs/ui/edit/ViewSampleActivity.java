@@ -85,7 +85,7 @@ public class ViewSampleActivity extends AppCompatActivity implements OnActivityR
     }
 
     private void setUpToolbar() {
-        BaseActivity.setToolbarAsBack(this, R.id.toolbar, mSample.getSimplifiedName());
+        BaseActivity.Companion.setToolbarAsBack(this, R.id.toolbar, mSample.getSimplifiedName());
     }
 
     @OnClick(R.id.run)

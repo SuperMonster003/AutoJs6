@@ -54,7 +54,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.main.MainActivity_"
+            android:name=".ui.main.MainActivity"
             android:hardwareAccelerated="true"
             android:label="@string/app_name"
             android:launchMode="singleTask"
@@ -82,38 +82,38 @@
         </provider>
 
         <activity
-            android:name=".ui.edit.EditActivity_"
+            android:name=".ui.edit.EditActivity"
             android:configChanges="orientation|screenSize"
             android:multiprocess="true"
             android:theme="@style/EditorTheme">
         </activity>
-        <activity android:name=".ui.settings.AboutActivity_"/>
+        <activity android:name=".ui.settings.AboutActivity"/>
         <activity
-            android:name=".ui.settings.SettingsActivity_"
+            android:name=".ui.settings.SettingsActivity"
             android:theme="@style/AppTheme.Settings"/>
         <activity android:name=".ui.error.ErrorReportActivity"/>
         <activity
-            android:name=".external.tasker.TaskerScriptEditActivity_"
+            android:name=".external.tasker.TaskerScriptEditActivity"
             android:configChanges="orientation|screenSize"
             />
         <activity android:name=".ui.edit.ViewSampleActivity"/>
         <activity
-            android:name=".ui.user.LoginActivity_"
+            android:name=".ui.user.LoginActivity"
             android:windowSoftInputMode="adjustResize"/>
         <activity
-            android:name=".ui.user.RegisterActivity_"
+            android:name=".ui.user.RegisterActivity"
             android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".ui.user.WebActivity_"/>
-        <activity android:name=".ui.project.BuildActivity_"/>
-        <activity android:name=".ui.project.ProjectConfigActivity_"/>
-        <activity android:name=".ui.log.LogActivity_"/>
-        <activity android:name=".ui.doc.DocumentationActivity_"/>
-        <activity android:name=".ui.shortcut.ShortcutIconSelectActivity_"/>
-        <activity android:name=".ui.timing.TimedTaskSettingActivity_"/>
+        <activity android:name=".ui.user.WebActivity"/>
+        <activity android:name=".ui.project.BuildActivity"/>
+        <activity android:name=".ui.project.ProjectConfigActivity"/>
+        <activity android:name=".ui.log.LogActivity"/>
+        <activity android:name=".ui.doc.DocumentationActivity"/>
+        <activity android:name=".ui.shortcut.ShortcutIconSelectActivity"/>
+        <activity android:name=".ui.timing.TimedTaskSettingActivity"/>
         <activity
             android:name=".ui.shortcut.ShortcutCreateActivity"
             android:theme="@style/AppTheme.Transparent"/>
-        <activity android:name=".external.widget.ScriptWidgetSettingsActivity_">
+        <activity android:name=".external.widget.ScriptWidgetSettingsActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>
@@ -131,7 +131,7 @@
         <service android:name=".external.foreground.ForegroundService"/>
         <service android:name=".external.ScriptExecutionIntentService"/>
 
-        <activity android:name=".external.tasker.TaskPrefEditActivity_"/>
+        <activity android:name=".external.tasker.TaskPrefEditActivity"/>
 
         <service
             android:name=".external.tile.LayoutBoundsTile"
@@ -165,7 +165,7 @@
             android:exported="true"
             android:icon="@drawable/ic_android_eat_js"
             android:label="@string/app_name"
-            android:targetActivity=".external.tasker.TaskPrefEditActivity_"
+            android:targetActivity=".external.tasker.TaskPrefEditActivity"
             tools:ignore="ExportedActivity">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING"/>

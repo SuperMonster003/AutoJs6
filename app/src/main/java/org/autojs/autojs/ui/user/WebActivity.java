@@ -10,7 +10,7 @@ import org.autojs.autojs.ui.widget.EWebView;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 
 /**
  * Created by Stardust on 2017/10/26.
@@ -22,7 +22,7 @@ public class WebActivity extends BaseActivity implements OnActivityResultDelegat
 
     private OnActivityResultDelegate.Mediator mMediator = new OnActivityResultDelegate.Mediator();
 
-    @ViewById(R.id.eweb_view)
+    @BindView(R.id.eweb_view)
     EWebView mEWebView;
 
     @AfterViews

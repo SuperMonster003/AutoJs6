@@ -24,7 +24,7 @@ public class MarketFragment extends ViewPagerFragment implements BackPressedHand
 
 
     public MarketFragment() {
-        super(ROTATION_GONE);
+        super(Companion.getROTATION_GONE());
     }
 
     @Override

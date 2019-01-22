@@ -1,29 +1,23 @@
 package org.autojs.autojs.ui.project
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
-import androidx.annotation.Nullable
-import androidx.cardview.widget.CardView
-import android.text.Editable
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
-
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.textfield.TextInputLayout
 import com.stardust.autojs.project.ProjectConfig
 import com.stardust.util.IntentUtil
-
-import org.androidannotations.annotations.AfterViews
-import org.androidannotations.annotations.Click
-import org.androidannotations.annotations.EActivity
-import org.androidannotations.annotations.ViewById
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_build.*
 import org.autojs.autojs.Pref
 import org.autojs.autojs.R
 import org.autojs.autojs.autojs.build.ApkBuilder
@@ -36,61 +30,29 @@ import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.shortcut.ShortcutIconSelectActivity
 import org.autojs.autojs.ui.shortcut.ShortcutIconSelectActivity_
-
 import java.io.File
-import java.io.InputStream
-import java.util.Locale
-import java.util.concurrent.Callable
+import java.util.*
 import java.util.regex.Pattern
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 
-/**
- * Created by Stardust on 2017/10/22.
- */
-@EActivity(R.layout.activity_build)
-open class BuildActivity : BaseActivity(), ApkBuilder.ProgressCallback {
-
-    @ViewById(R.id.source_path)
-    internal var mSourcePath: EditText? = null
-
-    @ViewById(R.id.source_path_container)
-    internal var mSourcePathContainer: View? = null
-
-    @ViewById(R.id.output_path)
-    internal var mOutputPath: EditText? = null
-
-    @ViewById(R.id.app_name)
-    internal var mAppName: EditText? = null
-
-    @ViewById(R.id.package_name)
-    internal var mPackageName: EditText? = null
-
-    @ViewById(R.id.version_name)
-    internal var mVersionName: EditText? = null
-
-    @ViewById(R.id.version_code)
-    internal var mVersionCode: EditText? = null
-
-    @ViewById(R.id.icon)
-    internal var mIcon: ImageView? = null
-
-    @ViewById(R.id.app_config)
-    internal var mAppConfig: CardView? = null
+class BuildActivity : BaseActivity(), ApkBuilder.ProgressCallback {
 
     private var mProjectConfig: ProjectConfig? = null
     private var mProgressDialog: MaterialDialog? = null
     private var mSource: String? = null
     private var mIsDefaultIcon = true
 
-    protected override fun onCreate(@Nullable savedInstanceState: Bundle) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_build)
+        setupViews()
     }
 
-    @AfterViews
-    internal fun setupViews() {
+    private fun setupViews() {
         setToolbarAsBack(getString(R.string.text_build_apk))
+        buttonSelectSource.setOnClickListener { selectSourceFilePath() }
+        imageIcon.setOnClickListener { selectIcon() }
+        fab.setOnClickListener { buildApk() }
+        selectOutput.setOnClickListener { selectOutputDirPath() }
         mSource = intent.getStringExtra(EXTRA_SOURCE)
         if (mSource != null) {
             setupWithSourceFile(ScriptFile(mSource))
@@ -118,8 +80,8 @@ open class BuildActivity : BaseActivity(), ApkBuilder.ProgressCallback {
                 .content(msgRes)
                 .positiveText(R.string.ok)
                 .negativeText(R.string.cancel)
-                .onPositive { dialog, which -> downloadPlugin() }
-                .onNegative { dialog, which -> if (finishIfCanceled) finish() }
+                .onPositive { _, _ -> downloadPlugin() }
+                .onNegative { _, _ -> if (finishIfCanceled) finish() }
                 .show()
 
     }
@@ -134,64 +96,55 @@ open class BuildActivity : BaseActivity(), ApkBuilder.ProgressCallback {
         if (dir.startsWith(filesDir.path)) {
             dir = Pref.getScriptDirPath()
         }
-        mOutputPath!!.setText(dir)
-        mAppName!!.setText(file.simplifiedName)
-        mPackageName!!.setText(getString(R.string.format_default_package_name, System.currentTimeMillis()))
+        inputOutputPath.setText(dir)
+        inputAppName.setText(file.simplifiedName)
+        inputPackageName.setText(getString(R.string.format_default_package_name, System.currentTimeMillis()))
         setSource(file)
     }
 
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-
-    }
-
-    @Click(R.id.select_source)
-    internal fun selectSourceFilePath() {
-        val initialDir = File(mSourcePath!!.text.toString()).parent
+    private fun selectSourceFilePath() {
+        val initialDir = File(inputSourcePath.text.toString()).parent
         FileChooserDialogBuilder(this)
                 .title(R.string.text_source_file_path)
                 .dir(Environment.getExternalStorageDirectory().path,
                         initialDir ?: Pref.getScriptDirPath())
-                .singleChoice(SingleChoiceCallback { this.setSource(it) })
+                .singleChoice { this.setSource(it) }
                 .show()
     }
 
     private fun setSource(file: File) {
         if (!file.isDirectory) {
-            mSourcePath!!.setText(file.path)
+            inputSourcePath.setText(file.path)
             return
         }
         mProjectConfig = ProjectConfig.fromProjectDir(file.path)
         if (mProjectConfig == null) {
             return
         }
-        mOutputPath!!.setText(File(mSource, mProjectConfig!!.buildDir).path)
-        mAppConfig!!.visibility = View.GONE
-        mSourcePathContainer!!.visibility = View.GONE
+        inputOutputPath.setText(File(mSource, mProjectConfig!!.buildDir).path)
+        appConfig.visibility = View.GONE
+        containerSourcePath.visibility = View.GONE
     }
 
-    @Click(R.id.select_output)
-    internal fun selectOutputDirPath() {
-        val initialDir = if (File(mOutputPath!!.text.toString()).exists())
-            mOutputPath!!.text.toString()
+    private fun selectOutputDirPath() {
+        val initialDir = if (File(inputOutputPath.text.toString()).exists())
+            inputOutputPath.text.toString()
         else
             Pref.getScriptDirPath()
         FileChooserDialogBuilder(this)
                 .title(R.string.text_output_apk_path)
                 .dir(initialDir)
                 .chooseDir()
-                .singleChoice { dir -> mOutputPath!!.setText(dir.path) }
+                .singleChoice { dir -> inputOutputPath.setText(dir.path) }
                 .show()
     }
 
-    @Click(R.id.icon)
-    internal fun selectIcon() {
+    private fun selectIcon() {
         ShortcutIconSelectActivity_.intent(this)
                 .startForResult(REQUEST_CODE)
     }
 
-    @Click(R.id.fab)
-    internal fun buildApk() {
+    private fun buildApk() {
         if (!ApkBuilderPluginHelper.isPluginAvailable(this)) {
             Toast.makeText(this, R.string.text_apk_builder_plugin_unavailable, Toast.LENGTH_SHORT).show()
             return
@@ -204,13 +157,13 @@ open class BuildActivity : BaseActivity(), ApkBuilder.ProgressCallback {
 
     private fun checkInputs(): Boolean {
         var inputValid = true
-        inputValid = inputValid and checkNotEmpty(mSourcePath!!)
-        inputValid = inputValid and checkNotEmpty(mOutputPath!!)
-        inputValid = inputValid and checkNotEmpty(mAppName!!)
-        inputValid = inputValid and checkNotEmpty(mSourcePath!!)
-        inputValid = inputValid and checkNotEmpty(mVersionCode!!)
-        inputValid = inputValid and checkNotEmpty(mVersionName!!)
-        inputValid = inputValid and checkPackageNameValid(mPackageName!!)
+        inputValid = inputValid and checkNotEmpty(inputSourcePath)
+        inputValid = inputValid and checkNotEmpty(inputOutputPath)
+        inputValid = inputValid and checkNotEmpty(inputAppName)
+        inputValid = inputValid and checkNotEmpty(inputSourcePath)
+        inputValid = inputValid and checkNotEmpty(inputVersionCode)
+        inputValid = inputValid and checkNotEmpty(inputVersionName!!)
+        inputValid = inputValid and checkPackageNameValid(inputPackageName)
         return inputValid
     }
 
@@ -242,37 +195,37 @@ open class BuildActivity : BaseActivity(), ApkBuilder.ProgressCallback {
     private fun doBuildingApk() {
         val appConfig = createAppConfig()
         val tmpDir = File(cacheDir, "build/")
-        val outApk = File(mOutputPath!!.text.toString(),
+        val outApk = File(inputOutputPath.text.toString(),
                 String.format("%s_v%s.apk", appConfig.appName, appConfig.versionName))
         showProgressDialog()
         Observable.fromCallable { callApkBuilder(tmpDir, outApk, appConfig) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ apkBuilder -> onBuildSuccessful(outApk) },
-                        Consumer<Throwable> { this.onBuildFailed(it) })
+                .subscribe({ onBuildSuccessful(outApk) }, { this.onBuildFailed(it) })
     }
 
     private fun createAppConfig(): ApkBuilder.AppConfig {
         if (mProjectConfig != null) {
             return ApkBuilder.AppConfig.fromProjectConfig(mSource, mProjectConfig!!)
         }
-        val jsPath = mSourcePath!!.text.toString()
-        val versionName = mVersionName!!.text.toString()
-        val versionCode = Integer.parseInt(mVersionCode!!.text.toString())
-        val appName = mAppName!!.text.toString()
-        val packageName = mPackageName!!.text.toString()
+        val jsPath = inputSourcePath.text.toString()
+        val versionName = inputVersionName.text.toString()
+        val versionCode = Integer.parseInt(inputVersionCode.text.toString())
+        val appName = inputAppName.text.toString()
+        val packageName = inputPackageName.text.toString()
         return ApkBuilder.AppConfig()
                 .setAppName(appName)
                 .setSourcePath(jsPath)
                 .setPackageName(packageName)
                 .setVersionCode(versionCode)
                 .setVersionName(versionName)
-                .setIcon(if (mIsDefaultIcon)
-                    null
-                else {
-                    BitmapTool.drawableToBitmap(mIcon!!.drawable)
-                } as Callable<Bitmap>
-                )
+                .setIcon {
+                    if (mIsDefaultIcon)
+                        null
+                    else {
+                        BitmapTool.drawableToBitmap(imageIcon.drawable)
+                    }
+                }
     }
 
     @Throws(Exception::class)
@@ -288,6 +241,7 @@ open class BuildActivity : BaseActivity(), ApkBuilder.ProgressCallback {
     }
 
     private fun showProgressDialog() {
+        mProgressDialog?.dismiss()
         mProgressDialog = MaterialDialog.Builder(this)
                 .progress(true, 100)
                 .content(R.string.text_on_progress)
@@ -296,47 +250,45 @@ open class BuildActivity : BaseActivity(), ApkBuilder.ProgressCallback {
     }
 
     private fun onBuildFailed(error: Throwable) {
-        if (mProgressDialog != null) {
-            mProgressDialog!!.dismiss()
-            mProgressDialog = null
-        }
+        mProgressDialog?.dismiss()
+        mProgressDialog = null
         Toast.makeText(this, getString(R.string.text_build_failed) + error.message, Toast.LENGTH_SHORT).show()
         Log.e(LOG_TAG, "Build failed", error)
     }
 
     private fun onBuildSuccessful(outApk: File) {
-        mProgressDialog!!.dismiss()
+        mProgressDialog?.dismiss()
         mProgressDialog = null
         MaterialDialog.Builder(this)
                 .title(R.string.text_build_successfully)
                 .content(getString(R.string.format_build_successfully, outApk.path))
                 .positiveText(R.string.text_install)
                 .negativeText(R.string.cancel)
-                .onPositive { dialog, which -> IntentUtil.installApkOrToast(this@BuildActivity, outApk.path, AppFileProvider.AUTHORITY) }
+                .onPositive { _, _ -> IntentUtil.installApkOrToast(this@BuildActivity, outApk.path, AppFileProvider.AUTHORITY) }
                 .show()
 
     }
 
     override fun onPrepare(builder: ApkBuilder) {
-        mProgressDialog!!.setContent(R.string.apk_builder_prepare)
+        mProgressDialog?.setContent(R.string.apk_builder_prepare)
     }
 
     override fun onBuild(builder: ApkBuilder) {
-        mProgressDialog!!.setContent(R.string.apk_builder_build)
+        mProgressDialog?.setContent(R.string.apk_builder_build)
 
     }
 
     override fun onSign(builder: ApkBuilder) {
-        mProgressDialog!!.setContent(R.string.apk_builder_package)
+        mProgressDialog?.setContent(R.string.apk_builder_package)
 
     }
 
     override fun onClean(builder: ApkBuilder) {
-        mProgressDialog!!.setContent(R.string.apk_builder_clean)
+        mProgressDialog?.setContent(R.string.apk_builder_clean)
     }
 
     @SuppressLint("CheckResult")
-    protected override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) {
             return
         }
@@ -344,19 +296,19 @@ open class BuildActivity : BaseActivity(), ApkBuilder.ProgressCallback {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ bitmap ->
-                    mIcon!!.setImageBitmap(bitmap)
+                    imageIcon.setImageBitmap(bitmap)
                     mIsDefaultIcon = false
-                }, Consumer<Throwable> { it.printStackTrace() })
+                }, { it.printStackTrace() })
 
     }
 
     companion object {
 
-        private val REQUEST_CODE = 44401
+        private const val REQUEST_CODE = 44401
 
         val EXTRA_SOURCE = BuildActivity::class.java.name + ".extra_source_file"
 
-        private val LOG_TAG = "BuildActivity"
+        private const val LOG_TAG = "BuildActivity"
         private val REGEX_PACKAGE_NAME = Pattern.compile("^([A-Za-z][A-Za-z\\d_]*\\.)+([A-Za-z][A-Za-z\\d_]*)$")
     }
 

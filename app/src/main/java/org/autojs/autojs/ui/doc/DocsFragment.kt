@@ -2,33 +2,33 @@ package org.autojs.autojs.ui.doc
 
 import android.app.Activity
 import android.os.Bundle
+import android.text.TextUtils
+import android.view.View
+import android.webkit.WebView
 import androidx.annotation.Nullable
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import android.text.TextUtils
-import android.webkit.WebView
-
+import com.stardust.util.BackPressedHandler
+import kotlinx.android.synthetic.main.fragment_online_docs.*
 import org.autojs.autojs.Pref
 import org.autojs.autojs.R
 import org.autojs.autojs.ui.main.QueryEvent
 import org.autojs.autojs.ui.main.ViewPagerFragment
-
-import com.stardust.util.BackPressedHandler
-
-import org.autojs.autojs.ui.widget.EWebView
-
-import butterknife.BindView
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
 /**
  * Created by Stardust on 2017/8/22.
  */
-class DocsFragment : ViewPagerFragment(ViewPagerFragment.ROTATION_GONE), BackPressedHandler {
+class DocsFragment : ViewPagerFragment(), BackPressedHandler {
 
-    @BindView(R.id.eweb_view)
-    internal var mEWebView: EWebView? = null
-    internal var mWebView: WebView
+    override val layout: Int
+        get() = R.layout.fragment_online_docs
+
+    override val fabRotation: Int
+        get() = ViewPagerFragment.ROTATION_GONE
+
+
+    private lateinit var mWebView: WebView
 
     private var mIndexUrl: String? = null
     private var mPreviousQuery: String? = null
@@ -37,22 +37,22 @@ class DocsFragment : ViewPagerFragment(ViewPagerFragment.ROTATION_GONE), BackPre
         arguments = Bundle()
     }
 
-    override fun onCreate(@Nullable savedInstanceState: Bundle) {
+    override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         EventBus.getDefault().register(this)
     }
 
-    @AfterViews
-    internal fun setUpViews() {
-        mWebView = mEWebView!!.webView
-        mEWebView!!.swipeRefreshLayout.setOnRefreshListener {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mWebView = eweb_view.webView
+        eweb_view.swipeRefreshLayout.setOnRefreshListener {
             if (TextUtils.equals(mWebView.url, mIndexUrl)) {
                 loadUrl()
             } else {
-                mEWebView!!.onRefresh()
+                eweb_view.onRefresh()
             }
         }
-        val savedWebViewState = arguments.getBundle("savedWebViewState")
+        val savedWebViewState = arguments?.getBundle("savedWebViewState")
         if (savedWebViewState != null) {
             mWebView.restoreState(savedWebViewState)
         } else {
@@ -61,7 +61,7 @@ class DocsFragment : ViewPagerFragment(ViewPagerFragment.ROTATION_GONE), BackPre
     }
 
     private fun loadUrl() {
-        mIndexUrl = arguments.getString(ARGUMENT_URL, Pref.getDocumentationUrl() + "index.html")
+        mIndexUrl = arguments?.getString(ARGUMENT_URL, Pref.getDocumentationUrl() + "index.html")
         mWebView.loadUrl(mIndexUrl)
     }
 
@@ -70,7 +70,7 @@ class DocsFragment : ViewPagerFragment(ViewPagerFragment.ROTATION_GONE), BackPre
         super.onPause()
         val savedWebViewState = Bundle()
         mWebView.saveState(savedWebViewState)
-        arguments.putBundle("savedWebViewState", savedWebViewState)
+        arguments?.putBundle("savedWebViewState", savedWebViewState)
     }
 
     override fun onBackPressed(activity: Activity): Boolean {
@@ -114,6 +114,6 @@ class DocsFragment : ViewPagerFragment(ViewPagerFragment.ROTATION_GONE), BackPre
 
     companion object {
 
-        val ARGUMENT_URL = "url"
+        const val ARGUMENT_URL = "url"
     }
 }

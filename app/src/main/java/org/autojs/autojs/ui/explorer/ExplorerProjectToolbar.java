@@ -85,7 +85,7 @@ public class ExplorerProjectToolbar extends CardView {
     @OnClick(R.id.build)
     void build() {
         BuildActivity_.intent(getContext())
-                .extra(BuildActivity.EXTRA_SOURCE, mDirectory.getPath())
+                .extra(BuildActivity.Companion.getEXTRA_SOURCE(), mDirectory.getPath())
                 .start();
     }
 

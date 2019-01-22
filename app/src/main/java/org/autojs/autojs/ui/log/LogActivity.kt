@@ -1,40 +1,31 @@
 package org.autojs.autojs.ui.log
 
 import android.os.Bundle
-import androidx.annotation.Nullable
 import android.view.View
-
-import com.stardust.autojs.core.console.ConsoleView
+import androidx.annotation.Nullable
 import com.stardust.autojs.core.console.ConsoleImpl
-
-import butterknife.BindView
+import kotlinx.android.synthetic.main.activity_log.*
 import org.autojs.autojs.R
 import org.autojs.autojs.autojs.AutoJs
 import org.autojs.autojs.ui.BaseActivity
 
-@EActivity(R.layout.activity_log)
-class LogActivity : BaseActivity() {
+class LogActivity : BaseActivity(R.layout.activity_log) {
 
-    @BindView(R.id.console)
-    internal var mConsoleView: ConsoleView? = null
-
-    private var mConsoleImpl: ConsoleImpl? = null
+    private lateinit var mConsoleImpl: ConsoleImpl
 
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyDayNightMode()
     }
 
-    @AfterViews
-    internal fun setupViews() {
+    override fun setUpViews() {
         setToolbarAsBack(getString(R.string.text_log))
         mConsoleImpl = AutoJs.getInstance().globalConsole
-        mConsoleView!!.setConsole(mConsoleImpl)
-        mConsoleView!!.findViewById<View>(R.id.input_container).visibility = View.GONE
+        fab.setOnClickListener {
+            mConsoleImpl.clear()
+        }
+        console.setConsole(mConsoleImpl)
+        console.findViewById<View>(R.id.input_container).visibility = View.GONE
     }
 
-    @Click(R.id.fab)
-    internal fun clearConsole() {
-        mConsoleImpl!!.clear()
-    }
 }

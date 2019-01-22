@@ -4,23 +4,16 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.annotation.NonNull
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-
-import androidx.core.view.GravityCompat
-import androidx.fragment.app.Fragment
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.widget.Toolbar
-import androidx.viewpager.widget.ViewPager
-import butterknife.BindView
-
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-
-import com.google.android.material.tabs.TabLayout
+import androidx.annotation.NonNull
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.viewpager.widget.ViewPager
+import butterknife.OnClick
 import com.stardust.app.FragmentPagerAdapterBuilder
 import com.stardust.app.OnActivityResultDelegate
 import com.stardust.autojs.core.permission.OnRequestPermissionsResultCallback
@@ -32,10 +25,7 @@ import com.stardust.theme.ThemeColorManager
 import com.stardust.util.BackPressedHandler
 import com.stardust.util.DeveloperUtils
 import com.stardust.util.DrawerAutoClose
-
-import org.androidannotations.annotations.AfterViews
-import org.androidannotations.annotations.Click
-import org.androidannotations.annotations.EActivity
+import kotlinx.android.synthetic.main.activity_main.*
 import org.autojs.autojs.BuildConfig
 import org.autojs.autojs.Pref
 import org.autojs.autojs.R
@@ -45,33 +35,22 @@ import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.tool.AccessibilityServiceTool
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.common.NotAskAgainDialog
-import org.autojs.autojs.ui.doc.DocsFragment_
+import org.autojs.autojs.ui.doc.DocsFragment
 import org.autojs.autojs.ui.floating.FloatyWindowManger
-import org.autojs.autojs.ui.log.LogActivity_
+import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.main.community.CommunityFragment
-import org.autojs.autojs.ui.main.community.CommunityFragment_
-import org.autojs.autojs.ui.main.sample.MarketFragment_
-import org.autojs.autojs.ui.main.scripts.MyScriptListFragment_
-import org.autojs.autojs.ui.main.task.TaskManagerFragment_
-import org.autojs.autojs.ui.settings.SettingsActivity_
+import org.autojs.autojs.ui.main.sample.MarketFragment
+import org.autojs.autojs.ui.main.scripts.MyScriptListFragment
+import org.autojs.autojs.ui.main.task.TaskManagerFragment
+import org.autojs.autojs.ui.settings.SettingsActivity
 import org.autojs.autojs.ui.update.VersionGuard
 import org.autojs.autojs.ui.widget.CommonMarkdownView
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import java.util.*
 
-import java.util.Arrays
-
-class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, BackPressedHandler.HostActivity, PermissionRequestProxyActivity {
-
-    @BindView(R.id.drawer_layout)
-    internal var mDrawerLayout: DrawerLayout? = null
-
-    @BindView(R.id.viewpager)
-    internal var mViewPager: ViewPager? = null
-
-    @BindView(R.id.fab)
-    internal var mFab: FloatingActionButton? = null
+class MainActivity : BaseActivity(R.layout.activity_main), OnActivityResultDelegate.DelegateHost, BackPressedHandler.HostActivity, PermissionRequestProxyActivity {
 
     private var mPagerAdapter: FragmentPagerAdapterBuilder.StoredFragmentPagerAdapter? = null
     private val mActivityResultMediator = OnActivityResultDelegate.Mediator()
@@ -82,11 +61,7 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
     private var mLogMenuItem: MenuItem? = null
     private var mDocsSearchItemExpanded: Boolean = false
 
-
-    object DrawerOpenEvent {
-        internal var SINGLETON = DrawerOpenEvent()
-    }
-
+    object DrawerOpenEvent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,16 +73,15 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
         applyDayNightMode()
     }
 
-    @AfterViews
-    internal override fun setUpViews() {
+    override fun setUpViews() {
         setUpToolbar()
         setUpTabViewPager()
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         registerBackPressHandlers()
         ThemeColorManager.addViewBackground(findViewById(R.id.app_bar))
-        mDrawerLayout!!.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
-            override fun onDrawerOpened(drawerView: View?) {
-                EventBus.getDefault().post(DrawerOpenEvent.SINGLETON)
+        drawer_layout.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
+            override fun onDrawerOpened(drawerView: View) {
+                EventBus.getDefault().post(DrawerOpenEvent)
             }
         })
     }
@@ -127,7 +101,7 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
 
 
     private fun registerBackPressHandlers() {
-        mBackPressObserver.registerHandler(DrawerAutoClose(mDrawerLayout, Gravity.START))
+        mBackPressObserver.registerHandler(DrawerAutoClose(drawer_layout, Gravity.START))
         mBackPressObserver.registerHandler(BackPressedHandler.DoublePressExit(this, R.string.text_press_again_to_exit))
     }
 
@@ -144,30 +118,28 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
                 .content(R.string.explain_accessibility_permission)
                 .positiveText(R.string.text_go_to_setting)
                 .negativeText(R.string.text_cancel)
-                .onPositive { dialog, which -> AccessibilityServiceTool.enableAccessibilityService() }.show()
+                .onPositive { _, _ -> AccessibilityServiceTool.enableAccessibilityService() }.show()
     }
 
     private fun setUpToolbar() {
-        val toolbar = `$`(R.id.toolbar)
         setSupportActionBar(toolbar)
         toolbar.setTitle(R.string.app_name)
-        val drawerToggle = ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.text_drawer_open,
+        val drawerToggle = ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.text_drawer_open,
                 R.string.text_drawer_close)
         drawerToggle.syncState()
-        mDrawerLayout!!.addDrawerListener(drawerToggle)
+        drawer_layout.addDrawerListener(drawerToggle)
     }
 
     private fun setUpTabViewPager() {
-        val tabLayout = `$`(R.id.tab)
         mPagerAdapter = FragmentPagerAdapterBuilder(this)
-                .add(MyScriptListFragment_(), R.string.text_file)
-                .add(DocsFragment_(), R.string.text_tutorial)
-                .add(CommunityFragment_(), R.string.text_community)
-                .add(MarketFragment_(), R.string.text_market)
-                .add(TaskManagerFragment_(), R.string.text_manage)
+                .add(MyScriptListFragment(), R.string.text_file)
+                .add(DocsFragment(), R.string.text_tutorial)
+                .add(CommunityFragment(), R.string.text_community)
+                .add(MarketFragment(), R.string.text_market)
+                .add(TaskManagerFragment(), R.string.text_manage)
                 .build()
-        mViewPager!!.adapter = mPagerAdapter
-        tabLayout.setupWithViewPager(mViewPager)
+        viewpager.adapter = mPagerAdapter
+        tab.setupWithViewPager(viewpager)
         setUpViewPagerFragmentBehaviors()
     }
 
@@ -175,12 +147,12 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
 
 
         mPagerAdapter!!.setOnFragmentInstantiateListener { pos, fragment ->
-            (fragment as ViewPagerFragment).setFab(mFab)
-            if (pos == mViewPager!!.currentItem) {
+            (fragment as ViewPagerFragment).setFab(fab)
+            if (pos == viewpager.currentItem) {
                 fragment.onPageShow()
             }
         }
-        mViewPager!!.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
+        viewpager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             private var mPreviousFragment: ViewPagerFragment? = null
 
             override fun onPageSelected(position: Int) {
@@ -195,12 +167,12 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
     }
 
 
-    @Click(R.id.setting)
+    @OnClick(R.id.setting)
     internal fun startSettingActivity() {
-        startActivity(Intent(this, SettingsActivity_::class.java))
+        startActivity(Intent(this, SettingsActivity::class.java))
     }
 
-    @Click(R.id.exit)
+    @OnClick(R.id.exit)
     fun exitCompletely() {
         finish()
         FloatyWindowManger.hideCircularMenu()
@@ -209,20 +181,16 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
         AutoJs.getInstance().scriptEngineService.stopAll()
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
     override fun onResume() {
         super.onResume()
         mVersionGuard!!.checkForDeprecatesAndUpdates()
     }
 
-    protected override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         mActivityResultMediator.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, @NonNull permissions: Array<String>, @NonNull grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int, @NonNull permissions: Array<out String>, @NonNull grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (mRequestPermissionCallbacks.onRequestPermissionsResult(requestCode, permissions, grantResults)) {
             return
@@ -232,7 +200,7 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
         }
     }
 
-    private fun getGrantResult(permission: String, permissions: Array<String>, grantResults: IntArray): Int {
+    private fun getGrantResult(permission: String, permissions: Array<out String>, grantResults: IntArray): Int {
         val i = Arrays.asList(*permissions).indexOf(permission)
         return if (i < 0) {
             2
@@ -253,7 +221,7 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
     }
 
     override fun onBackPressed() {
-        val fragment = mPagerAdapter!!.getStoredFragment(mViewPager!!.currentItem)
+        val fragment = mPagerAdapter!!.getStoredFragment(viewpager.currentItem)
         if (fragment is BackPressedHandler) {
             if ((fragment as BackPressedHandler).onBackPressed(this)) {
                 return
@@ -291,7 +259,7 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
             if (mDocsSearchItemExpanded) {
                 submitForwardQuery()
             } else {
-                LogActivity_.intent(this).start()
+                startActivity(Intent(this, LogActivity::class.java))
             }
             return true
         }
@@ -300,14 +268,14 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
 
     @Subscribe
     fun onLoadUrl(loadUrl: CommunityFragment.LoadUrl) {
-        mDrawerLayout!!.closeDrawer(GravityCompat.START)
+        drawer_layout.closeDrawer(GravityCompat.START)
     }
 
 
     private fun setUpSearchMenuItem(searchMenuItem: MenuItem) {
         mSearchViewItem = object : SearchViewItem(this, searchMenuItem) {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                if (mViewPager!!.currentItem == 1) {
+                if (viewpager.currentItem == 1) {
                     mDocsSearchItemExpanded = true
                     mLogMenuItem!!.setIcon(R.drawable.ic_ali_up)
                 }
@@ -347,8 +315,4 @@ class MainActivity : BaseActivity(), OnActivityResultDelegate.DelegateHost, Back
         EventBus.getDefault().unregister(this)
     }
 
-    companion object {
-
-        private val LOG_TAG = "MainActivity"
-    }
 }

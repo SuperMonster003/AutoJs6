@@ -3,7 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.jakewharton.butterknife'
 
-def AAVersion = '4.5.2'
 def SupportLibVersion = '28.0.0'
 
 configurations.all {
@@ -96,9 +95,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testImplementation 'junit:junit:4.12'
-    // Android Annotations
-    annotationProcessor "org.androidannotations:androidannotations:$AAVersion"
-    implementation "org.androidannotations:androidannotations-api:$AAVersion"
     // ButterKnife
     implementation('com.jakewharton:butterknife:9.0.0-rc2', {
         exclude group: 'com.android.support'
@@ -107,7 +103,7 @@ dependencies {
     // Android supports
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.1.0-alpha01'
+    implementation 'com.google.android.material:material:1.1.0-alpha02'
     implementation 'androidx.multidex:multidex:2.0.0'
     // Personal libraries
     implementation 'com.github.hyb1996:MutableTheme:1.0.0'
@@ -133,7 +129,7 @@ dependencies {
     //???
     implementation 'com.wang.avi:library:2.1.3'
     //Commons-lang
-    implementation 'org.apache.commons:commons-lang3:3.6'
+    implementation 'org.apache.commons:commons-lang3:3.8.1'
     //Expandable RecyclerView
     implementation 'com.thoughtbot:expandablerecyclerview:1.3'
     implementation 'com.github.hyb1996:Auto.js-ApkBuilder:1.0.1'

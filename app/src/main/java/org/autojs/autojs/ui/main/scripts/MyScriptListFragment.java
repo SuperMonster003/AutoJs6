@@ -11,7 +11,7 @@ import com.stardust.util.IntentUtil;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 import org.autojs.autojs.Pref;
 import org.autojs.autojs.R;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
@@ -44,7 +44,7 @@ public class MyScriptListFragment extends ViewPagerFragment implements FloatingA
         super(0);
     }
 
-    @ViewById(R.id.script_file_list)
+    @BindView(R.id.script_file_list)
     ExplorerView mExplorerView;
 
     private FloatingActionMenu mFloatingActionMenu;

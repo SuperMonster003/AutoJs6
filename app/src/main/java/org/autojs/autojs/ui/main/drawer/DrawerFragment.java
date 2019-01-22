@@ -68,7 +68,7 @@ import com.stardust.util.IntentUtil;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EFragment;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 import org.autojs.autojs.ui.widget.BackgroundTarget;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -92,17 +92,17 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
 
     private static final String URL_DEV_PLUGIN = "https://www.autojs.org/topic/968/";
 
-    @ViewById(R.id.header)
+    @BindView(R.id.header)
     View mHeaderView;
-    @ViewById(R.id.username)
+    @BindView(R.id.username)
     TextView mUserName;
-    @ViewById(R.id.avatar)
+    @BindView(R.id.avatar)
     AvatarView mAvatar;
-    @ViewById(R.id.shadow)
+    @BindView(R.id.shadow)
     View mShadow;
-    @ViewById(R.id.default_cover)
+    @BindView(R.id.default_cover)
     View mDefaultCover;
-    @ViewById(R.id.drawer_menu)
+    @BindView(R.id.drawer_menu)
     RecyclerView mDrawerMenu;
 
 

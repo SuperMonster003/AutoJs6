@@ -1,7 +1,6 @@
 package org.autojs.autojs.ui
 
 import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 
@@ -28,18 +27,20 @@ import java.util.Arrays
 
 import android.content.pm.PackageManager.PERMISSION_DENIED
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import butterknife.ButterKnife
 
 /**
  * Created by Stardust on 2017/1/23.
  */
 
-abstract class BaseActivity(private val mLayout: Int) : AppCompatActivity() {
+abstract class BaseActivity(private val layout: Int) : AppCompatActivity() {
     private var mShouldApplyDayNightModeForOptionsMenu = true
 
-    protected override fun onCreate(@Nullable savedInstanceState: Bundle) {
+    override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (mLayout != 0) {
-            setContentView(mLayout)
+        if (layout != 0) {
+            setContentView(layout)
+            ButterKnife.bind(this)
             setUpViews()
         }
     }
@@ -72,17 +73,12 @@ abstract class BaseActivity(private val mLayout: Int) : AppCompatActivity() {
         if (window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN == 0) {
             ThemeColorManager.addActivityStatusBar(this)
         }
-
-    }
-
-    fun <T : View> `$`(resId: Int): T {
-        return findViewById<View>(resId) as T
     }
 
     protected fun checkPermission(vararg permissions: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val requestPermissions = getRequestPermissions(permissions)
-            if (requestPermissions.size > 0) {
+            if (requestPermissions.isNotEmpty()) {
                 requestPermissions(requestPermissions, PERMISSION_REQUEST_CODE)
                 return false
             }
@@ -97,7 +93,7 @@ abstract class BaseActivity(private val mLayout: Int) : AppCompatActivity() {
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    private fun getRequestPermissions(permissions: Array<String>): Array<String> {
+    private fun getRequestPermissions(permissions: Array<out String>): Array<String> {
         val list = ArrayList<String>()
         for (permission in permissions) {
             if (checkSelfPermission(permission) == PERMISSION_DENIED) {
@@ -112,7 +108,7 @@ abstract class BaseActivity(private val mLayout: Int) : AppCompatActivity() {
     }
 
     @CallSuper
-    override fun onRequestPermissionsResult(requestCode: Int, @NonNull permissions: Array<String>, @NonNull grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int, @NonNull permissions: Array<out String>, @NonNull grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
@@ -130,22 +126,17 @@ abstract class BaseActivity(private val mLayout: Int) : AppCompatActivity() {
         return super.onPrepareOptionsMenu(menu)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-
-        return super.onCreateOptionsMenu(menu)
-    }
-
     companion object {
 
-        protected val PERMISSION_REQUEST_CODE = 11186
+        protected const val PERMISSION_REQUEST_CODE = 11186
 
         fun setToolbarAsBack(activity: AppCompatActivity, id: Int, title: String) {
             val toolbar = activity.findViewById<Toolbar>(id)
             toolbar.title = title
             activity.setSupportActionBar(toolbar)
-            if (activity.supportActionBar != null) {
-                toolbar.setNavigationOnClickListener { v -> activity.finish() }
-                activity.supportActionBar.setDisplayHomeAsUpEnabled(true)
+            activity.supportActionBar?.let {
+                toolbar.setNavigationOnClickListener { activity.finish() }
+                it.setDisplayHomeAsUpEnabled(true)
             }
         }
     }

@@ -13,11 +13,16 @@ import org.autojs.autojs.ui.BaseFragment
  * Created by Stardust on 2017/8/22.
  */
 
-abstract class ViewPagerFragment(private val mFabRotation: Int) : BaseFragment(), BackPressedHandler {
-    private var mFab: FloatingActionButton? = null
+abstract class ViewPagerFragment : BaseFragment(), BackPressedHandler {
+
+    protected abstract val fabRotation: Int
+
+    private lateinit var mFab: FloatingActionButton
+
     var isShown: Boolean = false
         private set
-    private val mOnFabClickListener = { v -> onFabClick(v as FloatingActionButton) }
+
+    private val mOnFabClickListener = { v: View -> onFabClick(v as FloatingActionButton) }
 
     fun setFab(fab: FloatingActionButton) {
         mFab = fab
@@ -28,20 +33,20 @@ abstract class ViewPagerFragment(private val mFabRotation: Int) : BaseFragment()
     @CallSuper
     open fun onPageShow() {
         isShown = true
-        if (mFabRotation == ROTATION_GONE) {
-            if (mFab!!.visibility == View.VISIBLE) {
-                mFab!!.hide()
+        if (fabRotation == ROTATION_GONE) {
+            if (mFab.visibility == View.VISIBLE) {
+                mFab.hide()
             }
-            mFab!!.setOnClickListener(null)
+            mFab.setOnClickListener(null)
             return
         }
-        mFab!!.setOnClickListener(mOnFabClickListener)
-        if (mFab!!.visibility != View.VISIBLE) {
-            mFab!!.rotation = mFabRotation.toFloat()
-            mFab!!.show()
-        } else if (Math.abs(mFab!!.rotation - mFabRotation) > 0.1f) {
-            mFab!!.animate()
-                    .rotation(mFabRotation.toFloat())
+        mFab.setOnClickListener(mOnFabClickListener)
+        if (mFab.visibility != View.VISIBLE) {
+            mFab.rotation = fabRotation.toFloat()
+            mFab.show()
+        } else if (Math.abs(mFab.rotation - fabRotation) > 0.1f) {
+            mFab.animate()
+                    .rotation(fabRotation.toFloat())
                     .setDuration(300)
                     .setInterpolator(FastOutSlowInInterpolator())
                     .start()
@@ -56,6 +61,6 @@ abstract class ViewPagerFragment(private val mFabRotation: Int) : BaseFragment()
 
     companion object {
 
-        protected val ROTATION_GONE = -1
+        const val ROTATION_GONE = -1
     }
 }

@@ -41,7 +41,7 @@ import com.stardust.util.ViewUtils;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EViewGroup;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 import org.autojs.autojs.Pref;
 import org.autojs.autojs.R;
 import org.autojs.autojs.autojs.AutoJs;
@@ -97,31 +97,31 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
     public static final String EXTRA_SAVE_ENABLED = "saveEnabled";
     public static final String EXTRA_RUN_ENABLED = "runEnabled";
 
-    @ViewById(R.id.editor)
+    @BindView(R.id.editor)
     CodeEditor mEditor;
 
-    @ViewById(R.id.code_completion_bar)
+    @BindView(R.id.code_completion_bar)
     CodeCompletionBar mCodeCompletionBar;
 
-    @ViewById(R.id.input_method_enhance_bar)
+    @BindView(R.id.input_method_enhance_bar)
     View mInputMethodEnhanceBar;
 
-    @ViewById(R.id.symbol_bar)
+    @BindView(R.id.symbol_bar)
     CodeCompletionBar mSymbolBar;
 
-    @ViewById(R.id.functions)
+    @BindView(R.id.functions)
     ImageView mShowFunctionsButton;
 
-    @ViewById(R.id.functions_keyboard)
+    @BindView(R.id.functions_keyboard)
     FunctionsKeyboardView mFunctionsKeyboard;
 
-    @ViewById(R.id.debug_bar)
+    @BindView(R.id.debug_bar)
     DebugBar mDebugBar;
 
-    @ViewById(R.id.docs)
+    @BindView(R.id.docs)
     EWebView mDocsWebView;
 
-    @ViewById(R.id.drawer_layout)
+    @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
 
     private String mName;

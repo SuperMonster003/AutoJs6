@@ -20,7 +20,7 @@ import com.stardust.pio.PFiles;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 import org.autojs.autojs.R;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileItem;
@@ -53,25 +53,25 @@ public class ProjectConfigActivity extends BaseActivity {
     private static final Pattern REGEX_PACKAGE_NAME = Pattern.compile("^([A-Za-z][A-Za-z\\d_]*\\.)+([A-Za-z][A-Za-z\\d_]*)$");
 
 
-    @ViewById(R.id.project_location)
+    @BindView(R.id.project_location)
     EditText mProjectLocation;
 
-    @ViewById(R.id.app_name)
+    @BindView(R.id.app_name)
     EditText mAppName;
 
-    @ViewById(R.id.package_name)
+    @BindView(R.id.package_name)
     EditText mPackageName;
 
-    @ViewById(R.id.version_name)
+    @BindView(R.id.version_name)
     EditText mVersionName;
 
-    @ViewById(R.id.version_code)
+    @BindView(R.id.version_code)
     EditText mVersionCode;
 
-    @ViewById(R.id.main_file_name)
+    @BindView(R.id.main_file_name)
     EditText mMainFileName;
 
-    @ViewById(R.id.icon)
+    @BindView(R.id.icon)
     ImageView mIcon;
 
     private File mDirectory;

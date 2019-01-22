@@ -35,7 +35,7 @@ public class TaskPrefEditActivity extends AbstractAppCompatPluginActivity {
 
     @AfterViews
     void setUpViews() {
-        BaseActivity.setToolbarAsBack(this, R.id.toolbar, getString(R.string.text_please_choose_a_script));
+        BaseActivity.Companion.setToolbarAsBack(this, R.id.toolbar, getString(R.string.text_please_choose_a_script));
         initScriptListRecyclerView();
     }
 
@@ -52,7 +52,7 @@ public class TaskPrefEditActivity extends AbstractAppCompatPluginActivity {
 
     @Click(R.id.edit_script)
     void editPreExecuteScript() {
-        TaskerScriptEditActivity.edit(this, getString(R.string.text_pre_execute_script), getString(R.string.summary_pre_execute_script), mPreExecuteScript == null ? "" : mPreExecuteScript);
+        TaskerScriptEditActivity.Companion.edit(this, getString(R.string.text_pre_execute_script), getString(R.string.summary_pre_execute_script), mPreExecuteScript == null ? "" : mPreExecuteScript);
     }
 
     @Override

@@ -24,7 +24,7 @@ import org.autojs.autojs.ui.BaseActivity;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 import org.autojs.autojs.workground.WrapContentGridLayoutManger;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class ShortcutIconSelectActivity extends BaseActivity {
 
     public static final String EXTRA_PACKAGE_NAME = "extra_package_name";
 
-    @ViewById(R.id.apps)
+    @BindView(R.id.apps)
     RecyclerView mApps;
 
     private PackageManager mPackageManager;

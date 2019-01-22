@@ -17,7 +17,7 @@ import com.stardust.theme.ThemeColorManager;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 import org.w3c.dom.Node;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -29,13 +29,13 @@ import io.reactivex.schedulers.Schedulers;
 @EActivity(R.layout.activity_login)
 public class LoginActivity extends BaseActivity {
 
-    @ViewById(R.id.username)
+    @BindView(R.id.username)
     TextView mUserName;
 
-    @ViewById(R.id.password)
+    @BindView(R.id.password)
     TextView mPassword;
 
-    @ViewById(R.id.login)
+    @BindView(R.id.login)
     View mLogin;
 
     @AfterViews

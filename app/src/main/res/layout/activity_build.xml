@@ -57,7 +57,7 @@
                             android:textColor="?android:textColorSecondary"/>
 
                         <LinearLayout
-                            android:id="@+id/source_path_container"
+                            android:id="@+id/containerSourcePath"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
@@ -69,7 +69,7 @@
                                 android:hint="@string/text_source_file_path">
 
                                 <androidx.appcompat.widget.AppCompatEditText
-                                    android:id="@+id/source_path"
+                                    android:id="@+id/inputSourcePath"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     />
@@ -77,7 +77,7 @@
                             </com.google.android.material.textfield.TextInputLayout>
 
                             <androidx.appcompat.widget.AppCompatButton
-                                android:id="@+id/select_source"
+                                android:id="@+id/buttonSelectSource"
                                 style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                                 android:layout_width="60dp"
                                 android:layout_height="wrap_content"
@@ -99,7 +99,7 @@
                                 android:hint="@string/text_output_apk_path">
 
                                 <androidx.appcompat.widget.AppCompatEditText
-                                    android:id="@+id/output_path"
+                                    android:id="@+id/inputOutputPath"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     />
@@ -107,7 +107,7 @@
                             </com.google.android.material.textfield.TextInputLayout>
 
                             <androidx.appcompat.widget.AppCompatButton
-                                android:id="@+id/select_output"
+                                android:id="@+id/selectOutput"
                                 style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                                 android:layout_width="60dp"
                                 android:layout_height="wrap_content"
@@ -119,7 +119,7 @@
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/app_config"
+                    android:id="@+id/appConfig"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="6dp"
@@ -148,7 +148,7 @@
                             android:hint="@string/text_app_name">
 
                             <androidx.appcompat.widget.AppCompatEditText
-                                android:id="@+id/app_name"
+                                android:id="@+id/inputAppName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"/>
                         </com.google.android.material.textfield.TextInputLayout>
@@ -160,7 +160,7 @@
                             android:hint="@string/text_package_name">
 
                             <androidx.appcompat.widget.AppCompatEditText
-                                android:id="@+id/package_name"
+                                android:id="@+id/inputPackageName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_."/>
@@ -184,7 +184,7 @@
                                     android:hint="@string/text_version_name">
 
                                     <androidx.appcompat.widget.AppCompatEditText
-                                        android:id="@+id/version_name"
+                                        android:id="@+id/inputVersionName"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
 
@@ -198,7 +198,7 @@
                                     android:hint="@string/text_version_code">
 
                                     <androidx.appcompat.widget.AppCompatEditText
-                                        android:id="@+id/version_code"
+                                        android:id="@+id/inputVersionCode"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
 
@@ -222,7 +222,7 @@
                                     android:textSize="12sp"/>
 
                                 <ImageView
-                                    android:id="@+id/icon"
+                                    android:id="@+id/imageIcon"
                                     android:layout_width="64dp"
                                     android:layout_height="64dp"
                                     android:layout_gravity="center"

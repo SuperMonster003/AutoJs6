@@ -13,7 +13,7 @@ import org.autojs.autojs.ui.widget.SimpleAdapterDataObserver;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 
 /**
  * Created by Stardust on 2017/3/24.
@@ -21,13 +21,13 @@ import org.androidannotations.annotations.ViewById;
 @EFragment(R.layout.fragment_task_manager)
 public class TaskManagerFragment extends ViewPagerFragment {
 
-    @ViewById(R.id.task_list)
+    @BindView(R.id.task_list)
     TaskListRecyclerView mTaskListRecyclerView;
 
-    @ViewById(R.id.notice_no_running_script)
+    @BindView(R.id.notice_no_running_script)
     View mNoRunningScriptNotice;
 
-    @ViewById(R.id.swipe_refresh_layout)
+    @BindView(R.id.swipe_refresh_layout)
     SwipeRefreshLayout mSwipeRefreshLayout;
 
 

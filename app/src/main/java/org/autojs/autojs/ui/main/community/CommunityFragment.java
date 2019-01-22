@@ -14,7 +14,7 @@ import com.stardust.util.BackPressedHandler;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
-import org.androidannotations.annotations.ViewById;
+import butterknife.BindView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -45,7 +45,7 @@ public class CommunityFragment extends ViewPagerFragment implements BackPressedH
 
     private static final String POSTS_PAGE_PATTERN = "[\\S\\s]+/topic/[0-9]+/[\\S\\s]+";
 
-    @ViewById(R.id.eweb_view)
+    @BindView(R.id.eweb_view)
     CommunityWebView mEWebView;
     WebView mWebView;
 
