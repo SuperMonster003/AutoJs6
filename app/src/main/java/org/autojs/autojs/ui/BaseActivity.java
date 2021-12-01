@@ -22,11 +22,9 @@ import org.autojs.autojs.Pref;
 import org.autojs.autojs.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 /**
  * Created by Stardust on 2017/1/23.
@@ -39,6 +37,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        // Dunno how to disable the splash screen. T-T
+        // com.android.server.policy.PhoneWindowManager.SHOW_SPLASH_SCREENS = false;
         super.onCreate(savedInstanceState);
     }
 
@@ -75,19 +75,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         return (T) findViewById(resId);
     }
 
-    protected boolean checkPermission(String... permissions) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String[] requestPermissions = getRequestPermissions(permissions);
-            if (requestPermissions.length > 0) {
-                requestPermissions(requestPermissions, PERMISSION_REQUEST_CODE);
-                return false;
-            }
-            return true;
-        } else {
-            int[] grantResults = new int[permissions.length];
-            Arrays.fill(grantResults, PERMISSION_GRANTED);
-            onRequestPermissionsResult(PERMISSION_REQUEST_CODE, permissions, grantResults);
-            return false;
+    protected void checkPermission(String... permissions) {
+        String[] requestPermissions = getRequestPermissions(permissions);
+        if (requestPermissions.length > 0) {
+            requestPermissions(requestPermissions, PERMISSION_REQUEST_CODE);
         }
     }
 

@@ -30,18 +30,18 @@ class App : Application() {
         Drawables.setDefaultImageLoader(object : ImageLoader {
             override fun loadInto(imageView: ImageView, uri: Uri) {
                 Glide.with(this@App)
-                        .load(uri)
-                        .into(imageView)
+                    .load(uri)
+                    .into(imageView)
             }
 
             override fun loadIntoBackground(view: View, uri: Uri) {
                 Glide.with(this@App)
-                        .load(uri)
-                        .into(object : SimpleTarget<Drawable>() {
-                            override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>) {
-                                view.background = resource
-                            }
-                        })
+                    .load(uri)
+                    .into(object : SimpleTarget<Drawable>() {
+                        override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                            view.background = resource
+                        }
+                    })
             }
 
             override fun load(view: View, uri: Uri): Drawable {
@@ -50,23 +50,23 @@ class App : Application() {
 
             override fun load(view: View, uri: Uri, drawableCallback: ImageLoader.DrawableCallback) {
                 Glide.with(this@App)
-                        .load(uri)
-                        .into(object : SimpleTarget<Drawable>() {
-                            override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>) {
-                                drawableCallback.onLoaded(resource)
-                            }
-                        })
+                    .load(uri)
+                    .into(object : SimpleTarget<Drawable>() {
+                        override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                            drawableCallback.onLoaded(resource)
+                        }
+                    })
             }
 
             override fun load(view: View, uri: Uri, bitmapCallback: ImageLoader.BitmapCallback) {
                 Glide.with(this@App)
-                        .asBitmap()
-                        .load(uri)
-                        .into(object : SimpleTarget<Bitmap>() {
-                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>) {
-                                bitmapCallback.onLoaded(resource)
-                            }
-                        })
+                    .asBitmap()
+                    .load(uri)
+                    .into(object : SimpleTarget<Bitmap>() {
+                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                            bitmapCallback.onLoaded(resource)
+                        }
+                    })
             }
         })
     }

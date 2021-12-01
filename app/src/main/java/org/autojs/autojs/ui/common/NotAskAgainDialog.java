@@ -1,7 +1,7 @@
 package org.autojs.autojs.ui.common;
 
 import android.content.Context;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import android.text.TextUtils;
 

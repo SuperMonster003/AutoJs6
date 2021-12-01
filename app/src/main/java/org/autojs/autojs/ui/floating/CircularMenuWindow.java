@@ -2,7 +2,7 @@ package org.autojs.autojs.ui.floating;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;

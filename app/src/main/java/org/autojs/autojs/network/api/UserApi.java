@@ -36,5 +36,5 @@ public interface UserApi {
     Observable<ResponseBody> logout(@HeaderMap Map<String, String> csrfToken);
 
     @GET("/api/notifications")
-    Observable<NotificationResponse> getNotifitions();
+    Observable<NotificationResponse> getNotifications();
 }

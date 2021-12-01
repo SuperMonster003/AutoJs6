@@ -19,6 +19,7 @@
     <string name="theme_color_brown">棕色</string>
     <string name="theme_color_gray">灰色</string>
     <string name="theme_color_blue_gray">蓝灰</string>
+    <string name="theme_color_default">默认颜色</string>
 
 
     <color name="theme_color_red">#F44336</color>
@@ -40,4 +41,5 @@
     <color name="theme_color_brown">#795548</color>
     <color name="theme_color_gray">#9E9E9E</color>
     <color name="theme_color_blue_gray">#607D8B</color>
+    <color name="theme_color_default">#37474F</color>
 </resources>

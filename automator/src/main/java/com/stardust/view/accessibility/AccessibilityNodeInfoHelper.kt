@@ -1,10 +1,8 @@
 package com.stardust.view.accessibility
 
 import android.graphics.Rect
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import android.view.accessibility.AccessibilityNodeInfo
-
-import com.stardust.automator.UiObject
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 
 /**
  * Created by Stardust on 2017/3/6.
@@ -20,6 +18,7 @@ object AccessibilityNodeInfoHelper {
      * @param height pixel height of the display
      * @return null if node is null, else a Rect containing visible bounds
      */
+    @Suppress("unused")
     fun getVisibleBoundsInScreen(node: AccessibilityNodeInfo?, width: Int, height: Int): Rect? {
         if (node == null) {
             return null
@@ -33,7 +32,6 @@ object AccessibilityNodeInfoHelper {
         displayRect.left = 0
         displayRect.right = width
         displayRect.bottom = height
-        val intersect = nodeRect.intersect(displayRect)
         return nodeRect
     }
 

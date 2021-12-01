@@ -74,7 +74,6 @@ class NodeInfoView : RecyclerView {
         internal val VIEW_TYPE_HEADER = 0
         internal val VIEW_TYPE_ITEM = 1
 
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val layoutRes = if (viewType == VIEW_TYPE_HEADER) R.layout.node_info_view_header else R.layout.node_info_view_item
             return ViewHolder(LayoutInflater.from(parent.context).inflate(layoutRes, parent, false))
@@ -96,9 +95,7 @@ class NodeInfoView : RecyclerView {
 
     internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        @BindView(R.id.name)
-        val attrName: TextView = itemView.findViewById(R.id.name)
-
+        val attrName: TextView = itemView.findViewById(R.id.name);
         val attrValue: TextView = itemView.findViewById(R.id.value)
 
         init {
@@ -107,7 +104,7 @@ class NodeInfoView : RecyclerView {
                 if (pos < 1 || pos >= mData.size)
                     return@setOnClickListener
                 ClipboardUtil.setClip(context, mData[pos][0] + " = " + mData[pos][1])
-                Snackbar.make(this@NodeInfoView, R.string.text_already_copy_to_clip, Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(this@NodeInfoView, R.string.text_already_copied_to_clip, Snackbar.LENGTH_SHORT).show()
             }
         }
 

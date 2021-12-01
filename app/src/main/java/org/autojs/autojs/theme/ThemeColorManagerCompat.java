@@ -1,8 +1,10 @@
 package org.autojs.autojs.theme;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -20,9 +22,8 @@ import com.stardust.theme.ThemeColorManager;
 public class ThemeColorManagerCompat {
 
     private static SharedPreferences sSharedPreferences;
-    private static Context sContext;
-    private static SharedPreferences.OnSharedPreferenceChangeListener sPreferenceChangeListener = (sharedPreferences, key) -> {
-        if (key.equals(sContext.getString(R.string.key_night_mode))) {
+    private static final SharedPreferences.OnSharedPreferenceChangeListener sPreferenceChangeListener = (sharedPreferences, key) -> {
+        if (key.equals(GlobalAppContext.get().getString(R.string.key_night_mode))) {
             setNightModeEnabled(sharedPreferences.getBoolean(key, false));
         }
     };
@@ -30,7 +31,7 @@ public class ThemeColorManagerCompat {
     public static int getColorPrimary() {
         int color = ThemeColorManager.getColorPrimary();
         if (color == 0) {
-            return GlobalAppContext.get().getResources().getColor(R.color.colorPrimary);
+            return ContextCompat.getColor(GlobalAppContext.get(), R.color.colorPrimary);
         } else {
             return color;
         }
@@ -39,11 +40,11 @@ public class ThemeColorManagerCompat {
     public static void setNightModeEnabled(boolean enabled) {
         if (enabled) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            ThemeColor currentTheme = ThemeColor.fromPreferences(PreferenceManager.getDefaultSharedPreferences(sContext), null);
+            ThemeColor currentTheme = ThemeColor.fromPreferences(PreferenceManager.getDefaultSharedPreferences(GlobalAppContext.get()), null);
             if (currentTheme != null) {
                 currentTheme.saveIn(sSharedPreferences);
             }
-            ThemeColorManager.setThemeColor(ContextCompat.getColor(sContext, R.color.theme_color_black));
+            ThemeColorManager.setThemeColor(ContextCompat.getColor(GlobalAppContext.get(), R.color.theme_color_black));
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             ThemeColor previousTheme = ThemeColor.fromPreferences(sSharedPreferences, null);
@@ -53,11 +54,11 @@ public class ThemeColorManagerCompat {
         }
     }
 
-    public static void init(Context context, ThemeColor defaultThemeColor) {
-        sContext = context;
-        sSharedPreferences = context.getSharedPreferences("theme_color", Context.MODE_PRIVATE);
+    public static void init(ThemeColor defaultThemeColor) {
+        Context mContext = GlobalAppContext.get();
+        sSharedPreferences = mContext.getSharedPreferences("theme_color", Context.MODE_PRIVATE);
         ThemeColorManager.setDefaultThemeColor(defaultThemeColor);
-        ThemeColorManager.init(context);
-        PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(sPreferenceChangeListener);
+        ThemeColorManager.init(mContext);
+        PreferenceManager.getDefaultSharedPreferences(mContext).registerOnSharedPreferenceChangeListener(sPreferenceChangeListener);
     }
 }

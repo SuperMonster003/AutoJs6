@@ -2,7 +2,7 @@ package com.stardust.autojs.core.util;
 
 import android.content.Context;
 import android.os.Handler;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 
 import com.stardust.autojs.runtime.ScriptRuntime;

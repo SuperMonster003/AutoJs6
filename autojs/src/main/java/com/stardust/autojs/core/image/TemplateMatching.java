@@ -37,12 +37,10 @@ public class TemplateMatching {
             this.similarity = similarity;
         }
 
+        @SuppressWarnings("NullableProblems")
         @Override
         public String toString() {
-            return "Match{" +
-                    "point=" + point +
-                    ", similarity=" + similarity +
-                    '}';
+            return String.format("Match{point=%s, similarity=%s}", point, similarity);
         }
     }
 
@@ -68,7 +66,6 @@ public class TemplateMatching {
      * @param weakThreshold   弱阈值。该值用于在每一轮模板匹配中检验是否继续匹配。如果相似度小于该值，则不再继续匹配。
      * @param strictThreshold 强阈值。该值用于检验最终匹配结果，以及在每一轮匹配中如果相似度大于该值则直接返回匹配结果。
      * @param maxLevel        图像金字塔的层数
-     * @return
      */
     public static List<Match> fastTemplateMatching(Mat img, Mat template, int matchMethod, float weakThreshold, float strictThreshold, int maxLevel, int limit) {
         TimingLogger logger = new TimingLogger(LOG_TAG, "fast_tm");
@@ -90,6 +87,8 @@ public class TemplateMatching {
             if (previousMatchResult.isEmpty()) {
                 // 如果不是第一次匹配，并且不满足shouldContinueMatching的条件，则直接退出匹配
                 if (!isFirstMatching && !shouldContinueMatching(level, maxLevel)) {
+                    releaseIfNeeded(src, img);
+                    releaseIfNeeded(currentTemplate, template);
                     break;
                 }
                 Mat matchResult = matchTemplate(src, currentTemplate, matchMethod);
@@ -107,10 +106,8 @@ public class TemplateMatching {
                 }
             }
 
-            if (src != img)
-                OpenCVHelper.release(src);
-            if (currentTemplate != template)
-                OpenCVHelper.release(currentTemplate);
+            releaseIfNeeded(src, img);
+            releaseIfNeeded(currentTemplate, template);
 
             logger.addSplit("level:" + level + ", result:" + previousMatchResult);
 
@@ -138,6 +135,11 @@ public class TemplateMatching {
         return finalMatchResult;
     }
 
+    private static void releaseIfNeeded(Mat src, Mat ref) {
+        if (src != ref) {
+            OpenCVHelper.release(src);
+        }
+    }
 
     private static Mat getPyramidDownAtLevel(Mat m, int level) {
         if (level == 0) {
@@ -190,7 +192,7 @@ public class TemplateMatching {
     private static int selectPyramidLevel(Mat img, Mat template) {
         int minDim = Nath.min(img.rows(), img.cols(), template.rows(), template.cols());
         //这里选取16为图像缩小后的最小宽高，从而用log(2, minDim / 16)得到最多可以经过几次缩小。
-        int maxLevel = (int) (Math.log(minDim / 16) / Math.log(2));
+        int maxLevel = (int) (Math.log(minDim >> 4) / Math.log(2));
         if (maxLevel < 0) {
             return 0;
         }

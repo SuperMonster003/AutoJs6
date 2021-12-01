@@ -8,13 +8,15 @@ import java.util.*
 /**
  * Created by Stardust on 2017/2/1.
  */
-data class ExecutionConfig(var workingDirectory: String = "",
-                           var path: Array<out String> = emptyArray(),
-                           var intentFlags: Int = 0,
-                           var delay: Long = 0,
-                           var interval: Long = 0,
-                           var loopTimes: Int = 1,
-                           var scriptConfig: ScriptConfig = ScriptConfig()) : Parcelable {
+data class ExecutionConfig(
+    var workingDirectory: String = "",
+    var path: Array<out String> = emptyArray(),
+    var intentFlags: Int = 0,
+    var delay: Long = 0,
+    var interval: Long = 0,
+    var loopTimes: Int = 1,
+    var scriptConfig: ScriptConfig = ScriptConfig()
+) : Parcelable {
 
 
     private val mArguments = HashMap<String, Any>()
@@ -23,12 +25,13 @@ data class ExecutionConfig(var workingDirectory: String = "",
         get() = mArguments
 
     constructor(parcel: Parcel) : this(
-            parcel.readString().orEmpty(),
-            parcel.createStringArray().orEmpty(),
-            parcel.readInt(),
-            parcel.readLong(),
-            parcel.readLong(),
-            parcel.readInt())
+        parcel.readString().orEmpty(),
+        parcel.createStringArray().orEmpty(),
+        parcel.readInt(),
+        parcel.readLong(),
+        parcel.readLong(),
+        parcel.readInt()
+    )
 
     fun setArgument(key: String, `object`: Any) {
         mArguments[key] = `object`
@@ -36,6 +39,10 @@ data class ExecutionConfig(var workingDirectory: String = "",
 
     fun getArgument(key: String): Any? {
         return mArguments[key]
+    }
+
+    fun getArguments(): Any {
+        return mArguments
     }
 
     override fun equals(other: Any?): Boolean {

@@ -5,17 +5,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.Looper;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.snackbar.Snackbar;
 import android.text.Editable;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.material.snackbar.Snackbar;
 import com.stardust.app.DialogUtils;
 import com.stardust.app.GlobalAppContext;
 import com.stardust.pio.PFiles;
@@ -30,21 +32,21 @@ import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileItem;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.explorer.Explorers;
-import org.autojs.autojs.storage.file.TmpScriptFiles;
 import org.autojs.autojs.model.sample.SampleFile;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.network.download.DownloadManager;
+import org.autojs.autojs.storage.file.TmpScriptFiles;
+import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity_;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
-
 import org.reactivestreams.Publisher;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -62,10 +64,10 @@ public class ScriptOperations {
 
     private static final String LOG_TAG = "ScriptOperations";
     private final ExplorerPage mExplorerPage;
-    private Context mContext;
-    private View mView;
-    private ScriptFile mCurrentDirectory;
-    private Explorer mExplorer;
+    private final Context mContext;
+    private final View mView;
+    private final ScriptFile mCurrentDirectory;
+    private final Explorer mExplorer;
 
     public ScriptOperations(Context context, View view, ScriptFile currentDirectory) {
         mContext = context;
@@ -243,7 +245,7 @@ public class ScriptOperations {
                 .alwaysCallInputCallback()
                 .input(getString(R.string.text_please_input_name), prefix, false, textWatcher)
                 .onPositive((dialog, which) -> {
-                    input.onNext(dialog.getInputEditText().getText().toString());
+                    input.onNext(Objects.requireNonNull(dialog.getInputEditText()).getText().toString());
                     input.onComplete();
                 })
                 .build());
@@ -291,11 +293,9 @@ public class ScriptOperations {
     public void delete(final ScriptFile scriptFile) {
         DialogUtils.showDialog(new ThemeColorMaterialDialogBuilder(mContext)
                 .title(mContext.getString(R.string.text_are_you_sure_to_delete, scriptFile.getName()))
-                .positiveText(R.string.cancel)
-                .negativeText(R.string.ok)
-                .onNegative((dialog, which) -> {
-                    deleteWithoutConfirm(scriptFile);
-                })
+                .negativeText(R.string.cancel)
+                .positiveText(R.string.ok)
+                .onPositive((dialog, which) -> deleteWithoutConfirm(scriptFile))
                 .build());
 
     }
@@ -307,9 +307,12 @@ public class ScriptOperations {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(deleted -> {
-                    showMessage(deleted ? R.string.text_already_delete : R.string.text_delete_failed);
-                    if (deleted)
+                    if (deleted) {
+                        showMessage(R.string.text_already_delete);
                         notifyFileRemoved(isDir, scriptFile);
+                    } else {
+                        showMessage(R.string.text_delete_failed);
+                    }
                 });
     }
 
@@ -338,7 +341,9 @@ public class ScriptOperations {
                     return RxDialogs.confirm(mContext, R.string.confirm_overwrite_file)
                             .flatMap(yes -> {
                                 if (yes) {
-                                    new File(savePath).delete();
+                                    if (!new File(savePath).delete()) {
+                                        Log.e(LOG_TAG, "download: delete failed");
+                                    }
                                     return Observable.just(savePath);
                                 } else {
                                     return Observable.empty();
@@ -375,9 +380,9 @@ public class ScriptOperations {
 
     private class InputCallback implements MaterialDialog.InputCallback {
 
-        private String mExcluded;
+        private final String mExcluded;
         private boolean mIsFirstTextChanged = true;
-        private String mExtension;
+        private final String mExtension;
 
         InputCallback(@Nullable String ext, String excluded) {
             mExtension = ext == null ? null : "." + ext;

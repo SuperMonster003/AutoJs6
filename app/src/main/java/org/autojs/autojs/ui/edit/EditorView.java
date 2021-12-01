@@ -23,6 +23,7 @@ import androidx.fragment.app.FragmentManager;
 
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.View;
@@ -89,6 +90,8 @@ import static org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE;
  */
 @EViewGroup(R.layout.editor_view)
 public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintClickListener, FunctionsKeyboardView.ClickCallback, ToolbarFragment.OnMenuItemClickListener {
+
+    private static final String TAG = EditorView.class.getSimpleName();
 
     public static final String EXTRA_PATH = "path";
     public static final String EXTRA_NAME = "name";
@@ -408,6 +411,7 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
             Snackbar.make(this, R.string.text_start_running, Snackbar.LENGTH_SHORT).show();
         }
         // TODO: 2018/10/24
+        @Nullable
         ScriptExecution execution = Scripts.INSTANCE.runWithBroadcastSender(new File(mUri.getPath()));
         if (execution == null) {
             return null;
@@ -428,7 +432,8 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
 
     public Observable<String> save() {
         String path = mUri.getPath();
-        PFiles.move(path, path + ".bak");
+        String backPath = path + ".bak";
+        PFiles.move(path, backPath);
         return Observable.just(mEditor.getText())
                 .observeOn(Schedulers.io())
                 .doOnNext(s -> PFiles.write(getContext().getContentResolver().openOutputStream(mUri), s))
@@ -436,6 +441,11 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
                 .doOnNext(s -> {
                     mEditor.markTextAsSaved();
                     setMenuItemStatus(R.id.save, false);
+                })
+                .doOnNext(s -> {
+                    if (!new File(backPath).delete()) {
+                        Log.e(TAG, "save: failed");
+                    }
                 });
     }
 

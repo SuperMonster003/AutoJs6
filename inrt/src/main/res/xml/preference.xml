@@ -11,9 +11,9 @@
 
         <SwitchPreference
             android:defaultValue="false"
-            android:key="@string/key_dont_show_main_activity"
-            android:summary="@string/summary_dont_show_main_activity"
-            android:title="@string/text_dont_show_main_activity"/>
+            android:key="@string/key_not_show_main_activity"
+            android:summary="@string/summary_not_show_main_activity"
+            android:title="@string/text_not_show_main_activity"/>
 
     </PreferenceCategory>
 

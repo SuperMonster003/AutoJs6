@@ -284,11 +284,6 @@ public class JsDialog {
         }
     }
 
-    @Deprecated
-    public void setMessage(CharSequence message) {
-        mDialog.setMessage(message);
-    }
-
     @Nullable
     public ArrayList<CharSequence> getItems() {
         return mDialog.getItems();

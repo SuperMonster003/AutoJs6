@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#009688</color>
-    <color name="colorPrimaryDark">#009688</color>
+<!--    <color name="colorPrimary">#009688</color>-->
+<!--    <color name="colorPrimaryDark">#009688</color>-->
+<!--    <color name="colorAccent">#03a9f4</color>-->
+    <color name="colorPrimary">#37474F</color>
+    <color name="colorPrimaryDark">#37474F</color>
     <color name="colorAccent">#03a9f4</color>
     <color name="sliding_up_panel_shadow_color">#99444444</color>
     <color name="bubble_bg">#eef2f3f9</color>

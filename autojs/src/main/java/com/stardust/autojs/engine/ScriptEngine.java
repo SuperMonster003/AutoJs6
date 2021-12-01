@@ -13,16 +13,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Stardust on 2017/4/2.
  * <p>
- * <p>
  * A ScriptEngine is created by {@link ScriptEngineManager#createEngine(String, int)} ()}, and then can be
- * used to execute script with {@link ScriptEngine#execute(ScriptSource)} in the **same** thread.
+ * used to execute script with {@link ScriptEngine#execute(ScriptSource)} in the <strong>same</strong> thread.
  * When the execution finish successfully, the engine should be destroy in the thread that created it.
- * <p>
+ * <br>
  * If you want to stop the engine in other threads, you should call {@link ScriptEngine#forceStop()}.
+ * </p>
  */
 
 public interface ScriptEngine<S extends ScriptSource> {
-
 
     String TAG_ENV_PATH = "env_path";
     String TAG_SOURCE = "source";

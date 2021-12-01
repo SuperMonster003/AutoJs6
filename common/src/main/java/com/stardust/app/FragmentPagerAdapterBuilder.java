@@ -1,5 +1,6 @@
 package com.stardust.app;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -20,9 +21,9 @@ public class FragmentPagerAdapterBuilder {
         void OnInstantiate(int pos, Fragment fragment);
     }
 
-    private List<Fragment> mFragments = new ArrayList<>();
-    private List<String> mTitles = new ArrayList<>();
-    private FragmentActivity mActivity;
+    private final List<Fragment> mFragments = new ArrayList<>();
+    private final List<String> mTitles = new ArrayList<>();
+    private final FragmentActivity mActivity;
 
     public FragmentPagerAdapterBuilder(FragmentActivity activity) {
         mActivity = activity;
@@ -59,15 +60,16 @@ public class FragmentPagerAdapterBuilder {
 
     public abstract static class StoredFragmentPagerAdapter extends FragmentPagerAdapter {
 
-        private SparseArray<Fragment> mStoredFragments = new SparseArray<>();
+        private final SparseArray<Fragment> mStoredFragments = new SparseArray<>();
         private OnFragmentInstantiateListener mOnFragmentInstantiateListener;
 
         public StoredFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
+        @NonNull
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
+        public Object instantiateItem(@NonNull ViewGroup container, int position) {
             Fragment fragment = (Fragment) super.instantiateItem(container, position);
             mStoredFragments.put(position, fragment);
             if(mOnFragmentInstantiateListener != null){
@@ -78,7 +80,7 @@ public class FragmentPagerAdapterBuilder {
 
 
         @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
+        public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
             mStoredFragments.remove(position);
             super.destroyItem(container, position, object);
         }

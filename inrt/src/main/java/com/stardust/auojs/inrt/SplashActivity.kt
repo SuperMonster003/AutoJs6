@@ -53,7 +53,7 @@ class SplashActivity : AppCompatActivity() {
                 runOnUiThread {
                     Toast.makeText(this@SplashActivity, e.message, Toast.LENGTH_LONG).show()
                     startActivity(Intent(this@SplashActivity, LogActivity::class.java))
-                    AutoJs.instance!!.globalConsole.printAllStackTrace(e)
+                    AutoJs.instance.globalConsole.printAllStackTrace(e)
                 }
             }
         }.start()
@@ -64,13 +64,9 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun checkPermission(vararg permissions: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val requestPermissions = getRequestPermissions(permissions)
-            if (requestPermissions.isNotEmpty()) {
-                requestPermissions(requestPermissions, PERMISSION_REQUEST_CODE)
-            } else {
-                runScript()
-            }
+        val requestPermissions = getRequestPermissions(permissions)
+        if (requestPermissions.isNotEmpty()) {
+            requestPermissions(requestPermissions, PERMISSION_REQUEST_CODE)
         } else {
             runScript()
         }
@@ -91,7 +87,7 @@ class SplashActivity : AppCompatActivity() {
     companion object {
 
         private const val PERMISSION_REQUEST_CODE = 11186
-        private const val INIT_TIMEOUT: Long = 2500
+        private const val INIT_TIMEOUT: Long = 1000
     }
 
 }

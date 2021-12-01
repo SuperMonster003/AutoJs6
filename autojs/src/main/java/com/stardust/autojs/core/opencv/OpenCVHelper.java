@@ -7,11 +7,6 @@ import androidx.annotation.Nullable;
 import android.os.Looper;
 import android.util.Log;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.stardust.app.DialogUtils;
-
-import org.opencv.android.InstallCallbackInterface;
-import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 
@@ -25,7 +20,7 @@ public class OpenCVHelper {
         void onInitFinish();
     }
 
-    private static final String LOG_TAG = "OpenCVHelper";
+    private static final String TAG = "OpenCVHelper";
     private static boolean sInitialized = false;
 
     public static MatOfPoint newMatOfPoint(Mat mat) {
@@ -49,19 +44,20 @@ public class OpenCVHelper {
     }
 
     public synchronized static void initIfNeeded(Context context, InitializeCallback callback) {
-        if (sInitialized) {
-            callback.onInitFinish();
-            return;
-        }
-        sInitialized = true;
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            new Thread(() -> {
-                OpenCVLoader.initDebug();
-                callback.onInitFinish();
-            }).start();
+        if (!sInitialized) {
+            sInitialized = true;
+            if (Looper.getMainLooper() == Looper.myLooper()) {
+                new Thread(() -> init(callback)).start();
+            } else {
+                init(callback);
+            }
         } else {
-            OpenCVLoader.initDebug();
             callback.onInitFinish();
         }
+    }
+
+    private static void init(InitializeCallback callback) {
+        OpenCVLoader.initDebug();
+        callback.onInitFinish();
     }
 }

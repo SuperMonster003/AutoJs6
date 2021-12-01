@@ -49,10 +49,6 @@ public class ApkBuilderPluginHelper {
             return -1;
         }
     }
-
-    public static int getSuitablePluginVersion() {
-        return BuildConfig.VERSION_CODE - 200;
-    }
 }
 
 

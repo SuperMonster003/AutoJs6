@@ -133,8 +133,8 @@ public abstract class AccessibilityBridge {
 
     public void setFlags(int flags) {
         mFlags = flags;
-        if ((mFlags & FLAG_USE_USAGE_STATS) != 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (!AppOpsKt.isOpPermissionGranted(mContext, AppOpsManager.OPSTR_GET_USAGE_STATS)) {
+        if ((mFlags & FLAG_USE_USAGE_STATS) != 0) {
+            if (!AppOpsKt.isUsageStatsPermissionGranted(mContext)) {
                 IntentUtil.requestAppUsagePermission(mContext);
                 throw new SecurityException("没有\"查看使用情况\"权限");
             }

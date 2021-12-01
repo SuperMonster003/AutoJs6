@@ -22,7 +22,7 @@ class GlobalKeyObserver internal constructor() : OnKeyListener, ShellKeyObserver
 
     init {
         AccessibilityService.stickOnKeyObserver
-                .addListener(this)
+            .addListener(this)
         val observer = ShellKeyObserver()
         observer.setKeyListener(this)
         InputEventObserver.getGlobal(GlobalAppContext.get()).addListener(observer)
@@ -31,7 +31,7 @@ class GlobalKeyObserver internal constructor() : OnKeyListener, ShellKeyObserver
     fun onVolumeUp() {
         Log.d(LOG_TAG, "onVolumeUp at " + System.currentTimeMillis())
         if (Pref.shouldStopAllScriptsWhenVolumeUp()) {
-            AutoJs.instance!!.scriptEngineService.stopAllAndToast()
+            AutoJs.instance.scriptEngineService.stopAllAndToast()
         }
     }
 
@@ -83,9 +83,7 @@ class GlobalKeyObserver internal constructor() : OnKeyListener, ShellKeyObserver
     }
 
     companion object {
-
-
-        private val LOG_TAG = "GlobalKeyObserver"
+        private const val LOG_TAG = "GlobalKeyObserver"
         private val sSingleton = GlobalKeyObserver()
 
         fun init() {

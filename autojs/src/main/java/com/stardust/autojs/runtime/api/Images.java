@@ -15,6 +15,7 @@ import android.os.Looper;
 import androidx.annotation.RequiresApi;
 
 import android.util.Base64;
+import android.util.Log;
 import android.view.Gravity;
 
 import com.stardust.autojs.annotation.ScriptVariable;
@@ -44,8 +45,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -53,6 +52,8 @@ import java.util.List;
  */
 @RequiresApi(api = Build.VERSION_CODES.KITKAT)
 public class Images {
+
+    private static final String TAG = Images.class.getSimpleName();
 
     private ScriptRuntime mScriptRuntime;
     private ScreenCaptureRequester mScreenCaptureRequester;
@@ -348,21 +349,22 @@ public class Images {
         }
         Activity currentActivity = mScriptRuntime.app.getCurrentActivity();
         Context context = currentActivity == null ? mContext : currentActivity;
-        mScriptRuntime.console.info("opencv initializing");
+        Log.i(TAG, "opencv: initializing");
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            OpenCVHelper.initIfNeeded(context, () -> {
-                mOpenCvInitialized = true;
-                mScriptRuntime.console.info("opencv initialized");
-            });
+            OpenCVHelper.initIfNeeded(context, this::initSuccessfully);
         } else {
             VolatileDispose<Boolean> result = new VolatileDispose<>();
             OpenCVHelper.initIfNeeded(context, () -> {
-                mOpenCvInitialized = true;
+                initSuccessfully();
                 result.setAndNotify(true);
-                mScriptRuntime.console.info("opencv initialized");
             });
             result.blockedGet();
         }
 
+    }
+
+    private void initSuccessfully() {
+        mOpenCvInitialized = true;
+        Log.i(TAG, "opencv: initialized");
     }
 }

@@ -3,17 +3,15 @@ package org.autojs.autojs;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 
 import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.runtime.accessibility.AccessibilityConfig;
-import com.stardust.theme.ThemeColorManager;
 
 import org.autojs.autojs.autojs.key.GlobalKeyObserver;
-import org.autojs.autojs.theme.ThemeColorManagerCompat;
 
 import java.io.File;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 
 /**
  * Created by Stardust on 2017/1/31.
@@ -22,20 +20,16 @@ public class Pref {
 
     private static final SharedPreferences DISPOSABLE_BOOLEAN = GlobalAppContext.get().getSharedPreferences("DISPOSABLE_BOOLEAN", Context.MODE_PRIVATE);
     private static final String KEY_SERVER_ADDRESS = "KEY_SERVER_ADDRESS";
-    private static final String KEY_SHOULD_SHOW_ANNUNCIATION = "KEY_SHOULD_SHOW_ANNUNCIATION";
     private static final String KEY_FLOATING_MENU_SHOWN = "KEY_FLOATING_MENU_SHOWN";
     private static final String KEY_EDITOR_THEME = "editor.theme";
     private static final String KEY_EDITOR_TEXT_SIZE = "editor.textSize";
 
-    private static SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences p, String key) {
-            if (key.equals(getString(R.string.key_guard_mode))) {
-                AccessibilityConfig.setIsUnintendedGuardEnabled(p.getBoolean(getString(R.string.key_guard_mode), false));
-            } else if ((key.equals(getString(R.string.key_use_volume_control_record)) || key.equals(getString(R.string.key_use_volume_control_running)))
-                    && p.getBoolean(key, false)) {
-                GlobalKeyObserver.init();
-            }
+    private static final SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = (p, key) -> {
+        if (key.equals(getString(R.string.key_guard_mode))) {
+            AccessibilityConfig.setIsUnintendedGuardEnabled(p.getBoolean(getString(R.string.key_guard_mode), false));
+        } else if ((key.equals(getString(R.string.key_use_volume_control_record)) || key.equals(getString(R.string.key_use_volume_control_running)))
+                && p.getBoolean(key, false)) {
+            GlobalKeyObserver.init();
         }
     };
 
@@ -60,19 +54,15 @@ public class Pref {
     }
 
     public static boolean isFirstGoToAccessibilitySetting() {
-        return getDisposableBoolean("isFirstGoToAccessibilitySetting", true);
-    }
-
-    public static int oldVersion() {
-        return 0;
+        return getDisposableBoolean("isFirstGoToAccessibilitySetting", false);
     }
 
     public static boolean isRunningVolumeControlEnabled() {
-        return def().getBoolean(getString(R.string.key_use_volume_control_running), false);
+        return def().getBoolean(getString(R.string.key_use_volume_control_running), true);
     }
 
     public static boolean shouldEnableAccessibilityServiceByRoot() {
-        return def().getBoolean(getString(R.string.key_enable_accessibility_service_by_root), false);
+        return def().getBoolean(getString(R.string.key_enable_accessibility_service_by_root), true);
     }
 
     private static String getString(int id) {
@@ -87,10 +77,6 @@ public class Pref {
         def().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
-    public static boolean isEditActivityFirstUsing() {
-        return getDisposableBoolean("Love Honmua 18.7.9", true);
-    }
-
     public static String getServerAddressOrDefault(String defaultAddress) {
         return def().getString(KEY_SERVER_ADDRESS, defaultAddress);
     }
@@ -99,30 +85,12 @@ public class Pref {
         def().edit().putString(KEY_SERVER_ADDRESS, address).apply();
     }
 
-    public static boolean shouldShowAnnunciation() {
-        return getDisposableBoolean(KEY_SHOULD_SHOW_ANNUNCIATION, true);
-    }
-
-    private static boolean isFirstDay() {
-        long firstUsingMillis = def().getLong("firstUsingMillis", -1);
-        if (firstUsingMillis == -1) {
-            def().edit().putLong("firstUsingMillis", System.currentTimeMillis()).apply();
-            return true;
-        }
-        return System.currentTimeMillis() - firstUsingMillis <= TimeUnit.DAYS.toMillis(1);
-    }
-
     public static boolean isRecordToastEnabled() {
         return def().getBoolean(getString(R.string.key_record_toast), true);
     }
 
     public static boolean rootRecordGeneratesBinary() {
-        return def().getString(getString(R.string.key_root_record_out_file_type), "binary")
-                .equals("binary");
-    }
-
-    public static boolean isObservingKeyEnabled() {
-        return def().getBoolean(getString(R.string.key_enable_observe_key), false);
+        return Objects.equals(def().getString(getString(R.string.key_root_record_out_file_type), "binary"), "binary");
     }
 
     public static boolean isStableModeEnabled() {
@@ -169,6 +137,6 @@ public class Pref {
     }
 
     public static boolean isForegroundServiceEnabled() {
-        return def().getBoolean(getString(R.string.key_foreground_servie), false);
+        return def().getBoolean(getString(R.string.key_foreground_service), false);
     }
 }

@@ -18,7 +18,6 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.w3c.dom.Node;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -53,7 +52,7 @@ public class LoginActivity extends BaseActivity {
         }
         MaterialDialog dialog = new MaterialDialog.Builder(this)
                 .progress(true, 0)
-                .content(R.string.text_logining)
+                .content(R.string.text_logging_in)
                 .cancelable(false)
                 .show();
         UserService.getInstance().login(userName, password)

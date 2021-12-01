@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<android.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   android:widgetLayout="@layout/preference_custom">
 
     <com.stardust.theme.preference.ThemeColorPreferenceCategory
@@ -15,7 +15,7 @@
             android:title="@string/text_use_volume_control_record"/>
 
         <com.stardust.theme.preference.ThemeColorSwitchPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="@string/key_record_toast"
             android:layout="@layout/preference_custom"
             android:title="@string/text_record_msg"/>
@@ -35,7 +35,7 @@
         android:title="@string/text_script_running">
 
         <com.stardust.theme.preference.ThemeColorSwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="@string/key_use_volume_control_running"
             android:layout="@layout/preference_custom"
             android:title="@string/text_use_volume_to_stop_running"/>
@@ -65,7 +65,7 @@
         android:title="@string/text_accessibility_service">
 
         <com.stardust.theme.preference.ThemeColorSwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="@string/key_enable_accessibility_service_by_root"
             android:layout="@layout/preference_custom"
             android:summary="@string/summary_enable_accessibility_service_by_root"
@@ -116,10 +116,10 @@
         android:layout="@layout/preference_category_custom"
         android:title="@string/text_about">
 
-        <Preference
-            android:layout="@layout/preference_custom"
-            android:title="@string/text_check_for_updates"
-            />
+<!--        <Preference-->
+<!--            android:layout="@layout/preference_custom"-->
+<!--            android:title="@string/text_check_for_updates"-->
+<!--            />-->
 
         <Preference
             android:layout="@layout/preference_custom"
@@ -137,4 +137,4 @@
             />
     </com.stardust.theme.preference.ThemeColorPreferenceCategory>
 
-</PreferenceScreen>
+</android.preference.PreferenceScreen>

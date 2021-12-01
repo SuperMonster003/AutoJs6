@@ -1,18 +1,16 @@
 package com.stardust.autojs.core.activity
 
 import android.accessibilityservice.AccessibilityService
-import android.app.AppOpsManager
 import android.app.usage.UsageStatsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.annotation.RequiresApi
-import com.stardust.app.isOpPermissionGranted
+import com.stardust.app.isUsageStatsPermissionGranted
 import com.stardust.autojs.core.util.Shell
 import com.stardust.view.accessibility.AccessibilityDelegate
 import java.util.regex.Pattern
@@ -27,6 +25,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
 
     @Volatile
     private var mLatestPackage: String = ""
+
     @Volatile
     private var mLatestActivity: String = ""
     private var mLatestComponentFromShell: ComponentName? = null
@@ -40,7 +39,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
             if (useShell && compFromShell != null) {
                 return compFromShell.packageName
             }
-            if (useUsageStats && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            if (useUsageStats) {
                 mLatestPackage = getLatestPackageByUsageStats()
             }
             return mLatestPackage
@@ -78,19 +77,17 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
 
     override fun onAccessibilityEvent(service: AccessibilityService, event: AccessibilityEvent): Boolean {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                val window = service.getWindow(event.windowId)
-                if (window?.isFocused != false) {
-                    setLatestComponent(event.packageName, event.className)
-                    return false
-                }
+            val window = service.getWindow(event.windowId)
+            if (window?.isFocused != false) {
+                setLatestComponent(event.packageName, event.className)
+                return false
             }
         }
         return false
     }
 
     fun getLatestPackageByUsageStatsIfGranted(): String {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1 && context.isOpPermissionGranted(AppOpsManager.OPSTR_GET_USAGE_STATS)) {
+        if (context.isUsageStatsPermissionGranted()) {
             return getLatestPackageByUsageStats()
         }
         return mLatestPackage
@@ -103,7 +100,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
             return
         }
         val latestPackage = matcher.group(1)
-        if (latestPackage.contains(":")) {
+        if (latestPackage != null && latestPackage.contains(":")) {
             return
         }
         val latestActivity = if (matcher.groupCount() >= 2) {
@@ -112,10 +109,12 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
             ""
         }
         Log.d(LOG_TAG, "setLatestComponent: output = $output, comp = $latestPackage/$latestActivity")
-        mLatestComponentFromShell = ComponentName(latestPackage, latestActivity)
+        if (latestPackage != null) {
+            mLatestComponentFromShell = ComponentName(latestPackage, latestActivity)
+        }
     }
 
-    private fun createShell(dumpInterval: Int): Shell {
+    private fun createShell(@Suppress("SameParameterValue") dumpInterval: Int): Shell {
         val shell = Shell(true)
         shell.setCallback(object : Shell.Callback {
             override fun onOutput(str: String) {

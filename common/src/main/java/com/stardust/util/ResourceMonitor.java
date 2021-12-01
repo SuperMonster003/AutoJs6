@@ -8,13 +8,41 @@ import android.util.SparseArray;
 import com.stardust.BuildConfig;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public final class ResourceMonitor {
 
     private static final String LOG_TAG = "ResourceMonitor";
 
-    private static final ConcurrentHashMap<Class<?>, SparseArray<Exception>> mResources = new ConcurrentHashMap<>();
+    // @Reference to TonyJiangWJ/Auto.js on Nov 22, 2021
+    private static class LockedResource {
+        private ReentrantLock lock;
+        private SparseArray<Exception> resource;
+
+        public LockedResource() {
+            this.resource = new SparseArray<>();
+            this.lock = new ReentrantLock();
+        }
+
+        public ReentrantLock getLock() {
+            return lock;
+        }
+
+        public void setLock(ReentrantLock lock) {
+            this.lock = lock;
+        }
+
+        public SparseArray<Exception> getResource() {
+            return resource;
+        }
+
+        public void setResource(SparseArray<Exception> resource) {
+            this.resource = resource;
+        }
+    }
+
+    private static final ConcurrentHashMap<Class<?>, LockedResource> mResources = new ConcurrentHashMap<>();
     private static Handler sHandler;
     private static boolean sEnabled = BuildConfig.DEBUG;
     private static ExceptionCreator sExceptionCreator;
@@ -32,9 +60,9 @@ public final class ResourceMonitor {
         if (!sEnabled) {
             return;
         }
-        SparseArray<Exception> map = mResources.get(resource.getClass());
+        LockedResource map = mResources.get(resource.getClass());
         if (map == null) {
-            map = new SparseArray<>();
+            map = new LockedResource();
             mResources.put(resource.getClass(), map);
         }
         int resourceId = resource.getResourceId();
@@ -45,16 +73,20 @@ public final class ResourceMonitor {
         } else {
             exception = sExceptionCreator.create(resource);
         }
-        map.put(resourceId, exception);
+        map.getLock().lock();
+        map.getResource().put(resourceId, exception);
+        map.getLock().unlock();
     }
 
     public static void onClose(ResourceMonitor.Resource resource) {
         if (!sEnabled) {
             return;
         }
-        SparseArray map = mResources.get(resource.getClass());
+        LockedResource map = mResources.get(resource.getClass());
         if (map != null) {
-            map.remove(resource.getResourceId());
+            map.getLock().lock();
+            map.getResource().remove(resource.getResourceId());
+            map.getLock().unlock();
         }
     }
 
@@ -62,12 +94,16 @@ public final class ResourceMonitor {
         if (!sEnabled) {
             return;
         }
-        SparseArray<Exception> map = mResources.get(resource.getClass());
+        LockedResource map = mResources.get(resource.getClass());
         if (map != null) {
-            int indexOfKey = map.indexOfKey(resource.getResourceId());
-            if (indexOfKey >= 0) {
-                final Exception exception = map.valueAt(indexOfKey);
-                map.removeAt(indexOfKey);
+            map.getLock().lock();
+            int indexOfKey = map.getResource().indexOfKey(resource.getResourceId());
+            if (indexOfKey < 0) {
+                map.getLock().unlock();
+            } else {
+                final Exception exception = map.getResource().valueAt(indexOfKey);
+                map.getResource().removeAt(indexOfKey);
+                map.getLock().unlock();
                 if (sHandler == null) {
                     sHandler = new Handler(Looper.getMainLooper());
                 }

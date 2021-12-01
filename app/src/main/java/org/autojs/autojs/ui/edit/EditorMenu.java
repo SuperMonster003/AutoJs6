@@ -2,7 +2,9 @@ package org.autojs.autojs.ui.edit;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+
 import com.google.android.material.snackbar.Snackbar;
+
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -173,7 +175,7 @@ public class EditorMenu {
                 .neutralText(R.string.text_view_docs)
                 .onPositive((ignored, which) -> {
                     ClipboardUtil.setClip(mContext, desc);
-                    Toast.makeText(mContext, R.string.text_already_copy_to_clip, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, R.string.text_already_copied_to_clip, Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                 })
                 .onNegative((ignored, which) -> {
@@ -287,7 +289,7 @@ public class EditorMenu {
 
     private void copyAll() {
         ClipboardUtil.setClip(mContext, mEditor.getText());
-        Snackbar.make(mEditorView, R.string.text_already_copy_to_clip, Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(mEditorView, R.string.text_already_copied_to_clip, Snackbar.LENGTH_SHORT).show();
     }
 
 

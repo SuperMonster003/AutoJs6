@@ -97,7 +97,7 @@ public class LayoutBoundsFloatyWindow extends FullScreenFloatyWindow {
         if (mBubblePopMenu != null)
             return;
         mBubblePopMenu = new BubblePopupMenu(mContext, Arrays.asList(
-                mContext.getString(R.string.text_show_widget_infomation),
+                mContext.getString(R.string.text_show_widget_information),
                 mContext.getString(R.string.text_show_layout_hierarchy),
                 mContext.getString(R.string.text_generate_code)));
         mBubblePopMenu.setOnItemClickListener((view, position) -> {

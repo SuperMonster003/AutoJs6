@@ -1,1 +1,9 @@
 include ':app', ':automator', ':common', ':autojs', ':inrt'
+
+include ":libs:com.android.dx-1.7.0"
+include ":libs:com.tencent.bugly.crashreport-2.6.6"
+include ":libs:jackpal.androidterm.emulatorview-1.0.42"
+include ":libs:jackpal.androidterm.libtermexec-1.0"
+include ":libs:jackpal.androidterm-1.0.70"
+include ":libs:org.mozilla.rhino-1.7.14"
+include ":libs:org.opencv-4.5.4"

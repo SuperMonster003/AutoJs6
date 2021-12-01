@@ -1,16 +1,14 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion versions.compile
-    buildToolsVersion versions.buildTool
 
     defaultConfig {
         applicationId "com.stardust.auojs.inrt"
         minSdkVersion versions.mini
         targetSdkVersion versions.target
-        versionCode versions.appVersionCode - 200
+        versionCode versions.appVersionCode
         versionName versions.appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -21,8 +19,8 @@ android {
         disable 'ExtraTranslation'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_16
+        targetCompatibility JavaVersion.VERSION_16
     }
     splits {
 
@@ -39,7 +37,7 @@ android {
             reset()
 
             // Specifies a list of ABIs that Gradle should create APKs for.
-            include "x86", "armeabi-v7a"
+            include "armeabi-v7a"
 
             // Specifies that we do not want to also generate a universal APK that includes all ABIs.
             universalApk false
@@ -87,7 +85,6 @@ task buildApkPlugin {
             return
         }
         buildApkPluginForAbi(pluginProjectDir, 'armeabi-v7a')
-        buildApkPluginForAbi(pluginProjectDir, 'x86')
     }
 }
 
@@ -97,23 +94,24 @@ tasks.whenTaskAdded { task ->
     }
 }
 
-repositories {
-    flatDir {
-        dirs 'libs'
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_16
     }
+}
+
+repositories {
     google()
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.1-alpha01', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    //Glide
-    implementation('com.github.bumptech.glide:glide:4.2.0', {
-        exclude group: 'com.android.support'
-    })
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
+
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+
+    implementation project(":libs:org.mozilla.rhino-1.7.14")
+    implementation project(":libs:org.opencv-4.5.4")
+
     implementation project(':automator')
     implementation project(':common')
     implementation project(':autojs')

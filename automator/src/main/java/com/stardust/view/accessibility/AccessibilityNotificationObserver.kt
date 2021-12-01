@@ -1,6 +1,5 @@
 package com.stardust.view.accessibility
 
-import android.accessibilityservice.*
 import android.content.Context
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
@@ -8,7 +7,6 @@ import android.view.accessibility.AccessibilityEvent
 import com.stardust.notification.Notification
 
 import java.util.ArrayList
-import java.util.Collections
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -81,14 +79,14 @@ class AccessibilityNotificationObserver(private val mContext: Context) : Notific
                 return false
             }
             if (list != null) {
-                onToast(event, Toast(event.packageName.toString(), list))
+                onToast(Toast(event.packageName.toString(), list))
             }
         }
 
         return false
     }
 
-    private fun onToast(event: AccessibilityEvent, toast: Toast) {
+    private fun onToast(toast: Toast) {
         for (listener in mToastListeners) {
             try {
                 listener.onToast(toast)

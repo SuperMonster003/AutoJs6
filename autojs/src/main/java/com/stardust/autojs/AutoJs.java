@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
@@ -233,6 +234,7 @@ public abstract class AutoJs {
             return mActivityInfoProvider;
         }
 
+        @NonNull
         @Override
         public AccessibilityNotificationObserver getNotificationObserver() {
             return mNotificationObserver;

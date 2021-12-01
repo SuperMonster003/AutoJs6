@@ -1,7 +1,7 @@
 package com.stardust.auojs.inrt
 
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 
 import com.stardust.app.GlobalAppContext
 
@@ -14,13 +14,13 @@ object Pref {
     private const val KEY_FIRST_USING = "key_first_using"
     private var sPreferences: SharedPreferences? = null
 
-    val preferences: SharedPreferences
+    private val preferences: SharedPreferences
         get() {
-            return sPreferences ?: {
+            return sPreferences ?: run {
                 val pref = PreferenceManager.getDefaultSharedPreferences(GlobalAppContext.get())
                 sPreferences = pref
                 pref
-            }()
+            }
         }
 
     val isFirstUsing: Boolean
@@ -37,11 +37,11 @@ object Pref {
     }
 
     fun shouldEnableAccessibilityServiceByRoot(): Boolean {
-        return preferences.getBoolean(getString(R.string.key_enable_accessibility_service_by_root), false)
+        return preferences.getBoolean(getString(R.string.key_enable_accessibility_service_by_root), true)
     }
 
     fun shouldHideLogs(): Boolean {
-        return preferences.getBoolean(getString(R.string.key_dont_show_main_activity), false)
+        return preferences.getBoolean(getString(R.string.key_not_show_main_activity), false)
     }
 
     fun shouldStopAllScriptsWhenVolumeUp(): Boolean {

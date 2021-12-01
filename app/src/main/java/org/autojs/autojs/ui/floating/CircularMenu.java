@@ -301,7 +301,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         if (TextUtils.isEmpty(mRunningPackage))
             return;
         ClipboardUtil.setClip(mContext, mRunningPackage);
-        Toast.makeText(mContext, R.string.text_already_copy_to_clip, Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext, R.string.text_already_copied_to_clip, Toast.LENGTH_SHORT).show();
     }
 
     @Optional
@@ -311,7 +311,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         if (TextUtils.isEmpty(mRunningActivity))
             return;
         ClipboardUtil.setClip(mContext, mRunningActivity);
-        Toast.makeText(mContext, R.string.text_already_copy_to_clip, Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext, R.string.text_already_copied_to_clip, Toast.LENGTH_SHORT).show();
     }
 
     @Optional

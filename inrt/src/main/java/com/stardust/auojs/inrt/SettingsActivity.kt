@@ -5,14 +5,11 @@ import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 
-
 /**
  * Created by Stardust on 2017/12/8.
  */
 
 class SettingsActivity : AppCompatActivity() {
-
-
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupViews()
@@ -28,11 +25,15 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    class PreferenceFragment : android.preference.PreferenceFragment() {
+    class PreferenceFragment : androidx.preference.PreferenceFragment() {
 
         override fun onCreate(@Nullable savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             addPreferencesFromResource(R.xml.preference)
+        }
+
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            TODO("Not yet implemented")
         }
     }
 }

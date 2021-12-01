@@ -11,6 +11,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import androidx.annotation.Nullable;
 import android.util.Base64;
+import android.util.Log;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -19,6 +20,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import kotlin.text.Regex;
+
 /**
  * Created by Stardust on 2017/4/5.
  */
@@ -26,8 +29,7 @@ import java.util.zip.ZipFile;
 public class DeveloperUtils {
 
     private static final String PACKAGE_NAME = "org.autojs.autojs";
-    private static final String SIGNATURE = "nPNPcy4Lk/eP6fLvZitP0VPbHdFCbKua77m59vis5fA=";
-    private static final String LOG_TAG = "DeveloperUtils";
+    private static final Regex SIGNATURE_REX = new Regex(".*(CbKua77m59vis|N7YkpKxKjsPWe).*");
     private static final ExecutorService sExecutor = UnderuseExecutors.getExecutor();
     private static final String SALT = "let\nlife\nbe\nbeautiful\nlike\nsummer\nflowers\nand\ndeath\nlike\nautumn\nleaves\n.";
 
@@ -80,7 +82,7 @@ public class DeveloperUtils {
         if (sha.endsWith("\n")) {
             sha = sha.substring(0, sha.length() - 1);
         }
-        return SIGNATURE.equals(sha);
+        return SIGNATURE_REX.matches(sha);
     }
 
 
@@ -150,7 +152,7 @@ public class DeveloperUtils {
         }
     }
 
-    public static void verifyApk(Activity activity, final int crcRes) {
+    public static void verifyApk(Activity activity) {
         final WeakReference<Activity> activityWeakReference = new WeakReference<>(activity);
         sExecutor.execute(new Runnable() {
             @Override
@@ -160,13 +162,7 @@ public class DeveloperUtils {
                     return;
                 if (!checkSignature(a)) {
                     a.finish();
-                    return;
                 }
-                //long[] crc = readCrc(a.getString(crcRes));
-                //if (!checkDexFile(a, crc)) {
-                //a.finish();
-                //}
-
             }
         });
     }

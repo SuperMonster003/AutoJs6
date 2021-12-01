@@ -6,7 +6,7 @@ import com.android.dx.command.dexer.Main;
 import com.stardust.pio.PFiles;
 import com.stardust.util.MD5;
 
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
 import net.lingala.zip4j.model.ZipParameters;
@@ -17,7 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,14 +28,13 @@ import dalvik.system.DexClassLoader;
 
 public class AndroidClassLoader extends ClassLoader implements GeneratedClassLoader {
 
-
     private static final String LOG_TAG = "AndroidClassLoader";
     private final ClassLoader parent;
     private final List<DexClassLoader> mDexClassLoaders = new ArrayList<>();
     private final File mCacheDir;
 
     /**
-     * Create a new instance with the given parent classloader and cache dierctory
+     * Create a new instance with the given parent classloader and cache directory
      *
      * @param parent the parent
      * @param dir    the cache directory
@@ -47,7 +45,9 @@ public class AndroidClassLoader extends ClassLoader implements GeneratedClassLoa
         if (dir.exists()) {
             PFiles.deleteFilesOfDir(dir);
         } else {
-            dir.mkdirs();
+            if (!dir.mkdirs()) {
+                Log.e(LOG_TAG, "dir.mkdirs() failed");
+            }
         }
     }
 
@@ -63,14 +63,15 @@ public class AndroidClassLoader extends ClassLoader implements GeneratedClassLoa
             final ZipFile zipFile = new ZipFile(classFile);
             final ZipParameters parameters = new ZipParameters();
             parameters.setFileNameInZip(name.replace('.', '/') + ".class");
-            parameters.setSourceExternalStream(true);
             zipFile.addStream(new ByteArrayInputStream(data), parameters);
             return dexJar(classFile, null).loadClass(name);
-        } catch (IOException | ZipException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new FatalLoadingException(e);
         } finally {
             if (classFile != null) {
-                classFile.delete();
+                if (!classFile.delete()) {
+                    Log.e(LOG_TAG, "classFile.delete() failed");
+                }
             }
         }
     }
@@ -79,10 +80,14 @@ public class AndroidClassLoader extends ClassLoader implements GeneratedClassLoa
         File file = new File(mCacheDir, name.hashCode() + System.currentTimeMillis() + ".jar");
         if (create) {
             if (!file.exists()) {
-                file.createNewFile();
+                if (!file.createNewFile()) {
+                    Log.e(LOG_TAG, "file.createNewFile() failed");
+                }
             }
         } else {
-            file.delete();
+            if (!file.delete()) {
+                Log.e(LOG_TAG, "file.delete() failed");
+            }
         }
         return file;
     }
@@ -101,17 +106,17 @@ public class AndroidClassLoader extends ClassLoader implements GeneratedClassLoa
             final File classFile = generateTempFile(jar.getPath(), false);
             final ZipFile zipFile = new ZipFile(classFile);
             final ZipFile jarFile = new ZipFile(jar);
-            //noinspection unchecked
-            for (FileHeader header : (List<FileHeader>) jarFile.getFileHeaders()) {
+            for (FileHeader header : jarFile.getFileHeaders()) {
                 if (!header.isDirectory()) {
                     final ZipParameters parameters = new ZipParameters();
                     parameters.setFileNameInZip(header.getFileName());
-                    parameters.setSourceExternalStream(true);
                     zipFile.addStream(jarFile.getInputStream(header), parameters);
                 }
             }
             dexJar(classFile, dexFile);
-            classFile.delete();
+            if (!classFile.delete()) {
+                Log.e(LOG_TAG, "classFile.delete() failed");
+            }
         } catch (ZipException e) {
             throw new IOException(e);
         }
@@ -144,7 +149,9 @@ public class AndroidClassLoader extends ClassLoader implements GeneratedClassLoa
         Main.run(arguments);
         DexClassLoader loader = loadDex(dexFile);
         if (isTmpDex) {
-            dexFile.delete();
+            if (!dexFile.delete()) {
+                Log.e(LOG_TAG, "dexFile.delete() failed");
+            }
         }
         return loader;
     }

@@ -2849,5 +2849,3 @@ function beautify(source){
            'e4x': true
     });
 }
-
-beautify;

@@ -7,20 +7,20 @@ import com.stardust.automator.UiObject
  * Created by Stardust on 2017/1/27.
  */
 
-class SearchUpTargetAction(action: Int, filter: FilterAction.Filter) : SearchTargetAction(action, filter) {
+class SearchUpTargetAction(action: Int, filter: Filter) : SearchTargetAction(action, filter) {
     private val mAble: Able = Able.ABLE_MAP.get(action)
 
-    override fun searchTarget(n: UiObject?): UiObject? {
-        var node = n
+    override fun searchTarget(node: UiObject?): UiObject? {
+        var o = node
         var i = 0
-        while (node != null && !mAble.isAble(node)) {
+        while (o != null && !mAble.isAble(o)) {
             i++
             if (i > LOOP_MAX) {
                 return null
             }
-            node = node.parent()
+            o = o.parent()
         }
-        return node
+        return o
     }
 
     override fun toString(): String {
@@ -31,8 +31,6 @@ class SearchUpTargetAction(action: Int, filter: FilterAction.Filter) : SearchTar
     }
 
     companion object {
-
-        private val TAG = SearchUpTargetAction::class.java!!.getSimpleName()
-        private val LOOP_MAX = 20
+        private const val LOOP_MAX = 20
     }
 }

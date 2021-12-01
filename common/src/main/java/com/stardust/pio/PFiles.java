@@ -1,11 +1,9 @@
 package com.stardust.pio;
 
-import android.app.NativeActivity;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.stardust.util.Func1;
 
@@ -14,23 +12,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Created by Stardust on 2017/4/1.
  */
 
 public class PFiles {
-
-    private static final String TAG = "PFiles";
 
     static final int DEFAULT_BUFFER_SIZE = 8192;
     static final String DEFAULT_ENCODING = Charset.defaultCharset().name();
@@ -313,16 +306,8 @@ public class PFiles {
             String fullAssetsPath = join(assetsDir, file);
             String[] children = manager.list(fullAssetsPath);
             if (children == null || children.length == 0) {
-                InputStream stream = null;
-                try {
-                    stream = manager.open(fullAssetsPath);
+                try (InputStream stream = manager.open(fullAssetsPath)) {
                     copyStream(stream, join(toDir, file));
-                } catch (IOException e) {
-                    throw e;
-                } finally {
-                    if (stream != null) {
-                        stream.close();
-                    }
                 }
             } else {
                 copyAssetDir(manager, fullAssetsPath, join(toDir, file), children);
@@ -460,12 +445,7 @@ public class PFiles {
 
     public static String[] listDir(String path, final Func1<String, Boolean> filter) {
         final File file = new File(path);
-        return wrapNonNull(file.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return filter.call(name);
-            }
-        }));
+        return wrapNonNull(file.list((dir, name) -> filter.call(name)));
     }
 
     public static boolean isFile(String path) {
@@ -478,7 +458,7 @@ public class PFiles {
 
     public static boolean isEmptyDir(String path) {
         File file = new File(path);
-        return file.isDirectory() && file.list().length == 0;
+        return file.isDirectory() && Objects.requireNonNull(file.list()).length == 0;
     }
 
     public static String join(String base, String... paths) {

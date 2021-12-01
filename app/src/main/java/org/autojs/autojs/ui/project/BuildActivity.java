@@ -43,7 +43,6 @@ import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import androidx.cardview.widget.CardView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -109,41 +108,34 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void checkApkBuilderPlugin() {
-        if (!ApkBuilderPluginHelper.isPluginAvailable(this)) {
-            showPluginDownloadDialog(R.string.no_apk_builder_plugin, true);
-            return;
-        }
-        int version = ApkBuilderPluginHelper.getPluginVersion(this);
-        if (version < 0) {
-            showPluginDownloadDialog(R.string.no_apk_builder_plugin, true);
-            return;
-        }
-        if (version < ApkBuilderPluginHelper.getSuitablePluginVersion()) {
-            showPluginDownloadDialog(R.string.apk_builder_plugin_version_too_low, false);
+        if (!ApkBuilderPluginHelper.isPluginAvailable(this) || ApkBuilderPluginHelper.getPluginVersion(this) < 0) {
+            showPluginDownloadDialog(R.string.no_apk_builder_plugin);
         }
     }
 
-    private void showPluginDownloadDialog(int msgRes, boolean finishIfCanceled) {
+    private void showPluginDownloadDialog(int msgRes) {
         new ThemeColorMaterialDialogBuilder(this)
                 .content(msgRes)
                 .positiveText(R.string.ok)
                 .negativeText(R.string.cancel)
                 .onPositive((dialog, which) -> downloadPlugin())
-                .onNegative((dialog, which) -> {
-                    if (finishIfCanceled) finish();
-                })
+                .onNegative((dialog, which) -> finish())
                 .show();
 
     }
 
     private void downloadPlugin() {
-        IntentUtil.browse(this, String.format(Locale.getDefault(),
-                "https://i.autojs.org/autojs/plugin/%d.apk", ApkBuilderPluginHelper.getSuitablePluginVersion()));
+        IntentUtil.browse(this, "https://github.com/" +
+                "SuperMonster002/Hello-Sockpuppet/raw/master/" +
+                "%5B" + "auto.js" + "%5D" +
+                "%5B" + "apk_builder_plugin_4.1.1_alpha2" + "%5D" +
+                "%5B" + "arm-v7a" + "%5D" +
+                "%5B" + "9b150ec3" + "%5D" + ".apk");
     }
 
     private void setupWithSourceFile(ScriptFile file) {
         String dir = file.getParent();
-        if (dir.startsWith(getFilesDir().getPath())) {
+        if (dir != null && dir.startsWith(getFilesDir().getPath())) {
             dir = Pref.getScriptDirPath();
         }
         mOutputPath.setText(dir);
@@ -348,20 +340,19 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mProgressDialog.setContent(R.string.apk_builder_clean);
     }
 
-    @SuppressLint("CheckResult")
+    @SuppressLint({"CheckResult", "MissingSuperCall"})
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != RESULT_OK) {
-            return;
+        if (resultCode == RESULT_OK) {
+            //noinspection ResultOfMethodCallIgnored
+            ShortcutIconSelectActivity.getBitmapFromIntent(getApplicationContext(), data)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(bitmap -> {
+                        mIcon.setImageBitmap(bitmap);
+                        mIsDefaultIcon = false;
+                    }, Throwable::printStackTrace);
         }
-        ShortcutIconSelectActivity.getBitmapFromIntent(getApplicationContext(), data)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bitmap -> {
-                    mIcon.setImageBitmap(bitmap);
-                    mIsDefaultIcon = false;
-                }, Throwable::printStackTrace);
-
     }
 
 }

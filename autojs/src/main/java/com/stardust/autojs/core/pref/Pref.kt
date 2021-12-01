@@ -1,6 +1,6 @@
 package com.stardust.autojs.core.pref
 
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.stardust.app.GlobalAppContext
 
 object Pref {

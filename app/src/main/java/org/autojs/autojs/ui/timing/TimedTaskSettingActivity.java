@@ -72,11 +72,10 @@ public class TimedTaskSettingActivity extends BaseActivity {
     public static final String EXTRA_TASK_ID = TaskReceiver.EXTRA_TASK_ID;
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat.forPattern("HH:mm");
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormat.forPattern("yy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final int REQUEST_CODE_IGNORE_BATTERY = 27101;
 
     private static final String LOG_TAG = "TimedTaskSettings";
-
 
     public static final Map<String, Integer> ACTION_DESC_MAP = new MapBuilder<String, Integer>()
             .put(DynamicBroadcastReceivers.ACTION_STARTUP, R.string.text_run_on_startup)
@@ -296,10 +295,13 @@ public class TimedTaskSettingActivity extends BaseActivity {
     @Click(R.id.disposable_task_date_container)
     void showDisposableTaskDatePicker() {
         LocalDate date = DATE_FORMATTER.parseLocalDate(mDisposableTaskDate.getText().toString());
-        new DatePickerDialog(this, (view, year, month, dayOfMonth) ->
-                mDisposableTaskDate.setText(DATE_FORMATTER.print(new LocalDate(year, month, dayOfMonth)))
-                , date.getYear(), date.getMonthOfYear() - 1, date.getDayOfMonth())
-                .show();
+        new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> mDisposableTaskDate.setText(DATE_FORMATTER.print(new LocalDate(year, month + 1, dayOfMonth))),
+                date.getYear(),
+                date.getMonthOfYear() - 1,
+                date.getDayOfMonth()
+        ).show();
     }
 
     TimedTask createTimedTask() {

@@ -1,7 +1,7 @@
 package com.stardust.autojs.engine;
 
 import android.content.Context;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 
 import com.stardust.autojs.core.util.ProcessShell;

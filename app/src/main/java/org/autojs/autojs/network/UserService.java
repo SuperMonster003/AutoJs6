@@ -126,7 +126,7 @@ public class UserService {
     public Observable<List<Notification>> getNotifications() {
         return NodeBB.getInstance().getRetrofit()
                 .create(UserApi.class)
-                .getNotifitions()
+                .getNotifications()
                 .map(NotificationResponse::getNotifications);
     }
 
