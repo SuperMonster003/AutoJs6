@@ -39,6 +39,7 @@
 -keepclassmembers class ** {
     @org.greenrobot.eventbus.Subscribe <methods>;
 }
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }
 # volley
 -keepclassmembers class ** {
   @com.google.common.eventbus.Subscribe <methods>;
@@ -68,10 +69,6 @@
 -keepclassmembers public class * extends android.view.View {
    void set*(***);
    *** get*();
-}
-
--keep class * extends android.support.v4.app.Fragment {
-    <methods>;
 }
 
 -keepclassmembers class * extends android.app.Activity {

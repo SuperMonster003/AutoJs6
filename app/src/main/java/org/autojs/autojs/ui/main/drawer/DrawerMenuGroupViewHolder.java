@@ -23,7 +23,7 @@ public class DrawerMenuGroupViewHolder extends BindableViewHolder<DrawerMenuItem
     @Override
     public void bind(DrawerMenuItem data, int position) {
         mTextView.setText(data.getTitle());
-        int padding = itemView.getResources().getDimensionPixelOffset(R.dimen.divider_drawer_menu_group);
+        int padding = (int) (itemView.getResources().getDimensionPixelOffset(R.dimen.divider_drawer_menu_group) / 3);
         itemView.setPadding(0, position == 0 ? 0 : padding, 0, 0);
     }
 }

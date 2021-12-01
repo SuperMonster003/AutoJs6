@@ -1,9 +1,6 @@
 package org.autojs.autojs.tool;
 
-/**
- * Created by Stardust on 2017/2/2.
- */
-
+/* Created by Stardust on 2017/2/2 */
 
 import android.content.Intent;
 import android.os.Build;

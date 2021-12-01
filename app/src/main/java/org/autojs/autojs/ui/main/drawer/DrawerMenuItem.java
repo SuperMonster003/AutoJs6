@@ -69,7 +69,6 @@ public class DrawerMenuItem {
         return mSwitchChecked;
     }
 
-
     public boolean isProgress() {
         return mOnProgress;
     }

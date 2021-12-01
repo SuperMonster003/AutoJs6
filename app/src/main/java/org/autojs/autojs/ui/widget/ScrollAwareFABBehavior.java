@@ -22,6 +22,10 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
     private boolean mHidden = false;
 
     public ScrollAwareFABBehavior(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public ScrollAwareFABBehavior() {
         super();
     }
 

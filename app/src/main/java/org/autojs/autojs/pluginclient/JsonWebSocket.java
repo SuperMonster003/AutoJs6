@@ -10,7 +10,7 @@ import com.google.gson.stream.JsonReader;
 
 import java.io.StringReader;
 
-import javax.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;

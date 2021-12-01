@@ -2,7 +2,7 @@ package org.autojs.autojs.ui.edit.debug;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextUtils;

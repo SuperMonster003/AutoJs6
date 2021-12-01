@@ -1,13 +1,15 @@
 package org.autojs.autojs.ui.settings;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
-import androidx.core.util.Pair;
+
 import androidx.appcompat.widget.Toolbar;
-import android.view.View;
+import androidx.core.content.ContextCompat;
+import androidx.core.util.Pair;
 
 import com.stardust.theme.app.ColorSelectActivity;
 import com.stardust.theme.preference.ThemeColorPreferenceFragment;
@@ -19,11 +21,11 @@ import org.androidannotations.annotations.EActivity;
 import org.autojs.autojs.R;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.error.IssueReporterActivity;
-import org.autojs.autojs.ui.update.UpdateCheckDialog;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.psdev.licensesdialog.LicenseResolver;
 import de.psdev.licensesdialog.LicensesDialog;
@@ -32,6 +34,7 @@ import de.psdev.licensesdialog.licenses.License;
 /**
  * Created by Stardust on 2017/2/2.
  */
+@SuppressLint("NonConstantResourceId")
 @EActivity(R.layout.activity_settings)
 public class SettingsActivity extends BaseActivity {
 
@@ -55,13 +58,13 @@ public class SettingsActivity extends BaseActivity {
             .add(new Pair<>(R.color.theme_color_brown, R.string.theme_color_brown))
             .add(new Pair<>(R.color.theme_color_gray, R.string.theme_color_gray))
             .add(new Pair<>(R.color.theme_color_blue_gray, R.string.theme_color_blue_gray))
+            .add(new Pair<>(R.color.theme_color_default, R.string.theme_color_default))
             .list();
 
     public static void selectThemeColor(Context context) {
         List<ColorSelectActivity.ColorItem> colorItems = new ArrayList<>(COLOR_ITEMS.size());
         for (Pair<Integer, Integer> item : COLOR_ITEMS) {
-            colorItems.add(new ColorSelectActivity.ColorItem(context.getString(item.second),
-                    context.getResources().getColor(item.first)));
+            colorItems.add(new ColorSelectActivity.ColorItem(context.getString(item.second), ContextCompat.getColor(context, item.first)));
         }
         ColorSelectActivity.startColorSelect(context, context.getString(R.string.mt_color_picker_title), colorItems);
     }
@@ -76,20 +79,13 @@ public class SettingsActivity extends BaseActivity {
         Toolbar toolbar = $(R.id.toolbar);
         toolbar.setTitle(R.string.text_setting);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> finish());
     }
 
 
     public static class PreferenceFragment extends ThemeColorPreferenceFragment {
-
         private Map<String, Runnable> ACTION_MAP;
-
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -102,15 +98,12 @@ public class SettingsActivity extends BaseActivity {
             super.onStart();
             ACTION_MAP = new MapBuilder<String, Runnable>()
                     .put(getString(R.string.text_theme_color), () -> selectThemeColor(getActivity()))
-                    .put(getString(R.string.text_check_for_updates), () -> new UpdateCheckDialog(getActivity())
-                            .show())
                     .put(getString(R.string.text_issue_report), () -> startActivity(new Intent(getActivity(), IssueReporterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
                     .put(getString(R.string.text_about_me_and_repo), () -> startActivity(new Intent(getActivity(), AboutActivity_.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
-                    .put(getString(R.string.text_licenses), () -> showLicenseDialog())
+                    .put(getString(R.string.text_licenses), this::showLicenseDialog)
                     .build();
         }
 
-        @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             Runnable action = ACTION_MAP.get(preference.getTitle().toString());
             if (action != null) {
@@ -127,7 +120,7 @@ public class SettingsActivity extends BaseActivity {
                     .setNotices(R.raw.licenses)
                     .setIncludeOwnLicense(true)
                     .build()
-                    .showAppCompat();
+                    .show();
         }
 
         public static class MozillaPublicLicense20 extends License {

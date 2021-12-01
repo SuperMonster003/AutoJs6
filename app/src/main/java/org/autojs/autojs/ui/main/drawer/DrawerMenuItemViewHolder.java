@@ -25,7 +25,7 @@ import static android.view.View.VISIBLE;
 
 public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem> {
 
-    private static final long CLICK_TIMEOUT = 1000;
+    private static final long CLICK_TIMEOUT = 540;
     @BindView(R.id.sw)
     PrefSwitch mSwitchCompat;
 
@@ -96,7 +96,7 @@ public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem>
     private void onClick() {
         mDrawerMenuItem.setChecked(mSwitchCompat.isChecked());
         if (mAntiShake && (System.currentTimeMillis() - mLastClickMillis < CLICK_TIMEOUT)) {
-            Toast.makeText(itemView.getContext(), R.string.text_click_too_frequently, Toast.LENGTH_SHORT).show();
+            // Toast.makeText(itemView.getContext(), R.string.text_click_too_frequently, Toast.LENGTH_SHORT).show();
             mSwitchCompat.setChecked(!mSwitchCompat.isChecked(), false);
             return;
         }

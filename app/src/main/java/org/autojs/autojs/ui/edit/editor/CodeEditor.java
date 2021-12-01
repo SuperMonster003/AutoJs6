@@ -100,7 +100,7 @@ public class CodeEditor extends HVScrollView {
         CharSequence lineText = mCodeEditText.getText().subSequence(mCodeEditText.getLayout().getLineStart(line),
                 mCodeEditText.getLayout().getLineEnd(line));
         ClipboardUtil.setClip(getContext(), lineText);
-        Snackbar.make(this, R.string.text_already_copy_to_clip, Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(this, R.string.text_already_copied_to_clip, Snackbar.LENGTH_SHORT).show();
     }
 
 

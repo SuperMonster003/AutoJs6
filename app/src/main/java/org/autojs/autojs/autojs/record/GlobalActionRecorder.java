@@ -176,7 +176,7 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
                                 .newScriptFileForScript(script);
                     } else {
                         ClipboardUtil.setClip(mContext, script);
-                        Toast.makeText(mContext, R.string.text_already_copy_to_clip, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, R.string.text_already_copied_to_clip, Toast.LENGTH_SHORT).show();
                     }
                 })
                 .negativeText(R.string.text_cancel)

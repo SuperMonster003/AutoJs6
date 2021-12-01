@@ -3,18 +3,15 @@ package org.autojs.autojs.model.script
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.annotation.Nullable
 import android.widget.Toast
-
+import androidx.annotation.Nullable
 import com.stardust.app.GlobalAppContext
 import com.stardust.autojs.execution.ExecutionConfig
 import com.stardust.autojs.execution.ScriptExecution
-import com.stardust.autojs.execution.ScriptExecutionListener
 import com.stardust.autojs.execution.SimpleScriptExecutionListener
 import com.stardust.autojs.runtime.exception.ScriptInterruptedException
 import com.stardust.autojs.script.ScriptSource
 import com.stardust.util.IntentUtil
-
 import org.autojs.autojs.Pref
 import org.autojs.autojs.R
 import org.autojs.autojs.autojs.AutoJs
@@ -23,9 +20,7 @@ import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.external.shortcut.Shortcut
 import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.ui.edit.EditActivity
-
 import org.mozilla.javascript.RhinoException
-
 import java.io.File
 import java.io.FileFilter
 
@@ -60,14 +55,18 @@ object Scripts {
                 col = rhinoException.columnNumber()
             }
             if (ScriptInterruptedException.causedByInterrupted(e)) {
-                GlobalAppContext.get().sendBroadcast(Intent(ACTION_ON_EXECUTION_FINISHED)
+                GlobalAppContext.get().sendBroadcast(
+                    Intent(ACTION_ON_EXECUTION_FINISHED)
                         .putExtra(EXTRA_EXCEPTION_LINE_NUMBER, line)
-                        .putExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, col))
+                        .putExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, col)
+                )
             } else {
-                GlobalAppContext.get().sendBroadcast(Intent(ACTION_ON_EXECUTION_FINISHED)
+                GlobalAppContext.get().sendBroadcast(
+                    Intent(ACTION_ON_EXECUTION_FINISHED)
                         .putExtra(EXTRA_EXCEPTION_MESSAGE, e.message)
                         .putExtra(EXTRA_EXCEPTION_LINE_NUMBER, line)
-                        .putExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, col))
+                        .putExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, col)
+                )
             }
         }
 
@@ -84,10 +83,10 @@ object Scripts {
 
     fun createShortcut(scriptFile: ScriptFile) {
         Shortcut(GlobalAppContext.get()).name(scriptFile.simplifiedName)
-                .targetClass(ShortcutActivity::class.java)
-                .iconRes(R.drawable.ic_node_js_black)
-                .extras(Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.path))
-                .send()
+            .targetClass(ShortcutActivity::class.java)
+            .iconRes(R.drawable.ic_node_js_black)
+            .extras(Intent().putExtra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.path))
+            .send()
     }
 
 
@@ -99,16 +98,16 @@ object Scripts {
         edit(context, ScriptFile(path))
     }
 
-    fun run(file: ScriptFile): ScriptExecution? {
-        return try {
-            AutoJs.getInstance().scriptEngineService.execute(file.toSource(),
-                    ExecutionConfig(workingDirectory = file.parent))
+    fun run(file: ScriptFile) {
+        try {
+            val parent = file.parent
+            if (parent != null) {
+                AutoJs.getInstance().scriptEngineService.execute(file.toSource(), ExecutionConfig(workingDirectory = parent))
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(GlobalAppContext.get(), e.message, Toast.LENGTH_LONG).show()
-            null
         }
-
     }
 
 
@@ -123,17 +122,30 @@ object Scripts {
 
     }
 
-    fun runWithBroadcastSender(file: File): ScriptExecution {
-        return AutoJs.getInstance().scriptEngineService.execute(ScriptFile(file).toSource(), BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
-                ExecutionConfig(workingDirectory = file.parent))
+    fun runWithBroadcastSender(file: File): ScriptExecution? {
+        val parent = file.parent
+        return if (parent == null) {
+            parent
+        } else {
+            AutoJs.getInstance().scriptEngineService.execute(
+                ScriptFile(file).toSource(), BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
+                ExecutionConfig(workingDirectory = parent)
+            )
+        }
     }
 
 
-    fun runRepeatedly(scriptFile: ScriptFile, loopTimes: Int, delay: Long, interval: Long): ScriptExecution {
+    fun runRepeatedly(scriptFile: ScriptFile, loopTimes: Int, delay: Long, interval: Long) {
         val source = scriptFile.toSource()
         val directoryPath = scriptFile.parent
-        return AutoJs.getInstance().scriptEngineService.execute(source, ExecutionConfig(workingDirectory = directoryPath,
-                delay = delay, loopTimes = loopTimes, interval = interval))
+        if (directoryPath != null) {
+            AutoJs.getInstance().scriptEngineService.execute(
+                source, ExecutionConfig(
+                    workingDirectory = directoryPath,
+                    delay = delay, loopTimes = loopTimes, interval = interval
+                )
+            )
+        }
     }
 
     @Nullable
@@ -150,11 +162,14 @@ object Scripts {
 
     fun send(file: ScriptFile) {
         val context = GlobalAppContext.get()
-        context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND)
-                .setType("text/plain")
-                .putExtra(Intent.EXTRA_STREAM, IntentUtil.getUriOfFile(context, file.path, AppFileProvider.AUTHORITY)),
+        context.startActivity(
+            Intent.createChooser(
+                Intent(Intent.ACTION_SEND)
+                    .setType("text/plain")
+                    .putExtra(Intent.EXTRA_STREAM, IntentUtil.getUriOfFile(context, file.path, AppFileProvider.AUTHORITY)),
                 GlobalAppContext.getString(R.string.text_send)
-        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
 
     }
 }
