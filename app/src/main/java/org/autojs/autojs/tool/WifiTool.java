@@ -2,36 +2,36 @@ package org.autojs.autojs.tool;
 
 import android.content.Context;
 import android.net.DhcpInfo;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.text.format.Formatter;
+import android.util.Log;
 
+import java.math.BigInteger;
 import java.net.InetAddress;
-
-import static android.content.Context.WIFI_SERVICE;
+import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 
 /**
  * Created by Stardust on 2017/5/11.
  */
 
 public class WifiTool {
-
-    public static String getWifiAddress(Context context) {
-        WifiManager wifiMgr = (WifiManager) context.getApplicationContext().getSystemService(WIFI_SERVICE);
-        if(wifiMgr == null){
-            return null;
+    public static String getRouterIp(Context context) {
+        byte[] ipAddressByte = getIpAddressByte(context);
+        try {
+            return InetAddress.getByAddress(ipAddressByte).getHostAddress();
+        } catch (UnknownHostException e) {
+            Log.e(WifiTool.class.getSimpleName(), "Error getting Hotspot IP address ", e);
+            return "0.0.0.0";
         }
-        WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
-        int ip = wifiInfo.getIpAddress();
-        return Formatter.formatIpAddress(ip);
     }
 
-    public static String getRouterIp(Context context){
-        WifiManager wifiService = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if(wifiService == null){
-            return null;
+    private static byte[] getIpAddressByte(Context context) {
+        WifiManager manager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        DhcpInfo dhcp = manager.getDhcpInfo();
+        int ipAddress = dhcp.gateway;
+        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
+            ipAddress = Integer.reverseBytes(ipAddress);
         }
-        DhcpInfo dhcpInfo = wifiService.getDhcpInfo();
-        return Formatter.formatIpAddress(dhcpInfo.gateway);
+        return BigInteger.valueOf(ipAddress).toByteArray();
     }
 }

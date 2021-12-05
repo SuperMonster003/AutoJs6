@@ -155,15 +155,14 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         mWindow.collapse();
         if (!RootTool.isRootAvailable()) {
             DialogUtils.showDialog(new NotAskAgainDialog.Builder(mContext, "CircularMenu.root")
-                    .title(R.string.text_device_not_rooted)
-                    .content(R.string.prompt_device_not_rooted)
-                    .neutralText(R.string.text_device_rooted)
-                    .positiveText(R.string.ok)
-                    .onNeutral(((dialog, which) -> mRecorder.start()))
+                    .title(R.string.text_no_root_access)
+                    .content(R.string.no_root_access_for_record)
+                    .negativeText(R.string.text_quit)
+                    .positiveText(R.string.text_insist_on_record)
+                    .onPositive(((dialog, which) -> mRecorder.start()))
                     .build());
         } else {
             mRecorder.start();
-
         }
     }
 

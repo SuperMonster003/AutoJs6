@@ -18,13 +18,15 @@ public class RootTool {
         }
     }
 
-    private static final String cmd = "enabled=$(settings get system pointer_location)\n" +
-            "if [[ $enabled == 1 ]]\n" +
-            "then\n" +
-            "settings put system pointer_location 0\n" +
-            "else\n" +
-            "settings put system pointer_location 1\n" +
-            "fi\n";
+    private static final String cmd = """
+            enabled=$(settings get system pointer_location)
+            if [[ $enabled == 1 ]]
+            then
+            settings put system pointer_location 0
+            else
+            settings put system pointer_location 1
+            fi
+            """;
 
     public static void togglePointerLocation() {
         try {

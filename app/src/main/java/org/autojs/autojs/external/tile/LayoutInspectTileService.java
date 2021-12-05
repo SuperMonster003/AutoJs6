@@ -49,7 +49,7 @@ public abstract class LayoutInspectTileService extends TileService implements La
     public void onClick() {
         super.onClick();
         Log.d(getClass().getName(), "onClick");
-        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        // sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
         if (AccessibilityService.Companion.getInstance() == null) {
             Toast.makeText(this, R.string.text_no_accessibility_permission_to_capture, Toast.LENGTH_SHORT).show();
             AccessibilityServiceTool.goToAccessibilitySetting();
@@ -83,7 +83,6 @@ public abstract class LayoutInspectTileService extends TileService implements La
                 inactive();
             }
         });
-
     }
 
     protected abstract FullScreenFloatyWindow onCreateWindow(NodeInfo capture);
