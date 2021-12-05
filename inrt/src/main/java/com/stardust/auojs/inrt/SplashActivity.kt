@@ -19,6 +19,7 @@ import com.stardust.auojs.inrt.launch.GlobalProjectLauncher
 import java.util.ArrayList
 
 import android.content.pm.PackageManager.PERMISSION_DENIED
+import android.os.Looper
 
 /**
  * Created by Stardust on 2018/2/2.
@@ -34,7 +35,7 @@ class SplashActivity : AppCompatActivity() {
         if (!Pref.isFirstUsing) {
             main()
         } else {
-            Handler().postDelayed({ this@SplashActivity.main() }, INIT_TIMEOUT)
+            Handler(Looper.myLooper()!!).postDelayed({ this@SplashActivity.main() }, INIT_TIMEOUT)
         }
     }
 

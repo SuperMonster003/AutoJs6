@@ -1,5 +1,7 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+plugins {
+    id "com.android.library"
+    id "kotlin-android"
+}
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
@@ -45,8 +47,8 @@ dependencies {
 
     api 'net.lingala.zip4j:zip4j:2.9.1'
 
-    api('com.afollestad.material-dialogs:core:0.9.6.0')
-    api 'com.google.android.material:material:1.5.0-beta01'
+    api 'com.afollestad.material-dialogs:core:0.9.6.0'
+    api 'com.google.android.material:material:1.6.0-alpha01'
 
     api 'com.github.hyb1996:EnhancedFloaty:0.31'
 

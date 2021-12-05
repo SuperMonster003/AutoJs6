@@ -4,6 +4,18 @@
 
 ******
 
+# v6.0.1 Alpha
+
+###### 2021/12/05
+
+* `新增` polyfill (Object.getOwnPropertyDescriptors)
+* `新增` polyfill (Array.prototype.flat)
+* `新增` isInteger/isNullish/isPlainObject/isPrimitive/isReference
+* `优化` 扩展global.sleep支持随机范围/负数兼容
+* `优化` 扩展global.toast支持时长控制/强制覆盖控制/dismiss方法
+* `优化` 包名对象全局化 (okhttp3/androidx/de)
+* `优化` 升级 Android Material 版本 1.5.0-beta01 -> 1.6.0-alpha01
+
 # v6.0.0
 
 ###### 2021/12/01

@@ -1,5 +1,6 @@
 package com.stardust.app;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -8,6 +9,8 @@ import android.os.Build;
 import android.os.Looper;
 import android.view.Window;
 import android.view.WindowManager;
+
+import kotlin.Suppress;
 
 /**
  * Created by Stardust on 2017/8/4.
@@ -20,24 +23,17 @@ public class DialogUtils {
 
         if (!isActivityContext(context)) {
             Window window = dialog.getWindow();
-            int type;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-            } else {
-                type = WindowManager.LayoutParams.TYPE_PHONE;
-            }
-            if (window != null)
+            int type = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                    ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                    : WindowManager.LayoutParams.TYPE_PHONE;
+            if (window != null) {
                 window.setType(type);
+            }
         }
         if (Looper.getMainLooper() == Looper.myLooper()) {
             dialog.show();
         } else {
-            GlobalAppContext.post(new Runnable() {
-                @Override
-                public void run() {
-                    dialog.show();
-                }
-            });
+            GlobalAppContext.post(dialog::show);
         }
         return dialog;
     }

@@ -115,6 +115,13 @@ android {
             buildConfigField "String", "APP_SINCE_DATE", "\"${versions.appSinceDate}\""
         }
     }
+    applicationVariants.all { variant ->
+        variant.mergeAssetsProvider.configure {
+            doLast {
+                delete(fileTree(dir: outputDir, includes: ['declarations/**']))
+            }
+        }
+    }
 }
 
 repositories {
@@ -138,7 +145,7 @@ dependencies {
     // Android supports
     implementation "androidx.appcompat:appcompat:1.4.0"
     implementation "androidx.cardview:cardview:1.0.0"
-    implementation "com.google.android.material:material:1.5.0-beta01"
+    implementation "com.google.android.material:material:1.6.0-alpha01"
     implementation "androidx.multidex:multidex:2.0.1"
 
     // Material Dialogs

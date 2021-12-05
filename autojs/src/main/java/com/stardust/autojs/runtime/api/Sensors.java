@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+
 import androidx.annotation.NonNull;
 
 import com.stardust.autojs.core.eventloop.EventEmitter;
@@ -23,7 +24,6 @@ import java.util.Set;
  */
 
 public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
-
 
     public class SensorEventEmitter extends EventEmitter implements SensorEventListener {
 
@@ -58,32 +58,28 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
         public static final int fastest = SensorManager.SENSOR_DELAY_FASTEST;
     }
 
-
     private static final Map<String, Integer> SENSORS = new MapBuilder<String, Integer>()
             .put("ACCELEROMETER", Sensor.TYPE_ACCELEROMETER)
-            .put("MAGNETIC_FIELD", Sensor.TYPE_MAGNETIC_FIELD)
-            .put("ORIENTATION", Sensor.TYPE_ORIENTATION)
+            .put("AMBIENT_TEMPERATURE", Sensor.TYPE_AMBIENT_TEMPERATURE)
+            .put("GRAVITY", Sensor.TYPE_GRAVITY)
             .put("GYROSCOPE", Sensor.TYPE_GYROSCOPE)
             .put("LIGHT", Sensor.TYPE_LIGHT)
-            .put("TEMPERATURE", Sensor.TYPE_TEMPERATURE)
-            .put("PRESSURE", Sensor.TYPE_PRESSURE)
-            .put("AMBIENT_TEMPERATURE", Sensor.TYPE_AMBIENT_TEMPERATURE)
-            .put("PROXIMITY", Sensor.TYPE_PROXIMITY)
-            .put("GRAVITY", Sensor.TYPE_GRAVITY)
             .put("LINEAR_ACCELERATION", Sensor.TYPE_LINEAR_ACCELERATION)
+            .put("MAGNETIC_FIELD", Sensor.TYPE_MAGNETIC_FIELD)
+            .put("ORIENTATION", Sensor.TYPE_ORIENTATION)
+            .put("PRESSURE", Sensor.TYPE_PRESSURE)
+            .put("PROXIMITY", Sensor.TYPE_PROXIMITY)
             .put("RELATIVE_HUMIDITY", Sensor.TYPE_RELATIVE_HUMIDITY)
-            .put("AMBIENT_TEMPERATURE", Sensor.TYPE_AMBIENT_TEMPERATURE)
+            .put("TEMPERATURE", Sensor.TYPE_AMBIENT_TEMPERATURE)
             .build();
 
     public boolean ignoresUnsupportedSensor = false;
-    public final Delay delay = new Delay();
 
     private final Set<SensorEventEmitter> mSensorEventEmitters = new HashSet<>();
     private final SensorManager mSensorManager;
     private final ScriptBridges mScriptBridges;
     private final SensorEventEmitter mNoOpSensorEventEmitter;
     private final ScriptRuntime mScriptRuntime;
-
 
     public Sensors(Context context, ScriptRuntime runtime) {
         super(runtime.bridges);
@@ -99,8 +95,9 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
     }
 
     public SensorEventEmitter register(String sensorName, int delay) {
-        if (sensorName == null)
+        if (sensorName == null) {
             throw new NullPointerException("sensorName = null");
+        }
         Sensor sensor = getSensor(sensorName);
         if (sensor == null) {
             if (ignoresUnsupportedSensor) {
@@ -122,26 +119,19 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
         return emitter;
     }
 
-
     @Override
     public boolean shouldQuit() {
-        if (mSensorEventEmitters.isEmpty()) {
-            return true;
-        }
-        return false;
+        return mSensorEventEmitters.isEmpty();
     }
 
     public Sensor getSensor(String sensorName) {
-        Integer type = SENSORS.get(sensorName.toUpperCase());
-        if (type == null)
-            type = getSensorTypeByReflect(sensorName);
-        if (type == null)
-            return null;
-        return mSensorManager.getDefaultSensor(type);
+        sensorName = sensorName.toUpperCase();
+        Integer type = SENSORS.get(sensorName);
+        type = type == null ? getSensorTypeByReflect(sensorName) : type;
+        return type == null ? null : mSensorManager.getDefaultSensor(type);
     }
 
     private Integer getSensorTypeByReflect(String sensorName) {
-        sensorName = sensorName.toUpperCase();
         try {
             Field field = Sensor.class.getField("TYPE_" + sensorName);
             return (Integer) field.get(null);
@@ -151,12 +141,12 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
     }
 
     public void unregister(SensorEventEmitter emitter) {
-        if (emitter == null)
-            return;
-        synchronized (mSensorEventEmitters) {
-            mSensorEventEmitters.remove(emitter);
+        if (emitter != null) {
+            synchronized (mSensorEventEmitters) {
+                mSensorEventEmitters.remove(emitter);
+            }
+            mSensorManager.unregisterListener(emitter);
         }
-        mSensorManager.unregisterListener(emitter);
     }
 
     public void unregisterAll() {

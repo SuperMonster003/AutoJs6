@@ -2,6 +2,7 @@
 *.exe
 *.iml
 *.jks
+*.log
 
 .DS_Store
 .externalNativeBuild
@@ -19,3 +20,5 @@ output-metadata.json
 
 /local.properties
 /sign.properties
+
+**/assets/declarations/

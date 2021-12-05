@@ -9,10 +9,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Base64;
 import android.view.View;
 import android.widget.ImageView;
+
+import androidx.appcompat.content.res.AppCompatResources;
 
 import com.stardust.autojs.core.ui.inflater.ImageLoader;
 
@@ -41,7 +42,6 @@ public class Drawables {
     }
 
     public Drawable parse(Context context, String value) {
-        Resources resources = context.getResources();
         if (value.startsWith("@color/") || value.startsWith("@android:color/") || value.startsWith("#")) {
             return new ColorDrawable(Colors.parse(context, value));
         }
@@ -49,30 +49,29 @@ public class Drawables {
             return loadAttrResources(context, value);
         }
         if (value.startsWith("file://")) {
-            return decodeImage(value.substring(7));
+            return decodeImage(context, value.substring(7));
         }
         return loadDrawableResources(context, value);
     }
 
     public Drawable loadDrawableResources(Context context, String value) {
-        int resId = context.getResources().getIdentifier(value, "drawable",
-                context.getPackageName());
-        if (resId == 0)
+        int resId = context.getResources().getIdentifier(value, "drawable", context.getPackageName());
+        if (resId == 0) {
             throw new Resources.NotFoundException("drawable not found: " + value);
-        return context.getResources().getDrawable(resId);
+        }
+        return AppCompatResources.getDrawable(context, resId);
     }
 
     public Drawable loadAttrResources(Context context, String value) {
-        int[] attr = {context.getResources().getIdentifier(value.substring(1), "attr",
-                context.getPackageName())};
+        int[] attr = {context.getResources().getIdentifier(value.substring(1), "attr", context.getPackageName())};
         TypedArray ta = context.obtainStyledAttributes(attr);
         Drawable drawable = ta.getDrawable(0 /* index */);
         ta.recycle();
         return drawable;
     }
 
-    public Drawable decodeImage(String path) {
-        return new BitmapDrawable(BitmapFactory.decodeFile(path));
+    public Drawable decodeImage(Context context, String path) {
+        return new BitmapDrawable(context.getResources(), BitmapFactory.decodeFile(path));
     }
 
     public Drawable parse(View view, String name) {
@@ -119,11 +118,7 @@ public class Drawables {
         if (value.startsWith("http://") || value.startsWith("https://")) {
             loadIntoBackground(view, Uri.parse(value));
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                view.setBackground(parse(view, value));
-            } else {
-                view.setBackgroundDrawable(parse(view, value));
-            }
+            view.setBackground(parse(view, value));
         }
     }
 

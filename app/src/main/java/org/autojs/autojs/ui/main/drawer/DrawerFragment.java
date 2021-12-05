@@ -155,9 +155,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         if (checked && !isAccessibilityServiceEnabled) {
             enableAccessibilityService();
         } else if (!checked && isAccessibilityServiceEnabled) {
-            if (!AccessibilityService.Companion.disable()) {
-                AccessibilityServiceTool.goToAccessibilitySetting();
-            }
+            disableAccessibilityService();
         }
     }
 
@@ -177,24 +175,25 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         }
         boolean checked = holder.getSwitchCompat().isChecked();
         if (checked && !enabled) {
-            if (new NotAskAgainDialog.Builder(context, "DrawerFragment.usage_stats")
-                    .title(R.string.text_usage_stats_permission)
-                    .content(R.string.description_usage_stats_permission)
-                    .positiveText(R.string.ok)
-                    .dismissListener(dialog -> {
-                        if (context != null) {
-                            IntentUtil.requestAppUsagePermission(context);
-                        }
-                    })
-                    .show() == null) {
-                if (context != null) {
-                    IntentUtil.requestAppUsagePermission(context);
-                }
+            if (getUsageStatsDialog(context) == null) {
+                syncSwitchState();
             }
-        }
-        if (!checked && enabled) {
+        } else if (!checked && enabled) {
             IntentUtil.requestAppUsagePermission(context);
         }
+    }
+
+    private MaterialDialog getUsageStatsDialog(Context context) {
+        return new NotAskAgainDialog.Builder(context, "DrawerFragment.usage_stats")
+                .title(R.string.text_usage_stats_permission)
+                .content(R.string.description_usage_stats_permission)
+                .positiveText(R.string.ok)
+                .dismissListener(dialog -> {
+                    if (context != null) {
+                        IntentUtil.requestAppUsagePermission(context);
+                    }
+                })
+                .show();
     }
 
     void showOrDismissFloatingWindow(DrawerMenuItemViewHolder holder) {
@@ -273,6 +272,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     private boolean hasWriteSecureSettingsAccess() {
         Context context = getContext();
         if (context != null) {
+            @SuppressLint("WrongConstant")
             int checkVal = context.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS_PERMISSION);
             return checkVal == PackageManager.PERMISSION_GRANTED;
         }
@@ -373,7 +373,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         Observable.fromCallable(() -> Pref.shouldEnableAccessibilityServiceByRoot() && !isAccessibilityServiceEnabled())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(needed -> {
-                    if (needed) {
+                    if (needed && RootTool.isRootAvailable()) {
                         enableAccessibilityServiceByRoot();
                     }
                 });
@@ -457,11 +457,17 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     }
 
     private void enableAccessibilityService() {
-        if (!Pref.shouldEnableAccessibilityServiceByRoot()) {
+        if (Pref.shouldEnableAccessibilityServiceByRoot() && RootTool.isRootAvailable()) {
+            enableAccessibilityServiceByRoot();
+        } else {
             AccessibilityServiceTool.goToAccessibilitySetting();
-            return;
         }
-        enableAccessibilityServiceByRoot();
+    }
+
+    private void disableAccessibilityService() {
+        if (!AccessibilityService.Companion.disable()) {
+            AccessibilityServiceTool.goToAccessibilitySetting();
+        }
     }
 
     @SuppressLint("CheckResult")

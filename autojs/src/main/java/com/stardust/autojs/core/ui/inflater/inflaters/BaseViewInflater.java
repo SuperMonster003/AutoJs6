@@ -2,8 +2,9 @@ package com.stardust.autojs.core.ui.inflater.inflaters;
 
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
-import android.os.Build;
+
 import androidx.annotation.Nullable;
+
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -135,31 +136,17 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
             case "width":
             case "layout_width":
                 switch (value) {
-                    case "wrap_content":
-                        layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        break;
-                    case "fill_parent":
-                    case "match_parent":
-                        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-                        break;
-                    default:
-                        layoutParams.width = Dimensions.parseToPixel(value, view, parent, true);
-                        break;
+                    case "wrap_content" -> layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    case "fill_parent", "match_parent" -> layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                    default -> layoutParams.width = Dimensions.parseToPixel(value, view, parent, true);
                 }
                 break;
             case "height":
             case "layout_height":
                 switch (value) {
-                    case "wrap_content":
-                        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        break;
-                    case "fill_parent":
-                    case "match_parent":
-                        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
-                        break;
-                    default:
-                        layoutParams.height = Dimensions.parseToPixel(value, view, parent, false);
-                        break;
+                    case "wrap_content" -> layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    case "fill_parent", "match_parent" -> layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                    default -> layoutParams.height = Dimensions.parseToPixel(value, view, parent, false);
                 }
                 break;
             case "layout_gravity":
@@ -168,7 +155,7 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
                 } else if (parent instanceof FrameLayout) {
                     ((FrameLayout.LayoutParams) layoutParams).gravity = Gravities.parse(value);
                 } else {
-                    return setLayoutGravity(parent, view, Gravities.parse(value));
+                    return setLayoutGravity(view, Gravities.parse(value));
                 }
                 break;
             case "layout_weight":
@@ -234,37 +221,30 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
                 layoutRule = RelativeLayout.CENTER_IN_PARENT;
                 break;
             case "layout_margin":
-                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
                     int margin = Dimensions.parseToIntPixel(value, view);
                     params.bottomMargin = params.leftMargin = params.topMargin = params.rightMargin = margin;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        params.setMarginStart(margin);
-                        params.setMarginEnd(margin);
-                    }
+                    params.setMarginStart(margin);
+                    params.setMarginEnd(margin);
                 }
                 break;
             case "layout_marginLeft":
-                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
                     params.leftMargin = Dimensions.parseToIntPixel(value, view);
                 }
                 break;
             case "layout_marginTop":
-                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
                     params.topMargin = Dimensions.parseToIntPixel(value, view);
                 }
                 break;
             case "layout_marginRight":
-                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
                     params.rightMargin = Dimensions.parseToIntPixel(value, view);
                 }
                 break;
             case "layout_marginBottom":
-                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+                if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
                     params.bottomMargin = Dimensions.parseToIntPixel(value, view);
                 }
                 break;
@@ -293,21 +273,13 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
             case "accessibilityTraversalBefore":
                 Exceptions.unsupports(view, attr, value);
             case "alpha":
-                view.setAlpha(Float.valueOf(value));
-                break;
-            case "autofillHints":
-            case "autofilledHighlight":
-                Exceptions.unsupports(view, attr, value);
+                view.setAlpha(Float.parseFloat(value));
                 break;
             case "backgroundTint":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.setBackgroundTintList(ColorStateList.valueOf(Colors.parse(view, value)));
-                }
+                view.setBackgroundTintList(ColorStateList.valueOf(Colors.parse(view, value)));
                 break;
             case "backgroundTintMode":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.setBackgroundTintMode(TINT_MODES.get(value));
-                }
+                view.setBackgroundTintMode(TINT_MODES.get(value));
                 break;
             case "checked":
                 if (view instanceof CompoundButton) {
@@ -315,106 +287,73 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
                 }
                 break;
             case "clickable":
-                view.setClickable(Boolean.valueOf(value));
+                view.setClickable(Boolean.parseBoolean(value));
                 break;
             case "contentDescription":
                 view.setContentDescription(Strings.parse(view, value));
                 break;
             case "contextClickable":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    view.setContextClickable(Boolean.valueOf(value));
-                }
-                break;
-            case "defaultFocusHighlightEnabled":
-                Exceptions.unsupports(view, attr, value);
+                view.setContextClickable(Boolean.parseBoolean(value));
                 break;
             case "drawingCacheQuality":
                 view.setDrawingCacheQuality(DRAWABLE_CACHE_QUALITIES.get(value));
                 break;
             case "duplicateParentState":
-                view.setDuplicateParentStateEnabled(Boolean.valueOf(value));
+                view.setDuplicateParentStateEnabled(Boolean.parseBoolean(value));
                 break;
             case "elevation":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.setElevation(Dimensions.parseToIntPixel(value, view));
-                }
+                view.setElevation(Dimensions.parseToIntPixel(value, view));
                 break;
             case "fadeScrollbars":
-                view.setScrollbarFadingEnabled(Boolean.valueOf(value));
+                view.setScrollbarFadingEnabled(Boolean.parseBoolean(value));
                 break;
             case "fadingEdgeLength":
                 view.setFadingEdgeLength(Dimensions.parseToIntPixel(value, view));
                 break;
             case "filterTouchesWhenObscured":
-                view.setFilterTouchesWhenObscured(Boolean.valueOf(value));
+                view.setFilterTouchesWhenObscured(Boolean.parseBoolean(value));
                 break;
             case "fitsSystemWindows":
-                view.setFitsSystemWindows(Boolean.valueOf(value));
+                view.setFitsSystemWindows(Boolean.parseBoolean(value));
                 break;
             case "focusable":
-                view.setFocusable(Boolean.valueOf(value));
+                view.setFocusable(Boolean.parseBoolean(value));
                 break;
             case "focusableInTouchMode":
-                view.setFocusableInTouchMode(Boolean.valueOf(value));
-                break;
-            case "focusedByDefault":
-                Exceptions.unsupports(view, attr, value);
+                view.setFocusableInTouchMode(Boolean.parseBoolean(value));
                 break;
             case "forceHasOverlappingRendering":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    view.forceHasOverlappingRendering(Boolean.valueOf(value));
-                }
+                view.forceHasOverlappingRendering(Boolean.parseBoolean(value));
                 break;
             case "foreground":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    view.setForeground(getDrawables().parse(view, value));
-                }
+                view.setForeground(getDrawables().parse(view, value));
                 break;
             case "foregroundGravity":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    view.setForegroundGravity(Gravities.parse(value));
-                }
+                view.setForegroundGravity(Gravities.parse(value));
                 break;
             case "foregroundTint":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    view.setForegroundTintList(ColorStateList.valueOf(Colors.parse(view, value)));
-                }
+                view.setForegroundTintList(ColorStateList.valueOf(Colors.parse(view, value)));
                 break;
             case "foregroundTintMode":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    view.setForegroundTintMode(TINT_MODES.get(value));
-                }
+                view.setForegroundTintMode(TINT_MODES.get(value));
                 break;
             case "hapticFeedbackEnabled":
-                view.setHapticFeedbackEnabled(Boolean.valueOf(value));
+                view.setHapticFeedbackEnabled(Boolean.parseBoolean(value));
                 break;
             case "importantForAccessibility":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    view.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY.get(value));
-                }
-                break;
-            case "importantForAutofill":
-                Exceptions.unsupports(view, attr, value);
+                view.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY.get(value));
                 break;
             case "isScrollContainer":
-                view.setScrollContainer(Boolean.valueOf(value));
+                view.setScrollContainer(Boolean.parseBoolean(value));
                 break;
             case "keepScreenOn":
-                view.setKeepScreenOn(Boolean.valueOf(value));
-                break;
-            case "keyboardNavigationCluster":
-                Exceptions.unsupports(view, attr, value);
-                break;
-            case "layerType":
-                Exceptions.unsupports(view, attr, value);
+                view.setKeepScreenOn(Boolean.parseBoolean(value));
                 break;
             case "layoutDirection":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    view.setLayoutDirection(LAYOUT_DIRECTIONS.get(value));
-                }
+                view.setLayoutDirection(LAYOUT_DIRECTIONS.get(value));
                 break;
             case "longClickable":
-                view.setLongClickable(Boolean.valueOf(value));
+                view.setLongClickable(Boolean.parseBoolean(value));
                 break;
             case "minHeight":
                 view.setMinimumHeight(Dimensions.parseToIntPixel(value, view));
@@ -422,48 +361,13 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
             case "minWidth":
                 view.setMinimumWidth(Dimensions.parseToIntPixel(value, view));
                 break;
-            case "nextClusterForward":
-                Exceptions.unsupports(view, attr, value);
-                break;
-            case "nextFocusDown":
-                Exceptions.unsupports(view, attr, value);
-                break;
-            case "nextFocusForward":
-                Exceptions.unsupports(view, attr, value);
-                break;
-            case "nextFocusLeft":
-                Exceptions.unsupports(view, attr, value);
-                break;
-            case "nextFocusRight":
-                Exceptions.unsupports(view, attr, value);
-                break;
-            case "nextFocusUp":
-                Exceptions.unsupports(view, attr, value);
-                break;
-            case "onClick":
-                Exceptions.unsupports(view, attr, value);
-                break;
             case "paddingEnd":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    view.setPaddingRelative(view.getPaddingStart(), view.getPaddingTop(),
-                            Dimensions.parseToIntPixel(value, view), view.getPaddingBottom());
-                } else {
-                    view.setPadding(view.getPaddingLeft(), view.getPaddingTop(),
-                            Dimensions.parseToIntPixel(value, view), view.getPaddingBottom());
-                }
-                break;
-            case "paddingHorizontal":
-            case "paddingVertical":
-                Exceptions.unsupports(view, attr, value);
+                view.setPaddingRelative(view.getPaddingStart(), view.getPaddingTop(),
+                        Dimensions.parseToIntPixel(value, view), view.getPaddingBottom());
                 break;
             case "paddingStart":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    view.setPaddingRelative(Dimensions.parseToIntPixel(value, view), view.getPaddingTop(),
-                            view.getPaddingEnd(), view.getPaddingBottom());
-                } else {
-                    view.setPadding(Dimensions.parseToIntPixel(value, view), view.getPaddingTop(),
-                            view.getPaddingRight(), view.getPaddingBottom());
-                }
+                view.setPaddingRelative(Dimensions.parseToIntPixel(value, view), view.getPaddingTop(),
+                        view.getPaddingEnd(), view.getPaddingBottom());
                 break;
             case "requiresFadingEdge":
                 for (String str : value.split("\\|")) {
@@ -484,7 +388,7 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
                 view.setRotationY(Float.parseFloat(value));
                 break;
             case "saveEnabled":
-                view.setSaveEnabled(Boolean.valueOf(value));
+                view.setSaveEnabled(Boolean.parseBoolean(value));
                 break;
             case "scaleX":
                 view.setScaleX(Float.parseFloat(value));
@@ -493,9 +397,7 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
                 view.setScaleY(Float.parseFloat(value));
                 break;
             case "scrollIndicators":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    view.setScrollIndicators(SCROLL_INDICATORS.get(value));
-                }
+                view.setScrollIndicators(SCROLL_INDICATORS.get(value));
                 break;
             case "scrollX":
                 view.setScrollX(Dimensions.parseToIntPixel(value, view));
@@ -503,24 +405,14 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
             case "scrollY":
                 view.setScrollY(Dimensions.parseToIntPixel(value, view));
                 break;
-            case "scrollbarAlwaysDrawHorizontalTrack":
-            case "scrollbarAlwaysDrawVerticalTrack":
-                Exceptions.unsupports(view, attr, value);
-                break;
             case "scrollbarDefaultDelayBeforeFade":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    view.setScrollBarDefaultDelayBeforeFade(Integer.valueOf(value));
-                }
+                view.setScrollBarDefaultDelayBeforeFade(Integer.parseInt(value));
                 break;
             case "scrollbarFadeDuration":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    view.setScrollBarFadeDuration(Integer.valueOf(value));
-                }
+                view.setScrollBarFadeDuration(Integer.parseInt(value));
                 break;
             case "scrollbarSize":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    view.setScrollBarSize(Dimensions.parseToIntPixel(value, view));
-                }
+                view.setScrollBarSize(Dimensions.parseToIntPixel(value, view));
                 break;
             case "scrollbarStyle":
                 view.setScrollBarStyle(SCROLLBARS_STYLES.get(value));
@@ -531,7 +423,7 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
             case "scrollbarTrackVertical":
                 Exceptions.unsupports(view, attr, value);
             case "scrollbars":
-                for (String str : value.split("|")) {
+                for (String str : value.split("\\|")) {
                     if (str.equals("horizontal")) {
                         view.setHorizontalScrollBarEnabled(true);
                     } else if (str.equals("vertical")) {
@@ -540,7 +432,7 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
                 }
                 break;
             case "soundEffectsEnabled":
-                view.setSoundEffectsEnabled(Boolean.valueOf(value));
+                view.setSoundEffectsEnabled(Boolean.parseBoolean(value));
                 break;
             case "stateListAnimator":
                 Exceptions.unsupports(view, attr, value);
@@ -548,21 +440,10 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
                 view.setTag(Strings.parse(view, value));
                 break;
             case "textAlignment":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    view.setTextAlignment(TEXT_ALIGNMENTS.get(value));
-                }
+                view.setTextAlignment(TEXT_ALIGNMENTS.get(value));
                 break;
             case "textDirection":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    view.setTextDirection(TEXT_DIRECTIONS.get(value));
-                }
-                break;
-            case "theme":
-                //Exceptions.unsupports(view, attr, value);
-
-                break;
-            case "tooltipText":
-                Exceptions.unsupports(view, attr, value);
+                view.setTextDirection(TEXT_DIRECTIONS.get(value));
                 break;
             case "transformPivotX":
                 view.setPivotX(Dimensions.parseToPixel(value, view));
@@ -571,9 +452,7 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
                 view.setPivotY(Dimensions.parseToPixel(value, view));
                 break;
             case "transitionName":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.setTransitionName(Strings.parse(view, value));
-                }
+                view.setTransitionName(Strings.parse(view, value));
                 break;
             case "translationX":
                 view.setTranslationX(Dimensions.parseToPixel(value, view));
@@ -582,16 +461,34 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
                 view.setTranslationY(Dimensions.parseToPixel(value, view));
                 break;
             case "translationZ":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.setTranslationZ(Dimensions.parseToPixel(value, view));
-                }
+                view.setTranslationZ(Dimensions.parseToPixel(value, view));
                 break;
             case "visibility":
                 view.setVisibility(VISIBILITY.get(value));
                 break;
+            case "autofillHints":
+            case "autofilledHighlight":
+            case "tooltipText":
+            case "defaultFocusHighlightEnabled":
+            case "focusedByDefault":
+            case "importantForAutofill":
+            case "keyboardNavigationCluster":
+            case "layerType":
+            case "nextClusterForward":
+            case "nextFocusDown":
+            case "nextFocusForward":
+            case "nextFocusLeft":
+            case "nextFocusRight":
+            case "nextFocusUp":
+            case "onClick":
+            case "paddingHorizontal":
+            case "paddingVertical":
+            case "scrollbarAlwaysDrawHorizontalTrack":
+            case "scrollbarAlwaysDrawVerticalTrack":
+                Exceptions.unsupports(view, attr, value);
+                break;
             default:
                 return false;
-
         }
         if (layoutRule != null && parent instanceof RelativeLayout) {
             if (layoutTarget) {
@@ -604,7 +501,7 @@ public class BaseViewInflater<V extends View> implements ViewInflater<V> {
         return true;
     }
 
-    public boolean setLayoutGravity(ViewGroup parent, V view, int gravity) {
+    public boolean setLayoutGravity(V view, int gravity) {
         try {
             ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
             Field field = layoutParams.getClass().getField("gravity");

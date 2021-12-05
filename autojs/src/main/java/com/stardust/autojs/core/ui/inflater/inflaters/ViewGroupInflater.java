@@ -1,7 +1,6 @@
 package com.stardust.autojs.core.ui.inflater.inflaters;
 
 import android.animation.LayoutTransition;
-import android.os.Build;
 import android.view.ViewGroup;
 
 import com.stardust.autojs.core.ui.inflater.ResourceParser;
@@ -39,22 +38,16 @@ public class ViewGroupInflater<V extends ViewGroup> extends BaseViewInflater<V> 
     public boolean setAttr(V view, String attr, String value, ViewGroup parent, Map<String, String> attrs) {
         switch (attr) {
             case "addStatesFromChildren":
-                view.setAddStatesFromChildren(Boolean.valueOf(value));
-                break;
-            case "alwaysDrawnWithCache":
-                view.setAlwaysDrawnWithCacheEnabled(Boolean.valueOf(value));
+                view.setAddStatesFromChildren(Boolean.parseBoolean(value));
                 break;
             case "animateLayoutChanges":
                 view.setLayoutTransition(new LayoutTransition());
                 break;
-            case "animationCache":
-                view.setAnimationCacheEnabled(Boolean.valueOf(value));
-                break;
             case "clipChildren":
-                view.setClipChildren(Boolean.valueOf(value));
+                view.setClipChildren(Boolean.parseBoolean(value));
                 break;
             case "clipToPadding":
-                view.setClipToPadding(Boolean.valueOf(value));
+                view.setClipToPadding(Boolean.parseBoolean(value));
                 break;
             case "descendantFocusability":
                 view.setDescendantFocusability(DESCENDANT_FOCUSABILITY.get(value));
@@ -63,15 +56,13 @@ public class ViewGroupInflater<V extends ViewGroup> extends BaseViewInflater<V> 
                 Exceptions.unsupports(view, attr, value);
                 break;
             case "layoutMode":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    view.setLayoutMode(LAYOUT_MODES.get(value));
-                }
+                view.setLayoutMode(LAYOUT_MODES.get(value));
                 break;
             case "persistentDrawingCache":
                 view.setPersistentDrawingCache(PERSISTENT_DRAWING_CACHE.get(value));
                 break;
             case "splitMotionEvents":
-                view.setMotionEventSplittingEnabled(Boolean.valueOf(value));
+                view.setMotionEventSplittingEnabled(Boolean.parseBoolean(value));
                 break;
             default:
                 return super.setAttr(view, attr, value, parent, attrs);

@@ -107,16 +107,14 @@ public final class ResourceMonitor {
                 if (sHandler == null) {
                     sHandler = new Handler(Looper.getMainLooper());
                 }
-                sHandler.post(new Runnable() {
-                    public final void run() {
-                        UnclosedResourceDetectedException detectedException = new UnclosedResourceDetectedException(exception);
-                        detectedException.fillInStackTrace();
-                        Log.w(LOG_TAG, "UnclosedResourceDetected", detectedException);
-                        if (sUnclosedResourceDetectedHandler != null) {
-                            sUnclosedResourceDetectedHandler.onUnclosedResourceDetected(detectedException);
-                        } else {
-                            throw detectedException;
-                        }
+                sHandler.post(() -> {
+                    UnclosedResourceDetectedException detectedException = new UnclosedResourceDetectedException(exception);
+                    detectedException.fillInStackTrace();
+                    Log.w(LOG_TAG, "UnclosedResourceDetected", detectedException);
+                    if (sUnclosedResourceDetectedHandler != null) {
+                        sUnclosedResourceDetectedHandler.onUnclosedResourceDetected(detectedException);
+                    } else {
+                        throw detectedException;
                     }
                 });
             }

@@ -110,8 +110,8 @@ public class UI extends ProxyObject {
     private class Drawables extends com.stardust.autojs.core.ui.inflater.util.Drawables {
 
         @Override
-        public Drawable decodeImage(String path) {
-            return super.decodeImage(mRuntime.files.path(path));
+        public Drawable decodeImage(Context context, String path) {
+            return super.decodeImage(context, mRuntime.files.path(path));
         }
     }
 

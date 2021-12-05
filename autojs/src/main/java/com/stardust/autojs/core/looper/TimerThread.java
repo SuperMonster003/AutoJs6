@@ -3,6 +3,7 @@ package com.stardust.autojs.core.looper;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
 
 import com.stardust.autojs.engine.RhinoJavaScriptEngine;
 import com.stardust.autojs.runtime.ScriptRuntime;
@@ -18,12 +19,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TimerThread extends ThreadCompat {
 
-    private static ConcurrentHashMap<Thread, Timer> sTimerMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Thread, Timer> sTimerMap = new ConcurrentHashMap<>();
 
     private Timer mTimer;
     private final VolatileBox<Long> mMaxCallbackUptimeMillisForAllThreads;
     private final ScriptRuntime mRuntime;
-    private Runnable mTarget;
+    private final Runnable mTarget;
     private boolean mRunning = false;
     private final Object mRunningLock = new Object();
 
@@ -46,7 +47,7 @@ public class TimerThread extends ThreadCompat {
             Looper.loop();
         } catch (Throwable e) {
             if (!ScriptInterruptedException.causedByInterrupted(e)) {
-                mRuntime.console.error(Thread.currentThread().toString() + ": ", e);
+                mRuntime.console.error(Thread.currentThread() + ": ", e);
             }
         } finally {
             onExit();
@@ -121,6 +122,7 @@ public class TimerThread extends ThreadCompat {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Thread[" + getName() + "," + getPriority() + "]";

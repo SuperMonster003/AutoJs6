@@ -55,13 +55,13 @@ public class Images {
 
     private static final String TAG = Images.class.getSimpleName();
 
-    private ScriptRuntime mScriptRuntime;
-    private ScreenCaptureRequester mScreenCaptureRequester;
+    private final ScriptRuntime mScriptRuntime;
+    private final ScreenCaptureRequester mScreenCaptureRequester;
     private ScreenCapturer mScreenCapturer;
-    private Context mContext;
+    private final Context mContext;
     private Image mPreCapture;
     private ImageWrapper mPreCaptureImage;
-    private ScreenMetrics mScreenMetrics;
+    private final ScreenMetrics mScreenMetrics;
     private volatile boolean mOpenCvInitialized = false;
 
     @ScriptVariable
@@ -169,11 +169,11 @@ public class Images {
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
         if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
-            canvas.drawBitmap(img1.getBitmap(), 0, (height - img1.getHeight()) / 2, paint);
-            canvas.drawBitmap(img2.getBitmap(), img1.getWidth(), (height - img2.getHeight()) / 2, paint);
+            canvas.drawBitmap(img1.getBitmap(), 0, (float) (height - img1.getHeight()) / 2, paint);
+            canvas.drawBitmap(img2.getBitmap(), img1.getWidth(), (float) (height - img2.getHeight()) / 2, paint);
         } else {
-            canvas.drawBitmap(img1.getBitmap(), (width - img1.getWidth()) / 2, 0, paint);
-            canvas.drawBitmap(img2.getBitmap(), (width - img2.getWidth()) / 2, img1.getHeight(), paint);
+            canvas.drawBitmap(img1.getBitmap(), (float) (width - img1.getWidth()) / 2, 0, paint);
+            canvas.drawBitmap(img2.getBitmap(), (float) (width - img2.getWidth()) / 2, img1.getHeight(), paint);
         }
         return ImageWrapper.ofBitmap(bitmap);
     }
@@ -217,16 +217,12 @@ public class Images {
     }
 
     private Bitmap.CompressFormat parseImageFormat(String format) {
-        switch (format) {
-            case "png":
-                return Bitmap.CompressFormat.PNG;
-            case "jpeg":
-            case "jpg":
-                return Bitmap.CompressFormat.JPEG;
-            case "webp":
-                return Bitmap.CompressFormat.WEBP;
-        }
-        return null;
+        return switch (format) {
+            case "png" -> Bitmap.CompressFormat.PNG;
+            case "jpeg", "jpg" -> Bitmap.CompressFormat.JPEG;
+            case "webp" -> Bitmap.CompressFormat.WEBP;
+            default -> null;
+        };
     }
 
     public ImageWrapper load(String src) {
@@ -265,7 +261,7 @@ public class Images {
     }
 
     public void releaseScreenCapturer() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && mScreenCapturer != null) {
+        if (mScreenCapturer != null) {
             mScreenCapturer.release();
         }
     }

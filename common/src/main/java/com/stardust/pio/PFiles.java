@@ -23,21 +23,19 @@ import java.util.Objects;
  * Created by Stardust on 2017/4/1.
  */
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class PFiles {
 
     static final int DEFAULT_BUFFER_SIZE = 8192;
     static final String DEFAULT_ENCODING = Charset.defaultCharset().name();
 
     public static PFileInterface open(String path, String mode, String encoding, int bufferSize) {
-        switch (mode) {
-            case "r":
-                return new PReadableTextFile(path, encoding, bufferSize);
-            case "w":
-                return new PWritableTextFile(path, encoding, bufferSize, false);
-            case "a":
-                return new PWritableTextFile(path, encoding, bufferSize, true);
-        }
-        return null;
+        return switch (mode) {
+            case "r" -> new PReadableTextFile(path, encoding, bufferSize);
+            case "w" -> new PWritableTextFile(path, encoding, bufferSize, false);
+            case "a" -> new PWritableTextFile(path, encoding, bufferSize, true);
+            default -> null;
+        };
     }
 
     public static Object open(String path, String mode, String encoding) {

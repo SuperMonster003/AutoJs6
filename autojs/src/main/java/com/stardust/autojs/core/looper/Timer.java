@@ -14,12 +14,10 @@ import com.stardust.concurrent.VolatileBox;
 
 public class Timer {
 
-    private static final String LOG_TAG = "Timer";
-
-    private SparseArray<Runnable> mHandlerCallbacks = new SparseArray<>();
+    private final SparseArray<Runnable> mHandlerCallbacks = new SparseArray<>();
     private int mCallbackMaxId = 0;
-    private ScriptRuntime mRuntime;
-    private Handler mHandler;
+    private final ScriptRuntime mRuntime;
+    private final Handler mHandler;
     private long mMaxCallbackUptimeMillis = 0;
     private final VolatileBox<Long> mMaxCallbackMillisForAllThread;
 
@@ -39,7 +37,7 @@ public class Timer {
         mCallbackMaxId++;
         final int id = mCallbackMaxId;
         Runnable r = () -> {
-            callFunction(callback, null, args);
+            callFunction(callback, args);
             mHandlerCallbacks.remove(id);
         };
         mHandlerCallbacks.put(id, r);
@@ -47,15 +45,15 @@ public class Timer {
         return id;
     }
 
-    private void callFunction(Object callback, Object thiz, Object[] args) {
+    private void callFunction(Object callback, Object[] args) {
         if(Looper.myLooper() == Looper.getMainLooper()){
             try {
-                mRuntime.bridges.callFunction(callback, thiz, args);
+                mRuntime.bridges.callFunction(callback, null, args);
             }catch (Exception e){
                 mRuntime.exit(e);
             }
         }else {
-            mRuntime.bridges.callFunction(callback, thiz, args);
+            mRuntime.bridges.callFunction(callback, null, args);
         }
     }
 
@@ -71,7 +69,7 @@ public class Timer {
             public void run() {
                 if (mHandlerCallbacks.get(id) == null)
                     return;
-                callFunction(listener, null, args);
+                callFunction(listener, args);
                 postDelayed(this, interval);
             }
         };
@@ -89,9 +87,6 @@ public class Timer {
         }
     }
 
-    public void post(Runnable r) {
-
-    }
 
     public boolean clearInterval(int id) {
         return clearCallback(id);
@@ -101,7 +96,7 @@ public class Timer {
         mCallbackMaxId++;
         final int id = mCallbackMaxId;
         Runnable r = () -> {
-            callFunction(listener, null, args);
+            callFunction(listener, args);
             mHandlerCallbacks.remove(id);
         };
         mHandlerCallbacks.put(id, r);

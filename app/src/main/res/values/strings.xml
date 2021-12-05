@@ -311,9 +311,9 @@
     <string name="format_default_package_name" formatted="true">com.example.script%d</string>
     <string name="text_should_not_be_empty">不能为空</string>
     <string name="text_icon">图标</string>
-    <string name="text_device_not_rooted">设备没有root</string>
-    <string name="prompt_device_not_rooted">监测到您的设备没有root, 录制脚本需要root权限, 是否继续?</string>
-    <string name="text_device_rooted">仍要录制</string>
+    <string name="text_no_root_access">无root权限</string>
+    <string name="no_root_access_for_record">Auto.js无root权限, 录制脚本需root权限, 是否继续录制</string>
+    <string name="text_insist_on_record">录制</string>
     <string name="nodebb_error_invalid_login_credentials">无效的登录凭证</string>
     <string name="nodebb_error_change_password_error_length">密码太短</string>
     <string name="nodebb_error_email_taken">邮箱已被占用</string>
@@ -393,7 +393,7 @@
     <string name="text_run_on_package_update">应用更新时</string>
     <string name="text_run_on_headset_plug">耳机插拔时</string>
     <string name="text_run_on_time_tick">每分钟一次</string>
-    <string name="text_run_on_config_change">某些设置(屏幕方向,地区等)更改时</string>
+    <string name="text_run_on_config_change">某些设置 (屏幕方向, 地区等) 更改时</string>
     <string name="error_pattern_syntax">正则表达式错误</string>
     <string name="text_invalid_package_name">非法包名</string>
     <string name="error_cannot_rename">重命名失败</string>
@@ -403,7 +403,7 @@
     <string name="key_night_mode">key_night_mode</string>
     <string name="text_run_on_startup">Auto.js启动时</string>
     <string name="text_usage_stats_permission">查看使用情况权限</string>
-    <string name="description_usage_stats_permission">通过\"查看使用情况\"权限可以获取本设备过去使用应用的情况，从而使获取当前应用(currentPackage)时更准确。</string>
+    <string name="description_usage_stats_permission">通过\"查看使用情况\"权限可获取本设备过去使用应用的情况, 从而使\"获取当前应用\" (currentPackage) 结果更准确</string>
     <string name="text_open_with">打开方式</string>
     <string name="text_root">Root</string>
     <string name="text_no_root">免Root</string>
@@ -421,4 +421,5 @@
     <string name="text_failed">失败</string>
     <string name="mt_color_picker_title">选择颜色</string>
     <string name="mt_custom">自定义</string>
+    <string name="text_quit">放弃</string>
 </resources>

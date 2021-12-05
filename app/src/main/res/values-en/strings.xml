@@ -62,7 +62,7 @@
     <string name="text_error">Error</string>
     <string name="text_copy_debug_info">Copy debugging log</string>
     <string name="text_it_is_the_developer_of_app">This is a software developer(。・・)ノ</string>
-    <string name="text_please_choose">Please choose </string>
+    <string name="text_please_choose">Please choose</string>
     <string name="text_crash">Crash~ o(≧□≦)o</string>
     <string name="crash_feedback">(ಥ _ ಥ)Exit or submit a bug report or copy debugging log to the developer(≧∇≦)ﾉ</string>
     <string name="text_clear">Clear</string>
@@ -182,6 +182,7 @@
     <string name="text_stable_mode">Stable mode</string>
     <string name="text_foreground_service">Foreground service</string>
     <string name="text_usage_stats_permission">Usage stats access</string>
+    <string name="description_usage_stats_permission">Provides access to device usage history and statistics which results in currentPackage() a more accurate result</string>
     <string name="text_volume_down_control">Volume down control</string>
     <string name="text_task">Task</string>
     <string name="text_next_run_time">Next</string>
@@ -238,6 +239,7 @@
     <string name="text_time">Time</string>
     <string name="text_size">Size</string>
     <string name="text_type">Type</string>
+    <string name="text_icon">Icon</string>
     <string name="text_js_file">*.js file</string>
     <string name="text_notification_permission">Notification access</string>
     <string name="text_permission">Permission</string>
@@ -253,4 +255,8 @@
     <string name="text_failed">Failed</string>
     <string name="mt_color_picker_title">Color picker</string>
     <string name="mt_custom">Custom</string>
+    <string name="text_no_root_access">No root access</string>
+    <string name="no_root_access_for_record">Auto.js has no root access to record a script. Continue?</string>
+    <string name="text_insist_on_record">Record</string>
+    <string name="text_quit">Quit</string>
 </resources>
