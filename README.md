@@ -98,6 +98,12 @@
 
 [comment]: <> "Version history only shows last 3 versions"
 
+# v6.0.1 Alpha2
+
+###### 2021/12/07
+
+* `修复` global.sleep及global.toast方法绑定错误
+
 # v6.0.1 Alpha
 
 ###### 2021/12/05
@@ -109,6 +115,7 @@
 * `优化` 扩展global.toast支持时长控制/强制覆盖控制/dismiss方法
 * `优化` 包名对象全局化 (okhttp3/androidx/de)
 * `优化` 升级 Android Material 版本 1.5.0-beta01 -> 1.6.0-alpha01
+* `优化` 升级 Android Gradle 插件版本 7.2.0-alpha04 -> 7.2.0-alpha05
 
 # v6.0.0
 
@@ -185,5 +192,9 @@
 
 * [Auto.js](https://github.com/hyb1996/Auto.js-VSCode-Extension) { author: [hyb1996](https://github.com/hyb1996) }
     - `适用于 VS Code 的桌面开发插件`
+
+* [AutoX](https://github.com/kkevsekk1/AutoX) { author: [kkevsekk1](https://github.com/kkevsekk1) }
+    - `Auto.js 二次开发项目`
+
 * [Auto.js-TypeScript-Declarations](https://github.com/SuperMonster003/Auto.js-TypeScript-Declarations) { author: [SuperMonster003](https://github.com/SuperMonster003) }
     - `Auto.js 声明文件 (.d.ts)`

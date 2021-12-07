@@ -112,7 +112,7 @@ module.exports = function (runtime, global) {
                 this.toast = $.toast.bind($);
                 this.toast.dismiss = () => $.dismiss();
                 return this.toast;
-            }).apply(this, arguments);
+            }.call(this)).apply(null, arguments);
         },
         toastLog(msg, is_long, is_forcible) {
             this.toast.apply(this, arguments);
@@ -178,7 +178,7 @@ module.exports = function (runtime, global) {
 
             (function $LazY() {
                 return this.sleep = $.sleep.bind($);
-            }).call(this, millis_min, millis_max);
+            }).call(this).call(null, millis_min, millis_max);
         },
         isStopped() {
             return runtime.isStopped();

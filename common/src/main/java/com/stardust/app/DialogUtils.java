@@ -10,8 +10,6 @@ import android.os.Looper;
 import android.view.Window;
 import android.view.WindowManager;
 
-import kotlin.Suppress;
-
 /**
  * Created by Stardust on 2017/8/4.
  */

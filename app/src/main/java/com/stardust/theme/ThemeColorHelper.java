@@ -88,11 +88,9 @@ public class ThemeColorHelper {
 
     @TargetApi(21)
     public static void setStatusBarColor(Activity activity, int color) {
-        if (Build.VERSION.SDK_INT >= 21) {
-            Window window = activity.getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(color);
-        }
+        Window window = activity.getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(color);
     }
 
     public static void setBackgroundColor(View view, int color) {

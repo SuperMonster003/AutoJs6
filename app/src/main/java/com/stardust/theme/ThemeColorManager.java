@@ -159,11 +159,9 @@ public class ThemeColorManager {
 
         @TargetApi(21)
         public static void add(Activity activity) {
-            if (Build.VERSION.SDK_INT >= 21) {
-                activities.add(new WeakReference<>(activity));
-                if (shouldApplyThemeColor())
-                    activity.getWindow().setStatusBarColor(themeColor.colorPrimary);
-            }
+            activities.add(new WeakReference<>(activity));
+            if (shouldApplyThemeColor())
+                activity.getWindow().setStatusBarColor(themeColor.colorPrimary);
         }
 
         @TargetApi(21)

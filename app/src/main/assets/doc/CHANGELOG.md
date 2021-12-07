@@ -4,9 +4,9 @@
 
 ******
 
-# v6.0.1 Alpha
+# v6.0.1
 
-###### 2021/12/05
+###### 2021/12/07
 
 * `新增` polyfill (Object.getOwnPropertyDescriptors)
 * `新增` polyfill (Array.prototype.flat)
@@ -15,6 +15,7 @@
 * `优化` 扩展global.toast支持时长控制/强制覆盖控制/dismiss方法
 * `优化` 包名对象全局化 (okhttp3/androidx/de)
 * `优化` 升级 Android Material 版本 1.5.0-beta01 -> 1.6.0-alpha01
+* `优化` 升级 Android Gradle 插件版本 7.2.0-alpha04 -> 7.2.0-alpha05
 
 # v6.0.0
 
