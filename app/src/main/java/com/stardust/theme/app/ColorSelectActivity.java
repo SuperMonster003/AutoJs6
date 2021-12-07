@@ -1,6 +1,7 @@
 package com.stardust.theme.app;
 
 import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -203,6 +204,7 @@ public class ColorSelectActivity extends AppCompatActivity {
             return mColors.get(mSelectedPosition).themeColor;
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         public void setSelectedPosition(int selectedPosition) {
             if (mSelectedPosition != SELECT_NONE) {
                 int oldSelectedPosition = mSelectedPosition;
@@ -211,7 +213,7 @@ public class ColorSelectActivity extends AppCompatActivity {
                 getAdapter().notifyItemChanged(mSelectedPosition);
             } else {
                 this.mSelectedPosition = selectedPosition;
-                getAdapter().notifyDataSetChanged();
+                Objects.requireNonNull(getAdapter()).notifyDataSetChanged();
             }
         }
 
