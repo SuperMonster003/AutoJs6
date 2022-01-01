@@ -112,7 +112,7 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
             @Override
             public String println(int level, CharSequence charSequence) {
                 String log = super.println(level, charSequence);
-                DevPluginService.getInstance().print(log);
+                new Thread(() -> DevPluginService.getInstance().print(log)).start();
                 return log;
             }
         };
