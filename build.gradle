@@ -4,25 +4,22 @@ import org.apache.groovy.json.internal.LazyMap
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = "1.6.0"
+    ext.kotlinVer = "1.6.10"
+    ext.junitVer = "4.13.2"
     repositories {
         mavenCentral()
         google()
-        maven { url "https://maven.aliyun.com/repository/apache-snapshots" }
         maven { url "https://maven.aliyun.com/repository/central" }
         maven { url "https://maven.aliyun.com/repository/google" }
         maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
-        maven { url "https://maven.aliyun.com/repository/grails-core" }
         maven { url "https://maven.aliyun.com/repository/jcenter" }
         maven { url "https://maven.aliyun.com/repository/public" }
-        maven { url "https://maven.aliyun.com/repository/spring" }
-        maven { url "https://maven.aliyun.com/repository/spring-plugin" }
         maven { url "https://repo.huaweicloud.com/repository/maven" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0-alpha05'
+        classpath "com.android.tools.build:gradle:7.2.0-alpha06"
 
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVer}"
         classpath "com.jakewharton:butterknife-gradle-plugin:10.2.1"
 
         classpath "org.codehaus.groovy:groovy-json:3.0.8"
@@ -34,15 +31,11 @@ allprojects {
         maven { url "https://jitpack.io" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         mavenCentral()
-        maven { url "https://maven.aliyun.com/repository/apache-snapshots" }
         maven { url "https://maven.aliyun.com/repository/central" }
         maven { url "https://maven.aliyun.com/repository/google" }
         maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
-        maven { url "https://maven.aliyun.com/repository/grails-core" }
         maven { url "https://maven.aliyun.com/repository/jcenter" }
         maven { url "https://maven.aliyun.com/repository/public" }
-        maven { url "https://maven.aliyun.com/repository/spring" }
-        maven { url "https://maven.aliyun.com/repository/spring-plugin" }
         maven { url "https://repo.huaweicloud.com/repository/maven" }
         google()
     }

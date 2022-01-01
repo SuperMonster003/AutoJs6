@@ -1,23 +1,22 @@
 package org.autojs.autojs.ui.main.drawer;
 
-import android.content.pm.PackageManager;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.autojs.autojs.R;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
 import org.autojs.autojs.ui.widget.PrefSwitch;
 import org.autojs.autojs.ui.widget.SwitchCompat;
 
+import java.io.IOException;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
-
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 
 /**
  * Created by Stardust on 2017/12/10.
@@ -48,12 +47,22 @@ public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem>
     public DrawerMenuItemViewHolder(View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
-        mSwitchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> onClick());
+        mSwitchCompat.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            try {
+                onClick();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         itemView.setOnClickListener(v -> {
             if (mSwitchCompat.getVisibility() == VISIBLE) {
                 mSwitchCompat.toggle();
             } else {
-                onClick();
+                try {
+                    onClick();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -93,7 +102,7 @@ public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem>
         }
     }
 
-    private void onClick() {
+    private void onClick() throws IOException {
         mDrawerMenuItem.setChecked(mSwitchCompat.isChecked());
         if (mAntiShake && (System.currentTimeMillis() - mLastClickMillis < CLICK_TIMEOUT)) {
             // Toast.makeText(itemView.getContext(), R.string.text_click_too_frequently, Toast.LENGTH_SHORT).show();

@@ -2,7 +2,6 @@ package org.autojs.autojs.pluginclient;
 
 import android.annotation.SuppressLint;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -37,8 +36,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class DevPluginResponseHandler implements Handler {
 
-
-    private Router mRouter = new Router.RootRouter("type")
+    private final Router mRouter = new Router.RootRouter("type")
             .handler("command", new Router("command")
                     .handler("run", data -> {
                         String script = data.get("script").getAsString();
@@ -80,10 +78,10 @@ public class DevPluginResponseHandler implements Handler {
                         return true;
                     }));
 
-
-    private HashMap<String, ScriptExecution> mScriptExecutions = new HashMap<>();
+    private final HashMap<String, ScriptExecution> mScriptExecutions = new HashMap<>();
     private final File mCacheDir;
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public DevPluginResponseHandler(File cacheDir) {
         mCacheDir = cacheDir;
         if (cacheDir.exists()) {
@@ -101,14 +99,15 @@ public class DevPluginResponseHandler implements Handler {
         return mRouter.handle(data);
     }
 
-    public Observable<File> handleBytes(JsonObject data, JsonWebSocket.Bytes bytes) {
+    public Observable<File> handleBytes(JsonObject data, JsonSocket.Bytes bytes) {
         String id = data.get("data").getAsJsonObject().get("id").getAsString();
         String idMd5 = MD5.md5(id);
-        return Observable.fromCallable(() -> {
-            File dir = new File(mCacheDir, idMd5);
-            Zip.unzip(new ByteArrayInputStream(bytes.byteString.toByteArray()), dir);
-            return dir;
-        })
+        return Observable
+                .fromCallable(() -> {
+                    File dir = new File(mCacheDir, idMd5);
+                    Zip.unzip(new ByteArrayInputStream(bytes.byteString.toByteArray()), dir);
+                    return dir;
+                })
                 .subscribeOn(Schedulers.io());
     }
 
@@ -121,7 +120,6 @@ public class DevPluginResponseHandler implements Handler {
         mScriptExecutions.put(viewId, Scripts.INSTANCE.run(new StringScriptSource("[remote]" + name, script)));
     }
 
-
     private void launchProject(String dir) {
         try {
             new ProjectLauncher(dir)
@@ -131,7 +129,6 @@ public class DevPluginResponseHandler implements Handler {
             GlobalAppContext.toast(R.string.text_invalid_project);
         }
     }
-
 
     private void stopScript(String viewId) {
         ScriptExecution execution = mScriptExecutions.get(viewId);
@@ -163,7 +160,7 @@ public class DevPluginResponseHandler implements Handler {
         GlobalAppContext.toast(R.string.text_script_save_successfully);
     }
 
-
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     private void saveProject(String name, String dir) {
         if (TextUtils.isEmpty(name)) {
@@ -171,19 +168,20 @@ public class DevPluginResponseHandler implements Handler {
         }
         name = PFiles.getNameWithoutExtension(name);
         File toDir = new File(Pref.getScriptDirPath(), name);
-        Observable.fromCallable(() -> {
-            copyDir(new File(dir), toDir);
-            return toDir.getPath();
-        }).subscribeOn(Schedulers.io())
+        Observable
+                .fromCallable(() -> {
+                    copyDir(new File(dir), toDir);
+                    return toDir.getPath();
+                })
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(dest ->
-                                GlobalAppContext.toast(R.string.text_project_save_success, dest),
-                        err ->
-                                GlobalAppContext.toast(R.string.text_project_save_error, err.getMessage())
-                        );
+                .subscribe(dest -> GlobalAppContext.toast(R.string.text_project_save_success, dest),
+                        err -> GlobalAppContext.toast(R.string.text_project_save_error, err.getMessage())
+                );
 
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void copyDir(File fromDir, File toDir) throws FileNotFoundException {
         toDir.mkdirs();
         File[] files = fromDir.listFiles();

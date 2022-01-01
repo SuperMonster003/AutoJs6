@@ -53,6 +53,7 @@
 * 支持将脚本文件或项目打包为 APK 文件
 * 支持利用 Root 权限扩展功能 (屏幕点击/滑动/录制/Shell)
 * 支持作为 Tasker 插件使用
+* 支持与 VSCode 连接并进行桌面开发 (需要 [AutoJs6-VSCode-Ext](https://github.com/SuperMonster003/AutoJs6-VSCode-Ext) 插件)
 
 ******
 
@@ -98,24 +99,23 @@
 
 [comment]: <> "Version history only shows last 3 versions"
 
-# v6.0.1 Alpha2
+# v6.0.1
 
-###### 2021/12/07
+###### 2022/01/01
 
-* `修复` global.sleep及global.toast方法绑定错误
-
-# v6.0.1 Alpha
-
-###### 2021/12/05
-
-* `新增` polyfill (Object.getOwnPropertyDescriptors)
-* `新增` polyfill (Array.prototype.flat)
-* `新增` isInteger/isNullish/isPlainObject/isPrimitive/isReference
-* `优化` 扩展global.sleep支持随机范围/负数兼容
-* `优化` 扩展global.toast支持时长控制/强制覆盖控制/dismiss方法
+* `新增` 连接 VSCode 插件支持客户端 (LAN) 及服务端 (LAN/ADB) 方式 (Ref to Auto.js Pro)
+* `新增` 增加 $base64 全局对象 (Ref to Auto.js Pro)
+* `新增` 增加 isInteger/isNullish/isPlainObject/isPrimitive/isReference 全局方法
+* `新增` 增加 polyfill (Object.getOwnPropertyDescriptors)
+* `新增` 增加 polyfill (Array.prototype.flat)
+* `优化` 扩展 global.sleep 支持 随机范围/负数兼容
+* `优化` 扩展 global.toast 支持 时长控制/强制覆盖控制/dismiss
 * `优化` 包名对象全局化 (okhttp3/androidx/de)
 * `优化` 升级 Android Material 版本 1.5.0-beta01 -> 1.6.0-alpha01
-* `优化` 升级 Android Gradle 插件版本 7.2.0-alpha04 -> 7.2.0-alpha05
+* `优化` 升级 Android Gradle 插件版本 7.2.0-alpha04 -> 7.2.0-alpha06
+* `优化` 升级 Kotlinx Coroutines 版本 1.5.2-native-mt -> 1.6.0-native-mt
+* `优化` 升级 Kotlin Gradle 插件版本 1.6.0 -> 1.6.10
+* `优化` 升级 Gradle 发行版本 7.3 -> 7.3.3
 
 # v6.0.0
 
@@ -190,11 +190,11 @@
 
 ******
 
-* [Auto.js](https://github.com/hyb1996/Auto.js-VSCode-Extension) { author: [hyb1996](https://github.com/hyb1996) }
-    - `适用于 VS Code 的桌面开发插件`
+* [AutoJs6-VSCode-Ext](https://github.com/SuperMonster003/AutoJs6-VSCode-Ext) { author: [SuperMonster003](https://github.com/SuperMonster003) }
+    - `适用于 VSCode 的桌面开发插件 (二次开发项目)`
 
 * [AutoX](https://github.com/kkevsekk1/AutoX) { author: [kkevsekk1](https://github.com/kkevsekk1) }
-    - `Auto.js 二次开发项目`
+    - `安卓平台 JavaScript 自动化工具 (二次开发项目)`
 
-* [Auto.js-TypeScript-Declarations](https://github.com/SuperMonster003/Auto.js-TypeScript-Declarations) { author: [SuperMonster003](https://github.com/SuperMonster003) }
-    - `Auto.js 声明文件 (.d.ts)`
+[//]: # (* [Auto.js-TypeScript-Declarations]&#40;https://github.com/SuperMonster003/Auto.js-TypeScript-Declarations&#41; { author: [SuperMonster003]&#40;https://github.com/SuperMonster003&#41; })
+[//]: # (    - `Auto.js 声明文件 &#40;.d.ts&#41;`)

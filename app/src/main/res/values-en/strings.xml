@@ -51,7 +51,7 @@
     <string name="text_floating_window">Floating Window</string>
     <string name="text_error_report">Bug Report</string>
     <string name="text_press_again_to_exit">Press again to exit</string>
-    <string name="text_already_stop_n_scripts">%d script(s) is(are) stopped</string>
+    <string name="text_already_stop_n_scripts">%d script(s) stopped</string>
     <string name="text_start_running">Running</string>
     <string name="text_open_by_other_apps">Open by other apps</string>
     <string name="text_rename">Rename</string>
@@ -170,14 +170,17 @@
     <string name="summary_guard_mode">Prevent automation of scripts when Auto.js in the front</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
     <string name="text_force_stop">Force stop</string>
-    <string name="text_execution_finished" formatted="false">\\n------------\\n[%s]Finished，spent %f seconds.</string>
+    <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
     <string name="text_about_me_and_repo">About app and developer</string>
     <string name="text_attribute">Attribute</string>
     <string name="text_value">Value</string>
     <string name="text_show_widget_information">View info</string>
     <string name="text_show_layout_hierarchy">View in layout bounds\' view</string>
     <string name="default_value_script_dir_path">/Scripts/</string>
-    <string name="debug">Connect to PC</string>
+    <string name="text_connect_to_pc">Connect to PC</string>
+    <string name="text_client_mode">Client mode</string>
+    <string name="text_server_mode">Server mode</string>
+    <string name="text_pc_server_address">PC server address</string>
     <string name="text_night_mode">Dark mode</string>
     <string name="text_stable_mode">Stable mode</string>
     <string name="text_foreground_service">Foreground service</string>
@@ -259,4 +262,6 @@
     <string name="no_root_access_for_record">Auto.js has no root access to record a script. Continue?</string>
     <string name="text_insist_on_record">Record</string>
     <string name="text_quit">Quit</string>
+    <string name="error_connect_to_remote">Can\'t connect to the remote server: %s</string>
+    <string name="error_enable_server">Can\'t enable the AutoJs6 server: %s</string>
 </resources>
