@@ -6,16 +6,21 @@
 
 # v6.0.1
 
-###### 2021/12/07
+###### 2022/01/01
 
-* `新增` polyfill (Object.getOwnPropertyDescriptors)
-* `新增` polyfill (Array.prototype.flat)
-* `新增` isInteger/isNullish/isPlainObject/isPrimitive/isReference
-* `优化` 扩展global.sleep支持随机范围/负数兼容
-* `优化` 扩展global.toast支持时长控制/强制覆盖控制/dismiss方法
+* `新增` 连接 VSCode 插件支持客户端 (LAN) 及服务端 (LAN/ADB) 方式 (Ref to Auto.js Pro)
+* `新增` 增加 $base64 "工具类" (Ref to Auto.js Pro)
+* `新增` 增加 isInteger/isNullish/isPlainObject/isPrimitive/isReference 全局方法
+* `新增` 增加 polyfill (Object.getOwnPropertyDescriptors)
+* `新增` 增加 polyfill (Array.prototype.flat)
+* `优化` 扩展 global.sleep 支持 随机范围/负数兼容
+* `优化` 扩展 global.toast 支持 时长控制/强制覆盖控制/dismiss
 * `优化` 包名对象全局化 (okhttp3/androidx/de)
 * `优化` 升级 Android Material 版本 1.5.0-beta01 -> 1.6.0-alpha01
-* `优化` 升级 Android Gradle 插件版本 7.2.0-alpha04 -> 7.2.0-alpha05
+* `优化` 升级 Android Gradle 插件版本 7.2.0-alpha04 -> 7.2.0-alpha06
+* `优化` 升级 Kotlinx Coroutines 版本 1.5.2-native-mt -> 1.6.0-native-mt
+* `优化` 升级 Kotlin Gradle 插件版本 1.6.0 -> 1.6.10
+* `优化` 升级 Gradle 发行版本 7.3 -> 7.3.3
 
 # v6.0.0
 

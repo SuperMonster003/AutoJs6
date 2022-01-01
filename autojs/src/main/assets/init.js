@@ -63,7 +63,7 @@ runtime.init();
     (function (scope) {
         var modules = ['app', 'automator', 'console', 'dialogs', 'io', 'selector', 'shell', 'web', 'ui',
             'images', 'threads', 'events', 'engines', 'RootAutomator', 'http', 'storages', 'floaty',
-            'sensors', 'media', 'plugins', 'continuation'];
+            'sensors', 'media', 'plugins', 'continuation', '$base64'];
         var len = modules.length;
         for (var i = 0; i < len; i++) {
             var m = modules[i];
@@ -77,6 +77,11 @@ runtime.init();
 
     Canvas = com.stardust.autojs.core.graphics.ScriptCanvas;
     Image = com.stardust.autojs.core.image.ImageWrapper;
+
+    OkHttpClient = Packages.okhttp3.OkHttpClient;
+    MutableOkHttp = com.stardust.autojs.core.http.MutableOkHttp;
+    Intent = android.content.Intent;
+    BroadcastReceiver = com.stardust.autojs.core.content.BroadcastReceiver;
 
     // 重定向require以便支持相对路径和npm模块
     Module = require('jvm-npm.js');

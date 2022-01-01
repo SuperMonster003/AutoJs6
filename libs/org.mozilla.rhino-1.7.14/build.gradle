@@ -5,4 +5,4 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 configurations.maybeCreate("default")
-artifacts.add("default", file("rhino-1.7.14-SNAPSHOT.jar"))
+artifacts.add("default", file("rhino-1.7.14.jar"))

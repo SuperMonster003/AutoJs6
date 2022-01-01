@@ -1,5 +1,5 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
 
 android {
     compileSdkVersion versions.compile
@@ -15,8 +15,8 @@ android {
     }
     lintOptions {
         abortOnError false
-        disable 'MissingTranslation'
-        disable 'ExtraTranslation'
+        disable "MissingTranslation"
+        disable "ExtraTranslation"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_16
@@ -46,51 +46,51 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
 }
 
 def buildApkPluginForAbi(File pluginProjectDir, String abi) {
     copy {
-        from file('..\\app\\release\\')
-        into new File(pluginProjectDir, 'app\\src\\main\\assets')
+        from file("..\\app\\release\\")
+        into new File(pluginProjectDir, "app\\src\\main\\assets")
         def fileName = "inrt-" + abi + "-release.apk"
         include fileName
-        rename fileName, 'template.apk'
+        rename fileName, "template.apk"
     }
     exec {
         workingDir pluginProjectDir
-        commandLine 'gradlew.bat', 'assembleRelease'
+        commandLine "gradlew.bat", "assembleRelease"
     }
     copy {
-        from new File(pluginProjectDir, 'app\\build\\outputs\\apk\\release')
-        into file('..\\common\\release')
-        def fileName = '打包插件-' + versions.appVersionName + '-release.apk'
+        from new File(pluginProjectDir, "app\\build\\outputs\\apk\\release")
+        into file("..\\common\\release")
+        def fileName = "打包插件-" + versions.appVersionName + "-release.apk"
         include fileName
-        rename fileName, '打包插件-' + abi + '-' + versions.appVersionName + '-release.apk'
+        rename fileName, "打包插件-" + abi + "-" + versions.appVersionName + "-release.apk"
     }
 }
 
 task buildApkPlugin {
     doLast {
-        def pluginProjectDirPath = '..\\..\\AutoJsApkBuilderPlugin'
+        def pluginProjectDirPath = "..\\..\\AutoJsApkBuilderPlugin"
         def pluginProjectDir = file(pluginProjectDirPath)
         if (!pluginProjectDir.exists() || !pluginProjectDir.isDirectory()) {
-            println 'pluginProjectDir not exists'
+            println "pluginProjectDir not exists"
             return
         }
-        buildApkPluginForAbi(pluginProjectDir, 'armeabi-v7a')
+        buildApkPluginForAbi(pluginProjectDir, "armeabi-v7a")
     }
 }
 
 tasks.whenTaskAdded { task ->
-    if (task.name == 'assembleRelease') {
-        task.finalizedBy 'buildApkPlugin'
+    if (task.name == "assembleRelease") {
+        task.finalizedBy "buildApkPlugin"
     }
 }
 
@@ -105,14 +105,14 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:${junitVer}"
 
-    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    implementation "com.github.bumptech.glide:glide:4.12.0"
 
     implementation project(":libs:org.mozilla.rhino-1.7.14")
     implementation project(":libs:org.opencv-4.5.4")
 
-    implementation project(':automator')
-    implementation project(':common')
-    implementation project(':autojs')
+    implementation project(":automator")
+    implementation project(":common")
+    implementation project(":autojs")
 }

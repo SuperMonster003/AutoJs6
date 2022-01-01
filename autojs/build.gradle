@@ -9,9 +9,9 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     }
 }
 
-tasks.withType(JavaCompile) {
-    options.compilerArgs << '-Xlint:deprecation' << '-Xlint:unchecked'
-}
+// tasks.withType(JavaCompile) {
+//     options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+// }
 
 android {
     compileSdkVersion versions.compile
@@ -24,7 +24,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
     compileOptions {
@@ -41,37 +41,22 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:${junitVer}"
 
-    api 'org.greenrobot:eventbus:3.2.0'
+    implementation "net.lingala.zip4j:zip4j:2.9.1"
 
-    api 'net.lingala.zip4j:zip4j:2.9.1'
-
-    api 'com.afollestad.material-dialogs:core:0.9.6.0'
-    api 'com.google.android.material:material:1.6.0-alpha01'
-
-    api 'com.github.hyb1996:EnhancedFloaty:0.31'
-
-    api 'com.makeramen:roundedimageview:2.3.0'
+    implementation "com.afollestad.material-dialogs:core:0.9.6.0"
+    implementation "com.google.android.material:material:1.6.0-alpha01"
 
     // OkHttp
-    api 'com.squareup.okhttp3:okhttp:5.0.0-alpha.3'
-
-    // JDeferred
-    api 'org.jdeferred:jdeferred-android-aar:1.2.6'
-
-    // RootShell
-    api 'com.github.Stericson:RootShell:1.6'
+    implementation "com.squareup.okhttp3:okhttp:5.0.0-alpha.3"
 
     // Gson
-    api 'com.google.code.gson:gson:2.8.9'
+    implementation "com.google.code.gson:gson:2.8.9"
 
     // Log4j
-    api group: 'de.mindpipe.android', name: 'android-logging-log4j', version: '1.0.3'
-    api group: 'log4j', name: 'log4j', version: '1.2.17'
-
-    // Preference
-    api 'androidx.preference:preference-ktx:1.1.1'
+    implementation group: "de.mindpipe.android", name: "android-logging-log4j", version: "1.0.3"
+    implementation group: "log4j", name: "log4j", version: "1.2.17"
 
     // Terminal emulator
     api project(":libs:jackpal.androidterm.libtermexec-1.0")
@@ -80,8 +65,8 @@ dependencies {
 
     api project(":libs:com.android.dx-1.7.0")
     api project(":libs:org.mozilla.rhino-1.7.14")
-    api project(':libs:org.opencv-4.5.4')
+    api project(":libs:org.opencv-4.5.4")
 
-    api project(':common')
-    api project(':automator')
+    api project(":common")
+    api project(":automator")
 }

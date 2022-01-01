@@ -37,6 +37,8 @@ import org.autojs.autojs.Pref;
 import org.autojs.autojs.R;
 import org.autojs.autojs.external.foreground.ForegroundService;
 import org.autojs.autojs.pluginclient.DevPluginService;
+import org.autojs.autojs.pluginclient.JsonSocketClient;
+import org.autojs.autojs.pluginclient.JsonSocketServer;
 import org.autojs.autojs.tool.AccessibilityServiceTool;
 import org.autojs.autojs.tool.Observers;
 import org.autojs.autojs.tool.RootTool;
@@ -49,6 +51,7 @@ import org.autojs.autojs.ui.settings.SettingsActivity;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -58,10 +61,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-
 /**
  * Created by Stardust on Jan 30, 2017.
- * Modified by SuperMonster003 on Nov 16, 2021.
+ * Modified by SuperMonster003 as of Nov 16, 2021.
  */
 @SuppressLint("NonConstantResourceId")
 @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -79,6 +81,11 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     private final DrawerMenuItem mAccessibilityServiceItem = new DrawerMenuItem(R.drawable.ic_accessibility_black_48dp, R.string.text_accessibility_service, 0, this::enableOrDisableAccessibilityService);
     private final DrawerMenuItem mForegroundServiceItem = new DrawerMenuItem(R.drawable.ic_service_green, R.string.text_foreground_service, R.string.key_foreground_service, this::toggleForegroundService);
 
+    private final DrawerMenuItem mFloatingWindowItem = new DrawerMenuItem(R.drawable.ic_robot_64, R.string.text_floating_window, 0, this::showOrDismissFloatingWindow);
+
+    private final DrawerMenuItem mClientModeItem = new DrawerMenuItem(R.drawable.ic_computer_black_48dp, R.string.text_client_mode, 0, this::toggleRemoteServerCxn);
+    private final DrawerMenuItem mServerModeItem = new DrawerMenuItem(R.drawable.ic_smartphone_black_48dp, R.string.text_server_mode, 0, this::toggleLocalServerCxn);
+
     private final DrawerMenuItem mNotificationPermissionItem = new DrawerMenuItem(R.drawable.ic_ali_notification, R.string.text_notification_permission, 0, this::goToNotificationServiceSettings);
     private final DrawerMenuItem mUsageStatsPermissionItem = new DrawerMenuItem(R.drawable.ic_assessment_black_48dp, R.string.text_usage_stats_permission, 0, this::goToUsageStatsSettings);
     private final DrawerMenuItem mIgnoreBatteryOptimizationsItem = new DrawerMenuItem(R.drawable.ic_battery_std_black_48dp, R.string.text_ignore_battery_optimizations, 0, this::toggleIgnoreBatteryOptimizations);
@@ -86,36 +93,55 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     private final DrawerMenuItem mWriteSystemSettingsItem = new DrawerMenuItem(R.drawable.ic_settings_black_48dp, R.string.text_write_system_settings, 0, this::goToWriteSystemSettings);
     private final DrawerMenuItem mWriteSecuritySettingsItem = new DrawerMenuItem(R.drawable.ic_security_black_48dp, R.string.text_write_secure_settings, 0, this::toggleWriteSecureSettings);
 
-    private final DrawerMenuItem mFloatingWindowItem = new DrawerMenuItem(R.drawable.ic_robot_64, R.string.text_floating_window, 0, this::showOrDismissFloatingWindow);
-    private final DrawerMenuItem mConnectionItem = new DrawerMenuItem(R.drawable.ic_computer_black_48dp, R.string.debug, 0, this::connectOrDisconnectToRemote);
+    private final DevPluginService devPlugin = DevPluginService.getInstance();
 
     private DrawerMenuAdapter mDrawerMenuAdapter;
-    private Disposable mConnectionStateDisposable;
+    private Disposable mClientConnectionStateDisposable;
+    private Disposable mServerConnectionStateDisposable;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mConnectionStateDisposable = DevPluginService.getInstance().connectionState()
+
+        mClientConnectionStateDisposable = JsonSocketClient.cxnState
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(state -> {
-                    setChecked(mConnectionItem, state.getState() == DevPluginService.State.CONNECTED);
-                    setProgress(mConnectionItem, state.getState() == DevPluginService.State.CONNECTING);
-                    if (state.getException() != null) {
-                        showMessage(state.getException().getMessage());
-                    }
-                });
+                .subscribe(state -> setItemState(mClientModeItem, state));
+
+        mServerConnectionStateDisposable = JsonSocketServer.cxnState
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(state -> setItemState(mServerModeItem, state));
+
         EventBus.getDefault().register(this);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        syncSwitchState();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mClientConnectionStateDisposable.dispose();
+        mServerConnectionStateDisposable.dispose();
+        EventBus.getDefault().unregister(this);
+    }
+
     @AfterViews
-    void setUpViews() {
+    public void setUpViews() {
         ThemeColorManager.addViewBackground(mHeaderView);
         initMenuItems();
         if (Pref.isFloatingMenuShown()) {
             FloatyWindowManger.showCircularMenuIfNeeded();
             setChecked(mFloatingWindowItem, true);
         }
-        setChecked(mConnectionItem, DevPluginService.getInstance().isConnected());
+
+        JsonSocketClient jsonSocketClient = devPlugin.getJsonSocketClient();
+        if (jsonSocketClient != null) {
+            setChecked(mClientModeItem, jsonSocketClient.isConnected());
+        }
+
         if (Pref.isForegroundServiceEnabled()) {
             ForegroundService.start(GlobalAppContext.get());
             setChecked(mForegroundServiceItem, true);
@@ -128,6 +154,13 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                 mAccessibilityServiceItem,
                 mForegroundServiceItem,
 
+                new DrawerMenuGroup(R.string.text_tools),
+                mFloatingWindowItem,
+
+                new DrawerMenuGroup(R.string.text_connect_to_pc),
+                mClientModeItem,
+                mServerModeItem,
+
                 new DrawerMenuGroup(R.string.text_permission),
                 mNotificationPermissionItem,
                 mUsageStatsPermissionItem,
@@ -135,10 +168,6 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                 mDisplayOverOtherAppsItem,
                 mWriteSystemSettingsItem,
                 mWriteSecuritySettingsItem,
-
-                new DrawerMenuGroup(R.string.text_tools),
-                mFloatingWindowItem,
-                mConnectionItem,
 
                 new DrawerMenuGroup(R.string.text_appearance),
                 new DrawerMenuItem(R.drawable.ic_night_mode, R.string.text_night_mode, R.string.key_night_mode, this::toggleNightMode),
@@ -148,8 +177,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         mDrawerMenu.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
-
-    void enableOrDisableAccessibilityService(DrawerMenuItemViewHolder holder) {
+    public void enableOrDisableAccessibilityService(DrawerMenuItemViewHolder holder) {
         boolean isAccessibilityServiceEnabled = isAccessibilityServiceEnabled();
         boolean checked = holder.getSwitchCompat().isChecked();
         if (checked && !isAccessibilityServiceEnabled) {
@@ -159,7 +187,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         }
     }
 
-    void goToNotificationServiceSettings(DrawerMenuItemViewHolder holder) {
+    public void goToNotificationServiceSettings(DrawerMenuItemViewHolder holder) {
         boolean enabled = NotificationListenerService.Companion.getInstance() != null;
         boolean checked = holder.getSwitchCompat().isChecked();
         if ((checked && !enabled) || (!checked && enabled)) {
@@ -167,7 +195,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         }
     }
 
-    void goToUsageStatsSettings(DrawerMenuItemViewHolder holder) {
+    public void goToUsageStatsSettings(DrawerMenuItemViewHolder holder) {
         Context context = getContext();
         boolean enabled = false;
         if (context != null) {
@@ -196,7 +224,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                 .show();
     }
 
-    void showOrDismissFloatingWindow(DrawerMenuItemViewHolder holder) {
+    public void showOrDismissFloatingWindow(DrawerMenuItemViewHolder holder) {
         boolean isFloatingWindowShowing = FloatyWindowManger.isCircularMenuShowing();
         boolean checked = holder.getSwitchCompat().isChecked();
         if (getActivity() != null && !getActivity().isFinishing()) {
@@ -211,7 +239,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     }
 
     @SuppressLint("BatteryLife")
-    void toggleIgnoreBatteryOptimizations(DrawerMenuItemViewHolder holder) {
+    public void toggleIgnoreBatteryOptimizations(DrawerMenuItemViewHolder holder) {
         Context context = getContext();
         try {
             Intent intent = new Intent();
@@ -235,15 +263,15 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         }
     }
 
-    void openThemeColorSettings(DrawerMenuItemViewHolder holder) {
+    public void openThemeColorSettings(DrawerMenuItemViewHolder holder) {
         SettingsActivity.selectThemeColor(getActivity());
     }
 
-    void toggleNightMode(DrawerMenuItemViewHolder holder) {
+    public void toggleNightMode(DrawerMenuItemViewHolder holder) {
         ((BaseActivity) requireActivity()).setNightModeEnabled(holder.getSwitchCompat().isChecked());
     }
 
-    void goToDisplayOverOtherAppsSettings(DrawerMenuItemViewHolder holder) {
+    public void goToDisplayOverOtherAppsSettings(DrawerMenuItemViewHolder holder) {
         boolean checked = holder.getSwitchCompat().isChecked();
         Context context = getContext();
         if (checked != FloatingPermission.canDrawOverlays(context)) {
@@ -251,7 +279,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         }
     }
 
-    void goToWriteSystemSettings(DrawerMenuItemViewHolder holder) {
+    public void goToWriteSystemSettings(DrawerMenuItemViewHolder holder) {
         boolean checked = holder.getSwitchCompat().isChecked();
         if (checked != Settings.System.canWrite(getContext())) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
@@ -331,7 +359,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         if (context == null) {
             return;
         }
-        final int SNACKBAR_DURATION = 1000;
+        final int SNACK_BAR_DURATION = 1000;
         String scriptAction = state ? "grant" : "revoke";
         String script = "adb shell pm " + scriptAction + " " + context.getPackageName() + " " + WRITE_SECURE_SETTINGS_PERMISSION;
 
@@ -343,7 +371,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                     View view = dialog.getView();
                     int resultRes = hasWriteSecureSettingsAccess() ? R.string.text_granted : R.string.text_not_granted;
                     if (view != null) {
-                        Snackbar.make(view, resultRes, SNACKBAR_DURATION).show();
+                        Snackbar.make(view, resultRes, SNACK_BAR_DURATION).show();
                     } else {
                         Toast.makeText(context, resultRes, Toast.LENGTH_SHORT).show();
                     }
@@ -356,7 +384,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                     View view = dialog.getView();
                     int textRes = R.string.text_command_already_copied_to_clip;
                     if (view != null) {
-                        Snackbar.make(view, textRes, SNACKBAR_DURATION).show();
+                        Snackbar.make(view, textRes, SNACK_BAR_DURATION).show();
                     } else {
                         Toast.makeText(context, textRes, Toast.LENGTH_SHORT).show();
                     }
@@ -380,16 +408,36 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
 
     }
 
-    void connectOrDisconnectToRemote(DrawerMenuItemViewHolder holder) {
+    private void toggleRemoteServerCxn(DrawerMenuItemViewHolder holder) throws IOException {
+        JsonSocketClient jsonSocketClient = devPlugin.getJsonSocketClient();
+        boolean disconnected = jsonSocketClient == null || !jsonSocketClient.isSocketReady();
         boolean checked = holder.getSwitchCompat().isChecked();
-        boolean connected = DevPluginService.getInstance().isConnected();
-        if (checked && !connected) {
-            inputRemoteHost();
-        } else if (!checked && connected) {
-            DevPluginService.getInstance().disconnectIfNeeded();
+
+        if (checked) {
+            if (disconnected) {
+                inputRemoteHost();
+            }
+        } else {
+            if (jsonSocketClient != null) {
+                jsonSocketClient.switchOff();
+            }
         }
     }
 
+    @SuppressLint("CheckResult")
+    private void toggleLocalServerCxn(DrawerMenuItemViewHolder holder) throws IOException {
+        JsonSocketServer jsonSocketServer = devPlugin.getJsonSocketServer();
+        boolean checked = holder.getSwitchCompat().isChecked();
+
+        if (checked) {
+            devPlugin.enableLocalServer()
+                    .subscribe(Observers.emptyConsumer(), this::onAJServerConnectException);
+        } else {
+            if (jsonSocketServer != null) {
+                jsonSocketServer.switchOff();
+            }
+        }
+    }
 
     private void toggleForegroundService(DrawerMenuItemViewHolder holder) {
         boolean checked = holder.getSwitchCompat().isChecked();
@@ -400,37 +448,46 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         }
     }
 
-
     @SuppressLint("CheckResult")
     private void inputRemoteHost() {
         Context activity = getActivity();
         String host = Pref.getServerAddressOrDefault(WifiTool.getRouterIp(Objects.requireNonNull(activity)));
         new MaterialDialog.Builder(activity)
-                .title(R.string.text_server_address)
-                .input("", host, (dialog, input) -> {
+                .title(R.string.text_pc_server_address)
+                .input(getInputHint(), host, (dialog, input) -> {
                     Pref.saveServerAddress(input.toString());
-                    DevPluginService.getInstance().connectToServer(input.toString())
-                            .subscribe(Observers.emptyConsumer(), this::onConnectException);
+                    devPlugin.connectToRemoteServer(input.toString())
+                            .subscribe(Observers.emptyConsumer(), this::onPCServerConnectException);
                 })
                 .neutralText(R.string.text_help)
                 .onNeutral((dialog, which) -> {
-                    setChecked(mConnectionItem, false);
+                    setChecked(mClientModeItem, false);
                     IntentUtil.browse(activity, URL_DEV_PLUGIN);
                 })
-                .cancelListener(dialog -> setChecked(mConnectionItem, false))
+                .cancelListener(dialog -> setChecked(mClientModeItem, false))
                 .show();
     }
 
-    private void onConnectException(Throwable e) {
-        setChecked(mConnectionItem, false);
-        Toast.makeText(GlobalAppContext.get(), getString(R.string.error_connect_to_remote, e.getMessage()),
+    private String getInputHint() {
+        Context context = getContext();
+        if (context != null) {
+            return context.getString(R.string.text_pc_server_address);
+        }
+        return "Input a server address";
+    }
+
+    private void onPCServerConnectException(Throwable e) {
+        setChecked(mClientModeItem, false);
+        Toast.makeText(getContext(),
+                getString(R.string.error_connect_to_remote, e.getMessage()),
                 Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        syncSwitchState();
+    private void onAJServerConnectException(Throwable e) {
+        setChecked(mServerModeItem, false);
+        Toast.makeText(getContext(),
+                getString(R.string.error_enable_server, e.getMessage()),
+                Toast.LENGTH_LONG).show();
     }
 
     private void syncSwitchState() {
@@ -454,6 +511,10 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         setChecked(mDisplayOverOtherAppsItem, FloatingPermission.canDrawOverlays(context));
         setChecked(mWriteSystemSettingsItem, Settings.System.canWrite(getContext()));
         setChecked(mWriteSecuritySettingsItem, hasWriteSecureSettingsAccess());
+    }
+
+    private boolean isAccessibilityServiceEnabled() {
+        return AccessibilityServiceTool.isAccessibilityServiceEnabled(getActivity());
     }
 
     private void enableAccessibilityService() {
@@ -485,26 +546,17 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                 });
     }
 
-
+    @SuppressWarnings("unused")
     @Subscribe
     public void onCircularMenuStateChange(CircularMenu.StateChangeEvent event) {
         setChecked(mFloatingWindowItem, event.getCurrentState() != CircularMenu.STATE_CLOSED);
     }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mConnectionStateDisposable.dispose();
-        EventBus.getDefault().unregister(this);
-    }
-
 
     private void showMessage(CharSequence text) {
         if (getContext() == null)
             return;
         Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
     }
-
 
     private void setProgress(DrawerMenuItem item, boolean progress) {
         item.setProgress(progress);
@@ -516,7 +568,11 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         mDrawerMenuAdapter.notifyItemChanged(item);
     }
 
-    private boolean isAccessibilityServiceEnabled() {
-        return AccessibilityServiceTool.isAccessibilityServiceEnabled(getActivity());
+    private void setItemState(DrawerMenuItem item, DevPluginService.State state) {
+        setChecked(item, state.getState() == DevPluginService.State.CONNECTED);
+        setProgress(item, state.getState() == DevPluginService.State.CONNECTING);
+        if (state.getException() != null) {
+            showMessage(state.getException().getMessage());
+        }
     }
 }

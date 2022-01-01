@@ -1,9 +1,9 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
 
-tasks.withType(JavaCompile) {
-    options.compilerArgs << '-Xlint:deprecation'
-}
+// tasks.withType(JavaCompile) {
+//     options.compilerArgs << "-Xlint:deprecation"
+// }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
@@ -24,7 +24,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
     lintOptions {
@@ -37,8 +37,33 @@ android {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13.2'
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    api 'androidx.annotation:annotation:1.3.0'
-    api 'com.github.hyb1996:settingscompat:1.1.5'
+    testImplementation "junit:junit:${junitVer}"
+
+    // Kotlin
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${kotlinVer}"
+
+    // RoundedImageView
+    api "com.makeramen:roundedimageview:2.3.0"
+
+    // EventBus
+    api "org.greenrobot:eventbus:3.3.1"
+
+    // Annotation
+    api "androidx.annotation:annotation:1.3.0"
+
+    // Preference
+    api "androidx.preference:preference-ktx:1.1.1"
+
+    // RootShell
+    api "com.github.Stericson:RootShell:1.6"
+
+    // JDeferred
+    api "org.jdeferred:jdeferred-android-aar:1.2.6"
+
+    // Auto.js
+    api "com.github.hyb1996:settingscompat:1.1.5"
+    api "com.github.hyb1996:EnhancedFloaty:0.31"
+
+    // Rhino
+    api project(":libs:org.mozilla.rhino-1.7.14")
 }

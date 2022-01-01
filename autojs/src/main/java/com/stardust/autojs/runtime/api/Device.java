@@ -15,8 +15,10 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.provider.Settings;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.telephony.TelephonyManager;
 
 import com.stardust.autojs.R;
@@ -73,13 +75,8 @@ public class Device {
     public static final String securityPatch;
 
     static {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            baseOS = Build.VERSION.BASE_OS;
-            securityPatch = Build.VERSION.SECURITY_PATCH;
-        } else {
-            baseOS = null;
-            securityPatch = null;
-        }
+        baseOS = Build.VERSION.BASE_OS;
+        securityPatch = Build.VERSION.SECURITY_PATCH;
     }
 
     public static final String codename = Build.VERSION.CODENAME;
@@ -87,7 +84,7 @@ public class Device {
     @SuppressLint("HardwareIds")
     public static final String serial = Build.SERIAL;
 
-    private Context mContext;
+    private final Context mContext;
     private PowerManager.WakeLock mWakeLock;
     private int mWakeLockFlag;
 
@@ -285,16 +282,13 @@ public class Device {
             return;
         }
         SettingsCompat.manageWriteSettings(mContext);
-        throw new SecurityException(mContext.getString(R.string.no_write_settings_permissin));
+        throw new SecurityException(mContext.getString(R.string.no_write_settings_permission));
     }
 
 
     private void checkReadPhoneStatePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(mContext.getString(R.string.no_read_phone_state_permissin));
-            }
+        if (mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(mContext.getString(R.string.no_read_phone_state_permissin));
         }
     }
 
@@ -323,7 +317,9 @@ public class Device {
             return getMacByFile();
         }
 
+        @SuppressLint("MissingPermission")
         String mac = wifiInf.getMacAddress();
+
         if (FAKE_MAC_ADDRESS.equals(mac)) {
             mac = null;
         }

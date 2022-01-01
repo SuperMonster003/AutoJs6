@@ -1,5 +1,7 @@
 package com.stardust.autojs.core.console;
 
+import android.annotation.SuppressLint;
+
 import com.stardust.util.UiHandler;
 
 import org.apache.log4j.Level;
@@ -15,6 +17,7 @@ import java.util.Locale;
  * Created by Stardust on 2017/10/22.
  */
 
+@SuppressLint("ConstantLocale")
 public class GlobalConsole extends ConsoleImpl {
     private static final String LOG_tAG = "GlobalConsole";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
@@ -37,7 +40,6 @@ public class GlobalConsole extends ConsoleImpl {
     private Priority toLog4jLevel(int level) {
         switch (level) {
             case android.util.Log.VERBOSE:
-                return Level.DEBUG;
             case android.util.Log.DEBUG:
                 return Level.DEBUG;
             case android.util.Log.INFO:
@@ -53,22 +55,15 @@ public class GlobalConsole extends ConsoleImpl {
     }
 
     private String getLevelChar(int level) {
-        switch (level) {
-            case android.util.Log.VERBOSE:
-                return "V";
-            case android.util.Log.DEBUG:
-                return "D";
-            case android.util.Log.INFO:
-                return "I";
-            case android.util.Log.WARN:
-                return "W";
-            case android.util.Log.ERROR:
-                return "E";
-            case android.util.Log.ASSERT:
-                return "A";
-
-        }
-        return "";
+        return switch (level) {
+            case android.util.Log.VERBOSE -> "V";
+            case android.util.Log.DEBUG -> "D";
+            case android.util.Log.INFO -> "I";
+            case android.util.Log.WARN -> "W";
+            case android.util.Log.ERROR -> "E";
+            case android.util.Log.ASSERT -> "A";
+            default -> "";
+        };
     }
 
 }

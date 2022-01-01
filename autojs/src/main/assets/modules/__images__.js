@@ -2,38 +2,40 @@
 module.exports = function (runtime, scope) {
     const ResultAdapter = require("result_adapter");
 
-    var MatchingResult = (function () {
-        var comparators = {
-            "left": (l, r) => l.point.x - r.point.x,
-            "top": (l, r) => l.point.y - r.point.y,
-            "right": (l, r) => r.point.x - l.point.x,
-            "bottom": (l, r) => r.point.y - l.point.y
-        }
+    const MatchingResult = (function () {
+        let comparators = {
+            'left': (l, r) => l.point.x - r.point.x,
+            'top': (l, r) => l.point.y - r.point.y,
+            'right': (l, r) => r.point.x - l.point.x,
+            'bottom': (l, r) => r.point.y - l.point.y,
+        };
+
         function MatchingResult(list) {
             if (Array.isArray(list)) {
                 this.matches = list;
             } else {
                 this.matches = runtime.bridges.bridges.toArray(list);
             }
-            this.__defineGetter__("points", () => {
+            this.__defineGetter__('points', () => {
                 if (typeof (this.__points__) == 'undefined') {
                     this.__points__ = this.matches.map(m => m.point);
                 }
                 return this.__points__;
             });
         }
+
         MatchingResult.prototype.first = function () {
             if (this.matches.length == 0) {
                 return null;
             }
             return this.matches[0];
-        }
+        };
         MatchingResult.prototype.last = function () {
             if (this.matches.length == 0) {
                 return null;
             }
             return this.matches[this.matches.length - 1];
-        }
+        };
         MatchingResult.prototype.findMax = function (cmp) {
             if (this.matches.length == 0) {
                 return null;
@@ -45,32 +47,32 @@ module.exports = function (runtime, scope) {
                 }
             });
             return target;
-        }
+        };
         MatchingResult.prototype.leftmost = function () {
             return this.findMax(comparators.left);
-        }
+        };
         MatchingResult.prototype.topmost = function () {
             return this.findMax(comparators.top);
-        }
+        };
         MatchingResult.prototype.rightmost = function () {
             return this.findMax(comparators.right);
-        }
+        };
         MatchingResult.prototype.bottommost = function () {
             return this.findMax(comparators.bottom);
-        }
+        };
         MatchingResult.prototype.worst = function () {
             return this.findMax((l, r) => l.similarity - r.similarity);
-        }
+        };
         MatchingResult.prototype.best = function () {
             return this.findMax((l, r) => r.similarity - l.similarity);
-        }
+        };
         MatchingResult.prototype.sortBy = function (cmp) {
             var comparatorFn = null;
             if (typeof (cmp) == 'string') {
-                cmp.split("-").forEach(direction => {
+                cmp.split('-').forEach(direction => {
                     var buildInFn = comparators[direction];
                     if (!buildInFn) {
-                        throw new Error("unknown direction '" + direction + "' in '" + cmp + "'");
+                        throw new Error('unknown direction \'' + direction + '\' in \'' + cmp + '\'');
                     }
                     (function (fn) {
                         if (comparatorFn == null) {
@@ -83,7 +85,7 @@ module.exports = function (runtime, scope) {
                                         return fn(l, r);
                                     }
                                     return cmpValue;
-                                }
+                                };
                             })(comparatorFn, fn);
                         }
                     })(buildInFn);
@@ -94,7 +96,7 @@ module.exports = function (runtime, scope) {
             var clone = this.matches.slice();
             clone.sort(comparatorFn);
             return new MatchingResult(clone);
-        }
+        };
         return MatchingResult;
     })();
 

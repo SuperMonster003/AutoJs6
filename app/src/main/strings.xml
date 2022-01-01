@@ -58,8 +58,8 @@
     <string name="text_press_again_to_exit">Press again to exit</string>
     <string name="text_common_function">常用函数</string>
     <string name="sorry_for_crash">很抱歉(ಥ _ ಥ)程序遇到未知错误，即将停止运行\n错误代码：</string>
-    <string name="text_no_running_script">No running script</string>
-    <string name="text_already_stop_n_scripts">已停止%d个正在运行的脚本</string>
+    <string name="text_no_running_scripts">No running script</string>
+    <string name="text_already_stop_n_scripts">已停止 %d 个正在运行的脚本</string>
     <string name="text_start_running">Running</string>
     <string name="text_open_by_other_apps">Open by other apps</string>
     <string name="text_rename">Rename</string>

@@ -1,5 +1,7 @@
 package org.autojs.autojs.model.explorer;
 
+import androidx.annotation.NonNull;
+
 import com.stardust.pio.PFile;
 import com.stardust.util.ObjectHelper;
 import com.stardust.util.Objects;
@@ -18,7 +20,7 @@ public class ExplorerFileItem implements ExplorerItem {
             "js", "java", "xml", "json", "txt", "log", "ts"
     ));
 
-    private PFile mFile;
+    private final PFile mFile;
     private final ExplorerPage mParent;
 
     public ExplorerFileItem(PFile file, ExplorerPage parent) {
@@ -104,6 +106,7 @@ public class ExplorerFileItem implements ExplorerItem {
         return type.equals("js") || type.equals("auto");
     }
 
+    @NonNull
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{" +

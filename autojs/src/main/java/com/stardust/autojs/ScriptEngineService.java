@@ -25,6 +25,7 @@ import com.stardust.util.UiHandler;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -175,7 +176,7 @@ public class ScriptEngineService {
     @Subscribe
     public void onScriptExecution(ScriptExecutionEvent event) {
         if (event.getCode() == ScriptExecutionEvent.ON_START) {
-            mGlobalConsole.verbose(mContext.getString(R.string.text_start_running) + "[" + event.getMessage() + "]");
+            mGlobalConsole.verbose(MessageFormat.format("{0} [{1}].", mContext.getString(R.string.text_start_running), event.getMessage()));
         } else if (event.getCode() == ScriptExecutionEvent.ON_EXCEPTION) {
             mUiHandler.toast(mContext.getString(R.string.text_error) + ": " + event.getMessage());
         }

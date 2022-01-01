@@ -5,9 +5,9 @@ plugins {
     id "kotlin-kapt"
 }
 
-def AnnotationsVer = "4.8.0"
-def SupportLibsVer = "28.0.0"
-def ButterKnifeVer = "10.2.3"
+def annotationsVer = "4.8.0"
+def butterKnifeVer = "10.2.3"
+def leakcanaryVer = "2.7"
 
 def properties = new Properties()
 def propFile = new File("sign.properties")
@@ -15,21 +15,15 @@ def isPropFileExists = propFile.exists()
 
 isPropFileExists && properties.load(new FileInputStream(propFile))
 
-configurations.all {
-    resolutionStrategy {
-        force "com.android.support:support-v4:${SupportLibsVer}"
-    }
-}
-
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_16
     }
 }
 
-tasks.withType(JavaCompile) {
-    options.compilerArgs << '-Xlint:deprecation' << '-Xlint:unchecked'
-}
+// tasks.withType(JavaCompile) {
+//     options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+// }
 
 android {
     signingConfigs {
@@ -52,7 +46,7 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = [
-                        'resourcePackageName': applicationId,
+                        "resourcePackageName": applicationId,
                         "androidManifestFile": "$projectDir/src/main/AndroidManifest.xml".toString()
                 ]
             }
@@ -66,6 +60,10 @@ android {
             if (isPropFileExists) {
                 signingConfig signingConfigs.release
             }
+            // Disable Crashlytics reports.
+            ext.enableCrashlytics = false
+            // Disables PNG crunching for the release build type.
+            crunchPngs false
         }
         release {
             shrinkResources false
@@ -118,7 +116,7 @@ android {
     applicationVariants.all { variant ->
         variant.mergeAssetsProvider.configure {
             doLast {
-                delete(fileTree(dir: outputDir, includes: ['declarations/**']))
+                delete(fileTree(dir: outputDir, includes: ["declarations/**"]))
             }
         }
     }
@@ -129,18 +127,22 @@ repositories {
 }
 
 dependencies {
-    testImplementation "junit:junit:4.13.2"
+    // JUnit
+    testImplementation "junit:junit:${junitVer}"
+
+    // LeakCanary
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:${leakcanaryVer}"
 
     // Kotlin
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2-native-mt"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0-native-mt"
 
     // Android Annotations
-    kapt "org.androidannotations:androidannotations:${AnnotationsVer}"
-    implementation "org.androidannotations:androidannotations-api:${AnnotationsVer}"
+    kapt "org.androidannotations:androidannotations:${annotationsVer}"
+    implementation "org.androidannotations:androidannotations-api:${annotationsVer}"
 
     // ButterKnife
-    kapt "com.jakewharton:butterknife-compiler:${ButterKnifeVer}"
-    implementation "com.jakewharton:butterknife:${ButterKnifeVer}"
+    kapt "com.jakewharton:butterknife-compiler:${butterKnifeVer}"
+    implementation "com.jakewharton:butterknife:${butterKnifeVer}"
 
     // Android supports
     implementation "androidx.appcompat:appcompat:1.4.0"
@@ -212,13 +214,10 @@ dependencies {
     // Android Job
     implementation "com.evernote:android-job:1.4.2"
 
-    // Leakcanary
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
-
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
-    api 'com.jrummyapps:colorpicker:2.1.7'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'com.github.ozodrukh:CircularReveal:2.0.1'
+    implementation "com.jrummyapps:colorpicker:2.1.7"
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
+    implementation "com.github.ozodrukh:CircularReveal:2.0.1"
 
     // Bugly
     implementation project(":libs:com.tencent.bugly.crashreport-2.6.6")

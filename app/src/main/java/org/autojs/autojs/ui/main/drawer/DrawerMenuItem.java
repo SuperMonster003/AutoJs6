@@ -1,5 +1,7 @@
 package org.autojs.autojs.ui.main.drawer;
 
+import java.io.IOException;
+
 /**
  * Created by Stardust on 2017/8/25.
  */
@@ -7,17 +9,17 @@ public class DrawerMenuItem {
 
 
     public interface Action {
-        void onClick(DrawerMenuItemViewHolder holder);
+        void onClick(DrawerMenuItemViewHolder holder) throws IOException;
     }
 
-    private int mIcon;
-    private int mTitle;
+    private final int mIcon;
+    private final int mTitle;
+    private final Action mAction;
     private boolean mAntiShake;
-    private boolean mSwitchEnabled;
-    private int mPrefKey;
-    private Action mAction;
-    private boolean mSwitchChecked;
     private boolean mOnProgress;
+    private boolean mSwitchEnabled;
+    private boolean mSwitchChecked;
+    private int mPrefKey;
     private int mNotificationCount;
 
     public DrawerMenuItem(int icon, int title, Action action) {
@@ -81,7 +83,7 @@ public class DrawerMenuItem {
         return mPrefKey;
     }
 
-    public void performAction(DrawerMenuItemViewHolder holder) {
+    public void performAction(DrawerMenuItemViewHolder holder) throws IOException {
         if (mAction != null)
             mAction.onClick(holder);
     }

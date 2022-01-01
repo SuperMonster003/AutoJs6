@@ -51,7 +51,7 @@
     <string name="text_floating_window">悬浮窗</string>
     <string name="text_error_report">错误报告</string>
     <string name="text_press_again_to_exit">再按一次退出程序</string>
-    <string name="text_already_stop_n_scripts">已停止%d个正在运行的脚本</string>
+    <string name="text_already_stop_n_scripts">已停止 %d 个正在运行的脚本</string>
     <string name="text_start_running">开始运行</string>
     <string name="text_open_by_other_apps">用其他应用打开</string>
     <string name="text_rename">重命名</string>
@@ -142,13 +142,15 @@
     <string name="key_guard_mode" translatable="false">key_guard_mode</string>
     <string name="text_layout_inspector_is_dumping">布局分析中</string>
     <string name="text_force_stop">强制停止</string>
-    <string name="text_execution_finished" formatted="false">\n------------\n[%s]运行结束，用时%f秒</string>
+    <string name="text_execution_finished" formatted="false">[%s] 运行结束 (用时 %s 秒)\n</string>
     <string name="text_again">又</string>
     <string name="text_again_and_again">又双</string>
     <string name="text_again_and_again_again">又双叒</string>
     <string name="text_again_and_again_again_again">又双叒叕</string>
-    <string name="debug">连接到计算机</string>
-    <string name="text_server_address">服务器地址</string>
+    <string name="text_connect_to_pc">连接到计算机</string>
+    <string name="text_client_mode">客户端模式</string>
+    <string name="text_server_mode">服务端模式</string>
+    <string name="text_pc_server_address">PC 服务端地址</string>
     <string name="text_about_me_and_repo">关于项目与开发者</string>
     <string name="text_attribute">属性</string>
     <string name="text_value">值</string>
@@ -357,6 +359,7 @@
     <string name="text_close">关闭</string>
     <string name="text_execute">执行</string>
     <string name="error_connect_to_remote">连接失败: %s</string>
+    <string name="error_enable_server">AutoJs6 服务启用失败: %s</string>
     <string name="text_are_you_sure_to_delete">确定要删除%s吗</string>
     <string name="text_run_on_broadcast">广播触发任务</string>
     <string name="text_search_java_class">搜索Java包/类</string>

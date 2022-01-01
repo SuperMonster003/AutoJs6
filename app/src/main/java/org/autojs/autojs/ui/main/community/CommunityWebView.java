@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import android.util.AttributeSet;
 import android.webkit.ValueCallback;
@@ -96,7 +97,7 @@ public class CommunityWebView extends EWebView {
                     Scripts.INSTANCE.run(file);
                 }, error -> {
                     error.printStackTrace();
-                    Snackbar.make(CommunityWebView.this, R.string.text_download_failed, Toast.LENGTH_SHORT).show();
+                    Snackbar.make(CommunityWebView.this, R.string.text_download_failed, BaseTransientBottomBar.LENGTH_SHORT).show();
                 });
     }
 
