@@ -26,6 +26,7 @@
 ### 简介
 
 * Android 平台支持无障碍服务的 JavaScript 自动化工具
+* 需要 [Android 7.0](https://zh.wikipedia.org/wiki/Android_Nougat) (`API 24`) 及以上
 * 复刻 (Fork) 自 [hyb1996/Auto.js](https://github.com/hyb1996/Auto.js)
 
 ******
@@ -53,7 +54,7 @@
 * 支持将脚本文件或项目打包为 APK 文件
 * 支持利用 Root 权限扩展功能 (屏幕点击/滑动/录制/Shell)
 * 支持作为 Tasker 插件使用
-* 支持与 VSCode 连接并进行桌面开发 (需要 [AutoJs6-VSCode-Ext](https://github.com/SuperMonster003/AutoJs6-VSCode-Ext) 插件)
+* 支持与 VSCode 连接并进行桌面开发 (需要 [AutoJs6-VSCode-Extension](https://github.com/SuperMonster003/AutoJs6-VSCode-Extension) 插件)
 
 ******
 
@@ -61,7 +62,10 @@
 
 ******
 
-* Rhino 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升级至 [v1.7.14 (SNAPSHOT)](https://github.com/mozilla/rhino/)
+* VSCode 插件支持客户端 (LAN) 及服务端 (LAN/ADB) 连接方式
+
+
+* Rhino 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升级至 [v1.7.14](https://github.com/mozilla/rhino/)
 
     * 支持 [Object.values()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
 
@@ -98,6 +102,25 @@
 ******
 
 [comment]: <> "Version history only shows last 3 versions"
+
+# v6.0.2
+
+###### 2022/02/05
+
+* `新增` images.bilateralFilter() 双边滤波图像处理方法
+* `修复` 多次调用 toast 只生效最后一次调用的问题
+* `修复` toast.dismiss() 可能无效的问题
+* `修复` 客户端模式及服务端模式开关可能无法正常工作的问题
+* `修复` 客户端模式及服务端模式开关状态不能正常刷新的问题
+* `修复` Android 7 解析 UI 模式 text 元素异常 (Ref to TonyJiangWJ) _[`issue #4`](https://github.com/SuperMonster003/AutoJs6/issues/4)_
+* `优化` 忽略 sleep() 的 ScriptInterruptedException 异常
+* `优化` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
+* `优化` 升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1
+* `优化` 升级 Androidx Preference 版本 1.1.1 -> 1.2.0
+* `优化` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
+* `优化` 升级 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
+* `优化` 升级 Android Gradle 插件版本 7.2.0-alpha06 -> 7.2.0-beta01
+* `优化` 升级 Gradle 发行版本 7.3.3 -> 7.4-rc-2
 
 # v6.0.1
 
@@ -190,11 +213,11 @@
 
 ******
 
-* [AutoJs6-VSCode-Ext](https://github.com/SuperMonster003/AutoJs6-VSCode-Ext) { author: [SuperMonster003](https://github.com/SuperMonster003) }
+* [AutoJs6-VSCode-Extension](https://github.com/SuperMonster003/AutoJs6-VSCode-Extension) { author: [SuperMonster003](https://github.com/SuperMonster003) }
     - `适用于 VSCode 的桌面开发插件 (二次开发项目)`
 
 * [AutoX](https://github.com/kkevsekk1/AutoX) { author: [kkevsekk1](https://github.com/kkevsekk1) }
     - `安卓平台 JavaScript 自动化工具 (二次开发项目)`
 
-[//]: # (* [Auto.js-TypeScript-Declarations]&#40;https://github.com/SuperMonster003/Auto.js-TypeScript-Declarations&#41; { author: [SuperMonster003]&#40;https://github.com/SuperMonster003&#41; })
-[//]: # (    - `Auto.js 声明文件 &#40;.d.ts&#41;`)
+[comment]: <> (* [Auto.js-TypeScript-Declarations]&#40;https://github.com/SuperMonster003/Auto.js-TypeScript-Declarations&#41; { author: [SuperMonster003]&#40;https://github.com/SuperMonster003&#41; })
+[comment]: <> (    - `Auto.js 声明文件 &#40;.d.ts&#41;`)

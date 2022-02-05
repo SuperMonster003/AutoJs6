@@ -12,6 +12,8 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.subjects.PublishSubject;
@@ -19,6 +21,8 @@ import io.reactivex.subjects.PublishSubject;
 public class JsonSocketClient extends JsonSocket {
 
     private static final String TAG = JsonSocketClient.class.getSimpleName();
+
+    private final ExecutorService jsonSocketExecutor = Executors.newSingleThreadExecutor();
 
     public static final PublishSubject<DevPluginService.State> cxnState = PublishSubject.create();
 
@@ -32,14 +36,14 @@ public class JsonSocketClient extends JsonSocket {
 
     // @Constructor
     public JsonSocketClient(String host, int port) {
-        new Thread(() -> {
+        jsonSocketExecutor.submit(() -> {
             try {
                 setStateConnecting();
                 mSocket = new Socket(host, port);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }).start();
+        });
     }
 
     public boolean isSocketReady() {
@@ -80,6 +84,7 @@ public class JsonSocketClient extends JsonSocket {
             mSocket.close();
             mSocket = null;
         }
+        jsonSocketExecutor.shutdown();
     }
 
     @Override

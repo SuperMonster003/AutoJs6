@@ -80,7 +80,7 @@ public class DevPluginService {
 
     private volatile JsonSocketClient mJsonSocketClient;
     private volatile JsonSocketServer mJsonSocketServer;
-    private volatile ServerSocket mAJServerSocket;
+    private volatile ServerSocket mServerSocket;
 
     public DevPluginService() {
         File cache = new File(GlobalAppContext.get().getCacheDir(), "remote_project");
@@ -95,6 +95,11 @@ public class DevPluginService {
     @Nullable
     public JsonSocketServer getJsonSocketServer() {
         return mJsonSocketServer;
+    }
+
+    @Nullable
+    public ServerSocket getServerSocket() {
+        return mServerSocket;
     }
 
     @AnyThread
@@ -135,11 +140,11 @@ public class DevPluginService {
                 .doOnNext(jsonSocketServer -> {
                     try {
                         mJsonSocketServer = jsonSocketServer;
-                        mAJServerSocket = jsonSocketServer.getServerSocket();
-                        if (mAJServerSocket != null) {
+                        mServerSocket = jsonSocketServer.getServerSocket();
+                        if (mServerSocket != null) {
                             jsonSocketServer
                                     .setStateConnected()
-                                    .setSocket(mAJServerSocket.accept())
+                                    .setSocket(mServerSocket.accept())
                                     .subscribeMessage()
                                     .monitorMessage()
                                     .sayHello();

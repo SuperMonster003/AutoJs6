@@ -12,8 +12,8 @@ public class ThreadTool {
                 try {
                     //noinspection BusyWait
                     Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException ignore) {
+                    // ignored
                 }
             }
             result.set(true);

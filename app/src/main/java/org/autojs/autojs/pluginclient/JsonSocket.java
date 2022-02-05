@@ -21,7 +21,6 @@ import com.stardust.autojs.runtime.api.Device;
 import com.stardust.util.MapBuilder;
 
 import org.autojs.autojs.BuildConfig;
-import org.autojs.autojs.tool.IOTool;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -196,13 +195,12 @@ abstract public class JsonSocket extends Socket {
 
     public void monitorMessage(Socket socket, JsonSocket jsonSocket) {
         new Thread(() -> {
-            InputStream inputStream = null;
-            InputStreamReader inputStreamReader = null;
-            BufferedReader bufferedReader = null;
-            try {
-                inputStream = socket.getInputStream();
-                inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-                bufferedReader = new BufferedReader(inputStreamReader);
+            // try (AutoCloseable) { ... }
+            // @Thank to Zen2H
+            try (InputStream inputStream = socket.getInputStream();
+                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
+            ) {
                 final StringBuilder stringBuilder = new StringBuilder();
                 String readLine;
                 Log.d(TAG, "bufferedReader is reading lines...");
@@ -216,9 +214,6 @@ abstract public class JsonSocket extends Socket {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                IOTool.close(bufferedReader);
-                IOTool.close(inputStreamReader);
-                IOTool.close(inputStream);
                 try {
                     jsonSocket.switchOff();
                 } catch (IOException e) {
