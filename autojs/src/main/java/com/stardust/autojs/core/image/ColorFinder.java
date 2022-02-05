@@ -2,6 +2,7 @@ package com.stardust.autojs.core.image;
 
 import android.graphics.Color;
 import android.os.Build;
+
 import androidx.annotation.RequiresApi;
 
 import com.stardust.autojs.core.opencv.MatOfPoint;
@@ -23,7 +24,7 @@ import org.opencv.core.Scalar;
 @RequiresApi(api = Build.VERSION_CODES.KITKAT)
 public class ColorFinder {
 
-    private ScreenMetrics mScreenMetrics;
+    private final ScreenMetrics mScreenMetrics;
 
     public ColorFinder(ScreenMetrics screenMetrics) {
         mScreenMetrics = screenMetrics;
@@ -56,7 +57,6 @@ public class ColorFinder {
     }
 
     public Point[] findAllPointsForColor(ImageWrapper image, int color, int threshold, Rect rect) {
-
         MatOfPoint matOfPoint = findColorInner(image, color, threshold, rect);
         if (matOfPoint == null) {
             return new Point[0];
@@ -64,9 +64,9 @@ public class ColorFinder {
         Point[] points = matOfPoint.toArray();
         OpenCVHelper.release(matOfPoint);
         if (rect != null) {
-            for (int i = 0; i < points.length; i++) {
-                points[i].x = mScreenMetrics.scaleX((int) (points[i].x + rect.x));
-                points[i].y = mScreenMetrics.scaleX((int) (points[i].y + rect.y));
+            for (Point point : points) {
+                point.x = mScreenMetrics.scaleX((int) (point.x + rect.x));
+                point.y = mScreenMetrics.scaleX((int) (point.y + rect.y));
             }
         }
         return points;

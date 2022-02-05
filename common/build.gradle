@@ -1,8 +1,8 @@
-apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 // tasks.withType(JavaCompile) {
-//     options.compilerArgs << "-Xlint:deprecation"
+//     options.compilerArgs << '-Xlint:deprecation'
 // }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -12,19 +12,19 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 android {
-    compileSdkVersion versions.compile
+    compileSdkVersion versions.project.compile
 
     defaultConfig {
-        minSdkVersion versions.mini
-        targetSdkVersion versions.target
+        minSdkVersion versions.project.mini
+        targetSdkVersion versions.project.target
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     lintOptions {
@@ -37,33 +37,51 @@ android {
 }
 
 dependencies {
-    testImplementation "junit:junit:${junitVer}"
+    testImplementation "junit:junit:${versions.junit}"
 
     // Kotlin
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${kotlinVer}"
+    // noinspection DifferentStdlibGradleVersion
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${versions.kotlin}"
+
+    // Android supports
+    api 'com.google.android.material:material:1.6.0-alpha02'
+
+    // Material Dialogs
+    api "com.afollestad.material-dialogs:core:${versions.materialDialogs}"
+    api "com.afollestad.material-dialogs:commons:${versions.materialDialogs}"
+
+    // Glide
+    api "com.github.bumptech.glide:glide:${versions.glide}"
 
     // RoundedImageView
-    api "com.makeramen:roundedimageview:2.3.0"
+    api 'com.makeramen:roundedimageview:2.3.0'
 
     // EventBus
-    api "org.greenrobot:eventbus:3.3.1"
+    api 'org.greenrobot:eventbus:3.3.1'
 
     // Annotation
-    api "androidx.annotation:annotation:1.3.0"
+    api 'androidx.annotation:annotation:1.3.0'
 
     // Preference
-    api "androidx.preference:preference-ktx:1.1.1"
+    api 'androidx.preference:preference-ktx:1.2.0'
 
     // RootShell
-    api "com.github.Stericson:RootShell:1.6"
+    api 'com.github.Stericson:RootShell:1.6'
 
     // JDeferred
-    api "org.jdeferred:jdeferred-android-aar:1.2.6"
+    api 'org.jdeferred:jdeferred-android-aar:1.2.6'
 
     // Auto.js
-    api "com.github.hyb1996:settingscompat:1.1.5"
-    api "com.github.hyb1996:EnhancedFloaty:0.31"
+    api 'com.github.hyb1996:settingscompat:1.1.5'
+    api 'com.github.hyb1996:EnhancedFloaty:0.31'
+
+    // AppCompat
+    api 'androidx.appcompat:appcompat:1.4.1'
+    api project(':libs:androidx.appcompat-1.0.2')
+
+    // OpenCV
+    api project(':libs:org.opencv-4.5.4')
 
     // Rhino
-    api project(":libs:org.mozilla.rhino-1.7.14")
+    api project(':libs:org.mozilla.rhino-1.7.14')
 }

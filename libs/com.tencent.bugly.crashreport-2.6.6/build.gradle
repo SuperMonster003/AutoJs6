@@ -1,2 +1,2 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file("crashreport-2.6.6.aar"))
+configurations.maybeCreate('default')
+artifacts.add('default', file('crashreport-2.6.6.aar'))

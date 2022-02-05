@@ -332,9 +332,6 @@ public class ScriptRuntime {
     }
 
     public void requestPermissions(String[] permissions) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
         Context context = uiHandler.getContext();
         permissions = Permissions.getPermissionsNeedToRequest(context, permissions);
         if (permissions.length == 0)
@@ -412,9 +409,7 @@ public class ScriptRuntime {
             mRootShell = null;
             mShellSupplier = null;
         });
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            ignoresException(images::releaseScreenCapturer);
-        }
+        ignoresException(images::releaseScreenCapturer);
         ignoresException(sensors::unregisterAll);
         ignoresException(timers::recycle);
         ignoresException(ui::recycle);
@@ -456,8 +451,7 @@ public class ScriptRuntime {
     public static String getStackTrace(Throwable e, boolean printJavaStackTrace) {
         String message = e.getMessage();
         StringBuilder scriptTrace = new StringBuilder(message == null ? "" : message + "\n");
-        if (e instanceof RhinoException) {
-            RhinoException rhinoException = (RhinoException) e;
+        if (e instanceof RhinoException rhinoException) {
             scriptTrace.append(rhinoException.details()).append("\n");
             for (ScriptStackElement element : rhinoException.getScriptStack()) {
                 element.renderV8Style(scriptTrace);

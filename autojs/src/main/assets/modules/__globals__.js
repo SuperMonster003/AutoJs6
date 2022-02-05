@@ -1,6 +1,8 @@
 let Looper = android.os.Looper;
 let Toast = android.widget.Toast;
 let Runnable = java.lang.Runnable;
+let ScriptInterruptedException = com.stardust.autojs.runtime.exception.ScriptInterruptedException;
+let ReentrantLock = java.util.concurrent.locks.ReentrantLock;
 
 module.exports = function (runtime, global) {
     let _ = {
@@ -54,6 +56,28 @@ module.exports = function (runtime, global) {
             }
             return this.buildTypes.release;
         },
+        toasts: {
+            /**
+             * @type {android.widget.Toast[]}
+             */
+            pool: [],
+            lock: new ReentrantLock(),
+            add(t) {
+                if (t instanceof Toast) {
+                    this.lock.lock();
+                    this.pool.push(t);
+                    this.lock.unlock();
+                }
+            },
+            dismiss() {
+                this.lock.lock();
+                this.pool.forEach((t) => {
+                    t.cancel();
+                });
+                this.pool.splice(0);
+                this.lock.unlock();
+            },
+        },
     };
 
     Object.assign(global, {
@@ -62,28 +86,14 @@ module.exports = function (runtime, global) {
         androidx: Packages.androidx,
         toast(msg, is_long, is_forcible) {
             let $ = {
-                cache: null,
-                toast(msg, is_long, is_forcible) {
+                toast() {
                     this.init(arguments);
-                    this.post();
+                    this.show();
                 },
-                /** @param {IArguments} args */
-                init(args) {
-                    let [msg, is_long, is_forcible] = args;
+                init() {
                     this.message = isNullish(msg) ? '' : msg.toString();
                     this.is_long = this.parseIsLong(is_long);
                     this.is_forcible = is_forcible;
-                },
-                post() {
-                    ui.post(() => {
-                        new android.os.Handler(Looper.getMainLooper()).post(new Runnable({
-                            run() {
-                                $.is_forcible && $.dismiss();
-                                $.cache = Toast.makeText(context, $.message, $.is_long);
-                                $.show();
-                            },
-                        }));
-                    });
                 },
                 parseIsLong(is_long) {
                     if (typeof is_long === 'number') {
@@ -97,22 +107,23 @@ module.exports = function (runtime, global) {
                     }
                     return 0;
                 },
-                dismiss() {
-                    if (this.cache instanceof Toast) {
-                        this.cache.cancel();
-                        this.cache = null;
-                    }
-                },
                 show() {
-                    this.cache.show();
+                    ui.post(() => {
+                        new android.os.Handler(Looper.getMainLooper()).post(new Runnable({
+                            run() {
+                                if ($.is_forcible) {
+                                    $.dismiss();
+                                }
+                                $.toastObj = Toast.makeText(context, $.message, $.is_long);
+                                _.toasts.add($.toastObj);
+                                $.toastObj.show();
+                            },
+                        }));
+                    });
                 },
             };
 
-            (function $LazY() {
-                this.toast = $.toast.bind($);
-                this.toast.dismiss = () => $.dismiss();
-                return this.toast;
-            }.call(this)).apply(null, arguments);
+            $.toast();
         },
         toastLog(msg, is_long, is_forcible) {
             this.toast.apply(this, arguments);
@@ -136,7 +147,13 @@ module.exports = function (runtime, global) {
                 sleep(min, max) {
                     if (this.trigger()) {
                         this.parseArgs(min, max);
-                        runtime.sleep(this.min + this.rand_bound);
+                        try {
+                            runtime.sleep(this.min + this.rand_bound);
+                        } catch (e) {
+                            if (!(e.javaException instanceof ScriptInterruptedException)) {
+                                throw e;
+                            }
+                        }
                     }
                 },
                 trigger() {
@@ -262,5 +279,17 @@ module.exports = function (runtime, global) {
         isReference(o) {
             return o === Object(o);
         },
-    });
+        $bind() {
+            this.toast.dismiss = function () {
+                ui.post(() => {
+                    new android.os.Handler(Looper.getMainLooper()).post(new Runnable({
+                        run() {
+                            _.toasts.dismiss();
+                        },
+                    }));
+                });
+            };
+            return this;
+        },
+    }.$bind());
 };

@@ -32,6 +32,9 @@ import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.log.LogActivity_;
 import org.autojs.autojs.ui.settings.SettingsActivity_;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 /**
  * Created by Stardust on 2017/4/2.
@@ -41,10 +44,12 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
 
     private static AutoJs instance;
 
+    // @Thank to Zen2H
+    private final ExecutorService printExecutor = Executors.newSingleThreadExecutor();
+
     public static AutoJs getInstance() {
         return instance;
     }
-
 
     public synchronized static void initInstance(Application application) {
         if (instance != null) {
@@ -108,11 +113,18 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
 
     @Override
     protected GlobalConsole createGlobalConsole() {
+        DevPluginService devPluginService = DevPluginService.getInstance();
         return new GlobalConsole(getUiHandler()) {
             @Override
             public String println(int level, CharSequence charSequence) {
                 String log = super.println(level, charSequence);
-                new Thread(() -> DevPluginService.getInstance().print(log)).start();
+
+                // FIXME by SuperMonster003 on Feb 2, 2022
+                //  ! When running in 'ui' thread (`ui.run`, `ui.post`),
+                //  ! android.os.NetworkOnMainThreadException may happen.
+                //  ! Further more, dunno if a thread executor is a good idea.
+                printExecutor.submit(() -> devPluginService.print(log));
+
                 return log;
             }
         };

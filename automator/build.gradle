@@ -1,5 +1,5 @@
-apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
@@ -8,13 +8,13 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 android {
-    compileSdkVersion versions.compile
+    compileSdkVersion versions.project.compile
 
     defaultConfig {
-        minSdkVersion versions.mini
-        targetSdkVersion versions.target
+        minSdkVersion versions.project.mini
+        targetSdkVersion versions.project.target
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
     }
     compileOptions {
@@ -27,7 +27,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation "junit:junit:${junitVer}"
-    implementation "androidx.appcompat:appcompat:1.4.0"
-    api project(":common")
+    testImplementation "junit:junit:${versions.junit}"
+
+    api project(':common')
 }

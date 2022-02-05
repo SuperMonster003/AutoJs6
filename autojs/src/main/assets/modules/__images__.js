@@ -1,104 +1,128 @@
 // noinspection NpmUsedModulesInstalled
 
+const ResultAdapter = require('result_adapter');
+
 const Point = org.opencv.core.Point;
 const Rect = org.opencv.core.Rect;
 const Scalar = org.opencv.core.Scalar;
 const Size = org.opencv.core.Size;
 const Core = org.opencv.core.Core;
 const Imgproc = org.opencv.imgproc.Imgproc;
+
+const Gravity = android.view.Gravity;
+
 const Mat = com.stardust.autojs.core.opencv.Mat;
 const Images = com.stardust.autojs.runtime.api.Images;
+const ColorDetector = com.stardust.autojs.core.image.ColorDetector;
+const ScreenCapturer = com.stardust.autojs.core.image.capture.ScreenCapturer;
 
 const DEF_COLOR_THRESHOLD = 4;
 
 module.exports = function (runtime, scope) {
 
-    const ResultAdapter = require('result_adapter');
+    const colors = Object.assign(Object.create(runtime.colors), {
+        alpha(color) {
+            return _.parseColor(color) >>> 24;
+        },
+        red(color) {
+            return (_.parseColor(color) >> 16) & 0xFF;
+        },
+        green(color) {
+            return (_.parseColor(color) >> 8) & 0xFF;
+        },
+        blue(color) {
+            return _.parseColor(color) & 0xFF;
+        },
+        isSimilar(c1, c2, threshold, algorithm) {
+            let t = _.parseNumber(threshold, DEF_COLOR_THRESHOLD);
+            let c = _.parseColor(c2);
+            return _.getColorDetector(_.parseColor(c1), algorithm || 'diff', t)
+                .detectsColor(colors.red(c), colors.green(c), colors.blue(c));
+        },
+    });
 
     const MatchingResult = (function $iiFe() {
         let comparators = {
-            'left': (l, r) => l.point.x - r.point.x,
-            'top': (l, r) => l.point.y - r.point.y,
-            'right': (l, r) => r.point.x - l.point.x,
-            'bottom': (l, r) => r.point.y - l.point.y,
+            left: (l, r) => l.point.x - r.point.x,
+            top: (l, r) => l.point.y - r.point.y,
+            right: (l, r) => r.point.x - l.point.x,
+            bottom: (l, r) => r.point.y - l.point.y,
         };
 
         function MatchingResult(list) {
-            if (Array.isArray(list)) {
-                this.matches = list;
-            } else {
-                this.matches = runtime.bridges.getBridges().toArray(list);
-            }
+            this.matches = Array.isArray(list) ? list : runtime.bridges.getBridges().toArray(list);
+
+            // @LazyGetter
             Object.defineProperty(this, 'points', {
-                get() {
-                    if (typeof this.__points__ === 'undefined') {
-                        this.__points__ = this.matches.map(m => m.point);
-                    }
-                    return this.__points__;
+                set(v) {
+                    Object.defineProperty(this, 'points', {value: v});
                 },
+                get() {
+                    return this.points = this.matches.map(m => m.point);
+                },
+                enumerable: true,
+                configurable: true,
             });
         }
 
-        MatchingResult.prototype.first = function () {
-            return this.matches.length ? this.matches[0] : null;
-        };
-        MatchingResult.prototype.last = function () {
-            return this.matches.length ? this.matches[this.matches.length - 1] : null;
-        };
-        MatchingResult.prototype.findMax = function (cmp) {
-            if (!this.matches.length) {
-                return null;
-            }
-            let target = this.matches[0];
-            this.matches.forEach(m => target = cmp(target, m) > 0 ? m : target);
-            return target;
-        };
-        MatchingResult.prototype.leftmost = function () {
-            return this.findMax(comparators.left);
-        };
-        MatchingResult.prototype.topmost = function () {
-            return this.findMax(comparators.top);
-        };
-        MatchingResult.prototype.rightmost = function () {
-            return this.findMax(comparators.right);
-        };
-        MatchingResult.prototype.bottommost = function () {
-            return this.findMax(comparators.bottom);
-        };
-        MatchingResult.prototype.worst = function () {
-            return this.findMax((l, r) => l.similarity - r.similarity);
-        };
-        MatchingResult.prototype.best = function () {
-            return this.findMax((l, r) => r.similarity - l.similarity);
-        };
-        MatchingResult.prototype.sortBy = function (cmp) {
-            let comparatorFn = null;
-            if (typeof cmp === 'string') {
-                cmp.split('-').forEach((direction) => {
-                    let buildInFn = comparators[direction];
-                    if (!buildInFn) {
-                        throw new Error('unknown direction \'' + direction + '\' in \'' + cmp + '\'');
-                    }
-                    (function (fn) {
+        Object.assign(MatchingResult.prototype, {
+            first() {
+                return this.matches.length ? this.matches[0] : null;
+            },
+            last() {
+                return this.matches.length ? this.matches[this.matches.length - 1] : null;
+            },
+            findMax(cmp) {
+                if (!this.matches.length) {
+                    return null;
+                }
+                let target = this.matches[0];
+                this.matches.forEach(m => target = cmp(target, m) > 0 ? m : target);
+                return target;
+            },
+            leftmost() {
+                return this.findMax(comparators.left);
+            },
+            topmost() {
+                return this.findMax(comparators.top);
+            },
+            rightmost() {
+                return this.findMax(comparators.right);
+            },
+            bottommost() {
+                return this.findMax(comparators.bottom);
+            },
+            worst() {
+                return this.findMax((l, r) => l.similarity - r.similarity);
+            },
+            best() {
+                return this.findMax((l, r) => r.similarity - l.similarity);
+            },
+            sortBy(cmp) {
+                let comparatorFn = null;
+                if (typeof cmp === 'string') {
+                    cmp.split('-').forEach((direction) => {
+                        let buildInFn = comparators[direction];
+                        if (!buildInFn) {
+                            throw new Error(`unknown direction '${direction}' in '${cmp}'`);
+                        }
                         if (comparatorFn === null) {
-                            comparatorFn = fn;
+                            comparatorFn = buildInFn;
                         } else {
                             comparatorFn = (function (comparatorFn, fn) {
                                 return function (l, r) {
                                     let cmpValue = comparatorFn(l, r);
                                     return cmpValue === 0 ? fn(l, r) : cmpValue;
                                 };
-                            })(comparatorFn, fn);
+                            })(comparatorFn, buildInFn);
                         }
-                    })(buildInFn);
-                });
-            } else {
-                comparatorFn = cmp;
-            }
-            let clone = this.matches.slice();
-            clone.sort(comparatorFn);
-            return new MatchingResult(clone);
-        };
+                    });
+                } else {
+                    comparatorFn = cmp;
+                }
+                return new MatchingResult(this.matches.slice().sort(comparatorFn));
+            },
+        });
 
         return MatchingResult;
     })();
@@ -107,440 +131,445 @@ module.exports = function (runtime, scope) {
 
     const colorFinder = rtImages.colorFinder;
 
-    function getColorDetector(color, algorithm, threshold) {
-        switch (algorithm) {
-            case 'rgb':
-                return new com.stardust.autojs.core.image.ColorDetector.RGBDistanceDetector(color, threshold);
-            case 'equal':
-                return new com.stardust.autojs.core.image.ColorDetector.EqualityDetector(color);
-            case 'diff':
-                return new com.stardust.autojs.core.image.ColorDetector.DifferenceDetector(color, threshold);
-            case 'rgb+':
-                return new com.stardust.autojs.core.image.ColorDetector.WeightedRGBDistanceDetector(color, threshold);
-            case 'hs':
-                return new com.stardust.autojs.core.image.ColorDetector.HSDistanceDetector(color, threshold);
-        }
-        throw new Error('Unknown algorithm: ' + algorithm);
-    }
-
-    function toPointArray(points) {
-        let arr = [];
-        for (let i = 0; i < points.length; i++) {
-            arr.push(points[i]);
-        }
-        return arr;
-    }
-
-    function buildRegion(region, img) {
-        if (region === undefined) {
-            region = [];
-        }
-        let x = region[0] === undefined ? 0 : region[0];
-        let y = region[1] === undefined ? 0 : region[1];
-        let width = region[2] === undefined ? img.getWidth() - x : region[2];
-        let height = region[3] === undefined ? (img.getHeight() - y) : region[3];
-        let r = new Rect(x, y, width, height);
-        if (x < 0 || y < 0 || x + width > img.width || y + height > img.height) {
-            throw new Error('out of region: region = [' + [x, y, width, height] + '], image.size = [' + [img.width, img.height] + ']');
-        }
-        return r;
-    }
-
-    function parseColor(color) {
-        if (typeof color === 'string') {
-            color = colors.parseColor(color);
-        }
-        return color;
-    }
-
-    function newSize(size) {
-        if (!Array.isArray(size)) {
-            size = [size, size];
-        }
-        if (size.length === 1) {
-            size = [size[0], size[0]];
-        }
-        return new Size(size[0], size[1]);
-    }
-
-    function initIfNeeded() {
-        rtImages.initOpenCvIfNeeded();
-    }
-
-    const colors = Object.create(runtime.colors, {
-        alpha: {
-            value(color) {
-                color = parseColor(color);
-                return color >>> 24;
-            },
-            enumerable: true,
+    const _ = {
+        initIfNeeded() {
+            rtImages.initOpenCvIfNeeded();
         },
-        red: {
-            value(color) {
-                color = parseColor(color);
-                return (color >> 16) & 0xFF;
-            },
-            enumerable: true,
+        /**
+         * @param {number} x
+         * @param {number} min
+         * @param {number} max
+         * @param {number} [def=0]
+         * @returns {number}
+         */
+        clamp: (x, min, max, def) => {
+            return Math.min(Math.max(_.parseNumber(x, def), min), max);
         },
-        green: {
-            value(color) {
-                color = parseColor(color);
-                return (color >> 8) & 0xFF;
-            },
-            enumerable: true,
+        requestScreenCapture(orientation) {
+            return ResultAdapter.wait(rtImages.requestScreenCapture(orientation));
         },
-        blue: {
-            value(color) {
-                color = parseColor(color);
-                return color & 0xFF;
-            },
-            enumerable: true,
+        /**
+         * @param {any} num
+         * @param {number|function():number} [def=0]
+         * @returns {number}
+         */
+        parseNumber(num, def) {
+            return typeof num === 'number' ? num : typeof def === 'function' ? def() : def || 0;
         },
-        isSimilar: {
-            value(c1, c2, threshold, algorithm) {
-                c1 = parseColor(c1);
-                c2 = parseColor(c2);
-                threshold = threshold === undefined ? 4 : threshold;
-                algorithm = algorithm === undefined ? 'diff' : algorithm;
-                let colorDetector = getColorDetector(c1, algorithm, threshold);
-                return colorDetector.detectsColor(colors.red(c2), colors.green(c2), colors.blue(c2));
-            },
-            enumerable: true,
+        /**
+         * @param {number|number[]} size
+         * @returns {org.opencv.core.Size}
+         */
+        parseSize(size) {
+            let width, height;
+            if (!Array.isArray(size)) {
+                width = height = size;
+            } else {
+                if (size.length === 1) {
+                    width = height = size[0];
+                } else {
+                    [width, height] = size;
+                }
+            }
+            return new Size(width, height);
         },
-    });
+        /**
+         * @param {number|string} color
+         * @returns {number}
+         */
+        parseColor(color) {
+            if (typeof color === 'string') {
+                return colors.parseColor(color);
+            }
+            return color;
+        },
+        /**
+         * @param {number[]} point
+         * @returns {org.opencv.core.Point}
+         */
+        parsePoint(point) {
+            let [x, y] = point;
+            return new Point(x, y);
+        },
+        parseQuality(q) {
+            return this.clamp(q, 0, 100, 100);
+        },
+        parseScalar(color, offset) {
+            let d = this.clamp(offset, -255, 255, 0);
+            return new Scalar(colors.red(color) + d, colors.green(color) + d, colors.blue(color) + d, colors.alpha(color));
+        },
+        parseScalars(color, threshold) {
+            let thd = this.clamp(threshold, 0, 255, 0);
+            return {
+                lowerBound: _.parseScalar(color, -thd),
+                upperBound: _.parseScalar(color, +thd),
+            };
+        },
+        parseBorderType(type) {
+            return Core['BORDER_' + (type || 'DEFAULT')];
+        },
+        /**
+         * @param {{
+         *     threshold?: number,
+         *     similarity?: number,
+         * }} options
+         * @param {number} [def]
+         * @returns {number}
+         */
+        parseThreshold(options, def) {
+            let opt = options || {};
+            if (opt.similarity) {
+                return Math.trunc(255 * (1 - opt.similarity));
+            }
+            return opt.threshold || (def === undefined ? DEF_COLOR_THRESHOLD : def);
+        },
+        /**
+         * @param {{
+         *     weakThreshold?: number,
+         * }} options
+         * @param {number} [def]
+         * @returns {number}
+         */
+        parseWeakThreshold(options, def) {
+            let opt = options || {};
+            return opt.weakThreshold || def;
+        },
+        resize(img, mat, size, fx, fy, interpolation) {
+            Imgproc.resize(img.mat, mat, this.parseSize(0), fx, fy, Imgproc['INTER_' + (interpolation || 'LINEAR')]);
+        },
+        /**
+         * @param {com.stardust.autojs.core.image.ImageWrapper} img
+         * @param {{region?: number[]}} [o]
+         * @returns {?org.opencv.core.Rect}
+         */
+        buildRegion(img, o) {
+            if (!o || !o.region) {
+                return null;
+            }
+
+            let [x, y, w, h] = o.region;
+            x = _.parseNumber(x, 0);
+            y = _.parseNumber(y, 0);
+            w = _.parseNumber(w, () => img.getWidth() - x);
+            h = _.parseNumber(h, () => img.getHeight() - y);
+
+            return _.checkAndGetImageRect(new Rect(x, y, w, h), img);
+        },
+        /**
+         * @param {org.opencv.core.Point[]} points - Java Array
+         * @returns {org.opencv.core.Point[]}
+         */
+        toPointArray(points) {
+            let arr = [];
+            for (let i = 0; i < points.length; i++) {
+                arr.push(points[i]);
+            }
+            return arr;
+        },
+        /**
+         * @param {org.opencv.core.Rect} rect
+         * @param {com.stardust.autojs.core.image.ImageWrapper} img
+         * @returns {org.opencv.core.Rect}
+         */
+        checkAndGetImageRect(rect, img) {
+            let {x, y, width, height} = rect;
+            if (x < 0) {
+                throw Error(`X of region must be non-negative rather than ${x}`);
+            }
+            if (y < 0) {
+                throw Error(`Y of region must be non-negative rather than ${y}`);
+            }
+            if (x + width > img.width) {
+                throw Error(`Width of region overstepped:\n${x} + ${width} > ${img.width}`);
+            }
+            if (y + height > img.height) {
+                throw Error(`Height of region overstepped:\n${y} + ${height} > ${img.height}`);
+            }
+            return rect;
+        },
+        getColorDetector(color, algorithm, threshold) {
+            switch (algorithm) {
+                case 'rgb':
+                    return new ColorDetector.RGBDistanceDetector(color, threshold);
+                case 'equal':
+                    return new ColorDetector.EqualityDetector(color);
+                case 'diff':
+                    return new ColorDetector.DifferenceDetector(color, threshold);
+                case 'rgb+':
+                    return new ColorDetector.WeightedRGBDistanceDetector(color, threshold);
+                case 'hs':
+                    return new ColorDetector.HSDistanceDetector(color, threshold);
+            }
+            throw Error('Unknown algorithm for detector: ' + algorithm);
+        },
+    };
 
     const images = () => void 0;
 
-    images.requestScreenCapture = function (landscape) {
-        let ScreenCapturer = com.stardust.autojs.core.image.capture.ScreenCapturer;
-        let orientation = ScreenCapturer.ORIENTATION_AUTO;
-        if (landscape === true) {
-            orientation = ScreenCapturer.ORIENTATION_LANDSCAPE;
-        }
-        if (landscape === false) {
-            orientation = ScreenCapturer.ORIENTATION_PORTRAIT;
-        }
-        return ResultAdapter.wait(rtImages.requestScreenCapture(orientation));
-    };
-
-    images.save = function (img, path, format, quality) {
-        format = format || 'png';
-        quality = quality === undefined ? 100 : quality;
-        return rtImages.save(img, path, format, quality);
-    };
-
-    images.saveImage = function (img, path, format, quality) {
-        return images.save(img, path, format, quality);
-    };
-
-    images.grayscale = function (img, dstCn) {
-        return images.cvtColor(img, 'BGR2GRAY', dstCn);
-    };
-
-    images.threshold = function (img, threshold, maxVal, type) {
-        initIfNeeded();
-        let mat = new Mat();
-        type = type || 'BINARY';
-        type = Imgproc['THRESH_' + type];
-        Imgproc.threshold(img.mat, mat, threshold, maxVal, type);
-        return images.matToImage(mat);
-    };
-
-    images.inRange = function (img, lowerBound, upperBound) {
-        initIfNeeded();
-        let lb = new Scalar(colors.red(lowerBound), colors.green(lowerBound),
-            colors.blue(lowerBound), colors.alpha(lowerBound));
-        let ub = new Scalar(colors.red(upperBound), colors.green(upperBound),
-            colors.blue(upperBound), colors.alpha(lowerBound));
-        let bi = new Mat();
-        Core.inRange(img.mat, lb, ub, bi);
-        return images.matToImage(bi);
-    };
-
-    images.interval = function (img, color, threshold) {
-        initIfNeeded();
-        let lb = new Scalar(colors.red(color) - threshold, colors.green(color) - threshold,
-            colors.blue(color) - threshold, colors.alpha(color));
-        let ub = new Scalar(colors.red(color) + threshold, colors.green(color) + threshold,
-            colors.blue(color) + threshold, colors.alpha(color));
-        let bi = new Mat();
-        Core.inRange(img.mat, lb, ub, bi);
-        return images.matToImage(bi);
-    };
-
-    images.adaptiveThreshold = function (img, maxValue, adaptiveMethod, thresholdType, blockSize, C) {
-        initIfNeeded();
-        let mat = new Mat();
-        adaptiveMethod = Imgproc['ADAPTIVE_THRESH_' + adaptiveMethod];
-        thresholdType = Imgproc['THRESH_' + thresholdType];
-        Imgproc.adaptiveThreshold(img.mat, mat, maxValue, adaptiveMethod, thresholdType, blockSize, C);
-        return images.matToImage(mat);
-
-    };
-
-    images.blur = function (img, size, point, type) {
-        initIfNeeded();
-        let mat = new Mat();
-        size = newSize(size);
-        type = Core['BORDER_' + (type || 'DEFAULT')];
-        if (point === undefined) {
-            Imgproc.blur(img.mat, mat, size);
-        } else {
-            Imgproc.blur(img.mat, mat, size, new Point(point[0], point[1]), type);
-        }
-        return images.matToImage(mat);
-    };
-
-    images.medianBlur = function (img, size) {
-        initIfNeeded();
-        let mat = new Mat();
-        Imgproc.medianBlur(img.mat, mat, size);
-        return images.matToImage(mat);
-    };
-
-    images.gaussianBlur = function (img, size, sigmaX, sigmaY, type) {
-        initIfNeeded();
-        let mat = new Mat();
-        size = newSize(size);
-        sigmaX = sigmaX === undefined ? 0 : sigmaX;
-        sigmaY = sigmaY === undefined ? 0 : sigmaY;
-        type = Core['BORDER_' + (type || 'DEFAULT')];
-        Imgproc.GaussianBlur(img.mat, mat, size, sigmaX, sigmaY, type);
-        return images.matToImage(mat);
-    };
-
-    images.cvtColor = function (img, code, dstCn) {
-        initIfNeeded();
-        let mat = new Mat();
-        code = Imgproc['COLOR_' + code];
-        if (dstCn === undefined) {
-            Imgproc.cvtColor(img.mat, mat, code);
-        } else {
-            Imgproc.cvtColor(img.mat, mat, code, dstCn);
-        }
-        return images.matToImage(mat);
-    };
-
-    images.findCircles = function (grayImg, options) {
-        initIfNeeded();
-        options = options || {};
-        let mat = options.region === undefined ? grayImg.mat : new Mat(grayImg.mat, buildRegion(options.region, grayImg));
-        let resultMat = new Mat();
-        let dp = options.dp === undefined ? 1 : options.dp;
-        let minDst = options.minDst === undefined ? grayImg.height / 8 : options.minDst;
-        let param1 = options.param1 === undefined ? 100 : options.param1;
-        let param2 = options.param2 === undefined ? 100 : options.param2;
-        let minRadius = options.minRadius === undefined ? 0 : options.minRadius;
-        let maxRadius = options.maxRadius === undefined ? 0 : options.maxRadius;
-        Imgproc.HoughCircles(mat, resultMat, Imgproc.CV_HOUGH_GRADIENT, dp, minDst, param1, param2, minRadius, maxRadius);
-        let result = [];
-        for (let i = 0; i < resultMat.rows(); i++) {
-            for (let j = 0; j < resultMat.cols(); j++) {
-                let d = resultMat.get(i, j);
-                result.push({
-                    x: d[0],
-                    y: d[1],
-                    radius: d[2],
-                });
+    const images_ext = {
+        requestScreenCapture(landscape) {
+            switch (landscape) {
+                case true:
+                    return _.requestScreenCapture(ScreenCapturer.ORIENTATION_LANDSCAPE);
+                case false:
+                    return _.requestScreenCapture(ScreenCapturer.ORIENTATION_PORTRAIT);
+                default:
+                    return _.requestScreenCapture(ScreenCapturer.ORIENTATION_AUTO);
             }
-        }
-        if (options.region !== undefined) {
-            mat.release();
-        }
-        resultMat.release();
-        return result;
-    };
-
-    images.resize = function (img, size, interpolation) {
-        initIfNeeded();
-        let mat = new Mat();
-        interpolation = Imgproc['INTER_' + (interpolation || 'LINEAR')];
-        Imgproc.resize(img.mat, mat, newSize(size), 0, 0, interpolation);
-        return images.matToImage(mat);
-    };
-
-    images.scale = function (img, fx, fy, interpolation) {
-        initIfNeeded();
-        let mat = new Mat();
-        interpolation = Imgproc['INTER_' + (interpolation || 'LINEAR')];
-        Imgproc.resize(img.mat, mat, newSize([0, 0]), fx, fy, interpolation);
-        return images.matToImage(mat);
-    };
-
-    images.rotate = function (img, degree, x, y) {
-        initIfNeeded();
-        if (x === undefined) {
-            x = img.width / 2;
-        }
-        if (y === undefined) {
-            y = img.height / 2;
-        }
-        return rtImages.rotate(img, x, y, degree);
-    };
-
-    images.concat = function (img1, img2, direction) {
-        initIfNeeded();
-        direction = direction || 'right';
-        return Images.concat(img1, img2, android.view.Gravity[direction.toUpperCase()]);
-    };
-
-    images.detectsColor = function (img, color, x, y, threshold, algorithm) {
-        initIfNeeded();
-        color = parseColor(color);
-        algorithm = algorithm || 'diff';
-        threshold = threshold || DEF_COLOR_THRESHOLD;
-        let colorDetector = getColorDetector(color, algorithm, threshold);
-        let pixel = images.pixel(img, x, y);
-        return colorDetector.detectsColor(colors.red(pixel), colors.green(pixel), colors.blue(pixel));
-    };
-
-    images.findColor = function (img, color, options) {
-        initIfNeeded();
-        color = parseColor(color);
-        options = options || {};
-        let region = options.region || [];
-        let threshold = function $iiFe() {
-            if (options.similarity) {
-                return parseInt(255 * (1 - options.similarity));
+        },
+        save(img, path, format, quality) {
+            return rtImages.save(img, path, format || 'png', _.parseQuality(quality));
+        },
+        saveImage(img, path, format, quality) {
+            return this.save(img, path, format, quality);
+        },
+        grayscale(img, dstCn) {
+            return this.cvtColor(img, 'BGR2GRAY', dstCn);
+        },
+        threshold(img, threshold, maxVal, type) {
+            _.initIfNeeded();
+            let mat = new Mat();
+            Imgproc.threshold(img.mat, mat, threshold, maxVal, Imgproc['THRESH_' + (type || 'BINARY')]);
+            return this.matToImage(mat);
+        },
+        inRange(img, lowerBound, upperBound) {
+            _.initIfNeeded();
+            let dst = new Mat();
+            Core.inRange(img.mat, _.parseScalar(lowerBound), _.parseScalar(upperBound), dst);
+            return this.matToImage(dst);
+        },
+        interval(img, color, threshold) {
+            _.initIfNeeded();
+            let {lowerBound, upperBound} = _.parseScalars(color, threshold);
+            let dst = new Mat();
+            Core.inRange(img.mat, lowerBound, upperBound, dst);
+            return this.matToImage(dst);
+        },
+        adaptiveThreshold(img, maxValue, adaptiveMethod, thresholdType, blockSize, C) {
+            _.initIfNeeded();
+            let mat = new Mat();
+            Imgproc.adaptiveThreshold(img.mat, mat, maxValue,
+                Imgproc['ADAPTIVE_THRESH_' + adaptiveMethod],
+                Imgproc['THRESH_' + thresholdType], blockSize, C);
+            return this.matToImage(mat);
+        },
+        blur(img, size, point, type) {
+            _.initIfNeeded();
+            let mat = new Mat();
+            if (point === undefined) {
+                Imgproc.blur(img.mat, mat, _.parseSize(size));
+            } else {
+                Imgproc.blur(img.mat, mat, _.parseSize(size), _.parsePoint(point), _.parseBorderType(type));
             }
-            return options.threshold || DEF_COLOR_THRESHOLD;
-        }();
-
-        if (options.region) {
-            return colorFinder.findColor(img, color, threshold, buildRegion(region, img));
-        } else {
-            return colorFinder.findColor(img, color, threshold, null);
-        }
-    };
-
-    images.findColorInRegion = function (img, color, x, y, width, height, threshold) {
-        return findColor(img, color, {
-            region: [x, y, width, height],
-            threshold: threshold,
-        });
-    };
-
-    images.findColorEquals = function (img, color, x, y, width, height) {
-        return findColor(img, color, {
-            region: [x, y, width, height],
-            threshold: 0,
-        });
-    };
-
-    images.findAllPointsForColor = function (img, color, options) {
-        initIfNeeded();
-        color = parseColor(color);
-        options = options || {};
-        let threshold = function $iiFe() {
-            if (options.similarity) {
-                return parseInt(255 * (1 - options.similarity));
+            return this.matToImage(mat);
+        },
+        medianBlur(img, size) {
+            _.initIfNeeded();
+            let mat = new Mat();
+            Imgproc.medianBlur(img.mat, mat, size);
+            return this.matToImage(mat);
+        },
+        gaussianBlur(img, size, sigmaX, sigmaY, type) {
+            _.initIfNeeded();
+            let mat = new Mat();
+            let x = _.parseNumber(sigmaX);
+            let y = _.parseNumber(sigmaY);
+            Imgproc.GaussianBlur(img.mat, mat, _.parseSize(size), x, y, _.parseBorderType(type));
+            return this.matToImage(mat);
+        },
+        bilateralFilter(img, d, sigmaColor, sigmaSpace, borderType) {
+            _.initIfNeeded();
+            let mat = new Mat();
+            Imgproc.bilateralFilter(img.mat, mat,
+                _.parseNumber(d, 0),
+                _.parseNumber(sigmaColor, 40),
+                _.parseNumber(sigmaSpace, 20),
+                _.parseBorderType(borderType));
+            return images.matToImage(mat);
+        },
+        cvtColor(img, code, dstCn) {
+            _.initIfNeeded();
+            let mat = new Mat();
+            if (dstCn === undefined) {
+                Imgproc.cvtColor(img.mat, mat, Imgproc['COLOR_' + code]);
+            } else {
+                Imgproc.cvtColor(img.mat, mat, Imgproc['COLOR_' + code], dstCn);
             }
-            return options.threshold || DEF_COLOR_THRESHOLD;
-        }();
-        if (options.region) {
-            return toPointArray(colorFinder.findAllPointsForColor(img, color, threshold, buildRegion(options.region, img)));
-        } else {
-            return toPointArray(colorFinder.findAllPointsForColor(img, color, threshold, null));
-        }
+            return this.matToImage(mat);
+        },
+        findCircles(grayImg, options) {
+            let $ = {
+                getResult() {
+                    this.init();
+                    this.parseArgs();
+                    this.release();
+
+                    return this.results;
+                },
+                init() {
+                    _.initIfNeeded();
+                },
+                parseArgs() {
+                    this.options = options || {};
+                    this.region = this.options.region;
+                    this.parseImage();
+                    this.parseCircles();
+                },
+                parseImage() {
+                    this.image = this.region
+                        ? new Mat(grayImg.mat, _.buildRegion(grayImg, this))
+                        : grayImg.mat;
+                },
+                parseCircles() {
+                    let cir = this.circles = new Mat();
+
+                    Imgproc.HoughCircles(this.image, cir, Imgproc.CV_HOUGH_GRADIENT,
+                        _.parseNumber(this.options['dp'], 1),
+                        _.parseNumber(this.options['minDst'], () => grayImg.height / 8),
+                        _.parseNumber(this.options['param1'], 100),
+                        _.parseNumber(this.options['param2'], 100),
+                        _.parseNumber(this.options['minRadius'], 0),
+                        _.parseNumber(this.options['maxRadius'], 0),
+                    );
+
+                    this.results = [];
+                    for (let i = 0; i < cir.rows(); i++) {
+                        for (let j = 0; j < cir.cols(); j++) {
+                            let [x, y, radius] = cir.get(i, j);
+                            this.results.push({x, y, radius});
+                        }
+                    }
+                },
+                release() {
+                    if (this.region) {
+                        this.image.release();
+                    }
+                    this.circles.release();
+                },
+            };
+
+            return $.getResult();
+        },
+        resize(img, size, interpolation) {
+            _.initIfNeeded();
+            let mat = new Mat();
+            _.resize(img, mat, size, 0, 0, interpolation);
+            return this.matToImage(mat);
+        },
+        scale(img, fx, fy, interpolation) {
+            _.initIfNeeded();
+            let mat = new Mat();
+            _.resize(img, mat, 0, fx, fy, interpolation);
+            return this.matToImage(mat);
+        },
+        rotate(img, degree, x, y) {
+            _.initIfNeeded();
+            x = _.parseNumber(x, () => img.width / 2);
+            y = _.parseNumber(y, () => img.height / 2);
+            return rtImages.rotate(img, x, y, degree);
+        },
+        concat(img1, img2, direction) {
+            _.initIfNeeded();
+            return Images.concat(img1, img2, Gravity[(direction || 'right').toUpperCase()]);
+        },
+        detectsColor(img, color, x, y, threshold, algorithm) {
+            _.initIfNeeded();
+            let pixel = images.pixel(img, x, y);
+            return _.getColorDetector(_.parseColor(color), algorithm || 'diff', threshold || DEF_COLOR_THRESHOLD)
+                .detectsColor(colors.red(pixel), colors.green(pixel), colors.blue(pixel));
+        },
+        findColor(img, color, options) {
+            _.initIfNeeded();
+            let opt = options || {};
+            return colorFinder.findColor(img, _.parseColor(color), _.parseThreshold(opt), _.buildRegion(img, opt));
+        },
+        findColorInRegion(img, color, x, y, width, height, threshold) {
+            return this.findColor(img, color, {
+                region: [x, y, width, height],
+                threshold: threshold,
+            });
+        },
+        findColorEquals(img, color, x, y, width, height) {
+            return this.findColor(img, color, {
+                region: [x, y, width, height],
+                threshold: 0,
+            });
+        },
+        findAllPointsForColor(img, color, options) {
+            _.initIfNeeded();
+            let opt = options || {};
+            return _.toPointArray(colorFinder.findAllPointsForColor(img, _.parseColor(color), _.parseThreshold(opt), _.buildRegion(img, opt)));
+        },
+        findMultiColors(img, firstColor, paths, options) {
+            _.initIfNeeded();
+            let list = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, paths.length * 3);
+            for (let i = 0; i < paths.length; i++) {
+                let [x, y, color] = paths[i];
+                list[i * 3] = x;
+                list[i * 3 + 1] = y;
+                list[i * 3 + 2] = _.parseColor(color);
+            }
+            let opt = options || {};
+            return colorFinder.findMultiColors(img, _.parseColor(firstColor), _.parseThreshold(opt), _.buildRegion(img, opt), list);
+        },
+        findImage(img, template, options) {
+            _.initIfNeeded();
+            let opt = options || {};
+            return rtImages.findImage(img, template,
+                _.parseWeakThreshold(opt, 0.6),
+                _.parseThreshold(opt, 0.9),
+                _.buildRegion(img, opt),
+                _.parseNumber(opt.level, -1));
+        },
+        matchTemplate(img, template, options) {
+            _.initIfNeeded();
+            let opt = options || {};
+            return new MatchingResult(rtImages.matchTemplate(img, template,
+                _.parseWeakThreshold(opt, 0.6),
+                _.parseThreshold(opt, 0.9),
+                _.buildRegion(img, opt),
+                _.parseNumber(opt.level, -1),
+                _.parseNumber(opt.max, 5)));
+        },
+        findImageInRegion(img, template, x, y, width, height, threshold) {
+            return this.findImage(img, template, {
+                region: [x, y, width, height],
+                threshold: threshold,
+            });
+        },
+        fromBase64(base64) {
+            return rtImages.fromBase64(base64);
+        },
+        toBase64(img, format, quality) {
+            return rtImages.toBase64(img, format || 'png', _.parseQuality(quality));
+        },
+        fromBytes(bytes) {
+            return rtImages.fromBytes(bytes);
+        },
+        toBytes(img, format, quality) {
+            return rtImages.toBytes(img, format || 'png', _.parseQuality(quality));
+        },
+        readPixels(path) {
+            let img = images.read(path);
+            let bitmap = img.getBitmap();
+            let w = bitmap.getWidth();
+            let h = bitmap.getHeight();
+            let pixels = util.java.array('int', w * h);
+            bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+            img.recycle();
+            return {
+                data: pixels,
+                width: w,
+                height: h,
+            };
+        },
+        matToImage(img) {
+            _.initIfNeeded();
+            return Image.ofMat(img);
+        },
     };
 
-    images.findMultiColors = function (img, firstColor, paths, options) {
-        initIfNeeded();
-        options = options || {};
-        firstColor = parseColor(firstColor);
-        let list = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, paths.length * 3);
-        for (let i = 0; i < paths.length; i++) {
-            let p = paths[i];
-            list[i * 3] = p[0];
-            list[i * 3 + 1] = p[1];
-            list[i * 3 + 2] = parseColor(p[2]);
-        }
-        let region = options.region ? buildRegion(options.region, img) : null;
-        let threshold = options.threshold === undefined ? DEF_COLOR_THRESHOLD : options.threshold;
-        return colorFinder.findMultiColors(img, firstColor, threshold, region, list);
-    };
-
-    images.findImage = function (img, template, options) {
-        initIfNeeded();
-        options = options || {};
-        let threshold = options.threshold || 0.9;
-        let maxLevel = -1;
-        if (typeof options.level === 'number') {
-            maxLevel = options.level;
-        }
-        let weakThreshold = options.weakThreshold || 0.6;
-        if (options.region) {
-            return rtImages.findImage(img, template, weakThreshold, threshold, buildRegion(options.region, img), maxLevel);
-        } else {
-            return rtImages.findImage(img, template, weakThreshold, threshold, null, maxLevel);
-        }
-    };
-
-    images.matchTemplate = function (img, template, options) {
-        initIfNeeded();
-        options = options || {};
-        let threshold = options.threshold || 0.9;
-        let maxLevel = -1;
-        if (typeof options.level === 'number') {
-            maxLevel = options.level;
-        }
-        let max = options.max || 5;
-        let weakThreshold = options.weakThreshold || 0.6;
-        let result;
-        if (options.region) {
-            result = rtImages.matchTemplate(img, template, weakThreshold, threshold, buildRegion(options.region, img), maxLevel, max);
-        } else {
-            result = rtImages.matchTemplate(img, template, weakThreshold, threshold, null, maxLevel, max);
-        }
-        return new MatchingResult(result);
-    };
-
-    images.findImageInRegion = function (img, template, x, y, width, height, threshold) {
-        return images.findImage(img, template, {
-            region: [x, y, width, height],
-            threshold: threshold,
-        });
-    };
-
-    images.fromBase64 = function (base64) {
-        return rtImages.fromBase64(base64);
-    };
-
-    images.toBase64 = function (img, format, quality) {
-        format = format || 'png';
-        quality = quality === undefined ? 100 : quality;
-        return rtImages.toBase64(img, format, quality);
-    };
-
-    images.fromBytes = function (bytes) {
-        return rtImages.fromBytes(bytes);
-    };
-
-    images.toBytes = function (img, format, quality) {
-        format = format || 'png';
-        quality = quality === undefined ? 100 : quality;
-        return rtImages.toBytes(img, format, quality);
-    };
-
-    images.readPixels = function (path) {
-        let img = images.read(path);
-        let bitmap = img.getBitmap();
-        let w = bitmap.getWidth();
-        let h = bitmap.getHeight();
-        let pixels = util.java.array('int', w * h);
-        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
-        img.recycle();
-        return {
-            data: pixels,
-            width: w,
-            height: h,
-        };
-    };
-
-    images.matToImage = function (img) {
-        initIfNeeded();
-        return Image.ofMat(img);
-    };
+    Object.assign(images, images_ext);
 
     util.__assignFunctions__(rtImages, images, ['captureScreen', 'read', 'copy', 'load', 'clip', 'pixel']);
 

@@ -4,6 +4,25 @@
 
 ******
 
+# v6.0.2
+
+###### 2022/02/05
+
+* `新增` images.bilateralFilter() 双边滤波图像处理方法
+* `修复` 多次调用 toast 只生效最后一次调用的问题
+* `修复` toast.dismiss() 可能无效的问题
+* `修复` 客户端模式及服务端模式开关可能无法正常工作的问题
+* `修复` 客户端模式及服务端模式开关状态不能正常刷新的问题
+* `修复` Android 7 解析 UI 模式 text 元素异常 (Ref to TonyJiangWJ) _[`issue #4`](https://github.com/SuperMonster003/AutoJs6/issues/4)_
+* `优化` 忽略 sleep() 的 ScriptInterruptedException 异常
+* `优化` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
+* `优化` 升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1
+* `优化` 升级 Androidx Preference 版本 1.1.1 -> 1.2.0
+* `优化` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
+* `优化` 升级 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
+* `优化` 升级 Android Gradle 插件版本 7.2.0-alpha06 -> 7.2.0-beta01
+* `优化` 升级 Gradle 发行版本 7.3.3 -> 7.4-rc-2
+
 # v6.0.1
 
 ###### 2022/01/01

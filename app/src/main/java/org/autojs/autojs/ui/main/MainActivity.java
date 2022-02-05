@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Process;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -185,7 +186,7 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
         stopService(new Intent(view.getContext(), FloatyService.class));
         AutoJs.getInstance().getScriptEngineService().stopAll();
         finish();
-        Runtime.getRuntime().exit(0);
+        Process.killProcess(Process.myPid());
     }
 
     @Click(R.id.restart)
@@ -199,7 +200,7 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
         }
         Intent mainIntent = Intent.makeRestartActivityTask(componentName);
         context.startActivity(mainIntent);
-        Runtime.getRuntime().exit(0);
+        Process.killProcess(Process.myPid());
     }
 
     @Override

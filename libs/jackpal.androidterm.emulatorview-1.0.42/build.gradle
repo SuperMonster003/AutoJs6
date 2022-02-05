@@ -1,2 +1,2 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file("emulatorview-release.aar"))
+configurations.maybeCreate('default')
+artifacts.add('default', file('emulatorview-release.aar'))

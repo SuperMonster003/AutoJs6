@@ -1,2 +1,2 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file("dx.jar"))
+configurations.maybeCreate('default')
+artifacts.add('default', file('dx.jar'))

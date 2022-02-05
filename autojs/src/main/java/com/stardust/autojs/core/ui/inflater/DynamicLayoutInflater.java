@@ -1,9 +1,6 @@
 package com.stardust.autojs.core.ui.inflater;
 
 import android.content.Context;
-import android.os.Build;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InflateException;
@@ -18,6 +15,9 @@ import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.stardust.autojs.core.ui.inflater.inflaters.AppBarInflater;
@@ -64,7 +64,7 @@ public class DynamicLayoutInflater {
     private Map<String, ViewInflater<?>> mViewAttrSetters = new HashMap<>();
     private Map<String, ViewCreator<?>> mViewCreators = new HashMap<>();
     private Context mContext;
-    private ResourceParser mResourceParser;
+    private final ResourceParser mResourceParser;
     @NonNull
     private LayoutInflaterDelegate mLayoutInflaterDelegate = LayoutInflaterDelegate.NO_OP;
     private int mInflateFlags;
@@ -74,7 +74,7 @@ public class DynamicLayoutInflater {
         registerViewAttrSetters();
     }
 
-    @SuppressWarnings("IncompleteCopyConstructor")
+    @SuppressWarnings("CopyConstructorMissesField")
     public DynamicLayoutInflater(DynamicLayoutInflater inflater) {
         this.mResourceParser = inflater.mResourceParser;
         this.mContext = inflater.mContext;
@@ -159,7 +159,7 @@ public class DynamicLayoutInflater {
         return mLayoutInflaterDelegate.afterInflation(context, doInflation(context, xml, parent, attachToParent), xml, parent);
     }
 
-    public InflateContext newInflateContext(){
+    public InflateContext newInflateContext() {
         return new InflateContext();
     }
 
@@ -291,7 +291,7 @@ public class DynamicLayoutInflater {
             }
             Class<?> clazz = Class.forName(name);
             String style = attrs.get("style");
-            if (style == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            if (style == null) {
                 return (View) clazz.getConstructor(Context.class).newInstance(mContext);
             } else {
                 int styleRes = Res.parseStyle(mContext, style);
@@ -316,7 +316,6 @@ public class DynamicLayoutInflater {
         return attributes;
     }
 
-    @SuppressWarnings("unchecked")
     protected void applyAttributes(InflateContext context, View view, ViewInflater<View> setter, Map<String, String> attrs, @Nullable ViewGroup parent) {
         if (setter != null) {
             for (Map.Entry<String, String> entry : attrs.entrySet()) {

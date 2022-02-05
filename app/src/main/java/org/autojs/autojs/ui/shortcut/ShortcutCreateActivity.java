@@ -10,9 +10,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
@@ -65,8 +67,8 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     private void showDialog() {
         View view = View.inflate(this, R.layout.shortcut_create_dialog, null);
         ButterKnife.bind(this, view);
-        mUseAndroidNShortcut.setVisibility(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ?
-                View.VISIBLE : View.GONE);
+        mUseAndroidNShortcut.setVisibility(Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1
+                ? View.VISIBLE : View.GONE);
         mName.setText(mScriptFile.getSimplifiedName());
         new ThemeColorMaterialDialogBuilder(this)
                 .customView(view, false)
@@ -90,7 +92,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
 
     @SuppressLint("NewApi") //for fool android studio
     private void createShortcut() {
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && mUseAndroidNShortcut.isChecked())
+        if ((Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1 && mUseAndroidNShortcut.isChecked())
                 || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createShortcutByShortcutManager();
             return;
@@ -132,7 +134,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     }
 
 
-    @SuppressLint("CheckResult")
+    @SuppressLint({"CheckResult", "MissingSuperCall"})
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != RESULT_OK) {
@@ -149,7 +151,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
             return;
         }
         Uri uri = data.getData();
-        if(uri == null){
+        if (uri == null) {
             return;
         }
         Observable.fromCallable(() -> BitmapFactory.decodeStream(getContentResolver().openInputStream(uri)))
@@ -158,9 +160,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
                 .subscribe((bitmap -> {
                     mIcon.setImageBitmap(bitmap);
                     mIsDefaultIcon = false;
-                }), error -> {
-                    Log.e(LOG_TAG, "decode stream", error);
-                });
+                }), error -> Log.e(LOG_TAG, "decode stream", error));
 
     }
 }

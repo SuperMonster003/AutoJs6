@@ -1,2 +1,2 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file("term-debug.aar"))
+configurations.maybeCreate('default')
+artifacts.add('default', file('term-debug.aar'))

@@ -52,6 +52,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -408,33 +409,58 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
 
     }
 
-    private void toggleRemoteServerCxn(DrawerMenuItemViewHolder holder) throws IOException {
-        JsonSocketClient jsonSocketClient = devPlugin.getJsonSocketClient();
-        boolean disconnected = jsonSocketClient == null || !jsonSocketClient.isSocketReady();
-        boolean checked = holder.getSwitchCompat().isChecked();
-
-        if (checked) {
-            if (disconnected) {
-                inputRemoteHost();
-            }
+    private void toggleRemoteServerCxn(DrawerMenuItemViewHolder holder) {
+        boolean isChecked = holder.getSwitchCompat().isChecked();
+        boolean isDisconnected = !isJsonSocketClientConnected();
+        if (isChecked && isDisconnected) {
+            inputRemoteHost();
         } else {
-            if (jsonSocketClient != null) {
-                jsonSocketClient.switchOff();
+            disconnectJsonSocketClientIFN();
+        }
+    }
+
+    private void disconnectJsonSocketClientIFN() {
+        JsonSocketClient client = devPlugin.getJsonSocketClient();
+        if (client != null) {
+            try {
+                client.switchOff();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    @SuppressLint("CheckResult")
-    private void toggleLocalServerCxn(DrawerMenuItemViewHolder holder) throws IOException {
-        JsonSocketServer jsonSocketServer = devPlugin.getJsonSocketServer();
-        boolean checked = holder.getSwitchCompat().isChecked();
+    private boolean isJsonSocketClientConnected() {
+        JsonSocketClient client = devPlugin.getJsonSocketClient();
+        return client != null && client.isSocketReady();
+    }
 
-        if (checked) {
-            devPlugin.enableLocalServer()
+    @SuppressLint("CheckResult")
+    private void toggleLocalServerCxn(DrawerMenuItemViewHolder holder) {
+        boolean isChecked = holder.getSwitchCompat().isChecked();
+        boolean isDisconnected = !isServerSocketConnected();
+
+        if (isChecked && isDisconnected) {
+            devPlugin
+                    .enableLocalServer()
                     .subscribe(Observers.emptyConsumer(), this::onAJServerConnectException);
         } else {
-            if (jsonSocketServer != null) {
-                jsonSocketServer.switchOff();
+            disconnectServerSocketIFN();
+        }
+    }
+
+    private boolean isServerSocketConnected() {
+        ServerSocket serverSocket = devPlugin.getServerSocket();
+        return serverSocket != null && !serverSocket.isClosed();
+    }
+
+    private void disconnectServerSocketIFN() {
+        ServerSocket serverSocket = devPlugin.getServerSocket();
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -511,6 +537,8 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         setChecked(mDisplayOverOtherAppsItem, FloatingPermission.canDrawOverlays(context));
         setChecked(mWriteSystemSettingsItem, Settings.System.canWrite(getContext()));
         setChecked(mWriteSecuritySettingsItem, hasWriteSecureSettingsAccess());
+        setChecked(mClientModeItem, isJsonSocketClientConnected());
+        setChecked(mServerModeItem, isServerSocketConnected());
     }
 
     private boolean isAccessibilityServiceEnabled() {

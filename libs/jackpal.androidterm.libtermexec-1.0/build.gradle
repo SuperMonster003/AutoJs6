@@ -1,2 +1,2 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file("libtermexec-release.aar"))
+configurations.maybeCreate('default')
+artifacts.add('default', file('libtermexec-release.aar'))

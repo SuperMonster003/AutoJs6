@@ -1,6 +1,6 @@
 plugins {
-    id "com.android.library"
-    id "kotlin-android"
+    id 'com.android.library'
+    id 'kotlin-android'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -10,21 +10,21 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 // tasks.withType(JavaCompile) {
-//     options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+//     options.compilerArgs << '-Xlint:deprecation' << '-Xlint:unchecked'
 // }
 
 android {
-    compileSdkVersion versions.compile
+    compileSdkVersion versions.project.compile
     defaultConfig {
-        minSdkVersion versions.mini
-        targetSdkVersion versions.target
+        minSdkVersion versions.project.mini
+        targetSdkVersion versions.project.target
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
@@ -41,32 +41,27 @@ repositories {
 }
 
 dependencies {
-    testImplementation "junit:junit:${junitVer}"
+    testImplementation "junit:junit:${versions.junit}"
 
-    implementation "net.lingala.zip4j:zip4j:2.9.1"
-
-    implementation "com.afollestad.material-dialogs:core:0.9.6.0"
-    implementation "com.google.android.material:material:1.6.0-alpha01"
+    implementation 'net.lingala.zip4j:zip4j:2.9.1'
 
     // OkHttp
-    implementation "com.squareup.okhttp3:okhttp:5.0.0-alpha.3"
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.4'
 
     // Gson
-    implementation "com.google.code.gson:gson:2.8.9"
+    implementation 'com.google.code.gson:gson:2.8.9'
 
     // Log4j
-    implementation group: "de.mindpipe.android", name: "android-logging-log4j", version: "1.0.3"
-    implementation group: "log4j", name: "log4j", version: "1.2.17"
+    implementation 'de.mindpipe.android:android-logging-log4j:1.0.3'
+    implementation 'log4j:log4j:1.2.17'
 
     // Terminal emulator
-    api project(":libs:jackpal.androidterm.libtermexec-1.0")
-    api project(":libs:jackpal.androidterm.emulatorview-1.0.42")
-    api project(":libs:jackpal.androidterm-1.0.70")
+    api project(':libs:jackpal.androidterm.libtermexec-1.0')
+    api project(':libs:jackpal.androidterm.emulatorview-1.0.42')
+    api project(':libs:jackpal.androidterm-1.0.70')
 
-    api project(":libs:com.android.dx-1.7.0")
-    api project(":libs:org.mozilla.rhino-1.7.14")
-    api project(":libs:org.opencv-4.5.4")
+    api project(':libs:com.android.dx-1.7.0')
 
-    api project(":common")
-    api project(":automator")
+    api project(':common')
+    api project(':automator')
 }
