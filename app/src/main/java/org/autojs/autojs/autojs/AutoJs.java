@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Looper;
 
+import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.core.accessibility.AccessibilityServiceTool;
 import com.stardust.autojs.core.console.GlobalConsole;
 import com.stardust.autojs.runtime.ScriptRuntime;
 import com.stardust.autojs.runtime.accessibility.AccessibilityConfig;
@@ -20,11 +22,9 @@ import com.stardust.view.accessibility.AccessibilityService;
 import com.stardust.view.accessibility.LayoutInspector;
 import com.stardust.view.accessibility.NodeInfo;
 
-import org.autojs.autojs.Pref;
 import org.autojs.autojs.R;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.pluginclient.DevPluginService;
-import org.autojs.autojs.tool.AccessibilityServiceTool;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow;
@@ -43,6 +43,8 @@ import java.util.concurrent.Executors;
 public class AutoJs extends com.stardust.autojs.AutoJs {
 
     private static AutoJs instance;
+
+    private final Application appContext;
 
     // @Thank to Zen2H
     private final ExecutorService printExecutor = Executors.newSingleThreadExecutor();
@@ -64,6 +66,7 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
 
     private AutoJs(final Application application) {
         super(application);
+        appContext = application;
         getScriptEngineService().registerGlobalScriptExecutionListener(new ScriptExecutionGlobalListener());
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(LayoutBoundsFloatyWindow.class.getName());
@@ -119,7 +122,7 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
             public String println(int level, CharSequence charSequence) {
                 String log = super.println(level, charSequence);
 
-                // FIXME by SuperMonster003 on Feb 2, 2022
+                // FIXME by SuperMonster003 as of Feb 2, 2022.
                 //  ! When running in 'ui' thread (`ui.run`, `ui.post`),
                 //  ! android.os.NetworkOnMainThreadException may happen.
                 //  ! Further more, dunno if a thread executor is a good idea.
@@ -134,20 +137,9 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
         if (AccessibilityService.Companion.getInstance() != null) {
             return;
         }
-        String errorMessage = null;
-        if (AccessibilityServiceTool.isAccessibilityServiceEnabled(GlobalAppContext.get())) {
-            errorMessage = GlobalAppContext.getString(R.string.text_auto_operate_service_enabled_but_not_running);
-        } else {
-            if (Pref.shouldEnableAccessibilityServiceByRoot()) {
-                if (!AccessibilityServiceTool.enableAccessibilityServiceByRootAndWaitFor(2000)) {
-                    errorMessage = GlobalAppContext.getString(R.string.text_enable_accessibility_service_by_root_timeout);
-                }
-            } else {
-                errorMessage = GlobalAppContext.getString(R.string.text_no_accessibility_permission);
-            }
-        }
+        String errorMessage = tryEnableAccessibilityService();
         if (errorMessage != null) {
-            AccessibilityServiceTool.goToAccessibilitySetting();
+            getAccessibilityTool().goToAccessibilitySetting();
             throw new ScriptException(errorMessage);
         }
     }
@@ -157,24 +149,24 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
         if (AccessibilityService.Companion.getInstance() != null) {
             return;
         }
-        String errorMessage = null;
-        if (AccessibilityServiceTool.isAccessibilityServiceEnabled(GlobalAppContext.get())) {
-            errorMessage = GlobalAppContext.getString(R.string.text_auto_operate_service_enabled_but_not_running);
-        } else {
-            if (Pref.shouldEnableAccessibilityServiceByRoot()) {
-                if (!AccessibilityServiceTool.enableAccessibilityServiceByRootAndWaitFor(2000)) {
-                    errorMessage = GlobalAppContext.getString(R.string.text_enable_accessibility_service_by_root_timeout);
-                }
-            } else {
-                errorMessage = GlobalAppContext.getString(R.string.text_no_accessibility_permission);
-            }
-        }
+        String errorMessage = tryEnableAccessibilityService();
         if (errorMessage != null) {
-            AccessibilityServiceTool.goToAccessibilitySetting();
+            getAccessibilityTool().goToAccessibilitySetting();
             if (!AccessibilityService.Companion.waitForEnabled(-1)) {
                 throw new ScriptInterruptedException();
             }
         }
+    }
+
+    @Nullable
+    private String tryEnableAccessibilityService() {
+        if (getAccessibilityTool().isAccessibilityServiceEnabled()) {
+            return GlobalAppContext.getString(R.string.text_auto_operate_service_enabled_but_not_working);
+        }
+        if (!getAccessibilityTool().enableAccessibilityServiceAutomaticallyIfNeededAndWaitFor(2000)) {
+            return GlobalAppContext.getString(R.string.text_no_accessibility_permission);
+        }
+        return null;
     }
 
     @Override
@@ -190,6 +182,10 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
         runtime.putProperty("broadcast.inspect_layout_bounds", LayoutBoundsFloatyWindow.class.getName());
         runtime.putProperty("broadcast.inspect_layout_hierarchy", LayoutHierarchyFloatyWindow.class.getName());
         return runtime;
+    }
+
+    private AccessibilityServiceTool getAccessibilityTool() {
+        return new AccessibilityServiceTool(appContext);
     }
 
 }

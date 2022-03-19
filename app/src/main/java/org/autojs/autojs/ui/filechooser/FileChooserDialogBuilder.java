@@ -47,8 +47,8 @@ public class FileChooserDialogBuilder extends ThemeColorMaterialDialogBuilder {
         super(context);
         mFileChooseListView = new FileChooseListView(context);
         customView(mFileChooseListView, false);
-        positiveText(R.string.ok);
-        negativeText(R.string.cancel);
+        positiveText(R.string.text_ok);
+        negativeText(R.string.text_cancel);
         onPositive((dialog, which) -> notifySelected());
     }
 

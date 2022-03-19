@@ -263,7 +263,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="16dp"
                                 android:paddingStart="16dp"
-                                android:text="@string/text_run_on_broadcast"
+                                android:text="@string/text_broadcast_task"
                                 tools:ignore="RtlSymmetry" />
 
                         <com.github.aakira.expandablelayout.ExpandableRelativeLayout

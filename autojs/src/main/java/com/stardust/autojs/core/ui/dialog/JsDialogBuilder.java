@@ -1,15 +1,9 @@
 package com.stardust.autojs.core.ui.dialog;
 
 import android.content.Context;
-
-
 import android.widget.EditText;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.GravityEnum;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.afollestad.materialdialogs.StackingBehavior;
-import com.afollestad.materialdialogs.Theme;
 import com.stardust.autojs.core.eventloop.EventEmitter;
 import com.stardust.autojs.core.looper.Loopers;
 import com.stardust.autojs.core.looper.Timer;
@@ -43,22 +37,22 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
         showListener(dialog -> emit("show", dialog));
         onAny((dialog, which) -> {
             switch (which) {
-                case NEUTRAL:
+                case NEUTRAL -> {
                     emit("neutral", dialog);
                     emit("any", "neutral", dialog);
-                    break;
-                case NEGATIVE:
+                }
+                case NEGATIVE -> {
                     emit("negative", dialog);
                     emit("any", "negative", dialog);
-                    break;
-                case POSITIVE:
+                }
+                case POSITIVE -> {
                     EditText editText = dialog.getInputEditText();
                     if (editText != null) {
                         emit("input", editText.getText().toString());
                     }
                     emit("positive", dialog);
                     emit("any", "positive", dialog);
-                    break;
+                }
             }
         });
         dismissListener(dialog -> {

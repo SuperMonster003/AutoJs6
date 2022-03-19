@@ -102,9 +102,13 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         if (mListeningKey)
             return;
         AccessibilityService service = getAccessibilityService();
-        if ((service.getServiceInfo().flags & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) == 0) {
-            throw new ScriptException(mContext.getString(R.string.text_should_enable_key_observing));
-        }
+
+        // @Dubious by SuperMonster003 as of Feb 11, 2022.
+        //  ! condition may be always false ?
+        // if ((service.getServiceInfo().flags & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) == 0) {
+        //     throw new ScriptException(mContext.getString(R.string.text_should_enable_key_observing));
+        // }
+
         ensureHandler();
         mLoopers.waitWhenIdle(true);
         mListeningKey = true;
@@ -223,7 +227,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         mLoopers.waitWhenIdle(true);
         if (NotificationListenerService.Companion.getInstance() == null) {
                 mContext.startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
-            throw new ScriptException(mContext.getString(R.string.exception_notification_service_disabled));
+            throw new ScriptException(mContext.getString(R.string.text_notification_service_disabled));
         }
         NotificationListenerService.Companion.getInstance().addListener(this);
     }

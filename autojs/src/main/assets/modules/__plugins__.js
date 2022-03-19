@@ -1,12 +1,11 @@
 module.exports = function (runtime, scope) {
-    function plugins(){
-    }
+    const plugins = () => void 0;
 
-    plugins.load = function(packageName){
-        var plugin = runtime.plugins.load(packageName);
-        var index = require(plugin.mainScriptPath);
+    plugins.load = function (packageName) {
+        let plugin = runtime.plugins.load(packageName);
+        let index = require(plugin.getMainScriptPath());
         return index(plugin.unwrap());
-    }
+    };
 
     return plugins;
-}
+};

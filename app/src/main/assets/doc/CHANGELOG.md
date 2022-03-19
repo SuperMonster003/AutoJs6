@@ -4,6 +4,39 @@
 
 ******
 
+# v6.0.3
+
+###### 2022/03/19
+
+* `新增` 多语言切换功能 (尚不完善)
+* `新增` recorder 模块 (参阅 示例代码 > 计时器 > *.js × 4)
+* `新增` 使用 "修改安全设置权限" 自动启用无障碍服务及开关设置
+* `修复` 点击 "快速设置" 中相关图标后面板未自动收起的问题 (试修) _[`issue #7`](https://github.com/SuperMonster003/AutoJs6/issues/7)_
+* `修复` toast 使用强制显示参数时可能导致 AutoJs6 崩溃的问题
+* `修复` Socket 传输数据头部信息不完整时可能导致 AutoJs6 崩溃的问题
+* `优化` 启动或重启 AutoJs6 时根据选项设置自动开启无障碍服务
+* `优化` 开启悬浮窗显示时尝试自动开启无障碍服务
+* `优化` 所有资源文件补全元素对应的英文翻译
+* `优化` 微调主页抽屉布局 减小项目排列间距
+* `优化` 主页抽屉增加前台服务状态开关的同步
+* `优化` 主页抽屉展开时立即按需同步开关状态
+* `优化` 显示指针位置增加状态检测及结果提示
+* `优化` 支持 64 位操作系统 (Ref to TonyJiangWJ)
+* `优化` 悬浮窗初始化时同时应用透明度设置 (无需点击后再应用透明度)
+* `优化` 重置文件内容时增加是否为示例代码文件的检测并增加结果提示
+* `优化` 转移打包插件下载地址 GitHub -> JsDelivr
+* `优化` 附加 Zeugma Solutions LocaleHelper 版本 1.5.1
+* `优化` 降级 Android Material 版本 1.6.0-alpha02 -> 1.5.0
+* `优化` 升级 Kotlinx Coroutines 版本 1.6.0-native-mt -> 1.6.0
+* `优化` 升级 OpenCV 版本 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to TonyJiangWJ)
+* `优化` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6
+* `优化` 升级 Android Gradle 插件版本 7.2.0-beta01 -> 7.3.0-alpha06
+* `优化` 升级 Auto.js-ApkBuilder 版本 1.0.1 -> 1.0.3
+* `优化` 升级 Glide Compiler 版本 4.12.0 -> 4.13.1
+* `优化` 升级 Gradle 发行版本 7.4-rc-2 -> 7.4.1
+* `优化` 升级 Gradle Compile 版本 31 -> 32
+* `优化` 升级 Gson 版本 2.8.9 -> 2.9.0
+
 # v6.0.2
 
 ###### 2022/02/05
@@ -13,7 +46,7 @@
 * `修复` toast.dismiss() 可能无效的问题
 * `修复` 客户端模式及服务端模式开关可能无法正常工作的问题
 * `修复` 客户端模式及服务端模式开关状态不能正常刷新的问题
-* `修复` Android 7 解析 UI 模式 text 元素异常 (Ref to TonyJiangWJ) _[`issue #4`](https://github.com/SuperMonster003/AutoJs6/issues/4)_
+* `修复` Android 7 解析 UI 模式 text 元素异常 (Ref to TonyJiangWJ) _[`issue #4`](https://github.com/SuperMonster003/AutoJs6/issues/4)_ _[`#9`](https://github.com/SuperMonster003/AutoJs6/issues/9)_
 * `优化` 忽略 sleep() 的 ScriptInterruptedException 异常
 * `优化` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
 * `优化` 升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1

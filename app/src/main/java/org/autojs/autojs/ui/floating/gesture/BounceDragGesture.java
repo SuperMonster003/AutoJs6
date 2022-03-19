@@ -16,11 +16,12 @@ public class BounceDragGesture extends DragGesture {
     private long mBounceDuration = 300;
     private static final int MIN_DY_TO_SCREEN_BOTTOM = 100;
     private static final int MIN_DY_TO_SCREEN_TOP = 0;
-    private BounceInterpolator mBounceInterpolator;
+    private final BounceInterpolator mBounceInterpolator;
 
     public BounceDragGesture(WindowBridge windowBridge, View view) {
         super(windowBridge, view);
         setAutoKeepToEdge(true);
+        setAlphaUnpressed();
         mBounceInterpolator = new BounceInterpolator();
     }
 
@@ -47,12 +48,7 @@ public class BounceDragGesture extends DragGesture {
 
     protected void bounce(final int fromX, final int toX, final int y) {
         ValueAnimator animator = ValueAnimator.ofFloat(fromX, toX);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mWindowBridge.updatePosition((int) ((float) animation.getAnimatedValue()), y);
-            }
-        });
+        animator.addUpdateListener(animation -> mWindowBridge.updatePosition((int) ((float) animation.getAnimatedValue()), y));
         animator.setDuration(mBounceDuration);
         animator.setInterpolator(mBounceInterpolator);
         animator.start();

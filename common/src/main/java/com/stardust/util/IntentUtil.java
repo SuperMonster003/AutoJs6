@@ -119,7 +119,7 @@ public class IntentUtil {
             installApk(context, path, fileProviderAuthority);
         } catch (ActivityNotFoundException e) {
             e.printStackTrace();
-            Toast.makeText(context, R.string.error_activity_not_found_for_apk_installing, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.text_activity_not_found_for_apk_installing, Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -57,7 +57,6 @@ public class BlockedMaterialDialog extends MaterialDialog {
         return false;
     }
 
-
     public static class Builder extends MaterialDialog.Builder {
 
         private VolatileDispose<Object> mResultBox;

@@ -282,13 +282,13 @@ public class Device {
             return;
         }
         SettingsCompat.manageWriteSettings(mContext);
-        throw new SecurityException(mContext.getString(R.string.no_write_settings_permission));
+        throw new SecurityException(mContext.getString(R.string.text_no_write_settings_permission));
     }
 
 
     private void checkReadPhoneStatePermission() {
         if (mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(mContext.getString(R.string.no_read_phone_state_permissin));
+            throw new SecurityException(mContext.getString(R.string.text_no_read_phone_state_permission));
         }
     }
 

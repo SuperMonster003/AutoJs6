@@ -1,8 +1,9 @@
 package com.stardust.autojs.core.opencv;
 
+import androidx.annotation.NonNull;
+
 import com.stardust.util.ResourceMonitor;
 
-import org.mozilla.javascript.ScriptRuntime;
 import org.opencv.core.Range;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -73,6 +74,7 @@ public class Mat extends org.opencv.core.Mat implements ResourceMonitor.Resource
         ResourceMonitor.onOpen(this);
     }
 
+    @NonNull
     @Override
     public Mat clone() {
         return new Mat(n_clone(this.nativeObj));
@@ -80,7 +82,11 @@ public class Mat extends org.opencv.core.Mat implements ResourceMonitor.Resource
 
     protected long n_clone(long addr) {
         try {
-            return (long) nClone.invoke(this, addr);
+            Object cloned = nClone.invoke(this, addr);
+            if (cloned != null) {
+                return (long) cloned;
+            }
+            throw new Exception("Cloned is null");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

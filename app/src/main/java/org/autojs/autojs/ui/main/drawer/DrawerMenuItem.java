@@ -7,7 +7,6 @@ import java.io.IOException;
  */
 public class DrawerMenuItem {
 
-
     public interface Action {
         void onClick(DrawerMenuItemViewHolder holder) throws IOException;
     }
@@ -102,4 +101,5 @@ public class DrawerMenuItem {
     public int hashCode() {
         return mTitle;
     }
+
 }

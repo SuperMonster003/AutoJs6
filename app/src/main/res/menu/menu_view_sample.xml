@@ -23,7 +23,7 @@
     <item
         android:id="@+id/action_import"
         android:orderInCategory="400"
-        android:title="@string/text_copy_to_my_scripts"
+        android:title="@string/text_import_to_my_scripts"
         app:showAsAction="never"/>
 
 </menu>

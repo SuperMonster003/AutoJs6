@@ -2,6 +2,8 @@ package com.stardust.autojs.core.console;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +27,7 @@ import com.stardust.util.SparseArrayEntries;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Stardust on 2017/5/2.
@@ -57,9 +60,8 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     private RecyclerView mLogListRecyclerView;
     private EditText mEditText;
     private ResizableExpandableFloatyWindow mWindow;
-    private LinearLayout mInputContainer;
     private boolean mShouldStopRefresh = false;
-    private ArrayList<ConsoleImpl.LogEntry> mLogEntries = new ArrayList<>();
+    private final ArrayList<ConsoleImpl.LogEntry> mLogEntries = new ArrayList<>();
 
     public ConsoleView(Context context) {
         super(context);
@@ -89,6 +91,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
                 int logLevel = attr.getValue();
                 mColors.put(logLevel, typedArray.getColor(styleable, mColors.get(logLevel)));
             }
+            typedArray.recycle();
         }
         mLogListRecyclerView = findViewById(R.id.log_list);
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
@@ -118,7 +121,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     private void initEditText() {
         mEditText = findViewById(R.id.input);
         mEditText.setFocusableInTouchMode(true);
-        mInputContainer = findViewById(R.id.input_container);
+        LinearLayout mInputContainer = findViewById(R.id.input_container);
         OnClickListener listener = v -> {
             if (mWindow != null) {
                 mWindow.requestWindowFocus();
@@ -165,7 +168,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     public void onLogClear() {
         post(() -> {
             mLogEntries.clear();
-            mLogListRecyclerView.getAdapter().notifyDataSetChanged();
+            Objects.requireNonNull(mLogListRecyclerView.getAdapter()).notifyDataSetChanged();
         });
     }
 
@@ -189,7 +192,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
                     mLogEntries.add(logEntries.get(i));
                 }
             }
-            mLogListRecyclerView.getAdapter().notifyItemRangeInserted(oldSize, size - 1);
+            Objects.requireNonNull(mLogListRecyclerView.getAdapter()).notifyItemRangeInserted(oldSize, size - 1);
             mLogListRecyclerView.scrollToPosition(size - 1);
         }
     }
@@ -206,7 +209,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         });
     }
 
-    private class ViewHolder extends RecyclerView.ViewHolder {
+    private static class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView textView;
 
@@ -218,8 +221,9 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new ViewHolder(LayoutInflater.from(getContext()).inflate(R.layout.console_view_item, parent, false));
         }
 

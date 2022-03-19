@@ -327,7 +327,7 @@ public class ScriptRuntime {
 
     public static void requiresApi(int i) {
         if (Build.VERSION.SDK_INT < i) {
-            throw new ScriptException(GlobalAppContext.getString(R.string.text_requires_sdk_version_to_run_the_script) + SdkVersionUtil.sdkIntToString(i));
+            throw new ScriptException(GlobalAppContext.getString(R.string.text_requires_sdk_version_to_run_the_script) + ": " + SdkVersionUtil.sdkIntToString(i));
         }
     }
 
@@ -447,6 +447,9 @@ public class ScriptRuntime {
         return Continuation.Companion.create(this, scope);
     }
 
+    public SimpleActionAutomator getAutomator() {
+        return automator;
+    }
 
     public static String getStackTrace(Throwable e, boolean printJavaStackTrace) {
         String message = e.getMessage();

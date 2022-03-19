@@ -84,7 +84,7 @@ module.exports = function (runtime, global) {
         de: Packages.de,
         okhttp3: Packages.okhttp3,
         androidx: Packages.androidx,
-        toast(msg, is_long, is_forcible) {
+        toast(msg, isLong, isForcible) {
             let $ = {
                 toast() {
                     this.init(arguments);
@@ -92,18 +92,18 @@ module.exports = function (runtime, global) {
                 },
                 init() {
                     this.message = isNullish(msg) ? '' : msg.toString();
-                    this.is_long = this.parseIsLong(is_long);
-                    this.is_forcible = is_forcible;
+                    this.isLong = this.parseIsLong(isLong);
+                    this.isForcible = isForcible;
                 },
-                parseIsLong(is_long) {
-                    if (typeof is_long === 'number') {
-                        return Number(!!is_long);
+                parseIsLong(isLong) {
+                    if (typeof isLong === 'number') {
+                        return Number(!!isLong);
                     }
-                    if (typeof is_long === 'string') {
-                        return Number(/^l(ong)?$/i.test(is_long));
+                    if (typeof isLong === 'string') {
+                        return Number(/^l(ong)?$/i.test(isLong));
                     }
-                    if (typeof is_long === 'boolean') {
-                        return Number(is_long);
+                    if (typeof isLong === 'boolean') {
+                        return Number(isLong);
                     }
                     return 0;
                 },
@@ -111,12 +111,12 @@ module.exports = function (runtime, global) {
                     ui.post(() => {
                         new android.os.Handler(Looper.getMainLooper()).post(new Runnable({
                             run() {
-                                if ($.is_forcible) {
-                                    $.dismiss();
+                                if (isForcible) {
+                                    _.toasts.dismiss();
                                 }
-                                $.toastObj = Toast.makeText(context, $.message, $.is_long);
-                                _.toasts.add($.toastObj);
-                                $.toastObj.show();
+                                let o = Toast.makeText(context, $.message, $.isLong);
+                                _.toasts.add(o);
+                                o.show();
                             },
                         }));
                     });
@@ -125,7 +125,7 @@ module.exports = function (runtime, global) {
 
             $.toast();
         },
-        toastLog(msg, is_long, is_forcible) {
+        toastLog(msg, isLong, isForcible) {
             this.toast.apply(this, arguments);
             this.log(msg);
         },

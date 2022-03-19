@@ -1,14 +1,11 @@
 package com.stardust.view.accessibility
 
-import android.os.Build
 import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.stardust.event.EventDispatcher
-
-import java.util.HashSet
-import java.util.TreeMap
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -32,11 +29,11 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     private var mFastRootInActiveWindow: AccessibilityNodeInfo? = null
     private val eventExecutor: ExecutorService
         get() {
-            return mEventExecutor ?: {
+            return mEventExecutor ?: run {
                 val executor = Executors.newSingleThreadExecutor()
                 mEventExecutor = executor
                 executor
-            }()
+            }
         }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
@@ -140,7 +137,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         }
 
         fun disable(): Boolean {
-            if (instance != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (instance != null) {
                 instance!!.disableSelf()
                 return true
             }

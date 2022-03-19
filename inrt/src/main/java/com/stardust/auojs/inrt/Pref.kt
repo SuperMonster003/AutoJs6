@@ -37,11 +37,11 @@ object Pref {
     }
 
     fun shouldEnableAccessibilityServiceByRoot(): Boolean {
-        return preferences.getBoolean(getString(R.string.key_enable_accessibility_service_by_root), true)
+        return preferences.getBoolean(getString(R.string.key_enable_a11y_service_with_root_access), true)
     }
 
     fun shouldHideLogs(): Boolean {
-        return preferences.getBoolean(getString(R.string.key_not_show_main_activity), false)
+        return preferences.getBoolean(getString(R.string.key_not_showing_main_activity), false)
     }
 
     fun shouldStopAllScriptsWhenVolumeUp(): Boolean {

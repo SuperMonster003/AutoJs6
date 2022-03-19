@@ -13,7 +13,7 @@ public class ThreadTool {
                     //noinspection BusyWait
                     Thread.sleep(200);
                 } catch (InterruptedException ignore) {
-                    // ignored
+                    // Ignored.
                 }
             }
             result.set(true);

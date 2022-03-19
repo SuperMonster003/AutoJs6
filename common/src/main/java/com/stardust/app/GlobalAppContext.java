@@ -34,10 +34,6 @@ public class GlobalAppContext {
         return get().getString(resId);
     }
 
-    public static String getString(int resId, Object... formatArgs) {
-        return get().getString(resId, formatArgs);
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     public static int getColor(int id) {
         return get().getColor(id);
@@ -45,41 +41,50 @@ public class GlobalAppContext {
 
     public static void toast(final String message) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            Toast.makeText(get(), message, Toast.LENGTH_SHORT).show();
-            return;
+            toastMessage(message);
+        } else {
+            sHandler.post(() -> toastMessage(message));
         }
-        sHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(get(), message, Toast.LENGTH_SHORT).show();
-            }
-        });
+    }
+
+    public static void toast(final String message, int duration) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            toastMessage(message, duration);
+        } else {
+            sHandler.post(() -> toastMessage(message, duration));
+        }
     }
 
     public static void toast(final int resId) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            Toast.makeText(get(), resId, Toast.LENGTH_SHORT).show();
-            return;
+            toastResId(resId);
+        } else {
+            sHandler.post(() -> toastResId(resId));
         }
-        sHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(get(), resId, Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
-    public static void toast(final int resId, final Object... args) {
+    public static void toast(final int resId, int duration) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            Toast.makeText(get(), getString(resId, args), Toast.LENGTH_SHORT).show();
-            return;
+            toastResId(resId, duration);
+        } else {
+            sHandler.post(() -> toastResId(resId, duration));
         }
-        sHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(get(), getString(resId, args), Toast.LENGTH_SHORT).show();
-            }
-        });
+    }
+
+    private static void toastMessage(String message) {
+        Toast.makeText(get(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private static void toastMessage(String message, int duration) {
+        Toast.makeText(get(), message, duration).show();
+    }
+
+    private static void toastResId(int resId) {
+        Toast.makeText(get(), resId, Toast.LENGTH_SHORT).show();
+    }
+
+    private static void toastResId(int resId, int duration) {
+        Toast.makeText(get(), resId, duration).show();
     }
 
     public static void post(Runnable r) {

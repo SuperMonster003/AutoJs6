@@ -33,6 +33,18 @@ public class DragGesture extends GestureDetector.SimpleOnGestureListener {
         mView = view;
         setupView();
     }
+    
+    public void setAlpha(float alpha) {
+        mView.setAlpha(alpha);
+    }
+
+    public void setAlphaPressed() {
+        setAlpha(mPressedAlpha);
+    }
+
+    public void setAlphaUnpressed() {
+        setAlpha(mUnpressedAlpha);
+    }
 
     private void setupView() {
         final GestureDetectorCompat gestureDetector = new GestureDetectorCompat(mView.getContext(), this);
@@ -41,7 +53,7 @@ public class DragGesture extends GestureDetector.SimpleOnGestureListener {
             public boolean onTouch(View v, MotionEvent event) {
                 gestureDetector.onTouchEvent(event);
                 if (event.getAction() == MotionEvent.ACTION_UP) {
-                    mView.setAlpha(mUnpressedAlpha);
+                    setAlphaUnpressed();
                     if (!onTheEdge() && mAutoKeepToEdge) {
                         keepToEdge();
                     }
@@ -113,7 +125,7 @@ public class DragGesture extends GestureDetector.SimpleOnGestureListener {
         }
         mWindowBridge.updatePosition(mInitialX + (int) ((e2.getRawX() - mInitialTouchX)),
                 mInitialY + (int) ((e2.getRawY() - mInitialTouchY)));
-        mView.setAlpha(mPressedAlpha);
+        setAlphaPressed();
         Log.d("DragGesture", "onScroll");
         return false;
     }

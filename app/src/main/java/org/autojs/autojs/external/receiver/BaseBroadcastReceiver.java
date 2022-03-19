@@ -15,6 +15,8 @@ import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.timing.IntentTask;
 import org.autojs.autojs.timing.TimedTaskManager;
 
+import java.util.Objects;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -22,6 +24,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
 
     private static final String LOG_TAG = "BaseBroadcastReceiver";
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     public void onReceive(Context context, Intent intent) {
         Log.d(LOG_TAG, "onReceive: intent = " + intent + ", this = " + this);
@@ -31,7 +34,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(intentTask -> runTask(context, intent, intentTask), Throwable::printStackTrace);
         } catch (Exception e) {
-            GlobalAppContext.toast(e.getMessage());
+            GlobalAppContext.toast(e.getMessage(), Toast.LENGTH_LONG);
         }
     }
 
@@ -40,7 +43,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
         ScriptFile file = new ScriptFile(task.getScriptPath());
         ExecutionConfig config = new ExecutionConfig();
         config.setArgument("intent", intent.clone());
-        config.setWorkingDirectory(file.getParent());
+        config.setWorkingDirectory(Objects.requireNonNull(file.getParent()));
         try {
             AutoJs.getInstance().getScriptEngineService().execute(file.toSource(), config);
         } catch (Exception e) {

@@ -44,7 +44,7 @@ public class Dialogs {
         MaterialDialog.Builder builder = dialogBuilder(callback)
                 .alert()
                 .title(title)
-                .positiveText(R.string.ok);
+                .positiveText(R.string.text_ok);
         if (!TextUtils.isEmpty(content)) {
             builder.content(content);
         }
@@ -56,13 +56,13 @@ public class Dialogs {
         MaterialDialog.Builder builder = dialogBuilder(callback)
                 .confirm()
                 .title(title)
-                .positiveText(R.string.ok)
-                .negativeText(R.string.cancel);
+                .positiveText(R.string.text_ok)
+                .negativeText(R.string.text_cancel);
         if (!TextUtils.isEmpty(content)) {
             builder.content(content);
         }
         return ((BlockedMaterialDialog.Builder) builder).showAndGet();
-}
+    }
 
     private Context getContext() {
         if (mThemeWrapper != null)
@@ -76,24 +76,8 @@ public class Dialogs {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallback()
                 .title(title)
-                .items((CharSequence[]) items))
+                .items(items))
                 .showAndGet();
-    }
-
-    private String[] getItems(Object[] args) {
-        int len = 0;
-        if (args.length > 1) {
-            if (args[args.length - 1] instanceof CharSequence) {
-                len = args.length;
-            } else {
-                len = args.length - 1;
-            }
-        }
-        String[] items = new String[len];
-        for (int i = 0; i < len; i++) {
-            items[i] = args[i] == null ? null : args[i].toString();
-        }
-        return items;
     }
 
     @ScriptInterface
@@ -101,8 +85,8 @@ public class Dialogs {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallbackSingleChoice(selectedIndex)
                 .title(title)
-                .positiveText(R.string.ok)
-                .items((CharSequence[]) items))
+                .positiveText(R.string.text_ok)
+                .items(items))
                 .showAndGet();
     }
 
@@ -111,8 +95,8 @@ public class Dialogs {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallbackMultiChoice(ArrayUtils.box(indices))
                 .title(title)
-                .positiveText(R.string.ok)
-                .items((CharSequence[]) items))
+                .positiveText(R.string.text_ok)
+                .items(items))
                 .showAndGet();
     }
 

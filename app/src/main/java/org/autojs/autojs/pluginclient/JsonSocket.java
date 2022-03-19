@@ -112,10 +112,30 @@ abstract public class JsonSocket extends Socket {
     private void onMessageDispatch(JsonSocket jsonSocket, String str) throws IOException {
         Log.d(TAG, "Input total str: " + str);
         Log.d(TAG, "Input total length: " + str.length());
-        String header = str.substring(0, HEADER_SIZE);
-        Log.d(TAG, "Input data length: " + new Buffer(header.getBytes()).readInt32BE(0));
-        Log.d(TAG, "Input data type: " + new Buffer(header.getBytes()).readInt32BE(4));
-        String message = str.substring(HEADER_SIZE);
+
+        if (str.length() < HEADER_SIZE) {
+            Log.w(TAG, "Message with length less than HEADER_SIZE has been adopted");
+            return;
+        }
+
+        int idxDataStart = str.indexOf("{");
+
+        if (idxDataStart < 0) {
+            Log.w(TAG, "Message without data has been adopted");
+            return;
+        }
+
+        String header = str.substring(0, idxDataStart);
+
+        if (header.length() == 8) {
+            Log.d(TAG, "Input data length: " + new Buffer(header.getBytes()).readInt32BE(0));
+            Log.d(TAG, "Input data type: " + new Buffer(header.getBytes()).readInt32BE(4));
+        } else if (header.length() >= 4) {
+            Log.d(TAG, "Input data type: " + new Buffer(header.getBytes()).readInt32BE(header.length() - 4));
+        }
+
+        String message = str.substring(idxDataStart);
+
         Log.d(TAG, "Input message length: " + message.length());
         Log.d(TAG, "Input message: " + message);
 
@@ -128,22 +148,27 @@ abstract public class JsonSocket extends Socket {
     private void writeMap(String type, Map<String, ?> map) {
         JsonObject data = new JsonObject();
         for (Map.Entry<String, ?> entry : map.entrySet()) {
-            Object value = entry.getValue();
-            if (value instanceof String) {
-                data.addProperty(entry.getKey(), (String) value);
-            } else if (value instanceof Character) {
-                data.addProperty(entry.getKey(), (Character) value);
-            } else if (value instanceof Number) {
-                data.addProperty(entry.getKey(), (Number) value);
-            } else if (value instanceof Boolean) {
-                data.addProperty(entry.getKey(), (Boolean) value);
-            } else if (value instanceof JsonElement) {
-                data.add(entry.getKey(), (JsonElement) value);
-            } else {
-                throw new IllegalArgumentException("cannot put value " + value + " into json");
-            }
+            addProperty(entry, data);
         }
         writeData(type, data);
+    }
+
+    private void addProperty(Map.Entry<String, ?> entry, JsonObject data) {
+        Object value = entry.getValue();
+        String key = entry.getKey();
+        if (value instanceof String) {
+            data.addProperty(key, (String) value);
+        } else if (value instanceof Character) {
+            data.addProperty(key, (Character) value);
+        } else if (value instanceof Number) {
+            data.addProperty(key, (Number) value);
+        } else if (value instanceof Boolean) {
+            data.addProperty(key, (Boolean) value);
+        } else if (value instanceof JsonElement) {
+            data.add(key, (JsonElement) value);
+        } else {
+            throw new IllegalArgumentException("cannot put value " + value + " into json");
+        }
     }
 
     @SuppressWarnings("SameParameterValue")

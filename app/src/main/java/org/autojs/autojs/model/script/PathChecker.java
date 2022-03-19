@@ -44,17 +44,13 @@ public class PathChecker {
 
     private int checkWithStoragePermission(String path) {
         if (mContext instanceof Activity && !hasStorageReadPermission((Activity) mContext)) {
-            return com.stardust.autojs.R.string.text_no_file_rw_permission;
+            return com.stardust.autojs.R.string.text_no_storage_rw_permission;
         }
         return check(path);
     }
 
     private static boolean hasStorageReadPermission(Activity activity) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-                    activity.checkSelfPermission(READ_EXTERNAL_STORAGE) == PERMISSION_GRANTED;
-        }
-        return true;
+        return activity.checkSelfPermission(READ_EXTERNAL_STORAGE) == PERMISSION_GRANTED;
     }
 
 

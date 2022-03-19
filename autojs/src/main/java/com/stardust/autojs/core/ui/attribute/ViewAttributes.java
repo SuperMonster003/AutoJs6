@@ -1,19 +1,29 @@
 package com.stardust.autojs.core.ui.attribute;
 
+import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.DRAWABLE_CACHE_QUALITIES;
+import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.IMPORTANT_FOR_ACCESSIBILITY;
+import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.LAYOUT_DIRECTIONS;
+import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.SCROLLBARS_STYLES;
+import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.SCROLL_INDICATORS;
+import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.TEXT_ALIGNMENTS;
+import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.TEXT_DIRECTIONS;
+import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.TINT_MODES;
+import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.VISIBILITY;
+
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import androidx.annotation.CallSuper;
-import androidx.core.view.ViewCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+
+import androidx.annotation.CallSuper;
+import androidx.core.view.ViewCompat;
 
 import com.stardust.autojs.core.internal.Functions;
 import com.stardust.autojs.core.ui.inflater.ResourceParser;
@@ -28,16 +38,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.DRAWABLE_CACHE_QUALITIES;
-import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.IMPORTANT_FOR_ACCESSIBILITY;
-import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.LAYOUT_DIRECTIONS;
-import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.SCROLLBARS_STYLES;
-import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.SCROLL_INDICATORS;
-import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.TEXT_ALIGNMENTS;
-import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.TEXT_DIRECTIONS;
-import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.TINT_MODES;
-import static com.stardust.autojs.core.ui.inflater.inflaters.BaseViewInflater.VISIBILITY;
 
 public class ViewAttributes {
 
@@ -55,8 +55,7 @@ public class ViewAttributes {
         void set(String value);
     }
 
-
-    protected class BaseAttribute implements Attribute {
+    protected static class BaseAttribute implements Attribute {
 
         private String mValue;
         private final AttributeSetter mAttributeSetter;
@@ -79,7 +78,6 @@ public class ViewAttributes {
 
     protected interface AttributeGetter extends Getter<String> {
     }
-
 
     protected interface AttributeSetter extends Setter<String> {
     }
@@ -104,8 +102,7 @@ public class ViewAttributes {
         }
     }
 
-
-    private Map<String, Attribute> mAttributes = new HashMap<>();
+    private final Map<String, Attribute> mAttributes = new HashMap<>();
     private final Drawables mDrawables;
     private final View mView;
     private ViewAttributeDelegate mViewAttributeDelegate;
@@ -169,7 +166,6 @@ public class ViewAttributes {
     private void init() {
         onRegisterAttrs();
     }
-
 
     @CallSuper
     protected void onRegisterAttrs() {
@@ -251,27 +247,19 @@ public class ViewAttributes {
     }
 
     protected void setForegroundTintMode(PorterDuff.Mode mode) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mView.setForegroundTintMode(mode);
-        }
+        mView.setForegroundTintMode(mode);
     }
 
     protected void setForegroundGravity(int g) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mView.setForegroundGravity(g);
-        }
+        mView.setForegroundGravity(g);
     }
 
     protected void setForeground(Drawable foreground) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mView.setForeground(foreground);
-        }
+        mView.setForeground(foreground);
     }
 
     protected void forceHasOverlappingRendering(boolean b) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            mView.forceHasOverlappingRendering(b);
-        }
+        mView.forceHasOverlappingRendering(b);
     }
 
     protected void setElevation(int e) {
@@ -288,7 +276,6 @@ public class ViewAttributes {
         }
     }
 
-
     protected float parseDimensionToPixel(String value) {
         return Dimensions.parseToPixel(mView, value);
     }
@@ -297,17 +284,12 @@ public class ViewAttributes {
         return Dimensions.parseToIntPixel(value, mView);
     }
 
-
     protected int parseDimension(String dim) {
-        switch (dim) {
-            case "wrap_content":
-                return ViewGroup.LayoutParams.WRAP_CONTENT;
-            case "fill_parent":
-            case "match_parent":
-                return ViewGroup.LayoutParams.MATCH_PARENT;
-            default:
-                return Dimensions.parseToPixel(dim, mView, (ViewGroup) mView.getParent(), true);
-        }
+        return switch (dim) {
+            case "wrap_content" -> ViewGroup.LayoutParams.WRAP_CONTENT;
+            case "fill_parent", "match_parent" -> ViewGroup.LayoutParams.MATCH_PARENT;
+            default -> Dimensions.parseToPixel(dim, mView, (ViewGroup) mView.getParent(), true);
+        };
     }
 
     protected void registerAttr(String name, Attribute attribute) {
@@ -355,11 +337,11 @@ public class ViewAttributes {
         registerAttrs(names, new MappingAttributeSetter<>(converter, applier));
     }
 
-    protected <T> void registerAttrs(String[] names, AttributeSetter setter) {
+    protected void registerAttrs(String[] names, AttributeSetter setter) {
         registerAttrs(names, new BaseAttribute(setter));
     }
 
-    protected <T> void registerAttrs(String[] names, Attribute attribute) {
+    protected void registerAttrs(String[] names, Attribute attribute) {
         for (String name : names) {
             mAttributes.put(name, attribute);
         }
@@ -369,7 +351,6 @@ public class ViewAttributes {
         mAttributes.put(name, new BaseAttribute(new MappingAttributeSetter<>(
                 this::parseDrawable, applier)));
     }
-
 
     protected void registerDrawableAttrs(String[] names, Setter<Drawable> applier) {
         registerAttrs(names, new BaseAttribute(new MappingAttributeSetter<>(
@@ -392,7 +373,6 @@ public class ViewAttributes {
         registerAttr(name, Boolean::parseBoolean, applier);
     }
 
-
     protected Drawable parseDrawable(String value) {
         return mDrawables.parse(mView, value);
     }
@@ -409,42 +389,35 @@ public class ViewAttributes {
     }
 
     protected void setMargin(String  margin) {
-        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
+        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
             int[] pixels = Dimensions.parseToIntPixelArray(getView(), margin);
             params.setMargins(pixels[0], pixels[1], pixels[2], pixels[3]);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                params.setMarginStart(pixels[0]);
-                params.setMarginEnd(pixels[2]);
-            }
+            params.setMarginStart(pixels[0]);
+            params.setMarginEnd(pixels[2]);
             getView().setLayoutParams(params);
         }
     }
 
     protected void setMarginLeft(int margin) {
-        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
+        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
             params.leftMargin = margin;
         }
     }
 
     protected void setMarginRight(int margin) {
-        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
+        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
             params.rightMargin = margin;
         }
     }
 
     protected void setMarginTop(int margin) {
-        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
+        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
             params.topMargin = margin;
         }
     }
 
     protected void setMarginBottom(int margin) {
-        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
+        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
             params.bottomMargin = margin;
 
 
@@ -452,15 +425,13 @@ public class ViewAttributes {
     }
 
     protected void setMarginStart(int margin) {
-        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
+        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
             params.setMarginStart(margin);
         }
     }
 
     protected void setMarginEnd(int margin) {
-        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mView.getLayoutParams();
+        if (mView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams params) {
             params.setMarginEnd(margin);
         }
     }
@@ -474,26 +445,21 @@ public class ViewAttributes {
         mView.setPadding(padding, mView.getPaddingTop(), mView.getPaddingRight(), mView.getPaddingBottom());
     }
 
-
     protected void setPaddingRight(int padding) {
         mView.setPadding(mView.getPaddingLeft(), mView.getPaddingTop(), padding, mView.getPaddingBottom());
     }
-
 
     protected void setPaddingTop(int padding) {
         mView.setPadding(mView.getPaddingLeft(), padding, mView.getPaddingRight(), mView.getPaddingBottom());
     }
 
-
     protected void setPaddingStart(int padding) {
         mView.setPaddingRelative(padding, mView.getPaddingTop(), mView.getPaddingEnd(), mView.getPaddingBottom());
     }
 
-
     protected void setPaddingEnd(int padding) {
         mView.setPaddingRelative(mView.getPaddingStart(), mView.getPaddingTop(), padding, mView.getPaddingBottom());
     }
-
 
     protected void setPaddingBottom(int padding) {
         mView.setPadding(mView.getPaddingLeft(), mView.getPaddingTop(), mView.getPaddingRight(), padding);
@@ -504,9 +470,7 @@ public class ViewAttributes {
     }
 
     protected void setContextClickable(boolean clickable) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mView.setContextClickable(clickable);
-        }
+        mView.setContextClickable(clickable);
 
     }
 
@@ -546,13 +510,11 @@ public class ViewAttributes {
         }
     }
 
-
     protected void setWidth(int width) {
         ViewGroup.LayoutParams layoutParams = mView.getLayoutParams();
         layoutParams.width = width;
         mView.setLayoutParams(layoutParams);
     }
-
 
     protected void setHeight(int height) {
         ViewGroup.LayoutParams layoutParams = mView.getLayoutParams();

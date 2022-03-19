@@ -10,6 +10,8 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.stardust.autojs.script.JavaScriptSource;
 import com.stardust.pio.PFiles;
@@ -36,12 +38,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
  * Created by Stardust on 2017/9/28.
  */
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 @SuppressLint("CheckResult")
 public class EditorMenu {
 
-    private EditorView mEditorView;
-    private Context mContext;
-    private CodeEditor mEditor;
+    private final EditorView mEditorView;
+    private final Context mContext;
+    private final CodeEditor mEditor;
 
     public EditorMenu(EditorView editorView) {
         mEditorView = editorView;
@@ -50,96 +53,98 @@ public class EditorMenu {
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_log:
-                showLog();
-                return true;
-            case R.id.action_force_stop:
-                forceStop();
-                return true;
-            default:
-                if (onEditOptionsSelected(item)) {
-                    return true;
-                }
-                if (onJumpOptionsSelected(item)) {
-                    return true;
-                }
-                if (onMoreOptionsSelected(item)) {
-                    return true;
-                }
-                if (onDebugOptionsSelected(item)) {
-                    return true;
-                }
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_log) {
+            showLog();
+            return true;
         }
-        return false;
+        if (itemId == R.id.action_force_stop) {
+            forceStop();
+            return true;
+        }
+        return onEditOptionsSelected(item)
+                || onJumpOptionsSelected(item)
+                || onMoreOptionsSelected(item)
+                || onDebugOptionsSelected(item);
     }
 
     private boolean onDebugOptionsSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_breakpoint:
-                mEditor.addOrRemoveBreakpointAtCurrentLine();
-                return true;
-            case R.id.action_launch_debugger:
-                new NotAskAgainDialog.Builder(mEditorView.getContext(), "editor.debug.long_click_hint")
-                        .title(R.string.text_alert)
-                        .content(R.string.hint_long_click_run_to_debug)
-                        .positiveText(R.string.ok)
-                        .show();
-                mEditorView.debug();
-                return true;
-            case R.id.action_remove_all_breakpoints:
-                mEditor.removeAllBreakpoints();
-                return true;
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_breakpoint) {
+            mEditor.addOrRemoveBreakpointAtCurrentLine();
+            return true;
+        }
+        if (itemId == R.id.action_launch_debugger) {
+            new NotAskAgainDialog.Builder(mEditorView.getContext(), "editor.debug.long_click_hint")
+                    .title(R.string.text_prompt)
+                    .content(R.string.hint_long_click_run_to_debug)
+                    .positiveText(R.string.text_ok)
+                    .show();
+            mEditorView.debug();
+            return true;
+        }
+        if (itemId == R.id.action_remove_all_breakpoints) {
+            mEditor.removeAllBreakpoints();
+            return true;
         }
         return false;
     }
 
     private boolean onJumpOptionsSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_jump_to_line:
-                jumpToLine();
-                return true;
-            case R.id.action_jump_to_start:
-                mEditor.jumpToStart();
-                return true;
-            case R.id.action_jump_to_end:
-                mEditor.jumpToEnd();
-                return true;
-            case R.id.action_jump_to_line_start:
-                mEditor.jumpToLineStart();
-                return true;
-            case R.id.action_jump_to_line_end:
-                mEditor.jumpToLineEnd();
-                return true;
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_jump_to_line) {
+            jumpToLine();
+            return true;
+        }
+        if (itemId == R.id.action_jump_to_start) {
+            mEditor.jumpToStart();
+            return true;
+        }
+        if (itemId == R.id.action_jump_to_end) {
+            mEditor.jumpToEnd();
+            return true;
+        }
+        if (itemId == R.id.action_jump_to_line_start) {
+            mEditor.jumpToLineStart();
+            return true;
+        }
+        if (itemId == R.id.action_jump_to_line_end) {
+            mEditor.jumpToLineEnd();
+            return true;
         }
         return false;
     }
 
 
     private boolean onMoreOptionsSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_console:
-                showConsole();
-                return true;
-            case R.id.action_import_java_class:
-                importJavaPackageOrClass();
-                return true;
-            case R.id.action_editor_text_size:
-                mEditorView.selectTextSize();
-                return true;
-            case R.id.action_editor_theme:
-                mEditorView.selectEditorTheme();
-                return true;
-            case R.id.action_open_by_other_apps:
-                openByOtherApps();
-                return true;
-            case R.id.action_info:
-                showInfo();
-                return true;
-            case R.id.action_build_apk:
-                startBuildApkActivity();
-                return true;
-
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_console) {
+            showConsole();
+            return true;
+        }
+        if (itemId == R.id.action_import_java_class) {
+            importJavaPackageOrClass();
+            return true;
+        }
+        if (itemId == R.id.action_editor_text_size) {
+            mEditorView.selectTextSize();
+            return true;
+        }
+        if (itemId == R.id.action_editor_theme) {
+            mEditorView.selectEditorTheme();
+            return true;
+        }
+        if (itemId == R.id.action_open_by_other_apps) {
+            openByOtherApps();
+            return true;
+        }
+        if (itemId == R.id.action_info) {
+            showInfo();
+            return true;
+        }
+        if (itemId == R.id.action_build_apk) {
+            startBuildApkActivity();
+            return true;
         }
         return false;
     }
@@ -151,7 +156,7 @@ public class EditorMenu {
                         new ClassSearchDialogBuilder(mContext)
                                 .setQuery(s)
                                 .itemClick((dialog, item, pos) -> showClassSearchingItem(dialog, item))
-                                .title(R.string.text_search_java_class)
+                                .title(R.string.text_find_java_classes)
                                 .show()
                 );
     }
@@ -198,25 +203,30 @@ public class EditorMenu {
 
 
     private boolean onEditOptionsSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_find_or_replace:
-                findOrReplace();
-                return true;
-            case R.id.action_copy_all:
-                copyAll();
-                return true;
-            case R.id.action_copy_line:
-                copyLine();
-                return true;
-            case R.id.action_delete_line:
-                deleteLine();
-                return true;
-            case R.id.action_clear:
-                mEditor.setText("");
-                return true;
-            case R.id.action_beautify:
-                beautifyCode();
-                return true;
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_find_or_replace) {
+            findOrReplace();
+            return true;
+        }
+        if (itemId == R.id.action_copy_all) {
+            copyAll();
+            return true;
+        }
+        if (itemId == R.id.action_copy_line) {
+            copyLine();
+            return true;
+        }
+        if (itemId == R.id.action_delete_line) {
+            deleteLine();
+            return true;
+        }
+        if (itemId == R.id.action_clear) {
+            mEditor.setText("");
+            return true;
+        }
+        if (itemId == R.id.action_beautify) {
+            beautifyCode();
+            return true;
         }
         return false;
     }
@@ -273,7 +283,15 @@ public class EditorMenu {
     }
 
     private void paste() {
-        mEditor.insert(ClipboardUtil.getClip(mContext).toString());
+        CharSequence clip = getClip();
+        if (clip != null) {
+            mEditor.insert(clip.toString());
+        }
+    }
+
+    @Nullable
+    private CharSequence getClip() {
+        return ClipboardUtil.getClip(mContext);
     }
 
     private void findOrReplace() {

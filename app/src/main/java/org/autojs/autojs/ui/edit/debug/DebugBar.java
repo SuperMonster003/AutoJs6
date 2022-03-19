@@ -85,7 +85,7 @@ public class DebugBar extends FrameLayout {
 
     private void showNewWatchingVariableDialog() {
         new ThemeColorMaterialDialogBuilder(getContext())
-                .title(R.string.text_new_watching_variable)
+                .title(R.string.text_new_watching_variables)
                 .input(getResources().getString(R.string.text_variable_or_expr), "", (dialog, input) -> {
                     if (TextUtils.isEmpty(input)) {
                         return;
@@ -119,7 +119,7 @@ public class DebugBar extends FrameLayout {
         new ThemeColorMaterialDialogBuilder(getContext())
                 .title(variable.getDisplayName())
                 .content(variable.getValue())
-                .positiveText(R.string.ok)
+                .positiveText(R.string.text_ok)
                 .negativeText(R.string.text_copy_value)
                 .autoDismiss(true)
                 .onNegative((dialog, which) -> ClipboardUtil.setClip(getContext(), variable.getValue()))

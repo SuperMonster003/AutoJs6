@@ -18,6 +18,7 @@ import com.stardust.util.ViewUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -98,7 +99,7 @@ public class LayoutBoundsView extends View {
             }
             canvas.clipRect(mTouchedNodeBounds, Region.Op.DIFFERENCE);
         }
-        canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mFillingPaint);
+        canvas.drawRect(0, 0, getWidth(), getHeight(), mFillingPaint);
         if (mTouchedNode != null) {
             canvas.restore();
         }
@@ -166,9 +167,7 @@ public class LayoutBoundsView extends View {
         if (list.isEmpty()) {
             return null;
         }
-        return Collections.min(list, (o1, o2) ->
-                o1.getBoundsInScreen().width() * o1.getBoundsInScreen().height() -
-                        o2.getBoundsInScreen().width() * o2.getBoundsInScreen().height());
+        return Collections.min(list, Comparator.comparingInt(o -> o.getBoundsInScreen().width() * o.getBoundsInScreen().height()));
     }
 
 

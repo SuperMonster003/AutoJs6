@@ -1,10 +1,15 @@
 package com.stardust.autojs.core.pref
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.stardust.app.GlobalAppContext
+import com.stardust.autojs.R
 
 object Pref {
     private val preferences = PreferenceManager.getDefaultSharedPreferences(GlobalAppContext.get())
+
+    private val DISPOSABLE_BOOLEAN = GlobalAppContext.get().getSharedPreferences("DISPOSABLE_BOOLEAN", Context.MODE_PRIVATE)
 
     val isStableModeEnabled: Boolean
         get() {
@@ -15,4 +20,33 @@ object Pref {
         get() {
             return preferences.getBoolean("key_gesture_observing", false)
         }
+
+    fun isFirstGoToAccessibilitySetting(): Boolean {
+        return getDisposableBoolean("isFirstGoToAccessibilitySetting", false)
+    }
+
+    @Suppress("SameParameterValue")
+    private fun getDisposableBoolean(key: String, defaultValue: Boolean): Boolean {
+        val b: Boolean = DISPOSABLE_BOOLEAN.getBoolean(key, defaultValue)
+        if (b == defaultValue) {
+            DISPOSABLE_BOOLEAN.edit().putBoolean(key, !defaultValue).apply()
+        }
+        return b
+    }
+
+    fun shouldEnableAccessibilityServiceByRoot(): Boolean {
+        return def().getBoolean(getString(R.string.key_enable_a11y_service_with_root_access), true)
+    }
+
+    fun shouldEnableAccessibilityServiceBySecureSettings(): Boolean {
+        return def().getBoolean(getString(R.string.key_enable_a11y_service_with_secure_settings), true)
+    }
+
+    private fun def(): SharedPreferences {
+        return PreferenceManager.getDefaultSharedPreferences(GlobalAppContext.get())
+    }
+
+    private fun getString(id: Int): String {
+        return GlobalAppContext.getString(id)
+    }
 }

@@ -75,6 +75,9 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
 
     public boolean ignoresUnsupportedSensor = false;
 
+    @SuppressWarnings("InstantiationOfUtilityClass")
+    public final Delay delay = new Delay();
+
     private final Set<SensorEventEmitter> mSensorEventEmitters = new HashSet<>();
     private final SensorManager mSensorManager;
     private final ScriptBridges mScriptBridges;

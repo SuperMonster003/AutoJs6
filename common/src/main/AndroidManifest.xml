@@ -3,6 +3,6 @@
 
     <application
             android:allowBackup="true"
-            android:label="@string/app_name"
+            android:label="common"
             android:supportsRtl="true" />
 </manifest>

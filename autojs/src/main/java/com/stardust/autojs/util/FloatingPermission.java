@@ -3,11 +3,9 @@ package com.stardust.autojs.util;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
-import androidx.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -25,8 +23,6 @@ import ezy.assist.compat.SettingsCompat;
 
 public class FloatingPermission {
 
-
-    private static final int OP_SYSTEM_ALERT_WINDOW = 24;
     private static Method sCheckOp;
 
     static {
@@ -71,8 +67,7 @@ public class FloatingPermission {
 
     public static void manageDrawOverlays(Context context) {
         try {
-            if (RomUtil.isMiui() && TextUtils.equals("V10", RomUtil.getVersion())
-                    && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (RomUtil.isMiui() && TextUtils.equals("V10", RomUtil.getVersion())) {
                 manageDrawOverlaysForAndroidM(context);
             } else {
                 SettingsCompat.manageDrawOverlays(context);
@@ -82,7 +77,6 @@ public class FloatingPermission {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public static void manageDrawOverlaysForAndroidM(Context context) {
         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
         intent.setData(Uri.parse("package:" + context.getPackageName()));
@@ -95,7 +89,7 @@ public class FloatingPermission {
 
     private static boolean checkOp(Context context, int op) {
         if (sCheckOp == null) {
-            return SettingsCompat.canDrawOverlays(context);
+            return canDrawOverlays(context);
         }
         try {
             return (boolean) sCheckOp.invoke(null, context, op);

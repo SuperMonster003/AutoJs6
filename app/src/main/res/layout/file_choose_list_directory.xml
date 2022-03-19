@@ -49,7 +49,7 @@
             android:paddingRight="16dp"
             android:textColor="#484C4F"
             android:textSize="14sp"
-            tools:text="正在运行的服务"/>
+            tools:text="@string/text_sample_name"/>
 
 
     </LinearLayout>

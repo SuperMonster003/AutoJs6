@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_not_showing_main_activity">Run script directly without showing main activity</string>
+    <string name="text_a11y_service_enabled_but_not_running">Accessibility service enabled but not running (Re-enable or reboot the device)</string>
+    <string name="text_not_showing_main_activity">Not showing main activity</string>
+    <string name="text_settings">Settings</string>
+</resources>

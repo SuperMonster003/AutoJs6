@@ -14,7 +14,7 @@ public class ProgressDialog {
     private MaterialDialog mDialog;
 
     public ProgressDialog(Context context) {
-        this(context, R.string.text_on_progress);
+        this(context, R.string.text_in_progress);
     }
 
     public ProgressDialog(Context context, int resId) {

@@ -97,10 +97,10 @@ android {
             reset()
 
             // Specifies a list of ABIs that Gradle should create APKs for.
-            include 'x86', 'armeabi-v7a'
+            include 'x86', 'armeabi-v7a', 'arm64-v8a', 'x86_64'
 
             // Specifies that we do not want to also generate a universal APK that includes all ABIs.
-            universalApk false
+            universalApk true
         }
     }
     productFlavors {
@@ -110,6 +110,17 @@ android {
         }
     }
     applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def aj = "AutoJs6"
+            def ver = versionName.replaceAll(/\s/, "-")
+
+            // FIXME by SuperMonster003 as of Mar 19, 2022.
+            //  ! Interface com.android.build.OutputFile is deprecated.
+            //  ! Another way of getting ABI is needed.
+            def abi = getFilter(com.android.build.OutputFile.ABI)
+
+            output.outputFileName = "${aj}-v${ver}-${abi ? "${abi}" : "universal"}.apk".toLowerCase()
+        }
         variant.mergeAssetsProvider.configure {
             doLast {
                 delete(fileTree(dir: outputDir, includes: ['declarations/**']))
@@ -130,7 +141,7 @@ dependencies {
     debugImplementation "com.squareup.leakcanary:leakcanary-android:${versions.leakcanary}"
 
     // Kotlin
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0-native-mt'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0'
 
     // Android Annotations
     kapt "org.androidannotations:androidannotations:${versions.annotations}"
@@ -174,11 +185,7 @@ dependencies {
     // Expandable RecyclerView
     implementation 'com.thoughtbot:expandablerecyclerview:1.3'
 
-    implementation 'com.github.hyb1996:Auto.js-ApkBuilder:1.0.1'
-
-    // RxJava
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'com.github.hyb1996:Auto.js-ApkBuilder:1.0.3'
 
     // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'

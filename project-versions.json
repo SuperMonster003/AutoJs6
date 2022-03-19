@@ -1,8 +1,8 @@
 {
-  "appVersionCode": 718,
-  "appVersionName": "6.0.2",
-  "appSinceDate": "Feb 5, 2022",
+  "appVersionCode": 749,
+  "appVersionName": "6.0.3",
+  "appSinceDate": "Mar 19, 2022",
   "target": 28,
   "mini": 24,
-  "compile": 31
+  "compile": 32
 }

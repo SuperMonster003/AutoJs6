@@ -44,11 +44,12 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${versions.kotlin}"
 
     // Android supports
-    api 'com.google.android.material:material:1.6.0-alpha02'
+    api 'com.google.android.material:material:1.5.0'
 
     // Material Dialogs
+    // noinspection GradleDependency
     api "com.afollestad.material-dialogs:core:${versions.materialDialogs}"
-    api "com.afollestad.material-dialogs:commons:${versions.materialDialogs}"
+    api "com.afollestad.material-dialogs:commons:0.9.6.0"
 
     // Glide
     api "com.github.bumptech.glide:glide:${versions.glide}"
@@ -71,6 +72,10 @@ dependencies {
     // JDeferred
     api 'org.jdeferred:jdeferred-android-aar:1.2.6'
 
+    // Rx
+    api 'io.reactivex.rxjava2:rxjava:2.2.21'
+    api 'io.reactivex.rxjava2:rxandroid:2.1.1@aar'
+
     // Auto.js
     api 'com.github.hyb1996:settingscompat:1.1.5'
     api 'com.github.hyb1996:EnhancedFloaty:0.31'
@@ -79,8 +84,11 @@ dependencies {
     api 'androidx.appcompat:appcompat:1.4.1'
     api project(':libs:androidx.appcompat-1.0.2')
 
+    // LocaleHelper
+    api project(':libs:com.zeugmasolutions.localehelper-1.5.1')
+
     // OpenCV
-    api project(':libs:org.opencv-4.5.4')
+    api project(':libs:org.opencv-4.5.5')
 
     // Rhino
     api project(':libs:org.mozilla.rhino-1.7.14')

@@ -1,20 +1,23 @@
 package org.autojs.autojs.ui.edit;
 
+import static org.autojs.autojs.ui.edit.EditorView.EXTRA_CONTENT;
+import static org.autojs.autojs.ui.edit.EditorView.EXTRA_NAME;
+import static org.autojs.autojs.ui.edit.EditorView.EXTRA_PATH;
+import static org.autojs.autojs.ui.edit.EditorView.EXTRA_READ_ONLY;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stardust.app.OnActivityResultDelegate;
 import com.stardust.autojs.core.permission.OnRequestPermissionsResultCallback;
@@ -23,15 +26,14 @@ import com.stardust.autojs.core.permission.RequestPermissionCallbacks;
 import com.stardust.autojs.execution.ScriptExecution;
 import com.stardust.pio.PFiles;
 
-import org.autojs.autojs.R;
-import org.autojs.autojs.storage.file.TmpScriptFiles;
-import org.autojs.autojs.tool.Observers;
-import org.autojs.autojs.ui.BaseActivity;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
-
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.autojs.autojs.R;
+import org.autojs.autojs.storage.file.TmpScriptFiles;
+import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
+import org.autojs.autojs.tool.Observers;
+import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.main.MainActivity_;
 
 import java.io.File;
@@ -41,25 +43,20 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-import static org.autojs.autojs.ui.edit.EditorView.EXTRA_CONTENT;
-import static org.autojs.autojs.ui.edit.EditorView.EXTRA_NAME;
-import static org.autojs.autojs.ui.edit.EditorView.EXTRA_PATH;
-import static org.autojs.autojs.ui.edit.EditorView.EXTRA_READ_ONLY;
-
 /**
  * Created by Stardust on 2017/1/29.
  */
 @EActivity(R.layout.activity_edit)
 public class EditActivity extends BaseActivity implements OnActivityResultDelegate.DelegateHost, PermissionRequestProxyActivity {
 
-    private OnActivityResultDelegate.Mediator mMediator = new OnActivityResultDelegate.Mediator();
+    private final OnActivityResultDelegate.Mediator mMediator = new OnActivityResultDelegate.Mediator();
     private static final String LOG_TAG = "EditActivity";
 
     @ViewById(R.id.editor_view)
     EditorView mEditorView;
 
     private EditorMenu mEditorMenu;
-    private RequestPermissionCallbacks mRequestPermissionCallbacks = new RequestPermissionCallbacks();
+    private final RequestPermissionCallbacks mRequestPermissionCallbacks = new RequestPermissionCallbacks();
     private boolean mNewTask;
 
     public static void editFile(Context context, String path, boolean newTask) {
@@ -98,6 +95,7 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
         mNewTask = (getIntent().getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) != 0;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     @AfterViews
     void setUpViews() {
@@ -207,11 +205,7 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
     }
 
     private void finishAndRemoveFromRecents() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            finishAndRemoveTask();
-        } else {
-            super.finish();
-        }
+        finishAndRemoveTask();
         if (mNewTask) {
             startActivity(new Intent(this, MainActivity_.class));
         }
@@ -219,7 +213,7 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
 
     private void showExitConfirmDialog() {
         new ThemeColorMaterialDialogBuilder(this)
-                .title(R.string.text_alert)
+                .title(R.string.text_prompt)
                 .content(R.string.edit_exit_without_save_warn)
                 .positiveText(R.string.text_cancel)
                 .negativeText(R.string.text_save_and_exit)
@@ -244,13 +238,14 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
         return mMediator;
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mMediator.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         if (!mEditorView.isTextChanged()) {
             return;
@@ -267,6 +262,8 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SuppressLint("CheckResult")
     private File saveToTmpFile(String text) {
         try {
             File tmp = TmpScriptFiles.create(this);
@@ -280,6 +277,8 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SuppressLint("CheckResult")
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);

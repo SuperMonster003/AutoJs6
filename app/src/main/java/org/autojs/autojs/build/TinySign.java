@@ -2,6 +2,8 @@ package org.autojs.autojs.build;
 
 import android.util.Base64;
 
+import com.stardust.autojs.apkbuilder.util.StreamUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilterOutputStream;
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestOutputStream;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
@@ -17,36 +20,34 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 public class TinySign {
     public TinySign() {
     }
 
-    private static byte[] dBase64(String data) throws UnsupportedEncodingException {
-        return Base64.decode(data.getBytes("UTF-8"), Base64.NO_WRAP);
+    private static byte[] dBase64(String data) {
+        return Base64.decode(data.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
     }
 
     private static void doDir(String prefix, File dir, ZipOutputStream zos, DigestOutputStream dos, Manifest m) throws IOException {
         zos.putNextEntry(new ZipEntry(prefix));
         zos.closeEntry();
         File[] arr$ = dir.listFiles();
-        int len$ = arr$.length;
 
-        for(int i$ = 0; i$ < len$; ++i$) {
-            File f = arr$[i$];
-            if (f.isFile()) {
-                doFile(prefix + f.getName(), f, zos, dos, m);
-            } else {
-                doDir(prefix + f.getName() + "/", f, zos, dos, m);
+        if (arr$ != null) {
+            for (File f : arr$) {
+                if (f.isFile()) {
+                    doFile(prefix + f.getName(), f, zos, dos, m);
+                } else {
+                    doDir(prefix + f.getName() + "/", f, zos, dos, m);
+                }
             }
         }
 
@@ -54,13 +55,13 @@ public class TinySign {
 
     private static void doFile(String name, File f, ZipOutputStream zos, DigestOutputStream dos, Manifest m) throws IOException {
         zos.putNextEntry(new ZipEntry(name));
-        FileInputStream fis = FileUtils.openInputStream(f);
-        IOUtils.copy(fis, dos);
-        IOUtils.closeQuietly(fis);
-        byte[] digets = dos.getMessageDigest().digest();
+        FileInputStream fis = new FileInputStream(f);
+        StreamUtils.write(fis, dos);
+        fis.close();
+        byte[] digest = dos.getMessageDigest().digest();
         zos.closeEntry();
         Attributes attr = new Attributes();
-        attr.putValue("SHA1-Digest", eBase64(digets));
+        attr.putValue("SHA1-Digest", eBase64(digest));
         m.getEntries().put(name, attr);
     }
 
@@ -82,15 +83,11 @@ public class TinySign {
         }, md), true, "UTF-8");
         Manifest sf = new Manifest();
         Map<String, Attributes> entries = manifest.getEntries();
-        Iterator<Entry<String, Attributes>> iterator = entries.entrySet().iterator();
 
-        while(iterator.hasNext()) {
-            Entry<String, Attributes> entry = iterator.next();
+        for (Entry<String, Attributes> entry : entries.entrySet()) {
             print.print("Name: " + entry.getKey() + "\r\n");
-            Iterator<Entry<Object, Object>> iter = entry.getValue().entrySet().iterator();
 
-            while(iter.hasNext()) {
-                Entry<Object, Object> att = iter.next();
+            for (Entry<Object, Object> att : entry.getValue().entrySet()) {
                 print.print(att.getKey() + ": " + att.getValue() + "\r\n");
             }
 
@@ -104,8 +101,14 @@ public class TinySign {
         return sf;
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
+    private static class Constants {
+        static String privateKey = "MIIBVgIBADANBgkqhkiG9w0BAQEFAASCAUAwggE8AgEAAkEAoiZSqWnFDHA5sXKoDiUUO9JuL7cm/2dCck5MKumVvv+WfSg0jsovnywsFN0pifmdRSLmOdUkh0d0J+tOnSgtsQIDAQABAkEAihag5u3Qhds9BsViIUmqhZebhr8vUuqZR8cuTo1GnbSoOHIPbAgD3J8TDbC/CVqae8NrgwLp325Pem1Tuof/0QIhAN1hqft1K307bsljgw3iYKopGVZBHRXsjRnNL4edV9QrAiEAu4F+XtS1wohGLz5QtfuMFsQNo4l31mCjt6WpBDmSi5MCIQCB++YijxmJ3mueM5+vd0vqnVcTHghF5y6yB5fwuKHpIQIgInnS1Hjj2prX3MPmby+LOHxfzZvvDtnCAHhTNVWonkUCIQCvV8l+SpL6Vh1nQ/2EKFJo2dbZB3wKG/BEYsFkPFbn9w==";
+        static String sigPrefix = "MIIB5gYJKoZIhvcNAQcCoIIB1zCCAdMCAQExCzAJBgUrDgMCGgUAMAsGCSqGSIb3DQEHAaCCATYwggEyMIHdoAMCAQICBCunMokwDQYJKoZIhvcNAQELBQAwDzENMAsGA1UEAxMEVGVzdDAeFw0xMjA0MjIwODQ1NDdaFw0xMzA0MjIwODQ1NDdaMA8xDTALBgNVBAMTBFRlc3QwXDANBgkqhkiG9w0BAQEFAANLADBIAkEAoiZSqWnFDHA5sXKoDiUUO9JuL7cm/2dCck5MKumVvv+WfSg0jsovnywsFN0pifmdRSLmOdUkh0d0J+tOnSgtsQIDAQABoyEwHzAdBgNVHQ4EFgQUVL2yOinUwpARE1tOPxc1bf4WrTgwDQYJKoZIhvcNAQELBQADQQAnj/eZwhqwb2tgSYNvgRo5bBNNCpJbQ4alEeP/MLSIWf2nZpAix8T3oS9X2affQtAgctPATcKQaiH2B4L7FKlVMXoweAIBATAXMA8xDTALBgNVBAMTBFRlc3QCBCunMokwCQYFKw4DAhoFADANBgkqhkiG9w0BAQEFAARA";
+    }
+
     private static Signature instanceSignature() throws Exception {
-        byte[] data = dBase64("MIIBVgIBADANBgkqhkiG9w0BAQEFAASCAUAwggE8AgEAAkEAoiZSqWnFDHA5sXKoDiUUO9JuL7cm/2dCck5MKumVvv+WfSg0jsovnywsFN0pifmdRSLmOdUkh0d0J+tOnSgtsQIDAQABAkEAihag5u3Qhds9BsViIUmqhZebhr8vUuqZR8cuTo1GnbSoOHIPbAgD3J8TDbC/CVqae8NrgwLp325Pem1Tuof/0QIhAN1hqft1K307bsljgw3iYKopGVZBHRXsjRnNL4edV9QrAiEAu4F+XtS1wohGLz5QtfuMFsQNo4l31mCjt6WpBDmSi5MCIQCB++YijxmJ3mueM5+vd0vqnVcTHghF5y6yB5fwuKHpIQIgInnS1Hjj2prX3MPmby+LOHxfzZvvDtnCAHhTNVWonkUCIQCvV8l+SpL6Vh1nQ/2EKFJo2dbZB3wKG/BEYsFkPFbn9w==");
+        byte[] data = dBase64(Constants.privateKey);
         KeyFactory rSAKeyFactory = KeyFactory.getInstance("RSA");
         PrivateKey privateKey = rSAKeyFactory.generatePrivate(new PKCS8EncodedKeySpec(data));
         Signature signature = Signature.getInstance("SHA1withRSA");
@@ -122,7 +125,7 @@ public class TinySign {
         Manifest sf = generateSF(manifest);
         byte[] sign = writeSF(zos, sf, sha1Manifest);
         writeRSA(zos, sign);
-        IOUtils.closeQuietly(zos);
+        zos.close();
     }
 
     private static String writeMF(File dir, Manifest manifest, ZipOutputStream zos) throws NoSuchAlgorithmException, IOException {
@@ -140,7 +143,7 @@ public class TinySign {
 
     private static void writeRSA(ZipOutputStream zos, byte[] sign) throws IOException {
         zos.putNextEntry(new ZipEntry("META-INF/CERT.RSA"));
-        zos.write(dBase64("MIIB5gYJKoZIhvcNAQcCoIIB1zCCAdMCAQExCzAJBgUrDgMCGgUAMAsGCSqGSIb3DQEHAaCCATYwggEyMIHdoAMCAQICBCunMokwDQYJKoZIhvcNAQELBQAwDzENMAsGA1UEAxMEVGVzdDAeFw0xMjA0MjIwODQ1NDdaFw0xMzA0MjIwODQ1NDdaMA8xDTALBgNVBAMTBFRlc3QwXDANBgkqhkiG9w0BAQEFAANLADBIAkEAoiZSqWnFDHA5sXKoDiUUO9JuL7cm/2dCck5MKumVvv+WfSg0jsovnywsFN0pifmdRSLmOdUkh0d0J+tOnSgtsQIDAQABoyEwHzAdBgNVHQ4EFgQUVL2yOinUwpARE1tOPxc1bf4WrTgwDQYJKoZIhvcNAQELBQADQQAnj/eZwhqwb2tgSYNvgRo5bBNNCpJbQ4alEeP/MLSIWf2nZpAix8T3oS9X2affQtAgctPATcKQaiH2B4L7FKlVMXoweAIBATAXMA8xDTALBgNVBAMTBFRlc3QCBCunMokwCQYFKw4DAhoFADANBgkqhkiG9w0BAQEFAARA"));
+        zos.write(dBase64(Constants.sigPrefix));
         zos.write(sign);
         zos.closeEntry();
     }
@@ -149,10 +152,10 @@ public class TinySign {
         Signature signature = instanceSignature();
         zos.putNextEntry(new ZipEntry("META-INF/CERT.SF"));
         TinySign.SignatureOutputStream out = new TinySign.SignatureOutputStream(zos, signature);
-        out.write("Signature-Version: 1.0\r\n".getBytes("UTF-8"));
-        out.write(("Created-By: tiny-sign-" + TinySign.class.getPackage().getImplementationVersion() + "\r\n").getBytes("UTF-8"));
-        out.write("SHA1-Digest-Manifest: ".getBytes("UTF-8"));
-        out.write(sha1Manifest.getBytes("UTF-8"));
+        out.write("Signature-Version: 1.0\r\n".getBytes(StandardCharsets.UTF_8));
+        out.write(("Created-By: tiny-sign-" + Objects.requireNonNull(TinySign.class.getPackage()).getImplementationVersion() + "\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write("SHA1-Digest-Manifest: ".getBytes(StandardCharsets.UTF_8));
+        out.write(sha1Manifest.getBytes(StandardCharsets.UTF_8));
         out.write(13);
         out.write(10);
         sf.write(out);
@@ -160,17 +163,17 @@ public class TinySign {
         return signature.sign();
     }
 
-    private static void zipAndSha1(File dir, ZipOutputStream zos, DigestOutputStream dos, Manifest m) throws NoSuchAlgorithmException, IOException {
+    private static void zipAndSha1(File dir, ZipOutputStream zos, DigestOutputStream dos, Manifest m) throws IOException {
         File[] arr$ = dir.listFiles();
-        int len$ = arr$.length;
 
-        for(int i$ = 0; i$ < len$; ++i$) {
-            File f = arr$[i$];
-            if (!f.getName().startsWith("META-INF")) {
-                if (f.isFile()) {
-                    doFile(f.getName(), f, zos, dos, m);
-                } else {
-                    doDir(f.getName() + "/", f, zos, dos, m);
+        if (arr$ != null) {
+            for (File f : arr$) {
+                if (!f.getName().startsWith("META-INF")) {
+                    if (f.isFile()) {
+                        doFile(f.getName(), f, zos, dos, m);
+                    } else {
+                        doDir(f.getName() + "/", f, zos, dos, m);
+                    }
                 }
             }
         }
@@ -178,7 +181,7 @@ public class TinySign {
     }
 
     private static class SignatureOutputStream extends FilterOutputStream {
-        private Signature mSignature;
+        private final Signature mSignature;
 
         public SignatureOutputStream(OutputStream out, Signature sig) {
             super(out);
@@ -207,7 +210,7 @@ public class TinySign {
 
         public void write(int b) throws IOException {
             try {
-                this.mSignature.update((byte)b);
+                this.mSignature.update((byte) b);
             } catch (SignatureException var3) {
                 throw new IOException("SignatureException: " + var3);
             }

@@ -2,24 +2,20 @@ package com.stardust.auojs.inrt
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager.PERMISSION_DENIED
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
+import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.TextView
-import android.widget.Toast
-
 import com.stardust.auojs.inrt.autojs.AutoJs
 import com.stardust.auojs.inrt.launch.GlobalProjectLauncher
-
-import java.util.ArrayList
-
-import android.content.pm.PackageManager.PERMISSION_DENIED
-import android.os.Looper
 
 /**
  * Created by Stardust on 2018/2/2.
@@ -61,6 +57,7 @@ class SplashActivity : AppCompatActivity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, @NonNull permissions: Array<String>, @NonNull grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         runScript()
     }
 

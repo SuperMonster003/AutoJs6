@@ -166,7 +166,7 @@ public class DevPluginService {
     }
 
     @AnyThread
-    // FIXME by SuperMonster003 on Dec 29, 2021
+    // FIXME by SuperMonster003 as of Dec 29, 2021.
     //  ! Would print double (may be even more times) the amount of
     //  ! messages on VSCode when multi connection were established.
     public void print(String log) {

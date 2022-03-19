@@ -1,4 +1,3 @@
-module.exports = function(runtime, global){
-    var sensors = Object.create(runtime.sensors);
-    return sensors;
+module.exports = function (runtime, global) {
+    return Object.create(runtime.sensors);
 };

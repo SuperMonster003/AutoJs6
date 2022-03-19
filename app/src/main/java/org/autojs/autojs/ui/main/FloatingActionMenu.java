@@ -3,11 +3,15 @@ package org.autojs.autojs.ui.main;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+
 import androidx.annotation.AttrRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
+
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,13 +38,16 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
             R.drawable.ic_floating_action_menu_file,
             R.drawable.ic_floating_action_menu_open,
             R.drawable.ic_project};
-    private static final int[] LABELS = {R.string.text_directory, R.string.text_file, R.string.text_import, R.string.text_project};
-    private TextView[] mLabels;
+    private static final int[] LABELS = {
+            R.string.text_directory,
+            R.string.text_file,
+            R.string.text_import,
+            R.string.text_project};
     private FloatingActionButton[] mFabs;
     private View[] mFabContainers;
     private boolean mExpanded = false;
-    private int mInterval = 30;
-    private int mDuration = 250;
+    private final int mInterval = 30;
+    private final int mDuration = 250;
     private final Interpolator mInterpolator = new FastOutSlowInInterpolator();
     private final PublishSubject<Boolean> mState = PublishSubject.create();
     private OnFloatingActionButtonClickListener mOnFloatingActionButtonClickListener;
@@ -113,11 +120,13 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
         mState.onNext(false);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void buildFabs(int[] icons, int[] labels) {
-        if (icons.length != labels.length)
+        if (icons.length != labels.length) {
             throw new IllegalArgumentException("icons.length = " + icons.length + " is not equal to labels.length = " + labels.length);
+        }
         mFabs = new FloatingActionButton[icons.length];
-        mLabels = new TextView[icons.length];
+        TextView[] mLabels = new TextView[icons.length];
         mFabContainers = new View[icons.length];
         LayoutInflater inflater = LayoutInflater.from(getContext());
         for (int i = 0; i < icons.length; i++) {

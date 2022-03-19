@@ -153,10 +153,8 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
         mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(r);
         int screenHeight = mActivity.getWindow().getDecorView().getRootView().getHeight();
         int softInputHeight = screenHeight - r.bottom;
-        if (Build.VERSION.SDK_INT >= 20) {
-            // When SDK Level >= 20 (Android L), the softInputHeight will contain the height of softButtonsBar (if has)
-            softInputHeight = softInputHeight - getSoftKeyButtonsHeight();
-        }
+        // When SDK Level >= 20 (Android L), the softInputHeight will contain the height of softButtonsBar (if has)
+        softInputHeight = softInputHeight - getSoftKeyButtonsHeight();
         if (softInputHeight > 0) {
             mPreferences.edit().putInt(SHARE_PREFERENCE_SOFT_INPUT_HEIGHT, softInputHeight).apply();
         }

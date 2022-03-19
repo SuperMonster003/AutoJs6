@@ -25,7 +25,6 @@ public class StaticBroadcastReceiver extends BaseBroadcastReceiver {
             "android.intent.action.DREAMING_STOPPED",
             "android.intent.action.HEADSET_PLUG",
             "android.intent.action.INPUT_METHOD_CHANGED",
-            "android.intent.action.LOCALE_CHANGED",
             "android.intent.action.MEDIA_BUTTON",
             "android.intent.action.MEDIA_CHECKING",
             "android.intent.action.MEDIA_MOUNTED",

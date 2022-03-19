@@ -13,8 +13,10 @@ import androidx.annotation.RequiresApi;
 import com.stardust.app.OnActivityResultDelegate;
 import com.stardust.app.SimpleActivityLifecycleCallbacks;
 import com.stardust.autojs.core.accessibility.AccessibilityBridge;
-import com.stardust.autojs.core.console.GlobalConsole;
+import com.stardust.autojs.core.accessibility.SimpleActionAutomator;
+import com.stardust.autojs.core.activity.ActivityInfoProvider;
 import com.stardust.autojs.core.console.ConsoleImpl;
+import com.stardust.autojs.core.console.GlobalConsole;
 import com.stardust.autojs.core.image.capture.ScreenCaptureRequestActivity;
 import com.stardust.autojs.core.image.capture.ScreenCaptureRequester;
 import com.stardust.autojs.core.record.accessibility.AccessibilityActionRecorder;
@@ -31,7 +33,6 @@ import com.stardust.autojs.script.JavaScriptSource;
 import com.stardust.util.ResourceMonitor;
 import com.stardust.util.ScreenMetrics;
 import com.stardust.util.UiHandler;
-import com.stardust.autojs.core.activity.ActivityInfoProvider;
 import com.stardust.view.accessibility.AccessibilityNotificationObserver;
 import com.stardust.view.accessibility.AccessibilityService;
 import com.stardust.view.accessibility.LayoutInspector;
@@ -59,6 +60,7 @@ public abstract class AutoJs {
     private final ScreenCaptureRequester mScreenCaptureRequester = new ScreenCaptureRequesterImpl();
     private final ScriptEngineService mScriptEngineService;
     private final GlobalConsole mGlobalConsole;
+    private ScriptRuntime mGlobalRuntime;
 
 
     protected AutoJs(final Application application) {
@@ -96,7 +98,7 @@ public abstract class AutoJs {
             exception.fillInStackTrace();
             return exception;
         });
-        ResourceMonitor.setUnclosedResourceDetectedHandler(detectedException -> mGlobalConsole.error(detectedException));
+        ResourceMonitor.setUnclosedResourceDetectedHandler(mGlobalConsole::error);
     }
 
     public abstract void ensureAccessibilityServiceEnabled();
@@ -122,11 +124,22 @@ public abstract class AutoJs {
         mScriptEngineManager = new ScriptEngineManager(mContext);
         mScriptEngineManager.registerEngine(JavaScriptSource.ENGINE, () -> {
             LoopBasedJavaScriptEngine engine = new LoopBasedJavaScriptEngine(mContext);
-            engine.setRuntime(createRuntime());
+            mGlobalRuntime = createRuntime();
+            engine.setRuntime(mGlobalRuntime);
             return engine;
         });
         initContextFactory();
         mScriptEngineManager.registerEngine(AutoFileSource.ENGINE, () -> new RootAutomatorEngine(mContext));
+    }
+
+    @NonNull
+    public ScriptRuntime getGlobalRuntime() {
+        return mGlobalRuntime;
+    }
+
+    @NonNull
+    public SimpleActionAutomator getGlobalAutomator() {
+        return mGlobalRuntime.automator;
     }
 
     protected void initContextFactory() {
