@@ -479,40 +479,32 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
             if (context == null) return;
 
             switch (result) {
-                case RESULT_OK:
+                case RESULT_OK -> {
                     mReportFailed = false;
                     tryToFinishActivity();
-                    break;
-                case RESULT_BAD_CREDENTIALS:
-                    new MaterialDialog.Builder(context)
-                            .title(R.string.air_dialog_title_failed)
-                            .content(R.string.air_dialog_description_failed_wrong_credentials)
-                            .positiveText(R.string.air_dialog_action_failed)
-                            .show();
-                    break;
-                case RESULT_INVALID_TOKEN:
-                    new MaterialDialog.Builder(context)
-                            .title(R.string.air_dialog_title_failed)
-                            .content(R.string.air_dialog_description_failed_invalid_token)
-                            .positiveText(R.string.air_dialog_action_failed)
-                            .show();
-                    break;
-                case RESULT_ISSUES_NOT_ENABLED:
-                    new MaterialDialog.Builder(context)
-                            .title(R.string.air_dialog_title_failed)
-                            .content(R.string.air_dialog_description_failed_issues_not_available)
-                            .positiveText(R.string.air_dialog_action_failed)
-                            .show();
-                    break;
-                default:
-                    new MaterialDialog.Builder(context)
-                            .title(R.string.air_dialog_title_failed)
-                            .content(R.string.air_dialog_description_failed_unknown)
-                            .positiveText(R.string.air_dialog_action_failed)
-                            .onPositive((dialog, which) -> tryToFinishActivity())
-                            .cancelListener(dialog -> tryToFinishActivity())
-                            .show();
-                    break;
+                }
+                case RESULT_BAD_CREDENTIALS -> new MaterialDialog.Builder(context)
+                        .title(R.string.air_dialog_title_failed)
+                        .content(R.string.air_dialog_description_failed_wrong_credentials)
+                        .positiveText(R.string.air_dialog_action_failed)
+                        .show();
+                case RESULT_INVALID_TOKEN -> new MaterialDialog.Builder(context)
+                        .title(R.string.air_dialog_title_failed)
+                        .content(R.string.air_dialog_description_failed_invalid_token)
+                        .positiveText(R.string.air_dialog_action_failed)
+                        .show();
+                case RESULT_ISSUES_NOT_ENABLED -> new MaterialDialog.Builder(context)
+                        .title(R.string.air_dialog_title_failed)
+                        .content(R.string.air_dialog_description_failed_issues_not_available)
+                        .positiveText(R.string.air_dialog_action_failed)
+                        .show();
+                default -> new MaterialDialog.Builder(context)
+                        .title(R.string.air_dialog_title_failed)
+                        .content(R.string.air_dialog_description_failed_unknown)
+                        .positiveText(R.string.air_dialog_action_failed)
+                        .onPositive((dialog, which) -> tryToFinishActivity())
+                        .cancelListener(dialog -> tryToFinishActivity())
+                        .show();
             }
         }
 

@@ -2,14 +2,13 @@ package org.autojs.autojs.tool;
 
 import com.stardust.app.GlobalAppContext;
 
-import org.autojs.autojs.model.explorer.ExplorerFileItem;
-
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 public class Observers {
 
+    @SuppressWarnings("rawtypes")
     private static final Consumer CONSUMER = ignored -> {
 
     };
@@ -30,7 +29,7 @@ public class Observers {
     }
 
     public  static <T> Observer<T> emptyObserver() {
-        return new Observer<T>() {
+        return new Observer<>() {
             @Override
             public void onSubscribe(Disposable d) {
 

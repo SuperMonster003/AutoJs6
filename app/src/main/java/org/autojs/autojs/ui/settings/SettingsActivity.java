@@ -7,10 +7,14 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.stardust.app.GlobalAppContext;
 import com.stardust.theme.app.ColorSelectActivity;
 import com.stardust.theme.preference.ThemeColorPreferenceFragment;
 import com.stardust.theme.util.ListBuilder;
@@ -18,14 +22,20 @@ import com.stardust.util.MapBuilder;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
+import org.autojs.autojs.Pref;
 import org.autojs.autojs.R;
 import org.autojs.autojs.ui.BaseActivity;
+import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.error.IssueReporterActivity;
+import org.autojs.autojs.ui.update.UpdateCheckDialog;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 
 import de.psdev.licensesdialog.LicenseResolver;
 import de.psdev.licensesdialog.LicensesDialog;
@@ -69,6 +79,62 @@ public class SettingsActivity extends BaseActivity {
         ColorSelectActivity.startColorSelect(context, context.getString(R.string.mt_color_picker_title), colorItems);
     }
 
+    @NonNull
+    private static LinkedHashMap<String, Runnable> getAvailableLanguages(@NonNull Context context) {
+        LinkedHashMap<String, Runnable> map = new LinkedHashMap<>();
+        map.put(context.getString(R.string.text_app_language_follow_system),
+                ((BaseActivity) context)::setLocaleFollowSystem);
+        map.put(context.getString(R.string.text_app_language_simplified_chinese),
+                () -> ((BaseActivity) context).updateLocale(Locale.SIMPLIFIED_CHINESE));
+        map.put(context.getString(R.string.text_app_language_english),
+                () -> ((BaseActivity) context).updateLocale(Locale.ENGLISH));
+        return map;
+    }
+
+    public static void selectAppLanguage(Context context) {
+        LinkedHashMap<String, Runnable> languagesMap = getAvailableLanguages(context);
+        Set<String> languagesKey = languagesMap.keySet();
+        Collection<Runnable> languagesRunnable = languagesMap.values();
+
+        new MaterialDialog.Builder(context)
+                .title(R.string.text_app_language)
+                .items(languagesKey)
+                .itemsCallbackSingleChoice(Pref.getAppLanguageIndex(), (dialog, itemView, position, text) -> true)
+                .positiveText(R.string.text_ok)
+                .onPositive((dialog, which) -> {
+                    int index = dialog.getSelectedIndex();
+                    Runnable run = (Runnable) languagesRunnable.toArray()[index];
+                    if (run != null) {
+                        Pref.setAppLanguageIndex(index);
+                        GlobalAppContext.post(run);
+                    }
+                    dialog.dismiss();
+                })
+                .negativeText(R.string.text_cancel)
+                .onNegative((dialog, which) -> dialog.dismiss())
+                .neutralText(R.string.text_dialog_button_go_to_settings)
+                .onNeutral((dialog, which) -> {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                })
+                .autoDismiss(false)
+                .show();
+
+        showImperfectHint(context);
+    }
+
+    private static void showImperfectHint(Context context) {
+        new NotAskAgainDialog.Builder(context, "SettingsActivity.select_app_language_imperfect_hint")
+                .title(R.string.text_notice)
+                .content(R.string.text_imperfect_hint_for_app_language)
+                .positiveText(R.string.text_ok)
+                .onPositive((dialog, which) -> dialog.dismiss())
+                .autoDismiss(false)
+                .show();
+    }
+
     @AfterViews
     void setUpUI() {
         setUpToolbar();
@@ -79,10 +145,16 @@ public class SettingsActivity extends BaseActivity {
         Toolbar toolbar = $(R.id.toolbar);
         toolbar.setTitle(R.string.text_setting);
         setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        setDisplayHomeAsUpEnabledIfNeeded();
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
+    private void setDisplayHomeAsUpEnabledIfNeeded() {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
 
     public static class PreferenceFragment extends ThemeColorPreferenceFragment {
         private Map<String, Runnable> ACTION_MAP;
@@ -98,9 +170,11 @@ public class SettingsActivity extends BaseActivity {
             super.onStart();
             ACTION_MAP = new MapBuilder<String, Runnable>()
                     .put(getString(R.string.text_theme_color), () -> selectThemeColor(getActivity()))
+                    .put(getString(R.string.text_check_for_updates), () -> new UpdateCheckDialog(getActivity()).show())
                     .put(getString(R.string.text_issue_report), () -> startActivity(new Intent(getActivity(), IssueReporterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
-                    .put(getString(R.string.text_about_me_and_repo), () -> startActivity(new Intent(getActivity(), AboutActivity_.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
+                    .put(getString(R.string.text_about_app_and_developer), () -> startActivity(new Intent(getActivity(), AboutActivity_.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
                     .put(getString(R.string.text_licenses), this::showLicenseDialog)
+                    .put(getString(R.string.text_app_language), () -> selectAppLanguage(getActivity()))
                     .build();
         }
 
@@ -109,9 +183,8 @@ public class SettingsActivity extends BaseActivity {
             if (action != null) {
                 action.run();
                 return true;
-            } else {
-                return super.onPreferenceTreeClick(preferenceScreen, preference);
             }
+            return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
 
         private void showLicenseDialog() {
@@ -154,4 +227,5 @@ public class SettingsActivity extends BaseActivity {
         }
 
     }
+
 }

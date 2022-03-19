@@ -5,13 +5,14 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import androidx.annotation.IntDef;
-import androidx.annotation.Nullable;
-import com.google.android.material.appbar.AppBarLayout;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+
+import androidx.annotation.Nullable;
+
+import com.google.android.material.appbar.AppBarLayout;
 
 /**
  * Created by Stardust on 2017/8/22.

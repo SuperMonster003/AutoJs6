@@ -1,73 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:paddingLeft="16dp"
-              android:paddingRight="16dp">
-
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/text_loop_times">
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/loop_times"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
-            android:text="0"
-            tools:ignore="HardcodedText"/>
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/hint_loop_times"
-        android:textColor="#77000000"
-        android:textSize="12sp"/>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/text_loop_interval">
+            android:layout_marginVertical="12dp"
+            android:textColorHint="#91000000"
+            android:hint="@string/text_loop_times">
 
         <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/loop_interval"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
-            android:text="1.0"
-            tools:ignore="HardcodedText"/>
+                android:id="@+id/loop_times"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:inputType="number"
+                android:text="0"
+                android:textColor="#ff000000"
+                tools:ignore="HardcodedText"
+                android:height="48dp" />
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:textColor="#80000000"
+                android:text="@string/hint_loop_times"
+                android:textSize="12sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/text_loop_delay">
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/loop_delay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
-            android:text="0.0"
-            tools:ignore="HardcodedText"/>
+            android:layout_marginVertical="12dp"
+            android:textColorHint="#91000000"
+            android:hint="@string/text_loop_interval">
+
+        <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/loop_interval"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:inputType="numberDecimal"
+                android:text="1.0"
+                tools:ignore="HardcodedText"
+                android:height="48dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/hint_loop_delay"
-        android:textColor="#77000000"
-        android:textSize="12sp"/>
+    <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="12dp"
+            android:textColorHint="#91000000"
+            android:hint="@string/text_loop_delay">
+
+        <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/loop_delay"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:inputType="numberDecimal"
+                android:textColor="#ff000000"
+                android:text="0.0"
+                tools:ignore="HardcodedText" />
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:layout_marginBottom="8dp"
+                android:textColor="#80000000"
+                android:text="@string/hint_loop_delay"
+                android:textSize="12sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
 </LinearLayout>

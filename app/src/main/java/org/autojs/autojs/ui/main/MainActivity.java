@@ -49,6 +49,7 @@ import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.doc.DocsFragment_;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.log.LogActivity_;
+import org.autojs.autojs.ui.main.drawer.DrawerFragment;
 import org.autojs.autojs.ui.main.scripts.MyScriptListFragment_;
 import org.autojs.autojs.ui.main.task.TaskManagerFragment_;
 import org.autojs.autojs.ui.settings.SettingsActivity_;
@@ -131,8 +132,13 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
         Toolbar toolbar = $(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.app_name);
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.text_drawer_open,
-                R.string.text_drawer_close);
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.text_drawer_open, R.string.text_drawer_close) {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                EventBus.getDefault().post(DrawerFragment.class);
+            }
+        };
         drawerToggle.syncState();
         mDrawerLayout.addDrawerListener(drawerToggle);
     }

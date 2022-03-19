@@ -10,15 +10,13 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import com.stardust.app.DialogUtils;
 import com.stardust.enhancedfloaty.FloatyService;
+import com.stardust.view.accessibility.LayoutInspector;
+import com.stardust.view.accessibility.NodeInfo;
 
 import org.autojs.autojs.R;
 import org.autojs.autojs.ui.codegeneration.CodeGenerateDialog;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
-
-import com.stardust.view.accessibility.LayoutInspector;
-import com.stardust.view.accessibility.NodeInfo;
-
 import org.autojs.autojs.ui.widget.BubblePopupMenu;
 
 import java.util.Arrays;
@@ -74,11 +72,17 @@ public class LayoutBoundsFloatyWindow extends FullScreenFloatyWindow {
 
     protected void onViewCreated(View v) {
         mLayoutBoundsView.setOnNodeInfoSelectListener(info -> {
+            mLayoutBoundsView.setFocusable(false);
             mSelectedNode = info;
             ensureOperationPopMenu();
-            if (mBubblePopMenu.getContentView().getMeasuredWidth() <= 0)
+            if (mBubblePopMenu.getContentView().getMeasuredWidth() <= 0) {
                 mBubblePopMenu.preMeasure();
-            mBubblePopMenu.showAsDropDownAtLocation(mLayoutBoundsView, info.getBoundsInScreen().height(), info.getBoundsInScreen().centerX() - mBubblePopMenu.getContentView().getMeasuredWidth() / 2, info.getBoundsInScreen().bottom - mLayoutBoundsView.getStatusBarHeight());
+            }
+            mBubblePopMenu.showAsDropDownAtLocation(mLayoutBoundsView,
+                    info.getBoundsInScreen().height(),
+                    info.getBoundsInScreen().centerX() - mBubblePopMenu.getContentView().getMeasuredWidth() / 2,
+                    info.getBoundsInScreen().bottom - mLayoutBoundsView.getStatusBarHeight());
+            mLayoutBoundsView.setFocusable(true);
         });
         mLayoutBoundsView.getBoundsPaint().setStrokeWidth(2f);
         mLayoutBoundsView.setRootNode(mRootNode);
@@ -88,9 +92,13 @@ public class LayoutBoundsFloatyWindow extends FullScreenFloatyWindow {
 
 
     private void showNodeInfo() {
+        getNodeInfoDialog().show();
+    }
+
+    public MaterialDialog getNodeInfoDialog() {
         ensureDialog();
         mNodeInfoView.setNodeInfo(mSelectedNode);
-        mNodeInfoDialog.show();
+        return mNodeInfoDialog;
     }
 
     private void ensureOperationPopMenu() {

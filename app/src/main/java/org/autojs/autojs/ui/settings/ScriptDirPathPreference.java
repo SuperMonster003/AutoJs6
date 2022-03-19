@@ -1,7 +1,6 @@
 package org.autojs.autojs.ui.settings;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -9,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
@@ -83,7 +84,7 @@ public class ScriptDirPathPreference extends MaterialEditTextPreference {
         MaterialDialog dialog = new ThemeColorMaterialDialogBuilder(getContext())
                 .progress(true, 0)
                 .progressIndeterminateStyle(true)
-                .title(R.string.text_on_progress)
+                .title(R.string.text_in_progress)
                 .cancelable(false)
                 .content("")
                 .show();

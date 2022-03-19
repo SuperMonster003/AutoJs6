@@ -3,6 +3,8 @@ package org.autojs.autojs.model.explorer;
 import android.content.Context;
 import android.content.res.AssetManager;
 
+import androidx.annotation.Nullable;
+
 import com.stardust.autojs.project.ProjectConfig;
 import com.stardust.pio.PFile;
 import com.stardust.pio.PFiles;
@@ -16,7 +18,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
@@ -26,11 +27,9 @@ public class WorkspaceFileProvider extends ExplorerFileProvider {
 
     private final PFile mSampleDir;
     private final AssetManager mAssetManager;
-    private final Context mContext;
 
     public WorkspaceFileProvider(Context context, FileFilter fileFilter) {
         super(fileFilter);
-        mContext = context;
         mAssetManager = context.getAssets();
         mSampleDir = new PFile(context.getFilesDir(), SAMPLE_PATH);
     }
@@ -100,17 +99,22 @@ public class WorkspaceFileProvider extends ExplorerFileProvider {
                 });
     }
 
+    @Nullable
     public Observable<ScriptFile> resetSample(ScriptFile file) {
         if (file.getPath().length() <= mSampleDir.getPath().length() + 1) {
             return null;
         }
         String pathOfSample = file.getPath().substring(mSampleDir.getPath().length());
         String pathOfAsset = SAMPLE_PATH + pathOfSample;
-        return Observable.fromCallable(() -> {
-            InputStream stream = mAssetManager.open(pathOfAsset);
-            PFiles.copyStream(stream, file.getPath());
-            return file;
-        })
+        return Observable
+                .fromCallable(() -> {
+                    try (InputStream stream = mAssetManager.open(pathOfAsset)) {
+                        PFiles.copyStream(stream, file.getPath());
+                    } catch (FileNotFoundException ignored) {
+                        return new ScriptFile(System.currentTimeMillis() + "\ufeff" + Math.random());
+                    }
+                    return file;
+                })
                 .subscribeOn(Schedulers.io());
     }
 

@@ -209,7 +209,7 @@ public class ScriptOperations {
                 .subscribe(path -> {
                     ScriptFile newDir = new ScriptFile(getCurrentDirectory(), path);
                     if (newDir.mkdirs()) {
-                        showMessage(R.string.text_already_create);
+                        showMessage(R.string.text_already_created);
                         notifyFileCreated(mCurrentDirectory, new ScriptFile(newDir));
                     } else {
                         showMessage(R.string.text_create_fail);
@@ -293,8 +293,8 @@ public class ScriptOperations {
     public void delete(final ScriptFile scriptFile) {
         DialogUtils.showDialog(new ThemeColorMaterialDialogBuilder(mContext)
                 .title(mContext.getString(R.string.text_are_you_sure_to_delete, scriptFile.getName()))
-                .negativeText(R.string.cancel)
-                .positiveText(R.string.ok)
+                .negativeText(R.string.text_cancel)
+                .positiveText(R.string.text_ok)
                 .onPositive((dialog, which) -> deleteWithoutConfirm(scriptFile))
                 .build());
 
@@ -308,7 +308,7 @@ public class ScriptOperations {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(deleted -> {
                     if (deleted) {
-                        showMessage(R.string.text_already_delete);
+                        showMessage(R.string.text_already_deleted);
                         notifyFileRemoved(isDir, scriptFile);
                     } else {
                         showMessage(R.string.text_delete_failed);
@@ -329,7 +329,7 @@ public class ScriptOperations {
         BuglyLog.i(LOG_TAG, "dir = " + Pref.getScriptDirPath() + ", sdcard = " + Environment.getExternalStorageDirectory() + ", url = " + url);
         String fileName = DownloadManager.parseFileNameLocally(url);
         return new FileChooserDialogBuilder(mContext)
-                .title(R.string.text_select_save_path)
+                .title(R.string.text_save_to)
                 .dir(Pref.getScriptDirPath())
                 .chooseDir()
                 .singleChoice()
@@ -367,7 +367,7 @@ public class ScriptOperations {
                 .justScriptFile()
                 .singleChoice(file -> importFile(file.getPath()).subscribe())
                 .title(R.string.text_select_file_to_import)
-                .positiveText(R.string.ok)
+                .positiveText(R.string.text_ok)
                 .show();
     }
 

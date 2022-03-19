@@ -2,6 +2,7 @@ package org.autojs.autojs.pluginclient;
 
 import android.annotation.SuppressLint;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -175,8 +176,8 @@ public class DevPluginResponseHandler implements Handler {
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(dest -> GlobalAppContext.toast(R.string.text_project_save_success, dest),
-                        err -> GlobalAppContext.toast(R.string.text_project_save_error, err.getMessage())
+                .subscribe(dest -> GlobalAppContext.toast(R.string.text_project_save_success + "\n" + dest, Toast.LENGTH_LONG),
+                        err -> GlobalAppContext.toast(R.string.text_project_save_error + "\n" + err.getMessage(), Toast.LENGTH_LONG)
                 );
 
     }

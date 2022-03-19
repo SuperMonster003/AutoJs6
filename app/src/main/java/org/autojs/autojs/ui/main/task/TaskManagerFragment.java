@@ -2,18 +2,20 @@ package org.autojs.autojs.ui.main.task;
 
 import android.app.Activity;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import android.view.View;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.EFragment;
+import org.androidannotations.annotations.ViewById;
 import org.autojs.autojs.R;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.ui.main.ViewPagerFragment;
 import org.autojs.autojs.ui.widget.SimpleAdapterDataObserver;
 
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.EFragment;
-import org.androidannotations.annotations.ViewById;
+import java.util.Objects;
 
 /**
  * Created by Stardust on 2017/3/24.
@@ -24,12 +26,8 @@ public class TaskManagerFragment extends ViewPagerFragment {
     @ViewById(R.id.task_list)
     TaskListRecyclerView mTaskListRecyclerView;
 
-    @ViewById(R.id.notice_no_running_script)
-    View mNoRunningScriptNotice;
-
     @ViewById(R.id.swipe_refresh_layout)
     SwipeRefreshLayout mSwipeRefreshLayout;
-
 
     public TaskManagerFragment() {
         super(45);
@@ -39,23 +37,14 @@ public class TaskManagerFragment extends ViewPagerFragment {
     @AfterViews
     void setUpViews() {
         init();
-        final boolean noRunningScript = mTaskListRecyclerView.getAdapter().getItemCount() == 0;
-        mNoRunningScriptNotice.setVisibility(noRunningScript ? View.VISIBLE : View.GONE);
     }
 
     private void init() {
-        mTaskListRecyclerView.getAdapter().registerAdapterDataObserver(new SimpleAdapterDataObserver() {
-
+        Objects.requireNonNull(mTaskListRecyclerView.getAdapter()).registerAdapterDataObserver(new SimpleAdapterDataObserver() {
             @Override
             public void onSomethingChanged() {
-                final boolean noRunningScript = mTaskListRecyclerView.getAdapter().getItemCount() == 0;
-                mTaskListRecyclerView.postDelayed(() -> {
-                    if (mNoRunningScriptNotice == null)
-                        return;
-                    mNoRunningScriptNotice.setVisibility(noRunningScript ? View.VISIBLE : View.GONE);
-                }, 150);
+                // To do something here maybe some day.
             }
-
         });
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             mTaskListRecyclerView.refresh();

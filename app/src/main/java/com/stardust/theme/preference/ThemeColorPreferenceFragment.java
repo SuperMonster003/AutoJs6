@@ -1,9 +1,12 @@
 package com.stardust.theme.preference;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.preference.PreferenceFragment;
 import android.widget.ListView;
+
+import androidx.annotation.Nullable;
 
 import com.stardust.theme.ThemeColor;
 import com.stardust.theme.internal.ScrollingViewEdgeGlowColorHelper;
@@ -15,9 +18,12 @@ import java.lang.reflect.Field;
 /**
  * Created by Stardust on 2016/8/14.
  */
+@SuppressWarnings({"deprecation", "JavaReflectionMemberAccess"})
+@SuppressLint("SoonBlockedPrivateApi")
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class ThemeColorPreferenceFragment extends PreferenceFragment implements ThemeColorMutable {
 
+    @Nullable
     private static Field LIST_VIEW;
     private int mThemeColor;
     private boolean hasAppliedThemeColor = false;
@@ -34,11 +40,13 @@ public class ThemeColorPreferenceFragment extends PreferenceFragment implements 
 
     private ListView getListView() {
         try {
-            return (ListView) LIST_VIEW.get(this);
+            if (LIST_VIEW != null) {
+                return (ListView) LIST_VIEW.get(this);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
     public void addPreferencesFromResource(int resId) {

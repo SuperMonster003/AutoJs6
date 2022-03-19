@@ -1,12 +1,9 @@
 package org.autojs.autojs.ui.main.drawer;
 
-import static android.content.Context.POWER_SERVICE;
-
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -22,13 +19,13 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.stardust.app.AppOpsKt;
 import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.core.accessibility.AccessibilityServiceTool;
 import com.stardust.autojs.core.util.ProcessShell;
 import com.stardust.autojs.util.FloatingPermission;
 import com.stardust.notification.NotificationListenerService;
 import com.stardust.theme.ThemeColorManager;
 import com.stardust.util.ClipboardUtil;
 import com.stardust.util.IntentUtil;
-import com.stardust.view.accessibility.AccessibilityService;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -39,9 +36,9 @@ import org.autojs.autojs.external.foreground.ForegroundService;
 import org.autojs.autojs.pluginclient.DevPluginService;
 import org.autojs.autojs.pluginclient.JsonSocketClient;
 import org.autojs.autojs.pluginclient.JsonSocketServer;
-import org.autojs.autojs.tool.AccessibilityServiceTool;
 import org.autojs.autojs.tool.Observers;
 import org.autojs.autojs.tool.RootTool;
+import org.autojs.autojs.tool.SettingsTool;
 import org.autojs.autojs.tool.WifiTool;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
@@ -79,7 +76,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     @ViewById(R.id.drawer_menu)
     RecyclerView mDrawerMenu;
 
-    private final DrawerMenuItem mAccessibilityServiceItem = new DrawerMenuItem(R.drawable.ic_accessibility_black_48dp, R.string.text_accessibility_service, 0, this::enableOrDisableAccessibilityService);
+    private final DrawerMenuItem mAccessibilityServiceItem = new DrawerMenuItem(R.drawable.ic_accessibility_black_48dp, R.string.text_a11y_service, 0, this::enableOrDisableAccessibilityService);
     private final DrawerMenuItem mForegroundServiceItem = new DrawerMenuItem(R.drawable.ic_service_green, R.string.text_foreground_service, R.string.key_foreground_service, this::toggleForegroundService);
 
     private final DrawerMenuItem mFloatingWindowItem = new DrawerMenuItem(R.drawable.ic_robot_64, R.string.text_floating_window, 0, this::showOrDismissFloatingWindow);
@@ -106,11 +103,11 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
 
         mClientConnectionStateDisposable = JsonSocketClient.cxnState
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(state -> setItemState(mClientModeItem, state));
+                .subscribe(state -> setCxnItemState(mClientModeItem, state));
 
         mServerConnectionStateDisposable = JsonSocketServer.cxnState
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(state -> setItemState(mServerModeItem, state));
+                .subscribe(state -> setCxnItemState(mServerModeItem, state));
 
         EventBus.getDefault().register(this);
     }
@@ -132,7 +129,11 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     @AfterViews
     public void setUpViews() {
         ThemeColorManager.addViewBackground(mHeaderView);
+
         initMenuItems();
+
+        getAccessibilityServiceTool().enableAccessibilityServiceAutomaticallyIfNeeded();
+
         if (Pref.isFloatingMenuShown()) {
             FloatyWindowManger.showCircularMenuIfNeeded();
             setChecked(mFloatingWindowItem, true);
@@ -140,12 +141,12 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
 
         JsonSocketClient jsonSocketClient = devPlugin.getJsonSocketClient();
         if (jsonSocketClient != null) {
-            setChecked(mClientModeItem, jsonSocketClient.isConnected());
+            syncClientModeState();
         }
 
         if (Pref.isForegroundServiceEnabled()) {
             ForegroundService.start(GlobalAppContext.get());
-            setChecked(mForegroundServiceItem, true);
+            syncForegroundServiceState();
         }
     }
 
@@ -179,13 +180,80 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     }
 
     public void enableOrDisableAccessibilityService(DrawerMenuItemViewHolder holder) {
-        boolean isAccessibilityServiceEnabled = isAccessibilityServiceEnabled();
+        AccessibilityServiceTool ast = getAccessibilityServiceTool();
+        boolean isAccessibilityServiceEnabled = ast.isAccessibilityServiceEnabled();
         boolean checked = holder.getSwitchCompat().isChecked();
         if (checked && !isAccessibilityServiceEnabled) {
             enableAccessibilityService();
         } else if (!checked && isAccessibilityServiceEnabled) {
             disableAccessibilityService();
         }
+    }
+
+    @SuppressLint("CheckResult")
+    private void enableAccessibilityService() {
+        setProgress(mAccessibilityServiceItem, true);
+
+        AccessibilityServiceTool ast = getAccessibilityServiceTool();
+        Observable.fromCallable(ast::enableAccessibilityService)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((succeed) -> {
+                    if (!succeed) {
+                        ast.goToAccessibilitySetting();
+                    }
+                    setProgress(mAccessibilityServiceItem, false);
+                    syncSwitchState();
+                });
+    }
+
+    @SuppressLint("CheckResult")
+    private void disableAccessibilityService() {
+        setProgress(mAccessibilityServiceItem, true);
+
+        AccessibilityServiceTool ast = getAccessibilityServiceTool();
+        Observable.fromCallable(ast::disableAccessibilityService)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((succeed) -> {
+                    if (!succeed) {
+                        toast(R.string.text_disable_a11y_service_failed);
+                        ast.goToAccessibilitySetting();
+                    }
+                    setProgress(mAccessibilityServiceItem, false);
+                    syncSwitchState();
+                });
+    }
+
+    private void enableAccessibilityServiceIfNeeded() {
+        AccessibilityServiceTool ast = getAccessibilityServiceTool();
+        if (!ast.isAccessibilityServiceEnabled()) {
+            enableAccessibilityService();
+        }
+    }
+
+    private void toggleForegroundService(DrawerMenuItemViewHolder holder) {
+        Context context = requireContext();
+        Context globalAppContext = GlobalAppContext.get();
+        boolean checked = holder.getSwitchCompat().isChecked();
+        if (checked) {
+            if (getForegroundServiceDialog(context) == null) {
+                ForegroundService.start(globalAppContext);
+            }
+        } else {
+            ForegroundService.stop(globalAppContext);
+        }
+    }
+
+    private MaterialDialog getForegroundServiceDialog(Context context) {
+        return new NotAskAgainDialog.Builder(context, "DrawerFragment.foreground_service")
+                .title(R.string.text_foreground_service)
+                .content(R.string.description_foreground_service)
+                .positiveText(R.string.text_ok)
+                .onPositive((dialog, which) -> ForegroundService.start(GlobalAppContext.get()))
+                .canceledOnTouchOutside(false)
+                .cancelable(false)
+                .show();
     }
 
     public void goToNotificationServiceSettings(DrawerMenuItemViewHolder holder) {
@@ -197,31 +265,35 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     }
 
     public void goToUsageStatsSettings(DrawerMenuItemViewHolder holder) {
-        Context context = getContext();
-        boolean enabled = false;
-        if (context != null) {
-            enabled = AppOpsKt.isUsageStatsPermissionGranted(context);
-        }
+        Context context = requireContext();
+        boolean enabled = AppOpsKt.isUsageStatsPermissionGranted(context);
         boolean checked = holder.getSwitchCompat().isChecked();
         if (checked && !enabled) {
             if (getUsageStatsDialog(context) == null) {
-                syncSwitchState();
+                requestAppUsagePermission(context);
             }
         } else if (!checked && enabled) {
-            IntentUtil.requestAppUsagePermission(context);
+            requestAppUsagePermission(context);
         }
+    }
+
+    private void requestAppUsagePermission(Context context) {
+        IntentUtil.requestAppUsagePermission(context);
     }
 
     private MaterialDialog getUsageStatsDialog(Context context) {
         return new NotAskAgainDialog.Builder(context, "DrawerFragment.usage_stats")
                 .title(R.string.text_usage_stats_permission)
                 .content(R.string.description_usage_stats_permission)
-                .positiveText(R.string.ok)
-                .dismissListener(dialog -> {
-                    if (context != null) {
-                        IntentUtil.requestAppUsagePermission(context);
-                    }
+                .negativeText(R.string.text_quit)
+                .positiveText(R.string.text_ok)
+                .onNegative((dialog, which) -> {
+                    dialog.dismiss();
+                    syncUsageStatsPermissionState(context);
                 })
+                .onPositive((dialog, which) -> requestAppUsagePermission(context))
+                .canceledOnTouchOutside(false)
+                .cancelable(false)
                 .show();
     }
 
@@ -232,8 +304,10 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
             Pref.setFloatingMenuShown(checked);
         }
         if (checked && !isFloatingWindowShowing) {
-            setChecked(mFloatingWindowItem, FloatyWindowManger.showCircularMenu());
-            enableAccessibilityServiceByRootIfNeeded();
+            if (FloatyWindowManger.showCircularMenu()) {
+                setChecked(mFloatingWindowItem, true);
+                enableAccessibilityServiceIfNeeded();
+            }
         } else if (!checked && isFloatingWindowShowing) {
             FloatyWindowManger.hideCircularMenu();
         }
@@ -241,27 +315,25 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
 
     @SuppressLint("BatteryLife")
     public void toggleIgnoreBatteryOptimizations(DrawerMenuItemViewHolder holder) {
-        Context context = getContext();
+        Context context = requireContext();
         try {
             Intent intent = new Intent();
-            boolean isIgnoring = false;
-            if (context != null) {
-                isIgnoring = ((PowerManager) context.getSystemService(POWER_SERVICE))
-                        .isIgnoringBatteryOptimizations(context.getPackageName());
-            }
+            boolean isIgnoring = isIgnoringBatteryOptimizations(context);
             if (isIgnoring) {
                 intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
             } else {
-                if (context != null) {
-                    intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                            .setData(Uri.parse("package:" + context.getPackageName()));
-                }
+                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                        .setData(Uri.parse("package:" + context.getPackageName()));
             }
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
             e.printStackTrace();
-            Toast.makeText(context, R.string.text_failed, Toast.LENGTH_LONG).show();
+            toast(R.string.text_failed);
         }
+    }
+
+    private boolean isIgnoringBatteryOptimizations(Context context) {
+        return ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isIgnoringBatteryOptimizations(context.getPackageName());
     }
 
     public void openThemeColorSettings(DrawerMenuItemViewHolder holder) {
@@ -299,13 +371,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     }
 
     private boolean hasWriteSecureSettingsAccess() {
-        Context context = getContext();
-        if (context != null) {
-            @SuppressLint("WrongConstant")
-            int checkVal = context.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS_PERMISSION);
-            return checkVal == PackageManager.PERMISSION_GRANTED;
-        }
-        return false;
+        return SettingsTool.SecureSettings.isGranted(getContext());
     }
 
     @SuppressLint("CheckResult")
@@ -344,15 +410,15 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         try {
             ProcessShell.execCommand(cmd, true);
             if (state == hasWriteSecureSettingsAccess()) {
-                int successRes = state ? R.string.text_permission_granted_by_root : R.string.text_permission_revoked_by_root;
-                Toast.makeText(context, successRes, Toast.LENGTH_SHORT).show();
+                int successRes = state ? R.string.text_permission_granted_with_root : R.string.text_permission_revoked_with_root;
+                toast(successRes);
                 return;
             }
         } catch (Exception ignore) {
             // nothing to do here
         }
-        int successRes = state ? R.string.text_permission_granted_failed_by_root : R.string.text_permission_revoked_failed_by_root;
-        Toast.makeText(context, successRes, Toast.LENGTH_LONG).show();
+        int successRes = state ? R.string.text_permission_granted_failed_with_root : R.string.text_permission_revoked_failed_with_root;
+        toast(successRes);
     }
 
     private void setWriteSecureSettingsAccessByAdb(boolean state) {
@@ -374,7 +440,7 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                     if (view != null) {
                         Snackbar.make(view, resultRes, SNACK_BAR_DURATION).show();
                     } else {
-                        Toast.makeText(context, resultRes, Toast.LENGTH_SHORT).show();
+                        toast(context, resultRes);
                     }
                 })
                 .negativeText(R.string.text_back)
@@ -387,25 +453,13 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                     if (view != null) {
                         Snackbar.make(view, textRes, SNACK_BAR_DURATION).show();
                     } else {
-                        Toast.makeText(context, textRes, Toast.LENGTH_SHORT).show();
+                        toast(context, textRes);
                     }
                 })
                 .cancelable(false)
                 .autoDismiss(false)
-                .dismissListener(dialog -> setChecked(mWriteSecuritySettingsItem, hasWriteSecureSettingsAccess()))
+                .dismissListener(dialog -> setCheckedIfNeeded(mWriteSecuritySettingsItem, hasWriteSecureSettingsAccess()))
                 .show();
-
-    }
-
-    @SuppressLint("CheckResult")
-    private void enableAccessibilityServiceByRootIfNeeded() {
-        Observable.fromCallable(() -> Pref.shouldEnableAccessibilityServiceByRoot() && !isAccessibilityServiceEnabled())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(needed -> {
-                    if (needed && RootTool.isRootAvailable()) {
-                        enableAccessibilityServiceByRoot();
-                    }
-                });
 
     }
 
@@ -465,15 +519,6 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         }
     }
 
-    private void toggleForegroundService(DrawerMenuItemViewHolder holder) {
-        boolean checked = holder.getSwitchCompat().isChecked();
-        if (checked) {
-            ForegroundService.start(GlobalAppContext.get());
-        } else {
-            ForegroundService.stop(GlobalAppContext.get());
-        }
-    }
-
     @SuppressLint("CheckResult")
     private void inputRemoteHost() {
         Context activity = getActivity();
@@ -495,95 +540,111 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
     }
 
     private String getInputHint() {
-        Context context = getContext();
-        if (context != null) {
-            return context.getString(R.string.text_pc_server_address);
-        }
-        return "Input a server address";
+        Context context = requireContext();
+        return context.getString(R.string.text_pc_server_address);
     }
 
     private void onPCServerConnectException(Throwable e) {
         setChecked(mClientModeItem, false);
-        Toast.makeText(getContext(),
-                getString(R.string.error_connect_to_remote, e.getMessage()),
-                Toast.LENGTH_LONG).show();
+        toast(getString(R.string.error_connect_to_remote, e.getMessage()));
     }
 
     private void onAJServerConnectException(Throwable e) {
         setChecked(mServerModeItem, false);
-        Toast.makeText(getContext(),
-                getString(R.string.error_enable_server, e.getMessage()),
-                Toast.LENGTH_LONG).show();
+        toast(getString(R.string.error_enable_server, e.getMessage()));
     }
 
-    private void syncSwitchState() {
-        Context context = getContext();
+    public void syncSwitchState() {
+        Context context = requireContext();
 
-        if (context != null) {
-            setChecked(mUsageStatsPermissionItem, AppOpsKt.isUsageStatsPermissionGranted(context));
-        }
+        syncAccessibilityServiceState();
+        syncForegroundServiceState();
 
-        if (mFloatingWindowItem.isChecked() && !FloatingPermission.canDrawOverlays(context)) {
-            setChecked(mFloatingWindowItem, false);
-        }
+        syncFloatingWindowState(context);
 
-        if (context != null) {
-            setChecked(mIgnoreBatteryOptimizationsItem, ((PowerManager) context.getSystemService(POWER_SERVICE))
-                    .isIgnoringBatteryOptimizations(context.getPackageName()));
-        }
+        syncClientModeState();
+        syncServerModeState();
 
-        setChecked(mAccessibilityServiceItem, AccessibilityServiceTool.isAccessibilityServiceEnabled(getActivity()));
-        setChecked(mNotificationPermissionItem, NotificationListenerService.Companion.getInstance() != null);
-        setChecked(mDisplayOverOtherAppsItem, FloatingPermission.canDrawOverlays(context));
-        setChecked(mWriteSystemSettingsItem, Settings.System.canWrite(getContext()));
-        setChecked(mWriteSecuritySettingsItem, hasWriteSecureSettingsAccess());
-        setChecked(mClientModeItem, isJsonSocketClientConnected());
-        setChecked(mServerModeItem, isServerSocketConnected());
+        syncNotificationPermissionState();
+        syncUsageStatsPermissionState(context);
+        syncIgnoreBatteryOptimizationsState(context);
+        syncDisplayOverOtherAppsState(context);
+        syncWriteSystemSettingsState();
+        syncWriteSecuritySettingsState();
     }
 
-    private boolean isAccessibilityServiceEnabled() {
-        return AccessibilityServiceTool.isAccessibilityServiceEnabled(getActivity());
+    private void syncForegroundServiceState() {
+        setCheckedIfNeeded(mForegroundServiceItem, ForegroundService.isRunning(GlobalAppContext.get()));
     }
 
-    private void enableAccessibilityService() {
-        if (Pref.shouldEnableAccessibilityServiceByRoot() && RootTool.isRootAvailable()) {
-            enableAccessibilityServiceByRoot();
-        } else {
-            AccessibilityServiceTool.goToAccessibilitySetting();
-        }
+    private void syncWriteSecuritySettingsState() {
+        setCheckedIfNeeded(mWriteSecuritySettingsItem, hasWriteSecureSettingsAccess());
     }
 
-    private void disableAccessibilityService() {
-        if (!AccessibilityService.Companion.disable()) {
-            AccessibilityServiceTool.goToAccessibilitySetting();
-        }
+    private void syncWriteSystemSettingsState() {
+        setCheckedIfNeeded(mWriteSystemSettingsItem, Settings.System.canWrite(getContext()));
     }
 
-    @SuppressLint("CheckResult")
-    private void enableAccessibilityServiceByRoot() {
-        setProgress(mAccessibilityServiceItem, true);
-        Observable.fromCallable(() -> AccessibilityServiceTool.enableAccessibilityServiceByRootAndWaitFor(4000))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(succeed -> {
-                    if (!succeed) {
-                        Toast.makeText(getContext(), R.string.text_enable_accessibility_service_by_root_failed, Toast.LENGTH_SHORT).show();
-                        AccessibilityServiceTool.goToAccessibilitySetting();
-                    }
-                    setProgress(mAccessibilityServiceItem, false);
-                });
+    private void syncDisplayOverOtherAppsState(Context context) {
+        setCheckedIfNeeded(mDisplayOverOtherAppsItem, FloatingPermission.canDrawOverlays(context));
     }
 
-    @SuppressWarnings("unused")
+    private void syncIgnoreBatteryOptimizationsState(Context context) {
+        setCheckedIfNeeded(mIgnoreBatteryOptimizationsItem, isIgnoringBatteryOptimizations(context));
+    }
+
+    private void syncUsageStatsPermissionState(Context context) {
+        setCheckedIfNeeded(mUsageStatsPermissionItem, AppOpsKt.isUsageStatsPermissionGranted(context));
+    }
+
+    private void syncNotificationPermissionState() {
+        setCheckedIfNeeded(mNotificationPermissionItem, NotificationListenerService.Companion.getInstance() != null);
+    }
+
+    private void syncServerModeState() {
+        setCheckedIfNeeded(mServerModeItem, isServerSocketConnected());
+    }
+
+    private void syncClientModeState() {
+        setCheckedIfNeeded(mClientModeItem, isJsonSocketClientConnected());
+    }
+
+    private void syncFloatingWindowState(Context context) {
+        setCheckedIfNeeded(mFloatingWindowItem, FloatyWindowManger.isCircularMenuShowing() && FloatingPermission.canDrawOverlays(context));
+    }
+
+    private void syncAccessibilityServiceState() {
+        setCheckedIfNeeded(mAccessibilityServiceItem, getAccessibilityServiceTool().isAccessibilityServiceEnabled());
+    }
+
     @Subscribe
     public void onCircularMenuStateChange(CircularMenu.StateChangeEvent event) {
-        setChecked(mFloatingWindowItem, event.getCurrentState() != CircularMenu.STATE_CLOSED);
+        setCheckedIfNeeded(mFloatingWindowItem, event.getCurrentState() != CircularMenu.STATE_CLOSED);
+    }
+
+    @Subscribe
+    public void onDrawerOpened(Class<DrawerFragment> drawerFragmentClass) {
+        syncSwitchState();
     }
 
     private void showMessage(CharSequence text) {
-        if (getContext() == null)
-            return;
-        Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
+        toast(text);
+    }
+
+    private void toast(CharSequence text) {
+        toast(getContext(), text);
+    }
+
+    private void toast(int resId) {
+        toast(getContext(), resId);
+    }
+
+    private void toast(Context context, CharSequence text) {
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+    }
+
+    private void toast(Context context, int resId) {
+        Toast.makeText(context, resId, Toast.LENGTH_SHORT).show();
     }
 
     private void setProgress(DrawerMenuItem item, boolean progress) {
@@ -591,16 +652,27 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         mDrawerMenuAdapter.notifyItemChanged(item);
     }
 
+    private void setCheckedIfNeeded(DrawerMenuItem item, boolean b) {
+        if (item.isChecked() != b) {
+            setChecked(item, b);
+        }
+    }
+
     private void setChecked(DrawerMenuItem item, boolean checked) {
         item.setChecked(checked);
         mDrawerMenuAdapter.notifyItemChanged(item);
     }
 
-    private void setItemState(DrawerMenuItem item, DevPluginService.State state) {
-        setChecked(item, state.getState() == DevPluginService.State.CONNECTED);
+    private void setCxnItemState(DrawerMenuItem item, DevPluginService.State state) {
+        setCheckedIfNeeded(item, state.getState() == DevPluginService.State.CONNECTED);
         setProgress(item, state.getState() == DevPluginService.State.CONNECTING);
         if (state.getException() != null) {
             showMessage(state.getException().getMessage());
         }
     }
+
+    private AccessibilityServiceTool getAccessibilityServiceTool() {
+        return new AccessibilityServiceTool(requireContext());
+    }
+
 }

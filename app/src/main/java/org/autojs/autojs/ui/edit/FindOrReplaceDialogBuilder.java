@@ -61,8 +61,8 @@ public class FindOrReplaceDialogBuilder extends ThemeColorMaterialDialogBuilder 
         View view = View.inflate(context, R.layout.dialog_find_or_replace, null);
         ButterKnife.bind(this, view);
         customView(view, true);
-        positiveText(R.string.ok);
-        negativeText(R.string.cancel);
+        positiveText(R.string.text_ok);
+        negativeText(R.string.text_cancel);
         title(R.string.text_find_or_replace);
     }
 

@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
 
 import pxb.android.StringItem;
 import pxb.android.axml.AxmlWriter;
@@ -189,8 +188,7 @@ public class ApkBuilder {
                 if (child.getName().endsWith(".js")) {
                     encrypt(toDir, child);
                 } else {
-                    StreamUtils.write(new FileInputStream(child),
-                            new FileOutputStream(new File(toDir, child.getName())));
+                    StreamUtils.write(new FileInputStream(child), new FileOutputStream(new File(toDir, child.getName())));
                 }
             } else {
                 if (!mAppConfig.ignoredDirs.contains(child)) {

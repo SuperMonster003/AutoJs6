@@ -44,16 +44,16 @@ public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
                     .addOption(R.string.text_using_text_selector, true)
                     .addOption(R.string.text_using_desc_selector, true))
             .add(new OptionGroup(R.string.text_select)
-                    .addOption(R.string.text_find_one, true)
-                    .addOption(R.string.text_until_find)
-                    .addOption(R.string.text_wait_for)
-                    .addOption(R.string.text_selector_exists))
+                    .addOption(R.string.text_select_by_find_one, true)
+                    .addOption(R.string.text_select_by_until_find)
+                    .addOption(R.string.text_select_by_wait_for)
+                    .addOption(R.string.text_select_by_exists))
             .add(new OptionGroup(R.string.text_action)
-                    .addOption(R.string.text_click)
-                    .addOption(R.string.text_long_click)
-                    .addOption(R.string.text_set_text)
-                    .addOption(R.string.text_scroll_forward)
-                    .addOption(R.string.text_scroll_backward))
+                    .addOption(R.string.text_act_by_click)
+                    .addOption(R.string.text_act_by_long_click)
+                    .addOption(R.string.text_act_by_set_text)
+                    .addOption(R.string.text_act_by_scroll_forward)
+                    .addOption(R.string.text_act_by_scroll_backward))
             .list();
 
     @BindView(R.id.options)
@@ -101,32 +101,32 @@ public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
 
     private void setAction(CodeGenerator generator) {
         OptionGroup action = getOptionGroup(R.string.text_action);
-        if (action.getOption(R.string.text_click).checked) {
+        if (action.getOption(R.string.text_act_by_click).checked) {
             generator.setAction(AccessibilityNodeInfoCompat.ACTION_CLICK);
         }
-        if (action.getOption(R.string.text_long_click).checked) {
+        if (action.getOption(R.string.text_act_by_long_click).checked) {
             generator.setAction(AccessibilityNodeInfoCompat.ACTION_LONG_CLICK);
         }
-        if (action.getOption(R.string.text_scroll_forward).checked) {
+        if (action.getOption(R.string.text_act_by_scroll_forward).checked) {
             generator.setAction(AccessibilityNodeInfoCompat.ACTION_SCROLL_FORWARD);
         }
-        if (action.getOption(R.string.text_scroll_backward).checked) {
+        if (action.getOption(R.string.text_act_by_scroll_backward).checked) {
             generator.setAction(AccessibilityNodeInfoCompat.ACTION_SCROLL_BACKWARD);
         }
     }
 
     private int getSearchMode() {
         OptionGroup selectMode = getOptionGroup(R.string.text_select);
-        if (selectMode.getOption(R.string.text_find_one).checked) {
+        if (selectMode.getOption(R.string.text_select_by_find_one).checked) {
             return CodeGenerator.FIND_ONE;
         }
-        if (selectMode.getOption(R.string.text_until_find).checked) {
+        if (selectMode.getOption(R.string.text_select_by_until_find).checked) {
             return CodeGenerator.UNTIL_FIND;
         }
-        if (selectMode.getOption(R.string.text_wait_for).checked) {
+        if (selectMode.getOption(R.string.text_select_by_wait_for).checked) {
             return CodeGenerator.WAIT_FOR;
         }
-        if (selectMode.getOption(R.string.text_selector_exists).checked) {
+        if (selectMode.getOption(R.string.text_select_by_exists).checked) {
             return CodeGenerator.EXISTS;
         }
         return CodeGenerator.FIND_ONE;

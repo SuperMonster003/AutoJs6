@@ -41,8 +41,8 @@ public class TextSizeSettingDialogBuilder extends ThemeColorMaterialDialogBuilde
         View view = View.inflate(context, R.layout.dialog_text_size_setting, null);
         customView(view, false);
         title(R.string.text_text_size);
-        positiveText(R.string.ok);
-        negativeText(R.string.cancel);
+        positiveText(R.string.text_ok);
+        negativeText(R.string.text_cancel);
         ButterKnife.bind(this, view);
         mSeekBar.setOnSeekBarChangeListener(this);
     }

@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="theme_color_red">红色</string>
-    <string name="theme_color_pink">粉色</string>
-    <string name="theme_color_purple">紫色</string>
-    <string name="theme_color_dark_purple">深紫</string>
-    <string name="theme_color_indigo">靛蓝</string>
-    <string name="theme_color_blue">蓝色</string>
-    <string name="theme_color_light_blue">亮蓝</string>
-    <string name="theme_color_blue_green">蓝绿</string>
-    <string name="theme_color_cyan">青色</string>
-    <string name="theme_color_green">绿色</string>
-    <string name="theme_color_light_green">亮绿</string>
-    <string name="theme_color_yellow_green">黄绿</string>
-    <string name="theme_color_yellow">黄色</string>
-    <string name="theme_color_amber">琥珀</string>
-    <string name="theme_color_orange">橙色</string>
-    <string name="theme_color_dark_orange">深橙</string>
-    <string name="theme_color_brown">棕色</string>
-    <string name="theme_color_gray">灰色</string>
-    <string name="theme_color_blue_gray">蓝灰</string>
-    <string name="theme_color_default">默认颜色</string>
+    <string name="theme_color_red">Red</string>
+    <string name="theme_color_pink">Pink</string>
+    <string name="theme_color_purple">Purple</string>
+    <string name="theme_color_orange">Orange</string>
+    <string name="theme_color_amber">Amber</string>
+    <string name="theme_color_yellow">Yellow</string>
+    <string name="theme_color_yellow_green">Yellow green</string>
+    <string name="theme_color_light_green">Light green</string>
+    <string name="theme_color_green">Green</string>
+    <string name="theme_color_cyan">Cyan</string>
+    <string name="theme_color_blue_green">Blue green</string>
+    <string name="theme_color_light_blue">Light blue</string>
+    <string name="theme_color_blue">Blue</string>
+    <string name="theme_color_indigo">Indigo</string>
+    <string name="theme_color_dark_purple">Dark purple</string>
+    <string name="theme_color_dark_orange">Dark orange</string>
+    <string name="theme_color_brown">Brown</string>
+    <string name="theme_color_gray">Gray</string>
+    <string name="theme_color_blue_gray">Blue gray</string>
+    <string name="theme_color_default">Default color</string>
 
 
     <color name="theme_color_red">#F44336</color>

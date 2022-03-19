@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="304dp"
+        android:layout_width="288dp"
         android:layout_height="match_parent"
         android:background="?android:windowBackground"
         android:clickable="true"
@@ -36,8 +36,7 @@
                 android:id="@+id/drawer_menu"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                />
+                android:layout_weight="1" />
 
         <View
                 android:layout_width="match_parent"
@@ -46,8 +45,8 @@
 
         <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_gravity="bottom"
+                android:layout_height="41dp"
+                android:layout_gravity="center_horizontal"
                 android:baselineAligned="false">
 
             <LinearLayout
@@ -61,10 +60,10 @@
                     android:onClick="startSettingActivity">
 
                 <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="12dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_ali_settings"
                         app:tint="#666666"
                         tools:ignore="ContentDescription" />
@@ -73,6 +72,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="4dp"
                         android:gravity="center"
                         android:text="@string/text_setting"
                         android:textColor="?android:textColorPrimary"
@@ -90,10 +90,10 @@
                     android:onClick="restartAfterPendingIntent">
 
                 <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="12dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_refresh_white_24dp"
                         app:tint="#666666"
                         tools:ignore="ContentDescription" />
@@ -102,6 +102,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="4dp"
                         android:gravity="center"
                         android:text="@string/text_restart_app"
                         android:textColor="?android:textColorPrimary"
@@ -119,10 +120,10 @@
                     android:onClick="exitCompletely">
 
                 <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="12dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_ali_exit"
                         app:tint="#666666"
                         tools:ignore="ContentDescription" />
@@ -131,6 +132,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="4dp"
                         android:textColor="?android:textColorPrimary"
                         android:gravity="center"
                         android:text="@string/text_exit"

@@ -4,18 +4,21 @@ import android.content.Intent;
 import android.os.Build;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+
 import android.util.Log;
 import android.widget.Toast;
 
 import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.core.accessibility.AccessibilityServiceTool;
 import com.stardust.view.accessibility.AccessibilityService;
 import com.stardust.view.accessibility.LayoutInspector;
 import com.stardust.view.accessibility.NodeInfo;
 
 import org.autojs.autojs.R;
 import org.autojs.autojs.autojs.AutoJs;
-import org.autojs.autojs.tool.AccessibilityServiceTool;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
 
@@ -29,13 +32,14 @@ public abstract class LayoutInspectTileService extends TileService implements La
         super.onCreate();
         Log.d(getClass().getName(), "onCreate");
         AutoJs.getInstance().getLayoutInspector().addCaptureAvailableListener(this);
+        activeTile();
     }
 
     @Override
     public void onStartListening() {
         super.onStartListening();
         Log.d(getClass().getName(), "onStartListening");
-        inactive();
+        updateTile();
     }
 
     @Override
@@ -47,27 +51,50 @@ public abstract class LayoutInspectTileService extends TileService implements La
 
     @Override
     public void onClick() {
+        // FIXME by SuperMonster003 as of Mar 19, 2022.
+        //   ! Collapse quick settings panel.
+        //   ! Sometimes, there'll be a delay for a few seconds.
+        //   ! Dunno whether a better way exists.
+        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
         super.onClick();
         Log.d(getClass().getName(), "onClick");
-        // sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
         if (AccessibilityService.Companion.getInstance() == null) {
             Toast.makeText(this, R.string.text_no_accessibility_permission_to_capture, Toast.LENGTH_SHORT).show();
-            AccessibilityServiceTool.goToAccessibilitySetting();
-            inactive();
-            return;
+            if (!getAccessibilityServiceTool().enableAccessibilityServiceAutomaticallyIfNeeded()) {
+                getAccessibilityServiceTool().goToAccessibilitySetting();
+            }
+            updateTile();
+        } else {
+            mCapturing = true;
+            GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindow(), 1000);
         }
-        mCapturing = true;
-        GlobalAppContext.postDelayed(() ->
-                        AutoJs.getInstance().getLayoutInspector().captureCurrentWindow()
-                , 1000);
     }
 
-    protected void inactive() {
+    @NonNull
+    private AccessibilityServiceTool getAccessibilityServiceTool() {
+        return new AccessibilityServiceTool(this);
+    }
+
+    protected void updateTile() {
         Tile qsTile = getQsTile();
-        if (qsTile == null)
-            return;
-        qsTile.setState(Tile.STATE_INACTIVE);
-        qsTile.updateTile();
+        if (qsTile != null) {
+            qsTile.updateTile();
+        }
+    }
+
+    public void activeTile() {
+        Tile qsTile = getQsTile();
+        if (qsTile != null) {
+            qsTile.setState(Tile.STATE_ACTIVE);
+        }
+    }
+
+    public void inactiveTile() {
+        Tile qsTile = getQsTile();
+        if (qsTile != null) {
+            qsTile.setState(Tile.STATE_INACTIVE);
+        }
     }
 
     @Override
@@ -80,7 +107,7 @@ public abstract class LayoutInspectTileService extends TileService implements La
         GlobalAppContext.post(() -> {
             FullScreenFloatyWindow window = onCreateWindow(capture);
             if (!FloatyWindowManger.addWindow(getApplicationContext(), window)) {
-                inactive();
+                updateTile();
             }
         });
     }

@@ -1,6 +1,9 @@
 package org.autojs.autojs.external.tile;
 
+import android.content.Intent;
 import android.os.Build;
+import android.service.quicksettings.Tile;
+
 import androidx.annotation.RequiresApi;
 
 import com.stardust.view.accessibility.NodeInfo;
@@ -16,7 +19,7 @@ public class LayoutBoundsTile extends LayoutInspectTileService {
             @Override
             public void close() {
                 super.close();
-                inactive();
+                updateTile();
             }
         };
     }

@@ -1,5 +1,10 @@
 package org.autojs.autojs.ui.edit;
 
+import static org.autojs.autojs.model.script.Scripts.ACTION_ON_EXECUTION_FINISHED;
+import static org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_COLUMN_NUMBER;
+import static org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_LINE_NUMBER;
+import static org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -10,28 +15,24 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.util.SparseBooleanArray;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.Toast;
-
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.material.snackbar.Snackbar;
 import com.stardust.autojs.engine.JavaScriptEngine;
 import com.stardust.autojs.engine.ScriptEngine;
 import com.stardust.autojs.execution.ScriptExecution;
@@ -79,11 +80,6 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-
-import static org.autojs.autojs.model.script.Scripts.ACTION_ON_EXECUTION_FINISHED;
-import static org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_COLUMN_NUMBER;
-import static org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_LINE_NUMBER;
-import static org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE;
 
 /**
  * Created by Stardust on 2017/9/28.
@@ -245,14 +241,10 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
 
     @SuppressLint("CheckResult")
     private Observable<String> loadUri(final Uri uri) {
-        mEditor.setProgress(true);
         return Observable.fromCallable(() -> PFiles.read(getContext().getContentResolver().openInputStream(uri)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(s -> {
-                    setInitialText(s);
-                    mEditor.setProgress(false);
-                });
+                .doOnNext(this::setInitialText);
     }
 
     private void setInitialText(String text) {
@@ -525,6 +517,7 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
         mEditor.beautifyCode();
     }
 
+    @SuppressLint("CheckResult")
     public void selectEditorTheme() {
         mEditor.setProgress(true);
         Themes.getAllThemes(getContext())

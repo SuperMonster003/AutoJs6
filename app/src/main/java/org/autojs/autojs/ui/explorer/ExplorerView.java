@@ -3,13 +3,17 @@ package org.autojs.autojs.ui.explorer;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
+
 import androidx.annotation.Nullable;
+
 import com.google.android.material.snackbar.Snackbar;
+
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -317,6 +321,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         return getCurrentPage().toScriptFile();
     }
 
+    @SuppressLint("CheckResult")
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
@@ -370,16 +375,33 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
                 sort(ExplorerItemList.SORT_TYPE_SIZE, mDirSortMenuShowing);
                 break;
             case R.id.reset:
-                Explorers.Providers.workspace().resetSample(mSelectedItem.toScriptFile())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(ignored -> {
-                            Snackbar.make(this, R.string.text_reset_succeed, Snackbar.LENGTH_SHORT).show();
-                        }, Observers.toastMessage());
+                Observable<ScriptFile> o = Explorers.Providers.workspace()
+                        .resetSample(mSelectedItem.toScriptFile());
+                if (o == null) {
+                    resetFailed();
+                } else {
+                    o.observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(file -> {
+                                if (file.exists()) {
+                                    resetSucceeded();
+                                } else {
+                                    resetFailed();
+                                }
+                            }, Observers.toastMessage());
+                }
                 break;
             default:
                 return false;
         }
         return true;
+    }
+
+    private void resetSucceeded() {
+        Snackbar.make(this, R.string.text_reset_succeed, Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void resetFailed() {
+        Snackbar.make(this, R.string.text_reset_to_initial_content_only_for_assets, Snackbar.LENGTH_LONG).show();
     }
 
     protected void notifyOperated() {

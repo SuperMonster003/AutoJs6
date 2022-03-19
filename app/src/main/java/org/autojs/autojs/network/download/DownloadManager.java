@@ -1,5 +1,8 @@
 package org.autojs.autojs.network.download;
 
+import com.stardust.app.GlobalAppContext;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
@@ -9,8 +12,6 @@ import com.stardust.concurrent.VolatileBox;
 import com.stardust.pio.PFiles;
 
 import org.autojs.autojs.R;
-import org.autojs.autojs.model.script.ScriptFile;
-import org.autojs.autojs.network.NodeBB;
 import org.autojs.autojs.network.api.DownloadApi;
 import org.autojs.autojs.tool.SimpleObserver;
 
@@ -18,7 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.SocketTimeoutException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,13 +43,12 @@ public class DownloadManager {
     private static DownloadManager sInstance;
 
     private static final int RETRY_COUNT = 3;
-    private Retrofit mRetrofit;
-    private DownloadApi mDownloadApi;
-    private ConcurrentHashMap<String, VolatileBox<Boolean>> mDownloadStatuses = new ConcurrentHashMap<>();
+    private final DownloadApi mDownloadApi;
+    private final ConcurrentHashMap<String, VolatileBox<Boolean>> mDownloadStatuses = new ConcurrentHashMap<>();
 
     public DownloadManager() {
-        mRetrofit = new Retrofit.Builder()
-                .baseUrl(NodeBB.BASE_URL)
+        Retrofit mRetrofit = new Retrofit.Builder()
+                .baseUrl("https://www.autojs.org")
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(new OkHttpClient.Builder()
                         .addInterceptor(chain -> {
@@ -81,9 +81,15 @@ public class DownloadManager {
         if (i < 0) {
             i = url.lastIndexOf('/');
         }
-        return URLDecoder.decode(url.substring(i + 1));
+        try {
+            return URLDecoder.decode(url.substring(i + 1), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return GlobalAppContext.getString(R.string.text_should_never_happen);
+        }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SuppressLint("CheckResult")
     public Observable<Integer> download(String url, String path) {
         DownloadTask task = new DownloadTask(url, path);
         mDownloadApi.download(url)
@@ -112,7 +118,7 @@ public class DownloadManager {
         DownloadManager.getInstance().download(url, path)
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(progressDialog::setProgress)
-                .subscribe(new SimpleObserver<Integer>() {
+                .subscribe(new SimpleObserver<>() {
                     @Override
                     public void onComplete() {
                         progressDialog.dismiss();
@@ -139,12 +145,12 @@ public class DownloadManager {
 
     private class DownloadTask {
 
-        private String mUrl;
-        private String mPath;
-        private VolatileBox<Boolean> mStatus;
+        private final String mUrl;
+        private final String mPath;
+        private final VolatileBox<Boolean> mStatus;
         private InputStream mInputStream;
         private FileOutputStream mFileOutputStream;
-        private PublishSubject<Integer> mProgress;
+        private final PublishSubject<Integer> mProgress;
 
         public DownloadTask(String url, String path) {
             mUrl = url;
@@ -190,7 +196,7 @@ public class DownloadManager {
             }
         }
 
-        private void onCancel() throws IOException {
+        private void onCancel() {
             recycle();
             // TODO: 2017/12/6 notify?
         }

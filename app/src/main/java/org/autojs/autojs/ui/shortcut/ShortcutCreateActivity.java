@@ -73,7 +73,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         new ThemeColorMaterialDialogBuilder(this)
                 .customView(view, false)
                 .title(R.string.text_send_shortcut)
-                .positiveText(R.string.ok)
+                .positiveText(R.string.text_ok)
                 .onPositive((dialog, which) -> {
                     createShortcut();
                     finish();

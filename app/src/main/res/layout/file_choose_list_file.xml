@@ -56,7 +56,7 @@
                 android:maxLines="1"
                 android:textColor="#484C4F"
                 android:textSize="14sp"
-                tools:text="正在运行的服务"/>
+                tools:text="@string/text_sample_name"/>
 
             <TextView
                 android:id="@+id/desc"
@@ -69,7 +69,7 @@
                 android:maxLines="1"
                 android:textColor="#9DA0A2"
                 android:textSize="11sp"
-                tools:text="18 KB"/>
+                tools:text="@string/text_sample_desc"/>
 
         </LinearLayout>
 

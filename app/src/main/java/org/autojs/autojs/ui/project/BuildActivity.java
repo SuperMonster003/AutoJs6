@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
-import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -14,6 +12,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.material.textfield.TextInputLayout;
@@ -39,7 +40,7 @@ import org.autojs.autojs.ui.shortcut.ShortcutIconSelectActivity_;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
@@ -116,8 +117,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private void showPluginDownloadDialog(int msgRes) {
         new ThemeColorMaterialDialogBuilder(this)
                 .content(msgRes)
-                .positiveText(R.string.ok)
-                .negativeText(R.string.cancel)
+                .positiveText(R.string.text_download)
+                .negativeText(R.string.text_cancel)
                 .onPositive((dialog, which) -> downloadPlugin())
                 .onNegative((dialog, which) -> finish())
                 .show();
@@ -125,8 +126,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void downloadPlugin() {
-        IntentUtil.browse(this, "https://github.com/" +
-                "SuperMonster002/Hello-Sockpuppet/raw/master/" +
+        IntentUtil.browse(this, "https://cdn.jsdelivr.net/gh/SuperMonster002/Hello-Sockpuppet@master/" +
                 "%5B" + "auto.js" + "%5D" +
                 "%5B" + "apk_builder_plugin_4.1.1_alpha2" + "%5D" +
                 "%5B" + "arm-v7a" + "%5D" +
@@ -206,20 +206,18 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private boolean checkInputs() {
-        boolean inputValid = true;
-        inputValid &= checkNotEmpty(mSourcePath);
-        inputValid &= checkNotEmpty(mOutputPath);
-        inputValid &= checkNotEmpty(mAppName);
-        inputValid &= checkNotEmpty(mSourcePath);
-        inputValid &= checkNotEmpty(mVersionCode);
-        inputValid &= checkNotEmpty(mVersionName);
-        inputValid &= checkPackageNameValid(mPackageName);
-        return inputValid;
+        return checkNotEmpty(mSourcePath)
+                & checkNotEmpty(mOutputPath)
+                & checkNotEmpty(mAppName)
+                & checkNotEmpty(mSourcePath)
+                & checkNotEmpty(mVersionCode)
+                & checkNotEmpty(mVersionName)
+                & checkPackageNameValid(mPackageName);
     }
 
     private boolean checkPackageNameValid(EditText editText) {
         Editable text = editText.getText();
-        String hint = ((TextInputLayout) editText.getParent().getParent()).getHint().toString();
+        String hint = Objects.requireNonNull(((TextInputLayout) editText.getParent().getParent()).getHint()).toString();
         if (TextUtils.isEmpty(text)) {
             editText.setError(hint + getString(R.string.text_should_not_be_empty));
             return false;
@@ -236,7 +234,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (!TextUtils.isEmpty(editText.getText()) || !editText.isShown())
             return true;
         // TODO: 2017/12/8 more beautiful ways?
-        String hint = ((TextInputLayout) editText.getParent().getParent()).getHint().toString();
+        String hint = Objects.requireNonNull(((TextInputLayout) editText.getParent().getParent()).getHint()).toString();
         editText.setError(hint + getString(R.string.text_should_not_be_empty));
         return false;
     }
@@ -289,7 +287,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private void showProgressDialog() {
         mProgressDialog = new MaterialDialog.Builder(this)
                 .progress(true, 100)
-                .content(R.string.text_on_progress)
+                .content(R.string.text_in_progress)
                 .cancelable(false)
                 .show();
     }
@@ -299,7 +297,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             mProgressDialog.dismiss();
             mProgressDialog = null;
         }
-        Toast.makeText(this, getString(R.string.text_build_failed) + error.getMessage(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.text_build_failed) + "\n" + error.getMessage(), Toast.LENGTH_SHORT).show();
         Log.e(LOG_TAG, "Build failed", error);
     }
 
@@ -310,7 +308,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .title(R.string.text_build_successfully)
                 .content(getString(R.string.format_build_successfully, outApk.getPath()))
                 .positiveText(R.string.text_install)
-                .negativeText(R.string.cancel)
+                .negativeText(R.string.text_cancel)
                 .onPositive((dialog, which) ->
                         IntentUtil.installApkOrToast(BuildActivity.this, outApk.getPath(), AppFileProvider.AUTHORITY)
                 )

@@ -14,7 +14,6 @@ import android.provider.Settings;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.FileProvider;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -394,7 +393,7 @@ public class TimedTaskSettingActivity extends BaseActivity {
             if (mIntentTask != null) {
                 TimedTaskManager.getInstance().removeTask(mIntentTask);
             }
-            Toast.makeText(this, R.string.text_already_create, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.text_already_created, Toast.LENGTH_SHORT).show();
         } else {
             task.setId(mTimedTask.getId());
             TimedTaskManager.getInstance().updateTask(task);
@@ -426,7 +425,7 @@ public class TimedTaskSettingActivity extends BaseActivity {
         if (mIntentTask != null) {
             task.setId(mIntentTask.getId());
             TimedTaskManager.getInstance().updateTask(task);
-            Toast.makeText(this, R.string.text_already_create, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.text_already_created, Toast.LENGTH_SHORT).show();
         } else {
             TimedTaskManager.getInstance().addTask(task);
             if (mTimedTask != null) {

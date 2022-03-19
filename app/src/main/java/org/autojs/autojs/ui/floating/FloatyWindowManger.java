@@ -10,19 +10,10 @@ import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.util.FloatingPermission;
 import com.stardust.enhancedfloaty.FloatyService;
 import com.stardust.enhancedfloaty.FloatyWindow;
-import com.stardust.enhancedfloaty.util.FloatingWindowPermissionUtil;
 
-import org.autojs.autojs.App;
 import org.autojs.autojs.R;
-import org.autojs.autojs.ui.floating.CircularMenu;
-
-import com.stardust.util.IntentUtil;
 
 import java.lang.ref.WeakReference;
-
-import ezy.assist.compat.SettingsCompat;
-
-import static com.stardust.autojs.util.FloatingPermission.manageDrawOverlays;
 
 /**
  * Created by Stardust on 2017/9/30.
@@ -41,9 +32,9 @@ public class FloatyWindowManger {
             // SecurityException: https://github.com/hyb1996-guest/AutoJsIssueReport/issues/4781
         } catch (Exception e) {
             e.printStackTrace();
-            if(hasPermission){
-                manageDrawOverlays(context);
-                GlobalAppContext.toast(R.string.text_no_floating_window_permission);
+            if (hasPermission) {
+                FloatingPermission.manageDrawOverlays(context);
+                GlobalAppContext.toast(R.string.text_no_floating_window_permission, Toast.LENGTH_LONG);
             }
         }
         return false;
@@ -54,23 +45,28 @@ public class FloatyWindowManger {
     }
 
     public static void showCircularMenuIfNeeded() {
-        if (isCircularMenuShowing()) {
-            return;
+        if (!isCircularMenuShowing() || !canDrawOverlays()) {
+            showCircularMenu();
         }
-        showCircularMenu();
     }
 
     public static boolean showCircularMenu() {
-        if (!FloatingPermission.canDrawOverlays(GlobalAppContext.get())) {
-            Toast.makeText(GlobalAppContext.get(), R.string.text_no_floating_window_permission, Toast.LENGTH_SHORT).show();
-            manageDrawOverlays(GlobalAppContext.get());
-            return false;
-        } else {
-            GlobalAppContext.get().startService(new Intent(GlobalAppContext.get(), FloatyService.class));
-            CircularMenu menu = new CircularMenu(GlobalAppContext.get());
+        Context context = GlobalAppContext.get();
+
+        if (canDrawOverlays()) {
+            context.startService(new Intent(context, FloatyService.class));
+            CircularMenu menu = new CircularMenu(context);
             sCircularMenu = new WeakReference<>(menu);
             return true;
+        } else {
+            Toast.makeText(context, R.string.text_no_floating_window_permission, Toast.LENGTH_SHORT).show();
+            FloatingPermission.manageDrawOverlays(context);
+            return false;
         }
+    }
+
+    public static boolean canDrawOverlays() {
+        return FloatingPermission.canDrawOverlays(GlobalAppContext.get());
     }
 
     public static void hideCircularMenu() {
@@ -82,6 +78,7 @@ public class FloatyWindowManger {
         sCircularMenu = null;
     }
 
+    @SuppressWarnings("deprecation")
     public static int getWindowType() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;

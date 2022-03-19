@@ -122,7 +122,7 @@
 
             <item
                 android:id="@+id/action_import_java_class"
-                android:title="@string/text_search_java_class"
+                android:title="@string/text_find_java_classes"
                 app:showAsAction="never"/>
 
             <item
