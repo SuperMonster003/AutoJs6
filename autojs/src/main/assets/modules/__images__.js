@@ -235,7 +235,7 @@ module.exports = function (runtime, scope) {
             return opt.weakThreshold || def;
         },
         resize(img, mat, size, fx, fy, interpolation) {
-            Imgproc.resize(img.mat, mat, this.parseSize(0), fx, fy, Imgproc['INTER_' + (interpolation || 'LINEAR')]);
+            Imgproc.resize(img.mat, mat, this.parseSize(size), fx, fy, Imgproc['INTER_' + (interpolation || 'LINEAR')]);
         },
         /**
          * @param {com.stardust.autojs.core.image.ImageWrapper} img
