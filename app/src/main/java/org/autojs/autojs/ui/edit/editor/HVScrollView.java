@@ -1,7 +1,5 @@
 package org.autojs.autojs.ui.edit.editor;
 
-import java.util.List;
-
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -10,14 +8,14 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewParent;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.Scroller;
+
+import java.util.List;
 
 
 /**
@@ -416,16 +414,16 @@ public class HVScrollView extends FrameLayout {
         }
 
         switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_MOVE: {
-			/*
-			 * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
-			 * whether the user has moved far enough from his original down touch.
-			 */
+            case MotionEvent.ACTION_MOVE -> {
+                /*
+                 * mIsBeingDragged == false, otherwise the shortcut would have caught it. Check
+                 * whether the user has moved far enough from his original down touch.
+                 */
 
-			/*
-			 * Locally do absolute value. mLastMotionY is set to the y value
-			 * of the down event.
-			 */
+                /*
+                 * Locally do absolute value. mLastMotionY is set to the y value
+                 * of the down event.
+                 */
                 final int activePointerId = mActivePointerId;
                 if (activePointerId == INVALID_POINTER) {
                     // If we don't have a valid id, the touch down wasn't on content.
@@ -445,10 +443,8 @@ public class HVScrollView extends FrameLayout {
                     mIsBeingDragged = true;
                     mLastMotionX = x;
                 }
-                break;
             }
-
-            case MotionEvent.ACTION_DOWN: {
+            case MotionEvent.ACTION_DOWN -> {
                 final float x = ev.getX();
                 final float y = ev.getY();
                 if (!inChild((int) x, (int) y)) {
@@ -456,32 +452,27 @@ public class HVScrollView extends FrameLayout {
                     break;
                 }
 
-			/*
-			 * Remember location of down touch.
-			 * ACTION_DOWN always refers to pointer index 0.
-			 */
+                /*
+                 * Remember location of down touch.
+                 * ACTION_DOWN always refers to pointer index 0.
+                 */
                 mLastMotionY = y;
                 mLastMotionX = x;
                 mActivePointerId = ev.getPointerId(0);
 
-			/*
-			 * If being flinged and user touches the screen, initiate drag;
-			 * otherwise don't.  mScroller.isFinished should be false when
-			 * being flinged.
-			 */
+                /*
+                 * If being flinged and user touches the screen, initiate drag;
+                 * otherwise don't.  mScroller.isFinished should be false when
+                 * being flinged.
+                 */
                 mIsBeingDragged = !mScroller.isFinished();
-                break;
             }
-
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-			/* Release the drag */
+            case MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP -> {
+                /* Release the drag */
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
-                break;
-            case MotionEvent.ACTION_POINTER_UP:
-                onSecondaryPointerUp(ev);
-                break;
+            }
+            case MotionEvent.ACTION_POINTER_UP -> onSecondaryPointerUp(ev);
         }
 
 		/*

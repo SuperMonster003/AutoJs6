@@ -7,10 +7,7 @@
     <string name="confirm_overwrite_file">File already exists.\nOverwrite?</string>
     <string name="crash_feedback">Copy debugging log or exit directly</string>
     <string name="default_value_script_dir_path">/Scripts/</string>
-    <string name="description_foreground_service">Foreground services perform operations that are noticeable to the user.\nForeground services show a status bar notification, so that users are actively aware that your app is performing a task in the foreground and is consuming system resources. The notification cannot be dismissed unless the service is either stopped or removed from the foreground.\nNotification may be set low priority, even be turned off, by long-pressing notification.</string>
     <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
-    <string name="description_usage_stats_permission">Provides access to device usage history and statistics which results in currentPackage() a more accurate result</string>
-    <string name="developer">Stardust</string>
     <string name="edit_and_run_handle_intent_error">Can\'t process file</string>
     <string name="edit_exit_without_save_warn">The content has not been saved, are you sure you want to exit?</string>
     <string name="error_cannot_rename">Rename failed</string>
@@ -18,14 +15,14 @@
     <string name="error_change_password_error_match">Those passwords didn\'t match</string>
     <string name="error_connect_to_remote">Can\'t connect to the remote server: %s</string>
     <string name="error_email_taken">The e-mail is taken</string>
-    <string name="error_empty_selection">At least one broadcast must be selected</string>
+    <string name="error_empty_broadcast_selection">At least one broadcast must be selected</string>
     <string name="error_enable_server">Can\'t enable AutoJs6 server: %s</string>
     <string name="error_invalid_login_credentials">Invalid login credentials</string>
     <string name="error_pattern_syntax">Invalid pattern syntax</string>
     <string name="error_regex_find_prev">Can\'t find previous with regex</string>
-    <string name="foreground_notification_channel_name">Foreground service</string>
+    <string name="foreground_notification_channel_name">AutoJs6 foreground service</string>
     <string name="foreground_notification_text">Click to launch AutoJs6</string>
-    <string name="foreground_notification_title">AutoJs6 is running</string>
+    <string name="foreground_notification_title">AutoJs6 foreground service</string>
     <string name="format_build_successfully" formatted="true">Build succeeded.\nFile path: %s</string>
     <string name="format_debug_bar_title">Debug [ %s ]</string>
     <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
@@ -43,7 +40,13 @@
     <string name="summary_use_volume_control_record">Start or stop recording controlled by volume down key when floating button is showing</string>
     <string name="text_a11y_service_may_be_needed">Accessibility service may be needed</string>
     <string name="text_about">About</string>
+    <string name="text_about_all_files_access">About all files access</string>
     <string name="text_about_app_and_developer">About app and developer</string>
+    <string name="text_about_display_over_other_apps">About display over other apps</string>
+    <string name="text_about_functions_feedback">Feedback</string>
+    <string name="text_about_functions_licenses">Licenses</string>
+    <string name="text_about_functions_update">Update</string>
+    <string name="text_access_has_been_granted">Access has been granted</string>
     <string name="text_action">Action</string>
     <string name="text_act_by_click">Click (click)</string>
     <string name="text_act_by_long_click">Long click (longClick)</string>
@@ -51,12 +54,16 @@
     <string name="text_act_by_scroll_forward">Scroll forward (scrollForward)</string>
     <string name="text_act_by_set_text">Set text (setText)</string>
     <string name="text_adb_tool_needed">ADB tool is needed</string>
+    <string name="text_all_files_access">All files access</string>
+    <string name="text_all_files_access_is_needed">\"All files access\" is needed to access script files on the phone</string>
     <string name="text_already_copied_to_clip">Copied to clipboard</string>
     <string name="text_already_created">Created</string>
     <string name="text_already_deleted">Deleted</string>
+    <string name="text_already_stop_n_scripts">%d script(s) stopped</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder is unavailable</string>
     <string name="text_appearance">Appearance</string>
     <string name="text_app_crashed">AutoJs6 crashed</string>
+    <string name="text_app_language">Language</string>
     <string name="text_app_name">App name</string>
     <string name="text_app_source_code">Source code</string>
     <string name="text_are_you_sure_to_delete">Are you sure to delete %s ?</string>
@@ -80,6 +87,7 @@
     <string name="text_clear">Clear</string>
     <string name="text_clear_file_selection">Clear file selection</string>
     <string name="text_clear_pre_execute_script">Clear pre-execute script</string>
+    <string name="text_click_ok_to_go_to_access_settings">Click \"OK\" to go to settings</string>
     <string name="text_click_too_frequently">Frequent operation</string>
     <string name="text_client_mode">Client mode</string>
     <string name="text_close">Close</string>
@@ -88,6 +96,7 @@
     <string name="text_command_already_copied_to_clip">Command copied to clipboard</string>
     <string name="text_config">Config</string>
     <string name="text_connect_to_pc">Connect to PC</string>
+    <string name="text_continue">Continue</string>
     <string name="text_copy">Copy</string>
     <string name="text_copy_all">Copy all</string>
     <string name="text_copy_command">Copy cmd</string>
@@ -113,9 +122,12 @@
     <string name="text_delete_failed">Delete failed</string>
     <string name="text_delete_line">Delete line</string>
     <string name="text_detail">Details</string>
+    <string name="text_developer_details_under_development">Developer details is under development</string>
+    <string name="text_dialog_button_go_to_settings">System Settings</string>
     <string name="text_directly_download">Download now</string>
     <string name="text_directory">Directory</string>
     <string name="text_display_over_other_app">Display over other apps</string>
+    <string name="text_display_over_other_app_is_recommended">\"Display over other apps\" permission is recommended to make all widgets displayed properly</string>
     <string name="text_disposable_task">Disposable task</string>
     <string name="text_disposable_task_time_before_now">Time should be later than now</string>
     <string name="text_documentation">Documents</string>
@@ -142,6 +154,7 @@
     <string name="text_exit_directly">Exit</string>
     <string name="text_exit_floating_window">Exit floating window</string>
     <string name="text_failed">Failed</string>
+    <string name="text_failed_to_grant_access">Failed to grant access</string>
     <string name="text_file">File</string>
     <string name="text_file_exists">File already exists</string>
     <string name="text_file_write_fail">File write failed</string>
@@ -153,6 +166,7 @@
     <string name="text_floating_window">Floating window</string>
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Foreground service</string>
+    <string name="text_foreground_service_description">Foreground services perform operations that are noticeable to the user.\nForeground services show a status bar notification, so that users are actively aware that your app is performing a task in the foreground and is consuming system resources.\nThe notification cannot be dismissed unless the service is either stopped or removed from the foreground.\nNotification may be set low priority, even be turned off, by long-pressing notification.</string>
     <string name="text_generate">Generate</string>
     <string name="text_generated_code">Generated code</string>
     <string name="text_generate_code">Generate code</string>
@@ -163,6 +177,7 @@
     <string name="text_help">Help</string>
     <string name="text_icon">Icon</string>
     <string name="text_ignore_battery_optimizations">Ignore battery optimizations</string>
+    <string name="text_imperfect_hint_for_app_language">This feature is imperfect, even causes dysfunction sometimes.\nOption \"Follow system\" is recommended unless you have the purpose for test and so forth</string>
     <string name="text_import">Import</string>
     <string name="text_import_fail">Import failed</string>
     <string name="text_import_script">Import script(s)</string>
@@ -179,7 +194,6 @@
     <string name="text_in_progress">In progress</string>
     <string name="text_issue_report">Feedback</string>
     <string name="text_is_latest_version">No newer version found</string>
-    <string name="text_it_is_the_developer_of_app">This is a software developer</string>
     <string name="text_js_file">*.js file</string>
     <string name="text_jump">Jump</string>
     <string name="text_jump_to_end">Jump to end</string>
@@ -206,6 +220,7 @@
     <string name="text_manage">Manage</string>
     <string name="text_mobile_qq_not_installed">\"Mobile QQ\" not installed</string>
     <string name="text_more">More</string>
+    <string name="text_more_details">Details</string>
     <string name="text_name">Name</string>
     <string name="text_need_to_enable_a11y_service">Need to enable accessibility service</string>
     <string name="text_new_file">New file</string>
@@ -214,6 +229,7 @@
     <string name="text_new_watching_variables">New watching variables</string>
     <string name="text_next_run_time">Next run</string>
     <string name="text_night_mode">Dark mode</string>
+    <string name="text_notice">Notice</string>
     <string name="text_notification">Notification</string>
     <string name="text_notification_permission">Notification access</string>
     <string name="text_not_granted">Not granted</string>
@@ -228,12 +244,13 @@
     <string name="text_open_main_activity">Open main activity</string>
     <string name="text_open_with">Open with</string>
     <string name="text_options">Options</string>
+    <string name="text_original_developer">Original developer</string>
     <string name="text_output_apk_path">APK output path</string>
     <string name="text_package_name">Package name</string>
     <string name="text_password">Password</string>
     <string name="text_password_cannot_be_empty">Password can\'t be empty</string>
     <string name="text_pc_server_address">PC server address</string>
-    <string name="text_permission">Permission</string>
+    <string name="text_permissions">Permissions</string>
     <string name="text_permission_granted">Permission granted</string>
     <string name="text_permission_granted_failed_with_root">Permission granted failed (with root)</string>
     <string name="text_permission_granted_with_root">Permission granted (with root)</string>
@@ -250,6 +267,8 @@
     <string name="text_processing">Processing</string>
     <string name="text_project">Project</string>
     <string name="text_project_location">Project location</string>
+    <string name="text_project_media_access">Project media access</string>
+    <string name="text_project_media_access_description">With project media access, security warning for screen recording will not prompt.</string>
     <string name="text_project_save_error">Failed to save project</string>
     <string name="text_project_save_success">Project saved</string>
     <string name="text_prompt">Prompt</string>
@@ -298,11 +317,15 @@
     <string name="text_run_repeatedly">Run repeatedly</string>
     <string name="text_run_script">Run script</string>
     <string name="text_sample">Samples</string>
+    <string name="text_sample_name">Running service</string>
     <string name="text_save">Save</string>
     <string name="text_save_and_exit">Save and exit</string>
     <string name="text_save_to">Save to</string>
+    <string name="text_script_dir_pref_action_copy">Copy files to new directory</string>
+    <string name="text_script_dir_pref_action_move">Move files to new directory</string>
+    <string name="text_script_dir_pref_action_take_no_action">Take no action</string>
     <string name="text_script_record">Script recording</string>
-    <string name="text_script_save_successfully">Script saved succeeded (refresh needed)</string>
+    <string name="text_script_save_successfully">Script saved succeeded (refresh is needed)</string>
     <string name="text_search">Search</string>
     <string name="text_select">Select</string>
     <string name="text_select_by_exists">If clip exists (exists)</string>
@@ -329,6 +352,7 @@
     <string name="text_star">Star</string>
     <string name="text_start_record">Start recording</string>
     <string name="text_stop">Stop</string>
+    <string name="text_tailor_made_developer">Tailor-made developer</string>
     <string name="text_task">Task</string>
     <string name="text_text_size">Text size</string>
     <string name="text_theme_color">Theme color</string>
@@ -338,9 +362,12 @@
     <string name="text_tools">Tools</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Type</string>
+    <string name="text_under_development_content">The feature will be ready to use in the next few updates</string>
+    <string name="text_under_development_title">Under development</string>
     <string name="text_undo">Undo</string>
     <string name="text_update">Update</string>
     <string name="text_usage_stats_permission">Usage stats access</string>
+    <string name="text_usage_stats_permission_description">Provides access to device usage history and statistics which results in currentPackage() a more accurate result</string>
     <string name="text_username">Username</string>
     <string name="text_username_cannot_be_empty">Username can\'t be empty</string>
     <string name="text_use_android_n_shortcut">Use Android 7.0 shortcut</string>
@@ -356,6 +383,7 @@
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
     <string name="text_write_secure_settings">Write security settings</string>
+    <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="theme_color_amber">Amber</string>
     <string name="theme_color_blue">Blue</string>
@@ -377,16 +405,7 @@
     <string name="theme_color_red">Red</string>
     <string name="theme_color_yellow">Yellow</string>
     <string name="theme_color_yellow_green">Yellow green</string>
-    <string name="text_app_language">Language</string>
-    <string name="text_script_dir_pref_action_take_no_action">Take no action</string>
-    <string name="text_script_dir_pref_action_copy">Copy files to new directory</string>
-    <string name="text_script_dir_pref_action_move">Move files to new directory</string>
-    <string name="text_sample_name">Running service</string>
-    <string name="text_dialog_button_go_to_settings">System Settings</string>
-    <string name="text_under_development_title">Under development</string>
-    <string name="text_under_development_content">The feature will be ready to use in the next few updates</string>
-    <string name="text_notice">Notice</string>
-    <string name="text_imperfect_hint_for_app_language">This feature is imperfect, even causes dysfunction sometimes.\nOption \"Follow system\" is recommended unless you have the purpose for test and so forth</string>
+    <string name="text_refresh_explorer_may_needed">An explorer page swipe-to-refresh may be needed</string>
     <plurals name="air_error_short_description" key="air_error_short_description">
         <item quantity="one">The description must have at least %d character</item>
         <item quantity="other">The description must have at least %d characters</item>

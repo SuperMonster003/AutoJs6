@@ -12,7 +12,6 @@ import com.stardust.theme.ThemeColorMutable;
 /**
  * Created by Stardust on 2017/5/10.
  */
-
 public class ThemeColorImageViewCompat extends AppCompatImageView implements ThemeColorMutable {
     private int mColor;
 

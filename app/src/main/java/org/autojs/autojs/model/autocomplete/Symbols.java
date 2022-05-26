@@ -5,10 +5,9 @@ import java.util.Arrays;
 /**
  * Created by Stardust on 2017/9/28.
  */
-
 public class Symbols {
 
-    private static CodeCompletions sSymbols = CodeCompletions.just(Arrays.asList(
+    private static final CodeCompletions sSymbols = CodeCompletions.just(Arrays.asList(
             "\"", "(", ")", "=", ";", "/", "{", "}", "!", "|", "&", "-",
             "[", "]", "+", "-", "<", ">", "\\", "*", "?"));
 

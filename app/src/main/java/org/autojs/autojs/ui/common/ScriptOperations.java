@@ -25,7 +25,7 @@ import com.stardust.pio.UncheckedIOException;
 import com.tencent.bugly.crashreport.BuglyLog;
 
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
@@ -58,7 +58,6 @@ import io.reactivex.subjects.PublishSubject;
 /**
  * Created by Stardust on 2017/7/31.
  */
-
 @SuppressLint("CheckResult")
 public class ScriptOperations {
 
@@ -160,7 +159,7 @@ public class ScriptOperations {
             dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
             return;
         }
-        if (new File(getCurrentDirectory(), extension == null ? input.toString() : input.toString() + extension).exists()) {
+        if (new File(getCurrentDirectory(), extension == null ? input.toString() : input + extension).exists()) {
             errorResId = R.string.text_file_exists;
         }
         if (errorResId == 0) {

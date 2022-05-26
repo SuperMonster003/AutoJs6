@@ -10,7 +10,6 @@ import java.io.IOException;
 /**
  * Created by Stardust on 2017/10/21.
  */
-
 public class TmpScriptFiles {
 
     public static File create(Context context) throws IOException {

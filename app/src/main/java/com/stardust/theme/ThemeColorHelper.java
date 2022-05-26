@@ -1,6 +1,5 @@
 package com.stardust.theme;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -8,9 +7,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
-import android.os.Build;
-import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.appcompat.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,13 +15,15 @@ import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.Switch;
 
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+
 import com.stardust.theme.internal.ScrollingViewEdgeGlowColorHelper;
 
 
 /**
  * Created by Stardust on 2016/10/24.
  */
-
 public class ThemeColorHelper {
 
     private static final String TAG = "ThemeColorHelper";
@@ -58,10 +56,8 @@ public class ThemeColorHelper {
     }
 
     public static void setColorPrimary(Switch sw, int color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            setThumbDrawableTintList(sw.getThumbDrawable(), color);
-            setTrackDrawableTintList(sw.getTrackDrawable(), color);
-        }
+        setThumbDrawableTintList(sw.getThumbDrawable(), color);
+        setTrackDrawableTintList(sw.getTrackDrawable(), color);
     }
 
     private static void setThumbDrawableTintList(Drawable drawable, int color) {
@@ -85,8 +81,6 @@ public class ThemeColorHelper {
         return (color & 0xffffff) | (alpha << 24);
     }
 
-
-    @TargetApi(21)
     public static void setStatusBarColor(Activity activity, int color) {
         Window window = activity.getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);

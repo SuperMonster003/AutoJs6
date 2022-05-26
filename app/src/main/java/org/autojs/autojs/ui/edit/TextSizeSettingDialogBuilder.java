@@ -7,7 +7,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 
 import butterknife.BindView;
@@ -16,7 +16,6 @@ import butterknife.ButterKnife;
 /**
  * Created by Stardust on 2018/2/24.
  */
-
 public class TextSizeSettingDialogBuilder extends ThemeColorMaterialDialogBuilder implements SeekBar.OnSeekBarChangeListener {
 
 

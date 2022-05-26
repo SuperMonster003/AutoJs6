@@ -10,7 +10,6 @@ import retrofit2.http.Headers;
  * Created by Stardust on 2017/9/20.
  * Modified by SuperMonster003 as of Feb 28, 2022.
  */
-
 public interface UpdateCheckApi {
 
     @GET("/SuperMonster003/AutoJs6/master/project-versions.json")

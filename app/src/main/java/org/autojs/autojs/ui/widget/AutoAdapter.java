@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.widget;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.ViewGroup;
 
@@ -10,10 +11,9 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/8/19.
  */
-
 public class AutoAdapter<DT> extends RecyclerView.Adapter<BindableViewHolder<DT>> {
 
-    private ViewHolderSupplier<? extends BindableViewHolder<DT>> mViewHolderSupplier;
+    private final ViewHolderSupplier<? extends BindableViewHolder<DT>> mViewHolderSupplier;
     private final List<DT> mData = new ArrayList<>();
 
     public AutoAdapter(ViewHolderSupplier<? extends BindableViewHolder<DT>> viewHolderSupplier) {
@@ -25,8 +25,9 @@ public class AutoAdapter<DT> extends RecyclerView.Adapter<BindableViewHolder<DT>
     }
 
 
+    @NonNull
     @Override
-    public BindableViewHolder<DT> onCreateViewHolder(ViewGroup parent, int viewType) {
+    public BindableViewHolder<DT> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return mViewHolderSupplier.createViewHolder(parent, viewType);
     }
 

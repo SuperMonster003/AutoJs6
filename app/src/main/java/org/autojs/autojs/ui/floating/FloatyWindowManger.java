@@ -11,14 +11,13 @@ import com.stardust.autojs.util.FloatingPermission;
 import com.stardust.enhancedfloaty.FloatyService;
 import com.stardust.enhancedfloaty.FloatyWindow;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.lang.ref.WeakReference;
 
 /**
  * Created by Stardust on 2017/9/30.
  */
-
 public class FloatyWindowManger {
 
     private static WeakReference<CircularMenu> sCircularMenu;
@@ -34,7 +33,7 @@ public class FloatyWindowManger {
             e.printStackTrace();
             if (hasPermission) {
                 FloatingPermission.manageDrawOverlays(context);
-                GlobalAppContext.toast(R.string.text_no_floating_window_permission, Toast.LENGTH_LONG);
+                GlobalAppContext.toast(R.string.text_no_draw_overlays_permission, Toast.LENGTH_LONG);
             }
         }
         return false;
@@ -59,7 +58,7 @@ public class FloatyWindowManger {
             sCircularMenu = new WeakReference<>(menu);
             return true;
         } else {
-            Toast.makeText(context, R.string.text_no_floating_window_permission, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.text_no_draw_overlays_permission, Toast.LENGTH_SHORT).show();
             FloatingPermission.manageDrawOverlays(context);
             return false;
         }

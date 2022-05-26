@@ -12,7 +12,7 @@ public class ExplorerSorter {
 
     public static final Comparator<ExplorerItem> NAME = (o1, o2) -> collator.compare(o2.getName(), o1.getName());
 
-    public static final Comparator<ExplorerItem> DATE = (o1, o2) -> Long.compare(o1.lastModified(), o2.lastModified());
+    public static final Comparator<ExplorerItem> DATE = Comparator.comparingLong(ExplorerItem::lastModified);
 
     public static final Comparator<ExplorerItem> TYPE = (o1, o2) -> o2.getType().compareTo(o1.getType());
 
@@ -32,9 +32,9 @@ public class ExplorerSorter {
 
     public static void sort(List<? extends ExplorerItem> items, final Comparator<ExplorerItem> comparator, boolean ascending) {
         if (ascending) {
-            Collections.sort(items, comparator);
+            items.sort(comparator);
         } else {
-            Collections.sort(items, (Comparator<ExplorerItem>) (o1, o2) -> comparator.compare(o2, o1));
+            items.sort((Comparator<ExplorerItem>) (o1, o2) -> comparator.compare(o2, o1));
         }
     }
 

@@ -1,7 +1,5 @@
 package org.autojs.autojs.model.script;
 
-import androidx.annotation.Nullable;
-
 import com.stardust.autojs.script.AutoFileSource;
 import com.stardust.autojs.script.JavaScriptFileSource;
 import com.stardust.autojs.script.ScriptSource;
@@ -12,7 +10,6 @@ import java.io.File;
 /**
  * Created by Stardust on 2017/1/23.
  */
-
 public class ScriptFile extends PFile {
 
     public static final int TYPE_UNKNOWN = 0;

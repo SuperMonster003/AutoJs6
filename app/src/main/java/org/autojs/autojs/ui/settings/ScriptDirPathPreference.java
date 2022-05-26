@@ -15,7 +15,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
 
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.storage.file.FileObservable;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
@@ -90,7 +90,7 @@ public class ScriptDirPathPreference extends MaterialEditTextPreference {
                 .show();
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SimpleObserver<File>() {
+                .subscribe(new SimpleObserver<>() {
 
                     @Override
                     public void onNext(File file) {

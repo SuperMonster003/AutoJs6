@@ -175,3 +175,40 @@
    pad = o => o.padEnd(2, '_');
    `${pad(h)}:${pad(m)}:${pad(s)}`; // '9_:30:7_'
    ```
+
+* [Object.hasOwn](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwn)
+
+   ```javascript
+   let o = {a: 1};
+   Object.defineProperty(o, 'b', {value: 2});
+
+   Object.hasOwn(o, 'a'); // true
+   o.hasOwnProperty('a'); // true
+   'a' in o; // true
+
+   Object.hasOwn(o, 'b'); // true
+   o.hasOwnProperty('b'); // true
+   'b' in o; // true
+
+   Object.hasOwn(o, 'toString'); // false
+   o.hasOwnProperty('toString'); // false
+   'toString' in o; // true
+
+   let p = Object.create(null);
+   Object.defineProperties(p, {
+      a: {value: 1, enumerable: true},
+      b: {value: 2, enumerable: false},
+   });
+
+   Object.hasOwn(p, 'a'); // true
+   // p.hasOwnProperty('a'); // TypeError
+   'a' in p; // true
+
+   Object.hasOwn(p, 'b'); // true
+   // p.hasOwnProperty('b'); // TypeError
+   'b' in p; // true
+
+   Object.hasOwn(p, 'toString'); // false
+   // p.hasOwnProperty('toString'); // TypeError
+   'toString' in p; // false
+   ```

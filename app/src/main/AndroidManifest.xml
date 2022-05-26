@@ -2,32 +2,36 @@
         xmlns:tools="http://schemas.android.com/tools"
         package="org.autojs.autojs">
 
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+            android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+            android:maxSdkVersion="28" />
+    <uses-permission
+            android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+            tools:ignore="ScopedStorage" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission
+            android:name="android.permission.QUERY_ALL_PACKAGES"
+            tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission
             android:name="android.permission.PACKAGE_USAGE_STATS"
             tools:ignore="ProtectedPermissions" />
     <uses-permission
-            android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-            tools:ignore="ScopedStorage" />
+            android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
+            tools:ignore="ProtectedPermissions" />
 
-    <!-- 非Auto.js运行必需，不会主动申请，某些脚本可以自行申请-->
+    <!-- 非Auto.js运行必需，不会主动申请，某些脚本可以自行申请 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
-    <!-- Ad SDK Permissions -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
 
     <application
             android:name="org.autojs.autojs.App"
@@ -38,7 +42,8 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true"
-            tools:replace="android:label, android:allowBackup">
+            tools:replace="android:label, android:allowBackup"
+            tools:ignore="DataExtractionRules">
 
         <meta-data
                 android:name="android.max_aspect"
@@ -74,7 +79,7 @@
 
         <provider
                 android:name="androidx.core.content.FileProvider"
-                android:authorities="org.autojs.autojs.fileprovider"
+                android:authorities="org.autojs.autojs6.fileprovider"
                 android:exported="false"
                 android:grantUriPermissions="true">
             <meta-data
@@ -126,7 +131,7 @@
                 android:theme="@style/IssueReporterTheme" />
 
 
-        <service android:name="org.autojs.autojs.external.foreground.ForegroundService" />
+        <service android:name="org.autojs.autojs.external.foreground.MainActivityForegroundService" />
         <service android:name="org.autojs.autojs.external.ScriptExecutionIntentService" />
 
         <activity android:name="org.autojs.autojs.external.tasker.TaskPrefEditActivity_" />
@@ -165,7 +170,7 @@
                 android:exported="true"
                 android:icon="@drawable/ic_android_eat_js"
                 android:label="@string/app_name"
-                android:targetActivity=".external.tasker.TaskPrefEditActivity_"
+                android:targetActivity="org.autojs.autojs.external.tasker.TaskPrefEditActivity_"
                 tools:ignore="ExportedActivity">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />

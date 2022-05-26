@@ -10,7 +10,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.stardust.app.DialogUtils;
 import com.stardust.app.GlobalAppContext;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.model.script.Scripts;
 
@@ -20,11 +20,10 @@ import butterknife.ButterKnife;
 /**
  * Created by Stardust on 2017/7/8.
  */
-
 public class ScriptLoopDialog {
 
-    private ScriptFile mScriptFile;
-    private MaterialDialog mDialog;
+    private final ScriptFile mScriptFile;
+    private final MaterialDialog mDialog;
 
     @BindView(R.id.loop_times)
     EditText mLoopTimes;

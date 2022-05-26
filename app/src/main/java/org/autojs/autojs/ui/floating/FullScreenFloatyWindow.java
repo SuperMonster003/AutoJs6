@@ -1,16 +1,13 @@
 package org.autojs.autojs.ui.floating;
 
 import android.graphics.PixelFormat;
-import android.view.View;
 import android.view.WindowManager;
 
-import com.stardust.enhancedfloaty.FloatyService;
 import com.stardust.enhancedfloaty.FloatyWindow;
 
 /**
  * Created by Stardust on 2017/10/18.
  */
-
 public abstract class FullScreenFloatyWindow extends FloatyWindow {
 
     @Override

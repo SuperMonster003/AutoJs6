@@ -2,8 +2,6 @@ package com.stardust.theme.widget;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatTextView;
 import android.util.AttributeSet;
 
@@ -14,7 +12,6 @@ import com.stardust.theme.ThemeColorMutable;
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public class ThemeColorTextView extends AppCompatTextView implements ThemeColorMutable {
 
     public ThemeColorTextView(Context context) {

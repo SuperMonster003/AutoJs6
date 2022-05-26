@@ -45,7 +45,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EViewGroup;
 import org.androidannotations.annotations.ViewById;
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.model.autocomplete.AutoCompletion;
 import org.autojs.autojs.model.autocomplete.CodeCompletion;
@@ -130,7 +130,7 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
     private AutoCompletion mAutoCompletion;
     private Theme mEditorTheme;
     private FunctionsKeyboardHelper mFunctionsKeyboardHelper;
-    private BroadcastReceiver mOnRunFinishedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mOnRunFinishedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_ON_EXECUTION_FINISHED.equals(intent.getAction())) {
@@ -152,9 +152,9 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
         }
     };
 
-    private SparseBooleanArray mMenuItemStatus = new SparseBooleanArray();
+    private final SparseBooleanArray mMenuItemStatus = new SparseBooleanArray();
     private String mRestoredText;
-    private NormalToolbarFragment mNormalToolbar = new NormalToolbarFragment_();
+    private final NormalToolbarFragment mNormalToolbar = new NormalToolbarFragment_();
     private boolean mDebugging = false;
 
     public EditorView(Context context) {
@@ -365,30 +365,14 @@ public class EditorView extends FrameLayout implements CodeCompletionBar.OnHintC
     @Override
     public void onToolbarMenuItemClick(int id) {
         switch (id) {
-            case R.id.run:
-                runAndSaveFileIfNeeded();
-                break;
-            case R.id.save:
-                saveFile();
-                break;
-            case R.id.undo:
-                undo();
-                break;
-            case R.id.redo:
-                redo();
-                break;
-            case R.id.replace:
-                replace();
-                break;
-            case R.id.find_next:
-                findNext();
-                break;
-            case R.id.find_prev:
-                findPrev();
-                break;
-            case R.id.cancel_search:
-                cancelSearch();
-                break;
+            case R.id.run -> runAndSaveFileIfNeeded();
+            case R.id.save -> saveFile();
+            case R.id.undo -> undo();
+            case R.id.redo -> redo();
+            case R.id.replace -> replace();
+            case R.id.find_next -> findNext();
+            case R.id.find_prev -> findPrev();
+            case R.id.cancel_search -> cancelSearch();
         }
     }
 

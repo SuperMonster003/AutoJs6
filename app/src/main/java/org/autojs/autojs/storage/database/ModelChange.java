@@ -1,10 +1,11 @@
 package org.autojs.autojs.storage.database;
 
 
+import androidx.annotation.NonNull;
+
 /**
  * Created by Stardust on 2017/11/28.
  */
-
 public class ModelChange<M> {
 
     public static final int INSERT = 1;
@@ -28,6 +29,7 @@ public class ModelChange<M> {
         return mAction;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ModelChange{" +

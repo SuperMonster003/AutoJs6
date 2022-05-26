@@ -17,7 +17,6 @@ import com.google.android.material.appbar.AppBarLayout;
 /**
  * Created by Stardust on 2017/8/22.
  */
-
 public class AppWithStatusBarLayout extends AppBarLayout {
 
     public AppWithStatusBarLayout(Context context) {

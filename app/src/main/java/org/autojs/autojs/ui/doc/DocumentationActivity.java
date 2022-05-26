@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.doc;
 import android.webkit.WebView;
 
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.widget.EWebView;
 

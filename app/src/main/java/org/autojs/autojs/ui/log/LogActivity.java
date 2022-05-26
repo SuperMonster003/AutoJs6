@@ -11,7 +11,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.ui.BaseActivity;
 
@@ -38,7 +38,7 @@ public class LogActivity extends BaseActivity {
     }
 
     @Click(R.id.fab)
-    void clearConsole() {
+    public void clearConsole() {
         mConsoleImpl.clear();
     }
 }

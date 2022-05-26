@@ -22,7 +22,7 @@ import com.stardust.view.accessibility.AccessibilityService;
 import com.stardust.view.accessibility.LayoutInspector;
 import com.stardust.view.accessibility.NodeInfo;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.pluginclient.DevPluginService;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
@@ -39,7 +39,6 @@ import java.util.concurrent.Executors;
 /**
  * Created by Stardust on 2017/4/2.
  */
-
 public class AutoJs extends com.stardust.autojs.AutoJs {
 
     private static AutoJs instance;
@@ -123,7 +122,7 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
                 String log = super.println(level, charSequence);
 
                 // FIXME by SuperMonster003 as of Feb 2, 2022.
-                //  ! When running in 'ui' thread (`ui.run`, `ui.post`),
+                //  ! When running in "ui" thread (ui.run() or ui.post()),
                 //  ! android.os.NetworkOnMainThreadException may happen.
                 //  ! Further more, dunno if a thread executor is a good idea.
                 printExecutor.submit(() -> devPluginService.print(log));
@@ -145,14 +144,14 @@ public class AutoJs extends com.stardust.autojs.AutoJs {
     }
 
     @Override
-    public void waitForAccessibilityServiceEnabled() {
+    public void waitForAccessibilityServiceEnabled(long timeout) {
         if (AccessibilityService.Companion.getInstance() != null) {
             return;
         }
         String errorMessage = tryEnableAccessibilityService();
         if (errorMessage != null) {
             getAccessibilityTool().goToAccessibilitySetting();
-            if (!AccessibilityService.Companion.waitForEnabled(-1)) {
+            if (!AccessibilityService.Companion.waitForEnabled(timeout)) {
                 throw new ScriptInterruptedException();
             }
         }

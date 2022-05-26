@@ -8,7 +8,6 @@ import com.heinrichreimersoftware.androidissuereporter.model.github.GithubTarget
 /**
  * Created by Stardust on 2017/2/13.
  */
-
 public class IssueReporterActivity extends AbstractIssueReporterActivity {
 
     @Override

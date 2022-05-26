@@ -1,8 +1,6 @@
 package org.autojs.autojs.ui.widget;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,12 +10,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/1/24.
  */
-
 public class SlidingUpPanel extends FrameLayout {
 
     private static final long DEFAULT_ANIMATION_DURATION = 300;
@@ -42,7 +39,6 @@ public class SlidingUpPanel extends FrameLayout {
         init();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public SlidingUpPanel(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
@@ -57,12 +53,7 @@ public class SlidingUpPanel extends FrameLayout {
 
     public void dismiss() {
         mContentContainer.startAnimation(mSlideDownAnimation);
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                SlidingUpPanel.this.setVisibility(GONE);
-            }
-        }, mSlideDownAnimation.getDuration());
+        postDelayed(() -> SlidingUpPanel.this.setVisibility(GONE), mSlideDownAnimation.getDuration());
         mShowing = false;
     }
 
@@ -80,7 +71,7 @@ public class SlidingUpPanel extends FrameLayout {
         initShadow();
         initAnimation();
         setVisibility(GONE);
-        mContentContainer = (FrameLayout) findViewById(R.id.content_container);
+        mContentContainer = findViewById(R.id.content_container);
     }
 
     private void initAnimation() {
@@ -91,12 +82,7 @@ public class SlidingUpPanel extends FrameLayout {
 
     private void initShadow() {
         mShadow = findViewById(R.id.shadow);
-        mShadow.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SlidingUpPanel.this.dismiss();
-            }
-        });
+        mShadow.setOnClickListener(v -> SlidingUpPanel.this.dismiss());
     }
 
     @Override

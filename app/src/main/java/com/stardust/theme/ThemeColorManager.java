@@ -1,12 +1,11 @@
 package com.stardust.theme;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Paint;
-import android.os.Build;
-import android.preference.PreferenceManager;
 import android.view.View;
+
+import androidx.preference.PreferenceManager;
 
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
@@ -17,7 +16,6 @@ import java.util.Vector;
 /**
  * Created by Stardust on 2016/5/10.
  */
-
 public class ThemeColorManager {
 
     private static ThemeColor defaultThemeColor;
@@ -54,22 +52,19 @@ public class ThemeColorManager {
     }
 
     public static void addActivityNavigationBar(final Activity activity) {
-        if (Build.VERSION.SDK_INT > 19) {
-            ThemeColorWidgetReferenceManager.add(new ThemeColorMutableReference() {
-                WeakReference<Activity> weakReference = new WeakReference<>(activity);
+        ThemeColorWidgetReferenceManager.add(new ThemeColorMutableReference() {
+            final WeakReference<Activity> weakReference = new WeakReference<>(activity);
 
-                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                @Override
-                public void setThemeColor(ThemeColor color) {
-                    activity.getWindow().setNavigationBarColor(color.colorPrimary);
-                }
+            @Override
+            public void setThemeColor(ThemeColor color) {
+                activity.getWindow().setNavigationBarColor(color.colorPrimary);
+            }
 
-                @Override
-                public boolean isNull() {
-                    return weakReference.get() == null;
-                }
-            });
-        }
+            @Override
+            public boolean isNull() {
+                return weakReference.get() == null;
+            }
+        });
     }
 
     public static int getColorPrimary() {
@@ -132,7 +127,7 @@ public class ThemeColorManager {
     }
 
     private static class BackgroundColorManager {
-        private static List<WeakReference<View>> views = new LinkedList<>();
+        private static final List<WeakReference<View>> views = new LinkedList<>();
 
         public static void add(View view) {
             views.add(new WeakReference<>(view));
@@ -155,16 +150,14 @@ public class ThemeColorManager {
     }
 
     private static class StatusBarManager {
-        private static Vector<WeakReference<Activity>> activities = new Vector<>();
+        private static final Vector<WeakReference<Activity>> activities = new Vector<>();
 
-        @TargetApi(21)
         public static void add(Activity activity) {
             activities.add(new WeakReference<>(activity));
             if (shouldApplyThemeColor())
                 activity.getWindow().setStatusBarColor(themeColor.colorPrimary);
         }
 
-        @TargetApi(21)
         public static void setColor(int color) {
             Iterator<WeakReference<Activity>> iterator = activities.iterator();
             while (iterator.hasNext()) {
@@ -179,7 +172,7 @@ public class ThemeColorManager {
     }
 
     private static class PaintManager {
-        private static List<WeakReference<Paint>> paints = new LinkedList<>();
+        private static final List<WeakReference<Paint>> paints = new LinkedList<>();
 
         public static void add(Paint paint) {
             if (shouldApplyThemeColor())
@@ -202,7 +195,7 @@ public class ThemeColorManager {
 
     private static class ThemeColorWidgetReferenceManager {
 
-        private static List<ThemeColorMutableReference> widgets = new LinkedList<>();
+        private static final List<ThemeColorMutableReference> widgets = new LinkedList<>();
 
         public static void add(ThemeColorMutableReference widget) {
             if (shouldApplyThemeColor())
@@ -226,7 +219,7 @@ public class ThemeColorManager {
 
     private static class ThemeColorMutableManager {
 
-        private static List<WeakReference<ThemeColorMutable>> widgets = new LinkedList<>();
+        private static final List<WeakReference<ThemeColorMutable>> widgets = new LinkedList<>();
 
         public static void add(ThemeColorMutable widget) {
             if (shouldApplyThemeColor())

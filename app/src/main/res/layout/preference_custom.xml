@@ -16,8 +16,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginLeft="@dimen/md_preference_content_inset"
-        android:layout_marginStart="@dimen/md_preference_content_inset"
+        android:layout_marginLeft="@dimen/content_inset"
+        android:layout_marginStart="@dimen/content_inset"
         tools:ignore="ContentDescription"/>
 
     <LinearLayout

@@ -1,20 +1,20 @@
 package org.autojs.autojs.ui;
 
-import static android.content.pm.PackageManager.PERMISSION_DENIED;
-
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.view.Menu;
 import android.view.View;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -28,7 +28,7 @@ import com.zeugmasolutions.localehelper.LocaleHelperActivityDelegate;
 import com.zeugmasolutions.localehelper.LocaleHelperActivityDelegateImpl;
 
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,6 @@ import java.util.Locale;
  * Created by Stardust on 2017/1/23.
  * Modified by SuperMonster003 as of Feb 18, 2022.
  */
-
 public abstract class BaseActivity extends AppCompatActivity {
 
     protected static final int PERMISSION_REQUEST_CODE = 11186;
@@ -100,6 +99,22 @@ public abstract class BaseActivity extends AppCompatActivity {
         localeDelegate.onResumed(this);
     }
 
+    public void restartAfterPendingIntent(@NonNull View view) {
+        restartAfterPendingIntent(view.getContext());
+    }
+
+    public void restartAfterPendingIntent(@NonNull Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
+        ComponentName componentName = null;
+        if (intent != null) {
+            componentName = intent.getComponent();
+        }
+        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
+        context.startActivity(mainIntent);
+        Process.killProcess(Process.myPid());
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -136,17 +151,16 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void checkPermission(String... permissions) {
-        String[] requestPermissions = getRequestPermissions(permissions);
-        if (requestPermissions.length > 0) {
-            requestPermissions(requestPermissions, PERMISSION_REQUEST_CODE);
+        String[] permissionsToRequest = getPermissionsToRequest(permissions);
+        if (permissionsToRequest.length > 0) {
+            requestPermissions(permissionsToRequest, PERMISSION_REQUEST_CODE);
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    private String[] getRequestPermissions(String[] permissions) {
+    public String[] getPermissionsToRequest(String[] permissions) {
         List<String> list = new ArrayList<>();
         for (String permission : permissions) {
-            if (checkSelfPermission(permission) == PERMISSION_DENIED) {
+            if (checkSelfPermission(permission) == PackageManager.PERMISSION_DENIED) {
                 list.add(permission);
             }
         }

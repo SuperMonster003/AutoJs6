@@ -4,10 +4,9 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,7 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.model.indices.Module;
 import org.autojs.autojs.model.indices.Modules;
 import org.autojs.autojs.model.indices.Property;
@@ -40,7 +39,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 /**
  * Created by Stardust on 2017/12/9.
  */
-
 public class FunctionsKeyboardView extends FrameLayout {
 
     public interface ClickCallback {
@@ -59,7 +57,7 @@ public class FunctionsKeyboardView extends FrameLayout {
     RecyclerView mPropertiesView;
 
     private List<Module> mModules;
-    private Map<Module, List<Integer>> mSpanSizes = new HashMap<>();
+    private final Map<Module, List<Integer>> mSpanSizes = new HashMap<>();
     private Module mSelectedModule;
     private View mSelectedModuleView;
     private Paint mPaint;
@@ -80,7 +78,6 @@ public class FunctionsKeyboardView extends FrameLayout {
         init();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public FunctionsKeyboardView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
@@ -205,7 +202,7 @@ public class FunctionsKeyboardView extends FrameLayout {
     private class ModuleViewHolder extends RecyclerView.ViewHolder {
 
 
-        private TextView mTextView;
+        private final TextView mTextView;
         private Module mModule;
 
         ModuleViewHolder(View itemView) {
@@ -239,7 +236,7 @@ public class FunctionsKeyboardView extends FrameLayout {
 
     private class PropertyViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView mTextView;
+        private final TextView mTextView;
         private Property mProperty;
 
         PropertyViewHolder(View itemView) {
@@ -267,6 +264,7 @@ public class FunctionsKeyboardView extends FrameLayout {
 
     private class ModulesAdapter extends RecyclerView.Adapter<ModuleViewHolder> {
 
+        @NonNull
         @Override
         public ModuleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return new ModuleViewHolder(LayoutInflater.from(parent.getContext())
@@ -286,6 +284,7 @@ public class FunctionsKeyboardView extends FrameLayout {
 
     private class PropertiesAdapter extends RecyclerView.Adapter<PropertyViewHolder> {
 
+        @NonNull
         @Override
         public PropertyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return new PropertyViewHolder(LayoutInflater.from(parent.getContext())

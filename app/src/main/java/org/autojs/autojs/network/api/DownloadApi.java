@@ -9,7 +9,6 @@ import retrofit2.http.Url;
 /**
  * Created by Stardust on 2017/12/6.
  */
-
 public interface DownloadApi {
 
     @GET

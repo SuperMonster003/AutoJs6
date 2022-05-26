@@ -10,7 +10,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import com.stardust.app.DialogUtils;
 import com.stardust.enhancedfloaty.FloatyService;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.codegeneration.CodeGenerateDialog;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
@@ -23,7 +23,6 @@ import java.util.Arrays;
 /**
  * Created by Stardust on 2017/3/12.
  */
-
 public class LayoutHierarchyFloatyWindow extends FullScreenFloatyWindow {
 
     private static final String TAG = "FloatingHierarchyView";
@@ -34,7 +33,7 @@ public class LayoutHierarchyFloatyWindow extends FullScreenFloatyWindow {
     private BubblePopupMenu mBubblePopMenu;
     private NodeInfoView mNodeInfoView;
     private Context mContext;
-    private NodeInfo mRootNode;
+    private final NodeInfo mRootNode;
     private NodeInfo mSelectedNode;
 
     public LayoutHierarchyFloatyWindow(NodeInfo rootNode) {

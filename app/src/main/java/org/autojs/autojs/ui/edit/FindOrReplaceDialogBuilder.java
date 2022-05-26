@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
 
@@ -22,7 +22,6 @@ import butterknife.OnTextChanged;
 /**
  * Created by Stardust on 2017/9/28.
  */
-
 public class FindOrReplaceDialogBuilder extends ThemeColorMaterialDialogBuilder {
 
     private static final String KEY_KEYWORDS = "...";
@@ -42,7 +41,7 @@ public class FindOrReplaceDialogBuilder extends ThemeColorMaterialDialogBuilder 
     @BindView(R.id.replacement)
     EditText mReplacementEditText;
 
-    private EditorView mEditorView;
+    private final EditorView mEditorView;
 
     public FindOrReplaceDialogBuilder(@NonNull Context context, EditorView editorView) {
         super(context);

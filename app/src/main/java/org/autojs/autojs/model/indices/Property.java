@@ -5,7 +5,6 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Stardust on 2017/12/9.
  */
-
 public class Property {
 
     @SerializedName("url")

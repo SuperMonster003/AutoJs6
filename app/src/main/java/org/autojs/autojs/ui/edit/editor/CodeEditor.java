@@ -10,7 +10,7 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.stardust.autojs.script.JsBeautifier;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.edit.theme.Theme;
 
 import com.stardust.util.ClipboardUtil;

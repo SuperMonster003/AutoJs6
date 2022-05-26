@@ -13,7 +13,6 @@ import java.nio.ByteOrder;
 /**
  * Created by Stardust on 2017/5/11.
  */
-
 public class WifiTool {
     public static String getRouterIp(Context context) {
         byte[] ipAddressByte = getIpAddressByte(context);

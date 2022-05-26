@@ -7,7 +7,7 @@ import org.mozilla.javascript.ContextFactory;
 
 public class DebuggerSingleton {
 
-    private static Debugger sDebugger = new Debugger(AutoJs.getInstance().getScriptEngineService(), ContextFactory.getGlobal());
+    private static final Debugger sDebugger = new Debugger(AutoJs.getInstance().getScriptEngineService(), ContextFactory.getGlobal());
 
     public static Debugger get(){
         return sDebugger;

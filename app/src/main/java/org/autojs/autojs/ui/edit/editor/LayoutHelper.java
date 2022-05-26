@@ -1,16 +1,12 @@
 package org.autojs.autojs.ui.edit.editor;
 
-import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.os.Parcelable;
 import android.text.Layout;
-import android.text.TextUtils;
 
 /**
  * Created by Stardust on 2018/2/13.
  */
-
 public class LayoutHelper {
 
 

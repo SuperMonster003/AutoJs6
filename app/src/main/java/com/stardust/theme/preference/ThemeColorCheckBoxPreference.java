@@ -1,18 +1,15 @@
 package com.stardust.theme.preference;
 
 import android.content.Context;
-import android.os.Build;
 import android.preference.CheckBoxPreference;
 
-import androidx.annotation.RequiresApi;
 import android.util.AttributeSet;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public class ThemeColorCheckBoxPreference extends CheckBoxPreference {
 
     public ThemeColorCheckBoxPreference(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -20,7 +17,6 @@ public class ThemeColorCheckBoxPreference extends CheckBoxPreference {
         init();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public ThemeColorCheckBoxPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();

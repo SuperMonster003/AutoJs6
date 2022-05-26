@@ -10,7 +10,6 @@ import java.lang.reflect.Constructor;
 /**
  * Created by Stardust on 2017/4/8.
  */
-
 public interface ViewHolderSupplier<VH extends RecyclerView.ViewHolder> {
 
     VH createViewHolder(ViewGroup parent, int viewType);

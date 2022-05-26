@@ -32,7 +32,7 @@ public class CircularMenuWindow extends FloatyWindow {
     protected float mKeepToSideHiddenWidthRadio;
     protected float mActiveAlpha = 1.0F;
     protected float mInactiveAlpha = 0.4F;
-    private Context mContext;
+    private final Context mContext;
     private OrientationEventListener mOrientationEventListener;
 
     public CircularMenuWindow(Context context, CircularMenuFloaty floaty) {

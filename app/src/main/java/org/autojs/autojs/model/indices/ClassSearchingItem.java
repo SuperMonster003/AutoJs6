@@ -55,6 +55,7 @@ public abstract class ClassSearchingItem implements Comparable<ClassSearchingIte
         return 1;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ClassSearchingItem{" + getLabel() + "}";

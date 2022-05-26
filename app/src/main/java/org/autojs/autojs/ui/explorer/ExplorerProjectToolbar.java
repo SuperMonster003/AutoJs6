@@ -11,7 +11,7 @@ import com.stardust.autojs.project.ProjectConfig;
 import com.stardust.autojs.project.ProjectLauncher;
 import com.stardust.pio.PFile;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent;
 import org.autojs.autojs.model.explorer.ExplorerItem;

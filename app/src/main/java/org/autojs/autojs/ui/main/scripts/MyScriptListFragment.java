@@ -13,7 +13,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.ViewById;
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.Explorers;
@@ -37,8 +37,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
  */
 @EFragment(R.layout.fragment_my_script_list)
 public class MyScriptListFragment extends ViewPagerFragment implements FloatingActionMenu.OnFloatingActionButtonClickListener {
-
-    private static final String TAG = "MyScriptListFragment";
 
     public MyScriptListFragment() {
         super(0);
@@ -76,7 +74,6 @@ public class MyScriptListFragment extends ViewPagerFragment implements FloatingA
             mFloatingActionMenu.collapse();
         } else {
             mFloatingActionMenu.expand();
-
         }
     }
 
@@ -86,7 +83,7 @@ public class MyScriptListFragment extends ViewPagerFragment implements FloatingA
         mFloatingActionMenu = getActivity().findViewById(R.id.floating_action_menu);
         mFloatingActionMenu.getState()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SimpleObserver<Boolean>() {
+                .subscribe(new SimpleObserver<>() {
                     @Override
                     public void onNext(@io.reactivex.annotations.NonNull Boolean expanding) {
                         fab.animate()
@@ -157,25 +154,16 @@ public class MyScriptListFragment extends ViewPagerFragment implements FloatingA
         if (mExplorerView == null)
             return;
         switch (pos) {
-            case 0:
-                new ScriptOperations(getContext(), mExplorerView, mExplorerView.getCurrentPage())
-                        .newDirectory();
-                break;
-            case 1:
-                new ScriptOperations(getContext(), mExplorerView, mExplorerView.getCurrentPage())
-                        .newFile();
-                break;
-            case 2:
-                new ScriptOperations(getContext(), mExplorerView, mExplorerView.getCurrentPage())
-                        .importFile();
-                break;
-            case 3:
-                ProjectConfigActivity_.intent(getContext())
-                        .extra(ProjectConfigActivity.EXTRA_PARENT_DIRECTORY, mExplorerView.getCurrentPage().getPath())
-                        .extra(ProjectConfigActivity.EXTRA_NEW_PROJECT, true)
-                        .start();
-                break;
-
+            case 0 -> new ScriptOperations(getContext(), mExplorerView, mExplorerView.getCurrentPage())
+                    .newDirectory();
+            case 1 -> new ScriptOperations(getContext(), mExplorerView, mExplorerView.getCurrentPage())
+                    .newFile();
+            case 2 -> new ScriptOperations(getContext(), mExplorerView, mExplorerView.getCurrentPage())
+                    .importFile();
+            case 3 -> ProjectConfigActivity_.intent(getContext())
+                    .extra(ProjectConfigActivity.EXTRA_PARENT_DIRECTORY, mExplorerView.getCurrentPage().getPath())
+                    .extra(ProjectConfigActivity.EXTRA_NEW_PROJECT, true)
+                    .start();
         }
     }
 }

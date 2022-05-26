@@ -16,7 +16,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.stardust.autojs.script.JavaScriptSource;
 import com.stardust.pio.PFiles;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.ui.project.BuildActivity;
@@ -37,7 +37,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 /**
  * Created by Stardust on 2017/9/28.
  */
-
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @SuppressLint("CheckResult")
 public class EditorMenu {

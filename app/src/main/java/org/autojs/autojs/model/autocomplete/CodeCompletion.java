@@ -3,7 +3,6 @@ package org.autojs.autojs.model.autocomplete;
 /**
  * Created by Stardust on 2018/2/3.
  */
-
 public class CodeCompletion {
 
     private final String mHint;

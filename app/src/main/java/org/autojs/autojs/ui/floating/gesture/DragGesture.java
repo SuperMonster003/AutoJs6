@@ -11,7 +11,6 @@ import com.stardust.enhancedfloaty.WindowBridge;
 /**
  * Created by Stardust on 2017/4/18.
  */
-
 public class DragGesture extends GestureDetector.SimpleOnGestureListener {
 
     protected WindowBridge mWindowBridge;
@@ -48,18 +47,15 @@ public class DragGesture extends GestureDetector.SimpleOnGestureListener {
 
     private void setupView() {
         final GestureDetectorCompat gestureDetector = new GestureDetectorCompat(mView.getContext(), this);
-        mView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                gestureDetector.onTouchEvent(event);
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    setAlphaUnpressed();
-                    if (!onTheEdge() && mAutoKeepToEdge) {
-                        keepToEdge();
-                    }
+        mView.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                setAlphaUnpressed();
+                if (!onTheEdge() && mAutoKeepToEdge) {
+                    keepToEdge();
                 }
-                return true;
             }
+            return true;
         });
     }
 

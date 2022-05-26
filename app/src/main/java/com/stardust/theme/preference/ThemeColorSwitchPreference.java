@@ -3,9 +3,8 @@ package com.stardust.theme.preference;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.os.Build;
 import android.preference.SwitchPreference;
-import androidx.annotation.RequiresApi;
+
 import androidx.appcompat.widget.SwitchCompat;
 import android.util.AttributeSet;
 import android.view.View;
@@ -17,18 +16,14 @@ import com.stardust.theme.ThemeColorHelper;
 import com.stardust.theme.ThemeColorManager;
 import com.stardust.theme.ThemeColorMutable;
 
-import java.lang.reflect.Field;
-
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public class ThemeColorSwitchPreference extends SwitchPreference implements ThemeColorMutable {
 
     private View mCheckableView;
     private int mColor = Color.TRANSPARENT;
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public ThemeColorSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
@@ -73,13 +68,11 @@ public class ThemeColorSwitchPreference extends SwitchPreference implements Them
 
     public void applyColor() {
         if (mCheckableView != null && mCheckableView instanceof Checkable) {
-            if (mCheckableView instanceof Switch) {
-                final Switch switchView = (Switch) mCheckableView;
+            if (mCheckableView instanceof final Switch switchView) {
                 ThemeColorHelper.setColorPrimary(switchView, mColor);
             }
 
-            if (mCheckableView instanceof SwitchCompat) {
-                final SwitchCompat switchView = (SwitchCompat) mCheckableView;
+            if (mCheckableView instanceof final SwitchCompat switchView) {
                 ThemeColorHelper.setColorPrimary(switchView, mColor);
 
             }

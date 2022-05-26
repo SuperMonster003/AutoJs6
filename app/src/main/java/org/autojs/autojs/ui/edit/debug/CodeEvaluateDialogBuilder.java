@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 
 public class CodeEvaluateDialogBuilder extends ThemeColorMaterialDialogBuilder {
@@ -19,7 +19,7 @@ public class CodeEvaluateDialogBuilder extends ThemeColorMaterialDialogBuilder {
     private CodeEvaluator mCodeEvaluator;
     private TextView mResult;
     private EditText mCode;
-    private SharedPreferences mSharedPreferences;
+    private final SharedPreferences mSharedPreferences;
 
     public CodeEvaluateDialogBuilder(@NonNull Context context) {
         super(context);

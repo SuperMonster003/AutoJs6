@@ -6,7 +6,6 @@ import android.util.AttributeSet;
 /**
  * Created by Stardust on 2017/9/18.
  */
-
 public class SwitchCompat extends androidx.appcompat.widget.SwitchCompat {
 
     private boolean mIgnoreCheckedChange = false;

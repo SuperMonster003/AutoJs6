@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
 
@@ -21,13 +21,12 @@ import butterknife.ButterKnife;
 /**
  * Created by Stardust on 2017/6/26.
  */
-
 public class OperationDialogBuilder extends MaterialDialog.Builder {
 
-    private RecyclerView mOperations;
-    private ArrayList<Integer> mIds = new ArrayList<>();
-    private ArrayList<Integer> mIcons = new ArrayList<>();
-    private ArrayList<String> mTexts = new ArrayList<>();
+    private final RecyclerView mOperations;
+    private final ArrayList<Integer> mIds = new ArrayList<>();
+    private final ArrayList<Integer> mIcons = new ArrayList<>();
+    private final ArrayList<String> mTexts = new ArrayList<>();
     private Object mOnItemClickTarget;
 
     public OperationDialogBuilder(@NonNull Context context) {
@@ -35,13 +34,14 @@ public class OperationDialogBuilder extends MaterialDialog.Builder {
         mOperations = new RecyclerView(context);
         mOperations.setLayoutManager(new LinearLayoutManager(context));
         mOperations.setAdapter(new RecyclerView.Adapter<ViewHolder>() {
+            @NonNull
             @Override
-            public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.operation_dialog_item, parent, false));
             }
 
             @Override
-            public void onBindViewHolder(ViewHolder holder, int position) {
+            public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
                 holder.itemView.setId(mIds.get(position));
                 holder.text.setText(mTexts.get(position));
                 holder.icon.setImageResource(mIcons.get(position));

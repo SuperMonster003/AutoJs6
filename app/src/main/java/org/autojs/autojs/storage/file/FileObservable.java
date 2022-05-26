@@ -19,7 +19,7 @@ public class FileObservable {
     }
 
     private static Observable<File> copy(String fromPath, String toPath, boolean deleteOld) {
-        return new Observable<File>() {
+        return new Observable<>() {
             @Override
             protected void subscribeActual(Observer<? super File> observer) {
                 try {

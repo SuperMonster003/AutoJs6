@@ -15,14 +15,13 @@ import com.stardust.pio.PFiles;
 
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.edit.EditActivity;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.io.File;
 
 /**
  * Created by Stardust on 2017/2/2.
  */
-
 public class EditIntentActivity extends BaseActivity {
 
     private static final String EXTERNAL_FILES = "external_files";

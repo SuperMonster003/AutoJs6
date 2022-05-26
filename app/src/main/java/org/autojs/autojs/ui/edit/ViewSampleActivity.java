@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.SparseArray;
@@ -19,7 +20,7 @@ import com.stardust.app.OnActivityResultDelegate;
 import com.stardust.autojs.engine.JavaScriptEngine;
 import com.stardust.autojs.execution.ScriptExecution;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.model.sample.SampleFile;
 import org.autojs.autojs.ui.BaseActivity;
@@ -33,8 +34,6 @@ import org.autojs.autojs.ui.widget.ToolbarMenuItem;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
 
 import static org.autojs.autojs.model.script.Scripts.ACTION_ON_EXECUTION_FINISHED;
 import static org.autojs.autojs.model.script.Scripts.EXTRA_EXCEPTION_MESSAGE;
@@ -56,8 +55,8 @@ public class ViewSampleActivity extends AppCompatActivity implements OnActivityR
     private SampleFile mSample;
     private ScriptExecution mScriptExecution;
     private SparseArray<ToolbarMenuItem> mMenuMap;
-    private OnActivityResultDelegate.Mediator mMediator = new OnActivityResultDelegate.Mediator();
-    private BroadcastReceiver mOnRunFinishedReceiver = new BroadcastReceiver() {
+    private final OnActivityResultDelegate.Mediator mMediator = new OnActivityResultDelegate.Mediator();
+    private final BroadcastReceiver mOnRunFinishedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ACTION_ON_EXECUTION_FINISHED)) {
@@ -113,14 +112,14 @@ public class ViewSampleActivity extends AppCompatActivity implements OnActivityR
 
     private void initMenuItem() {
         mMenuMap = new SparseArrayEntries<ToolbarMenuItem>()
-                .entry(R.id.run, (ToolbarMenuItem) findViewById(R.id.run))
+                .entry(R.id.run, findViewById(R.id.run))
                 .sparseArray();
     }
 
     public void setMenuStatus(int menuResId, int status) {
         ToolbarMenuItem menuItem = mMenuMap.get(menuResId);
-        if (menuItem == null)
-            return;
+        if (menuItem == null) {
+        }
     }
 
 
@@ -178,6 +177,7 @@ public class ViewSampleActivity extends AppCompatActivity implements OnActivityR
         }
     }
 
+    @NonNull
     @Override
     public OnActivityResultDelegate.Mediator getOnActivityResultDelegateMediator() {
         return mMediator;

@@ -2,6 +2,8 @@ package org.autojs.autojs.ui.edit.completion;
 
 import android.content.Context;
 import android.os.Looper;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -11,13 +13,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.stardust.autojs.workground.WrapContentLinearLayoutManager;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.model.autocomplete.CodeCompletions;
 
 /**
  * Created by Stardust on 2017/2/17.
  */
-
 public class CodeCompletionBar extends RecyclerView {
 
     public interface OnHintClickListener {
@@ -100,8 +101,9 @@ public class CodeCompletionBar extends RecyclerView {
 
     private class CodeCompletionAdapter extends RecyclerView.Adapter<ViewHolder> {
 
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new ViewHolder(LayoutInflater.from(getContext()).inflate(R.layout.input_method_enhance_bar_item, parent, false));
         }
 

@@ -21,7 +21,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.external.shortcut.Shortcut;
 import org.autojs.autojs.external.shortcut.ShortcutActivity;
@@ -40,7 +40,6 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Created by Stardust on 2017/10/25.
  */
-
 public class ShortcutCreateActivity extends AppCompatActivity {
 
     public static final String EXTRA_FILE = "file";

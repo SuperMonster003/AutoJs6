@@ -15,7 +15,6 @@ import java.lang.reflect.Field;
 /**
  * Created by Stardust on 2016/8/15.
  */
-
 public class ThemeColorNavigationView extends NavigationView implements ThemeColorMutable {
 
     private static final int COLOR_GRAY = 0xff7a7a7a;

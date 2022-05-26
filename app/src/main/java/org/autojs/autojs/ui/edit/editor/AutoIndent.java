@@ -6,11 +6,11 @@ import android.text.TextWatcher;
 /**
  * Created by Stardust on 2018/2/25.
  */
-
 public class AutoIndent implements TextWatcher {
 
-    private String mIndent = "    ";
-    private CodeEditText mEditText;
+    // nbsp ×4
+    private final String mIndent = "    ";
+    private final CodeEditText mEditText;
     private boolean mInsertingIndent = false;
     private boolean mExtraIndent = false;
     private boolean mAutoIndent = false;

@@ -19,11 +19,10 @@ import java.io.Reader;
 /**
  * Created by Stardust on 2017/10/28.
  */
-
 public class SampleFile extends ScriptFile {
 
     private long mLength;
-    private AssetManager mAssetManager;
+    private final AssetManager mAssetManager;
 
     public SampleFile(@NonNull String pathname, AssetManager assetManager) {
         super(pathname);

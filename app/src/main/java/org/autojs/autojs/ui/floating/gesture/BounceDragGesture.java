@@ -10,7 +10,6 @@ import com.stardust.enhancedfloaty.WindowBridge;
 /**
  * Created by Stardust on 2017/9/26.
  */
-
 public class BounceDragGesture extends DragGesture {
 
     private long mBounceDuration = 300;

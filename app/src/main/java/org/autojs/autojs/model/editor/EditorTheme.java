@@ -11,7 +11,7 @@ import java.util.List;
 
 public class EditorTheme {
 
-    private static Gson sGson;
+    private static final Gson sGson;
 
     static {
         sGson = new GsonBuilder()

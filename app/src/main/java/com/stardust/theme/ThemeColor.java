@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat;
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public class ThemeColor {
 
     private static final String KEY_COLOR_PRIMARY = "com.stardust.theme.ThemeColor.KEY_COLOR_PRIMARY";
@@ -21,8 +20,8 @@ public class ThemeColor {
     public int colorPrimary, colorAccent, colorPrimaryDark;
 
     public ThemeColor() {
-    }
 
+    }
 
     public ThemeColor(int color) {
         this(color, color, color);
@@ -67,8 +66,7 @@ public class ThemeColor {
         if (this == obj) {
             return true;
         }
-        if (obj instanceof ThemeColor) {
-            ThemeColor color = (ThemeColor) obj;
+        if (obj instanceof ThemeColor color) {
             return colorPrimary == color.colorPrimary && colorPrimaryDark == color.colorPrimaryDark
                     && colorAccent == color.colorAccent;
         }

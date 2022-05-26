@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.viewmodel;
 
 import android.content.SharedPreferences;
 
-import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.explorer.ExplorerSorter;
@@ -13,7 +12,6 @@ import java.util.Comparator;
 /**
  * Created by Stardust on 2017/9/30.
  */
-
 public class ExplorerItemList {
 
     public static class SortConfig {
@@ -64,7 +62,6 @@ public class ExplorerItemList {
                     .putBoolean(CLASS_NAME + "." + "file_ascending", mFileSortedAscending)
                     .putBoolean(CLASS_NAME + "." + "dir_ascending", mDirSortedAscending)
                     .apply();
-
         }
 
         public static SortConfig from(SharedPreferences preferences) {
@@ -83,9 +80,8 @@ public class ExplorerItemList {
     public static final int SORT_TYPE_DATE = 0x40;
 
     private SortConfig mSortConfig = new SortConfig();
-    private ArrayList<ExplorerItem> mItems = new ArrayList<>();
-    private ArrayList<ExplorerPage> mItemGroups = new ArrayList<>();
-
+    private final ArrayList<ExplorerItem> mItems = new ArrayList<>();
+    private final ArrayList<ExplorerPage> mItemGroups = new ArrayList<>();
 
     public boolean isDirSortedAscending() {
         return mSortConfig.mDirSortedAscending;

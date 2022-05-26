@@ -10,7 +10,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.stardust.pio.PFiles;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.external.open.RunIntentActivity;
 
@@ -20,7 +20,6 @@ import java.util.Set;
 /**
  * Created by Stardust on 2017/7/11.
  */
-
 public class ScriptWidget extends AppWidgetProvider {
 
     private static final String LOG_TAG = "ScriptWidget";

@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.tool.BitmapTool;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.workground.WrapContentGridLayoutManger;
@@ -27,6 +27,7 @@ import org.autojs.autojs.workground.WrapContentGridLayoutManger;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -44,7 +45,7 @@ public class ShortcutIconSelectActivity extends BaseActivity {
     RecyclerView mApps;
 
     private PackageManager mPackageManager;
-    private List<AppItem> mAppList = new ArrayList<>();
+    private final List<AppItem> mAppList = new ArrayList<>();
 
     @AfterViews
     void setupViews() {
@@ -144,6 +145,7 @@ public class ShortcutIconSelectActivity extends BaseActivity {
 
     private class AppsAdapter extends RecyclerView.Adapter<AppIconViewHolder> {
 
+        @NonNull
         @Override
         public AppIconViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return new AppIconViewHolder(LayoutInflater.from(parent.getContext())

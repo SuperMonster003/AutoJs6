@@ -12,7 +12,6 @@ import com.stardust.theme.ThemeColorMutable;
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public class ThemeColorToolbar extends Toolbar implements ThemeColorMutable {
 
     public ThemeColorToolbar(Context context) {

@@ -7,10 +7,7 @@
     <string name="confirm_overwrite_file">文件已存在, 是否覆盖</string>
     <string name="crash_feedback">可复制调试信息到剪贴板或直接退出程序</string>
     <string name="default_value_script_dir_path">/脚本/</string>
-    <string name="description_foreground_service">前台服务执行一些用户能注意到的操作.\n前台服务必须显示通知, 确保用户知道应用正在执行的任务.\n前台服务通知无法移除, 除非服务停止运行.\n可通过长按通知将通知优先级降低 (部分系统支持关闭前台服务通知), 以减少通知对用户的影响.</string>
     <string name="description_stable_mode">稳定模式省略布局细节, 脚本分析布局时更稳定, 但可能影响获取的控件总量.\n需重启无障碍服务.</string>
-    <string name="description_usage_stats_permission">\"查看使用情况\" 权限可获取本设备过去使用应用的情况, 从而使 \"获取当前应用\" (currentPackage) 结果更准确</string>
-    <string name="developer">星尘幻影</string>
     <string name="edit_and_run_handle_intent_error">无法处理文件</string>
     <string name="edit_exit_without_save_warn">内容尚未保存, 确定要退出吗</string>
     <string name="error_cannot_rename">重命名失败</string>
@@ -18,14 +15,14 @@
     <string name="error_change_password_error_match">密码不一致</string>
     <string name="error_connect_to_remote">连接失败: %s</string>
     <string name="error_email_taken">邮箱已被占用</string>
-    <string name="error_empty_selection">需至少选择一个广播事件</string>
+    <string name="error_empty_broadcast_selection">需至少选择一个广播事件</string>
     <string name="error_enable_server">AutoJs6 服务启用失败: %s</string>
     <string name="error_invalid_login_credentials">无效的登录凭证</string>
     <string name="error_pattern_syntax">正则表达式句法错误</string>
     <string name="error_regex_find_prev">正则表达式不支持向前查找</string>
-    <string name="foreground_notification_channel_name">前台服务通知</string>
+    <string name="foreground_notification_channel_name">AutoJs6 前台服务</string>
     <string name="foreground_notification_text">点击返回 AutoJs6 主界面</string>
-    <string name="foreground_notification_title">AutoJs6 保持运行中</string>
+    <string name="foreground_notification_title">AutoJs6 前台服务</string>
     <string name="format_build_successfully">构建成功.\n文件路径: %s</string>
     <string name="format_debug_bar_title">调试 [ %s ]</string>
     <string name="format_editor_info" formatted="false">字符数: %d\n行数: %d\n大小: %s</string>
@@ -43,7 +40,13 @@
     <string name="summary_use_volume_control_record">按 \"音量减\" 键开始或停止脚本录制 (需开启悬浮窗)</string>
     <string name="text_a11y_service_may_be_needed">可能需要启用无障碍服务</string>
     <string name="text_about">关于</string>
+    <string name="text_about_all_files_access">关于所有文件访问权限</string>
     <string name="text_about_app_and_developer">关于应用与开发者</string>
+    <string name="text_about_display_over_other_apps">关于显示在其他应用上层</string>
+    <string name="text_about_functions_feedback">问题反馈</string>
+    <string name="text_about_functions_licenses">许可信息</string>
+    <string name="text_about_functions_update">检查更新</string>
+    <string name="text_access_has_been_granted">授权成功</string>
     <string name="text_action">动作</string>
     <string name="text_act_by_click">点击 (click)</string>
     <string name="text_act_by_long_click">长按 (longClick)</string>
@@ -51,18 +54,22 @@
     <string name="text_act_by_scroll_forward">向前/右/下滑动 (scrollForward)</string>
     <string name="text_act_by_set_text">设置文本 (setText)</string>
     <string name="text_adb_tool_needed">需要 ADB 命令行工具</string>
+    <string name="text_all_files_access">所有文件管理权限</string>
+    <string name="text_all_files_access_is_needed">需要授予 \"所有文件管理权限\" 才能正常读写脚本文件</string>
     <string name="text_already_copied_to_clip">已复制到剪贴板</string>
     <string name="text_already_created">已创建</string>
     <string name="text_already_deleted">已删除</string>
+    <string name="text_already_stop_n_scripts">已停止运行 %d 个脚本</string>
     <string name="text_apk_builder_plugin_unavailable">打包插件不可用</string>
     <string name="text_appearance">外观</string>
     <string name="text_app_crashed">AutoJs6 应用崩溃</string>
+    <string name="text_app_language">语言</string>
     <string name="text_app_name">应用名称</string>
     <string name="text_app_source_code">软件源码</string>
     <string name="text_are_you_sure_to_delete">是否确定删除 %s</string>
     <string name="text_attribute">属性</string>
     <string name="text_auto_operate_service">无障碍服务</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">无障碍服务已启用但并未正常运行</string>
+    <string name="text_auto_operate_service_enabled_but_not_working">无障碍服务已启用但未正常运行</string>
     <string name="text_back">返回</string>
     <string name="text_broadcast_action">动作 (Action)</string>
     <string name="text_broadcast_task">广播触发任务</string>
@@ -80,6 +87,7 @@
     <string name="text_clear">清空</string>
     <string name="text_clear_file_selection">清空文件选择</string>
     <string name="text_clear_pre_execute_script">清空预执行脚本</string>
+    <string name="text_click_ok_to_go_to_access_settings">点击 \"OK\" 跳转到设置页面</string>
     <string name="text_click_too_frequently">操作频率过快</string>
     <string name="text_client_mode">客户端模式</string>
     <string name="text_close">关闭</string>
@@ -88,6 +96,7 @@
     <string name="text_command_already_copied_to_clip">指令已复制到剪贴板</string>
     <string name="text_config">配置</string>
     <string name="text_connect_to_pc">连接到计算机</string>
+    <string name="text_continue">继续</string>
     <string name="text_copy">复制</string>
     <string name="text_copy_all">复制全部</string>
     <string name="text_copy_command">复制指令</string>
@@ -113,9 +122,12 @@
     <string name="text_delete_failed">删除失败</string>
     <string name="text_delete_line">删除行</string>
     <string name="text_detail">详情</string>
+    <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"开发者详情\" 正在开发中...</string>
+    <string name="text_dialog_button_go_to_settings">系统设置</string>
     <string name="text_directly_download">直接下载</string>
     <string name="text_directory">文件夹</string>
     <string name="text_display_over_other_app">显示在其他应用上层</string>
+    <string name="text_display_over_other_app_is_recommended">建议授予 \"显示在其他应用上层\" 权限以确保应用窗口组件正常显示</string>
     <string name="text_disposable_task">一次性任务</string>
     <string name="text_disposable_task_time_before_now">任务时间小于当前时间</string>
     <string name="text_documentation">文档</string>
@@ -142,6 +154,7 @@
     <string name="text_exit_directly">直接退出</string>
     <string name="text_exit_floating_window">退出悬浮窗</string>
     <string name="text_failed">失败</string>
+    <string name="text_failed_to_grant_access">授权失败</string>
     <string name="text_file">文件</string>
     <string name="text_file_exists">文件已存在</string>
     <string name="text_file_write_fail">文件写入失败</string>
@@ -153,6 +166,7 @@
     <string name="text_floating_window">悬浮窗</string>
     <string name="text_force_stop">强制停止</string>
     <string name="text_foreground_service">前台服务</string>
+    <string name="text_foreground_service_description">前台服务执行一些用户能注意到的操作.\n前台服务必须显示通知, 确保用户知道应用正在执行的任务.\n前台服务通知无法移除, 除非服务停止运行.\n可通过长按通知将通知优先级降低 (部分系统支持关闭前台服务通知), 以减少通知对用户的影响.</string>
     <string name="text_generate">生成</string>
     <string name="text_generated_code">已生成代码</string>
     <string name="text_generate_code">生成代码</string>
@@ -163,6 +177,7 @@
     <string name="text_help">帮助</string>
     <string name="text_icon">图标</string>
     <string name="text_ignore_battery_optimizations">忽略电池优化</string>
+    <string name="text_imperfect_hint_for_app_language">语言设置功能尚不完善, 甚至引起部分页面功能异常\n除非用于测试等目的, 否则建议始终选择 \"跟随系统\" 选项</string>
     <string name="text_import">导入</string>
     <string name="text_import_fail">导入失败</string>
     <string name="text_import_script">导入脚本文件</string>
@@ -179,7 +194,6 @@
     <string name="text_in_progress">处理中</string>
     <string name="text_issue_report">问题反馈</string>
     <string name="text_is_latest_version">暂无更新版本</string>
-    <string name="text_it_is_the_developer_of_app">这是软件开发者</string>
     <string name="text_js_file">*.js 文件</string>
     <string name="text_jump">跳转</string>
     <string name="text_jump_to_end">跳转到文件末尾</string>
@@ -206,6 +220,7 @@
     <string name="text_manage">管理</string>
     <string name="text_mobile_qq_not_installed">未安装 \"手机QQ\"</string>
     <string name="text_more">更多</string>
+    <string name="text_more_details">了解详情</string>
     <string name="text_name">名称</string>
     <string name="text_need_to_enable_a11y_service">需要启用无障碍服务</string>
     <string name="text_new_file">新建文件</string>
@@ -214,6 +229,7 @@
     <string name="text_new_watching_variables">增加监视的变量或表达式</string>
     <string name="text_next_run_time">下次运行</string>
     <string name="text_night_mode">夜间模式</string>
+    <string name="text_notice">提示</string>
     <string name="text_notification">通知</string>
     <string name="text_notification_permission">通知读取权限</string>
     <string name="text_not_granted">未授予</string>
@@ -228,12 +244,13 @@
     <string name="text_open_main_activity">打开主界面</string>
     <string name="text_open_with">打开方式</string>
     <string name="text_options">选项</string>
+    <string name="text_original_developer">原始开发者</string>
     <string name="text_output_apk_path">打包应用保存路径</string>
     <string name="text_package_name">包名</string>
     <string name="text_password">密码</string>
     <string name="text_password_cannot_be_empty">密码不能为空</string>
     <string name="text_pc_server_address">PC 服务端地址</string>
-    <string name="text_permission">权限</string>
+    <string name="text_permissions">权限</string>
     <string name="text_permission_granted">已授予权限</string>
     <string name="text_permission_granted_failed_with_root">权限授予失败 (with root)</string>
     <string name="text_permission_granted_with_root">已授予权限 (with root)</string>
@@ -250,6 +267,8 @@
     <string name="text_processing">处理中</string>
     <string name="text_project">项目</string>
     <string name="text_project_location">项目位置</string>
+    <string name="text_project_media_access">投影媒体权限</string>
+    <string name="text_project_media_access_description">被授予 \"投影媒体权限\" 后, 录制屏幕的安全提示窗口将不再弹出.</string>
     <string name="text_project_save_error">项目保存失败</string>
     <string name="text_project_save_success">项目已保存</string>
     <string name="text_prompt">提示</string>
@@ -298,9 +317,13 @@
     <string name="text_run_repeatedly">循环运行</string>
     <string name="text_run_script">运行脚本</string>
     <string name="text_sample">示例代码</string>
+    <string name="text_sample_name">正在运行的服务</string>
     <string name="text_save">保存</string>
     <string name="text_save_and_exit">保存并退出</string>
     <string name="text_save_to">保存到</string>
+    <string name="text_script_dir_pref_action_copy">同时复制原文件夹内容</string>
+    <string name="text_script_dir_pref_action_move">同时移动原文件夹内容</string>
+    <string name="text_script_dir_pref_action_take_no_action">不执行任何操作</string>
     <string name="text_script_record">录制脚本</string>
     <string name="text_script_save_successfully">保存成功 (需刷新目录)</string>
     <string name="text_search">搜索</string>
@@ -329,6 +352,7 @@
     <string name="text_star">收藏</string>
     <string name="text_start_record">开始录制</string>
     <string name="text_stop">停止</string>
+    <string name="text_tailor_made_developer">二次开发者</string>
     <string name="text_task">任务</string>
     <string name="text_text_size">字体大小</string>
     <string name="text_theme_color">主题色</string>
@@ -338,9 +362,12 @@
     <string name="text_tools">工具</string>
     <string name="text_tutorial">教程</string>
     <string name="text_type">类型</string>
+    <string name="text_under_development_content">将在后续版本实现当前功能</string>
+    <string name="text_under_development_title">开发中</string>
     <string name="text_undo">撤销</string>
     <string name="text_update">更新</string>
     <string name="text_usage_stats_permission">查看使用情况权限</string>
+    <string name="text_usage_stats_permission_description">\"查看使用情况\" 权限可获取本设备过去使用应用的情况,从而使 \"获取当前应用\" (currentPackage) 结果更准确</string>
     <string name="text_username">用户名</string>
     <string name="text_username_cannot_be_empty">用户名不能为空</string>
     <string name="text_use_android_n_shortcut">使用安卓 7.0 快捷方式</string>
@@ -356,6 +383,7 @@
     <string name="text_weekly_task">每周任务</string>
     <string name="text_weekly_task_should_check_day_of_week">需至少选择一天</string>
     <string name="text_write_secure_settings">修改安全设置</string>
+    <string name="text_write_secure_settings_description">安全设置包含应用程序可读但不可写入的设置选项, 这些选项只能由 UI 或系统级别应用修改.\n被授予 \"修改安全设置权限\" 后, 普通应用可直接修改上述安全设置 (例如无障碍服务).</string>
     <string name="text_write_system_settings">修改系统设置</string>
     <string name="theme_color_amber">琥珀</string>
     <string name="theme_color_blue">蓝色</string>
@@ -377,16 +405,7 @@
     <string name="theme_color_red">红色</string>
     <string name="theme_color_yellow">黄色</string>
     <string name="theme_color_yellow_green">黄绿</string>
-    <string name="text_app_language">语言</string>
-    <string name="text_script_dir_pref_action_take_no_action">不执行任何操作</string>
-    <string name="text_script_dir_pref_action_copy">同时复制原文件夹内容</string>
-    <string name="text_script_dir_pref_action_move">同时移动原文件夹内容</string>
-    <string name="text_sample_name">正在运行的服务</string>
-    <string name="text_dialog_button_go_to_settings">系统设置</string>
-    <string name="text_under_development_title">开发中</string>
-    <string name="text_under_development_content">将在后续版本实现当前功能</string>
-    <string name="text_notice">提示</string>
-    <string name="text_imperfect_hint_for_app_language">语言设置功能尚不完善, 甚至引起部分页面功能异常\n除非用于测试等目的, 否则建议保持选择 \"跟随系统\" 选项</string>
+    <string name="text_refresh_explorer_may_needed">可能需要下拉刷新文件浏览器页面</string>
     <plurals name="air_error_short_description" key="air_error_short_description" tools:ignore="UnusedQuantity">
         <item quantity="one">描述至少需要 %d 个字</item>
         <item quantity="other">描述至少需要 %d 个字</item>

@@ -1,15 +1,16 @@
 package org.autojs.autojs.ui.widget;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by Stardust on 2017/4/6.
  */
-
 public class ItemTouchHelperSimpleCallback extends ItemTouchHelper.SimpleCallback {
 
-    private boolean mLongPressDragEnabled, mItemViewSwipeEnabled;
+    private final boolean mLongPressDragEnabled;
+    private final boolean mItemViewSwipeEnabled;
 
     public ItemTouchHelperSimpleCallback(int dragDirs, int swipeDirs) {
         super(dragDirs, swipeDirs);
@@ -18,12 +19,12 @@ public class ItemTouchHelperSimpleCallback extends ItemTouchHelper.SimpleCallbac
     }
 
     @Override
-    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
         return false;
     }
 
     @Override
-    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
     }
 

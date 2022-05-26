@@ -11,7 +11,7 @@ import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.stardust.concurrent.VolatileBox;
 import com.stardust.pio.PFiles;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.network.api.DownloadApi;
 import org.autojs.autojs.tool.SimpleObserver;
 
@@ -36,7 +36,6 @@ import retrofit2.Retrofit;
 /**
  * Created by Stardust on 2017/10/20.
  */
-
 public class DownloadManager {
 
     private static final String LOG_TAG = "DownloadManager";

@@ -14,7 +14,6 @@ import java.util.concurrent.Executors;
 /**
  * Created by Stardust on 2018/3/16.
  */
-
 public class TestSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     private volatile boolean mDrawing = true;

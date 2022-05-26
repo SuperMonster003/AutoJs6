@@ -3,6 +3,8 @@ package org.autojs.autojs.ui.edit.theme;
 import android.graphics.Color;
 import android.util.SparseIntArray;
 
+import androidx.annotation.NonNull;
+
 import org.autojs.autojs.model.editor.EditorTheme;
 import org.autojs.autojs.model.editor.TokenColor;
 
@@ -13,19 +15,18 @@ import java.io.Reader;
 /**
  * Created by Stardust on 2018/2/16.
  */
-
 public class Theme {
 
 
     private int mBackgroundColor = Color.WHITE;
     private int mForegroundColor = Color.BLACK;
     private int mLineNumberColor = Color.GRAY;
-    private SparseIntArray mTokenColors = new SparseIntArray();
+    private final SparseIntArray mTokenColors = new SparseIntArray();
     private int mImeBarBackgroundColor = 0xDDFFFFFF;
     private int mImeBarForegroundColor = Color.WHITE;
-    private EditorTheme mEditorTheme;
+    private final EditorTheme mEditorTheme;
     private int mLineHighlightBackground;
-    private int mBreakpointColor;
+    private final int mBreakpointColor;
     private int mDebuggingLineBackground;
 
     public Theme(EditorTheme theme) {
@@ -140,6 +141,7 @@ public class Theme {
         return mEditorTheme.getName() != null ? mEditorTheme.getName().equals(theme.mEditorTheme.getName()) : theme.mEditorTheme.getName() == null;
     }
 
+    @NonNull
     public String toString() {
         return getName();
     }

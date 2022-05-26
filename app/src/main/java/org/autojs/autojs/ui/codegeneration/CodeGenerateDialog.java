@@ -18,7 +18,7 @@ import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 import com.bignerdranch.expandablerecyclerview.model.Parent;
 import com.stardust.app.DialogUtils;
 import com.stardust.autojs.codegeneration.CodeGenerator;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.widget.CheckBoxCompat;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import com.stardust.theme.util.ListBuilder;
@@ -35,7 +35,6 @@ import butterknife.OnCheckedChanged;
 /**
  * Created by Stardust on 2017/11/6.
  */
-
 public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
 
     private final List<OptionGroup> mOptionGroups = new ListBuilder<OptionGroup>()
@@ -59,8 +58,8 @@ public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
     @BindView(R.id.options)
     RecyclerView mOptionsRecyclerView;
 
-    private NodeInfo mRootNode;
-    private NodeInfo mTargetNode;
+    private final NodeInfo mRootNode;
+    private final NodeInfo mTargetNode;
     private Adapter mAdapter;
 
     public CodeGenerateDialog(@NonNull Context context, NodeInfo rootNode, NodeInfo targetNode) {
@@ -254,8 +253,8 @@ public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
 
         OptionGroupViewHolder(@NonNull View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.title);
-            icon = (ImageView) itemView.findViewById(R.id.icon);
+            title = itemView.findViewById(R.id.title);
+            icon = itemView.findViewById(R.id.icon);
             itemView.setOnClickListener(view -> {
                 if (isExpanded()) {
                     collapseView();

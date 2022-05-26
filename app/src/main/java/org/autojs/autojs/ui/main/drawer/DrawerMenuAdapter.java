@@ -1,10 +1,11 @@
 package org.autojs.autojs.ui.main.drawer;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
 
 import java.util.List;
@@ -12,7 +13,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/12/10.
  */
-
 public class DrawerMenuAdapter extends RecyclerView.Adapter<BindableViewHolder<DrawerMenuItem>> {
 
 
@@ -20,7 +20,7 @@ public class DrawerMenuAdapter extends RecyclerView.Adapter<BindableViewHolder<D
     private static final int VIEW_TYPE_GROUP = 1;
 
 
-    private List<DrawerMenuItem> mDrawerMenuItems;
+    private final List<DrawerMenuItem> mDrawerMenuItems;
 
     public DrawerMenuAdapter(List<DrawerMenuItem> drawerMenuItems) {
         mDrawerMenuItems = drawerMenuItems;
@@ -30,8 +30,9 @@ public class DrawerMenuAdapter extends RecyclerView.Adapter<BindableViewHolder<D
         return mDrawerMenuItems;
     }
 
+    @NonNull
     @Override
-    public BindableViewHolder<DrawerMenuItem> onCreateViewHolder(ViewGroup parent, int viewType) {
+    public BindableViewHolder<DrawerMenuItem> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == VIEW_TYPE_GROUP) {
             return new DrawerMenuGroupViewHolder(LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.drawer_menu_group, parent, false));

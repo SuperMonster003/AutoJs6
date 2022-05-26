@@ -1,6 +1,6 @@
 package org.autojs.autojs.model.explorer;
 
-import com.stardust.util.ObjectHelper;
+import androidx.annotation.NonNull;
 
 public class ExplorerChangeEvent {
 
@@ -49,6 +49,7 @@ public class ExplorerChangeEvent {
         return mPage;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ExplorerChangeEvent{" +

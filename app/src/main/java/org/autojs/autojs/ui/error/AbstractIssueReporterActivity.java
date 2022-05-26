@@ -1,20 +1,13 @@
 package org.autojs.autojs.ui.error;
 
+import static android.util.Patterns.EMAIL_ADDRESS;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringDef;
-import androidx.annotation.StringRes;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -26,9 +19,17 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputLayout;
 import com.heinrichreimersoftware.androidissuereporter.R;
 import com.heinrichreimersoftware.androidissuereporter.model.DeviceInfo;
 import com.heinrichreimersoftware.androidissuereporter.model.Report;
@@ -39,7 +40,7 @@ import com.heinrichreimersoftware.androidissuereporter.util.ColorUtils;
 import com.heinrichreimersoftware.androidissuereporter.util.ThemeUtils;
 import com.stardust.theme.ThemeColorManager;
 
-import org.autojs.autojs.BuildConfig;
+import org.autojs.autojs6.BuildConfig;
 import org.autojs.autojs.ui.BaseActivity;
 import org.eclipse.egit.github.core.Issue;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -51,12 +52,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 
-import static android.util.Patterns.EMAIL_ADDRESS;
-
 /**
  * Created by Stardust on 2017/4/3.
  */
-
 public abstract class AbstractIssueReporterActivity extends BaseActivity {
 
     private static final String TAG = AbstractIssueReporterActivity.class.getSimpleName();
@@ -94,8 +92,6 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
     private ExpandableRelativeLayout layoutLogin;
     private FloatingActionButton buttonSend;
 
-    private Drawable optionUseAccountButtonDrawable = null;
-
     private String token;
 
     @Override
@@ -105,14 +101,10 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
         if (TextUtils.isEmpty(getTitle()))
             setTitle(R.string.air_title_report_issue);
 
-        setContentView(org.autojs.autojs.R.layout.air_activity_issue_reporter);
+        setContentView(org.autojs.autojs6.R.layout.air_activity_issue_reporter);
         findViews();
 
-        //noinspection deprecation
-        token = getGuestToken();
-
         initViews();
-
 
         DeviceInfo deviceInfo = new DeviceInfo(this);
         textDeviceInfo.setText(deviceInfo.toString());
@@ -122,6 +114,7 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
         optionAnonymous.post(() -> optionAnonymous.performClick());
     }
 
+    @SuppressLint("SetTextI18n")
     private void handleIntent() {
         final String errorDetail = getIntent().getStringExtra("error");
         if (errorDetail != null) {
@@ -160,15 +153,13 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
     }
 
     private void initViews() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(ThemeColorManager.getColorPrimary());
-        }
+        getWindow().setStatusBarColor(ThemeColorManager.getColorPrimary());
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(org.autojs.autojs.R.string.text_issue_report);
+            actionBar.setTitle(org.autojs.autojs6.R.string.text_issue_report);
         }
         toolbar.setBackgroundColor(ThemeColorManager.getColorPrimary());
 
@@ -204,11 +195,7 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
 
     private void setOptionUseAccountMarginStart(int marginStart) {
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) optionUseAccount.getLayoutParams();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            layoutParams.setMarginStart(marginStart);
-        } else {
-            layoutParams.leftMargin = marginStart;
-        }
+        layoutParams.setMarginStart(marginStart);
         optionUseAccount.setLayoutParams(layoutParams);
     }
 
@@ -260,6 +247,7 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
         }
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean validateInput() {
         boolean hasErrors = false;
 
@@ -386,11 +374,6 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
 
     protected abstract GithubTarget getTarget();
 
-    @Deprecated
-    protected String getGuestToken() {
-        return null;
-    }
-
     protected final void setGuestToken(String token) {
         this.token = token;
         Log.d(TAG, "GuestToken: " + token);
@@ -401,9 +384,9 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
     public void finish() {
         if (mCrash) {
             if (!mReportFailed) {
-                Toast.makeText(this, org.autojs.autojs.R.string.text_report_succeed, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, org.autojs.autojs6.R.string.text_report_succeed, Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, org.autojs.autojs.R.string.text_report_fail, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, org.autojs.autojs6.R.string.text_report_fail, Toast.LENGTH_SHORT).show();
             }
             finishAffinity();
         } else {
@@ -428,7 +411,6 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
             this.target = target;
             this.login = login;
         }
-
 
         @Override
         protected Dialog createDialog(@NonNull Context context) {
@@ -517,7 +499,7 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
     }
 
     private static abstract class DialogAsyncTask<Pa, Pr, Re> extends AsyncTask<Pa, Pr, Re> {
-        private WeakReference<Context> contextWeakReference;
+        private final WeakReference<Context> contextWeakReference;
         private WeakReference<Dialog> dialogWeakReference;
 
         private boolean supposedToBeDismissed;
@@ -587,4 +569,5 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
 
         protected abstract Dialog createDialog(@NonNull Context context);
     }
+
 }

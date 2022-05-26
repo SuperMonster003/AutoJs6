@@ -16,7 +16,7 @@ import com.stardust.pio.PFiles;
 import com.stardust.util.MD5;
 
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.model.script.Scripts;
 
@@ -26,19 +26,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Stardust on 2017/5/11.
  */
-
 public class DevPluginResponseHandler implements Handler {
 
+    public static final String TYPE_COMMAND = DevPluginService.TYPE_COMMAND;
+    public static final String TYPE_BYTES_COMMAND = DevPluginService.TYPE_BYTES_COMMAND;
+
     private final Router mRouter = new Router.RootRouter("type")
-            .handler("command", new Router("command")
+            .handler(TYPE_COMMAND, new Router("command")
                     .handler("run", data -> {
                         String script = data.get("script").getAsString();
                         String name = getName(data);
@@ -57,19 +61,11 @@ public class DevPluginResponseHandler implements Handler {
                         saveScript(name, script);
                         return true;
                     })
-                    .handler("rerun", data -> {
-                        String id = data.get("id").getAsString();
-                        String script = data.get("script").getAsString();
-                        String name = getName(data);
-                        stopScript(id);
-                        runScript(id, name, script);
-                        return true;
-                    })
                     .handler("stopAll", data -> {
                         AutoJs.getInstance().getScriptEngineService().stopAllAndToast();
                         return true;
                     }))
-            .handler("bytes_command", new Router("command")
+            .handler(TYPE_BYTES_COMMAND, new Router("command")
                     .handler("run_project", data -> {
                         launchProject(data.get("dir").getAsString());
                         return true;
@@ -127,7 +123,7 @@ public class DevPluginResponseHandler implements Handler {
                     .launch(AutoJs.getInstance().getScriptEngineService());
         } catch (Exception e) {
             e.printStackTrace();
-            GlobalAppContext.toast(R.string.text_invalid_project);
+            GlobalAppContext.toast(R.string.text_invalid_project, Toast.LENGTH_LONG);
         }
     }
 
@@ -158,7 +154,7 @@ public class DevPluginResponseHandler implements Handler {
         File file = new File(Pref.getScriptDirPath(), name);
         PFiles.ensureDir(file.getPath());
         PFiles.write(file, script);
-        GlobalAppContext.toast(R.string.text_script_save_successfully);
+        GlobalAppContext.toast(R.string.text_script_save_successfully, Toast.LENGTH_LONG);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -168,17 +164,23 @@ public class DevPluginResponseHandler implements Handler {
             name = "untitled";
         }
         name = PFiles.getNameWithoutExtension(name);
+
         File toDir = new File(Pref.getScriptDirPath(), name);
+        Callable<String> stringCallable = () -> {
+            copyDir(new File(dir), toDir);
+            return toDir.getPath();
+        };
+
+        Consumer<String> stringConsumer = dest -> GlobalAppContext
+                .toast(R.string.text_project_save_success + "\n" + dest, Toast.LENGTH_LONG);
+        Consumer<Throwable> throwableConsumer = err -> GlobalAppContext
+                .toast(R.string.text_project_save_error + "\n" + err.getMessage(), Toast.LENGTH_LONG);
+
         Observable
-                .fromCallable(() -> {
-                    copyDir(new File(dir), toDir);
-                    return toDir.getPath();
-                })
+                .fromCallable(stringCallable)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(dest -> GlobalAppContext.toast(R.string.text_project_save_success + "\n" + dest, Toast.LENGTH_LONG),
-                        err -> GlobalAppContext.toast(R.string.text_project_save_error + "\n" + err.getMessage(), Toast.LENGTH_LONG)
-                );
+                .subscribe(stringConsumer, throwableConsumer);
 
     }
 

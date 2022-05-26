@@ -8,7 +8,6 @@ import android.widget.CompoundButton;
 /**
  * Created by Stardust on 2017/10/19.
  */
-
 public class CheckBoxCompat extends AppCompatCheckBox {
     private boolean mIgnoreCheckedChange;
 
@@ -27,14 +26,11 @@ public class CheckBoxCompat extends AppCompatCheckBox {
 
     @Override
     public void setOnCheckedChangeListener(final OnCheckedChangeListener listener) {
-        super.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (mIgnoreCheckedChange) {
-                    return;
-                }
-                listener.onCheckedChanged(buttonView, isChecked);
+        super.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (mIgnoreCheckedChange) {
+                return;
             }
+            listener.onCheckedChanged(buttonView, isChecked);
         });
     }
 
