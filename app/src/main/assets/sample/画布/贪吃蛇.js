@@ -132,7 +132,7 @@ function move(dx, dy){
 }
 
 function snakeEatsApple(){
-    return snake[0].x == apple.x && snake[0].y == apple.y;
+    return snake[0].x === apple.x && snake[0].y === apple.y;
 }
 
 function generateApple(){
@@ -147,7 +147,7 @@ function generateApple(){
 
 function isAppleValid(x, y){
     for (var i = 0; i < snake.length; i++) {
-        if (snake[i].x == x && snake[i].y == y) {
+        if (snake[i].x === x && snake[i].y === y) {
             return false;
         }
     }
@@ -164,7 +164,7 @@ function collisionTest(){
     }
     //检测蛇有没有撞到自己
     for(var i = 1; i < snake.length; i++){
-        if(snake[i].x == head && snake[i].y == head){
+        if(snake[i].x === head && snake[i].y === head){
             gameOver();
             return;
         }

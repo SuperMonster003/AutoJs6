@@ -7,7 +7,6 @@ import com.stardust.autojs.annotation.ScriptInterface;
 /**
  * Created by Stardust on 2017/4/2.
  */
-
 public interface Console {
 
     @ScriptInterface

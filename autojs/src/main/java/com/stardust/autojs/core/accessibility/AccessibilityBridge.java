@@ -1,21 +1,18 @@
 package com.stardust.autojs.core.accessibility;
 
-import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.content.Context;
-import android.os.Build;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
-
 import com.stardust.app.AppOpsKt;
+import com.stardust.autojs.R;
+import com.stardust.autojs.core.activity.ActivityInfoProvider;
 import com.stardust.autojs.runtime.accessibility.AccessibilityConfig;
 import com.stardust.util.IntentUtil;
 import com.stardust.util.UiHandler;
-import com.stardust.autojs.core.activity.ActivityInfoProvider;
 import com.stardust.view.accessibility.AccessibilityNotificationObserver;
 import com.stardust.view.accessibility.AccessibilityService;
 
@@ -27,7 +24,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/4/2.
  */
-
 public abstract class AccessibilityBridge {
 
     public interface WindowFilter {
@@ -57,7 +53,7 @@ public abstract class AccessibilityBridge {
 
     public abstract void ensureServiceEnabled();
 
-    public abstract void waitForServiceEnabled();
+    public abstract void waitForServiceEnabled(long timeout);
 
     public void post(Runnable r) {
         mUiHandler.post(r);
@@ -71,7 +67,7 @@ public abstract class AccessibilityBridge {
         if (service == null)
             return Collections.emptyList();
         ArrayList<AccessibilityNodeInfo> roots = new ArrayList<>();
-        if (mWindowFilter != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (mWindowFilter != null) {
             for (AccessibilityWindowInfo window : service.getWindows()) {
                 if (mWindowFilter.filter(window)) {
                     AccessibilityNodeInfo root = window.getRoot();
@@ -93,7 +89,7 @@ public abstract class AccessibilityBridge {
         AccessibilityService service = getService();
         if (service == null)
             return null;
-        if (mWindowFilter != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (mWindowFilter != null) {
             for (AccessibilityWindowInfo window : service.getWindows()) {
                 if (mWindowFilter.filter(window)) {
                     return window.getRoot();
@@ -136,7 +132,7 @@ public abstract class AccessibilityBridge {
         if ((mFlags & FLAG_USE_USAGE_STATS) != 0) {
             if (!AppOpsKt.isUsageStatsPermissionGranted(mContext)) {
                 IntentUtil.requestAppUsagePermission(mContext);
-                throw new SecurityException("没有\"查看使用情况\"权限");
+                throw new SecurityException(mContext.getString(R.string.text_no_usage_stats_permission));
             }
         }
         getInfoProvider().setUseUsageStats((mFlags & FLAG_USE_USAGE_STATS) != 0);

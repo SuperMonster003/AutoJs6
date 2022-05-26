@@ -7,7 +7,6 @@ import org.mozilla.javascript.Scriptable;
 /**
  * Created by Stardust on 2017/5/13.
  */
-
 public class RhinoE4XTest {
 
     @Test

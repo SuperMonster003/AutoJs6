@@ -3,13 +3,14 @@ package com.stardust.autojs.runtime.api;
 import android.content.Context;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+
 import com.stardust.autojs.engine.RootAutomatorEngine;
 import com.stardust.util.ScreenMetrics;
 
 /**
  * Created by Stardust on 2017/4/24.
  */
-
 public abstract class AbstractShell {
 
     public static class Result {
@@ -17,6 +18,7 @@ public abstract class AbstractShell {
         public String error;
         public String result;
 
+        @NonNull
         @Override
         public String toString() {
             return "ShellResult{" +
@@ -36,7 +38,7 @@ public abstract class AbstractShell {
     private int mTouchDevice = -1;
     private ScreenMetrics mScreenMetrics;
 
-    private boolean mRoot;
+    private final boolean mRoot;
     protected Context mContext;
 
     public AbstractShell() {

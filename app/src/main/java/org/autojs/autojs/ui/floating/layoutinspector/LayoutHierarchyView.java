@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import com.stardust.view.accessibility.NodeInfo;
 import com.stardust.util.ViewUtil;
 import org.autojs.autojs.ui.widget.LevelBeamView;
@@ -34,7 +34,6 @@ import pl.openrnd.multilevellistview.OnItemClickListener;
 /**
  * Created by Stardust on 2017/3/10.
  */
-
 public class LayoutHierarchyView extends MultiLevelListView {
 
     public interface OnItemLongClickListener {
@@ -43,7 +42,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
 
     private Adapter mAdapter;
     private OnItemLongClickListener mOnItemLongClickListener;
-    private AdapterView.OnItemLongClickListener mOnItemLongClickListenerProxy = new AdapterView.OnItemLongClickListener() {
+    private final AdapterView.OnItemLongClickListener mOnItemLongClickListenerProxy = new AdapterView.OnItemLongClickListener() {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             if (mOnItemLongClickListener != null) {
@@ -65,7 +64,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
     private boolean mShowClickedNodeBounds;
     private int mClickedColor = 0x99b2b3b7;
     private NodeInfo mRootNode;
-    private Set<NodeInfo> mInitiallyExpandedNodes = new HashSet<>();
+    private final Set<NodeInfo> mInitiallyExpandedNodes = new HashSet<>();
 
     public LayoutHierarchyView(Context context) {
         super(context);
@@ -194,10 +193,10 @@ public class LayoutHierarchyView extends MultiLevelListView {
         NodeInfo nodeInfo;
 
         ViewHolder(View view) {
-            infoView = (TextView) view.findViewById(R.id.dataItemInfo);
-            nameView = (TextView) view.findViewById(R.id.dataItemName);
-            arrowView = (ImageView) view.findViewById(R.id.dataItemArrow);
-            levelBeamView = (LevelBeamView) view.findViewById(R.id.dataItemLevelBeam);
+            infoView = view.findViewById(R.id.dataItemInfo);
+            nameView = view.findViewById(R.id.dataItemName);
+            arrowView = view.findViewById(R.id.dataItemArrow);
+            levelBeamView = view.findViewById(R.id.dataItemLevelBeam);
         }
     }
 

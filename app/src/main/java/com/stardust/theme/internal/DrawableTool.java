@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 /**
  * Created by Stardust on 2017/2/12.
  */
-
 public class DrawableTool {
 
     public static Drawable filterDrawableColor(Drawable drawable, int color) {

@@ -18,13 +18,12 @@ import com.stardust.autojs.R;
 /**
  * Created by Stardust on 2017/4/20.
  */
-
 public class ConsoleFloaty extends ResizableExpandableFloaty.AbstractResizableExpandableFloaty {
 
     private ContextWrapper mContextWrapper;
     private View mResizer, mMoveCursor;
     private TextView mTitleView;
-    private ConsoleImpl mConsole;
+    private final ConsoleImpl mConsole;
     private CharSequence mTitle;
     private View mExpandedView;
 

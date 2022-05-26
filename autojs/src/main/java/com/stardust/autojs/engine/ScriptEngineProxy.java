@@ -5,7 +5,6 @@ import com.stardust.autojs.script.ScriptSource;
 /**
  * Created by Stardust on 2018/3/17.
  */
-
 public class ScriptEngineProxy<S extends ScriptSource> implements ScriptEngine<S> {
 
     private final ScriptEngine<S> mScriptEngine;

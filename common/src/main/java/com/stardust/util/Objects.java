@@ -3,7 +3,6 @@ package com.stardust.util;
 /**
  * Created by Stardust on 2017/12/31.
  */
-
 public class Objects {
 
     /**
@@ -22,7 +21,7 @@ public class Objects {
      * @see Object#equals(Object)
      */
     public static boolean equals(Object a, Object b) {
-        return (a == b) || (a != null && a.equals(b));
+        return java.util.Objects.equals(a, b);
     }
 
     /**

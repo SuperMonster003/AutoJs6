@@ -1,206 +1,307 @@
-module.exports = function (runtime, scope) {
-    importPackage(Packages["okhttp3"]);
-    importClass(com.stardust.autojs.core.http.MutableOkHttp);
-    var http = {};
+// noinspection JSUnusedGlobalSymbols
 
-    http.__okhttp__ = new MutableOkHttp();
+/* Here, importClass() is not recommended for intelligent code completion in IDE like WebStorm. */
+/* The same is true of destructuring assignment syntax (like `let {Uri} = android.net`). */
 
-    http.get = function (url, options, callback) {
-        options = options || {};
-        options.method = "GET";
-        return http.request(url, options, callback);
-    }
+const PFile = com.stardust.pio.PFile;
+const Request = okhttp3.Request;
+const RequestBody = okhttp3.RequestBody;
+const MultipartBody = okhttp3.MultipartBody;
+const MediaType = okhttp3.MediaType;
+const FormBody = okhttp3.FormBody;
+const Callback = okhttp3.Callback;
+const MimeTypeMap = android.webkit.MimeTypeMap;
 
-    http.client = function () {
-        return http.__okhttp__.client();
-    }
-
-    http.post = function (url, data, options, callback) {
-        options = options || {};
-        options.method = "POST";
-        options.contentType = options.contentType || "application/x-www-form-urlencoded";
-        if (data) {
-            fillPostData(options, data);
-        }
-        return http.request(url, options, callback);
-    }
-
-    http.postJson = function (url, data, options, callback) {
-        options = options || {};
-        options.contentType = "application/json";
-        return http.post(url, data, options, callback);
-    }
-
-    http.postMultipart = function (url, files, options, callback) {
-        options = options || {};
-        options.method = "POST";
-        options.contentType = "multipart/form-data";
-        options.files = files;
-        return http.request(url, options, callback);
-    }
-
-    http.request = function (url, options, callback) {
-        var cont = null;
-        if (!callback && ui.isUiThread() && continuation.enabled) {
-            cont = continuation.create();
-        }
-        var call = http.client().newCall(http.buildRequest(url, options));
-        if (!callback && !cont) {
-            return wrapResponse(call.execute());
-        }
-        call.enqueue(new Callback({
-            onResponse: function (call, res) {
-                res = wrapResponse(res);
-                cont && cont.resume(res);
-                callback && callback(res);
+let _ = {
+    constants: {
+        DEF_CONTENT_TYPE: 'application/x-www-form-urlencoded',
+    },
+    init(__runtime__, scope) {
+        this.runtime = __runtime__;
+        this.scope = scope;
+        this.http = {};
+    },
+    getModule() {
+        return this.http;
+    },
+    selfAugment() {
+        Object.assign(this.http, {
+            __okhttp__: new MutableOkHttp(),
+            client() {
+                return this.__okhttp__.client();
             },
-            onFailure: function (call, ex) {
-                cont && cont.resumeError(ex);
-                callback && callback(null, ex);
-            }
-        }));
-        if (cont) {
-            return cont.await();
-        }
-    }
+            /**
+             * @param {string} url
+             * @param {Http.RequestOptions} [options]
+             * @return {okhttp3.Request}
+             */
+            buildRequest(url, options) {
+                let __ = {
+                    options: options || {},
+                    getUrl(url) {
+                        if (typeof url !== 'string') {
+                            throw TypeError('Param url must be a string');
+                        }
+                        // noinspection HttpUrlsUsage
+                        return url.match(/^https?:\/\//) ? url : `http://${url}`;
+                    },
+                    setHeaders(request) {
+                        Object.entries(this.options.headers || {}).forEach((entries) => {
+                            let [key, value] = entries;
+                            if (Array.isArray(value)) {
+                                value.forEach(v => request.header(key, v));
+                            } else {
+                                request.header(key, value);
+                            }
+                        });
+                    },
+                    setMethod(request) {
+                        if (this.options.body) {
+                            this.ensureMethodInOptions();
+                            request.method(this.options.method, this.parseBody());
+                        } else if (this.options.files) {
+                            this.ensureMethodInOptions();
+                            request.method(this.options.method, this.parseMultipart());
+                        } else {
+                            this.ensureMethodInOptions();
+                            request.method(this.options.method, null);
+                        }
+                    },
+                    ensureMethodInOptions() {
+                        if (typeof this.options.method !== 'string') {
+                            throw Error('Property method is required for header options');
+                        }
+                    },
+                    parseBody() {
+                        let body = this.options.body;
 
-    http.buildRequest = function (url, options) {
-        var r = new Request.Builder();
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            url = "http://" + url;
-        }
-        r.url(url);
-        if (options.headers) {
-            setHeaders(r, options.headers);
-        }
-        if (options.body) {
-            r.method(options.method, parseBody(options, options.body));
-        } else if (options.files) {
-            r.method(options.method, parseMultipart(options.files));
-        } else {
-            r.method(options.method, null);
-        }
-        return r.build();
-    }
+                        if (body instanceof RequestBody) {
+                            return body;
+                        }
+                        if (typeof body === 'string') {
+                            return RequestBody.create(MediaType.parse(this.options.contentType), body);
+                        }
+                        if (typeof body === 'function') {
+                            // noinspection JSValidateTypes
+                            return new RequestBody({
+                                contentType() {
+                                    return MediaType.parse(this.options.contentType);
+                                },
+                                writeTo: body,
+                            });
+                        }
+                        throw TypeError('Unknown type of body for header options');
+                    },
+                    parseMultipart() {
+                        let files = this.options.files;
 
-    function parseMultipart(files) {
-        var builder = new MultipartBody.Builder()
-            .setType(MultipartBody.FORM);
-        for (var key in files) {
-            if (!files.hasOwnProperty(key)) {
-                continue;
-            }
-            var value = files[key];
-            if (typeof (value) == 'string') {
-                builder.addFormDataPart(key, value);
-                continue;
-            }
-            var path, mimeType, fileName;
-            if (typeof (value.getPath) == 'function') {
-                path = value.getPath();
-            } else if (value.length == 2) {
-                fileName = value[0];
-                path = value[1];
-            } else if (value.length >= 3) {
-                fileName = value[0];
-                mimeType = value[1]
-                path = value[2];
-            }
-            var file = new com.stardust.pio.PFile(path);
-            fileName = fileName || file.getName();
-            mimeType = mimeType || parseMimeType(file.getExtension());
-            builder.addFormDataPart(key, fileName, RequestBody.create(MediaType.parse(mimeType), file));
-        }
-        return builder.build();
-    }
+                        let builder = new MultipartBody.Builder()
+                            .setType(MultipartBody.FORM);
 
-    function parseMimeType(ext) {
-        if (ext.length == 0) {
-            return "application/octet-stream";
-        }
-        return android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext)
-            || "application/octet-stream";
-    }
+                        Object.entries(files).forEach((entries) => {
+                            let [key, value] = entries;
+                            if (typeof value === 'string') {
+                                builder.addFormDataPart(key, value);
+                                return;
+                            }
+                            let path, mimeType, fileName;
+                            if (typeof value.getPath === 'function') {
+                                path = value.getPath();
+                            } else if (value.length === 2) {
+                                [fileName, path] = value;
+                            } else if (value.length > 2) {
+                                [fileName, mimeType, path] = value;
+                            }
+                            let file = new PFile(path);
+                            fileName = fileName || file.getName();
+                            mimeType = mimeType || this.parseMimeType(file.getExtension());
+                            let requestBody = RequestBody.create(MediaType.parse(mimeType), file);
+                            builder.addFormDataPart(key, fileName, requestBody);
+                        });
 
-    function fillPostData(options, data) {
-        if (options.contentType == "application/x-www-form-urlencoded") {
-            var b = new FormBody.Builder();
-            for (var key in data) {
-                if (data.hasOwnProperty(key)) {
-                    b.add(key, data[key]);
+                        return builder.build();
+                    },
+                    parseMimeType(ext) {
+                        if (ext.length > 0) {
+                            let type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+                            if (type) {
+                                return type;
+                            }
+                        }
+                        return 'application/octet-stream';
+                    },
+                };
+
+                let $$ = {
+                    request: new Request.Builder(),
+                    build() {
+                        this.setUrl();
+                        this.setHeader();
+                        this.setMethod();
+
+                        return this.request.build();
+                    },
+                    setUrl() {
+                        this.request.url(__.getUrl(url));
+                    },
+                    setHeader() {
+                        __.setHeaders(this.request);
+                    },
+                    setMethod() {
+                        __.setMethod(this.request);
+                    },
+                };
+
+                return $$.build();
+            },
+            /**
+             * @param {string} url
+             * @param {Http.RequestOptions} [options]
+             * @param {(response: Http.WrappedResponse, ex?: java.io.IOException) => void} [callback]
+             * @return {Http.WrappedResponse | void}
+             */
+            request(url, options, callback) {
+                let cont = !callback && ui.isUiThread() && continuation.enabled
+                    ? continuation.create() : null;
+                let call = this.client().newCall(this.buildRequest(url, options));
+
+                if (!callback && !cont) {
+                    return _.wrapResponse(call.execute());
                 }
+
+                call.enqueue(new Callback({
+                    onResponse(call, res) {
+                        res = _.wrapResponse(res);
+                        cont && cont.resume(res);
+                        callback && callback(res);
+                    },
+                    onFailure(call, ex) {
+                        cont && cont.resumeError(ex);
+                        callback && callback(null, ex);
+                    },
+                }));
+
+                if (cont) {
+                    return cont.await();
+                }
+            },
+            get(url, options, callback) {
+                return this.request(url, Object.assign(options || {}, {
+                    method: 'GET',
+                }), callback);
+            },
+            post(url, data, options, callback) {
+                let opt = Object.assign({
+                    contentType: _.constants.DEF_CONTENT_TYPE,
+                }, options, {
+                    method: 'POST',
+                });
+                if (data) {
+                    _.fillPostData(opt, data);
+                }
+                return this.request(url, opt, callback);
+            },
+            postJson(url, data, options, callback) {
+                return this.post(url, data, Object.assign(options || {}, {
+                    contentType: 'application/json',
+                }), callback);
+            },
+            postMultipart(url, files, options, callback) {
+                return this.request(url, Object.assign(options || {}, {
+                    method: 'POST',
+                    contentType: 'multipart/form-data',
+                    files: files,
+                }), callback);
+            },
+        });
+    },
+    /**
+     * @param {okhttp3.Response} res
+     * @return {Http.WrappedResponse}
+     */
+    wrapResponse: (res) => /* @AXR */ ({
+        request: res.request(),
+        getResponse() {
+            return {
+                request: this.request,
+                statusMessage: res.message(),
+                statusCode: res.code(),
+                body: this.getBody(),
+                headers: this.getHeaders(),
+                url: this.request.url(),
+                method: this.request.method(),
+            };
+        },
+        getHeaders() {
+            let result = {};
+            let headers = res.headers();
+            for (let i = 0; i < headers.size(); i += 1) {
+                let name = headers.name(i);
+                let value = headers.value(i);
+                if (!(name in result)) {
+                    result[name] = value;
+                    continue;
+                }
+                let origin = result[name];
+                if (!Array.isArray(origin)) {
+                    result[name] = [origin];
+                }
+                result[name].push(value);
             }
+            return result;
+        },
+        getBody() {
+            let body = res.body();
+            return {
+                string: body.string.bind(body),
+                bytes: body.bytes.bind(body),
+                contentType: body.contentType(),
+                json() {
+                    try {
+                        return JSON.parse(this.string());
+                    } catch (e) {
+                        console.warn(`${e.message}\n${e.stack}`);
+                        throw Error('JSON parsed failed. Body string may be not in JSON format');
+                    }
+                },
+            };
+        },
+    }.getResponse()),
+    /**
+     * @param {Http.RequestOptions} options
+     * @param {Object.<string, string>} data
+     */
+    fillPostData(options, data) {
+        if (options.contentType === _.constants.DEF_CONTENT_TYPE) {
+            let b = new FormBody.Builder();
+            Object.entries(data).forEach((entries) => {
+                let [key, value] = entries;
+                b.add(key, value);
+            });
             options.body = b.build();
-        } else if (options.contentType == "application/json") {
+        } else if (options.contentType === 'application/json') {
             options.body = JSON.stringify(data);
         } else {
             options.body = data;
         }
-    }
+    },
+};
 
-    function setHeaders(r, headers) {
-        for (var key in headers) {
-            if (headers.hasOwnProperty(key)) {
-                let value = headers[key];
-                if (Array.isArray(value)) {
-                    value.forEach(v => {
-                        r.header(key, v);
-                    });
-                } else {
-                    r.header(key, value);
-                }
-            }
-        }
-    }
+let $ = {
+    getModule(__runtime__, scope) {
+        _.init(__runtime__, scope);
 
-    function parseBody(options, body) {
-        if (typeof (body) == "string") {
-            body = RequestBody.create(MediaType.parse(options.contentType), body);
-        } else if (body instanceof RequestBody) {
-            return body;
-        } else {
-            body = new RequestBody({
-                contentType: function () {
-                    return MediaType.parse(options.contentType);
-                },
-                writeTo: body
-            });
-        }
-        return body;
-    }
+        _.selfAugment();
 
-    function wrapResponse(res) {
-        var r = {};
-        r.statusCode = res.code();
-        r.statusMessage = res.message();
-        var headers = res.headers();
-        r.headers = {};
-        for (var i = 0; i < headers.size(); i++) {
-            let name = headers.name(i);
-            let value = headers.value(i);
-            if (r.headers.hasOwnProperty(name)) {
-                let origin = r.headers[name];
-                if (!Array.isArray(origin)) {
-                    r.headers[name] = [origin];
-                }
-                r.headers[name].push(value);
-            } else {
-                r.headers[name] = value;
-            }
-        }
-        r.body = {};
-        var body = res.body();
-        r.body.string = body.string.bind(body);
-        r.body.bytes = body.bytes.bind(body);
-        r.body.json = function () {
-            return JSON.parse(r.body.string());
-        }
-        r.body.contentType = body.contentType();
-        r.request = res.request();
-        r.url = r.request.url();
-        r.method = r.request.method();
-        return r;
-    }
+        return _.getModule();
+    },
+};
 
-    return http;
-}
+/**
+ * @param {com.stardust.autojs.runtime.ScriptRuntime} __runtime__
+ * @param {org.mozilla.javascript.Scriptable} scope
+ * @return {Internal.Http}
+ */
+module.exports = function (__runtime__, scope) {
+    return $.getModule(__runtime__, scope);
+};

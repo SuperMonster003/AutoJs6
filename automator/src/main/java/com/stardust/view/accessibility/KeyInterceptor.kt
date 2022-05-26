@@ -7,7 +7,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 /**
  * Created by Stardust on 2018/2/27.
  */
-
 interface KeyInterceptor {
 
     fun onInterceptKeyEvent(event: KeyEvent): Boolean

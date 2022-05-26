@@ -23,7 +23,7 @@ import com.stardust.autojs.script.AutoFileSource;
 import com.stardust.autojs.workground.WrapContentLinearLayoutManager;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.storage.database.ModelChange;
 import org.autojs.autojs.timing.TimedTaskManager;
@@ -43,7 +43,6 @@ import io.reactivex.disposables.Disposable;
 /**
  * Created by Stardust on 2017/3/24.
  */
-
 public class TaskListRecyclerView extends ThemeColorRecyclerView {
 
 
@@ -55,7 +54,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
     private Adapter mAdapter;
     private Disposable mTimedTaskChangeDisposable;
     private Disposable mIntentTaskChangeDisposable;
-    private ScriptExecutionListener mScriptExecutionListener = new SimpleScriptExecutionListener() {
+    private final ScriptExecutionListener mScriptExecutionListener = new SimpleScriptExecutionListener() {
         @Override
         public void onStart(final ScriptExecution execution) {
             post(() -> mAdapter.notifyChildInserted(0, mRunningTaskGroup.addTask(execution)));
@@ -213,7 +212,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         TextView mDesc;
 
         private Task mTask;
-        private GradientDrawable mFirstCharBackground;
+        private final GradientDrawable mFirstCharBackground;
 
         TaskViewHolder(View itemView) {
             super(itemView);
@@ -244,8 +243,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         }
 
         void onItemClick(View view) {
-            if (mTask instanceof Task.PendingTask) {
-                Task.PendingTask task = (Task.PendingTask) mTask;
+            if (mTask instanceof Task.PendingTask task) {
                 String extra = task.getTimedTask() == null ? TimedTaskSettingActivity.EXTRA_INTENT_TASK_ID
                         : TimedTaskSettingActivity.EXTRA_TASK_ID;
                 TimedTaskSettingActivity_.intent(getContext())

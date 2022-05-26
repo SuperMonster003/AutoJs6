@@ -5,7 +5,6 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Stardust on 2018/2/21.
  */
-
 public class TokenColorSettings {
 
     @SerializedName("foreground")

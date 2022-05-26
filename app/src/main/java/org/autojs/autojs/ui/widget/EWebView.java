@@ -8,9 +8,6 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
 
 import android.util.AttributeSet;
 import android.webkit.ValueCallback;
@@ -22,10 +19,9 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.stardust.app.OnActivityResultDelegate;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.tool.ImageSelector;
 
 import java.util.Arrays;
@@ -39,7 +35,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 /**
  * Created by Stardust on 2017/8/22.
  */
-
 public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefreshListener, OnActivityResultDelegate {
 
     private static final List<String> IMAGE_TYPES = Arrays.asList("png", "jpg", "bmp");
@@ -90,11 +85,7 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
     }
 
     public void evalJavaScript(String script) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mWebView.evaluateJavascript(script, null);
-        } else {
-            mWebView.loadUrl("javascript:" + script);
-        }
+        mWebView.evaluateJavascript(script, null);
     }
 
     @SuppressLint("CheckResult")
@@ -140,8 +131,6 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
             return false;
         }
 
-        // For Android >= 5.0
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public boolean onShowFileChooser(WebView webView,
                                          ValueCallback<Uri[]> filePathCallback,
@@ -198,7 +187,6 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
             mSwipeRefreshLayout.setRefreshing(false);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             return shouldOverrideUrlLoading(view, request.getUrl().toString());

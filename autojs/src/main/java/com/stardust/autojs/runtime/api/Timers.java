@@ -1,29 +1,24 @@
 package com.stardust.autojs.runtime.api;
 
-import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.util.Log;
-import android.util.SparseArray;
 
 import com.stardust.autojs.core.looper.Timer;
 import com.stardust.autojs.core.looper.TimerThread;
-import com.stardust.autojs.runtime.ScriptBridges;
 import com.stardust.autojs.runtime.ScriptRuntime;
 import com.stardust.concurrent.VolatileBox;
 
 /**
  * Created by Stardust on 2017/7/21.
  */
-
 public class Timers {
 
     private static final String LOG_TAG = "Timers";
 
-    private VolatileBox<Long> mMaxCallbackUptimeMillisForAllThreads = new VolatileBox<>(0L);
-    private Threads mThreads;
-    private Timer mMainTimer;
-    private Timer mUiTimer;
+    private final VolatileBox<Long> mMaxCallbackUptimeMillisForAllThreads = new VolatileBox<>(0L);
+    private final Threads mThreads;
+    private final Timer mMainTimer;
+    private final Timer mUiTimer;
 
 
     public Timers(ScriptRuntime runtime) {

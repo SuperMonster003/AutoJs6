@@ -1,8 +1,6 @@
 package com.stardust.theme.widget;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.EdgeEffect;
 import android.widget.HorizontalScrollView;
@@ -36,17 +34,14 @@ public class ThemeColorHorizontalScrollView extends HorizontalScrollView impleme
         init();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public ThemeColorHorizontalScrollView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
 
     private void init() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            mEdgeGlowLeft = new EdgeEffect(getContext());
-            mEdgeGlowRight = new EdgeEffect(getContext());
-        }
+        mEdgeGlowLeft = new EdgeEffect(getContext());
+        mEdgeGlowRight = new EdgeEffect(getContext());
         ThemeColorManager.add(this);
     }
 
@@ -56,15 +51,13 @@ public class ThemeColorHorizontalScrollView extends HorizontalScrollView impleme
 
     @Override
     public void setThemeColor(ThemeColor color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mFadingEdgeColor = color.colorPrimary;
-            if (mEdgeGlowLeft != null && mEdgeGlowRight != null) {
-                mEdgeGlowLeft.setColor(color.colorPrimary);
-                mEdgeGlowRight.setColor(color.colorPrimary);
-                syncEdgeEffect();
-            }
-            invalidate();
+        mFadingEdgeColor = color.colorPrimary;
+        if (mEdgeGlowLeft != null && mEdgeGlowRight != null) {
+            mEdgeGlowLeft.setColor(color.colorPrimary);
+            mEdgeGlowRight.setColor(color.colorPrimary);
+            syncEdgeEffect();
         }
+        invalidate();
     }
 
     private void syncEdgeEffect() {

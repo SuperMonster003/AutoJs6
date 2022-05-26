@@ -1,6 +1,5 @@
 package com.stardust.autojs.core.ui.inflater.inflaters;
 
-import android.os.Build;
 import android.view.InflateException;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -14,7 +13,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/3.
  */
-
 public class ImageViewInflater<V extends ImageView> extends BaseViewInflater<V> {
 
     public ImageViewInflater(ResourceParser resourceParser) {
@@ -28,16 +26,16 @@ public class ImageViewInflater<V extends ImageView> extends BaseViewInflater<V> 
         }
         switch (attr) {
             case "adjustViewBounds":
-                view.setAdjustViewBounds(Boolean.valueOf(value));
+                view.setAdjustViewBounds(Boolean.parseBoolean(value));
                 break;
             case "baseline":
                 view.setBaseline(Dimensions.parseToIntPixel(value, view));
                 break;
             case "baselineAlignBottom":
-                view.setBaselineAlignBottom(Boolean.valueOf(value));
+                view.setBaselineAlignBottom(Boolean.parseBoolean(value));
                 break;
             case "cropToPadding":
-                view.setCropToPadding(Boolean.valueOf(value));
+                view.setCropToPadding(Boolean.parseBoolean(value));
                 break;
             case "maxHeight":
                 view.setMaxHeight(Dimensions.parseToIntPixel(value, view));
@@ -58,9 +56,7 @@ public class ImageViewInflater<V extends ImageView> extends BaseViewInflater<V> 
                 view.setColorFilter(Colors.parse(view, value));
                 break;
             case "tintMode":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.setImageTintMode(TINT_MODES.get(value));
-                }
+                view.setImageTintMode(TINT_MODES.get(value));
                 break;
             case "url":
                 getDrawables().setupWithImage(view,  wrapAsUrl(value));

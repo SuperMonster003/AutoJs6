@@ -2,7 +2,6 @@ package com.stardust.util;
 
 import android.content.SharedPreferences;
 
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by Stardust on 2017/2/3.
  */
-
 public class StateObserver {
 
     public interface OnStateChangedListener {
@@ -32,7 +30,7 @@ public class StateObserver {
 
 
     private final Map<String, List<OnStateChangedListener>> mKeyStateListenersMap = new HashMap<>();
-    private SharedPreferences mSharedPreferences;
+    private final SharedPreferences mSharedPreferences;
 
     public StateObserver(SharedPreferences sharedPreferences) {
         mSharedPreferences = sharedPreferences;

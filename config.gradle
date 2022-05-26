@@ -1,0 +1,353 @@
+import java.util.zip.CRC32
+
+/**
+ * A custom Gradle plugin for AutoJs6 projects.
+ * Created by SuperMonster003 on May 18, 2022.
+ */
+
+apply plugin: ConfigPlugin
+
+@SuppressWarnings(['GroovyImplicitNullArgumentCall', 'GrMethodMayBeStatic'])
+class ConfigPlugin implements Plugin<Project> {
+
+    private isApp, isInrt, isDeployable
+
+    private sign = new Sign('sign.properties')
+    private versions = new Versions('version.properties')
+
+    @Override
+    void apply(Project project) {
+        isApp = project.name == 'app'
+        isInrt = project.name == 'inrt'
+        isDeployable = isApp || isInrt
+
+        applyPlugins(project)
+        applyExtensions(project)
+        applyDependencies(project)
+        applyAndroid(project)
+        applyCompileOptions(project)
+
+        handleVersionsIfNeeded(project)
+    }
+
+    private applyPlugins = {
+        [
+                'kotlin-android',
+                isDeployable ? 'com.android.application' : 'com.android.library',
+        ].forEach (s) -> it.pluginManager.apply(s)
+    }
+
+    private applyExtensions = {
+        // @Hint by SuperMonster003 on May 20, 2022.
+        //  ! Uncomment if you want to share with other projects
+        // it.ext { sign = sign; versions = versions }
+    }
+
+    private applyDependencies = {
+        it.dependencies {
+            testImplementation "junit:junit:4.13.2"
+        }
+    }
+
+    private applyAndroid = { project ->
+        project.android {
+            namespace project.namespace
+
+            compileSdkVersion versions.sdkVersionCompile
+
+            defaultConfig {
+                minSdkVersion versions.sdkVersionMin
+                targetSdkVersion versions.sdkVersionTarget
+                testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+            }
+
+            compileOptions {
+                sourceCompatibility versions.javaVersion
+                targetCompatibility versions.javaVersion
+            }
+
+            kotlinOptions {
+                jvmTarget = versions.javaVersion
+            }
+
+            lintOptions {
+                abortOnError false
+            }
+
+            signingConfigs {
+                isApp && sign.isValid && release {
+                    storeFile project.file(sign.properties['storeFile'])
+                    keyPassword sign.properties['keyPassword']
+                    keyAlias sign.properties['keyAlias']
+                    storePassword sign.properties['storePassword']
+                }
+            }
+
+            buildTypes {
+                release {
+                    minifyEnabled false
+                    proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                    // @Hint by SuperMonster003 on May 19, 2022.
+                    //  ! Notice the difference between release and 'release'.
+                    //  !
+                    //  ! Alternative grammars:
+                    //  ! a. release in signingConfigs
+                    //  ! b. signingConfigs.contains(release)
+                    //  ! c. signingConfigs.hasProperty('release')
+                    //  !
+                    //  ! Other way with the same purpose:
+                    //  ! a. signingConfigs.properties.names.contains('release')
+                    //  ! b. 'release' in signingConfigs.properties.names
+                    signingConfig = release in signingConfigs ? signingConfigs.release : null
+                }
+                isDeployable && debug {
+                    minifyEnabled = release.minifyEnabled
+                    proguardFiles = release.proguardFiles
+                    signingConfig = release.signingConfig
+                }
+            }
+
+            isDeployable && defaultConfig {
+                versionCode versions.appVersionCode
+                versionName versions.appVersionName
+                multiDexEnabled true
+                javaCompileOptions {
+                    annotationProcessorOptions {
+                        arguments = [
+                                resourcePackageName: project.applicationId,
+                                androidManifestFile: "$project.projectDir/src/main/AndroidManifest.xml".toString()
+                        ]
+                    }
+                }
+                buildConfigField 'String', 'VERSION_DATE', "\"${Utils.getDateString("MMM dd, yyyy", "GMT+08:00")}\""
+            }
+
+            isDeployable && applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    outputFileName = Utils.getOutputFileName(variant, output)
+                }
+
+                variant.mergeAssetsProvider.configure {
+                    doLast {
+                        project.delete(project.fileTree(dir: outputDir, includes: ['declarations/**']))
+                    }
+                }
+            }
+
+            isDeployable && splits {
+                // Configures multiple APKs based on ABI.
+                abi {
+                    // Enables building multiple APKs per ABI.
+                    enable true
+                    // By default all ABIs are included, so use reset() and include to specify that we only
+                    // want APKs for x86 and x86_64.
+                    // Resets the list of ABIs that Gradle should create APKs for to none.
+                    reset()
+                    // Specifies a list of ABIs that Gradle should create APKs for.
+                    include 'x86', 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+                    // Specifies that we do not want to also generate a universal APK that includes all ABIs.
+                    universalApk true
+                }
+            }
+        }
+    }
+
+    private applyCompileOptions = {
+        it.tasks.withType(JavaCompile) {
+            options.encoding 'UTF-8'
+
+            // @Hint by SuperMonster003 on May 18, 2022.
+            //  ! Comment or remove this option if you're tired of plenty of warnings. :)
+            // options.compilerArgs << '-Xlint:deprecation' << '-Xlint:unchecked'
+        }
+    }
+
+    private handleVersionsIfNeeded = { versions.handleIfNeeded(it) }
+
+}
+
+class Versions {
+
+    def sdkVersionMin, sdkVersionTarget, sdkVersionCompile, appVersionName, appVersionCode, javaVersion
+    def properties, file
+
+    private isBuildNumberAutoIncremented
+    private minBuildTimeGap = Utils.hours2Millis(0.5)
+    /**
+     * <p>@Type
+     * <code>
+     * {@link LinkedHashMap}<{@link String} projectName, {@link String} | {@link ArrayList}<{@link String}> buildType>
+     * </code>
+     * </p>
+     * <p>@Example
+     * <code><pre>
+     * def assembleTargets = [
+     *     [autojs: 'release'],
+     *     [app: ['debug', 'release']],
+     *     [others: 'debug'],
+     * ]
+     * </pre></code>
+     * </p>
+     */
+    private assembleTargets = [app: ['debug', 'release']]
+
+    Versions(filePath) {
+        properties = new Properties()
+        file = new File(filePath)
+        loadFile()
+        setVersions()
+    }
+
+    private loadFile = {
+        if (!file.canRead()) {
+            throw new FileNotFoundException("Can't read file version.properties")
+        }
+        properties.load(new FileInputStream(file))
+    }
+
+    private setVersions = {
+        sdkVersionMin = properties['MIN_SDK_VERSION'] as int
+        sdkVersionTarget = properties['TARGET_SDK_VERSION'] as int
+        sdkVersionCompile = properties['COMPILE_SDK_VERSION'] as int
+        appVersionName = properties['VERSION_NAME']
+        appVersionCode = properties['VERSION_BUILD'] as int
+        javaVersion = JavaVersion["VERSION_${properties['JAVA_VERSION']}"]
+    }
+
+    private isBuildGapEnough = {
+        if (properties['BUILD_TIME'] != null) {
+            new Date().time - (properties['BUILD_TIME'] as long) > minBuildTimeGap
+        }
+    }
+
+    public updateProperties = {
+        if (isBuildGapEnough()) {
+            properties['VERSION_BUILD'] = (appVersionCode + 1).toString()
+            isBuildNumberAutoIncremented = true
+        }
+        properties['BUILD_TIME'] = new Date().time.toString()
+        properties.store(file.newWriter(), null)
+    }
+
+    public showInfo = {
+        println "Version name: $appVersionName"
+        println "Version code: $appVersionCode${isBuildNumberAutoIncremented ? " [auto-incremented]" : ""}"
+        println "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]"
+        println "Java version: $javaVersion"
+    }
+
+    public handleIfNeeded = { project ->
+        def hasTask = { taskGraph, name, buildType ->
+            taskGraph.hasTask(Utils.getAssembleFullTaskName(name, buildType))
+        }
+        def append = { buildType ->
+            project.tasks.named(Utils.getAssembleTaskName(buildType)) {
+                doLast { updateProperties(); println(); showInfo() }
+            }
+        }
+
+        assembleTargets.each { Map.Entry<String, ArrayList<String>> entry ->
+            def target = [name: entry.key, buildType: entry.value]
+            if (target.name != project.name) {
+                return
+            }
+            project.gradle.taskGraph.whenReady { taskGraph ->
+                if (target.buildType instanceof ArrayList) {
+                    for (buildType in target.buildType) {
+                        if (hasTask(taskGraph, target.name, buildType)) {
+                            return append(buildType)
+                        }
+                    }
+                } else {
+                    if (hasTask(taskGraph, target.name, target.buildType)) {
+                        return append(target.buildType)
+                    }
+                }
+                return showInfo()
+            }
+        }
+    }
+
+}
+
+class Sign {
+
+    def properties, file, isValid
+
+    Sign(filePath) {
+        properties = new Properties()
+        file = new File(filePath)
+        if (file.exists()) {
+            properties.load(new FileInputStream(file))
+            isValid = !properties.isEmpty()
+        }
+    }
+
+}
+
+class Utils {
+
+    static FILE_EXTENSION_APK = 'apk'
+
+    static hours2Millis = { it * 3.6e6 }
+
+    static capitalize = { "${it[0].toUpperCase()}${it.substring(1)}" }
+
+    static getDateString = { format, timeZone ->
+        def zone = timeZone ? TimeZone.getTimeZone(timeZone) : TimeZone.getDefault()
+
+        new Date().format(format, zone) // e.g. May 23, 2011
+    }
+
+    static getOutputFileName = { variant, output ->
+        def autojs = variant.applicationId.replaceAll(/^.+\.(.+)$/, '$1') // e.g. autojs6
+        def version = variant.versionName.replaceAll(/\s/, '-') // e.g. 6.1.0
+        def architecture = output.getFilter("ABI") ?: 'universal'
+        def extension = FILE_EXTENSION_APK
+
+        "$autojs-v$version-$architecture.$extension".toLowerCase()
+    }
+
+    static getAssembleTaskName = { buildType ->
+        "assemble${Utils.capitalize(buildType)}"
+    }
+
+    static getAssembleFullTaskName = { name, buildType ->
+        ":$name:${Utils.getAssembleTaskName(buildType)}"
+    }
+
+    static digestCRC32 = { File file ->
+        def instance = new CRC32()
+
+        def fis = new FileInputStream(file)
+        def buffer = new byte[4096]
+        def read
+        while ((read = fis.read(buffer)) > 0) {
+            instance.update(buffer, 0, read)
+        }
+
+        String.format("%08x", instance.getValue())
+    }
+
+}
+
+task appendDigestToReleasedFiles(type: Copy) {
+    def src = "release"
+    def dst = "${src}s"
+    def ext = Utils.FILE_EXTENSION_APK
+
+    from src
+    into dst
+    include "*.$ext"
+    rename { String name ->
+        String digest = Utils.digestCRC32(file("${src}/$name"))
+        if (digest.matches(/^0{8}$/)) {
+            project.logger.error "Invalid digest"
+        } else {
+            name.replaceAll "^(.+?)(\\.$ext)\$", "\$1-$digest\$2"
+        }
+    }
+    doLast {
+        println "Destination: ${file(dst)}"
+    }
+}

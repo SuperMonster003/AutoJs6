@@ -5,7 +5,6 @@ import com.stardust.automator.UiObject
 /**
  * Created by Stardust on 2017/3/9.
  */
-
 class StringEqualsFilter(private val mValue: String, private val mKeyGetter: KeyGetter) : Filter {
 
     override fun filter(node: UiObject): Boolean {
@@ -16,6 +15,6 @@ class StringEqualsFilter(private val mValue: String, private val mKeyGetter: Key
     }
 
     override fun toString(): String {
-        return mKeyGetter.toString() + "(\"" + mValue + "\")"
+        return "$mKeyGetter(\"$mValue\")"
     }
 }

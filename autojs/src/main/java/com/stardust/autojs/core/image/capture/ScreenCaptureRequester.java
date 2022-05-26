@@ -4,18 +4,19 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.projection.MediaProjectionManager;
-import android.os.Build;
-import androidx.annotation.RequiresApi;
 
 import com.stardust.app.OnActivityResultDelegate;
 
 /**
  * Created by Stardust on 2017/5/17.
  */
-
 public interface ScreenCaptureRequester {
 
+    void request();
+
     void cancel();
+
+    void setOnActivityResultCallback(Callback callback);
 
     interface Callback {
 
@@ -23,13 +24,37 @@ public interface ScreenCaptureRequester {
 
     }
 
-    void request();
+    class ActivityScreenCaptureRequester extends AbstractScreenCaptureRequester implements ScreenCaptureRequester, OnActivityResultDelegate {
 
-    void setOnActivityResultCallback(Callback callback);
+        private static final int REQUEST_CODE_MEDIA_PROJECTION = 17777;
+        private final OnActivityResultDelegate.Mediator mMediator;
+        private final Activity mActivity;
+
+        public ActivityScreenCaptureRequester(Mediator mediator, Activity activity) {
+            mMediator = mediator;
+            mActivity = activity;
+            mMediator.addDelegate(REQUEST_CODE_MEDIA_PROJECTION, this);
+        }
+
+        @Override
+        public void request() {
+            MediaProjectionManager manager = (MediaProjectionManager) mActivity.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            mActivity.startActivityForResult(manager.createScreenCaptureIntent(), REQUEST_CODE_MEDIA_PROJECTION);
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            mResult = data;
+            mMediator.removeDelegate(this);
+            onResult(resultCode, data);
+        }
+
+    }
 
     abstract class AbstractScreenCaptureRequester implements ScreenCaptureRequester {
 
         protected Callback mCallback;
+
         protected Intent mResult;
 
         @Override
@@ -50,33 +75,7 @@ public interface ScreenCaptureRequester {
             if (mCallback != null)
                 mCallback.onRequestResult(Activity.RESULT_CANCELED, null);
         }
-    }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    class ActivityScreenCaptureRequester extends AbstractScreenCaptureRequester implements ScreenCaptureRequester, OnActivityResultDelegate {
-
-        private static final int REQUEST_CODE_MEDIA_PROJECTION = 17777;
-        private OnActivityResultDelegate.Mediator mMediator;
-        private Activity mActivity;
-
-        public ActivityScreenCaptureRequester(Mediator mediator, Activity activity) {
-            mMediator = mediator;
-            mActivity = activity;
-            mMediator.addDelegate(REQUEST_CODE_MEDIA_PROJECTION, this);
-        }
-
-
-        @Override
-        public void request() {
-            mActivity.startActivityForResult(((MediaProjectionManager) mActivity.getSystemService(Context.MEDIA_PROJECTION_SERVICE)).createScreenCaptureIntent(), REQUEST_CODE_MEDIA_PROJECTION);
-        }
-
-        @Override
-        public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            mResult = data;
-            mMediator.removeDelegate(this);
-            onResult(resultCode, data);
-        }
     }
 
 }

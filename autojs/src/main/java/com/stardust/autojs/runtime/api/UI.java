@@ -2,7 +2,6 @@ package com.stardust.autojs.runtime.api;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.Nullable;
 
 import com.stardust.autojs.core.graphics.ScriptCanvasView;
 import com.stardust.autojs.core.ui.inflater.DynamicLayoutInflater;
@@ -25,18 +24,14 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Stardust on 2017/5/14.
  */
-
 public class UI extends ProxyObject {
 
-
-    private Context mContext;
-    private Map<String, Object> mProperties = new ConcurrentHashMap<>();
-    private DynamicLayoutInflater mDynamicLayoutInflater;
-    private ScriptRuntime mRuntime;
-    private ResourceParser mResourceParser;
+    private final Map<String, Object> mProperties = new ConcurrentHashMap<>();
+    private final DynamicLayoutInflater mDynamicLayoutInflater;
+    private final ScriptRuntime mRuntime;
+    private final ResourceParser mResourceParser;
 
     public UI(Context context, ScriptRuntime runtime) {
-        mContext = context;
         mRuntime = runtime;
         mResourceParser = new ResourceParser(new Drawables());
         mDynamicLayoutInflater = new DynamicLayoutInflater(mResourceParser);
@@ -70,7 +65,6 @@ public class UI extends ProxyObject {
         else
             mProperties.put("bindingContext", context);
     }
-
 
     public DynamicLayoutInflater getLayoutInflater() {
         return mDynamicLayoutInflater;
@@ -114,6 +108,5 @@ public class UI extends ProxyObject {
             return super.decodeImage(context, mRuntime.files.path(path));
         }
     }
-
 
 }

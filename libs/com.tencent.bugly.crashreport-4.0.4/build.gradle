@@ -1,0 +1,2 @@
+configurations.maybeCreate('default')
+artifacts.add('default', file('crashreport-4.0.4.aar'))

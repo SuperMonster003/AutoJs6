@@ -2,7 +2,6 @@ package com.stardust.autojs.core.ui;
 
 import com.stardust.autojs.rhino.NativeJavaObjectWithPrototype;
 
-import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 

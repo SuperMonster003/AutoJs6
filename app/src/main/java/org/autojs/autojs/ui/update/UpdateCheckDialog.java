@@ -3,20 +3,12 @@ package org.autojs.autojs.ui.update;
 import android.content.Context;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.stardust.app.GlobalAppContext;
 
-import org.autojs.autojs.R;
-import org.autojs.autojs.network.VersionService;
-import org.autojs.autojs.network.entity.VersionInfo;
-import org.autojs.autojs.tool.SimpleObserver;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/9/20.
  */
-
 public class UpdateCheckDialog {
 
     private final MaterialDialog mProgress;

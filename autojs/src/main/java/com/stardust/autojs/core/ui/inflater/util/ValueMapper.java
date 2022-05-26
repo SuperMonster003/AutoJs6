@@ -7,11 +7,10 @@ import java.util.HashMap;
 /**
  * Created by Stardust on 2017/11/3.
  */
-
 public class ValueMapper<V> {
 
-    private HashMap<String, V> mHashMap = new HashMap<>();
-    private String mAttrName;
+    private final HashMap<String, V> mHashMap = new HashMap<>();
+    private final String mAttrName;
 
     public ValueMapper(String attrName) {
         mAttrName = attrName;

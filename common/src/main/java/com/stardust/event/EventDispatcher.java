@@ -5,14 +5,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by Stardust on 2017/8/6.
  */
-
 public class EventDispatcher<Listener> {
 
     public interface Event<Listener> {
         void notify(Listener l);
     }
 
-    private CopyOnWriteArrayList<Listener> mListeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<Listener> mListeners = new CopyOnWriteArrayList<>();
 
     public void addListener(Listener l) {
         mListeners.add(l);

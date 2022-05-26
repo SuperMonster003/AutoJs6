@@ -1,87 +1,64 @@
+let _ = {
+    init(__runtime__, scope) {
+        this.runtime = __runtime__;
+        this.scope = scope;
 
+        /**
+         * @type {(cmd: string, root: number) => com.stardust.autojs.runtime.api.AbstractShell.Result}
+         */
+        this.rtShell = __runtime__.shell.bind(__runtime__);
 
-module.exports = function(__runtime__, scope){
+        /**
+         *
+         * @type {com.stardust.autojs.runtime.api.AbstractShell}
+         */
+        this.rtRootShell = __runtime__.getRootShell();
+    },
+    getModule() {
+        return (cmd, root) => this.rtShell(cmd, Number(Boolean(root)));
+    },
+    scopeAugment() {
+        Object.assign(this.scope, {
+            Menu: () => KeyCode(KeyEvent.KEYCODE_MENU),
+            Home: () => KeyCode(KeyEvent.KEYCODE_HOME),
+            Back: () => KeyCode(KeyEvent.KEYCODE_BACK),
+            Up: () => KeyCode(KeyEvent.KEYCODE_DPAD_UP),
+            Down: () => KeyCode(KeyEvent.KEYCODE_DPAD_DOWN),
+            Left: () => KeyCode(KeyEvent.KEYCODE_DPAD_LEFT),
+            Right: () => KeyCode(KeyEvent.KEYCODE_DPAD_RIGHT),
+            OK: () => KeyCode(KeyEvent.KEYCODE_DPAD_CENTER),
+            VolumeUp: () => KeyCode(KeyEvent.KEYCODE_VOLUME_UP),
+            VolumeDown: () => KeyCode(KeyEvent.KEYCODE_VOLUME_DOWN),
+            Power: () => KeyCode(KeyEvent.KEYCODE_POWER),
+            Camera: () => KeyCode(KeyEvent.KEYCODE_CAMERA),
+            Text: text => this.rtRootShell.Text(text),
+            Input: text => this.rtRootShell.Text(text),
+            Tap: (x, y) => this.rtRootShell.Tap(x, y),
+            Screencap: path => this.rtRootShell.Screencap(path),
+            KeyCode: keyCode => this.rtRootShell.KeyCode(keyCode),
+            SetScreenMetrics: (w, h) => this.rtRootShell.SetScreenMetrics(w, h),
+            Swipe: (x1, y1, x2, y2, duration) => duration === undefined
+                ? this.rtRootShell.Swipe(x1, y1, x2, y2)
+                : this.rtRootShell.Swipe(x1, y1, x2, y2, duration),
+        });
+    },
+};
 
-    scope.SetScreenMetrics = function(w, h){
-        __runtime__.getRootShell().SetScreenMetrics(w, h);
-    }
+let $ = {
+    getModule(__runtime__, scope) {
+        _.init(__runtime__, scope);
 
-    scope.Tap = function(x, y){
-        __runtime__.getRootShell().Tap(x, y);
-    }
+        _.scopeAugment();
 
-    scope.Swipe = function(x1, y1, x2, y2, duration){
-        if(arguments.length == 5){
-            __runtime__.getRootShell().Swipe(x1, y1, x2, y2, duration);
-        }else{
-            __runtime__.getRootShell().Swipe(x1, y1, x2, y2);
-        }
-    }
+        return _.getModule();
+    },
+};
 
-    scope.Screencap = function(path){
-         __runtime__.getRootShell().Screencap(path);
-    }
-
-    scope.KeyCode = function(keyCode){
-        __runtime__.getRootShell().KeyCode(keyCode);
-    }
-
-    scope.Home = function(){
-        return KeyCode(3);
-    }
-
-    scope.Back = function(){
-        return KeyCode(4);
-    }
-
-    scope.Power = function(){
-        return KeyCode(26);
-    }
-
-    scope.Up = function(){
-        return KeyCode(19);
-    }
-
-    scope.Down = function(){
-        return KeyCode(20);
-    }
-
-    scope.Left = function(){
-        return KeyCode(21);
-    }
-
-    scope.Right = function(){
-        return KeyCode(22);
-    }
-
-    scope.OK = function(){
-        return KeyCode(23);
-    }
-
-    scope.VolumeUp = function(){
-        return KeyCode(24);
-    }
-
-    scope.VolumeDown = function(){
-        return KeyCode(25);
-    }
-
-    scope.Menu = function(){
-        return KeyCode(1);
-    }
-
-    scope.Camera = function(){
-        return KeyCode(27);
-    }
-
-    scope.Text = function(text){
-         __runtime__.getRootShell().Text(text);
-    }
-
-    scope.Input = scope.Text;
-
-    return function(cmd, root){
-       root = root ? 1 : 0;
-       return __runtime__.shell(cmd, root);
-   };
-}
+/**
+ * @param {com.stardust.autojs.runtime.ScriptRuntime} __runtime__
+ * @param {org.mozilla.javascript.Scriptable} scope
+ * @return {Internal.Shell}
+ */
+module.exports = function (__runtime__, scope) {
+    return $.getModule(__runtime__, scope);
+};

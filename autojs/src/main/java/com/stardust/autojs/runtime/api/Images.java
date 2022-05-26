@@ -8,12 +8,8 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.Image;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-
-import androidx.annotation.RequiresApi;
-
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
@@ -50,7 +46,7 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/5/20.
  */
-@RequiresApi(api = Build.VERSION_CODES.KITKAT)
+@SuppressWarnings("unused")
 public class Images {
 
     private static final String TAG = Images.class.getSimpleName();
@@ -75,32 +71,33 @@ public class Images {
         colorFinder = new ColorFinder(mScreenMetrics);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public ScriptPromiseAdapter requestScreenCapture(int orientation) {
-        ScriptRuntime.requiresApi(21);
         ScriptPromiseAdapter promiseAdapter = new ScriptPromiseAdapter();
-        if (mScreenCapturer != null) {
+        if (mScreenCapturer == null || !mScreenCapturer.isMediaProjectionValid()) {
+            mScreenCaptureRequester.setOnActivityResultCallback((result, data) -> {
+                if (result == Activity.RESULT_OK) {
+                    int density = ScreenMetrics.getDeviceScreenDensity();
+                    Looper servantLooper = mScriptRuntime.loopers.getServantLooper();
+                    Handler handler = new Handler(servantLooper);
+                    mScreenCapturer = ScreenCapturer.getInstance(mContext, data, orientation, density, handler, mScriptRuntime);
+                    promiseAdapter.resolve(true);
+                } else {
+                    promiseAdapter.resolve(false);
+                }
+            });
+            mScreenCaptureRequester.request();
+        } else {
             mScreenCapturer.setOrientation(orientation);
+            // FIXME by SuperMonster003 on May 19, 2022.
+            //  ! In JavaScript images module, code below will get a stuck
+            //  ! when being called more than once in the same script runtime:
+            //  ! ResultAdapter.wait(rtImages.requestScreenCapture(orientation))
             promiseAdapter.resolve(true);
-            return promiseAdapter;
         }
-        Looper servantLooper = mScriptRuntime.loopers.getServantLooper();
-        mScreenCaptureRequester.setOnActivityResultCallback((result, data) -> {
-            if (result == Activity.RESULT_OK) {
-                mScreenCapturer = new ScreenCapturer(mContext, data, orientation, ScreenMetrics.getDeviceScreenDensity(),
-                        new Handler(servantLooper));
-                promiseAdapter.resolve(true);
-            } else {
-                promiseAdapter.resolve(false);
-            }
-        });
-        mScreenCaptureRequester.request();
         return promiseAdapter;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public synchronized ImageWrapper captureScreen() {
-        ScriptRuntime.requiresApi(21);
         if (mScreenCapturer == null) {
             throw new SecurityException("No screen capture permission");
         }
@@ -116,7 +113,6 @@ public class Images {
         return mPreCaptureImage;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public boolean captureScreen(String path) {
         path = mScriptRuntime.files.path(path);
         ImageWrapper image = captureScreen();
@@ -133,8 +129,9 @@ public class Images {
 
     public boolean save(ImageWrapper image, String path, String format, int quality) throws IOException {
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
-        if (compressFormat == null)
+        if (compressFormat == null) {
             throw new IllegalArgumentException("unknown format " + format);
+        }
         Bitmap bitmap = image.getBitmap();
         FileOutputStream outputStream = new FileOutputStream(mScriptRuntime.files.path(path));
         return bitmap.compress(compressFormat, quality, outputStream);
@@ -148,17 +145,17 @@ public class Images {
     }
 
     public static ImageWrapper concat(ImageWrapper img1, ImageWrapper img2, int direction) {
-        if (!Arrays.asList(Gravity.LEFT, Gravity.RIGHT, Gravity.TOP, Gravity.BOTTOM).contains(direction)) {
+        if (!Arrays.asList(Gravity.START, Gravity.END, Gravity.TOP, Gravity.BOTTOM).contains(direction)) {
             throw new IllegalArgumentException("unknown direction " + direction);
         }
         int width;
         int height;
-        if (direction == Gravity.LEFT || direction == Gravity.TOP) {
+        if (direction == Gravity.START || direction == Gravity.TOP) {
             ImageWrapper tmp = img1;
             img1 = img2;
             img2 = tmp;
         }
-        if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
+        if (direction == Gravity.START || direction == Gravity.END) {
             width = img1.getWidth() + img2.getWidth();
             height = Math.max(img1.getHeight(), img2.getHeight());
         } else {
@@ -168,7 +165,7 @@ public class Images {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
-        if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
+        if (direction == Gravity.START || direction == Gravity.END) {
             canvas.drawBitmap(img1.getBitmap(), 0, (float) (height - img1.getHeight()) / 2, paint);
             canvas.drawBitmap(img2.getBitmap(), img1.getWidth(), (float) (height - img2.getHeight()) / 2, paint);
         } else {
@@ -204,8 +201,9 @@ public class Images {
 
     public byte[] toBytes(ImageWrapper wrapper, String format, int quality) {
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
-        if (compressFormat == null)
-            throw new IllegalArgumentException("unknown format " + format);
+        if (compressFormat == null) {
+            throw new IllegalArgumentException("Unknown format " + format);
+        }
         Bitmap bitmap = wrapper.getBitmap();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(compressFormat, quality, outputStream);
@@ -262,7 +260,7 @@ public class Images {
 
     public void releaseScreenCapturer() {
         if (mScreenCapturer != null) {
-            mScreenCapturer.release();
+            mScreenCapturer.release(mScriptRuntime);
         }
     }
 
@@ -280,10 +278,12 @@ public class Images {
 
     public Point findImage(ImageWrapper image, ImageWrapper template, float weakThreshold, float threshold, Rect rect, int maxLevel) {
         initOpenCvIfNeeded();
-        if (image == null)
-            throw new NullPointerException("image = null");
-        if (template == null)
-            throw new NullPointerException("template = null");
+        if (image == null) {
+            throw new NullPointerException("Param image is null");
+        }
+        if (template == null) {
+            throw new NullPointerException("Param template is null");
+        }
         Mat src = image.getMat();
         if (rect != null) {
             src = new Mat(src, rect);
@@ -306,10 +306,12 @@ public class Images {
 
     public List<TemplateMatching.Match> matchTemplate(ImageWrapper image, ImageWrapper template, float weakThreshold, float threshold, Rect rect, int maxLevel, int limit) {
         initOpenCvIfNeeded();
-        if (image == null)
-            throw new NullPointerException("image = null");
-        if (template == null)
-            throw new NullPointerException("template = null");
+        if (image == null) {
+            throw new NullPointerException("Param image is null");
+        }
+        if (template == null) {
+            throw new NullPointerException("Param template is null");
+        }
         Mat src = image.getMat();
         if (rect != null) {
             src = new Mat(src, rect);

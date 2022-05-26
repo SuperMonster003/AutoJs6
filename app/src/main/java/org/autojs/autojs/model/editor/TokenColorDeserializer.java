@@ -6,8 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import org.mozilla.javascript.Token;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +14,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2018/2/21.
  */
-
 public class TokenColorDeserializer implements JsonDeserializer<TokenColor> {
 
     @Override

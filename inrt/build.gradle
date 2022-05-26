@@ -1,113 +1,13 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-
-android {
-    compileSdkVersion versions.project.compile
-
-    defaultConfig {
-        applicationId 'com.stardust.auojs.inrt'
-        minSdkVersion versions.project.mini
-        targetSdkVersion versions.project.target
-        versionCode versions.project.appVersionCode
-        versionName versions.project.appVersionName
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        multiDexEnabled true
-    }
-    lintOptions {
-        abortOnError false
-        disable 'MissingTranslation'
-        disable 'ExtraTranslation'
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_16
-        targetCompatibility JavaVersion.VERSION_16
-    }
-    splits {
-
-        // Configures multiple APKs based on ABI.
-        abi {
-
-            // Enables building multiple APKs per ABI.
-            enable true
-
-            // By default all ABIs are included, so use reset() and include to specify that we only
-            // want APKs for x86 and x86_64.
-
-            // Resets the list of ABIs that Gradle should create APKs for to none.
-            reset()
-
-            // Specifies a list of ABIs that Gradle should create APKs for.
-            include 'x86', 'armeabi-v7a'
-
-            // Specifies that we do not want to also generate a universal APK that includes all ABIs.
-            universalApk false
-        }
-    }
-    buildTypes {
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
+ext {
+    applicationId = 'com.stardust.autojs.inrt'
+    namespace = applicationId
 }
 
-def buildApkPluginForAbi(File pluginProjectDir, String abi) {
-    copy {
-        from file('..\\app\\release\\')
-        into new File(pluginProjectDir, 'app\\src\\main\\assets')
-        def fileName = 'inrt-' + abi + '-release.apk'
-        include fileName
-        rename fileName, 'template.apk'
-    }
-    exec {
-        workingDir pluginProjectDir
-        commandLine 'gradlew.bat', 'assembleRelease'
-    }
-    copy {
-        from new File(pluginProjectDir, 'app\\build\\outputs\\apk\\release')
-        into file('..\\common\\release')
-        def fileName = '打包插件-' + versions.project.appVersionName + '-release.apk'
-        include fileName
-        rename fileName, '打包插件-' + abi + '-' + versions.project.appVersionName + '-release.apk'
-    }
-}
-
-task buildApkPlugin {
-    doLast {
-        def pluginProjectDirPath = '..\\..\\AutoJsApkBuilderPlugin'
-        def pluginProjectDir = file(pluginProjectDirPath)
-        if (!pluginProjectDir.exists() || !pluginProjectDir.isDirectory()) {
-            println 'pluginProjectDir not exists'
-            return
-        }
-        buildApkPluginForAbi(pluginProjectDir, 'armeabi-v7a')
-    }
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name == 'assembleRelease') {
-        task.finalizedBy 'buildApkPlugin'
-    }
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_16
-    }
-}
-
-repositories {
-    google()
+apply {
+    from rootProject.file('config.gradle')
 }
 
 dependencies {
-    testImplementation "junit:junit:${versions.junit}"
-
-    implementation project(':automator')
-    implementation project(':common')
+    // Indirect: automator, common
     implementation project(':autojs')
 }

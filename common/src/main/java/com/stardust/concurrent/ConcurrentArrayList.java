@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Stardust on 2017/12/30.
  */
-
 public class ConcurrentArrayList<T> {
 
     private final Class<T> mTClass;

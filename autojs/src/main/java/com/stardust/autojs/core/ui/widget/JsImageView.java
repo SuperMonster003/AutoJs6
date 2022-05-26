@@ -1,19 +1,15 @@
 package com.stardust.autojs.core.ui.widget;
 
 import android.content.Context;
-import androidx.core.widget.ImageViewCompat;
-import androidx.appcompat.widget.AppCompatImageView;
 import android.util.AttributeSet;
 
 import com.makeramen.roundedimageview.RoundedImageView;
-
 import com.stardust.autojs.core.image.ImageWrapper;
 import com.stardust.autojs.core.ui.inflater.util.Drawables;
 
 /**
  * Created by Stardust on 2017/11/30.
  */
-
 public class JsImageView extends RoundedImageView {
 
     private boolean mCircle;

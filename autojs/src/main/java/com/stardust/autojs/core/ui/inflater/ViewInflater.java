@@ -12,8 +12,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/3.
  */
-
-
 public interface ViewInflater<V extends View> {
 
     boolean setAttr(V view, String attrName, String value, ViewGroup parent, Map<String, String> attrs);

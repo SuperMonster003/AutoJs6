@@ -1,61 +1,36 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
-// tasks.withType(JavaCompile) {
-//     options.compilerArgs << '-Xlint:deprecation'
-// }
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_16
-    }
+ext {
+    namespace = 'com.stardust'
 }
 
-android {
-    compileSdkVersion versions.project.compile
-
-    defaultConfig {
-        minSdkVersion versions.project.mini
-        targetSdkVersion versions.project.target
-
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-    lintOptions {
-        abortOnError false
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_16
-        targetCompatibility JavaVersion.VERSION_16
-    }
+apply {
+    from rootProject.file('config.gradle')
 }
 
 dependencies {
-    testImplementation "junit:junit:${versions.junit}"
-
     // Kotlin
-    // noinspection DifferentStdlibGradleVersion
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${versions.kotlin}"
+    // @Comment by SuperMonster003 on May 19, 2022.
+    //  ! It is no longer necessary to declare a dependency on the stdlib library in any Kotlin Gradle project.
+    //  ! The dependency is added by default.
+    //  ! See https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library
+    // api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.21"
 
     // Android supports
-    api 'com.google.android.material:material:1.5.0'
+    api 'com.google.android.material:material:1.6.0'
 
     // Material Dialogs
-    // noinspection GradleDependency
-    api "com.afollestad.material-dialogs:core:${versions.materialDialogs}"
+    // TODO by SuperMonster003 on Feb 5, 2022.
+    //  ! Upgrade to 3.3.0 (more difficult than expected)
+    api "com.afollestad.material-dialogs:core:0.9.6.0"
     api "com.afollestad.material-dialogs:commons:0.9.6.0"
 
     // Glide
-    api "com.github.bumptech.glide:glide:${versions.glide}"
+    api "com.github.bumptech.glide:glide:4.13.2"
 
     // RoundedImageView
     api 'com.makeramen:roundedimageview:2.3.0'
+
+    // CircleImageView
+    api 'de.hdodenhof:circleimageview:3.1.0'
 
     // EventBus
     api 'org.greenrobot:eventbus:3.3.1'
@@ -82,6 +57,8 @@ dependencies {
 
     // AppCompat
     api 'androidx.appcompat:appcompat:1.4.1'
+
+    // AppCompat for legacy views (such as JsTextViewLegacy)
     api project(':libs:androidx.appcompat-1.0.2')
 
     // LocaleHelper
@@ -91,5 +68,5 @@ dependencies {
     api project(':libs:org.opencv-4.5.5')
 
     // Rhino
-    api project(':libs:org.mozilla.rhino-1.7.14')
+    api project(':libs:org.mozilla.rhino-1.7.15-snapshot')
 }

@@ -12,7 +12,6 @@ import com.twofortyfouram.locale.sdk.client.receiver.AbstractPluginSettingReceiv
 /**
  * Created by Stardust on 2017/3/27.
  */
-
 public class FireSettingReceiver extends AbstractPluginSettingReceiver {
 
     private static final String TAG = "FireSettingReceiver";

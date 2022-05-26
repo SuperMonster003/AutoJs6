@@ -9,7 +9,6 @@ import com.stardust.theme.ThemeColorManager;
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public class ThemeColorAppCompatActivity extends AppCompatActivity {
 
     @Override

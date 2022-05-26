@@ -3,7 +3,8 @@ package com.stardust.autojs.core.image;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.Image;
-import android.os.Build;
+
+import androidx.annotation.NonNull;
 
 import com.stardust.autojs.core.opencv.Mat;
 import com.stardust.autojs.core.opencv.OpenCVHelper;
@@ -14,45 +15,84 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
-
-import androidx.annotation.RequiresApi;
+import java.util.ArrayList;
 
 /**
  * Created by Stardust on 2017/11/25.
  */
-public class ImageWrapper {
+public class ImageWrapper implements Recyclable {
 
     private Mat mMat;
-    private int mWidth;
-    private int mHeight;
     private Bitmap mBitmap;
 
+    private final int mWidth;
+    private final int mHeight;
+
+    private boolean isRecycled;
+
+    private final static ArrayList<WeakReference<Object>> imageList = new ArrayList<>();
+
+    @NonNull
+    public static ArrayList<Object> getImageList() {
+        ArrayList<Object> list = new ArrayList<>();
+        for (WeakReference<Object> ref : imageList) {
+            Object image = ref.get();
+            if (image != null) {
+                list.add(image);
+            }
+        }
+        return list;
+    }
+
+    public static Object addToList(Object image) {
+        imageList.add(new WeakReference<>(image));
+        return image;
+    }
+
+    public static synchronized void recycleAll() {
+        for (WeakReference<Object> reference : imageList) {
+            Object image = reference.get();
+            if (image instanceof Recyclable) {
+                ((Recyclable) image).recycle();
+            } else if (image instanceof Bitmap) {
+                ((Bitmap) image).recycle();
+            }
+        }
+        imageList.clear();
+    }
+
     protected ImageWrapper(Mat mat) {
-        mMat = mat;
-        mWidth = mat.cols();
-        mHeight = mat.rows();
+        this(null, mat);
     }
 
     protected ImageWrapper(Bitmap bitmap) {
-        mBitmap = bitmap;
-        mWidth = bitmap.getWidth();
-        mHeight = bitmap.getHeight();
+        this(bitmap, null);
     }
 
-    protected ImageWrapper(Bitmap bitmap, Mat mat) {
-        mBitmap = bitmap;
-        mMat = mat;
-        mWidth = bitmap.getWidth();
-        mHeight = bitmap.getHeight();
-    }
-
-    public ImageWrapper(int width, int height) {
+    protected ImageWrapper(int width, int height) {
         this(Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888));
     }
 
+    protected ImageWrapper(Bitmap bitmap, Mat mat) {
+        if (mat != null) {
+            mMat = mat;
+        }
+        if (bitmap != null) {
+            mBitmap = bitmap;
+            mWidth = bitmap.getWidth();
+            mHeight = bitmap.getHeight();
+        } else {
+            if (mat == null) {
+                throw new Error("Both bitmap and mat are null");
+            }
+            mWidth = mat.cols();
+            mHeight = mat.rows();
+        }
+        addToList(this);
+    }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public static ImageWrapper ofImage(Image image) {
         if (image == null) {
             return null;
@@ -67,7 +107,6 @@ public class ImageWrapper {
         return new ImageWrapper(mat);
     }
 
-
     public static ImageWrapper ofBitmap(Bitmap bitmap) {
         if (bitmap == null) {
             return null;
@@ -75,7 +114,6 @@ public class ImageWrapper {
         return new ImageWrapper(bitmap);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public static Bitmap toBitmap(Image image) {
         Image.Plane plane = image.getPlanes()[0];
         ByteBuffer buffer = plane.getBuffer();
@@ -87,7 +125,13 @@ public class ImageWrapper {
         if (rowPadding == 0) {
             return bitmap;
         }
-        return Bitmap.createBitmap(bitmap, 0, 0, image.getWidth(), image.getHeight());
+        try {
+            return Bitmap.createBitmap(bitmap, 0, 0, image.getWidth(), image.getHeight());
+        } catch (IllegalStateException e) {
+            // Wrapped java.lang.IllegalStateException: Image is already closed
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public int getWidth() {
@@ -140,6 +184,7 @@ public class ImageWrapper {
         return mBitmap;
     }
 
+    @Override
     public void recycle() {
         if (mBitmap != null) {
             mBitmap.recycle();
@@ -149,14 +194,22 @@ public class ImageWrapper {
             OpenCVHelper.release(mMat);
             mMat = null;
         }
+        isRecycled = true;
+    }
 
+    @Override
+    public boolean isRecycled() {
+        return isRecycled;
     }
 
     public void ensureNotRecycled() {
-        if (mBitmap == null && mMat == null)
-            throw new IllegalStateException("image has been recycled");
+        if (isRecycled()) {
+            throw new IllegalStateException("Image has been recycled");
+        }
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @NonNull
     public ImageWrapper clone() {
         ensureNotRecycled();
         if (mBitmap == null) {

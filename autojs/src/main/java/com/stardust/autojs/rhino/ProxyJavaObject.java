@@ -10,7 +10,6 @@ import org.mozilla.javascript.UniqueTag;
 /**
  * Created by Stardust on 2017/12/6.
  */
-
 public class ProxyJavaObject extends NativeJavaObject {
 
     private NativeFunction mGetter;

@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.update;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 
 import androidx.annotation.NonNull;
 
@@ -12,7 +12,7 @@ import com.stardust.app.GlobalAppContext;
 import com.stardust.util.IntentUtil;
 
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.network.download.DownloadManager;
 import org.autojs.autojs.network.entity.VersionInfo;
@@ -24,7 +24,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 /**
  * Created by Stardust on 2017/4/9.
  */
-
 public class UpdateInfoDialogBuilder extends MaterialDialog.Builder {
 
     private static final String KEY_IGNORED_VERSION_PREFIX = "Ignored version: ";

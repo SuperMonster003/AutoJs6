@@ -3,8 +3,6 @@ package com.stardust.autojs.core.database;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.sql.ResultSet;
-
 public class Transaction {
 
     private final SQLiteDatabase mDatabase;

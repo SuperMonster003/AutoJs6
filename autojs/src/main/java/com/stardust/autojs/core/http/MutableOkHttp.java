@@ -12,13 +12,12 @@ import okhttp3.Response;
 /**
  * Created by Stardust on 2018/4/11.
  */
-
 public class MutableOkHttp extends OkHttpClient {
 
     private OkHttpClient mOkHttpClient;
     private int mMaxRetries = 3;
     private long mTimeout = 30 * 1000;
-    private Interceptor mRetryInterceptor = chain -> {
+    private final Interceptor mRetryInterceptor = chain -> {
         Request request = chain.request();
         Response response = null;
         int tryCount = 0;

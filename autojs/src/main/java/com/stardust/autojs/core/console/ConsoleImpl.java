@@ -2,8 +2,10 @@ package com.stardust.autojs.core.console;
 
 import android.content.Context;
 import android.content.Intent;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.view.WindowManager;
 
 import com.stardust.autojs.R;
@@ -27,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Stardust on 2017/5/2.
  */
-
 public class ConsoleImpl extends AbstractConsole {
 
     public static class LogEntry implements Comparable<LogEntry> {
@@ -65,12 +66,12 @@ public class ConsoleImpl extends AbstractConsole {
     private final Object WINDOW_SHOW_LOCK = new Object();
     private final Console mGlobalConsole;
     private final ArrayList<LogEntry> mLogEntries = new ArrayList<>();
-    private AtomicInteger mIdCounter = new AtomicInteger(0);
-    private ResizableExpandableFloatyWindow mFloatyWindow;
-    private ConsoleFloaty mConsoleFloaty;
+    private final AtomicInteger mIdCounter = new AtomicInteger(0);
+    private final ResizableExpandableFloatyWindow mFloatyWindow;
+    private final ConsoleFloaty mConsoleFloaty;
     private WeakReference<LogListener> mLogListener;
-    private UiHandler mUiHandler;
-    private BlockingQueue<String> mInput = new ArrayBlockingQueue<>(1);
+    private final UiHandler mUiHandler;
+    private final BlockingQueue<String> mInput = new ArrayBlockingQueue<>(1);
     private WeakReference<ConsoleView> mConsoleView;
     private volatile boolean mShown = false;
     private int mX, mY;
@@ -104,7 +105,6 @@ public class ConsoleImpl extends AbstractConsole {
             this.notify();
         }
     }
-
 
     public void setLogListener(LogListener logListener) {
         mLogListener = new WeakReference<>(logListener);
@@ -143,7 +143,6 @@ public class ConsoleImpl extends AbstractConsole {
         println(level, charSequence);
     }
 
-
     @Override
     public void clear() {
         synchronized (mLogEntries) {
@@ -161,7 +160,7 @@ public class ConsoleImpl extends AbstractConsole {
         }
         if (!FloatingPermission.canDrawOverlays(mUiHandler.getContext())) {
             FloatingPermission.manageDrawOverlays(mUiHandler.getContext());
-            mUiHandler.toast(R.string.text_no_floating_window_permission);
+            mUiHandler.toast(R.string.text_no_draw_overlays_permission);
             return;
         }
         startFloatyService();
@@ -171,7 +170,7 @@ public class ConsoleImpl extends AbstractConsole {
                 // SecurityException: https://github.com/hyb1996-guest/AutoJsIssueReport/issues/4781
             } catch (WindowManager.BadTokenException | SecurityException e) {
                 e.printStackTrace();
-                mUiHandler.toast(R.string.text_no_floating_window_permission);
+                mUiHandler.toast(R.string.text_no_draw_overlays_permission);
             }
         });
         synchronized (WINDOW_SHOW_LOCK) {
@@ -207,14 +206,9 @@ public class ConsoleImpl extends AbstractConsole {
         });
     }
 
-
     public void setSize(int w, int h) {
         if (mShown) {
-            mUiHandler.post(() -> {
-                if (mShown) {
-                    ViewUtil.setViewMeasure(mConsoleFloaty.getExpandedView(), w, h);
-                }
-            });
+            mUiHandler.post(() -> ViewUtil.setViewMeasure(mConsoleFloaty.getExpandedView(), w, h));
         }
     }
 
@@ -222,10 +216,7 @@ public class ConsoleImpl extends AbstractConsole {
         mX = x;
         mY = y;
         if (mShown) {
-            mUiHandler.post(() -> {
-                if (mShown)
-                    mFloatyWindow.getWindowBridge().updatePosition(x, y);
-            });
+            mUiHandler.post(() -> mFloatyWindow.getWindowBridge().updatePosition(x, y));
         }
     }
 
@@ -295,4 +286,5 @@ public class ConsoleImpl extends AbstractConsole {
             super.error(data, options);
         }
     }
+
 }

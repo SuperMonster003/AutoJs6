@@ -72,10 +72,8 @@ public class VMBridge_custom extends VMBridge_jdk18 {
             return proxy;
         } catch (InvocationTargetException var10) {
             throw Context.throwAsScriptRuntimeEx(var10);
-        } catch (IllegalAccessException var11) {
+        } catch (IllegalAccessException | InstantiationException var11) {
             throw new IllegalStateException(var11);
-        } catch (InstantiationException var12) {
-            throw new IllegalStateException(var12);
         }
     }
 

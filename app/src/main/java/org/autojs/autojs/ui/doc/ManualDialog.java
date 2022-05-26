@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.widget.EWebView;
 
 import butterknife.BindView;
@@ -18,7 +18,6 @@ import butterknife.OnClick;
 /**
  * Created by Stardust on 2017/10/24.
  */
-
 public class ManualDialog {
 
     @BindView(R.id.title)
@@ -31,7 +30,7 @@ public class ManualDialog {
     View mPinToLeft;
 
     Dialog mDialog;
-    private Context mContext;
+    private final Context mContext;
 
     public ManualDialog(Context context) {
         mContext = context;

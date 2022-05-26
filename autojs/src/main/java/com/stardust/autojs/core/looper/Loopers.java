@@ -22,7 +22,6 @@ import androidx.annotation.Nullable;
 /**
  * Created by Stardust on 2017/7/29.
  */
-
 @SuppressWarnings("ConstantConditions")
 public class Loopers implements MessageQueue.IdleHandler {
 

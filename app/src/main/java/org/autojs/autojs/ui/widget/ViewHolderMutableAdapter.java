@@ -1,12 +1,12 @@
 package org.autojs.autojs.ui.widget;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.ViewGroup;
 
 /**
  * Created by Stardust on 2017/4/8.
  */
-
 public abstract class ViewHolderMutableAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     private ViewHolderSupplier<VH> mViewHolderSupplier;
@@ -15,8 +15,9 @@ public abstract class ViewHolderMutableAdapter<VH extends RecyclerView.ViewHolde
         mViewHolderSupplier = viewHolderSupplier;
     }
 
+    @NonNull
     @Override
-    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return mViewHolderSupplier.createViewHolder(parent, viewType);
     }
 

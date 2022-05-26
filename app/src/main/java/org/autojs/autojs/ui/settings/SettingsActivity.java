@@ -23,10 +23,9 @@ import com.stardust.util.MapBuilder;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
-import org.autojs.autojs.ui.error.IssueReporterActivity;
 import org.autojs.autojs.ui.update.UpdateCheckDialog;
 
 import java.util.ArrayList;
@@ -36,10 +35,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import de.psdev.licensesdialog.LicenseResolver;
-import de.psdev.licensesdialog.LicensesDialog;
-import de.psdev.licensesdialog.licenses.License;
 
 /**
  * Created by Stardust on 2017/2/2.
@@ -171,59 +166,21 @@ public class SettingsActivity extends BaseActivity {
             ACTION_MAP = new MapBuilder<String, Runnable>()
                     .put(getString(R.string.text_theme_color), () -> selectThemeColor(getActivity()))
                     .put(getString(R.string.text_check_for_updates), () -> new UpdateCheckDialog(getActivity()).show())
-                    .put(getString(R.string.text_issue_report), () -> startActivity(new Intent(getActivity(), IssueReporterActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
                     .put(getString(R.string.text_about_app_and_developer), () -> startActivity(new Intent(getActivity(), AboutActivity_.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
-                    .put(getString(R.string.text_licenses), this::showLicenseDialog)
                     .put(getString(R.string.text_app_language), () -> selectAppLanguage(getActivity()))
                     .build();
         }
 
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
-            Runnable action = ACTION_MAP.get(preference.getTitle().toString());
-            if (action != null) {
-                action.run();
-                return true;
+            CharSequence title = preference.getTitle();
+            if (title != null) {
+                Runnable action = ACTION_MAP.get(title.toString());
+                if (action != null) {
+                    action.run();
+                    return true;
+                }
             }
             return super.onPreferenceTreeClick(preferenceScreen, preference);
-        }
-
-        private void showLicenseDialog() {
-            LicenseResolver.registerLicense(MozillaPublicLicense20.instance);
-            new LicensesDialog.Builder(getActivity())
-                    .setNotices(R.raw.licenses)
-                    .setIncludeOwnLicense(true)
-                    .build()
-                    .show();
-        }
-
-        public static class MozillaPublicLicense20 extends License {
-
-            public static MozillaPublicLicense20 instance = new MozillaPublicLicense20();
-
-            @Override
-            public String getName() {
-                return "Mozilla Public License 2.0";
-            }
-
-            @Override
-            public String readSummaryTextFromResources(Context context) {
-                return getContent(context, R.raw.mpl_20_summary);
-            }
-
-            @Override
-            public String readFullTextFromResources(Context context) {
-                return getContent(context, R.raw.mpl_20_full);
-            }
-
-            @Override
-            public String getVersion() {
-                return "2.0";
-            }
-
-            @Override
-            public String getUrl() {
-                return "https://www.mozilla.org/en-US/MPL/2.0/";
-            }
         }
 
     }

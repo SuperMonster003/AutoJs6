@@ -4,6 +4,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.NonNull;
+
 import com.stardust.autojs.execution.ExecutionConfig;
 
 import org.autojs.autojs.external.ScriptIntents;
@@ -195,6 +197,7 @@ public class TimedTask extends BaseModel {
                 createIntent(), PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "TimedTask{" +

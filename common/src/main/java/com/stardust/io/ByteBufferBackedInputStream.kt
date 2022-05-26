@@ -3,6 +3,7 @@ package com.stardust.io
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
+import kotlin.math.min
 
 class ByteBufferBackedInputStream(private var buf: ByteBuffer) : InputStream() {
 
@@ -18,7 +19,7 @@ class ByteBufferBackedInputStream(private var buf: ByteBuffer) : InputStream() {
         if (!buf.hasRemaining()) {
             return -1
         }
-        val read = Math.min(len, available())
+        val read = min(len, available())
         buf.get(bytes, off, read)
         buf.position(buf.position() - read)
         return read

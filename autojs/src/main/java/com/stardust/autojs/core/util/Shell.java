@@ -20,7 +20,6 @@ import jackpal.androidterm.util.TermSettings;
 /**
  * Created by Stardust on 2017/4/24.
  */
-
 public class Shell extends AbstractShell {
 
     public interface Callback {
@@ -213,8 +212,8 @@ public class Shell extends AbstractShell {
 
     private class MyShellTermSession extends ShellTermSession {
 
-        private StringBuilder mStringBuffer = new StringBuilder();
-        private ArrayList<String> mCommandOutputs = new ArrayList<>();
+        private final StringBuilder mStringBuffer = new StringBuilder();
+        private final ArrayList<String> mCommandOutputs = new ArrayList<>();
 
         public MyShellTermSession(TermSettings settings, String initialCommand) throws IOException {
             super(settings, initialCommand);

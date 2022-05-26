@@ -26,7 +26,7 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 import org.autojs.autojs.Pref;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.autojs.build.ApkBuilder;
 import org.autojs.autojs.build.ApkBuilderPluginHelper;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
@@ -268,7 +268,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .setPackageName(packageName)
                 .setVersionCode(versionCode)
                 .setVersionName(versionName)
-                .setIcon(mIsDefaultIcon ? null : (Callable<Bitmap>) () ->
+                .setIcon(mIsDefaultIcon ? null : () ->
                         BitmapTool.drawableToBitmap(mIcon.getDrawable())
                 );
     }

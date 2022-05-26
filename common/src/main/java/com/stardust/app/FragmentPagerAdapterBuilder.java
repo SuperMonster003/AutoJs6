@@ -14,7 +14,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/3/24.
  */
-
 public class FragmentPagerAdapterBuilder {
 
     public interface OnFragmentInstantiateListener {
@@ -41,6 +40,7 @@ public class FragmentPagerAdapterBuilder {
 
     public StoredFragmentPagerAdapter build() {
         return new StoredFragmentPagerAdapter(mActivity.getSupportFragmentManager()) {
+            @NonNull
             @Override
             public Fragment getItem(int position) {
                 return mFragments.get(position);

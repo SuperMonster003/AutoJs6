@@ -1,7 +1,5 @@
 package com.stardust.autojs.core.util
 
-import com.stardust.autojs.core.internal.Functions
-
 class ScriptPromiseAdapter {
 
     interface Callback {

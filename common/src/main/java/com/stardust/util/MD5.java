@@ -1,7 +1,6 @@
 package com.stardust.util;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class MD5 {
 

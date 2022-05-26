@@ -29,7 +29,7 @@ function download(){
         autoDismiss: false
     })
         .on("positive", ()=>{
-            if(downloadDialog.getActionButton("positive") == "暂停"){
+            if(downloadDialog.getActionButton("positive") === "暂停"){
                 stopDownload();
                 downloadDialog.setActionButton("positive", "继续");
             }else{

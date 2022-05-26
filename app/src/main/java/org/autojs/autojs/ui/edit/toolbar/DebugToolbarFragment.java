@@ -18,7 +18,7 @@ import com.stardust.pio.PFiles;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EFragment;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.edit.EditorView;
 import org.autojs.autojs.ui.edit.debug.CodeEvaluator;
 import org.autojs.autojs.ui.edit.debug.DebugBar;
@@ -48,7 +48,7 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
             updateWatchingVariables(positionStart, positionStart + itemCount);
         }
     };
-    private CodeEditor.BreakpointChangeListener mBreakpointChangeListener = new CodeEditor.BreakpointChangeListener() {
+    private final CodeEditor.BreakpointChangeListener mBreakpointChangeListener = new CodeEditor.BreakpointChangeListener() {
         @Override
         public void onBreakpointChange(int line, boolean enabled) {
             if (mDebugger != null) {

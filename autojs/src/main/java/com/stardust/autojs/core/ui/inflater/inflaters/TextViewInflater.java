@@ -2,7 +2,6 @@ package com.stardust.autojs.core.ui.inflater.inflaters;
 
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -27,7 +26,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/3.
  */
-
 public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
 
     private static final int LEFT = 0;
@@ -142,13 +140,13 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
                 view.setAutoLinkMask(AUTO_LINK_MASKS.get(value));
                 break;
             case "autoText":
-                mAutoText = Boolean.valueOf(value);
+                mAutoText = Boolean.parseBoolean(value);
                 break;
             case "capitalize":
                 mCapitalize = CAPITALIZE.get(value);
                 break;
             case "cursorVisible":
-                view.setCursorVisible(Boolean.valueOf(value));
+                view.setCursorVisible(Boolean.parseBoolean(value));
                 break;
             case "digit":
                 if (value.equals("true")) {
@@ -178,9 +176,7 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
             case "editorExtras":
                 Exceptions.unsupports(view, attrName, value);
             case "elegantTextHeight":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.setElegantTextHeight(Boolean.valueOf(value));
-                }
+                view.setElegantTextHeight(Boolean.parseBoolean(value));
                 break;
             case "ellipsize":
                 TextUtils.TruncateAt e = ELLIPSIZE.get(value);
@@ -189,18 +185,16 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
                 }
                 break;
             case "ems":
-                view.setEms(Integer.valueOf(value));
+                view.setEms(Integer.parseInt(value));
                 break;
             case "fontFamily":
                 mFontFamily = value;
                 break;
             case "fontFeatureSettings":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.setFontFeatureSettings(value);
-                }
+                view.setFontFeatureSettings(value);
                 break;
             case "freezesText":
-                view.setFreezesText(Boolean.valueOf(value));
+                view.setFreezesText(Boolean.parseBoolean(value));
                 break;
             case "gravity":
                 view.setGravity(Gravities.parse(value));
@@ -209,12 +203,10 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
                 view.setHint(Strings.parse(view, value));
                 break;
             case "hyphenationFrequency":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    view.setHyphenationFrequency(HYPHENATION_FREQUENCY.get(value));
-                }
+                view.setHyphenationFrequency(HYPHENATION_FREQUENCY.get(value));
                 break;
             case "imeActionId":
-                view.setImeActionLabel(view.getImeActionLabel(), Integer.valueOf(value));
+                view.setImeActionLabel(view.getImeActionLabel(), Integer.parseInt(value));
                 break;
             case "imeActionLabel":
                 view.setImeActionLabel(value, view.getImeActionId());
@@ -223,7 +215,7 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
                 view.setImeOptions(IME_OPTIONS.split(value));
                 break;
             case "includeFontPadding":
-                view.setIncludeFontPadding(Boolean.valueOf(value));
+                view.setIncludeFontPadding(Boolean.parseBoolean(value));
                 break;
             case "inputMethod":
                 Exceptions.unsupports(view, attrName, value);
@@ -231,9 +223,7 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
                 view.setInputType(INPUT_TYPES.split(value));
                 break;
             case "letterSpacing":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.setLetterSpacing(Float.valueOf(value));
-                }
+                view.setLetterSpacing(Float.parseFloat(value));
                 break;
             case "lineSpacingExtra":
                 view.setLineSpacing(Dimensions.parseToIntPixel(value, view), view.getLineSpacingMultiplier());
@@ -242,37 +232,37 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
                 view.setLineSpacing(view.getLineSpacingExtra(), Dimensions.parseToIntPixel(value, view));
                 break;
             case "lines":
-                view.setLines(Integer.valueOf(value));
+                view.setLines(Integer.parseInt(value));
                 break;
             case "linksClickable":
-                view.setLinksClickable(Boolean.valueOf(value));
+                view.setLinksClickable(Boolean.parseBoolean(value));
                 break;
             case "marqueeRepeatLimit":
-                view.setMarqueeRepeatLimit(value.equals("marquee_forever") ? Integer.MAX_VALUE : Integer.valueOf(value));
+                view.setMarqueeRepeatLimit(value.equals("marquee_forever") ? Integer.MAX_VALUE : Integer.parseInt(value));
                 break;
             case "maxEms":
-                view.setMaxEms(Integer.valueOf(value));
+                view.setMaxEms(Integer.parseInt(value));
                 break;
             case "maxHeight":
-                view.setMaxHeight(Integer.valueOf(value));
+                view.setMaxHeight(Integer.parseInt(value));
                 break;
             case "maxLength":
-                view.setFilters(new InputFilter[]{new InputFilter.LengthFilter(Integer.valueOf(value))});
+                view.setFilters(new InputFilter[]{new InputFilter.LengthFilter(Integer.parseInt(value))});
                 break;
             case "maxLines":
-                view.setMaxLines(Integer.valueOf(value));
+                view.setMaxLines(Integer.parseInt(value));
                 break;
             case "maxWidth":
-                view.setMaxWidth(Integer.valueOf(value));
+                view.setMaxWidth(Integer.parseInt(value));
                 break;
             case "minEms":
-                view.setMinEms(Integer.valueOf(value));
+                view.setMinEms(Integer.parseInt(value));
                 break;
             case "minHeight":
                 view.setMinHeight(Dimensions.parseToIntPixel(value, view));
                 break;
             case "minLines":
-                view.setMinLines(Integer.valueOf(value));
+                view.setMinLines(Integer.parseInt(value));
                 break;
             case "minWidth":
                 view.setMinWidth(Dimensions.parseToIntPixel(value, view));
@@ -294,10 +284,10 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
                 view.setPrivateImeOptions(Strings.parse(view, value));
                 break;
             case "scrollHorizontally":
-                view.setHorizontallyScrolling(Boolean.valueOf(value));
+                view.setHorizontallyScrolling(Boolean.parseBoolean(value));
                 break;
             case "selectAllOnFocus":
-                view.setSelectAllOnFocus(Boolean.valueOf(value));
+                view.setSelectAllOnFocus(Boolean.parseBoolean(value));
                 break;
             case "shadowColor":
                 view.setShadowLayer(view.getShadowRadius(), view.getShadowDx(), view.getShadowDy(), Colors.parse(view, value));
@@ -312,15 +302,13 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
                 view.setShadowLayer(Dimensions.parseToPixel(value, view), view.getShadowDx(), view.getShadowDy(), view.getShadowColor());
                 break;
             case "singleLine":
-                view.setSingleLine(Boolean.valueOf(value));
+                view.setSingleLine(Boolean.parseBoolean(value));
                 break;
             case "textAllCaps":
-                view.setAllCaps(Boolean.valueOf(value));
+                view.setAllCaps(Boolean.parseBoolean(value));
                 break;
             case "textAppearance":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    view.setTextAppearance(Res.parseStyle(view, value));
-                }
+                view.setTextAppearance(Res.parseStyle(view, value));
                 break;
             case "textColorHighlight":
                 view.setHighlightColor(Colors.parse(view, value));
@@ -332,7 +320,7 @@ public class TextViewInflater<V extends TextView> extends BaseViewInflater<V> {
                 view.setLinkTextColor(Colors.parse(view, value));
                 break;
             case "textIsSelectable":
-                view.setTextIsSelectable(Boolean.valueOf(value));
+                view.setTextIsSelectable(Boolean.parseBoolean(value));
                 break;
             case "textScaleX":
                 view.setTextScaleX(Dimensions.parseToPixel(value, view));

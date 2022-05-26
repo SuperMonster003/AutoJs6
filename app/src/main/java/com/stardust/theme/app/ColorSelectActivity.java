@@ -6,7 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +32,7 @@ import com.stardust.theme.ThemeColor;
 import com.stardust.theme.ThemeColorHelper;
 import com.stardust.theme.ThemeColorManager;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,6 @@ import java.util.Objects;
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public class ColorSelectActivity extends AppCompatActivity {
 
     public static class ColorItem {

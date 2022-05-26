@@ -7,7 +7,7 @@ import androidx.annotation.StringRes;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.stardust.pio.PFile;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileProvider;
@@ -26,7 +26,6 @@ import io.reactivex.subjects.PublishSubject;
 /**
  * Created by Stardust on 2017/10/19.
  */
-
 public class FileChooserDialogBuilder extends ThemeColorMaterialDialogBuilder {
 
     public interface SingleChoiceCallback {
@@ -37,7 +36,7 @@ public class FileChooserDialogBuilder extends ThemeColorMaterialDialogBuilder {
         void onSelected(List<PFile> files);
     }
 
-    private FileChooseListView mFileChooseListView;
+    private final FileChooseListView mFileChooseListView;
     private MultiChoiceCallback mCallback;
     private FileFilter mFileFilter;
     private String mRootDir;

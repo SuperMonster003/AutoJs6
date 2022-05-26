@@ -3,9 +3,9 @@ package org.autojs.autojs.ui.widget;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
+
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+
 import android.util.AttributeSet;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -24,15 +24,14 @@ import java.util.Collections;
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public class CommonMarkdownView extends WebView {
 
     public interface OnPageFinishedListener {
         void onPageFinished(WebView view, String url);
     }
 
-    private Parser mParser = Parser.builder().build();
-    private HtmlRenderer mHtmlRender = HtmlRenderer.builder()
+    private final Parser mParser = Parser.builder().build();
+    private final HtmlRenderer mHtmlRender = HtmlRenderer.builder()
             .extensions(Collections.singleton(new HeadingAnchorExtension.Builder().build()))
             .build();
 
@@ -69,7 +68,6 @@ public class CommonMarkdownView extends WebView {
                 }
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 getContext().startActivity(new Intent(Intent.ACTION_VIEW).setData(request.getUrl()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -86,7 +84,6 @@ public class CommonMarkdownView extends WebView {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public CommonMarkdownView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
@@ -126,8 +123,8 @@ public class CommonMarkdownView extends WebView {
 
     public static class DialogBuilder extends ThemeColorMaterialDialogBuilder {
 
-        private CommonMarkdownView mMarkdownView;
-        private FrameLayout mContainer;
+        private final CommonMarkdownView mMarkdownView;
+        private final FrameLayout mContainer;
 
         public DialogBuilder(@NonNull Context context) {
             super(context);

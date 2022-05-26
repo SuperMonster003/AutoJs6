@@ -7,7 +7,6 @@ import com.stardust.util.SparseArrayEntries
 /**
  * Created by Stardust on 2017/1/27.
  */
-
 interface Able {
 
     fun isAble(node: UiObject): Boolean

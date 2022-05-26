@@ -9,7 +9,6 @@ import com.stardust.view.accessibility.NodeInfo;
 /**
  * Created by Stardust on 2017/12/7.
  */
-
 public class CodeGenerator {
 
     public static final int UNTIL_FIND = 0;
@@ -136,22 +135,14 @@ public class CodeGenerator {
     }
 
     private String getAction() {
-        switch (mAction) {
-            case AccessibilityNodeInfoCompat.ACTION_CLICK:
-                return "click()";
-            case AccessibilityNodeInfoCompat.ACTION_LONG_CLICK:
-                return "longClick()";
-
-            case AccessibilityNodeInfoCompat.ACTION_SCROLL_BACKWARD:
-                return "scrollBackward()";
-
-            case AccessibilityNodeInfoCompat.ACTION_SCROLL_FORWARD:
-                return "scrollForward()";
-
-            case AccessibilityNodeInfoCompat.ACTION_SET_TEXT:
-                return "setText(\"\")";
-        }
-        return "";
+        return switch (mAction) {
+            case AccessibilityNodeInfoCompat.ACTION_CLICK -> "click()";
+            case AccessibilityNodeInfoCompat.ACTION_LONG_CLICK -> "longClick()";
+            case AccessibilityNodeInfoCompat.ACTION_SCROLL_BACKWARD -> "scrollBackward()";
+            case AccessibilityNodeInfoCompat.ACTION_SCROLL_FORWARD -> "scrollForward()";
+            case AccessibilityNodeInfoCompat.ACTION_SET_TEXT -> "setText(\"\")";
+            default -> "";
+        };
     }
 
     private String generateCodeForCollectionChild(UiObject collection, UiObject target) {

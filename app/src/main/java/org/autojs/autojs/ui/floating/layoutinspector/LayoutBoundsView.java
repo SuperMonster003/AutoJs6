@@ -6,9 +6,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Build;
+
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
+
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,7 +24,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/3/10.
  */
-
 public class LayoutBoundsView extends View {
 
     private static final int COLOR_SHADOW = 0x6a000000;
@@ -55,7 +54,6 @@ public class LayoutBoundsView extends View {
         init();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public LayoutBoundsView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();

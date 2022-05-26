@@ -7,7 +7,6 @@ import io.reactivex.disposables.Disposable;
 /**
  * Created by Stardust on 2017/8/20.
  */
-
 public class SimpleObserver<T> implements Observer<T> {
     @Override
     public void onSubscribe(@NonNull Disposable d) {

@@ -15,7 +15,6 @@ import static com.stardust.pio.PFiles.DEFAULT_BUFFER_SIZE;
 /**
  * Created by Stardust on 2017/4/1.
  */
-
 public class PWritableTextFile implements Closeable, PFileInterface {
 
     public static PWritableTextFile open(String path, String encoding, int bufferSize) {
@@ -34,8 +33,8 @@ public class PWritableTextFile implements Closeable, PFileInterface {
         return new PWritableTextFile(path);
     }
 
-    private BufferedWriter mBufferedWriter;
-    private String mPath;
+    private final BufferedWriter mBufferedWriter;
+    private final String mPath;
 
     public PWritableTextFile(String path, String encoding, int bufferingSize, boolean append) {
         mPath = path;

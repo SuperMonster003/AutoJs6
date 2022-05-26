@@ -20,7 +20,6 @@ package com.stardust.io;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A reader which reads sequentially from multiple sources.
@@ -44,7 +43,7 @@ public class ConcatReader extends Reader {
      *
      * @since ostermillerutils 1.04.01
      */
-    private ArrayList<Reader> readerQueue = new ArrayList<>();
+    private final ArrayList<Reader> readerQueue = new ArrayList<>();
 
     /**
      * A cache of the current reader from the readerQueue

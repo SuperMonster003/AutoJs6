@@ -2,7 +2,9 @@ package com.stardust.autojs.core.inputevent;
 
 import android.content.Context;
 import android.os.SystemClock;
+
 import androidx.annotation.Nullable;
+
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.ViewConfiguration;
@@ -20,8 +22,8 @@ import static com.stardust.autojs.core.inputevent.InputEventCodes.*;
 
 /**
  * Created by Stardust on 2017/7/16.
+ * Modified by SuperMonster003 as of May 12, 2022.
  */
-
 public class RootAutomator implements Shell.Callback {
 
     private static final String LOG_TAG = "RootAutomator";
@@ -32,34 +34,31 @@ public class RootAutomator implements Shell.Callback {
     public static final byte DATA_TYPE_EVENT_TOUCH_X = 3;
     public static final byte DATA_TYPE_EVENT_TOUCH_Y = 4;
 
+    private static final long READY_TIMEOUT = 2000;
+
     @Nullable
     private ScreenMetrics mScreenMetrics;
-    private Shell mShell;
+    private final Shell mShell;
     private int mDefaultId = 0;
-    private AtomicInteger mTracingId = new AtomicInteger(1);
-    private SparseIntArray mSlotIdMap = new SparseIntArray();
+    private final AtomicInteger mTracingId = new AtomicInteger(1);
+    private final SparseIntArray mSlotIdMap = new SparseIntArray();
     private final Object mReadyLock = new Object();
     private volatile boolean mReady = false;
     private final Context mContext;
-    private String mInputDevice;
 
-    public RootAutomator(Context context, String inputDevice, boolean waitForReady) throws IOException {
-        mContext = context;
-        if (inputDevice == null) {
-            mInputDevice = RootAutomatorEngine.getDeviceNameOrPath(mContext, InputDevices.getTouchDeviceName());
-        } else {
-            mInputDevice = inputDevice;
-        }
-        mShell = new Shell(true);
-        mShell.setCallback(this);
-        if (waitForReady) {
-            waitForReady();
-        }
+    public RootAutomator(Context context, boolean waitForReady) throws IOException {
+        this(context, waitForReady ? READY_TIMEOUT : -1);
     }
 
+    public RootAutomator(Context context, long waitForReadyTimeout) throws IOException {
+        mContext = context;
+        mShell = new Shell(true);
+        mShell.setCallback(this);
+        waitForReady(waitForReadyTimeout);
+    }
 
     public void sendEvent(int type, int code, int value) throws IOException {
-        waitForReady();
+        waitForReady(READY_TIMEOUT);
         sendEventInternal(type, code, value);
     }
 
@@ -67,8 +66,8 @@ public class RootAutomator implements Shell.Callback {
         mShell.exec(type + " " + code + " " + value);
     }
 
-    private void waitForReady() throws IOException {
-        if (mReady) {
+    private void waitForReady(long timeout) throws IOException {
+        if (timeout < 0 || mReady) {
             return;
         }
         synchronized (mReadyLock) {
@@ -76,7 +75,7 @@ public class RootAutomator implements Shell.Callback {
                 return;
             }
             try {
-                mReadyLock.wait();
+                mReadyLock.wait(timeout);
             } catch (InterruptedException e) {
                 exit();
                 throw new ScriptInterruptedException();

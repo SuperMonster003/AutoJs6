@@ -5,7 +5,6 @@ import com.stardust.automator.UiObject
 /**
  * Created by Stardust on 2017/11/5.
  */
-
 class IntFilter(private val mIntProperty: IntProperty, private val mValue: Int) : Filter {
 
     interface IntProperty {
@@ -17,7 +16,7 @@ class IntFilter(private val mIntProperty: IntProperty, private val mValue: Int) 
     }
 
     override fun toString(): String {
-        return mIntProperty.toString() + "(" + mValue + ")"
+        return "$mIntProperty($mValue)"
     }
 
     companion object {

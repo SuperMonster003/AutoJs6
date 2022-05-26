@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 /**
  * Created by Stardust on 2018/3/30.
  */
-
 public class JsGridView extends JsListView {
 
     public JsGridView(Context context, ScriptRuntime scriptRuntime) {

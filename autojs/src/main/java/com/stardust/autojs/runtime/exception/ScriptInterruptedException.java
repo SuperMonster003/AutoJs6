@@ -4,7 +4,6 @@ package com.stardust.autojs.runtime.exception;
 /**
  * Created by Stardust on 2017/4/30.
  */
-
 public class ScriptInterruptedException extends ScriptException {
 
     public ScriptInterruptedException() {

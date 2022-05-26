@@ -5,7 +5,6 @@ import com.stardust.automator.UiObject
 /**
  * Created by Stardust on 2017/1/27.
  */
-
 abstract class SimpleAction {
 
     @Volatile

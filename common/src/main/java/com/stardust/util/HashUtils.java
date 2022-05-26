@@ -8,7 +8,6 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Created by Stardust on 2017/9/26.
  */
-
 public class HashUtils {
 
     public static String md5(String text) {

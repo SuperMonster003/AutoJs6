@@ -5,28 +5,23 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.stardust.app.OnActivityResultDelegate;
-import org.autojs.autojs.R;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public class ImageSelector implements OnActivityResultDelegate {
 
     public interface ImageSelectorCallback {
         void onImageSelected(ImageSelector selector, Uri uri);
     }
 
-    private static final String TAG = ImageSelector.class.getSimpleName();
-
     private static final int REQUEST_CODE = "LOVE HONMUA".hashCode() >> 16;
-    private Activity mActivity;
-    private ImageSelectorCallback mCallback;
+    private final Activity mActivity;
+    private final ImageSelectorCallback mCallback;
+    private final Mediator mMediator;
     private boolean mDisposable;
-    private Mediator mMediator;
 
     public ImageSelector(Activity activity, OnActivityResultDelegate.Mediator mediator, ImageSelectorCallback callback) {
         mediator.addDelegate(REQUEST_CODE, this);
@@ -58,6 +53,5 @@ public class ImageSelector implements OnActivityResultDelegate {
         mCallback.onImageSelected(this, data.getData());
 
     }
-
 
 }

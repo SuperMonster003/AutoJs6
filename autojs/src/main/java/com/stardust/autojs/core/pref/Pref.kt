@@ -5,20 +5,39 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.stardust.app.GlobalAppContext
 import com.stardust.autojs.R
+import org.autojs.autojs.tool.RootTool.RootMode
 
 object Pref {
     private val preferences = PreferenceManager.getDefaultSharedPreferences(GlobalAppContext.get())
-
     private val DISPOSABLE_BOOLEAN = GlobalAppContext.get().getSharedPreferences("DISPOSABLE_BOOLEAN", Context.MODE_PRIVATE)
+
+    var rootMode: RootMode
+        get() {
+            val key = preferences.getString(getString(R.string.key_root_mode), RootMode.AUTO_DETECT.key)
+            return RootMode.getRootMode(key!!)
+        }
+        set(mode) {
+            preferences.edit()
+                .putString(getString(R.string.key_root_mode), mode.key)
+                .apply()
+        }
 
     val isStableModeEnabled: Boolean
         get() {
-            return preferences.getBoolean("key_stable_mode", false)
+            return preferences.getBoolean(getString(R.string.key_stable_mode), false)
         }
 
     val isGestureObservingEnabled: Boolean
         get() {
-            return preferences.getBoolean("key_gesture_observing", false)
+            return preferences.getBoolean(getString(R.string.key_gesture_observing), false)
+        }
+
+    val isHiddenFilesShow: Boolean
+        get() {
+            val key = getString(R.string.key_hidden_files)
+            val def = getString(R.string.value_hidden_files_default)
+            val valueShow = getString(R.string.key_hidden_files_show)
+            return preferences.getString(key, def) == valueShow
         }
 
     fun isFirstGoToAccessibilitySetting(): Boolean {

@@ -6,7 +6,6 @@ import com.stardust.automator.UiObject
 /**
  * Created by Stardust on 2017/1/27.
  */
-
 class SearchUpTargetAction(action: Int, filter: Filter) : SearchTargetAction(action, filter) {
     private val mAble: Able = Able.ABLE_MAP.get(action)
 

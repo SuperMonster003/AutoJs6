@@ -1,9 +1,9 @@
 package com.stardust.autojs.core.ui.widget;
 
 import android.content.Context;
-import android.os.Build;
+
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
+
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -13,7 +13,6 @@ import com.stardust.autojs.core.ui.JsViewHelper;
 /**
  * Created by Stardust on 2017/5/14.
  */
-
 public class JsLinearLayout extends LinearLayout {
 
 
@@ -29,7 +28,6 @@ public class JsLinearLayout extends LinearLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public JsLinearLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }

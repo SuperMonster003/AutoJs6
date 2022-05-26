@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.main.MainActivity_;
 

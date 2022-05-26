@@ -13,10 +13,9 @@ import java.io.Reader;
 /**
  * Created by Stardust on 2017/4/2.
  */
-
 public class JavaScriptFileSource extends JavaScriptSource {
 
-    private File mFile;
+    private final File mFile;
     private String mScript;
     private boolean mCustomsName = false;
 
@@ -65,6 +64,7 @@ public class JavaScriptFileSource extends JavaScriptSource {
         return mFile;
     }
 
+    @NonNull
     @Override
     public String toString() {
         if (mCustomsName) {

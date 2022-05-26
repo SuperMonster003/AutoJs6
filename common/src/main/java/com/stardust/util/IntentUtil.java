@@ -4,13 +4,11 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.provider.Settings;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
-
-import android.os.Build;
-import android.widget.Toast;
 
 import com.stardust.R;
 
@@ -21,6 +19,7 @@ public class IntentUtil {
 
     public static boolean chatWithQQ(Context context, String qq) {
         try {
+            @SuppressWarnings("SpellCheckingInspection")
             String url = "mqqwpa://im/chat?chat_type=wpa&uin=" + qq;
             context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             return true;
@@ -31,8 +30,10 @@ public class IntentUtil {
     }
 
     public static boolean joinQQGroup(Context context, String key) {
+        @SuppressWarnings("SpellCheckingInspection")
+        String url = "mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D" + key;
         Intent intent = new Intent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setData(Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D" + key));
+        intent.setData(Uri.parse(url));
         try {
             context.startActivity(intent);
             return true;
@@ -89,7 +90,7 @@ public class IntentUtil {
 
     public static boolean goToAppDetailSettings(Context context, String packageName) {
         try {
-            Intent i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
             i.addCategory(Intent.CATEGORY_DEFAULT);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             i.setData(Uri.parse("package:" + packageName));
@@ -187,12 +188,10 @@ public class IntentUtil {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static void requestAppUsagePermission(Context context) {
-        Intent intent = new Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
-            context.startActivity(intent);
+            context.startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         } catch (ActivityNotFoundException e) {
             e.printStackTrace();
         }

@@ -6,7 +6,6 @@ import java.io.IOException;
 /**
  * Created by Stardust on 2017/4/6.
  */
-
 public class PReadableBinaryFile implements Closeable {
 
 

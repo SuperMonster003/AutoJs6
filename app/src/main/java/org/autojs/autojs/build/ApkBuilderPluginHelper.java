@@ -6,7 +6,7 @@ import android.content.pm.PackageManager;
 
 import com.stardust.pio.UncheckedIOException;
 
-import org.autojs.autojs.BuildConfig;
+import org.autojs.autojs6.BuildConfig;
 
 import com.stardust.util.DeveloperUtils;
 
@@ -16,7 +16,6 @@ import java.io.InputStream;
 /**
  * Created by Stardust on 2017/11/29.
  */
-
 public class ApkBuilderPluginHelper {
 
     private static final String PLUGIN_PACKAGE_NAME = "org.autojs.apkbuilderplugin";

@@ -3,15 +3,14 @@ package org.autojs.autojs.ui.common;
 import android.content.Context;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/7/31.
  */
-
 public class ProgressDialog {
 
-    private MaterialDialog mDialog;
+    private final MaterialDialog mDialog;
 
     public ProgressDialog(Context context) {
         this(context, R.string.text_in_progress);

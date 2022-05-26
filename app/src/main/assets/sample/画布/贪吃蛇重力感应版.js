@@ -89,7 +89,7 @@ function move(dx, dy){
 }
 
 function snakeEatsApple(){
-    return snake[0].x == apple.x && snake[0].y == apple.y;
+    return snake[0].x === apple.x && snake[0].y === apple.y;
 }
 
 function generateApple(){
@@ -104,7 +104,7 @@ function generateApple(){
 
 function isAppleValid(x, y){
     for (var i = 0; i < snake.length; i++) {
-        if (snake[i].x == x && snake[i].y == y) {
+        if (snake[i].x === x && snake[i].y === y) {
             return false;
         }
     }
@@ -227,5 +227,5 @@ function drawSnakeBody(canvas, paint){
 }
 
 function equals(point1, point2){
-    return point1.x == point2.x && point1.y == point2.y;
+    return point1.x === point2.x && point1.y === point2.y;
 }

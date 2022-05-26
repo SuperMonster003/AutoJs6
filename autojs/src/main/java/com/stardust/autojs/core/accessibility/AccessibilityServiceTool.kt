@@ -22,7 +22,6 @@ import java.util.*
  * Created by Stardust on 2017/1/26.
  * Modified by SuperMonster003 as of Feb 15, 2022.
  */
-
 class AccessibilityServiceTool(val context: Context) {
 
     val tag: String = AccessibilityServiceTool::class.java.simpleName

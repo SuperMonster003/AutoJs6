@@ -1,29 +1,56 @@
+// noinspection JSUnusedGlobalSymbols
 
-module.exports = function(__runtime__, scope){
-    importClass(android.view.KeyEvent);
-    var events = Object.create(__runtime__.events);
+let _ = {
+    init(__runtime__, scope) {
+        this.runtime = __runtime__;
+        this.scope = scope;
 
-    events.__asEmitter__ = function(obj, thread){
-        var emitter = thread ? events.emitter(thread) : events.emitter();
-        for(var key in emitter){
-            if(obj[key] == undefined && typeof(emitter[key]) == 'function'){
-                obj[key] = emitter[key].bind(emitter);
-            }
-        }
-        return obj;
-    }
-    var keys = {
-        "home": KeyEvent.KEYCODE_HOME,
-        "menu": KeyEvent.KEYCODE_MENU,
-        "back": KeyEvent.KEYCODE_BACK,
-        "volume_up": KeyEvent.KEYCODE_VOLUME_UP,
-        "volume_down": KeyEvent.KEYCODE_VOLUME_DOWN
-    }
+        this.rtEvents = __runtime__.events;
+        this.events = Object.create(this.rtEvents);
+    },
+    getModule() {
+        return this.events;
+    },
+    selfAugment() {
+        Object.assign(this.events, {
+            __asEmitter__(obj, thread) {
+                let emitter = thread ? events.emitter(thread) : events.emitter();
+                for (let key in emitter) {
+                    if (obj[key] === undefined && typeof emitter[key] === 'function') {
+                        obj[key] = emitter[key].bind(emitter);
+                    }
+                }
+                return obj;
+            },
+        });
+    },
+    scopeAugment() {
+        this.scope.keys = {
+            home: KeyEvent.KEYCODE_HOME,
+            menu: KeyEvent.KEYCODE_MENU,
+            back: KeyEvent.KEYCODE_BACK,
+            volume_up: KeyEvent.KEYCODE_VOLUME_UP,
+            volume_down: KeyEvent.KEYCODE_VOLUME_DOWN,
+        };
+    },
+};
 
-    scope.keys = keys;
+let $ = {
+    getModule(__runtime__, scope) {
+        _.init(__runtime__, scope);
 
+        _.selfAugment();
+        _.scopeAugment();
 
+        return _.getModule();
+    },
+};
 
-    return events;
-}
-
+/**
+ * @param {com.stardust.autojs.runtime.ScriptRuntime} __runtime__
+ * @param {org.mozilla.javascript.Scriptable} scope
+ * @return {Internal.Events}
+ */
+module.exports = function (__runtime__, scope) {
+    return $.getModule(__runtime__, scope);
+};

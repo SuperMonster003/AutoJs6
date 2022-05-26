@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Stardust on 2017/12/27.
  */
-
 public class TimerThread extends ThreadCompat {
 
     private static final ConcurrentHashMap<Thread, Timer> sTimerMap = new ConcurrentHashMap<>();

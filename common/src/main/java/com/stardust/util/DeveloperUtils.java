@@ -9,9 +9,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
-import androidx.annotation.Nullable;
 import android.util.Base64;
-import android.util.Log;
+
+import androidx.annotation.Nullable;
+
+import com.stardust.app.GlobalAppContext;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -25,16 +27,14 @@ import kotlin.text.Regex;
 /**
  * Created by Stardust on 2017/4/5.
  */
-
 public class DeveloperUtils {
 
-    private static final String PACKAGE_NAME = "org.autojs.autojs";
     private static final Regex SIGNATURE_REX = new Regex(".*(CbKua77m59vis|N7YkpKxKjsPWe).*");
     private static final ExecutorService sExecutor = UnderuseExecutors.getExecutor();
     private static final String SALT = "let\nlife\nbe\nbeautiful\nlike\nsummer\nflowers\nand\ndeath\nlike\nautumn\nleaves\n.";
 
     public static boolean isSelfPackage(@Nullable String runningPackage) {
-        return PACKAGE_NAME.equals(runningPackage);
+        return selfPackage().equals(runningPackage);
     }
 
     @Nullable
@@ -85,11 +85,9 @@ public class DeveloperUtils {
         return SIGNATURE_REX.matches(sha);
     }
 
-
     public static String selfPackage() {
-        return PACKAGE_NAME;
+        return GlobalAppContext.get().getPackageName();
     }
-
 
     public static boolean isActivityRegistered(Context context, Class<? extends Activity> c) {
         try {
@@ -154,15 +152,10 @@ public class DeveloperUtils {
 
     public static void verifyApk(Activity activity) {
         final WeakReference<Activity> activityWeakReference = new WeakReference<>(activity);
-        sExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Activity a = activityWeakReference.get();
-                if (a == null)
-                    return;
-                if (!checkSignature(a)) {
-                    a.finish();
-                }
+        sExecutor.execute(() -> {
+            Activity a = activityWeakReference.get();
+            if (a != null && !checkSignature(a)) {
+                a.finish();
             }
         });
     }

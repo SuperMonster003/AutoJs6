@@ -7,10 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Stardust on 2017/12/27.
  */
-
 public class LooperHelper {
 
-    private static volatile ConcurrentHashMap<Thread, Looper> sLoopers = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Thread, Looper> sLoopers = new ConcurrentHashMap<>();
 
     public static void prepare() {
         if (Looper.myLooper() == Looper.getMainLooper())

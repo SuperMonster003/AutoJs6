@@ -1,13 +1,10 @@
 package com.stardust.autojs.core.image;
 
 import android.graphics.Color;
-import android.os.Build;
-import androidx.annotation.RequiresApi;
 
 /**
  * Created by Stardust on 2017/12/31.
  */
-
 public class Colors {
 
     public static final int BLACK = 0xFF000000;
@@ -31,7 +28,6 @@ public class Colors {
         return Color.argb(alpha, red, green, blue);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     public float luminance(int color) {
         double red = Color.red(color) / 255.0;
         red = red < 0.03928 ? red / 12.92 : Math.pow((red + 0.055) / 1.055, 2.4);

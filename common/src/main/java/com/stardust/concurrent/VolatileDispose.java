@@ -3,7 +3,6 @@ package com.stardust.concurrent;
 /**
  * Created by Stardust on 2017/10/28.
  */
-
 public class VolatileDispose<T> {
 
     private volatile T mValue;
@@ -32,9 +31,7 @@ public class VolatileDispose<T> {
             } catch (InterruptedException e) {
                 try {
                     throw exception.newInstance();
-                } catch (InstantiationException e1) {
-                    throw new RuntimeException(e1);
-                } catch (IllegalAccessException e1) {
+                } catch (InstantiationException | IllegalAccessException e1) {
                     throw new RuntimeException(e1);
                 }
             }
@@ -52,9 +49,7 @@ public class VolatileDispose<T> {
             } catch (InterruptedException e) {
                 try {
                     throw exception.newInstance();
-                } catch (InstantiationException e1) {
-                    throw new RuntimeException(e1);
-                } catch (IllegalAccessException e1) {
+                } catch (InstantiationException | IllegalAccessException e1) {
                     throw new RuntimeException(e1);
                 }
             }

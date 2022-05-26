@@ -3,7 +3,6 @@ package com.stardust.autojs.core.internal;
 /**
  * Created by Stardust on 2017/7/19.
  */
-
 public class Functions {
 
     @SuppressWarnings("unchecked")

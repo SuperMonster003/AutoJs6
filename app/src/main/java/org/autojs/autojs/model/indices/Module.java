@@ -8,7 +8,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/12/9.
  */
-
 public class Module {
 
     @SerializedName("properties")

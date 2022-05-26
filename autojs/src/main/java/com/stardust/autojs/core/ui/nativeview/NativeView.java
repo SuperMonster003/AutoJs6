@@ -1,17 +1,13 @@
 package com.stardust.autojs.core.ui.nativeview;
 
-import android.graphics.PorterDuff;
 import android.view.View;
-import android.widget.Button;
 
 import com.stardust.autojs.core.ui.JsViewHelper;
 import com.stardust.autojs.core.ui.ViewExtras;
 import com.stardust.autojs.core.ui.attribute.ViewAttributes;
 import com.stardust.autojs.rhino.NativeJavaObjectWithPrototype;
 
-import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 
 public class NativeView extends NativeJavaObjectWithPrototype {

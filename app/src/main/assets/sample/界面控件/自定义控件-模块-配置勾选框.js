@@ -27,7 +27,7 @@ var PrefCheckBox = (function() {
         }
         let id = this.view.attr("id");
         if(!id){
-            throw new Error("should set a id or key to the checkbox");
+            throw Error("should set a id or key to the checkbox");
         }
         return id.replace("@+id/", "");
     }

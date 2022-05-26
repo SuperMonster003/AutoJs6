@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class InterruptibleAndroidContextFactory extends AndroidContextFactory {
 
-    private AtomicInteger mContextCount = new AtomicInteger();
+    private final AtomicInteger mContextCount = new AtomicInteger();
     private static final String LOG_TAG = "ContextFactory";
 
     /**

@@ -1,52 +1,84 @@
+/* Here, importClass() is not recommended for intelligent code completion in IDE like WebStorm. */
+/* The same is true of destructuring assignment syntax (like `let {Uri} = android.net`). */
 
-module.exports = function(runtime, global){
-    var floaty = {};
+const ProxyJavaObject = com.stardust.autojs.rhino.ProxyJavaObject;
 
-    floaty.window = function(xml){
-        if(typeof(xml) == 'xml'){
-            xml = xml.toXMLString();
-        }
-        return wrap(runtime.floaty.window(function(context, parent){
-             runtime.ui.layoutInflater.setContext(context);
-             return runtime.ui.layoutInflater.inflate(xml.toString(), parent, true);
-        }));
-    }
+let _ = {
+    init(__runtime__, scope) {
+        this.runtime = __runtime__;
+        this.scope = scope;
 
-    floaty.rawWindow = function(xml){
-        if(typeof(xml) == 'xml'){
-            xml = xml.toXMLString();
-        }
-        return wrap(runtime.floaty.rawWindow(function(context, parent){
-             runtime.ui.layoutInflater.setContext(context);
-             return runtime.ui.layoutInflater.inflate(xml.toString(), parent, true);
-        }));
-    }
+        /**
+         * @type {com.stardust.autojs.runtime.api.Floaty}
+         */
+        this.rtFloaty = __runtime__.floaty;
+        this.floaty = {};
 
-    function wrap(window){
-        var proxyObject = new com.stardust.autojs.rhino.ProxyJavaObject(global, window, window.getClass());
-        var viewCache = {};
+        this.layoutInflater = this.runtime.ui.layoutInflater;
+    },
+    getModule() {
+        return this.floaty;
+    },
+    selfAugment() {
+        Object.assign(this.floaty, {
+            closeAll: () => _.rtFloaty.closeAll(),
+            window: xml => _.wrap(_.rtFloaty.window.bind(_.rtFloaty), xml),
+            rawWindow: xml => _.wrap(_.rtFloaty.rawWindow.bind(_.rtFloaty), xml),
+        });
+    },
+    toXMLStringIfNeeded(xml) {
+        // noinspection JSTypeOfValues
+        return typeof xml === 'xml' ? xml.toXMLString() : String(xml);
+    },
+    /**
+     * @param {(f: (context: android.content.Context, parent: android.view.ViewGroup) => android.view.View)
+     *     => com.stardust.autojs.runtime.api.Floaty.JsResizableWindow
+     *      | com.stardust.autojs.runtime.api.Floaty.JsRawWindow} windowFunction
+     * @param {Xml} xml
+     * @return {com.stardust.autojs.rhino.ProxyJavaObject|android.view.View}
+     */
+    wrap(windowFunction, xml) {
+        let window = windowFunction(function (context, parent) {
+            _.layoutInflater.setContext(context);
+            return _.layoutInflater.inflate(_.toXMLStringIfNeeded(xml), parent, true);
+        });
+        let proxyObject = new ProxyJavaObject(_.scope, window, getClass(window));
         proxyObject.__proxy__ = {
-            set: function(name, value){
+            set(name, value) {
                 window[name] = value;
             },
-            get: function(name) {
-               var value = window[name];
-               if(typeof(value) == 'undefined'){
-                   if(!value){
+            get(name) {
+                let value = window[name];
+                if (typeof value === 'undefined') {
+                    if (!value) {
                         value = window.findView(name);
-                   }
-                   if(!value){
-                      value = undefined;
-                   }
-               }
-               return value;
-            }
+                    }
+                    if (!value) {
+                        value = undefined;
+                    }
+                }
+                return value;
+            },
         };
         return proxyObject;
-    }
-    
-    floaty.closeAll = runtime.floaty.closeAll.bind(runtime.floaty);
+    },
+};
 
-    return floaty;
-}
+let $ = {
+    getModule(__runtime__, scope) {
+        _.init(__runtime__, scope);
 
+        _.selfAugment();
+
+        return _.getModule();
+    },
+};
+
+/**
+ * @param {com.stardust.autojs.runtime.ScriptRuntime} __runtime__
+ * @param {org.mozilla.javascript.Scriptable} scope
+ * @return {Internal.Floaty}
+ */
+module.exports = function (__runtime__, scope) {
+    return $.getModule(__runtime__, scope);
+};

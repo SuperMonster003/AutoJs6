@@ -11,10 +11,9 @@ import com.stardust.view.accessibility.NodeInfo;
 /**
  * Created by Stardust on 2017/11/5.
  */
-
 public class ReadOnlyUiObject extends UiObject {
 
-    private NodeInfo mNodeInfo;
+    private final NodeInfo mNodeInfo;
 
     public ReadOnlyUiObject(NodeInfo info) {
         super(null, info.getDepth(), -1);
@@ -89,11 +88,13 @@ public class ReadOnlyUiObject extends UiObject {
     }
 
 
+    @NonNull
     @Override
     public Rect bounds() {
         return mNodeInfo.getBoundsInScreen();
     }
 
+    @NonNull
     @Override
     public Rect boundsInParent() {
         return mNodeInfo.getBoundsInParent();
@@ -115,6 +116,7 @@ public class ReadOnlyUiObject extends UiObject {
         return text();
     }
 
+    @NonNull
     @Override
     public AccessibilityNodeInfoCompat getChild(int index) {
         return child(index);
@@ -325,6 +327,7 @@ public class ReadOnlyUiObject extends UiObject {
         return result;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return mNodeInfo.toString();

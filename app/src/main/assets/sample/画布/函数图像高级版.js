@@ -34,7 +34,7 @@ paint.setStrokeWidth(2);
 ui.board.on("draw", function(canvas){
     w = canvas.getWidth();
     h = canvas.getHeight();
-    if(minY == undefined){
+    if(minY === undefined){
         minY = -(maxX - minX) * h / w / 2;
     }
     //计算y轴区间上限

@@ -51,9 +51,7 @@ public class ImageViewAttributes extends ViewAttributes {
             PorterDuff.Mode mode = ImageViewCompat.getImageTintMode(getView());
             getView().setColorFilter(value, mode == null ? PorterDuff.Mode.SRC_ATOP : mode);
         });
-        registerAttr("tintMode", TINT_MODES::get, value -> {
-            ImageViewCompat.setImageTintMode(getView(), value);
-        });
+        registerAttr("tintMode", TINT_MODES::get, value -> ImageViewCompat.setImageTintMode(getView(), value));
         registerAttr("url", value ->
                 getDrawables().setupWithImage(getView(), wrapAsUrl(value))
         );

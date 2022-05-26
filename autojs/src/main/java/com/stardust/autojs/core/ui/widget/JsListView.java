@@ -15,12 +15,12 @@ import org.w3c.dom.NodeList;
 
 import com.stardust.autojs.workground.WrapContentLinearLayoutManager;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by Stardust on 2018/3/28.
  */
-
 public class JsListView extends RecyclerView {
 
     public interface DataSourceAdapter {
@@ -40,7 +40,7 @@ public class JsListView extends RecyclerView {
 
     private Node mItemTemplate;
     private DynamicLayoutInflater mDynamicLayoutInflater;
-    private ScriptRuntime mScriptRuntime;
+    private final ScriptRuntime mScriptRuntime;
     private Object mDataSource;
     private DataSourceAdapter mDataSourceAdapter;
     private OnItemTouchListener mOnItemTouchListener;
@@ -132,8 +132,9 @@ public class JsListView extends RecyclerView {
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             try {
                 mDynamicLayoutInflater.setInflateFlags(DynamicLayoutInflater.FLAG_IGNORES_DYNAMIC_ATTRS);
                 return new ViewHolder(mDynamicLayoutInflater.inflate(mDynamicLayoutInflater.newInflateContext(), mItemTemplate, parent, false));
@@ -146,7 +147,7 @@ public class JsListView extends RecyclerView {
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             try {
                 Object oldCtx = mScriptRuntime.ui.getBindingContext();
                 Object item = mDataSourceAdapter.getItem(mDataSource, position);
@@ -164,9 +165,8 @@ public class JsListView extends RecyclerView {
 
         private void applyDynamicAttrs(Node node, View itemView, ViewGroup parent) {
             mDynamicLayoutInflater.applyAttributes(mDynamicLayoutInflater.newInflateContext(), itemView, mDynamicLayoutInflater.getAttributesMap(node), parent);
-            if (!(itemView instanceof ViewGroup))
+            if (!(itemView instanceof ViewGroup viewGroup))
                 return;
-            ViewGroup viewGroup = (ViewGroup) itemView;
             NodeList nodeList = node.getChildNodes();
             int j = 0;
             for (int i = 0; i < nodeList.getLength(); i++) {

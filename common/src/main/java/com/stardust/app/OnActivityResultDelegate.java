@@ -10,7 +10,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/3/5.
  */
-
 public interface OnActivityResultDelegate {
 
     void onActivityResult(int requestCode, int resultCode, Intent data);
@@ -22,8 +21,8 @@ public interface OnActivityResultDelegate {
 
     class Mediator implements OnActivityResultDelegate {
 
-        private SparseArray<OnActivityResultDelegate> mSpecialDelegate = new SparseArray<>();
-        private List<OnActivityResultDelegate> mDelegates = new ArrayList<>();
+        private final SparseArray<OnActivityResultDelegate> mSpecialDelegate = new SparseArray<>();
+        private final List<OnActivityResultDelegate> mDelegates = new ArrayList<>();
 
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             OnActivityResultDelegate delegate = mSpecialDelegate.get(requestCode);

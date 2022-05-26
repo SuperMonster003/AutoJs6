@@ -5,7 +5,6 @@ import com.stardust.automator.UiObject
 /**
  * Created by Stardust on 2017/3/9.
  */
-
 class StringEndsWithFilter(private val mSuffix: String, private val mKeyGetter: KeyGetter) : Filter {
 
     override fun filter(node: UiObject): Boolean {

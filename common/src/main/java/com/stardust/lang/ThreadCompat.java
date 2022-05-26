@@ -1,19 +1,16 @@
 package com.stardust.lang;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
  * Created by Stardust on 2017/4/30.
  */
-
 public class ThreadCompat extends Thread {
 
     // FIXME: 2017/12/29 是否需要用synchronizedMap?这里虽然线程不安全，但竞争很小
-    private static final Set<Thread> interruptedThreads = Collections.newSetFromMap(new WeakHashMap<Thread, Boolean>());
+    private static final Set<Thread> interruptedThreads = Collections.newSetFromMap(new WeakHashMap<>());
 
     public ThreadCompat() {
     }

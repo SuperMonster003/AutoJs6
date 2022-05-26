@@ -46,12 +46,12 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
             .build();
 
     static final SparseArray<Integer> COLORS = new SparseArrayEntries<Integer>()
-            .entry(Log.VERBOSE, 0xdfc0c0c0)
-            .entry(Log.DEBUG, 0xdfffffff)
-            .entry(Log.INFO, 0xff64dd17)
-            .entry(Log.WARN, 0xff2962ff)
-            .entry(Log.ERROR, 0xffd50000)
-            .entry(Log.ASSERT, 0xffff534e)
+            .entry(Log.VERBOSE, 0xDFC0C0C0)
+            .entry(Log.DEBUG, 0xDFFFFFFF)
+            .entry(Log.INFO, 0xFF43A047)
+            .entry(Log.WARN, 0xFF1976D2)
+            .entry(Log.ERROR, 0xFFC62828)
+            .entry(Log.ASSERT, 0xFFE254FF)
             .sparseArray();
 
     private static final int REFRESH_INTERVAL = 100;

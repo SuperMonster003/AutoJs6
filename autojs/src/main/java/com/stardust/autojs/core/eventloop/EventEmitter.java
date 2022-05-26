@@ -17,7 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by Stardust on 2017/7/19.
  */
-
 public class EventEmitter {
 
     private static class ListenerWrapper {
@@ -32,7 +31,7 @@ public class EventEmitter {
 
 
     private class Listeners {
-        private CopyOnWriteArrayList<ListenerWrapper> mListenerWrappers = new CopyOnWriteArrayList<>();
+        private final CopyOnWriteArrayList<ListenerWrapper> mListenerWrappers = new CopyOnWriteArrayList<>();
 
         void add(Object listener, boolean once) {
             ensureListenersNotAtLimit();
@@ -50,9 +49,7 @@ public class EventEmitter {
         }
 
         void emit(Object[] args) {
-            Iterator<ListenerWrapper> listenerIterator = mListenerWrappers.iterator();
-            while (listenerIterator.hasNext()) {
-                ListenerWrapper listenerWrapper = listenerIterator.next();
+            for (ListenerWrapper listenerWrapper : mListenerWrappers) {
                 if (mTimer != null) {
                     mTimer.setImmediate(listenerWrapper.listener, args);
                 } else {
@@ -74,7 +71,7 @@ public class EventEmitter {
             while (listenerIterator.hasNext()) {
                 listeners.add(listenerIterator.next().listener);
             }
-            return listeners.toArray(new Object[listeners.size()]);
+            return listeners.toArray(new Object[0]);
         }
 
         void prepend(Object listener, boolean once) {
@@ -94,7 +91,7 @@ public class EventEmitter {
         }
     }
 
-    private Map<String, Listeners> mListenersMap = new HashMap<>();
+    private final Map<String, Listeners> mListenersMap = new HashMap<>();
     public static int defaultMaxListeners = 10;
     private int mMaxListeners = defaultMaxListeners;
     protected ScriptBridges mBridges;

@@ -1,52 +1,16 @@
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
+ext {
+    namespace = 'com.stardust.autojs'
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_16
-    }
-}
-
-// tasks.withType(JavaCompile) {
-//     options.compilerArgs << '-Xlint:deprecation' << '-Xlint:unchecked'
-// }
-
-android {
-    compileSdkVersion versions.project.compile
-    defaultConfig {
-        minSdkVersion versions.project.mini
-        targetSdkVersion versions.project.target
-
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_16
-        targetCompatibility JavaVersion.VERSION_16
-    }
-    lintOptions {
-        abortOnError false
-    }
-}
-
-repositories {
-    google()
+apply {
+    from rootProject.file('config.gradle')
 }
 
 dependencies {
-    testImplementation "junit:junit:${versions.junit}"
-
-    implementation 'net.lingala.zip4j:zip4j:2.9.1'
+    implementation 'net.lingala.zip4j:zip4j:2.10.0'
 
     // OkHttp
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.6'
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.7'
 
     // Gson
     implementation 'com.google.code.gson:gson:2.9.0'
@@ -62,6 +26,6 @@ dependencies {
 
     api project(':libs:com.android.dx-1.7.0')
 
-    api project(':common')
+    // Indirect: common
     api project(':automator')
 }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -27,7 +28,7 @@ import android.widget.TextView;
 
 import com.stardust.pio.PFiles;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
@@ -53,6 +54,7 @@ import org.autojs.autojs.workground.WrapContentGridLayoutManger;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Stack;
+import java.util.concurrent.Callable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,7 +67,8 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Created by Stardust on 2017/8/21.
  */
-
+@SuppressWarnings("ResultOfMethodCallIgnored")
+@SuppressLint({"CheckResult", "NonConstantResourceId", "NotifyDataSetChanged"})
 public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeRefreshLayout.OnRefreshListener, PopupMenu.OnMenuItemClickListener {
 
     private static final String LOG_TAG = "ExplorerView";
@@ -80,7 +83,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
 
     protected static final int VIEW_TYPE_ITEM = 0;
     protected static final int VIEW_TYPE_PAGE = 1;
-    //category是类别，也即"文件", "文件夹"那两个
+    // category是类别，也即"文件", "文件夹"那两个
     protected static final int VIEW_TYPE_CATEGORY = 2;
 
     private static final int positionOfCategoryDir = 0;
@@ -88,13 +91,13 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
     private ExplorerItemList mExplorerItemList = new ExplorerItemList();
     private RecyclerView mExplorerItemListView;
     private ExplorerProjectToolbar mProjectToolbar;
-    private ExplorerAdapter mExplorerAdapter = new ExplorerAdapter();
+    private final ExplorerAdapter mExplorerAdapter = new ExplorerAdapter();
     protected OnItemClickListener mOnItemClickListener;
     private Function<ExplorerItem, Boolean> mFilter;
     private OnItemOperatedListener mOnItemOperatedListener;
     protected ExplorerItem mSelectedItem;
     private Explorer mExplorer;
-    private Stack<ExplorerPageState> mPageStateHistory = new Stack<>();
+    private final Stack<ExplorerPageState> mPageStateHistory = new Stack<>();
     private ExplorerPageState mCurrentPageState = new ExplorerPageState();
     private boolean mDirSortMenuShowing = false;
     private int mDirectorySpanSize = 2;
@@ -130,7 +133,10 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
     }
 
     protected void enterDirectChildPage(ExplorerPage childItemGroup) {
-        mCurrentPageState.scrollY = ((LinearLayoutManager) mExplorerItemListView.getLayoutManager()).findLastCompletelyVisibleItemPosition();
+        LinearLayoutManager layoutManager = (LinearLayoutManager) mExplorerItemListView.getLayoutManager();
+        if (layoutManager != null) {
+            mCurrentPageState.scrollY = layoutManager.findLastCompletelyVisibleItemPosition();
+        }
         mPageStateHistory.push(mCurrentPageState);
         setCurrentPageState(new ExplorerPageState(childItemGroup));
         loadItemList();
@@ -247,7 +253,6 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         return mExplorerItemList.groupCount() + 1;
     }
 
-    @SuppressLint("CheckResult")
     private void loadItemList() {
         setRefreshing(true);
         mExplorer.fetchChildren(mCurrentPageState.page)
@@ -256,7 +261,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
                     mCurrentPageState.page = page;
                     return Observable.fromIterable(page);
                 })
-                .filter(f -> mFilter == null ? true : mFilter.apply(f))
+                .filter(f -> mFilter == null || mFilter.apply(f))
                 .collectInto(mExplorerItemList.cloneConfig(), ExplorerItemList::add)
                 .observeOn(Schedulers.computation())
                 .doOnSuccess(ExplorerItemList::sort)
@@ -265,9 +270,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
                     mExplorerItemList = list;
                     mExplorerAdapter.notifyDataSetChanged();
                     setRefreshing(false);
-                    post(() ->
-                            mExplorerItemListView.scrollToPosition(mCurrentPageState.scrollY)
-                    );
+                    post(() -> mExplorerItemListView.scrollToPosition(mCurrentPageState.scrollY));
                 });
     }
 
@@ -290,22 +293,22 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         if (currentDirPath.equals(changedDirPath)) {
             int i;
             switch (event.getAction()) {
-                case ExplorerChangeEvent.CHANGE:
+                case ExplorerChangeEvent.CHANGE -> {
                     i = mExplorerItemList.update(item, event.getNewItem());
                     if (i >= 0) {
                         mExplorerAdapter.notifyItemChanged(item, i);
                     }
-                    break;
-                case ExplorerChangeEvent.CREATE:
+                }
+                case ExplorerChangeEvent.CREATE -> {
                     mExplorerItemList.insertAtFront(event.getNewItem());
                     mExplorerAdapter.notifyItemInserted(event.getNewItem(), 0);
-                    break;
-                case ExplorerChangeEvent.REMOVE:
+                }
+                case ExplorerChangeEvent.REMOVE -> {
                     i = mExplorerItemList.remove(item);
                     if (i >= 0) {
                         mExplorerAdapter.notifyItemRemoved(item, i);
                     }
-                    break;
+                }
             }
         }
     }
@@ -321,7 +324,6 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         return getCurrentPage().toScriptFile();
     }
 
-    @SuppressLint("CheckResult")
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
@@ -410,18 +412,17 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         }
     }
 
-    @SuppressLint("CheckResult")
     private void sort(final int sortType, final boolean isDir) {
         setRefreshing(true);
-        Observable.fromCallable(() -> {
+        Callable<ExplorerItemList> explorerItemListCallable = () -> {
             if (isDir) {
                 mExplorerItemList.sortItemGroup(sortType);
             } else {
                 mExplorerItemList.sortFile(sortType);
             }
             return mExplorerItemList;
-        })
-
+        };
+        Observable.fromCallable(explorerItemListCallable)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(o -> {
@@ -430,13 +431,11 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
                 });
     }
 
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (mExplorer != null)
             mExplorer.registerChangeListener(this);
-
     }
 
     @Override
@@ -444,7 +443,6 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         super.onDetachedFromWindow();
         mExplorer.unregisterChangeListener(this);
     }
-
 
     protected BindableViewHolder<?> onCreateViewHolder(LayoutInflater inflater, ViewGroup parent, int viewType) {
         if (viewType == VIEW_TYPE_ITEM) {
@@ -462,26 +460,26 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
 
     private class ExplorerAdapter extends RecyclerView.Adapter<BindableViewHolder<?>> {
 
+        @NonNull
         @Override
-        public BindableViewHolder<?> onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BindableViewHolder<?> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
             return ExplorerView.this.onCreateViewHolder(inflater, parent, viewType);
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public void onBindViewHolder(BindableViewHolder<?> holder, int position) {
+        public void onBindViewHolder(@NonNull BindableViewHolder<?> holder, int position) {
             int positionOfCategoryFile = positionOfCategoryFile();
-            BindableViewHolder bindableViewHolder = (BindableViewHolder) holder;
             if (position == positionOfCategoryDir || position == positionOfCategoryFile) {
-                bindableViewHolder.bind(position == positionOfCategoryDir, position);
+                ((BindableViewHolder<Boolean>) holder).bind(position == positionOfCategoryDir, position);
                 return;
             }
             if (position < positionOfCategoryFile) {
-                bindableViewHolder.bind(mExplorerItemList.getItemGroup(position - 1), position);
+                ((BindableViewHolder<ExplorerPage>) holder).bind(mExplorerItemList.getItemGroup(position - 1), position);
                 return;
             }
-            bindableViewHolder.bind(mExplorerItemList.getItem(position - positionOfCategoryFile - 1), position);
+            ((BindableViewHolder<ExplorerItem>) holder).bind(mExplorerItemList.getItem(position - positionOfCategoryFile - 1), position);
         }
 
         @Override

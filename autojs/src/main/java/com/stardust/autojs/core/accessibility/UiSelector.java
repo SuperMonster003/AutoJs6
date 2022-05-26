@@ -10,6 +10,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.stardust.autojs.BuildConfig;
 import com.stardust.autojs.annotation.ScriptInterface;
+import com.stardust.autojs.rhino.continuation.Continuation;
 import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
 import com.stardust.automator.ActionArgument;
 import com.stardust.automator.UiGlobalSelector;
@@ -59,13 +60,11 @@ import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.Acces
 /**
  * Created by Stardust on 2017/3/9.
  */
-
 public class UiSelector extends UiGlobalSelector {
-
 
     private static final String TAG = "UiSelector";
 
-    private AccessibilityBridge mAccessibilityBridge;
+    private final AccessibilityBridge mAccessibilityBridge;
     private AccessibilityNodeInfoAllocator mAllocator = null;
 
     public UiSelector(AccessibilityBridge accessibilityBridge) {
@@ -78,7 +77,7 @@ public class UiSelector extends UiGlobalSelector {
     }
 
     protected UiObjectCollection find(int max) {
-        ensureAccessibilityServiceEnabled();
+        mAccessibilityBridge.ensureServiceEnabled();
         if ((mAccessibilityBridge.getFlags() & AccessibilityBridge.FLAG_FIND_ON_UI_THREAD) != 0
                 && Looper.myLooper() != Looper.getMainLooper()) {
             VolatileBox<UiObjectCollection> result = new VolatileBox<>();
@@ -120,48 +119,58 @@ public class UiSelector extends UiGlobalSelector {
         return UiObjectCollection.Companion.of(result);
     }
 
+    @NonNull
     @Override
     public UiGlobalSelector textMatches(@NotNull String regex) {
         return super.textMatches(convertRegex(regex));
     }
 
-    // TODO: 2018/1/30 更好的实现方式。
-    private String convertRegex(String regex) {
-        if (regex.startsWith("/") && regex.endsWith("/") && regex.length() > 2) {
-            return regex.substring(1, regex.length() - 1);
-        }
-        return regex;
+    // @Overwrite by SuperMonster003 on May 5, 2022.
+    //  ! Dunno what "better implementation" really means.
+    //  ! The only thing I did was make code more "lightweight". ;)
+    // @TodoDiary by Stardust on Jan 30, 2018.
+    //  ! 更好的实现方式。
+    @NonNull
+    private String convertRegex(@NonNull String regex) {
+        String pattern = "^/(.+)/$";
+        return regex.matches(pattern) ? regex.replaceAll(pattern, "$1") : regex;
     }
 
+    private boolean isUiThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
 
+    @NonNull
     @Override
     public UiGlobalSelector classNameMatches(@NotNull String regex) {
         return super.classNameMatches(convertRegex(regex));
     }
 
+    @NonNull
     @Override
     public UiGlobalSelector idMatches(@NotNull String regex) {
         return super.idMatches(convertRegex(regex));
     }
 
+    @NonNull
     @Override
     public UiGlobalSelector packageNameMatches(@NotNull String regex) {
         return super.packageNameMatches(convertRegex(regex));
     }
 
+    @NonNull
     @Override
     public UiGlobalSelector descMatches(@NotNull String regex) {
         return super.descMatches(convertRegex(regex));
     }
 
-    private void ensureAccessibilityServiceEnabled() {
-        mAccessibilityBridge.ensureServiceEnabled();
-    }
-
     @ScriptInterface
     @NonNull
     public UiObjectCollection untilFind() {
-        ensureNonUiThread();
+        if (isUiThread()) {
+            // TODO: 2018/11/1 配置字符串
+            throw new IllegalThreadStateException("不能在ui线程执行阻塞操作, 请在子线程或子脚本执行untilFind()");
+        }
         UiObjectCollection uiObjectCollection = find();
         while (uiObjectCollection.empty()) {
             if (Thread.currentThread().isInterrupted()) {
@@ -177,15 +186,12 @@ public class UiSelector extends UiGlobalSelector {
         return uiObjectCollection;
     }
 
-    private void ensureNonUiThread() {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            // TODO: 2018/11/1 配置字符串
-            throw new IllegalThreadStateException("不能在ui线程执行阻塞操作, 请在子线程或子脚本执行findOne()或untilFind()");
-        }
-    }
-
     @ScriptInterface
     public UiObject findOne(long timeout) {
+        if (isUiThread()) {
+            // TODO: 2018/11/1 配置字符串
+            throw new IllegalThreadStateException("不能在ui线程执行阻塞操作, 请在子线程或子脚本执行findOne()");
+        }
         UiObjectCollection uiObjectCollection = find(1);
         long start = SystemClock.uptimeMillis();
         while (uiObjectCollection.empty()) {
@@ -238,6 +244,7 @@ public class UiSelector extends UiGlobalSelector {
         untilFind();
     }
 
+    @NonNull
     @ScriptInterface
     public UiSelector id(@NotNull final String id) {
         if (!id.contains(":")) {
@@ -248,6 +255,7 @@ public class UiSelector extends UiGlobalSelector {
                     return fullId.equals(node.getViewIdResourceName());
                 }
 
+                @NonNull
                 @Override
                 public String toString() {
                     return "id(\"" + id + "\")";
@@ -259,6 +267,7 @@ public class UiSelector extends UiGlobalSelector {
         return this;
     }
 
+    @NonNull
     @Override
     public UiGlobalSelector idStartsWith(@NotNull String prefix) {
         if (!prefix.contains(":")) {
@@ -270,6 +279,7 @@ public class UiSelector extends UiGlobalSelector {
                     return id != null && id.startsWith(fullIdPrefix);
                 }
 
+                @NonNull
                 @Override
                 public String toString() {
                     return "idStartsWith(\"" + prefix + "\")";
@@ -284,7 +294,6 @@ public class UiSelector extends UiGlobalSelector {
     private boolean performAction(int action, ActionArgument... arguments) {
         return untilFind().performAction(action, arguments);
     }
-
 
     @ScriptInterface
     public boolean click() {
@@ -416,4 +425,5 @@ public class UiSelector extends UiGlobalSelector {
                 new ActionArgument.IntActionArgument(ACTION_ARGUMENT_ROW_INT, row),
                 new ActionArgument.IntActionArgument(ACTION_ARGUMENT_COLUMN_INT, column));
     }
+
 }

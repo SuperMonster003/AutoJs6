@@ -1,13 +1,9 @@
 package com.stardust.automator.simple_action
 
 import android.view.accessibility.AccessibilityNodeInfo
-
 import com.stardust.automator.test.TestUiObject
-import com.stardust.automator.UiObject
-
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
 
 /**
  * Created by Stardust on 2017/5/5.

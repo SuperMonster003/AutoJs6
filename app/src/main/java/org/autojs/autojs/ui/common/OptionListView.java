@@ -1,6 +1,8 @@
 package org.autojs.autojs.ui.common;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
 
@@ -22,14 +24,13 @@ import butterknife.ButterKnife;
 /**
  * Created by Stardust on 2017/10/20.
  */
-
 public class OptionListView extends LinearLayout {
 
 
     public static class Builder {
 
-        private OptionListView mOptionListView;
-        private Context mContext;
+        private final OptionListView mOptionListView;
+        private final Context mContext;
 
         public Builder(Context context) {
             mContext = context;
@@ -68,9 +69,9 @@ public class OptionListView extends LinearLayout {
     }
 
 
-    private ArrayList<Integer> mIds = new ArrayList<>();
-    private ArrayList<Integer> mIcons = new ArrayList<>();
-    private ArrayList<String> mTexts = new ArrayList<>();
+    private final ArrayList<Integer> mIds = new ArrayList<>();
+    private final ArrayList<Integer> mIcons = new ArrayList<>();
+    private final ArrayList<String> mTexts = new ArrayList<>();
     private Object mOnItemClickTarget;
     private RecyclerView mOptionList;
     private TextView mTitleView;
@@ -86,13 +87,14 @@ public class OptionListView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mTitleView = (TextView) findViewById(R.id.title);
-        mOptionList = (RecyclerView) findViewById(R.id.list);
+        mTitleView = findViewById(R.id.title);
+        mOptionList = findViewById(R.id.list);
         mOptionList.setLayoutManager(new LinearLayoutManager(getContext()));
         mOptionList.setAdapter(new Adapter());
     }
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
+        @NonNull
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.operation_dialog_item, parent, false));

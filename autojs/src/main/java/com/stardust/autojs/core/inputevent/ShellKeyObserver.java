@@ -10,7 +10,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/5/4.
  */
-
 public class ShellKeyObserver implements InputEventObserver.InputEventListener {
 
     public interface KeyListener {

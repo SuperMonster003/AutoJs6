@@ -13,7 +13,6 @@ import android.os.Looper;
 import android.os.Message;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -50,7 +49,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2018/4/17.
  */
-
 public class JsDialog {
 
     private final EventEmitter mEmitter;
@@ -93,16 +91,12 @@ public class JsDialog {
     }
 
     private DialogAction getDialogAction(String action) {
-        switch (action) {
-            case "positive":
-                return DialogAction.POSITIVE;
-            case "negative":
-                return DialogAction.NEGATIVE;
-            case "neutral":
-                return DialogAction.NEUTRAL;
-            default:
-                throw new IllegalArgumentException("unknown action " + action);
-        }
+        return switch (action) {
+            case "positive" -> DialogAction.POSITIVE;
+            case "negative" -> DialogAction.NEGATIVE;
+            case "neutral" -> DialogAction.NEUTRAL;
+            default -> throw new IllegalArgumentException("unknown action " + action);
+        };
     }
 
     public int getProgress() {
@@ -447,7 +441,6 @@ public class JsDialog {
         return mDialog.isShowing();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void create() {
         mDialog.create();
     }

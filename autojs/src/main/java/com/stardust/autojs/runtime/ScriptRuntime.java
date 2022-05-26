@@ -10,8 +10,15 @@ import com.stardust.autojs.R;
 import com.stardust.autojs.ScriptEngineService;
 import com.stardust.autojs.annotation.ScriptVariable;
 import com.stardust.autojs.core.accessibility.AccessibilityBridge;
+import com.stardust.autojs.core.accessibility.SimpleActionAutomator;
+import com.stardust.autojs.core.accessibility.UiSelector;
+import com.stardust.autojs.core.activity.ActivityInfoProvider;
 import com.stardust.autojs.core.image.Colors;
+import com.stardust.autojs.core.image.ImageWrapper;
+import com.stardust.autojs.core.image.capture.ScreenCaptureRequester;
+import com.stardust.autojs.core.looper.Loopers;
 import com.stardust.autojs.core.permission.Permissions;
+import com.stardust.autojs.core.util.ProcessShell;
 import com.stardust.autojs.rhino.AndroidClassLoader;
 import com.stardust.autojs.rhino.TopLevelScope;
 import com.stardust.autojs.rhino.continuation.Continuation;
@@ -19,36 +26,31 @@ import com.stardust.autojs.runtime.api.AbstractShell;
 import com.stardust.autojs.runtime.api.AppUtils;
 import com.stardust.autojs.runtime.api.Console;
 import com.stardust.autojs.runtime.api.Device;
+import com.stardust.autojs.runtime.api.Dialogs;
 import com.stardust.autojs.runtime.api.Engines;
 import com.stardust.autojs.runtime.api.Events;
 import com.stardust.autojs.runtime.api.Files;
 import com.stardust.autojs.runtime.api.Floaty;
-import com.stardust.autojs.core.looper.Loopers;
+import com.stardust.autojs.runtime.api.Images;
 import com.stardust.autojs.runtime.api.Media;
 import com.stardust.autojs.runtime.api.Plugins;
 import com.stardust.autojs.runtime.api.Sensors;
 import com.stardust.autojs.runtime.api.Threads;
 import com.stardust.autojs.runtime.api.Timers;
-import com.stardust.autojs.core.accessibility.UiSelector;
-import com.stardust.autojs.runtime.api.Images;
-import com.stardust.autojs.core.image.capture.ScreenCaptureRequester;
-import com.stardust.autojs.runtime.api.Dialogs;
+import com.stardust.autojs.runtime.api.UI;
 import com.stardust.autojs.runtime.exception.ScriptEnvironmentException;
 import com.stardust.autojs.runtime.exception.ScriptException;
 import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
-import com.stardust.autojs.core.accessibility.SimpleActionAutomator;
-import com.stardust.autojs.runtime.api.UI;
 import com.stardust.concurrent.VolatileDispose;
 import com.stardust.lang.ThreadCompat;
 import com.stardust.pio.UncheckedIOException;
 import com.stardust.util.ClipboardUtil;
-import com.stardust.autojs.core.util.ProcessShell;
 import com.stardust.util.ScreenMetrics;
 import com.stardust.util.SdkVersionUtil;
 import com.stardust.util.Supplier;
 import com.stardust.util.UiHandler;
-import com.stardust.autojs.core.activity.ActivityInfoProvider;
 
+import org.autojs.autojs.tool.RootTool;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.ScriptStackElement;
@@ -68,7 +70,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Stardust on 2017/1/27.
  */
-
 public class ScriptRuntime {
 
     private static final String TAG = "ScriptRuntime";
@@ -193,13 +194,13 @@ public class ScriptRuntime {
     @ScriptVariable
     public final Plugins plugins;
 
-    private Images images;
+    private final Images images;
 
     private static WeakReference<Context> applicationContext;
-    private Map<String, Object> mProperties = new ConcurrentHashMap<>();
+    private final Map<String, Object> mProperties = new ConcurrentHashMap<>();
     private AbstractShell mRootShell;
     private Supplier<AbstractShell> mShellSupplier;
-    private ScreenMetrics mScreenMetrics = new ScreenMetrics();
+    private final ScreenMetrics mScreenMetrics = new ScreenMetrics();
     private Thread mThread;
     private TopLevelScope mTopLevelScope;
 
@@ -219,7 +220,7 @@ public class ScriptRuntime {
         engines = new Engines(builder.mEngineService, this);
         dialogs = new Dialogs(this);
         device = new Device(context);
-        floaty = new Floaty(uiHandler, ui, this);
+        floaty = new Floaty(uiHandler, this);
         files = new Files(this);
         media = new Media(context, this);
         plugins = new Plugins(context, this);
@@ -325,9 +326,12 @@ public class ScriptRuntime {
         return Thread.currentThread().isInterrupted();
     }
 
-    public static void requiresApi(int i) {
-        if (Build.VERSION.SDK_INT < i) {
-            throw new ScriptException(GlobalAppContext.getString(R.string.text_requires_sdk_version_to_run_the_script) + ": " + SdkVersionUtil.sdkIntToString(i));
+    public static void requiresApi(int requiresApi) throws ScriptException {
+        int currentApi = Build.VERSION.SDK_INT;
+        if (currentApi < requiresApi) {
+            throw new ScriptException(String.format(GlobalAppContext.getString(R.string.text_requires_android_os_version),
+                    SdkVersionUtil.sdkIntToString(requiresApi), requiresApi,
+                    SdkVersionUtil.sdkIntToString(currentApi), currentApi));
         }
     }
 
@@ -376,7 +380,6 @@ public class ScriptRuntime {
         exit();
     }
 
-
     public void setScreenMetrics(int width, int height) {
         mScreenMetrics.setScreenMetrics(width, height);
     }
@@ -389,26 +392,27 @@ public class ScriptRuntime {
         accessibilityBridge.ensureServiceEnabled();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void onExit() {
         Log.d(TAG, "on exit");
-        //清除interrupt状态
-        ThreadCompat.interrupted();
-        //悬浮窗需要第一时间关闭以免出现恶意脚本全屏悬浮窗屏蔽屏幕并且在exit中写死循环的问题
+
+        ignoresException(RootTool::resetRuntimeOverriddenRootModeState);
+        ignoresException(ImageWrapper::recycleAll);
+
+        // 清除 interrupt 状态
+        ignoresException(ThreadCompat::interrupted);
+
+        // 悬浮窗需要第一时间关闭
+        // 以免出现恶意脚本全屏悬浮窗屏蔽屏幕并且在 exit 中写死循环的问题
         ignoresException(floaty::closeAll);
-        try {
-            events.emit("exit");
-        } catch (Throwable e) {
-            console.error("exception on exit: ", e);
-        }
+
+        ignoresException(() -> events.emit("exit"), "exception on exit: %s");
+
         ignoresException(threads::shutDownAll);
         ignoresException(events::recycle);
         ignoresException(media::recycle);
         ignoresException(loopers::recycle);
-        ignoresException(() -> {
-            if (mRootShell != null) mRootShell.exit();
-            mRootShell = null;
-            mShellSupplier = null;
-        });
+        ignoresException(this::recycleShell);
         ignoresException(images::releaseScreenCapturer);
         ignoresException(sensors::unregisterAll);
         ignoresException(timers::recycle);
@@ -416,11 +420,26 @@ public class ScriptRuntime {
     }
 
     private void ignoresException(Runnable r) {
+        ignoresException(r, null);
+    }
+
+    private void ignoresException(Runnable r, String consoleMessage) {
         try {
             r.run();
         } catch (Throwable e) {
+            if (consoleMessage != null) {
+                console.error(String.format(consoleMessage, e));
+            }
             e.printStackTrace();
         }
+    }
+
+    private void recycleShell() {
+        if (mRootShell != null) {
+            mRootShell.exit();
+        }
+        mRootShell = null;
+        mShellSupplier = null;
     }
 
     public Object getImages() {

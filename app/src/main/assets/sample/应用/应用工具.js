@@ -1,6 +1,6 @@
 var i = dialogs.select("请选择工具", "获取应用包名", "打开应用详情页", "卸载应用");
 
-if(i == -1){
+if(i === -1){
     alert("没有选择任何工具！");
 }
 
@@ -22,7 +22,7 @@ case 2:
     //卸载应用
     appName = rawInput("请输入应用名称");
     packageName = getPackageName(appName);
-    if(packageName == ""){
+    if(packageName === ""){
         toast("应用不存在");
     }else if(confirm("确定卸载应用" + packageName + "吗？")){
         app.uninstall(packageName);

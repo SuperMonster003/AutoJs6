@@ -6,7 +6,6 @@ import android.view.View;
 /**
  * Created by Stardust on 2017/11/5.
  */
-
 public class Res {
     public static int parseStyle(View view, String value) {
         return parseStyle(view.getContext(), value);

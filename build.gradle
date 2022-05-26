@@ -1,19 +1,6 @@
-import groovy.json.JsonSlurper
-import org.apache.groovy.json.internal.LazyMap
-
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.versions = [
-            'junit'          : '4.13.2',
-            'glide'          : '4.13.1',
-            'kotlin'         : '1.6.10',
-            'leakcanary'     : '2.8.1',
-            'annotations'    : '4.8.0',
-            'butterKnife'    : '10.2.3',
-            // TODO upgrade to 3.3.0 (more difficult than expected)
-            'materialDialogs': '0.9.6.0',
-    ]
     repositories {
         mavenCentral()
         google()
@@ -24,13 +11,11 @@ buildscript {
         maven { url 'https://maven.aliyun.com/repository/public' }
         maven { url 'https://repo.huaweicloud.com/repository/maven' }
     }
+
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0-alpha06'
-
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
+        classpath 'com.android.tools.build:gradle:7.4.0-alpha02'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21"
         classpath 'com.jakewharton:butterknife-gradle-plugin:10.2.3'
-
-        classpath 'org.codehaus.groovy:groovy-json:3.0.8'
     }
 }
 
@@ -52,5 +37,3 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-
-ext.versions.project = new JsonSlurper().parse(file("./project-versions.json")) as LazyMap

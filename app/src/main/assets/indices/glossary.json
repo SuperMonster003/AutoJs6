@@ -1,0 +1,399 @@
+{
+  "AXR": "Arrow function returns without (X) the Return keyword",
+  "a11y": "accessibility",
+  "acc": "account",
+  "accu": "accumulated",
+  "act": [
+    "action",
+    "activity"
+  ],
+  "addn": [
+    "addition",
+    "additional"
+  ],
+  "af": "ant forest",
+  "ahd": "ahead",
+  "amt": "amount",
+  "anm": "animation",
+  "app": "application",
+  "args": "arguments",
+  "argv": "argument values",
+  "asg": [
+    "assign",
+    "assignment"
+  ],
+  "async": "asynchronous",
+  "avail": "available",
+  "avt": "avatar",
+  "b": [
+    "bottom",
+    "bounds",
+    "backup",
+    "blue",
+    "bomb"
+  ],
+  "bak": "backup",
+  "blist": "blacklist",
+  "blt": "bilateral",
+  "bnd": [
+    "bound",
+    "bounds"
+  ],
+  "bo": "bitmap options",
+  "btm": "bottom",
+  "btn": "button",
+  "buf": "buffer",
+  "c": [
+    "checked",
+    "click",
+    "clickable",
+    "color",
+    "compass"
+  ],
+  "cbk": "callback",
+  "cf": "comparison (latin: conferatur)",
+  "cfg": "configuration",
+  "cfm": "confirm",
+  "chk": "check",
+  "cmd": "command",
+  "cmps": "compass",
+  "cnsl": "console",
+  "cnt": "count",
+  "col": "color",
+  "cond": "condition",
+  "constr": "constructor",
+  "cont": "content",
+  "coord": "coordination",
+  "ctd": "countdown",
+  "ctr": "counter",
+  "ctx": "context",
+  "cur": "current",
+  "cvr": "cover",
+  "cwd": "current working directory",
+  "cwp": "current working path",
+  "cxn": "connection",
+  "d": "dialog",
+  "dat": "data",
+  "dbg": "debug",
+  "dc": "decrease",
+  "dec": [
+    "decode",
+    "decrypt"
+  ],
+  "def": "default",
+  "del": [
+    "delete",
+    "deletion"
+  ],
+  "desc": "description",
+  "dev": [
+    "device",
+    "development"
+  ],
+  "diag": "dialog",
+  "dic": "dictionary",
+  "diff": "difference",
+  "dis": "dismiss",
+  "disp": "display",
+  "dist": [
+    "distance",
+    "disturb",
+    "disturbance"
+  ],
+  "dn": "down",
+  "dnt": "donation",
+  "dny": "dynamic",
+  "drxn": "direction",
+  "ds": "data source",
+  "dsk": "data source key",
+  "du": "duration",
+  "dupe": [
+    "duplicate",
+    "duplicated",
+    "duplication"
+  ],
+  "dys": "dysfunctional",
+  "e": [
+    "error",
+    "engine",
+    "event"
+  ],
+  "eball": "energy ball",
+  "eballs": "energy balls",
+  "ele": "element",
+  "emount": "energy amount",
+  "enabl": [
+    "enable",
+    "enabled"
+  ],
+  "enc": [
+    "encode",
+    "encrypt"
+  ],
+  "ens": "ensure",
+  "ent": "entrance",
+  "eq": "equal",
+  "eql": "equal",
+  "et": "elapsed time",
+  "ev": "event",
+  "evt": "event",
+  "ex": "exception",
+  "exc": "exclude",
+  "excl": "exclusive",
+  "excpt": "exception",
+  "exec": "execution",
+  "exp": "expected",
+  "ext": "extension",
+  "f": "function",
+  "fg": [
+    "foreground",
+    "flag"
+  ],
+  "flg": "flag",
+  "flo": "floaty",
+  "fltr": "filter",
+  "forc": [
+    "force",
+    "forcible",
+    "forcibly"
+  ],
+  "frac": "fraction",
+  "fri": "friend",
+  "frst": "forest",
+  "ft": "fault tolerance",
+  "fx": [
+    "function",
+    "special effects"
+  ],
+  "fxo": "function object (an object with some functions)",
+  "fxs": "functions",
+  "g": "green",
+  "glob": "global",
+  "grn": "green",
+  "gt": "greater than",
+  "h": [
+    "height",
+    "head",
+    "heads"
+  ],
+  "his": "history",
+  "horiz": "horizontal",
+  "i": [
+    "intent",
+    "increment"
+  ],
+  "ic": "increase",
+  "ident": "identification",
+  "idt": "identification",
+  "idx": "index",
+  "ifn": "if needed",
+  "IIFE": "Immediately-Invoked Function Expression",
+  "inc": "increment",
+  "inf": "information",
+  "info": "information",
+  "inp": "input",
+  "ins": "insurance",
+  "inst": "instant",
+  "intrp": "interrupt",
+  "invt": "invitation",
+  "ipt": "input",
+  "itp": "interpolate",
+  "itv": "interval",
+  "js": "javascript",
+  "k": "key",
+  "kg": "keyguard",
+  "kw": "keyword",
+  "l": "left",
+  "lbl": "label",
+  "lch": "launch",
+  "len": "length",
+  "lmt": "limit",
+  "ln": "line",
+  "loc": "locator",
+  "ls": "list",
+  "lsn": [
+    "listener",
+    "listeners"
+  ],
+  "lv": "level",
+  "lyt": "layout",
+  "man": [
+    "manual",
+    "manually"
+  ],
+  "mch": [
+    "match",
+    "matched"
+  ],
+  "mod": "module",
+  "mon": "monitor",
+  "msg": "message",
+  "mthd": "method",
+  "mv": "move",
+  "n": "name",
+  "nec": "necessary",
+  "neg": "negative",
+  "neu": "neutral",
+  "nm": "name",
+  "num": "number",
+  "nxt": "next",
+  "o": [
+    "object",
+    "orange"
+  ],
+  "opr": "operation",
+  "opt": [
+    "option",
+    "optional"
+  ],
+  "or": "orientation",
+  "ovl": "overlap",
+  "p": [
+    "press",
+    "parent"
+  ],
+  "par": "parameter",
+  "param": "parameter",
+  "pat": "pattern",
+  "pct": "percentage",
+  "pg": "page",
+  "pkg": "package",
+  "pos": "position",
+  "pref": "prefix",
+  "prog": "progress",
+  "prv": "privilege",
+  "pw": "password",
+  "pwr": "power",
+  "q": "queue",
+  "qte": "quote",
+  "que": "queue",
+  "r": [
+    "red",
+    "right",
+    "region"
+  ],
+  "rand": "random",
+  "rch": [
+    "reach",
+    "reached"
+  ],
+  "rec": [
+    "record",
+    "recorded"
+  ],
+  "recog": "recognition",
+  "rect": "rectangle",
+  "req": [
+    "require",
+    "request"
+  ],
+  "res": [
+    "resource",
+    "result",
+    "restore"
+  ],
+  "reso": [
+    "resolve",
+    "resolver"
+  ],
+  "resp": "response",
+  "ret": "return",
+  "rev": "review",
+  "rl": "rank list",
+  "rls": "release",
+  "rm": "remove",
+  "rmng": "remaining",
+  "rsn": "reason",
+  "s": [
+    "second",
+    "seconds",
+    "stack"
+  ],
+  "sav": "save",
+  "sc": "script",
+  "scr": "screen",
+  "sec": "second",
+  "sect": "section",
+  "sel": [
+    "selector",
+    "select",
+    "selected"
+  ],
+  "sels": "selectors",
+  "sep": "separator",
+  "set": "settings",
+  "sgl": "single",
+  "sgn": "signal",
+  "simpl": "simplify",
+  "sltr": "selector",
+  "smp": "sample",
+  "spl": "special",
+  "src": "source",
+  "stab": "stable",
+  "stat": "statistics",
+  "stg": "strategy",
+  "sto": "storage",
+  "stp": "stripe",
+  "str": "string",
+  "succ": [
+    "success",
+    "successful"
+  ],
+  "suff": "suffix",
+  "svc": "service",
+  "svr": "server",
+  "sw": "switch",
+  "swp": "swipe",
+  "sxn": [
+    "section",
+    "sections"
+  ],
+  "sym": "symbol",
+  "sz": "size",
+  "t": [
+    "top",
+    "time"
+  ],
+  "tar": "target",
+  "thd": "thread",
+  "thds": "threads",
+  "thrd": "threshold",
+  "tmp": "temporary",
+  "tpl": "template",
+  "treas": [
+    "treasury",
+    "treasuries"
+  ],
+  "trig": [
+    "trigger",
+    "triggered"
+  ],
+  "ts": "timestamp",
+  "tt": [
+    "title",
+    "timeout"
+  ],
+  "tv": "text view",
+  "txt": "text",
+  "u": "unit",
+  "unexp": "unexpected",
+  "unintrp": "uninterrupted",
+  "unlk": [
+    "unlock",
+    "unlocked"
+  ],
+  "usr": "user",
+  "util": "utility",
+  "v": [
+    "value",
+    "view"
+  ],
+  "val": "value",
+  "vert": "vertical",
+  "vw": "view",
+  "w": "widget",
+  "wball": "water ball",
+  "wballs": "water balls",
+  "wc": "widget collection",
+  "win": "window"
+}

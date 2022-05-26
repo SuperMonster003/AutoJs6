@@ -1,18 +1,14 @@
 package com.stardust.automator.simple_action
 
 import android.graphics.Rect
-import android.os.Build
 import android.os.Bundle
-import androidx.annotation.RequiresApi
 import android.view.accessibility.AccessibilityNodeInfo
-
 import com.stardust.automator.UiObject
 import com.stardust.util.MapBuilder
 
 /**
  * Created by Stardust on 2017/1/27.
  */
-
 object ActionFactory {
 
     private val searchUpAction = MapBuilder<Int, Any>()
@@ -39,7 +35,6 @@ object ActionFactory {
             DepthFirstSearchTargetAction(action, FilterAction.BoundsFilter(rect))
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     fun createActionWithEditableFilter(action: Int, index: Int, text: String): SimpleAction {
         return object : SearchTargetAction(action, FilterAction.EditableFilter(index)) {
 

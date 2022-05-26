@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.stardust.pio.PFile;
 import com.stardust.pio.PFiles;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.script.ScriptFile;
@@ -36,11 +36,10 @@ import butterknife.OnClick;
 /**
  * Created by Stardust on 2017/10/19.
  */
-
 public class FileChooseListView extends ExplorerView {
 
     private int mMaxChoice = 1;
-    private LinkedHashMap<PFile, Integer> mSelectedFiles = new LinkedHashMap<>();
+    private final LinkedHashMap<PFile, Integer> mSelectedFiles = new LinkedHashMap<>();
     private boolean mCanChooseDir = false;
 
     public FileChooseListView(Context context) {

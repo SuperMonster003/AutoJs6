@@ -5,7 +5,7 @@ import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.stardust.event.EventDispatcher
-import java.util.*
+import java.util.TreeMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -14,8 +14,6 @@ import java.util.concurrent.locks.ReentrantLock
 /**
  * Created by Stardust on 2017/5/2.
  */
-
-
 open class AccessibilityService : android.accessibilityservice.AccessibilityService() {
 
     interface GestureListener {
@@ -73,6 +71,8 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         return keyInterrupterObserver.onInterceptKeyEvent(event)
     }
 
+    @Suppress("DEPRECATION")
+    @Deprecated("Deprecated in Java")
     override fun onGesture(gestureId: Int): Boolean {
         eventExecutor.execute {
             gestureEventDispatcher.dispatchEvent {
@@ -100,7 +100,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
 
     override fun onServiceConnected() {
-        Log.v(TAG, "onServiceConnected: " + serviceInfo.toString())
+        Log.v(TAG, "onServiceConnected: $serviceInfo")
         instance = this
         super.onServiceConnected()
         LOCK.lock()
@@ -116,7 +116,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
     companion object {
 
-        private val TAG = "AccessibilityService"
+        private const val TAG = "AccessibilityService"
 
         private val mDelegates = TreeMap<Int, AccessibilityDelegate>()
         private val LOCK = ReentrantLock()
@@ -144,18 +144,18 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             return false
         }
 
-        fun waitForEnabled(timeOut: Long): Boolean {
+        fun waitForEnabled(timeout: Long): Boolean {
             if (instance != null)
                 return true
             LOCK.lock()
             try {
                 if (instance != null)
                     return true
-                if (timeOut == -1L) {
+                if (timeout == -1L) {
                     ENABLED.await()
                     return true
                 }
-                return ENABLED.await(timeOut, TimeUnit.MILLISECONDS)
+                return ENABLED.await(timeout, TimeUnit.MILLISECONDS)
             } catch (e: InterruptedException) {
                 e.printStackTrace()
                 return false

@@ -8,9 +8,9 @@ import java.io.File;
 
 public class ProjectLauncher {
 
-    private String mProjectDir;
-    private File mMainScriptFile;
-    private ProjectConfig mProjectConfig;
+    private final String mProjectDir;
+    private final File mMainScriptFile;
+    private final ProjectConfig mProjectConfig;
 
     public ProjectLauncher(String projectDir) {
         mProjectDir = projectDir;

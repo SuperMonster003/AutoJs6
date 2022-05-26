@@ -9,8 +9,8 @@ import java.util.List;
 public class CodeCompletions {
 
 
-    private int mFrom;
-    private List<CodeCompletion> mCompletions;
+    private final int mFrom;
+    private final List<CodeCompletion> mCompletions;
 
     public CodeCompletions(int cursor, List<CodeCompletion> completions) {
         mFrom = cursor;

@@ -11,12 +11,11 @@ import java.io.StringReader;
 /**
  * Created by Stardust on 2017/4/2.
  */
-
 public class SequenceScriptSource extends JavaScriptSource {
 
     private String mScript;
-    private JavaScriptSource mSecondScriptSource;
-    private JavaScriptSource mFirstScriptSource;
+    private final JavaScriptSource mSecondScriptSource;
+    private final JavaScriptSource mFirstScriptSource;
 
 
     public SequenceScriptSource(String name, JavaScriptSource firstScriptSource, JavaScriptSource secondScriptSource) {
@@ -46,6 +45,7 @@ public class SequenceScriptSource extends JavaScriptSource {
         return new ConcatReader(mFirstScriptSource.getNonNullScriptReader(), mSecondScriptSource.getNonNullScriptReader());
     }
 
+    @NonNull
     @Override
     public String toString() {
         return mSecondScriptSource.toString();

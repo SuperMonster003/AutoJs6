@@ -25,9 +25,9 @@ import io.reactivex.Observable;
 public class TimedTaskManager {
 
     private static TimedTaskManager sInstance;
-    private Context mContext;
-    private TimedTaskDatabase mTimedTaskDatabase;
-    private IntentTaskDatabase mIntentTaskDatabase;
+    private final Context mContext;
+    private final TimedTaskDatabase mTimedTaskDatabase;
+    private final IntentTaskDatabase mIntentTaskDatabase;
 
     public static TimedTaskManager getInstance() {
         if (sInstance == null) {

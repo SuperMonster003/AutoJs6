@@ -324,7 +324,7 @@ function sanitizeOperatorPosition(opPosition) {
     opPosition = opPosition || OPERATOR_POSITION.before_newline;
 
     if (!in_array(opPosition, validPositionValues)) {
-        throw new Error("Invalid Option Value: The option 'operator_position' must be one of the following values\n" +
+        throw Error("Invalid Option Value: The option 'operator_position' must be one of the following values\n" +
             validPositionValues +
             "\nYou passed in: '" + opPosition + "'");
     }
@@ -705,7 +705,7 @@ function Beautifier(js_source_text, options) {
 
         printable_token = printable_token || current_token.text;
         print_token_line_indentation();
-        if(current_token.type == "TK_XML" && printable_token){
+        if(current_token.type === "TK_XML" && printable_token){
             var indent_count = output.current_line._indent_count;
             println("indent_count: " + indent_count);
             var indent = output.indent_cache[Math.max(0, indent_count - 1)];

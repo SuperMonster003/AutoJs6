@@ -136,8 +136,7 @@ public class UrlModuleSourceProvider extends ModuleSourceProviderBase {
         final long request_time = System.currentTimeMillis();
         final URLConnection urlConnection = openUrlConnection(url);
         final URLValidator applicableValidator;
-        if (validator instanceof URLValidator) {
-            final URLValidator uriValidator = ((URLValidator) validator);
+        if (validator instanceof final URLValidator uriValidator) {
             applicableValidator = uriValidator.appliesTo(uri) ? uriValidator :
                     null;
         } else {
@@ -161,10 +160,7 @@ public class UrlModuleSourceProvider extends ModuleSourceProviderBase {
                             urlConnectionExpiryCalculator));
         } catch (FileNotFoundException e) {
             return null;
-        } catch (RuntimeException e) {
-            close(urlConnection);
-            throw e;
-        } catch (IOException e) {
+        } catch (RuntimeException | IOException e) {
             close(urlConnection);
             throw e;
         }
@@ -280,7 +276,7 @@ public class UrlModuleSourceProvider extends ModuleSourceProviderBase {
             final String cacheControl = urlConnection.getHeaderField(
                     "Cache-Control");
             if (cacheControl != null) {
-                if (cacheControl.indexOf("no-cache") != -1) {
+                if (cacheControl.contains("no-cache")) {
                     return 0L;
                 }
                 final int max_age = getMaxAge(cacheControl);

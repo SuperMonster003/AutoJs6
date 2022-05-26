@@ -9,7 +9,6 @@ import kotlin.collections.ArrayList
 /**
  * Created by Stardust on 2017/3/9.
  */
-
 object DFS : SearchAlgorithm {
 
     override fun search(root: UiObject, filter: Filter, limit: Int): ArrayList<UiObject> {

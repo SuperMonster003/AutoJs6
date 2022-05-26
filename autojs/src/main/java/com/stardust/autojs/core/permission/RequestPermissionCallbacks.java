@@ -8,7 +8,7 @@ import java.util.List;
 
 public class RequestPermissionCallbacks {
 
-    private List<OnRequestPermissionsResultCallback> mCallbacks = new ArrayList<>();
+    private final List<OnRequestPermissionsResultCallback> mCallbacks = new ArrayList<>();
 
 
     public void addCallback(OnRequestPermissionsResultCallback callback) {

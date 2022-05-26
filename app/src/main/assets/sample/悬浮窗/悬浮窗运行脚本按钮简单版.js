@@ -14,7 +14,7 @@ window.exitOnClose();
 var execution = null;
 
 window.action.click(()=>{
-    if(window.action.getText() == '开始运行'){
+    if(window.action.getText() === '开始运行'){
         execution = engines.execScriptFile(path);
         window.action.setText('停止运行');
     }else{

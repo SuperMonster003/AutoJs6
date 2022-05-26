@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
@@ -28,7 +29,6 @@ import org.mozilla.javascript.ContinuationPending;
 /**
  * Created by Stardust on 2017/2/5.
  */
-
 public class ScriptExecuteActivity extends AppCompatActivity {
 
 
@@ -64,7 +64,7 @@ public class ScriptExecuteActivity extends AppCompatActivity {
             return;
         }
         ScriptExecution execution = ScriptEngineService.getInstance().getScriptExecution(executionId);
-        if (execution == null || !(execution instanceof ActivityScriptExecution)) {
+        if (!(execution instanceof ActivityScriptExecution)) {
             super.finish();
             return;
         }
@@ -151,7 +151,7 @@ public class ScriptExecuteActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mScriptExecution != null)
             outState.putInt(EXTRA_EXECUTION_ID, mScriptExecution.getId());
@@ -226,7 +226,7 @@ public class ScriptExecuteActivity extends AppCompatActivity {
 
     public void emit(String event, Object... args) {
         try {
-            mEventEmitter.emit(event, (Object[]) args);
+            mEventEmitter.emit(event, args);
         } catch (Exception e) {
             mRuntime.exit(e);
         }
@@ -235,7 +235,7 @@ public class ScriptExecuteActivity extends AppCompatActivity {
     private static class ActivityScriptExecution extends ScriptExecution.AbstractScriptExecution {
 
         private ScriptEngine mScriptEngine;
-        private ScriptEngineManager mScriptEngineManager;
+        private final ScriptEngineManager mScriptEngineManager;
 
         ActivityScriptExecution(ScriptEngineManager manager, ScriptExecutionTask task) {
             super(task);

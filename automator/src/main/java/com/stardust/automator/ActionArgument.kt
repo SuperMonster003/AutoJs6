@@ -5,7 +5,6 @@ import android.os.Bundle
 /**
  * Created by Stardust on 2017/3/9.
  */
-
 abstract class ActionArgument private constructor(protected val mKey: String) {
 
     abstract fun putIn(bundle: Bundle)

@@ -3,7 +3,6 @@ package com.stardust.autojs.core.record.inputevent;
 /**
  * Created by Stardust on 2017/3/7.
  */
-
 public class EventFormatException extends RuntimeException {
 
 

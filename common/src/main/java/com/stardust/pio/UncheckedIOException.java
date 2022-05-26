@@ -5,7 +5,6 @@ import java.io.IOException;
 /**
  * Created by Stardust on 2017/4/1.
  */
-
 public class UncheckedIOException extends RuntimeException {
 
     public UncheckedIOException(IOException cause) {

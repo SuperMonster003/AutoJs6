@@ -17,7 +17,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/8/2.
  */
-
 public abstract class JavaScriptSource extends ScriptSource {
 
     public static final String ENGINE = "com.stardust.autojs.script.JavaScriptSource.Engine";
@@ -57,6 +56,7 @@ public abstract class JavaScriptSource extends ScriptSource {
         return reader;
     }
 
+    @NonNull
     public String toString() {
         return getName() + ".js";
     }

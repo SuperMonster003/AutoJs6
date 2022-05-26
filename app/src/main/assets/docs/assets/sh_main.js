@@ -529,7 +529,7 @@ function highlight(prefix, suffix, tag) {
           sh_highlightElement(element, sh_languages[language]);
           highlighted = true;
         }
-        else if (typeof(prefix) === 'string' && typeof(suffix) === 'string') {
+        else if (typeof prefix === 'string' && typeof suffix === 'string') {
           sh_load(language, element, prefix, suffix);
         }
         else {
@@ -538,7 +538,7 @@ function highlight(prefix, suffix, tag) {
         break;
       }
     }
-    if (highlighted === false && donthighlight == false) {
+    if (highlighted === false && donthighlight === false) {
       sh_highlightElement(element, sh_languages["javascript"]);
     }
   }

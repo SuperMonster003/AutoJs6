@@ -2,12 +2,11 @@ package androidx.recyclerview.widget;
 
 
 import android.content.Context;
-import android.os.Build;
-import androidx.annotation.Nullable;
-import androidx.core.widget.EdgeEffectCompat;
-
 import android.util.AttributeSet;
 import android.widget.EdgeEffect;
+
+import androidx.annotation.Nullable;
+import androidx.core.widget.EdgeEffectCompat;
 
 import com.stardust.theme.ThemeColor;
 import com.stardust.theme.ThemeColorManager;
@@ -72,19 +71,18 @@ public class ThemeColorRecyclerView extends RecyclerView implements ThemeColorMu
         ThemeColorManager.add(this);
     }
 
-    // TODO support api 21 below
     private boolean setEdgeEffectColor(EdgeEffectCompat compat, int color) {
         if (compat == null)
             return false;
         try {
-            if (Build.VERSION.SDK_INT >= 21) {  // Android L
-                EdgeEffect edgeEffect = (EdgeEffect) mEdgeEffectField.get(compat);
+            EdgeEffect edgeEffect = (EdgeEffect) mEdgeEffectField.get(compat);
+            if (edgeEffect != null) {
                 edgeEffect.setColor(color);
             }
-            return true;
-        } catch (Exception e) {
-            return true;
+        } catch (Exception ignored) {
+
         }
+        return true;
     }
 
     @Override

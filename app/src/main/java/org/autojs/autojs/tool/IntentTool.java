@@ -3,13 +3,12 @@ package org.autojs.autojs.tool;
 import android.content.Context;
 import android.widget.Toast;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import com.stardust.util.IntentUtil;
 
 /**
  * Created by Stardust on 2017/4/12.
  */
-
 public class IntentTool {
 
     public static void browse(Context context, String url){

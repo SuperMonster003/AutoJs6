@@ -1,6 +1,7 @@
 package com.stardust.autojs.script;
 
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.Reader;
@@ -8,10 +9,9 @@ import java.io.Reader;
 /**
  * Created by Stardust on 2017/4/2.
  */
-
 public class StringScriptSource extends JavaScriptSource {
 
-    private String mScript;
+    private final String mScript;
 
     public StringScriptSource(String script) {
         super("Tmp");
@@ -23,6 +23,7 @@ public class StringScriptSource extends JavaScriptSource {
         mScript = script;
     }
 
+    @NonNull
     @Override
     public String getScript() {
         return mScript;

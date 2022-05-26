@@ -1,7 +1,6 @@
 package com.stardust.autojs.core.floaty;
 
 import android.graphics.PixelFormat;
-import android.os.Build;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +9,9 @@ import android.view.WindowManager;
 import com.stardust.autojs.R;
 import com.stardust.autojs.core.ui.inflater.inflaters.Exceptions;
 import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
-import com.stardust.concurrent.VolatileBox;
 import com.stardust.concurrent.VolatileDispose;
 import com.stardust.enhancedfloaty.FloatyService;
 import com.stardust.enhancedfloaty.FloatyWindow;
-import com.stardust.enhancedfloaty.WindowBridge;
 import com.stardust.enhancedfloaty.util.WindowTypeCompat;
 
 public class RawWindow extends FloatyWindow {
@@ -26,8 +23,8 @@ public class RawWindow extends FloatyWindow {
         View inflateWindowView(FloatyService service, ViewGroup parent);
     }
 
-    private VolatileDispose<RuntimeException> mInflateException = new VolatileDispose<>();
-    private RawFloaty mRawFloaty;
+    private final VolatileDispose<RuntimeException> mInflateException = new VolatileDispose<>();
+    private final RawFloaty mRawFloaty;
     private View mContentView;
 
     public RawWindow(RawFloaty rawFloaty) {
@@ -67,9 +64,7 @@ public class RawWindow extends FloatyWindow {
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_FULLSCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            flags |= WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
-        }
+        flags |= WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,

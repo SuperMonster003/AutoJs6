@@ -20,10 +20,9 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/4/2.
  */
-
 public class AppUtils {
 
-    private Context mContext;
+    private final Context mContext;
     private volatile WeakReference<Activity> mCurrentActivity = new WeakReference<>(null);
     private final String mFileProviderAuthority;
 

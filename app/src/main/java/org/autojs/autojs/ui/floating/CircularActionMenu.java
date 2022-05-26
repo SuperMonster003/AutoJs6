@@ -17,14 +17,13 @@ import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.FrameLayout;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Stardust on 2017/9/25.
  */
-
 public class CircularActionMenu extends FrameLayout {
 
     public interface OnStateChangeListener {
@@ -68,13 +67,13 @@ public class CircularActionMenu extends FrameLayout {
     }
 
     private PointF[] mItemExpandedPositionOffsets;
-    private CopyOnWriteArrayList<OnStateChangeListener> mOnStateChangeListeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<OnStateChangeListener> mOnStateChangeListeners = new CopyOnWriteArrayList<>();
     private boolean mExpanded;
     private boolean mExpanding = false;
     private boolean mCollapsing = false;
     private float mRadius = 200;
     private float mAngle = (float) Math.toRadians(90);
-    private long mDuration = 200;
+    private final long mDuration = 200;
     private int mExpandedHeight = -1;
     private int mExpandedWidth = -1;
     private final Interpolator mInterpolator = new FastOutSlowInInterpolator();

@@ -10,7 +10,6 @@ import com.stardust.autojs.R;
 import com.stardust.autojs.core.floaty.BaseResizableFloatyWindow;
 import com.stardust.autojs.core.floaty.RawWindow;
 import com.stardust.autojs.core.ui.JsViewHelper;
-import com.stardust.autojs.core.ui.inflater.DynamicLayoutInflater;
 import com.stardust.autojs.core.ui.inflater.inflaters.Exceptions;
 import com.stardust.autojs.runtime.ScriptRuntime;
 import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
@@ -24,20 +23,17 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Created by Stardust on 2017/12/5.
  */
-
 public class Floaty {
 
-    private DynamicLayoutInflater mLayoutInflater;
-    private Context mContext;
-    private UiHandler mUiHandler;
-    private CopyOnWriteArraySet<JsWindow> mWindows = new CopyOnWriteArraySet<>();
-    private ScriptRuntime mRuntime;
+    private final Context mContext;
+    private final UiHandler mUiHandler;
+    private final CopyOnWriteArraySet<JsWindow> mWindows = new CopyOnWriteArraySet<>();
+    private final ScriptRuntime mRuntime;
 
-    public Floaty(UiHandler uiHandler, UI ui, ScriptRuntime runtime) {
+    public Floaty(UiHandler uiHandler, ScriptRuntime runtime) {
         mUiHandler = uiHandler;
         mRuntime = runtime;
         mContext = new ContextThemeWrapper(mUiHandler.getContext(), R.style.ScriptTheme);
-        mLayoutInflater = ui.getLayoutInflater();
     }
 
     public JsResizableWindow window(BaseResizableFloatyWindow.ViewSupplier supplier) {
@@ -89,6 +85,7 @@ public class Floaty {
         mWindows.add(window);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private synchronized boolean removeWindow(JsWindow window) {
         return mWindows.remove(window);
     }

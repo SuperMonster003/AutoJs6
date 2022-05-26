@@ -7,7 +7,6 @@
 /**
  * liveConnect.js: a simple demonstration of JavaScript-to-Java connectivity
  */
-
 // Create a new StringBuffer. Note that the class name must be fully qualified
 // by its package. Packages other than "java" must start with "Packages", i.e.,
 // "Packages.javax.servlet...".

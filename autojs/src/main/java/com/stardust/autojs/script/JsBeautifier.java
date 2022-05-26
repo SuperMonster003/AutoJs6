@@ -23,7 +23,6 @@ import java.util.concurrent.Executors;
 /**
  * Created by Stardust on 2017/4/12.
  */
-
 public class JsBeautifier {
 
 
@@ -34,8 +33,8 @@ public class JsBeautifier {
         void onException(Exception e);
     }
 
-    private ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-    private Context mContext;
+    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+    private final Context mContext;
     private Function mJsBeautifyFunction;
     private org.mozilla.javascript.Context mScriptContext;
     private Scriptable mScriptable;

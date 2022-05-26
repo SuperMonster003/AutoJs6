@@ -14,32 +14,29 @@ public class Database {
     private SQLiteDatabase mWritableDatabase;
     private SQLiteDatabase mReadableDatabase;
 
-    public void executeSql(String sql){
+    public void executeSql(String sql) {
         mWritableDatabase.execSQL(sql);
     }
 
-    public void transaction(TransactionCallback callback, TransactionErrorCallback errorCallback, DatabaseVoidCallback successCallback){
+    public void transaction(TransactionCallback callback, TransactionErrorCallback errorCallback, DatabaseVoidCallback successCallback) {
         transactionInternal(mWritableDatabase, callback, errorCallback, successCallback);
     }
 
-    public void readTransaction(TransactionCallback callback, TransactionErrorCallback errorCallback, DatabaseVoidCallback successCallback){
+    public void readTransaction(TransactionCallback callback, TransactionErrorCallback errorCallback, DatabaseVoidCallback successCallback) {
         transactionInternal(mReadableDatabase, callback, errorCallback, successCallback);
     }
 
-    public void changeVersion(int oldVersion, int newVersion, TransactionCallback callback, TransactionErrorCallback errorCallback, DatabaseVoidCallback successCallback){
-        transactionInternal(mWritableDatabase, new TransactionCallback() {
-            @Override
-            public void handleEvent(Transaction transaction) {
-                //TODO
-                if(transaction.getDatabase().getVersion() == oldVersion){
-                    transaction.getDatabase().setVersion(newVersion);
-                    callback.handleEvent(transaction);
-                }
+    public void changeVersion(int oldVersion, int newVersion, TransactionCallback callback, TransactionErrorCallback errorCallback, DatabaseVoidCallback successCallback) {
+        transactionInternal(mWritableDatabase, transaction -> {
+            //TODO
+            if (transaction.getDatabase().getVersion() == oldVersion) {
+                transaction.getDatabase().setVersion(newVersion);
+                callback.handleEvent(transaction);
             }
         }, errorCallback, successCallback);
     }
 
-    private void transactionInternal(SQLiteDatabase database, TransactionCallback callback, TransactionErrorCallback errorCallback, DatabaseVoidCallback successCallback){
+    private void transactionInternal(SQLiteDatabase database, TransactionCallback callback, TransactionErrorCallback errorCallback, DatabaseVoidCallback successCallback) {
         database.beginTransactionWithListener(new SQLiteTransactionListener() {
             @Override
             public void onBegin() {
@@ -47,9 +44,9 @@ public class Database {
                 try {
                     callback.handleEvent(transaction);
                     transaction.succeed();
-                }catch (SQLException e){
+                } catch (SQLException e) {
                     errorCallback.handleEvent(e);
-                }finally {
+                } finally {
                     transaction.end();
                 }
             }

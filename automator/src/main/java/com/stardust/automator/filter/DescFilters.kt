@@ -5,7 +5,6 @@ import com.stardust.automator.UiObject
 /**
  * Created by Stardust on 2017/3/9.
  */
-
 object DescFilters {
 
     private val DESC_GETTER = object : KeyGetter {

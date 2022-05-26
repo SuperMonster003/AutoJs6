@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 /**
  * Created by Stardust on 2017/5/3.
  */
-
 public class TextUtils {
 
     public static String join(CharSequence delimiter, Object... tokens) {

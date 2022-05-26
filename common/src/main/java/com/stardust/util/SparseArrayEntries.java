@@ -6,7 +6,6 @@ import android.util.SparseArray;
 /**
  * Created by Stardust on 2017/1/26.
  */
-
 public class SparseArrayEntries<E> {
 
     private final SparseArray<E> mSparseArray = new SparseArray<>();

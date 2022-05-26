@@ -1,5 +1,7 @@
 package com.stardust.autojs.engine;
 
+import androidx.annotation.NonNull;
+
 import com.stardust.autojs.runtime.ScriptRuntime;
 import com.stardust.autojs.script.JavaScriptSource;
 import com.stardust.autojs.script.ScriptSource;
@@ -7,7 +9,6 @@ import com.stardust.autojs.script.ScriptSource;
 /**
  * Created by Stardust on 2017/8/3.
  */
-
 public abstract class JavaScriptEngine extends ScriptEngine.AbstractScriptEngine<JavaScriptSource> {
     private ScriptRuntime mRuntime;
     private Object mExecArgv;
@@ -60,6 +61,7 @@ public abstract class JavaScriptEngine extends ScriptEngine.AbstractScriptEngine
         super.destroy();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ScriptEngine@" + Integer.toHexString(hashCode()) + "{" +

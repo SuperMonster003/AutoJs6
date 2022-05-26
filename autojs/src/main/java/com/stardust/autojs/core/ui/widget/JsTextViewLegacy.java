@@ -6,6 +6,10 @@ import android.util.AttributeSet;
 import androidx.annotation.Nullable;
 import androidx.appcompatlegacy.widget.AppCompatTextView;
 
+/**
+ * Created by SuperMonster003 on Mar 20, 2022.
+ */
+// @Reference to TonyJiangWJ/Auto.js on Mar 20, 2022
 public class JsTextViewLegacy extends AppCompatTextView {
 
     public JsTextViewLegacy(Context context) {
@@ -27,4 +31,5 @@ public class JsTextViewLegacy extends AppCompatTextView {
     public void text(CharSequence text) {
         setText(text);
     }
+
 }

@@ -49,7 +49,6 @@ import javax.xml.parsers.ParserConfigurationException;
 /**
  * Created by Stardust on 2017/5/14.
  */
-
 public class XmlConverter {
 
     private static final NodeHandler NODE_HANDLER = new NodeHandler.NameRouter()
@@ -60,9 +59,11 @@ public class XmlConverter {
                     .map("horizontal", JsLinearLayout.class.getName())
                     .map("relative", JsRelativeLayout.class.getName())
                     .map("button", JsButton.class.getName())
-                    .map("text", Build.VERSION.SDK_INT < Build.VERSION_CODES.O
-                            ? JsTextViewLegacy.class.getName()
-                            : JsTextView.class.getName())
+                    .map("text",
+                            // @Reference to TonyJiangWJ/Auto.js on Mar 20, 2022
+                            Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+                                    ? JsTextViewLegacy.class.getName()
+                                    : JsTextView.class.getName())
                     .map("input", JsEditText.class.getName())
                     .map("img", JsImageView.class.getName())
                     .map("datepicker", DatePicker.class.getName())

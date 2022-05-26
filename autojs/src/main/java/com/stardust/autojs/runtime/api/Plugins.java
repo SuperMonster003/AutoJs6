@@ -12,7 +12,7 @@ public class Plugins {
 
     private final Context mContext;
     private final ScriptRuntime mRuntime;
-    private File mPluginCacheDir;
+    private final File mPluginCacheDir;
 
     public Plugins(Context context, ScriptRuntime runtime) {
         mContext = context;

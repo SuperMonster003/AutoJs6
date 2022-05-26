@@ -1,8 +1,6 @@
 package com.stardust.util;
 
-import android.os.Build;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,7 +22,7 @@ public class BiMaps {
 
     public static class BiMapBuilder<K, V> {
 
-        private final BiMap<K, V> mBiMap = make(new HashMap<K, V>(), new HashMap<V, K>());
+        private final BiMap<K, V> mBiMap = make(new HashMap<>(), new HashMap<>());
 
         public BiMapBuilder<K, V> put(K key, V value) {
             mBiMap.put(key, value);
@@ -149,69 +147,58 @@ public class BiMaps {
             return mKVMap.hashCode();
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public V getOrDefault(Object key, V defaultValue) {
             return mKVMap.getOrDefault(key, defaultValue);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        public void forEach(BiConsumer<? super K, ? super V> action) {
+        public void forEach(@NonNull BiConsumer<? super K, ? super V> action) {
             mKVMap.forEach(action);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+        public void replaceAll(@NonNull BiFunction<? super K, ? super V, ? extends V> function) {
             mKVMap.replaceAll(function);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public V putIfAbsent(K key, V value) {
             return mKVMap.putIfAbsent(key, value);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public boolean remove(Object key, Object value) {
             return mKVMap.remove(key, value);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public boolean replace(K key, V oldValue, V newValue) {
             return mKVMap.replace(key, oldValue, newValue);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public V replace(K key, V value) {
             return mKVMap.replace(key, value);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+        public V computeIfAbsent(K key, @NonNull Function<? super K, ? extends V> mappingFunction) {
             return mKVMap.computeIfAbsent(key, mappingFunction);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        public V computeIfPresent(K key, @NonNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
             return mKVMap.computeIfPresent(key, remappingFunction);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        public V compute(K key, @NonNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
             return mKVMap.compute(key, remappingFunction);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+        public V merge(K key, @NonNull V value, @NonNull BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
             return mKVMap.merge(key, value, remappingFunction);
         }
     }

@@ -6,6 +6,4 @@ public class Databases {
         return new Database();
     }
 
-
-
 }

@@ -87,13 +87,13 @@ public class Dim {
      * Synchronization object used to allow script evaluations to
      * happen when a thread is resumed.
      */
-    private Object monitor = new Object();
+    private final Object monitor = new Object();
 
     /**
      * Synchronization object used to wait for valid
      * {@link #interruptedContextData}.
      */
-    private Object eventThreadMonitor = new Object();
+    private final Object eventThreadMonitor = new Object();
 
     /**
      * The action to perform to end the interruption loop.
@@ -141,19 +141,19 @@ public class Dim {
      * Table mapping URLs to information about the script source.
      */
     private final Map<String, SourceInfo> urlToSourceInfo =
-            Collections.synchronizedMap(new HashMap<String, SourceInfo>());
+            Collections.synchronizedMap(new HashMap<>());
 
     /**
      * Table mapping function names to information about the function.
      */
     private final Map<String, FunctionSource> functionNames =
-            Collections.synchronizedMap(new HashMap<String, FunctionSource>());
+            Collections.synchronizedMap(new HashMap<>());
 
     /**
      * Table mapping functions to information about the function.
      */
     private final Map<DebuggableScript, FunctionSource> functionToSource =
-            Collections.synchronizedMap(new HashMap<DebuggableScript, FunctionSource>());
+            Collections.synchronizedMap(new HashMap<>());
 
     /**
      * ContextFactory.Listener instance attached to {@link #contextFactory}.
@@ -308,7 +308,7 @@ public class Dim {
                             is = new FileInputStream(f);
                             break openStream;
                         }
-                    } catch (SecurityException ex) {
+                    } catch (SecurityException ignored) {
                     }
                     // No existing file, assume missed http://
                     if (sourceUrl.startsWith("//")) {
@@ -390,7 +390,7 @@ public class Dim {
      */
     public String[] functionNames() {
         synchronized (urlToSourceInfo) {
-            return functionNames.keySet().toArray(new String[functionNames.size()]);
+            return functionNames.keySet().toArray(new String[0]);
         }
     }
 
@@ -654,22 +654,20 @@ public class Dim {
                                          Object id) {
         Scriptable scriptable = (Scriptable) object;
         Object result;
-        if (id instanceof String) {
-            String name = (String) id;
-            if (name.equals("this")) {
-                result = scriptable;
-            } else if (name.equals("__proto__")) {
-                result = scriptable.getPrototype();
-            } else if (name.equals("__parent__")) {
-                result = scriptable.getParentScope();
-            } else {
-                result = ScriptableObject.getProperty(scriptable, name);
-                if (result == ScriptableObject.NOT_FOUND) {
-                    result = Undefined.instance;
+        if (id instanceof String name) {
+            switch (name) {
+                case "this" -> result = scriptable;
+                case "__proto__" -> result = scriptable.getPrototype();
+                case "__parent__" -> result = scriptable.getParentScope();
+                default -> {
+                    result = ScriptableObject.getProperty(scriptable, name);
+                    if (result == ScriptableObject.NOT_FOUND) {
+                        result = Undefined.instance;
+                    }
                 }
             }
         } else {
-            int index = ((Integer) id).intValue();
+            int index = (Integer) id;
             result = ScriptableObject.getProperty(scriptable, index);
             if (result == ScriptableObject.NOT_FOUND) {
                 result = Undefined.instance;
@@ -682,12 +680,11 @@ public class Dim {
      * Returns an array of the property names on the given script object.
      */
     private Object[] getObjectIdsImpl(Context cx, Object object) {
-        if (!(object instanceof Scriptable) || object == Undefined.instance) {
+        if (!(object instanceof Scriptable scriptable) || object == Undefined.instance) {
             return Context.emptyArgs;
         }
 
         Object[] ids;
-        Scriptable scriptable = (Scriptable) object;
         if (scriptable instanceof DebuggableObject) {
             ids = ((DebuggableObject) scriptable).getAllIds();
         } else {
@@ -760,7 +757,7 @@ public class Dim {
                 while (this.returnValue == -1) {
                     try {
                         callback.dispatchNextGuiEvent();
-                    } catch (InterruptedException exc) {
+                    } catch (InterruptedException ignored) {
                     }
                 }
             }
@@ -826,7 +823,7 @@ public class Dim {
                     while (this.returnValue == -1) {
                         try {
                             callback.dispatchNextGuiEvent();
-                        } catch (InterruptedException exc) {
+                        } catch (InterruptedException ignored) {
                         }
                     }
                     returnValue = this.returnValue;
@@ -903,7 +900,7 @@ public class Dim {
          * The interface implementation type.  One of the IPROXY_* constants
          * defined in {@link Dim}.
          */
-        private int type;
+        private final int type;
 
         /**
          * The URL origin of the script to compile or evaluate.
@@ -1074,7 +1071,7 @@ public class Dim {
         /**
          * The stack frames.
          */
-        private ObjArray frameStack = new ObjArray();
+        private final ObjArray frameStack = new ObjArray();
 
         /**
          * Whether the debugger should break at the next line in this context.
@@ -1142,12 +1139,12 @@ public class Dim {
         /**
          * The debugger.
          */
-        private Dim dim;
+        private final Dim dim;
 
         /**
          * The ContextData for the Context being debugged.
          */
-        private ContextData contextData;
+        private final ContextData contextData;
 
         /**
          * The scope.
@@ -1162,12 +1159,12 @@ public class Dim {
         /**
          * Information about the function.
          */
-        private FunctionSource fsource;
+        private final FunctionSource fsource;
 
         /**
          * Array of breakpoint state for each source line.
          */
-        private boolean[] breakpoints;
+        private final boolean[] breakpoints;
 
         /**
          * Current line number.
@@ -1303,17 +1300,17 @@ public class Dim {
         /**
          * Information about the source of the function.
          */
-        private SourceInfo sourceInfo;
+        private final SourceInfo sourceInfo;
 
         /**
          * Line number of the first line of the function.
          */
-        private int firstLine;
+        private final int firstLine;
 
         /**
          * The function name.
          */
-        private String name;
+        private final String name;
 
         /**
          * Creates a new FunctionSource.
@@ -1362,27 +1359,27 @@ public class Dim {
         /**
          * The script.
          */
-        private String source;
+        private final String source;
 
         /**
          * The URL of the script.
          */
-        private String url;
+        private final String url;
 
         /**
          * Array indicating which lines can have breakpoints set.
          */
-        private boolean[] breakableLines;
+        private final boolean[] breakableLines;
 
         /**
          * Array indicating whether a breakpoint is set on the line.
          */
-        private boolean[] breakpoints;
+        private final boolean[] breakpoints;
 
         /**
          * Array of FunctionSource objects for the functions in the script.
          */
-        private FunctionSource[] functionSources;
+        private final FunctionSource[] functionSources;
 
         /**
          * Creates a new SourceInfo object.
@@ -1550,9 +1547,7 @@ public class Dim {
          */
         public void removeAllBreakpoints() {
             synchronized (breakpoints) {
-                for (int line = 0; line != breakpoints.length; ++line) {
-                    breakpoints[line] = false;
-                }
+                Arrays.fill(breakpoints, false);
             }
         }
     }

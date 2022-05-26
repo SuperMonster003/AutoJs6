@@ -22,8 +22,8 @@
 
         <com.afollestad.materialdialogs.prefs.MaterialListPreference
                 android:defaultValue="@string/value_documentation_source_default"
-                android:entries="@array/keys_documentation_source"
-                android:entryValues="@array/values_documentation_source"
+                android:entries="@array/entries_documentation_source"
+                android:entryValues="@array/keys_documentation_source"
                 android:key="@string/key_documentation_source"
                 android:layout="@layout/preference_custom"
                 android:title="@string/text_documentation_source" />
@@ -33,6 +33,24 @@
                 android:key="@string/key_script_dir_path"
                 android:layout="@layout/preference_custom"
                 android:title="@string/text_change_working_dir" />
+
+        <org.autojs.autojs.ui.settings.SetRootModePreference
+                android:defaultValue="@string/value_root_mode_default"
+                android:entries="@array/entries_root_mode"
+                android:entryValues="@array/keys_root_mode"
+                android:key="@string/key_root_mode"
+                android:layout="@layout/preference_custom"
+                android:dialogMessage="@string/text_root_mode_description"
+                android:title="@string/text_root_mode_title"/>
+
+        <org.autojs.autojs.ui.settings.SetHiddenFilesPreference
+                android:defaultValue="@string/value_hidden_files_default"
+                android:entries="@array/entries_hidden_files"
+                android:entryValues="@array/keys_hidden_files"
+                android:key="@string/key_hidden_files"
+                android:layout="@layout/preference_custom"
+                android:dialogMessage="@string/text_hidden_files_description"
+                android:title="@string/text_hidden_files_title"/>
 
     </com.stardust.theme.preference.ThemeColorPreferenceCategory>
 
@@ -102,8 +120,8 @@
 
         <com.afollestad.materialdialogs.prefs.MaterialListPreference
                 android:defaultValue="@string/default_value_binary"
-                android:entries="@array/keys_root_record_out_file_type"
-                android:entryValues="@array/values_root_record_out_file_type"
+                android:entries="@array/entries_root_record_out_file_type"
+                android:entryValues="@array/keys_root_record_out_file_type"
                 android:key="@string/key_root_record_out_file_type"
                 android:layout="@layout/preference_custom"
                 android:title="@string/text_recorded_output_file_type" />
@@ -121,14 +139,6 @@
         <Preference
                 android:layout="@layout/preference_custom"
                 android:title="@string/text_about_app_and_developer" />
-
-        <Preference
-                android:layout="@layout/preference_custom"
-                android:title="@string/text_issue_report" />
-
-        <Preference
-                android:layout="@layout/preference_custom"
-                android:title="@string/text_licenses" />
 
     </com.stardust.theme.preference.ThemeColorPreferenceCategory>
 

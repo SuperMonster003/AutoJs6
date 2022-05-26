@@ -1,13 +1,19 @@
 package org.autojs.autojs.ui.main;
 
-import android.Manifest;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
 import android.annotation.SuppressLint;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
+import android.provider.Settings;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +22,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -29,6 +36,7 @@ import com.stardust.app.OnActivityResultDelegate;
 import com.stardust.autojs.core.permission.OnRequestPermissionsResultCallback;
 import com.stardust.autojs.core.permission.PermissionRequestProxyActivity;
 import com.stardust.autojs.core.permission.RequestPermissionCallbacks;
+import com.stardust.autojs.util.FloatingPermission;
 import com.stardust.enhancedfloaty.FloatyService;
 import com.stardust.theme.ThemeColor;
 import com.stardust.theme.ThemeColorManager;
@@ -40,12 +48,11 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.autojs.autojs.BuildConfig;
-import org.autojs.autojs.R;
 import org.autojs.autojs.autojs.AutoJs;
-import org.autojs.autojs.external.foreground.ForegroundService;
+import org.autojs.autojs.external.foreground.MainActivityForegroundService;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.ui.BaseActivity;
+import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.doc.DocsFragment_;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.log.LogActivity_;
@@ -54,6 +61,8 @@ import org.autojs.autojs.ui.main.scripts.MyScriptListFragment_;
 import org.autojs.autojs.ui.main.task.TaskManagerFragment_;
 import org.autojs.autojs.ui.settings.SettingsActivity_;
 import org.autojs.autojs.ui.widget.SearchViewItem;
+import org.autojs.autojs6.BuildConfig;
+import org.autojs.autojs6.R;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
@@ -61,11 +70,6 @@ import java.util.Arrays;
 @SuppressLint("NonConstantResourceId")
 @EActivity(R.layout.activity_main)
 public class MainActivity extends BaseActivity implements OnActivityResultDelegate.DelegateHost, BackPressedHandler.HostActivity, PermissionRequestProxyActivity {
-
-    public static class DrawerOpenEvent {
-        @SuppressWarnings("InstantiationOfUtilityClass")
-        static DrawerOpenEvent SINGLETON = new DrawerOpenEvent();
-    }
 
     @ViewById(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
@@ -80,10 +84,11 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
     private final OnActivityResultDelegate.Mediator mActivityResultMediator = new OnActivityResultDelegate.Mediator();
     private final RequestPermissionCallbacks mRequestPermissionCallbacks = new RequestPermissionCallbacks();
     private final BackPressedHandler.Observer mBackPressObserver = new BackPressedHandler.Observer();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private SearchViewItem mSearchViewItem;
     private MenuItem mLogMenuItem;
     private boolean mDocsSearchItemExpanded;
-
+    private boolean mShouldRestartApplication;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +98,20 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
         applyDayNightMode();
     }
 
-    void applyThemeColor() {
+    @Override
+    protected void onPostResume() {
+        restartIfNeeded();
+        super.onPostResume();
+    }
+
+    private void restartIfNeeded() {
+        if (mShouldRestartApplication) {
+            mShouldRestartApplication = false;
+            mHandler.post(() -> restartAfterPendingIntent(this));
+        }
+    }
+
+    public void applyThemeColor() {
         if (ThemeColor.fromPreferences(PreferenceManager.getDefaultSharedPreferences(this), null) == null) {
             ThemeColor defaultThemeColor = new ThemeColor(
                     ContextCompat.getColor(this, R.color.colorPrimary),
@@ -105,18 +123,12 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
     }
 
     @AfterViews
-    void setUpViews() {
+    public void setUpViews() {
         setUpToolbar();
         setUpTabViewPager();
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         registerBackPressHandlers();
         ThemeColorManager.addViewBackground(findViewById(R.id.app_bar));
-        mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                EventBus.getDefault().post(DrawerOpenEvent.SINGLETON);
-            }
-        });
     }
 
     private void registerBackPressHandlers() {
@@ -125,7 +137,79 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
     }
 
     private void checkPermissions() {
-        checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        checkDisplayOverOtherApps();
+        checkStorageAccess();
+    }
+
+    private void checkStorageAccess() {
+        if (!hasStorageAccess()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                new NotAskAgainDialog.Builder(this, "MainActivity.check_storage_access")
+                        .title(R.string.text_all_files_access)
+                        .content(String.format("%s\n\n%s",
+                                getString(R.string.text_all_files_access_is_needed),
+                                getString(R.string.text_click_ok_to_go_to_access_settings)))
+                        .negativeText(R.string.text_cancel)
+                        .positiveText(R.string.text_ok)
+                        .onNegative((dialog, which) -> dialog.dismiss())
+                        .onPositive((dialog, which) -> {
+                            requestStorageAccess();
+                            mShouldRestartApplication = true;
+                            dialog.dismiss();
+                        })
+                        .cancelable(false)
+                        .autoDismiss(false)
+                        .show();
+            } else {
+                requestStorageAccess();
+            }
+        }
+    }
+
+    private boolean hasStorageAccess() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                ? Environment.isExternalStorageManager()
+                : getPermissionsToRequest(new String[]{READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE}).length == 0;
+    }
+
+    private void checkDisplayOverOtherApps() {
+        if (!FloatingPermission.canDrawOverlays(this)) {
+            new NotAskAgainDialog.Builder(this, "MainActivity.check_display_over_other_apps")
+                    .title(R.string.text_display_over_other_app)
+                    .content(String.format("%s\n\n%s",
+                            getString(R.string.text_display_over_other_app_is_recommended),
+                            getString(R.string.text_click_ok_to_go_to_access_settings)))
+                    .negativeText(R.string.text_cancel)
+                    .positiveText(R.string.text_ok)
+                    .onNegative((dialog, which) -> dialog.dismiss())
+                    .onPositive((dialog, which) -> {
+                        goToManageDisplayOverOtherApps();
+                        dialog.dismiss();
+                    })
+                    .cancelable(false)
+                    .autoDismiss(false)
+                    .show();
+        }
+    }
+
+    private void requestStorageAccess() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            String[] permissions = {READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE};
+            ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
+            return;
+        }
+        try {
+            startActivity(new Intent()
+                    .setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                    .setData(Uri.fromParts("package", getPackageName(), null)));
+        } catch (Exception e) {
+            startActivity(new Intent()
+                    .setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION));
+        }
+    }
+
+    private void goToManageDisplayOverOtherApps() {
+        FloatingPermission.manageDrawOverlays(this);
     }
 
     private void setUpToolbar() {
@@ -179,7 +263,6 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
         });
     }
 
-
     @Click(R.id.setting)
     public void startSettingActivity(View view) {
         startActivity(new Intent(view.getContext(), SettingsActivity_.class));
@@ -188,7 +271,7 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
     @Click(R.id.exit)
     public void exitCompletely(View view) {
         FloatyWindowManger.hideCircularMenu();
-        ForegroundService.stop(this);
+        MainActivityForegroundService.stop(this);
         stopService(new Intent(view.getContext(), FloatyService.class));
         AutoJs.getInstance().getScriptEngineService().stopAll();
         finish();
@@ -196,17 +279,9 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
     }
 
     @Click(R.id.restart)
-    public void restartAfterPendingIntent(View view) {
-        Context context = view.getContext();
-        PackageManager packageManager = context.getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
-        ComponentName componentName = null;
-        if (intent != null) {
-            componentName = intent.getComponent();
-        }
-        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
-        context.startActivity(mainIntent);
-        Process.killProcess(Process.myPid());
+    @Override
+    public void restartAfterPendingIntent(@NonNull View view) {
+        super.restartAfterPendingIntent(view);
     }
 
     @Override
@@ -237,7 +312,7 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
     }
 
     private int getGrantResult(String[] permissions, int[] grantResults) {
-        int i = Arrays.asList(permissions).indexOf(Manifest.permission.READ_EXTERNAL_STORAGE);
+        int i = Arrays.asList(permissions).indexOf(READ_EXTERNAL_STORAGE);
         if (i < 0) {
             return 2;
         }
@@ -247,11 +322,14 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
     @Override
     protected void onStart() {
         super.onStart();
+        verifyApkIfNeeded();
+    }
+
+    private void verifyApkIfNeeded() {
         if (!BuildConfig.DEBUG) {
             DeveloperUtils.verifyApk(this);
         }
     }
-
 
     @NonNull
     @Override
@@ -282,7 +360,6 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
         return mRequestPermissionCallbacks.removeCallback(callback);
     }
 
-
     @Override
     public BackPressedHandler.Observer getBackPressedObserver() {
         return mBackPressObserver;
@@ -296,7 +373,6 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
         setUpSearchMenuItem(searchMenuItem);
         return true;
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -356,4 +432,5 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
+
 }

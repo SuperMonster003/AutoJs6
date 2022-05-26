@@ -5,7 +5,6 @@ import java.util.Arrays;
 /**
  * Created by Stardust on 2017/3/16.
  */
-
 public interface Recorder {
 
     interface OnStateChangedListener {
@@ -22,8 +21,8 @@ public interface Recorder {
 
     class StateChangeEvent {
 
-        private int mOldState;
-        private int mCurrentState;
+        private final int mOldState;
+        private final int mCurrentState;
 
         public StateChangeEvent(int oldState, int currentState) {
             mOldState = oldState;

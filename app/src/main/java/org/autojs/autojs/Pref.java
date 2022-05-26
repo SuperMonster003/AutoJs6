@@ -1,6 +1,5 @@
 package org.autojs.autojs;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 
@@ -10,6 +9,7 @@ import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.runtime.accessibility.AccessibilityConfig;
 
 import org.autojs.autojs.autojs.key.GlobalKeyObserver;
+import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.util.Objects;
@@ -19,7 +19,6 @@ import java.util.Objects;
  */
 public class Pref {
 
-    private static final SharedPreferences DISPOSABLE_BOOLEAN = GlobalAppContext.get().getSharedPreferences("DISPOSABLE_BOOLEAN", Context.MODE_PRIVATE);
     private static final String KEY_SERVER_ADDRESS = "KEY_SERVER_ADDRESS";
     private static final String KEY_FLOATING_MENU_SHOWN = "KEY_FLOATING_MENU_SHOWN";
     private static final String KEY_APP_LANG_INDEX = "KEY_APP_LANG_INDEX";
@@ -37,50 +36,23 @@ public class Pref {
 
     static {
         AccessibilityConfig.setIsUnintendedGuardEnabled(def().getBoolean(getString(R.string.key_guard_mode), false));
+        def().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
     private static SharedPreferences def() {
         return PreferenceManager.getDefaultSharedPreferences(GlobalAppContext.get());
     }
 
-    private static boolean getDisposableBoolean(String key, boolean defaultValue) {
-        boolean b = DISPOSABLE_BOOLEAN.getBoolean(key, defaultValue);
-        if (b == defaultValue) {
-            DISPOSABLE_BOOLEAN.edit().putBoolean(key, !defaultValue).apply();
-        }
-        return b;
-    }
-
     public static boolean isNightModeEnabled() {
         return def().getBoolean(getString(R.string.key_night_mode), false);
-    }
-
-    public static boolean isFirstGoToAccessibilitySetting() {
-        return getDisposableBoolean("isFirstGoToAccessibilitySetting", false);
     }
 
     public static boolean isRunningVolumeControlEnabled() {
         return def().getBoolean(getString(R.string.key_use_volume_control_running), true);
     }
 
-    public static boolean shouldEnableAccessibilityServiceByRoot() {
-        return def().getBoolean(getString(R.string.key_enable_a11y_service_with_root_access), true);
-    }
-
-    public static boolean shouldEnableAccessibilityServiceBySecureSettings() {
-        return def().getBoolean(getString(R.string.key_enable_a11y_service_with_secure_settings), true);
-    }
-
     private static String getString(int id) {
         return GlobalAppContext.getString(id);
-    }
-
-    public static boolean isFirstUsing() {
-        return getDisposableBoolean("isFirstUsing", true);
-    }
-
-    static {
-        def().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
     public static String getServerAddressOrDefault(String defaultAddress) {
@@ -96,7 +68,7 @@ public class Pref {
     }
 
     public static boolean rootRecordGeneratesBinary() {
-        return Objects.equals(def().getString(getString(R.string.key_root_record_out_file_type), getString(R.string.default_value_binary)), getString(R.string.value_root_record_out_file_type_binary));
+        return Objects.equals(def().getString(getString(R.string.key_root_record_out_file_type), getString(R.string.default_value_binary)), getString(R.string.key_root_record_out_file_type_binary));
     }
 
     public static boolean isStableModeEnabled() {
@@ -105,7 +77,7 @@ public class Pref {
 
     public static String getDocumentationUrl() {
         String docSource = def().getString(getString(R.string.key_documentation_source), null);
-        if (docSource == null || docSource.equals(getString(R.string.value_documentation_source_local))) {
+        if (docSource == null || docSource.equals(getString(R.string.key_documentation_source_local))) {
             return "file:///android_asset/docs/";
         } else {
             return "https://www.autojs.org/assets/autojs/docs/";

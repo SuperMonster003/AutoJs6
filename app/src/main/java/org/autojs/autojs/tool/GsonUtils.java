@@ -9,7 +9,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/7/21.
  */
-
 public class GsonUtils {
 
     public static List<String> toReservedStringList(JsonElement element) {

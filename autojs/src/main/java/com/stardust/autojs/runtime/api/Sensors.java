@@ -22,7 +22,6 @@ import java.util.Set;
 /**
  * Created by Stardust on 2018/2/5.
  */
-
 public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
 
     public class SensorEventEmitter extends EventEmitter implements SensorEventListener {

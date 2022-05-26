@@ -25,7 +25,7 @@ ui.layout(
 var downloadId = null;
 
 ui.download.click(()=>{
-    if(downloadId != null){
+    if(downloadId){
         stopDownload();
     }else{
         startDownload();
@@ -39,7 +39,7 @@ function stopDownload(){
 }
 
 function startDownload(){
-    if(ui.progress.getProgress() == 100){
+    if(ui.progress.getProgress() === 100){
         ui.progress.setProgress(0);
     }
     ui.download.text("停止下载");

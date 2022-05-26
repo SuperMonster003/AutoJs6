@@ -20,7 +20,7 @@ import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.runtime.api.Device;
 import com.stardust.util.MapBuilder;
 
-import org.autojs.autojs.BuildConfig;
+import org.autojs.autojs6.BuildConfig;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;

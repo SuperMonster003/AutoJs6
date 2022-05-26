@@ -2,7 +2,7 @@ package org.autojs.autojs.ui.common;
 
 import android.content.Context;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 
 import io.reactivex.Observable;
@@ -11,7 +11,6 @@ import io.reactivex.subjects.PublishSubject;
 /**
  * Created by Stardust on 2017/10/21.
  */
-
 public class RxDialogs {
 
 

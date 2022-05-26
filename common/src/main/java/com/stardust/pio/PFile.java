@@ -1,7 +1,6 @@
 package com.stardust.pio;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 /**
  * Created by Stardust on 2017/10/19.
  */
-
 public class PFile extends File {
 
     private String mSimplifyPath;
@@ -85,47 +83,66 @@ public class PFile extends File {
     @Override
     public PFile getParentFile() {
         String p = this.getParent();
-        if (p == null)
+        if (p == null) {
             return null;
+        }
         return new PFile(p);
     }
 
     @Override
     public PFile[] listFiles() {
-        String ss[] = list();
-        if (ss == null) return null;
-        ArrayList<PFile> files = new ArrayList<>();
-        for (int i = 0; i < ss.length; i++) {
-            if (!ss[i].startsWith(".")) {
-                files.add(new PFile(this, ss[i]));
-            }
-        }
-        return files.toArray(new PFile[files.size()]);
+        return listFiles((FilenameFilter) null, true);
     }
 
     @Override
     public PFile[] listFiles(FilenameFilter filter) {
-        String ss[] = list();
-        if (ss == null) return null;
-        ArrayList<PFile> files = new ArrayList<>();
-        for (String s : ss)
-            if (!s.startsWith(".") && (filter == null || filter.accept(this, s)))
-                files.add(new PFile(this, s));
-        return files.toArray(new PFile[files.size()]);
+        return listFiles(filter, true);
     }
 
     @Override
     public PFile[] listFiles(FileFilter filter) {
-        String ss[] = list();
-        if (ss == null) return null;
+        return listFiles(filter, true);
+    }
+
+    public PFile[] listFiles(boolean isShowHidden) {
+        return listFiles((FilenameFilter) null, isShowHidden);
+    }
+
+    public PFile[] listFiles(FilenameFilter filter, boolean isShowHidden) {
+        String[] ss = list();
+        if (ss == null) {
+            return null;
+        }
+        ArrayList<PFile> files = new ArrayList<>();
+        for (String s : ss) {
+            if (canAddHidden(s, isShowHidden) && (filter == null || filter.accept(this, s))) {
+                files.add(new PFile(this, s));
+            }
+        }
+        return files.toArray(new PFile[0]);
+    }
+
+    public PFile[] listFiles(FileFilter filter, boolean isShowHidden) {
+        String[] ss = list();
+        if (ss == null) {
+            return null;
+        }
         ArrayList<PFile> files = new ArrayList<>();
         for (String s : ss) {
             PFile f = new PFile(this, s);
-            if (!f.isHidden() && (filter == null || filter.accept(f)))
+            if (canAddHidden(f, isShowHidden) && (filter == null || filter.accept(f))) {
                 files.add(f);
+            }
         }
-        return files.toArray(new PFile[files.size()]);
+        return files.toArray(new PFile[0]);
+    }
 
+    private boolean canAddHidden(PFile file, boolean override) {
+        return override || !file.isHidden();
+    }
+
+    private boolean canAddHidden(String fileName, boolean override) {
+        return override || !fileName.startsWith(".");
     }
 
     public String getSimplifiedName() {

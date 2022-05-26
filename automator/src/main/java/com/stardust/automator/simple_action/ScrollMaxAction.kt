@@ -10,7 +10,6 @@ import java.util.HashSet
 /**
  * Created by Stardust on 2017/1/27.
  */
-
 class ScrollMaxAction(private val mScrollAction: Int) : SimpleAction() {
     private var mMaxScrollableNode: UiObject? = null
     private var mRootNode: UiObject? = null

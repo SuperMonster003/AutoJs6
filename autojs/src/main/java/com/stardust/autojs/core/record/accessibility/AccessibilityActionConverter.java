@@ -1,7 +1,6 @@
 package com.stardust.autojs.core.record.accessibility;
 
 import android.accessibilityservice.AccessibilityService;
-import android.os.Build;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -20,7 +19,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/2/14.
  */
-
 public class AccessibilityActionConverter {
 
     private static final SparseArray<EventToScriptConverter> CONVERTER_MAP = new SparseArrayEntries<EventToScriptConverter>()
@@ -31,12 +29,10 @@ public class AccessibilityActionConverter {
             .sparseArray();
 
     static {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            CONVERTER_MAP.put(AccessibilityEvent.TYPE_VIEW_CONTEXT_CLICKED, new DoOnceConverter("contextClick"));
-        }
+        CONVERTER_MAP.put(AccessibilityEvent.TYPE_VIEW_CONTEXT_CLICKED, new DoOnceConverter("contextClick"));
     }
 
-    private StringBuilder mScript = new StringBuilder();
+    private final StringBuilder mScript = new StringBuilder();
     private boolean mFirstAction = true;
 
     public AccessibilityActionConverter(boolean shouldIgnoreFirstAction) {
@@ -89,7 +85,7 @@ public class AccessibilityActionConverter {
 
     private static class DoOnceConverter extends BoundsEventConverter {
 
-        private String mActionFunction;
+        private final String mActionFunction;
 
         DoOnceConverter(String actionFunction) {
             mActionFunction = actionFunction;
@@ -103,7 +99,7 @@ public class AccessibilityActionConverter {
 
     private static class DoUtilSucceedConverter extends BoundsEventConverter {
 
-        private String mActionFunction;
+        private final String mActionFunction;
 
         DoUtilSucceedConverter(String actionFunction) {
             mActionFunction = actionFunction;

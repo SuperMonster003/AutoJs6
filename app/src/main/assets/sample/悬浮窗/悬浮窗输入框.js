@@ -10,7 +10,7 @@ window.exitOnClose();
 toast("长按确定键可调整位置");
 
 window.input.on("key", function(keyCode, event){
-    if(event.getAction() == event.ACTION_DOWN && keyCode == keys.back){
+    if(event.getAction() === event.ACTION_DOWN && keyCode === keys.back){
         window.disableFocus();
         event.consumed = true;
     }

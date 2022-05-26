@@ -7,7 +7,6 @@ import androidx.preference.PreferenceManager;
 /**
  * Created by Stardust on 2017/12/8.
  */
-
 public class Config {
 
     private static Config sInstance;

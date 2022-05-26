@@ -18,7 +18,6 @@ import java.util.concurrent.Executors
 /**
  * Created by Stardust on 2018/3/16.
  */
-
 @SuppressLint("ViewConstructor")
 class ScriptCanvasView(context: Context, private val mScriptRuntime: ScriptRuntime) : TextureView(context), TextureView.SurfaceTextureListener {
     @Volatile
@@ -89,7 +88,7 @@ class ScriptCanvasView(context: Context, private val mScriptRuntime: ScriptRunti
     }
 
     override fun onWindowVisibilityChanged(visibility: Int) {
-        Log.d(LOG_TAG, "onWindowVisibilityChanged: " + this + ": visibility=" + visibility + ", mDrawingThreadPool=" + mDrawingThreadPool)
+        Log.d(LOG_TAG, "onWindowVisibilityChanged: $this: visibility=$visibility, mDrawingThreadPool=$mDrawingThreadPool")
         val oldDrawing = mDrawing
         mDrawing = visibility == View.VISIBLE
         if (!oldDrawing && mDrawing) {
@@ -160,7 +159,7 @@ class ScriptCanvasView(context: Context, private val mScriptRuntime: ScriptRunti
     override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
         mDrawing = false
         mDrawingThreadPool?.shutdown()
-        Log.d(LOG_TAG, "onSurfaceTextureDestroyed: ${this}")
+        Log.d(LOG_TAG, "onSurfaceTextureDestroyed: $this")
         return true
     }
 

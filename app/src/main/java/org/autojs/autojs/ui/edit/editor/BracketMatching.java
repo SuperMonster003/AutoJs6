@@ -3,7 +3,6 @@ package org.autojs.autojs.ui.edit.editor;
 /**
  * Created by Stardust on 2018/2/25.
  */
-
 public class BracketMatching {
 
     public static int UNMATCHED_BRACKET = -2;

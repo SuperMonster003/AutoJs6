@@ -6,7 +6,6 @@ import android.text.TextWatcher;
 /**
  * Created by Stardust on 2018/2/16.
  */
-
 public class SimpleTextWatcher implements TextWatcher {
 
     public interface AfterTextChangedListener {

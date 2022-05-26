@@ -11,7 +11,6 @@ import com.stardust.autojs.core.ui.inflater.ViewCreator;
 /**
  * Created by Stardust on 2017/11/29.
  */
-
 public class TimePickerInflater extends BaseViewInflater<TimePicker> {
 
     public TimePickerInflater(ResourceParser resourceParser) {

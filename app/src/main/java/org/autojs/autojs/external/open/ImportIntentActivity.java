@@ -10,7 +10,7 @@ import android.widget.Toast;
 import com.stardust.pio.PFiles;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.ScriptOperations;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -18,7 +18,6 @@ import java.io.InputStream;
 /**
  * Created by Stardust on 2017/2/2.
  */
-
 public class ImportIntentActivity extends BaseActivity {
 
     @Override

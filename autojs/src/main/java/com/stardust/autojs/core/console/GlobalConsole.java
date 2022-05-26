@@ -12,11 +12,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-
 /**
  * Created by Stardust on 2017/10/22.
  */
-
 @SuppressLint("ConstantLocale")
 public class GlobalConsole extends ConsoleImpl {
     private static final String LOG_tAG = "GlobalConsole";

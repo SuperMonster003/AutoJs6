@@ -9,7 +9,6 @@ import java.io.Serializable;
 /**
  * Created by Stardust on 2017/4/5.
  */
-
 public class NoSecurityController extends SecurityController implements Serializable {
     @Override
     public GeneratedClassLoader createClassLoader(ClassLoader classLoader, Object o) {

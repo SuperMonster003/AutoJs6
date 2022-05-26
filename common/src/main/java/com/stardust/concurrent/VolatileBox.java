@@ -1,12 +1,9 @@
 package com.stardust.concurrent;
 
 
-import java.lang.reflect.Constructor;
-
 /**
  * Created by Stardust on 2017/5/8.
  */
-
 public class VolatileBox<T> {
 
     private volatile T mValue;
@@ -60,9 +57,7 @@ public class VolatileBox<T> {
             } catch (InterruptedException e) {
                 try {
                     throw exception.newInstance();
-                } catch (InstantiationException e1) {
-                    throw new RuntimeException(e1);
-                } catch (IllegalAccessException e1) {
+                } catch (InstantiationException | IllegalAccessException e1) {
                     throw new RuntimeException(e1);
                 }
             }

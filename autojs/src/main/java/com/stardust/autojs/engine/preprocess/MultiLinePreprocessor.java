@@ -1,14 +1,11 @@
 package com.stardust.autojs.engine.preprocess;
 
-import androidx.annotation.VisibleForTesting;
-
 import java.io.Reader;
 import java.io.StringReader;
 
 /**
  * Created by Stardust on 2017/5/15.
  */
-
 public class MultiLinePreprocessor extends AbstractProcessor {
 
     private static final int STATE_SINGLE_QUOTE_LITERAL = 0x00000001;

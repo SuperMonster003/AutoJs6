@@ -1,5 +1,7 @@
 package org.autojs.autojs.model.editor;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Collections;
@@ -8,7 +10,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2018/2/21.
  */
-
 public class TokenColor {
 
     @SerializedName("name")
@@ -47,6 +48,7 @@ public class TokenColor {
         mSettings = settings;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "TokenColor{" +

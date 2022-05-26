@@ -1,42 +1,27 @@
 package com.stardust.autojs.util;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.R;
 import com.stardust.enhancedfloaty.util.FloatingWindowPermissionUtil;
 
-import java.lang.reflect.Method;
+import org.autojs.autojs.tool.ThreadTool;
 
-import ezy.assist.compat.RomUtil;
 import ezy.assist.compat.SettingsCompat;
 
 /**
  * Created by Stardust on 2018/1/30.
+ * Modified by SuperMonster003 as of Apr 10, 2022.
  */
-
 public class FloatingPermission {
-
-    private static Method sCheckOp;
-
-    static {
-        try {
-            sCheckOp = SettingsCompat.class.getDeclaredMethod("checkOp", Context.class, int.class);
-            sCheckOp.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static boolean ensurePermissionGranted(Context context) {
         if (!canDrawOverlays(context)) {
-            Toast.makeText(context, R.string.text_no_floating_window_permission, Toast.LENGTH_SHORT).show();
+            GlobalAppContext.toast(R.string.text_no_draw_overlays_permission);
             manageDrawOverlays(context);
             return false;
         }
@@ -49,53 +34,29 @@ public class FloatingPermission {
         }
         Runnable r = () -> {
             manageDrawOverlays(context);
-            Toast.makeText(context, R.string.text_no_floating_window_permission, Toast.LENGTH_SHORT).show();
+            GlobalAppContext.toast(R.string.text_no_draw_overlays_permission);
         };
         if (Looper.myLooper() != Looper.getMainLooper()) {
             new Handler(Looper.getMainLooper()).post(r);
         } else {
             r.run();
         }
-        while (true) {
-            if (canDrawOverlays(context))
-                return;
-            Thread.sleep(200);
+        if (!ThreadTool.wait(() -> canDrawOverlays(context), 60 * 1000)) {
+            GlobalAppContext.toast(R.string.text_draw_overlays_permission_failed, Toast.LENGTH_LONG);
         }
-
     }
 
 
     public static void manageDrawOverlays(Context context) {
         try {
-            if (RomUtil.isMiui() && TextUtils.equals("V10", RomUtil.getVersion())) {
-                manageDrawOverlaysForAndroidM(context);
-            } else {
-                SettingsCompat.manageDrawOverlays(context);
-            }
+            SettingsCompat.manageDrawOverlays(context);
         } catch (Exception ex) {
             FloatingWindowPermissionUtil.goToAppDetailSettings(context, context.getPackageName());
         }
-    }
-
-    public static void manageDrawOverlaysForAndroidM(Context context) {
-        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-        intent.setData(Uri.parse("package:" + context.getPackageName()));
-        context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     public static boolean canDrawOverlays(Context context) {
         return SettingsCompat.canDrawOverlays(context);
     }
 
-    private static boolean checkOp(Context context, int op) {
-        if (sCheckOp == null) {
-            return canDrawOverlays(context);
-        }
-        try {
-            return (boolean) sCheckOp.invoke(null, context, op);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }

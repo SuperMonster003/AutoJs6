@@ -16,12 +16,11 @@ import android.view.Window;
 /**
  * Created by Stardust on 2017/1/24.
  */
-
 public class ViewUtil {
 
     @SuppressWarnings("unchecked")
     public static <V extends View> V $(View view, @IdRes int resId) {
-        return (V) view.findViewById(resId);
+        return view.findViewById(resId);
     }
 
     // FIXME: 2018/1/23 not working in some devices (https://github.com/hyb1996/Auto.js/issues/268)

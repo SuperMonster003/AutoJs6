@@ -11,14 +11,13 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.util.List;
 
 /**
  * Created by Stardust on 2017/5/23.
  */
-
 public class BubblePopupMenu extends PopupWindow {
 
     public interface OnItemClickListener {

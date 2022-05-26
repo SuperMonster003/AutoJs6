@@ -7,7 +7,6 @@ import java.util.*
 /**
  * Created by Stardust on 2017/1/27.
  */
-
 abstract class FilterAction(private val mFilter: Filter) : SimpleAction() {
 
     abstract fun perform(nodes: List<UiObject>): Boolean

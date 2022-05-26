@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Created by Stardust on 2017/4/2.
  */
-
 open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Context) : JavaScriptEngine() {
 
     val context: Context
@@ -36,16 +35,14 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
 
     private val initScript: Script
         get() {
-            return sInitScript ?: {
-                try {
-                    val reader = InputStreamReader(mAndroidContext.assets.open("init.js"))
-                    val script = context.compileReader(reader, SOURCE_NAME_INIT, 1, null)
-                    sInitScript = script
-                    script
-                } catch (e: IOException) {
-                    throw UncheckedIOException(e)
-                }
-            }()
+            return sInitScript ?: try {
+                val reader = InputStreamReader(mAndroidContext.assets.open("init.js"))
+                val script = context.compileReader(reader, SOURCE_NAME_INIT, 1, null)
+                sInitScript = script
+                script
+            } catch (e: IOException) {
+                throw UncheckedIOException(e)
+            }
         }
 
     val scriptable: Scriptable
@@ -96,7 +93,6 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
         thread.interrupt()
     }
 
-
     @Synchronized
     override fun destroy() {
         super.destroy()
@@ -120,14 +116,16 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
         }
     }
 
-    internal fun initRequireBuilder(context: Context, scope: Scriptable) {
-        val provider = AssetAndUrlModuleSourceProvider(mAndroidContext, MODULES_PATH,
-                listOf<URI>(File("/").toURI()))
+    private fun initRequireBuilder(context: Context, scope: Scriptable) {
+        val provider = AssetAndUrlModuleSourceProvider(
+            mAndroidContext, MODULES_PATH,
+            listOf<URI>(File("/").toURI())
+        )
         RequireBuilder()
-                .setModuleScriptProvider(SoftCachingModuleScriptProvider(provider))
-                .setSandboxed(true)
-                .createRequire(context, scope)
-                .install(scope)
+            .setModuleScriptProvider(SoftCachingModuleScriptProvider(provider))
+            .setSandboxed(true)
+            .createRequire(context, scope)
+            .install(scope)
 
     }
 
@@ -174,11 +172,11 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
 
     companion object {
 
-        val SOURCE_NAME_INIT = "<init>"
+        const val SOURCE_NAME_INIT = "<init>"
 
-        private val LOG_TAG = "RhinoJavaScriptEngine"
+        private const val LOG_TAG = "RhinoJavaScriptEngine"
 
-        private val MODULES_PATH = "modules"
+        private const val MODULES_PATH = "modules"
         private var sInitScript: Script? = null
         private val sContextEngineMap = ConcurrentHashMap<Context, RhinoJavaScriptEngine>()
 
@@ -187,6 +185,5 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
             return sContextEngineMap[context]
         }
     }
-
 
 }

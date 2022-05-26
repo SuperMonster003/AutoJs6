@@ -11,7 +11,6 @@ import java.util.TreeMap;
 /**
  * Created by Stardust on 2018/2/3.
  */
-
 public class DictionaryTree<T> {
 
     private static class Node<T> {
@@ -36,7 +35,7 @@ public class DictionaryTree<T> {
         }
     }
 
-    private Node<T> mRoot = new Node<>('@');
+    private final Node<T> mRoot = new Node<>('@');
 
     public void putWord(String word, T tag) {
         Node<T> node = mRoot;

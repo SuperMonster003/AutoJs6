@@ -9,7 +9,6 @@ import com.stardust.autojs.script.JavaScriptSource;
 /**
  * Created by Stardust on 2017/10/27.
  */
-
 public class LoopedBasedJavaScriptExecution extends RunnableScriptExecution {
 
     public LoopedBasedJavaScriptExecution(ScriptEngineManager manager, ScriptExecutionTask task) {

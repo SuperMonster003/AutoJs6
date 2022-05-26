@@ -5,12 +5,10 @@ package org.autojs.autojs.ui.edit.keyboard;
  */
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
-import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,9 +25,9 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
 
     private static final String SHARE_PREFERENCE_NAME = "FunctionsKeyboardHelper";
     private static final String SHARE_PREFERENCE_SOFT_INPUT_HEIGHT = "soft_input_height";
-    private Activity mActivity;
-    private InputMethodManager mInputManager;
-    private SharedPreferences mPreferences;
+    private final Activity mActivity;
+    private final InputMethodManager mInputManager;
+    private final SharedPreferences mPreferences;
     private View mFunctionsLayout;
     private View mEditView;
     private View mContentView;
@@ -161,7 +159,6 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
         return softInputHeight;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private int getSoftKeyButtonsHeight() {
         DisplayMetrics metrics = new DisplayMetrics();
         mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);

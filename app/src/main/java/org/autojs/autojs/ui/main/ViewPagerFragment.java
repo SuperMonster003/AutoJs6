@@ -11,15 +11,14 @@ import com.stardust.util.BackPressedHandler;
 /**
  * Created by Stardust on 2017/8/22.
  */
-
 public abstract class ViewPagerFragment extends Fragment implements BackPressedHandler {
 
     protected static final int ROTATION_GONE = -1;
 
-    private int mFabRotation;
+    private final int mFabRotation;
     private FloatingActionButton mFab;
     private boolean mShown;
-    private View.OnClickListener mOnFabClickListener = v -> onFabClick((FloatingActionButton) v);
+    private final View.OnClickListener mOnFabClickListener = v -> onFabClick((FloatingActionButton) v);
 
     public ViewPagerFragment(int fabRotation) {
         mFabRotation = fabRotation;

@@ -8,7 +8,6 @@ import com.stardust.autojs.runtime.exception.ScriptException;
 /**
  * Created by Stardust on 2017/5/1.
  */
-
 public abstract class AbstractConsole implements Console {
 
     public void printf(int level, @Nullable Object data, Object... options) {

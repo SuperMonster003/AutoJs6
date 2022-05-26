@@ -26,7 +26,7 @@ ui.icons.on("item_click", function(icon){
 
 ui.search.on("click", function(){
     var text = ui.input.text();
-    if(text.length == 0){
+    if(text.length === 0){
         return;
     }
     search(text);

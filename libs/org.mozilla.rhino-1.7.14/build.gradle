@@ -1,8 +1,0 @@
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_16
-    }
-}
-
-configurations.maybeCreate('default')
-artifacts.add('default', file('rhino-1.7.14.jar'))

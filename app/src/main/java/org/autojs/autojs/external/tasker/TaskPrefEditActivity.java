@@ -14,7 +14,7 @@ import com.twofortyfouram.locale.sdk.client.ui.activity.AbstractAppCompatPluginA
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.Explorers;
@@ -41,7 +41,7 @@ public class TaskPrefEditActivity extends AbstractAppCompatPluginActivity {
 
 
     private void initScriptListRecyclerView() {
-        ExplorerView explorerView = (ExplorerView) findViewById(R.id.script_list);
+        ExplorerView explorerView = findViewById(R.id.script_list);
         explorerView.setExplorer(Explorers.external(), ExplorerDirPage.createRoot(Environment.getExternalStorageDirectory()));
         explorerView.setOnItemClickListener((view, item) -> {
             mSelectedScriptFilePath = item.getPath();

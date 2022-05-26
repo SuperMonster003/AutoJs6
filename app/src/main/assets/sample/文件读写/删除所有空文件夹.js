@@ -7,7 +7,7 @@ if(confirm("该操作会删除SD卡目录及其子目录下所有空文件夹，
 function deleteAllEmptyDirs(dir){
     var list = files.listDir(dir);
     var len = list.length;
-    if(len == 0){
+    if(len === 0){
         log("删除目录 " + dir + " " + (files.remove(dir) ? "成功" : "失败"));
         return;
     }

@@ -1,19 +1,14 @@
 package com.stardust.view.accessibility
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
-
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 /**
  * Created by Stardust on 2017/3/10.
  */
-
 class LayoutInspector(private val mContext: Context) {
     @Volatile
     var capture: NodeInfo? = null
@@ -65,7 +60,6 @@ class LayoutInspector(private val mContext: Context) {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     private fun refreshChildList(root: AccessibilityNodeInfo?) {
         if (root == null)
             return

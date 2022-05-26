@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import com.stardust.util.HashUtils;
 
@@ -14,7 +14,6 @@ import com.stardust.util.HashUtils;
 /**
  * Created by Stardust on 2017/1/30.
  */
-
 public class NotAskAgainDialog extends MaterialDialog {
 
     protected NotAskAgainDialog(Builder builder) {

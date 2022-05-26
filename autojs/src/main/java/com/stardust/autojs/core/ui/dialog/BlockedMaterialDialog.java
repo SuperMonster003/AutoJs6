@@ -13,7 +13,6 @@ import android.view.WindowManager;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
-import com.stardust.autojs.rhino.continuation.Continuation;
 import com.stardust.autojs.runtime.ScriptBridges;
 import com.stardust.autojs.runtime.ScriptRuntime;
 import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
@@ -24,7 +23,6 @@ import com.stardust.util.UiHandler;
 /**
  * Created by Stardust on 2017/5/8.
  */
-
 public class BlockedMaterialDialog extends MaterialDialog {
 
     protected BlockedMaterialDialog(MaterialDialog.Builder builder) {
@@ -60,9 +58,9 @@ public class BlockedMaterialDialog extends MaterialDialog {
     public static class Builder extends MaterialDialog.Builder {
 
         private VolatileDispose<Object> mResultBox;
-        private UiHandler mUiHandler;
-        private Object mCallback;
-        private ScriptBridges mScriptBridges;
+        private final UiHandler mUiHandler;
+        private final Object mCallback;
+        private final ScriptBridges mScriptBridges;
         private boolean mNotified = false;
 
         public Builder(Context context, ScriptRuntime runtime, Object callback) {
@@ -130,11 +128,7 @@ public class BlockedMaterialDialog extends MaterialDialog {
         public Builder confirm() {
             dismissListener(dialog -> setAndNotify(false));
             onAny((dialog, which) -> {
-                if (which == DialogAction.POSITIVE) {
-                    setAndNotify(true);
-                } else {
-                    setAndNotify(false);
-                }
+                setAndNotify(which == DialogAction.POSITIVE);
             });
             return this;
         }

@@ -1,12 +1,10 @@
 package com.stardust.view.accessibility
 
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.view.accessibility.AccessibilityNodeInfo
 
 /**
  * Created by Stardust on 2017/7/13.
  */
-
 class LayoutInspectService : AccessibilityService() {
 
 

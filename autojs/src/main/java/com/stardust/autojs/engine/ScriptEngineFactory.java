@@ -12,7 +12,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/8/2.
  */
-
 public class ScriptEngineFactory {
 
     public static class EngineNotFoundException extends RuntimeException {
@@ -22,9 +21,9 @@ public class ScriptEngineFactory {
         }
     }
 
-    private static ScriptEngineFactory sInstance = new ScriptEngineFactory();
-    private Map<String, Supplier<ScriptEngine>> mEngines = new HashMap<>();
-    private Map<String, Object> mGlobalVariableMap = new HashMap<>();
+    private static final ScriptEngineFactory sInstance = new ScriptEngineFactory();
+    private final Map<String, Supplier<ScriptEngine>> mEngines = new HashMap<>();
+    private final Map<String, Object> mGlobalVariableMap = new HashMap<>();
 
     ScriptEngineFactory() {
 
@@ -74,7 +73,7 @@ public class ScriptEngineFactory {
     public ScriptEngine createEngineOfSourceOrThrow(ScriptSource source) {
         ScriptEngine engine = createEngineOfSource(source);
         if (engine == null)
-            throw new EngineNotFoundException("source: " + source.toString());
+            throw new EngineNotFoundException("source: " + source);
         return engine;
     }
 

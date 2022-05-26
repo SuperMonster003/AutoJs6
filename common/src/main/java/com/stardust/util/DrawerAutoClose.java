@@ -6,11 +6,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 /**
  * Created by Stardust on 2017/6/19.
  */
-
 public class DrawerAutoClose implements BackPressedHandler {
 
-    private DrawerLayout mDrawerLayout;
-    private int mGravity;
+    private final DrawerLayout mDrawerLayout;
+    private final int mGravity;
 
     public DrawerAutoClose(DrawerLayout drawerLayout, int gravity){
         mDrawerLayout = drawerLayout;

@@ -2,29 +2,28 @@ package com.stardust.automator.test
 
 import android.graphics.Rect
 import android.os.Bundle
-import android.view.accessibility.AccessibilityNodeInfo
 import com.stardust.automator.UiObject
 import java.util.*
+import kotlin.math.max
 
 /**
  * Created by Stardust on 2017/5/5.
  */
-
-class TestUiObject @JvmOverloads constructor(private val mChildCount: Int = Math.max(0, random.nextInt(6) - 2)) : UiObject(null) {
+class TestUiObject @JvmOverloads constructor(private val mChildCount: Int = max(0, random.nextInt(6) - 2)) : UiObject(null) {
 
     private val mHashCode = random.nextInt()
     private var mRecycled = false
 
     init {
         count++
-        max = Math.max(max, count)
+        max = max(max, count)
     }
 
-    override fun child(i: Int): UiObject? {
+    override fun child(i: Int): UiObject {
         return TestUiObject()
     }
 
-    override fun parent(): UiObject? {
+    override fun parent(): UiObject {
         return TestUiObject()
     }
 

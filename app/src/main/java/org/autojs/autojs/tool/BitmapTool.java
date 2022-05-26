@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable;
 /**
  * Created by Stardust on 2017/4/22.
  */
-
 public class BitmapTool {
 
     public static Bitmap scaleBitmap(Bitmap origin, int newWidth, int newHeight) {

@@ -11,19 +11,16 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.stardust.autojs.core.image.ImageWrapper;
-import com.stardust.autojs.runtime.ScriptRuntime;
 
 /**
  * Created by Stardust on 2018/3/22.
  */
-
+@SuppressWarnings("unused")
 public class ScriptCanvas {
 
     private Canvas mCanvas;
@@ -102,9 +99,7 @@ public class ScriptCanvas {
         return mCanvas.saveLayer(bounds, paint, saveFlags);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public int saveLayer(@Nullable RectF bounds, @Nullable Paint paint) {
-        ScriptRuntime.requiresApi(Build.VERSION_CODES.LOLLIPOP);
         return mCanvas.saveLayer(bounds, paint);
     }
 
@@ -112,9 +107,7 @@ public class ScriptCanvas {
         return mCanvas.saveLayer(left, top, right, bottom, paint, saveFlags);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public int saveLayer(float left, float top, float right, float bottom, @Nullable Paint paint) {
-        ScriptRuntime.requiresApi(Build.VERSION_CODES.LOLLIPOP);
         return mCanvas.saveLayer(left, top, right, bottom, paint);
     }
 
@@ -122,9 +115,7 @@ public class ScriptCanvas {
         return mCanvas.saveLayerAlpha(bounds, alpha, saveFlags);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public int saveLayerAlpha(@Nullable RectF bounds, int alpha) {
-        ScriptRuntime.requiresApi(Build.VERSION_CODES.LOLLIPOP);
         return mCanvas.saveLayerAlpha(bounds, alpha);
     }
 
@@ -132,9 +123,7 @@ public class ScriptCanvas {
         return mCanvas.saveLayerAlpha(left, top, right, bottom, alpha, saveFlags);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha) {
-        ScriptRuntime.requiresApi(Build.VERSION_CODES.LOLLIPOP);
         return mCanvas.saveLayerAlpha(left, top, right, bottom, alpha);
     }
 
@@ -316,7 +305,6 @@ public class ScriptCanvas {
         mCanvas.drawOval(oval, paint);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void drawOval(float left, float top, float right, float bottom, @NonNull Paint paint) {
         mCanvas.drawOval(left, top, right, bottom, paint);
     }
@@ -329,9 +317,7 @@ public class ScriptCanvas {
         mCanvas.drawArc(oval, startAngle, sweepAngle, useCenter, paint);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void drawArc(float left, float top, float right, float bottom, float startAngle, float sweepAngle, boolean useCenter, @NonNull Paint paint) {
-        ScriptRuntime.requiresApi(Build.VERSION_CODES.LOLLIPOP);
         mCanvas.drawArc(left, top, right, bottom, startAngle, sweepAngle, useCenter, paint);
     }
 
@@ -340,9 +326,7 @@ public class ScriptCanvas {
         mCanvas.drawRoundRect(rect, rx, ry, paint);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry, @NonNull Paint paint) {
-        ScriptRuntime.requiresApi(Build.VERSION_CODES.LOLLIPOP);
         mCanvas.drawRoundRect(left, top, right, bottom, rx, ry, paint);
     }
 
@@ -400,15 +384,11 @@ public class ScriptCanvas {
         mCanvas.drawText(text, start, end, x, y, paint);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void drawTextRun(@NonNull char[] text, int index, int count, int contextIndex, int contextCount, float x, float y, boolean isRtl, @NonNull Paint paint) {
-        ScriptRuntime.requiresApi(Build.VERSION_CODES.M);
         mCanvas.drawTextRun(text, index, count, contextIndex, contextCount, x, y, isRtl, paint);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart, int contextEnd, float x, float y, boolean isRtl, @NonNull Paint paint) {
-        ScriptRuntime.requiresApi(Build.VERSION_CODES.M);
         mCanvas.drawTextRun(text, start, end, contextStart, contextEnd, x, y, isRtl, paint);
     }
 

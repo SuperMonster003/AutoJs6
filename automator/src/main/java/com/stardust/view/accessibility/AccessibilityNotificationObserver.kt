@@ -12,12 +12,11 @@ import java.util.concurrent.CopyOnWriteArrayList
 /**
  * Created by Stardust on 2017/11/3.
  */
-
 class AccessibilityNotificationObserver(private val mContext: Context) : NotificationListener, AccessibilityDelegate {
     private val mNotificationListeners = CopyOnWriteArrayList<NotificationListener>()
     private val mToastListeners = CopyOnWriteArrayList<ToastListener>()
 
-    override val eventTypes: Set<Int>?
+    override val eventTypes: Set<Int>
         get() = EVENT_TYPES
 
     inner class Toast(val packageName: String, texts: List<CharSequence>) {
@@ -112,7 +111,7 @@ class AccessibilityNotificationObserver(private val mContext: Context) : Notific
 
         private val EVENT_TYPES = setOf(AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED)
 
-        private val TAG = "NotificationObserver"
+        private const val TAG = "NotificationObserver"
         private val EMPTY = arrayOfNulls<String>(0)
     }
 }

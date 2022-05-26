@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 /**
  * Created by Stardust on 2017/8/1.
  */
-
 public class RootAutomatorEngine extends ScriptEngine.AbstractScriptEngine<AutoFileSource> {
 
     public static final int VERSION = 1;
@@ -34,7 +33,7 @@ public class RootAutomatorEngine extends ScriptEngine.AbstractScriptEngine<AutoF
     private static int sTouchDevice = -1;
     private static final String ROOT_AUTOMATOR_EXECUTABLE_ASSET = "binary/root_automator";
 
-    private Context mContext;
+    private final Context mContext;
     private final String mDeviceNameOrPath;
     private Thread mThread;
     private String mExecutablePath;

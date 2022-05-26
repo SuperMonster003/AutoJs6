@@ -8,7 +8,6 @@ import android.view.InputDevice;
 /**
  * Created by Stardust on 2017/8/1.
  */
-
 public class InputDevices {
 
     private static final String LOG_TAG = "InputDevices";

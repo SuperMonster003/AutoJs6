@@ -21,14 +21,13 @@ import java.util.Date;
 /**
  * Created by Stardust on 2017/8/2.
  */
-
 public class InputEventToAutoFileRecorder extends InputEventRecorder {
 
     private static final String LOG_TAG = "InputEventToAutoFileRec";
     private double mLastEventTime;
     private int mTouchDevice = -1;
-    private DataOutputStream mDataOutputStream;
-    private File mTmpFile;
+    private final DataOutputStream mDataOutputStream;
+    private final File mTmpFile;
 
     public InputEventToAutoFileRecorder(Context context) {
         try {

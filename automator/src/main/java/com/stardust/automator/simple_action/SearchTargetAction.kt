@@ -1,13 +1,10 @@
 package com.stardust.automator.simple_action
 
-import android.graphics.BitmapFactory
-
 import com.stardust.automator.UiObject
 
 /**
  * Created by Stardust on 2017/1/27.
  */
-
 abstract class SearchTargetAction(val action: Int, filter: FilterAction.Filter) : FilterAction(filter) {
 
     override fun perform(nodes: List<UiObject>): Boolean {

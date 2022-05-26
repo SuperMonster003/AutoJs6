@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
  * Created by Stardust on 2017/2/13.
  * http://stackoverflow.com/questions/31759171/recyclerview-and-java-lang-indexoutofboundsexception-inconsistency-detected-in
  */
-
 public class WrapContentLinearLayoutManager extends LinearLayoutManager {
     public WrapContentLinearLayoutManager(Context context) {
         super(context);

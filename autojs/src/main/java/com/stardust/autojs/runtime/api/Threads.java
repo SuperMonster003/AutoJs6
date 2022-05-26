@@ -15,13 +15,12 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by Stardust on 2017/12/3.
  */
-
 public class Threads {
 
     private final HashSet<Thread> mThreads = new HashSet<>();
-    private ScriptRuntime mRuntime;
+    private final ScriptRuntime mRuntime;
     private final Thread mMainThread;
-    private MainThreadProxy mMainThreadProxy;
+    private final MainThreadProxy mMainThreadProxy;
     private int mSpawnCount = 0;
     private boolean mExit = false;
 
@@ -46,7 +45,7 @@ public class Threads {
         TimerThread thread = createThread(runnable);
         synchronized (mThreads) {
             if (mExit) {
-                throw new IllegalStateException("script exiting");
+                throw new IllegalStateException("Script is on exiting");
             }
             mThreads.add(thread);
             thread.setName(mMainThread.getName() + " (Spawn-" + mSpawnCount + ")");

@@ -17,13 +17,10 @@ import com.stardust.enhancedfloaty.FloatyService;
 import com.stardust.enhancedfloaty.ResizableFloaty;
 import com.stardust.enhancedfloaty.ResizableFloatyWindow;
 import com.stardust.enhancedfloaty.WindowBridge;
-import com.stardust.enhancedfloaty.gesture.DragGesture;
-import com.stardust.enhancedfloaty.gesture.ResizeGesture;
 
 /**
  * Created by Stardust on 2017/12/5.
  */
-
 public class BaseResizableFloatyWindow extends ResizableFloatyWindow {
 
     public interface ViewSupplier {
@@ -32,7 +29,7 @@ public class BaseResizableFloatyWindow extends ResizableFloatyWindow {
 
     }
 
-    private VolatileDispose<RuntimeException> mInflateException = new VolatileDispose<>();
+    private final VolatileDispose<RuntimeException> mInflateException = new VolatileDispose<>();
     private View mCloseButton;
     private int mOffset;
 
@@ -123,9 +120,9 @@ public class BaseResizableFloatyWindow extends ResizableFloatyWindow {
     private static class MyFloaty implements ResizableFloaty {
 
 
-        private ViewSupplier mContentViewSupplier;
+        private final ViewSupplier mContentViewSupplier;
         private View mRootView;
-        private Context mContext;
+        private final Context mContext;
 
 
         public MyFloaty(Context context, ViewSupplier supplier) {

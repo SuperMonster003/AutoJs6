@@ -22,7 +22,6 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Created by Stardust on 2017/11/27.
  */
-
 public class TimedTaskScheduler {
 
     private static final String LOG_TAG = "TimedTaskScheduler";

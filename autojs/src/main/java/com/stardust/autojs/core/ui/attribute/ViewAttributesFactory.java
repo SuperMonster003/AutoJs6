@@ -19,7 +19,7 @@ public class ViewAttributesFactory {
         ViewAttributes create(ResourceParser resourceParser, View view);
     }
 
-    private static HashMap<Class<? extends View>, ViewAttributesCreator> sViewAttributesCreators = new HashMap<>();
+    private static final HashMap<Class<? extends View>, ViewAttributesCreator> sViewAttributesCreators = new HashMap<>();
 
     static {
         sViewAttributesCreators.put(ImageView.class, ImageViewAttributes::new);

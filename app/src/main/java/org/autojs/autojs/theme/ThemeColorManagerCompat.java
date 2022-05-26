@@ -1,6 +1,5 @@
 package org.autojs.autojs.theme;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -10,7 +9,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.stardust.app.GlobalAppContext;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import com.stardust.theme.ThemeColor;
 import com.stardust.theme.ThemeColorManager;
@@ -18,7 +17,6 @@ import com.stardust.theme.ThemeColorManager;
 /**
  * Created by Stardust on 2017/3/12.
  */
-
 public class ThemeColorManagerCompat {
 
     private static SharedPreferences sSharedPreferences;

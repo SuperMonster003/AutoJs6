@@ -1,10 +1,8 @@
 package com.stardust.autojs.rhino.continuation
 
 import com.stardust.autojs.core.looper.Timer
-import com.stardust.autojs.core.looper.TimerThread
 import com.stardust.autojs.rhino.AutoJsContext
 import com.stardust.autojs.runtime.ScriptRuntime
-
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.Scriptable

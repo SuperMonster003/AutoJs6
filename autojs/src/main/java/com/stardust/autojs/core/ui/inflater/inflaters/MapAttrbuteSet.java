@@ -8,11 +8,10 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/5.
  */
-
 public class MapAttrbuteSet implements AttributeSet {
-    private Map<String, String> mMap;
-    private ArrayList<String> mKeys;
-    private ArrayList<String> mValues;
+    private final Map<String, String> mMap;
+    private final ArrayList<String> mKeys;
+    private final ArrayList<String> mValues;
 
     public MapAttrbuteSet(Map<String, String> map) {
         mMap = map;
@@ -62,7 +61,7 @@ public class MapAttrbuteSet implements AttributeSet {
     @Override
     public boolean getAttributeBooleanValue(String namespace, String attribute, boolean defaultValue) {
         String v = mMap.get(attribute);
-        return v == null ? defaultValue : Boolean.valueOf(v);
+        return v == null ? defaultValue : Boolean.parseBoolean(v);
 
     }
 

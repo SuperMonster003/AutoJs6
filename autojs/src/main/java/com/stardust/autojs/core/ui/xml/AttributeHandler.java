@@ -1,7 +1,5 @@
 package com.stardust.autojs.core.ui.xml;
 
-import android.util.Log;
-
 import org.w3c.dom.Node;
 
 import java.util.HashMap;
@@ -10,14 +8,13 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/5/14.
  */
-
 public interface AttributeHandler {
 
     boolean handle(String nodeName, Node attr, StringBuilder layoutXml);
 
     class AttrNameRouter implements AttributeHandler {
 
-        private Map<String, AttributeHandler> mHandlerMap = new HashMap<>();
+        private final Map<String, AttributeHandler> mHandlerMap = new HashMap<>();
         private AttributeHandler mDefaultHandler;
 
         @Override
@@ -41,8 +38,8 @@ public interface AttributeHandler {
 
     class MappedAttributeHandler implements AttributeHandler {
 
-        private Map<String, String> mAttrNameMap = new HashMap<>();
-        private Map<String, Map<String, String>> mAttrValueMap = new HashMap<>();
+        private final Map<String, String> mAttrNameMap = new HashMap<>();
+        private final Map<String, Map<String, String>> mAttrValueMap = new HashMap<>();
 
         @Override
         public boolean handle(String nodeName, Node attr, StringBuilder layoutXml) {
@@ -60,11 +57,7 @@ public interface AttributeHandler {
         }
 
         public MappedAttributeHandler mapValue(String attrName, String oldValue, String newValue) {
-            Map<String, String> valueMap = mAttrValueMap.get(attrName);
-            if (valueMap == null) {
-                valueMap = new HashMap<>();
-                mAttrValueMap.put(attrName, valueMap);
-            }
+            Map<String, String> valueMap = mAttrValueMap.computeIfAbsent(attrName, k -> new HashMap<>());
             valueMap.put(oldValue, newValue);
             return this;
         }
@@ -97,7 +90,7 @@ public interface AttributeHandler {
 
     class DimenHandler implements AttributeHandler {
 
-        private String mAttrName;
+        private final String mAttrName;
 
         public DimenHandler(String attrName) {
             mAttrName = attrName;
@@ -141,7 +134,7 @@ public interface AttributeHandler {
 
     class MarginPaddingHandler implements AttributeHandler {
 
-        private String mAttrName;
+        private final String mAttrName;
 
         public MarginPaddingHandler(String attrName) {
             mAttrName = attrName;

@@ -5,7 +5,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by Stardust on 2017/8/6.
  */
-
 public class KeyEventDispatcher {
 
     public interface OnKeyListener {
@@ -16,9 +15,9 @@ public class KeyEventDispatcher {
         void onCamera();
     }
 
-    private static KeyEventDispatcher sSingleton = new KeyEventDispatcher();
+    private static final KeyEventDispatcher sSingleton = new KeyEventDispatcher();
 
-    private CopyOnWriteArrayList<OnKeyListener> mOnKeyListeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<OnKeyListener> mOnKeyListeners = new CopyOnWriteArrayList<>();
 
     public static KeyEventDispatcher getSingleton() {
         return sSingleton;

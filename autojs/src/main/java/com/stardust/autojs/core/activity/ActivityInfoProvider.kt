@@ -5,11 +5,9 @@ import android.app.usage.UsageStatsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityWindowInfo
-import androidx.annotation.RequiresApi
 import com.stardust.app.isUsageStatsPermissionGranted
 import com.stardust.autojs.core.util.Shell
 import com.stardust.view.accessibility.AccessibilityDelegate
@@ -18,7 +16,6 @@ import java.util.regex.Pattern
 /**
  * Created by Stardust on 2017/3/9.
  */
-
 class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate {
 
     private val mPackageManager: PackageManager = context.packageManager
@@ -136,7 +133,6 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         return shell
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     fun getLatestPackageByUsageStats(): String {
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val current = System.currentTimeMillis()
@@ -174,7 +170,8 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
     }
 
     companion object {
-        private val WINDOW_PATTERN = Pattern.compile("Window\\{\\S+\\s\\S+\\s([^\\/]+)\\/?([^}]+)?\\}")
+        @Suppress("RegExpRedundantEscape")
+        private val WINDOW_PATTERN = Pattern.compile("""Window\{\S+\s\S+\s([^/]+)/?([^}]+)?\}""")
         private val DUMP_WINDOW_COMMAND = """
             oldActivity=""
             currentActivity=`dumpsys window windows | grep -E 'mCurrentFocus'`
@@ -192,7 +189,6 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 private fun AccessibilityService.getWindow(windowId: Int): AccessibilityWindowInfo? {
     windows.forEach {
         if (it.id == windowId) {

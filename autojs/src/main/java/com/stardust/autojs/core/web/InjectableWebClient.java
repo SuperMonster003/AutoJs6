@@ -21,22 +21,16 @@ import java.util.Queue;
 /**
  * Created by Stardust on 2017/4/1.
  */
-
 public class InjectableWebClient extends WebViewClient {
 
     private static final String TAG = "InjectableWebClient";
 
-    private Queue<Pair<String, ValueCallback<String>>> mToInjectJavaScripts = new LinkedList<>();
-    private final ValueCallback<String> defaultCallback = new ValueCallback<String>() {
-        @Override
-        public void onReceiveValue(String value) {
-            Log.i(TAG, "onReceiveValue: " + value);
-        }
-    };
+    private final Queue<Pair<String, ValueCallback<String>>> mToInjectJavaScripts = new LinkedList<>();
+    private final ValueCallback<String> defaultCallback = value -> Log.i(TAG, "onReceiveValue: " + value);
     private WebView mWebView;
-    private Context mContext;
-    private Scriptable mScriptable;
-    private ScriptBridge mScriptBridge = new ScriptBridge();
+    private final Context mContext;
+    private final Scriptable mScriptable;
+    private final ScriptBridge mScriptBridge = new ScriptBridge();
 
     public InjectableWebClient(Context context, Scriptable scriptable) {
         mContext = context;

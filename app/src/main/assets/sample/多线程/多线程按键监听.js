@@ -5,7 +5,7 @@ threads.start(function(){
     events.observeKey();
     events.on("key_down", function(keyCode, events){
         //音量键关闭脚本
-        if(keyCode == keys.volume_up){
+        if(keyCode === keys.volume_up){
             exit();
         }
     });

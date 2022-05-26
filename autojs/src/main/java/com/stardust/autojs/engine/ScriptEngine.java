@@ -5,7 +5,6 @@ import androidx.annotation.CallSuper;
 import com.stardust.autojs.execution.ScriptExecution;
 import com.stardust.autojs.script.ScriptSource;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * If you want to stop the engine in other threads, you should call {@link ScriptEngine#forceStop()}.
  * </p>
  */
-
 public interface ScriptEngine<S extends ScriptSource> {
 
     String TAG_ENV_PATH = "env_path";
@@ -68,11 +66,11 @@ public interface ScriptEngine<S extends ScriptSource> {
     abstract class AbstractScriptEngine<S extends ScriptSource> implements ScriptEngine<S> {
 
 
-        private Map<String, Object> mTags = new ConcurrentHashMap<>();
+        private final Map<String, Object> mTags = new ConcurrentHashMap<>();
         private OnDestroyListener mOnDestroyListener;
         private volatile boolean mDestroyed = false;
         private Throwable mUncaughtException;
-        private volatile AtomicInteger mId = new AtomicInteger(ScriptExecution.NO_ID);
+        private final AtomicInteger mId = new AtomicInteger(ScriptExecution.NO_ID);
 
         @Override
         public void setTag(String key, Object value) {

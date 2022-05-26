@@ -18,7 +18,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/5.
  */
-
 public class ToolbarInflater<V extends Toolbar> extends BaseViewInflater<V> {
 
 

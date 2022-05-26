@@ -5,15 +5,16 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 
 import android.os.Looper;
-import android.util.Log;
 
 import org.opencv.android.OpenCVLoader;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 /**
  * Created by Stardust on 2018/4/2.
  */
-
 public class OpenCVHelper {
 
     public interface InitializeCallback {
@@ -21,6 +22,7 @@ public class OpenCVHelper {
     }
 
     private static final String TAG = "OpenCVHelper";
+    private static final Executor executor = Executors.newSingleThreadExecutor();
     private static boolean sInitialized = false;
 
     public static MatOfPoint newMatOfPoint(Mat mat) {
@@ -47,7 +49,7 @@ public class OpenCVHelper {
         if (!sInitialized) {
             sInitialized = true;
             if (Looper.getMainLooper() == Looper.myLooper()) {
-                new Thread(() -> init(callback)).start();
+                executor.execute(() -> init(callback));
             } else {
                 init(callback);
             }

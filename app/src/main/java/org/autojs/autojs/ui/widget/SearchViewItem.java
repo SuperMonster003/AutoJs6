@@ -10,7 +10,6 @@ import android.view.MenuItem;
 /**
  * Created by Stardust on 2017/10/25.
  */
-
 public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, SearchView.OnQueryTextListener {
 
     public interface QueryCallback {
@@ -18,7 +17,7 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
     }
 
     private QueryCallback mQueryCallback;
-    private MenuItem mSearchMenuItem;
+    private final MenuItem mSearchMenuItem;
 
     public SearchViewItem(Activity activity, MenuItem searchMenuItem) {
         mSearchMenuItem = searchMenuItem;

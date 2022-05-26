@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 /**
  * Created by Stardust on 2017/11/3.
  */
-
 public class Drawables {
 
     private static final Pattern DATA_PATTERN = Pattern.compile("data:(\\w+/\\w+);base64,(.+)");

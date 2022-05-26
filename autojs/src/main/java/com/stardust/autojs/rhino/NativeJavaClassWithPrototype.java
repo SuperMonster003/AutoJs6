@@ -2,7 +2,6 @@ package com.stardust.autojs.rhino;
 
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.NativeJavaClass;
-import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,11 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Stardust on 2018/4/4.
  */
-
 public class NativeJavaClassWithPrototype extends NativeJavaClass {
 
     private static final Object NULL = new Object();
-    private ConcurrentHashMap<String, Object> mProperties = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Object> mProperties = new ConcurrentHashMap<>();
 
     public NativeJavaClassWithPrototype(Scriptable scope, Class<?> javaClass) {
         super(scope, javaClass);

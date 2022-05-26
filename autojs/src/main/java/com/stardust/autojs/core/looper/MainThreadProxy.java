@@ -1,5 +1,7 @@
 package com.stardust.autojs.core.looper;
 
+import androidx.annotation.NonNull;
+
 import com.stardust.autojs.runtime.ScriptRuntime;
 import com.stardust.lang.ThreadCompat;
 
@@ -8,11 +10,10 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/12/28.
  */
-
 public class MainThreadProxy {
 
     private final Thread mThread;
-    private ScriptRuntime mRuntime;
+    private final ScriptRuntime mRuntime;
 
     public MainThreadProxy(Thread thread, ScriptRuntime runtime) {
         mThread = thread;
@@ -201,6 +202,7 @@ public class MainThreadProxy {
         return mThread.getState();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return mThread.toString();

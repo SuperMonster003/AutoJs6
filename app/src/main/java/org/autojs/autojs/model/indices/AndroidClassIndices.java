@@ -41,12 +41,12 @@ public class AndroidClassIndices {
     @SuppressLint("StaticFieldLeak")
     private static AndroidClassIndices sInstance;
 
-    private static Type ANDROID_CLASS_LIST_TYPE = new TypeToken<List<AndroidClass>>() {
+    private static final Type ANDROID_CLASS_LIST_TYPE = new TypeToken<List<AndroidClass>>() {
     }.getType();
-    //packageName -> package classes
-    private LinkedHashMap<String, ArrayList<ClassSearchingItem>> mPackages = new LinkedHashMap<>();
-    private Context mContext;
-    private ExecutorService mSingleThreadExecutor = new ThreadPoolExecutor(1, 1,
+    // packageName -> package classes
+    private final LinkedHashMap<String, ArrayList<ClassSearchingItem>> mPackages = new LinkedHashMap<>();
+    private final Context mContext;
+    private final ExecutorService mSingleThreadExecutor = new ThreadPoolExecutor(1, 1,
             2, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
     private Throwable mLoadThrowable;
 
@@ -109,14 +109,10 @@ public class AndroidClassIndices {
 
 
     private void load(Reader reader) throws IOException {
-        try {
+        try (reader) {
             Gson gson = new Gson();
             ArrayList<AndroidClass> classes = gson.fromJson(reader, ANDROID_CLASS_LIST_TYPE);
             load(classes);
-        } catch (RuntimeException e) {
-            throw e;
-        } finally {
-            reader.close();
         }
     }
 

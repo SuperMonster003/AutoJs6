@@ -19,14 +19,13 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import io.reactivex.subjects.PublishSubject;
 
 /**
  * Created by Stardust on 2017/9/24.
  */
-
 public class FloatingActionMenu extends FrameLayout implements View.OnClickListener {
 
     public interface OnFloatingActionButtonClickListener {
@@ -131,11 +130,11 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
         LayoutInflater inflater = LayoutInflater.from(getContext());
         for (int i = 0; i < icons.length; i++) {
             mFabContainers[i] = inflater.inflate(R.layout.item_floating_action_menu, this, false);
-            mFabs[i] = (FloatingActionButton) mFabContainers[i].findViewById(R.id.floating_action_button);
+            mFabs[i] = mFabContainers[i].findViewById(R.id.floating_action_button);
             mFabs[i].setImageResource(icons[i]);
             mFabs[i].setOnClickListener(this);
             mFabs[i].setTag(i);
-            mLabels[i] = (TextView) mFabContainers[i].findViewById(R.id.label);
+            mLabels[i] = mFabContainers[i].findViewById(R.id.label);
             mLabels[i].setText(labels[i]);
             addView(mFabContainers[i]);
         }

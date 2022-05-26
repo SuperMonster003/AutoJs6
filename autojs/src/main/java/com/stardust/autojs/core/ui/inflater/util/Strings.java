@@ -7,7 +7,6 @@ import android.view.View;
 /**
  * Created by Stardust on 2017/11/4.
  */
-
 public class Strings {
 
 

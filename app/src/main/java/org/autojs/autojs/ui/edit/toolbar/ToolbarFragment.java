@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.edit.toolbar;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
@@ -37,7 +38,7 @@ public abstract class ToolbarFragment extends Fragment implements View.OnClickLi
     public abstract List<Integer> getMenuItemIds();
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         updateMenuItemStatus(view);
     }

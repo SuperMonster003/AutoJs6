@@ -2,10 +2,6 @@ package com.stardust;
 
 import org.junit.Test;
 
-import java.net.Socket;
-
-import static org.junit.Assert.*;
-
 /**
  * Example local unit test, which will execute on the development machine (host).
  *

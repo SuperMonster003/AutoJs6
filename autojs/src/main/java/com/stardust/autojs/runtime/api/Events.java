@@ -1,20 +1,17 @@
 package com.stardust.autojs.runtime.api;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
-import android.os.Build;
 import android.os.Handler;
 import android.provider.Settings;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.stardust.autojs.R;
 import com.stardust.autojs.core.accessibility.AccessibilityBridge;
-import com.stardust.autojs.core.boardcast.BroadcastEmitter;
+import com.stardust.autojs.core.broadcast.BroadcastEmitter;
 import com.stardust.autojs.core.eventloop.EventEmitter;
 import com.stardust.autojs.core.inputevent.InputEventObserver;
 import com.stardust.autojs.core.inputevent.TouchObserver;
@@ -38,7 +35,6 @@ import java.util.Set;
 /**
  * Created by Stardust on 2017/7/18.
  */
-
 public class Events extends EventEmitter implements OnKeyListener, TouchObserver.OnTouchEventListener, NotificationListener, AccessibilityNotificationObserver.ToastListener, AccessibilityService.GestureListener {
 
     private static final String PREFIX_KEY_DOWN = "__key_down__#";
@@ -103,8 +99,9 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
             return;
         AccessibilityService service = getAccessibilityService();
 
-        // @Dubious by SuperMonster003 as of Feb 11, 2022.
-        //  ! condition may be always false ?
+        // @Dubious by SuperMonster003 on Feb 11, 2022.
+        //  ! Condition may be always false?
+
         // if ((service.getServiceInfo().flags & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) == 0) {
         //     throw new ScriptException(mContext.getString(R.string.text_should_enable_key_observing));
         // }
@@ -217,9 +214,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         mTouchEventTimeout = touchEventTimeout;
     }
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void observeNotification() {
-        ScriptRuntime.requiresApi(18);
         if (mListeningNotification)
             return;
         mListeningNotification = true;

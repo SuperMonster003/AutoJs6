@@ -8,22 +8,21 @@ import java.util.TimerTask;
 /**
  * Created by Stardust on 2017/4/5.
  */
-
 public class SimpleCache<T> {
 
     public interface Supplier<T> {
         T get(String key);
     }
 
-    private long mPersistTime;
-    private LimitedHashMap<String, Item<T>> mCache;
-    private Timer mCacheCheckTimer;
-    private Supplier<T> mSupplier;
+    private final long mPersistTime;
+    private final LimitedHashMap<String, Item<T>> mCache;
+    private final Timer mCacheCheckTimer;
+    private final Supplier<T> mSupplier;
 
     public SimpleCache(long persistTime, int cacheSize, long checkInterval, Supplier<T> supplier) {
         mPersistTime = persistTime;
         mCache = new LimitedHashMap<>(cacheSize);
-        mSupplier = supplier == null ? new NullSupplier<T>() : supplier;
+        mSupplier = supplier == null ? new NullSupplier<>() : supplier;
         mCacheCheckTimer = new Timer();
         startCacheCheck(checkInterval);
     }
@@ -81,18 +80,13 @@ public class SimpleCache<T> {
 
 
     private synchronized void checkCache() {
-        Iterator<Map.Entry<String, Item<T>>> iterator = mCache.entrySet().iterator();
-        while (iterator.hasNext()) {
-            if (!iterator.next().getValue().isValid()) {
-                iterator.remove();
-            }
-        }
+        mCache.entrySet().removeIf(stringItemEntry -> !stringItemEntry.getValue().isValid());
     }
 
     private class Item<T> {
 
         T value;
-        private long mSaveMillis;
+        private final long mSaveMillis;
 
 
         Item(T value) {

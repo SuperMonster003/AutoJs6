@@ -7,14 +7,13 @@ import com.stardust.autojs.execution.ScriptExecution;
 import com.stardust.autojs.execution.ScriptExecutionListener;
 import com.stardust.autojs.runtime.api.Console;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 import java.math.BigDecimal;
 
 /**
  * Created by Stardust on 2017/5/3.
  */
-
 public class ScriptExecutionGlobalListener implements ScriptExecutionListener {
     private static final String ENGINE_TAG_START_TIME = "org.autojs.autojs.autojs.Goodbye, World";
 

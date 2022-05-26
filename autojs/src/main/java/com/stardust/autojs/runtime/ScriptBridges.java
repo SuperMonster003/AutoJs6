@@ -3,7 +3,6 @@ package com.stardust.autojs.runtime;
 /**
  * Created by Stardust on 2017/7/21.
  */
-
 public class ScriptBridges {
 
 
@@ -41,7 +40,7 @@ public class ScriptBridges {
     }
 
 
-    public Object toArray(Iterable c) {
+    public Object toArray(Iterable<?> c) {
         checkBridges();
         return mBridges.toArray(c);
     }

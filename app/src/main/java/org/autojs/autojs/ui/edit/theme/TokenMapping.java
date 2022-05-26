@@ -11,7 +11,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2018/2/21.
  */
-
 public class TokenMapping {
 
 

@@ -13,7 +13,7 @@ import com.stardust.enhancedfloaty.FloatyService;
 import com.stardust.view.accessibility.LayoutInspector;
 import com.stardust.view.accessibility.NodeInfo;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.codegeneration.CodeGenerateDialog;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
@@ -24,7 +24,6 @@ import java.util.Arrays;
 /**
  * Created by Stardust on 2017/3/12.
  */
-
 public class LayoutBoundsFloatyWindow extends FullScreenFloatyWindow {
 
     private LayoutBoundsView mLayoutBoundsView;
@@ -33,7 +32,7 @@ public class LayoutBoundsFloatyWindow extends FullScreenFloatyWindow {
     private NodeInfoView mNodeInfoView;
     private NodeInfo mSelectedNode;
     private Context mContext;
-    private NodeInfo mRootNode;
+    private final NodeInfo mRootNode;
 
     public LayoutBoundsFloatyWindow(NodeInfo rootNode) {
         mRootNode = rootNode;

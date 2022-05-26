@@ -1,17 +1,14 @@
 package com.stardust.automator
 
 import android.graphics.Rect
-import android.os.Build
 import com.stardust.automator.filter.*
 import com.stardust.automator.search.BFS
 import com.stardust.automator.search.DFS
 import com.stardust.automator.search.SearchAlgorithm
-import java.lang.IllegalArgumentException
 
 /**
  * Created by Stardust on 2017/3/8.
  */
-
 open class UiGlobalSelector {
 
     private val mSelector = Selector()
@@ -162,7 +159,7 @@ open class UiGlobalSelector {
     fun drawingOrder(order: Int): UiGlobalSelector {
         mSelector.add(object : Filter {
             override fun filter(node: UiObject): Boolean {
-                return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && node.drawingOrder == order
+                return node.drawingOrder == order
             }
 
             override fun toString(): String {

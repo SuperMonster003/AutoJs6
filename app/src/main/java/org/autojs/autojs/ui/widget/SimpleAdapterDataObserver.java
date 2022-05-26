@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.RecyclerView;
 /**
  * Created by Stardust on 2017/3/14.
  */
-
 public class SimpleAdapterDataObserver extends RecyclerView.AdapterDataObserver {
 
     public void onChanged() {

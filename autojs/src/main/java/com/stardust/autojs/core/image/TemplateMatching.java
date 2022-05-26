@@ -25,7 +25,6 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/11/25.
  */
-
 public class TemplateMatching {
 
     public static class Match {

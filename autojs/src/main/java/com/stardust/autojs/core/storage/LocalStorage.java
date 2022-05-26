@@ -6,11 +6,10 @@ import android.content.SharedPreferences;
 /**
  * Created by Stardust on 2017/12/3.
  */
-
 public class LocalStorage {
 
     private static final String NAME_PREFIX = "autojs.localstorage.";
-    private SharedPreferences mSharedPreferences;
+    private final SharedPreferences mSharedPreferences;
 
     public LocalStorage(Context context, String name) {
         mSharedPreferences = context.getSharedPreferences(NAME_PREFIX + name, Context.MODE_PRIVATE);

@@ -1,11 +1,9 @@
 package com.stardust.autojs.core.permission;
 
 import android.app.Activity;
-import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 public class PermissionRequestActivity extends Activity {
 
@@ -19,9 +17,7 @@ public class PermissionRequestActivity extends Activity {
             finish();
             return;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(permissions, Permissions.REQUEST_CODE);
-        }
+        requestPermissions(permissions, Permissions.REQUEST_CODE);
     }
 
     @Override

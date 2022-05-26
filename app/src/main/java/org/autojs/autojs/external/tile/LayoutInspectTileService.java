@@ -1,15 +1,12 @@
 package org.autojs.autojs.external.tile;
 
 import android.content.Intent;
-import android.os.Build;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.core.accessibility.AccessibilityServiceTool;
@@ -17,12 +14,11 @@ import com.stardust.view.accessibility.AccessibilityService;
 import com.stardust.view.accessibility.LayoutInspector;
 import com.stardust.view.accessibility.NodeInfo;
 
-import org.autojs.autojs.R;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
+import org.autojs.autojs6.R;
 
-@RequiresApi(api = Build.VERSION_CODES.N)
 public abstract class LayoutInspectTileService extends TileService implements LayoutInspector.CaptureAvailableListener {
 
     private boolean mCapturing = false;

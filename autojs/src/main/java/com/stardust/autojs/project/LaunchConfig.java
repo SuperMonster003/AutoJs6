@@ -5,7 +5,6 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Stardust on 2018/1/25.
  */
-
 public class LaunchConfig {
 
     @SerializedName("hideLogs")

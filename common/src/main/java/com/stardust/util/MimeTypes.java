@@ -9,7 +9,6 @@ import static com.stardust.pio.PFiles.getExtension;
 /**
  * Created by Stardust on 2018/2/12.
  */
-
 public class MimeTypes {
 
     @Nullable

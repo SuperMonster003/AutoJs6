@@ -21,7 +21,6 @@ import io.reactivex.subjects.PublishSubject;
 /**
  * Created by Stardust on 2017/5/11.
  */
-
 public class DevPluginService {
 
     public static DevPluginService getInstance() {
@@ -70,6 +69,7 @@ public class DevPluginService {
     }
 
     public static final String TYPE_HELLO = "hello";
+    public static final String TYPE_COMMAND = "command";
     public static final String TYPE_BYTES_COMMAND = "bytes_command";
     public static final int HANDSHAKE_TIMEOUT = JsonSocket.HANDSHAKE_TIMEOUT;
 

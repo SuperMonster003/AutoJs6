@@ -14,11 +14,10 @@ import java.util.regex.Pattern;
 /**
  * Created by Stardust on 2017/8/4.
  */
-
 public class InputEventObserver {
 
     public static class InputEvent {
-        static final Pattern PATTERN = Pattern.compile("^\\[([^\\]]*)\\]\\s+([^:]*):\\s+([^\\s]*)\\s+([^\\s]*)\\s+([^\\s]*)\\s*$");
+        static final Pattern PATTERN = Pattern.compile("^\\[([^]]*)]\\s+([^:]*):\\s+([^\\s]*)\\s+([^\\s]*)\\s+([^\\s]*)\\s*$");
 
         static InputEvent parse(String eventStr) {
             Matcher matcher = PATTERN.matcher(eventStr);
@@ -50,6 +49,7 @@ public class InputEventObserver {
         }
 
 
+        @NonNull
         @Override
         public String toString() {
             return "Event{" +
@@ -67,8 +67,8 @@ public class InputEventObserver {
     }
 
     private static InputEventObserver sGlobal;
-    private CopyOnWriteArrayList<InputEventListener> mInputEventListeners = new CopyOnWriteArrayList<>();
-    private Context mContext;
+    private final CopyOnWriteArrayList<InputEventListener> mInputEventListeners = new CopyOnWriteArrayList<>();
+    private final Context mContext;
     private Shell mShell;
 
     public InputEventObserver(Context context) {

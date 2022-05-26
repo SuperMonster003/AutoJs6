@@ -1,155 +1,27 @@
-plugins {
-    id 'com.android.application'
-    id 'com.jakewharton.butterknife'
-    id 'kotlin-android'
-    id 'kotlin-kapt'
+ext {
+    applicationId = 'org.autojs.autojs6'
+    namespace = applicationId
 }
 
-def properties = new Properties()
-def propFile = new File('sign.properties')
-def isPropFileExists = propFile.exists()
-
-isPropFileExists && properties.load(new FileInputStream(propFile))
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_16
-    }
-}
-
-// tasks.withType(JavaCompile) {
-//     options.compilerArgs << '-Xlint:deprecation' << '-Xlint:unchecked'
-// }
-
-android {
-    signingConfigs {
-        isPropFileExists && release {
-            storeFile file(properties['storeFile'])
-            keyPassword properties['keyPassword']
-            keyAlias properties['keyAlias']
-            storePassword properties['storePassword']
-        }
-    }
-    compileSdkVersion versions.project.compile
-    defaultConfig {
-        applicationId 'org.autojs.autojs'
-        minSdkVersion versions.project.mini
-        targetSdkVersion versions.project.target
-        versionCode versions.project.appVersionCode
-        versionName versions.project.appVersionName
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        multiDexEnabled true
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = [
-                        'resourcePackageName': applicationId,
-                        'androidManifestFile': "$projectDir/src/main/AndroidManifest.xml".toString()
-                ]
-            }
-        }
-    }
-    buildTypes {
-        debug {
-            shrinkResources false
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (isPropFileExists) {
-                signingConfig signingConfigs.release
-            }
-            // Disable Crashlytics reports.
-            ext.enableCrashlytics = false
-            // Disables PNG crunching for the release build type.
-            crunchPngs false
-        }
-        release {
-            shrinkResources false
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (isPropFileExists) {
-                signingConfig signingConfigs.release
-            }
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_16
-        targetCompatibility JavaVersion.VERSION_16
-        encoding = 'utf-8'
-    }
-    lintOptions {
-        abortOnError false
-        disable 'MissingTranslation'
-        disable 'ExtraTranslation'
-    }
-    configurations.all {
-        resolutionStrategy.force 'com.google.code.findbugs:jsr305:3.0.1'
-    }
-    flavorDimensions 'channel'
-    splits {
-        // Configures multiple APKs based on ABI.
-        abi {
-            // Enables building multiple APKs per ABI.
-            enable true
-
-            // By default all ABIs are included, so use reset() and include to specify that we only
-            // want APKs for x86 and x86_64.
-
-            // Resets the list of ABIs that Gradle should create APKs for to none.
-            reset()
-
-            // Specifies a list of ABIs that Gradle should create APKs for.
-            include 'x86', 'armeabi-v7a', 'arm64-v8a', 'x86_64'
-
-            // Specifies that we do not want to also generate a universal APK that includes all ABIs.
-            universalApk true
-        }
-    }
-    productFlavors {
-        common {
-            buildConfigField 'String', 'CHANNEL', '"common"'
-            buildConfigField 'String', 'APP_SINCE_DATE', "\"${versions.project.appSinceDate}\""
-        }
-    }
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            def aj = "AutoJs6"
-            def ver = versionName.replaceAll(/\s/, "-")
-
-            // FIXME by SuperMonster003 as of Mar 19, 2022.
-            //  ! Interface com.android.build.OutputFile is deprecated.
-            //  ! Another way of getting ABI is needed.
-            def abi = getFilter(com.android.build.OutputFile.ABI)
-
-            output.outputFileName = "${aj}-v${ver}-${abi ? "${abi}" : "universal"}.apk".toLowerCase()
-        }
-        variant.mergeAssetsProvider.configure {
-            doLast {
-                delete(fileTree(dir: outputDir, includes: ['declarations/**']))
-            }
-        }
-    }
-}
-
-repositories {
-    google()
+apply {
+    from rootProject.file('config.gradle')
+    plugin 'kotlin-kapt'
 }
 
 dependencies {
-    // JUnit
-    testImplementation "junit:junit:${versions.junit}"
-
     // LeakCanary
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:${versions.leakcanary}"
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:2.9.1"
 
     // Kotlin
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1-native-mt'
 
     // Android Annotations
-    kapt "org.androidannotations:androidannotations:${versions.annotations}"
-    implementation "org.androidannotations:androidannotations-api:${versions.annotations}"
+    kapt "org.androidannotations:androidannotations:4.8.0"
+    implementation "org.androidannotations:androidannotations-api:4.8.0"
 
     // ButterKnife
-    kapt "com.jakewharton:butterknife-compiler:${versions.butterKnife}"
-    implementation "com.jakewharton:butterknife:${versions.butterKnife}"
+    kapt "com.jakewharton:butterknife-compiler:10.2.3"
+    implementation "com.jakewharton:butterknife:10.2.3"
 
     // Android supports
     implementation 'androidx.cardview:cardview:1.0.0'
@@ -194,19 +66,19 @@ dependencies {
     implementation 'com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2'
 
     // Glide
-    kapt "com.github.bumptech.glide:compiler:${versions.glide}"
+    kapt "com.github.bumptech.glide:compiler:4.13.2"
 
     // Joda Time
-    implementation 'joda-time:joda-time:2.10.13'
+    implementation 'joda-time:joda-time:2.10.14'
 
     // Tasker Plugin
     implementation 'com.twofortyfouram:android-plugin-client-sdk-for-locale:4.0.3'
 
     // Flurry
-    implementation 'com.flurry.android:analytics:13.1.0'
+    implementation 'com.flurry.android:analytics:13.3.0'
 
     // Android Job
-    implementation 'com.evernote:android-job:1.4.2'
+    implementation 'com.evernote:android-job:1.4.3'
 
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
     implementation 'com.jrummyapps:colorpicker:2.1.7'
@@ -214,14 +86,8 @@ dependencies {
     implementation 'com.github.ozodrukh:CircularReveal:2.0.1'
 
     // Bugly
-    implementation project(':libs:com.tencent.bugly.crashreport-2.6.6')
+    implementation project(':libs:com.tencent.bugly.crashreport-4.0.4')
 
-    implementation project(':automator')
-    implementation project(':common')
+    // Indirect: automator, common
     implementation project(':autojs')
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
 }

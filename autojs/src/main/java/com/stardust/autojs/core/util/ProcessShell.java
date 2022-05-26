@@ -1,10 +1,8 @@
 package com.stardust.autojs.core.util;
 
-
 import android.util.Log;
 
 import com.stardust.autojs.runtime.api.AbstractShell;
-import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
 import com.stardust.autojs.util.ProcessUtils;
 import com.stardust.pio.UncheckedIOException;
 
@@ -19,7 +17,6 @@ import java.io.InputStreamReader;
  * <p>
  * 来自网络~~
  */
-
 public class ProcessShell extends AbstractShell {
 
     private static final String TAG = "ProcessShell";
@@ -29,8 +26,8 @@ public class ProcessShell extends AbstractShell {
     private BufferedReader mSucceedReader;
     private BufferedReader mErrorReader;
 
-    private StringBuilder mSucceedOutput = new StringBuilder();
-    private StringBuilder mErrorOutput = new StringBuilder();
+    private final StringBuilder mSucceedOutput = new StringBuilder();
+    private final StringBuilder mErrorOutput = new StringBuilder();
 
     public ProcessShell() {
 
@@ -202,7 +199,20 @@ public class ProcessShell extends AbstractShell {
             commandResult.error = readAll(process.getErrorStream());
             Log.d(TAG, commandResult.toString());
         } catch (Exception e) {
-            throw new ScriptInterruptedException(e);
+            // @Overwrite by SuperMonster003 on Apr 26, 2022.
+            //  ! Try write exception into commandResult and make it visible to AutoJs6 console.
+            //  ! Example (for non-root devices): log(shell('date', true));
+
+            // throw new ScriptInterruptedException(e);
+
+            String message = e.getMessage();
+            String aimErrStr = "error=";
+
+            int index = message != null ? message.indexOf(aimErrStr) : -1;
+
+            commandResult.code = index < 0 ? 1 : Integer.parseInt(message.substring(index + aimErrStr.length()).replaceAll("^(\\d+).+", "$1"));
+            commandResult.result = "";
+            commandResult.error = message != null ? message : "";
         } finally {
             try {
                 if (os != null) os.close();
@@ -234,6 +244,5 @@ public class ProcessShell extends AbstractShell {
         String[] commands = command.split("\n");
         return execCommand(commands, isRoot);
     }
-
 
 }

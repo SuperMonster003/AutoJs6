@@ -1,94 +1,174 @@
+// noinspection JSUnusedGlobalSymbols
 
-module.exports = function (runtime, scope) {
-    var rtConsole = runtime.console;
-    var console = {};
+/* Here, importClass() is not recommended for intelligent code completion in IDE like WebStorm. */
+/* The same is true of destructuring assignment syntax (like `let {Uri} = android.net`). */
 
-    console.assert = function (value, message) {
-        message = message || "";
-        rtConsole.assertTrue(value, message);
-    }
+const Log = android.util.Log;
+const Level = org.apache.log4j.Level;
+const ConsoleTool = org.autojs.autojs.tool.ConsoleTool;
+const LogConfigurator = de.mindpipe.android.logging.log4j.LogConfigurator;
 
-    console.rawInput = rtConsole.rawInput.bind(rtConsole);
+let _ = {
+    init(__runtime__, scope) {
+        this.runtime = __runtime__;
+        this.scope = scope;
 
-    console.input = function (data, param) {
-        return eval(console.rawInput.call(console, [].slice(arguments)) + "");
-    }
+        /**
+         * @type {com.stardust.autojs.core.console.ConsoleImpl}
+         */
+        this.rtConsole = __runtime__.console;
+        this.console = {};
+    },
+    getModule() {
+        return this.console;
+    },
+    selfAugment() {
+        let __ = {
+            timeTable: {
+                data: {},
+                default: 'default',
+                uptimeMillis() {
+                    return android.os.SystemClock.uptimeMillis();
+                },
+                parseLabel(label) {
+                    return label || this.default;
+                },
+                save(label) {
+                    this.data[this.parseLabel(label)] = this.uptimeMillis();
+                },
+                load(label) {
+                    return this.data[this.parseLabel(label)];
+                },
+                remove(label) {
+                    delete this.data[this.parseLabel(label)];
+                },
+                log(label, text) {
+                    _.console.log(`${this.parseLabel(label)}: ${text}ms`);
+                },
+                loadAndLog(label) {
+                    let text = this.uptimeMillis() - this.load(label);
+                    this.remove(label);
+                    this.log(label, text);
+                },
+            },
+            parseOption(value, def) {
+                return value === undefined ? def : value;
+            },
+        };
 
-    console.log = function () {
-        rtConsole.log(util.format.apply(util, arguments));
-    }
+        Object.assign(this.console, {
+            show: _.rtConsole.show.bind(_.rtConsole),
+            hide: _.rtConsole.hide.bind(_.rtConsole),
+            clear: _.rtConsole.clear.bind(_.rtConsole),
+            setSize: _.rtConsole.setSize.bind(_.rtConsole),
+            setPosition: _.rtConsole.setPosition.bind(_.rtConsole),
+            setTitle: _.rtConsole.setTitle.bind(_.rtConsole),
+            rawInput: _.rtConsole.rawInput.bind(_.rtConsole),
+            assert(value, message) {
+                _.rtConsole.assertTrue(value, message || '');
+            },
+            input(data, param) {
+                return eval(String(this.rawInput(data, param)));
+            },
+            log() {
+                _.rtConsole.log(util.format.apply(util, arguments));
+            },
+            verbose() {
+                _.rtConsole.verbose(util.format.apply(util, arguments));
+            },
+            print() {
+                _.rtConsole.print(Log.DEBUG, util.format.apply(util, arguments));
+            },
+            info() {
+                _.rtConsole.info(util.format.apply(util, arguments));
+            },
+            warn() {
+                _.rtConsole.warn(util.format.apply(util, arguments));
+            },
+            error() {
+                _.rtConsole.error(util.format.apply(util, arguments));
+            },
+            time(label) {
+                __.timeTable.save(label);
+            },
+            timeEnd(label) {
+                __.timeTable.loadAndLog(label);
+            },
+            trace: ( /* @IIFE */ () => function captureStack(message, level) {
+                let target = {};
+                Error.captureStackTrace(target, captureStack);
+                if (typeof level === 'string') {
+                    level = level.toUpperCase();
+                }
+                let msg = `${util.format(message)}\n${target.stack}`;
+                switch (level) {
+                    case Log.VERBOSE:
+                    case 'VERBOSE':
+                        _.console.verbose(msg);
+                        break;
+                    case Log.DEBUG:
+                    case 'DEBUG':
+                        _.console.debug(msg);
+                        break;
+                    case Log.INFO:
+                    case 'INFO':
+                        _.console.info(msg);
+                        break;
+                    case Log.WARN:
+                    case 'WARN':
+                        _.console.warn(msg);
+                        break;
+                    case Log.ERROR:
+                    case 'ERROR':
+                        _.console.error(msg);
+                        break;
+                    default:
+                        _.console.log(msg);
+                }
+            })(),
+            setGlobalLogConfig(config) {
+                let configurator = new LogConfigurator();
+                if (config.file) {
+                    configurator.setFileName(files.path(config.file));
+                    configurator.setUseFileAppender(true);
+                }
+                configurator.setFilePattern(__.parseOption(config.filePattern, '%m%n'));
+                configurator.setMaxFileSize(__.parseOption(config.maxFileSize, 512 * 1024));
+                configurator.setImmediateFlush(__.parseOption(config.immediateFlush, true));
+                configurator.setRootLevel(Level[__.parseOption(config.rootLevel, 'ALL').toUpperCase()]);
+                configurator.setMaxBackupSize(__.parseOption(config.maxBackupSize, 5));
+                configurator.setResetConfiguration(__.parseOption(config.resetConfiguration, true));
+                configurator.configure();
+            },
+            launch() {
+                ConsoleTool.launch();
+            },
+        });
+    },
+    scopeAugment() {
+        __asGlobal__(this.console, [
+            'print', 'log', 'warn', {err: 'error'},
+            {openConsole: 'show'}, {clearConsole: 'clear'}, {launchConsole: 'launch'},
+        ]);
+    },
+};
 
-    console.verbose = function () {
-        rtConsole.verbose(util.format.apply(util, arguments));
-    }
+let $ = {
+    getModule(__runtime__, scope) {
+        _.init(__runtime__, scope);
 
-    console.print = function () {
-        rtConsole.print(android.util.Log.DEBUG, util.format.apply(util, arguments));
-    }
+        _.selfAugment();
+        _.scopeAugment();
 
-    console.info = function () {
-        rtConsole.info(util.format.apply(util, arguments));
-    }
+        return _.getModule();
+    },
+};
 
-    console.warn = function () {
-        rtConsole.warn(util.format.apply(util, arguments));
-    }
-
-    console.error = function () {
-        rtConsole.error(util.format.apply(util, arguments));
-    }
-
-    var timers = {}, ascu = android.os.SystemClock.uptimeMillis;
-    console.time = console.time || function (label) {
-        label = label || "default";
-        timers[label] = ascu();
-    }
-
-    console.timeEnd = console.timeEnd || function (label) {
-        label = label || "default";
-        var result = ascu() - timers[label];
-        delete timers[label];
-        console.log(label + ": " + result + "ms");
-    }
-
-    console.trace = console.trace || function captureStack(message) {
-        var k = {};
-        Error.captureStackTrace(k, captureStack);
-        console.log(util.format.apply(util, arguments) + "\n" + k.stack);
-    };
-
-    console.setGlobalLogConfig = function (config) {
-        let logConfigurator = new Packages["de.mindpipe.android.logging.log4j"].LogConfigurator();
-        if (config.file) {
-            logConfigurator.setFileName(files.path(config.file));
-            logConfigurator.setUseFileAppender(true);
-        }
-        logConfigurator.setFilePattern(option(config.filePattern, "%m%n"))
-        logConfigurator.setMaxFileSize(option(config.maxFileSize, 512 * 1024));
-        logConfigurator.setImmediateFlush(option(config.immediateFlush, true));
-        let rootLevel = option(config.rootLevel, "ALL");
-        logConfigurator.setRootLevel(org.apache.log4j.Level[rootLevel.toUpperCase()]);
-        logConfigurator.setMaxBackupSize(option(config.maxBackupSize, 5));
-        logConfigurator.setResetConfiguration(option(config.resetConfiguration, true));
-        logConfigurator.configure();
-    }
-
-    function option(value, def) {
-        return value == undefined ? def : value;
-    }
-
-    console.show = rtConsole.show.bind(rtConsole);
-    console.hide = rtConsole.hide.bind(rtConsole);
-    console.clear = rtConsole.clear.bind(rtConsole);
-    console.setSize = rtConsole.setSize.bind(rtConsole);
-    console.setPosition = rtConsole.setPosition.bind(rtConsole);
-    console.setTitle = rtConsole.setTitle.bind(rtConsole);
-
-    scope.print = console.print.bind(console);
-    scope.log = console.log.bind(console);
-    scope.err = console.error.bind(console);
-    scope.openConsole = console.show.bind(console);
-    scope.clearConsole = console.clear.bind(console);
-
-    return console;
-}
+/**
+ * @param {com.stardust.autojs.runtime.ScriptRuntime} __runtime__
+ * @param {org.mozilla.javascript.Scriptable} scope
+ * @return {Internal.Console}
+ */
+module.exports = function (__runtime__, scope) {
+    return $.getModule(__runtime__, scope);
+};

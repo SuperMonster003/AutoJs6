@@ -8,7 +8,6 @@ import static com.stardust.autojs.core.record.inputevent.InputEventRecorder.pars
 /**
  * Created by Stardust on 2017/7/20.
  */
-
 public class TouchObserver implements InputEventObserver.InputEventListener {
 
 
@@ -19,7 +18,7 @@ public class TouchObserver implements InputEventObserver.InputEventListener {
     private int mTouchX, mTouchY;
     private OnTouchEventListener mOnTouchEventListener;
     private int mLastTouchX = -1, mLastTouchY = -1;
-    private InputEventObserver mInputEventObserver;
+    private final InputEventObserver mInputEventObserver;
 
     public TouchObserver(InputEventObserver observer) {
         mInputEventObserver = observer;

@@ -10,7 +10,6 @@ import java.util.Locale
 /**
  * Created by Stardust on 2017/3/9.
  */
-
 class BoundsFilter(private val mBounds: Rect, private val mType: Int) : Filter {
 
     override fun filter(node: UiObject): Boolean {

@@ -12,7 +12,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/4.
  */
-
 public class LinearLayoutInflater<V extends LinearLayout> extends ViewGroupInflater<V> {
 
     static final ValueMapper<Integer> ORIENTATIONS = new ValueMapper<Integer>("orientation")
@@ -33,10 +32,10 @@ public class LinearLayoutInflater<V extends LinearLayout> extends ViewGroupInfla
     public boolean setAttr(V view, String attr, String value, ViewGroup parent, Map<String, String> attrs) {
         switch (attr) {
             case "baselineAligned":
-                view.setBaselineAligned(Boolean.valueOf(value));
+                view.setBaselineAligned(Boolean.parseBoolean(value));
                 break;
             case "baselineAlignedChildIndex":
-                view.setBaselineAlignedChildIndex(Integer.valueOf(value));
+                view.setBaselineAlignedChildIndex(Integer.parseInt(value));
                 break;
             case "divider":
                 view.setDividerDrawable(getDrawables().parse(view, value));
@@ -45,7 +44,7 @@ public class LinearLayoutInflater<V extends LinearLayout> extends ViewGroupInfla
                 view.setGravity(Gravities.parse(value));
                 break;
             case "measureWithLargestChild":
-                view.setMeasureWithLargestChildEnabled(Boolean.valueOf(value));
+                view.setMeasureWithLargestChildEnabled(Boolean.parseBoolean(value));
                 break;
             case "orientation":
                 view.setOrientation(ORIENTATIONS.get(value));
@@ -54,7 +53,7 @@ public class LinearLayoutInflater<V extends LinearLayout> extends ViewGroupInfla
                 view.setShowDividers(SHOW_DIVIDERS.split(value));
                 break;
             case "weightSum":
-                view.setWeightSum(Float.valueOf(value));
+                view.setWeightSum(Float.parseFloat(value));
                 break;
             default:
                 return super.setAttr(view, attr, value, parent, attrs);

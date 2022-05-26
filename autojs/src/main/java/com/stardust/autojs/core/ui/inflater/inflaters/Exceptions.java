@@ -5,7 +5,6 @@ import android.view.View;
 /**
  * Created by Stardust on 2017/11/4.
  */
-
 public class Exceptions {
 
     public static final RuntimeException NO_EXCEPTION = new RuntimeException();

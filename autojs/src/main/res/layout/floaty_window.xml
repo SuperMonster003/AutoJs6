@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
     <FrameLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/floaty_window_offset">
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/floaty_window_offset">
 
     </FrameLayout>
 
     <ImageView
-        android:id="@+id/resizer"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_gravity="bottom|right"
-        android:background="@drawable/circle_cool_black"
-        android:padding="6dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_resizer"
-        android:tint="@android:color/white"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+            android:id="@+id/resizer"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="bottom|end"
+            android:background="@drawable/circle_cool_black"
+            android:padding="6dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_resizer"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:tint="@android:color/white" />
 
     <ImageView
-        android:id="@+id/close"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_gravity="top|right"
-        android:background="@drawable/circle_cool_black"
-        android:padding="5dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_close_white_24dp"
-        android:tint="@android:color/white"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+            android:id="@+id/close"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="top|end"
+            android:background="@drawable/circle_cool_black"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_close_white_24dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:tint="@android:color/white" />
 
     <ImageView
-        android:id="@+id/move_cursor"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_gravity="top|left"
-        android:background="@drawable/circle_cool_black"
-        android:padding="5dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_move_cursor"
-        android:tint="@android:color/white"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+            android:id="@+id/move_cursor"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="top|start"
+            android:background="@drawable/circle_cool_black"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_move_cursor"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:tint="@android:color/white" />
 
 </FrameLayout>

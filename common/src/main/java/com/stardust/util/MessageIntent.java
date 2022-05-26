@@ -9,7 +9,6 @@ import java.util.HashMap;
 /**
  * Created by Stardust on 2017/6/27.
  */
-
 public class MessageIntent extends Intent {
 
     private HashMap<String, Object> mObjectExtras;

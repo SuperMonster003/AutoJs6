@@ -11,7 +11,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/29.
  */
-
 public class RadioGroupInflater<V extends RadioGroup> extends LinearLayoutInflater<V> {
 
     private Integer mCheckedButton;

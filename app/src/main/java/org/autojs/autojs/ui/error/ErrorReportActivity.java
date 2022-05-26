@@ -9,8 +9,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
-import org.autojs.autojs.BuildConfig;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.BuildConfig;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import org.autojs.autojs.ui.BaseActivity;
 
@@ -22,7 +22,6 @@ import java.util.TimerTask;
 /**
  * Created by Stardust on 2017/2/2.
  */
-
 public class ErrorReportActivity extends BaseActivity {
 
     private static final String TAG = "ErrorReportActivity";

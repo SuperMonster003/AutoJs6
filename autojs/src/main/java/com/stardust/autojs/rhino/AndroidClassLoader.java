@@ -25,7 +25,6 @@ import dalvik.system.DexClassLoader;
 /**
  * Created by Stardust on 2017/4/5.
  */
-
 public class AndroidClassLoader extends ClassLoader implements GeneratedClassLoader {
 
     private static final String LOG_TAG = "AndroidClassLoader";

@@ -3,7 +3,6 @@ package com.stardust.util;
 /**
  * Created by Stardust on 2017/3/12.
  */
-
 public class MessageEvent {
 
     public String message;

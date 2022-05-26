@@ -3,13 +3,14 @@ package org.autojs.autojs.tool;
 /* Created by Stardust on 2017/2/2 */
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.stardust.app.GlobalAppContext;
 
-import org.autojs.autojs.BuildConfig;
+import org.autojs.autojs6.BuildConfig;
 import org.mozilla.javascript.RhinoException;
 
 import com.stardust.view.accessibility.AccessibilityService;
@@ -25,7 +26,7 @@ public class CrashHandler extends CrashReport.CrashHandleCallback implements Unc
     private static long firstCrashMillis = 0;
     private final Class<?> mErrorReportClass;
     private UncaughtExceptionHandler mBuglyHandler;
-    private UncaughtExceptionHandler mSystemHandler;
+    private final UncaughtExceptionHandler mSystemHandler;
 
     public CrashHandler(Class<?> errorReportClass) {
         this.mErrorReportClass = errorReportClass;
@@ -36,7 +37,7 @@ public class CrashHandler extends CrashReport.CrashHandleCallback implements Unc
         mBuglyHandler = buglyHandler;
     }
 
-    public void uncaughtException(Thread thread, Throwable ex) {
+    public void uncaughtException(@NonNull Thread thread, @NonNull Throwable ex) {
         Log.e(TAG, "Uncaught Exception", ex);
         if (thread != Looper.getMainLooper().getThread()) {
             if(!(ex instanceof RhinoException)){

@@ -8,19 +8,17 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
 import com.google.android.material.snackbar.Snackbar
 import com.stardust.util.ClipboardUtil
 import com.stardust.util.sortedArrayOf
 import com.stardust.view.accessibility.NodeInfo
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration
-import org.autojs.autojs.R
+import org.autojs.autojs6.R
 import java.lang.reflect.Field
 
 /**
  * Created by Stardust on 2017/3/10.
  */
-
 class NodeInfoView : RecyclerView {
 
     private val mData = Array(FIELDS.size + 1) { Array(2) { "" } }
@@ -71,8 +69,8 @@ class NodeInfoView : RecyclerView {
 
     private inner class Adapter : RecyclerView.Adapter<ViewHolder>() {
 
-        internal val VIEW_TYPE_HEADER = 0
-        internal val VIEW_TYPE_ITEM = 1
+        val VIEW_TYPE_HEADER = 0
+        val VIEW_TYPE_ITEM = 1
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val layoutRes = if (viewType == VIEW_TYPE_HEADER) R.layout.node_info_view_header else R.layout.node_info_view_item
@@ -95,7 +93,7 @@ class NodeInfoView : RecyclerView {
 
     internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        val attrName: TextView = itemView.findViewById(R.id.name);
+        val attrName: TextView = itemView.findViewById(R.id.name)
         val attrValue: TextView = itemView.findViewById(R.id.value)
 
         init {

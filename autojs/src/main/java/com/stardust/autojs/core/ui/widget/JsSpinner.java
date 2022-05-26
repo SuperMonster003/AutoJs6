@@ -124,10 +124,9 @@ public class JsSpinner extends androidx.appcompat.widget.AppCompatSpinner {
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             View view = super.getView(position, convertView, parent);
-            if (!(view instanceof TextView)) {
+            if (!(view instanceof TextView textView)) {
                 return view;
             }
-            TextView textView = (TextView) view;
             if (mTextColor != 0) {
                 textView.setTextColor(mTextColor);
             }
@@ -143,10 +142,9 @@ public class JsSpinner extends androidx.appcompat.widget.AppCompatSpinner {
         @Override
         public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             View view = super.getDropDownView(position, convertView, parent);
-            if (!(view instanceof TextView)) {
+            if (!(view instanceof TextView textView)) {
                 return view;
             }
-            TextView textView = (TextView) view;
             if (mEntryTextColor != 0) {
                 textView.setTextColor(mEntryTextColor);
             }

@@ -18,7 +18,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/30.
  */
-
 public class JsImageViewInflater extends ImageViewInflater<JsImageView> {
 
 

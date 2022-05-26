@@ -3,21 +3,46 @@ package com.stardust.util;
 /**
  * Created by Stardust on 2017/4/3.
  */
-
 public class SdkVersionUtil {
 
     private static final String[] SDK_VERSIONS = {
-            "1.0", "1.1", "1.5", "1.6", "2.0", "2.0.1", "2.1.x", "2.2.x",
-            "2.3", "2.3.3", "3.0.x", "3.1.x", "3.2", "4.0", "4.0.3", "4.1",
-            "4.2", "4.3", "4.4.2", "4.4W", "5.0", "5.1", "6.0", "7.0", "7.1",
-            "8.0", "8.1", "9", "10", "11", "12"
+            /* placeholder */ null,
+            /* api: 1 */ "1.0",
+            /* api: 2 */ "1.1",
+            /* api: 3 */ "1.5",
+            /* api: 4 */ "1.6",
+            /* api: 5 */ "2.0",
+            /* api: 6 */ "2.0.1",
+            /* api: 7 */ "2.1.x",
+            /* api: 8 */ "2.2.x",
+            /* api: 9 */ "2.3",
+            /* api: 10 */ "2.3.3",
+            /* api: 11 */ "3.0.x",
+            /* api: 12 */ "3.1.x",
+            /* api: 13 */ "3.2",
+            /* api: 14 */ "4.0",
+            /* api: 15 */ "4.0.3",
+            /* api: 16 */ "4.1",
+            /* api: 17 */ "4.2",
+            /* api: 18 */ "4.3",
+            /* api: 19 */ "4.4.2",
+            /* api: 20 */ "4.4W",
+            /* api: 21 */ "5.0",
+            /* api: 22 */ "5.1",
+            /* api: 23 */ "6.0",
+            /* api: 24 */ "7.0",
+            /* api: 25 */ "7.1",
+            /* api: 26 */ "8.0",
+            /* api: 27 */ "8.1",
+            /* api: 28 */ "9",
+            /* api: 29 */ "10",
+            /* api: 30 */ "11",
+            /* api: 31 */ "12",
+            /* api: 32 */ "13"
     };
 
     public static String sdkIntToString(int i) {
-        if (i > 31) {
-            return "Unknown";
-        }
-        return SDK_VERSIONS[i - 1];
+        return i > SDK_VERSIONS.length || i < 1 ? "Unknown" : SDK_VERSIONS[i];
     }
 
 }

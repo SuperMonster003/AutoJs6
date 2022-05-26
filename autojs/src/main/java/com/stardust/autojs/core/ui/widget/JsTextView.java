@@ -9,7 +9,6 @@ import androidx.appcompat.widget.AppCompatTextView;
 /**
  * Created by Stardust on 2017/5/15.
  */
-
 public class JsTextView extends AppCompatTextView {
 
     public JsTextView(Context context) {

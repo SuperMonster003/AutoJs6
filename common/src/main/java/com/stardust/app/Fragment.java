@@ -12,7 +12,6 @@ import com.stardust.util.ViewUtil;
 /**
  * Created by Stardust on 2017/1/30.
  */
-
 public abstract class Fragment extends androidx.fragment.app.Fragment {
 
     private View mView;
@@ -36,7 +35,7 @@ public abstract class Fragment extends androidx.fragment.app.Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mView = createView(inflater, container, savedInstanceState);
         return mView;
     }

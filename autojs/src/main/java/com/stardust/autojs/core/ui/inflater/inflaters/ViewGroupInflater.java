@@ -11,7 +11,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/4.
  */
-
 public class ViewGroupInflater<V extends ViewGroup> extends BaseViewInflater<V> {
 
     private static final ValueMapper<Integer> PERSISTENT_DRAWING_CACHE = new ValueMapper<Integer>("persistentDrawingCache")

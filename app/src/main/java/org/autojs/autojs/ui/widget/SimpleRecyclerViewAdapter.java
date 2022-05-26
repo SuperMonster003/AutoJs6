@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.widget;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,16 +13,15 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/5/24.
  */
-
 public class SimpleRecyclerViewAdapter<M, VH extends BindableViewHolder<M>> extends RecyclerView.Adapter<VH> {
 
     public interface ViewHolderFactory<VH> {
         VH create(View itemView);
     }
 
-    private List<M> mDataList = new ArrayList<>();
-    private int mLayoutResource;
-    private ViewHolderFactory<VH> mVHViewHolderFactory;
+    private final List<M> mDataList = new ArrayList<>();
+    private final int mLayoutResource;
+    private final ViewHolderFactory<VH> mVHViewHolderFactory;
 
     public SimpleRecyclerViewAdapter(int layoutResource, List<M> dataList, ViewHolderFactory<VH> VHViewHolderFactory) {
         mLayoutResource = layoutResource;
@@ -30,9 +30,10 @@ public class SimpleRecyclerViewAdapter<M, VH extends BindableViewHolder<M>> exte
     }
 
     public SimpleRecyclerViewAdapter(int layoutResource, ViewHolderFactory<VH> VHViewHolderFactory) {
-        this(layoutResource, Collections.<M>emptyList(), VHViewHolderFactory);
+        this(layoutResource, Collections.emptyList(), VHViewHolderFactory);
     }
 
+    @NonNull
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
         return mVHViewHolderFactory.create(LayoutInflater.from(parent.getContext()).inflate(mLayoutResource, parent, false));

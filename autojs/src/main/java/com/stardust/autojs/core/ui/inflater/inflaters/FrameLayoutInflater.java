@@ -12,7 +12,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/29.
  */
-
 public class FrameLayoutInflater<V extends FrameLayout> extends ViewGroupInflater<V> {
 
     private Integer mGravity;

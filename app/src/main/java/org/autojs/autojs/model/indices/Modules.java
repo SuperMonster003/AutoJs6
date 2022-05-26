@@ -9,24 +9,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Stardust on 2017/12/9.
  */
-
 public class Modules {
 
     private static final Type MODULE_LIST_TYPE = new TypeToken<List<Module>>() {
 
     }.getType();
     private static final String MODULES_JSON_PATH = "indices/all.json";
-    private static Modules sInstance = new Modules();
+    private static final Modules sInstance = new Modules();
 
     private List<Module> mModules;
 

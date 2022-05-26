@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 /**
  * Created by Stardust on 2017/3/7.
  */
-
 public abstract class InputEventRecorder extends Recorder.AbstractRecorder implements InputEventObserver.InputEventListener {
 
 

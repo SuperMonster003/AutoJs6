@@ -12,7 +12,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 
 import static org.autojs.autojs.model.explorer.ExplorerChangeEvent.*;
 
-
 public class Explorer {
 
     private final ExplorerProvider mExplorerProvider;
@@ -59,7 +58,6 @@ public class Explorer {
         return getFromCache(getParent(item));
     }
 
-
     public void notifyItemRemoved(ExplorerItem item) {
         ExplorerPage parent = getParent(item);
         ExplorerPage cachedParent = getFromCache(parent);
@@ -90,13 +88,11 @@ public class Explorer {
         mEventBus.post(new ExplorerChangeEvent(parent, CREATE, item, item));
     }
 
-    @SuppressWarnings("unchecked")
     public void refreshAll() {
         if (mExplorerPageLruCache != null)
             mExplorerPageLruCache.evictAll();
         mEventBus.post(ExplorerChangeEvent.EVENT_ALL);
     }
-
 
     public Single<ExplorerPage> fetchChildren(ExplorerPage page) {
         ExplorerPage cachedGroup = mExplorerPageLruCache == null ? null : mExplorerPageLruCache.get(page.getPath());
@@ -127,4 +123,5 @@ public class Explorer {
     public void unregisterChangeListener(Object subscriber) {
         mEventBus.unregister(subscriber);
     }
+
 }

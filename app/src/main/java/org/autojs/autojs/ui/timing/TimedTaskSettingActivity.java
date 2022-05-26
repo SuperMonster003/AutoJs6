@@ -7,14 +7,9 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
-
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -31,6 +26,9 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout;
 import com.stardust.autojs.execution.ExecutionConfig;
 import com.stardust.util.BiMap;
@@ -42,7 +40,7 @@ import org.androidannotations.annotations.CheckedChange;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers;
 import org.autojs.autojs.model.script.ScriptFile;
@@ -64,6 +62,7 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/28.
  */
+@SuppressLint("NonConstantResourceId")
 @EActivity(R.layout.activity_timed_task_setting)
 public class TimedTaskSettingActivity extends BaseActivity {
 
@@ -154,7 +153,7 @@ public class TimedTaskSettingActivity extends BaseActivity {
     @ViewById(R.id.weekly_task_container)
     LinearLayout mWeeklyTaskContainer;
 
-    private List<CheckBox> mDayOfWeekCheckBoxes = new ArrayList<>();
+    private final List<CheckBox> mDayOfWeekCheckBoxes = new ArrayList<>();
 
     private ScriptFile mScriptFile;
     private TimedTask mTimedTask;
@@ -190,9 +189,7 @@ public class TimedTaskSettingActivity extends BaseActivity {
     @AfterViews
     void setupViews() {
         setToolbarAsBack(getString(R.string.text_timed_task));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mToolbar.setSubtitle(mScriptFile.getName());
-        }
+        mToolbar.setSubtitle(mScriptFile.getName());
         mDailyTaskTimePicker.setIs24HourView(true);
         mWeeklyTaskTimePicker.setIs24HourView(true);
         findDayOfWeekCheckBoxes(mWeeklyTaskContainer);
@@ -246,10 +243,10 @@ public class TimedTaskSettingActivity extends BaseActivity {
             return;
         }
         LocalTime time = LocalTime.fromMillisOfDay(mTimedTask.getMillis());
-        mDailyTaskTimePicker.setCurrentHour(time.getHourOfDay());
-        mDailyTaskTimePicker.setCurrentMinute(time.getMinuteOfHour());
-        mWeeklyTaskTimePicker.setCurrentHour(time.getHourOfDay());
-        mWeeklyTaskTimePicker.setCurrentMinute(time.getMinuteOfHour());
+        mDailyTaskTimePicker.setHour(time.getHourOfDay());
+        mDailyTaskTimePicker.setMinute(time.getMinuteOfHour());
+        mWeeklyTaskTimePicker.setHour(time.getHourOfDay());
+        mWeeklyTaskTimePicker.setMinute(time.getMinuteOfHour());
         if (mTimedTask.isDaily()) {
             mDailyTaskRadio.setChecked(true);
         } else {
@@ -324,12 +321,12 @@ public class TimedTaskSettingActivity extends BaseActivity {
             Toast.makeText(this, R.string.text_weekly_task_should_check_day_of_week, Toast.LENGTH_SHORT).show();
             return null;
         }
-        LocalTime time = new LocalTime(mWeeklyTaskTimePicker.getCurrentHour(), mWeeklyTaskTimePicker.getCurrentMinute());
+        LocalTime time = new LocalTime(mWeeklyTaskTimePicker.getHour(), mWeeklyTaskTimePicker.getMinute());
         return TimedTask.weeklyTask(time, timeFlag, mScriptFile.getPath(), ExecutionConfig.getDefault());
     }
 
     private TimedTask createDailyTask() {
-        LocalTime time = new LocalTime(mDailyTaskTimePicker.getCurrentHour(), mDailyTaskTimePicker.getCurrentMinute());
+        LocalTime time = new LocalTime(mDailyTaskTimePicker.getHour(), mDailyTaskTimePicker.getMinute());
         return TimedTask.dailyTask(time, mScriptFile.getPath(), new ExecutionConfig());
     }
 
@@ -351,20 +348,22 @@ public class TimedTaskSettingActivity extends BaseActivity {
         return true;
     }
 
-    @SuppressLint("BatteryLife")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_done) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !((PowerManager) getSystemService(POWER_SERVICE)).isIgnoringBatteryOptimizations(getPackageName())) {
+            if (((PowerManager) getSystemService(POWER_SERVICE)).isIgnoringBatteryOptimizations(getPackageName())) {
+                createOrUpdateTask();
+            } else {
                 try {
-                    startActivityForResult(new Intent().setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                            .setData(Uri.parse("package:" + getPackageName())), REQUEST_CODE_IGNORE_BATTERY);
+                    @SuppressLint("BatteryLife")
+                    Intent intent = new Intent()
+                            .setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                            .setData(Uri.parse("package:" + getPackageName()));
+                    startActivityForResult(intent, REQUEST_CODE_IGNORE_BATTERY);
                 } catch (ActivityNotFoundException e) {
                     e.printStackTrace();
                     createOrUpdateTask();
                 }
-            } else {
-                createOrUpdateTask();
             }
             return true;
         }
@@ -405,7 +404,7 @@ public class TimedTaskSettingActivity extends BaseActivity {
     private void createOrUpdateIntentTask() {
         int buttonId = mBroadcastGroup.getCheckedRadioButtonId();
         if (buttonId == -1) {
-            Toast.makeText(this, R.string.error_empty_selection, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error_empty_broadcast_selection, Toast.LENGTH_SHORT).show();
             return;
         }
         String action;
@@ -421,7 +420,7 @@ public class TimedTaskSettingActivity extends BaseActivity {
         IntentTask task = new IntentTask();
         task.setAction(action);
         task.setScriptPath(mScriptFile.getPath());
-        task.setLocal(action.equals(DynamicBroadcastReceivers.ACTION_STARTUP));
+        task.setLocal(action != null && action.equals(DynamicBroadcastReceivers.ACTION_STARTUP));
         if (mIntentTask != null) {
             task.setId(mIntentTask.getId());
             TimedTaskManager.getInstance().updateTask(task);

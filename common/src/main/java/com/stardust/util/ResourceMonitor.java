@@ -10,7 +10,6 @@ import com.stardust.BuildConfig;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 public final class ResourceMonitor {
 
     private static final String LOG_TAG = "ResourceMonitor";
@@ -133,9 +132,7 @@ public final class ResourceMonitor {
         public UnclosedResourceException(Resource resource) {
             super("id = " + resource.getResourceId() + ", resource = " + resource);
         }
-
     }
-
 
     public static final class UnclosedResourceDetectedException extends RuntimeException {
         public UnclosedResourceDetectedException(Throwable cause) {
@@ -152,7 +149,6 @@ public final class ResourceMonitor {
     }
 
     public interface UnclosedResourceDetectedHandler {
-
         void onUnclosedResourceDetected(UnclosedResourceDetectedException detectedException);
     }
 }

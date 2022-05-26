@@ -13,7 +13,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2018/3/29.
  */
-
 public interface LayoutInflaterDelegate {
 
     LayoutInflaterDelegate NO_OP = new NoOp();

@@ -1,7 +1,5 @@
 package com.stardust.theme.internal;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.widget.AbsListView;
 import android.widget.EdgeEffect;
 import android.widget.ScrollView;
@@ -39,7 +37,6 @@ public class ScrollingViewEdgeGlowColorHelper {
         RECYCLER_VIEW_FIELD_EDGE_GLOW_BOTTOM = fields[1];
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setEdgeGlowColor(AbsListView listView, int color) {
         try {
             Objects.requireNonNull((EdgeEffect) ABS_LIST_VIEW_FIELD_EDGE_GLOW_TOP.get(listView)).setColor(color);
@@ -49,7 +46,6 @@ public class ScrollingViewEdgeGlowColorHelper {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setEdgeGlowColor(ScrollView scrollView, int color) {
         try {
             Objects.requireNonNull((EdgeEffect) SCROLL_VIEW_FIELD_EDGE_GLOW_TOP.get(scrollView)).setColor(color);
@@ -59,7 +55,6 @@ public class ScrollingViewEdgeGlowColorHelper {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setEdgeGlowColor(RecyclerView recyclerView, int color) {
         try {
             Objects.requireNonNull((EdgeEffect) RECYCLER_VIEW_FIELD_EDGE_GLOW_TOP.get(recyclerView)).setColor(color);
@@ -73,14 +68,14 @@ public class ScrollingViewEdgeGlowColorHelper {
         Field edgeGlowTop = null, edgeGlowBottom = null;
         for (Field f : viewClass.getDeclaredFields()) {
             switch (f.getName()) {
-                case "mEdgeGlowTop":
+                case "mEdgeGlowTop" -> {
                     f.setAccessible(true);
                     edgeGlowTop = f;
-                    break;
-                case "mEdgeGlowBottom":
+                }
+                case "mEdgeGlowBottom" -> {
                     f.setAccessible(true);
                     edgeGlowBottom = f;
-                    break;
+                }
             }
             if (edgeGlowBottom != null && edgeGlowTop != null)
                 break;

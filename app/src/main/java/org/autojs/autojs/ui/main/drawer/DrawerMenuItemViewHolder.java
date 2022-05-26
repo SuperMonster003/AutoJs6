@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
 import org.autojs.autojs.ui.widget.PrefSwitch;
 import org.autojs.autojs.ui.widget.SwitchCompat;
@@ -21,7 +21,6 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 /**
  * Created by Stardust on 2017/12/10.
  */
-
 public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem> {
 
     private static final long CLICK_TIMEOUT = 540;

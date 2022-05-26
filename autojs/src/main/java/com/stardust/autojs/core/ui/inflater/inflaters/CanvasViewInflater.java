@@ -10,10 +10,9 @@ import com.stardust.autojs.runtime.ScriptRuntime;
 /**
  * Created by Stardust on 2018/3/16.
  */
-
 public class CanvasViewInflater extends BaseViewInflater<ScriptCanvasView> {
 
-    private ScriptRuntime mScriptRuntime;
+    private final ScriptRuntime mScriptRuntime;
 
     public CanvasViewInflater(ResourceParser resourceParser, ScriptRuntime runtime) {
         super(resourceParser);

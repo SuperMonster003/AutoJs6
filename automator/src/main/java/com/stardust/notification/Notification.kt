@@ -1,22 +1,16 @@
 package com.stardust.notification
 
 import android.app.PendingIntent
-import android.os.Build
-import android.os.Parcel
-import androidx.annotation.RequiresApi
 
 /**
  * Created by Stardust on 2017/10/30.
  */
-
 class Notification private constructor(val packageName: String) : android.app.Notification() {
 
     val text: String?
-        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         get() = extras.getString(EXTRA_TEXT)
 
     val title: String?
-        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         get() = extras.getString(EXTRA_TITLE)
 
     fun click() {
@@ -38,13 +32,11 @@ class Notification private constructor(val packageName: String) : android.app.No
     }
 
     override fun toString(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            "Notification{" +
-                    "packageName='" + packageName + "', " +
-                    "title='" + title + ", " +
-                    "text='" + text + "'" +
-                    "} "
-        } else super.toString()
+        return "Notification{" +
+                "packageName='" + packageName + "', " +
+                "title='" + title + ", " +
+                "text='" + text + "'" +
+                "} "
     }
 
     companion object {
@@ -68,14 +60,12 @@ class Notification private constructor(val packageName: String) : android.app.No
             to.tickerView = from.tickerView
             to.contentView = from.contentView
             to.bigContentView = from.bigContentView
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                to.headsUpContentView = from.headsUpContentView
-                to.audioAttributes = from.audioAttributes
-                to.color = from.color
-                to.visibility = from.visibility
-                to.category = from.category
-                to.publicVersion = from.publicVersion
-            }
+            to.headsUpContentView = from.headsUpContentView
+            to.audioAttributes = from.audioAttributes
+            to.color = from.color
+            to.visibility = from.visibility
+            to.category = from.category
+            to.publicVersion = from.publicVersion
             to.largeIcon = from.largeIcon
             to.sound = from.sound
             to.audioStreamType = from.audioStreamType
@@ -86,10 +76,8 @@ class Notification private constructor(val packageName: String) : android.app.No
             to.defaults = from.defaults
             to.flags = from.flags
             to.priority = from.priority
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                to.extras = from.extras
-                to.actions = from.actions
-            }
+            to.extras = from.extras
+            to.actions = from.actions
         }
     }
 

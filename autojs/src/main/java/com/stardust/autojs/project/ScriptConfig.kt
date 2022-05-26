@@ -13,6 +13,6 @@ data class ScriptConfig(
     }
 
     companion object {
-        val FEATURE_CONTINUATION = "continuation"
+        const val FEATURE_CONTINUATION = "continuation"
     }
 }

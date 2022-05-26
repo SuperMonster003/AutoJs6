@@ -37,7 +37,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/3.
  */
-
 public class BaseViewInflater<V extends View> implements ViewInflater<V> {
 
     private static final String LOG_TAG = "BaseViewInflater";

@@ -18,7 +18,6 @@ import com.stardust.util.ArrayUtils;
 /**
  * Created by Stardust on 2017/5/8.
  */
-
 public class Dialogs {
 
     private ContextThemeWrapper mThemeWrapper;

@@ -4,20 +4,16 @@ import com.stardust.automator.UiGlobalSelector;
 import com.stardust.automator.UiObject;
 import com.stardust.util.Consumer;
 
-import androidx.appcompat.widget.AppCompatEditText;
-
 import static com.stardust.autojs.codegeneration.CodeGenerator.FIND_ONE;
 import static com.stardust.autojs.codegeneration.CodeGenerator.UNTIL_FIND;
-import static com.stardust.autojs.codegeneration.CodeGenerator.WAIT_FOR;
 
 /**
  * Created by Stardust on 2017/12/7.
  */
-
 public class UiSelectorGenerator {
 
-    private UiObject mRoot;
-    private UiObject mTarget;
+    private final UiObject mRoot;
+    private final UiObject mTarget;
     private boolean mUsingId = true;
     private boolean mUsingDesc = true;
     private boolean mUsingText = true;

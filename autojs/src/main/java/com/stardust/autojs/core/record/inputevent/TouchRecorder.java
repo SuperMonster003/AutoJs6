@@ -8,12 +8,11 @@ import com.stardust.autojs.core.record.Recorder;
 /**
  * Created by Stardust on 2017/3/16.
  */
-
 public class TouchRecorder extends Recorder.AbstractRecorder {
 
     private InputEventRecorder mInputEventRecorder;
-    private Context mContext;
-    private InputEventObserver mInputEventObserver;
+    private final Context mContext;
+    private final InputEventObserver mInputEventObserver;
 
     public TouchRecorder(Context context, InputEventObserver observer) {
         mContext = context;

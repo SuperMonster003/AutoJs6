@@ -3,7 +3,6 @@ package org.autojs.autojs.ui.main;
 /**
  * Created by Stardust on 2017/10/25.
  */
-
 public class QueryEvent {
 
     public static final QueryEvent CLEAR = new QueryEvent(null);

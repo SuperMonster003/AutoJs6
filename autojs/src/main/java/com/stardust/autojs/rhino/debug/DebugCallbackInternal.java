@@ -7,9 +7,6 @@ package com.stardust.autojs.rhino.debug;
 
 
 import com.stardust.autojs.engine.RhinoJavaScriptEngine;
-import com.stardust.autojs.engine.ScriptEngine;
-
-import org.mozilla.javascript.Context;
 
 /**
  * Interface for communication between the debugger and its GUI.  This

@@ -13,6 +13,7 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.PowerManager;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 
@@ -20,6 +21,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.telephony.TelephonyManager;
+import android.view.Display;
+import android.view.WindowManager;
 
 import com.stardust.autojs.R;
 import com.stardust.autojs.runtime.exception.ScriptException;
@@ -37,7 +40,6 @@ import ezy.assist.compat.SettingsCompat;
 /**
  * Created by Stardust on 2017/12/2.
  */
-
 public class Device {
 
     public static final int width = ScreenMetrics.getDeviceScreenWidth();
@@ -85,14 +87,16 @@ public class Device {
     public static final String serial = Build.SERIAL;
 
     private final Context mContext;
+    private final Vibrator mVibrator;
     private PowerManager.WakeLock mWakeLock;
     private int mWakeLockFlag;
 
     public Device(Context context) {
         mContext = context;
+        mVibrator = context.getSystemService(Vibrator.class);
     }
 
-    @SuppressLint("HardwareIds")
+    @SuppressLint({"HardwareIds", "MissingPermission"})
     @Nullable
     public String getIMEI() {
         checkReadPhoneStatePermission();
@@ -102,7 +106,6 @@ public class Device {
             return null;
         }
     }
-
 
     @SuppressLint("HardwareIds")
     public String getAndroidId() {
@@ -182,8 +185,8 @@ public class Device {
         }
         int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        float battery = ((float) level / scale) * 100.0f;
-        return Math.round(battery * 10) / 10;
+        float battery = ((float) level / scale) * 100f;
+        return Math.round(battery * 10) / 10f;
     }
 
     public long getTotalMem() {
@@ -221,13 +224,7 @@ public class Device {
     }
 
     public boolean isScreenOn() {
-        //按照API文档来说不应该使用PowerManager.isScreenOn()，但是，isScreenOn()和实际不一致的情况通常只会出现在安卓智能手表的类似设备上
-        //因此这里仍然使用PowerManager.isScreenOn()
-        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
-        //   return ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getState() == Display.STATE_ON;
-        //} else {
-        return ((PowerManager) getSystemService(Context.POWER_SERVICE)).isScreenOn();
-        //}
+        return ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getState() == Display.STATE_ON;
     }
 
     public void wakeUpIfNeeded() {
@@ -258,6 +255,7 @@ public class Device {
 
     private void checkWakeLock(int flags) {
         if (mWakeLock == null || flags != mWakeLockFlag) {
+            mWakeLockFlag = flags;
             cancelKeepingAwake();
             mWakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE)).newWakeLock(flags, Device.class.getName());
         }
@@ -269,13 +267,28 @@ public class Device {
     }
 
     public void vibrate(long millis) {
-        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(millis);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mVibrator.vibrate(VibrationEffect.createOneShot(millis, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            mVibrator.vibrate(millis);
+        }
+    }
+
+    public void vibrate(long off, long millis) {
+        vibrate(new long[]{off, millis});
+    }
+
+    public void vibrate(long[] timings) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mVibrator.vibrate(VibrationEffect.createWaveform(timings, -1));
+        } else {
+            mVibrator.vibrate(timings, -1);
+        }
     }
 
     public void cancelVibration() {
-        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).cancel();
+        mVibrator.cancel();
     }
-
 
     private void checkWriteSettingsPermission() {
         if (SettingsCompat.canWriteSettings(mContext)) {
@@ -285,13 +298,11 @@ public class Device {
         throw new SecurityException(mContext.getString(R.string.text_no_write_settings_permission));
     }
 
-
     private void checkReadPhoneStatePermission() {
         if (mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException(mContext.getString(R.string.text_no_read_phone_state_permission));
         }
     }
-
 
     // just to avoid warning of null pointer to make android studio happy..
     @NonNull
@@ -355,7 +366,7 @@ public class Device {
         return null;
     }
 
-    private static String getMacByFile() throws Exception {
+    private static String getMacByFile() {
         try {
             return PFiles.read("/sys/class/net/wlan0/address");
         } catch (UncheckedIOException e) {
@@ -363,6 +374,7 @@ public class Device {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Device{" +

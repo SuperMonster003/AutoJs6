@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.stardust.autojs.core.ui.inflater.ShouldCallOnFinishInflate;
 
+import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -36,8 +37,9 @@ public class JsViewPager extends ViewPager implements ShouldCallOnFinishInflate 
         setOffscreenPageLimit(getChildCount());
         setAdapter(new PagerAdapter() {
 
+            @NonNull
             @Override
-            public Object instantiateItem(ViewGroup container, int position) {
+            public Object instantiateItem(@NonNull ViewGroup container, int position) {
                 return getChildAt(position);
             }
 
@@ -54,12 +56,12 @@ public class JsViewPager extends ViewPager implements ShouldCallOnFinishInflate 
             }
 
             @Override
-            public boolean isViewFromObject(View view, Object object) {
+            public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
                 return view == object;
             }
 
             @Override
-            public void destroyItem(ViewGroup container, int position, Object object) {
+            public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
 
             }
         });

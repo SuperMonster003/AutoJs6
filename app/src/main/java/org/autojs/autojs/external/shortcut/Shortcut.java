@@ -10,16 +10,15 @@ import org.autojs.autojs.tool.BitmapTool;
 /**
  * Created by Stardust on 2017/1/20.
  */
-
 public class Shortcut {
 
-    private Context mContext;
+    private final Context mContext;
     private String mName;
     private String mTargetClass;
     private String mTargetPackage;
     private Intent.ShortcutIconResource mIconRes;
     private boolean mDuplicate = false;
-    private Intent mLaunchIntent = new Intent();
+    private final Intent mLaunchIntent = new Intent();
     private Bitmap mIcon;
 
     public Shortcut(Context context) {

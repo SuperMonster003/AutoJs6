@@ -1,4 +1,4 @@
-"ui";
+'ui';
 ui.layout(
     <vertical padding="16">
         <horizontal>
@@ -6,15 +6,15 @@ ui.layout(
             <button id="save" text="保存" w="auto" style="Widget.AppCompat.Button.Borderless.Colored"/>
         </horizontal>
         <input id="content" h="*" gravity="top"/>
-    </vertical>
+    </vertical>,
 );
-var storage = storages.create("Auto.js例子:随手记");
-var content = storage.get("content");
-if(content != null){
+var storage = storages.create('Auto.js例子:随手记');
+var content = storage.get('content');
+if (!isNullish(content)) {
     ui.content.setText(content);
 }
-ui.save.click(()=>{
-    storage.put("content", ui.content.text());
+ui.save.click(() => {
+    storage.put('content', ui.content.text());
 });
 
 

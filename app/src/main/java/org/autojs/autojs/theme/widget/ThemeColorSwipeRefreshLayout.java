@@ -11,7 +11,6 @@ import com.stardust.theme.ThemeColorMutable;
 /**
  * Created by Stardust on 2018/1/23.
  */
-
 public class ThemeColorSwipeRefreshLayout extends SwipeRefreshLayout implements ThemeColorMutable {
     public ThemeColorSwipeRefreshLayout(Context context) {
         super(context);

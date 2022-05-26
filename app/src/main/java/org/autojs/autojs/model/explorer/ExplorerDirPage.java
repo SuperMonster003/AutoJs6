@@ -1,8 +1,6 @@
 package org.autojs.autojs.model.explorer;
 
-import android.os.Build;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.stardust.pio.PFile;
 
@@ -87,13 +85,12 @@ public class ExplorerDirPage extends ExplorerFileItem implements ExplorerPage {
         return mChildren.iterator();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void forEach(Consumer<? super ExplorerItem> action) {
+    public void forEach(@NonNull Consumer<? super ExplorerItem> action) {
         mChildren.forEach(action);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    @NonNull
     @Override
     public Spliterator<ExplorerItem> spliterator() {
         return mChildren.spliterator();

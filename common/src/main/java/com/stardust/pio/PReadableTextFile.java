@@ -7,14 +7,13 @@ import java.util.List;
 /**
  * Created by Stardust on 2017/4/1.
  */
-
 public class PReadableTextFile implements Closeable, PFileInterface {
 
     private BufferedReader mBufferedReader;
-    private FileInputStream mFileInputStream;
-    private int mBufferingSize;
-    private String mEncoding;
-    private String mPath;
+    private final FileInputStream mFileInputStream;
+    private final int mBufferingSize;
+    private final String mEncoding;
+    private final String mPath;
 
     public PReadableTextFile(String path) {
         this(path, PFiles.DEFAULT_ENCODING);
@@ -87,7 +86,7 @@ public class PReadableTextFile implements Closeable, PFileInterface {
             while (mBufferedReader.ready()) {
                 lines.add(mBufferedReader.readLine());
             }
-            return lines.toArray(new String[lines.size()]);
+            return lines.toArray(new String[0]);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

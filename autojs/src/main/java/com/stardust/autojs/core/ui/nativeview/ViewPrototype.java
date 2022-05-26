@@ -1,9 +1,8 @@
 package com.stardust.autojs.core.ui.nativeview;
 
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.os.Looper;
-import androidx.core.view.ViewCompat;
+
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -163,15 +162,12 @@ public class ViewPrototype {
             }
             return true;
             case "scroll_change": {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    mView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                        BaseEvent e = new BaseEvent(mScope, new NativeView.ScrollEvent(scrollX, scrollY, oldScrollX, oldScrollY));
-                        emit("scroll_change", e, v);
-                    });
-                    return true;
-                }
+                mView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                    BaseEvent e = new BaseEvent(mScope, new NativeView.ScrollEvent(scrollX, scrollY, oldScrollX, oldScrollY));
+                    emit("scroll_change", e, v);
+                });
+                return true;
             }
-            break;
             case "check": {
                 if (mView instanceof CompoundButton) {
                     ((CompoundButton) mView).setOnCheckedChangeListener((buttonView, isChecked) ->

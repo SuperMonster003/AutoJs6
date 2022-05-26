@@ -1,9 +1,7 @@
 package com.stardust.theme.preference;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Build;
 import android.preference.PreferenceCategory;
 import android.util.AttributeSet;
 import android.view.View;
@@ -23,7 +21,6 @@ public class ThemeColorPreferenceCategory extends PreferenceCategory implements 
     private TextView mTitleTextView;
     private int mColor = Color.TRANSPARENT;
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public ThemeColorPreferenceCategory(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
@@ -56,7 +53,7 @@ public class ThemeColorPreferenceCategory extends PreferenceCategory implements 
 
     public View onCreateView(ViewGroup parent) {
         View view = super.onCreateView(parent);
-        mTitleTextView = (TextView) view.findViewById(android.R.id.title);
+        mTitleTextView = view.findViewById(android.R.id.title);
         if (mColor != Color.TRANSPARENT)
             mTitleTextView.setTextColor(mColor);
         return view;

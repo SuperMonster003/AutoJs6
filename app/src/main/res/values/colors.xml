@@ -31,6 +31,11 @@
     <color name="console_verbose">#dfc0c0c0</color>
     <color name="market_button_selected">#e14123</color>
     <color name="market_button_unselected">#939393</color>
+    <color name="github_avatar_border">#261B1F24</color>
+    <color name="github_color_fg_default">#24292F</color>
+    <color name="github_color_fg_muted">#57606A</color>
+    <color name="tint_1st_developer_identifier">#2B7A85</color>
+    <color name="tint_2nd_developer_identifier">#CC7A34</color>
 
 
 </resources>

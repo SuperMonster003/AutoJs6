@@ -11,4 +11,11 @@
     <dimen name="divider_drawer_menu_group">6dp</dimen>
     <dimen name="padding_circular_menu_recording">8dp</dimen>
     <dimen name="padding_circular_menu_normal">5dp</dimen>
+    <dimen name="about_item_avatar_side_length">50dp</dimen>
+    <dimen name="github_avatar_border_width">1dp</dimen>
+    <dimen name="github_font_size_full_name">18sp</dimen>
+    <dimen name="github_font_size_nickname">15sp</dimen>
+    <dimen name="icon_developer_identifier_image_side_length">48dp</dimen>
+    <dimen name="icon_developer_identifier_image_padding">5dp</dimen>
+    <dimen name="content_inset">16dp</dimen>
 </resources>

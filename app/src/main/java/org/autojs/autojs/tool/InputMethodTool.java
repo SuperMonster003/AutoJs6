@@ -7,7 +7,6 @@ import android.view.inputmethod.InputMethodManager;
 /**
  * Created by Stardust on 2017/12/9.
  */
-
 public class InputMethodTool {
 
     public static void dismissInputMethod(Context context, View view) {

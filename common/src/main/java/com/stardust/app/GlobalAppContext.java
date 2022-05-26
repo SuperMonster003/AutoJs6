@@ -3,16 +3,13 @@ package com.stardust.app;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.RequiresApi;
 import android.widget.Toast;
 
 /**
  * Created by Stardust on 2018/3/22.
  */
-
 public class GlobalAppContext {
 
     @SuppressLint("StaticFieldLeak")
@@ -34,7 +31,6 @@ public class GlobalAppContext {
         return get().getString(resId);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public static int getColor(int id) {
         return get().getColor(id);
     }

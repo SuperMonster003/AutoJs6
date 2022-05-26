@@ -8,7 +8,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/5/15.
  */
-
 public interface NodeHandler {
 
     String handleNode(Node node, StringBuilder layoutXml);
@@ -28,7 +27,7 @@ public interface NodeHandler {
 
     class NameRouter extends Adapter {
 
-        private Map<String, NodeHandler> mNodeHandlerMap = new HashMap<>();
+        private final Map<String, NodeHandler> mNodeHandlerMap = new HashMap<>();
         private NodeHandler mDefaultHandler;
 
         @Override
@@ -55,7 +54,7 @@ public interface NodeHandler {
 
     class MapNameHandler extends Adapter {
 
-        private Map<String, String> mNameMap = new HashMap<>();
+        private final Map<String, String> mNameMap = new HashMap<>();
 
         @Override
         public String handleNode(Node node, StringBuilder layoutXml) {
@@ -75,7 +74,7 @@ public interface NodeHandler {
 
     class VerticalHandler extends Adapter {
 
-        private String mLinearLayoutClassName;
+        private final String mLinearLayoutClassName;
 
         public VerticalHandler(String linearLayoutClassName) {
             mLinearLayoutClassName = linearLayoutClassName;

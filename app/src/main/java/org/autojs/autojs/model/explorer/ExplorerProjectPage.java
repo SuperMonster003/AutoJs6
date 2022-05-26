@@ -7,7 +7,7 @@ import java.io.File;
 
 public class ExplorerProjectPage extends ExplorerDirPage {
 
-    private ProjectConfig mProjectConfig;
+    private final ProjectConfig mProjectConfig;
 
     public ExplorerProjectPage(PFile file, ExplorerPage parent, ProjectConfig projectConfig) {
         super(file, parent);

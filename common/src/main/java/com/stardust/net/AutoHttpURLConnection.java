@@ -6,16 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
  * Created by Stardust on 2017/4/10.
  */
-
 public class AutoHttpURLConnection extends HttpURLConnection implements AutoCloseable {
 
-    private HttpURLConnection mHttpURLConnection;
+    private final HttpURLConnection mHttpURLConnection;
     private InputStream mInputStream;
     private OutputStream mOutputStream;
 

@@ -10,7 +10,6 @@ import com.stardust.autojs.core.ui.inflater.util.Ids;
 /**
  * Created by Stardust on 2017/5/14.
  */
-
 public class JsViewHelper {
 
     @Nullable
@@ -18,10 +17,9 @@ public class JsViewHelper {
         View result = view.findViewById(Ids.parse(id));
         if (result != null)
             return result;
-        if (!(view instanceof ViewGroup)) {
+        if (!(view instanceof ViewGroup group)) {
             return null;
         }
-        ViewGroup group = (ViewGroup) view;
         for (int i = 0; i < group.getChildCount(); i++) {
             result = findViewByStringId(group.getChildAt(i), id);
             if (result != null)

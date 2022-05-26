@@ -1,67 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.stardust.auojs.inrt">
+        xmlns:tools="http://schemas.android.com/tools"
+        package="com.stardust.autojs.inrt">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+            android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+            android:maxSdkVersion="28" />
+    <uses-permission
+            android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+            tools:ignore="ScopedStorage" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+            android:name="android.permission.QUERY_ALL_PACKAGES"
+            tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission
+            android:name="android.permission.PACKAGE_USAGE_STATS"
+            tools:ignore="ProtectedPermissions" />
+    <uses-permission
+            android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
+            tools:ignore="ProtectedPermissions" />
 
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
-    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-
-
-    <!-- 非Auto.js运行必需，不会主动申请，某些脚本可以自行申请-->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-
+    <!-- 非Auto.js运行必需，不会主动申请，某些脚本可以自行申请 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
-        android:name=".App"
-        android:allowBackup="false"
-        android:icon="@mipmap/ic_launcher"
-        android:label="inrt"
-        android:supportsRtl="true"
-        android:theme="@style/ScriptTheme"
-        android:usesCleartextTraffic="true"
-        tools:ignore="GoogleAppIndexingWarning"
-        tools:replace="android:label, android:allowBackup"
-        tools:targetApi="m">
-        <activity android:name=".LogActivity">
+            android:name=".App"
+            android:allowBackup="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="inrt"
+            android:supportsRtl="true"
+            android:theme="@style/ScriptTheme"
+            android:usesCleartextTraffic="true"
+            tools:replace="android:label, android:allowBackup"
+            tools:targetApi="m"
+            tools:ignore="DataExtractionRules">
 
-        </activity>
+        <activity android:name=".LogActivity" />
 
         <activity
-            android:name=".SplashActivity"
-            android:theme="@style/AppTheme.Splash">
+                android:name=".SplashActivity"
+                android:theme="@style/AppTheme.Splash"
+                android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".SettingsActivity"/>
+        <activity android:name=".SettingsActivity" />
 
         <service
-            android:name="com.stardust.notification.NotificationListenerService"
-            android:label="inrt"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+                android:name="com.stardust.notification.NotificationListenerService"
+                android:label="inrt"
+                android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+                android:exported="false">
             <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService"/>
+                <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
         <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="org.autojs.autojs.inrt.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="org.autojs.autojs6.inrt.fileprovider"
+                android:exported="false"
+                android:grantUriPermissions="true">
             <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/provider_paths" />
         </provider>
     </application>
 

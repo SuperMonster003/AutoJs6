@@ -36,7 +36,6 @@ import static com.stardust.autojs.runtime.exception.ScriptInterruptedException.c
 /**
  * Created by Stardust on 2017/1/23.
  */
-
 public class ScriptEngineService {
 
     private static final String LOG_TAG = "ScriptEngineService";
@@ -72,8 +71,7 @@ public class ScriptEngineService {
                             .console.error(e);
                 }
             }
-            if (execution.getEngine() instanceof JavaScriptEngine) {
-                JavaScriptEngine engine = (JavaScriptEngine) execution.getEngine();
+            if (execution.getEngine() instanceof JavaScriptEngine engine) {
                 Throwable uncaughtException = engine.getUncaughtException();
                 if (uncaughtException != null) {
                     engine.getRuntime().console.error(uncaughtException);
@@ -90,7 +88,7 @@ public class ScriptEngineService {
 
     private static ScriptEngineService sInstance;
     private final Context mContext;
-    private UiHandler mUiHandler;
+    private final UiHandler mUiHandler;
     private final Console mGlobalConsole;
     private final ScriptEngineManager mScriptEngineManager;
     private final EngineLifecycleObserver mEngineLifecycleObserver = new EngineLifecycleObserver() {
@@ -101,8 +99,8 @@ public class ScriptEngineService {
             super.onEngineRemove(engine);
         }
     };
-    private ScriptExecutionObserver mScriptExecutionObserver = new ScriptExecutionObserver();
-    private LinkedHashMap<Integer, ScriptExecution> mScriptExecutions = new LinkedHashMap<>();
+    private final ScriptExecutionObserver mScriptExecutionObserver = new ScriptExecutionObserver();
+    private final LinkedHashMap<Integer, ScriptExecution> mScriptExecutions = new LinkedHashMap<>();
 
     ScriptEngineService(ScriptEngineServiceBuilder builder) {
         mUiHandler = builder.mUiHandler;

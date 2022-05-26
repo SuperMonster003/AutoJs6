@@ -18,7 +18,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2018/3/28.
  */
-
 public class JsListViewInflater<V extends JsListView> extends BaseViewInflater<V> {
 
     private final ScriptRuntime mRuntime;
@@ -34,13 +33,11 @@ public class JsListViewInflater<V extends JsListView> extends BaseViewInflater<V
 
     @Override
     public boolean setAttr(V view, String attr, String value, ViewGroup parent, Map<String, String> attrs) {
-        switch (attr) {
-            case "orientation":
-                view.setLayoutManager(new WrapContentLinearLayoutManager(view.getContext(), LinearLayoutInflater.ORIENTATIONS.get(value), false));
-                return true;
-            default:
-                return super.setAttr(view, attr, value, parent, attrs);
+        if ("orientation".equals(attr)) {
+            view.setLayoutManager(new WrapContentLinearLayoutManager(view.getContext(), LinearLayoutInflater.ORIENTATIONS.get(value), false));
+            return true;
         }
+        return super.setAttr(view, attr, value, parent, attrs);
     }
 
     @Override

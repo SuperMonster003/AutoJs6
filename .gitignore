@@ -8,10 +8,12 @@
 .externalNativeBuild
 output.json
 output-metadata.json
+desktop.ini
 
-/.git/
-/.gradle/
-/.idea/
+.git/
+.gradle/
+.idea/
+
 /build/
 /libs/**/build/
 /captures/
@@ -22,3 +24,4 @@ output-metadata.json
 /sign.properties
 
 **/assets/declarations/
+**/assets/sample/.declarations/

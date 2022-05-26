@@ -1,20 +1,14 @@
 package com.stardust.view.accessibility
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
-
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.stardust.automator.BuildConfig
-
-import java.util.Arrays
-import java.util.HashMap
+import java.util.*
 
 /**
  * Created by Stardust on 2017/3/22.
  */
-
 open class AccessibilityNodeInfoAllocator {
 
     private val mAccessibilityNodeInfoList = HashMap<AccessibilityNodeInfo, String?>()
@@ -53,7 +47,6 @@ open class AccessibilityNodeInfoAllocator {
         return list
     }
 
-    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     open fun findAccessibilityNodeInfosByViewId(root: AccessibilityNodeInfo, id: String): List<AccessibilityNodeInfo> {
         val list = root.findAccessibilityNodeInfosByViewId(id)
         addAll(list)
@@ -135,7 +128,6 @@ open class AccessibilityNodeInfoAllocator {
         }
 
 
-        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun findAccessibilityNodeInfosByViewId(root: AccessibilityNodeInfo, id: String): List<AccessibilityNodeInfo> {
             return root.findAccessibilityNodeInfosByViewId(id)
         }
@@ -146,14 +138,6 @@ open class AccessibilityNodeInfoAllocator {
 
         override fun findAccessibilityNodeInfosByText(root: AccessibilityNodeInfoCompat, text: String): List<AccessibilityNodeInfoCompat> {
             return root.findAccessibilityNodeInfosByText(text)
-        }
-
-        override fun recycle(nodeInfo: AccessibilityNodeInfo) {
-            super.recycle(nodeInfo)
-        }
-
-        override fun recycle(nodeInfo: AccessibilityNodeInfoCompat) {
-            super.recycle(nodeInfo)
         }
 
         override fun recycleAll(): Int {
@@ -167,7 +151,7 @@ open class AccessibilityNodeInfoAllocator {
 
         val NONE: AccessibilityNodeInfoAllocator = NoOpAllocator()
 
-        private val TAG = "AccessibilityAllocator"
+        private const val TAG = "AccessibilityAllocator"
         private val DEBUG = BuildConfig.DEBUG
 
 

@@ -1,6 +1,5 @@
 package com.stardust.autojs.core.ui.inflater.inflaters;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.view.ViewGroup;
@@ -19,7 +18,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/11/29.
  */
-
 public class SpinnerInflater extends BaseViewInflater<JsSpinner> {
 
     protected static final ValueMapper<Integer> SPINNER_MODES = new ValueMapper<Integer>("spinnerMode")

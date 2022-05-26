@@ -1,6 +1,8 @@
 package org.autojs.autojs.ui.widget;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.ThemeColorRecyclerView;
@@ -12,12 +14,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.autojs.autojs.R;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/2/4.
  */
-
 public class ExpandableRecyclerView extends ThemeColorRecyclerView {
 
     public void setOnChildClickListener(OnChildClickListener onChildClickListener) {
@@ -30,14 +31,8 @@ public class ExpandableRecyclerView extends ThemeColorRecyclerView {
     }
 
 
-    private OnClickListener mOnTitleClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            toggle();
-        }
-
-    };
-    private OnClickListener mOnChildClickListenerWrapper = new OnClickListener() {
+    private final OnClickListener mOnTitleClickListener = v -> toggle();
+    private final OnClickListener mOnChildClickListenerWrapper = new OnClickListener() {
 
         @Override
         public void onClick(View v) {
@@ -123,8 +118,9 @@ public class ExpandableRecyclerView extends ThemeColorRecyclerView {
 
         protected abstract int getChildItemViewType(int position);
 
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             if (viewType == VIEW_TYPE_TITLE) {
                 ViewHolder holder = onCreateTitleViewHolder(parent);
                 holder.itemView.setOnClickListener(mOnTitleClickListener);
@@ -191,7 +187,7 @@ public class ExpandableRecyclerView extends ThemeColorRecyclerView {
 
             TitleViewHolder(View itemView) {
                 super(itemView);
-                mExpandHint = (ImageView) itemView.findViewById(R.id.expand_hint);
+                mExpandHint = itemView.findViewById(R.id.expand_hint);
                 ((TextView) itemView.findViewById(R.id.title)).setText(mTitle);
                 if (mIconResId != -1) {
                     ((ImageView) itemView.findViewById(R.id.icon)).setImageResource(mIconResId);

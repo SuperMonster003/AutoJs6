@@ -1,5 +1,6 @@
 package org.autojs.autojs.model.autocomplete;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,8 +9,6 @@ import android.widget.EditText;
 import org.autojs.autojs.model.indices.Module;
 import org.autojs.autojs.model.indices.Modules;
 import org.autojs.autojs.model.indices.Property;
-import org.autojs.autojs.ui.widget.SimpleTextWatcher;
-import org.mozilla.javascript.ast.Loop;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +25,6 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * Created by Stardust on 2018/2/3.
  */
-
 public class AutoCompletion {
 
     public interface AutoCompleteCallback {
@@ -39,12 +37,12 @@ public class AutoCompletion {
     private String mModuleName;
     private String mPropertyPrefill;
     private List<Module> mModules;
-    private DictionaryTree<Property> mGlobalPropertyTree = new DictionaryTree<>();
+    private final DictionaryTree<Property> mGlobalPropertyTree = new DictionaryTree<>();
     private AutoCompleteCallback mAutoCompleteCallback;
-    private ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
-    private AnyWordsCompletion mAnyWordsCompletion;
-    private AtomicInteger mExecuteId = new AtomicInteger();
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private final ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
+    private final AnyWordsCompletion mAnyWordsCompletion;
+    private final AtomicInteger mExecuteId = new AtomicInteger();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final EditText mEditText;
 
     public AutoCompletion(Context context, EditText editText) {
@@ -58,6 +56,8 @@ public class AutoCompletion {
         mAutoCompleteCallback = autoCompleteCallback;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SuppressLint("CheckResult")
     private void buildDictionaryTree(Context context) {
         Modules.getInstance().getModules(context)
                 .subscribeOn(Schedulers.io())

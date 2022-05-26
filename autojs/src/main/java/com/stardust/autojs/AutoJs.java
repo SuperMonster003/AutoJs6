@@ -3,12 +3,10 @@ package com.stardust.autojs;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 
 import com.stardust.app.OnActivityResultDelegate;
 import com.stardust.app.SimpleActivityLifecycleCallbacks;
@@ -19,6 +17,7 @@ import com.stardust.autojs.core.console.ConsoleImpl;
 import com.stardust.autojs.core.console.GlobalConsole;
 import com.stardust.autojs.core.image.capture.ScreenCaptureRequestActivity;
 import com.stardust.autojs.core.image.capture.ScreenCaptureRequester;
+import com.stardust.autojs.core.image.capture.ScreenCapturerForegroundService;
 import com.stardust.autojs.core.record.accessibility.AccessibilityActionRecorder;
 import com.stardust.autojs.core.util.Shell;
 import com.stardust.autojs.engine.LoopBasedJavaScriptEngine;
@@ -30,6 +29,7 @@ import com.stardust.autojs.runtime.accessibility.AccessibilityConfig;
 import com.stardust.autojs.runtime.api.AppUtils;
 import com.stardust.autojs.script.AutoFileSource;
 import com.stardust.autojs.script.JavaScriptSource;
+import com.stardust.autojs.util.ForegroundServiceUtils;
 import com.stardust.util.ResourceMonitor;
 import com.stardust.util.ScreenMetrics;
 import com.stardust.util.UiHandler;
@@ -45,7 +45,6 @@ import java.io.File;
 /**
  * Created by Stardust on 2017/11/29.
  */
-
 public abstract class AutoJs {
 
     private final AccessibilityActionRecorder mAccessibilityActionRecorder = new AccessibilityActionRecorder();
@@ -214,7 +213,7 @@ public abstract class AutoJs {
     }
 
 
-    public abstract void waitForAccessibilityServiceEnabled();
+    public abstract void waitForAccessibilityServiceEnabled(long timeout);
 
     protected AccessibilityConfig createAccessibilityConfig() {
         return new AccessibilityConfig();
@@ -232,8 +231,8 @@ public abstract class AutoJs {
         }
 
         @Override
-        public void waitForServiceEnabled() {
-            AutoJs.this.waitForAccessibilityServiceEnabled();
+        public void waitForServiceEnabled(long timeout) {
+            AutoJs.this.waitForAccessibilityServiceEnabled(timeout);
         }
 
         @Nullable
@@ -265,10 +264,12 @@ public abstract class AutoJs {
             });
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void request() {
+            ForegroundServiceUtils.requestIfNeeded(mContext, ScreenCapturerForegroundService.class);
+
             Activity activity = mAppUtils.getCurrentActivity();
+
             if (activity instanceof OnActivityResultDelegate.DelegateHost) {
                 ScreenCaptureRequester requester = new ActivityScreenCaptureRequester(
                         ((OnActivityResultDelegate.DelegateHost) activity).getOnActivityResultDelegateMediator(), activity);
