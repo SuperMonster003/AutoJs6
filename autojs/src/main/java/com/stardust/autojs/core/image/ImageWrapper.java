@@ -6,6 +6,8 @@ import android.media.Image;
 
 import androidx.annotation.NonNull;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.core.opencv.Mat;
 import com.stardust.autojs.core.opencv.OpenCVHelper;
 import com.stardust.pio.UncheckedIOException;
@@ -85,7 +87,7 @@ public class ImageWrapper implements Recyclable {
             mHeight = bitmap.getHeight();
         } else {
             if (mat == null) {
-                throw new Error("Both bitmap and mat are null");
+                throw new Error(GlobalAppContext.getString(R.string.error_both_bitmap_and_mat_are_null));
             }
             mWidth = mat.cols();
             mHeight = mat.rows();
@@ -204,7 +206,7 @@ public class ImageWrapper implements Recyclable {
 
     public void ensureNotRecycled() {
         if (isRecycled()) {
-            throw new IllegalStateException("Image has been recycled");
+            throw new IllegalStateException(GlobalAppContext.getString(R.string.error_image_has_been_recycled));
         }
     }
 

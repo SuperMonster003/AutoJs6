@@ -3,6 +3,8 @@ package com.stardust.autojs.rhino;
 import android.util.Log;
 
 import com.android.dx.command.dexer.Main;
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.pio.PFiles;
 import com.stardust.util.MD5;
 
@@ -94,7 +96,7 @@ public class AndroidClassLoader extends ClassLoader implements GeneratedClassLoa
     public void loadJar(File jar) throws IOException {
         Log.d(LOG_TAG, "loadJar: jar = " + jar);
         if (!jar.exists() || !jar.canRead()) {
-            throw new FileNotFoundException("File does not exist or readable: " + jar.getPath());
+            throw new FileNotFoundException(GlobalAppContext.getString(R.string.file_not_exist_or_readable, jar.getPath()));
         }
         File dexFile = new File(mCacheDir, generateDexFileName(jar));
         if (dexFile.exists()) {

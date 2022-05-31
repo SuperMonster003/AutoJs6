@@ -2,6 +2,8 @@ package org.autojs.autojs.ui.edit.toolbar;
 
 import android.os.Bundle;
 import android.os.Handler;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
@@ -69,7 +71,7 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mEditorView = findEditorView(view);
         mDebugger = DebuggerSingleton.get();

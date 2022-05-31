@@ -5,6 +5,8 @@ import android.os.Looper;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.engine.RhinoJavaScriptEngine;
 import com.stardust.autojs.runtime.ScriptRuntime;
 import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
@@ -88,7 +90,7 @@ public class TimerThread extends ThreadCompat {
 
     public Timer getTimer() {
         if (mTimer == null) {
-            throw new IllegalStateException("thread is not alive");
+            throw new IllegalStateException(GlobalAppContext.getString(R.string.error_thread_is_not_alive));
         }
         return mTimer;
     }

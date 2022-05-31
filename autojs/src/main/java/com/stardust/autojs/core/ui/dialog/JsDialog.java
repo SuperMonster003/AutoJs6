@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Message;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -39,6 +40,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.internal.MDButton;
 import com.stardust.app.DialogUtils;
+import com.stardust.autojs.R;
 import com.stardust.autojs.core.eventloop.EventEmitter;
 import com.stardust.util.UiHandler;
 
@@ -78,7 +80,7 @@ public class JsDialog {
         Context context = mDialog.getContext();
         if (!DialogUtils.isActivityContext(context)) {
             Window window = mDialog.getWindow();
-            if (window != null){
+            if (window != null) {
                 int type;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -95,7 +97,8 @@ public class JsDialog {
             case "positive" -> DialogAction.POSITIVE;
             case "negative" -> DialogAction.NEGATIVE;
             case "neutral" -> DialogAction.NEUTRAL;
-            default -> throw new IllegalArgumentException("unknown action " + action);
+            default -> throw new IllegalArgumentException(getContext()
+                    .getString(R.string.error_illegal_argument, "action", action));
         };
     }
 

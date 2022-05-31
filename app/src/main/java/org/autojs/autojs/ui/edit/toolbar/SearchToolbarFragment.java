@@ -1,6 +1,8 @@
 package org.autojs.autojs.ui.edit.toolbar;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.view.View;
@@ -17,9 +19,12 @@ public class SearchToolbarFragment extends ToolbarFragment {
     public static final String ARGUMENT_SHOW_REPLACE_ITEM = "show_replace_item";
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        boolean showReplaceItem = getArguments().getBoolean(ARGUMENT_SHOW_REPLACE_ITEM, false);
+        boolean showReplaceItem = false;
+        if (getArguments() != null) {
+            showReplaceItem = getArguments().getBoolean(ARGUMENT_SHOW_REPLACE_ITEM, false);
+        }
         view.findViewById(R.id.replace).setVisibility(showReplaceItem ? View.VISIBLE : View.GONE);
     }
 

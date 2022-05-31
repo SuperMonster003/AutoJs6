@@ -7,6 +7,8 @@ import android.view.InflateException;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.stardust.autojs.R;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +58,7 @@ public class Dimensions {
         }
         Matcher m = DIMENSION_PATTERN.matcher(dimension);
         if (!m.matches()) {
-            throw new InflateException("dimension cannot be resolved: " + dimension);
+            throw new InflateException(context.getString(R.string.error_illegal_argument, "dimension", dimension));
         }
         int unit = m.groupCount() == 2 ? UNITS.get(m.group(2), TypedValue.COMPLEX_UNIT_DIP) : TypedValue.COMPLEX_UNIT_DIP;
         float value = Integer.parseInt(m.group(1));

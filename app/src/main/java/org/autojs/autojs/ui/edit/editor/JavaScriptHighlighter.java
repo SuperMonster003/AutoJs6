@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChangedListener {
 
-
     public static class HighlightTokens {
 
         public final int[] colors;
@@ -90,7 +89,6 @@ public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChanged
         updateTokens(s.toString());
     }
 
-
     public void setTheme(Theme theme) {
         mTheme = theme;
     }
@@ -112,7 +110,6 @@ public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChanged
             } catch (IOException neverHappen) {
                 throw new UncheckedIOException(neverHappen);
             }
-
         });
     }
 

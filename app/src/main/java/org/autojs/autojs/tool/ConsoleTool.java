@@ -8,10 +8,16 @@ import org.autojs.autojs.ui.log.LogActivity_;
 
 public class ConsoleTool {
 
-    public static void launch() {
-        LogActivity_.intent(GlobalAppContext.get())
-                .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .start();
+    public static boolean launch() {
+        try {
+            LogActivity_.intent(GlobalAppContext.get())
+                    .flags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .start();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

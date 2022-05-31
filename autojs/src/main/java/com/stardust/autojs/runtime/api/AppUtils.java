@@ -6,11 +6,13 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.util.Log;
 
+import com.stardust.autojs.R;
 import com.stardust.autojs.annotation.ScriptInterface;
 import com.stardust.util.IntentUtil;
 
@@ -110,15 +112,21 @@ public class AppUtils {
 
     @ScriptInterface
     public void viewFile(String path) {
-        if (path == null)
-            throw new NullPointerException("path == null");
+        if (path == null) {
+            throw new NullPointerException(mContext
+                    .getString(R.string.error_method_called_with_null_argument,
+                            "AppUtils.viewFile", "path"));
+        }
         IntentUtil.viewFile(mContext, path, mFileProviderAuthority);
     }
 
     @ScriptInterface
     public void editFile(String path) {
-        if (path == null)
-            throw new NullPointerException("path == null");
+        if (path == null) {
+            throw new NullPointerException(mContext
+                    .getString(R.string.error_method_called_with_null_argument,
+                            "AppUtils.editFile", "path"));
+        }
         IntentUtil.editFile(mContext, path, mFileProviderAuthority);
     }
 

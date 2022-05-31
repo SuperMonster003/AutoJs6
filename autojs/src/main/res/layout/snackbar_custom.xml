@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<view xmlns:android="http://schemas.android.com/apk/res/android"
+        class="com.stardust.autojs.core.ui.widget.CustomSnackbarContentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:theme="@style/Theme.Holo">
+
+    <TextView
+            android:id="@+id/snackbar_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical|start"
+            android:paddingTop="@dimen/snackbar_padding_vertical"
+            android:paddingBottom="@dimen/snackbar_padding_vertical"
+            android:paddingLeft="@dimen/snackbar_padding_horizontal"
+            android:paddingRight="@dimen/snackbar_padding_horizontal"
+            android:ellipsize="end"
+            android:maxLines="@integer/snackbar_text_max_lines"
+            android:textSize="@dimen/snackbar_text_size"
+            android:textAlignment="viewStart"
+            android:textAppearance="@style/TextAppearance.Design.Snackbar.Message"/>
+
+    <Button
+            android:id="@+id/snackbar_action_two"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:textSize="@dimen/snackbar_text_size"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/snackbar_extra_spacing_horizontal"
+            android:layout_gravity="center_vertical|end"
+            android:minWidth="@dimen/snackbar_min_width"
+            android:textColor="@color/colorAccent" />
+
+    <Button
+            android:id="@+id/snackbar_action_one"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:textSize="@dimen/snackbar_text_size"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/snackbar_extra_spacing_horizontal"
+            android:layout_gravity="center_vertical|end"
+            android:minWidth="@dimen/snackbar_min_width"
+            android:textColor="@color/colorAccent"/>
+</view>

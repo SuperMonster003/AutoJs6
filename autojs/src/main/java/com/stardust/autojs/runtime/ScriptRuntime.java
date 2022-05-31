@@ -227,8 +227,9 @@ public class ScriptRuntime {
     }
 
     public void init() {
-        if (loopers != null)
-            throw new IllegalStateException("already initialized");
+        if (loopers != null) {
+            throw new IllegalStateException("Already initialized");
+        }
         threads = new Threads(this);
         timers = new Timers(this);
         loopers = new Loopers(this);
@@ -243,7 +244,7 @@ public class ScriptRuntime {
 
     public void setTopLevelScope(TopLevelScope topLevelScope) {
         if (mTopLevelScope != null) {
-            throw new IllegalStateException("top level has already exists");
+            throw new IllegalStateException("Top level has already exists");
         }
         mTopLevelScope = topLevelScope;
     }

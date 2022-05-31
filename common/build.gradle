@@ -58,6 +58,8 @@ dependencies {
     // AppCompat
     api 'androidx.appcompat:appcompat:1.4.1'
 
+    api 'org.kohsuke:github-api:1.306'
+
     // AppCompat for legacy views (such as JsTextViewLegacy)
     api project(':libs:androidx.appcompat-1.0.2')
 

@@ -3,6 +3,8 @@ package com.stardust.autojs.core.eventloop;
 import androidx.annotation.NonNull;
 
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.core.looper.Timer;
 import com.stardust.autojs.runtime.ScriptBridges;
 import com.stardust.autojs.runtime.exception.ScriptException;
@@ -40,7 +42,8 @@ public class EventEmitter {
 
         private void ensureListenersNotAtLimit() {
             if (mMaxListeners != 0 && mListenerWrappers.size() >= mMaxListeners) {
-                throw new ScriptException(new TooManyListenersException("max = " + mMaxListeners));
+                throw new ScriptException(new TooManyListenersException(GlobalAppContext
+                        .getString(R.string.error_max_listeners_exceeded, mMaxListeners)));
             }
         }
 

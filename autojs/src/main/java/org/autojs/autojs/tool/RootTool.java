@@ -56,7 +56,9 @@ public class RootTool {
             if (key.equals(AUTO_DETECT.key)) {
                 return AUTO_DETECT;
             }
-            throw new Error("Unknown RootMode number");
+            throw new IllegalArgumentException(GlobalAppContext
+                    .getString(R.string.error_illegal_argument,
+                            "RootMode", key));
         }
 
         @NonNull

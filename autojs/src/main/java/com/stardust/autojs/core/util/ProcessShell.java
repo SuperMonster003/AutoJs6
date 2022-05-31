@@ -2,6 +2,8 @@ package com.stardust.autojs.core.util;
 
 import android.util.Log;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.runtime.api.AbstractShell;
 import com.stardust.autojs.util.ProcessUtils;
 import com.stardust.pio.UncheckedIOException;
@@ -178,7 +180,7 @@ public class ProcessShell extends AbstractShell {
     public static Result execCommand(String[] commands, boolean isRoot) {
         Result commandResult = new Result();
         if (commands == null || commands.length == 0)
-            throw new IllegalArgumentException("command is empty");
+            throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_empty_shell_command));
         Process process = null;
         DataOutputStream os = null;
         try {

@@ -17,7 +17,7 @@ console.log('code: ' + morse.code);
 console.log('pattern: ' + morse.pattern);
 
 // Call vibrate() if you need your device play this morse code by vibration.
-// zh-CN: Call vibrate() if you need your device play this morse code by vibration.
+// zh-CN: 可调用 vibrate() 方法使设备按摩斯电码模式震动.
 
 // morse.vibrate();
 

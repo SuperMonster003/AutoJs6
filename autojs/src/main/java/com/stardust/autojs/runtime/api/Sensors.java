@@ -8,6 +8,8 @@ import android.hardware.SensorManager;
 
 import androidx.annotation.NonNull;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.core.eventloop.EventEmitter;
 import com.stardust.autojs.core.looper.Loopers;
 import com.stardust.autojs.runtime.ScriptBridges;
@@ -98,7 +100,9 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
 
     public SensorEventEmitter register(String sensorName, int delay) {
         if (sensorName == null) {
-            throw new NullPointerException("sensorName = null");
+            throw new NullPointerException(GlobalAppContext
+                    .getString(R.string.error_method_called_with_null_argument,
+                            "Sensors.register", "sensorName"));
         }
         Sensor sensor = getSensor(sensorName);
         if (sensor == null) {

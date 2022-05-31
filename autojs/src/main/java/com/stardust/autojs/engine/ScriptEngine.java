@@ -2,6 +2,8 @@ package com.stardust.autojs.engine;
 
 import androidx.annotation.CallSuper;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.execution.ScriptExecution;
 import com.stardust.autojs.script.ScriptSource;
 
@@ -105,8 +107,10 @@ public interface ScriptEngine<S extends ScriptSource> {
         }
 
         public void setOnDestroyListener(OnDestroyListener onDestroyListener) {
-            if (mOnDestroyListener != null)
-                throw new SecurityException("setOnDestroyListener can be called only once");
+            if (mOnDestroyListener != null) {
+                throw new SecurityException(GlobalAppContext.getString(R.string.error_function_called_more_than_once,
+                        "AbstractScriptEngine.setOnDestroyListener"));
+            }
             mOnDestroyListener = onDestroyListener;
         }
 

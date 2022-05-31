@@ -2,9 +2,12 @@ package org.autojs.autojs.ui.viewmodel;
 
 import android.content.SharedPreferences;
 
+import com.stardust.app.GlobalAppContext;
+
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.explorer.ExplorerSorter;
+import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -118,7 +121,7 @@ public class ExplorerItemList {
             case SORT_TYPE_TYPE:
                 return ExplorerSorter.TYPE;
         }
-        throw new IllegalArgumentException("unknown type " + sortType);
+        throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "sortType", sortType));
     }
 
     public int groupCount() {

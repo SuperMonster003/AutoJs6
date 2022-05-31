@@ -56,4 +56,20 @@
     <string name="key_gesture_observing" translatable="false">key_gesture_observing</string>
     <string name="text_root_mode_description">If you have exotic root or abnormal state for root access, you can force set root to root or non-root.</string>
     <string name="text_hidden_files_description">Whether the hidden files and folders show or not in file explorer. A file or folder is considered to be hidden if its name begins with a period character (\".\").</string>
+    <string name="text_updates_snack_bar_act_view">View</string>
+    <string name="text_updates_snack_bar_act_later">Later</string>
+    <string name="error_function_called_in_ui_thread">UI thread can\'t be blocked. Try running %s() in sub-thread or sub-script</string>
+    <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
+    <string name="error_both_bitmap_and_mat_are_null">Both bitmap and mat are null</string>
+    <string name="error_image_has_been_recycled">Image has been recycled</string>
+    <string name="error_function_called_more_than_once">%s() called more than once</string>
+    <string name="error_thread_is_not_alive">Thread is not alive</string>
+    <string name="error_empty_shell_command">Command is empty</string>
+    <string name="error_a_runtime_has_been_set">A runtime has been set</string>
+    <string name="file_not_exist_or_readable">File doesn\'t exist or readable: %s</string>
+    <string name="error_cannot_retrieve_battery_state">Can\'t retrieve the battery state</string>
+    <string name="error_no_screen_capture_permission">No screen capture permission</string>
+    <string name="error_no_accessibility_service">No accessibility service</string>
+    <string name="error_method_called_with_null_argument">%s() called with null argument: %s</string>
+    <string name="error_script_is_on_exiting">Script is on exiting</string>
 </resources>

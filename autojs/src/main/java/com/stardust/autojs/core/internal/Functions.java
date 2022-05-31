@@ -1,5 +1,8 @@
 package com.stardust.autojs.core.internal;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
+
 /**
  * Created by Stardust on 2017/7/19.
  */
@@ -18,7 +21,8 @@ public class Functions {
         } else if (func instanceof Func4) {
             return ((Func4) func).call(args[0], args[1], args[2], args[3]);
         }
-        throw new IllegalArgumentException("Unknown func: " + func);
+        throw new IllegalArgumentException(GlobalAppContext
+                .getString(R.string.error_illegal_argument, "func", func));
     }
 
     public interface Func {

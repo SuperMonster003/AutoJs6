@@ -2,6 +2,8 @@ package com.stardust.autojs.engine;
 
 import androidx.annotation.NonNull;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.runtime.ScriptRuntime;
 import com.stardust.autojs.script.JavaScriptSource;
 import com.stardust.autojs.script.ScriptSource;
@@ -29,7 +31,7 @@ public abstract class JavaScriptEngine extends ScriptEngine.AbstractScriptEngine
 
     public void setRuntime(ScriptRuntime runtime) {
         if (mRuntime != null) {
-            throw new IllegalStateException("a runtime has been set");
+            throw new IllegalStateException(GlobalAppContext.getString(R.string.error_a_runtime_has_been_set));
         }
         mRuntime = runtime;
         mRuntime.engines.setCurrentEngine(this);

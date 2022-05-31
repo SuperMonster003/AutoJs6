@@ -45,4 +45,5 @@
     <string name="text_script_running">Script running</string>
     <string name="text_stable_mode">Stable mode</string>
     <string name="text_use_volume_to_stop_running">Use volume up key to stop all running scripts</string>
+    <string name="error_illegal_argument">Illegal argument %s: %s</string>
 </resources>

@@ -2,6 +2,8 @@ package com.stardust.autojs.runtime.api;
 
 import androidx.annotation.NonNull;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.core.looper.MainThreadProxy;
 import com.stardust.autojs.core.looper.TimerThread;
 import com.stardust.autojs.runtime.ScriptRuntime;
@@ -45,7 +47,7 @@ public class Threads {
         TimerThread thread = createThread(runnable);
         synchronized (mThreads) {
             if (mExit) {
-                throw new IllegalStateException("Script is on exiting");
+                throw new IllegalStateException(GlobalAppContext.getString(R.string.error_script_is_on_exiting));
             }
             mThreads.add(thread);
             thread.setName(mMainThread.getName() + " (Spawn-" + mSpawnCount + ")");

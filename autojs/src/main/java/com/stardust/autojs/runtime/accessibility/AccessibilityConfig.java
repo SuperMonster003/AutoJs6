@@ -35,7 +35,7 @@ public class AccessibilityConfig {
 
     public void addWhiteList(String packageName) {
         if (mSealed)
-            throw new IllegalStateException("sealed");
+            throw new IllegalStateException("Sealed");
         mWhiteList.add(packageName);
     }
 

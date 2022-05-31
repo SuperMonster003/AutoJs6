@@ -206,7 +206,7 @@ public class Device {
     public boolean isCharging() {
         Intent intent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         if (intent == null) {
-            throw new ScriptException("Cannot retrieve the battery state");
+            throw new ScriptException(mContext.getString(R.string.error_cannot_retrieve_battery_state));
         }
         int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
@@ -310,7 +310,7 @@ public class Device {
     private <T> T getSystemService(String service) {
         Object systemService = mContext.getSystemService(service);
         if (systemService == null) {
-            throw new RuntimeException("should never happen..." + service);
+            throw new RuntimeException("Should never happen... " + service);
         }
         return (T) systemService;
     }

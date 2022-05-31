@@ -39,10 +39,10 @@ public class TinySign {
     private static void doDir(String prefix, File dir, ZipOutputStream zos, DigestOutputStream dos, Manifest m) throws IOException {
         zos.putNextEntry(new ZipEntry(prefix));
         zos.closeEntry();
-        File[] arr$ = dir.listFiles();
+        File[] files = dir.listFiles();
 
-        if (arr$ != null) {
-            for (File f : arr$) {
+        if (files != null) {
+            for (File f : files) {
                 if (f.isFile()) {
                     doFile(prefix + f.getName(), f, zos, dos, m);
                 } else {
@@ -72,13 +72,8 @@ public class TinySign {
     private static Manifest generateSF(Manifest manifest) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest md = MessageDigest.getInstance("SHA1");
         PrintStream print = new PrintStream(new DigestOutputStream(new OutputStream() {
-            public void write(byte[] arg0) {
-            }
-
-            public void write(byte[] arg0, int arg1, int arg2) {
-            }
-
-            public void write(int arg0) {
+            @Override
+            public void write(int b) {
             }
         }, md), true, "UTF-8");
         Manifest sf = new Manifest();
@@ -164,10 +159,10 @@ public class TinySign {
     }
 
     private static void zipAndSha1(File dir, ZipOutputStream zos, DigestOutputStream dos, Manifest m) throws IOException {
-        File[] arr$ = dir.listFiles();
+        File[] files = dir.listFiles();
 
-        if (arr$ != null) {
-            for (File f : arr$) {
+        if (files != null) {
+            for (File f : files) {
                 if (!f.getName().startsWith("META-INF")) {
                     if (f.isFile()) {
                         doFile(f.getName(), f, zos, dos, m);
@@ -191,8 +186,8 @@ public class TinySign {
         public void write(byte[] buffer) throws IOException {
             try {
                 this.mSignature.update(buffer);
-            } catch (SignatureException var3) {
-                throw new IOException("SignatureException: " + var3);
+            } catch (SignatureException e) {
+                throw new IOException("SignatureException: " + e);
             }
 
             this.out.write(buffer);
@@ -201,8 +196,8 @@ public class TinySign {
         public void write(byte[] b, int off, int len) throws IOException {
             try {
                 this.mSignature.update(b, off, len);
-            } catch (SignatureException var5) {
-                throw new IOException("SignatureException: " + var5);
+            } catch (SignatureException e) {
+                throw new IOException("SignatureException: " + e);
             }
 
             this.out.write(b, off, len);
@@ -211,8 +206,8 @@ public class TinySign {
         public void write(int b) throws IOException {
             try {
                 this.mSignature.update((byte) b);
-            } catch (SignatureException var3) {
-                throw new IOException("SignatureException: " + var3);
+            } catch (SignatureException e) {
+                throw new IOException("SignatureException: " + e);
             }
 
             this.out.write(b);

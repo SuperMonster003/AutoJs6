@@ -2,6 +2,8 @@ package com.stardust.autojs.core.console;
 
 import android.annotation.SuppressLint;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.util.UiHandler;
 
 import org.apache.log4j.Level;
@@ -49,7 +51,7 @@ public class GlobalConsole extends ConsoleImpl {
             case android.util.Log.ASSERT:
                 return Level.FATAL;
         }
-        throw new IllegalArgumentException("invalid level = " + level);
+        throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "level", level));
     }
 
     private String getLevelChar(int level) {

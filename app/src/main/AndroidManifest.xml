@@ -2,10 +2,25 @@
         xmlns:tools="http://schemas.android.com/tools"
         package="org.autojs.autojs">
 
+    <!--
+         @Hint by SuperMonster003 on May 27, 2022.
+          ! WRT: android.permission.WRITE_EXTERNAL_STORAGE
+          ! MSV<API>: android:maxSdkVersion="API"
+          ! LGC: android:requestLegacyExternalStorage="true" (since API 29)
+          ! MAN: android.permission.MANAGE_EXTERNAL_STORAGE (since API 30)
+          !
+          ! Storage permission requirement on different API targets.
+          ! [ XXX ] means optional but recommended.
+          !
+          ! Target API == 28: WRT
+          ! Target API == 29: WRT + [ MSV<29> ] / WRT + [ MSV<28> ] + LGC
+          ! Target API >= 30: WRT + [ MSV<29> ] + LGC  + MAN
+     -->
+
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission
             android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-            android:maxSdkVersion="28" />
+            android:maxSdkVersion="29" />
     <uses-permission
             android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
             tools:ignore="ScopedStorage" />
@@ -42,6 +57,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true"
+            android:requestLegacyExternalStorage="true"
             tools:replace="android:label, android:allowBackup"
             tools:ignore="DataExtractionRules">
 

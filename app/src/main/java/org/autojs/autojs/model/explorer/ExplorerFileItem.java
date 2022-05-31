@@ -2,11 +2,12 @@ package org.autojs.autojs.model.explorer;
 
 import androidx.annotation.NonNull;
 
+import com.stardust.app.GlobalAppContext;
 import com.stardust.pio.PFile;
-import com.stardust.util.ObjectHelper;
 import com.stardust.util.Objects;
 
 import org.autojs.autojs.model.script.ScriptFile;
+import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.util.Arrays;
@@ -24,7 +25,11 @@ public class ExplorerFileItem implements ExplorerItem {
     private final ExplorerPage mParent;
 
     public ExplorerFileItem(PFile file, ExplorerPage parent) {
-        ObjectHelper.requireNonNull(file, "file");
+        if (file == null) {
+            throw new NullPointerException(GlobalAppContext
+                    .getString(R.string.error_method_called_with_null_argument,
+                            "ExplorerFileItem.constructor", "file"));
+        }
         mFile = file;
         mParent = parent;
     }

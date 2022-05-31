@@ -44,7 +44,7 @@ public class ValueMapper<V> {
     public V get(String key) {
         V v = mHashMap.get(key);
         if (v == null) {
-            throw new InflateException(String.format("unknown value for %s: %s", mAttrName, key));
+            throw new InflateException(String.format("Unknown value for %s: %s", mAttrName, key));
         }
         return v;
     }

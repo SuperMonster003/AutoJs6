@@ -37,4 +37,20 @@
     <string name="entry_hidden_files_show">显示隐藏文件和文件夹</string>
     <string name="text_root_mode_description">如果设备使用非常规 Root 方式或 Root 权限检测异常, 可设置强制 Root 或 强制非 Root 模式.</string>
     <string name="text_hidden_files_description">设置是否在文件浏览器页面显示隐藏文件和文件夹 (文件名以 \".\" 开头)</string>
+    <string name="text_updates_snack_bar_act_view">查看更新</string>
+    <string name="text_updates_snack_bar_act_later">稍后提示</string>
+    <string name="error_function_called_in_ui_thread">UI 线程内无法执行阻塞操作. 可尝试在子线程或子脚本中执行 %s()</string>
+    <string name="error_max_listeners_exceeded">超出最大监听器数量限制: %d</string>
+    <string name="error_both_bitmap_and_mat_are_null">Bitmap 与 Mat 不能同时为 null</string>
+    <string name="error_image_has_been_recycled">图像资源已被回收</string>
+    <string name="error_function_called_more_than_once">%s() 调用不能超过一次</string>
+    <string name="error_thread_is_not_alive">线程处于非活动状态</string>
+    <string name="error_empty_shell_command">命令为空</string>
+    <string name="error_a_runtime_has_been_set">运行时已存在</string>
+    <string name="file_not_exist_or_readable">文件不存在或不可读: %s</string>
+    <string name="error_cannot_retrieve_battery_state">无法获取设备电池状态</string>
+    <string name="error_no_screen_capture_permission">缺少屏幕捕获权限</string>
+    <string name="error_no_accessibility_service">没有无障碍服务</string>
+    <string name="error_method_called_with_null_argument">%s() 传入的 %s 参数为空</string>
+    <string name="error_script_is_on_exiting">脚本正在退出中</string>
 </resources>

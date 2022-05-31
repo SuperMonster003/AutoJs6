@@ -22,9 +22,14 @@ public class GlobalAppContext {
     }
 
     public static Context get() {
-        if (sApplicationContext == null)
+        if (sApplicationContext == null) {
             throw new IllegalStateException("Call GlobalAppContext.set() to set a application context");
+        }
         return sApplicationContext;
+    }
+
+    public static String getString(int resId, Object... formatArgs) {
+        return get().getString(resId, formatArgs);
     }
 
     public static String getString(int resId) {

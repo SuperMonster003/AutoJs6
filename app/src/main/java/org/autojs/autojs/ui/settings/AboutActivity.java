@@ -11,11 +11,11 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.autojs.autojs.tool.UpdateUtils;
 import org.autojs.autojs6.BuildConfig;
 import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.error.IssueReporterActivity;
-import org.autojs.autojs.ui.update.UpdateCheckDialog;
 
 import de.psdev.licensesdialog.LicenseResolver;
 import de.psdev.licensesdialog.LicensesDialog;
@@ -113,8 +113,8 @@ public class AboutActivity extends BaseActivity {
 
     @SuppressLint("NonConstantResourceId")
     @Click(R.id.about_functions_button_update)
-    void checkForUpdated() {
-        new UpdateCheckDialog(this).show();
+    void checkForUpdates() {
+        UpdateUtils.getDialogChecker(this).checkNow();
     }
 
     @SuppressLint("NonConstantResourceId")

@@ -3,6 +3,8 @@ package com.stardust.autojs.engine;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.script.ScriptSource;
 import com.stardust.util.Supplier;
 
@@ -64,16 +66,18 @@ public class ScriptEngineFactory {
     @NonNull
     public ScriptEngine createEngineByNameOrThrow(String name) {
         ScriptEngine engine = createEngine(name);
-        if (engine == null)
-            throw new EngineNotFoundException("name: " + name);
+        if (engine == null) {
+            throw new EngineNotFoundException(GlobalAppContext.getString(R.string.error_illegal_argument, "name", name));
+        }
         return engine;
     }
 
     @NonNull
     public ScriptEngine createEngineOfSourceOrThrow(ScriptSource source) {
         ScriptEngine engine = createEngineOfSource(source);
-        if (engine == null)
-            throw new EngineNotFoundException("source: " + source);
+        if (engine == null) {
+            throw new EngineNotFoundException(GlobalAppContext.getString(R.string.error_illegal_argument, "source", source));
+        }
         return engine;
     }
 

@@ -46,4 +46,5 @@
     <string name="text_script_running">脚本运行</string>
     <string name="text_stable_mode">稳定模式</string>
     <string name="text_use_volume_to_stop_running">使用 \"音量加\" 键停止所有运行的脚本</string>
+    <string name="error_illegal_argument">不合法的参数 %s: %s</string>
 </resources>

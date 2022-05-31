@@ -2,6 +2,10 @@ package org.autojs.autojs.model.explorer;
 
 import androidx.annotation.NonNull;
 
+import com.stardust.app.GlobalAppContext;
+
+import org.autojs.autojs6.R;
+
 public class ExplorerChangeEvent {
 
 
@@ -73,6 +77,6 @@ public class ExplorerChangeEvent {
             case CHILDREN_CHANGE:
                 return "CHILDREN_CHANGE";
         }
-        throw new IllegalArgumentException("action = " + action);
+        throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "action", action));
     }
 }

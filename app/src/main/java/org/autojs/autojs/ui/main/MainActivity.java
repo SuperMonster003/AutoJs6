@@ -48,9 +48,12 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.autojs.autojs.Pref;
 import org.autojs.autojs.autojs.AutoJs;
 import org.autojs.autojs.external.foreground.MainActivityForegroundService;
 import org.autojs.autojs.model.explorer.Explorers;
+import org.autojs.autojs.network.UpdateChecker;
+import org.autojs.autojs.tool.UpdateUtils;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.doc.DocsFragment_;
@@ -101,6 +104,7 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
     @Override
     protected void onPostResume() {
         restartIfNeeded();
+        autoCheckForUpdatesIfNeeded();
         super.onPostResume();
     }
 
@@ -108,6 +112,19 @@ public class MainActivity extends BaseActivity implements OnActivityResultDelega
         if (mShouldRestartApplication) {
             mShouldRestartApplication = false;
             mHandler.post(() -> restartAfterPendingIntent(this));
+        }
+    }
+
+    private void autoCheckForUpdatesIfNeeded() {
+        if (Pref.isAutoCheckForUpdatesEnabled()) {
+            long minCheckedInterval = 2 * 60 * 60 * 1000; // 2 hours
+            long lastChecked = Pref.getLastUpdatesCheckedTimestamp();
+
+            if (System.currentTimeMillis() - lastChecked > minCheckedInterval) {
+                View rootView = findViewById(android.R.id.content);
+                UpdateChecker checker = UpdateUtils.getSnackbarChecker(rootView);
+                checker.checkNow();
+            }
         }
     }
 

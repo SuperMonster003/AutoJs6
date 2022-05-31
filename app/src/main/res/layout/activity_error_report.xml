@@ -30,5 +30,5 @@
         android:scrollbars="vertical"
         android:textColor="@android:color/secondary_text_light"
         android:textSize="16sp"
-        tools:text="错误"/>
+        tools:text="@string/text_error"/>
 </LinearLayout>

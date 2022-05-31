@@ -325,7 +325,7 @@ public class DynamicLayoutInflater {
                 } else if (attr.length == 2) {
                     applyAttribute(context, setter, view, attr[0], attr[1], entry.getValue(), parent, attrs);
                 } else {
-                    throw new InflateException("illegal attr name: " + entry.getKey());
+                    throw new InflateException("Illegal attr name: " + entry.getKey());
                 }
             }
             setter.applyPendingAttributes(view, parent);

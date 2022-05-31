@@ -295,7 +295,7 @@ public class PFiles {
             list = manager.list(assetsDir);
         }
         if (list == null)
-            throw new IOException("not a directory: " + assetsDir);
+            throw new IOException("Not a directory: " + assetsDir);
         for (String file : list) {
             if (TextUtils.isEmpty(file)) {
                 continue;
@@ -398,7 +398,7 @@ public class PFiles {
 
     public static boolean deleteFilesOfDir(File dir) {
         if (!dir.isDirectory())
-            throw new IllegalArgumentException("not a directory: " + dir);
+            throw new IllegalArgumentException("Not a directory: " + dir);
         File[] children = dir.listFiles();
         if (children != null) {
             for (File child : children) {

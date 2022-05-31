@@ -36,7 +36,7 @@ public class ScriptBridges {
 
     private void checkBridges() {
         if (mBridges == null)
-            throw new IllegalStateException("no bridges set");
+            throw new IllegalStateException("No bridges have been set");
     }
 
 

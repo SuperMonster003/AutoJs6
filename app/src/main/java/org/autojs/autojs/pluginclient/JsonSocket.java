@@ -21,6 +21,7 @@ import com.stardust.autojs.runtime.api.Device;
 import com.stardust.util.MapBuilder;
 
 import org.autojs.autojs6.BuildConfig;
+import org.autojs.autojs6.R;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -167,7 +168,7 @@ abstract public class JsonSocket extends Socket {
         } else if (value instanceof JsonElement) {
             data.add(key, (JsonElement) value);
         } else {
-            throw new IllegalArgumentException("cannot put value " + value + " into json");
+            throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_put_value_into_json, value));
         }
     }
 

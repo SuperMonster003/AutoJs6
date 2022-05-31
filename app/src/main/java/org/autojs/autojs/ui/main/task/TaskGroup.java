@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.main.task;
 import android.content.Context;
 
 import com.bignerdranch.expandablerecyclerview.model.Parent;
+import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.execution.ScriptExecution;
 
 import org.autojs.autojs6.R;
@@ -69,7 +70,7 @@ public abstract class TaskGroup implements Parent<Task> {
             } else if (task instanceof IntentTask) {
                 mTasks.add(new Task.PendingTask((IntentTask) task));
             } else {
-                throw new IllegalArgumentException("task = " + task);
+                throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "task", task));
             }
             return pos;
         }
@@ -100,7 +101,7 @@ public abstract class TaskGroup implements Parent<Task> {
                 } else if (task instanceof IntentTask) {
                     ((Task.PendingTask) mTasks.get(i)).setIntentTask((IntentTask) task);
                 } else {
-                    throw new IllegalArgumentException("task = " + task);
+                    throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "task", task));
                 }
             }
             return i;

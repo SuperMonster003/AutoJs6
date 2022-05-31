@@ -30,6 +30,7 @@
     <string name="key_enable_a11y_service_with_secure_settings" translatable="false">key_enable_a11y_service_with_secure_settings</string>
     <string name="key_stable_mode" translatable="false">key_stable_mode</string>
     <string name="key_use_volume_control_running" translatable="false">key_use_volume_control_running</string>
+    <string name="key_auto_check_for_updates" translatable="false">key_auto_check_for_updates</string>
     <string name="summary_enable_a11y_service_with_root_access">Enable accessibility service with root access automatically when needed</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Enable accessibility service with secure settings automatically when needed</string>
     <string name="summary_stable_mode">More stable layout analysis but worse code compatibility (a11y service restarting needed)</string>
@@ -51,4 +52,5 @@
     <string name="text_script_running">Script running</string>
     <string name="text_stable_mode">Stable mode</string>
     <string name="text_use_volume_to_stop_running">Use volume up key to stop all running scripts</string>
+    <string name="error_illegal_argument">Illegal argument %s: %s</string>
 </resources>

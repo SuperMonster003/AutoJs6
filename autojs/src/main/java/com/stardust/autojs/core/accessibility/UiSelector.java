@@ -1,30 +1,5 @@
 package com.stardust.autojs.core.accessibility;
 
-import android.os.Looper;
-import android.os.SystemClock;
-
-import androidx.annotation.NonNull;
-
-import android.util.Log;
-import android.view.accessibility.AccessibilityNodeInfo;
-
-import com.stardust.autojs.BuildConfig;
-import com.stardust.autojs.annotation.ScriptInterface;
-import com.stardust.autojs.rhino.continuation.Continuation;
-import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
-import com.stardust.automator.ActionArgument;
-import com.stardust.automator.UiGlobalSelector;
-import com.stardust.automator.UiObject;
-import com.stardust.automator.UiObjectCollection;
-import com.stardust.automator.filter.Filter;
-import com.stardust.concurrent.VolatileBox;
-import com.stardust.view.accessibility.AccessibilityNodeInfoAllocator;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.ACTION_ACCESSIBILITY_FOCUS;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.ACTION_ARGUMENT_COLUMN_INT;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.ACTION_ARGUMENT_PROGRESS_VALUE;
@@ -56,6 +31,31 @@ import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.Acces
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SCROLL_UP;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SET_PROGRESS;
 import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_SHOW_ON_SCREEN;
+
+import android.os.Looper;
+import android.os.SystemClock;
+import android.util.Log;
+import android.view.accessibility.AccessibilityNodeInfo;
+
+import androidx.annotation.NonNull;
+
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.BuildConfig;
+import com.stardust.autojs.R;
+import com.stardust.autojs.annotation.ScriptInterface;
+import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
+import com.stardust.automator.ActionArgument;
+import com.stardust.automator.UiGlobalSelector;
+import com.stardust.automator.UiObject;
+import com.stardust.automator.UiObjectCollection;
+import com.stardust.automator.filter.Filter;
+import com.stardust.concurrent.VolatileBox;
+import com.stardust.view.accessibility.AccessibilityNodeInfoAllocator;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Stardust on 2017/3/9.
@@ -168,8 +168,7 @@ public class UiSelector extends UiGlobalSelector {
     @NonNull
     public UiObjectCollection untilFind() {
         if (isUiThread()) {
-            // TODO: 2018/11/1 配置字符串
-            throw new IllegalThreadStateException("不能在ui线程执行阻塞操作, 请在子线程或子脚本执行untilFind()");
+            throw new IllegalThreadStateException(GlobalAppContext.getString(R.string.error_function_called_in_ui_thread, "untilFind"));
         }
         UiObjectCollection uiObjectCollection = find();
         while (uiObjectCollection.empty()) {
@@ -189,8 +188,7 @@ public class UiSelector extends UiGlobalSelector {
     @ScriptInterface
     public UiObject findOne(long timeout) {
         if (isUiThread()) {
-            // TODO: 2018/11/1 配置字符串
-            throw new IllegalThreadStateException("不能在ui线程执行阻塞操作, 请在子线程或子脚本执行findOne()");
+            throw new IllegalThreadStateException(GlobalAppContext.getString(R.string.error_function_called_in_ui_thread, "findOne"));
         }
         UiObjectCollection uiObjectCollection = find(1);
         long start = SystemClock.uptimeMillis();

@@ -4,6 +4,8 @@ import android.view.InflateException;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.core.ui.inflater.ResourceParser;
 import com.stardust.autojs.core.ui.inflater.util.Colors;
 import com.stardust.autojs.core.ui.inflater.util.Dimensions;
@@ -44,7 +46,7 @@ public class ImageViewInflater<V extends ImageView> extends BaseViewInflater<V> 
                 view.setMaxWidth(Dimensions.parseToIntPixel(value, view));
                 break;
             case "path":
-                getDrawables().setupWithImage(view,  wrapAsPath(value));
+                getDrawables().setupWithImage(view, wrapAsPath(value));
                 break;
             case "scaleType":
                 view.setScaleType(parseScaleType(value));
@@ -59,13 +61,14 @@ public class ImageViewInflater<V extends ImageView> extends BaseViewInflater<V> 
                 view.setImageTintMode(TINT_MODES.get(value));
                 break;
             case "url":
-                getDrawables().setupWithImage(view,  wrapAsUrl(value));
+                getDrawables().setupWithImage(view, wrapAsUrl(value));
                 break;
             default:
                 return false;
         }
         return true;
     }
+
     private String wrapAsPath(String value) {
         if (!value.startsWith("file://")) {
             return "file://" + value;
@@ -80,8 +83,8 @@ public class ImageViewInflater<V extends ImageView> extends BaseViewInflater<V> 
         return value;
     }
 
-    private ImageView.ScaleType parseScaleType(String value) {
-        switch (value.toLowerCase()) {
+    private ImageView.ScaleType parseScaleType(String scaleType) {
+        switch (scaleType.toLowerCase()) {
             case "center":
                 return ImageView.ScaleType.CENTER;
             case "center_crop":
@@ -99,6 +102,7 @@ public class ImageViewInflater<V extends ImageView> extends BaseViewInflater<V> 
             case "matrix":
                 return ImageView.ScaleType.MATRIX;
         }
-        throw new InflateException("unknown scale type: " + value);
+        throw new InflateException(GlobalAppContext
+                .getString(R.string.error_illegal_argument, "scaleType", scaleType));
     }
 }

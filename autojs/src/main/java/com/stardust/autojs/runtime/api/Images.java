@@ -14,6 +14,10 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 
+import androidx.annotation.NonNull;
+
+import com.stardust.app.GlobalAppContext;
+import com.stardust.autojs.R;
 import com.stardust.autojs.annotation.ScriptVariable;
 import com.stardust.autojs.core.image.ColorFinder;
 import com.stardust.autojs.core.image.ImageWrapper;
@@ -99,7 +103,7 @@ public class Images {
 
     public synchronized ImageWrapper captureScreen() {
         if (mScreenCapturer == null) {
-            throw new SecurityException("No screen capture permission");
+            throw new SecurityException(mContext.getString(R.string.error_no_screen_capture_permission));
         }
         Image capture = mScreenCapturer.capture();
         if (capture == mPreCapture && mPreCaptureImage != null) {
@@ -123,15 +127,12 @@ public class Images {
         return false;
     }
 
-    public ImageWrapper copy(ImageWrapper image) {
+    public ImageWrapper copy(@NonNull ImageWrapper image) {
         return image.clone();
     }
 
-    public boolean save(ImageWrapper image, String path, String format, int quality) throws IOException {
+    public boolean save(@NonNull ImageWrapper image, String path, String format, int quality) throws IOException {
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
-        if (compressFormat == null) {
-            throw new IllegalArgumentException("unknown format " + format);
-        }
         Bitmap bitmap = image.getBitmap();
         FileOutputStream outputStream = new FileOutputStream(mScriptRuntime.files.path(path));
         return bitmap.compress(compressFormat, quality, outputStream);
@@ -139,14 +140,17 @@ public class Images {
 
     public static int pixel(ImageWrapper image, int x, int y) {
         if (image == null) {
-            throw new NullPointerException("image = null");
+            throw new NullPointerException(GlobalAppContext
+                    .getString(R.string.error_method_called_with_null_argument, "Images.pixel", "image"));
         }
         return image.pixel(x, y);
     }
 
     public static ImageWrapper concat(ImageWrapper img1, ImageWrapper img2, int direction) {
         if (!Arrays.asList(Gravity.START, Gravity.END, Gravity.TOP, Gravity.BOTTOM).contains(direction)) {
-            throw new IllegalArgumentException("unknown direction " + direction);
+            throw new IllegalArgumentException(GlobalAppContext
+                    .getString(R.string.error_illegal_argument,
+                            "direction", direction));
         }
         int width;
         int height;
@@ -175,13 +179,13 @@ public class Images {
         return ImageWrapper.ofBitmap(bitmap);
     }
 
-    public ImageWrapper rotate(ImageWrapper img, float x, float y, float degree) {
+    public ImageWrapper rotate(@NonNull ImageWrapper img, float x, float y, float degree) {
         Matrix matrix = new Matrix();
         matrix.postRotate(degree, x, y);
         return ImageWrapper.ofBitmap(Bitmap.createBitmap(img.getBitmap(), 0, 0, img.getWidth(), img.getHeight(), matrix, true));
     }
 
-    public ImageWrapper clip(ImageWrapper img, int x, int y, int w, int h) {
+    public ImageWrapper clip(@NonNull ImageWrapper img, int x, int y, int w, int h) {
         return ImageWrapper.ofBitmap(Bitmap.createBitmap(img.getBitmap(), x, y, w, h));
     }
 
@@ -199,11 +203,8 @@ public class Images {
         return Base64.encodeToString(toBytes(wrapper, format, quality), Base64.NO_WRAP);
     }
 
-    public byte[] toBytes(ImageWrapper wrapper, String format, int quality) {
+    public byte[] toBytes(@NonNull ImageWrapper wrapper, String format, int quality) {
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
-        if (compressFormat == null) {
-            throw new IllegalArgumentException("Unknown format " + format);
-        }
         Bitmap bitmap = wrapper.getBitmap();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(compressFormat, quality, outputStream);
@@ -219,7 +220,8 @@ public class Images {
             case "png" -> Bitmap.CompressFormat.PNG;
             case "jpeg", "jpg" -> Bitmap.CompressFormat.JPEG;
             case "webp" -> Bitmap.CompressFormat.WEBP;
-            default -> null;
+            default -> throw new IllegalArgumentException(GlobalAppContext
+                    .getString(R.string.error_illegal_argument, "format", format));
         };
     }
 
@@ -237,7 +239,7 @@ public class Images {
         }
     }
 
-    public static void saveBitmap(Bitmap bitmap, String path) {
+    public static void saveBitmap(@NonNull Bitmap bitmap, String path) {
         try {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(path));
         } catch (FileNotFoundException e) {
@@ -279,10 +281,14 @@ public class Images {
     public Point findImage(ImageWrapper image, ImageWrapper template, float weakThreshold, float threshold, Rect rect, int maxLevel) {
         initOpenCvIfNeeded();
         if (image == null) {
-            throw new NullPointerException("Param image is null");
+            throw new NullPointerException(GlobalAppContext
+                    .getString(R.string.error_method_called_with_null_argument,
+                            "Images.findImage", "image"));
         }
         if (template == null) {
-            throw new NullPointerException("Param template is null");
+            throw new NullPointerException(GlobalAppContext
+                    .getString(R.string.error_method_called_with_null_argument,
+                            "Images.findImage", "template"));
         }
         Mat src = image.getMat();
         if (rect != null) {
@@ -307,10 +313,14 @@ public class Images {
     public List<TemplateMatching.Match> matchTemplate(ImageWrapper image, ImageWrapper template, float weakThreshold, float threshold, Rect rect, int maxLevel, int limit) {
         initOpenCvIfNeeded();
         if (image == null) {
-            throw new NullPointerException("Param image is null");
+            throw new NullPointerException(GlobalAppContext
+                    .getString(R.string.error_method_called_with_null_argument,
+                            "Images.matchTemplate", "image"));
         }
         if (template == null) {
-            throw new NullPointerException("Param template is null");
+            throw new NullPointerException(GlobalAppContext
+                    .getString(R.string.error_method_called_with_null_argument,
+                            "Images.matchTemplate", "template"));
         }
         Mat src = image.getMat();
         if (rect != null) {

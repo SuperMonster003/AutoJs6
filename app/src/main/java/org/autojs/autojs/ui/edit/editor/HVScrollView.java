@@ -15,6 +15,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.Scroller;
 
+import org.autojs.autojs6.R;
+
 import java.util.List;
 
 
@@ -194,38 +196,32 @@ public class HVScrollView extends FrameLayout {
 
     @Override
     public void addView(View child) {
-        if (getChildCount() > 0) {
-            throw new IllegalStateException("ScrollView can host only one direct child");
-        }
-
+        ensureNotMoreThanOneChild();
         super.addView(child);
     }
 
     @Override
     public void addView(View child, int index) {
-        if (getChildCount() > 0) {
-            throw new IllegalStateException("ScrollView can host only one direct child");
-        }
-
+        ensureNotMoreThanOneChild();
         super.addView(child, index);
     }
 
     @Override
     public void addView(View child, ViewGroup.LayoutParams params) {
-        if (getChildCount() > 0) {
-            throw new IllegalStateException("ScrollView can host only one direct child");
-        }
-
+        ensureNotMoreThanOneChild();
         super.addView(child, params);
     }
 
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        if (getChildCount() > 0) {
-            throw new IllegalStateException("ScrollView can host only one direct child");
-        }
-
+        ensureNotMoreThanOneChild();
         super.addView(child, index, params);
+    }
+
+    private void ensureNotMoreThanOneChild() {
+        if (getChildCount() > 0) {
+            throw new IllegalStateException(getContext().getString(R.string.error_only_one_child_for_scroll_view));
+        }
     }
 
     /**

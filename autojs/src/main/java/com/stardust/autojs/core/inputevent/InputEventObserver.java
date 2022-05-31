@@ -4,6 +4,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.stardust.autojs.R;
 import com.stardust.autojs.core.record.inputevent.EventFormatException;
 import com.stardust.autojs.core.util.Shell;
 
@@ -91,7 +92,9 @@ public class InputEventObserver {
 
     public void observe() {
         if (mShell != null)
-            throw new IllegalStateException("observe() should be called only once");
+            throw new IllegalStateException(mContext
+                    .getString(R.string.error_function_called_more_than_once,
+                            "InputEventObserver.observe"));
         mShell = new Shell(mContext, true);
         mShell.setCallback(new Shell.SimpleCallback() {
             @Override
