@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import android.view.View;
 
 import org.autojs.autojs.ui.edit.EditorView;
+import org.autojs.autojs6.R;
 
 import java.util.List;
 
@@ -48,7 +49,7 @@ public abstract class ToolbarFragment extends Fragment implements View.OnClickLi
             view = (View) view.getParent();
         }
         if (!(view instanceof EditorView)) {
-            throw new IllegalStateException("cannot find EditorView from child: " + view);
+            throw new IllegalStateException(getString(R.string.error_cannot_find_editor_view_from_child_view, view));
         }
         return (EditorView) view;
     }

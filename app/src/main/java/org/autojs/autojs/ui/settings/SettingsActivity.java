@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.settings;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,10 +24,10 @@ import com.stardust.util.MapBuilder;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.autojs.autojs.Pref;
+import org.autojs.autojs.tool.UpdateUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
-import org.autojs.autojs.ui.update.UpdateCheckDialog;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,70 +67,6 @@ public class SettingsActivity extends BaseActivity {
             .add(new Pair<>(R.color.theme_color_default, R.string.theme_color_default))
             .list();
 
-    public static void selectThemeColor(Context context) {
-        List<ColorSelectActivity.ColorItem> colorItems = new ArrayList<>(COLOR_ITEMS.size());
-        for (Pair<Integer, Integer> item : COLOR_ITEMS) {
-            colorItems.add(new ColorSelectActivity.ColorItem(context.getString(item.second), ContextCompat.getColor(context, item.first)));
-        }
-        ColorSelectActivity.startColorSelect(context, context.getString(R.string.mt_color_picker_title), colorItems);
-    }
-
-    @NonNull
-    private static LinkedHashMap<String, Runnable> getAvailableLanguages(@NonNull Context context) {
-        LinkedHashMap<String, Runnable> map = new LinkedHashMap<>();
-        map.put(context.getString(R.string.text_app_language_follow_system),
-                ((BaseActivity) context)::setLocaleFollowSystem);
-        map.put(context.getString(R.string.text_app_language_simplified_chinese),
-                () -> ((BaseActivity) context).updateLocale(Locale.SIMPLIFIED_CHINESE));
-        map.put(context.getString(R.string.text_app_language_english),
-                () -> ((BaseActivity) context).updateLocale(Locale.ENGLISH));
-        return map;
-    }
-
-    public static void selectAppLanguage(Context context) {
-        LinkedHashMap<String, Runnable> languagesMap = getAvailableLanguages(context);
-        Set<String> languagesKey = languagesMap.keySet();
-        Collection<Runnable> languagesRunnable = languagesMap.values();
-
-        new MaterialDialog.Builder(context)
-                .title(R.string.text_app_language)
-                .items(languagesKey)
-                .itemsCallbackSingleChoice(Pref.getAppLanguageIndex(), (dialog, itemView, position, text) -> true)
-                .positiveText(R.string.text_ok)
-                .onPositive((dialog, which) -> {
-                    int index = dialog.getSelectedIndex();
-                    Runnable run = (Runnable) languagesRunnable.toArray()[index];
-                    if (run != null) {
-                        Pref.setAppLanguageIndex(index);
-                        GlobalAppContext.post(run);
-                    }
-                    dialog.dismiss();
-                })
-                .negativeText(R.string.text_cancel)
-                .onNegative((dialog, which) -> dialog.dismiss())
-                .neutralText(R.string.text_dialog_button_go_to_settings)
-                .onNeutral((dialog, which) -> {
-                    Intent intent = new Intent(Intent.ACTION_MAIN);
-                    intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
-                })
-                .autoDismiss(false)
-                .show();
-
-        showImperfectHint(context);
-    }
-
-    private static void showImperfectHint(Context context) {
-        new NotAskAgainDialog.Builder(context, "SettingsActivity.select_app_language_imperfect_hint")
-                .title(R.string.text_notice)
-                .content(R.string.text_imperfect_hint_for_app_language)
-                .positiveText(R.string.text_ok)
-                .onPositive((dialog, which) -> dialog.dismiss())
-                .autoDismiss(false)
-                .show();
-    }
-
     @AfterViews
     void setUpUI() {
         setUpToolbar();
@@ -163,12 +100,26 @@ public class SettingsActivity extends BaseActivity {
         @Override
         public void onStart() {
             super.onStart();
+            Activity mActivity = getActivity();
             ACTION_MAP = new MapBuilder<String, Runnable>()
-                    .put(getString(R.string.text_theme_color), () -> selectThemeColor(getActivity()))
-                    .put(getString(R.string.text_check_for_updates), () -> new UpdateCheckDialog(getActivity()).show())
-                    .put(getString(R.string.text_about_app_and_developer), () -> startActivity(new Intent(getActivity(), AboutActivity_.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)))
-                    .put(getString(R.string.text_app_language), () -> selectAppLanguage(getActivity()))
+                    .put(getString(R.string.text_theme_color), () -> selectThemeColor(mActivity))
+                    .put(getString(R.string.text_about_app_and_developer), () -> launchAboutAppAndDeveloper(mActivity))
+                    .put(getString(R.string.text_app_language), () -> selectAppLanguage(mActivity))
+                    .put(getString(R.string.text_check_for_updates), () -> checkForUpdates(mActivity))
+                    .put(getString(R.string.text_manage_ignored_updates), () -> manageIgnoredUpdates(mActivity))
                     .build();
+        }
+
+        private void manageIgnoredUpdates(Activity mActivity) {
+            // TODO by SuperMonster003 on May 31, 2022.
+            //  ! Updates ignorance.
+
+            new MaterialDialog.Builder(mActivity)
+                    .title(R.string.text_prompt)
+                    .content(R.string.text_under_development_content)
+                    .positiveText(R.string.dialog_button_back)
+                    .build()
+                    .show();
         }
 
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
@@ -183,6 +134,78 @@ public class SettingsActivity extends BaseActivity {
             return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
 
+    }
+
+    public static void checkForUpdates(Context context) {
+        UpdateUtils.getDialogChecker(context).checkNow();
+    }
+
+    public static void selectThemeColor(Context context) {
+        List<ColorSelectActivity.ColorItem> colorItems = new ArrayList<>(COLOR_ITEMS.size());
+        for (Pair<Integer, Integer> item : COLOR_ITEMS) {
+            colorItems.add(new ColorSelectActivity.ColorItem(context.getString(item.second), ContextCompat.getColor(context, item.first)));
+        }
+        ColorSelectActivity.startColorSelect(context, context.getString(R.string.mt_color_picker_title), colorItems);
+    }
+
+    public static void selectAppLanguage(Context context) {
+        LinkedHashMap<String, Runnable> languagesMap = getAvailableLanguages(context);
+        Set<String> languagesKey = languagesMap.keySet();
+        Collection<Runnable> languagesRunnable = languagesMap.values();
+
+        new MaterialDialog.Builder(context)
+                .title(R.string.text_app_language)
+                .items(languagesKey)
+                .itemsCallbackSingleChoice(Pref.getAppLanguageIndex(), (dialog, itemView, position, text) -> true)
+                .positiveText(R.string.text_ok)
+                .onPositive((dialog, which) -> {
+                    int index = dialog.getSelectedIndex();
+                    Runnable run = (Runnable) languagesRunnable.toArray()[index];
+                    if (run != null) {
+                        Pref.setAppLanguageIndex(index);
+                        GlobalAppContext.post(run);
+                    }
+                    dialog.dismiss();
+                })
+                .negativeText(R.string.text_cancel)
+                .onNegative((dialog, which) -> dialog.dismiss())
+                .neutralText(R.string.dialog_button_go_to_settings)
+                .onNeutral((dialog, which) -> {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                })
+                .autoDismiss(false)
+                .show();
+
+        showImperfectHint(context);
+    }
+
+    public static void launchAboutAppAndDeveloper(@NonNull Context context) {
+        context.startActivity(new Intent(context, AboutActivity_.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    @NonNull
+    private static LinkedHashMap<String, Runnable> getAvailableLanguages(@NonNull Context context) {
+        LinkedHashMap<String, Runnable> map = new LinkedHashMap<>();
+        map.put(context.getString(R.string.text_app_language_follow_system),
+                ((BaseActivity) context)::setLocaleFollowSystem);
+        map.put(context.getString(R.string.text_app_language_simplified_chinese),
+                () -> ((BaseActivity) context).updateLocale(Locale.SIMPLIFIED_CHINESE));
+        map.put(context.getString(R.string.text_app_language_english),
+                () -> ((BaseActivity) context).updateLocale(Locale.ENGLISH));
+        return map;
+    }
+
+    private static void showImperfectHint(Context context) {
+        new NotAskAgainDialog.Builder(context, "SettingsActivity.select_app_language_imperfect_hint")
+                .title(R.string.text_notice)
+                .content(R.string.text_imperfect_hint_for_app_language)
+                .positiveText(R.string.text_ok)
+                .onPositive((dialog, which) -> dialog.dismiss())
+                .autoDismiss(false)
+                .show();
     }
 
 }

@@ -77,12 +77,12 @@
     <string name="text_build_failed">打包失败</string>
     <string name="text_build_successfully">打包成功</string>
     <string name="text_cancel">取消</string>
-    <string name="text_cancel_download">取消下载</string>
+    <string name="dialog_button_cancel_download">取消下载</string>
     <string name="text_cannot_read_file">无法读取文件</string>
     <string name="text_change_working_dir">更改工作路径 (脚本文件夹)</string>
-    <string name="text_checking_update">正在检查更新</string>
+    <string name="text_checking_update" tools:ignore="TypographyEllipsis">正在检查更新...</string>
     <string name="text_check_for_updates">检查更新</string>
-    <string name="text_check_update_error">检查更新失败</string>
+    <string name="error_check_for_update">检查更新失败</string>
     <string name="text_class_or_package_name">类/包名</string>
     <string name="text_clear">清空</string>
     <string name="text_clear_file_selection">清空文件选择</string>
@@ -102,6 +102,7 @@
     <string name="text_copy_command">复制指令</string>
     <string name="text_copy_debug_info">复制调试信息</string>
     <string name="text_copy_line">复制行</string>
+    <string name="text_paste">粘贴</string>
     <string name="text_copy_to_clip">复制到剪贴板</string>
     <string name="text_copy_value">复制值</string>
     <string name="text_create_fail">创建失败</string>
@@ -123,7 +124,7 @@
     <string name="text_delete_line">删除行</string>
     <string name="text_detail">详情</string>
     <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"开发者详情\" 正在开发中...</string>
-    <string name="text_dialog_button_go_to_settings">系统设置</string>
+    <string name="dialog_button_go_to_settings">系统设置</string>
     <string name="text_directly_download">直接下载</string>
     <string name="text_directory">文件夹</string>
     <string name="text_display_over_other_app">显示在其他应用上层</string>
@@ -193,7 +194,7 @@
     <string name="text_invalid_project">无效项目</string>
     <string name="text_in_progress">处理中</string>
     <string name="text_issue_report">问题反馈</string>
-    <string name="text_is_latest_version">暂无更新版本</string>
+    <string name="text_is_latest_version">已是最新版本</string>
     <string name="text_js_file">*.js 文件</string>
     <string name="text_jump">跳转</string>
     <string name="text_jump_to_end">跳转到文件末尾</string>
@@ -365,7 +366,7 @@
     <string name="text_under_development_content">将在后续版本实现当前功能</string>
     <string name="text_under_development_title">开发中</string>
     <string name="text_undo">撤销</string>
-    <string name="text_update">更新</string>
+    <string name="text_updates">更新</string>
     <string name="text_usage_stats_permission">查看使用情况权限</string>
     <string name="text_usage_stats_permission_description">\"查看使用情况\" 权限可获取本设备过去使用应用的情况,从而使 \"获取当前应用\" (currentPackage) 结果更准确</string>
     <string name="text_username">用户名</string>
@@ -406,6 +407,42 @@
     <string name="theme_color_yellow">黄色</string>
     <string name="theme_color_yellow_green">黄绿</string>
     <string name="text_refresh_explorer_may_needed">可能需要下拉刷新文件浏览器页面</string>
+    <string name="error_set_both_icon_res_and_icon">不支持同时设置 iconRes 与 icon</string>
+    <string name="error_only_one_child_for_scroll_view">ScrollView 只能拥有至多一个直接子控件</string>
+    <string name="error_illegal_url_argument">URL 需以协议标识开头 (如 "https://" 等)</string>
+    <string name="error_illegal_relative_url_argument_without_base">使用相对 URL 时必须指定 Base URL</string>
+    <string name="dialog_button_ignore_current_update">忽略此版本</string>
+    <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_update_now">立即更新</string>
+    <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">正在获取版本信息...</string>
+    <string name="error_cannot_connect_to_github">无法连接到 GitHub</string>
+    <string name="error_invalid_github_repo">无效的 GitHub 仓库: %s</string>
+    <string name="error_get_github_latest_release">无法获取最新的 GitHub 发行版</string>
+    <string name="error_corresponding_github_release_may_not_published">对应的 GitHub 发行版可能还未发布</string>
+    <string name="error_parse_version_info">无法解析版本信息</string>
+    <string name="text_empty_release_note">无版本信息</string>
+    <string name="error_cannot_get_download_url">无法获取下载链接</string>
+    <string name="error_empty_github_release_assets">无可供下载的 GitHub 发行版资源</string>
+    <string name="text_github_backup_url_used">备用 URL 已使用</string>
+    <string name="error_unknown">未知错误</string>
+    <string name="text_downloading">下载中</string>
+    <string name="text_file_name">文件名</string>
+    <string name="text_version">版本</string>
+    <string name="dialog_button_quit">放弃</string>
+    <string name="dialog_button_retry">重试</string>
+    <string name="text_preparing" tools:ignore="TypographyEllipsis">准备中...</string>
+    <string name="error_download_interrupted">下载中断</string>
+    <string name="text_download_cancelled">下载已取消</string>
+    <string name="text_manage_ignored_updates">管理已忽略更新</string>
+    <string name="text_auto_check_for_updates_and_show_snackbar">自动检查更新并在首页下方显示通知条</string>
+    <string name="text_auto_check_for_updates">自动检查更新</string>
+    <string name="text_last_updates_checked_time">上次检查: %s</string>
+    <string name="error_failed_to_parse_version_info">无法解析版本信息</string>
+    <string name="error_put_value_into_json">无法将值 %s 存入 JSON</string>
+    <string name="error_github_api_token_needed">需要提供 GitHub API 令牌</string>
+    <string name="error_cannot_find_editor_view_from_child_view">无法在子控件 %s 中找到 EditorView</string>
+    <string name="error_unknown_type">未知类型: %s</string>
+    <string name="error_sdk_lower_than_o_not_supported_yet">当前功能暂不支持安卓 SDK 版本低于 26 (Android 8.0) 的系统</string>
     <plurals name="air_error_short_description" key="air_error_short_description" tools:ignore="UnusedQuantity">
         <item quantity="one">描述至少需要 %d 个字</item>
         <item quantity="other">描述至少需要 %d 个字</item>

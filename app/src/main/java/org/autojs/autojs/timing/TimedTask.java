@@ -6,10 +6,12 @@ import android.content.Intent;
 
 import androidx.annotation.NonNull;
 
+import com.stardust.app.GlobalAppContext;
 import com.stardust.autojs.execution.ExecutionConfig;
 
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.storage.database.BaseModel;
+import org.autojs.autojs6.R;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDateTime;
@@ -100,7 +102,7 @@ public class TimedTask extends BaseModel {
             dayOfWeek++;
             nextTimeMillis += TimeUnit.DAYS.toMillis(1);
         }
-        throw new IllegalStateException("Should not happen! timeFlag = " + mTimeFlag + ", dayOfWeek = " + DateTime.now().getDayOfWeek());
+        return -1;
     }
 
     public static long getDayOfWeekTimeFlag(int dayOfWeek) {
@@ -127,7 +129,7 @@ public class TimedTask extends BaseModel {
                 return FLAG_FRIDAY;
 
         }
-        throw new IllegalArgumentException("dayOfWeek = " + dayOfWeek);
+        throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "dayOfWeek", dayOfWeek));
     }
 
     public long getMillis() {

@@ -16,6 +16,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.stardust.autojs.script.JavaScriptSource;
 import com.stardust.pio.PFiles;
 
+import org.autojs.autojs.tool.ConsoleTool;
 import org.autojs.autojs6.R;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
@@ -23,7 +24,6 @@ import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.ui.project.BuildActivity_;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
-import org.autojs.autojs.ui.log.LogActivity_;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 
 import com.stardust.util.ClipboardUtil;
@@ -54,12 +54,10 @@ public class EditorMenu {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_log) {
-            showLog();
-            return true;
+            return ConsoleTool.launch();
         }
         if (itemId == R.id.action_force_stop) {
-            forceStop();
-            return true;
+            return tryDoing(mEditorView::forceStop);
         }
         return onEditOptionsSelected(item)
                 || onJumpOptionsSelected(item)
@@ -79,8 +77,7 @@ public class EditorMenu {
                     .content(R.string.hint_long_click_run_to_debug)
                     .positiveText(R.string.text_ok)
                     .show();
-            mEditorView.debug();
-            return true;
+            return tryDoing(mEditorView::debug);
         }
         if (itemId == R.id.action_remove_all_breakpoints) {
             mEditor.removeAllBreakpoints();
@@ -118,24 +115,20 @@ public class EditorMenu {
     private boolean onMoreOptionsSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_console) {
-            showConsole();
-            return true;
+            return tryDoing(mEditorView::showConsole);
         }
         if (itemId == R.id.action_import_java_class) {
             importJavaPackageOrClass();
             return true;
         }
         if (itemId == R.id.action_editor_text_size) {
-            mEditorView.selectTextSize();
-            return true;
+            return tryDoing(mEditorView::selectTextSize);
         }
         if (itemId == R.id.action_editor_theme) {
-            mEditorView.selectEditorTheme();
-            return true;
+            return tryDoing(mEditorView::selectEditorTheme);
         }
         if (itemId == R.id.action_open_by_other_apps) {
-            openByOtherApps();
-            return true;
+            return tryDoing(mEditorView::openByOtherApps);
         }
         if (itemId == R.id.action_info) {
             showInfo();
@@ -212,20 +205,19 @@ public class EditorMenu {
             return true;
         }
         if (itemId == R.id.action_copy_line) {
-            copyLine();
-            return true;
+            return copyLine();
         }
         if (itemId == R.id.action_delete_line) {
-            deleteLine();
-            return true;
+            return deleteLine();
+        }
+        if (itemId == R.id.action_paste) {
+            return paste();
         }
         if (itemId == R.id.action_clear) {
-            mEditor.setText("");
-            return true;
+            return tryDoing(() -> mEditor.setText(""));
         }
         if (itemId == R.id.action_beautify) {
-            beautifyCode();
-            return true;
+            return tryDoing(mEditorView::beautifyCode);
         }
         return false;
     }
@@ -255,11 +247,12 @@ public class EditorMenu {
     }
 
     private void showInfo() {
-        Observable.zip(Observable.just(mEditor.getText()), mEditor.getLineCount(), (text, lineCount) -> {
-            String size = PFiles.getHumanReadableSize(text.length());
-            return String.format(Locale.getDefault(), mContext.getString(R.string.format_editor_info),
-                    text.length(), lineCount, size);
-        })
+        Observable
+                .zip(Observable.just(mEditor.getText()), mEditor.getLineCount(), (text, lineCount) -> {
+                    String size = PFiles.getHumanReadableSize(text.length());
+                    return String.format(Locale.getDefault(), mContext.getString(R.string.format_editor_info),
+                            text.length(), lineCount, size);
+                })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::showInfo);
 
@@ -272,20 +265,21 @@ public class EditorMenu {
                 .show();
     }
 
-    private void copyLine() {
-        mEditor.copyLine();
+    protected boolean copyLine() {
+        return tryDoing(mEditor::copyLine);
     }
 
-
-    private void deleteLine() {
-        mEditor.deleteLine();
+    protected boolean deleteLine() {
+        return tryDoing(mEditor::deleteLine);
     }
 
-    private void paste() {
-        CharSequence clip = getClip();
-        if (clip != null) {
-            mEditor.insert(clip.toString());
-        }
+    protected boolean paste() {
+        return tryDoing(() -> {
+            CharSequence clip = getClip();
+            if (clip != null) {
+                mEditor.insert(clip.toString());
+            }
+        });
     }
 
     @Nullable
@@ -309,25 +303,14 @@ public class EditorMenu {
         Snackbar.make(mEditorView, R.string.text_already_copied_to_clip, Snackbar.LENGTH_SHORT).show();
     }
 
-
-    private void showLog() {
-        LogActivity_.intent(mContext).start();
-    }
-
-    private void showConsole() {
-        mEditorView.showConsole();
-    }
-
-    private void forceStop() {
-        mEditorView.forceStop();
-    }
-
-    private void openByOtherApps() {
-        mEditorView.openByOtherApps();
-    }
-
-    private void beautifyCode() {
-        mEditorView.beautifyCode();
+    private boolean tryDoing(Runnable callable) {
+        try {
+            callable.run();
+            return true;
+        } catch (Exception ignore) {
+            // Ignored.
+        }
+        return false;
     }
 
 }

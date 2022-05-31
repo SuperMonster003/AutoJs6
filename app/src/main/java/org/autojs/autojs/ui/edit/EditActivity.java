@@ -29,12 +29,12 @@ import com.stardust.pio.PFiles;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.autojs.autojs6.R;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
 import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import org.autojs.autojs.tool.Observers;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.main.MainActivity_;
+import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.io.IOException;
@@ -158,9 +158,27 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
         Log.d(LOG_TAG, "onActionModeStarted: " + mode);
         Menu menu = mode.getMenu();
         MenuItem item = menu.getItem(menu.size() - 1);
-        menu.add(item.getGroupId(), R.id.action_delete_line, 10000, R.string.text_delete_line);
-        menu.add(item.getGroupId(), R.id.action_copy_line, 20000, R.string.text_copy_line);
+        addMenuItem(menu, item.getGroupId(), R.id.action_delete_line, 10000, R.string.text_delete_line, () -> mEditorMenu.deleteLine());
+        addMenuItem(menu, item.getGroupId(), R.id.action_copy_line, 20000, R.string.text_copy_line, () -> mEditorMenu.copyLine());
         super.onActionModeStarted(mode);
+    }
+
+    private void addMenuItem(Menu menu, int groupId, int itemId, int order, int titleRes, Runnable runnable) {
+        try {
+            menu.add(groupId, itemId, order, titleRes).setOnMenuItemClickListener(item -> {
+                try {
+                    runnable.run();
+                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+            // @Example android.content.res.Resources.NotFoundException
+            //  ! on MIUI devices (maybe more)
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -215,14 +233,17 @@ public class EditActivity extends BaseActivity implements OnActivityResultDelega
         new ThemeColorMaterialDialogBuilder(this)
                 .title(R.string.text_prompt)
                 .content(R.string.edit_exit_without_save_warn)
-                .positiveText(R.string.text_cancel)
-                .negativeText(R.string.text_save_and_exit)
-                .neutralText(R.string.text_exit_directly)
-                .onNegative((dialog, which) -> {
+                .neutralText(R.string.text_back)
+                .neutralColor(getColor(R.color.dialog_button_default))
+                .negativeText(R.string.text_exit_directly)
+                .negativeColor(getColor(R.color.dialog_button_caution))
+                .positiveText(R.string.text_save_and_exit)
+                .positiveColor(getColor(R.color.dialog_button_hint))
+                .onNegative((dialog, which) -> finishAndRemoveFromRecents())
+                .onPositive((dialog, which) -> {
                     mEditorView.saveFile();
                     finishAndRemoveFromRecents();
                 })
-                .onNeutral((dialog, which) -> finishAndRemoveFromRecents())
                 .show();
     }
 

@@ -2,7 +2,7 @@
 
 <div align="center">
   <p>
-    <img alt="AF_Banner" src="https://github.com/SuperMonster002/Hello-Sockpuppet/raw/master/auto.js-banner_800×224_transparent.png"/>
+    <img alt="AF_Banner" src="https://raw.githubusercontent.com/SuperMonster002/Hello-Sockpuppet/master/auto.js-banner_800%C3%97224_transparent.png"/>
   </p>
 
   <p>Android 平台支持无障碍服务的 JavaScript 自动化工具</p>
@@ -16,7 +16,7 @@
     <a href="https://github.com/mozilla/rhino"><img alt="Rhino" src="https://img.shields.io/badge/rhino-1.7.15--snapshot-F06292"/></a>
     <a href="https://developer.android.com/studio/archive"><img alt="Android Studio" src="https://img.shields.io/badge/android%20studio-bumblebee%202021.1.1-B64FC8"/></a>
     <br>
-    <a href="https://github.com/SuperMonster003/AutoJs6/commit/ce88d3acb797b180c3f1f15bf77dbba5e934393c"><img alt="Created" src="https://img.shields.io/date/1636632233?color=2e7d32&label=created"/></a>
+    <a href="https://github.com/SuperMonster003/AutoJs6/commit/99a1d8490fac5b6d55f6f183db59ad833a2064ed"><img alt="Created" src="https://img.shields.io/date/1636632233?color=2e7d32&label=created"/></a>
     <a href="https://github.com/SuperMonster003/AutoJs6/find/master"><img alt="GitHub Code Size" src="https://img.shields.io/github/languages/code-size/SuperMonster003/AutoJs6?color=795548"/></a>
     <a href="https://github.com/SuperMonster003/AutoJs6/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/SuperMonster003/AutoJs6?color=534BAE"/></a>
   </p>
@@ -104,6 +104,19 @@
 
 [comment]: <> "Version history only shows last 3 versions"
 
+# v6.1.1
+
+###### 2022/05/31
+
+* `新增` 检查更新/下载更新/更新提示功能 (参阅 设置页面) (暂不支持安卓 7.x 系统)
+* `修复` 应用在安卓 10 系统无法读写外部存储的问题 _[`issue #17`](https://github.com/SuperMonster003/AutoJs6/issues/17)_
+* `修复` 编辑器页面长按时可能导致应用崩溃的问题 _[`issue #18`](https://github.com/SuperMonster003/AutoJs6/issues/18)_
+* `修复` 编辑器页面长按菜单 "删除行" 和 "复制行" 功能无效的问题
+* `修复` 编辑器页面选项菜单中 "粘贴" 功能缺失的问题
+* `优化` 部分异常消息字符串资源化 (en / zh)
+* `优化` 调整内容未保存对话框的按钮布局并增加颜色区分
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](https://github.com/SuperMonster003/AutoJs6/blob/master/app/src/main/assets/doc/CHANGELOG.md#v611)_
+
 # v6.1.0
 
 ###### 2022/05/26 - 包名变更 谨慎升级
@@ -150,7 +163,7 @@
 * `优化` 保存 ImageWrapper 所有实例弱引用并在脚本结束时自动回收 (实验性)
 * `优化` 附加 CircleImageView 版本 3.1.0
 * `优化` 升级 Rhino 引擎版本 1.7.14 -> 1.7.15-snapshot
-* `优化` 部分依赖或本地库版本调整 (详见 [`CHANGELOG.md`](https://github.com/SuperMonster003/AutoJs6/blob/master/app/src/main/assets/doc/CHANGELOG.md#v610))
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](https://github.com/SuperMonster003/AutoJs6/blob/master/app/src/main/assets/doc/CHANGELOG.md#v610)_
 
 # v6.0.3
 
@@ -169,28 +182,13 @@
 * `优化` 主页抽屉增加前台服务状态开关的同步
 * `优化` 主页抽屉展开时立即按需同步开关状态
 * `优化` 显示指针位置增加状态检测及结果提示
-* `优化` 支持 64 位操作系统 (Ref to TonyJiangWJ)
+* `优化` 支持 64 位操作系统 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
 * `优化` 悬浮窗初始化时同时应用透明度设置 (无需点击后再应用透明度)
 * `优化` 重置文件内容时增加是否为示例代码文件的检测并增加结果提示
 * `优化` 转移打包插件下载地址 GitHub -> JsDelivr
 * `优化` 附加 Zeugma Solutions LocaleHelper 版本 1.5.1
 * `优化` 降级 Android Material 版本 1.6.0-alpha02 -> 1.5.0
-* `优化` 部分依赖或本地库版本调整 (详见 [`CHANGELOG.md`](https://github.com/SuperMonster003/AutoJs6/blob/master/app/src/main/assets/doc/CHANGELOG.md#v603))
-
-# v6.0.2
-
-###### 2022/02/05
-
-* `新增` images.bilateralFilter() 双边滤波图像处理方法
-* `修复` 多次调用 toast 只生效最后一次调用的问题
-* `修复` toast.dismiss() 可能无效的问题
-* `修复` 客户端模式及服务端模式开关可能无法正常工作的问题
-* `修复` 客户端模式及服务端模式开关状态不能正常刷新的问题
-* `修复` Android 7 解析 UI 模式 text 元素异常 (Ref to TonyJiangWJ) _[`issue #4`](https://github.com/SuperMonster003/AutoJs6/issues/4)_ _[`#9`](https://github.com/SuperMonster003/AutoJs6/issues/9)_
-* `优化` 忽略 sleep() 的 ScriptInterruptedException 异常
-* `优化` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
-* `优化` 升级 Rhino 引擎版本 1.7.14-snapshot -> 1.7.14
-* `优化` 部分依赖或本地库版本调整 (详见 [`CHANGELOG.md`](https://github.com/SuperMonster003/AutoJs6/blob/master/app/src/main/assets/doc/CHANGELOG.md#v602))
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](https://github.com/SuperMonster003/AutoJs6/blob/master/app/src/main/assets/doc/CHANGELOG.md#v603)_
 
 ##### 更多版本历史可参阅
 

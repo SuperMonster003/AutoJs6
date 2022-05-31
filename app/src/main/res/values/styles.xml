@@ -79,4 +79,7 @@
     <style name="MtAppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorPrimary">#212121</item>
     </style>
+
+    <style name="TextAppearance.Design.Snackbar.Message" parent="android:TextAppearance" />
+
 </resources>

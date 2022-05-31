@@ -126,7 +126,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void downloadPlugin() {
-        IntentUtil.browse(this, "https://cdn.jsdelivr.net/gh/SuperMonster002/Hello-Sockpuppet@master/" +
+        IntentUtil.browse(this, "https://raw.githubusercontent.com/SuperMonster002/Hello-Sockpuppet/master/" +
                 "%5B" + "auto.js" + "%5D" +
                 "%5B" + "apk_builder_plugin_4.1.1_alpha2" + "%5D" +
                 "%5B" + "arm-v7a" + "%5D" +

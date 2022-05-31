@@ -38,6 +38,7 @@ import com.heinrichreimersoftware.androidissuereporter.model.github.GithubLogin;
 import com.heinrichreimersoftware.androidissuereporter.model.github.GithubTarget;
 import com.heinrichreimersoftware.androidissuereporter.util.ColorUtils;
 import com.heinrichreimersoftware.androidissuereporter.util.ThemeUtils;
+import com.stardust.app.GlobalAppContext;
 import com.stardust.theme.ThemeColorManager;
 
 import org.autojs.autojs6.BuildConfig;
@@ -235,7 +236,8 @@ public abstract class AbstractIssueReporterActivity extends BaseActivity {
             sendBugReport(new GithubLogin(username, password), null);
         } else {
             if (TextUtils.isEmpty(token))
-                throw new IllegalStateException("You must provide a GitHub API Token.");
+                throw new IllegalStateException(GlobalAppContext
+                        .getString(org.autojs.autojs6.R.string.error_github_api_token_needed));
 
             String email = null;
             if (!TextUtils.isEmpty(inputEmail.getText()) &&

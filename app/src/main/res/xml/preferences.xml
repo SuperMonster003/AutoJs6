@@ -41,7 +41,7 @@
                 android:key="@string/key_root_mode"
                 android:layout="@layout/preference_custom"
                 android:dialogMessage="@string/text_root_mode_description"
-                android:title="@string/text_root_mode_title"/>
+                android:title="@string/text_root_mode_title" />
 
         <org.autojs.autojs.ui.settings.SetHiddenFilesPreference
                 android:defaultValue="@string/value_hidden_files_default"
@@ -50,7 +50,7 @@
                 android:key="@string/key_hidden_files"
                 android:layout="@layout/preference_custom"
                 android:dialogMessage="@string/text_hidden_files_description"
-                android:title="@string/text_hidden_files_title"/>
+                android:title="@string/text_hidden_files_title" />
 
     </com.stardust.theme.preference.ThemeColorPreferenceCategory>
 
@@ -130,11 +130,28 @@
 
     <com.stardust.theme.preference.ThemeColorPreferenceCategory
             android:layout="@layout/preference_category_custom"
-            android:title="@string/text_about">
+            android:title="@string/text_updates">
+
+        <org.autojs.autojs.ui.settings.CheckForUpdatesPreference
+                android:layout="@layout/preference_custom"
+                android:title="@string/text_check_for_updates" />
+
+        <com.stardust.theme.preference.ThemeColorSwitchPreference
+                android:defaultValue="true"
+                android:key="@string/key_auto_check_for_updates"
+                android:layout="@layout/preference_custom"
+                android:title="@string/text_auto_check_for_updates"
+                android:summary="@string/text_auto_check_for_updates_and_show_snackbar" />
 
         <Preference
                 android:layout="@layout/preference_custom"
-                android:title="@string/text_check_for_updates" />
+                android:title="@string/text_manage_ignored_updates" />
+
+    </com.stardust.theme.preference.ThemeColorPreferenceCategory>
+
+    <com.stardust.theme.preference.ThemeColorPreferenceCategory
+            android:layout="@layout/preference_category_custom"
+            android:title="@string/text_about">
 
         <Preference
                 android:layout="@layout/preference_custom"

@@ -77,12 +77,12 @@
     <string name="text_build_failed">Build failed</string>
     <string name="text_build_successfully">Build succeeded</string>
     <string name="text_cancel">Cancel</string>
-    <string name="text_cancel_download">Cancel downloading</string>
+    <string name="dialog_button_cancel_download">Cancel</string>
     <string name="text_cannot_read_file">Can\'t read file</string>
     <string name="text_change_working_dir">Change working directory</string>
-    <string name="text_checking_update">Checking for updates</string>
+    <string name="text_checking_update" tools:ignore="TypographyEllipsis">Checking for updates...</string>
     <string name="text_check_for_updates">Check for updates</string>
-    <string name="text_check_update_error">Check for updates failed</string>
+    <string name="error_check_for_update">Checking for updates failed</string>
     <string name="text_class_or_package_name">Class / Package name</string>
     <string name="text_clear">Clear</string>
     <string name="text_clear_file_selection">Clear file selection</string>
@@ -102,6 +102,7 @@
     <string name="text_copy_command">Copy cmd</string>
     <string name="text_copy_debug_info">Copy debugging log</string>
     <string name="text_copy_line">Copy line</string>
+    <string name="text_paste">Paste</string>
     <string name="text_copy_to_clip">Copy to clipboard</string>
     <string name="text_copy_value">Copy value</string>
     <string name="text_create_fail">Create failed</string>
@@ -123,7 +124,7 @@
     <string name="text_delete_line">Delete line</string>
     <string name="text_detail">Details</string>
     <string name="text_developer_details_under_development">Developer details is under development</string>
-    <string name="text_dialog_button_go_to_settings">System Settings</string>
+    <string name="dialog_button_go_to_settings">System Settings</string>
     <string name="text_directly_download">Download now</string>
     <string name="text_directory">Directory</string>
     <string name="text_display_over_other_app">Display over other apps</string>
@@ -365,7 +366,7 @@
     <string name="text_under_development_content">The feature will be ready to use in the next few updates</string>
     <string name="text_under_development_title">Under development</string>
     <string name="text_undo">Undo</string>
-    <string name="text_update">Update</string>
+    <string name="text_updates">Updates</string>
     <string name="text_usage_stats_permission">Usage stats access</string>
     <string name="text_usage_stats_permission_description">Provides access to device usage history and statistics which results in currentPackage() a more accurate result</string>
     <string name="text_username">Username</string>
@@ -406,6 +407,42 @@
     <string name="theme_color_yellow">Yellow</string>
     <string name="theme_color_yellow_green">Yellow green</string>
     <string name="text_refresh_explorer_may_needed">An explorer page swipe-to-refresh may be needed</string>
+    <string name="error_set_both_icon_res_and_icon">Can\'t set both iconRes and icon</string>
+    <string name="error_only_one_child_for_scroll_view">ScrollView can host only one direct child</string>
+    <string name="error_illegal_url_argument">URL must starts with a protocol like \"https://\" and so forth</string>
+    <string name="error_illegal_relative_url_argument_without_base">Relative URL can\'t be used without base URL</string>
+    <string name="dialog_button_ignore_current_update">Ignore</string>
+    <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_update_now">Update</string>
+    <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">Retrieving release notes...</string>
+    <string name="error_cannot_connect_to_github">Can\'t connect to GitHub</string>
+    <string name="error_invalid_github_repo">Invalid GitHub repository: %s</string>
+    <string name="error_get_github_latest_release">Can\'t get latest GitHub release</string>
+    <string name="error_corresponding_github_release_may_not_published">Corresponding GitHub release may have not been published yet</string>
+    <string name="error_parse_version_info">Can\'t parse version information</string>
+    <string name="text_empty_release_note">No release note</string>
+    <string name="error_cannot_get_download_url">Can\'t get downloading URL</string>
+    <string name="error_empty_github_release_assets">No GitHub release assets to download</string>
+    <string name="text_github_backup_url_used">Backup URL has been used</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="text_downloading">Downloading</string>
+    <string name="text_file_name">File name</string>
+    <string name="text_version">Version</string>
+    <string name="dialog_button_quit">Quit</string>
+    <string name="dialog_button_retry">Retry</string>
+    <string name="text_preparing" tools:ignore="TypographyEllipsis">Preparing...</string>
+    <string name="error_download_interrupted">Download interrupted</string>
+    <string name="text_download_cancelled">Download cancelled</string>
+    <string name="text_manage_ignored_updates">Manage ignored updates</string>
+    <string name="text_auto_check_for_updates_and_show_snackbar">Check for updates automatically and show a snackbar on homepage</string>
+    <string name="text_auto_check_for_updates">Auto check for updates</string>
+    <string name="text_last_updates_checked_time">Last checked: %s</string>
+    <string name="error_failed_to_parse_version_info">Failed to parse version info</string>
+    <string name="error_put_value_into_json">Can\'t put value %s into JSON</string>
+    <string name="error_github_api_token_needed">You must provide a GitHub API Token</string>
+    <string name="error_cannot_find_editor_view_from_child_view">Cann\'t find EditorView from child view: %s</string>
+    <string name="error_unknown_type">Unknown type: %s</string>
+    <string name="error_sdk_lower_than_o_not_supported_yet">Current function is not supported by Android SDK versions lower than 26 (Android 8.0) yet</string>
     <plurals name="air_error_short_description" key="air_error_short_description">
         <item quantity="one">The description must have at least %d character</item>
         <item quantity="other">The description must have at least %d characters</item>

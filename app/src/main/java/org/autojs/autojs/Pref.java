@@ -3,6 +3,7 @@ package org.autojs.autojs;
 import android.content.SharedPreferences;
 import android.os.Environment;
 
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import com.stardust.app.GlobalAppContext;
@@ -10,6 +11,9 @@ import com.stardust.autojs.runtime.accessibility.AccessibilityConfig;
 
 import org.autojs.autojs.autojs.key.GlobalKeyObserver;
 import org.autojs.autojs6.R;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.io.File;
 import java.util.Objects;
@@ -21,6 +25,7 @@ public class Pref {
 
     private static final String KEY_SERVER_ADDRESS = "KEY_SERVER_ADDRESS";
     private static final String KEY_FLOATING_MENU_SHOWN = "KEY_FLOATING_MENU_SHOWN";
+    private static final String KEY_LAST_UPDATED_CHECKED = "KEY_LAST_UPDATED_CHECKED";
     private static final String KEY_APP_LANG_INDEX = "KEY_APP_LANG_INDEX";
     private static final String KEY_EDITOR_THEME = "editor.theme";
     private static final String KEY_EDITOR_TEXT_SIZE = "editor.textSize";
@@ -49,6 +54,29 @@ public class Pref {
 
     public static boolean isRunningVolumeControlEnabled() {
         return def().getBoolean(getString(R.string.key_use_volume_control_running), true);
+    }
+
+    public static boolean isAutoCheckForUpdatesEnabled() {
+        return def().getBoolean(getString(R.string.key_auto_check_for_updates), true);
+    }
+
+    public static void refreshLastUpdatesCheckedTimestamp() {
+        def().edit().putLong(KEY_LAST_UPDATED_CHECKED, System.currentTimeMillis()).apply();
+    }
+
+    public static long getLastUpdatesCheckedTimestamp() {
+        return def().getLong(KEY_LAST_UPDATED_CHECKED, -1);
+    }
+
+    @Nullable
+    public static String getLastUpdatesCheckedTimeString() {
+        long ts = getLastUpdatesCheckedTimestamp();
+        if (ts < 0) {
+            return null;
+        }
+        DateTime dt = new DateTime(ts);
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm");
+        return fmt.print(dt);
     }
 
     private static String getString(int id) {

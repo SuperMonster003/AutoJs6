@@ -36,6 +36,46 @@
     <color name="github_color_fg_muted">#57606A</color>
     <color name="tint_1st_developer_identifier">#2B7A85</color>
     <color name="tint_2nd_developer_identifier">#CC7A34</color>
+    <color name="title_material_toolbar">#ffffff</color>
 
+    <color name="dialog_button_default">#03A9F4</color>
+    <color name="dialog_button_caution">#FF3D00</color>
+    <color name="dialog_button_warn">#F57C00</color>
+    <color name="dialog_button_attraction">#7B1FA2</color>
+    <color name="dialog_button_hint">#0DA798</color>
+    <color name="dialog_button_reset">#A1887F</color>
+    <color name="dialog_button_unavailable">#BDBDBD</color>
+    <color name="dialog_button_finish">#009624</color>
+    <color name="dialog_button_success">@color/dialog_button_finish</color>
+    <color name="dialog_button_error">#003C8F</color>
+    <color name="dialog_button_failure">@color/dialog_button_error</color>
+
+    <color name="dialog_progress_download_tint">#FF6F00</color>
+    <color name="dialog_progress_download_bg_tint">#FFECB3</color>
+    <color name="dialog_progress_download_act_btn">#C43E00</color>
+    <color name="dialog_progress_files_tint">#F9A825</color>
+    <color name="dialog_progress_files_bg_tint">#FFF59D</color>
+    <color name="dialog_progress_files_act_btn">#C17900</color>
+    <color name="dialog_progress_backup_tint">#455A64</color>
+    <color name="dialog_progress_backup_bg_tint">#ECEFF1</color>
+    <color name="dialog_progress_backup_act_btn">#1C313A</color>
+    <color name="dialog_progress_restore_tint">#AB47BC</color>
+    <color name="dialog_progress_restore_bg_tint">#F3E5F5</color>
+    <color name="dialog_progress_restore_act_btn">#790E8B</color>
+    <color name="dialog_progress_indeterminate_tint">#00897B</color>
+    <color name="dialog_progress_indeterminate_bg_tint">#B2DFDB</color>
+    <color name="dialog_progress_indeterminate_act_btn">#005B4F</color>
+    <color name="dialog_progress_finish_tint">#00C853</color>
+    <color name="dialog_progress_finish_bg_tint">#DCEDC8</color>
+    <color name="dialog_progress_finish_act_btn">#009624</color>
+    <color name="dialog_progress_success_tint">#00C853</color>
+    <color name="dialog_progress_success_bg_tint">#DCEDC8</color>
+    <color name="dialog_progress_success_act_btn">#009624</color>
+    <color name="dialog_progress_error_tint">#1565C0</color>
+    <color name="dialog_progress_error_bg_tint">#BBDEFB</color>
+    <color name="dialog_progress_error_act_btn">#003C8F</color>
+    <color name="dialog_progress_failure_tint">#1565C0</color>
+    <color name="dialog_progress_failure_bg_tint">#BBDEFB</color>
+    <color name="dialog_progress_failure_act_btn">#003C8F</color>
 
 </resources>

@@ -1,19 +1,23 @@
 package org.autojs.autojs.network.api;
 
-import org.autojs.autojs.network.entity.VersionInfo;
+import java.io.InputStream;
 
 import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
+import retrofit2.http.Streaming;
+import retrofit2.http.Url;
 
 /**
  * Created by Stardust on 2017/9/20.
  * Modified by SuperMonster003 as of Feb 28, 2022.
  */
-public interface UpdateCheckApi {
+public interface UpdateCheckerApi {
 
-    @GET("/SuperMonster003/AutoJs6/master/project-versions.json")
+    @Streaming
+    @GET()
     @Headers("Cache-Control: no-cache")
-    Observable<VersionInfo> checkForUpdates();
+    Observable<ResponseBody> checkForUpdates(@Url String url);
 
 }

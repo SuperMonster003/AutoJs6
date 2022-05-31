@@ -189,7 +189,10 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
 
                 new DrawerMenuGroup(R.string.text_appearance),
                 new DrawerMenuItem(R.drawable.ic_night_mode, R.string.text_night_mode, R.string.key_night_mode, this::toggleNightMode),
-                new DrawerMenuItem(R.drawable.ic_personalize, R.string.text_theme_color, this::openThemeColorSettings)
+                new DrawerMenuItem(R.drawable.ic_personalize, R.string.text_theme_color, this::launchThemeColorSettings),
+
+                new DrawerMenuGroup(R.string.text_about),
+                new DrawerMenuItem(R.drawable.ic_about, R.string.text_about_app_and_developer, this::launchAboutAppAndDeveloper)
         )));
         mDrawerMenu.setAdapter(mDrawerMenuAdapter);
         mDrawerMenu.setLayoutManager(new LinearLayoutManager(mContext));
@@ -266,7 +269,6 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                     syncForegroundServiceState();
                 })
                 .onPositive((dialog, which) -> MainActivityForegroundService.start(mContext))
-                .canceledOnTouchOutside(false)
                 .cancelable(false)
                 .show();
     }
@@ -307,7 +309,6 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                     syncUsageStatsPermissionState();
                 })
                 .onPositive((dialog, which) -> requestAppUsagePermission())
-                .canceledOnTouchOutside(false)
                 .cancelable(false)
                 .show();
     }
@@ -350,8 +351,12 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
         return ((PowerManager) mContext.getSystemService(Context.POWER_SERVICE)).isIgnoringBatteryOptimizations(mPackageName);
     }
 
-    public void openThemeColorSettings(DrawerMenuItemViewHolder holder) {
+    public void launchThemeColorSettings(DrawerMenuItemViewHolder holder) {
         SettingsActivity.selectThemeColor(getActivity());
+    }
+
+    public void launchAboutAppAndDeveloper(DrawerMenuItemViewHolder holder) {
+        SettingsActivity.launchAboutAppAndDeveloper(requireActivity());
     }
 
     public void toggleNightMode(@NonNull DrawerMenuItemViewHolder holder) {
@@ -402,7 +407,6 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                     syncWriteSecuritySettingsState();
                 })
                 .onPositive((dialog, which) -> grantWriteSecureSettingsAccess())
-                .canceledOnTouchOutside(false)
                 .cancelable(false)
                 .show();
     }
@@ -430,7 +434,6 @@ public class DrawerFragment extends androidx.fragment.app.Fragment {
                     syncProjectMediaAccessState();
                 })
                 .onPositive((dialog, which) -> grantProjectMediaAccess())
-                .canceledOnTouchOutside(false)
                 .cancelable(false)
                 .show();
     }

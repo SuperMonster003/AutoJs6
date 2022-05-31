@@ -2,6 +2,7 @@ package com.stardust.theme.preference;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.preference.PreferenceCategory;
 import android.util.AttributeSet;
 import android.view.View;
@@ -54,8 +55,10 @@ public class ThemeColorPreferenceCategory extends PreferenceCategory implements 
     public View onCreateView(ViewGroup parent) {
         View view = super.onCreateView(parent);
         mTitleTextView = view.findViewById(android.R.id.title);
-        if (mColor != Color.TRANSPARENT)
+        if (mColor != Color.TRANSPARENT) {
             mTitleTextView.setTextColor(mColor);
+        }
+        mTitleTextView.setTypeface(null, Typeface.BOLD);
         return view;
     }
 

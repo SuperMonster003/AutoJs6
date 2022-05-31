@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 
 import org.autojs.autojs.tool.BitmapTool;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/1/20.
@@ -54,7 +55,7 @@ public class Shortcut {
 
     public Shortcut iconRes(Intent.ShortcutIconResource icon) {
         if (mIcon != null) {
-            throw new IllegalStateException("Cannot set both iconRes and icon");
+            throw new IllegalStateException(mContext.getString(R.string.error_set_both_icon_res_and_icon));
         }
         mIconRes = icon;
         return this;
@@ -67,7 +68,7 @@ public class Shortcut {
 
     public Shortcut icon(Bitmap icon) {
         if (mIconRes != null) {
-            throw new IllegalStateException("Cannot set both iconRes and icon");
+            throw new IllegalStateException(mContext.getString(R.string.error_set_both_icon_res_and_icon));
         }
         if (icon.getByteCount() > 1024 * 500) {
             mIcon = BitmapTool.scaleBitmap(icon, 200, 200);
