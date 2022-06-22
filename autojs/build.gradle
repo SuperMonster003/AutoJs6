@@ -26,6 +26,9 @@ dependencies {
 
     api project(':libs:com.android.dx-1.7.0')
 
+    // PaddleOcr
+    api project(':libs:paddle.paddleocr')
+
     // Indirect: common
     api project(':automator')
 }

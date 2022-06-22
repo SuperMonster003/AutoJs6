@@ -43,6 +43,7 @@ module.exports = function (runtime, global) {
             kotlin: Packages.kotlin,
             okhttp3: Packages.okhttp3,
             androidx: Packages.androidx,
+            $ocr: Object.create(runtime.ocr),
             toast(msg, isLong, isForcible) {
                 let $ = {
                     toast() {
