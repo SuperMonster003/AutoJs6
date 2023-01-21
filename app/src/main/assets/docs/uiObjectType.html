@@ -1,0 +1,2261 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>控件节点 (UiObject) | AutoJs6 文档 - 6.2.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="canonical" href="https://nodejs.org/api/uiObjectType.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-uiObjectType">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
+<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
+<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType active" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
+<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="uiObjectType" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_uiobject">控件节点 (UiObject)</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_uiobject_1">[@] UiObject</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_parent">[m#] parent</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_parent">parent()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_child">[m#] child</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_child_i">child(i)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_children">[m#] children</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_children">children()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_childcount">[m#] childCount</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_childcount">childCount()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_haschildren">[m#] hasChildren</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_haschildren">hasChildren()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_indexinparent">[m#] indexInParent</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_indexinparent">indexInParent()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_find">[m#] find</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_find">find()</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_find_selector">find(selector)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_findone">[m#] findOne</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_findone_selector">findOne(selector)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_bounds">[m#] bounds</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_bounds">bounds()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundsinscreen">[m#] boundsInScreen</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundsinscreen">boundsInScreen()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundsinparent">[m#] boundsInParent</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundsinparent">boundsInParent()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundsleft">[m#] boundsLeft</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundsleft">boundsLeft()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundstop">[m#] boundsTop</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundstop">boundsTop()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundsright">[m#] boundsRight</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundsright">boundsRight()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundsbottom">[m#] boundsBottom</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundsbottom">boundsBottom()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundswidth">[m#] boundsWidth</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundswidth">boundsWidth()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundsheight">[m#] boundsHeight</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundsheight">boundsHeight()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundscenterx">[m#] boundsCenterX</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundscenterx">boundsCenterX()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundsexactcenterx">[m#] boundsExactCenterX</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundsexactcenterx">boundsExactCenterX()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundscentery">[m#] boundsCenterY</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundscentery">boundsCenterY()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_boundsexactcentery">[m#] boundsExactCenterY</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_boundsexactcentery">boundsExactCenterY()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_left">[m#] left</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_left">left()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_top">[m#] top</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_top">top()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_right">[m#] right</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_right">right()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_bottom">[m#] bottom</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_bottom">bottom()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_width">[m#] width</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_width">width()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_height">[m#] height</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_height">height()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_centerx">[m#] centerX</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_centerx">centerX()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_exactcenterx">[m#] exactCenterX</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_exactcenterx">exactCenterX()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_centery">[m#] centerY</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_centery">centerY()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_exactcentery">[m#] exactCenterY</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_exactcentery">exactCenterY()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_point">[m#] point</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_point">point()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_size">[m#] size</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_size">size()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_clickbounds">[m#] clickBounds</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_clickbounds_offsetx_offsety">clickBounds(offsetX?, offsetY?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_id">[m#] id</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_id">id()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_fullid">[m#] fullId</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_fullid">fullId()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_identry">[m#] idEntry</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_identry">idEntry()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_simpleid">[m#] simpleId</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_simpleid">simpleId()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_idhex">[m#] idHex</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_idhex">idHex()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_text">[m#] text</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_text">text()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_desc">[m#] desc</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_desc">desc()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_content">[m#] content</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_content">content()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_classname">[m#] className</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_classname">className()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_packagename">[m#] packageName</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_packagename">packageName()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_depth">[m#] depth</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_depth">depth()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_checkable">[m#] checkable</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_checkable">checkable()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_checked">[m#] checked</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_checked">checked()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_focusable">[m#] focusable</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_focusable">focusable()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_focused">[m#] focused</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_focused">focused()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_visibletouser">[m#] visibleToUser</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_visibletouser">visibleToUser()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_accessibilityfocused">[m#] accessibilityFocused</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_accessibilityfocused">accessibilityFocused()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_selected">[m#] selected</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_selected">selected()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_clickable">[m#] clickable</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_clickable">clickable()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_longclickable">[m#] longClickable</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_longclickable">longClickable()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_enabled">[m#] enabled</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_enabled">enabled()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_password">[m#] password</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_password">password()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_scrollable">[m#] scrollable</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_scrollable">scrollable()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_editable">[m#] editable</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_editable">editable()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_rowcount">[m#] rowCount</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_rowcount">rowCount()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_columncount">[m#] columnCount</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_columncount">columnCount()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_row">[m#] row</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_row">row()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_column">[m#] column</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_column">column()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_rowspan">[m#] rowSpan</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_rowspan">rowSpan()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_columnspan">[m#] columnSpan</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_columnspan">columnSpan()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_drawingorder">[m#] drawingOrder</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_drawingorder">drawingOrder()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_actionnames">[m#] actionNames</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_actionnames">actionNames()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_hasaction">[m#] hasAction</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_hasaction_actions">hasAction(...actions)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_performaction">[m#] performAction</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_performaction_action_arguments">performAction(action, ...arguments)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_performaction_action_bundle">performAction(action, bundle)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_click">[m#] click</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_click">click()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_longclick">[m#] longClick</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_longclick">longClick()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_accessibilityfocus">[m#] accessibilityFocus</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_accessibilityfocus">accessibilityFocus()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_clearaccessibilityfocus">[m#] clearAccessibilityFocus</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_clearaccessibilityfocus">clearAccessibilityFocus()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_focus">[m#] focus</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_focus">focus()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_clearfocus">[m#] clearFocus</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_clearfocus">clearFocus()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_dragstart">[m#] dragStart</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_dragstart">dragStart()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_dragdrop">[m#] dragDrop</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_dragdrop">dragDrop()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_dragcancel">[m#] dragCancel</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_dragcancel">dragCancel()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_imeenter">[m#] imeEnter</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_imeenter">imeEnter()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_movewindow">[m#] moveWindow</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_movewindow_x_y">moveWindow(x, y)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_nextatmovementgranularity">[m#] nextAtMovementGranularity</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_nextatmovementgranularity_granularity_isextendselection">nextAtMovementGranularity(granularity, isExtendSelection)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_nexthtmlelement">[m#] nextHtmlElement</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_nexthtmlelement_element">nextHtmlElement(element)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_pageleft">[m#] pageLeft</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_pageleft">pageLeft()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_pageup">[m#] pageUp</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_pageup">pageUp()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_pageright">[m#] pageRight</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_pageright">pageRight()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_pagedown">[m#] pageDown</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_pagedown">pageDown()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_pressandhold">[m#] pressAndHold</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_pressandhold">pressAndHold()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_previousatmovementgranularity">[m#] previousAtMovementGranularity</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_previousatmovementgranularity_granularity_isextendselection">previousAtMovementGranularity(granularity, isExtendSelection)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_previoushtmlelement">[m#] previousHtmlElement</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_previoushtmlelement_element">previousHtmlElement(element)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_showtextsuggestions">[m#] showTextSuggestions</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_showtextsuggestions">showTextSuggestions()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_showtooltip">[m#] showTooltip</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_showtooltip">showTooltip()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_hidetooltip">[m#] hideTooltip</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_hidetooltip">hideTooltip()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_show">[m#] show</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_show">show()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_dismiss">[m#] dismiss</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_dismiss">dismiss()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_copy">[m#] copy</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_copy">copy()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_cut">[m#] cut</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_cut">cut()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_paste">[m#] paste</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_paste">paste()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_select">[m#] select</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_select">select()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_expand">[m#] expand</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_expand">expand()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_collapse">[m#] collapse</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_collapse">collapse()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_scrollleft">[m#] scrollLeft</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_scrollleft">scrollLeft()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_scrollup">[m#] scrollUp</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_scrollup">scrollUp()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_scrollright">[m#] scrollRight</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_scrollright">scrollRight()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_scrolldown">[m#] scrollDown</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_scrolldown">scrollDown()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_scrollforward">[m#] scrollForward</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_scrollforward">scrollForward()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_scrollbackward">[m#] scrollBackward</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_scrollbackward">scrollBackward()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_scrollto">[m#] scrollTo</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_scrollto_row_column">scrollTo(row, column)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_contextclick">[m#] contextClick</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_contextclick">contextClick()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_settext">[m#] setText</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_settext_text">setText(text)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_setselection">[m#] setSelection</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_setselection_start_end">setSelection(start, end)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_clearselection">[m#] clearSelection</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_clearselection">clearSelection()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_setprogress">[m#] setProgress</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_setprogress_progress">setProgress(progress)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_compass">[m#] compass</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_compass_compassarg">compass(compassArg)</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_parent_p">parent (p)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_child_c">child (c)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_sibling_s">sibling (s)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_clickable_k">clickable (k)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_iscompass">[m] isCompass</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_iscompass_s">isCompass(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_ensurecompass">[m] ensureCompass</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_ensurecompass_s">ensureCompass(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_detect">[m] detect</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_detect_w_compass">detect(w, compass)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_detect_w_result">detect(w, result)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_detect_w_compass_result">detect(w, compass, result)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_detect_w_callback">detect(w, callback)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_detect_w_compass_callback">detect(w, compass, callback)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_detect_w_result_callback">detect(w, result, callback)</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_detect_w_compass_result_callback">detect(w, compass, result, callback)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>控件节点 (UiObject)<span><a class="mark" href="#uiobjecttype_uiobject" id="uiobjecttype_uiobject">#</a></span></h1>
+<p>UiObject 通常被称为 [ 控件 / 节点 / 控件节点 ], 可看做是一个通过安卓无障碍服务包装的 <a href="https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo">AccessibilityNodeInfo</a> 对象, 代表一个当前活动窗口中的节点, 通过此节点可收集控件信息或执行控件行为, 进而实现一系列自动化操作.</p>
+<p>应用界面通常由控件构成, 如 <a href="https://developer.android.com/reference/android/widget/ImageView">ImageView</a> 构成图像控件, <a href="https://developer.android.com/reference/android/widget/TextView">TextView</a> 构成文本控件. 通过不同的布局可决定不同控件的位置, 如 <a href="https://developer.android.com/reference/android/widget/LinearLayout">LinearLayout (线性布局)</a> 按水平或垂直方式排布及显示控件, <a href="https://developer.android.com/reference/android/widget/AbsListView">AbsListView (列表布局)</a> 按列表方式排布及显示控件.
+不同的布局方式形成了 <a href="glossaries.html#glossaries_控件层级">控件层级</a>.</p>
+<p>控件拥有特定的属性, 可分为两种类型, 状态型及行为型.<br>行为型属性可参阅章节 <a href="uiObjectActionsType.html">控件节点行为 (UiObjectActions)</a>.<br>状态型属性访问均被封装为方法调用的形式, 如访问控件的类名, 需使用 <code>w.className()</code> 而非 <code>w.className</code>.</p>
+<blockquote>
+<p>注: 在 AutoJs6 中, 由 <a href="uiObjectType.html">UiObject</a> 代表一个控件节点, 它继承自 <a href="https://developer.android.com/reference/androidx/core/view/accessibility/AccessibilityNodeInfoCompat">AccessibilityNodeInfoCompat</a>, 而并非一个 <a href="https://developer.android.com/reference/android/view/View">View</a>.</p>
+</blockquote>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">UiObject</p>
+
+<hr>
+<h2>[@] UiObject<span><a class="mark" href="#uiobjecttype_uiobject_1" id="uiobjecttype_uiobject_1">#</a></span></h2>
+<p><strong><code>Global</code></strong></p>
+<p>如需获取一个 UiObject 对象, 通常使用 <a href="uiSelectorType.html">选择器</a> 获取.</p>
+<pre><code class="lang-js">/* 获取一个包含任意文本的 UiObject 对象. */
+let w = pickup(/.+/);
+
+/* 当活动窗口中不存在符合筛选条件的控件时返回 null. */
+console.log(w === null);
+
+/* 使用 instanceof 操作符查看对象 w 是否为 UiObject &quot;类&quot; 的实例. */
+console.log(w instanceof UiObject);
+</code></pre>
+<p>多数 UiObject 的实例方法 (如 parent 和 child 等) 均返回自身类型, 因此可实现链式调用:</p>
+<pre><code class="lang-js">let w = pickup(&#39;hello&#39;);
+/* 获取 w 控件的三级父控件的 2 号索引子控件. */
+w.parent().parent().parent().child(2);
+</code></pre>
+<h2>[m#] parent<span><a class="mark" href="#uiobjecttype_m_parent" id="uiobjecttype_m_parent">#</a></span></h2>
+<h3>parent()<span><a class="mark" href="#uiobjecttype_parent" id="uiobjecttype_parent">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回其父控件.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+w.parent();
+w.compass(&#39;p&#39;); /* 同上. */
+detect(w, &#39;p&#39;); /* 同上. */
+
+w.parent().parent().parent();
+w.compass(&#39;p3&#39;); /* 同上. */
+detect(w, &#39;p3&#39;); /* 同上. */
+</code></pre>
+<h2>[m#] child<span><a class="mark" href="#uiobjecttype_m_child" id="uiobjecttype_m_child">#</a></span></h2>
+<h3>child(i)<span><a class="mark" href="#uiobjecttype_child_i" id="uiobjecttype_child_i">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>i</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 索引</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回其索引为 i 的子控件.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+w.child(3);
+w.compass(&#39;c3&#39;); /* 同上. */
+detect(w, &#39;c3&#39;); /* 同上. */
+
+w.child(3).child(1);
+w.compass(&#39;c3c1&#39;); /* 同上. */
+detect(w, &#39;c3&gt;1&#39;); /* 同上. */
+</code></pre>
+<h2>[m#] children<span><a class="mark" href="#uiobjecttype_m_children" id="uiobjecttype_m_children">#</a></span></h2>
+<h3>children()<span><a class="mark" href="#uiobjecttype_children" id="uiobjecttype_children">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectCollectionType.html">UiObjectCollection</a></span> }</li>
+</ul>
+<p>返回当前节点的子控件集合.</p>
+<pre><code class="lang-js">let cc = pickup({ filter: w =&gt; w.children().length &gt; 5 }, &#39;children&#39;);
+
+console.log(cc.length); /* e.g. 10 */
+
+cc.forEach((w) =&gt; {
+    let content = w.content();
+    content &amp;&amp; console.log(content);
+})
+</code></pre>
+<p>如需返回当前节点下的所有子孙控件集合, 可使用 <a href="#uiobjecttype_m_find">UiObject#find()</a>.</p>
+<pre><code class="lang-js">let w = pickup({ filter: w =&gt; w.children().length &gt; 5 });
+console.log(w.find().length); /* e.g. 20 */
+</code></pre>
+<h2>[m#] childCount<span><a class="mark" href="#uiobjecttype_m_childcount" id="uiobjecttype_m_childcount">#</a></span></h2>
+<h3>childCount()<span><a class="mark" href="#uiobjecttype_childcount" id="uiobjecttype_childcount">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回当前节点的子控件数量.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> getChildCount</li>
+</ul>
+<h2>[m#] hasChildren<span><a class="mark" href="#uiobjecttype_m_haschildren" id="uiobjecttype_m_haschildren">#</a></span></h2>
+<h3>hasChildren()<span><a class="mark" href="#uiobjecttype_haschildren" id="uiobjecttype_haschildren">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回当前节点是否有子节点.</p>
+<p>相当于 <code>childCount() &gt; 0</code>.</p>
+<h2>[m#] indexInParent<span><a class="mark" href="#uiobjecttype_m_indexinparent" id="uiobjecttype_m_indexinparent">#</a></span></h2>
+<h3>indexInParent()<span><a class="mark" href="#uiobjecttype_indexinparent" id="uiobjecttype_indexinparent">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回当前节点在其父控件的索引值.</p>
+<pre><code class="lang-js">/* 例如 p 控件有 3 个子控件 (a, b, c). */
+
+a.indexInParent(); // 0 
+p.child(0); /* 对应 a. */
+
+console.log(c.indexInParent()); // 2
+p.child(2); /* 对应 c. */
+</code></pre>
+<p>方法 <code>indexInParent</code> 通常用于访问临近或相对位置的兄弟节点:</p>
+<pre><code class="lang-js">/* 例如 p 控件有 3 个子控件 (a, b, c). */
+
+/* c 是 b 的相邻兄弟节点 (相对索引为 1). */
+p.child(b.indexInParent() + 1); /* 对应 c. */
+b.compass(&#39;s&gt;1&#39;); /* 使用罗盘方法, 效果同上. */
+
+/* a 也是 b 的相邻兄弟节点 (相对索引为 -1). */
+p.child(b.indexInParent() - 1); /* 对应 a. */
+b.compass(&#39;s&lt;1&#39;); /* 使用罗盘方法, 效果同上. */
+
+/* a 是 c 的兄弟节点 (相对索引为 -2). */
+p.child(c.indexInParent() - 2); /* 对应 a. */
+b.compass(&#39;s&lt;2&#39;); /* 使用罗盘方法, 效果同上. */
+</code></pre>
+<p>有时也需要获取当前节点的父控件在其父控件的索引值:</p>
+<pre><code class="lang-js">let p = pickup({ filter: w =&gt; w.depth() &gt; 0 &amp;&amp; w.parent().indexInParent() &gt; 0 });
+console.log(p.parent().indexInParent()); // e.g. 2
+</code></pre>
+<h2>[m#] find<span><a class="mark" href="#uiobjecttype_m_find" id="uiobjecttype_m_find">#</a></span></h2>
+<h3>find()<span><a class="mark" href="#uiobjecttype_find" id="uiobjecttype_find">#</a></span></h3>
+<p><strong><code>Overload 1/2</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectCollectionType.html">UiObjectCollection</a></span> }</li>
+</ul>
+<p>以当前节点作为根节点, 返回其所有的子孙控件集合.</p>
+<p>与 <a href="#uiobjecttype_m_children">children</a> 方法不同, <code>w.children()</code> 返回子控件集合, 而 <code>w.find()</code> 返回所有子孙控件集合.</p>
+<pre><code class="lang-js">let root = depth(0).findOnce();
+console.log(root.find().length); // e.g. 500
+console.log(root.children().length); // e.g. 2
+</code></pre>
+<p>子孙控件集合中包含根节点本身:</p>
+<pre><code class="lang-js">/* 找出一个没有任何子孙控件的节点. */
+let w = pickup({ filter: w =&gt; w.childCount() === 0 });
+
+/* find() 返回的集合包含其自身, 而非空集合. */
+console.log(w.find().length); // 1
+</code></pre>
+<p>因此, <code>N 层级子孙控件集合数量</code> = <code>N + 1 层级子孙控件数量总和</code> + <code>1</code>:</p>
+<pre><code class="lang-js">let root = depth(0).findOnce();
+let sumA = root.find().length;
+let sumB = root.children().reduce((sum, c) =&gt; sum + c.find().length, 0);
+console.log(sumA, sumB); /* sumA 和 sumB 相差 1. */
+</code></pre>
+<h3>find(selector)<span><a class="mark" href="#uiobjecttype_find_selector" id="uiobjecttype_find_selector">#</a></span></h3>
+<p><strong><code>Overload 2/2</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>selector</strong> { <span class="type"><a href="uiSelectorType.html">selector</a></span> } - 选择器</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectCollectionType.html">UiObjectCollection</a></span> }</li>
+</ul>
+<p>以当前节点作为根节点, 返回其所有满足选择器筛选条件的子孙控件集合.</p>
+<pre><code class="lang-js">/* 找出 w 控件下所有符合有效内容长度不小于 10 的子孙控件集合. */
+console.log(w.find(contentMatch(/\s*.{10,}\s*/)));
+</code></pre>
+<h2>[m#] findOne<span><a class="mark" href="#uiobjecttype_m_findone" id="uiobjecttype_m_findone">#</a></span></h2>
+<h3>findOne(selector)<span><a class="mark" href="#uiobjecttype_findone_selector" id="uiobjecttype_findone_selector">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>selector</strong> { <span class="type"><a href="uiSelectorType.html">selector</a></span> } - 选择器</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> }</li>
+</ul>
+<p>以当前节点作为根节点, 在其所有子孙控件中找出一个满足选择器筛选条件的控件.</p>
+<pre><code class="lang-js">/* 找出 w 子孙控件中符合有效内容长度不小于 10 的一个控件. */
+console.log(w.findOne(contentMatch(/\s*.{10,}\s*/)));
+</code></pre>
+<h2>[m#] bounds<span><a class="mark" href="#uiobjecttype_m_bounds" id="uiobjecttype_m_bounds">#</a></span></h2>
+<h3>bounds()<span><a class="mark" href="#uiobjecttype_bounds" id="uiobjecttype_bounds">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_androidrect">AndroidRect</a></span> }</li>
+</ul>
+<p>方法 <a href="#uiobjecttype_m_boundsinscreen">boundsInScreen</a> 的别名.</p>
+<p>返回一个 <a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a>, 表示控件在屏幕的相对位置及空间范围.</p>
+<pre><code class="lang-js">let bounds = contentMatch(/.+/).findOnce().bounds();
+console.log(bounds); // e.g. Rect(0, 48 - 112, 160)
+</code></pre>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_boundsinscreen">boundsInScreen</a></li>
+</ul>
+<h2>[m#] boundsInScreen<span><a class="mark" href="#uiobjecttype_m_boundsinscreen" id="uiobjecttype_m_boundsinscreen">#</a></span></h2>
+<h3>boundsInScreen()<span><a class="mark" href="#uiobjecttype_boundsinscreen" id="uiobjecttype_boundsinscreen">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_androidrect">AndroidRect</a></span> }</li>
+</ul>
+<p>返回一个 <a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a>, 表示控件在屏幕的相对位置及空间范围.</p>
+<pre><code class="lang-js">let bounds = contentMatch(/.+/).findOnce().boundsInScreen();
+console.log(bounds); // e.g. Rect(0, 48 - 112, 160)
+</code></pre>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_bounds">bounds</a></li>
+</ul>
+<h2>[m#] boundsInParent<span><a class="mark" href="#uiobjecttype_m_boundsinparent" id="uiobjecttype_m_boundsinparent">#</a></span></h2>
+<h3>boundsInParent()<span><a class="mark" href="#uiobjecttype_boundsinparent" id="uiobjecttype_boundsinparent">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<p><strong><code>DEPRECATED</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_androidrect">AndroidRect</a></span> }</li>
+</ul>
+<p>返回一个 <a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a>, 表示控件于其父控件的相对位置及空间范围.</p>
+<p>因其父控件实际上是 <code>View#getParentForAccessibility()</code> 的结果, 而非此控件的 <code>viewParent</code>, 所以得到的结果是不可靠的.</p>
+<pre><code class="lang-js">let bounds = contentMatch(/.+/).findOnce().boundsInParent();
+console.log(bounds); // e.g. Rect(0, 0 - 112, 112)
+</code></pre>
+<h2>[m#] boundsLeft<span><a class="mark" href="#uiobjecttype_m_boundsleft" id="uiobjecttype_m_boundsleft">#</a></span></h2>
+<h3>boundsLeft()<span><a class="mark" href="#uiobjecttype_boundsleft" id="uiobjecttype_boundsleft">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形左边界距屏幕左边缘的像素距离.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+console.log(w.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(w.bounds().left); // e.g. 0
+console.log(w.boundsLeft()); // e.g. 0
+console.log(w.left()); // e.g. 0
+</code></pre>
+<h2>[m#] boundsTop<span><a class="mark" href="#uiobjecttype_m_boundstop" id="uiobjecttype_m_boundstop">#</a></span></h2>
+<h3>boundsTop()<span><a class="mark" href="#uiobjecttype_boundstop" id="uiobjecttype_boundstop">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形上边界距屏幕上边缘的像素距离.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+console.log(w.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(w.bounds().top); // e.g. 48
+console.log(w.boundsTop()); // e.g. 48
+console.log(w.top()); // e.g. 48
+</code></pre>
+<h2>[m#] boundsRight<span><a class="mark" href="#uiobjecttype_m_boundsright" id="uiobjecttype_m_boundsright">#</a></span></h2>
+<h3>boundsRight()<span><a class="mark" href="#uiobjecttype_boundsright" id="uiobjecttype_boundsright">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形右边界距屏幕左边缘的像素距离.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+console.log(w.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(w.bounds().right); // e.g. 112
+console.log(w.right()); // e.g. 112
+console.log(w.boundsRight()); // e.g. 112
+</code></pre>
+<h2>[m#] boundsBottom<span><a class="mark" href="#uiobjecttype_m_boundsbottom" id="uiobjecttype_m_boundsbottom">#</a></span></h2>
+<h3>boundsBottom()<span><a class="mark" href="#uiobjecttype_boundsbottom" id="uiobjecttype_boundsbottom">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形下边界距屏幕上边缘的像素距离.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+console.log(w.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(w.bounds().bottom); // e.g. 160
+console.log(w.bottom()); // e.g. 160
+console.log(w.boundsBottom()); // e.g. 160
+</code></pre>
+<h2>[m#] boundsWidth<span><a class="mark" href="#uiobjecttype_m_boundswidth" id="uiobjecttype_m_boundswidth">#</a></span></h2>
+<h3>boundsWidth()<span><a class="mark" href="#uiobjecttype_boundswidth" id="uiobjecttype_boundswidth">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的宽度.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+console.log(w.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(w.bounds().width()); // e.g. 112
+console.log(w.boundsWidth()); // e.g. 112
+console.log(w.right() - w.left()); // e.g. 112
+</code></pre>
+<h2>[m#] boundsHeight<span><a class="mark" href="#uiobjecttype_m_boundsheight" id="uiobjecttype_m_boundsheight">#</a></span></h2>
+<h3>boundsHeight()<span><a class="mark" href="#uiobjecttype_boundsheight" id="uiobjecttype_boundsheight">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的高度.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+console.log(w.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(w.bounds().height()); // e.g. 112
+console.log(w.boundsHeight()); // e.g. 112
+console.log(w.bottom() - w.top()); // e.g. 112
+</code></pre>
+<h2>[m#] boundsCenterX<span><a class="mark" href="#uiobjecttype_m_boundscenterx" id="uiobjecttype_m_boundscenterx">#</a></span></h2>
+<h3>boundsCenterX()<span><a class="mark" href="#uiobjecttype_boundscenterx" id="uiobjecttype_boundscenterx">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心 X 坐标 (中心点距屏幕左边缘的像素距离).</p>
+<p>该坐标为整数, 非整数数值将按 <strong>向下取整</strong> 处理, 因此会损失精度.</p>
+<p>如需保留精度, 可使用 <a href="#uiobjecttype_m_boundsexactcenterx">boundsExactCenterX</a>.</p>
+<pre><code class="lang-js">let wA = pickup(/.+/);
+console.log(wA.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(wA.bounds().centerX()); // e.g. 56
+console.log(wA.boundsCenterX()); // e.g. 56
+
+let wB = pickup(/.+/);
+console.log(wB.bounds()); // e.g. Rect(0, 0 - 11, 20)
+console.log(wB.boundsCenterX()); // e.g. 5 (5.5 向下取整得 5)
+
+let wC = pickup(/.+/);
+console.log(wC.bounds()); // e.g. Rect(0, 0 - -11, 20)
+console.log(wC.boundsCenterX()); // e.g. -6 (-5.5 向下取整得 -6)
+</code></pre>
+<h2>[m#] boundsExactCenterX<span><a class="mark" href="#uiobjecttype_m_boundsexactcenterx" id="uiobjecttype_m_boundsexactcenterx">#</a></span></h2>
+<h3>boundsExactCenterX()<span><a class="mark" href="#uiobjecttype_boundsexactcenterx" id="uiobjecttype_boundsexactcenterx">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心 X 坐标 (中心点距屏幕左边缘的像素距离).</p>
+<p>该坐标将保留精度 (可能为非整数), 如需返回整数结果, 可使用 <a href="#uiobjecttype_m_boundscenterx">boundsCenterX</a>.</p>
+<pre><code class="lang-js">let wA = pickup(/.+/);
+console.log(wA.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(wA.bounds().exactCenterX()); // e.g. 56
+console.log(wA.boundsExactCenterX()); // e.g. 56
+
+let wB = pickup(/.+/);
+console.log(wB.bounds()); // e.g. Rect(0, 0 - 11, 20)
+console.log(wB.boundsExactCenterX()); // e.g. 5.5
+
+let wC = pickup(/.+/);
+console.log(wC.bounds()); // e.g. Rect(0, 0 - -11, 20)
+console.log(wC.boundsExactCenterX()); // e.g. -5.5
+</code></pre>
+<h2>[m#] boundsCenterY<span><a class="mark" href="#uiobjecttype_m_boundscentery" id="uiobjecttype_m_boundscentery">#</a></span></h2>
+<h3>boundsCenterY()<span><a class="mark" href="#uiobjecttype_boundscentery" id="uiobjecttype_boundscentery">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心 Y 坐标 (中心点距屏幕上边缘的像素距离).</p>
+<p>该坐标为整数, 非整数数值将按 <strong>向下取整</strong> 处理, 因此会损失精度.</p>
+<p>如需保留精度, 可使用 <a href="#uiobjecttype_m_boundsexactcentery">boundsExactCenterY</a>.</p>
+<pre><code class="lang-js">let wA = pickup(/.+/);
+console.log(wA.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(wA.bounds().centerY()); // e.g. 104
+console.log(wA.boundsCenterY()); // e.g. 104
+
+let wB = pickup(/.+/);
+console.log(wB.bounds()); // e.g. Rect(0, 0 - 11, 33)
+console.log(wB.boundsCenterY()); // e.g. 16 (16.5 向下取整得 16)
+
+let wC = pickup(/.+/);
+console.log(wC.bounds()); // e.g. Rect(0, 0 - 11, -33)
+console.log(wC.boundsCenterY()); // e.g. -17 (-16.5 向下取整得 -17)
+</code></pre>
+<h2>[m#] boundsExactCenterY<span><a class="mark" href="#uiobjecttype_m_boundsexactcentery" id="uiobjecttype_m_boundsexactcentery">#</a></span></h2>
+<h3>boundsExactCenterY()<span><a class="mark" href="#uiobjecttype_boundsexactcentery" id="uiobjecttype_boundsexactcentery">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心 Y 坐标 (中心点距屏幕上边缘的像素距离).</p>
+<p>该坐标将保留精度 (可能为非整数), 如需返回整数结果, 可使用 <a href="#uiobjecttype_m_boundscentery">boundsCenterY</a>.</p>
+<pre><code class="lang-js">let wA = pickup(/.+/);
+console.log(wA.bounds()); // e.g. Rect(0, 48 - 112, 160)
+console.log(wA.bounds().exactCenterY()); // e.g. 104
+console.log(wA.boundsExactCenterY()); // e.g. 104
+
+let wB = pickup(/.+/);
+console.log(wB.bounds()); // e.g. Rect(0, 0 - 11, 33)
+console.log(wB.boundsExactCenterY()); // e.g. 16.5
+
+let wC = pickup(/.+/);
+console.log(wC.bounds()); // e.g. Rect(0, 0 - 11, -33)
+console.log(wC.boundsExactCenterY()); // e.g. -16.5
+</code></pre>
+<h2>[m#] left<span><a class="mark" href="#uiobjecttype_m_left" id="uiobjecttype_m_left">#</a></span></h2>
+<h3>left()<span><a class="mark" href="#uiobjecttype_left" id="uiobjecttype_left">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形左边界距屏幕左边缘的像素距离.</p>
+<p><a href="#uiobjecttype_m_boundsleft">UiObject#boundsLeft</a> 的别名方法.</p>
+<h2>[m#] top<span><a class="mark" href="#uiobjecttype_m_top" id="uiobjecttype_m_top">#</a></span></h2>
+<h3>top()<span><a class="mark" href="#uiobjecttype_top" id="uiobjecttype_top">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形上边界距屏幕上边缘的像素距离.</p>
+<p><a href="#uiobjecttype_m_boundstop">UiObject#boundsTop</a> 的别名方法.</p>
+<h2>[m#] right<span><a class="mark" href="#uiobjecttype_m_right" id="uiobjecttype_m_right">#</a></span></h2>
+<h3>right()<span><a class="mark" href="#uiobjecttype_right" id="uiobjecttype_right">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形右边界距屏幕左边缘的像素距离.</p>
+<p><a href="#uiobjecttype_m_boundsright">UiObject#boundsRight</a> 的别名方法.</p>
+<h2>[m#] bottom<span><a class="mark" href="#uiobjecttype_m_bottom" id="uiobjecttype_m_bottom">#</a></span></h2>
+<h3>bottom()<span><a class="mark" href="#uiobjecttype_bottom" id="uiobjecttype_bottom">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形下边界距屏幕上边缘的像素距离.</p>
+<p><a href="#uiobjecttype_m_boundsbottom">UiObject#boundsBottom</a> 的别名方法.</p>
+<h2>[m#] width<span><a class="mark" href="#uiobjecttype_m_width" id="uiobjecttype_m_width">#</a></span></h2>
+<h3>width()<span><a class="mark" href="#uiobjecttype_width" id="uiobjecttype_width">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的宽度.</p>
+<p><a href="#uiobjecttype_m_boundswidth">UiObject#boundsWidth</a> 的别名方法.</p>
+<h2>[m#] height<span><a class="mark" href="#uiobjecttype_m_height" id="uiobjecttype_m_height">#</a></span></h2>
+<h3>height()<span><a class="mark" href="#uiobjecttype_height" id="uiobjecttype_height">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的高度.</p>
+<p><a href="#uiobjecttype_m_boundsheight">UiObject#boundsHeight</a> 的别名方法.</p>
+<h2>[m#] centerX<span><a class="mark" href="#uiobjecttype_m_centerx" id="uiobjecttype_m_centerx">#</a></span></h2>
+<h3>centerX()<span><a class="mark" href="#uiobjecttype_centerx" id="uiobjecttype_centerx">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心 X 坐标 (中心点距屏幕左边缘的像素距离).</p>
+<p><a href="#uiobjecttype_m_boundscenterx">UiObject#boundsCenterX</a> 的别名方法.</p>
+<h2>[m#] exactCenterX<span><a class="mark" href="#uiobjecttype_m_exactcenterx" id="uiobjecttype_m_exactcenterx">#</a></span></h2>
+<h3>exactCenterX()<span><a class="mark" href="#uiobjecttype_exactcenterx" id="uiobjecttype_exactcenterx">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心 X 坐标 (中心点距屏幕左边缘的像素距离).</p>
+<p><a href="#uiobjecttype_m_boundsexactcenterx">UiObject#boundsExactCenterX</a> 的别名方法.</p>
+<h2>[m#] centerY<span><a class="mark" href="#uiobjecttype_m_centery" id="uiobjecttype_m_centery">#</a></span></h2>
+<h3>centerY()<span><a class="mark" href="#uiobjecttype_centery" id="uiobjecttype_centery">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心 Y 坐标 (中心点距屏幕上边缘的像素距离).</p>
+<p><a href="#uiobjecttype_m_boundscentery">UiObject#boundsCenterY</a> 的别名方法.</p>
+<h2>[m#] exactCenterY<span><a class="mark" href="#uiobjecttype_m_exactcentery" id="uiobjecttype_m_exactcentery">#</a></span></h2>
+<h3>exactCenterY()<span><a class="mark" href="#uiobjecttype_exactcentery" id="uiobjecttype_exactcentery">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心 Y 坐标 (中心点距屏幕上边缘的像素距离).</p>
+<p><a href="#uiobjecttype_m_boundsexactcentery">UiObject#boundsExactCenterY</a> 的别名方法.</p>
+<h2>[m#] point<span><a class="mark" href="#uiobjecttype_m_point" id="uiobjecttype_m_point">#</a></span></h2>
+<h3>point()<span><a class="mark" href="#uiobjecttype_point" id="uiobjecttype_point">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_opencvpoint">OpencvPoint</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心点 (<a href="dataTypes.html#datatypes_opencvpoint">Point</a>).</p>
+<p>该中心点坐标由 <a href="#uiobjecttype_m_exactcenterx">exactCenterX</a> 和 <a href="#uiobjecttype_m_exactcentery">exactCenterY</a> 计算获得, 因此会保留精度.</p>
+<pre><code class="lang-js">let wA = pickup(/.+/);
+console.log(wA.bounds()); // e.g. Rect(0, 0 - 10, 12)
+console.log(wA.point()); // e.g. {5.0, 6.0}
+console.log(wA.point().x); // e.g. 5
+
+let wB = pickup(/.+/);
+console.log(wB.bounds()); // e.g. Rect(0, 0 - 11, 13)
+console.log(wB.point()); // e.g. {5.5, 6.5}
+console.log(wB.point().y); // e.g. 6.5
+</code></pre>
+<h2>[m#] size<span><a class="mark" href="#uiobjecttype_m_size" id="uiobjecttype_m_size">#</a></span></h2>
+<h3>size()<span><a class="mark" href="#uiobjecttype_size" id="uiobjecttype_size">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_opencvsize">OpencvSize</a></span> }</li>
+</ul>
+<p>返回控件矩形的尺寸 (<a href="dataTypes.html#datatypes_opencvsize">Size</a>).</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+console.log(w.bounds()); // e.g. Rect(0, 0 - 10, 12)
+console.log(w.size()); // e.g. 10x12
+console.log(w.size().width); // e.g. 10
+console.log(w.size().height); // e.g. 12
+</code></pre>
+<h2>[m#] clickBounds<span><a class="mark" href="#uiobjecttype_m_clickbounds" id="uiobjecttype_m_clickbounds">#</a></span></h2>
+<h3>clickBounds(offsetX?, offsetY?)<span><a class="mark" href="#uiobjecttype_clickbounds_offsetx_offsety" id="uiobjecttype_clickbounds_offsetx_offsety">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload [1-3]/3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>[ offsetX = 0 ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - X 坐标偏移量 (支持负值及百分率)</li>
+<li><strong>[ offsetY = 0 ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - Y 坐标偏移量 (支持负值及百分率)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否点击行为已执行且执行过程中无异常</li>
+</ul>
+<p>点击控件矩形的中心点坐标.</p>
+<p>点击操作借助 <a href="automator.html#automator_m_click">automator.click(x, y)</a> 完成, 此操作需要启用无障碍服务.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+
+console.log(w.bounds()); // e.g. Rect(0, 60 - 100, 200)
+
+w.clickBounds(); /* 相当于 click(50, 130) . */
+click(w.centerX(), w.centerY()); /* 效果同上. */
+
+w.clickBounds(10); /* X 坐标偏移量为 10 像素, 相当于 click(50 + 10, 130) . */
+w.clickBounds(10, 15); /* X 与 Y 坐标偏移量分别为 10 和 15 像素, 相当于 click(50 + 10, 130 + 15) . */
+w.clickBounds(0, -15); /* Y 坐标偏移量为 -15 像素, 相当于 click(50, 130 - 15) . */
+w.clickBounds(0.2); /* X 坐标偏移量为 20% 屏幕宽度, 相当于 click(50 + 0.2 * device.width, 130) . */
+w.clickBounds(0.2, -0.05); /* X 与 Y 坐标偏移量为 20% 屏幕宽度和 -5% 屏幕高度. */
+</code></pre>
+<h2>[m#] id<span><a class="mark" href="#uiobjecttype_m_id" id="uiobjecttype_m_id">#</a></span></h2>
+<h3>id()<span><a class="mark" href="#uiobjecttype_id" id="uiobjecttype_id">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回节点的 ID 资源全称 (Fully-Qualified ID Resource Name).</p>
+<p>若 ID 不存在, 返回 null.</p>
+<p>安卓资源全称格式为 <code>package:type/entry</code>, 即 <code>包名:类型/资源项</code>.<br>ID 资源全称的 <code>类型</code> 为 <code>id</code>.<br>一个有效的 ID 资源全称: <code>com.test:id/some_entry</code>.</p>
+<pre><code class="lang-js">console.log(idMatch(/.+/).findOnce().id()); // e.g. org.autojs.autojs6:id/action_bar_root
+console.log(idMatch(/.+/).findOnce().fullId()); /* 同上. */
+console.log(idMatch(/.+/).findOnce().getViewIdResourceName()); /* 同上. */
+</code></pre>
+<p>需额外留意, 部分应用的控件 ID 资源全称可能不符合标准:</p>
+<pre><code class="lang-js">/* 标准 ID 全称. */
+let canonicalId = &quot;com.test:id/hello_world&quot;;
+
+/* 可能出现的非标准 ID 全称. */
+let peculiarId = &quot;hello_world&quot;; /* 仅含资源项, 无包名及类型标识. */
+</code></pre>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> getViewIdResourceName</li>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_fullid">fullId</a></li>
+</ul>
+<h2>[m#] fullId<span><a class="mark" href="#uiobjecttype_m_fullid" id="uiobjecttype_m_fullid">#</a></span></h2>
+<h3>fullId()<span><a class="mark" href="#uiobjecttype_fullid" id="uiobjecttype_fullid">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回节点的 ID 资源全称 (Fully-Qualified ID Resource Name).</p>
+<p>若 ID 不存在, 返回 null.</p>
+<p><a href="#uiobjecttype_m_id">UiObject#id</a> 的别名方法.</p>
+<h2>[m#] idEntry<span><a class="mark" href="#uiobjecttype_m_identry" id="uiobjecttype_m_identry">#</a></span></h2>
+<h3>idEntry()<span><a class="mark" href="#uiobjecttype_identry" id="uiobjecttype_identry">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回节点的 ID 资源项名称 (ID Resource Entry Name).</p>
+<p>安卓资源全称格式为 <code>package:type/entry</code>, 即 <code>包名:类型/资源项</code>.<br>例如对于 ID 资源全称 <code>com.test:id/some_entry</code>, 其 ID 资源项名称为 <code>some_entry</code>.</p>
+<pre><code class="lang-js">/* ID 资源全称. */
+console.log(idMatch(/.+/).findOnce().id()); // e.g. org.autojs.autojs6:id/action_bar_root
+
+/* ID 资源项名称. */
+console.log(idMatch(/.+/).findOnce().idEntry()); // action_bar_root
+console.log(idMatch(/.+/).findOnce().simpleId()); /* 同上. */
+</code></pre>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_simpleid">simpleId</a></li>
+</ul>
+<h2>[m#] simpleId<span><a class="mark" href="#uiobjecttype_m_simpleid" id="uiobjecttype_m_simpleid">#</a></span></h2>
+<h3>simpleId()<span><a class="mark" href="#uiobjecttype_simpleid" id="uiobjecttype_simpleid">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回节点的 ID 资源项名称 (ID Resource Entry Name).</p>
+<p>若 ID 不存在, 返回 null.</p>
+<p><a href="#uiobjecttype_m_identry">UiObject#idEntry</a> 的别名方法.</p>
+<h2>[m#] idHex<span><a class="mark" href="#uiobjecttype_m_idhex" id="uiobjecttype_m_idhex">#</a></span></h2>
+<h3>idHex()<span><a class="mark" href="#uiobjecttype_idhex" id="uiobjecttype_idhex">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回节点的 <a href="#uiobjecttype_m_fullid">ID 资源全称</a> 的 <a href="glossaries.md.html#glossaries.md_资源_ID">资源 ID</a> 十六进制字符串值, 简称 <code>ID 资源十六进制代表值</code>.</p>
+<ol>
+<li>获取 <code>ID 资源全称</code> 对应的 <code>资源 ID</code></li>
+<li>将 <code>资源 ID</code> 的十六进制值以 <code>0x</code> 作为前缀进行组合</li>
+<li>返回组合的字符串值</li>
+</ol>
+<p>若 ID 不存在, 返回 null.</p>
+<pre><code class="lang-js">console.log(idMatch(/explorer_item_list/).findOnce().idHex()); /* e.g. 0x7f090117 */
+</code></pre>
+<h2>[m#] text<span><a class="mark" href="#uiobjecttype_m_text" id="uiobjecttype_m_text">#</a></span></h2>
+<h3>text()<span><a class="mark" href="#uiobjecttype_text" id="uiobjecttype_text">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>返回控件文本内容.</p>
+<p>若文本内容不存在, 返回空字符串.</p>
+<p>出于保护隐私目的, <code>isPassword()</code> 返回 <code>true</code> 的密码类型控件, <code>text()</code> 将返回空字符串.</p>
+<pre><code class="lang-js">console.log(textMatch(/.+/).findOnce().text()); /* e.g. hello */
+</code></pre>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> getText</li>
+</ul>
+<h2>[m#] desc<span><a class="mark" href="#uiobjecttype_m_desc" id="uiobjecttype_m_desc">#</a></span></h2>
+<h3>desc()<span><a class="mark" href="#uiobjecttype_desc" id="uiobjecttype_desc">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回控件的内容描述标签.</p>
+<p>若内容描述标签容不存在, 返回 null.</p>
+<p>内容描述标签可以帮助需要无障碍服务的用户 (如视力障碍人群等) 理解当前控件的用途或说明.<br>如 <a href="https://support.google.com/accessibility/android/topic/10601570?hl=zh-Hans">TalkBack</a> 开启后可以朗读控件的内容描述标签, 对于理解那些没有文本内容的控件尤其重要.</p>
+<pre><code class="lang-js">console.log(descMatch(/.+/).findOnce().desc()); /* e.g. Restart icon */
+</code></pre>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> getContentDescription</li>
+</ul>
+<h2>[m#] content<span><a class="mark" href="#uiobjecttype_m_content" id="uiobjecttype_m_content">#</a></span></h2>
+<h3>content()<span><a class="mark" href="#uiobjecttype_content" id="uiobjecttype_content">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>返回控件内容 (包括内容描述标签或本文内容).</p>
+<p>若无内容, 返回空字符串.</p>
+<p><code>content</code> 方法相当于 <code>w.desc() || w.text()</code>, 即优先获取 <a href="#uiobjecttype_m_desc">desc</a> 返回的内容, 若为 null, 继续获取 <a href="#uiobjecttype_m_text">text</a> 返回的内容.</p>
+<pre><code class="lang-js">console.log(contentMatch(/.+/).findOnce().content()); /* e.g. Avatar */
+</code></pre>
+<h2>[m#] className<span><a class="mark" href="#uiobjecttype_m_classname" id="uiobjecttype_m_classname">#</a></span></h2>
+<h3>className()<span><a class="mark" href="#uiobjecttype_classname" id="uiobjecttype_classname">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回控件的类名.</p>
+<p>若如类名, 返回 null.</p>
+<pre><code class="lang-js">console.log(classNameMatch(/.+/).findOnce().className()); /* e.g. android.widget.EditText */
+</code></pre>
+<p>常见类名:</p>
+<ul>
+<li>android.view.View</li>
+<li>android.view.ViewGroup</li>
+<li>android.widget.ImageView</li>
+<li>android.widget.ImageButton</li>
+<li>android.widget.Button</li>
+<li>android.widget.ScrollView</li>
+<li>android.widget.TextView</li>
+<li>android.widget.EditText</li>
+<li>android.widget.Switch</li>
+<li>android.widget.LinearLayout</li>
+<li>android.widget.FrameLayout</li>
+<li>android.widget.RelativeLayout</li>
+</ul>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> getClassName</li>
+</ul>
+<h2>[m#] packageName<span><a class="mark" href="#uiobjecttype_m_packagename" id="uiobjecttype_m_packagename">#</a></span></h2>
+<h3>packageName()<span><a class="mark" href="#uiobjecttype_packagename" id="uiobjecttype_packagename">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回控件的包名.</p>
+<p>若如包名, 返回 null.</p>
+<pre><code class="lang-js">console.log(packageNameMatch(/.+/).findOnce().packageName()); /* e.g. org.autojs.autojs6 */
+</code></pre>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> getPackageName</li>
+</ul>
+<h2>[m#] depth<span><a class="mark" href="#uiobjecttype_m_depth" id="uiobjecttype_m_depth">#</a></span></h2>
+<h3>depth()<span><a class="mark" href="#uiobjecttype_depth" id="uiobjecttype_depth">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回 <a href="glossaries.html#glossaries_控件层级">控件层级</a> 深度.</p>
+<p>顶层控件 (只有一个) 的深度值为 0, 次级控件 (可能有多个) 的深度值全部为 1, 以此类推.</p>
+<pre><code class="lang-js">console.log(findOnce().depth()); // 0
+console.log(contentMatch(/.+/).depth()); /* e.g. 5 */
+</code></pre>
+<h2>[m#] checkable<span><a class="mark" href="#uiobjecttype_m_checkable" id="uiobjecttype_m_checkable">#</a></span></h2>
+<h3>checkable()<span><a class="mark" href="#uiobjecttype_checkable" id="uiobjecttype_checkable">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否可勾选.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isCheckable</li>
+</ul>
+<p>关联属性或方法:</p>
+<ul>
+<li>检查状态<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_checked">checked</a> (isChecked)</li>
+</ul>
+</li>
+<li>检查可用性<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_checkable">checkable</a> (isCheckable)</li>
+</ul>
+</li>
+</ul>
+<h2>[m#] checked<span><a class="mark" href="#uiobjecttype_m_checked" id="uiobjecttype_m_checked">#</a></span></h2>
+<h3>checked()<span><a class="mark" href="#uiobjecttype_checked" id="uiobjecttype_checked">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否已勾选.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isChecked</li>
+</ul>
+<p>关联属性或方法:</p>
+<ul>
+<li>检查状态<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_checked">checked</a> (isChecked)</li>
+</ul>
+</li>
+<li>检查可用性<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_checkable">checkable</a> (isCheckable)</li>
+</ul>
+</li>
+</ul>
+<h2>[m#] focusable<span><a class="mark" href="#uiobjecttype_m_focusable" id="uiobjecttype_m_focusable">#</a></span></h2>
+<h3>focusable()<span><a class="mark" href="#uiobjecttype_focusable" id="uiobjecttype_focusable">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否可聚焦.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isFocusable</li>
+</ul>
+<p>关联属性或方法:</p>
+<ul>
+<li>检查状态<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_focused">focused</a> (isFocused)</li>
+</ul>
+</li>
+<li>检查可用性<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_focusable">focusable</a> (isFocusable)</li>
+</ul>
+</li>
+</ul>
+<h2>[m#] focused<span><a class="mark" href="#uiobjecttype_m_focused" id="uiobjecttype_m_focused">#</a></span></h2>
+<h3>focused()<span><a class="mark" href="#uiobjecttype_focused" id="uiobjecttype_focused">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否已聚焦.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isFocused</li>
+</ul>
+<p>关联属性或方法:</p>
+<ul>
+<li>检查状态<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_focused">focused</a> (isFocused)</li>
+</ul>
+</li>
+<li>检查可用性<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_focusable">focusable</a> (isFocusable)</li>
+</ul>
+</li>
+</ul>
+<h2>[m#] visibleToUser<span><a class="mark" href="#uiobjecttype_m_visibletouser" id="uiobjecttype_m_visibletouser">#</a></span></h2>
+<h3>visibleToUser()<span><a class="mark" href="#uiobjecttype_visibletouser" id="uiobjecttype_visibletouser">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否对用户可见.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isVisibleToUser</li>
+</ul>
+<h2>[m#] accessibilityFocused<span><a class="mark" href="#uiobjecttype_m_accessibilityfocused" id="uiobjecttype_m_accessibilityfocused">#</a></span></h2>
+<h3>accessibilityFocused()<span><a class="mark" href="#uiobjecttype_accessibilityfocused" id="uiobjecttype_accessibilityfocused">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否已获取无障碍焦点.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isAccessibilityFocused</li>
+</ul>
+<p>关联属性或方法:</p>
+<ul>
+<li>检查状态<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_accessibilityfocused">accessibilityFocused</a> (isAccessibilityFocused)</li>
+</ul>
+</li>
+<li>执行行为<ul>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_accessibilityfocus">accessibilityFocus</a></li>
+</ul>
+</li>
+</ul>
+<h2>[m#] selected<span><a class="mark" href="#uiobjecttype_m_selected" id="uiobjecttype_m_selected">#</a></span></h2>
+<h3>selected()<span><a class="mark" href="#uiobjecttype_selected" id="uiobjecttype_selected">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否已选中.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isSelected</li>
+</ul>
+<p>关联属性或方法:</p>
+<ul>
+<li>检查状态<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_selected">selected</a> (isSelected)</li>
+</ul>
+</li>
+<li>执行行为<ul>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_select">select</a></li>
+</ul>
+</li>
+</ul>
+<h2>[m#] clickable<span><a class="mark" href="#uiobjecttype_m_clickable" id="uiobjecttype_m_clickable">#</a></span></h2>
+<h3>clickable()<span><a class="mark" href="#uiobjecttype_clickable" id="uiobjecttype_clickable">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否可点击.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isClickable</li>
+</ul>
+<p>关联属性或方法:</p>
+<ul>
+<li>检查状态<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_clickable">clickable</a> (isClickable)</li>
+</ul>
+</li>
+<li>执行行为<ul>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_click">click</a></li>
+</ul>
+</li>
+</ul>
+<h2>[m#] longClickable<span><a class="mark" href="#uiobjecttype_m_longclickable" id="uiobjecttype_m_longclickable">#</a></span></h2>
+<h3>longClickable()<span><a class="mark" href="#uiobjecttype_longclickable" id="uiobjecttype_longclickable">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否可长按.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isLongClickable</li>
+</ul>
+<p>关联属性或方法:</p>
+<ul>
+<li>检查状态<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_longclickable">longClickable</a> (isLongClickable)</li>
+</ul>
+</li>
+<li>执行行为<ul>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_longclick">longClick</a></li>
+</ul>
+</li>
+</ul>
+<h2>[m#] enabled<span><a class="mark" href="#uiobjecttype_m_enabled" id="uiobjecttype_m_enabled">#</a></span></h2>
+<h3>enabled()<span><a class="mark" href="#uiobjecttype_enabled" id="uiobjecttype_enabled">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否启用 (未被禁用).</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isEnabled</li>
+</ul>
+<h2>[m#] password<span><a class="mark" href="#uiobjecttype_m_password" id="uiobjecttype_m_password">#</a></span></h2>
+<h3>password()<span><a class="mark" href="#uiobjecttype_password" id="uiobjecttype_password">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否是密码型控件.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isPassword</li>
+</ul>
+<h2>[m#] scrollable<span><a class="mark" href="#uiobjecttype_m_scrollable" id="uiobjecttype_m_scrollable">#</a></span></h2>
+<h3>scrollable()<span><a class="mark" href="#uiobjecttype_scrollable" id="uiobjecttype_scrollable">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否可滚动.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isScrollable</li>
+</ul>
+<p>关联属性或方法:</p>
+<ul>
+<li>检查状态<ul>
+<li><code>[m#]</code> <a href="#uiobjecttype_m_scrollable">scrollable</a> (isScrollable)</li>
+</ul>
+</li>
+<li>执行行为<ul>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollbackward">scrollBackward</a></li>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrolldown">scrollDown</a></li>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollforward">scrollForward</a></li>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollleft">scrollLeft</a></li>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollright">scrollRight</a></li>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollto">scrollTo</a></li>
+<li><code>[m#]</code> <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollup">scrollUp</a></li>
+</ul>
+</li>
+</ul>
+<h2>[m#] editable<span><a class="mark" href="#uiobjecttype_m_editable" id="uiobjecttype_m_editable">#</a></span></h2>
+<h3>editable()<span><a class="mark" href="#uiobjecttype_editable" id="uiobjecttype_editable">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否可编辑.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> isEditable</li>
+</ul>
+<h2>[m#] rowCount<span><a class="mark" href="#uiobjecttype_m_rowcount" id="uiobjecttype_m_rowcount">#</a></span></h2>
+<h3>rowCount()<span><a class="mark" href="#uiobjecttype_rowcount" id="uiobjecttype_rowcount">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 <a href="glossaries.html#glossaries_信息集控件">信息集控件</a> 的行数.</p>
+<h2>[m#] columnCount<span><a class="mark" href="#uiobjecttype_m_columncount" id="uiobjecttype_m_columncount">#</a></span></h2>
+<h3>columnCount()<span><a class="mark" href="#uiobjecttype_columncount" id="uiobjecttype_columncount">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 <a href="glossaries.html#glossaries_信息集控件">信息集控件</a> 的列数.</p>
+<h2>[m#] row<span><a class="mark" href="#uiobjecttype_m_row" id="uiobjecttype_m_row">#</a></span></h2>
+<h3>row()<span><a class="mark" href="#uiobjecttype_row" id="uiobjecttype_row">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 <a href="glossaries.html#glossaries_子项信息集控件">子项信息集控件</a> 所在行的索引值.</p>
+<h2>[m#] column<span><a class="mark" href="#uiobjecttype_m_column" id="uiobjecttype_m_column">#</a></span></h2>
+<h3>column()<span><a class="mark" href="#uiobjecttype_column" id="uiobjecttype_column">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 <a href="glossaries.html#glossaries_子项信息集控件">子项信息集控件</a> 所在列的索引值.</p>
+<h2>[m#] rowSpan<span><a class="mark" href="#uiobjecttype_m_rowspan" id="uiobjecttype_m_rowspan">#</a></span></h2>
+<h3>rowSpan()<span><a class="mark" href="#uiobjecttype_rowspan" id="uiobjecttype_rowspan">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 <a href="glossaries.html#glossaries_子项信息集控件">子项信息集控件</a> 纵跨的行数.</p>
+<h2>[m#] columnSpan<span><a class="mark" href="#uiobjecttype_m_columnspan" id="uiobjecttype_m_columnspan">#</a></span></h2>
+<h3>columnSpan()<span><a class="mark" href="#uiobjecttype_columnspan" id="uiobjecttype_columnspan">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 <a href="glossaries.html#glossaries_子项信息集控件">子项信息集控件</a> 横跨的列数.</p>
+<h2>[m#] drawingOrder<span><a class="mark" href="#uiobjecttype_m_drawingorder" id="uiobjecttype_m_drawingorder">#</a></span></h2>
+<h3>drawingOrder()<span><a class="mark" href="#uiobjecttype_drawingorder" id="uiobjecttype_drawingorder">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回节点的视图绘制次序.</p>
+<p>此次序由其父节点决定, 是一个相对于其兄弟节点的索引值.<br>在某些情况下, 视图 (View) 绘制的过程本质上是同时发生的, 两个兄弟节点可能返回同一个索引值, 甚至此索引值可能被忽略 (返回默认值 0).</p>
+<pre><code class="lang-js">console.log(pickup(/.+/).drawingOrder()); // e.g. 0
+</code></pre>
+<h2>[m#] actionNames<span><a class="mark" href="#uiobjecttype_m_actionnames" id="uiobjecttype_m_actionnames">#</a></span></h2>
+<h3>actionNames()<span><a class="mark" href="#uiobjecttype_actionnames" id="uiobjecttype_actionnames">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>返回控件支持的 <a href="uiObjectActionsType.html">控件行为</a> 数组.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+
+/* e.g. [ ACTION_CLICK, ACTION_SET_SELECTION, ACTION_FOCUS ] */
+console.log(w.actionNames());
+</code></pre>
+<p>上述示例, 数组中的三个元素代表控件可以执行对应的行为, 即 <code>w.click()</code>, <code>w.setSelection(...)</code> 及 <code>w.focus()</code>.</p>
+<p>数组中的元素均为 &quot;ACTION_&quot; 开头的控件行为 ID 的字符串形式.<br>更多控件行为 ID 可参阅 <a href="uiObjectActionsType.html">控件节点行为</a> 章节的 <code>行为 ID</code> 表格.</p>
+<p>如需判断一个控件是否支持一个或多个行为, 可使用 <a href="#uiobjecttype_m_hasaction">hasAction</a> 方法.</p>
+<h2>[m#] hasAction<span><a class="mark" href="#uiobjecttype_m_hasaction" id="uiobjecttype_m_hasaction">#</a></span></h2>
+<h3>hasAction(...actions)<span><a class="mark" href="#uiobjecttype_hasaction_actions" id="uiobjecttype_hasaction_actions">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>actions</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_string">string</a><a href="documentation.html#documentation_可变参数">[]</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回控件是否 <strong>全部支持</strong> 指定的一个或多个 <a href="uiObjectActionsType.html">控件行为</a>.</p>
+<p>参数 actions 是 <a href="documentation.html#documentation_可变参数">可变参数</a>, 均满足 &quot;ACTION_&quot; 开头的控件行为 ID 的字符串形式 (&quot;ACTION_&quot; 可省略).</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+
+/* 判断 w 是否可点击. */
+console.log(w.hasAction(&quot;ACTION_CLICK&quot;));
+console.log(w.hasAction(&quot;CLICK&quot;)); /* ACTION_ 前缀可省略. */
+
+/* 判断 w 是否可点击, 可聚焦, 可设置文本. */
+console.log(w.hasAction(&quot;ACTION_CLICK&quot;, &quot;ACTION_FOCUS&quot;, &quot;ACTION_SET_TEXT&quot;));
+console.log(w.hasAction(&quot;CLICK&quot;, &quot;FOCUS&quot;, &quot;SET_TEXT&quot;)); /* ACTION_ 前缀可省略. */
+</code></pre>
+<p>更多控件行为 ID 可参阅 <a href="uiObjectActionsType.html">控件节点行为</a> 章节的 <code>行为 ID</code> 表格.</p>
+<h2>[m#] performAction<span><a class="mark" href="#uiobjecttype_m_performaction" id="uiobjecttype_m_performaction">#</a></span></h2>
+<p>用于执行指定的控件行为.<br>在 <a href="uiObjectActionsType.html">控件节点行为</a> 章节已详细描述相关内容, 此处仅注明几个重载方法的签名, 相关内容将不再赘述.</p>
+<h3>performAction(action, ...arguments)<span><a class="mark" href="#uiobjecttype_performaction_action_arguments" id="uiobjecttype_performaction_action_arguments">#</a></span></h3>
+<p><strong><code>Overload 1/2</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>action</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 行为的唯一标志符 (Action ID)</li>
+<li><strong>arguments</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="uiObjectActionsType.html#uiobjectactionstype_i_actionargument">ActionArgument</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 行为参数, 用于给行为传递参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<h3>performAction(action, bundle)<span><a class="mark" href="#uiobjecttype_performaction_action_bundle" id="uiobjecttype_performaction_action_bundle">#</a></span></h3>
+<p><strong><code>Overload 2/2</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>action</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 行为的唯一标志符 (Action ID)</li>
+<li><strong>bundle</strong> { <span class="type"><a href="uiObjectActionsType.html#uiobjectactionstype_i_actionargument">AndroidBundle</a></span> } - 行为参数容器, 用于给行为传递参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<h2>[m#] click<span><a class="mark" href="#uiobjecttype_m_click" id="uiobjecttype_m_click">#</a></span></h2>
+<h3>click()<span><a class="mark" href="#uiobjecttype_click" id="uiobjecttype_click">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_click">[ 点击 ] 行为</a>.</p>
+<h2>[m#] longClick<span><a class="mark" href="#uiobjecttype_m_longclick" id="uiobjecttype_m_longclick">#</a></span></h2>
+<h3>longClick()<span><a class="mark" href="#uiobjecttype_longclick" id="uiobjecttype_longclick">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_longclick">[ 长按 ] 行为</a>.</p>
+<h2>[m#] accessibilityFocus<span><a class="mark" href="#uiobjecttype_m_accessibilityfocus" id="uiobjecttype_m_accessibilityfocus">#</a></span></h2>
+<h3>accessibilityFocus()<span><a class="mark" href="#uiobjecttype_accessibilityfocus" id="uiobjecttype_accessibilityfocus">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_accessibilityfocus">[ 获取无障碍焦点 ] 行为</a>.</p>
+<h2>[m#] clearAccessibilityFocus<span><a class="mark" href="#uiobjecttype_m_clearaccessibilityfocus" id="uiobjecttype_m_clearaccessibilityfocus">#</a></span></h2>
+<h3>clearAccessibilityFocus()<span><a class="mark" href="#uiobjecttype_clearaccessibilityfocus" id="uiobjecttype_clearaccessibilityfocus">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_clearaccessibilityfocus">[ 清除无障碍焦点 ] 行为</a>.</p>
+<h2>[m#] focus<span><a class="mark" href="#uiobjecttype_m_focus" id="uiobjecttype_m_focus">#</a></span></h2>
+<h3>focus()<span><a class="mark" href="#uiobjecttype_focus" id="uiobjecttype_focus">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_focus">[ 获取焦点 ] 行为</a>.</p>
+<h2>[m#] clearFocus<span><a class="mark" href="#uiobjecttype_m_clearfocus" id="uiobjecttype_m_clearfocus">#</a></span></h2>
+<h3>clearFocus()<span><a class="mark" href="#uiobjecttype_clearfocus" id="uiobjecttype_clearfocus">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_clearfocus">[ 清除焦点 ] 行为</a>.</p>
+<h2>[m#] dragStart<span><a class="mark" href="#uiobjecttype_m_dragstart" id="uiobjecttype_m_dragstart">#</a></span></h2>
+<h3>dragStart()<span><a class="mark" href="#uiobjecttype_dragstart" id="uiobjecttype_dragstart">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=32</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_dragstart">[ 拖放开始 ] 行为</a>.</p>
+<h2>[m#] dragDrop<span><a class="mark" href="#uiobjecttype_m_dragdrop" id="uiobjecttype_m_dragdrop">#</a></span></h2>
+<h3>dragDrop()<span><a class="mark" href="#uiobjecttype_dragdrop" id="uiobjecttype_dragdrop">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=32</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_dragdrop">[ 拖放放下 ] 行为</a>.</p>
+<h2>[m#] dragCancel<span><a class="mark" href="#uiobjecttype_m_dragcancel" id="uiobjecttype_m_dragcancel">#</a></span></h2>
+<h3>dragCancel()<span><a class="mark" href="#uiobjecttype_dragcancel" id="uiobjecttype_dragcancel">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=32</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_dragcancel">[ 拖放取消 ] 行为</a>.</p>
+<h2>[m#] imeEnter<span><a class="mark" href="#uiobjecttype_m_imeenter" id="uiobjecttype_m_imeenter">#</a></span></h2>
+<h3>imeEnter()<span><a class="mark" href="#uiobjecttype_imeenter" id="uiobjecttype_imeenter">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=30</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_imeenter">[ 输入法 ENTER 键 ] 行为</a>.</p>
+<h2>[m#] moveWindow<span><a class="mark" href="#uiobjecttype_m_movewindow" id="uiobjecttype_m_movewindow">#</a></span></h2>
+<h3>moveWindow(x, y)<span><a class="mark" href="#uiobjecttype_movewindow_x_y" id="uiobjecttype_movewindow_x_y">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=26</code></strong></p>
+<ul>
+<li><strong>x</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - X 坐标</li>
+<li><strong>y</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - Y 坐标</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_movewindow">[ 移动窗口到新位置 ] 行为</a>.</p>
+<h2>[m#] nextAtMovementGranularity<span><a class="mark" href="#uiobjecttype_m_nextatmovementgranularity" id="uiobjecttype_m_nextatmovementgranularity">#</a></span></h2>
+<h3>nextAtMovementGranularity(granularity, isExtendSelection)<span><a class="mark" href="#uiobjecttype_nextatmovementgranularity_granularity_isextendselection" id="uiobjecttype_nextatmovementgranularity_granularity_isextendselection">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>granularity</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 粒度</li>
+<li><strong>isExtendSelection</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否扩展选则文本</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_nextatmovementgranularity">[ 按粒度移至下一位置 ] 行为</a>.</p>
+<h2>[m#] nextHtmlElement<span><a class="mark" href="#uiobjecttype_m_nexthtmlelement" id="uiobjecttype_m_nexthtmlelement">#</a></span></h2>
+<h3>nextHtmlElement(element)<span><a class="mark" href="#uiobjecttype_nexthtmlelement_element" id="uiobjecttype_nexthtmlelement_element">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>element</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 元素名称</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_nexthtmlelement">[ 按元素移至下一位置 ] 行为</a>.</p>
+<h2>[m#] pageLeft<span><a class="mark" href="#uiobjecttype_m_pageleft" id="uiobjecttype_m_pageleft">#</a></span></h2>
+<h3>pageLeft()<span><a class="mark" href="#uiobjecttype_pageleft" id="uiobjecttype_pageleft">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_pageleft">[ 使视窗左移的翻页 ] 行为</a>.</p>
+<h2>[m#] pageUp<span><a class="mark" href="#uiobjecttype_m_pageup" id="uiobjecttype_m_pageup">#</a></span></h2>
+<h3>pageUp()<span><a class="mark" href="#uiobjecttype_pageup" id="uiobjecttype_pageup">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_pageup">[ 使视窗上移的翻页 ] 行为</a>.</p>
+<h2>[m#] pageRight<span><a class="mark" href="#uiobjecttype_m_pageright" id="uiobjecttype_m_pageright">#</a></span></h2>
+<h3>pageRight()<span><a class="mark" href="#uiobjecttype_pageright" id="uiobjecttype_pageright">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_pageright">[ 使视窗右移的翻页 ] 行为</a>.</p>
+<h2>[m#] pageDown<span><a class="mark" href="#uiobjecttype_m_pagedown" id="uiobjecttype_m_pagedown">#</a></span></h2>
+<h3>pageDown()<span><a class="mark" href="#uiobjecttype_pagedown" id="uiobjecttype_pagedown">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_pagedown">[ 使视窗下移的翻页 ] 行为</a>.</p>
+<h2>[m#] pressAndHold<span><a class="mark" href="#uiobjecttype_m_pressandhold" id="uiobjecttype_m_pressandhold">#</a></span></h2>
+<h3>pressAndHold()<span><a class="mark" href="#uiobjecttype_pressandhold" id="uiobjecttype_pressandhold">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=30</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_pressandhold">[ 按住 ] 行为</a>.</p>
+<h2>[m#] previousAtMovementGranularity<span><a class="mark" href="#uiobjecttype_m_previousatmovementgranularity" id="uiobjecttype_m_previousatmovementgranularity">#</a></span></h2>
+<h3>previousAtMovementGranularity(granularity, isExtendSelection)<span><a class="mark" href="#uiobjecttype_previousatmovementgranularity_granularity_isextendselection" id="uiobjecttype_previousatmovementgranularity_granularity_isextendselection">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>granularity</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 粒度</li>
+<li><strong>isExtendSelection</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否扩展选则文本</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_previousatmovementgranularity">[ 按粒度移至上一位置 ] 行为</a>.</p>
+<h2>[m#] previousHtmlElement<span><a class="mark" href="#uiobjecttype_m_previoushtmlelement" id="uiobjecttype_m_previoushtmlelement">#</a></span></h2>
+<h3>previousHtmlElement(element)<span><a class="mark" href="#uiobjecttype_previoushtmlelement_element" id="uiobjecttype_previoushtmlelement_element">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>element</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 元素名称</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_previoushtmlelement">[ 按元素移至上一位置 ] 行为</a>.</p>
+<h2>[m#] showTextSuggestions<span><a class="mark" href="#uiobjecttype_m_showtextsuggestions" id="uiobjecttype_m_showtextsuggestions">#</a></span></h2>
+<h3>showTextSuggestions()<span><a class="mark" href="#uiobjecttype_showtextsuggestions" id="uiobjecttype_showtextsuggestions">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=33</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_showtextsuggestions">[ 显示文本建议 ] 行为</a>.</p>
+<h2>[m#] showTooltip<span><a class="mark" href="#uiobjecttype_m_showtooltip" id="uiobjecttype_m_showtooltip">#</a></span></h2>
+<h3>showTooltip()<span><a class="mark" href="#uiobjecttype_showtooltip" id="uiobjecttype_showtooltip">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=28</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_showtooltip">[ 显示工具提示信息 ] 行为</a>.</p>
+<h2>[m#] hideTooltip<span><a class="mark" href="#uiobjecttype_m_hidetooltip" id="uiobjecttype_m_hidetooltip">#</a></span></h2>
+<h3>hideTooltip()<span><a class="mark" href="#uiobjecttype_hidetooltip" id="uiobjecttype_hidetooltip">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=28</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_hidetooltip">[ 隐藏工具提示信息 ] 行为</a>.</p>
+<h2>[m#] show<span><a class="mark" href="#uiobjecttype_m_show" id="uiobjecttype_m_show">#</a></span></h2>
+<h3>show()<span><a class="mark" href="#uiobjecttype_show" id="uiobjecttype_show">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_show">[ 显示在视窗内 ] 行为</a>.</p>
+<h2>[m#] dismiss<span><a class="mark" href="#uiobjecttype_m_dismiss" id="uiobjecttype_m_dismiss">#</a></span></h2>
+<h3>dismiss()<span><a class="mark" href="#uiobjecttype_dismiss" id="uiobjecttype_dismiss">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_dismiss">[ 消隐 ] 行为</a>.</p>
+<h2>[m#] copy<span><a class="mark" href="#uiobjecttype_m_copy" id="uiobjecttype_m_copy">#</a></span></h2>
+<h3>copy()<span><a class="mark" href="#uiobjecttype_copy" id="uiobjecttype_copy">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_copy">[ 复制文本 ] 行为</a>.</p>
+<h2>[m#] cut<span><a class="mark" href="#uiobjecttype_m_cut" id="uiobjecttype_m_cut">#</a></span></h2>
+<h3>cut()<span><a class="mark" href="#uiobjecttype_cut" id="uiobjecttype_cut">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_cut">[ 剪切文本 ] 行为</a>.</p>
+<h2>[m#] paste<span><a class="mark" href="#uiobjecttype_m_paste" id="uiobjecttype_m_paste">#</a></span></h2>
+<h3>paste()<span><a class="mark" href="#uiobjecttype_paste" id="uiobjecttype_paste">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_paste">[ 粘贴文本 ] 行为</a>.</p>
+<h2>[m#] select<span><a class="mark" href="#uiobjecttype_m_select" id="uiobjecttype_m_select">#</a></span></h2>
+<h3>select()<span><a class="mark" href="#uiobjecttype_select" id="uiobjecttype_select">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_select">[ 选中 ] 行为</a>.</p>
+<h2>[m#] expand<span><a class="mark" href="#uiobjecttype_m_expand" id="uiobjecttype_m_expand">#</a></span></h2>
+<h3>expand()<span><a class="mark" href="#uiobjecttype_expand" id="uiobjecttype_expand">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_expand">[ 展开 ] 行为</a>.</p>
+<h2>[m#] collapse<span><a class="mark" href="#uiobjecttype_m_collapse" id="uiobjecttype_m_collapse">#</a></span></h2>
+<h3>collapse()<span><a class="mark" href="#uiobjecttype_collapse" id="uiobjecttype_collapse">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_collapse">[ 折叠 ] 行为</a>.</p>
+<h2>[m#] scrollLeft<span><a class="mark" href="#uiobjecttype_m_scrollleft" id="uiobjecttype_m_scrollleft">#</a></span></h2>
+<h3>scrollLeft()<span><a class="mark" href="#uiobjecttype_scrollleft" id="uiobjecttype_scrollleft">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollleft">[ 使视窗左移的滚动 ] 行为</a>.</p>
+<h2>[m#] scrollUp<span><a class="mark" href="#uiobjecttype_m_scrollup" id="uiobjecttype_m_scrollup">#</a></span></h2>
+<h3>scrollUp()<span><a class="mark" href="#uiobjecttype_scrollup" id="uiobjecttype_scrollup">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollup">[ 使视窗上移的滚动 ] 行为</a>.</p>
+<h2>[m#] scrollRight<span><a class="mark" href="#uiobjecttype_m_scrollright" id="uiobjecttype_m_scrollright">#</a></span></h2>
+<h3>scrollRight()<span><a class="mark" href="#uiobjecttype_scrollright" id="uiobjecttype_scrollright">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollright">[ 使视窗右移的滚动 ] 行为</a>.</p>
+<h2>[m#] scrollDown<span><a class="mark" href="#uiobjecttype_m_scrolldown" id="uiobjecttype_m_scrolldown">#</a></span></h2>
+<h3>scrollDown()<span><a class="mark" href="#uiobjecttype_scrolldown" id="uiobjecttype_scrolldown">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrolldown">[ 使视窗下移的滚动 ] 行为</a>.</p>
+<h2>[m#] scrollForward<span><a class="mark" href="#uiobjecttype_m_scrollforward" id="uiobjecttype_m_scrollforward">#</a></span></h2>
+<h3>scrollForward()<span><a class="mark" href="#uiobjecttype_scrollforward" id="uiobjecttype_scrollforward">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollforward">[ 使视窗前移的滚动 ] 行为</a>.</p>
+<h2>[m#] scrollBackward<span><a class="mark" href="#uiobjecttype_m_scrollbackward" id="uiobjecttype_m_scrollbackward">#</a></span></h2>
+<h3>scrollBackward()<span><a class="mark" href="#uiobjecttype_scrollbackward" id="uiobjecttype_scrollbackward">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollbackward">[ 使视窗后移的滚动 ] 行为</a>.</p>
+<h2>[m#] scrollTo<span><a class="mark" href="#uiobjecttype_m_scrollto" id="uiobjecttype_m_scrollto">#</a></span></h2>
+<h3>scrollTo(row, column)<span><a class="mark" href="#uiobjecttype_scrollto_row_column" id="uiobjecttype_scrollto_row_column">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>row</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 行序数</li>
+<li><strong>column</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 列序数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_scrollto">[ 将指定位置滚动至视窗内 ] 行为</a>.</p>
+<h2>[m#] contextClick<span><a class="mark" href="#uiobjecttype_m_contextclick" id="uiobjecttype_m_contextclick">#</a></span></h2>
+<h3>contextClick()<span><a class="mark" href="#uiobjecttype_contextclick" id="uiobjecttype_contextclick">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_contextclick">[ 上下文点击 ] 行为</a>.</p>
+<h2>[m#] setText<span><a class="mark" href="#uiobjecttype_m_settext" id="uiobjecttype_m_settext">#</a></span></h2>
+<h3>setText(text)<span><a class="mark" href="#uiobjecttype_settext_text" id="uiobjecttype_settext_text">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 文本</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_settext">[ 设置文本 ] 行为</a>.</p>
+<h2>[m#] setSelection<span><a class="mark" href="#uiobjecttype_m_setselection" id="uiobjecttype_m_setselection">#</a></span></h2>
+<h3>setSelection(start, end)<span><a class="mark" href="#uiobjecttype_setselection_start_end" id="uiobjecttype_setselection_start_end">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>start</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 开始位置</li>
+<li><strong>end</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 结束位置</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_setselection">[ 选择文本 ] 行为</a>.</p>
+<h2>[m#] clearSelection<span><a class="mark" href="#uiobjecttype_m_clearselection" id="uiobjecttype_m_clearselection">#</a></span></h2>
+<h3>clearSelection()<span><a class="mark" href="#uiobjecttype_clearselection" id="uiobjecttype_clearselection">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_clearselection">[ 取消选择文本 ] 行为</a>.</p>
+<h2>[m#] setProgress<span><a class="mark" href="#uiobjecttype_m_setprogress" id="uiobjecttype_m_setprogress">#</a></span></h2>
+<h3>setProgress(progress)<span><a class="mark" href="#uiobjecttype_setprogress_progress" id="uiobjecttype_setprogress_progress">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>progress</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 进度值</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 <a href="uiObjectActionsType.html#uiobjectactionstype_m_setprogress">[ 设置进度值 ] 行为</a>.</p>
+<h2>[m#] compass<span><a class="mark" href="#uiobjecttype_m_compass" id="uiobjecttype_m_compass">#</a></span></h2>
+<h3>compass(compassArg)<span><a class="mark" href="#uiobjecttype_compass_compassarg" id="uiobjecttype_compass_compassarg">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>compassArg</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectcompass">DetectCompass</a></span> } - 罗盘参数, 用于控制罗盘定位</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> } - 罗盘最终定位的控件节点</li>
+</ul>
+<p>返回罗盘最终定位的 <a href="uiObjectType.html">控件节点</a>, 若定位失败, 返回 null.</p>
+<p>罗盘定位类似于在 <a href="glossaries.html#glossaries_控件层级">控件层级</a> 中自由移动, 最终定位在某个指定的控件节点上.</p>
+<pre><code class="lang-js">let w = clickable().findOnce();
+
+console.log(w.parent()); /* 父控件. */
+console.log(w.parent().parent()); /* 二级父控件. */
+console.log(w.child(0)); /* 索引 0 (首个) 子控件. */
+console.log(w.child(2)); /* 索引 2 子控件. */
+console.log(w.child(w.childCount() - 1)); /* 末尾子控件. */
+console.log(w.parent().child(5)); /* 索引 5 兄弟控件. */
+console.log(w.parent().child(w.childCount() - 2)); /* 倒数第 2 兄弟控件. */
+console.log(w.parent().child(w.indexInParent() - 1)); /* 相邻左侧兄弟节点. */
+console.log(w.parent().child(w.indexInParent() + 1)); /* 相邻右侧兄弟节点. */
+console.log(w.parent().parent().parent().parent().child(0).child(1).child(1).child(0)); /* 多级访问. */
+
+/* 使用控件罗盘替代上述所有语句. */
+
+console.log(w.compass(&#39;p&#39;)); /* 父控件. */
+console.log(w.compass(&#39;p2&#39;)); /* 二级父控件. */
+console.log(w.compass(&#39;c0&#39;)); /* 索引 0 (首个) 子控件. */
+console.log(w.compass(&#39;c2&#39;)); /* 索引 2 子控件. */
+console.log(w.compass(&#39;c-1&#39;)); /* 末尾子控件. */
+console.log(w.compass(&#39;s5&#39;)); /* 索引 5 兄弟控件. */
+console.log(w.compass(&#39;s-2&#39;)); /* 倒数第 2 兄弟控件. */
+console.log(w.compass(&#39;s&lt;1&#39;)); /* 相邻左侧兄弟节点. */
+console.log(w.compass(&#39;s&gt;1&#39;)); /* 相邻右侧兄弟节点. */
+console.log(w.compass(&#39;p4c0&gt;1&gt;1&gt;0&#39;)); /* 多级访问. */
+</code></pre>
+<p>罗盘参数有以下几类:</p>
+<ul>
+<li>p: <a href="#uiobjecttype_parent_p">parent (父控件)</a></li>
+<li>c: <a href="#uiobjecttype_child_c">child (子控件)</a></li>
+<li>s: <a href="#uiobjecttype_sibling_s">sibling (兄弟控件)</a></li>
+<li>k: <a href="#uiobjecttype_clickable_k">clickable (可点击控件)</a></li>
+</ul>
+<p>不同种类的罗盘参数可以重复使用或组合使用.</p>
+<h4>parent (p)<span><a class="mark" href="#uiobjecttype_parent_p" id="uiobjecttype_parent_p">#</a></span></h4>
+<p>访问父控件.</p>
+<p>如 <code>w.parent()</code> 的两种罗盘定位形式:</p>
+<pre><code class="lang-js">w.compass(&#39;p&#39;); /* 较为常用. */
+w.compass(&#39;p1&#39;);
+</code></pre>
+<p>罗盘 <code>p</code> 可跟随一个数字, 表示层级跨度:</p>
+<pre><code class="lang-js">/* 二级. */
+w.parent().parent(); /* 原始方式. */
+w.compass(&#39;pp&#39;);
+w.compass(&#39;p2&#39;); /* 较为常用. */
+
+/* 五级. */
+w.parent().parent().parent().parent().parent(); /* 原始方式. */
+w.compass(&#39;ppppp&#39;);
+w.compass(&#39;p5&#39;); /* 较为常用. */
+w.compass(&#39;p4p&#39;);
+w.compass(&#39;p3p2&#39;);
+w.compass(&#39;p2p1p2&#39;);
+</code></pre>
+<p>罗盘 <code>p</code> 每移动一次, 控件的 depth 将减少一级, 当 depth 为 0 时, 后续所有父级访问均返回 null:</p>
+<pre><code class="lang-js">console.log(w.depth()); /* e.g. 23 */
+console.log(w.compass(&#39;p5&#39;).depth()); /* e.g. 18 */
+console.log(w.compass(&#39;p23&#39;).depth()); /* e.g. 0 */
+console.log(w.compass(&#39;p24&#39;)); // null
+console.log(w.compass(&#39;p40&#39;)); // null
+</code></pre>
+<p>罗盘 <code>p</code> 跟随负数时将抛出异常:</p>
+<pre><code class="lang-js">/* e.g. java.lang.IllegalArgumentException: 无效的剩余罗盘参数: -2 */
+console.log(w.compass(&#39;p-2&#39;));
+</code></pre>
+<p><code>p0</code> 将返回控件本身:</p>
+<pre><code class="lang-js">console.log(w.compass(&#39;p0&#39;) === w); // true
+</code></pre>
+<h4>child (c)<span><a class="mark" href="#uiobjecttype_child_c" id="uiobjecttype_child_c">#</a></span></h4>
+<p>访问子控件.</p>
+<p>如 <code>w.child(0)</code> 的罗盘定位形式:</p>
+<pre><code class="lang-js">w.compass(&#39;c0&#39;);
+</code></pre>
+<p>罗盘 <code>c</code> 可跟随一个整数, 表示子控件索引:</p>
+<pre><code class="lang-js">/* 索引 2 子控件 */
+w.child(2);
+w.compass(&#39;c2&#39;);
+
+/* 倒数第 2 子控件. */
+w.child(w.childCount() - 2);
+w.compass(&#39;c-2&#39;);
+</code></pre>
+<p>连续多级子控件访问, 可使用 <code>cXcYcZ</code> 或 <code>cX&gt;Y&gt;Z</code> 形式:</p>
+<pre><code class="lang-js">w.child(1).child(1).child(0).child(5).child(2).child(3);
+w.compass(&#39;c1c1c0c5c2c3&#39;);
+w.compass(&#39;c1&gt;1&gt;0&gt;5&gt;2&gt;3&#39;); /* 同上. */
+</code></pre>
+<h4>sibling (s)<span><a class="mark" href="#uiobjecttype_sibling_s" id="uiobjecttype_sibling_s">#</a></span></h4>
+<p>访问兄弟控件.</p>
+<p>例如一个控件有 10 个子控件, 这些子控件互为兄弟控件, 它们拥有同一个父控件.<br>10 个子控件中, 索引为 n (n &gt; 0 且 n &lt; 9) 的子控件有两个相邻兄弟控件节点, 即索引为 n - 1 的左邻兄弟和索引为 n + 1 的右邻兄弟.</p>
+<pre><code class="lang-js">/* 左邻兄弟节点. */
+w.parent().child(w.indexInParent() - 1);
+w.compass(&#39;s&lt;1&#39;);
+
+/* 右邻兄弟节点. */
+w.parent().child(w.indexInParent() + 1);
+w.compass(&#39;s&gt;1&#39;);
+
+/* 右侧第 2 个兄弟节点. */
+w.parent().child(w.indexInParent() + 2);
+w.compass(&#39;s&gt;2&#39;);
+
+/* 索引 5 的兄弟节点. */
+w.parent().child(5);
+w.compass(&#39;s5&#39;);
+
+/* 倒数第 2 个兄弟节点. */
+w.parent().child(w.childCount() - 2);
+w.compass(&#39;s-2&#39;);
+</code></pre>
+<h4>clickable (k)<span><a class="mark" href="#uiobjecttype_clickable_k" id="uiobjecttype_clickable_k">#</a></span></h4>
+<p>访问可点击控件.</p>
+<p>有些控件本身不可点击, 而是包含在一个可点击控件内部:</p>
+<pre><code class="lang-js">let w = contentMatch(/.+/).findOnce();
+console.log(w.clickable()); // false
+console.log(w.parent().clickable()); // true
+</code></pre>
+<p>对于上述情况的控件, 通常执行 &quot;父控件.click()&quot; 都会达到预期, 即虽然点击的是父控件, 但实际效果和点击这个控件本身是一样的.</p>
+<p>在某些情况下, 这样的可点击父控件可能需要两级甚至更多级:</p>
+<pre><code class="lang-js">let w = contentMatch(/.+/).findOnce();
+console.log(w.clickable()); // false
+console.log(w.parent().clickable()); // false
+console.log(w.parent().parent().clickable()); // false
+console.log(w.parent().parent().parent().clickable()); // false
+console.log(w.parent().parent().parent().parent().clickable()); // true
+</code></pre>
+<p>上述示例直到 4 级父控件才是可点击的, 对于这种情况通常需要使用循环语句结合 <code>clickable</code> 的条件检测:</p>
+<pre><code class="lang-js">let w = contentMatch(/.+/).findOnce();
+let max = 5;
+let temp = w;
+while (max--) {
+    if (temp !== null &amp;&amp; temp.clickable()) {
+        temp.click();
+        break;
+    }
+    temp = temp.parent();
+}
+</code></pre>
+<p>上述示例的 <code>max</code> 变量表示最多尝试的层级数, 层级数过小, 可能导致错过真正可点击的父控件, 过大则可能会得到不相关的可点击控件 (这样的控件点击后将出现非预期结果), 通常这个 <code>max</code> 建议设置为 2.</p>
+<p>将上述示例用控件罗盘表示:</p>
+<pre><code class="lang-js">let w = contentMatch(/.+/).findOnce();
+let temp = w.compass(&#39;k5&#39;); /* 5 表示尝试的最大层级数, 通常建议设置为 2. */
+if (temp !== null &amp;&amp; temp.clickable()) {
+    temp.click();
+}
+</code></pre>
+<p>将上述示例用 <a href="uiSelectorType.html#uiselectortype_m_pickup">拾取选择器</a> 表示:</p>
+<pre><code class="lang-js">pickup(/.+/, &#39;k5&#39;, &#39;click&#39;);
+</code></pre>
+<h2>[m] isCompass<span><a class="mark" href="#uiobjecttype_m_iscompass" id="uiobjecttype_m_iscompass">#</a></span></h2>
+<h3>isCompass(s)<span><a class="mark" href="#uiobjecttype_iscompass_s" id="uiobjecttype_iscompass_s">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 罗盘参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>检测罗盘参数是否符合既定格式.</p>
+<pre><code class="lang-js">console.log(UiObject.isCompass(&#39;p2c3&#39;)); // true
+console.log(UiObject.isCompass(&#39;p-2c3&#39;)); // true
+console.log(UiObject.isCompass(&#39;p2c-3&#39;)); // true
+console.log(UiObject.isCompass(&#39;hello&#39;)); // false
+</code></pre>
+<p>上述示例中的 <code>p-2c3</code> 罗盘参数, 在使用时会抛出异常, 但因符合既定格式, 故 <code>isCompass</code> 返回 <code>true</code>.</p>
+<h2>[m] ensureCompass<span><a class="mark" href="#uiobjecttype_m_ensurecompass" id="uiobjecttype_m_ensurecompass">#</a></span></h2>
+<h3>ensureCompass(s)<span><a class="mark" href="#uiobjecttype_ensurecompass_s" id="uiobjecttype_ensurecompass_s">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 罗盘参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>确保罗盘参数符合既定格式, 若不符合则抛出异常.</p>
+<pre><code class="lang-js">UiObject.ensureCompass(&#39;p2c3&#39;); /* 无异常. */
+UiObject.ensureCompass(&#39;world&#39;); /* 抛出异常. */
+</code></pre>
+<h2>[m] detect<span><a class="mark" href="#uiobjecttype_m_detect" id="uiobjecttype_m_detect">#</a></span></h2>
+<p>控件探测.</p>
+<p>探测相当于对控件进行一系列组合操作 (罗盘定位, 结果筛选, 参化调用, 回调处理).</p>
+<p>部分特性:</p>
+<ul>
+<li><code>detect</code> 已全局化, 支持全局使用.</li>
+<li><code>detect</code> 的首个参数固定为 <a href="uiObjectType.html">UiObject</a> 类型.</li>
+<li><a href="#uiobjecttype_m_compass">compass</a> 是 <code>detect</code> 的衍生方法.</li>
+<li><a href="uiSelectorType.html#uiselectortype_m_pickup">pickup</a> 的内部实现引用了 <code>detect</code> 方法.</li>
+</ul>
+<h3>detect(w, compass)<span><a class="mark" href="#uiobjecttype_detect_w_compass" id="uiobjecttype_detect_w_compass">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 1/7</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>w</strong> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> } - 控件节点</li>
+<li><strong>compass</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectcompass">DetectCompass</a></span> } - 罗盘参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> } - 探测后的控件节点</li>
+</ul>
+<p>携带 <a href="dataTypes.html#datatypes_detectcompass">罗盘参数</a> 的控件探测.</p>
+<p>相当于 <a href="#uiobjecttype_m_compass">w.compass(compass)</a>, 因此 <code>compass</code> 是 <code>detect</code> 的衍生方法.</p>
+<h3>detect(w, result)<span><a class="mark" href="#uiobjecttype_detect_w_result" id="uiobjecttype_detect_w_result">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/7</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>w</strong> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> } - 控件节点</li>
+<li><strong>result</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectresult">DetectResult</a></span> } - 探测结果参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> } - 探测结果</li>
+</ul>
+<p>携带 <a href="dataTypes.html#datatypes_detectresult">探测结果参数</a> 的控件探测.</p>
+<h3>detect(w, compass, result)<span><a class="mark" href="#uiobjecttype_detect_w_compass_result" id="uiobjecttype_detect_w_compass_result">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 3/7</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>w</strong> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> } - 控件节点</li>
+<li><strong>compass</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectcompass">DetectCompass</a></span> } - 罗盘参数</li>
+<li><strong>result</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectresult">DetectResult</a></span> } - 探测结果参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> } - 探测结果</li>
+</ul>
+<p>携带 <a href="dataTypes.html#datatypes_detectcompass">罗盘参数</a> 和 <a href="dataTypes.html#datatypes_detectresult">探测结果参数</a> 的控件探测.</p>
+<p>需特别留意 compass 和 result 的顺序, 两者均为字符串时, 前者会被解析为 <code>罗盘参数</code>.</p>
+<pre><code class="lang-js">console.log(w.parent().parent().child(1).child(0).bounds()); /* 潜在的空指针异常. */
+console.log(detect(w, &#39;p2c1&gt;0&#39;, &#39;bounds&#39;)); /* 空指针安全. */
+</code></pre>
+<h3>detect(w, callback)<span><a class="mark" href="#uiobjecttype_detect_w_callback" id="uiobjecttype_detect_w_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 4/7</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>w</strong> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> } - 控件节点</li>
+<li><strong>callback</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectcallback">DetectCallback</a></span> } - 探测回调</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> } - 探测回调的结果</li>
+</ul>
+<p>携带 <a href="dataTypes.html#datatypes_detectcallback">探测回调</a> 的控件探测.</p>
+<pre><code class="lang-js">detect(pickup(/^[A-Z][a-z]+ ?\d*$/), (w) =&gt; {
+    w ? w.click() : console.warn(&#39;未找到指定控件&#39;);
+});
+</code></pre>
+<h3>detect(w, compass, callback)<span><a class="mark" href="#uiobjecttype_detect_w_compass_callback" id="uiobjecttype_detect_w_compass_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 5/7</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>w</strong> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> } - 控件节点</li>
+<li><strong>compass</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectcompass">DetectCompass</a></span> } - 罗盘参数</li>
+<li><strong>callback</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectcallback">DetectCallback</a></span> } - 探测回调</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> } - 探测回调的结果</li>
+</ul>
+<p>携带 <a href="dataTypes.html#datatypes_detectcompass">罗盘参数</a> 和 <a href="dataTypes.html#datatypes_detectcallback">探测回调</a> 的控件探测.</p>
+<pre><code class="lang-js">detect(pickup(/^[A-Z][a-z]+ ?\d*$/), &#39;k2&#39;, (w) =&gt; {
+    w ? w.click() : console.warn(&#39;未找到指定控件&#39;);
+});
+</code></pre>
+<h3>detect(w, result, callback)<span><a class="mark" href="#uiobjecttype_detect_w_result_callback" id="uiobjecttype_detect_w_result_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 6/7</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>w</strong> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> } - 控件节点</li>
+<li><strong>result</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectresult">DetectResult</a></span> } - 探测结果参数</li>
+<li><strong>callback</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectcallback">DetectCallback</a></span> } - 探测回调</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> } - 探测回调的结果</li>
+</ul>
+<p>携带 <a href="dataTypes.html#datatypes_detectresult">探测结果参数</a> 和 <a href="dataTypes.html#datatypes_detectcallback">探测回调</a> 的控件探测.</p>
+<pre><code class="lang-js">detect(pickup(/^[A-Z][a-z]+ ?\d*$/), &#39;content&#39;, (content) =&gt; {
+    content ? console.log(content) : console.warn(&#39;无文本内容或未能定位指定控件&#39;);
+});
+</code></pre>
+<h3>detect(w, compass, result, callback)<span><a class="mark" href="#uiobjecttype_detect_w_compass_result_callback" id="uiobjecttype_detect_w_compass_result_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 7/7</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>w</strong> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> } - 控件节点</li>
+<li><strong>compass</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectcompass">DetectCompass</a></span> } - 罗盘参数</li>
+<li><strong>result</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectresult">DetectResult</a></span> } - 探测结果参数</li>
+<li><strong>callback</strong> { <span class="type"><a href="dataTypes.html#datatypes_detectcallback">DetectCallback</a></span> } - 探测回调</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> } - 探测回调的结果</li>
+</ul>
+<p>携带 <a href="dataTypes.html#datatypes_detectcompass">罗盘参数</a>, <a href="dataTypes.html#datatypes_detectresult">探测结果参数</a> 和 <a href="dataTypes.html#datatypes_detectcallback">探测回调</a> 的控件探测.</p>
+<p>需特别留意 compass 和 result 的顺序, 两者均为字符串时, 前者会被解析为 <code>罗盘参数</code>.</p>
+<pre><code class="lang-js">detect(pickup({ clickable: true }), &#39;p2c1&#39;, &#39;content&#39;, (content) =&gt; {
+    content ? console.log(content) : console.warn(&#39;无文本内容或未能定位指定控件&#39;);
+});
+</code></pre>
+
+        </div>
+    </div>
+</div>
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+<!-- __TRACKING__ -->
+</body>
+</html>

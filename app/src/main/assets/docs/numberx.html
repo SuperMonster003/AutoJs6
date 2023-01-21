@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Numberx (Number 扩展) | AutoJs6 文档 - 6.2.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="canonical" href="https://nodejs.org/api/numberx.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-numberx">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
+<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
+<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx active" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
+<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="numberx" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#numberx_numberx_number">Numberx (Number 扩展)</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx">启用内置扩展</a></span></li>
+<li><span class="stability_undefined"><a href="#numberx_p_icu">[p] ICU</a></span></li>
+<li><span class="stability_undefined"><a href="#numberx_m_ensurenumber">[m] ensureNumber</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_ensurenumber_o">ensureNumber(...o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_check">[m] check</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_check_o">check(o)</a></span></li>
+<li><span class="stability_undefined"><a href="#numberx_check_numa_numb">check(numA, numB)</a></span></li>
+<li><span class="stability_undefined"><a href="#numberx_check_numberoroperator">check(...numberOrOperator)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_clamp">[m] clamp</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_clamp_num_clamps">clamp(num, ...clamps)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_clampto">[m] clampTo</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_clampto_num_range_cycle">clampTo(num, range, cycle?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_tofixednum">[m] toFixedNum</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_tofixednum_num_fraction">toFixedNum(num, fraction?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_padstart">[m] padStart</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_padstart_num_targetlength_pad">padStart(num, targetLength, pad?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_padend">[m] padEnd</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_padend_num_targetlength_pad">padEnd(num, targetLength, pad?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_parsefloat">[m] parseFloat</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_parsefloat_string_radix">parseFloat(string, radix)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_parsepercent">[m] parsePercent</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_parsepercent_percentage">parsePercent(percentage)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_parseratio">[m] parseRatio</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_parseratio_ratio">parseRatio(ratio)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#numberx_m_parseany">[m] parseAny</a></span><ul>
+<li><span class="stability_undefined"><a href="#numberx_parseany_o">parseAny(o)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>Numberx (Number 扩展)<span><a class="mark" href="#numberx_numberx_number" id="numberx_numberx_number">#</a></span></h1>
+<p>Numberx 用于扩展 JavaScript 标准内置对象 Number 的功能 (参阅 <a href="glossaries.html#glossaries_内置对象扩展">内置对象扩展</a>).</p>
+<p>Numberx 全局可用:</p>
+<pre><code class="lang-js">console.log(typeof Numberx); // &quot;object&quot;
+console.log(typeof Numberx.clamp); // &quot;function&quot;
+</code></pre>
+<p>当启用内置扩展后, Numberx 将被应用在 Number 及其原型上:</p>
+<pre><code class="lang-js">console.log(typeof Number.prototype.clamp); // &quot;function&quot;
+console.log(typeof (123).clamp); // &quot;function&quot;
+</code></pre>
+<h2>启用内置扩展<span><a class="mark" href="#numberx" id="numberx">#</a></span></h2>
+<p>内置扩展默认被禁用, 以下任一方式可启用内置扩展:</p>
+<ul>
+<li>在脚本中加入代码片段: <code>plugins.extendAll();</code> 或 <code>plugins.extend(&#39;Number&#39;);</code></li>
+<li>AutoJs6 应用设置 - 扩展性 - JavaScript 内置对象扩展 - [ 启用 ]</li>
+</ul>
+<p>当上述应用设置启用时, 所有脚本均默认启用内置扩展.<br>当上述应用设置禁用时, 只有加入上述代码片段的脚本才会启用内置扩展.<br>内置扩展往往是不安全的, 除非明确了解内置扩展的原理及风险, 否则不建议启用.</p>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">Numberx</p>
+
+<hr>
+<h2>[p] ICU<span><a class="mark" href="#numberx_p_icu" id="numberx_p_icu">#</a></span></h2>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[[ 996 ]] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>996.ICU - Developers&#39; lives matter (程序员生命健康值得呵护).</p>
+<p>常量值: 996</p>
+<pre><code class="lang-js">/* 静态常量. */
+console.log(`${Numberx.ICU} is not only a number`);
+
+/* 启用内置对象扩展后. */
+console.log(`${Number.ICU} is not only a number`);
+</code></pre>
+<blockquote>
+<p>参阅: <a href="https://zh.wikipedia.org/wiki/996%E5%B7%A5%E4%BD%9C%E5%88%B6">Wikipedia</a> / <a href="https://github.com/996icu/996.ICU">GitHub</a></p>
+</blockquote>
+<h2>[m] ensureNumber<span><a class="mark" href="#numberx_m_ensurenumber" id="numberx_m_ensurenumber">#</a></span></h2>
+<h3>ensureNumber(...o)<span><a class="mark" href="#numberx_ensurenumber_o" id="numberx_ensurenumber_o">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong></p>
+<ul>
+<li><strong>o</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_any">any</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>相当于严格类型检查, 当任意一个 o 不满足 <code>typeof o === &#39;number&#39;</code> 时抛出异常.</p>
+<pre><code class="lang-js">/* 确保每一个对象都是 number 基本类型. */
+
+console.log(Numberx.ensureNumber(9)); /* 无异常. */
+console.log(Numberx.ensureNumber(null)); /* 抛出异常. */
+console.log(Numberx.ensureNumber(NaN, 0, Infinity)); /* 无异常. */
+
+/* 启用内置对象扩展后. */
+
+console.log(Number.ensureNumber(9)); /* 无异常. */
+console.log(Number.ensureNumber(null)); /* 抛出异常. */
+console.log(Number.ensureNumber(NaN, 0, Infinity)); /* 无异常. */
+</code></pre>
+<h2>[m] check<span><a class="mark" href="#numberx_m_check" id="numberx_m_check">#</a></span></h2>
+<h3>check(o)<span><a class="mark" href="#numberx_check_o" id="numberx_check_o">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/3</code></strong> <strong><code>xObject</code></strong></p>
+<ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>检查对象参数是否为数字类型, 相当于 <code>typeof o === &#39;number&#39;</code>.</p>
+<pre><code class="lang-js">console.log(Numberx.check(9)); // true
+console.log(Numberx.check(&#39;9&#39;)); // false
+
+/* 启用内置对象扩展后. */
+
+console.log(Number.check(9)); // true
+console.log(Number.check(&#39;9&#39;)); // false
+</code></pre>
+<h3>check(numA, numB)<span><a class="mark" href="#numberx_check_numa_numb" id="numberx_check_numa_numb">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong> <strong><code>xObject</code></strong></p>
+<ul>
+<li><strong>numA</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+<li><strong>numB</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>检查两个数字是否相等.</p>
+<p>任何一个参数不是 <code>number</code> 类型, 则返回 <code>false</code>.</p>
+<pre><code class="lang-js">console.log(Numberx.check(9, 2 + 7)); // true
+console.log(Numberx.check(&#39;9&#39;, &#39;9&#39;)); // false
+
+/* 启用内置对象扩展后. */
+
+console.log(Number.check(9, 2 + 7)); // true
+console.log(Number.check(&#39;9&#39;, &#39;9&#39;)); // false
+</code></pre>
+<h3>check(...numberOrOperator)<span><a class="mark" href="#numberx_check_numberoroperator" id="numberx_check_numberoroperator">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong> <strong><code>xObject</code></strong></p>
+<ul>
+<li><strong>o</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a>(<a href="dataTypes.html#datatypes_number">number</a> <a href="dataTypes.html#datatypes_联合类型"></span> | <span class="type"></a> <a href="dataTypes.html#datatypes_comparisonoperatorstring">ComparisonOperatorString</a>)<a href="documentation.html#documentation_可变参数">[]</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>检查数字与操作符字符串的逻辑关系.</p>
+<p>对于参数索引 [0, 1, 2 ... n],<br>索引 [0, 2, 4 ...] 需为 <code>number</code> 类型,<br>索引 [1, 3, 5 ...] 需为 <code>string</code> 类型.</p>
+<p>参数不满足上述类型需求时将抛出异常.</p>
+<pre><code class="lang-js">let a = 0.5;
+let b = 5;
+let c = 23;
+let d = 2011;
+
+console.log(Numberx.check(a, &#39;&lt;&#39;, b)); // true
+console.log(Numberx.check(a, &#39;&lt;&#39;, b, &#39;&lt;=&#39;, c)); // true
+console.log(Numberx.check(a, &#39;&lt;&#39;, d, &#39;&gt;&#39;, b, &#39;&lt;&#39;, c, &#39;&gt;&#39;, a)); // true
+console.log(Numberx.check(a, c, d)); /* 抛出异常. */
+
+/* 启用内置对象扩展后. */
+
+console.log(Number.check(a, &#39;&lt;&#39;, b)); // true
+console.log(Number.check(a, &#39;&lt;&#39;, b, &#39;&lt;=&#39;, c)); // true
+console.log(Number.check(a, &#39;&lt;&#39;, d, &#39;&gt;&#39;, b, &#39;&lt;&#39;, c, &#39;&gt;&#39;, a)); // true
+console.log(Number.check(a, c, d)); /* 抛出异常. */
+</code></pre>
+<p>逻辑关系检查时, 仅检查操作符字符串相邻的两个数字.<br>例如对于 <code>check(a, &#39;&lt;&#39;, d, &#39;&gt;&#39;, b)</code>, 仅检查 <code>a &lt; d</code> 与 <code>d &gt; b</code>, 而不会检查 <code>a</code> 与 <code>b</code> 的关系.</p>
+<h2>[m] clamp<span><a class="mark" href="#numberx_m_clamp" id="numberx_m_clamp">#</a></span></h2>
+<h3>clamp(num, ...clamps)<span><a class="mark" href="#numberx_clamp_num_clamps" id="numberx_clamp_num_clamps">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xProto</code></strong></p>
+<ul>
+<li><strong>num</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 待处理数字</li>
+<li><strong>clamps</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a>(<a href="dataTypes.html#datatypes_number">number</a></span> | <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a>)<a href="documentation.html#documentation_可变参数">[]</a></span> } - 限制范围</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回限制在指定范围内的数字.<br>当给定数字不在限制范围内时, 则就近返回一个范围边界值.</p>
+<p>通常限制范围用两个大小不同的数字数组表示,<br>如范围 10 - 30 可用 <code>[ 10, 30 ]</code> 表示.<br>范围参数会根据给定参数排序后挑选出最大值与最小值作为限制上限及下限,<br>因此 <code>[ 30, 10 ]</code> 与 <code>[ 10, 30 ]</code> 效果相同,<br>而与 <code>[ 10, 11, 15, 22, 30 ]</code> 或 <code>[ 20, 30, 25, 10 ]</code> 等效果也相同:</p>
+<pre><code class="lang-js">let num = Math.random() * 50;
+console.log(Numberx.clamp(num, [ 10, 30 ]));
+console.log(Numberx.clamp(num, [ 10, 12, 30, 22, 20 ])); /* 同上. */
+
+/* 启用内置对象扩展后. */
+
+console.log(num.clamp([ 10, 30 ])); /* 同上. */
+console.log(num.clamp([ 10, 12, 30, 22, 20 ])); /* 同上. */
+</code></pre>
+<p>因范围参数 clamps 是 <a href="documentation.html#documentation_可变参数">可变参数</a>, 因此以下两种调用方式效果相同:</p>
+<pre><code class="lang-js">let num = Math.random() * 50;
+console.log(Numberx.clamp(num, [ 10, 30 ]));
+console.log(Numberx.clamp(num, 10, 30)); /* 同上. */
+
+/* 启用内置对象扩展后. */
+
+console.log(num.clamp([ 10, 30 ])); /* 同上. */
+console.log(num.clamp(10, 30)); /* 同上. */
+</code></pre>
+<p>当限制范围参数是 1 个数字时, 相当于 <code>[ x, x ]</code>, 则一定返回 x 本身;<br>当限制范围参数是 0 个数字时 (省略或空数组), 则返回 num 本身:</p>
+<pre><code class="lang-js">let num = 307;
+console.log(Numberx.clamp(num, 523)); // 523
+console.log(Numberx.clamp(num)); // 307
+
+/* 启用内置对象扩展后. */
+
+console.log(num.clamp(523)); // 523
+console.log(num.clamp()); // 307
+</code></pre>
+<h2>[m] clampTo<span><a class="mark" href="#numberx_m_clampto" id="numberx_m_clampto">#</a></span></h2>
+<h3>clampTo(num, range, cycle?)<span><a class="mark" href="#numberx_clampto_num_range_cycle" id="numberx_clampto_num_range_cycle">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xProto</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>num</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 待处理数字</li>
+<li><strong>range</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 限制范围</li>
+<li><strong>[cycle = maxOf(range) - minOf(range)]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 周期, 默认为 range 参数的跨度</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回按周期限制在指定范围内的数字.</p>
+<p>在数学中, 周期函数是无论任何独立变量上经过一个确定的周期之后数值皆能重复的函数.  </p>
+<p>如果在函数 _f_ 中所有的位置 _x_ 都满足 _f_ ( _x_ + _T_ ) = _f_ ( _x_ ), 那么, _f_ 就是周期为 _T_ 的周期函数.<br>如果周期函数 _f_ 的周期为 _T_ , 那么对于 _f_ 中任意 _x_ 及任意整数 _n_, 有 _f_ ( _x_ + _Tn_ ) = _f_ ( _x_ ).</p>
+<p>三角函数正弦函数与余弦函数都是常见的周期函数, 如 _f_ ( _x_ ) = sin _x_ 与 _f_ ( _x_ ) = cos _x_ 等, 其周期为 <code>2π</code>.</p>
+<p><code>clampTo</code> 方法的作用是将数字通过周期变换回落到指定范围内:</p>
+<pre><code class="lang-js">Numberx.clampTo(30, [ 0, 360 ]); // 30
+Numberx.clampTo(390, [ 0, 360 ]); // 30
+Numberx.clampTo(30 + 10 * 360, [ 0, 360 ]); // 30
+Numberx.clampTo(30 - 10 * 360, [ 0, 360 ]); // 30
+
+/* 启用内置对象扩展后. */
+
+(30).clampTo([ 0, 360 ]); // 30
+(390).clampTo([ 0, 360 ]); // 30
+(30 + 10 * 360).clampTo([ 0, 360 ]); // 30
+(30 - 10 * 360).clampTo([ 0, 360 ]); // 30
+</code></pre>
+<p><code>cycle</code> 参数默认是范围的跨度, 即范围的两个极值差, 当极值为 <code>0</code> 时, 将抛出异常:</p>
+<pre><code class="lang-js">Numberx.clampTo(30, [0, 0]); /* 抛出异常. */
+
+/* 启用内置对象扩展后. */
+
+(30).clampTo([0, 0]); /* 抛出异常. */
+</code></pre>
+<p>指定一个周期:</p>
+<pre><code class="lang-js">Numberx.clampTo(372, [0, 360], 10); // 352
+
+/* 启用内置对象扩展后. */
+
+(372).clampTo([0, 360], 10); // 352
+</code></pre>
+<h2>[m] toFixedNum<span><a class="mark" href="#numberx_m_tofixednum" id="numberx_m_tofixednum">#</a></span></h2>
+<h3>toFixedNum(num, fraction?)<span><a class="mark" href="#numberx_tofixednum_num_fraction" id="numberx_tofixednum_num_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xProto</code></strong></p>
+<ul>
+<li><strong>num</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 待处理数字</li>
+<li><strong>[ fraction = 0 ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后数字的个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>使用定点表示法来格式化一个数值, 然后返回其对应的 number 值.</p>
+<pre><code class="lang-js">console.log(Numberx.toFixedNum(123.456, 2)); // 123.46
+console.log(Numberx.toFixedNum(3.004, 2)); // 3
+console.log(Numberx.toFixedNum(1.23456e3)); // 1235
+
+/* 启用内置对象扩展后. */
+
+console.log((123.456).toFixedNum(2)); // 123.46
+console.log((3.004).toFixedNum(2)); // 3
+console.log((1.23456e3).toFixedNum()); // 1235
+</code></pre>
+<h2>[m] padStart<span><a class="mark" href="#numberx_m_padstart" id="numberx_m_padstart">#</a></span></h2>
+<h3>padStart(num, targetLength, pad?)<span><a class="mark" href="#numberx_padstart_num_targetlength_pad" id="numberx_padstart_num_targetlength_pad">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xProto</code></strong></p>
+<ul>
+<li><strong>num</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 待处理数字</li>
+<li><strong>targetLength</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 当前数字需要填充到的目标字符串长度. 如果此长度小于 num 参数的字符串长度, 则返回 num 参数的字符串本身.</li>
+<li><strong>[ pad = &#39;0&#39; ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 填充字符串. 如果字符串太长, 使填充后的字符串长度超过了目标长度, 则只保留最左侧部分, 其他部分会被截断. 此参数的默认值为 &quot;0&quot;（U+0030）。</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>此方法用一个字符串填充当前数字 (如果需要的话则重复填充), 返回填充后达到指定长度的字符串.<br>填充从当前数字对应字符串的开头开始.</p>
+<pre><code class="lang-js">console.log(Numberx.padStart(5, 2, 0)); // &quot;05&quot;
+console.log(Numberx.padStart(5, 2)); // &quot;05&quot;
+console.log(Numberx.padStart(3, 3)); // &quot;003&quot;
+console.log(Numberx.padStart(99, 5, &quot;AB&quot;)); // &quot;ABA99&quot;
+
+/* 启用内置对象扩展后. */
+
+console.log((5).padStart(2, 0)); // &quot;05&quot;
+console.log((5).padStart(2)); // &quot;05&quot;
+console.log((3).padStart(3)); // &quot;003&quot;
+console.log((99).padStart(5, &quot;AB&quot;)); // &quot;ABA99&quot;
+</code></pre>
+<p>格式化日期与时间:</p>
+<pre><code class="lang-js">let pad = x =&gt; Numberx.padStart(x, 2, 0); /* 启用内置对象扩展后: `x.padStart(2, 0)`. */
+let now = new Date();
+let date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+let time = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+console.log(`${date} ${time}`); /* e.g. &quot;2022-11-01 08:47:15&quot; */
+</code></pre>
+<h2>[m] padEnd<span><a class="mark" href="#numberx_m_padend" id="numberx_m_padend">#</a></span></h2>
+<h3>padEnd(num, targetLength, pad?)<span><a class="mark" href="#numberx_padend_num_targetlength_pad" id="numberx_padend_num_targetlength_pad">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xProto</code></strong></p>
+<ul>
+<li><strong>num</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 待处理数字</li>
+<li><strong>targetLength</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 当前数字需要填充到的目标字符串长度. 如果此长度小于 num 参数的字符串长度, 则返回 num 参数的字符串本身.</li>
+<li><strong>[ pad = &#39;0&#39; ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 填充字符串. 如果字符串太长, 使填充后的字符串长度超过了目标长度, 则只保留最左侧部分, 其他部分会被截断. 此参数的默认值为 &quot;0&quot;（U+0030）。</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>此方法用一个字符串填充当前数字 (如果需要的话则重复填充), 返回填充后达到指定长度的字符串.<br>填充从当前数字对应字符串的末尾开始.</p>
+<pre><code class="lang-js">console.log(Numberx.padEnd(5, 2, 0)); // &quot;50&quot;
+console.log(Numberx.padEnd(5, 2)); // &quot;50&quot;
+console.log(Numberx.padEnd(3, 3)); // &quot;300&quot;
+console.log(Numberx.padEnd(99.1, 5)); // &quot;99.10&quot;
+
+/* 启用内置对象扩展后. */
+
+console.log((5).padEnd(2, 0)); // &quot;50&quot;
+console.log((5).padEnd(2)); // &quot;50&quot;
+console.log((3).padEnd(3)); // &quot;300&quot;
+console.log((99.1).padEnd(5)); // &quot;99.10&quot;
+</code></pre>
+<h2>[m] parseFloat<span><a class="mark" href="#numberx_m_parsefloat" id="numberx_m_parsefloat">#</a></span></h2>
+<h3>parseFloat(string, radix)<span><a class="mark" href="#numberx_parsefloat_string_radix" id="numberx_parsefloat_string_radix">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong></p>
+<ul>
+<li><strong>string</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待解析的字符串</li>
+<li><strong>radix</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 进制的基数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>根据指定的进制基数, 解析字符串并返回一个数字.</p>
+<p>标准内置对象 Number 的 parseInt 支持进制基数 radix 参数, 即 parseInt(string, radix), 但 parseFloat 不支持 radix 参数.</p>
+<p>此扩展方法对上述 radix 参数提供了支持:</p>
+<pre><code class="lang-js">console.log(Numberx.parseFloat(&quot;0.8&quot;, 16)); // 0.5
+console.log(Numberx.parseFloat(&quot;0.101&quot;, 2)); // 0.625
+
+/* 启用内置对象扩展后. */
+
+console.log(Number.parseFloat(&quot;0.8&quot;, 16)); // 0.5
+console.log(Number.parseFloat(&quot;0.101&quot;, 2)); // 0.625
+console.log(parseFloat(&quot;0.8&quot;, 16)); // 0.5
+console.log(parseFloat(&quot;0.101&quot;, 2)); // 0.625
+</code></pre>
+<h2>[m] parsePercent<span><a class="mark" href="#numberx_m_parsepercent" id="numberx_m_parsepercent">#</a></span></h2>
+<h3>parsePercent(percentage)<span><a class="mark" href="#numberx_parsepercent_percentage" id="numberx_parsepercent_percentage">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong></p>
+<ul>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 百分数字符串或任意数字</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>此方法用于解析一个百分数字符串 (如 <code>&quot;5%&quot;</code>) 并返回其代表的数值.<br>如果 percentage 是一个 number 基本类型值, 则直接返回.</p>
+<pre><code class="lang-js">console.log(Numberx.parsePercent(&#39;1%&#39;)); // 0.01
+console.log(Numberx.parsePercent(&#39;50.00%&#39;)); // 0.5
+console.log(Numberx.parsePercent(&#39;2%%&#39;)); // 0.0002
+
+/* 启用内置对象扩展后. */
+
+console.log(Number.parsePercent(&#39;1%&#39;)); // 0.01
+console.log(Number.parsePercent(&#39;50.00%&#39;)); // 0.5
+console.log(Number.parsePercent(&#39;2%%&#39;)); // 0.0002
+</code></pre>
+<h2>[m] parseRatio<span><a class="mark" href="#numberx_m_parseratio" id="numberx_m_parseratio">#</a></span></h2>
+<h3>parseRatio(ratio)<span><a class="mark" href="#numberx_parseratio_ratio" id="numberx_parseratio_ratio">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong></p>
+<ul>
+<li><strong>ratio</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 比率字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>此方法用于解析一个比率字符串 (如 <code>&quot;5:23&quot;</code>) 并返回其代表的数值.</p>
+<pre><code class="lang-js">console.log(Numberx.parseRatio(&#39;3:2&#39;)); // 1.5
+console.log(Numberx.parseRatio(&#39;3:0.1&#39;)); // 30
+console.log(Numberx.parseRatio(&#39;0.1:0.01&#39;)); // 10
+
+/* 启用内置对象扩展后. */
+
+console.log(Number.parseRatio(&#39;3:2&#39;)); // 1.5
+console.log(Number.parseRatio(&#39;3:0.1&#39;)); // 30
+console.log(Number.parseRatio(&#39;0.1:0.01&#39;)); // 10
+</code></pre>
+<h2>[m] parseAny<span><a class="mark" href="#numberx_m_parseany" id="numberx_m_parseany">#</a></span></h2>
+<h3>parseAny(o)<span><a class="mark" href="#numberx_parseany_o" id="numberx_parseany_o">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong></p>
+<ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 待解析的对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>此方法用于解析任意对象并返回其代表的数值.</p>
+<pre><code class="lang-js">console.log(Numberx.parseAny(&#39;9&#39;)); // 9
+console.log(Numberx.parseAny(&#39;30.05&#39;)); // 30.05
+console.log(Numberx.parseAny(&#39;0xFF&#39;)); // 255
+
+console.log(Numberx.parseAny(&#39;20%&#39;)); // 0.2
+console.log(Numberx.parseAny(&#39;20%%&#39;)); // 0.002
+
+console.log(Numberx.parseAny(&#39;18:9&#39;)); // 2
+</code></pre>
+
+        </div>
+    </div>
+</div>
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+<!-- __TRACKING__ -->
+</body>
+</html>

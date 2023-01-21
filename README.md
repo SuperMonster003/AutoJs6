@@ -279,7 +279,7 @@
 
 * [Ant-Forest](https://github.com/SuperMonster003/Ant-Forest) { author: [SuperMonster003](https://github.com/SuperMonster003) }
     - `蚂蚁森林能量自动收取脚本 (AutoJs6 示例脚本项目)`
-* 
+
 * [Auto.js](https://github.com/TonyJiangWJ/Auto.js) { author: [TonyJiangWJ](https://github.com/TonyJiangWJ) }
     - `安卓平台 JavaScript 自动化工具 (Auto.js 二次开发项目)`
 

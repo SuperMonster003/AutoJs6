@@ -1,0 +1,6667 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>颜色列表 (Color Table) | AutoJs6 文档 - 6.2.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="canonical" href="https://nodejs.org/api/colorTable.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-colorTable">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
+<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
+<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable active" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
+<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="colorTable" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#colortable_color_table">颜色列表 (Color Table)</a></span><ul>
+<li><span class="stability_undefined"><a href="#colortable_android">Android 颜色列表</a></span></li>
+<li><span class="stability_undefined"><a href="#colortable_css">CSS 颜色列表</a></span></li>
+<li><span class="stability_undefined"><a href="#colortable_web">WEB 颜色列表</a></span></li>
+<li><span class="stability_undefined"><a href="#colortable_material">Material 颜色列表</a></span></li>
+<li><span class="stability_undefined"><a href="#colortable">支持简写的颜色列表</a></span></li>
+<li><span class="stability_undefined"><a href="#colortable_1">颜色名称冲突</a></span></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>颜色列表 (Color Table)<span><a class="mark" href="#colortable_color_table" id="colortable_color_table">#</a></span></h1>
+<p>颜色列表列出了颜色名称对应的颜色信息 (Hex 代码, RGB 分量, HSV 分量等).</p>
+<p>颜色名称也称为颜色关键字, 如 <code>black</code> 表示黑色, <code>blue</code> 表示蓝色等.<br>在 <a href="https://zh.wikipedia.org/wiki/%E5%B1%82%E5%8F%A0%E6%A0%B7%E5%BC%8F%E8%A1%A8">CSS</a> 的颜色定义中, 共有 148 种颜色关键字, 其名称取自 <a href="https://zh.wikipedia.org/wiki/X%E8%A6%96%E7%AA%97%E7%B3%BB%E7%B5%B1">X Window 系统</a> (也称为 <code>X11</code>), 因此这些颜色名称也称为 <a href="https://en.wikipedia.org/wiki/X11_color_names">X11 颜色</a>. 详情参阅 <a href="#colortable_CSS_颜色列表">CSS 颜色列表</a> 小节.</p>
+<blockquote>
+<p>注: 列表中的 HSV 分量均为取整近似值, 仅供参考.<br>当作为参数转换为对应颜色后, 可能与原始颜色有偏差.</p>
+</blockquote>
+<h2>Android 颜色列表<span><a class="mark" href="#colortable_android" id="colortable_android">#</a></span></h2>
+<p>Android 的 <code>android.graphics.Color</code> 类提供了部分颜色名称与颜色整数值的映射, 保存在私有变量 <code>sColorNameMap</code> 中.</p>
+<p>下述颜色列表将其颜色名称转换为变量名, 可通过 <code>colors</code> 全局对象直接访问.</p>
+<p>使用方式:</p>
+<pre><code class="lang-js">colors.android.BLACK;
+colors.BLACK; /* 同上, android 命名空间可省略. */
+colors.toInt(&#39;black&#39;); /* 同上, 不区分大小写. */
+
+colors.android.DARK_GRAY;
+colors.DARK_GRAY; /* 同上, android 命名空间可省略. */
+colors.toInt(&#39;darkgray&#39;); /* 同上, 不区分大小写. */
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">颜色</th>
+<th>变量名</th>
+<th>颜色译名</th>
+<th>Hex 代码</th>
+<th>RGB</th>
+<th>HSV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><p style="background-color: #000000">　　　</p></td>
+<td>BLACK</td>
+<td>黑</td>
+<td>#000000</td>
+<td>0,0,0</td>
+<td>0,0,0</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0000FF">　　　</p></td>
+<td>BLUE</td>
+<td>蓝</td>
+<td>#0000FF</td>
+<td>0,0,255</td>
+<td>240,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FFFF">　　　</p></td>
+<td>CYAN / AQUA</td>
+<td>青</td>
+<td>#00FFFF</td>
+<td>0,255,255</td>
+<td>180,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #444444">　　　</p></td>
+<td>DARK_GRAY / DARK_GREY / DKGRAY</td>
+<td>暗灰</td>
+<td>#444444</td>
+<td>68,68,68</td>
+<td>0,0,27</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #888888">　　　</p></td>
+<td>GRAY / GREY</td>
+<td>灰</td>
+<td>#888888</td>
+<td>136,136,136</td>
+<td>0,0,53</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FF00">　　　</p></td>
+<td>GREEN / LIME</td>
+<td>绿</td>
+<td>#00FF00</td>
+<td>0,255,0</td>
+<td>120,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CCCCCC">　　　</p></td>
+<td>LIGHT_GRAY / LIGHT_GREY / LTGRAY</td>
+<td>亮灰</td>
+<td>#CCCCCC</td>
+<td>204,204,204</td>
+<td>0,0,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF00FF">　　　</p></td>
+<td>MAGENTA / FUCHSIA</td>
+<td>品红 / 洋红</td>
+<td>#FF00FF</td>
+<td>255,0,255</td>
+<td>300,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #800000">　　　</p></td>
+<td>MAROON</td>
+<td>栗</td>
+<td>#800000</td>
+<td>128,0,0</td>
+<td>0,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #000080">　　　</p></td>
+<td>NAVY</td>
+<td>海军蓝 / 藏青</td>
+<td>#000080</td>
+<td>0,0,128</td>
+<td>240,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #808000">　　　</p></td>
+<td>OLIVE</td>
+<td>橄榄</td>
+<td>#808000</td>
+<td>128,128,0</td>
+<td>60,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #800080">　　　</p></td>
+<td>PURPLE</td>
+<td>紫</td>
+<td>#800080</td>
+<td>128,0,128</td>
+<td>300,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF0000">　　　</p></td>
+<td>RED</td>
+<td>红</td>
+<td>#FF0000</td>
+<td>255,0,0</td>
+<td>0,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C0C0C0">　　　</p></td>
+<td>SILVER</td>
+<td>银</td>
+<td>#C0C0C0</td>
+<td>192,192,192</td>
+<td>0,0,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #008080">　　　</p></td>
+<td>TEAL</td>
+<td>鸭绿 / 凫绿</td>
+<td>#008080</td>
+<td>0,128,128</td>
+<td>180,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFFFF">　　　</p></td>
+<td>WHITE</td>
+<td>白</td>
+<td>#FFFFFF</td>
+<td>255,255,255</td>
+<td>0,0,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFF00">　　　</p></td>
+<td>YELLOW</td>
+<td>黄</td>
+<td>#FFFF00</td>
+<td>255,255,0</td>
+<td>60,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00000000">　　　</p></td>
+<td>TRANSPARENT</td>
+<td>透明</td>
+<td>#00000000</td>
+<td>0,0,0,0 (RGBA)</td>
+<td>0,0,0,0 (HSVA)</td>
+</tr>
+</tbody>
+</table>
+<h2>CSS 颜色列表<span><a class="mark" href="#colortable_css" id="colortable_css">#</a></span></h2>
+<p>CSS 颜色名称也称为 CSS 颜色关键字, 它表示一个具体的颜色值.<br>如 CSS 语法 <code>color:red</code> 的 <code>red</code> 即是一个颜色关键字.</p>
+<p>在 CSS3 之前共包含 17 个颜色关键字, CSS3 扩充到了 147 个, CSS4 继续扩充了 1 个, 共计 148 个.</p>
+<p>使用方式:</p>
+<pre><code class="lang-js">colors.css.ORANGE_RED;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">颜色</th>
+<th>变量名</th>
+<th>颜色译名</th>
+<th>Hex 代码</th>
+<th>RGB</th>
+<th>HSV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><p style="background-color: #F0F8FF">　　　</p></td>
+<td>ALICE_BLUE</td>
+<td>爱丽丝蓝</td>
+<td>#F0F8FF</td>
+<td>240,248,255</td>
+<td>208,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FAEBD7">　　　</p></td>
+<td>ANTIQUE_WHITE</td>
+<td>古董白</td>
+<td>#FAEBD7</td>
+<td>250,235,215</td>
+<td>34,14,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7FFFD4">　　　</p></td>
+<td>AQUAMARINE</td>
+<td>蓝绿 / 碧蓝</td>
+<td>#7FFFD4</td>
+<td>127,255,212</td>
+<td>160,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F0FFFF">　　　</p></td>
+<td>AZURE</td>
+<td>湛蓝</td>
+<td>#F0FFFF</td>
+<td>240,255,255</td>
+<td>210,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F5F5DC">　　　</p></td>
+<td>BEIGE</td>
+<td>米黄</td>
+<td>#F5F5DC</td>
+<td>245,245,220</td>
+<td>60,10,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE4C4">　　　</p></td>
+<td>BISQUE</td>
+<td>陶坯黄</td>
+<td>#FFE4C4</td>
+<td>255,228,196</td>
+<td>33,23,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #000000">　　　</p></td>
+<td>BLACK</td>
+<td>黑</td>
+<td>#000000</td>
+<td>0,0,0</td>
+<td>0,0,0</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFEBCD">　　　</p></td>
+<td>BLANCHED_ALMOND</td>
+<td>杏仁白</td>
+<td>#FFEBCD</td>
+<td>255,235,205</td>
+<td>36,20,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0000FF">　　　</p></td>
+<td>BLUE</td>
+<td>蓝</td>
+<td>#0000FF</td>
+<td>0,0,255</td>
+<td>240,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8A2BE2">　　　</p></td>
+<td>BLUE_VIOLET</td>
+<td>蓝紫</td>
+<td>#8A2BE2</td>
+<td>138,43,226</td>
+<td>271,81,89</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A52A2A">　　　</p></td>
+<td>BROWN</td>
+<td>褐</td>
+<td>#A52A2A</td>
+<td>165,42,42</td>
+<td>0,75,65</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DEB887">　　　</p></td>
+<td>BURLY_WOOD</td>
+<td>硬木</td>
+<td>#DEB887</td>
+<td>222,184,135</td>
+<td>34,39,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #5F9EA0">　　　</p></td>
+<td>CADET_BLUE</td>
+<td>军服蓝</td>
+<td>#5F9EA0</td>
+<td>95,158,160</td>
+<td>182,41,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7FFF00">　　　</p></td>
+<td>CHARTREUSE</td>
+<td>查特酒绿</td>
+<td>#7FFF00</td>
+<td>127,255,0</td>
+<td>90,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D2691E">　　　</p></td>
+<td>CHOCOLATE</td>
+<td>巧克力</td>
+<td>#D2691E</td>
+<td>210,105,30</td>
+<td>25,86,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF7F50">　　　</p></td>
+<td>CORAL</td>
+<td>珊瑚红</td>
+<td>#FF7F50</td>
+<td>255,127,80</td>
+<td>16,69,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6495ED">　　　</p></td>
+<td>CORNFLOWER_BLUE</td>
+<td>矢车菊蓝</td>
+<td>#6495ED</td>
+<td>100,149,237</td>
+<td>219,58,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF8DC">　　　</p></td>
+<td>CORN_SILK</td>
+<td>玉米丝</td>
+<td>#FFF8DC</td>
+<td>255,248,220</td>
+<td>48,14,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DC143C">　　　</p></td>
+<td>CRIMSON</td>
+<td>绯红</td>
+<td>#DC143C</td>
+<td>220,20,60</td>
+<td>348,91,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FFFF">　　　</p></td>
+<td>CYAN / AQUA</td>
+<td>青</td>
+<td>#00FFFF</td>
+<td>0,255,255</td>
+<td>180,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00008B">　　　</p></td>
+<td>DARK_BLUE</td>
+<td>暗蓝</td>
+<td>#00008B</td>
+<td>0,0,139</td>
+<td>240,100,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #008B8B">　　　</p></td>
+<td>DARK_CYAN</td>
+<td>暗青</td>
+<td>#008B8B</td>
+<td>0,139,139</td>
+<td>180,100,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B8860B">　　　</p></td>
+<td>DARK_GOLDENROD</td>
+<td>暗金菊</td>
+<td>#B8860B</td>
+<td>184,134,11</td>
+<td>43,94,72</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A9A9A9">　　　</p></td>
+<td>DARK_GRAY / DARK_GREY</td>
+<td>暗灰</td>
+<td>#A9A9A9</td>
+<td>169,169,169</td>
+<td>0,0,66</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #006400">　　　</p></td>
+<td>DARK_GREEN</td>
+<td>暗绿</td>
+<td>#006400</td>
+<td>0,100,0</td>
+<td>120,100,39</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BDB76B">　　　</p></td>
+<td>DARK_KHAKI</td>
+<td>暗卡其</td>
+<td>#BDB76B</td>
+<td>189,183,107</td>
+<td>56,43,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8B008B">　　　</p></td>
+<td>DARK_MAGENTA</td>
+<td>暗洋红</td>
+<td>#8B008B</td>
+<td>139,0,139</td>
+<td>300,100,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #556B2F">　　　</p></td>
+<td>DARK_OLIVE_GREEN</td>
+<td>暗橄榄绿</td>
+<td>#556B2F</td>
+<td>85,107,47</td>
+<td>82,56,42</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF8C00">　　　</p></td>
+<td>DARK_ORANGE</td>
+<td>暗橙</td>
+<td>#FF8C00</td>
+<td>255,140,0</td>
+<td>33,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9932CC">　　　</p></td>
+<td>DARK_ORCHID</td>
+<td>暗兰紫</td>
+<td>#9932CC</td>
+<td>153,50,204</td>
+<td>280,75,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8B0000">　　　</p></td>
+<td>DARK_RED</td>
+<td>暗红</td>
+<td>#8B0000</td>
+<td>139,0,0</td>
+<td>0,100,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E9967A">　　　</p></td>
+<td>DARK_SALMON</td>
+<td>暗鲑红</td>
+<td>#E9967A</td>
+<td>233,150,122</td>
+<td>15,48,91</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8FBC8F">　　　</p></td>
+<td>DARK_SEA_GREEN</td>
+<td>暗海绿</td>
+<td>#8FBC8F</td>
+<td>143,188,143</td>
+<td>120,24,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #483D8B">　　　</p></td>
+<td>DARK_SLATE_BLUE</td>
+<td>暗岩蓝</td>
+<td>#483D8B</td>
+<td>72,61,139</td>
+<td>248,56,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #2F4F4F">　　　</p></td>
+<td>DARK_SLATE_GRAY / DARK_SLATE_GREY</td>
+<td>暗岩灰</td>
+<td>#2F4F4F</td>
+<td>47,79,79</td>
+<td>180,41,31</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00CED1">　　　</p></td>
+<td>DARK_TURQUOISE</td>
+<td>暗绿松石</td>
+<td>#00CED1</td>
+<td>0,206,209</td>
+<td>181,100,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9400D3">　　　</p></td>
+<td>DARK_VIOLET</td>
+<td>暗紫</td>
+<td>#9400D3</td>
+<td>148,0,211</td>
+<td>282,100,83</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF1493">　　　</p></td>
+<td>DEEP_PINK</td>
+<td>深粉红</td>
+<td>#FF1493</td>
+<td>255,20,147</td>
+<td>328,92,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00BFFF">　　　</p></td>
+<td>DEEP_SKY_BLUE</td>
+<td>深天蓝</td>
+<td>#00BFFF</td>
+<td>0,191,255</td>
+<td>195,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #696969">　　　</p></td>
+<td>DIM_GRAY / DIM_GREY</td>
+<td>昏灰</td>
+<td>#696969</td>
+<td>105,105,105</td>
+<td>0,0,41</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #1E90FF">　　　</p></td>
+<td>DODGER_BLUE</td>
+<td>道奇蓝</td>
+<td>#1E90FF</td>
+<td>30,144,255</td>
+<td>210,88,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B22222">　　　</p></td>
+<td>FIRE_BRICK</td>
+<td>砖红</td>
+<td>#B22222</td>
+<td>178,34,34</td>
+<td>0,81,70</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFAF0">　　　</p></td>
+<td>FLORAL_WHITE</td>
+<td>花卉白</td>
+<td>#FFFAF0</td>
+<td>255,250,240</td>
+<td>40,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #228B22">　　　</p></td>
+<td>FOREST_GREEN</td>
+<td>森林绿</td>
+<td>#228B22</td>
+<td>34,139,34</td>
+<td>120,76,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DCDCDC">　　　</p></td>
+<td>GAINSBORO</td>
+<td>庚斯博罗灰</td>
+<td>#DCDCDC</td>
+<td>220,220,220</td>
+<td>0,0,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F8F8FF">　　　</p></td>
+<td>GHOST_WHITE</td>
+<td>幽灵白</td>
+<td>#F8F8FF</td>
+<td>248,248,255</td>
+<td>240,3,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFD700">　　　</p></td>
+<td>GOLD</td>
+<td>金</td>
+<td>#FFD700</td>
+<td>255,215,0</td>
+<td>51,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DAA520">　　　</p></td>
+<td>GOLDENROD</td>
+<td>金菊</td>
+<td>#DAA520</td>
+<td>218,165,32</td>
+<td>43,85,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #808080">　　　</p></td>
+<td>GRAY / GREY</td>
+<td>灰</td>
+<td>#808080</td>
+<td>128,128,128</td>
+<td>0,0,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #008000">　　　</p></td>
+<td>GREEN</td>
+<td>绿</td>
+<td>#008000</td>
+<td>0,128,0</td>
+<td>120,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #ADFF2F">　　　</p></td>
+<td>GREEN_YELLOW</td>
+<td>绿黄</td>
+<td>#ADFF2F</td>
+<td>173,255,47</td>
+<td>84,82,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F0FFF0">　　　</p></td>
+<td>HONEYDEW</td>
+<td>蜜瓜绿</td>
+<td>#F0FFF0</td>
+<td>240,255,240</td>
+<td>120,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF69B4">　　　</p></td>
+<td>HOT_PINK</td>
+<td>暖粉红</td>
+<td>#FF69B4</td>
+<td>255,105,180</td>
+<td>330,59,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CD5C5C">　　　</p></td>
+<td>INDIAN_RED</td>
+<td>印度红</td>
+<td>#CD5C5C</td>
+<td>205,92,92</td>
+<td>0,55,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4B0082">　　　</p></td>
+<td>INDIGO</td>
+<td>靛</td>
+<td>#4B0082</td>
+<td>75,0,130</td>
+<td>275,100,51</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFFF0">　　　</p></td>
+<td>IVORY</td>
+<td>象牙</td>
+<td>#FFFFF0</td>
+<td>255,255,240</td>
+<td>60,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F0E68C">　　　</p></td>
+<td>KHAKI</td>
+<td>卡其</td>
+<td>#F0E68C</td>
+<td>240,230,140</td>
+<td>54,42,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E6E6FA">　　　</p></td>
+<td>LAVENDER</td>
+<td>薰衣草</td>
+<td>#E6E6FA</td>
+<td>230,230,250</td>
+<td>240,8,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF0F5">　　　</p></td>
+<td>LAVENDER_BLUSH</td>
+<td>薰衣草紫红</td>
+<td>#FFF0F5</td>
+<td>255,240,245</td>
+<td>340,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7CFC00">　　　</p></td>
+<td>LAWN_GREEN</td>
+<td>草坪绿</td>
+<td>#7CFC00</td>
+<td>124,252,0</td>
+<td>90,100,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFACD">　　　</p></td>
+<td>LEMON_CHIFFON</td>
+<td>柠檬绸</td>
+<td>#FFFACD</td>
+<td>255,250,205</td>
+<td>54,20,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #ADD8E6">　　　</p></td>
+<td>LIGHT_BLUE</td>
+<td>亮蓝</td>
+<td>#ADD8E6</td>
+<td>173,216,230</td>
+<td>195,25,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F08080">　　　</p></td>
+<td>LIGHT_CORAL</td>
+<td>亮珊瑚</td>
+<td>#F08080</td>
+<td>240,128,128</td>
+<td>0,47,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E0FFFF">　　　</p></td>
+<td>LIGHT_CYAN</td>
+<td>亮青</td>
+<td>#E0FFFF</td>
+<td>224,255,255</td>
+<td>180,12,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FAFAD2">　　　</p></td>
+<td>LIGHT_GOLDENROD_YELLOW</td>
+<td>亮金菊黄</td>
+<td>#FAFAD2</td>
+<td>250,250,210</td>
+<td>60,16,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D3D3D3">　　　</p></td>
+<td>LIGHT_GRAY / LIGHT_GREY</td>
+<td>亮灰</td>
+<td>#D3D3D3</td>
+<td>211,211,211</td>
+<td>0,0,83</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #90EE90">　　　</p></td>
+<td>LIGHT_GREEN</td>
+<td>亮绿</td>
+<td>#90EE90</td>
+<td>144,238,144</td>
+<td>120,39,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFB6C1">　　　</p></td>
+<td>LIGHT_PINK</td>
+<td>亮粉红</td>
+<td>#FFB6C1</td>
+<td>255,182,193</td>
+<td>351,29,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFA07A">　　　</p></td>
+<td>LIGHT_SALMON</td>
+<td>亮鲑红</td>
+<td>#FFA07A</td>
+<td>255,160,122</td>
+<td>17,52,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #20B2AA">　　　</p></td>
+<td>LIGHT_SEA_GREEN</td>
+<td>亮海绿</td>
+<td>#20B2AA</td>
+<td>32,178,170</td>
+<td>177,82,70</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #87CEFA">　　　</p></td>
+<td>LIGHT_SKY_BLUE</td>
+<td>浅天蓝</td>
+<td>#87CEFA</td>
+<td>135,206,250</td>
+<td>203,46,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #778899">　　　</p></td>
+<td>LIGHT_SLATE_GRAY / LIGHT_SLATE_GREY</td>
+<td>亮岩灰</td>
+<td>#778899</td>
+<td>119,136,153</td>
+<td>210,22,60</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B0C4DE">　　　</p></td>
+<td>LIGHT_STEEL_BLUE</td>
+<td>亮钢蓝</td>
+<td>#B0C4DE</td>
+<td>176,196,222</td>
+<td>214,21,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFFE0">　　　</p></td>
+<td>LIGHT_YELLOW</td>
+<td>亮黄</td>
+<td>#FFFFE0</td>
+<td>255,255,224</td>
+<td>60,12,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FF00">　　　</p></td>
+<td>LIME</td>
+<td>鲜绿 / 莱姆</td>
+<td>#00FF00</td>
+<td>0,255,0</td>
+<td>120,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #32CD32">　　　</p></td>
+<td>LIME_GREEN</td>
+<td>柠檬绿</td>
+<td>#32CD32</td>
+<td>50,205,50</td>
+<td>120,76,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FAF0E6">　　　</p></td>
+<td>LINEN</td>
+<td>亚麻</td>
+<td>#FAF0E6</td>
+<td>250,240,230</td>
+<td>30,8,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF00FF">　　　</p></td>
+<td>MAGENTA / FUCHSIA</td>
+<td>洋红 / 品红</td>
+<td>#FF00FF</td>
+<td>255,0,255</td>
+<td>300,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #800000">　　　</p></td>
+<td>MAROON</td>
+<td>栗</td>
+<td>#800000</td>
+<td>128,0,0</td>
+<td>0,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #66CDAA">　　　</p></td>
+<td>MEDIUM_AQUAMARINE</td>
+<td>中碧蓝</td>
+<td>#66CDAA</td>
+<td>102,205,170</td>
+<td>160,50,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0000CD">　　　</p></td>
+<td>MEDIUM_BLUE</td>
+<td>中蓝</td>
+<td>#0000CD</td>
+<td>0,0,205</td>
+<td>240,100,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DDA0DD">　　　</p></td>
+<td>MEDIUM_LAVENDER_MAGENTA</td>
+<td>梅红</td>
+<td>#DDA0DD</td>
+<td>221,160,221</td>
+<td>300,28,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BA55D3">　　　</p></td>
+<td>MEDIUM_ORCHID</td>
+<td>中兰紫</td>
+<td>#BA55D3</td>
+<td>186,85,211</td>
+<td>288,60,83</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9370DB">　　　</p></td>
+<td>MEDIUM_PURPLE</td>
+<td>中紫</td>
+<td>#9370DB</td>
+<td>147,112,219</td>
+<td>260,49,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #3CB371">　　　</p></td>
+<td>MEDIUM_SEA_GREEN</td>
+<td>中海绿</td>
+<td>#3CB371</td>
+<td>60,179,113</td>
+<td>147,66,70</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7B68EE">　　　</p></td>
+<td>MEDIUM_SLATE_BLUE</td>
+<td>中岩蓝</td>
+<td>#7B68EE</td>
+<td>123,104,238</td>
+<td>249,56,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FA9A">　　　</p></td>
+<td>MEDIUM_SPRING_GREEN</td>
+<td>中春绿</td>
+<td>#00FA9A</td>
+<td>0,250,154</td>
+<td>157,100,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #48D1CC">　　　</p></td>
+<td>MEDIUM_TURQUOISE</td>
+<td>中绿松石</td>
+<td>#48D1CC</td>
+<td>72,209,204</td>
+<td>178,66,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C71585">　　　</p></td>
+<td>MEDIUM_VIOLET_RED</td>
+<td>中青紫红</td>
+<td>#C71585</td>
+<td>199,21,133</td>
+<td>322,89,78</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #191970">　　　</p></td>
+<td>MIDNIGHT_BLUE</td>
+<td>午夜蓝</td>
+<td>#191970</td>
+<td>25,25,112</td>
+<td>240,78,44</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F5FFFA">　　　</p></td>
+<td>MINT_CREAM</td>
+<td>薄荷奶油</td>
+<td>#F5FFFA</td>
+<td>245,255,250</td>
+<td>150,4,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE4E1">　　　</p></td>
+<td>MISTY_ROSE</td>
+<td>雾玫瑰</td>
+<td>#FFE4E1</td>
+<td>255,228,225</td>
+<td>6,12,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE4B5">　　　</p></td>
+<td>MOCCASIN</td>
+<td>鹿皮鞋</td>
+<td>#FFE4B5</td>
+<td>255,228,181</td>
+<td>38,29,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFDEAD">　　　</p></td>
+<td>NAVAJO_WHITE</td>
+<td>那瓦霍白</td>
+<td>#FFDEAD</td>
+<td>255,222,173</td>
+<td>36,32,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #000080">　　　</p></td>
+<td>NAVY</td>
+<td>海军蓝 / 深蓝</td>
+<td>#000080</td>
+<td>0,0,128</td>
+<td>240,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FDF5E6">　　　</p></td>
+<td>OLD_LACE</td>
+<td>旧蕾丝</td>
+<td>#FDF5E6</td>
+<td>253,245,230</td>
+<td>39,9,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #808000">　　　</p></td>
+<td>OLIVE</td>
+<td>橄榄</td>
+<td>#808000</td>
+<td>128,128,0</td>
+<td>60,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6B8E23">　　　</p></td>
+<td>OLIVE_DRAB</td>
+<td>橄榄军服绿</td>
+<td>#6B8E23</td>
+<td>107,142,35</td>
+<td>80,75,56</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFA500">　　　</p></td>
+<td>ORANGE</td>
+<td>橙</td>
+<td>#FFA500</td>
+<td>255,165,0</td>
+<td>39,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF4500">　　　</p></td>
+<td>ORANGE_RED</td>
+<td>橙红</td>
+<td>#FF4500</td>
+<td>255,69,0</td>
+<td>16,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DA70D6">　　　</p></td>
+<td>ORCHID</td>
+<td>兰花 / 兰紫</td>
+<td>#DA70D6</td>
+<td>218,112,214</td>
+<td>302,49,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EEE8AA">　　　</p></td>
+<td>PALE_GOLDENROD</td>
+<td>灰金菊</td>
+<td>#EEE8AA</td>
+<td>238,232,170</td>
+<td>55,29,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #98FB98">　　　</p></td>
+<td>PALE_GREEN</td>
+<td>灰绿</td>
+<td>#98FB98</td>
+<td>152,251,152</td>
+<td>120,39,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #AFEEEE">　　　</p></td>
+<td>PALE_TURQUOISE</td>
+<td>灰绿松石</td>
+<td>#AFEEEE</td>
+<td>175,238,238</td>
+<td>180,26,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DB7093">　　　</p></td>
+<td>PALE_VIOLET_RED</td>
+<td>灰紫红</td>
+<td>#DB7093</td>
+<td>219,112,147</td>
+<td>340,49,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFEFD5">　　　</p></td>
+<td>PAPAYA_WHIP</td>
+<td>蕃木瓜</td>
+<td>#FFEFD5</td>
+<td>255,239,213</td>
+<td>37,16,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #800080">　　　</p></td>
+<td>PATRIARCH</td>
+<td>宗主教</td>
+<td>#800080</td>
+<td>128,0,128</td>
+<td>300,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFDAB9">　　　</p></td>
+<td>PEACH_PUFF</td>
+<td>粉扑桃</td>
+<td>#FFDAB9</td>
+<td>255,218,185</td>
+<td>28,27,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CD853F">　　　</p></td>
+<td>PERU</td>
+<td>秘鲁</td>
+<td>#CD853F</td>
+<td>205,133,63</td>
+<td>30,69,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFC0CB">　　　</p></td>
+<td>PINK</td>
+<td>粉红</td>
+<td>#FFC0CB</td>
+<td>255,192,203</td>
+<td>350,25,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B0E0E6">　　　</p></td>
+<td>POWDER_BLUE</td>
+<td>粉蓝</td>
+<td>#B0E0E6</td>
+<td>176,224,230</td>
+<td>187,23,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #663399">　　　</p></td>
+<td>REBECCA_PURPLE</td>
+<td>丽贝卡紫</td>
+<td>#663399</td>
+<td>102,51,153</td>
+<td>270,67,60</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF0000">　　　</p></td>
+<td>RED</td>
+<td>红</td>
+<td>#FF0000</td>
+<td>255,0,0</td>
+<td>0,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BC8F8F">　　　</p></td>
+<td>ROSY_BROWN</td>
+<td>玫瑰褐</td>
+<td>#BC8F8F</td>
+<td>188,143,143</td>
+<td>0,24,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4169E1">　　　</p></td>
+<td>ROYAL_BLUE</td>
+<td>品蓝 / 皇室蓝</td>
+<td>#4169E1</td>
+<td>65,105,225</td>
+<td>225,71,88</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8B4513">　　　</p></td>
+<td>SADDLE_BROWN</td>
+<td>鞍褐</td>
+<td>#8B4513</td>
+<td>139,69,19</td>
+<td>25,86,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FA8072">　　　</p></td>
+<td>SALMON</td>
+<td>鲑红</td>
+<td>#FA8072</td>
+<td>250,128,114</td>
+<td>6,54,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F4A460">　　　</p></td>
+<td>SAND_BROWN</td>
+<td>沙褐</td>
+<td>#F4A460</td>
+<td>244,164,96</td>
+<td>28,61,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF5EE">　　　</p></td>
+<td>SEASHELL</td>
+<td>海贝</td>
+<td>#FFF5EE</td>
+<td>255,245,238</td>
+<td>25,7,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #2E8B57">　　　</p></td>
+<td>SEA_GREEN</td>
+<td>海绿</td>
+<td>#2E8B57</td>
+<td>46,139,87</td>
+<td>146,67,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A0522D">　　　</p></td>
+<td>SIENNA</td>
+<td>赭黄</td>
+<td>#A0522D</td>
+<td>160,82,45</td>
+<td>19,72,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C0C0C0">　　　</p></td>
+<td>SILVER</td>
+<td>银</td>
+<td>#C0C0C0</td>
+<td>192,192,192</td>
+<td>0,0,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #87CEEB">　　　</p></td>
+<td>SKY_BLUE</td>
+<td>天空蓝</td>
+<td>#87CEEB</td>
+<td>135,206,235</td>
+<td>197,43,92</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6A5ACD">　　　</p></td>
+<td>SLATE_BLUE</td>
+<td>岩蓝</td>
+<td>#6A5ACD</td>
+<td>106,90,205</td>
+<td>248,56,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #708090">　　　</p></td>
+<td>SLATE_GRAY / SLATE_GREY</td>
+<td>岩灰</td>
+<td>#708090</td>
+<td>112,128,144</td>
+<td>210,22,56</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFAFA">　　　</p></td>
+<td>SNOW</td>
+<td>雪</td>
+<td>#FFFAFA</td>
+<td>255,250,250</td>
+<td>0,2,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FF7F">　　　</p></td>
+<td>SPRING_GREEN</td>
+<td>春绿</td>
+<td>#00FF7F</td>
+<td>0,255,127</td>
+<td>150,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4682B4">　　　</p></td>
+<td>STEEL_BLUE</td>
+<td>钢青</td>
+<td>#4682B4</td>
+<td>70,130,180</td>
+<td>207,61,71</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D2B48C">　　　</p></td>
+<td>TAN</td>
+<td>日晒</td>
+<td>#D2B48C</td>
+<td>210,180,140</td>
+<td>34,33,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #008080">　　　</p></td>
+<td>TEAL</td>
+<td>鸭绿 / 凫绿</td>
+<td>#008080</td>
+<td>0,128,128</td>
+<td>180,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D8BFD8">　　　</p></td>
+<td>THISTLE</td>
+<td>蓟紫</td>
+<td>#D8BFD8</td>
+<td>216,191,216</td>
+<td>300,12,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF6347">　　　</p></td>
+<td>TOMATO</td>
+<td>蕃茄红</td>
+<td>#FF6347</td>
+<td>255,99,71</td>
+<td>9,72,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #40E0D0">　　　</p></td>
+<td>TURQUOISE</td>
+<td>绿松</td>
+<td>#40E0D0</td>
+<td>64,224,208</td>
+<td>174,71,88</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EE82EE">　　　</p></td>
+<td>VIOLET</td>
+<td>紫罗兰</td>
+<td>#EE82EE</td>
+<td>238,130,238</td>
+<td>300,45,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F5DEB3">　　　</p></td>
+<td>WHEAT</td>
+<td>小麦</td>
+<td>#F5DEB3</td>
+<td>245,222,179</td>
+<td>39,27,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFFFF">　　　</p></td>
+<td>WHITE</td>
+<td>白</td>
+<td>#FFFFFF</td>
+<td>255,255,255</td>
+<td>0,0,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F5F5F5">　　　</p></td>
+<td>WHITE_SMOKE</td>
+<td>白烟</td>
+<td>#F5F5F5</td>
+<td>245,245,245</td>
+<td>0,0,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFF00">　　　</p></td>
+<td>YELLOW</td>
+<td>黄</td>
+<td>#FFFF00</td>
+<td>255,255,0</td>
+<td>60,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9ACD32">　　　</p></td>
+<td>YELLOW_GREEN</td>
+<td>黄绿</td>
+<td>#9ACD32</td>
+<td>154,205,50</td>
+<td>80,76,80</td>
+</tr>
+</tbody>
+</table>
+<h2>WEB 颜色列表<span><a class="mark" href="#colortable_web" id="colortable_web">#</a></span></h2>
+<p>此小节的 WEB 颜色列表综合了 [ X11 颜色名称 / CSS3 标准名称 / HTML4 标准名称 / SVG 颜色名称 ] 等.  </p>
+<p>此列表是一个相对较大的颜色列表集合, 但可能并未完全包含上述所有颜色名称条目, 也可能会不定期增加新条目.</p>
+<p>使用方式:</p>
+<pre><code class="lang-js">colors.web.BURNT_ORANGE;
+</code></pre>
+<blockquote>
+<p>参阅: <a href="https://zh.wikipedia.org/zh-cn/%E9%A2%9C%E8%89%B2%E5%88%97%E8%A1%A8">Wikipedia (中)</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">颜色</th>
+<th>变量名</th>
+<th>颜色译名</th>
+<th>Hex 代码</th>
+<th>RGB</th>
+<th>HSV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><p style="background-color: #F0F8FF">　　　</p></td>
+<td>ALICE_BLUE</td>
+<td>爱丽丝蓝</td>
+<td>#F0F8FF</td>
+<td>240,248,255</td>
+<td>208,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E32636">　　　</p></td>
+<td>ALIZARIN_CRIMSON</td>
+<td>茜红 / 深茜红</td>
+<td>#E32636</td>
+<td>227,38,54</td>
+<td>355,83,89</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFBF00">　　　</p></td>
+<td>AMBER</td>
+<td>琥珀</td>
+<td>#FFBF00</td>
+<td>255,191,0</td>
+<td>45,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9966CC">　　　</p></td>
+<td>AMETHYST</td>
+<td>紫水晶</td>
+<td>#9966CC</td>
+<td>153,102,204</td>
+<td>270,50,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FAEBD7">　　　</p></td>
+<td>ANTIQUE_WHITE</td>
+<td>古董白</td>
+<td>#FAEBD7</td>
+<td>250,235,215</td>
+<td>34,14,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8CE600">　　　</p></td>
+<td>APPLE_GREEN</td>
+<td>苹果绿</td>
+<td>#8CE600</td>
+<td>140,230,0</td>
+<td>83,100,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E69966">　　　</p></td>
+<td>APRICOT</td>
+<td>杏黄</td>
+<td>#E69966</td>
+<td>230,153,102</td>
+<td>24,56,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #AFDFE4">　　　</p></td>
+<td>AQUA</td>
+<td>水</td>
+<td>#AFDFE4</td>
+<td>175,223,228</td>
+<td>186,23,89</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7FFFD4">　　　</p></td>
+<td>AQUAMARINE</td>
+<td>蓝绿 / 碧蓝</td>
+<td>#7FFFD4</td>
+<td>127,255,212</td>
+<td>160,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #66FFE6">　　　</p></td>
+<td>AQUA_BLUE</td>
+<td>水蓝</td>
+<td>#66FFE6</td>
+<td>102,255,230</td>
+<td>170,60,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #007FFF">　　　</p></td>
+<td>AZURE</td>
+<td>蔚蓝 / 湛蓝</td>
+<td>#007FFF</td>
+<td>0,127,255</td>
+<td>210,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #89CFF0">　　　</p></td>
+<td>BABY_BLUE</td>
+<td>浅蓝</td>
+<td>#89CFF0</td>
+<td>137,207,240</td>
+<td>199,43,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFD9E6">　　　</p></td>
+<td>BABY_PINK</td>
+<td>浅粉红</td>
+<td>#FFD9E6</td>
+<td>255,217,230</td>
+<td>339,15,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F5F5DC">　　　</p></td>
+<td>BEIGE</td>
+<td>米黄</td>
+<td>#F5F5DC</td>
+<td>245,245,220</td>
+<td>60,10,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE4C4">　　　</p></td>
+<td>BISQUE</td>
+<td>陶坯黄</td>
+<td>#FFE4C4</td>
+<td>255,228,196</td>
+<td>33,23,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #000000">　　　</p></td>
+<td>BLACK</td>
+<td>黑</td>
+<td>#000000</td>
+<td>0,0,0</td>
+<td>0,0,0</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFEBCD">　　　</p></td>
+<td>BLANCHED_ALMOND</td>
+<td>杏仁白</td>
+<td>#FFEBCD</td>
+<td>255,235,205</td>
+<td>36,20,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0000FF">　　　</p></td>
+<td>BLUE</td>
+<td>蓝</td>
+<td>#0000FF</td>
+<td>0,0,255</td>
+<td>240,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8A2BE2">　　　</p></td>
+<td>BLUE_VIOLET</td>
+<td>蓝紫</td>
+<td>#8A2BE2</td>
+<td>138,43,226</td>
+<td>271,81,89</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #66FF00">　　　</p></td>
+<td>BRIGHT_GREEN</td>
+<td>黄绿 / 明绿</td>
+<td>#66FF00</td>
+<td>102,255,0</td>
+<td>96,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CD7F32">　　　</p></td>
+<td>BRONZE</td>
+<td>铜</td>
+<td>#CD7F32</td>
+<td>184,115,51</td>
+<td>29,72,72</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A52A2A">　　　</p></td>
+<td>BROWN</td>
+<td>褐</td>
+<td>#A52A2A</td>
+<td>165,42,42</td>
+<td>0,75,65</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #800020">　　　</p></td>
+<td>BURGUNDY</td>
+<td>勃艮第酒红</td>
+<td>#800020</td>
+<td>128,0,32</td>
+<td>345,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DEB887">　　　</p></td>
+<td>BURLY_WOOD</td>
+<td>硬木</td>
+<td>#DEB887</td>
+<td>222,184,135</td>
+<td>34,39,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CC5500">　　　</p></td>
+<td>BURNT_ORANGE</td>
+<td>燃橙</td>
+<td>#CC5500</td>
+<td>204,85,0</td>
+<td>25,100,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #5F9EA0">　　　</p></td>
+<td>CADET_BLUE</td>
+<td>军服蓝</td>
+<td>#5F9EA0</td>
+<td>95,158,160</td>
+<td>182,41,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A16B47">　　　</p></td>
+<td>CAMEL</td>
+<td>驼</td>
+<td>#A16B47</td>
+<td>161,107,71</td>
+<td>24,56,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E63995">　　　</p></td>
+<td>CAMELLIA</td>
+<td>山茶红</td>
+<td>#E63995</td>
+<td>230,57,149</td>
+<td>328,75,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFEF00">　　　</p></td>
+<td>CANARY_YELLOW</td>
+<td>鲜黄</td>
+<td>#FFEF00</td>
+<td>255,239,0</td>
+<td>56,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #990036">　　　</p></td>
+<td>CARDINAL_RED</td>
+<td>枢机红</td>
+<td>#990036</td>
+<td>153,0,54</td>
+<td>339,100,60</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E6005C">　　　</p></td>
+<td>CARMINE</td>
+<td>胭脂红</td>
+<td>#E6005C</td>
+<td>230,0,92</td>
+<td>336,100,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #ACE1AF">　　　</p></td>
+<td>CELADON</td>
+<td>青瓷绿</td>
+<td>#ACE1AF</td>
+<td>172,225,175</td>
+<td>123,24,88</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DE3163">　　　</p></td>
+<td>CERISE</td>
+<td>樱桃红 / 樱桃</td>
+<td>#DE3163</td>
+<td>222,49,99</td>
+<td>343,78,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #2A52BE">　　　</p></td>
+<td>CERULEAN_BLUE</td>
+<td>蔚蓝 / 天青蓝</td>
+<td>#2A52BE</td>
+<td>42,82,190</td>
+<td>224,78,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFF99">　　　</p></td>
+<td>CHAMPAGNE_YELLOW</td>
+<td>香槟黄</td>
+<td>#FFFF99</td>
+<td>255,255,153</td>
+<td>60,40,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7FFF00">　　　</p></td>
+<td>CHARTREUSE</td>
+<td>查特酒绿</td>
+<td>#7FFF00</td>
+<td>127,255,0</td>
+<td>90,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D2691E">　　　</p></td>
+<td>CHOCOLATE</td>
+<td>巧克力</td>
+<td>#D2691E</td>
+<td>210,105,30</td>
+<td>25,86,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E6B800">　　　</p></td>
+<td>CHROME_YELLOW</td>
+<td>铬黄</td>
+<td>#E6B800</td>
+<td>230,184,0</td>
+<td>48,100,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CCA3CC">　　　</p></td>
+<td>CLEMATIS</td>
+<td>铁线莲紫</td>
+<td>#CCA3CC</td>
+<td>204,163,204</td>
+<td>300,20,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0047AB">　　　</p></td>
+<td>COBALT_BLUE</td>
+<td>钴蓝</td>
+<td>#0047AB</td>
+<td>0,71,171</td>
+<td>215,100,67</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #66FF59">　　　</p></td>
+<td>COBALT_GREEN</td>
+<td>钴绿</td>
+<td>#66FF59</td>
+<td>102,255,89</td>
+<td>115,65,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4D1F00">　　　</p></td>
+<td>COCONUT_BROWN</td>
+<td>椰褐</td>
+<td>#4D1F00</td>
+<td>77,31,0</td>
+<td>24,100,30</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4D3900">　　　</p></td>
+<td>COFFEE</td>
+<td>咖啡</td>
+<td>#4D3900</td>
+<td>77,57,0</td>
+<td>44,100,30</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF7F50">　　　</p></td>
+<td>CORAL</td>
+<td>珊瑚红</td>
+<td>#FF7F50</td>
+<td>255,127,80</td>
+<td>16,69,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF80BF">　　　</p></td>
+<td>CORAL_PINK</td>
+<td>浅珊瑚红</td>
+<td>#FF80BF</td>
+<td>255,128,191</td>
+<td>330,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6495ED">　　　</p></td>
+<td>CORNFLOWER_BLUE</td>
+<td>矢车菊蓝</td>
+<td>#6495ED</td>
+<td>100,149,237</td>
+<td>219,58,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF8DC">　　　</p></td>
+<td>CORN_SILK</td>
+<td>玉米丝</td>
+<td>#FFF8DC</td>
+<td>255,248,220</td>
+<td>48,14,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFDD0">　　　</p></td>
+<td>CREAM</td>
+<td>奶油</td>
+<td>#FFFDD0</td>
+<td>255,253,208</td>
+<td>57,18,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DC143C">　　　</p></td>
+<td>CRIMSON</td>
+<td>绯红</td>
+<td>#DC143C</td>
+<td>220,20,60</td>
+<td>348,91,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FFFF">　　　</p></td>
+<td>CYAN</td>
+<td>青</td>
+<td>#00FFFF</td>
+<td>0,255,255</td>
+<td>180,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0DBF8C">　　　</p></td>
+<td>CYAN_BLUE</td>
+<td>青蓝</td>
+<td>#0DBF8C</td>
+<td>13,191,140</td>
+<td>163,93,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00008B">　　　</p></td>
+<td>DARK_BLUE</td>
+<td>暗蓝</td>
+<td>#00008B</td>
+<td>0,0,139</td>
+<td>240,100,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #008B8B">　　　</p></td>
+<td>DARK_CYAN</td>
+<td>暗青</td>
+<td>#008B8B</td>
+<td>0,139,139</td>
+<td>180,100,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B8860B">　　　</p></td>
+<td>DARK_GOLDENROD</td>
+<td>暗金菊</td>
+<td>#B8860B</td>
+<td>184,134,11</td>
+<td>43,94,72</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A9A9A9">　　　</p></td>
+<td>DARK_GRAY</td>
+<td>暗灰</td>
+<td>#A9A9A9</td>
+<td>169,169,169</td>
+<td>0,0,66</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #006400">　　　</p></td>
+<td>DARK_GREEN</td>
+<td>暗绿</td>
+<td>#006400</td>
+<td>0,100,0</td>
+<td>120,100,39</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BDB76B">　　　</p></td>
+<td>DARK_KHAKI</td>
+<td>暗卡其</td>
+<td>#BDB76B</td>
+<td>189,183,107</td>
+<td>56,43,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8B008B">　　　</p></td>
+<td>DARK_MAGENTA</td>
+<td>暗洋红</td>
+<td>#8B008B</td>
+<td>139,0,139</td>
+<td>300,100,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #24367D">　　　</p></td>
+<td>DARK_MINERAL_BLUE</td>
+<td>暗矿蓝</td>
+<td>#24367D</td>
+<td>36,54,125</td>
+<td>228,71,49</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #556B2F">　　　</p></td>
+<td>DARK_OLIVE_GREEN</td>
+<td>暗橄榄绿</td>
+<td>#556B2F</td>
+<td>85,107,47</td>
+<td>82,56,42</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF8C00">　　　</p></td>
+<td>DARK_ORANGE</td>
+<td>暗橙</td>
+<td>#FF8C00</td>
+<td>255,140,0</td>
+<td>33,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9932CC">　　　</p></td>
+<td>DARK_ORCHID</td>
+<td>暗兰紫</td>
+<td>#9932CC</td>
+<td>153,50,204</td>
+<td>280,75,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #003399">　　　</p></td>
+<td>DARK_POWDER_BLUE</td>
+<td>暗粉蓝</td>
+<td>#003399</td>
+<td>0,51,153</td>
+<td>220,100,60</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8B0000">　　　</p></td>
+<td>DARK_RED</td>
+<td>暗红</td>
+<td>#8B0000</td>
+<td>139,0,0</td>
+<td>0,100,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E9967A">　　　</p></td>
+<td>DARK_SALMON</td>
+<td>暗鲑红</td>
+<td>#E9967A</td>
+<td>233,150,122</td>
+<td>15,48,91</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8FBC8F">　　　</p></td>
+<td>DARK_SEA_GREEN</td>
+<td>暗海绿</td>
+<td>#8FBC8F</td>
+<td>143,188,143</td>
+<td>120,24,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #483D8B">　　　</p></td>
+<td>DARK_SLATE_BLUE</td>
+<td>暗岩蓝</td>
+<td>#483D8B</td>
+<td>72,61,139</td>
+<td>248,56,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #2F4F4F">　　　</p></td>
+<td>DARK_SLATE_GRAY</td>
+<td>暗岩灰</td>
+<td>#2F4F4F</td>
+<td>47,79,79</td>
+<td>180,41,31</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00CED1">　　　</p></td>
+<td>DARK_TURQUOISE</td>
+<td>暗绿松石</td>
+<td>#00CED1</td>
+<td>0,206,209</td>
+<td>181,100,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9400D3">　　　</p></td>
+<td>DARK_VIOLET</td>
+<td>暗紫</td>
+<td>#9400D3</td>
+<td>148,0,211</td>
+<td>282,100,83</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF1493">　　　</p></td>
+<td>DEEP_PINK</td>
+<td>深粉红</td>
+<td>#FF1493</td>
+<td>255,20,147</td>
+<td>328,92,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00BFFF">　　　</p></td>
+<td>DEEP_SKY_BLUE</td>
+<td>深天蓝</td>
+<td>#00BFFF</td>
+<td>0,191,255</td>
+<td>195,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #696969">　　　</p></td>
+<td>DIM_GRAY</td>
+<td>昏灰</td>
+<td>#696969</td>
+<td>105,105,105</td>
+<td>0,0,41</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #1E90FF">　　　</p></td>
+<td>DODGER_BLUE</td>
+<td>道奇蓝</td>
+<td>#1E90FF</td>
+<td>30,144,255</td>
+<td>210,88,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #50C878">　　　</p></td>
+<td>EMERALD</td>
+<td>碧绿</td>
+<td>#50C878</td>
+<td>80,200,120</td>
+<td>140,60,78</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B22222">　　　</p></td>
+<td>FIRE_BRICK</td>
+<td>砖红</td>
+<td>#B22222</td>
+<td>178,34,34</td>
+<td>0,81,70</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E68AB8">　　　</p></td>
+<td>FLAMINGO</td>
+<td>火鹤红</td>
+<td>#E68AB8</td>
+<td>230,138,184</td>
+<td>330,40,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFAF0">　　　</p></td>
+<td>FLORAL_WHITE</td>
+<td>花卉白</td>
+<td>#FFFAF0</td>
+<td>255,250,240</td>
+<td>40,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #73B839">　　　</p></td>
+<td>FOLIAGE_GREEN</td>
+<td>叶绿</td>
+<td>#73B839</td>
+<td>115,184,57</td>
+<td>93,69,72</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #228B22">　　　</p></td>
+<td>FOREST_GREEN</td>
+<td>森林绿</td>
+<td>#228B22</td>
+<td>34,139,34</td>
+<td>120,76,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #99FF4D">　　　</p></td>
+<td>FRESH_LEAVES</td>
+<td>嫩绿</td>
+<td>#99FF4D</td>
+<td>153,255,77</td>
+<td>94,70,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F400A1">　　　</p></td>
+<td>FUCHSIA</td>
+<td>紫红</td>
+<td>#F400A1</td>
+<td>244,0,161</td>
+<td>320,100,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DCDCDC">　　　</p></td>
+<td>GAINSBORO</td>
+<td>庚斯博罗灰</td>
+<td>#DCDCDC</td>
+<td>220,220,220</td>
+<td>0,0,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F8F8FF">　　　</p></td>
+<td>GHOST_WHITE</td>
+<td>幽灵白</td>
+<td>#F8F8FF</td>
+<td>248,248,255</td>
+<td>240,3,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFD700">　　　</p></td>
+<td>GOLDEN / GOLD</td>
+<td>金</td>
+<td>#FFD700</td>
+<td>255,215,0</td>
+<td>51,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DAA520">　　　</p></td>
+<td>GOLDENROD</td>
+<td>金菊</td>
+<td>#DAA520</td>
+<td>218,165,32</td>
+<td>43,85,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #99E64D">　　　</p></td>
+<td>GRASS_GREEN</td>
+<td>草绿</td>
+<td>#99E64D</td>
+<td>153,230,77</td>
+<td>90,67,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #808080">　　　</p></td>
+<td>GRAY</td>
+<td>灰</td>
+<td>#808080</td>
+<td>128,128,128</td>
+<td>0,0,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8674A1">　　　</p></td>
+<td>GRAYISH_PURPLE</td>
+<td>浅灰紫</td>
+<td>#8674A1</td>
+<td>134,116,161</td>
+<td>264,28,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #008000">　　　</p></td>
+<td>GREEN</td>
+<td>绿</td>
+<td>#008000</td>
+<td>0,128,0</td>
+<td>120,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #ADFF2F">　　　</p></td>
+<td>GREEN_YELLOW</td>
+<td>绿黄</td>
+<td>#ADFF2F</td>
+<td>173,255,47</td>
+<td>84,82,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DF73FF">　　　</p></td>
+<td>HELIOTROPE</td>
+<td>缬草紫</td>
+<td>#DF73FF</td>
+<td>223,115,255</td>
+<td>286,55,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F0FFF0">　　　</p></td>
+<td>HONEYDEW</td>
+<td>蜜瓜绿</td>
+<td>#F0FFF0</td>
+<td>240,255,240</td>
+<td>120,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFB366">　　　</p></td>
+<td>HONEY_ORANGE</td>
+<td>蜜橙</td>
+<td>#FFB366</td>
+<td>255,179,102</td>
+<td>30,60,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B8DDC8">　　　</p></td>
+<td>HORIZON_BLUE</td>
+<td>苍</td>
+<td>#B8DDC8</td>
+<td>184,221,200</td>
+<td>146,35,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF69B4">　　　</p></td>
+<td>HOT_PINK</td>
+<td>暖粉红</td>
+<td>#FF69B4</td>
+<td>255,105,180</td>
+<td>330,59,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CD5C5C">　　　</p></td>
+<td>INDIAN_RED</td>
+<td>印度红</td>
+<td>#CD5C5C</td>
+<td>205,92,92</td>
+<td>0,55,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4B0080">　　　</p></td>
+<td>INDIGO</td>
+<td>靛</td>
+<td>#4B0080</td>
+<td>75,0,128</td>
+<td>275,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #002FA7">　　　</p></td>
+<td>INTERNATIONAL_KLEIN_BLUE</td>
+<td>国际奇连蓝</td>
+<td>#002FA7</td>
+<td>0,47,167</td>
+<td>223,100,65</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #625B57">　　　</p></td>
+<td>IRON_GRAY</td>
+<td>铁灰</td>
+<td>#625B57</td>
+<td>98,91,87</td>
+<td>21,12,39</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFFF0">　　　</p></td>
+<td>IVORY</td>
+<td>象牙</td>
+<td>#FFFFF0</td>
+<td>255,255,240</td>
+<td>60,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #36BF36">　　　</p></td>
+<td>IVY_GREEN</td>
+<td>常春藤绿</td>
+<td>#36BF36</td>
+<td>54,191,54</td>
+<td>120,72,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E6C35C">　　　</p></td>
+<td>JASMINE</td>
+<td>茉莉黄</td>
+<td>#E6C35C</td>
+<td>230,195,92</td>
+<td>45,60,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #996B1F">　　　</p></td>
+<td>KHAKI</td>
+<td>卡其</td>
+<td>#996B1F</td>
+<td>153,107,31</td>
+<td>37,80,60</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #26619C">　　　</p></td>
+<td>LAPIS_LAZULI</td>
+<td>天青石蓝</td>
+<td>#26619C</td>
+<td>38,97,156</td>
+<td>210,76,61</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B57EDC">　　　</p></td>
+<td>LAVENDER</td>
+<td>薰衣草紫</td>
+<td>#B57EDC</td>
+<td>181,126,220</td>
+<td>275,43,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CCCCFF">　　　</p></td>
+<td>LAVENDER_BLUE / PERIWINKLE</td>
+<td>薰衣草蓝 / 长春花</td>
+<td>#CCCCFF</td>
+<td>204,204,255</td>
+<td>240,20,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF0F5">　　　</p></td>
+<td>LAVENDER_BLUSH</td>
+<td>薰衣草紫红</td>
+<td>#FFF0F5</td>
+<td>255,240,245</td>
+<td>340,6,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EE82EE">　　　</p></td>
+<td>LAVENDER_MAGENTA</td>
+<td>亮紫</td>
+<td>#EE82EE</td>
+<td>238,130,238</td>
+<td>300,45,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E6E6FA">　　　</p></td>
+<td>LAVENDER_MIST</td>
+<td>薰衣草雾</td>
+<td>#E6E6FA</td>
+<td>230,230,250</td>
+<td>240,8,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7CFC00">　　　</p></td>
+<td>LAWN_GREEN</td>
+<td>草坪绿</td>
+<td>#7CFC00</td>
+<td>124,252,0</td>
+<td>90,100,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFACD">　　　</p></td>
+<td>LEMON_CHIFFON</td>
+<td>柠檬绸</td>
+<td>#FFFACD</td>
+<td>255,250,205</td>
+<td>54,20,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #ADD8E6">　　　</p></td>
+<td>LIGHT_BLUE</td>
+<td>亮蓝</td>
+<td>#ADD8E6</td>
+<td>173,216,230</td>
+<td>195,25,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F08080">　　　</p></td>
+<td>LIGHT_CORAL</td>
+<td>亮珊瑚</td>
+<td>#F08080</td>
+<td>240,128,128</td>
+<td>0,47,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E0FFFF">　　　</p></td>
+<td>LIGHT_CYAN</td>
+<td>亮青</td>
+<td>#E0FFFF</td>
+<td>224,255,255</td>
+<td>180,12,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FAFAD2">　　　</p></td>
+<td>LIGHT_GOLDENROD_YELLOW</td>
+<td>亮金菊黄</td>
+<td>#FAFAD2</td>
+<td>250,250,210</td>
+<td>60,16,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D3D3D3">　　　</p></td>
+<td>LIGHT_GRAY</td>
+<td>亮灰</td>
+<td>#D3D3D3</td>
+<td>211,211,211</td>
+<td>0,0,83</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #90EE90">　　　</p></td>
+<td>LIGHT_GREEN</td>
+<td>亮绿</td>
+<td>#90EE90</td>
+<td>144,238,144</td>
+<td>120,39,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F0E68C">　　　</p></td>
+<td>LIGHT_KHAKI</td>
+<td>亮卡其</td>
+<td>#F0E68C</td>
+<td>240,230,140</td>
+<td>54,42,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFB6C1">　　　</p></td>
+<td>LIGHT_PINK</td>
+<td>亮粉红</td>
+<td>#FFB6C1</td>
+<td>255,182,193</td>
+<td>351,29,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFA07A">　　　</p></td>
+<td>LIGHT_SALMON</td>
+<td>亮鲑红</td>
+<td>#FFA07A</td>
+<td>255,160,122</td>
+<td>17,52,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #20B2AA">　　　</p></td>
+<td>LIGHT_SEA_GREEN</td>
+<td>亮海绿</td>
+<td>#20B2AA</td>
+<td>32,178,170</td>
+<td>177,82,70</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #87CEFA">　　　</p></td>
+<td>LIGHT_SKY_BLUE</td>
+<td>浅天蓝</td>
+<td>#87CEFA</td>
+<td>135,206,250</td>
+<td>203,46,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #778899">　　　</p></td>
+<td>LIGHT_SLATE_GRAY</td>
+<td>亮岩灰</td>
+<td>#778899</td>
+<td>119,136,153</td>
+<td>210,22,60</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B0C4DE">　　　</p></td>
+<td>LIGHT_STEEL_BLUE</td>
+<td>亮钢蓝</td>
+<td>#B0C4DE</td>
+<td>176,196,222</td>
+<td>214,21,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B09DB9">　　　</p></td>
+<td>LIGHT_VIOLET</td>
+<td>亮紫</td>
+<td>#B09DB9</td>
+<td>176,157,185</td>
+<td>281,15,73</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFFE0">　　　</p></td>
+<td>LIGHT_YELLOW</td>
+<td>亮黄</td>
+<td>#FFFFE0</td>
+<td>255,255,224</td>
+<td>60,12,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C8A2C8">　　　</p></td>
+<td>LILAC</td>
+<td>紫丁香</td>
+<td>#C8A2C8</td>
+<td>200,162,200</td>
+<td>300,19,78</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CCFF00">　　　</p></td>
+<td>LIME / LIGHT_LIME</td>
+<td>柠檬绿 / 亮柠檬绿</td>
+<td>#CCFF00</td>
+<td>204,255,0</td>
+<td>72,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #32CD32">　　　</p></td>
+<td>LIME_GREEN</td>
+<td>柠檬绿</td>
+<td>#32CD32</td>
+<td>50,205,50</td>
+<td>120,76,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FAF0E6">　　　</p></td>
+<td>LINEN</td>
+<td>亚麻</td>
+<td>#FAF0E6</td>
+<td>250,240,230</td>
+<td>30,8,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF00FF">　　　</p></td>
+<td>MAGENTA</td>
+<td>洋红 / 品红</td>
+<td>#FF00FF</td>
+<td>255,0,255</td>
+<td>300,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF0DA6">　　　</p></td>
+<td>MAGENTA_ROSE</td>
+<td>洋玫瑰红</td>
+<td>#FF0DA6</td>
+<td>255,13,166</td>
+<td>322,95,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #22C32E">　　　</p></td>
+<td>MALACHITE</td>
+<td>孔雀石绿</td>
+<td>#22C32E</td>
+<td>34,195,46</td>
+<td>124,83,76</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D94DFF">　　　</p></td>
+<td>MALLOW</td>
+<td>锦葵紫</td>
+<td>#D94DFF</td>
+<td>217,77,255</td>
+<td>287,70,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF9900">　　　</p></td>
+<td>MARIGOLD</td>
+<td>万寿菊黄</td>
+<td>#FF9900</td>
+<td>255,153,0</td>
+<td>36,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00477D">　　　</p></td>
+<td>MARINE_BLUE</td>
+<td>水手蓝</td>
+<td>#00477D</td>
+<td>0,71,125</td>
+<td>206,100,49</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #800000">　　　</p></td>
+<td>MAROON</td>
+<td>栗</td>
+<td>#800000</td>
+<td>128,0,0</td>
+<td>0,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E0B0FF">　　　</p></td>
+<td>MAUVE</td>
+<td>木槿紫</td>
+<td>#E0B0FF</td>
+<td>224,176,255</td>
+<td>276,31,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #66CDAA">　　　</p></td>
+<td>MEDIUM_AQUAMARINE</td>
+<td>中碧蓝</td>
+<td>#66CDAA</td>
+<td>102,205,170</td>
+<td>160,50,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0000CD">　　　</p></td>
+<td>MEDIUM_BLUE</td>
+<td>中蓝</td>
+<td>#0000CD</td>
+<td>0,0,205</td>
+<td>240,100,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DDA0DD">　　　</p></td>
+<td>MEDIUM_LAVENDER_MAGENTA</td>
+<td>梅红</td>
+<td>#DDA0DD</td>
+<td>221,160,221</td>
+<td>300,28,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BA55D3">　　　</p></td>
+<td>MEDIUM_ORCHID</td>
+<td>中兰紫</td>
+<td>#BA55D3</td>
+<td>186,85,211</td>
+<td>288,60,83</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9370DB">　　　</p></td>
+<td>MEDIUM_PURPLE</td>
+<td>中紫</td>
+<td>#9370DB</td>
+<td>147,112,219</td>
+<td>260,49,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #3CB371">　　　</p></td>
+<td>MEDIUM_SEA_GREEN</td>
+<td>中海绿</td>
+<td>#3CB371</td>
+<td>60,179,113</td>
+<td>147,66,70</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7B68EE">　　　</p></td>
+<td>MEDIUM_SLATE_BLUE</td>
+<td>中岩蓝</td>
+<td>#7B68EE</td>
+<td>123,104,238</td>
+<td>249,56,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FA9A">　　　</p></td>
+<td>MEDIUM_SPRING_GREEN</td>
+<td>中春绿</td>
+<td>#00FA9A</td>
+<td>0,250,154</td>
+<td>157,100,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #48D1CC">　　　</p></td>
+<td>MEDIUM_TURQUOISE</td>
+<td>中绿松石</td>
+<td>#48D1CC</td>
+<td>72,209,204</td>
+<td>178,66,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C71585">　　　</p></td>
+<td>MEDIUM_VIOLET_RED</td>
+<td>中青紫红</td>
+<td>#C71585</td>
+<td>199,21,133</td>
+<td>322,89,78</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #191970">　　　</p></td>
+<td>MIDNIGHT_BLUE</td>
+<td>午夜蓝</td>
+<td>#191970</td>
+<td>25,25,112</td>
+<td>240,78,44</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E6D933">　　　</p></td>
+<td>MIMOSA</td>
+<td>含羞草黄</td>
+<td>#E6D933</td>
+<td>230,217,51</td>
+<td>56,78,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #004D99">　　　</p></td>
+<td>MINERAL_BLUE</td>
+<td>矿蓝</td>
+<td>#004D99</td>
+<td>0,77,153</td>
+<td>210,100,60</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A39DAE">　　　</p></td>
+<td>MINERAL_VIOLET</td>
+<td>矿紫</td>
+<td>#A39DAE</td>
+<td>163,157,174</td>
+<td>261,10,68</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #16982B">　　　</p></td>
+<td>MINT</td>
+<td>薄荷绿</td>
+<td>#16982B</td>
+<td>22,152,43</td>
+<td>130,86,60</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F5FFFA">　　　</p></td>
+<td>MINT_CREAM</td>
+<td>薄荷奶油</td>
+<td>#F5FFFA</td>
+<td>245,255,250</td>
+<td>150,4,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE4E1">　　　</p></td>
+<td>MISTY_ROSE</td>
+<td>雾玫瑰</td>
+<td>#FFE4E1</td>
+<td>255,228,225</td>
+<td>6,12,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE4B5">　　　</p></td>
+<td>MOCCASIN</td>
+<td>鹿皮鞋</td>
+<td>#FFE4B5</td>
+<td>255,228,181</td>
+<td>38,29,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFF4D">　　　</p></td>
+<td>MOON_YELLOW</td>
+<td>月黄</td>
+<td>#FFFF4D</td>
+<td>255,255,77</td>
+<td>60,70,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #697723">　　　</p></td>
+<td>MOSS_GREEN</td>
+<td>苔藓绿</td>
+<td>#697723</td>
+<td>105,119,35</td>
+<td>70,71,47</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CCCC4D">　　　</p></td>
+<td>MUSTARD</td>
+<td>芥末黄</td>
+<td>#CCCC4D</td>
+<td>204,204,77</td>
+<td>60,62,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFDEAD">　　　</p></td>
+<td>NAVAJO_WHITE</td>
+<td>那瓦霍白</td>
+<td>#FFDEAD</td>
+<td>255,222,173</td>
+<td>36,32,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #000080">　　　</p></td>
+<td>NAVY / NAVY_BLUE</td>
+<td>海军蓝 / 藏青</td>
+<td>#000080</td>
+<td>0,0,128</td>
+<td>240,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CC7722">　　　</p></td>
+<td>OCHER</td>
+<td>赭</td>
+<td>#CC7722</td>
+<td>204,119,34</td>
+<td>30,83,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FDF5E6">　　　</p></td>
+<td>OLD_LACE</td>
+<td>旧蕾丝</td>
+<td>#FDF5E6</td>
+<td>253,245,230</td>
+<td>39,9,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C08081">　　　</p></td>
+<td>OLD_ROSE</td>
+<td>陈玫红</td>
+<td>#C08081</td>
+<td>192,128,129</td>
+<td>359,33,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #808000">　　　</p></td>
+<td>OLIVE</td>
+<td>橄榄</td>
+<td>#808000</td>
+<td>128,128,0</td>
+<td>60,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6B8E23">　　　</p></td>
+<td>OLIVE_DRAB</td>
+<td>橄榄军服绿</td>
+<td>#6B8E23</td>
+<td>107,142,35</td>
+<td>80,75,56</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B784A7">　　　</p></td>
+<td>OPERA_MAUVE</td>
+<td>优品紫红</td>
+<td>#B784A7</td>
+<td>183,132,167</td>
+<td>319,28,72</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFA500">　　　</p></td>
+<td>ORANGE</td>
+<td>橙</td>
+<td>#FFA500</td>
+<td>255,165,0</td>
+<td>39,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF4500">　　　</p></td>
+<td>ORANGE_RED</td>
+<td>橙红</td>
+<td>#FF4500</td>
+<td>255,69,0</td>
+<td>16,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DA70D6">　　　</p></td>
+<td>ORCHID</td>
+<td>兰花 / 兰紫</td>
+<td>#DA70D6</td>
+<td>218,112,214</td>
+<td>302,49,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E6CFE6">　　　</p></td>
+<td>PAIL_LILAC</td>
+<td>淡紫丁香</td>
+<td>#E6CFE6</td>
+<td>230,207,230</td>
+<td>300,10,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D1EDF2">　　　</p></td>
+<td>PALE_BLUE</td>
+<td>灰蓝</td>
+<td>#D1EDF2</td>
+<td>209,237,242</td>
+<td>189,14,95</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #5E86C1">　　　</p></td>
+<td>PALE_DENIM</td>
+<td>灰丁宁蓝 / 白牛仔布</td>
+<td>#5E86C1</td>
+<td>94,134,193</td>
+<td>216,51,76</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EEE8AA">　　　</p></td>
+<td>PALE_GOLDENROD</td>
+<td>灰金菊</td>
+<td>#EEE8AA</td>
+<td>238,232,170</td>
+<td>55,29,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #98FB98">　　　</p></td>
+<td>PALE_GREEN</td>
+<td>灰绿</td>
+<td>#98FB98</td>
+<td>152,251,152</td>
+<td>120,39,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CCB38C">　　　</p></td>
+<td>PALE_OCHRE</td>
+<td>灰土</td>
+<td>#CCB38C</td>
+<td>204,179,140</td>
+<td>37,31,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #AFEEEE">　　　</p></td>
+<td>PALE_TURQUOISE</td>
+<td>灰绿松石</td>
+<td>#AFEEEE</td>
+<td>175,238,238</td>
+<td>180,26,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DB7093">　　　</p></td>
+<td>PALE_VIOLET_RED</td>
+<td>灰紫红</td>
+<td>#DB7093</td>
+<td>219,112,147</td>
+<td>340,49,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7400A1">　　　</p></td>
+<td>PANSY</td>
+<td>三色堇紫</td>
+<td>#7400A1</td>
+<td>116,0,161</td>
+<td>283,100,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFEFD5">　　　</p></td>
+<td>PAPAYA_WHIP</td>
+<td>蕃木瓜</td>
+<td>#FFEFD5</td>
+<td>255,239,213</td>
+<td>37,16,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #800080">　　　</p></td>
+<td>PATRIARCH</td>
+<td>宗主教</td>
+<td>#800080</td>
+<td>128,0,128</td>
+<td>300,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE5B4">　　　</p></td>
+<td>PEACH</td>
+<td>桃</td>
+<td>#FFE5B4</td>
+<td>255,229,180</td>
+<td>39,29,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FBBEA1">　　　</p></td>
+<td>PEACH_PEARL</td>
+<td>珍珠桃</td>
+<td>#FBBEA1</td>
+<td>251,190,161</td>
+<td>40,29,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFDAB9">　　　</p></td>
+<td>PEACH_PUFF</td>
+<td>粉扑桃</td>
+<td>#FFDAB9</td>
+<td>255,218,185</td>
+<td>28,27,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00808C">　　　</p></td>
+<td>PEACOCK_BLUE</td>
+<td>孔雀蓝</td>
+<td>#00808C</td>
+<td>0,128,140</td>
+<td>185,100,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00A15C">　　　</p></td>
+<td>PEACOCK_GREEN</td>
+<td>孔雀绿</td>
+<td>#00A15C</td>
+<td>0,161,92</td>
+<td>154,100,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFB3E6">　　　</p></td>
+<td>PEARL_PINK</td>
+<td>浅珍珠红</td>
+<td>#FFB3E6</td>
+<td>255,179,230</td>
+<td>320,30,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF4D40">　　　</p></td>
+<td>PERSIMMON</td>
+<td>柿子橙</td>
+<td>#FF4D40</td>
+<td>255,77,64</td>
+<td>4,75,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CD853F">　　　</p></td>
+<td>PERU</td>
+<td>秘鲁</td>
+<td>#CD853F</td>
+<td>205,133,63</td>
+<td>30,69,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFC0CB">　　　</p></td>
+<td>PINK</td>
+<td>粉红</td>
+<td>#FFC0CB</td>
+<td>255,192,203</td>
+<td>350,25,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8E4585">　　　</p></td>
+<td>PLUM</td>
+<td>梅红</td>
+<td>#8E4585</td>
+<td>142,69,133</td>
+<td>307,51,56</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B0E0E6">　　　</p></td>
+<td>POWDER_BLUE</td>
+<td>粉蓝</td>
+<td>#B0E0E6</td>
+<td>176,224,230</td>
+<td>187,23,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #003153">　　　</p></td>
+<td>PRUSSIAN_BLUE</td>
+<td>普鲁士蓝</td>
+<td>#003153</td>
+<td>0,49,83</td>
+<td>205,100,43</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6A0DAD">　　　</p></td>
+<td>PURPLE</td>
+<td>紫</td>
+<td>#6A0DAD</td>
+<td>106,13,173</td>
+<td>275,92,68</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF0000">　　　</p></td>
+<td>RED</td>
+<td>红</td>
+<td>#FF0000</td>
+<td>255,0,0</td>
+<td>0,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF007F">　　　</p></td>
+<td>ROSE</td>
+<td>玫瑰红</td>
+<td>#FF007F</td>
+<td>255,0,127</td>
+<td>330,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF66CC">　　　</p></td>
+<td>ROSE_PINK</td>
+<td>浅玫瑰红</td>
+<td>#FF66CC</td>
+<td>255,102,204</td>
+<td>320,60,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BC8F8F">　　　</p></td>
+<td>ROSY_BROWN</td>
+<td>玫瑰褐</td>
+<td>#BC8F8F</td>
+<td>188,143,143</td>
+<td>0,24,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4169E1">　　　</p></td>
+<td>ROYAL_BLUE</td>
+<td>品蓝 / 皇室蓝</td>
+<td>#4169E1</td>
+<td>65,105,225</td>
+<td>225,71,88</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CC0080">　　　</p></td>
+<td>RUBY</td>
+<td>红宝石</td>
+<td>#CC0080</td>
+<td>204,0,128</td>
+<td>322,100,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8B4513">　　　</p></td>
+<td>SADDLE_BROWN</td>
+<td>鞍褐</td>
+<td>#8B4513</td>
+<td>139,69,19</td>
+<td>25,86,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FA8072">　　　</p></td>
+<td>SALMON</td>
+<td>鲑红</td>
+<td>#FA8072</td>
+<td>250,128,114</td>
+<td>6,54,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF8099">　　　</p></td>
+<td>SALMON_PINK</td>
+<td>浅鲑红</td>
+<td>#FF8099</td>
+<td>255,128,153</td>
+<td>348,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4D80E6">　　　</p></td>
+<td>SALVIA_BLUE</td>
+<td>鼠尾草蓝</td>
+<td>#4D80E6</td>
+<td>77,128,230</td>
+<td>220,67,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E6C3C3">　　　</p></td>
+<td>SAND_BEIGE</td>
+<td>沙棕</td>
+<td>#E6C3C3</td>
+<td>230,195,195</td>
+<td>0,15,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F4A460">　　　</p></td>
+<td>SAND_BROWN</td>
+<td>沙褐</td>
+<td>#F4A460</td>
+<td>244,164,96</td>
+<td>28,61,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #082567">　　　</p></td>
+<td>SAPPHIRE</td>
+<td>蓝宝石 / 青玉</td>
+<td>#082567</td>
+<td>8,37,103</td>
+<td>222,92,40</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4798B3">　　　</p></td>
+<td>SAXE_BLUE</td>
+<td>萨克斯蓝</td>
+<td>#4798B3</td>
+<td>71,152,179</td>
+<td>195,60,70</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF2400">　　　</p></td>
+<td>SCARLET</td>
+<td>猩红 / 腥红</td>
+<td>#FF2400</td>
+<td>255,36,0</td>
+<td>8,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF5EE">　　　</p></td>
+<td>SEASHELL</td>
+<td>海贝</td>
+<td>#FFF5EE</td>
+<td>255,245,238</td>
+<td>25,7,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #2E8B57">　　　</p></td>
+<td>SEA_GREEN</td>
+<td>海绿</td>
+<td>#2E8B57</td>
+<td>46,139,87</td>
+<td>146,67,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #704214">　　　</p></td>
+<td>SEPIA</td>
+<td>深褐 / 乌贼墨</td>
+<td>#704214</td>
+<td>112,66,20</td>
+<td>30,82,44</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFB3BF">　　　</p></td>
+<td>SHELL_PINK</td>
+<td>壳黄红</td>
+<td>#FFB3BF</td>
+<td>255,179,191</td>
+<td>351,30,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A0522D">　　　</p></td>
+<td>SIENNA</td>
+<td>赭黄</td>
+<td>#A0522D</td>
+<td>160,82,45</td>
+<td>19,72,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C0C0C0">　　　</p></td>
+<td>SILVER</td>
+<td>银</td>
+<td>#C0C0C0</td>
+<td>192,192,192</td>
+<td>0,0,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #87CEEB">　　　</p></td>
+<td>SKY_BLUE</td>
+<td>天空蓝</td>
+<td>#87CEEB</td>
+<td>135,206,235</td>
+<td>197,43,92</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6A5ACD">　　　</p></td>
+<td>SLATE_BLUE</td>
+<td>岩蓝</td>
+<td>#6A5ACD</td>
+<td>106,90,205</td>
+<td>248,56,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #708090">　　　</p></td>
+<td>SLATE_GRAY</td>
+<td>岩灰</td>
+<td>#708090</td>
+<td>112,128,144</td>
+<td>210,22,56</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFAFA">　　　</p></td>
+<td>SNOW</td>
+<td>雪</td>
+<td>#FFFAFA</td>
+<td>255,250,250</td>
+<td>0,2,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF73B3">　　　</p></td>
+<td>SPINEL_RED</td>
+<td>尖晶石红</td>
+<td>#FF73B3</td>
+<td>255,115,179</td>
+<td>333,55,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FF80">　　　</p></td>
+<td>SPRING_GREEN</td>
+<td>春绿</td>
+<td>#00FF80</td>
+<td>0,255,128</td>
+<td>150,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4682B4">　　　</p></td>
+<td>STEEL_BLUE</td>
+<td>钢青</td>
+<td>#4682B4</td>
+<td>70,130,180</td>
+<td>207,61,71</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #006374">　　　</p></td>
+<td>STRONG_BLUE</td>
+<td>浓蓝</td>
+<td>#006374</td>
+<td>0,99,116</td>
+<td>189,100,45</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E60000">　　　</p></td>
+<td>STRONG_RED</td>
+<td>鲜红</td>
+<td>#E60000</td>
+<td>230,0,0</td>
+<td>0,100,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF7300">　　　</p></td>
+<td>SUN_ORANGE</td>
+<td>阳橙</td>
+<td>#FF7300</td>
+<td>255,115,0</td>
+<td>27,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D2B48C">　　　</p></td>
+<td>TAN</td>
+<td>日晒</td>
+<td>#D2B48C</td>
+<td>210,180,140</td>
+<td>34,33,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F28500">　　　</p></td>
+<td>TANGERINE</td>
+<td>橘</td>
+<td>#F28500</td>
+<td>242,133,0</td>
+<td>33,100,95</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFCC00">　　　</p></td>
+<td>TANGERINE_YELLOW</td>
+<td>橙黄</td>
+<td>#FFCC00</td>
+<td>255,204,0</td>
+<td>48,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #008080">　　　</p></td>
+<td>TEAL</td>
+<td>鸭绿 / 凫绿</td>
+<td>#008080</td>
+<td>0,128,128</td>
+<td>180,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D8BFD8">　　　</p></td>
+<td>THISTLE</td>
+<td>蓟紫</td>
+<td>#D8BFD8</td>
+<td>216,191,216</td>
+<td>300,12,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF6347">　　　</p></td>
+<td>TOMATO</td>
+<td>蕃茄红</td>
+<td>#FF6347</td>
+<td>255,99,71</td>
+<td>9,72,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF8033">　　　</p></td>
+<td>TROPICAL_ORANGE</td>
+<td>热带橙</td>
+<td>#FF8033</td>
+<td>255,128,51</td>
+<td>23,80,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #30D5C8">　　　</p></td>
+<td>TURQUOISE</td>
+<td>绿松 / 绿松石</td>
+<td>#30D5C8</td>
+<td>48,213,200</td>
+<td>210,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00FFEF">　　　</p></td>
+<td>TURQUOISE_BLUE</td>
+<td>土耳其蓝</td>
+<td>#00FFEF</td>
+<td>0,255,239</td>
+<td>176,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4DE680">　　　</p></td>
+<td>TURQUOISE_GREEN</td>
+<td>绿松石绿</td>
+<td>#4DE680</td>
+<td>77,230,128</td>
+<td>140,67,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0033FF">　　　</p></td>
+<td>ULTRAMARINE</td>
+<td>极浓海蓝</td>
+<td>#0033FF</td>
+<td>0,51,255</td>
+<td>228,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E34234">　　　</p></td>
+<td>VERMILION</td>
+<td>朱红</td>
+<td>#E34234</td>
+<td>227,66,52</td>
+<td>5,77,89</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #73E68C">　　　</p></td>
+<td>VERY_LIGHT_MALACHITE_GREEN</td>
+<td>孔雀石绿</td>
+<td>#73E68C</td>
+<td>115,230,140</td>
+<td>133,50,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8000FF">　　　</p></td>
+<td>VIOLET</td>
+<td>堇紫</td>
+<td>#8000FF</td>
+<td>128,0,255</td>
+<td>270,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #127436">　　　</p></td>
+<td>VIRIDIAN</td>
+<td>铬绿</td>
+<td>#127436</td>
+<td>18,116,54</td>
+<td>142,84,45</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #5686BF">　　　</p></td>
+<td>WEDGWOOD_BLUE</td>
+<td>韦奇伍德瓷蓝</td>
+<td>#5686BF</td>
+<td>86,134,191</td>
+<td>213,55,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F5DEB3">　　　</p></td>
+<td>WHEAT</td>
+<td>小麦</td>
+<td>#F5DEB3</td>
+<td>245,222,179</td>
+<td>39,27,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFFFF">　　　</p></td>
+<td>WHITE</td>
+<td>白</td>
+<td>#FFFFFF</td>
+<td>255,255,255</td>
+<td>0,0,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F5F5F5">　　　</p></td>
+<td>WHITE_SMOKE</td>
+<td>白烟</td>
+<td>#F5F5F5</td>
+<td>245,245,245</td>
+<td>0,0,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C9A0DC">　　　</p></td>
+<td>WISTERIA</td>
+<td>紫藤</td>
+<td>#C9A0DC</td>
+<td>201,160,220</td>
+<td>281,27,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFF00">　　　</p></td>
+<td>YELLOW</td>
+<td>黄</td>
+<td>#FFFF00</td>
+<td>255,255,0</td>
+<td>60,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9ACD32">　　　</p></td>
+<td>YELLOW_GREEN</td>
+<td>黄绿</td>
+<td>#9ACD32</td>
+<td>154,205,50</td>
+<td>80,76,80</td>
+</tr>
+</tbody>
+</table>
+<h2>Material 颜色列表<span><a class="mark" href="#colortable_material" id="colortable_material">#</a></span></h2>
+<p>Material Color (材料颜色) 是 Material Design (材料设计) 中的色彩方案.</p>
+<p>Material Design 是谷歌开发的一种视觉语言和设计系统, 拥有近乎扁平化的风格和充满活力的色彩方案.</p>
+<p>下述颜色列表列出了所有 Material Color, 带有下划线和数字的变量名表示颜色色号, 每个颜色将 500 色号作为默认代表颜色, 即 <code>colors.material.RED</code> 与 <code>colors.material.RED_500</code> 等价 (黑白两种颜色除外), 带有 <code>A</code> 的变量, 如 <code>RED_A400</code> 代表强调色, 对应英文 <code>Accent</code>.</p>
+<p>使用方式:</p>
+<pre><code class="lang-js">colors.material.ORANGE;
+</code></pre>
+<blockquote>
+<p>参阅: <a href="https://materialui.co/colors/">materialui.co</a></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">颜色</th>
+<th>变量名</th>
+<th>颜色译名</th>
+<th>Hex 代码</th>
+<th>RGB</th>
+<th>HSV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFEBEE">　　　</p></td>
+<td>RED_50</td>
+<td>红 (50)</td>
+<td>#FFEBEE</td>
+<td>255,235,238</td>
+<td>351,8,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFCDD2">　　　</p></td>
+<td>RED_100</td>
+<td>红 (100)</td>
+<td>#FFCDD2</td>
+<td>255,205,210</td>
+<td>354,20,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EF9A9A">　　　</p></td>
+<td>RED_200</td>
+<td>红 (200)</td>
+<td>#EF9A9A</td>
+<td>239,154,154</td>
+<td>0,36,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E57373">　　　</p></td>
+<td>RED_300</td>
+<td>红 (300)</td>
+<td>#E57373</td>
+<td>229,115,115</td>
+<td>0,50,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EF5350">　　　</p></td>
+<td>RED_400</td>
+<td>红 (400)</td>
+<td>#EF5350</td>
+<td>239,83,80</td>
+<td>1,67,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F44336">　　　</p></td>
+<td>RED_500 / RED</td>
+<td>红 (500)</td>
+<td>#F44336</td>
+<td>244,67,54</td>
+<td>4,78,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E53935">　　　</p></td>
+<td>RED_600</td>
+<td>红 (600)</td>
+<td>#E53935</td>
+<td>229,57,53</td>
+<td>1,77,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D32F2F">　　　</p></td>
+<td>RED_700</td>
+<td>红 (700)</td>
+<td>#D32F2F</td>
+<td>211,47,47</td>
+<td>0,78,83</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C62828">　　　</p></td>
+<td>RED_800</td>
+<td>红 (800)</td>
+<td>#C62828</td>
+<td>198,40,40</td>
+<td>0,80,78</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B71C1C">　　　</p></td>
+<td>RED_900</td>
+<td>红 (900)</td>
+<td>#B71C1C</td>
+<td>183,28,28</td>
+<td>0,85,72</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF8A80">　　　</p></td>
+<td>RED_A100</td>
+<td>红 (A100)</td>
+<td>#FF8A80</td>
+<td>255,138,128</td>
+<td>5,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF5252">　　　</p></td>
+<td>RED_A200</td>
+<td>红 (A200)</td>
+<td>#FF5252</td>
+<td>255,82,82</td>
+<td>0,68,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF1744">　　　</p></td>
+<td>RED_A400</td>
+<td>红 (A400)</td>
+<td>#FF1744</td>
+<td>255,23,68</td>
+<td>348,91,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D50000">　　　</p></td>
+<td>RED_A700</td>
+<td>红 (A700)</td>
+<td>#D50000</td>
+<td>213,0,0</td>
+<td>0,100,84</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FCE4EC">　　　</p></td>
+<td>PINK_50</td>
+<td>粉红 (50)</td>
+<td>#FCE4EC</td>
+<td>252,228,236</td>
+<td>340,10,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F8BBD0">　　　</p></td>
+<td>PINK_100</td>
+<td>粉红 (100)</td>
+<td>#F8BBD0</td>
+<td>248,187,208</td>
+<td>339,25,97</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F48FB1">　　　</p></td>
+<td>PINK_200</td>
+<td>粉红 (200)</td>
+<td>#F48FB1</td>
+<td>244,143,177</td>
+<td>340,41,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F06292">　　　</p></td>
+<td>PINK_300</td>
+<td>粉红 (300)</td>
+<td>#F06292</td>
+<td>240,98,146</td>
+<td>340,59,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EC407A">　　　</p></td>
+<td>PINK_400</td>
+<td>粉红 (400)</td>
+<td>#EC407A</td>
+<td>236,64,122</td>
+<td>340,73,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E91E63">　　　</p></td>
+<td>PINK_500 / PINK</td>
+<td>粉红 (500)</td>
+<td>#E91E63</td>
+<td>233,30,99</td>
+<td>340,87,91</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D81B60">　　　</p></td>
+<td>PINK_600</td>
+<td>粉红 (600)</td>
+<td>#D81B60</td>
+<td>216,27,96</td>
+<td>338,88,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C2185B">　　　</p></td>
+<td>PINK_700</td>
+<td>粉红 (700)</td>
+<td>#C2185B</td>
+<td>194,24,91</td>
+<td>336,88,76</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #AD1457">　　　</p></td>
+<td>PINK_800</td>
+<td>粉红 (800)</td>
+<td>#AD1457</td>
+<td>173,20,87</td>
+<td>334,88,68</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #880E4F">　　　</p></td>
+<td>PINK_900</td>
+<td>粉红 (900)</td>
+<td>#880E4F</td>
+<td>136,14,79</td>
+<td>328,90,53</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF80AB">　　　</p></td>
+<td>PINK_A100</td>
+<td>粉红 (A100)</td>
+<td>#FF80AB</td>
+<td>255,128,171</td>
+<td>340,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF4081">　　　</p></td>
+<td>PINK_A200</td>
+<td>粉红 (A200)</td>
+<td>#FF4081</td>
+<td>255,64,129</td>
+<td>340,75,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F50057">　　　</p></td>
+<td>PINK_A400</td>
+<td>粉红 (A400)</td>
+<td>#F50057</td>
+<td>245,0,87</td>
+<td>339,100,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C51162">　　　</p></td>
+<td>PINK_A700</td>
+<td>粉红 (A700)</td>
+<td>#C51162</td>
+<td>197,17,98</td>
+<td>333,91,77</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F3E5F5">　　　</p></td>
+<td>PURPLE_50</td>
+<td>紫 (50)</td>
+<td>#F3E5F5</td>
+<td>243,229,245</td>
+<td>293,7,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E1BEE7">　　　</p></td>
+<td>PURPLE_100</td>
+<td>紫 (100)</td>
+<td>#E1BEE7</td>
+<td>225,190,231</td>
+<td>291,18,91</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CE93D8">　　　</p></td>
+<td>PURPLE_200</td>
+<td>紫 (200)</td>
+<td>#CE93D8</td>
+<td>206,147,216</td>
+<td>291,32,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BA68C8">　　　</p></td>
+<td>PURPLE_300</td>
+<td>紫 (300)</td>
+<td>#BA68C8</td>
+<td>186,104,200</td>
+<td>291,48,78</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #AB47BC">　　　</p></td>
+<td>PURPLE_400</td>
+<td>紫 (400)</td>
+<td>#AB47BC</td>
+<td>171,71,188</td>
+<td>291,62,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9C27B0">　　　</p></td>
+<td>PURPLE_500 / PURPLE</td>
+<td>紫 (500)</td>
+<td>#9C27B0</td>
+<td>156,39,176</td>
+<td>291,78,69</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8E24AA">　　　</p></td>
+<td>PURPLE_600</td>
+<td>紫 (600)</td>
+<td>#8E24AA</td>
+<td>142,36,170</td>
+<td>287,79,67</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7B1FA2">　　　</p></td>
+<td>PURPLE_700</td>
+<td>紫 (700)</td>
+<td>#7B1FA2</td>
+<td>123,31,162</td>
+<td>282,81,64</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6A1B9A">　　　</p></td>
+<td>PURPLE_800</td>
+<td>紫 (800)</td>
+<td>#6A1B9A</td>
+<td>106,27,154</td>
+<td>277,82,60</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4A148C">　　　</p></td>
+<td>PURPLE_900</td>
+<td>紫 (900)</td>
+<td>#4A148C</td>
+<td>74,20,140</td>
+<td>267,86,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EA80FC">　　　</p></td>
+<td>PURPLE_A100</td>
+<td>紫 (A100)</td>
+<td>#EA80FC</td>
+<td>234,128,252</td>
+<td>291,49,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E040FB">　　　</p></td>
+<td>PURPLE_A200</td>
+<td>紫 (A200)</td>
+<td>#E040FB</td>
+<td>224,64,251</td>
+<td>291,75,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D500F9">　　　</p></td>
+<td>PURPLE_A400</td>
+<td>紫 (A400)</td>
+<td>#D500F9</td>
+<td>213,0,249</td>
+<td>291,100,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #AA00FF">　　　</p></td>
+<td>PURPLE_A700</td>
+<td>紫 (A700)</td>
+<td>#AA00FF</td>
+<td>170,0,255</td>
+<td>280,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EDE7F6">　　　</p></td>
+<td>DEEP_PURPLE_50</td>
+<td>深紫 (50)</td>
+<td>#EDE7F6</td>
+<td>237,231,246</td>
+<td>264,6,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D1C4E9">　　　</p></td>
+<td>DEEP_PURPLE_100</td>
+<td>深紫 (100)</td>
+<td>#D1C4E9</td>
+<td>209,196,233</td>
+<td>261,16,91</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B39DDB">　　　</p></td>
+<td>DEEP_PURPLE_200</td>
+<td>深紫 (200)</td>
+<td>#B39DDB</td>
+<td>179,157,219</td>
+<td>261,28,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9575CD">　　　</p></td>
+<td>DEEP_PURPLE_300</td>
+<td>深紫 (300)</td>
+<td>#9575CD</td>
+<td>149,117,205</td>
+<td>262,43,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7E57C2">　　　</p></td>
+<td>DEEP_PURPLE_400</td>
+<td>深紫 (400)</td>
+<td>#7E57C2</td>
+<td>126,87,194</td>
+<td>262,55,76</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #673AB7">　　　</p></td>
+<td>DEEP_PURPLE_500 / DEEP_PURPLE</td>
+<td>深紫 (500)</td>
+<td>#673AB7</td>
+<td>103,58,183</td>
+<td>262,68,72</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #5E35B1">　　　</p></td>
+<td>DEEP_PURPLE_600</td>
+<td>深紫 (600)</td>
+<td>#5E35B1</td>
+<td>94,53,177</td>
+<td>260,70,69</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #512DA8">　　　</p></td>
+<td>DEEP_PURPLE_700</td>
+<td>深紫 (700)</td>
+<td>#512DA8</td>
+<td>81,45,168</td>
+<td>258,73,66</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4527A0">　　　</p></td>
+<td>DEEP_PURPLE_800</td>
+<td>深紫 (800)</td>
+<td>#4527A0</td>
+<td>69,39,160</td>
+<td>255,76,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #311B92">　　　</p></td>
+<td>DEEP_PURPLE_900</td>
+<td>深紫 (900)</td>
+<td>#311B92</td>
+<td>49,27,146</td>
+<td>251,82,57</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B388FF">　　　</p></td>
+<td>DEEP_PURPLE_A100</td>
+<td>深紫 (A100)</td>
+<td>#B388FF</td>
+<td>179,136,255</td>
+<td>262,47,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7C4DFF">　　　</p></td>
+<td>DEEP_PURPLE_A200</td>
+<td>深紫 (A200)</td>
+<td>#7C4DFF</td>
+<td>124,77,255</td>
+<td>256,70,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #651FFF">　　　</p></td>
+<td>DEEP_PURPLE_A400</td>
+<td>深紫 (A400)</td>
+<td>#651FFF</td>
+<td>101,31,255</td>
+<td>259,88,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6200EA">　　　</p></td>
+<td>DEEP_PURPLE_A700</td>
+<td>深紫 (A700)</td>
+<td>#6200EA</td>
+<td>98,0,234</td>
+<td>265,100,92</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E8EAF6">　　　</p></td>
+<td>INDIGO_50</td>
+<td>靛蓝 (50)</td>
+<td>#E8EAF6</td>
+<td>232,234,246</td>
+<td>231,6,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C5CAE9">　　　</p></td>
+<td>INDIGO_100</td>
+<td>靛蓝 (100)</td>
+<td>#C5CAE9</td>
+<td>197,202,233</td>
+<td>232,15,91</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9FA8DA">　　　</p></td>
+<td>INDIGO_200</td>
+<td>靛蓝 (200)</td>
+<td>#9FA8DA</td>
+<td>159,168,218</td>
+<td>231,27,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7986CB">　　　</p></td>
+<td>INDIGO_300</td>
+<td>靛蓝 (300)</td>
+<td>#7986CB</td>
+<td>121,134,203</td>
+<td>230,40,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #5C6BC0">　　　</p></td>
+<td>INDIGO_400</td>
+<td>靛蓝 (400)</td>
+<td>#5C6BC0</td>
+<td>92,107,192</td>
+<td>231,52,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #3F51B5">　　　</p></td>
+<td>INDIGO_500 / INDIGO</td>
+<td>靛蓝 (500)</td>
+<td>#3F51B5</td>
+<td>63,81,181</td>
+<td>231,65,71</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #3949AB">　　　</p></td>
+<td>INDIGO_600</td>
+<td>靛蓝 (600)</td>
+<td>#3949AB</td>
+<td>57,73,171</td>
+<td>232,67,67</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #303F9F">　　　</p></td>
+<td>INDIGO_700</td>
+<td>靛蓝 (700)</td>
+<td>#303F9F</td>
+<td>48,63,159</td>
+<td>232,70,62</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #283593">　　　</p></td>
+<td>INDIGO_800</td>
+<td>靛蓝 (800)</td>
+<td>#283593</td>
+<td>40,53,147</td>
+<td>233,73,58</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #1A237E">　　　</p></td>
+<td>INDIGO_900</td>
+<td>靛蓝 (900)</td>
+<td>#1A237E</td>
+<td>26,35,126</td>
+<td>235,79,49</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8C9EFF">　　　</p></td>
+<td>INDIGO_A100</td>
+<td>靛蓝 (A100)</td>
+<td>#8C9EFF</td>
+<td>140,158,255</td>
+<td>231,45,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #536DFE">　　　</p></td>
+<td>INDIGO_A200</td>
+<td>靛蓝 (A200)</td>
+<td>#536DFE</td>
+<td>83,109,254</td>
+<td>231,67,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #3D5AFE">　　　</p></td>
+<td>INDIGO_A400</td>
+<td>靛蓝 (A400)</td>
+<td>#3D5AFE</td>
+<td>61,90,254</td>
+<td>231,76,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #304FFE">　　　</p></td>
+<td>INDIGO_A700</td>
+<td>靛蓝 (A700)</td>
+<td>#304FFE</td>
+<td>48,79,254</td>
+<td>231,81,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E3F2FD">　　　</p></td>
+<td>BLUE_50</td>
+<td>蓝 (50)</td>
+<td>#E3F2FD</td>
+<td>227,242,253</td>
+<td>205,10,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BBDEFB">　　　</p></td>
+<td>BLUE_100</td>
+<td>蓝 (100)</td>
+<td>#BBDEFB</td>
+<td>187,222,251</td>
+<td>207,25,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #90CAF9">　　　</p></td>
+<td>BLUE_200</td>
+<td>蓝 (200)</td>
+<td>#90CAF9</td>
+<td>144,202,249</td>
+<td>207,42,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #64B5F6">　　　</p></td>
+<td>BLUE_300</td>
+<td>蓝 (300)</td>
+<td>#64B5F6</td>
+<td>100,181,246</td>
+<td>207,59,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #42A5F5">　　　</p></td>
+<td>BLUE_400</td>
+<td>蓝 (400)</td>
+<td>#42A5F5</td>
+<td>66,165,245</td>
+<td>207,73,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #2196F3">　　　</p></td>
+<td>BLUE_500 / BLUE</td>
+<td>蓝 (500)</td>
+<td>#2196F3</td>
+<td>33,150,243</td>
+<td>207,86,95</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #1E88E5">　　　</p></td>
+<td>BLUE_600</td>
+<td>蓝 (600)</td>
+<td>#1E88E5</td>
+<td>30,136,229</td>
+<td>208,87,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #1976D2">　　　</p></td>
+<td>BLUE_700</td>
+<td>蓝 (700)</td>
+<td>#1976D2</td>
+<td>25,118,210</td>
+<td>210,88,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #1565C0">　　　</p></td>
+<td>BLUE_800</td>
+<td>蓝 (800)</td>
+<td>#1565C0</td>
+<td>21,101,192</td>
+<td>212,89,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0D47A1">　　　</p></td>
+<td>BLUE_900</td>
+<td>蓝 (900)</td>
+<td>#0D47A1</td>
+<td>13,71,161</td>
+<td>216,92,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #82B1FF">　　　</p></td>
+<td>BLUE_A100</td>
+<td>蓝 (A100)</td>
+<td>#82B1FF</td>
+<td>130,177,255</td>
+<td>217,49,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #448AFF">　　　</p></td>
+<td>BLUE_A200</td>
+<td>蓝 (A200)</td>
+<td>#448AFF</td>
+<td>68,138,255</td>
+<td>218,73,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #2979FF">　　　</p></td>
+<td>BLUE_A400</td>
+<td>蓝 (A400)</td>
+<td>#2979FF</td>
+<td>41,121,255</td>
+<td>218,84,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #2962FF">　　　</p></td>
+<td>BLUE_A700</td>
+<td>蓝 (A700)</td>
+<td>#2962FF</td>
+<td>41,98,255</td>
+<td>224,84,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E1F5FE">　　　</p></td>
+<td>LIGHT_BLUE_50</td>
+<td>浅蓝 (50)</td>
+<td>#E1F5FE</td>
+<td>225,245,254</td>
+<td>199,11,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B3E5FC">　　　</p></td>
+<td>LIGHT_BLUE_100</td>
+<td>浅蓝 (100)</td>
+<td>#B3E5FC</td>
+<td>179,229,252</td>
+<td>199,29,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #81D4FA">　　　</p></td>
+<td>LIGHT_BLUE_200</td>
+<td>浅蓝 (200)</td>
+<td>#81D4FA</td>
+<td>129,212,250</td>
+<td>199,48,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4FC3F7">　　　</p></td>
+<td>LIGHT_BLUE_300</td>
+<td>浅蓝 (300)</td>
+<td>#4FC3F7</td>
+<td>79,195,247</td>
+<td>199,68,97</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #29B6FC">　　　</p></td>
+<td>LIGHT_BLUE_400</td>
+<td>浅蓝 (400)</td>
+<td>#29B6FC</td>
+<td>41,182,252</td>
+<td>200,84,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #03A9F4">　　　</p></td>
+<td>LIGHT_BLUE_500 / LIGHT_BLUE</td>
+<td>浅蓝 (500)</td>
+<td>#03A9F4</td>
+<td>3,169,244</td>
+<td>199,99,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #039BE5">　　　</p></td>
+<td>LIGHT_BLUE_600</td>
+<td>浅蓝 (600)</td>
+<td>#039BE5</td>
+<td>3,155,229</td>
+<td>200,99,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0288D1">　　　</p></td>
+<td>LIGHT_BLUE_700</td>
+<td>浅蓝 (700)</td>
+<td>#0288D1</td>
+<td>2,136,209</td>
+<td>201,99,82</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0277BD">　　　</p></td>
+<td>LIGHT_BLUE_800</td>
+<td>浅蓝 (800)</td>
+<td>#0277BD</td>
+<td>2,119,189</td>
+<td>202,99,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #01579B">　　　</p></td>
+<td>LIGHT_BLUE_900</td>
+<td>浅蓝 (900)</td>
+<td>#01579B</td>
+<td>1,87,155</td>
+<td>206,99,61</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #80D8FF">　　　</p></td>
+<td>LIGHT_BLUE_A100</td>
+<td>浅蓝 (A100)</td>
+<td>#80D8FF</td>
+<td>128,216,255</td>
+<td>198,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #40C4FF">　　　</p></td>
+<td>LIGHT_BLUE_A200</td>
+<td>浅蓝 (A200)</td>
+<td>#40C4FF</td>
+<td>64,196,255</td>
+<td>199,75,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00B0FF">　　　</p></td>
+<td>LIGHT_BLUE_A400</td>
+<td>浅蓝 (A400)</td>
+<td>#00B0FF</td>
+<td>0,176,255</td>
+<td>199,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0091EA">　　　</p></td>
+<td>LIGHT_BLUE_A700</td>
+<td>浅蓝 (A700)</td>
+<td>#0091EA</td>
+<td>0,145,234</td>
+<td>203,100,92</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E0F7FA">　　　</p></td>
+<td>CYAN_50</td>
+<td>青 (50)</td>
+<td>#E0F7FA</td>
+<td>224,247,250</td>
+<td>187,10,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B2EBF2">　　　</p></td>
+<td>CYAN_100</td>
+<td>青 (100)</td>
+<td>#B2EBF2</td>
+<td>178,235,242</td>
+<td>187,26,95</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #80DEEA">　　　</p></td>
+<td>CYAN_200</td>
+<td>青 (200)</td>
+<td>#80DEEA</td>
+<td>128,222,234</td>
+<td>187,45,92</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4DD0E1">　　　</p></td>
+<td>CYAN_300</td>
+<td>青 (300)</td>
+<td>#4DD0E1</td>
+<td>77,208,225</td>
+<td>187,66,88</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #26C6DA">　　　</p></td>
+<td>CYAN_400</td>
+<td>青 (400)</td>
+<td>#26C6DA</td>
+<td>38,198,218</td>
+<td>187,83,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00BCD4">　　　</p></td>
+<td>CYAN_500 / CYAN</td>
+<td>青 (500)</td>
+<td>#00BCD4</td>
+<td>0,188,212</td>
+<td>187,100,83</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00ACC1">　　　</p></td>
+<td>CYAN_600</td>
+<td>青 (600)</td>
+<td>#00ACC1</td>
+<td>0,172,193</td>
+<td>187,100,76</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #0097A7">　　　</p></td>
+<td>CYAN_700</td>
+<td>青 (700)</td>
+<td>#0097A7</td>
+<td>0,151,167</td>
+<td>186,100,65</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00838F">　　　</p></td>
+<td>CYAN_800</td>
+<td>青 (800)</td>
+<td>#00838F</td>
+<td>0,131,143</td>
+<td>185,100,56</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #006064">　　　</p></td>
+<td>CYAN_900</td>
+<td>青 (900)</td>
+<td>#006064</td>
+<td>0,96,100</td>
+<td>182,100,39</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #84FFFF">　　　</p></td>
+<td>CYAN_A100</td>
+<td>青 (A100)</td>
+<td>#84FFFF</td>
+<td>132,255,255</td>
+<td>180,48,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #18FFFF">　　　</p></td>
+<td>CYAN_A200</td>
+<td>青 (A200)</td>
+<td>#18FFFF</td>
+<td>24,255,255</td>
+<td>180,91,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00E5FF">　　　</p></td>
+<td>CYAN_A400</td>
+<td>青 (A400)</td>
+<td>#00E5FF</td>
+<td>0,229,255</td>
+<td>186,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00B8D4">　　　</p></td>
+<td>CYAN_A700</td>
+<td>青 (A700)</td>
+<td>#00B8D4</td>
+<td>0,184,212</td>
+<td>188,100,83</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E0F2F1">　　　</p></td>
+<td>TEAL_50</td>
+<td>蓝绿 (50)</td>
+<td>#E0F2F1</td>
+<td>224,242,241</td>
+<td>177,7,95</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B2DFDB">　　　</p></td>
+<td>TEAL_100</td>
+<td>蓝绿 (100)</td>
+<td>#B2DFDB</td>
+<td>178,223,219</td>
+<td>175,20,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #80CBC4">　　　</p></td>
+<td>TEAL_200</td>
+<td>蓝绿 (200)</td>
+<td>#80CBC4</td>
+<td>128,203,196</td>
+<td>174,37,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4DB6AC">　　　</p></td>
+<td>TEAL_300</td>
+<td>蓝绿 (300)</td>
+<td>#4DB6AC</td>
+<td>77,182,172</td>
+<td>174,58,71</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #26A69A">　　　</p></td>
+<td>TEAL_400</td>
+<td>蓝绿 (400)</td>
+<td>#26A69A</td>
+<td>38,166,154</td>
+<td>174,77,65</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #009688">　　　</p></td>
+<td>TEAL_500 / TEAL</td>
+<td>蓝绿 (500)</td>
+<td>#009688</td>
+<td>0,150,136</td>
+<td>174,100,59</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00897B">　　　</p></td>
+<td>TEAL_600</td>
+<td>蓝绿 (600)</td>
+<td>#00897B</td>
+<td>0,137,123</td>
+<td>174,100,54</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00796B">　　　</p></td>
+<td>TEAL_700</td>
+<td>蓝绿 (700)</td>
+<td>#00796B</td>
+<td>0,121,107</td>
+<td>173,100,47</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00695C">　　　</p></td>
+<td>TEAL_800</td>
+<td>蓝绿 (800)</td>
+<td>#00695C</td>
+<td>0,105,92</td>
+<td>173,100,41</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #004D40">　　　</p></td>
+<td>TEAL_900</td>
+<td>蓝绿 (900)</td>
+<td>#004D40</td>
+<td>0,77,64</td>
+<td>170,100,30</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A7FFEB">　　　</p></td>
+<td>TEAL_A100</td>
+<td>蓝绿 (A100)</td>
+<td>#A7FFEB</td>
+<td>167,255,235</td>
+<td>166,35,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #64FFDA">　　　</p></td>
+<td>TEAL_A200</td>
+<td>蓝绿 (A200)</td>
+<td>#64FFDA</td>
+<td>100,255,218</td>
+<td>166,61,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #1DE9B6">　　　</p></td>
+<td>TEAL_A400</td>
+<td>蓝绿 (A400)</td>
+<td>#1DE9B6</td>
+<td>29,233,182</td>
+<td>165,88,91</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00BFA5">　　　</p></td>
+<td>TEAL_A700</td>
+<td>蓝绿 (A700)</td>
+<td>#00BFA5</td>
+<td>0,191,165</td>
+<td>172,100,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E8F5E9">　　　</p></td>
+<td>GREEN_50</td>
+<td>绿 (50)</td>
+<td>#E8F5E9</td>
+<td>232,245,233</td>
+<td>125,5,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C8E6C9">　　　</p></td>
+<td>GREEN_100</td>
+<td>绿 (100)</td>
+<td>#C8E6C9</td>
+<td>200,230,201</td>
+<td>122,13,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A5D6A7">　　　</p></td>
+<td>GREEN_200</td>
+<td>绿 (200)</td>
+<td>#A5D6A7</td>
+<td>165,214,167</td>
+<td>122,23,84</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #81C784">　　　</p></td>
+<td>GREEN_300</td>
+<td>绿 (300)</td>
+<td>#81C784</td>
+<td>129,199,132</td>
+<td>123,35,78</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #66BB6A">　　　</p></td>
+<td>GREEN_400</td>
+<td>绿 (400)</td>
+<td>#66BB6A</td>
+<td>102,187,106</td>
+<td>123,45,73</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4CAF50">　　　</p></td>
+<td>GREEN_500 / GREEN</td>
+<td>绿 (500)</td>
+<td>#4CAF50</td>
+<td>76,175,80</td>
+<td>122,57,69</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #43A047">　　　</p></td>
+<td>GREEN_600</td>
+<td>绿 (600)</td>
+<td>#43A047</td>
+<td>67,160,71</td>
+<td>123,58,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #388E3C">　　　</p></td>
+<td>GREEN_700</td>
+<td>绿 (700)</td>
+<td>#388E3C</td>
+<td>56,142,60</td>
+<td>123,61,56</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #2E7D32">　　　</p></td>
+<td>GREEN_800</td>
+<td>绿 (800)</td>
+<td>#2E7D32</td>
+<td>46,125,50</td>
+<td>123,63,49</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #1B5E20">　　　</p></td>
+<td>GREEN_900</td>
+<td>绿 (900)</td>
+<td>#1B5E20</td>
+<td>27,94,32</td>
+<td>124,71,37</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B9F6CA">　　　</p></td>
+<td>GREEN_A100</td>
+<td>绿 (A100)</td>
+<td>#B9F6CA</td>
+<td>185,246,202</td>
+<td>137,25,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #69F0AE">　　　</p></td>
+<td>GREEN_A200</td>
+<td>绿 (A200)</td>
+<td>#69F0AE</td>
+<td>105,240,174</td>
+<td>151,56,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00E676">　　　</p></td>
+<td>GREEN_A400</td>
+<td>绿 (A400)</td>
+<td>#00E676</td>
+<td>0,230,118</td>
+<td>151,100,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #00C853">　　　</p></td>
+<td>GREEN_A700</td>
+<td>绿 (A700)</td>
+<td>#00C853</td>
+<td>0,200,83</td>
+<td>145,100,78</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F1F8E9">　　　</p></td>
+<td>LIGHT_GREEN_50</td>
+<td>浅绿 (50)</td>
+<td>#F1F8E9</td>
+<td>241,248,233</td>
+<td>88,6,97</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DCEDC8">　　　</p></td>
+<td>LIGHT_GREEN_100</td>
+<td>浅绿 (100)</td>
+<td>#DCEDC8</td>
+<td>220,237,200</td>
+<td>88,16,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C5E1A5">　　　</p></td>
+<td>LIGHT_GREEN_200</td>
+<td>浅绿 (200)</td>
+<td>#C5E1A5</td>
+<td>197,225,165</td>
+<td>88,27,88</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #AED581">　　　</p></td>
+<td>LIGHT_GREEN_300</td>
+<td>浅绿 (300)</td>
+<td>#AED581</td>
+<td>174,213,129</td>
+<td>88,39,84</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9CCC65">　　　</p></td>
+<td>LIGHT_GREEN_400</td>
+<td>浅绿 (400)</td>
+<td>#9CCC65</td>
+<td>156,204,101</td>
+<td>88,50,80</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8BC34A">　　　</p></td>
+<td>LIGHT_GREEN_500 / LIGHT_GREEN</td>
+<td>浅绿 (500)</td>
+<td>#8BC34A</td>
+<td>139,195,74</td>
+<td>88,62,76</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #7CB342">　　　</p></td>
+<td>LIGHT_GREEN_600</td>
+<td>浅绿 (600)</td>
+<td>#7CB342</td>
+<td>124,179,66</td>
+<td>89,63,70</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #689F38">　　　</p></td>
+<td>LIGHT_GREEN_700</td>
+<td>浅绿 (700)</td>
+<td>#689F38</td>
+<td>104,159,56</td>
+<td>92,65,62</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #558B2F">　　　</p></td>
+<td>LIGHT_GREEN_800</td>
+<td>浅绿 (800)</td>
+<td>#558B2F</td>
+<td>85,139,47</td>
+<td>95,66,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #33691E">　　　</p></td>
+<td>LIGHT_GREEN_900</td>
+<td>浅绿 (900)</td>
+<td>#33691E</td>
+<td>51,105,30</td>
+<td>103,71,41</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CCFF90">　　　</p></td>
+<td>LIGHT_GREEN_A100</td>
+<td>浅绿 (A100)</td>
+<td>#CCFF90</td>
+<td>204,255,144</td>
+<td>88,44,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B2FF59">　　　</p></td>
+<td>LIGHT_GREEN_A200</td>
+<td>浅绿 (A200)</td>
+<td>#B2FF59</td>
+<td>178,255,89</td>
+<td>88,65,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #76FF03">　　　</p></td>
+<td>LIGHT_GREEN_A400</td>
+<td>浅绿 (A400)</td>
+<td>#76FF03</td>
+<td>118,255,3</td>
+<td>93,99,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #64DD17">　　　</p></td>
+<td>LIGHT_GREEN_A700</td>
+<td>浅绿 (A700)</td>
+<td>#64DD17</td>
+<td>100,221,23</td>
+<td>97,90,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F9FBE7">　　　</p></td>
+<td>LIME_50</td>
+<td>绿黄 (50)</td>
+<td>#F9FBE7</td>
+<td>249,251,231</td>
+<td>66,8,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F0F4C3">　　　</p></td>
+<td>LIME_100</td>
+<td>绿黄 (100)</td>
+<td>#F0F4C3</td>
+<td>240,244,195</td>
+<td>65,20,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E6EE9C">　　　</p></td>
+<td>LIME_200</td>
+<td>绿黄 (200)</td>
+<td>#E6EE9C</td>
+<td>230,238,156</td>
+<td>66,34,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DCE775">　　　</p></td>
+<td>LIME_300</td>
+<td>绿黄 (300)</td>
+<td>#DCE775</td>
+<td>220,231,117</td>
+<td>66,49,91</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D4E157">　　　</p></td>
+<td>LIME_400</td>
+<td>绿黄 (400)</td>
+<td>#D4E157</td>
+<td>212,225,87</td>
+<td>66,61,88</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CDDC39">　　　</p></td>
+<td>LIME_500 / LIME</td>
+<td>绿黄 (500)</td>
+<td>#CDDC39</td>
+<td>205,220,57</td>
+<td>66,74,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C0CA33">　　　</p></td>
+<td>LIME_600</td>
+<td>绿黄 (600)</td>
+<td>#C0CA33</td>
+<td>192,202,51</td>
+<td>64,75,79</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A4B42B">　　　</p></td>
+<td>LIME_700</td>
+<td>绿黄 (700)</td>
+<td>#A4B42B</td>
+<td>164,180,43</td>
+<td>67,76,71</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9E9D24">　　　</p></td>
+<td>LIME_800</td>
+<td>绿黄 (800)</td>
+<td>#9E9D24</td>
+<td>158,157,36</td>
+<td>60,77,62</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #827717">　　　</p></td>
+<td>LIME_900</td>
+<td>绿黄 (900)</td>
+<td>#827717</td>
+<td>130,119,23</td>
+<td>54,82,51</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F4FF81">　　　</p></td>
+<td>LIME_A100</td>
+<td>绿黄 (A100)</td>
+<td>#F4FF81</td>
+<td>244,255,129</td>
+<td>65,49,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EEFF41">　　　</p></td>
+<td>LIME_A200</td>
+<td>绿黄 (A200)</td>
+<td>#EEFF41</td>
+<td>238,255,65</td>
+<td>65,75,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #C6FF00">　　　</p></td>
+<td>LIME_A400</td>
+<td>绿黄 (A400)</td>
+<td>#C6FF00</td>
+<td>198,255,0</td>
+<td>73,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #AEEA00">　　　</p></td>
+<td>LIME_A700</td>
+<td>绿黄 (A700)</td>
+<td>#AEEA00</td>
+<td>174,234,0</td>
+<td>75,100,92</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFDE7">　　　</p></td>
+<td>YELLOW_50</td>
+<td>黄 (50)</td>
+<td>#FFFDE7</td>
+<td>255,253,231</td>
+<td>55,9,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF9C4">　　　</p></td>
+<td>YELLOW_100</td>
+<td>黄 (100)</td>
+<td>#FFF9C4</td>
+<td>255,249,196</td>
+<td>54,23,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF590">　　　</p></td>
+<td>YELLOW_200</td>
+<td>黄 (200)</td>
+<td>#FFF590</td>
+<td>255,245,144</td>
+<td>55,44,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF176">　　　</p></td>
+<td>YELLOW_300</td>
+<td>黄 (300)</td>
+<td>#FFF176</td>
+<td>255,241,118</td>
+<td>54,54,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFEE58">　　　</p></td>
+<td>YELLOW_400</td>
+<td>黄 (400)</td>
+<td>#FFEE58</td>
+<td>255,238,88</td>
+<td>54,65,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFEB3B">　　　</p></td>
+<td>YELLOW_500 / YELLOW</td>
+<td>黄 (500)</td>
+<td>#FFEB3B</td>
+<td>255,235,59</td>
+<td>54,77,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FDD835">　　　</p></td>
+<td>YELLOW_600</td>
+<td>黄 (600)</td>
+<td>#FDD835</td>
+<td>253,216,53</td>
+<td>49,79,99</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FBC02D">　　　</p></td>
+<td>YELLOW_700</td>
+<td>黄 (700)</td>
+<td>#FBC02D</td>
+<td>251,192,45</td>
+<td>43,82,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F9A825">　　　</p></td>
+<td>YELLOW_800</td>
+<td>黄 (800)</td>
+<td>#F9A825</td>
+<td>249,168,37</td>
+<td>37,85,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F57F17">　　　</p></td>
+<td>YELLOW_900</td>
+<td>黄 (900)</td>
+<td>#F57F17</td>
+<td>245,127,23</td>
+<td>28,91,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFF82">　　　</p></td>
+<td>YELLOW_A100</td>
+<td>黄 (A100)</td>
+<td>#FFFF82</td>
+<td>255,255,130</td>
+<td>60,49,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFF00">　　　</p></td>
+<td>YELLOW_A200</td>
+<td>黄 (A200)</td>
+<td>#FFFF00</td>
+<td>255,255,0</td>
+<td>60,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFEA00">　　　</p></td>
+<td>YELLOW_A400</td>
+<td>黄 (A400)</td>
+<td>#FFEA00</td>
+<td>255,234,0</td>
+<td>55,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFD600">　　　</p></td>
+<td>YELLOW_A700</td>
+<td>黄 (A700)</td>
+<td>#FFD600</td>
+<td>255,214,0</td>
+<td>50,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF8E1">　　　</p></td>
+<td>AMBER_50</td>
+<td>琥珀 (50)</td>
+<td>#FFF8E1</td>
+<td>255,248,225</td>
+<td>46,12,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFECB3">　　　</p></td>
+<td>AMBER_100</td>
+<td>琥珀 (100)</td>
+<td>#FFECB3</td>
+<td>255,236,179</td>
+<td>45,30,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE082">　　　</p></td>
+<td>AMBER_200</td>
+<td>琥珀 (200)</td>
+<td>#FFE082</td>
+<td>255,224,130</td>
+<td>45,49,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFD54F">　　　</p></td>
+<td>AMBER_300</td>
+<td>琥珀 (300)</td>
+<td>#FFD54F</td>
+<td>255,213,79</td>
+<td>46,69,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFCA28">　　　</p></td>
+<td>AMBER_400</td>
+<td>琥珀 (400)</td>
+<td>#FFCA28</td>
+<td>255,202,40</td>
+<td>45,84,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFC107">　　　</p></td>
+<td>AMBER_500 / AMBER</td>
+<td>琥珀 (500)</td>
+<td>#FFC107</td>
+<td>255,193,7</td>
+<td>45,97,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFB300">　　　</p></td>
+<td>AMBER_600</td>
+<td>琥珀 (600)</td>
+<td>#FFB300</td>
+<td>255,179,0</td>
+<td>42,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFA000">　　　</p></td>
+<td>AMBER_700</td>
+<td>琥珀 (700)</td>
+<td>#FFA000</td>
+<td>255,160,0</td>
+<td>38,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF8F00">　　　</p></td>
+<td>AMBER_800</td>
+<td>琥珀 (800)</td>
+<td>#FF8F00</td>
+<td>255,143,0</td>
+<td>34,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF6F00">　　　</p></td>
+<td>AMBER_900</td>
+<td>琥珀 (900)</td>
+<td>#FF6F00</td>
+<td>255,111,0</td>
+<td>26,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE57F">　　　</p></td>
+<td>AMBER_A100</td>
+<td>琥珀 (A100)</td>
+<td>#FFE57F</td>
+<td>255,229,127</td>
+<td>48,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFD740">　　　</p></td>
+<td>AMBER_A200</td>
+<td>琥珀 (A200)</td>
+<td>#FFD740</td>
+<td>255,215,64</td>
+<td>47,75,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFC400">　　　</p></td>
+<td>AMBER_A400</td>
+<td>琥珀 (A400)</td>
+<td>#FFC400</td>
+<td>255,196,0</td>
+<td>46,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFAB00">　　　</p></td>
+<td>AMBER_A700</td>
+<td>琥珀 (A700)</td>
+<td>#FFAB00</td>
+<td>255,171,0</td>
+<td>40,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFF3E0">　　　</p></td>
+<td>ORANGE_50</td>
+<td>橙 (50)</td>
+<td>#FFF3E0</td>
+<td>255,243,224</td>
+<td>37,12,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFE0B2">　　　</p></td>
+<td>ORANGE_100</td>
+<td>橙 (100)</td>
+<td>#FFE0B2</td>
+<td>255,224,178</td>
+<td>36,30,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFCC80">　　　</p></td>
+<td>ORANGE_200</td>
+<td>橙 (200)</td>
+<td>#FFCC80</td>
+<td>255,204,128</td>
+<td>36,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFB74D">　　　</p></td>
+<td>ORANGE_300</td>
+<td>橙 (300)</td>
+<td>#FFB74D</td>
+<td>255,183,77</td>
+<td>36,70,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFA726">　　　</p></td>
+<td>ORANGE_400</td>
+<td>橙 (400)</td>
+<td>#FFA726</td>
+<td>255,167,38</td>
+<td>36,85,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF9800">　　　</p></td>
+<td>ORANGE_500 / ORANGE</td>
+<td>橙 (500)</td>
+<td>#FF9800</td>
+<td>255,152,0</td>
+<td>36,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FB8C00">　　　</p></td>
+<td>ORANGE_600</td>
+<td>橙 (600)</td>
+<td>#FB8C00</td>
+<td>251,140,0</td>
+<td>33,100,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F57C00">　　　</p></td>
+<td>ORANGE_700</td>
+<td>橙 (700)</td>
+<td>#F57C00</td>
+<td>245,124,0</td>
+<td>30,100,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EF6C00">　　　</p></td>
+<td>ORANGE_800</td>
+<td>橙 (800)</td>
+<td>#EF6C00</td>
+<td>239,108,0</td>
+<td>27,100,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E65100">　　　</p></td>
+<td>ORANGE_900</td>
+<td>橙 (900)</td>
+<td>#E65100</td>
+<td>230,81,0</td>
+<td>21,100,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFD180">　　　</p></td>
+<td>ORANGE_A100</td>
+<td>橙 (A100)</td>
+<td>#FFD180</td>
+<td>255,209,128</td>
+<td>38,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFAB40">　　　</p></td>
+<td>ORANGE_A200</td>
+<td>橙 (A200)</td>
+<td>#FFAB40</td>
+<td>255,171,64</td>
+<td>34,75,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF9100">　　　</p></td>
+<td>ORANGE_A400</td>
+<td>橙 (A400)</td>
+<td>#FF9100</td>
+<td>255,145,0</td>
+<td>34,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF6D00">　　　</p></td>
+<td>ORANGE_A700</td>
+<td>橙 (A700)</td>
+<td>#FF6D00</td>
+<td>255,109,0</td>
+<td>26,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FBE9A7">　　　</p></td>
+<td>DEEP_ORANGE_50</td>
+<td>深橙 (50)</td>
+<td>#FBE9A7</td>
+<td>251,233,167</td>
+<td>47,33,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFCCBC">　　　</p></td>
+<td>DEEP_ORANGE_100</td>
+<td>深橙 (100)</td>
+<td>#FFCCBC</td>
+<td>255,204,188</td>
+<td>14,26,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFAB91">　　　</p></td>
+<td>DEEP_ORANGE_200</td>
+<td>深橙 (200)</td>
+<td>#FFAB91</td>
+<td>255,171,145</td>
+<td>14,43,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF8A65">　　　</p></td>
+<td>DEEP_ORANGE_300</td>
+<td>深橙 (300)</td>
+<td>#FF8A65</td>
+<td>255,138,101</td>
+<td>14,60,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF7043">　　　</p></td>
+<td>DEEP_ORANGE_400</td>
+<td>深橙 (400)</td>
+<td>#FF7043</td>
+<td>255,112,67</td>
+<td>14,74,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF5722">　　　</p></td>
+<td>DEEP_ORANGE_500 / DEEP_ORANGE</td>
+<td>深橙 (500)</td>
+<td>#FF5722</td>
+<td>255,87,34</td>
+<td>14,87,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F4511E">　　　</p></td>
+<td>DEEP_ORANGE_600</td>
+<td>深橙 (600)</td>
+<td>#F4511E</td>
+<td>244,81,30</td>
+<td>14,88,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E64A19">　　　</p></td>
+<td>DEEP_ORANGE_700</td>
+<td>深橙 (700)</td>
+<td>#E64A19</td>
+<td>230,74,25</td>
+<td>14,89,90</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D84315">　　　</p></td>
+<td>DEEP_ORANGE_800</td>
+<td>深橙 (800)</td>
+<td>#D84315</td>
+<td>216,67,21</td>
+<td>14,90,85</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BF360C">　　　</p></td>
+<td>DEEP_ORANGE_900</td>
+<td>深橙 (900)</td>
+<td>#BF360C</td>
+<td>191,54,12</td>
+<td>14,94,75</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF9E80">　　　</p></td>
+<td>DEEP_ORANGE_A100</td>
+<td>深橙 (A100)</td>
+<td>#FF9E80</td>
+<td>255,158,128</td>
+<td>14,50,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF6E40">　　　</p></td>
+<td>DEEP_ORANGE_A200</td>
+<td>深橙 (A200)</td>
+<td>#FF6E40</td>
+<td>255,110,64</td>
+<td>14,75,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FF3D00">　　　</p></td>
+<td>DEEP_ORANGE_A400</td>
+<td>深橙 (A400)</td>
+<td>#FF3D00</td>
+<td>255,61,0</td>
+<td>14,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #DD2600">　　　</p></td>
+<td>DEEP_ORANGE_A700</td>
+<td>深橙 (A700)</td>
+<td>#DD2600</td>
+<td>221,38,0</td>
+<td>10,100,87</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EFEBE9">　　　</p></td>
+<td>BROWN_50</td>
+<td>棕 (50)</td>
+<td>#EFEBE9</td>
+<td>239,235,233</td>
+<td>20,3,94</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #D7CCC8">　　　</p></td>
+<td>BROWN_100</td>
+<td>棕 (100)</td>
+<td>#D7CCC8</td>
+<td>215,204,200</td>
+<td>16,7,84</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BCAAA4">　　　</p></td>
+<td>BROWN_200</td>
+<td>棕 (200)</td>
+<td>#BCAAA4</td>
+<td>188,170,164</td>
+<td>15,13,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #A1887F">　　　</p></td>
+<td>BROWN_300</td>
+<td>棕 (300)</td>
+<td>#A1887F</td>
+<td>161,136,127</td>
+<td>16,21,63</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #8D6E63">　　　</p></td>
+<td>BROWN_400</td>
+<td>棕 (400)</td>
+<td>#8D6E63</td>
+<td>141,110,99</td>
+<td>16,30,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #795548">　　　</p></td>
+<td>BROWN_500 / BROWN</td>
+<td>棕 (500)</td>
+<td>#795548</td>
+<td>121,85,72</td>
+<td>16,40,47</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #6D4C41">　　　</p></td>
+<td>BROWN_600</td>
+<td>棕 (600)</td>
+<td>#6D4C41</td>
+<td>109,76,65</td>
+<td>15,40,43</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #5D4037">　　　</p></td>
+<td>BROWN_700</td>
+<td>棕 (700)</td>
+<td>#5D4037</td>
+<td>93,64,55</td>
+<td>14,41,36</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #4E342E">　　　</p></td>
+<td>BROWN_800</td>
+<td>棕 (800)</td>
+<td>#4E342E</td>
+<td>78,52,46</td>
+<td>11,41,31</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #3E2723">　　　</p></td>
+<td>BROWN_900</td>
+<td>棕 (900)</td>
+<td>#3E2723</td>
+<td>62,39,35</td>
+<td>9,44,24</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FAFAFA">　　　</p></td>
+<td>GREY_50</td>
+<td>灰 (50)</td>
+<td>#FAFAFA</td>
+<td>250,250,250</td>
+<td>0,0,98</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #F5F5F5">　　　</p></td>
+<td>GREY_100</td>
+<td>灰 (100)</td>
+<td>#F5F5F5</td>
+<td>245,245,245</td>
+<td>0,0,96</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #EEEEEE">　　　</p></td>
+<td>GREY_200</td>
+<td>灰 (200)</td>
+<td>#EEEEEE</td>
+<td>238,238,238</td>
+<td>0,0,93</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #E0E0E0">　　　</p></td>
+<td>GREY_300</td>
+<td>灰 (300)</td>
+<td>#E0E0E0</td>
+<td>224,224,224</td>
+<td>0,0,88</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #BDBDBD">　　　</p></td>
+<td>GREY_400</td>
+<td>灰 (400)</td>
+<td>#BDBDBD</td>
+<td>189,189,189</td>
+<td>0,0,74</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #9E9E9E">　　　</p></td>
+<td>GREY_500 / GREY</td>
+<td>灰 (500)</td>
+<td>#9E9E9E</td>
+<td>158,158,158</td>
+<td>0,0,62</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #757575">　　　</p></td>
+<td>GREY_600</td>
+<td>灰 (600)</td>
+<td>#757575</td>
+<td>117,117,117</td>
+<td>0,0,46</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #616161">　　　</p></td>
+<td>GREY_700</td>
+<td>灰 (700)</td>
+<td>#616161</td>
+<td>97,97,97</td>
+<td>0,0,38</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #424242">　　　</p></td>
+<td>GREY_800</td>
+<td>灰 (800)</td>
+<td>#424242</td>
+<td>66,66,66</td>
+<td>0,0,26</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #212121">　　　</p></td>
+<td>GREY_900</td>
+<td>灰 (900)</td>
+<td>#212121</td>
+<td>33,33,33</td>
+<td>0,0,13</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #000000">　　　</p></td>
+<td>BLACK_1000 / BLACK</td>
+<td>黑</td>
+<td>#000000</td>
+<td>0,0,0</td>
+<td>0,0,0</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #FFFFFF">　　　</p></td>
+<td>WHITE_1000 / WHITE</td>
+<td>白</td>
+<td>#FFFFFF</td>
+<td>255,255,255</td>
+<td>0,0,100</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #ECEFF1">　　　</p></td>
+<td>BLUE_GREY_50</td>
+<td>蓝灰 (50)</td>
+<td>#ECEFF1</td>
+<td>236,239,241</td>
+<td>204,2,95</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #CFD8DC">　　　</p></td>
+<td>BLUE_GREY_100</td>
+<td>蓝灰 (100)</td>
+<td>#CFD8DC</td>
+<td>207,216,220</td>
+<td>198,6,86</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #B0BBC5">　　　</p></td>
+<td>BLUE_GREY_200</td>
+<td>蓝灰 (200)</td>
+<td>#B0BBC5</td>
+<td>176,187,197</td>
+<td>209,11,77</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #90A4AE">　　　</p></td>
+<td>BLUE_GREY_300</td>
+<td>蓝灰 (300)</td>
+<td>#90A4AE</td>
+<td>144,164,174</td>
+<td>200,17,68</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #78909C">　　　</p></td>
+<td>BLUE_GREY_400</td>
+<td>蓝灰 (400)</td>
+<td>#78909C</td>
+<td>120,144,156</td>
+<td>200,23,61</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #607D8B">　　　</p></td>
+<td>BLUE_GREY_500 / BLUE_GREY</td>
+<td>蓝灰 (500)</td>
+<td>#607D8B</td>
+<td>96,125,139</td>
+<td>200,31,55</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #546E7A">　　　</p></td>
+<td>BLUE_GREY_600</td>
+<td>蓝灰 (600)</td>
+<td>#546E7A</td>
+<td>84,110,122</td>
+<td>199,31,48</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #455A64">　　　</p></td>
+<td>BLUE_GREY_700</td>
+<td>蓝灰 (700)</td>
+<td>#455A64</td>
+<td>69,90,100</td>
+<td>199,31,39</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #37474F">　　　</p></td>
+<td>BLUE_GREY_800</td>
+<td>蓝灰 (800)</td>
+<td>#37474F</td>
+<td>55,71,79</td>
+<td>200,30,31</td>
+</tr>
+<tr>
+<td style="text-align:center"><p style="background-color: #263238">　　　</p></td>
+<td>BLUE_GREY_900</td>
+<td>蓝灰 (900)</td>
+<td>#263238</td>
+<td>38,50,56</td>
+<td>200,32,22</td>
+</tr>
+</tbody>
+</table>
+<h2>支持简写的颜色列表<span><a class="mark" href="#colortable" id="colortable">#</a></span></h2>
+<p>支持三位数简写的颜色 Hex 代码格式需满足 R / G / B 的每个分量符合叠字模式, 如 <code>#663399</code>, <code>#CCFF00</code>, <code>#888888</code> 等.</p>
+<p>使用 <a href="color.md.html#color.md_tohexcolor_length">colors.toHex(color, 3)</a> 可实现由 <code>#RRGGBB</code> 到 <code>#RGB</code> 的转换:</p>
+<pre><code class="lang-js">colors.toHex(colors.GRAY, 3); // #888
+colors.toHex(colors.css.REBECCA_PURPLE, 3); // #639
+colors.toHex(colors.web.BURNT_ORANGE, 3); // #C50
+
+/* PURPLE (紫色) 无法简化, 因为 #800080 的 R 和 B 分量都不是叠字模式. */
+colors.toHex(colors.PURPLE, 3); /* 抛出异常. */
+</code></pre>
+<p>下表将上述几个颜色列表中支持上述转换的颜色汇总在一起:</p>
+<table>
+<thead>
+<tr>
+<th>命名空间</th>
+<th style="text-align:center">颜色</th>
+<th>变量名</th>
+<th>颜色译名</th>
+<th>Hex 代码</th>
+<th>RGB</th>
+<th>HSV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #000000">　　　</p></td>
+<td>BLACK</td>
+<td>黑</td>
+<td>#000000</td>
+<td>0,0,0</td>
+<td>0,0,0</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #0000FF">　　　</p></td>
+<td>BLUE</td>
+<td>蓝</td>
+<td>#0000FF</td>
+<td>0,0,255</td>
+<td>240,100,100</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #00FFFF">　　　</p></td>
+<td>CYAN / AQUA</td>
+<td>青</td>
+<td>#00FFFF</td>
+<td>0,255,255</td>
+<td>180,100,100</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #444444">　　　</p></td>
+<td>DARK_GRAY / DARK_GREY / DKGRAY</td>
+<td>暗灰</td>
+<td>#444444</td>
+<td>68,68,68</td>
+<td>0,0,27</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #888888">　　　</p></td>
+<td>GRAY / GREY</td>
+<td>灰</td>
+<td>#888888</td>
+<td>136,136,136</td>
+<td>0,0,53</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #00FF00">　　　</p></td>
+<td>GREEN / LIME</td>
+<td>绿</td>
+<td>#00FF00</td>
+<td>0,255,0</td>
+<td>120,100,100</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #CCCCCC">　　　</p></td>
+<td>LIGHT_GRAY / LIGHT_GREY / LTGRAY</td>
+<td>亮灰</td>
+<td>#CCCCCC</td>
+<td>204,204,204</td>
+<td>0,0,80</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #FF00FF">　　　</p></td>
+<td>MAGENTA / FUCHSIA</td>
+<td>品红 / 洋红</td>
+<td>#FF00FF</td>
+<td>255,0,255</td>
+<td>300,100,100</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #FF0000">　　　</p></td>
+<td>RED</td>
+<td>红</td>
+<td>#FF0000</td>
+<td>255,0,0</td>
+<td>0,100,100</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #FFFFFF">　　　</p></td>
+<td>WHITE</td>
+<td>白</td>
+<td>#FFFFFF</td>
+<td>255,255,255</td>
+<td>0,0,100</td>
+</tr>
+<tr>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #FFFF00">　　　</p></td>
+<td>YELLOW</td>
+<td>黄</td>
+<td>#FFFF00</td>
+<td>255,255,0</td>
+<td>60,100,100</td>
+</tr>
+<tr>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #778899">　　　</p></td>
+<td>LIGHT_SLATE_GRAY / LIGHT_SLATE_GREY</td>
+<td>亮岩灰</td>
+<td>#778899</td>
+<td>119,136,153</td>
+<td>210,22,60</td>
+</tr>
+<tr>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #663399">　　　</p></td>
+<td>REBECCA_PURPLE</td>
+<td>丽贝卡紫</td>
+<td>#663399</td>
+<td>102,51,153</td>
+<td>270,67,60</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #9966CC">　　　</p></td>
+<td>AMETHYST</td>
+<td>紫水晶</td>
+<td>#9966CC</td>
+<td>153,102,204</td>
+<td>270,50,80</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #66FF00">　　　</p></td>
+<td>BRIGHT_GREEN</td>
+<td>黄绿 / 明绿</td>
+<td>#66FF00</td>
+<td>102,255,0</td>
+<td>96,100,100</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #CC5500">　　　</p></td>
+<td>BURNT_ORANGE</td>
+<td>燃橙</td>
+<td>#CC5500</td>
+<td>204,85,0</td>
+<td>25,100,80</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #FFFF99">　　　</p></td>
+<td>CHAMPAGNE_YELLOW</td>
+<td>香槟黄</td>
+<td>#FFFF99</td>
+<td>255,255,153</td>
+<td>60,40,100</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #003399">　　　</p></td>
+<td>DARK_POWDER_BLUE</td>
+<td>暗粉蓝</td>
+<td>#003399</td>
+<td>0,51,153</td>
+<td>220,100,60</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #CCCCFF">　　　</p></td>
+<td>LAVENDER_BLUE / PERIWINKLE</td>
+<td>薰衣草蓝 / 长春花</td>
+<td>#CCCCFF</td>
+<td>204,204,255</td>
+<td>240,20,100</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #CCFF00">　　　</p></td>
+<td>LIME / LIGHT_LIME</td>
+<td>柠檬绿 / 亮柠檬绿</td>
+<td>#CCFF00</td>
+<td>204,255,0</td>
+<td>72,100,100</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #FF9900">　　　</p></td>
+<td>MARIGOLD</td>
+<td>万寿菊黄</td>
+<td>#FF9900</td>
+<td>255,153,0</td>
+<td>36,100,100</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #CC7722">　　　</p></td>
+<td>OCHER</td>
+<td>赭</td>
+<td>#CC7722</td>
+<td>204,119,34</td>
+<td>30,83,80</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #FF66CC">　　　</p></td>
+<td>ROSE_PINK</td>
+<td>浅玫瑰红</td>
+<td>#FF66CC</td>
+<td>255,102,204</td>
+<td>320,60,100</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #FFCC00">　　　</p></td>
+<td>TANGERINE_YELLOW</td>
+<td>橙黄</td>
+<td>#FFCC00</td>
+<td>255,204,0</td>
+<td>48,100,100</td>
+</tr>
+<tr>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #0033FF">　　　</p></td>
+<td>ULTRAMARINE</td>
+<td>极浓海蓝</td>
+<td>#0033FF</td>
+<td>0,51,255</td>
+<td>228,100,100</td>
+</tr>
+<tr>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #AA00FF">　　　</p></td>
+<td>PURPLE_A700</td>
+<td>紫 (A700)</td>
+<td>#AA00FF</td>
+<td>170,0,255</td>
+<td>280,100,100</td>
+</tr>
+<tr>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #EEEEEE">　　　</p></td>
+<td>GREY_200</td>
+<td>灰 (200)</td>
+<td>#EEEEEE</td>
+<td>238,238,238</td>
+<td>0,0,93</td>
+</tr>
+</tbody>
+</table>
+<h2>颜色名称冲突<span><a class="mark" href="#colortable_1" id="colortable_1">#</a></span></h2>
+<p>当使用 <a href="dataTypes.html#datatypes_colorname">颜色名称 (ColorName)</a> 作为参数时, 同一个名称可能同时出现在不同的颜色列表中, 如 <code>CYAN</code> 在所有列表中均有出现, 且 <a href="#colortable_material_颜色列表">Material 颜色列表</a> 中的 <code>CYAN</code> 与其它列表中的 <code>CYAN</code> 颜色不同.</p>
+<p>为避免上述冲突, 按如下命名空间优先级查找并使用颜色名称对应的颜色:</p>
+<pre><code class="lang-text">android &gt; css &gt; web &gt; material
+</code></pre>
+<p>因此颜色名称 <code>CYAN</code> 相当于 <code>colors.android.CYAN</code> (即 <code>colors.CYAN</code>, <code>android</code> 命名空间可省略);<br>颜色名称 <code>ORANGE</code> 相当于 <code>colors.css.ORANGE</code> (而非 <code>colors.material.ORANGE</code>).</p>
+<p>下表列出了所有存在冲突的颜色, 其中 &quot;决定性&quot; <code>列 (Column)</code> 表明存在冲突时, 将最终采用对应 <code>行 (Row)</code> 表示的颜色:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">决定性</th>
+<th>命名空间</th>
+<th style="text-align:center">颜色</th>
+<th>变量名</th>
+<th>颜色译名</th>
+<th>Hex 代码</th>
+<th>RGB</th>
+<th>HSV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #0000FF">　　　</p></td>
+<td>BLUE</td>
+<td>蓝</td>
+<td>#0000FF</td>
+<td>0,0,255</td>
+<td>240,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #2196F3">　　　</p></td>
+<td></td>
+<td>蓝 (500)</td>
+<td>#2196F3</td>
+<td>33,150,243</td>
+<td>207,86,95</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #00FFFF">　　　</p></td>
+<td>CYAN</td>
+<td>青</td>
+<td>#00FFFF</td>
+<td>0,255,255</td>
+<td>180,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #00FFFF">　　　</p></td>
+<td></td>
+<td>青</td>
+<td>#00FFFF</td>
+<td>0,255,255</td>
+<td>180,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #00FFFF">　　　</p></td>
+<td></td>
+<td>青</td>
+<td>#00FFFF</td>
+<td>0,255,255</td>
+<td>180,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #00BCD4">　　　</p></td>
+<td></td>
+<td>青 (500)</td>
+<td>#00BCD4</td>
+<td>0,188,212</td>
+<td>187,100,83</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #00FFFF">　　　</p></td>
+<td>AQUA</td>
+<td>青</td>
+<td>#00FFFF</td>
+<td>0,255,255</td>
+<td>180,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #00FFFF">　　　</p></td>
+<td></td>
+<td>青</td>
+<td>#00FFFF</td>
+<td>0,255,255</td>
+<td>180,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #AFDFE4">　　　</p></td>
+<td></td>
+<td>水</td>
+<td>#AFDFE4</td>
+<td>175,223,228</td>
+<td>186,23,89</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #444444">　　　</p></td>
+<td>DARK_GRAY</td>
+<td>暗灰</td>
+<td>#444444</td>
+<td>68,68,68</td>
+<td>0,0,27</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #A9A9A9">　　　</p></td>
+<td></td>
+<td>暗灰</td>
+<td>#A9A9A9</td>
+<td>169,169,169</td>
+<td>0,0,66</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #A9A9A9">　　　</p></td>
+<td></td>
+<td>暗灰</td>
+<td>#A9A9A9</td>
+<td>169,169,169</td>
+<td>0,0,66</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #444444">　　　</p></td>
+<td>DARK_GREY</td>
+<td>暗灰</td>
+<td>#444444</td>
+<td>68,68,68</td>
+<td>0,0,27</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #A9A9A9">　　　</p></td>
+<td></td>
+<td>暗灰</td>
+<td>#A9A9A9</td>
+<td>169,169,169</td>
+<td>0,0,66</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #888888">　　　</p></td>
+<td>GRAY</td>
+<td>灰</td>
+<td>#888888</td>
+<td>136,136,136</td>
+<td>0,0,53</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #808080">　　　</p></td>
+<td></td>
+<td>灰</td>
+<td>#808080</td>
+<td>128,128,128</td>
+<td>0,0,50</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #808080">　　　</p></td>
+<td></td>
+<td>灰</td>
+<td>#808080</td>
+<td>128,128,128</td>
+<td>0,0,50</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #888888">　　　</p></td>
+<td>GREY</td>
+<td>灰</td>
+<td>#888888</td>
+<td>136,136,136</td>
+<td>0,0,53</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #808080">　　　</p></td>
+<td></td>
+<td>灰</td>
+<td>#808080</td>
+<td>128,128,128</td>
+<td>0,0,50</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #9E9E9E">　　　</p></td>
+<td></td>
+<td>灰 (500)</td>
+<td>#9E9E9E</td>
+<td>158,158,158</td>
+<td>0,0,62</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #00FF00">　　　</p></td>
+<td>GREEN</td>
+<td>绿</td>
+<td>#00FF00</td>
+<td>0,255,0</td>
+<td>120,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #008000">　　　</p></td>
+<td></td>
+<td>绿</td>
+<td>#008000</td>
+<td>0,128,0</td>
+<td>120,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #008000">　　　</p></td>
+<td></td>
+<td>绿</td>
+<td>#008000</td>
+<td>0,128,0</td>
+<td>120,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #4CAF50">　　　</p></td>
+<td></td>
+<td>绿 (500)</td>
+<td>#4CAF50</td>
+<td>76,175,80</td>
+<td>122,57,69</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #00FF00">　　　</p></td>
+<td>LIME</td>
+<td>绿</td>
+<td>#00FF00</td>
+<td>0,255,0</td>
+<td>120,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #00FF00">　　　</p></td>
+<td></td>
+<td>鲜绿 / 莱姆</td>
+<td>#00FF00</td>
+<td>0,255,0</td>
+<td>120,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #CCFF00">　　　</p></td>
+<td></td>
+<td>柠檬绿 / 亮柠檬绿</td>
+<td>#CCFF00</td>
+<td>204,255,0</td>
+<td>72,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #CDDC39">　　　</p></td>
+<td></td>
+<td>绿黄 (500)</td>
+<td>#CDDC39</td>
+<td>205,220,57</td>
+<td>66,74,86</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #CCCCCC">　　　</p></td>
+<td>LIGHT_GRAY</td>
+<td>亮灰</td>
+<td>#CCCCCC</td>
+<td>204,204,204</td>
+<td>0,0,80</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #D3D3D3">　　　</p></td>
+<td></td>
+<td>亮灰</td>
+<td>#D3D3D3</td>
+<td>211,211,211</td>
+<td>0,0,83</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #D3D3D3">　　　</p></td>
+<td></td>
+<td>亮灰</td>
+<td>#D3D3D3</td>
+<td>211,211,211</td>
+<td>0,0,83</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #CCCCCC">　　　</p></td>
+<td>LIGHT_GREY</td>
+<td>亮灰</td>
+<td>#CCCCCC</td>
+<td>204,204,204</td>
+<td>0,0,80</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #D3D3D3">　　　</p></td>
+<td></td>
+<td>亮灰</td>
+<td>#D3D3D3</td>
+<td>211,211,211</td>
+<td>0,0,83</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #FF00FF">　　　</p></td>
+<td>FUCHSIA</td>
+<td>品红 / 洋红</td>
+<td>#FF00FF</td>
+<td>255,0,255</td>
+<td>300,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #FF00FF">　　　</p></td>
+<td></td>
+<td>洋红 / 品红</td>
+<td>#FF00FF</td>
+<td>255,0,255</td>
+<td>300,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #F400A1">　　　</p></td>
+<td></td>
+<td>紫红</td>
+<td>#F400A1</td>
+<td>244,0,161</td>
+<td>320,100,96</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #800080">　　　</p></td>
+<td>PURPLE</td>
+<td>紫</td>
+<td>#800080</td>
+<td>128,0,128</td>
+<td>300,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #9C27B0">　　　</p></td>
+<td></td>
+<td>紫 (500)</td>
+<td>#9C27B0</td>
+<td>156,39,176</td>
+<td>291,78,69</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #6A0DAD">　　　</p></td>
+<td></td>
+<td>紫</td>
+<td>#6A0DAD</td>
+<td>106,13,173</td>
+<td>275,92,68</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #FF0000">　　　</p></td>
+<td>RED</td>
+<td>红</td>
+<td>#FF0000</td>
+<td>255,0,0</td>
+<td>0,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #FF0000">　　　</p></td>
+<td></td>
+<td>红</td>
+<td>#FF0000</td>
+<td>255,0,0</td>
+<td>0,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #FF0000">　　　</p></td>
+<td></td>
+<td>红</td>
+<td>#FF0000</td>
+<td>255,0,0</td>
+<td>0,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #F44336">　　　</p></td>
+<td></td>
+<td>红 (500)</td>
+<td>#F44336</td>
+<td>244,67,54</td>
+<td>4,78,96</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #008080">　　　</p></td>
+<td>TEAL</td>
+<td>鸭绿 / 凫绿</td>
+<td>#008080</td>
+<td>0,128,128</td>
+<td>180,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #008080">　　　</p></td>
+<td></td>
+<td>鸭绿 / 凫绿</td>
+<td>#008080</td>
+<td>0,128,128</td>
+<td>180,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #008080">　　　</p></td>
+<td></td>
+<td>鸭绿 / 凫绿</td>
+<td>#008080</td>
+<td>0,128,128</td>
+<td>180,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #009688">　　　</p></td>
+<td></td>
+<td>蓝绿 (500)</td>
+<td>#009688</td>
+<td>0,150,136</td>
+<td>174,100,59</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>android</td>
+<td style="text-align:center"><p style="background-color: #FFFF00">　　　</p></td>
+<td>YELLOW</td>
+<td>黄</td>
+<td>#FFFF00</td>
+<td>255,255,0</td>
+<td>60,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #FFFF00">　　　</p></td>
+<td></td>
+<td>黄</td>
+<td>#FFFF00</td>
+<td>255,255,0</td>
+<td>60,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #FFFF00">　　　</p></td>
+<td></td>
+<td>黄</td>
+<td>#FFFF00</td>
+<td>255,255,0</td>
+<td>60,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #FFEB3B">　　　</p></td>
+<td></td>
+<td>黄 (500)</td>
+<td>#FFEB3B</td>
+<td>255,235,59</td>
+<td>54,77,100</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #FFC0CB">　　　</p></td>
+<td>PINK</td>
+<td>粉红</td>
+<td>#FFC0CB</td>
+<td>255,192,203</td>
+<td>350,25,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #FFC0CB">　　　</p></td>
+<td></td>
+<td>粉红</td>
+<td>#FFC0CB</td>
+<td>255,192,203</td>
+<td>350,25,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #E91E63">　　　</p></td>
+<td></td>
+<td>粉红 (500)</td>
+<td>#E91E63</td>
+<td>233,30,99</td>
+<td>340,87,91</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #4B0082">　　　</p></td>
+<td>INDIGO</td>
+<td>靛</td>
+<td>#4B0082</td>
+<td>75,0,130</td>
+<td>275,100,51</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #4B0080">　　　</p></td>
+<td></td>
+<td>靛</td>
+<td>#4B0080</td>
+<td>75,0,128</td>
+<td>275,100,50</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #3F51B5">　　　</p></td>
+<td></td>
+<td>靛蓝 (500)</td>
+<td>#3F51B5</td>
+<td>63,81,181</td>
+<td>231,65,71</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #ADD8E6">　　　</p></td>
+<td>LIGHT_BLUE</td>
+<td>亮蓝</td>
+<td>#ADD8E6</td>
+<td>173,216,230</td>
+<td>195,25,90</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #ADD8E6">　　　</p></td>
+<td></td>
+<td>亮蓝</td>
+<td>#ADD8E6</td>
+<td>173,216,230</td>
+<td>195,25,90</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #03A9F4">　　　</p></td>
+<td></td>
+<td>浅蓝 (500)</td>
+<td>#03A9F4</td>
+<td>3,169,244</td>
+<td>199,99,96</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #90EE90">　　　</p></td>
+<td>LIGHT_GREEN</td>
+<td>亮绿</td>
+<td>#90EE90</td>
+<td>144,238,144</td>
+<td>120,39,93</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #90EE90">　　　</p></td>
+<td></td>
+<td>亮绿</td>
+<td>#90EE90</td>
+<td>144,238,144</td>
+<td>120,39,93</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #8BC34A">　　　</p></td>
+<td></td>
+<td>浅绿 (500)</td>
+<td>#8BC34A</td>
+<td>139,195,74</td>
+<td>88,62,76</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #FFBF00">　　　</p></td>
+<td>AMBER</td>
+<td>琥珀</td>
+<td>#FFBF00</td>
+<td>255,191,0</td>
+<td>45,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #FFC107">　　　</p></td>
+<td></td>
+<td>琥珀 (500)</td>
+<td>#FFC107</td>
+<td>255,193,7</td>
+<td>45,97,100</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #FFA500">　　　</p></td>
+<td>ORANGE</td>
+<td>橙</td>
+<td>#FFA500</td>
+<td>255,165,0</td>
+<td>39,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #FFA500">　　　</p></td>
+<td></td>
+<td>橙</td>
+<td>#FFA500</td>
+<td>255,165,0</td>
+<td>39,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #FF9800">　　　</p></td>
+<td></td>
+<td>橙 (500)</td>
+<td>#FF9800</td>
+<td>255,152,0</td>
+<td>36,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #A52A2A">　　　</p></td>
+<td>BROWN</td>
+<td>褐</td>
+<td>#A52A2A</td>
+<td>165,42,42</td>
+<td>0,75,65</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #A52A2A">　　　</p></td>
+<td></td>
+<td>褐</td>
+<td>#A52A2A</td>
+<td>165,42,42</td>
+<td>0,75,65</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>material</td>
+<td style="text-align:center"><p style="background-color: #795548">　　　</p></td>
+<td></td>
+<td>棕 (500)</td>
+<td>#795548</td>
+<td>121,85,72</td>
+<td>16,40,47</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #F0FFFF">　　　</p></td>
+<td>AZURE</td>
+<td>湛蓝</td>
+<td>#F0FFFF</td>
+<td>240,255,255</td>
+<td>210,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #007FFF">　　　</p></td>
+<td></td>
+<td>蔚蓝 / 湛蓝</td>
+<td>#007FFF</td>
+<td>0,127,255</td>
+<td>210,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #F0E68C">　　　</p></td>
+<td>KHAKI</td>
+<td>卡其</td>
+<td>#F0E68C</td>
+<td>240,230,140</td>
+<td>54,42,94</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #996B1F">　　　</p></td>
+<td></td>
+<td>卡其</td>
+<td>#996B1F</td>
+<td>153,107,31</td>
+<td>37,80,60</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #E6E6FA">　　　</p></td>
+<td>LAVENDER</td>
+<td>薰衣草</td>
+<td>#E6E6FA</td>
+<td>230,230,250</td>
+<td>240,8,98</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #B57EDC">　　　</p></td>
+<td></td>
+<td>薰衣草紫</td>
+<td>#B57EDC</td>
+<td>181,126,220</td>
+<td>275,43,86</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #00FF7F">　　　</p></td>
+<td>SPRING_GREEN</td>
+<td>春绿</td>
+<td>#00FF7F</td>
+<td>0,255,127</td>
+<td>150,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #00FF80">　　　</p></td>
+<td></td>
+<td>春绿</td>
+<td>#00FF80</td>
+<td>0,255,128</td>
+<td>150,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #40E0D0">　　　</p></td>
+<td>TURQUOISE</td>
+<td>绿松</td>
+<td>#40E0D0</td>
+<td>64,224,208</td>
+<td>174,71,88</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #30D5C8">　　　</p></td>
+<td></td>
+<td>绿松 / 绿松石</td>
+<td>#30D5C8</td>
+<td>48,213,200</td>
+<td>210,100,100</td>
+</tr>
+<tr>
+<td style="text-align:center">√</td>
+<td>css</td>
+<td style="text-align:center"><p style="background-color: #EE82EE">　　　</p></td>
+<td>VIOLET</td>
+<td>紫罗兰</td>
+<td>#EE82EE</td>
+<td>238,130,238</td>
+<td>300,45,93</td>
+</tr>
+<tr>
+<td style="text-align:center"></td>
+<td>web</td>
+<td style="text-align:center"><p style="background-color: #8000FF">　　　</p></td>
+<td></td>
+<td>堇紫</td>
+<td>#8000FF</td>
+<td>128,0,255</td>
+<td>270,100,100</td>
+</tr>
+</tbody>
+</table>
+
+        </div>
+    </div>
+</div>
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+<!-- __TRACKING__ -->
+</body>
+</html>
