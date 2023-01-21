@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
-
-
-    <org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
-        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <org.autojs.autojs.ui.main.task.TaskListRecyclerView
-            android:id="@+id/task_list"
+    <org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent">
+
+        <org.autojs.autojs.ui.main.task.TaskListRecyclerView
+                android:id="@+id/task_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
     </org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout>
 

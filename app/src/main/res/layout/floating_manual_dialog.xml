@@ -23,7 +23,7 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:paddingLeft="20dp"
+                android:paddingStart="20dp"
                 android:textColor="#2a2a2a"
                 android:textSize="16sp"
                 tools:text="标题"/>
@@ -35,7 +35,7 @@
                 android:background="?selectableItemBackgroundBorderless"
                 android:padding="16dp"
                 android:src="@drawable/ic_ali_pin_to_left"
-                android:tint="#3c3c3c"/>
+                    app:tint="#3c3c3c" />
 
             <ImageView
                 android:id="@+id/fullscreen"
@@ -44,17 +44,17 @@
                 android:background="?selectableItemBackgroundBorderless"
                 android:padding="16dp"
                 android:src="@drawable/ic_ali_fullscreen"
-                android:tint="#3c3c3c"/>
+                    app:tint="#3c3c3c" />
 
             <ImageView
                 android:id="@+id/close"
                 android:layout_width="47dp"
                 android:layout_height="47dp"
-                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:padding="16dp"
                 android:src="@drawable/ic_ali_close"
-                android:tint="#3c3c3c"/>
+                    app:tint="#3c3c3c" />
         </LinearLayout>
 
         <View

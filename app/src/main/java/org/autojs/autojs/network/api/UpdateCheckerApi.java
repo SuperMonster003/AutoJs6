@@ -1,7 +1,5 @@
 package org.autojs.autojs.network.api;
 
-import java.io.InputStream;
-
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.http.GET;

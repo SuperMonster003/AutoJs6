@@ -14,8 +14,7 @@
             android:id="@+id/icon"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginHorizontal="8dp"
             android:background="@drawable/shortcut_create_dialog_icon_bg"
             android:padding="12dp"
             android:src="@drawable/ic_add_white_48dp"/>
@@ -38,7 +37,7 @@
         android:id="@+id/use_android_n_shortcut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="4dp"
         android:text="@string/text_use_android_n_shortcut"/>
 

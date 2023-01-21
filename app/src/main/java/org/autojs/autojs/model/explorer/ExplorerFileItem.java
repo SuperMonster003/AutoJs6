@@ -2,12 +2,10 @@ package org.autojs.autojs.model.explorer;
 
 import androidx.annotation.NonNull;
 
-import com.stardust.app.GlobalAppContext;
-import com.stardust.pio.PFile;
-import com.stardust.util.Objects;
-
 import org.autojs.autojs.model.script.ScriptFile;
-import org.autojs.autojs6.R;
+import org.autojs.autojs.pio.PFile;
+import org.autojs.autojs.util.FileUtils;
+import org.autojs.autojs.util.Objects;
 
 import java.io.File;
 import java.util.Arrays;
@@ -17,8 +15,8 @@ import java.util.Set;
 
 public class ExplorerFileItem implements ExplorerItem {
 
-    private static final Set<String> sEditableFileExts = new HashSet<>(Arrays.asList(
-            "js", "java", "xml", "json", "txt", "log", "ts"
+    private static final Set<String> sEditableFileExtensions = new HashSet<>(Arrays.asList(
+            "js", "java", "xml", "json", "txt", "log", "ts", "md", "ini", "html", "css", "kt"
     ));
 
     private final PFile mFile;
@@ -26,9 +24,7 @@ public class ExplorerFileItem implements ExplorerItem {
 
     public ExplorerFileItem(PFile file, ExplorerPage parent) {
         if (file == null) {
-            throw new NullPointerException(GlobalAppContext
-                    .getString(R.string.error_method_called_with_null_argument,
-                            "ExplorerFileItem.constructor", "file"));
+            throw new NullPointerException(ExplorerFileItem.class.getSimpleName());
         }
         mFile = file;
         mParent = parent;
@@ -82,11 +78,35 @@ public class ExplorerFileItem implements ExplorerItem {
         return new ExplorerFileItem(mFile.renameTo(newName), getParent());
     }
 
+    @NonNull
     @Override
-    public String getType() {
+    public FileUtils.TYPE getType() {
         if (mFile.isDirectory()) {
-            return "/";
+            return FileUtils.TYPE.DIRECTORY;
         }
+        if (mFile.isProject()) {
+            return FileUtils.TYPE.PROJECT;
+        }
+        String extension = mFile.getExtension();
+        if (FileUtils.TYPE.JAVASCRIPT.getExtension().equals(extension)) {
+            return FileUtils.TYPE.JAVASCRIPT;
+        }
+        if (FileUtils.TYPE.AUTO.getExtension().equals(extension)) {
+            return FileUtils.TYPE.AUTO;
+        }
+        if (FileUtils.TYPE.XML.getExtension().equals(extension)) {
+            return FileUtils.TYPE.XML;
+        }
+        if (FileUtils.TYPE.APK.getExtension().equals(extension)) {
+            return FileUtils.TYPE.APK;
+        }
+        if (FileUtils.TYPE.JSON.getExtension().equals(extension)) {
+            return FileUtils.TYPE.JSON;
+        }
+        return FileUtils.TYPE.UNKNOWN;
+    }
+
+    public String getExtension() {
         return mFile.getExtension();
     }
 
@@ -102,13 +122,13 @@ public class ExplorerFileItem implements ExplorerItem {
 
     @Override
     public boolean isEditable() {
-        return sEditableFileExts.contains(getType());
+        return sEditableFileExtensions.contains(getExtension());
     }
 
     @Override
     public boolean isExecutable() {
-        String type = getType();
-        return type.equals("js") || type.equals("auto");
+        FileUtils.TYPE type = getType();
+        return type == FileUtils.TYPE.JAVASCRIPT || type == FileUtils.TYPE.AUTO;
     }
 
     @NonNull

@@ -1,16 +1,17 @@
 package org.autojs.autojs.ui.main.task;
 
+import static org.autojs.autojs.util.StringUtils.str;
+
 import android.content.Context;
 
 import com.bignerdranch.expandablerecyclerview.model.Parent;
-import com.stardust.app.GlobalAppContext;
-import com.stardust.autojs.execution.ScriptExecution;
 
-import org.autojs.autojs6.R;
-import org.autojs.autojs.autojs.AutoJs;
+import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.timing.IntentTask;
 import org.autojs.autojs.timing.TimedTask;
 import org.autojs.autojs.timing.TimedTaskManager;
+import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,6 @@ public abstract class TaskGroup implements Parent<Task> {
         mTitle = title;
     }
 
-
     @Override
     public List<Task> getChildList() {
         return mTasks;
@@ -43,34 +43,44 @@ public abstract class TaskGroup implements Parent<Task> {
         return mTitle;
     }
 
+    public abstract Context getContext();
+
     public abstract void refresh();
 
     public static class PendingTaskGroup extends TaskGroup {
 
+        private final Context mContext;
+
         public PendingTaskGroup(Context context) {
             super(context.getString(R.string.text_timed_task));
+            mContext = context;
             refresh();
+        }
+
+        @Override
+        public Context getContext() {
+            return mContext;
         }
 
         @Override
         public void refresh() {
             mTasks.clear();
             for (TimedTask timedTask : TimedTaskManager.getInstance().getAllTasksAsList()) {
-                mTasks.add(new Task.PendingTask(timedTask));
+                mTasks.add(new Task.PendingTask(getContext(), timedTask));
             }
             for (IntentTask intentTask : TimedTaskManager.getInstance().getAllIntentTasksAsList()) {
-                mTasks.add(new Task.PendingTask(intentTask));
+                mTasks.add(new Task.PendingTask(getContext(), intentTask));
             }
         }
 
         public int addTask(Object task) {
             int pos = mTasks.size();
             if (task instanceof TimedTask) {
-                mTasks.add(new Task.PendingTask((TimedTask) task));
+                mTasks.add(new Task.PendingTask(getContext(), (TimedTask) task));
             } else if (task instanceof IntentTask) {
-                mTasks.add(new Task.PendingTask((IntentTask) task));
+                mTasks.add(new Task.PendingTask(getContext(), (IntentTask) task));
             } else {
-                throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "task", task));
+                throw new IllegalArgumentException(str(R.string.error_illegal_argument, "task", task));
             }
             return pos;
         }
@@ -92,7 +102,6 @@ public abstract class TaskGroup implements Parent<Task> {
             return -1;
         }
 
-
         public int updateTask(Object task) {
             int i = indexOf(task);
             if (i >= 0) {
@@ -101,7 +110,7 @@ public abstract class TaskGroup implements Parent<Task> {
                 } else if (task instanceof IntentTask) {
                     ((Task.PendingTask) mTasks.get(i)).setIntentTask((IntentTask) task);
                 } else {
-                    throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "task", task));
+                    throw new IllegalArgumentException(str(R.string.error_illegal_argument, "task", task));
                 }
             }
             return i;
@@ -110,9 +119,17 @@ public abstract class TaskGroup implements Parent<Task> {
 
     public static class RunningTaskGroup extends TaskGroup {
 
+        private final Context mContext;
+
         public RunningTaskGroup(Context context) {
             super(context.getString(R.string.text_running_task));
+            mContext = context;
             refresh();
+        }
+
+        @Override
+        public Context getContext() {
+            return mContext;
         }
 
         @Override
@@ -120,13 +137,13 @@ public abstract class TaskGroup implements Parent<Task> {
             Collection<ScriptExecution> executions = AutoJs.getInstance().getScriptEngineService().getScriptExecutions();
             mTasks.clear();
             for (ScriptExecution execution : executions) {
-                mTasks.add(new Task.RunningTask(execution));
+                mTasks.add(new Task.RunningTask(getContext(), execution));
             }
         }
 
         public int addTask(ScriptExecution engine) {
             int pos = mTasks.size();
-            mTasks.add(new Task.RunningTask(engine));
+            mTasks.add(new Task.RunningTask(getContext(), engine));
             return pos;
         }
 

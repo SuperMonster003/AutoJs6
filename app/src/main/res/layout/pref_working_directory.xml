@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/md_dialog_frame_margin"
+        android:paddingEnd="@dimen/md_dialog_frame_margin"
+        android:orientation="vertical">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+        <EditText
+                android:id="@+id/md_contentPath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:textSize="@dimen/md_content_textsize"
+                android:text="@string/text_sample_string"
+                android:minHeight="48dp"/>
+
+        <ImageView
+                android:id="@+id/md_FileChooserIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_folder"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_gravity="center_vertical"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/md_contentFileTransfer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+        <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/md_contentSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="4dp"
+                android:checked="false"
+                android:text="@string/text_files_transfer"
+                android:minHeight="48dp" />
+
+        <RadioGroup
+                android:id="@+id/md_contentRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:visibility="gone"
+                android:orientation="vertical">
+
+            <RadioButton
+                    android:id="@+id/copy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/text_copy_all_files_to_new_directory"
+                    android:minHeight="48dp" />
+
+            <RadioButton
+                    android:id="@+id/move"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_move_all_files_to_new_directory"
+                    android:minHeight="48dp" />
+
+        </RadioGroup>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

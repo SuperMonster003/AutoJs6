@@ -1,22 +1,30 @@
 package org.autojs.autojs.ui.edit.editor;
 
+import static org.autojs.autojs.util.StringUtils.key;
+
 import android.content.Context;
 import android.graphics.Canvas;
-import com.google.android.material.snackbar.Snackbar;
+import android.text.Editable;
 import android.text.Layout;
 import android.util.AttributeSet;
-import android.widget.Toast;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+
+import androidx.annotation.NonNull;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.stardust.autojs.script.JsBeautifier;
 
-import org.autojs.autojs6.R;
+import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.script.JsBeautifier;
 import org.autojs.autojs.ui.edit.theme.Theme;
-
-import com.stardust.util.ClipboardUtil;
-import com.stardust.util.TextUtils;
+import org.autojs.autojs.util.ClipboardUtils;
+import org.autojs.autojs.util.DisplayUtils;
+import org.autojs.autojs.util.StringUtils;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -42,22 +50,11 @@ import io.reactivex.Observable;
  */
 public class CodeEditor extends HVScrollView {
 
-    public static class CheckedPatternSyntaxException extends Exception {
-        public CheckedPatternSyntaxException(PatternSyntaxException cause) {
-            super(cause);
-        }
-    }
-
-    public interface CursorChangeCallback {
-
-        void onCursorChange(String line, int ch);
-
-    }
-
-
     private CodeEditText mCodeEditText;
     private TextViewUndoRedo mTextViewRedoUndo;
     private JavaScriptHighlighter mJavaScriptHighlighter;
+    private ScaleGestureDetector mScaleGestureDetector;
+    private ScaleGestureDetector mScaleGestureDetectorForChangeTextSize;
     private Theme mTheme;
     private JsBeautifier mJsBeautifier;
     private MaterialDialog mProcessDialog;
@@ -66,6 +63,12 @@ public class CodeEditor extends HVScrollView {
     private String mKeywords;
     private Matcher mMatcher;
     private int mFoundIndex = -1;
+
+    private double mLastScaleFactor = 0;
+    private int mLastTextSize = 0;
+
+    private int mMinTextSize = 0;
+    private int mMaxTextSize = 0;
 
     public CodeEditor(Context context) {
         super(context);
@@ -77,16 +80,88 @@ public class CodeEditor extends HVScrollView {
         init();
     }
 
+    public void setLastTextSize(int size) {
+        mLastTextSize = size;
+    }
 
     private void init() {
-        //setFillViewport(true);
+        // setFillViewport(true);
         inflate(getContext(), R.layout.code_editor, this);
         mCodeEditText = findViewById(R.id.code_edit_text);
         mCodeEditText.addTextChangedListener(new AutoIndent(mCodeEditText));
+        mLastTextSize = Pref.getEditorTextSize((int) DisplayUtils.pxToSp(getContext(), mCodeEditText.getTextSize()));
+        mMinTextSize = Integer.parseInt(getContext().getString(R.string.text_size_min_value));
+        mMaxTextSize = Integer.parseInt(getContext().getString(R.string.text_size_max_value));
         mTextViewRedoUndo = new TextViewUndoRedo(mCodeEditText);
         mJavaScriptHighlighter = new JavaScriptHighlighter(mTheme, mCodeEditText);
-        mJsBeautifier = new JsBeautifier(this, "js/js-beautify");
+        mJsBeautifier = new JsBeautifier(this, "js-beautify");
+        mScaleGestureDetectorForChangeTextSize = new ScaleGestureDetector(getContext(), getSimpleOnScaleGestureListener());
+        applyScaleGesture();
+    }
 
+    private void applyScaleGesture() {
+        applyScaleGesture(null);
+    }
+
+    private void applyScaleGesture(String key) {
+        if (key == null) {
+            String defKey = key(R.string.default_key_editor_pinch_to_zoom_strategy);
+            key = Pref.getString(key(R.string.key_editor_pinch_to_zoom_strategy), defKey);
+        }
+        if (Objects.equals(key, key(R.string.key_editor_pinch_to_zoom_change_text_size))) {
+            mScaleGestureDetector = mScaleGestureDetectorForChangeTextSize;
+        } else if (Objects.equals(key, key(R.string.key_editor_pinch_to_zoom_scale_view))) {
+
+            // TODO by SuperMonster003 on Oct 17, 2022.
+
+        } else if (Objects.equals(key, key(R.string.key_editor_pinch_to_zoom_disable))) {
+            mScaleGestureDetector = null;
+        }
+    }
+
+    @NonNull
+    private ScaleGestureDetector.SimpleOnScaleGestureListener getSimpleOnScaleGestureListener() {
+        return new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            @Override
+            public boolean onScale(@NonNull ScaleGestureDetector detector) {
+                double currentFactor = Math.floor(detector.getScaleFactor() * 10) / 10;
+                if (currentFactor > 0 && mLastScaleFactor != currentFactor) {
+                    int currentTextSize = mLastTextSize + (currentFactor > mLastScaleFactor ? 1 : -1);
+                    mLastTextSize = Math.max(mMinTextSize, Math.min(mMaxTextSize, currentTextSize));
+                    mCodeEditText.setTextSize(mLastTextSize);
+
+                    mLastScaleFactor = currentFactor;
+                }
+                return super.onScale(detector);
+            }
+
+            @Override
+            public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
+                // TODO by SuperMonster003 on Oct 16, 2022.
+                //  ! Show a floating text size changing bar.
+
+                return super.onScaleBegin(detector);
+            }
+
+            @Override
+            public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
+                // TODO by SuperMonster003 on Oct 16, 2022.
+                //  ! Dismiss a floating text size changing bar in 2 seconds.
+
+                mLastScaleFactor = 1.0;
+                Pref.setEditorTextSize(mLastTextSize);
+                super.onScaleEnd(detector);
+            }
+        };
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        if (mScaleGestureDetector == null) {
+            return super.onTouchEvent(ev);
+        }
+        mScaleGestureDetector.onTouchEvent(ev);
+        return !mScaleGestureDetector.isInProgress() && super.onTouchEvent(ev);
     }
 
     public Observable<Integer> getLineCount() {
@@ -94,22 +169,29 @@ public class CodeEditor extends HVScrollView {
     }
 
     public void copyLine() {
-        int line = LayoutHelper.getLineOfChar(mCodeEditText.getLayout(), mCodeEditText.getSelectionStart());
-        if (line < 0 || line >= mCodeEditText.getLayout().getLineCount())
-            return;
-        CharSequence lineText = mCodeEditText.getText().subSequence(mCodeEditText.getLayout().getLineStart(line),
-                mCodeEditText.getLayout().getLineEnd(line));
-        ClipboardUtil.setClip(getContext(), lineText);
-        Snackbar.make(this, R.string.text_already_copied_to_clip, Snackbar.LENGTH_SHORT).show();
+        Layout layout = mCodeEditText.getLayout();
+        int line = LayoutHelper.getLineOfChar(layout, mCodeEditText.getSelectionStart());
+        if (line >= 0 && line < layout.getLineCount()) {
+            Editable text = mCodeEditText.getText();
+            CharSequence lineText = null;
+            if (text != null) {
+                lineText = text.subSequence(layout.getLineStart(line), layout.getLineEnd(line));
+            }
+            ClipboardUtils.setClip(getContext(), lineText);
+            ViewUtils.showSnack(this, R.string.text_already_copied_to_clip, false);
+        }
     }
 
 
     public void deleteLine() {
-        int line = LayoutHelper.getLineOfChar(mCodeEditText.getLayout(), mCodeEditText.getSelectionStart());
-        if (line < 0 || line >= mCodeEditText.getLayout().getLineCount())
-            return;
-        mCodeEditText.getText().replace(mCodeEditText.getLayout().getLineStart(line),
-                mCodeEditText.getLayout().getLineEnd(line), "");
+        Layout layout = mCodeEditText.getLayout();
+        int line = LayoutHelper.getLineOfChar(layout, mCodeEditText.getSelectionStart());
+        if (line >= 0 && line < layout.getLineCount()) {
+            Editable text = mCodeEditText.getText();
+            if (text != null) {
+                text.replace(layout.getLineStart(line), layout.getLineEnd(line), "");
+            }
+        }
     }
 
     public void jumpToStart() {
@@ -117,29 +199,36 @@ public class CodeEditor extends HVScrollView {
     }
 
     public void jumpToEnd() {
-        mCodeEditText.setSelection(mCodeEditText.getText().length());
+        Editable text = mCodeEditText.getText();
+        if (text != null) {
+            mCodeEditText.setSelection(text.length());
+        }
     }
 
     public void jumpToLineStart() {
-        int line = LayoutHelper.getLineOfChar(mCodeEditText.getLayout(), mCodeEditText.getSelectionStart());
-        if (line < 0 || line >= mCodeEditText.getLayout().getLineCount())
-            return;
-        mCodeEditText.setSelection(mCodeEditText.getLayout().getLineStart(line));
+        Layout layout = mCodeEditText.getLayout();
+        int line = LayoutHelper.getLineOfChar(layout, mCodeEditText.getSelectionStart());
+        if (line >= 0 && line < layout.getLineCount()) {
+            mCodeEditText.setSelection(layout.getLineStart(line));
+        }
     }
 
     public void jumpToLineEnd() {
-        int line = LayoutHelper.getLineOfChar(mCodeEditText.getLayout(), mCodeEditText.getSelectionStart());
-        if (line < 0 || line >= mCodeEditText.getLayout().getLineCount())
-            return;
-        mCodeEditText.setSelection(mCodeEditText.getLayout().getLineEnd(line) - 1);
-
+        Layout layout = mCodeEditText.getLayout();
+        int line = LayoutHelper.getLineOfChar(layout, mCodeEditText.getSelectionStart());
+        if (line >= 0 && line < layout.getLineCount()) {
+            mCodeEditText.setSelection(layout.getLineEnd(line) - 1);
+        }
     }
 
     public void setTheme(Theme theme) {
         mTheme = theme;
         setBackgroundColor(mTheme.getBackgroundColor());
         mJavaScriptHighlighter.setTheme(theme);
-        mJavaScriptHighlighter.updateTokens(mCodeEditText.getText().toString());
+        Editable text = mCodeEditText.getText();
+        if (text != null) {
+            mJavaScriptHighlighter.updateTokens(text.toString());
+        }
         mCodeEditText.setTheme(mTheme);
         invalidate();
     }
@@ -173,10 +262,9 @@ public class CodeEditor extends HVScrollView {
 
     public void jumpTo(int line, int col) {
         Layout layout = mCodeEditText.getLayout();
-        if (line < 0 || (layout != null && line >= layout.getLineCount())) {
-            return;
+        if (line >= 0 && (layout == null || line < layout.getLineCount())) {
+            mCodeEditText.setSelection(mCodeEditText.getLayout().getLineStart(line) + col);
         }
-        mCodeEditText.setSelection(mCodeEditText.getLayout().getLineStart(line) + col);
     }
 
     public void setReadOnly(boolean readOnly) {
@@ -188,22 +276,14 @@ public class CodeEditor extends HVScrollView {
     }
 
     public void setProgress(boolean progress) {
-        if (progress) {
-            if (mProcessDialog != null) {
-                mProcessDialog.dismiss();
-            }
-            mProcessDialog = new MaterialDialog.Builder(getContext())
-                    .content(R.string.text_processing)
-                    .progress(true, 0)
-                    .cancelable(false)
-                    .show();
-        } else {
-            if (mProcessDialog != null) {
-                mProcessDialog.dismiss();
-                mProcessDialog = null;
-            }
+        if (mProcessDialog != null) {
+            mProcessDialog.dismiss();
         }
-
+        mProcessDialog = !progress ? null : new MaterialDialog.Builder(getContext())
+                .content(R.string.text_processing)
+                .progress(true, 0)
+                .cancelable(false)
+                .show();
     }
 
     public void setText(String text) {
@@ -214,10 +294,9 @@ public class CodeEditor extends HVScrollView {
         mCodeEditText.addCursorChangeCallback(callback);
     }
 
-    public boolean removeCursorChangeCallback(CursorChangeCallback callback) {
-        return mCodeEditText.removeCursorChangeCallback(callback);
+    public void removeCursorChangeCallback(CursorChangeCallback callback) {
+        mCodeEditText.removeCursorChangeCallback(callback);
     }
-
 
     public void undo() {
         mTextViewRedoUndo.undo();
@@ -230,8 +309,11 @@ public class CodeEditor extends HVScrollView {
     public void find(String keywords, boolean usingRegex) throws CheckedPatternSyntaxException {
         if (usingRegex) {
             try {
-                mMatcher = Pattern.compile(keywords).matcher(mCodeEditText.getText());
-            }catch (PatternSyntaxException e){
+                Editable text = mCodeEditText.getText();
+                if (text != null) {
+                    mMatcher = Pattern.compile(keywords).matcher(text);
+                }
+            } catch (PatternSyntaxException e) {
                 throw new CheckedPatternSyntaxException(e);
             }
             mKeywords = null;
@@ -251,10 +333,16 @@ public class CodeEditor extends HVScrollView {
         if (!usingRegex) {
             keywords = Pattern.quote(keywords);
         }
-        String text = mCodeEditText.getText().toString();
+        Editable codeEditTextText = mCodeEditText.getText();
+        String text = null;
+        if (codeEditTextText != null) {
+            text = codeEditTextText.toString();
+        }
         try {
-            text = text.replaceAll(keywords, replacement);
-        }catch (PatternSyntaxException e){
+            if (text != null) {
+                text = text.replaceAll(keywords, replacement);
+            }
+        } catch (PatternSyntaxException e) {
             throw new CheckedPatternSyntaxException(e);
         }
         setText(text);
@@ -263,9 +351,15 @@ public class CodeEditor extends HVScrollView {
     public void findNext() {
         int foundIndex;
         if (mMatcher == null) {
-            if (mKeywords == null)
+            if (mKeywords == null) {
                 return;
-            foundIndex = TextUtils.indexOf(mCodeEditText.getText(), mKeywords, mFoundIndex + 1);
+            }
+            Editable text = mCodeEditText.getText();
+            if (text != null) {
+                foundIndex = StringUtils.indexOf(text, mKeywords, mFoundIndex + 1);
+            } else {
+                foundIndex = -1;
+            }
             if (foundIndex >= 0)
                 mCodeEditText.setSelection(foundIndex, foundIndex + mKeywords.length());
         } else if (mMatcher.find(mFoundIndex + 1)) {
@@ -284,7 +378,7 @@ public class CodeEditor extends HVScrollView {
 
     public void findPrev() {
         if (mMatcher != null) {
-            Toast.makeText(getContext(), R.string.error_regex_find_prev, Toast.LENGTH_SHORT).show();
+            ViewUtils.showToast(getContext(), R.string.error_regex_find_prev, true);
             return;
         }
         int len = mCodeEditText.getText().length();
@@ -376,17 +470,18 @@ public class CodeEditor extends HVScrollView {
     }
 
     public void addOrRemoveBreakpointAtCurrentLine() {
-        int line = LayoutHelper.getLineOfChar(mCodeEditText.getLayout(), mCodeEditText.getSelectionStart());
-        if (line < 0 || line >= mCodeEditText.getLayout().getLineCount())
-            return;
-        addOrRemoveBreakpoint(line);
+        Layout layout = mCodeEditText.getLayout();
+        int line = LayoutHelper.getLineOfChar(layout, mCodeEditText.getSelectionStart());
+        if (line >= 0 && line < layout.getLineCount()) {
+            addOrRemoveBreakpoint(line);
+        }
     }
 
     public void removeAllBreakpoints() {
         mCodeEditText.removeAllBreakpoints();
     }
 
-    public void destroy(){
+    public void destroy() {
         mJavaScriptHighlighter.shutdown();
         mJsBeautifier.shutdown();
     }
@@ -418,4 +513,23 @@ public class CodeEditor extends HVScrollView {
 
         void onAllBreakpointRemoved(int count);
     }
+
+    public void notifyPinchToZoomStrategyChanged(String newKey) {
+        applyScaleGesture(newKey);
+    }
+
+    public static class CheckedPatternSyntaxException extends Exception {
+
+        public CheckedPatternSyntaxException(PatternSyntaxException cause) {
+            super(cause);
+        }
+
+    }
+
+    public interface CursorChangeCallback {
+
+        void onCursorChange(String line, int ch);
+
+    }
+
 }

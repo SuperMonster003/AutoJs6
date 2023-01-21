@@ -10,9 +10,10 @@
     <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:theme="@style/AppTheme.AppBarOverlay"
+            android:fitsSystemWindows="true">
 
-        <com.stardust.theme.widget.ThemeColorToolbar
+        <org.autojs.autojs.theme.widget.ThemeColorToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
@@ -35,9 +36,9 @@
             <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="6dp"
+                    android:layout_marginStart="6dp"
                     android:layout_marginTop="12dp"
-                    android:layout_marginRight="6dp"
+                    android:layout_marginEnd="6dp"
                     app:cardCornerRadius="2dp"
                     app:cardElevation="1dp"
                     app:cardUseCompatPadding="true">

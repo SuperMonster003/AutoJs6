@@ -1,15 +1,15 @@
 package org.autojs.autojs.ui.common;
 
 import android.content.Context;
-import androidx.preference.PreferenceManager;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-import org.autojs.autojs6.R;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
-import com.stardust.util.HashUtils;
+import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+
+import org.autojs.autojs.util.MD5Utils;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/1/30.
@@ -20,8 +20,7 @@ public class NotAskAgainDialog extends MaterialDialog {
         super(builder);
     }
 
-
-    public static class Builder extends ThemeColorMaterialDialogBuilder {
+    public static class Builder extends MaterialDialog.Builder {
 
         private String mKeyRemind;
         private boolean mRemind;
@@ -38,10 +37,7 @@ public class NotAskAgainDialog extends MaterialDialog {
         }
 
         public MaterialDialog show() {
-            if (mRemind) {
-                return super.show();
-            }
-            return null;
+            return mRemind ? super.show() : null;
         }
 
         private void setRemindState(boolean remind) {
@@ -56,8 +52,11 @@ public class NotAskAgainDialog extends MaterialDialog {
         }
 
         private void generatePreferenceKeyIfNeeded() {
-            if (mKeyRemind == null)
-                mKeyRemind = HashUtils.md5(TextUtils.join("", Thread.currentThread().getStackTrace()));
+            if (mKeyRemind == null) {
+                mKeyRemind = MD5Utils.toHash(TextUtils.join("", Thread.currentThread().getStackTrace()));
+            }
         }
+
     }
+
 }

@@ -1,60 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-                                    xmlns:app="http://schemas.android.com/apk/res-auto"
-                                    xmlns:tools="http://schemas.android.com/tools"
-                                    android:id="@+id/item"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginLeft="3dp"
-                                    android:layout_marginRight="3dp"
-                                    android:clickable="true"
-                                    android:focusable="true"
-                                    android:foreground="?selectableItemBackground"
-                                    app:cardBackgroundColor="?android:itemBackground"
-                                    app:cardElevation="0.618dp"
-                                    app:cardUseCompatPadding="true">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="3dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?selectableItemBackground"
+        app:cardBackgroundColor="?android:itemBackground"
+        app:cardElevation="0.618dp"
+        app:cardUseCompatPadding="true">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
 
         <ImageView
-            android:id="@+id/icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"/>
+                android:id="@+id/icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="16dp" />
 
         <TextView
-            android:id="@+id/name"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:paddingRight="16dp"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="14sp"
-            tools:text="@string/text_sample_name"/>
+                android:id="@+id/name"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:paddingEnd="16dp"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="14sp"
+                tools:text="@string/text_sample_name" />
 
 
         <ImageView
-            android:id="@+id/more"
-            android:layout_width="52dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center_vertical"
-            android:background="?selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:src="@drawable/ic_more_vert_black_24dp"
-            android:tint="#A9AAAB"/>
+                android:id="@+id/more"
+                android:layout_width="52dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center_vertical"
+                android:background="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingHorizontal="16dp"
+                android:src="@drawable/ic_more_vert_black_24dp"
+                app:tint="#A9AAAB" />
 
 
     </LinearLayout>

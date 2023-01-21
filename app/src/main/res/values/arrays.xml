@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="keys_root_record_out_file_type">
+        <item>@string/key_root_record_out_file_type_binary</item>
+        <item>@string/key_root_record_out_file_type_js</item>
+    </string-array>
+
+    <string-array name="values_root_record_out_file_type">
+        <item>@string/entry_root_record_out_file_type_binary</item>
+        <item>@string/entry_root_record_out_file_type_js</item>
+    </string-array>
+
+    <string-array name="keys_documentation_source">
+        <item>@string/key_documentation_source_local</item>
+        <item>@string/key_documentation_source_online</item>
+    </string-array>
+
+    <string-array name="values_documentation_source">
+        <item>@string/entry_documentation_source_local</item>
+        <item>@string/entry_documentation_source_online</item>
+    </string-array>
+
+    <string-array name="keys_app_language">
+        <item>@string/key_app_language_auto</item>
+        <item>@string/key_app_language_zh</item>
+        <item>@string/key_app_language_zh_hk</item>
+        <item>@string/key_app_language_zh_tw</item>
+        <item>@string/key_app_language_en</item>
+        <item>@string/key_app_language_fr</item>
+        <item>@string/key_app_language_es</item>
+        <item>@string/key_app_language_ja</item>
+        <item>@string/key_app_language_ko</item>
+        <item>@string/key_app_language_ru</item>
+        <item>@string/key_app_language_ar</item>
+    </string-array>
+
+    <string-array name="values_app_language">
+        <item>@string/entry_app_language_auto</item>
+        <item>@string/entry_app_language_zh</item>
+        <item>@string/entry_app_language_zh_hk</item>
+        <item>@string/entry_app_language_zh_tw</item>
+        <item>@string/entry_app_language_en</item>
+        <item>@string/entry_app_language_fr</item>
+        <item>@string/entry_app_language_es</item>
+        <item>@string/entry_app_language_ja</item>
+        <item>@string/entry_app_language_ko</item>
+        <item>@string/entry_app_language_ru</item>
+        <item>@string/entry_app_language_ar</item>
+    </string-array>
+
+    <string-array name="keys_night_mode">
+        <item>@string/key_night_mode_follow_system</item>
+        <item>@string/key_night_mode_always_on</item>
+        <item>@string/key_night_mode_always_off</item>
+    </string-array>
+
+    <string-array name="values_night_mode">
+        <item>@string/entry_night_mode_follow_system</item>
+        <item>@string/entry_night_mode_always_on</item>
+        <item>@string/entry_night_mode_always_off</item>
+    </string-array>
+
+    <string-array name="keys_root_mode">
+        <item>@string/key_root_mode_auto_detect</item>
+        <item>@string/key_root_mode_force_root</item>
+        <item>@string/key_root_mode_force_non_root</item>
+    </string-array>
+
+    <string-array name="values_root_mode">
+        <item>@string/entry_root_mode_auto_detect</item>
+        <item>@string/entry_root_mode_force_root</item>
+        <item>@string/entry_root_mode_force_non_root</item>
+    </string-array>
+
+    <string-array name="keys_hidden_files">
+        <item>@string/key_hidden_files_not_show</item>
+        <item>@string/key_hidden_files_show</item>
+    </string-array>
+
+    <string-array name="values_hidden_files">
+        <item>@string/entry_hidden_files_not_show</item>
+        <item>@string/entry_hidden_files_show</item>
+    </string-array>
+
+    <string-array name="keys_editor_pinch_to_zoom_strategy">
+        <item>@string/key_editor_pinch_to_zoom_change_text_size</item>
+        <item>@string/key_editor_pinch_to_zoom_scale_view</item>
+        <item>@string/key_editor_pinch_to_zoom_disable</item>
+    </string-array>
+    
+    <string-array name="values_editor_pinch_to_zoom_strategy">
+        <item>@string/entry_editor_pinch_to_zoom_change_text_size</item>
+        <item>@string/entry_editor_pinch_to_zoom_scale_view</item>
+        <item>@string/entry_editor_pinch_to_zoom_disable</item>
+    </string-array>
+    
+    <string-array name="icon_about_app_svg_view_paths">
+        <item>M 178.66667,94.666667 C 168.364,98.733333 158.33067,106.3912 149.33333,112.88893 109.414,141.72 81.050533,184.25733 69.777733,232 63.1852,259.92133 66.666667,291.35467 66.666667,320 v 45.33333 c 0,15.09067 0.204933,30.13467 9.777733,42.66667 9.332533,12.21733 27.4312,24.23467 43.5556,22.66667 10.588,-1.02934 22.01867,-7.75334 29.77733,-14.66667 5.692,-5.07067 12.07067,-12.228 12.88934,-20 h 6.66666 L 172,420 l 6.66667,82.66667 2.66666,26.66666 26.66667,8.88934 46.66667,12.888 34.66666,7.556 32,-7.556 46.66667,-12.888 26.66667,-8.88934 6.66666,-72 5.33334,-56 L 408,386.66667 h 2.66667 c 4.768,12.94266 10.608,25.01733 22.66666,32.88933 31.55867,20.6 69.99734,-0.112 76.88934,-35.556 1.32266,-6.80267 0.444,-14.41067 0.444,-21.33333 V 324 c 0,-54.92933 0.836,-113.848 -33.77734,-160 C 462.65867,145.02667 446.71067,128.33027 428,113.77773 421.712,108.8868 414.844,104.532 408,100.4444 c -2.632,-1.572 -7.44667,-2.8016 -8.88933,-5.777733 -1.84934,-3.82 4.29466,-10.100667 6,-13.333334 C 411.928,68.417867 419.40933,55.848267 426,42.666667 c 2.34533,-4.69 9.25333,-13.191334 4.22267,-18.222267 -7.932,-7.931467 -14.03334,5.080533 -16.88934,10.222267 -7.132,12.8368 -14.41466,25.6352 -21.11066,38.666666 -1.84134,3.580934 -4.96534,12.1232 -9.112,13.5556 -1.548,0.5348 -4.356,-1.075333 -5.77734,-1.5556 C 371.472,83.352 365.816,81.049733 360,79.111067 341.83867,73.0576 321.61733,69.8424 302.66667,68 c -25.116,-2.441733 -53.25734,1.7568 -77.33334,8.4444 -5.836,1.621333 -11.64,3.435733 -17.33333,5.333333 -4.30533,1.435334 -9.784,5.1888 -14.444,5.1112 C 189.02533,86.813333 184.5,74.277467 182.444,70.666667 176.70133,60.580667 170.86133,50.324 165.556,40 163.04133,35.1072 160.51467,27.6952 156,24.222267 c -7.97333,-6.133467 -13.744,3.245333 -10.444,10.4444 9.26133,20.208533 21.264,41.242266 33.11067,60 m 210.66666,56.444003 c 23.36,0 24.06667,34.62133 1.33334,37.77866 -24.45467,3.396 -27.52534,-37.77866 -1.33334,-37.77866 m -208,1.112 c 4.54267,-0.94667 12.03067,-1.036 16,1.55466 15.28667,9.98 7.75867,33.212 -9.33333,35.112 -20.83733,2.31467 -27.89733,-32.244 -6.66667,-36.66666 m 188,166.444 L 358.66667,432 356,464 l -2,18.444 -8.66667,3.33333 -21.33333,6 -34.66667,9.556 -12,-2.22266 -32,-8.888 -22.444,-6.66667 L 220,468 217.33333,432 h 32 l 4.22267,26.22267 15.77733,4.888 L 286.66667,468 308,462.66667 l 15.33333,-5.556 2,-13.11067 1.33334,-20 6.66666,-73.33333 -124,-1.33334 -2.66666,-30.66666 L 308,317.33333 l 61.33333,1.33334 m 74.66667,164 c 0,-3.87867 -1.124,-9.80267 0.66667,-13.33334 C 447.38533,463.972 452.148,464 457.33333,464 h 28 V 450.66667 H 456 c -3.876,0 -9.78667,-1.10667 -13.33333,0.66666 -2.93334,1.46667 -5.904,4.86 -8,7.33334 C 430.66,463.396 432,470.14133 432,476 v 33.33333 c 0,4.416 -1.07067,10.436 0.22267,14.66667 1.09866,3.59867 7.08133,10.48533 10.66666,11.77733 C 445.452,536.70267 449.29333,536 452,536 c 7.38533,0 21.82267,2.73467 28,-1.556 10.648,-7.39333 8,-19.048 8,-30.444 0,-3.544 0.96,-8.748 -0.66667,-12 -1.404,-2.80933 -4.78,-6.004 -7.33333,-7.77733 -3.41467,-2.372 -8.02933,-1.556 -12,-1.556 H 444 M 444,496 h 21.33333 c 2.18534,0 5.884,-0.696 7.77734,0.66667 1.92266,1.384 1.528,3.944 1.556,6 0.0667,4.792 2.03333,16.18933 -1.556,19.77733 C 470.84133,524.71467 466.916,524 464,524 c -6.68267,0 -15.66533,1.9 -19.33333,-5.33333 C 441.864,513.14 444,502.152 444,496 Z</item>
+    </string-array>
+    
+    <integer-array name="icon_about_app_svg_view_fill_colors">
+        <item>@android:color/transparent</item>
+    </integer-array>
+    
+    <integer-array name="icon_about_app_svg_view_trace_colors">
+        <item>@color/about_app_svg_view_trace_color</item>
+    </integer-array>
+    
+    <integer-array name="icon_about_app_svg_view_trace_residue_colors">
+        <item>@color/about_app_svg_view_trace_color</item>
+    </integer-array>
+    
+</resources>

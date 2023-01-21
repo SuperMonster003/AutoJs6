@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="css_style_license_dialog_notices" translatable="false">
+        p.license {
+            background: grey;
+        }
+        body {
+            color: #CDCDCD;
+            background-color: #424242;
+            font-family: sans-serif;
+            overflow-wrap: break-word;
+        }
+        body a:link {
+            color: #0086C3;
+        }
+        pre {
+            background-color: #373737;
+            padding: 1em;
+            white-space: pre-wrap;
+        }
+    </string>
+</resources>

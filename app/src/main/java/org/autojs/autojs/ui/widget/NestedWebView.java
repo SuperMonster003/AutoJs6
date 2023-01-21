@@ -1,4 +1,6 @@
-package org.autojs.autojs.ui.widget;/*
+package org.autojs.autojs.ui.widget;
+
+/*
  * Copyright (C) 2015 takahirom
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +16,16 @@ package org.autojs.autojs.ui.widget;/*
  * limitations under the License.
  */
 
-
 import android.content.Context;
-import androidx.core.view.MotionEventCompat;
-import androidx.core.view.NestedScrollingChild;
-import androidx.core.view.NestedScrollingChildHelper;
-import androidx.core.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.webkit.WebView;
+
+import androidx.core.view.NestedScrollingChild;
+import androidx.core.view.NestedScrollingChildHelper;
+import androidx.core.view.ViewCompat;
+
+import org.autojs.autojs.ui.pager.ViewPager;
 
 public class NestedWebView extends WebView implements NestedScrollingChild {
     private int mLastY;
@@ -45,49 +48,75 @@ public class NestedWebView extends WebView implements NestedScrollingChild {
         setNestedScrollingEnabled(true);
     }
 
+    // @Comment by SuperMonster003 on Oct 14, 2022.
+    //  ! Will "fix" the swipe-refresh problem on documentation viewpager.
+    //  ! But the side effect has left unknown.
+
+    // @Override
+    // public boolean onTouchEvent(MotionEvent ev) {
+    //     boolean returnValue = false;
+    //
+    //     MotionEvent event = MotionEvent.obtain(ev);
+    //     // final int action = MotionEventCompat.getActionMasked(event);
+    //     final int action = event.getAction();
+    //     if (action == MotionEvent.ACTION_DOWN) {
+    //         mNestedOffsetY = 0;
+    //     }
+    //     int eventY = (int) event.getY();
+    //     event.offsetLocation(0, mNestedOffsetY);
+    //     switch (action) {
+    //         case MotionEvent.ACTION_MOVE -> {
+    //             int deltaY = mLastY - eventY;
+    //             // NestedPreScroll
+    //             if (dispatchNestedPreScroll(0, deltaY, mScrollConsumed, mScrollOffset)) {
+    //                 deltaY -= mScrollConsumed[1];
+    //                 mLastY = eventY - mScrollOffset[1];
+    //                 event.offsetLocation(0, -mScrollOffset[1]);
+    //                 mNestedOffsetY += mScrollOffset[1];
+    //             }
+    //             returnValue = super.onTouchEvent(event);
+    //
+    //             // NestedScroll
+    //             if (dispatchNestedScroll(0, mScrollOffset[1], 0, deltaY, mScrollOffset)) {
+    //                 event.offsetLocation(0, mScrollOffset[1]);
+    //                 mNestedOffsetY += mScrollOffset[1];
+    //                 mLastY -= mScrollOffset[1];
+    //             }
+    //         }
+    //         case MotionEvent.ACTION_DOWN -> {
+    //             returnValue = super.onTouchEvent(event);
+    //             mLastY = eventY;
+    //             // start NestedScroll
+    //             startNestedScroll(ViewCompat.SCROLL_AXIS_VERTICAL);
+    //         }
+    //         case MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+    //             returnValue = super.onTouchEvent(event);
+    //             // end NestedScroll
+    //             stopNestedScroll();
+    //         }
+    //     }
+    //     return returnValue;
+    // }
+
+    // FIXME by SuperMonster003 on Jul 28, 2022.
+    //  ! Code `ViewPager.setPageScrollEnabled(boolean)`
+    //  ! in the following overridden methods
+    //  ! - 1 - onInterceptTouchEvent
+    //  ! - 2 - onOverScrolled
+    //  ! existed only for disabling "Documents" ViewPager
+    //  ! from scrolling horizontally when swiping in the area of code.
+    //  ! A more elegant way is needed (for sure).
+
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        boolean returnValue = false;
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        ViewPager.setPageScrollEnabled(false);
+        return super.onInterceptTouchEvent(ev);
+    }
 
-        MotionEvent event = MotionEvent.obtain(ev);
-        final int action = MotionEventCompat.getActionMasked(event);
-        if (action == MotionEvent.ACTION_DOWN) {
-            mNestedOffsetY = 0;
-        }
-        int eventY = (int) event.getY();
-        event.offsetLocation(0, mNestedOffsetY);
-        switch (action) {
-            case MotionEvent.ACTION_MOVE -> {
-                int deltaY = mLastY - eventY;
-                // NestedPreScroll
-                if (dispatchNestedPreScroll(0, deltaY, mScrollConsumed, mScrollOffset)) {
-                    deltaY -= mScrollConsumed[1];
-                    mLastY = eventY - mScrollOffset[1];
-                    event.offsetLocation(0, -mScrollOffset[1]);
-                    mNestedOffsetY += mScrollOffset[1];
-                }
-                returnValue = super.onTouchEvent(event);
-
-                // NestedScroll
-                if (dispatchNestedScroll(0, mScrollOffset[1], 0, deltaY, mScrollOffset)) {
-                    event.offsetLocation(0, mScrollOffset[1]);
-                    mNestedOffsetY += mScrollOffset[1];
-                    mLastY -= mScrollOffset[1];
-                }
-            }
-            case MotionEvent.ACTION_DOWN -> {
-                returnValue = super.onTouchEvent(event);
-                mLastY = eventY;
-                // start NestedScroll
-                startNestedScroll(ViewCompat.SCROLL_AXIS_VERTICAL);
-            }
-            case MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                returnValue = super.onTouchEvent(event);
-                // end NestedScroll
-                stopNestedScroll();
-            }
-        }
-        return returnValue;
+    @Override
+    protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
+        super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
+        ViewPager.setPageScrollEnabled(true);
     }
 
     // Nested Scroll implements

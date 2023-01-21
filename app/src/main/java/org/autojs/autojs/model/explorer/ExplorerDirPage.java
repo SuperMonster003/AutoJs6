@@ -2,7 +2,7 @@ package org.autojs.autojs.model.explorer;
 
 import androidx.annotation.NonNull;
 
-import com.stardust.pio.PFile;
+import org.autojs.autojs.pio.PFile;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -56,22 +56,20 @@ public class ExplorerDirPage extends ExplorerFileItem implements ExplorerPage {
         return -1;
     }
 
-    public boolean updateChild(ExplorerItem oldItem, ExplorerItem newItem) {
+    public void updateChild(ExplorerItem oldItem, ExplorerItem newItem) {
         int i = indexOf(oldItem);
         if (i < 0) {
-            return false;
+            return;
         }
         mChildren.set(i, newItem);
-        return true;
     }
 
-    public boolean removeChild(ExplorerItem item) {
+    public void removeChild(ExplorerItem item) {
         int i = indexOf(item);
         if(i < 0){
-            return false;
+            return;
         }
         mChildren.remove(i);
-        return true;
     }
 
     public void addChild(ExplorerItem item) {

@@ -30,8 +30,8 @@
 
 -keep class org.mozilla.javascript.** { *; }
 -keep class com.jecelyin.editor.** { *; }
--keep class com.stardust.automator.** { *; }
--keep class com.stardust.autojs.** { *; }
+-keep class org.autojs.autojs.core.automator.** { *; }
+-keep class org.autojs.autojs.** { *; }
 -keep class org.greenrobot.eventbus.** { *; }
 -keep class * extends c
 -keepattributes *Annotation*
@@ -51,7 +51,7 @@
 -keep class com.some.package.server.JsonDeserializerWithOptions
 # autojs
 -keepclassmembers class ** {
-    @com.stardust.autojs.runtime.ScriptInterface <methods>;
+    @org.autojs.autojs.annotation.ScriptInterface <methods>;
 }
 # 920 editor
 -keep class org.msgpack.** { *; }
@@ -126,11 +126,6 @@
 -keepnames class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
-
-# AVLoadingView
-
--keep class com.wang.avi.** { *; }
--keep class com.wang.avi.indicators.** { *; }
 
 # Bugly
 

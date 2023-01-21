@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
-import org.autojs.autojs.tool.BitmapTool;
+import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs6.R;
 
 /**
@@ -71,7 +71,7 @@ public class Shortcut {
             throw new IllegalStateException(mContext.getString(R.string.error_set_both_icon_res_and_icon));
         }
         if (icon.getByteCount() > 1024 * 500) {
-            mIcon = BitmapTool.scaleBitmap(icon, 200, 200);
+            mIcon = BitmapUtils.scaleBitmap(icon, 200, 200);
         }else {
             mIcon = icon;
         }

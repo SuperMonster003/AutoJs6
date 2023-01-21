@@ -4,10 +4,10 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
-    <com.stardust.theme.widget.ThemeColorTextView
+    <org.autojs.autojs.theme.widget.ThemeColorTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:text="@string/text_code"
         android:textSize="14sp"/>
 
@@ -15,22 +15,22 @@
         android:id="@+id/code"
         android:layout_width="match_parent"
         android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:textSize="15sp"
         android:layout_height="wrap_content"
         android:textColor="@android:color/primary_text_light"/>
 
-    <com.stardust.theme.widget.ThemeColorTextView
+    <org.autojs.autojs.theme.widget.ThemeColorTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:text="@string/text_result"
         android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/result"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#727377"

@@ -1,35 +1,35 @@
 package org.autojs.autojs.ui.edit;
 
+import static org.autojs.autojs.util.StringUtils.key;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
-
-import com.google.android.material.snackbar.Snackbar;
-
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.stardust.autojs.script.JavaScriptSource;
-import com.stardust.pio.PFiles;
 
-import org.autojs.autojs.tool.ConsoleTool;
-import org.autojs.autojs6.R;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
-import org.autojs.autojs.ui.project.BuildActivity;
-import org.autojs.autojs.ui.project.BuildActivity_;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
+import org.autojs.autojs.ui.project.BuildActivity;
+import org.autojs.autojs.util.ClipboardUtils;
+import org.autojs.autojs.util.ConsoleUtils;
+import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
-import com.stardust.util.ClipboardUtil;
-import com.stardust.util.IntentUtil;
-
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -54,7 +54,7 @@ public class EditorMenu {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_log) {
-            return ConsoleTool.launch();
+            return ConsoleUtils.launch(mContext);
         }
         if (itemId == R.id.action_force_stop) {
             return tryDoing(mEditorView::forceStop);
@@ -124,6 +124,14 @@ public class EditorMenu {
         if (itemId == R.id.action_editor_text_size) {
             return tryDoing(mEditorView::selectTextSize);
         }
+        if (itemId == R.id.action_editor_pinch_to_zoom) {
+            setPinchToZoomStrategy();
+            return true;
+        }
+        if (itemId == R.id.action_editor_fx_symbols_settings) {
+            startSymbolsSettingsActivity();
+            return true;
+        }
         if (itemId == R.id.action_editor_theme) {
             return tryDoing(mEditorView::selectEditorTheme);
         }
@@ -164,15 +172,15 @@ public class EditorMenu {
             title = ((ClassSearchingItem.PackageItem) item).getPackageName();
             desc = title;
         }
-        new ThemeColorMaterialDialogBuilder(mContext)
+        new MaterialDialog.Builder(mContext)
                 .title(title)
                 .content(desc)
                 .positiveText(R.string.text_copy)
                 .negativeText(R.string.text_en_import)
                 .neutralText(R.string.text_view_docs)
                 .onPositive((ignored, which) -> {
-                    ClipboardUtil.setClip(mContext, desc);
-                    Toast.makeText(mContext, R.string.text_already_copied_to_clip, Toast.LENGTH_SHORT).show();
+                    ClipboardUtils.setClip(mContext, desc);
+                    ViewUtils.showToast(mContext, R.string.text_already_copied_to_clip);
                     dialog.dismiss();
                 })
                 .onNegative((ignored, which) -> {
@@ -182,17 +190,74 @@ public class EditorMenu {
                         mEditor.insert(0, item.getImportText() + ";\n");
                     }
                 })
-                .onNeutral((ignored, which) -> IntentUtil.browse(mContext, item.getUrl()))
+                .onNeutral((ignored, which) -> IntentUtils.browse(mContext, item.getUrl()))
                 .onAny((ignored, which) -> dialog.dismiss())
                 .show();
     }
 
     private void startBuildApkActivity() {
-        BuildActivity_.intent(mContext)
-                .extra(BuildActivity.EXTRA_SOURCE, mEditorView.getUri().getPath())
+        new BuildActivity.IntentBuilder(mContext)
+                .extra(mEditorView.getUri().getPath())
                 .start();
     }
 
+    private void setPinchToZoomStrategy() {
+        String key = key(R.string.key_editor_pinch_to_zoom_strategy);
+
+        String defItemKey = key(R.string.default_key_editor_pinch_to_zoom_strategy);
+        String itemKey = Pref.getString(key, defItemKey);
+
+        List<String> itemKeys = Arrays.asList(mContext.getResources().getStringArray(R.array.keys_editor_pinch_to_zoom_strategy));
+
+        int defSelectedIndex = Math.max(0, itemKeys.indexOf(itemKey));
+
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
+                .title(R.string.text_pinch_to_zoom)
+                .items(R.array.values_editor_pinch_to_zoom_strategy)
+                .itemsCallbackSingleChoice(defSelectedIndex, (dialog, itemView, which, text) -> {
+                    String newKey = itemKeys.get(which);
+                    if (!Objects.equals(newKey, itemKey)) {
+                        Pref.putString(key, newKey);
+                        mEditorView.getEditor().notifyPinchToZoomStrategyChanged(newKey);
+                    }
+                    return true;
+                })
+
+                // TODO by SuperMonster003 on Oct 17, 2022.
+
+                // .neutralText(R.string.dialog_button_details)
+                // .neutralColorRes(R.color.dialog_button_hint)
+                // .onNeutral((dialog, which) -> {
+                //     // Hint dialog.
+                // })
+                .negativeText(R.string.dialog_button_back)
+                .onNegative((dialog, which) -> dialog.dismiss())
+                .positiveText(R.string.dialog_button_confirm)
+                .onPositive((dialog, which) -> dialog.dismiss())
+                .autoDismiss(false);
+
+        // TODO by SuperMonster003 on Oct 17, 2022.
+        //  ! Implementation for "scale view".
+        makeEditorPinchToZoomScaleViewUnderDev(builder, itemKeys.indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view)));
+    }
+
+    private void makeEditorPinchToZoomScaleViewUnderDev(MaterialDialog.Builder builder, int i) {
+        builder.itemsDisabledIndices(i);
+        MaterialDialog built = builder.build();
+        assert built.getItems() != null;
+        built.getItems().set(i, built.getItems().get(i) + " (" + builder.getContext().getString(R.string.text_under_development_title).toLowerCase(Locale.ROOT) + ")");
+        built.show();
+    }
+
+    private void startSymbolsSettingsActivity() {
+        // TODO by SuperMonster003 on Oct 16, 2022.
+
+        // new SymbolsSettingsActivity.IntentBuilder(mContext)
+        //         .extra(mEditorView.getUri().getPath())
+        //         .start();
+
+        ViewUtils.showToast(mContext, R.string.text_under_development_content);
+    }
 
     private boolean onEditOptionsSelected(MenuItem item) {
         int itemId = item.getItemId();
@@ -229,17 +294,18 @@ public class EditorMenu {
     }
 
     private void showJumpDialog(final int lineCount) {
-        String hint = "1 ~ " + lineCount;
-        new ThemeColorMaterialDialogBuilder(mContext)
+        String hint = "1 - " + lineCount;
+        new MaterialDialog.Builder(mContext)
                 .title(R.string.text_jump_to_line)
                 .input(hint, "", (dialog, input) -> {
                     if (TextUtils.isEmpty(input)) {
                         return;
                     }
                     try {
-                        int line = Integer.parseInt(input.toString());
+                        int line = Math.max(Math.min(Integer.parseInt(input.toString()), lineCount), 1);
                         mEditor.jumpTo(line - 1, 0);
                     } catch (NumberFormatException ignored) {
+                        // Ignored.
                     }
                 })
                 .inputType(InputType.TYPE_CLASS_NUMBER)
@@ -259,7 +325,7 @@ public class EditorMenu {
     }
 
     private void showInfo(String info) {
-        new ThemeColorMaterialDialogBuilder(mContext)
+        new MaterialDialog.Builder(mContext)
                 .title(R.string.text_info)
                 .content(info)
                 .show();
@@ -284,7 +350,7 @@ public class EditorMenu {
 
     @Nullable
     private CharSequence getClip() {
-        return ClipboardUtil.getClip(mContext);
+        return ClipboardUtils.getClip(mContext);
     }
 
     private void findOrReplace() {
@@ -299,8 +365,8 @@ public class EditorMenu {
     }
 
     private void copyAll() {
-        ClipboardUtil.setClip(mContext, mEditor.getText());
-        Snackbar.make(mEditorView, R.string.text_already_copied_to_clip, Snackbar.LENGTH_SHORT).show();
+        ClipboardUtils.setClip(mContext, mEditor.getText());
+        ViewUtils.showSnack(mEditorView, R.string.text_already_copied_to_clip);
     }
 
     private boolean tryDoing(Runnable callable) {

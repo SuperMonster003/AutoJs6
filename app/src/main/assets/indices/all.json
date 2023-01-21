@@ -136,6 +136,11 @@
         "summary": "应用设置页"
       },
       {
+        "key": "openAppSettings",
+        "url": "app.html#app_app_openappsetting_packagename",
+        "summary": "应用设置页"
+      },
+      {
         "key": "sendEmail",
         "url": "app.html#app_app_sendemail_options",
         "summary": "发送邮件"

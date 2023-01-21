@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#f9f9f9"
             android:fitsSystemWindows="true"
             android:orientation="vertical">
 
         <com.google.android.material.appbar.AppBarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:theme="@style/AppTheme.AppBarOverlay">
+                app:theme="@style/AppTheme.AppBarOverlay"
+                android:fitsSystemWindows="true">
 
-            <com.stardust.theme.widget.ThemeColorToolbar
+            <org.autojs.autojs.theme.widget.ThemeColorToolbar
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
@@ -43,13 +43,37 @@
                     android:background="@android:color/transparent"
                     android:foreground="?selectableItemBackgroundBorderless">
 
+                <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                <com.jaredrummler.android.widget.AnimatedSvgView
+                        android:id="@+id/icon_about_app_svg_view"
+                        android:layout_width="91dp"
+                        android:layout_height="91dp"
+                        android:layout_gravity="center"
+                        android:layout_margin="10dp"
+                        app:animatedSvgFillColors="@array/icon_about_app_svg_view_fill_colors"
+                        app:animatedSvgGlyphStrings="@array/icon_about_app_svg_view_paths"
+                        app:animatedSvgTraceColors="@array/icon_about_app_svg_view_trace_colors"
+                        app:animatedSvgTraceResidueColors="@array/icon_about_app_svg_view_trace_residue_colors"
+                        app:animatedSvgImageSizeX="576"
+                        app:animatedSvgImageSizeY="576"
+                        app:animatedSvgFillStart="200"
+                        app:animatedSvgFillTime="200"
+                        app:animatedSvgTraceTime="500"
+                        app:animatedSvgTraceTimePerGlyph="500"/>
+
                 <ImageView
                         android:id="@+id/icon_about_app"
+                        android:visibility="invisible"
                         android:layout_width="91dp"
                         android:layout_height="91dp"
                         android:layout_margin="10dp"
-                        android:src="@drawable/autojs_material"
+                        android:src="@drawable/autojs6_material"
                         tools:ignore="ContentDescription,ImageContrastCheck" />
+
+                </FrameLayout>
 
                 <LinearLayout
                         android:layout_width="wrap_content"
@@ -63,8 +87,9 @@
                             android:layout_height="0dp"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:textColor="#414141"
-                            android:textSize="16sp" />
+                            android:textColor="@color/about_app_version_info"
+                            android:textSize="16sp"
+                            android:text="@string/text_sample_string" />
 
                     <TextView
                             android:id="@+id/since"
@@ -72,8 +97,9 @@
                             android:layout_height="0dp"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:textColor="#414141"
-                            android:textSize="13sp" />
+                            android:textColor="@color/about_app_version_info"
+                            android:textSize="13sp"
+                            android:text="@string/text_sample_string" />
 
                 </LinearLayout>
 
@@ -100,13 +126,13 @@
                             android:layout_height="wrap_content"
                             android:layout_width="match_parent" />
 
-                    <TextView
+                    <org.autojs.autojs.ui.widget.CopyrightTextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:layout_marginTop="20dp"
-                            android:text="@string/copyright"
-                            android:textColor="#616161"
+                            tools:text="@string/text_copyright_sample"
+                            android:textColor="@color/prefTextColorPrimary"
                             android:textSize="14sp" />
 
                 </LinearLayout>

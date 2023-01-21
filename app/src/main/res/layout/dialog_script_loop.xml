@@ -4,8 +4,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
     <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -27,7 +27,7 @@
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
                 android:textColor="#80000000"
                 android:text="@string/hint_loop_times"
                 android:textSize="12sp" />
@@ -71,7 +71,7 @@
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
                 android:layout_marginBottom="8dp"
                 android:textColor="#80000000"
                 android:text="@string/hint_loop_delay"

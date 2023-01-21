@@ -1,8 +1,7 @@
 package org.autojs.autojs.ui.edit.debug;
 
-import com.stardust.autojs.rhino.debug.Debugger;
-
-import org.autojs.autojs.autojs.AutoJs;
+import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.rhino.debug.Debugger;
 import org.mozilla.javascript.ContextFactory;
 
 public class DebuggerSingleton {
@@ -12,4 +11,5 @@ public class DebuggerSingleton {
     public static Debugger get(){
         return sDebugger;
     }
+
 }

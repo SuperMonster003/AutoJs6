@@ -5,13 +5,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.stardust.app.GlobalAppContext;
-
 import org.autojs.autojs.App;
+import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.storage.database.IntentTaskDatabase;
 import org.autojs.autojs.storage.database.ModelChange;
 import org.autojs.autojs.storage.database.TimedTaskDatabase;
-import org.autojs.autojs.tool.Observers;
+import org.autojs.autojs.util.Observers;
 
 import java.util.List;
 

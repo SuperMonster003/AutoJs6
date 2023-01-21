@@ -1,26 +1,25 @@
 package org.autojs.autojs.external.tasker;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Intent;
-import android.widget.Toast;
-
-import org.autojs.autojs6.R;
-import org.autojs.autojs.timing.TaskReceiver;
-import org.autojs.autojs.tool.Observers;
-import org.autojs.autojs.ui.BaseActivity;
-import org.autojs.autojs.ui.edit.EditorView;
-
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-
 import static org.autojs.autojs.ui.edit.EditorView.EXTRA_CONTENT;
 import static org.autojs.autojs.ui.edit.EditorView.EXTRA_NAME;
 import static org.autojs.autojs.ui.edit.EditorView.EXTRA_RUN_ENABLED;
 import static org.autojs.autojs.ui.edit.EditorView.EXTRA_SAVE_ENABLED;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
+
+import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.ViewById;
+import org.autojs.autojs.timing.TaskReceiver;
+import org.autojs.autojs.ui.BaseActivity;
+import org.autojs.autojs.ui.edit.EditorView;
+import org.autojs.autojs.util.Observers;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Stardust on 2017/4/5.
@@ -45,15 +44,14 @@ public class TaskerScriptEditActivity extends BaseActivity {
     @AfterViews
     void setUpViews() {
         mEditorView.handleIntent(getIntent()
-                .putExtra(EXTRA_RUN_ENABLED, false)
-                .putExtra(EXTRA_SAVE_ENABLED, false))
+                        .putExtra(EXTRA_RUN_ENABLED, false)
+                        .putExtra(EXTRA_SAVE_ENABLED, false))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(Observers.emptyConsumer(),
-                        ex -> {
-                            Toast.makeText(TaskerScriptEditActivity.this, ex.getMessage(), Toast.LENGTH_LONG).show();
-                            finish();
-                        });
-        BaseActivity.setToolbarAsBack(this, R.id.toolbar, mEditorView.getName());
+                .subscribe(Observers.emptyConsumer(), ex -> {
+                    ViewUtils.showToast(TaskerScriptEditActivity.this, ex.getMessage(), true);
+                    finish();
+                });
+        setToolbarAsBack(mEditorView.getName());
     }
 
 

@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- google's material design colours from
+    http://www.google.com/design/spec/style/color.html#color-ui-color-palette -->
+
+    <!-- reds -->
+    <string name="md_red_50">Красный (50)</string>
+    <string name="md_red_100">Красный (100)</string>
+    <string name="md_red_200">Красный (200)</string>
+    <string name="md_red_300">Красный (300)</string>
+    <string name="md_red_400">Красный (400)</string>
+    <string name="md_red_500">Красный (500)</string>
+    <string name="md_red_600">Красный (600)</string>
+    <string name="md_red_700">Красный (700)</string>
+    <string name="md_red_800">Красный (800)</string>
+    <string name="md_red_900">Красный (900)</string>
+    <string name="md_red_a100">Красный (A100)</string>
+    <string name="md_red_a200">Красный (A200)</string>
+    <string name="md_red_a400">Красный (A400)</string>
+    <string name="md_red_a700">Красный (A700)</string>
+
+    <!-- pinks -->
+    <string name="md_pink_50">Розовый (50)</string>
+    <string name="md_pink_100">Розовый (100)</string>
+    <string name="md_pink_200">Розовый (200)</string>
+    <string name="md_pink_300">Розовый (300)</string>
+    <string name="md_pink_400">Розовый (400)</string>
+    <string name="md_pink_500">Розовый (500)</string>
+    <string name="md_pink_600">Розовый (600)</string>
+    <string name="md_pink_700">Розовый (700)</string>
+    <string name="md_pink_800">Розовый (800)</string>
+    <string name="md_pink_900">Розовый (900)</string>
+    <string name="md_pink_a100">Розовый (A100)</string>
+    <string name="md_pink_a200">Розовый (A200)</string>
+    <string name="md_pink_a400">Розовый (A400)</string>
+    <string name="md_pink_a700">Розовый (A700)</string>
+
+    <!-- purples -->
+    <string name="md_purple_50">Фиолетовый (50)</string>
+    <string name="md_purple_100">Фиолетовый (100)</string>
+    <string name="md_purple_200">Фиолетовый (200)</string>
+    <string name="md_purple_300">Фиолетовый (300)</string>
+    <string name="md_purple_400">Фиолетовый (400)</string>
+    <string name="md_purple_500">Фиолетовый (500)</string>
+    <string name="md_purple_600">Фиолетовый (600)</string>
+    <string name="md_purple_700">Фиолетовый (700)</string>
+    <string name="md_purple_800">Фиолетовый (800)</string>
+    <string name="md_purple_900">Фиолетовый (900)</string>
+    <string name="md_purple_a100">Фиолетовый (A100)</string>
+    <string name="md_purple_a200">Фиолетовый (A200)</string>
+    <string name="md_purple_a400">Фиолетовый (A400)</string>
+    <string name="md_purple_a700">Фиолетовый (A700)</string>
+
+    <!-- deep purples -->
+    <string name="md_deep_purple_50">Глубокий фиолетовый (50)</string>
+    <string name="md_deep_purple_100">Глубокий фиолетовый (100)</string>
+    <string name="md_deep_purple_200">Глубокий фиолетовый (200)</string>
+    <string name="md_deep_purple_300">Глубокий фиолетовый (300)</string>
+    <string name="md_deep_purple_400">Глубокий фиолетовый (400)</string>
+    <string name="md_deep_purple_500">Глубокий фиолетовый (500)</string>
+    <string name="md_deep_purple_600">Глубокий фиолетовый (600)</string>
+    <string name="md_deep_purple_700">Глубокий фиолетовый (700)</string>
+    <string name="md_deep_purple_800">Глубокий фиолетовый (800)</string>
+    <string name="md_deep_purple_900">Глубокий фиолетовый (900)</string>
+    <string name="md_deep_purple_a100">Глубокий фиолетовый (A100)</string>
+    <string name="md_deep_purple_a200">Глубокий фиолетовый (A200)</string>
+    <string name="md_deep_purple_a400">Глубокий фиолетовый (A400)</string>
+    <string name="md_deep_purple_a700">Глубокий фиолетовый (A700)</string>
+
+    <!-- indigo -->
+    <string name="md_indigo_50">Индиго (50)</string>
+    <string name="md_indigo_100">Индиго (100)</string>
+    <string name="md_indigo_200">Индиго (200)</string>
+    <string name="md_indigo_300">Индиго (300)</string>
+    <string name="md_indigo_400">Индиго (400)</string>
+    <string name="md_indigo_500">Индиго (500)</string>
+    <string name="md_indigo_600">Индиго (600)</string>
+    <string name="md_indigo_700">Индиго (700)</string>
+    <string name="md_indigo_800">Индиго (800)</string>
+    <string name="md_indigo_900">Индиго (900)</string>
+    <string name="md_indigo_a100">Индиго (A100)</string>
+    <string name="md_indigo_a200">Индиго (A200)</string>
+    <string name="md_indigo_a400">Индиго (A400)</string>
+    <string name="md_indigo_a700">Индиго (A700)</string>
+
+    <!-- blue -->
+    <string name="md_blue_50">Синий (50)</string>
+    <string name="md_blue_100">Синий (100)</string>
+    <string name="md_blue_200">Синий (200)</string>
+    <string name="md_blue_300">Синий (300)</string>
+    <string name="md_blue_400">Синий (400)</string>
+    <string name="md_blue_500">Синий (500)</string>
+    <string name="md_blue_600">Синий (600)</string>
+    <string name="md_blue_700">Синий (700)</string>
+    <string name="md_blue_800">Синий (800)</string>
+    <string name="md_blue_900">Синий (900)</string>
+    <string name="md_blue_a100">Синий (A100)</string>
+    <string name="md_blue_a200">Синий (A200)</string>
+    <string name="md_blue_a400">Синий (A400)</string>
+    <string name="md_blue_a700">Синий (A700)</string>
+
+    <!-- light blue-->
+    <string name="md_light_blue_50">Светло-голубой (50)</string>
+    <string name="md_light_blue_100">Светло-голубой (100)</string>
+    <string name="md_light_blue_200">Светло-голубой (200)</string>
+    <string name="md_light_blue_300">Светло-голубой (300)</string>
+    <string name="md_light_blue_400">Светло-голубой (400)</string>
+    <string name="md_light_blue_500">Светло-голубой (500)</string>
+    <string name="md_light_blue_600">Светло-голубой (600)</string>
+    <string name="md_light_blue_700">Светло-голубой (700)</string>
+    <string name="md_light_blue_800">Светло-голубой (800)</string>
+    <string name="md_light_blue_900">Светло-голубой (900)</string>
+    <string name="md_light_blue_a100">Светло-голубой (A100)</string>
+    <string name="md_light_blue_a200">Светло-голубой (A200)</string>
+    <string name="md_light_blue_a400">Светло-голубой (A400)</string>
+    <string name="md_light_blue_a700">Светло-голубой (A700)</string>
+
+    <!-- cyan -->
+    <string name="md_cyan_50">Циан (50)</string>
+    <string name="md_cyan_100">Циан (100)</string>
+    <string name="md_cyan_200">Циан (200)</string>
+    <string name="md_cyan_300">Циан (300)</string>
+    <string name="md_cyan_400">Циан (400)</string>
+    <string name="md_cyan_500">Циан (500)</string>
+    <string name="md_cyan_600">Циан (600)</string>
+    <string name="md_cyan_700">Циан (700)</string>
+    <string name="md_cyan_800">Циан (800)</string>
+    <string name="md_cyan_900">Циан (900)</string>
+    <string name="md_cyan_a100">Циан (A100)</string>
+    <string name="md_cyan_a200">Циан (A200)</string>
+    <string name="md_cyan_a400">Циан (A400)</string>
+    <string name="md_cyan_a700">Циан (A700)</string>
+
+    <!-- teal -->
+    <string name="md_teal_50">Тиль (50)</string>
+    <string name="md_teal_100">Тиль (100)</string>
+    <string name="md_teal_200">Тиль (200)</string>
+    <string name="md_teal_300">Тиль (300)</string>
+    <string name="md_teal_400">Тиль (400)</string>
+    <string name="md_teal_500">Тиль (500)</string>
+    <string name="md_teal_600">Тиль (600)</string>
+    <string name="md_teal_700">Тиль (700)</string>
+    <string name="md_teal_800">Тиль (800)</string>
+    <string name="md_teal_900">Тиль (900)</string>
+    <string name="md_teal_a100">Тиль (A100)</string>
+    <string name="md_teal_a200">Тиль (A200)</string>
+    <string name="md_teal_a400">Тиль (A400)</string>
+    <string name="md_teal_a700">Тиль (A700)</string>
+
+    <!-- green -->
+    <string name="md_green_50">Зеленый (50)</string>
+    <string name="md_green_100">Зеленый (100)</string>
+    <string name="md_green_200">Зеленый (200)</string>
+    <string name="md_green_300">Зеленый (300)</string>
+    <string name="md_green_400">Зеленый (400)</string>
+    <string name="md_green_500">Зеленый (500)</string>
+    <string name="md_green_600">Зеленый (600)</string>
+    <string name="md_green_700">Зеленый (700)</string>
+    <string name="md_green_800">Зеленый (800)</string>
+    <string name="md_green_900">Зеленый (900)</string>
+    <string name="md_green_a100">Зеленый (A100)</string>
+    <string name="md_green_a200">Зеленый (A200)</string>
+    <string name="md_green_a400">Зеленый (A400)</string>
+    <string name="md_green_a700">Зеленый (A700)</string>
+
+    <!--light green-->
+    <string name="md_light_green_50">Светло-зеленый (50)</string>
+    <string name="md_light_green_100">Светло-зеленый (100)</string>
+    <string name="md_light_green_200">Светло-зеленый (200)</string>
+    <string name="md_light_green_300">Светло-зеленый (300)</string>
+    <string name="md_light_green_400">Светло-зеленый (400)</string>
+    <string name="md_light_green_500">Светло-зеленый (500)</string>
+    <string name="md_light_green_600">Светло-зеленый (600)</string>
+    <string name="md_light_green_700">Светло-зеленый (700)</string>
+    <string name="md_light_green_800">Светло-зеленый (800)</string>
+    <string name="md_light_green_900">Светло-зеленый (900)</string>
+    <string name="md_light_green_a100">Светло-зеленый (A100)</string>
+    <string name="md_light_green_a200">Светло-зеленый (A200)</string>
+    <string name="md_light_green_a400">Светло-зеленый (A400)</string>
+    <string name="md_light_green_a700">Светло-зеленый (A700)</string>
+
+    <!-- lime -->
+    <string name="md_lime_50">Лайм (50)</string>
+    <string name="md_lime_100">Лайм (100)</string>
+    <string name="md_lime_200">Лайм (200)</string>
+    <string name="md_lime_300">Лайм (300)</string>
+    <string name="md_lime_400">Лайм (400)</string>
+    <string name="md_lime_500">Лайм (500)</string>
+    <string name="md_lime_600">Лайм (600)</string>
+    <string name="md_lime_700">Лайм (700)</string>
+    <string name="md_lime_800">Лайм (800)</string>
+    <string name="md_lime_900">Лайм (900)</string>
+    <string name="md_lime_a100">Лайм (A100)</string>
+    <string name="md_lime_a200">Лайм (A200)</string>
+    <string name="md_lime_a400">Лайм (A400)</string>
+    <string name="md_lime_a700">Лайм (A700)</string>
+
+    <!-- yellow -->
+    <string name="md_yellow_50">Желтый (50)</string>
+    <string name="md_yellow_100">Желтый (100)</string>
+    <string name="md_yellow_200">Желтый (200)</string>
+    <string name="md_yellow_300">Желтый (300)</string>
+    <string name="md_yellow_400">Желтый (400)</string>
+    <string name="md_yellow_500">Желтый (500)</string>
+    <string name="md_yellow_600">Желтый (600)</string>
+    <string name="md_yellow_700">Желтый (700)</string>
+    <string name="md_yellow_800">Желтый (800)</string>
+    <string name="md_yellow_900">Желтый (900)</string>
+    <string name="md_yellow_a100">Желтый (A100)</string>
+    <string name="md_yellow_a200">Желтый (A200)</string>
+    <string name="md_yellow_a400">Желтый (A400)</string>
+    <string name="md_yellow_a700">Желтый (A700)</string>
+
+    <!-- amber -->
+    <string name="md_amber_50">Янтарь (50)</string>
+    <string name="md_amber_100">Янтарь (100)</string>
+    <string name="md_amber_200">Янтарь (200)</string>
+    <string name="md_amber_300">Янтарь (300)</string>
+    <string name="md_amber_400">Янтарь (400)</string>
+    <string name="md_amber_500">Янтарь (500)</string>
+    <string name="md_amber_600">Янтарь (600)</string>
+    <string name="md_amber_700">Янтарь (700)</string>
+    <string name="md_amber_800">Янтарь (800)</string>
+    <string name="md_amber_900">Янтарь (900)</string>
+    <string name="md_amber_a100">Янтарь (A100)</string>
+    <string name="md_amber_a200">Янтарь (A200)</string>
+    <string name="md_amber_a400">Янтарь (A400)</string>
+    <string name="md_amber_a700">Янтарь (A700)</string>
+
+    <!-- orange -->
+    <string name="md_orange_50">Оранжевый (50)</string>
+    <string name="md_orange_100">Оранжевый (100)</string>
+    <string name="md_orange_200">Оранжевый (200)</string>
+    <string name="md_orange_300">Оранжевый (300)</string>
+    <string name="md_orange_400">Оранжевый (400)</string>
+    <string name="md_orange_500">Оранжевый (500)</string>
+    <string name="md_orange_600">Оранжевый (600)</string>
+    <string name="md_orange_700">Оранжевый (700)</string>
+    <string name="md_orange_800">Оранжевый (800)</string>
+    <string name="md_orange_900">Оранжевый (900)</string>
+    <string name="md_orange_a100">Оранжевый (A100)</string>
+    <string name="md_orange_a200">Оранжевый (A200)</string>
+    <string name="md_orange_a400">Оранжевый (A400)</string>
+    <string name="md_orange_a700">Оранжевый (A700)</string>
+
+    <!--deep orange-->
+    <string name="md_deep_orange_50">Глубокий оранжевый (50)</string>
+    <string name="md_deep_orange_100">Глубокий оранжевый (100)</string>
+    <string name="md_deep_orange_200">Глубокий оранжевый (200)</string>
+    <string name="md_deep_orange_300">Глубокий оранжевый (300)</string>
+    <string name="md_deep_orange_400">Глубокий оранжевый (400)</string>
+    <string name="md_deep_orange_500">Глубокий оранжевый (500)</string>
+    <string name="md_deep_orange_600">Глубокий оранжевый (600)</string>
+    <string name="md_deep_orange_700">Глубокий оранжевый (700)</string>
+    <string name="md_deep_orange_800">Глубокий оранжевый (800)</string>
+    <string name="md_deep_orange_900">Глубокий оранжевый (900)</string>
+    <string name="md_deep_orange_a100">Глубокий оранжевый (A100)</string>
+    <string name="md_deep_orange_a200">Глубокий оранжевый (A200)</string>
+    <string name="md_deep_orange_a400">Глубокий оранжевый (A400)</string>
+    <string name="md_deep_orange_a700">Глубокий оранжевый (A700)</string>
+
+    <!-- brown -->
+    <string name="md_brown_50">Коричневый (50)</string>
+    <string name="md_brown_100">Коричневый (100)</string>
+    <string name="md_brown_200">Коричневый (200)</string>
+    <string name="md_brown_300">Коричневый (300)</string>
+    <string name="md_brown_400">Коричневый (400)</string>
+    <string name="md_brown_500">Коричневый (500)</string>
+    <string name="md_brown_600">Коричневый (600)</string>
+    <string name="md_brown_700">Коричневый (700)</string>
+    <string name="md_brown_800">Коричневый (800)</string>
+    <string name="md_brown_900">Коричневый (900)</string>
+
+    <!-- grey -->
+    <string name="md_grey_50">Серый (50)</string>
+    <string name="md_grey_100">Серый (100)</string>
+    <string name="md_grey_200">Серый (200)</string>
+    <string name="md_grey_300">Серый (300)</string>
+    <string name="md_grey_400">Серый (400)</string>
+    <string name="md_grey_500">Серый (500)</string>
+    <string name="md_grey_600">Серый (600)</string>
+    <string name="md_grey_700">Серый (700)</string>
+    <string name="md_grey_800">Серый (800)</string>
+    <string name="md_grey_900">Серый (900)</string>
+    <string name="md_black_1000">Черный (1000)</string>
+    <string name="md_white_1000">Белый (1000)</string>
+
+    <!--blue grey-->
+    <string name="md_blue_grey_50">Синий серый (50)</string>
+    <string name="md_blue_grey_100">Синий серый (100)</string>
+    <string name="md_blue_grey_200">Синий серый (200)</string>
+    <string name="md_blue_grey_300">Синий серый (300)</string>
+    <string name="md_blue_grey_400">Синий серый (400)</string>
+    <string name="md_blue_grey_500">Синий серый (500)</string>
+    <string name="md_blue_grey_600">Синий серый (600)</string>
+    <string name="md_blue_grey_700">Синий серый (700)</string>
+    <string name="md_blue_grey_800">Синий серый (800)</string>
+    <string name="md_blue_grey_900">Синий серый (900)</string>
+
+</resources>

@@ -11,7 +11,7 @@
             android:id="@+id/icon_container"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:layout_margin="14dp">
 
@@ -31,40 +31,44 @@
 
     </FrameLayout>
 
-    <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
+    <LinearLayout
             android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/icon_container"
-            android:gravity="center_vertical"
-            android:textColor="?drawer_item_text_color"
-            android:textSize="14sp"
-            tools:text="@string/text_auto_operate_service" />
-
-    <TextView
-            android:id="@+id/notifications"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="15dp"
-            android:background="@drawable/circle_red"
-            android:padding="3dp"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:visibility="gone"
-            tools:text="\u3000"
-            tools:visibility="visible" />
+            android:layout_toEndOf="@+id/icon_container"
+            android:layout_toStartOf="@id/sw"
+            android:gravity="center_vertical"
+            android:layout_marginEnd="5dp"
+            android:orientation="vertical">
+
+        <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:textColor="?drawer_item_text_color"
+                android:textSize="14sp"
+                tools:text="@string/text_auto_operate_service" />
+
+        <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:textColor="@color/drawer_item_subtitle_color"
+                android:textSize="11sp"
+                tools:text="@string/text_sample_string" />
+
+    </LinearLayout>
 
     <org.autojs.autojs.ui.widget.PrefSwitch
             android:id="@+id/sw"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="15dp"
+            android:layout_marginEnd="10dp"
             android:visibility="gone"
+            tools:checked="true"
             tools:visibility="visible" />
 
 </RelativeLayout>

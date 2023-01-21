@@ -6,9 +6,9 @@ import android.content.Intent;
 
 import androidx.annotation.NonNull;
 
-import com.stardust.app.GlobalAppContext;
-import com.stardust.autojs.execution.ExecutionConfig;
-
+import org.autojs.autojs.annotation.ScriptInterface;
+import org.autojs.autojs.app.GlobalAppContext;
+import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.storage.database.BaseModel;
 import org.autojs.autojs6.R;
@@ -18,7 +18,6 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 
 import java.util.concurrent.TimeUnit;
-
 
 public class TimedTask extends BaseModel {
 
@@ -49,6 +48,8 @@ public class TimedTask extends BaseModel {
 
     String mScriptPath;
 
+    private final Context mGlobalAppContext = GlobalAppContext.get();
+
     public TimedTask() {
 
     }
@@ -74,7 +75,12 @@ public class TimedTask extends BaseModel {
         mScheduled = scheduled;
     }
 
+    @ScriptInterface
     public long getNextTime() {
+        return getNextTime(mGlobalAppContext);
+    }
+
+    public long getNextTime(Context context) {
         if (isDisposable()) {
             return mMillis;
         }
@@ -86,15 +92,20 @@ public class TimedTask extends BaseModel {
             }
             return nextTimeMillis;
         }
-        return getNextTimeOfWeeklyTask();
+        return getNextTimeOfWeeklyTask(context);
 
     }
 
+    @ScriptInterface
     private long getNextTimeOfWeeklyTask() {
+        return getNextTimeOfWeeklyTask(mGlobalAppContext);
+    }
+
+    private long getNextTimeOfWeeklyTask(Context context) {
         int dayOfWeek = DateTime.now().getDayOfWeek();
         long nextTimeMillis = LocalTime.fromMillisOfDay(mMillis).toDateTimeToday().getMillis();
         for (int i = 0; i < 8; i++) {
-            if ((getDayOfWeekTimeFlag(dayOfWeek) & mTimeFlag) != 0) {
+            if ((getDayOfWeekTimeFlag(context, dayOfWeek) & mTimeFlag) != 0) {
                 if (System.currentTimeMillis() <= nextTimeMillis) {
                     return nextTimeMillis;
                 }
@@ -105,31 +116,30 @@ public class TimedTask extends BaseModel {
         return -1;
     }
 
+    @ScriptInterface
     public static long getDayOfWeekTimeFlag(int dayOfWeek) {
+        return getDayOfWeekTimeFlag(GlobalAppContext.get(), dayOfWeek);
+    }
+
+    public static long getDayOfWeekTimeFlag(Context context, int dayOfWeek) {
         dayOfWeek = (dayOfWeek - 1) % 7 + 1;
         switch (dayOfWeek) {
             case DateTimeConstants.SUNDAY:
                 return FLAG_SUNDAY;
-
             case DateTimeConstants.MONDAY:
                 return FLAG_MONDAY;
-
             case DateTimeConstants.SATURDAY:
                 return FLAG_SATURDAY;
-
             case DateTimeConstants.WEDNESDAY:
                 return FLAG_WEDNESDAY;
-
             case DateTimeConstants.TUESDAY:
                 return FLAG_TUESDAY;
-
             case DateTimeConstants.THURSDAY:
                 return FLAG_THURSDAY;
             case DateTimeConstants.FRIDAY:
                 return FLAG_FRIDAY;
-
         }
-        throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "dayOfWeek", dayOfWeek));
+        throw new IllegalArgumentException(context.getString(R.string.error_illegal_argument, "dayOfWeek", String.valueOf(dayOfWeek)));
     }
 
     public long getMillis() {
@@ -227,7 +237,7 @@ public class TimedTask extends BaseModel {
         return new TimedTask(time.getMillisOfDay(), timeFlag, scriptPath, config);
     }
 
-    public boolean hasDayOfWeek(int dayOfWeek) {
-        return (mTimeFlag & getDayOfWeekTimeFlag(dayOfWeek)) != 0;
+    public boolean hasDayOfWeek(Context context, int dayOfWeek) {
+        return (mTimeFlag & getDayOfWeekTimeFlag(context, dayOfWeek)) != 0;
     }
 }

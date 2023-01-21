@@ -17,7 +17,6 @@ import java.io.Reader;
  */
 public class Theme {
 
-
     private int mBackgroundColor = Color.WHITE;
     private int mForegroundColor = Color.BLACK;
     private int mLineNumberColor = Color.GRAY;
@@ -138,14 +137,15 @@ public class Theme {
 
         Theme theme = (Theme) o;
 
-        return mEditorTheme.getName() != null ? mEditorTheme.getName().equals(theme.mEditorTheme.getName()) : theme.mEditorTheme.getName() == null;
+        return mEditorTheme.getName() != null
+                ? mEditorTheme.getName().equals(theme.mEditorTheme.getName())
+                : theme.mEditorTheme.getName() == null;
     }
 
     @NonNull
     public String toString() {
         return getName();
     }
-
 
     public int getBreakpointColor() {
         return mBreakpointColor;
@@ -154,4 +154,5 @@ public class Theme {
     public int getDebuggingLineBackgroundColor() {
         return mDebuggingLineBackground;
     }
+
 }

@@ -13,10 +13,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.autojs.autojs6.R;
-import com.stardust.view.accessibility.NodeInfo;
-import com.stardust.util.ViewUtil;
+import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.ui.widget.LevelBeamView;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -85,7 +85,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
         mShowClickedNodeBounds = showClickedNodeBounds;
     }
 
-    public void setClickedColor(int clickedColor) {
+    public void setClickedBackgroundColor(int clickedColor) {
         mClickedColor = clickedColor;
     }
 
@@ -127,7 +127,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setAntiAlias(true);
         mPaint.setStrokeWidth(3);
-        mStatusBarHeight = ViewUtil.getStatusBarHeight(getContext());
+        mStatusBarHeight = ViewUtils.getStatusBarHeight(getContext());
     }
 
     public Paint getBoundsPaint() {

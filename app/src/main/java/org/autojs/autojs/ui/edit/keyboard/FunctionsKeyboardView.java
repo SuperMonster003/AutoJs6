@@ -4,13 +4,6 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -20,12 +13,19 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.autojs.autojs6.R;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.autojs.autojs.model.indices.Module;
 import org.autojs.autojs.model.indices.Modules;
 import org.autojs.autojs.model.indices.Property;
 import org.autojs.autojs.ui.widget.GridDividerDecoration;
 import org.autojs.autojs.workground.WrapContentGridLayoutManger;
+import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,7 +109,6 @@ public class FunctionsKeyboardView extends FrameLayout {
         Drawable divider = ContextCompat.getDrawable(getContext(), R.drawable.divider_functions_view);
         GridDividerDecoration dividerItemDecoration = new GridDividerDecoration(getContext(), divider);
         mPropertiesView.addItemDecoration(dividerItemDecoration);
-
     }
 
     private void initSpanSizes(Module module) {
@@ -179,7 +178,6 @@ public class FunctionsKeyboardView extends FrameLayout {
                 });
     }
 
-
     private void setSelectedModule(Module module, @Nullable View moduleView) {
         mSelectedModule = module;
         if (mSelectedModuleView != null) {
@@ -232,7 +230,6 @@ public class FunctionsKeyboardView extends FrameLayout {
             }
         }
     }
-
 
     private class PropertyViewHolder extends RecyclerView.ViewHolder {
 
@@ -301,6 +298,5 @@ public class FunctionsKeyboardView extends FrameLayout {
             return mSelectedModule == null ? 0 : mSelectedModule.getProperties().size();
         }
     }
-
 
 }

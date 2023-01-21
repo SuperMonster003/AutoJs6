@@ -10,18 +10,20 @@ output.json
 output-metadata.json
 desktop.ini
 
-.git/
-.gradle/
-.idea/
+.bak
+.git
+.gradle
+.idea
+.run
 
-/build/
-/libs/**/build/
-/captures/
-/release/
-/tools/
+/build
+/libs/**/build
+/captures
+/release
+/tools
 
 /local.properties
 /sign.properties
 
-**/assets/declarations/
-**/assets/sample/.declarations/
+**/assets/declarations
+**/assets/sample/declarations

@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/item"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="?selectableItemBackground"
-              android:clickable="true"
-              android:orientation="horizontal"
-              android:padding="8dp">
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:padding="8dp">
 
     <TextView
-        android:id="@+id/name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textColor="#de000000"
-        android:textSize="13sp"/>
+            android:id="@+id/name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/day_night"
+            android:textSize="13sp"
+            tools:text="@string/text_sample_string" />
 
     <TextView
-        android:id="@+id/value"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textColor="#8a000000"
-        android:textSize="13sp"/>
+            android:id="@+id/value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.2"
+            android:textColor="@color/day_night"
+            android:textSize="13sp"
+            tools:text="@string/text_sample_string" />
 </LinearLayout>

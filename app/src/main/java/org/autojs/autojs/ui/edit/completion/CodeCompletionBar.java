@@ -2,19 +2,19 @@ package org.autojs.autojs.ui.edit.completion;
 
 import android.content.Context;
 import android.os.Looper;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.stardust.autojs.workground.WrapContentLinearLayoutManager;
 
-import org.autojs.autojs6.R;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.autojs.autojs.model.autocomplete.CodeCompletions;
+import org.autojs.autojs.workground.WrapContentLinearLayoutManager;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/2/17.
@@ -78,10 +78,10 @@ public class CodeCompletionBar extends RecyclerView {
     public void setCodeCompletions(CodeCompletions codeCompletions) {
         if (Looper.getMainLooper() != Looper.myLooper()) {
             post(() -> setCodeCompletions(codeCompletions));
-            return;
+        } else {
+            mCodeCompletions = codeCompletions;
+            getAdapter().notifyDataSetChanged();
         }
-        mCodeCompletions = codeCompletions;
-        getAdapter().notifyDataSetChanged();
     }
 
     public CodeCompletions getCodeCompletions() {

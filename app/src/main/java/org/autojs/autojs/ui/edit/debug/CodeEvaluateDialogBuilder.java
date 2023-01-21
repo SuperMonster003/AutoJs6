@@ -2,18 +2,20 @@ package org.autojs.autojs.ui.edit.debug;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.preference.PreferenceManager;
-import androidx.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.autojs.autojs6.R;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
+import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
-public class CodeEvaluateDialogBuilder extends ThemeColorMaterialDialogBuilder {
+import com.afollestad.materialdialogs.MaterialDialog;
+
+import org.autojs.autojs6.R;
+
+public class CodeEvaluateDialogBuilder extends MaterialDialog.Builder {
 
     private static final String KEY_CODE = CodeEvaluateDialogBuilder.class.getName() + ".code";
     private CodeEvaluator mCodeEvaluator;

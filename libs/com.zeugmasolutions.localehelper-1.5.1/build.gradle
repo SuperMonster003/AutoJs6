@@ -1,2 +1,0 @@
-configurations.maybeCreate('default')
-artifacts.add('default', file('localehelper-1.5.1-modified.aar'))

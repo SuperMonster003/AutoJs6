@@ -1,8 +1,0 @@
-<resources>
-    <string name="key_not_showing_main_activity" translatable="false">key_not_showing_main_activity</string>
-    <string name="summary_not_showing_main_activity">Run script directly without showing main activity</string>
-    <string name="text_a11y_service_enabled_but_not_running">Accessibility service enabled but not running (Re-enable or reboot the device)</string>
-    <string name="text_not_showing_main_activity">Not showing main activity</string>
-    <string name="text_powered_by_autojs" translatable="false">Powered by AutoJs6</string>
-    <string name="text_settings">Settings</string>
-</resources>

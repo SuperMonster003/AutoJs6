@@ -1,19 +1,16 @@
 package org.autojs.autojs.model.explorer;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.autojs.autojs.model.script.ScriptFile;
+import org.autojs.autojs.util.FileUtils;
 
 public interface ExplorerItem {
 
-    String TYPE_DIRECTORY = "/";
-    String TYPE_JAVASCRIPT = "js";
-    String TYPE_AUTO_FILE = "auto";
-    String TYPE_JSON = "json";
-    String TYPE_XML = "xml";
-    String TYPE_UNKNOWN = "?";
-    String TYPE_APK = "apk";
-
     String getName();
 
+    @Nullable
     ExplorerPage getParent();
 
     String getPath();
@@ -24,7 +21,8 @@ public interface ExplorerItem {
 
     boolean canRename();
 
-    String getType();
+    @NonNull
+    FileUtils.TYPE getType();
 
     long getSize();
 

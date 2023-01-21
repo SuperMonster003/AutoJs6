@@ -7,6 +7,31 @@
     <attr name="drawer_group_text_color" format="color|reference" />
     <attr name="itemBackgroundDark" format="color|reference" />
 
+    <declare-styleable name="MaterialDialogPreference">
+        <attr name="dialogTitle" format="string" />
+        <attr name="dialogContent" format="string" />
+        <attr name="details" format="string" />
+        <attr name="neutralText" format="string" />
+        <attr name="neutralTextShort" format="string" />
+        <attr name="negativeText" format="string" />
+        <attr name="positiveText" format="string" />
+        <attr name="onConfirmPrompt" format="string" />
+    </declare-styleable>
+    <declare-styleable name="MaterialPreference">
+        <attr name="longClickPrompt" format="string" />
+        <attr name="longClickPromptMore" format="string" />
+    </declare-styleable>
+    <declare-styleable name="MaterialListPreference">
+        <attr name="dialogTitle" />
+        <attr name="dialogContent" />
+        <attr name="neutralText" />
+        <attr name="negativeText" />
+        <attr name="positiveText" />
+        <attr name="onConfirmPrompt" />
+        <attr name="itemKeys" format="reference" />
+        <attr name="itemValues" format="reference" />
+        <attr name="itemDefaultKey" format="string" />
+    </declare-styleable>
     <declare-styleable name="ToolbarMenuItem">
         <attr name="text" format="string|reference" />
         <attr name="icon" />
@@ -35,4 +60,9 @@
         <attr name="cam_radius" format="dimension|reference" />
         <attr name="cam_angle" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="Preference">
+        <attr name="message" format="string" />
+    </declare-styleable>
+
 </resources>

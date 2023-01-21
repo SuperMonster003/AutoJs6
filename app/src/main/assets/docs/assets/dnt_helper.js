@@ -21,7 +21,7 @@ function _dntEnabled(dnt, userAgent) {
     var ua = userAgent || navigator.userAgent;
 
     // List of Windows versions known to not implement DNT according to the standard.
-    var anomalousWinVersions = ['Windows NT 6.1', 'Windows NT 6.2', 'Windows NT 6.3'];
+    var anomalousWinVersions = [ 'Windows NT 6.1', 'Windows NT 6.2', 'Windows NT 6.3' ];
 
     var fxMatch = ua.match(/Firefox\/(\d+)/);
     var ieRegEx = /MSIE|Trident/i;

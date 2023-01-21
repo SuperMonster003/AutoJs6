@@ -1,6 +1,5 @@
 package androidx.recyclerview.widget;
 
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.EdgeEffect;
@@ -8,9 +7,9 @@ import android.widget.EdgeEffect;
 import androidx.annotation.Nullable;
 import androidx.core.widget.EdgeEffectCompat;
 
-import com.stardust.theme.ThemeColor;
-import com.stardust.theme.ThemeColorManager;
-import com.stardust.theme.ThemeColorMutable;
+import org.autojs.autojs.theme.ThemeColor;
+import org.autojs.autojs.theme.ThemeColorManager;
+import org.autojs.autojs.theme.ThemeColorMutable;
 
 import java.lang.reflect.Field;
 
@@ -31,7 +30,6 @@ public class ThemeColorRecyclerView extends RecyclerView implements ThemeColorMu
         super(context);
         init();
     }
-
 
     public ThemeColorRecyclerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);

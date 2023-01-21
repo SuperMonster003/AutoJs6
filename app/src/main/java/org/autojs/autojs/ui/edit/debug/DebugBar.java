@@ -1,10 +1,6 @@
 package org.autojs.autojs.ui.edit.debug;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -12,12 +8,17 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.stardust.util.ClipboardUtil;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import org.autojs.autojs6.R;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import org.autojs.autojs.ui.widget.AutoAdapter;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
+import org.autojs.autojs.util.ClipboardUtils;
+import org.autojs.autojs6.R;
 
 import java.util.List;
 
@@ -74,7 +75,6 @@ public class DebugBar extends FrameLayout {
                 .show();
     }
 
-
     public void setTitle(String title) {
         if (title == null) {
             mTitle.setText(R.string.text_debug);
@@ -84,7 +84,7 @@ public class DebugBar extends FrameLayout {
     }
 
     private void showNewWatchingVariableDialog() {
-        new ThemeColorMaterialDialogBuilder(getContext())
+        new MaterialDialog.Builder(getContext())
                 .title(R.string.text_new_watching_variables)
                 .input(getResources().getString(R.string.text_variable_or_expr), "", (dialog, input) -> {
                     if (TextUtils.isEmpty(input)) {
@@ -116,13 +116,13 @@ public class DebugBar extends FrameLayout {
 
 
     private void showVariable(WatchingVariable variable) {
-        new ThemeColorMaterialDialogBuilder(getContext())
+        new MaterialDialog.Builder(getContext())
                 .title(variable.getDisplayName())
                 .content(variable.getValue())
                 .positiveText(R.string.text_ok)
                 .negativeText(R.string.text_copy_value)
                 .autoDismiss(true)
-                .onNegative((dialog, which) -> ClipboardUtil.setClip(getContext(), variable.getValue()))
+                .onNegative((dialog, which) -> ClipboardUtils.setClip(getContext(), variable.getValue()))
                 .show();
     }
 

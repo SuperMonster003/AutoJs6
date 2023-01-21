@@ -1,30 +1,30 @@
 package org.autojs.autojs.ui.main.task;
 
-import com.stardust.app.GlobalAppContext;
-import com.stardust.autojs.engine.ScriptEngine;
-import com.stardust.autojs.execution.ScriptExecution;
-import com.stardust.autojs.script.AutoFileSource;
-import com.stardust.autojs.script.JavaScriptSource;
-import com.stardust.pio.PFiles;
+import android.content.Context;
 
-import org.autojs.autojs6.R;
+import org.autojs.autojs.engine.ScriptEngine;
+import org.autojs.autojs.execution.ScriptExecution;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.script.AutoFileSource;
+import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.timing.IntentTask;
 import org.autojs.autojs.timing.TimedTask;
 import org.autojs.autojs.timing.TimedTaskManager;
-
+import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
+import org.autojs.autojs.util.WorkingDirectoryUtils;
+import org.autojs.autojs6.R;
 import org.joda.time.format.DateTimeFormat;
-
-import static org.autojs.autojs.ui.timing.TimedTaskSettingActivity.ACTION_DESC_MAP;
 
 /**
  * Created by Stardust on 2017/11/28.
  */
 public abstract class Task {
 
-
     public abstract String getName();
 
     public abstract String getDesc();
+
+    public abstract Context getContext();
 
     public abstract void cancel();
 
@@ -32,17 +32,18 @@ public abstract class Task {
 
     public static class PendingTask extends Task {
 
-
+        private final Context mContext;
         private TimedTask mTimedTask;
         private IntentTask mIntentTask;
 
-
-        public PendingTask(TimedTask timedTask) {
+        public PendingTask(Context context, TimedTask timedTask) {
+            mContext = context;
             mTimedTask = timedTask;
             mIntentTask = null;
         }
 
-        public PendingTask(IntentTask intentTask) {
+        public PendingTask(Context context, IntentTask intentTask) {
+            mContext = context;
             mIntentTask = intentTask;
             mTimedTask = null;
         }
@@ -60,24 +61,29 @@ public abstract class Task {
 
         @Override
         public String getName() {
-            return PFiles.getSimplifiedPath(getScriptPath());
+            return PFiles.getRelativePath(getScriptPath(), WorkingDirectoryUtils.getPath(), true);
         }
 
         @Override
         public String getDesc() {
             if (mTimedTask != null) {
-                long nextTime = mTimedTask.getNextTime();
-                return GlobalAppContext.getString(R.string.text_next_run_time) + ": " +
+                long nextTime = mTimedTask.getNextTime(mContext);
+                return mContext.getString(R.string.text_next_run_time) + ": " +
                         DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").print(nextTime);
             } else {
                 assert mIntentTask != null;
-                Integer desc = ACTION_DESC_MAP.get(mIntentTask.getAction());
-                if(desc != null){
-                    return GlobalAppContext.getString(desc);
+                Integer desc = TimedTaskSettingActivity.ACTION_DESC_MAP.get(mIntentTask.getAction());
+                if (desc != null) {
+                    return mContext.getString(desc);
                 }
                 return mIntentTask.getAction();
             }
 
+        }
+
+        @Override
+        public Context getContext() {
+            return mContext;
         }
 
         @Override
@@ -116,7 +122,7 @@ public abstract class Task {
         }
 
         public long getId() {
-            if(mTimedTask != null)
+            if (mTimedTask != null)
                 return mTimedTask.getId();
             return mIntentTask.getId();
         }
@@ -124,9 +130,11 @@ public abstract class Task {
 
     public static class RunningTask extends Task {
         private final ScriptExecution mScriptExecution;
+        private final Context mContext;
 
-        public RunningTask(ScriptExecution scriptExecution) {
+        public RunningTask(Context context, ScriptExecution scriptExecution) {
             mScriptExecution = scriptExecution;
+            mContext = context;
         }
 
         public ScriptExecution getScriptExecution() {
@@ -140,7 +148,13 @@ public abstract class Task {
 
         @Override
         public String getDesc() {
-            return mScriptExecution.getSource().toString();
+            String fullPath =  mScriptExecution.getSource().toString();
+            return PFiles.getRelativePath(fullPath, WorkingDirectoryUtils.getPath(), true);
+        }
+
+        @Override
+        public Context getContext() {
+            return mContext;
         }
 
         @Override
@@ -155,5 +169,7 @@ public abstract class Task {
         public String getEngineName() {
             return mScriptExecution.getSource().getEngineName();
         }
+
     }
+
 }

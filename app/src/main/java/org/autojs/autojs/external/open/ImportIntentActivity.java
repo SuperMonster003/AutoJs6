@@ -3,13 +3,14 @@ package org.autojs.autojs.external.open;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
-import android.widget.Toast;
 
-import com.stardust.pio.PFiles;
+import androidx.annotation.Nullable;
+
+import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.ScriptOperations;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 import java.io.FileNotFoundException;
@@ -32,7 +33,7 @@ public class ImportIntentActivity extends BaseActivity {
             handleIntent(intent);
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, R.string.edit_and_run_handle_intent_error, Toast.LENGTH_LONG).show();
+            ViewUtils.showToast(this, R.string.edit_and_run_handle_intent_error, true);
             finish();
         }
     }

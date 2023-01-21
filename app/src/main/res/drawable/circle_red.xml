@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:innerRadius="0dp"
-       android:shape="ring"
+       android:shape="oval"
        android:thicknessRatio="2"
        android:useLevel="false">
-    <solid android:color="#ef5350"/>
+    <solid android:color="@color/circular_menu_icon_red"/>
 </shape>

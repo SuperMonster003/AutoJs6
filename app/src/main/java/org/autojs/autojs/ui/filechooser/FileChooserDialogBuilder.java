@@ -1,19 +1,20 @@
 package org.autojs.autojs.ui.filechooser;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.stardust.pio.PFile;
 
-import org.autojs.autojs6.R;
+import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.Scripts;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
+import org.autojs.autojs.pio.PFile;
+import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -26,17 +27,20 @@ import io.reactivex.subjects.PublishSubject;
 /**
  * Created by Stardust on 2017/10/19.
  */
-public class FileChooserDialogBuilder extends ThemeColorMaterialDialogBuilder {
+public class FileChooserDialogBuilder extends MaterialDialog.Builder {
 
     public interface SingleChoiceCallback {
+
         void onSelected(PFile file);
     }
 
     public interface MultiChoiceCallback {
+
         void onSelected(List<PFile> files);
     }
 
     private final FileChooseListView mFileChooseListView;
+
     private MultiChoiceCallback mCallback;
     private FileFilter mFileFilter;
     private String mRootDir;
@@ -45,10 +49,12 @@ public class FileChooserDialogBuilder extends ThemeColorMaterialDialogBuilder {
     public FileChooserDialogBuilder(@NonNull Context context) {
         super(context);
         mFileChooseListView = new FileChooseListView(context);
+        mFileChooseListView.setProjectRecognitionEnabled(false);
         customView(mFileChooseListView, false);
         positiveText(R.string.text_ok);
         negativeText(R.string.text_cancel);
         onPositive((dialog, which) -> notifySelected());
+        cancelable(false);
     }
 
     private void notifySelected() {
@@ -60,6 +66,11 @@ public class FileChooserDialogBuilder extends ThemeColorMaterialDialogBuilder {
         } else {
             mCallback.onSelected(selectedFiles);
         }
+    }
+
+    @Override
+    public MaterialDialog show() {
+        return DialogUtils.adaptToExplorer(super.show(), mFileChooseListView);
     }
 
     public FileChooserDialogBuilder dir(String rootDir, String initialDir) {
@@ -74,7 +85,7 @@ public class FileChooserDialogBuilder extends ThemeColorMaterialDialogBuilder {
     }
 
     public FileChooserDialogBuilder justScriptFile() {
-        mFileFilter = Scripts.INSTANCE.getFILE_FILTER();
+        mFileFilter = Scripts.getFILE_FILTER();
         return this;
     }
 
@@ -82,6 +93,11 @@ public class FileChooserDialogBuilder extends ThemeColorMaterialDialogBuilder {
     public FileChooserDialogBuilder chooseDir() {
         mFileFilter = File::isDirectory;
         mFileChooseListView.setCanChooseDir(true);
+        return this;
+    }
+
+    public FileChooserDialogBuilder setProjectRecognition(boolean b) {
+        mFileChooseListView.setProjectRecognitionEnabled(b);
         return this;
     }
 
@@ -127,13 +143,13 @@ public class FileChooserDialogBuilder extends ThemeColorMaterialDialogBuilder {
     @Override
     public MaterialDialog build() {
         ExplorerDirPage root = ExplorerDirPage.createRoot(mRootDir);
-        Explorer explorer = mFileFilter == null ? Explorers.external() :
-                new Explorer(new ExplorerFileProvider(mFileFilter), 0);
-        if(mInitialDir == null){
+        Explorer explorer = mFileFilter == null
+                ? Explorers.external()
+                : new Explorer(new ExplorerFileProvider(mFileFilter), 0);
+        if (mInitialDir == null) {
             mFileChooseListView.setExplorer(explorer, root);
-        }else {
-            mFileChooseListView.setExplorer(explorer, root,
-                    new ExplorerDirPage(mInitialDir, root));
+        } else {
+            mFileChooseListView.setExplorer(explorer, root, new ExplorerDirPage(mInitialDir, root));
         }
         return super.build();
     }

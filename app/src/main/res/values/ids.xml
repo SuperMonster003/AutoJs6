@@ -12,4 +12,5 @@
     <item name="layout_hierarchy" type="id"/>
     <item name="pointer_location" type="id"/>
     <item name="disable_pointer_location" type="id"/>
+    <item name="view_tag_view_extras" type="id"/>
 </resources>

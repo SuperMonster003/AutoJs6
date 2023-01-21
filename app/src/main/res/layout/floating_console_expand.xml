@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tool="http://schemas.android.com/tools"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
@@ -39,11 +40,12 @@
                         android:layout_height="40dp"
                         android:background="?selectableItemBackgroundBorderless"
                         android:paddingBottom="8dp"
-                        android:paddingLeft="8dp"
-                        android:paddingRight="8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
                         android:paddingTop="24dp"
                         android:scaleType="center"
-                        android:src="@drawable/ic_remove_white_24dp" />
+                        android:src="@drawable/ic_remove_white_24dp"
+                        app:tint="@android:color/white" />
 
                 <ImageView
                         android:id="@+id/move_or_resize"
@@ -62,32 +64,19 @@
                         android:background="?selectableItemBackgroundBorderless"
                         android:padding="8dp"
                         android:scaleType="fitXY"
-                        android:src="@drawable/ic_close_white_24dp" />
+                        android:src="@drawable/ic_close_white_24dp"
+                        app:tint="@android:color/white" />
             </LinearLayout>
 
         </LinearLayout>
 
-        <com.stardust.autojs.core.console.ConsoleView
+        <org.autojs.autojs.core.console.FloatingConsoleView
                 android:id="@+id/console"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/floating_console_bg_bottom"
-                android:minHeight="200dp" />
+                android:minHeight="240dp" />
     </LinearLayout>
-
-
-    <ImageView
-            android:id="@+id/resizer"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:background="@drawable/circle_cool_black"
-            android:padding="6dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_resizer"
-            android:visibility="gone"
-            app:tint="@android:color/white" />
 
     <ImageView
             android:id="@+id/move_cursor"
@@ -100,6 +89,23 @@
             android:scaleType="fitXY"
             android:src="@drawable/ic_move_cursor"
             android:visibility="gone"
-            app:tint="@android:color/white" />
+            tool:visibility="visible"
+            android:tint="@android:color/white"
+            tool:ignore="UseAppTint" />
+
+    <ImageView
+            android:id="@+id/resizer"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/circle_cool_black"
+            android:padding="6dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_resizer"
+            android:tint="@android:color/white"
+            android:visibility="gone"
+            tool:visibility="visible"
+            tool:ignore="UseAppTint" />
 
 </RelativeLayout>

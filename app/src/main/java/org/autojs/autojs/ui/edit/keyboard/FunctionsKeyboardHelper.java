@@ -1,9 +1,5 @@
 package org.autojs.autojs.ui.edit.keyboard;
 
-/**
- * Created by Stardust on 2017/12/9.
- */
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -16,9 +12,10 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 
-import com.stardust.util.BackPressedHandler;
+import org.autojs.autojs.event.BackPressedHandler;
 
 /**
+ * Created by Stardust on 2017/12/9.
  * https://github.com/dss886/Android-FunctionsInputDetector
  */
 public class FunctionsKeyboardHelper implements BackPressedHandler {

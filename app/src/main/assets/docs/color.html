@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>颜色 (Colors) | AutoJs6 文档 - 6.2.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="canonical" href="https://nodejs.org/api/color.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-color">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
+<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
+<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color active" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
+<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="color" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#color_colors">颜色 (Colors)</a></span><ul>
+<li><span class="stability_undefined"><a href="#color">颜色表示</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_toint">[m] toInt</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_toint_color">toInt(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_tohex">[m] toHex</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_tohex_color">toHex(color)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_tohex_color_alpha">toHex(color, alpha)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_tohex_color_length">toHex(color, length)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_tofullhex">[m] toFullHex</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_tofullhex_color">toFullHex(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_parsecolor">[m] parseColor</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_parsecolor_color">parseColor(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_tostring">[m] toString</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_tostring_color">toString(color)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_tostring_color_alpha">toString(color, alpha)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_tostring_color_length">toString(color, length)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_alpha">[m] alpha</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_alpha_color">alpha(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_alphadouble">[m] alphaDouble</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_alphadouble_color">alphaDouble(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_red">[m] red</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_red_color">red(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_green">[m] green</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_green_color">green(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_blue">[m] blue</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_blue_color">blue(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_rgb">[m] rgb</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_rgb_color">rgb(color)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_rgb_red_green_blue">rgb(red, green, blue)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_rgb_components">rgb(components)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_argb">[m] argb</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_argb_color">argb(color)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_argb_alpha_red_green_blue">argb(alpha, red, green, blue)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_argb_components">argb(components)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_rgba">[m] rgba</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_rgba_color">rgba(color)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_rgba_red_green_blue_alpha">rgba(red, green, blue, alpha)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_rgba_components">rgba(components)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_hsv_hue_saturation_value">hsv(hue, saturation, value)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_hsv_components">hsv(components)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_hsva">[m] hsva</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_hsl">[m] hsl</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_hsla">[m] hsla</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_torgb">[m] toRgb</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_torgba">[m] toRgba</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_toargb">[m] toArgb</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_tohsv">[m] toHsv</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_tohsva">[m] toHsva</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_tohsl">[m] toHsl</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_tohsla">[m] toHsla</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_issimilar">[m] isSimilar</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_equals">[m] equals</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_luminance">[m] luminance</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_android">[p+] android</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_css">[p+] css</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_web">[p+] web</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_material">[p+] material</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_black">[p] BLACK</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_blue">[p] BLUE</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_cyan">[p] CYAN</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_aqua">[p] AQUA</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_dark_gray">[p] DARK_GRAY</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_dark_grey">[p] DARK_GREY</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_dkgray">[p] DKGRAY</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_gray">[p] GRAY</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_grey">[p] GREY</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_green">[p] GREEN</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_lime">[p] LIME</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_light_gray">[p] LIGHT_GRAY</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_light_grey">[p] LIGHT_GREY</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_ltgray">[p] LTGRAY</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_magenta">[p] MAGENTA</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_fuchsia">[p] FUCHSIA</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_maroon">[p] MAROON</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_navy">[p] NAVY</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_olive">[p] OLIVE</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_purple">[p] PURPLE</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_red">[p] RED</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_silver">[p] SILVER</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_teal">[p] TEAL</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_white">[p] WHITE</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_yellow">[p] YELLOW</a></span></li>
+<li><span class="stability_undefined"><a href="#color_p_transparent">[p] TRANSPARENT</a></span></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>颜色 (Colors)<span><a class="mark" href="#color_colors" id="color_colors">#</a></span></h1>
+<hr>
+<p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Jan 21, 2023.</p>
+
+<hr>
+<h2>颜色表示<span><a class="mark" href="#color" id="color">#</a></span></h2>
+<p>AutoJs6 支持以下方式表示一个颜色:</p>
+<ul>
+<li><a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a><ul>
+<li>字面量<ul>
+<li><code>#RGB</code> (如 <code>#F00</code> 表示红色, 相当于 <code>#FF0000</code>)</li>
+<li><code>#RRGGBB</code> (如 <code>#FF0000</code> 表示红色)</li>
+<li><code>#AARRGGBB</code> (如 <code>#80FF0000</code> 表示半透明红色)</li>
+</ul>
+</li>
+<li>方法<ul>
+<li><a href="#color_m_tohex">colors.toHex</a> (如 <code>colors.toHex(0xFF0000)</code> 表示红色对应的颜色字符串, 结果为 <code>#FF0000</code>)</li>
+<li><a href="#color_m_tofullhex">colors.toFullHex</a> (如 <code>colors.toFullHex(0xFF0000)</code> 表示红色对应的完全颜色字符串, 结果为 <code>#FFFF0000</code>)</li>
+<li>... ...</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a><ul>
+<li>字面量<ul>
+<li><code>0xAARRGGBB</code> (如 <code>0x8000FF00</code> 在 <code>Java</code> 的 <code>Integer</code> 范围对应值表示半透明绿色)</li>
+</ul>
+</li>
+<li>方法<ul>
+<li><a href="#color_m_rgb">colors.rgb</a> (如 <code>colors.rgb(255, 0, 0)</code> 表示红色)</li>
+<li><a href="#color_m_argb">colors.argb</a> (如 <code>colors.argb(128, 255, 0, 0)</code> 表示半透明红色)</li>
+<li><a href="#color_m_rgba">colors.rgba</a> (如 <code>colors.rgba(255, 0, 0, 128)</code> 表示半透明红色)</li>
+<li><a href="#color_m_hsv">colors.hsv</a> (如 <code>colors.hsv(0, 1, 1)</code> 表示红色)</li>
+<li><a href="#color_m_hsva">colors.hsva</a> (如 <code>colors.rgba(0, 1, 1, 0.5)</code> 表示半透明红色)</li>
+<li><a href="#color_m_hsl">colors.hsl</a> (如 <code>colors.hsl(0, 1, 0.5)</code> 表示红色)</li>
+<li><a href="#color_m_hsla">colors.hsla</a> (如 <code>colors.hsl(0, 1, 0.5, 0.5)</code> 表示半透明红色)</li>
+<li><a href="#color_m_toint">colors.toInt</a> (如 <code>colors.toInt(&#39;#FF0000&#39;)</code> 表示红色对应的颜色整数, 结果为 <code>-65536</code>)</li>
+<li>... ...</li>
+</ul>
+</li>
+<li>常量<ul>
+<li><a href="#color_p_red">colors.RED</a> (<a href="colorTable.html#colortable_Android_颜色列表">Android 颜色列表</a> 的红色颜色整数)</li>
+<li><a href="#color_p_black">colors.BLACK</a> (<a href="colorTable.html#colortable_Android_颜色列表">Android 颜色列表</a> 的黑色颜色整数)</li>
+<li>... ...</li>
+<li><a href="#color_p_css">colors.css.RED</a> (<a href="colorTable.html#colortable_CSS_颜色列表">Css 颜色列表</a> 的红色颜色整数)</li>
+<li><a href="#color_p_css">colors.css.BLACK</a> (<a href="colorTable.html#colortable_CSS_颜色列表">Css 颜色列表</a> 的黑色颜色整数)</li>
+<li>... ...</li>
+<li><a href="#color_p_web">colors.web.RED</a> (<a href="colorTable.html#colortable_WEB_颜色列表">Web 颜色列表</a> 的红色颜色整数)</li>
+<li><a href="#color_p_web">colors.web.BLACK</a> (<a href="colorTable.html#colortable_WEB_颜色列表">Web 颜色列表</a> 的黑色颜色整数)</li>
+<li>... ...</li>
+<li><a href="#color_p_material">colors.material.ORANGE</a> (<a href="colorTable.html#colortable_Material_颜色列表">Material 颜色列表</a> 的橙色颜色整数)</li>
+<li><a href="#color_p_material">colors.material.ORANGE_300</a> (<a href="colorTable.html#colortable_Material_颜色列表">Material 颜色列表</a> 的 300 色号橙色颜色整数)</li>
+<li>... ...</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="dataTypes.md.html#datatypes.md_colorcomponents">颜色分量数组 (ColorComponents)</a><ul>
+<li>方法<ul>
+<li><a href="#color_m_torgb">colors.toRgb</a> (颜色分量数组 <code>[R,G,B]</code>)</li>
+<li><a href="#color_m_torgba">colors.toRgba</a> (颜色分量数组 <code>[R,G,B,A]</code>)</li>
+<li><a href="#color_m_toargb">colors.toArgb</a> (颜色分量数组 <code>[A,R,G,B]</code>)</li>
+<li><a href="#color_m_tohsv">colors.toHsv</a> (颜色分量数组 <code>[H,S,V]</code>)</li>
+<li><a href="#color_m_tohsva">colors.toHsva</a> (颜色分量数组 <code>[H,S,V,A]</code>)</li>
+<li><a href="#color_m_tohsl">colors.toHsl</a> (颜色分量数组 <code>[H,S,L]</code>)</li>
+<li><a href="#color_m_tohsla">colors.toHsla</a> (颜色分量数组 <code>[H,S,L,A]</code>)</li>
+<li>... ...</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="dataTypes.html#datatypes_colorname">颜色名称 (ColorName)</a><ul>
+<li>常量<ul>
+<li>&quot;red&quot; (红色)</li>
+<li>&quot;black&quot; (黑色)</li>
+<li>... ...</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">colors</p>
+
+<hr>
+<h2>[m] toInt<span><a class="mark" href="#color_m_toint" id="color_m_toint">#</a></span></h2>
+<h3>toInt(color)<span><a class="mark" href="#color_toint_color" id="color_toint_color">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> } - 颜色整数</li>
+</ul>
+</div><p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<pre><code class="lang-js">/* ColorHex - 颜色代码. */
+colors.toInt(&#39;#CC5500&#39;); // -3386112
+colors.toInt(&#39;#C50&#39;); // -3386112
+colors.toInt(&#39;#FFCC5500&#39;); // -3386112
+
+/* ColorInt - 颜色整数. */
+colors.toInt(0xFFCC5500); // -3386112
+colors.toInt(colors.web.BURNT_ORANGE); // -3386112
+
+/* ColorName - 颜色名称. */
+colors.toInt(&#39;BURNT_ORANGE&#39;); // -3386112
+colors.toInt(&#39;burnt-orange&#39;); // -3386112
+</code></pre>
+<h2>[m] toHex<span><a class="mark" href="#color_m_tohex" id="color_m_tohex">#</a></span></h2>
+<h3>toHex(color)<span><a class="mark" href="#color_tohex_color" id="color_tohex_color">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
+</ul>
+<p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>.</p>
+<pre><code class="lang-js">/* ColorHex - 颜色代码. */
+colors.toHex(&#39;#CC5500&#39;); // #CC5500
+colors.toHex(&#39;#C50&#39;); // #CC5500
+colors.toHex(&#39;#FFCC5500&#39;); // #CC5500
+
+/* ColorInt - 颜色整数. */
+colors.toHex(0xFFCC5500); // #CC5500
+colors.toHex(colors.web.BURNT_ORANGE); // #CC5500
+
+/* ColorName - 颜色名称. */
+colors.toHex(&#39;BURNT_ORANGE&#39;); // #CC5500
+colors.toHex(&#39;burnt-orange&#39;); // #CC5500
+</code></pre>
+<p>当 <code>A (alpha)</code> 分量为 <code>100% (255/255;100/100)</code> 时, <code>FF</code> 会自动省略,<br>如 <code>#FFC0C0C0</code> 将自动转换为 <code>#C0C0C0</code>, 此方法相当于 <code>toHex(color, &#39;auto&#39;)</code>.</p>
+<h3>toHex(color, alpha)<span><a class="mark" href="#color_tohex_color_alpha" id="color_tohex_color_alpha">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>[alpha = &#39;auto&#39;]</strong> { <a href="dataTypes.html#datatypes_boolean">boolean</a> | <code>&#39;keep&#39;</code> | <code>&#39;none&#39;</code> | <code>&#39;auto&#39;</code> } - A (alpha) 分量参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
+</ul>
+<p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>, 并根据 <code>alpha</code> 参数决定颜色代码 <code>A (alpha)</code> 分量的显示状态.</p>
+<p><code>A (alpha)</code> 分量参数取值表:</p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>含义</th>
+<th style="text-align:center">默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&#39;keep&#39; / true</td>
+<td>强制显示 A 分量, 不论 A 分量是否为 0xFF</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>&#39;none&#39; / false</td>
+<td>强制去除 A 分量, 只保留 R / G / B 分量</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>&#39;auto&#39;</td>
+<td>根据 A 分量是否为 0xFF 自动决定显示状态</td>
+<td style="text-align:center">√</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">let cA = &#39;#AAC0C0C0&#39;;
+let cB = &#39;#FFC0C0C0&#39;;
+let cC = &#39;#C0C0C0&#39;;
+
+colors.toHex(cA, &#39;auto&#39;); /* #AAC0C0C0, &#39;auto&#39; 参数可省略. */
+colors.toHex(cB, &#39;auto&#39;); /* #C0C0C0, &#39;auto&#39; 参数可省略. */
+colors.toHex(cC, &#39;auto&#39;); /* #C0C0C0, &#39;auto&#39; 参数可省略. */
+
+/* cA 舍弃 A 分量. */
+colors.toHex(cA, false); // #C0C0C0
+colors.toHex(cA, &#39;none&#39;); /* 同上. */
+
+/* cB 保留 A 分量. */
+colors.toHex(cB, true); // #FFC0C0C0
+colors.toHex(cB, &#39;keep&#39;); /* 同上. */
+
+/* cC 强制显示 A 分量. */
+colors.toHex(cC, true); // #FFC0C0C0
+colors.toHex(cC, &#39;keep&#39;); /* 同上. */
+</code></pre>
+<h3>toHex(color, length)<span><a class="mark" href="#color_tohex_color_length" id="color_tohex_color_length">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>length</strong> { <code>8</code> | <code>6</code> | <code>3</code> } - Hex 代码长度参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
+</ul>
+<p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>, 并根据 <code>length</code> 参数决定颜色代码的显示状态.</p>
+<p>Hex 代码长度参数取值表:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">取值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">8</td>
+<td>强制显示 A 分量, 结果格式为 #AARRGGBB</td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td>强制去除 A 分量, 结果格式为 #RRGGBB</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td>强制去除 A 分量, 结果格式为 #RGB</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">let cA = &#39;#AA9966CC&#39;;
+let cB = &#39;#FF9966CC&#39;;
+let cC = &#39;#9966CC&#39;;
+let cD = &#39;#FAEBD7&#39;;
+
+/* 转换为 8 长度颜色代码, 强制保留 A 分量. */
+colors.toHex(cA, 8); // #AA9966CC
+colors.toHex(cB, 8); // #FF9966CC
+colors.toHex(cC, 8); // #FF9966CC
+colors.toHex(cD, 8); // #FFFAEBD7
+
+/* 转换为 6 长度颜色代码, 强制去除 A 分量. */
+colors.toHex(cA, 6); // #9966CC
+colors.toHex(cB, 6); // #9966CC
+colors.toHex(cC, 6); // #9966CC
+colors.toHex(cD, 6); // #FAEBD7
+
+/* 转换为 3 长度颜色代码, 强制去除 A 分量. */
+colors.toHex(cA, 3); // #96C
+colors.toHex(cB, 3); // #96C
+colors.toHex(cC, 3); // #96C
+colors.toHex(cD, 3); /* 抛出异常. */
+</code></pre>
+<h2>[m] toFullHex<span><a class="mark" href="#color_m_tofullhex" id="color_m_tofullhex">#</a></span></h2>
+<h3>toFullHex(color)<span><a class="mark" href="#color_tofullhex_color" id="color_tofullhex_color">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码的完整形式</li>
+</ul>
+</div><p>将颜色参数强制转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a> 的完整形式 (#AARRGGBB).</p>
+<p>此方法为 <a href="#color_tohexcolor_length">colors.toHex(color, 8)</a> 的别名方法.</p>
+<pre><code class="lang-js">colors.toHex(&#39;#CC5500&#39;); // #CC5500
+colors.toFullHex(&#39;#CC5500&#39;); // #FFCC5500
+</code></pre>
+<h2>[m] parseColor<span><a class="mark" href="#color_m_parsecolor" id="color_m_parsecolor">#</a></span></h2>
+<h3>parseColor(color)<span><a class="mark" href="#color_parsecolor_color" id="color_parsecolor_color">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 颜色整数</li>
+</ul>
+</div><p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<p>类似 <a href="#color_m_toint">toInt</a>, 但参数接受范围相对狭小且类型及数值要求更加严格.<br>parseColor 的颜色参数仅支持六位数及八位数颜色代码及部分颜色名称.  </p>
+<p>支持的颜色名称 (不区分大小写): </p>
+<blockquote>
+<p>&#39;aqua&#39;, &#39;black&#39;, &#39;blue&#39;, &#39;cyan&#39;, &#39;darkgray&#39;, &#39;darkgrey&#39;,</p>
+<p>&#39;fuchsia&#39;, &#39;gray&#39;, &#39;green&#39;, &#39;grey&#39;, &#39;lightgray&#39;,</p>
+<p>&#39;lightgrey&#39;, &#39;lime&#39;, &#39;magenta&#39;, &#39;maroon&#39;, &#39;navy&#39;, &#39;olive&#39;,</p>
+<p>&#39;purple&#39;, &#39;red&#39;, &#39;silver&#39;, &#39;teal&#39;, &#39;white&#39;, &#39;yellow&#39;`.  </p>
+</blockquote>
+<p>下表列出部分 toInt 与 parseColor 传参后的结果对照:</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>toInt</th>
+<th>parseColor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&#39;blue&#39;</td>
+<td>-16776961</td>
+<td>-16776961</td>
+</tr>
+<tr>
+<td>&#39;burnt-orange&#39;</td>
+<td>-3386112</td>
+<td># 抛出异常 #</td>
+</tr>
+<tr>
+<td>&#39;#FFCC5500&#39;</td>
+<td>-3386112</td>
+<td>-3386112</td>
+</tr>
+<tr>
+<td>&#39;#CC5500&#39;</td>
+<td>-3386112</td>
+<td>-3386112</td>
+</tr>
+<tr>
+<td>&#39;#C50&#39;</td>
+<td>-3386112</td>
+<td># 抛出异常 #</td>
+</tr>
+<tr>
+<td>0xFFCC5500</td>
+<td>-3386112</td>
+<td># 抛出异常 #</td>
+</tr>
+<tr>
+<td>colors.web.BURNT_ORANGE</td>
+<td>-3386112</td>
+<td># 抛出异常 #</td>
+</tr>
+</tbody>
+</table>
+<p>除非需要考虑多版本兼容, 否则建议始终使用 toInt 替代 parseColor.</p>
+<h2>[m] toString<span><a class="mark" href="#color_m_tostring" id="color_m_tostring">#</a></span></h2>
+<h3>toString(color)<span><a class="mark" href="#color_tostring_color" id="color_tostring_color">#</a></span></h3>
+<p><strong><code>[6.2.0]</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
+</ul>
+<p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>.</p>
+<p><a href="#color_tohexcolor">toHex(color)</a> 的别名方法.</p>
+<h3>toString(color, alpha)<span><a class="mark" href="#color_tostring_color_alpha" id="color_tostring_color_alpha">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>[alpha = &#39;auto&#39;]</strong> { <a href="dataTypes.html#datatypes_boolean">boolean</a> | <code>&#39;keep&#39;</code> | <code>&#39;none&#39;</code> | <code>&#39;auto&#39;</code> } - A (alpha) 分量参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
+</ul>
+<p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>, 并根据 <code>alpha</code> 参数决定颜色代码 <code>A (alpha)</code> 分量的显示状态.</p>
+<p><a href="#color_tohexcolor_alpha">toHex(color, alpha)</a> 的别名方法.</p>
+<h3>toString(color, length)<span><a class="mark" href="#color_tostring_color_length" id="color_tostring_color_length">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>length</strong> { <code>8</code> | <code>6</code> | <code>3</code> } - Hex 代码长度参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
+</ul>
+<p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>, 并根据 <code>length</code> 参数决定颜色代码的显示状态.</p>
+<p><a href="#color_tohexcolor_length">toHex(color, length)</a> 的别名方法.</p>
+<h2>[m] alpha<span><a class="mark" href="#color_m_alpha" id="color_m_alpha">#</a></span></h2>
+<h3>alpha(color)<span><a class="mark" href="#color_alpha_color" id="color_alpha_color">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
+</ul>
+</div><p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
+<pre><code class="lang-js">colors.alpha(&#39;#663399&#39;); // 255
+colors.alpha(colors.TRANSPARENT); // 0
+colors.alpha(&#39;#05060708&#39;); // 5
+</code></pre>
+<h2>[m] alphaDouble<span><a class="mark" href="#color_m_alphadouble" id="color_m_alphadouble">#</a></span></h2>
+<h3>alphaDouble(color)<span><a class="mark" href="#color_alphadouble_color" id="color_alphadouble_color">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
+</ul>
+</div><p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
+<pre><code class="lang-js">colors.alphaDouble(&#39;#663399&#39;); // 1
+colors.alphaDouble(colors.TRANSPARENT); // 0
+colors.alphaDouble(&#39;#05060708&#39;); // 0.0196078431372549
+</code></pre>
+<h2>[m] red<span><a class="mark" href="#color_m_red" id="color_m_red">#</a></span></h2>
+<h3>red(color)<span><a class="mark" href="#color_red_color" id="color_red_color">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
+</ul>
+</div><p>获取颜色的 <code>R (red)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
+<pre><code class="lang-js">colors.red(&#39;#663399&#39;); // 102
+colors.red(colors.TRANSPARENT); // 0
+colors.red(&#39;#05060708&#39;); // 6
+</code></pre>
+<h2>[m] green<span><a class="mark" href="#color_m_green" id="color_m_green">#</a></span></h2>
+<h3>green(color)<span><a class="mark" href="#color_green_color" id="color_green_color">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
+</ul>
+</div><p>获取颜色的 <code>G (green)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
+<pre><code class="lang-js">colors.green(&#39;#663399&#39;); // 51
+colors.green(colors.TRANSPARENT); // 0
+colors.green(&#39;#05060708&#39;); // 7
+</code></pre>
+<h2>[m] blue<span><a class="mark" href="#color_m_blue" id="color_m_blue">#</a></span></h2>
+<h3>blue(color)<span><a class="mark" href="#color_blue_color" id="color_blue_color">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
+</ul>
+</div><p>获取颜色的 <code>B (blue)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
+<pre><code class="lang-js">colors.blue(&#39;#663399&#39;); // 153
+colors.blue(colors.TRANSPARENT); // 0
+colors.blue(&#39;#05060708&#39;); // 8
+</code></pre>
+<h2>[m] rgb<span><a class="mark" href="#color_m_rgb" id="color_m_rgb">#</a></span></h2>
+<h3>rgb(color)<span><a class="mark" href="#color_rgb_color" id="color_rgb_color">#</a></span></h3>
+<p><strong><code>[6.2.0]</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>获取 <code>color</code> 参数对应的 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.  </p>
+<p><code>color</code> 参数为颜色代码时, 支持情况如下:</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>#RRGGBB</td>
+<td>正常</td>
+</tr>
+<tr>
+<td>#RGB</td>
+<td>正常</td>
+</tr>
+<tr>
+<td>#AARRGGBB</td>
+<td>A (alpha) 分量被忽略</td>
+</tr>
+</tbody>
+</table>
+<p>方法调用结果的 <code>A (alpha)</code> 分量恒为 <code>255</code>, 意味着 <code>color</code> 参数中的 <code>A</code> 分量信息将被忽略.</p>
+<pre><code class="lang-js">colors.rgb(&#39;#663399&#39;);
+colors.rgb(&#39;#DE663399&#39;); /* 同上, A 分量被忽略. */
+</code></pre>
+<h3>rgb(red, green, blue)<span><a class="mark" href="#color_rgb_red_green_blue" id="color_rgb_red_green_blue">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong></p>
+<ul>
+<li><strong>red</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - R (red)</li>
+<li><strong>green</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - G (green)</li>
+<li><strong>blue</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - B (blue)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>通过 <a href="dataTypes.html#datatypes_colorcomponent">颜色分量</a> 获取 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<pre><code class="lang-js">colors.rgb(255, 128, 9);
+colors.rgb(0xFF, 0x80, 0x09); /* 同上. */
+colors.rgb(&#39;#FF8009&#39;); /* 同上. */
+colors.rgb(1, 0.5, &#39;3.53%&#39;); /* 同上. */
+</code></pre>
+<h3>rgb(components)<span><a class="mark" href="#color_rgb_components" id="color_rgb_components">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong></p>
+<ul>
+<li><strong>components</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 颜色分量数组</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>通过 <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a> 获取 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<pre><code class="lang-js">colors.rgb([ 255, 128, 9 ]);
+colors.rgb([ 0xFF, 0x80, 0x09 ]); /* 同上. */
+colors.rgb([ 1, 0.5, &#39;3.53%&#39; ]); /* 同上. */
+</code></pre>
+<h2>[m] argb<span><a class="mark" href="#color_m_argb" id="color_m_argb">#</a></span></h2>
+<h3>argb(color)<span><a class="mark" href="#color_argb_color" id="color_argb_color">#</a></span></h3>
+<p><strong><code>[6.2.0]</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>获取 <code>color</code> 参数对应的 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<p><code>color</code> 参数为颜色代码时, 支持情况如下:</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>#RRGGBB</td>
+<td>A (alpha) 分量为 0xFF</td>
+</tr>
+<tr>
+<td>#RGB</td>
+<td>A (alpha) 分量为 0xFF</td>
+</tr>
+<tr>
+<td>#AARRGGBB</td>
+<td>正常</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">colors.argb(&#39;#663399&#39;); /* 相当于 argb(&#39;#FF663399&#39;) . */
+colors.argb(&#39;#DE663399&#39;); /* 结果不同上. */
+</code></pre>
+<h3>argb(alpha, red, green, blue)<span><a class="mark" href="#color_argb_alpha_red_green_blue" id="color_argb_alpha_red_green_blue">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong></p>
+<ul>
+<li><strong>alpha</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - A (alpha)</li>
+<li><strong>red</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - R (red)</li>
+<li><strong>green</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - G (green)</li>
+<li><strong>blue</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - B (blue)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>通过 <a href="dataTypes.html#datatypes_colorcomponent">颜色分量</a> 获取 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<pre><code class="lang-js">colors.argb(64, 255, 128, 9);
+colors.argb(0x40, 0xFF, 0x80, 0x09); /* 同上. */
+colors.argb(&#39;#40FF8009&#39;); /* 同上. */
+colors.argb(0.25, 1, 0.5, &#39;3.53%&#39;); /* 同上. */
+</code></pre>
+<h3>argb(components)<span><a class="mark" href="#color_argb_components" id="color_argb_components">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong></p>
+<ul>
+<li><strong>components</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 颜色分量数组</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>通过 <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a> 获取 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<pre><code class="lang-js">colors.argb([ 64, 255, 128, 9 ]);
+colors.argb([ 0x40, 0xFF, 0x80, 0x09 ]); /* 同上. */
+colors.argb([ 0.25, 1, 0.5, &#39;3.53%&#39; ]); /* 同上. */
+</code></pre>
+<h2>[m] rgba<span><a class="mark" href="#color_m_rgba" id="color_m_rgba">#</a></span></h2>
+<h3>rgba(color)<span><a class="mark" href="#color_rgba_color" id="color_rgba_color">#</a></span></h3>
+<p><strong><code>[6.2.0]</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>获取 <code>color</code> 参数对应的 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<p><code>color</code> 参数为颜色代码时, 支持情况如下:</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>#RRGGBB</td>
+<td>A (alpha) 分量为 0xFF</td>
+</tr>
+<tr>
+<td>#RGB</td>
+<td>A (alpha) 分量为 0xFF</td>
+</tr>
+<tr>
+<td>#RRGGBBAA</td>
+<td>正常</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">colors.rgba(&#39;#663399&#39;); /* 相当于 rgba(&#39;#663399FF&#39;) . */
+colors.rgba(&#39;#663399FF&#39;); /* 结果同上. */
+colors.rgba(&#39;#FF663399&#39;); /* 结果不同上. */
+</code></pre>
+<p>注意区分 <code>colors.rgba</code> 与 <code>colors.argb</code>:</p>
+<pre><code class="lang-js">colors.rgba(&#39;#11335577&#39;); /* A (alpha) 分量为 0x77 . */
+colors.argb(&#39;#11335577&#39;); /* A (alpha) 分量为 0x11 . */
+</code></pre>
+<h3>rgba(red, green, blue, alpha)<span><a class="mark" href="#color_rgba_red_green_blue_alpha" id="color_rgba_red_green_blue_alpha">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong></p>
+<ul>
+<li><strong>red</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - R (red)</li>
+<li><strong>green</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - G (green)</li>
+<li><strong>blue</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - B (blue)</li>
+<li><strong>alpha</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - A (alpha)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>通过 <a href="dataTypes.html#datatypes_colorcomponent">颜色分量</a> 获取 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<pre><code class="lang-js">colors.rgba(255, 128, 9, 64);
+colors.rgba(0xFF, 0x80, 0x09, 0x40); /* 同上. */
+colors.rgba(&#39;#FF800940&#39;); /* 同上. */
+colors.rgba(1, 0.5, &#39;3.53%&#39;, 0.25); /* 同上. */
+</code></pre>
+<h3>rgba(components)<span><a class="mark" href="#color_rgba_components" id="color_rgba_components">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong></p>
+<ul>
+<li><strong>components</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 颜色分量数组</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>通过 <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a> 获取 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<pre><code class="lang-js">colors.rgba([ 255, 128, 9, 64 ]);
+colors.rgba([ 0xFF, 0x80, 0x09, 0x40 ]); /* 同上. */
+colors.rgba([ 1, 0.5, &#39;3.53%&#39;, 0.25 ]); /* 同上. */
+</code></pre>
+<h3>hsv(hue, saturation, value)<span><a class="mark" href="#color_hsv_hue_saturation_value" id="color_hsv_hue_saturation_value">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
+<ul>
+<li><strong>hue</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - H (hue)</li>
+<li><strong>saturation</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - S (saturation)</li>
+<li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - V (value)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>通过 <a href="dataTypes.html#datatypes_colorcomponent">颜色分量</a> 获取 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<pre><code class="lang-js">colors.hsv(90, 80, 64);
+colors.hsv(90, 0.8, 0.64); /* 同上. */
+colors.hsv(0.25, 0.8, 0.64); /* 同上. */
+colors.hsv(&#39;25%&#39;, &#39;80%&#39;, &#39;64%&#39;); /* 同上. */
+</code></pre>
+<h3>hsv(components)<span><a class="mark" href="#color_hsv_components" id="color_hsv_components">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
+<ul>
+<li><strong>components</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 颜色分量数组</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>通过 <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a> 获取 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
+<pre><code class="lang-js">colors.hsv([ 90, 80, 64 ]);
+colors.hsv([ 90, 0.8, 0.64 ]); /* 同上. */
+colors.hsv([ 0.25, 0.8, 0.64 ]); /* 同上. */
+colors.hsv([ &#39;25%&#39;, &#39;80%&#39;, &#39;64%&#39; ]); /* 同上. */
+</code></pre>
+<h2>[m] hsva<span><a class="mark" href="#color_m_hsva" id="color_m_hsva">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] hsl<span><a class="mark" href="#color_m_hsl" id="color_m_hsl">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] hsla<span><a class="mark" href="#color_m_hsla" id="color_m_hsla">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] toRgb<span><a class="mark" href="#color_m_torgb" id="color_m_torgb">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] toRgba<span><a class="mark" href="#color_m_torgba" id="color_m_torgba">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] toArgb<span><a class="mark" href="#color_m_toargb" id="color_m_toargb">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] toHsv<span><a class="mark" href="#color_m_tohsv" id="color_m_tohsv">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] toHsva<span><a class="mark" href="#color_m_tohsva" id="color_m_tohsva">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] toHsl<span><a class="mark" href="#color_m_tohsl" id="color_m_tohsl">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] toHsla<span><a class="mark" href="#color_m_tohsla" id="color_m_tohsla">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] isSimilar<span><a class="mark" href="#color_m_issimilar" id="color_m_issimilar">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] equals<span><a class="mark" href="#color_m_equals" id="color_m_equals">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[m] luminance<span><a class="mark" href="#color_m_luminance" id="color_m_luminance">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p+] android<span><a class="mark" href="#color_p_android" id="color_p_android">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p+] css<span><a class="mark" href="#color_p_css" id="color_p_css">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p+] web<span><a class="mark" href="#color_p_web" id="color_p_web">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p+] material<span><a class="mark" href="#color_p_material" id="color_p_material">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] BLACK<span><a class="mark" href="#color_p_black" id="color_p_black">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] BLUE<span><a class="mark" href="#color_p_blue" id="color_p_blue">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] CYAN<span><a class="mark" href="#color_p_cyan" id="color_p_cyan">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] AQUA<span><a class="mark" href="#color_p_aqua" id="color_p_aqua">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] DARK_GRAY<span><a class="mark" href="#color_p_dark_gray" id="color_p_dark_gray">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] DARK_GREY<span><a class="mark" href="#color_p_dark_grey" id="color_p_dark_grey">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] DKGRAY<span><a class="mark" href="#color_p_dkgray" id="color_p_dkgray">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] GRAY<span><a class="mark" href="#color_p_gray" id="color_p_gray">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] GREY<span><a class="mark" href="#color_p_grey" id="color_p_grey">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] GREEN<span><a class="mark" href="#color_p_green" id="color_p_green">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] LIME<span><a class="mark" href="#color_p_lime" id="color_p_lime">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] LIGHT_GRAY<span><a class="mark" href="#color_p_light_gray" id="color_p_light_gray">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] LIGHT_GREY<span><a class="mark" href="#color_p_light_grey" id="color_p_light_grey">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] LTGRAY<span><a class="mark" href="#color_p_ltgray" id="color_p_ltgray">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] MAGENTA<span><a class="mark" href="#color_p_magenta" id="color_p_magenta">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] FUCHSIA<span><a class="mark" href="#color_p_fuchsia" id="color_p_fuchsia">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] MAROON<span><a class="mark" href="#color_p_maroon" id="color_p_maroon">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] NAVY<span><a class="mark" href="#color_p_navy" id="color_p_navy">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] OLIVE<span><a class="mark" href="#color_p_olive" id="color_p_olive">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] PURPLE<span><a class="mark" href="#color_p_purple" id="color_p_purple">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] RED<span><a class="mark" href="#color_p_red" id="color_p_red">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] SILVER<span><a class="mark" href="#color_p_silver" id="color_p_silver">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] TEAL<span><a class="mark" href="#color_p_teal" id="color_p_teal">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] WHITE<span><a class="mark" href="#color_p_white" id="color_p_white">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] YELLOW<span><a class="mark" href="#color_p_yellow" id="color_p_yellow">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+<h2>[p] TRANSPARENT<span><a class="mark" href="#color_p_transparent" id="color_p_transparent">#</a></span></h2>
+<p>//// -=-= PENDING =-=- ////</p>
+
+        </div>
+    </div>
+</div>
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+<!-- __TRACKING__ -->
+</body>
+</html>

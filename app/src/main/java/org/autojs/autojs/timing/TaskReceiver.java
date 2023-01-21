@@ -12,7 +12,7 @@ import org.autojs.autojs.external.ScriptIntents;
  */
 public class TaskReceiver extends BroadcastReceiver {
 
-    public static final String ACTION_TASK = "com.stardust.autojs.action.task";
+    public static final String ACTION_TASK = "org.autojs.autojs.action.task";
     public static final String EXTRA_TASK_ID = "task_id";
 
     @Override

@@ -3,14 +3,13 @@ package org.autojs.autojs.ui.widget;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
-import androidx.preference.PreferenceManager;
 import android.util.AttributeSet;
 
-import com.stardust.theme.ThemeColor;
-import com.stardust.theme.ThemeColorHelper;
-import com.stardust.theme.ThemeColorManager;
-import com.stardust.theme.ThemeColorMutable;
-
+import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.theme.ThemeColor;
+import org.autojs.autojs.theme.ThemeColorHelper;
+import org.autojs.autojs.theme.ThemeColorManager;
+import org.autojs.autojs.theme.ThemeColorMutable;
 import org.autojs.autojs6.R;
 
 /**
@@ -19,7 +18,6 @@ import org.autojs.autojs6.R;
 public class PrefSwitch extends SwitchCompat implements SharedPreferences.OnSharedPreferenceChangeListener, ThemeColorMutable {
 
     private String mPrefKey;
-    private SharedPreferences mSharedPreferences;
     private boolean mDefaultChecked;
 
     public PrefSwitch(Context context) {
@@ -38,20 +36,19 @@ public class PrefSwitch extends SwitchCompat implements SharedPreferences.OnShar
     }
 
     private void init(AttributeSet attrs) {
+        ThemeColorManager.add(this);
         if (attrs == null)
             return;
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.PrefSwitch);
         mPrefKey = a.getString(R.styleable.PrefSwitch_key);
         mDefaultChecked = a.getBoolean(R.styleable.PrefSwitch_defaultVal, false);
         if (mPrefKey != null) {
-            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-            mSharedPreferences.registerOnSharedPreferenceChangeListener(this);
+            Pref.registerOnSharedPreferenceChangeListener(this);
             readInitialState();
         } else {
             setChecked(mDefaultChecked, false);
         }
         a.recycle();
-        ThemeColorManager.add(this);
     }
 
     public void setThemeColor(ThemeColor color) {
@@ -59,27 +56,22 @@ public class PrefSwitch extends SwitchCompat implements SharedPreferences.OnShar
     }
 
     private void readInitialState() {
-        if (mPrefKey == null || mSharedPreferences == null)
+        if (mPrefKey == null)
             return;
-        setChecked(mSharedPreferences.getBoolean(mPrefKey, mDefaultChecked), false);
+        setChecked(Pref.getBoolean(mPrefKey, mDefaultChecked), false);
     }
 
     private void notifyPrefChanged(boolean isChecked) {
-        if (mPrefKey == null)
-            return;
-        mSharedPreferences.edit()
-                .putBoolean(mPrefKey, isChecked)
-                .apply();
+        if (mPrefKey != null) {
+            Pref.putBoolean(mPrefKey, isChecked);
+        }
     }
 
     public void setPrefKey(String prefKey) {
         mPrefKey = prefKey;
-        if (mSharedPreferences == null) {
-            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-            mSharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        }
-        if(mPrefKey != null){
-            setChecked(mSharedPreferences.getBoolean(mPrefKey, mDefaultChecked), false);
+        Pref.registerOnSharedPreferenceChangeListener(this);
+        if (mPrefKey != null) {
+            setChecked(Pref.getBoolean(mPrefKey, mDefaultChecked), false);
         }
     }
 
@@ -99,7 +91,7 @@ public class PrefSwitch extends SwitchCompat implements SharedPreferences.OnShar
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (mPrefKey != null && mPrefKey.equals(key)) {
-            setChecked(mSharedPreferences.getBoolean(mPrefKey, isChecked()), false);
+            setChecked(Pref.getBoolean(mPrefKey, isChecked()), false);
         }
     }
 
@@ -108,7 +100,6 @@ public class PrefSwitch extends SwitchCompat implements SharedPreferences.OnShar
         if (visibility == VISIBLE) {
             readInitialState();
         }
-
     }
-}
 
+}

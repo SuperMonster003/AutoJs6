@@ -1,10 +1,11 @@
 package org.autojs.autojs.ui.widget;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +37,9 @@ public class SimpleRecyclerViewAdapter<M, VH extends BindableViewHolder<M>> exte
     @NonNull
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-        return mVHViewHolderFactory.create(LayoutInflater.from(parent.getContext()).inflate(mLayoutResource, parent, false));
+        return mVHViewHolderFactory.create(LayoutInflater
+                .from(parent.getContext())
+                .inflate(mLayoutResource, parent, false));
     }
 
     @Override

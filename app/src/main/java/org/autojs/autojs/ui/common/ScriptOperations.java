@@ -1,5 +1,8 @@
 package org.autojs.autojs.ui.common;
 
+import static org.autojs.autojs.app.DialogUtils.fixCheckBoxGravity;
+import static org.autojs.autojs.app.DialogUtils.showDialog;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -10,22 +13,15 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.android.material.snackbar.Snackbar;
-import com.stardust.app.DialogUtils;
-import com.stardust.app.GlobalAppContext;
-import com.stardust.pio.PFiles;
-import com.stardust.pio.UncheckedIOException;
 import com.tencent.bugly.crashreport.BuglyLog;
 
-import org.autojs.autojs.Pref;
-import org.autojs.autojs6.R;
+import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
@@ -36,11 +32,16 @@ import org.autojs.autojs.model.sample.SampleFile;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.network.download.DownloadManager;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity_;
+import org.autojs.autojs.util.EnvironmentUtils;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs.util.WorkingDirectoryUtils;
+import org.autojs.autojs6.R;
 import org.reactivestreams.Publisher;
 
 import java.io.File;
@@ -85,14 +86,14 @@ public class ScriptOperations {
     }
 
     public ScriptOperations(Context context, View view) {
-        this(context, view, new ScriptFile(Pref.getScriptDirPath()));
+        this(context, view, new ScriptFile(WorkingDirectoryUtils.getPath()));
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void newScriptFileForScript(final String script) {
-        showFileNameInputDialog("", "js")
-                .subscribe(input ->
-                        createScriptFile(getCurrentDirectoryPath() + input + ".js", script, false)
-                );
+        showFileNameInputDialog("", "js").subscribe(input ->
+                createScriptFile(getCurrentDirectoryPath() + input + ".js", script, false)
+        );
     }
 
     private String getCurrentDirectoryPath() {
@@ -103,25 +104,26 @@ public class ScriptOperations {
         return mCurrentDirectory;
     }
 
-    public void createScriptFile(String path, String script, boolean edit) {
+    public void createScriptFile(String path, String script, boolean editable) {
         if (PFiles.createIfNotExists(path)) {
             if (script != null) {
                 try {
                     PFiles.write(path, script);
                 } catch (UncheckedIOException e) {
-                    showMessage(R.string.text_file_write_fail);
+                    showMessage(R.string.text_failed_to_write_file);
                     return;
                 }
             }
-            notifyFileCreated(mCurrentDirectory, new ScriptFile(path));
-            if (edit)
-                Scripts.INSTANCE.edit(mContext, path);
+            notifyFileCreated(new ScriptFile(path));
+            if (editable) {
+                Scripts.edit(mContext, path);
+            }
         } else {
-            showMessage(R.string.text_create_fail);
+            showMessage(R.string.text_failed_to_create);
         }
     }
 
-    private void notifyFileCreated(ScriptFile directory, ScriptFile scriptFile) {
+    private void notifyFileCreated(ScriptFile scriptFile) {
         if (scriptFile.isDirectory()) {
             mExplorer.notifyItemCreated(new ExplorerDirPage(scriptFile, mExplorerPage));
         } else {
@@ -130,23 +132,27 @@ public class ScriptOperations {
     }
 
     public void newFile() {
-        DialogUtils.showDialog(new ThemeColorMaterialDialogBuilder(mContext).title(R.string.text_name)
+        MaterialDialog dialog = new MaterialDialog.Builder(mContext)
+                .title(R.string.text_name)
                 .inputType(InputType.TYPE_CLASS_TEXT)
                 .alwaysCallInputCallback()
-                .input(getString(R.string.text_please_input_name), "", false, (dialog, input) ->
-                        validateInput(dialog, dialog.isPromptCheckBoxChecked() ? ".js" : null))
+                .input(getString(R.string.text_please_input_name), "", false, (d, input) ->
+                        validateInput(d, d.isPromptCheckBoxChecked() ? ".js" : null))
                 .checkBoxPromptRes(R.string.text_js_file, true, (buttonView, isChecked) -> {
+                    // Ignored.
                 })
-                .onPositive((dialog, which) -> {
-                    boolean createJs = dialog.isPromptCheckBoxChecked();
-                    assert dialog.getInputEditText() != null;
+                .onPositive((d, which) -> {
+                    boolean createJs = d.isPromptCheckBoxChecked();
+                    assert d.getInputEditText() != null;
                     if (createJs) {
-                        createScriptFile(getCurrentDirectoryPath() + dialog.getInputEditText().getText() + ".js", null, true);
+                        createScriptFile(getCurrentDirectoryPath() + d.getInputEditText().getText() + ".js", null, true);
                     } else {
-                        createScriptFile(getCurrentDirectoryPath() + dialog.getInputEditText().getText(), null, false);
+                        createScriptFile(getCurrentDirectoryPath() + d.getInputEditText().getText(), null, false);
                     }
                 })
-                .build());
+                .build();
+
+        showDialog(fixCheckBoxGravity(dialog));
     }
 
     private void validateInput(MaterialDialog dialog, String extension) {
@@ -179,12 +185,12 @@ public class ScriptOperations {
                     if (PFiles.copy(pathFrom, pathTo)) {
                         showMessage(R.string.text_import_succeed);
                     } else {
-                        showMessage(R.string.text_import_fail);
+                        showMessage(R.string.text_failed_to_import);
                     }
                     return pathTo;
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(path -> notifyFileCreated(mCurrentDirectory, new ScriptFile(path)));
+                .doOnNext(path -> notifyFileCreated(new ScriptFile(path)));
     }
 
     public Observable<String> importFile(String prefix, final InputStream inputStream, final String ext) {
@@ -195,23 +201,24 @@ public class ScriptOperations {
                     if (PFiles.copyStream(inputStream, pathTo)) {
                         showMessage(R.string.text_import_succeed);
                     } else {
-                        showMessage(R.string.text_import_fail);
+                        showMessage(R.string.text_failed_to_import);
                     }
-                    notifyFileCreated(mCurrentDirectory, new ScriptFile(pathTo));
+                    notifyFileCreated(new ScriptFile(pathTo));
                     return pathTo;
                 });
     }
 
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void newDirectory() {
         showNameInputDialog("", new InputCallback())
                 .subscribe(path -> {
                     ScriptFile newDir = new ScriptFile(getCurrentDirectory(), path);
                     if (newDir.mkdirs()) {
                         showMessage(R.string.text_already_created);
-                        notifyFileCreated(mCurrentDirectory, new ScriptFile(newDir));
+                        notifyFileCreated(new ScriptFile(newDir));
                     } else {
-                        showMessage(R.string.text_create_fail);
+                        showMessage(R.string.text_failed_to_create);
                     }
                 });
     }
@@ -226,9 +233,9 @@ public class ScriptOperations {
 
     private void showMessageWithoutThreadSwitch(int resId) {
         if (mView != null) {
-            Snackbar.make(mView, resId, Snackbar.LENGTH_SHORT).show();
+            ViewUtils.showSnack(mView, resId);
         } else {
-            Toast.makeText(mContext, resId, Toast.LENGTH_SHORT).show();
+            ViewUtils.showToast(mContext, resId);
         }
     }
 
@@ -239,18 +246,21 @@ public class ScriptOperations {
 
     private Observable<String> showNameInputDialog(String prefix, MaterialDialog.InputCallback textWatcher) {
         final PublishSubject<String> input = PublishSubject.create();
-        DialogUtils.showDialog(new ThemeColorMaterialDialogBuilder(mContext).title(R.string.text_name)
+        showDialog(new MaterialDialog.Builder(mContext)
+                .title(R.string.text_name)
                 .inputType(InputType.TYPE_CLASS_TEXT)
                 .alwaysCallInputCallback()
                 .input(getString(R.string.text_please_input_name), prefix, false, textWatcher)
+                .negativeText(R.string.dialog_button_cancel)
+                .positiveText(R.string.dialog_button_confirm)
                 .onPositive((dialog, which) -> {
                     input.onNext(Objects.requireNonNull(dialog.getInputEditText()).getText().toString());
                     input.onComplete();
                 })
+                .canceledOnTouchOutside(false)
                 .build());
         return input;
     }
-
 
     private CharSequence getString(int resId) {
         return mContext.getString(resId);
@@ -261,7 +271,7 @@ public class ScriptOperations {
             return importFile(sample.getSimplifiedName(), sample.openInputStream(), sample.getExtension());
         } catch (IOException e) {
             e.printStackTrace();
-            showMessage(R.string.text_import_fail);
+            showMessage(R.string.text_failed_to_import);
             return Observable.error(e);
         }
     }
@@ -275,12 +285,12 @@ public class ScriptOperations {
                         showMessage(R.string.error_cannot_rename);
                         throw new IOException();
                     }
-                    notifyFileChanged(mCurrentDirectory, item, newItem);
+                    notifyFileChanged(item, newItem);
                     return newItem;
                 });
     }
 
-    private void notifyFileChanged(ScriptFile directory, ExplorerFileItem oldItem, ExplorerFileItem newItem) {
+    private void notifyFileChanged(ExplorerFileItem oldItem, ExplorerFileItem newItem) {
         mExplorer.notifyItemChanged(oldItem, newItem);
     }
 
@@ -290,16 +300,36 @@ public class ScriptOperations {
     }
 
     public void delete(final ScriptFile scriptFile) {
-        DialogUtils.showDialog(new ThemeColorMaterialDialogBuilder(mContext)
-                .title(mContext.getString(R.string.text_are_you_sure_to_delete, scriptFile.getName()))
+        new MaterialDialog.Builder(mContext)
+                .title(mContext.getString(R.string.text_confirm_to_delete))
+                .content(scriptFile.getName())
                 .negativeText(R.string.text_cancel)
                 .positiveText(R.string.text_ok)
+                .positiveColorRes(R.color.dialog_button_caution)
                 .onPositive((dialog, which) -> deleteWithoutConfirm(scriptFile))
-                .build());
-
+                .build()
+                .show();
     }
 
-    @SuppressLint("CheckResult")
+    public void setAsWorkingDir(final ScriptFile scriptFile) {
+        String oldPath = WorkingDirectoryUtils.getRelativePath();
+        String newPath = WorkingDirectoryUtils.toRelativePath(scriptFile.getPath());
+        if (newPath.equals(oldPath)) {
+            showMessage(R.string.text_new_path_is_same_as_old_path);
+            return;
+        }
+        String content = mContext.getString(R.string.text_old_path) + ": " + oldPath + "\n"
+                + mContext.getString(R.string.text_new_path) + ": " + newPath;
+        new MaterialDialog.Builder(mContext)
+                .title(mContext.getString(R.string.text_prompt))
+                .content(content)
+                .negativeText(R.string.text_cancel)
+                .positiveText(R.string.text_ok)
+                .onPositive((dialog, which) -> setAsWorkingDirNow(scriptFile))
+                .build()
+                .show();
+    }
+
     public void deleteWithoutConfirm(final ScriptFile scriptFile) {
         boolean isDir = scriptFile.isDirectory();
         Observable.fromPublisher((Publisher<Boolean>) s -> s.onNext(PFiles.deleteRecursively(scriptFile)))
@@ -310,9 +340,15 @@ public class ScriptOperations {
                         showMessage(R.string.text_already_deleted);
                         notifyFileRemoved(isDir, scriptFile);
                     } else {
-                        showMessage(R.string.text_delete_failed);
+                        showMessage(R.string.text_failed_to_delete);
                     }
                 });
+    }
+
+    public void setAsWorkingDirNow(final ScriptFile scriptFile) {
+        WorkingDirectoryUtils.setPath(scriptFile.getPath());
+        WorkingDirectoryUtils.addIntoHistories(scriptFile.getPath());
+        showMessage(R.string.text_done);
     }
 
     private void notifyFileRemoved(boolean isDir, ScriptFile scriptFile) {
@@ -323,13 +359,12 @@ public class ScriptOperations {
         }
     }
 
-
     public Observable<ScriptFile> download(String url) {
-        BuglyLog.i(LOG_TAG, "dir = " + Pref.getScriptDirPath() + ", sdcard = " + Environment.getExternalStorageDirectory() + ", url = " + url);
+        BuglyLog.i(LOG_TAG, "dir = " + WorkingDirectoryUtils.getPath() + ", sdcard = " + Environment.getExternalStorageDirectory() + ", url = " + url);
         String fileName = DownloadManager.parseFileNameLocally(url);
         return new FileChooserDialogBuilder(mContext)
                 .title(R.string.text_save_to)
-                .dir(Pref.getScriptDirPath())
+                .dir(WorkingDirectoryUtils.getPath())
                 .chooseDir()
                 .singleChoice()
                 .map(saveDir -> new File(saveDir, fileName).getPath())
@@ -362,7 +397,7 @@ public class ScriptOperations {
 
     public void importFile() {
         new FileChooserDialogBuilder(mContext)
-                .dir(Environment.getExternalStorageDirectory().getPath())
+                .dir(EnvironmentUtils.getExternalStoragePath())
                 .justScriptFile()
                 .singleChoice(file -> importFile(file.getPath()).subscribe())
                 .title(R.string.text_select_file_to_import)
@@ -375,7 +410,6 @@ public class ScriptOperations {
                 .extra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.getPath())
                 .start();
     }
-
 
     private class InputCallback implements MaterialDialog.InputCallback {
 
@@ -413,6 +447,5 @@ public class ScriptOperations {
             validateInput(dialog, mExtension);
         }
     }
-
 
 }

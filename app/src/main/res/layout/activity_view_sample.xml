@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <com.stardust.theme.widget.ThemeColorToolbar
+        <org.autojs.autojs.theme.widget.ThemeColorToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:theme="@style/ToolBarStyle"
@@ -25,7 +25,7 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:orientation="horizontal">
 
                 <org.autojs.autojs.ui.widget.ToolbarMenuItem
@@ -44,11 +44,9 @@
                     app:icon_color="@android:color/white"
                     app:text="@string/text_run"/>
 
-
-
             </LinearLayout>
 
-        </com.stardust.theme.widget.ThemeColorToolbar>
+        </org.autojs.autojs.theme.widget.ThemeColorToolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -65,7 +63,6 @@
                                             android:layout_width="match_parent"
                                             android:layout_height="0dp"
                                             android:layout_weight="1">
-
 
         <com.jecelyin.editor.v2.core.widget.JecEditText
             android:id="@+id/edit_text"
@@ -90,7 +87,6 @@
             android:visibility="gone"/>
 
     </com.jecelyin.editor.v2.view.EditorView>
-
 
 </LinearLayout>
 

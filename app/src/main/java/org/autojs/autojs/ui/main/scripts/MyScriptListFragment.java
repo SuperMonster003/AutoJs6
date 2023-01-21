@@ -2,18 +2,16 @@ package org.autojs.autojs.ui.main.scripts;
 
 import android.app.Activity;
 import android.os.Bundle;
-import androidx.preference.PreferenceManager;
-import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import com.stardust.app.GlobalAppContext;
-import com.stardust.util.IntentUtil;
+import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.ViewById;
-import org.autojs.autojs.Pref;
-import org.autojs.autojs6.R;
+import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.Explorers;
@@ -27,6 +25,10 @@ import org.autojs.autojs.ui.main.ViewPagerFragment;
 import org.autojs.autojs.ui.project.ProjectConfigActivity;
 import org.autojs.autojs.ui.project.ProjectConfigActivity_;
 import org.autojs.autojs.ui.viewmodel.ExplorerItemList;
+import org.autojs.autojs.util.EnvironmentUtils;
+import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.WorkingDirectoryUtils;
+import org.autojs.autojs6.R;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -55,14 +57,16 @@ public class MyScriptListFragment extends ViewPagerFragment implements FloatingA
 
     @AfterViews
     void setUpViews() {
-        ExplorerItemList.SortConfig sortConfig = ExplorerItemList.SortConfig.from(PreferenceManager.getDefaultSharedPreferences(getContext()));
+        ExplorerItemList.SortConfig sortConfig = ExplorerItemList.SortConfig.from(PreferenceManager.getDefaultSharedPreferences(requireContext()));
         mExplorerView.setSortConfig(sortConfig);
-        mExplorerView.setExplorer(Explorers.workspace(), ExplorerDirPage.createRoot(Pref.getScriptDirPath()));
+        mExplorerView.setExplorer(Explorers.workspace(),
+                ExplorerDirPage.createRoot(EnvironmentUtils.getExternalStoragePath()),
+                ExplorerDirPage.createRoot(WorkingDirectoryUtils.getPath()));
         mExplorerView.setOnItemClickListener((view, item) -> {
             if (item.isEditable()) {
-                Scripts.INSTANCE.edit(getActivity(), item.toScriptFile());
+                Scripts.edit(requireActivity(), item.toScriptFile());
             } else {
-                IntentUtil.viewFile(GlobalAppContext.get(), item.getPath(), AppFileProvider.AUTHORITY);
+                IntentUtils.viewFile(GlobalAppContext.get(), item.getPath(), AppFileProvider.AUTHORITY);
             }
         });
     }
@@ -80,7 +84,7 @@ public class MyScriptListFragment extends ViewPagerFragment implements FloatingA
     private void initFloatingActionMenuIfNeeded(final FloatingActionButton fab) {
         if (mFloatingActionMenu != null)
             return;
-        mFloatingActionMenu = getActivity().findViewById(R.id.floating_action_menu);
+        mFloatingActionMenu = requireActivity().findViewById(R.id.floating_action_menu);
         mFloatingActionMenu.getState()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SimpleObserver<>() {
@@ -132,7 +136,8 @@ public class MyScriptListFragment extends ViewPagerFragment implements FloatingA
     @Override
     public void onStop() {
         super.onStop();
-        mExplorerView.getSortConfig().saveInto(PreferenceManager.getDefaultSharedPreferences(getContext()));
+        mExplorerView.notifyDataSetChanged();
+        mExplorerView.getSortConfig().saveInto(PreferenceManager.getDefaultSharedPreferences(requireContext()));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.autojs.autojs.pluginclient;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,10 +17,9 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonReader;
-import com.stardust.app.GlobalAppContext;
-import com.stardust.autojs.runtime.api.Device;
-import com.stardust.util.MapBuilder;
 
+import org.autojs.autojs.runtime.api.Device;
+import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs6.BuildConfig;
 import org.autojs.autojs6.R;
 
@@ -41,6 +41,8 @@ import okio.ByteString;
 
 abstract public class JsonSocket extends Socket {
 
+    private final Context mContext;
+    private final DevPluginService mService;
     private final String TAG = "JsonSocket";
 
     public static final int HEADER_SIZE = 8;
@@ -70,7 +72,19 @@ abstract public class JsonSocket extends Socket {
     }
 
     public final android.os.Handler mHandler = new Handler(Looper.getMainLooper());
-    public final DevPluginService devPlugin = DevPluginService.getInstance();
+
+    public JsonSocket(DevPluginService service) {
+        mService = service;
+        mContext = service.getContext();
+    }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    protected DevPluginService getService() {
+        return mService;
+    }
 
     public abstract void switchOff() throws IOException;
 
@@ -96,7 +110,7 @@ abstract public class JsonSocket extends Socket {
                 .put("app_version", BuildConfig.VERSION_NAME)
                 .put("app_version_code", BuildConfig.VERSION_CODE)
                 .put("server_version", DevPluginService.Version.SERVER)
-                .put("device_id", new Device(GlobalAppContext.get()).getAndroidId())
+                .put("device_id", new Device(mContext).getAndroidId())
                 .build());
     }
 
@@ -168,7 +182,7 @@ abstract public class JsonSocket extends Socket {
         } else if (value instanceof JsonElement) {
             data.add(key, (JsonElement) value);
         } else {
-            throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_put_value_into_json, value));
+            throw new IllegalArgumentException(mContext.getString(R.string.error_put_value_into_json, value));
         }
     }
 
@@ -272,7 +286,7 @@ abstract public class JsonSocket extends Socket {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     public void handleBytes(JsonObject jsonObject, JsonSocket.Bytes bytes) {
-        devPlugin.mResponseHandler
+        mService.getResponseHandler()
                 .handleBytes(jsonObject, bytes)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(dir -> {
@@ -280,7 +294,7 @@ abstract public class JsonSocket extends Socket {
                             .get("data")
                             .getAsJsonObject()
                             .add("dir", new JsonPrimitive(dir.getPath()));
-                    devPlugin.mResponseHandler.handle(jsonObject);
+                    mService.getResponseHandler().handle(jsonObject);
                 });
 
     }

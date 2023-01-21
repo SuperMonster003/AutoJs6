@@ -5,14 +5,15 @@ import android.content.ClipboardManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+
+import org.autojs.autojs.ui.BaseActivity;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.BuildConfig;
 import org.autojs.autojs6.R;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
-import org.autojs.autojs.ui.BaseActivity;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -48,7 +49,7 @@ public class ErrorReportActivity extends BaseActivity {
     }
 
     private void showErrorMessageByDialog(String message, final String errorDetail) {
-        new ThemeColorMaterialDialogBuilder(this)
+        new MaterialDialog.Builder(this)
                 .title(mTitle)
                 .content(R.string.crash_feedback)
                 .positiveText(R.string.text_exit)
@@ -78,7 +79,7 @@ public class ErrorReportActivity extends BaseActivity {
     private void copyToClip(String text) {
         ((ClipboardManager) getSystemService(CLIPBOARD_SERVICE))
                 .setPrimaryClip(ClipData.newPlainText("Debug", text));
-        Toast.makeText(ErrorReportActivity.this, R.string.text_already_copied_to_clip, Toast.LENGTH_SHORT).show();
+        ViewUtils.showToast(ErrorReportActivity.this, R.string.text_already_copied_to_clip);
     }
 
     private void setUpUI() {

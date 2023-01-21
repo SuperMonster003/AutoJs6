@@ -9,8 +9,11 @@ import androidx.annotation.WorkerThread;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import org.autojs.autojs6.R;
+
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,6 +21,7 @@ import java.util.concurrent.Executors;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.subjects.PublishSubject;
 
+@SuppressWarnings({"resource", "UnusedReturnValue"})
 public class JsonSocketClient extends JsonSocket {
 
     private static final String TAG = JsonSocketClient.class.getSimpleName();
@@ -34,8 +38,8 @@ public class JsonSocketClient extends JsonSocket {
 
     private Socket mSocket;
 
-    // @Constructor
-    public JsonSocketClient(String host, int port) {
+    public JsonSocketClient(DevPluginService service, String host, int port) {
+        super(service);
         jsonSocketExecutor.submit(() -> {
             try {
                 setStateConnecting();
@@ -133,7 +137,7 @@ public class JsonSocketClient extends JsonSocket {
                         mRequiredBytesCommands.put(md5, obj);
                     }
                 }
-                default -> devPlugin.mResponseHandler.handle(obj);
+                default -> getService().getResponseHandler().handle(obj);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -162,8 +166,7 @@ public class JsonSocketClient extends JsonSocket {
     @MainThread
     public void onHandshakeTimeout() throws IOException {
         Log.i(TAG, "onHandshakeTimeout");
-        // setStateDisconnected(new SocketTimeoutException("handshake timeout"));
-        setStateDisconnected();
+        setStateDisconnected(new SocketTimeoutException(getContext().getString(R.string.error_handshake_timed_out, HANDSHAKE_TIMEOUT)));
         close();
     }
 

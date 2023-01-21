@@ -1,35 +1,34 @@
 package org.autojs.autojs.ui.explorer;
 
-import android.graphics.Color;
+import static org.autojs.autojs.util.FileUtils.TYPE.AUTO;
+import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
+import static org.autojs.autojs.util.FileUtils.TYPE.PROJECT;
+import static org.autojs.autojs.util.FileUtils.TYPE.UNKNOWN;
 
-import com.stardust.app.GlobalAppContext;
-import com.stardust.pio.PFiles;
+import android.content.Context;
 
-import org.autojs.autojs6.R;
+import androidx.annotation.NonNull;
+
 import org.autojs.autojs.model.explorer.ExplorerFileItem;
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.explorer.ExplorerProjectPage;
 import org.autojs.autojs.model.explorer.ExplorerSamplePage;
-
-import static androidx.core.content.ContextCompat.getColor;
-import static org.autojs.autojs.model.explorer.ExplorerItem.TYPE_AUTO_FILE;
-import static org.autojs.autojs.model.explorer.ExplorerItem.TYPE_JAVASCRIPT;
-import static org.autojs.autojs.model.explorer.ExplorerItem.TYPE_UNKNOWN;
-
-import androidx.annotation.NonNull;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.util.FileUtils.TYPE;
+import org.autojs.autojs6.R;
 
 public class ExplorerViewHelper {
 
-    public static String getDisplayName(ExplorerItem item) {
+    public static String getDisplayName(Context context, ExplorerItem item) {
         if (item instanceof ExplorerSamplePage && ((ExplorerSamplePage) item).isRoot()) {
-            return GlobalAppContext.getString(R.string.text_sample);
+            return context.getString(R.string.text_sample);
         }
         if (item instanceof ExplorerPage) {
             return item.getName();
         }
-        String type = item.getType();
-        if (type.equals(TYPE_JAVASCRIPT) || type.equals(TYPE_AUTO_FILE)) {
+        TYPE type = item.getType();
+        if (type == JAVASCRIPT || type == AUTO) {
             if (item instanceof ExplorerFileItem) {
                 return ((ExplorerFileItem) item).getFile().getSimplifiedName();
             }
@@ -39,22 +38,17 @@ public class ExplorerViewHelper {
     }
 
     public static String getIconText(@NonNull ExplorerItem item) {
-        String type = item.getType();
-        if (type.isEmpty()) {
-            return TYPE_UNKNOWN;
+        TYPE type = item.getType();
+        switch (type) {
+            case UNKNOWN:
+                return UNKNOWN.getAlias();
+            case AUTO:
+                return AUTO.getAlias();
         }
-        if (type.equals(TYPE_AUTO_FILE)) {
-            return "R";
+        if (item.getName().equalsIgnoreCase(PROJECT.getTypeName())) {
+            return PROJECT.getAlias();
         }
-        return type.substring(0, 1).toUpperCase();
-    }
-
-    public static int getIconColor(ExplorerItem item) {
-        return switch (item.getType()) {
-            case TYPE_JAVASCRIPT -> getColor(GlobalAppContext.get(), R.color.color_j);
-            case TYPE_AUTO_FILE -> getColor(GlobalAppContext.get(), R.color.color_r);
-            default -> Color.GRAY;
-        };
+        return type.getTypeName().substring(0, 1).toUpperCase();
     }
 
     public static int getIcon(ExplorerPage page) {

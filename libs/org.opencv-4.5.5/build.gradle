@@ -1,5 +1,0 @@
-configurations.maybeCreate('default')
-artifacts.add('default',
-        // @Reference to TonyJiangWJ/Auto.js on Mar 18, 2022.
-        file('opencv-4.5.5.aar')
-)

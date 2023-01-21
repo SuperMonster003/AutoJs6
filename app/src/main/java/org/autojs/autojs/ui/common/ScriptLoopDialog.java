@@ -4,15 +4,14 @@ import android.content.Context;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.stardust.app.DialogUtils;
-import com.stardust.app.GlobalAppContext;
 
-import org.autojs.autojs6.R;
+import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.model.script.Scripts;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -52,9 +51,9 @@ public class ScriptLoopDialog {
             int loopTimes = Integer.parseInt(mLoopTimes.getText().toString());
             float loopInterval = Float.parseFloat(mLoopInterval.getText().toString());
             float loopDelay = Float.parseFloat(mLoopDelay.getText().toString());
-            Scripts.INSTANCE.runRepeatedly(mScriptFile, loopTimes, (long) (1000L * loopDelay), (long) (loopInterval * 1000L));
+            Scripts.runRepeatedly(mScriptFile, loopTimes, (long) (1000L * loopDelay), (long) (loopInterval * 1000L));
         } catch (NumberFormatException e) {
-            GlobalAppContext.toast(R.string.text_number_format_error, Toast.LENGTH_LONG);
+            ViewUtils.showToast(mDialog.getContext(), R.string.text_number_format_error, true);
         }
     }
 

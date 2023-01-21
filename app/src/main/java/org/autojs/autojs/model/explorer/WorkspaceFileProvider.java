@@ -5,12 +5,11 @@ import android.content.res.AssetManager;
 
 import androidx.annotation.Nullable;
 
-import com.stardust.autojs.project.ProjectConfig;
-import com.stardust.pio.PFile;
-import com.stardust.pio.PFiles;
-
-import org.autojs.autojs.Pref;
 import org.autojs.autojs.model.script.ScriptFile;
+import org.autojs.autojs.pio.PFile;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.project.ProjectConfig;
+import org.autojs.autojs.util.WorkingDirectoryUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -23,7 +22,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class WorkspaceFileProvider extends ExplorerFileProvider {
 
-    private static final String SAMPLE_PATH = "sample";
+    public static final String SAMPLE_PATH = "sample";
 
     private final PFile mSampleDir;
     private final AssetManager mAssetManager;
@@ -121,7 +120,7 @@ public class WorkspaceFileProvider extends ExplorerFileProvider {
     @Override
     protected ExplorerDirPage createExplorerPage(String path, ExplorerPage parent) {
         ExplorerDirPage page = super.createExplorerPage(path, parent);
-        if (new File(path).equals(new File(Pref.getScriptDirPath()))) {
+        if (new File(path).equals(new File(WorkingDirectoryUtils.getPath()))) {
             page.addChild(ExplorerSamplePage.createRoot(mSampleDir));
         }
         return page;

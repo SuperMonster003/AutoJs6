@@ -2,8 +2,9 @@ package org.autojs.autojs.ui.common;
 
 import android.content.Context;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import org.autojs.autojs6.R;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
@@ -16,7 +17,7 @@ public class RxDialogs {
 
     public static Observable<Boolean> confirm(Context context, String text) {
         PublishSubject<Boolean> subject = PublishSubject.create();
-        new ThemeColorMaterialDialogBuilder(context)
+        new MaterialDialog.Builder(context)
                 .positiveText(R.string.text_ok)
                 .negativeText(R.string.text_cancel)
                 .onPositive((dialog, which) -> subject.onNext(true))

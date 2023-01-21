@@ -1,25 +1,28 @@
 package org.autojs.autojs.ui.explorer;
 
+import static org.autojs.autojs.util.ViewUtils.showToast;
+
 import android.content.Context;
-import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.stardust.autojs.project.ProjectConfig;
-import com.stardust.autojs.project.ProjectLauncher;
-import com.stardust.pio.PFile;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.LinearLayoutCompat;
+import androidx.cardview.widget.CardView;
 
-import org.autojs.autojs6.R;
-import org.autojs.autojs.autojs.AutoJs;
+import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent;
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.model.explorer.Explorers;
+import org.autojs.autojs.pio.PFile;
+import org.autojs.autojs.project.ProjectConfig;
+import org.autojs.autojs.project.ProjectLauncher;
 import org.autojs.autojs.ui.project.BuildActivity;
-import org.autojs.autojs.ui.project.BuildActivity_;
 import org.autojs.autojs.ui.project.ProjectConfigActivity;
 import org.autojs.autojs.ui.project.ProjectConfigActivity_;
+import org.autojs.autojs6.R;
 import org.greenrobot.eventbus.Subscribe;
 
 import butterknife.BindView;
@@ -28,11 +31,12 @@ import butterknife.OnClick;
 
 public class ExplorerProjectToolbar extends CardView {
 
-    private ProjectConfig mProjectConfig;
     private PFile mDirectory;
 
     @BindView(R.id.project_name)
     TextView mProjectName;
+
+    private OnOperateListener mOnOperateListener;
 
     public ExplorerProjectToolbar(Context context) {
         super(context);
@@ -56,13 +60,13 @@ public class ExplorerProjectToolbar extends CardView {
     }
 
     public void setProject(PFile dir) {
-        mProjectConfig = ProjectConfig.fromProjectDir(dir.getPath());
-        if(mProjectConfig == null){
+        ProjectConfig projectConfig = ProjectConfig.fromProjectDir(dir.getPath());
+        if (projectConfig == null) {
             setVisibility(GONE);
             return;
         }
         mDirectory = dir;
-        mProjectName.setText(mProjectConfig.getName());
+        mProjectName.setText(projectConfig.getName());
     }
 
     public void refresh() {
@@ -71,27 +75,29 @@ public class ExplorerProjectToolbar extends CardView {
         }
     }
 
-    @OnClick(R.id.run)
+    @OnClick(R.id.project_run)
     void run() {
+        notifyOperated();
         try {
             new ProjectLauncher(mDirectory.getPath())
                     .launch(AutoJs.getInstance().getScriptEngineService());
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            showToast(getContext(), e.getMessage(), true);
         }
     }
 
-    @OnClick(R.id.build)
-    void build() {
-        BuildActivity_.intent(getContext())
-                .extra(BuildActivity.EXTRA_SOURCE, mDirectory.getPath())
-                .start();
+    private void notifyOperated() {
+        if (mOnOperateListener != null) {
+            mOnOperateListener.onOperated(findViewById(R.id.commands));
+        }
     }
 
-    @OnClick(R.id.sync)
-    void sync() {
-
+    @OnClick(R.id.project_build)
+    void build() {
+        new BuildActivity.IntentBuilder(getContext())
+                .extra(mDirectory.getPath())
+                .start();
     }
 
     @Override
@@ -118,10 +124,27 @@ public class ExplorerProjectToolbar extends CardView {
         }
     }
 
+    @OnClick(R.id.project_edit)
     void edit() {
         ProjectConfigActivity_.intent(getContext())
                 .extra(ProjectConfigActivity.EXTRA_DIRECTORY, mDirectory.getPath())
                 .start();
+    }
+
+    public void setRunnableOnly(boolean b) {
+        ViewGroup viewGroup = (ViewGroup) findViewById(R.id.commands);
+        for (int i = 0; i < viewGroup.getChildCount(); i += 1) {
+            ImageView view = (ImageView) viewGroup.getChildAt(i);
+            view.setVisibility(!b || view.getId() == R.id.project_run ? VISIBLE : GONE);
+        }
+    }
+
+    public void setOnOperateListener(@Nullable OnOperateListener onOperateListener) {
+        mOnOperateListener = onOperateListener;
+    }
+
+    public interface OnOperateListener {
+        void onOperated(LinearLayoutCompat toolbar);
     }
 
 }

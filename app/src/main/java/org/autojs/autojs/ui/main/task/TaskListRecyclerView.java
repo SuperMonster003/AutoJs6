@@ -1,10 +1,6 @@
 package org.autojs.autojs.ui.main.task;
 
 import android.content.Context;
-import android.graphics.drawable.GradientDrawable;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,27 +9,32 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ThemeColorRecyclerView;
+
 import com.bignerdranch.expandablerecyclerview.ChildViewHolder;
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
-import com.stardust.autojs.execution.ScriptExecution;
-import com.stardust.autojs.execution.ScriptExecutionListener;
-import com.stardust.autojs.execution.SimpleScriptExecutionListener;
-import com.stardust.autojs.script.AutoFileSource;
-import com.stardust.autojs.workground.WrapContentLinearLayoutManager;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
-import org.autojs.autojs6.R;
-import org.autojs.autojs.autojs.AutoJs;
+import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.execution.ScriptExecution;
+import org.autojs.autojs.execution.ScriptExecutionListener;
+import org.autojs.autojs.execution.SimpleScriptExecutionListener;
+import org.autojs.autojs.script.AutoFileSource;
 import org.autojs.autojs.storage.database.ModelChange;
 import org.autojs.autojs.timing.TimedTaskManager;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity_;
+import org.autojs.autojs.ui.widget.FirstCharView;
+import org.autojs.autojs.workground.WrapContentLinearLayoutManager;
+import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.recyclerview.widget.ThemeColorRecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -44,7 +45,6 @@ import io.reactivex.disposables.Disposable;
  * Created by Stardust on 2017/3/24.
  */
 public class TaskListRecyclerView extends ThemeColorRecyclerView {
-
 
     private static final String LOG_TAG = "TaskListRecyclerView";
 
@@ -193,6 +193,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         @Override
         public void onBindParentViewHolder(@NonNull TaskGroupViewHolder viewHolder, int parentPosition, @NonNull TaskGroup taskGroup) {
             viewHolder.title.setText(taskGroup.getTitle());
+            viewHolder.title.setTextColor(getContext().getColor(R.color.day_night));
         }
 
         @Override
@@ -201,39 +202,36 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         }
     }
 
-
     class TaskViewHolder extends ChildViewHolder<Task> {
 
         @BindView(R.id.first_char)
-        TextView mFirstChar;
+        FirstCharView mFirstChar;
+
         @BindView(R.id.name)
         TextView mName;
+
         @BindView(R.id.desc)
         TextView mDesc;
 
         private Task mTask;
-        private final GradientDrawable mFirstCharBackground;
 
         TaskViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this::onItemClick);
             ButterKnife.bind(this, itemView);
-            mFirstCharBackground = (GradientDrawable) mFirstChar.getBackground();
         }
 
         public void bind(Task task) {
             mTask = task;
             mName.setText(task.getName());
             mDesc.setText(task.getDesc());
-            if (AutoFileSource.ENGINE.equals(mTask.getEngineName())) {
-                mFirstChar.setText("R");
-                mFirstCharBackground.setColor(getResources().getColor(R.color.color_r));
-            } else {
-                mFirstChar.setText("J");
-                mFirstCharBackground.setColor(getResources().getColor(R.color.color_j));
-            }
-        }
 
+            mFirstChar
+                    .setIconText(AutoFileSource.ENGINE.equals(mTask.getEngineName()) ? "R" : "J")
+                    .setIconTextThemeColor()
+                    .setStrokeThemeColor()
+                    .setFillTransparent();
+        }
 
         @OnClick(R.id.stop)
         void stop() {

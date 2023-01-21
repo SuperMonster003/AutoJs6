@@ -17,6 +17,8 @@
  */
 package org.autojs.autojs.ui.edit.editor;
 
+import static org.autojs.autojs.ui.edit.editor.BracketMatching.UNMATCHED_BRACKET;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -25,8 +27,6 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.Layout;
 import android.util.AttributeSet;
@@ -37,23 +37,21 @@ import android.view.MotionEvent;
 import android.widget.TextView;
 import android.widget.TextViewHelper;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.AppCompatEditText;
+
 import org.autojs.autojs.ui.edit.theme.Theme;
 import org.autojs.autojs.ui.edit.theme.TokenMapping;
-
-import com.stardust.util.TextUtils;
-
+import org.autojs.autojs.util.StringUtils;
 import org.mozilla.javascript.Token;
 
 import java.util.LinkedHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static org.autojs.autojs.ui.edit.editor.BracketMatching.UNMATCHED_BRACKET;
-
 /**
  * Created by Administrator on 2018/2/11.
  */
 public class CodeEditText extends AppCompatEditText {
-
 
     static final String LOG_TAG = "CodeEditText";
     private static final boolean DEBUG = false;
@@ -387,14 +385,14 @@ public class CodeEditText extends AppCompatEditText {
         }
         if (mCursorChangeCallbacks.isEmpty())
             return;
-        int lineStart = TextUtils.lastIndexOf(text, '\n', sel - 1) + 1;
+        int lineStart = StringUtils.lastIndexOf(text, '\n', sel - 1) + 1;
         if (lineStart < 0) {
             lineStart = 0;
         }
         if (lineStart > text.length() - 1) {
             lineStart = text.length() - 1;
         }
-        int lineEnd = TextUtils.indexOf(text, '\n', sel);
+        int lineEnd = StringUtils.indexOf(text, '\n', sel);
         if (lineEnd < 0) {
             lineEnd = text.length();
         }
@@ -415,7 +413,6 @@ public class CodeEditText extends AppCompatEditText {
         return mCursorChangeCallbacks.remove(callback);
     }
 
-
     public void updateHighlightTokens(JavaScriptHighlighter.HighlightTokens highlightTokens) {
         if (mHighlightTokens != null && mHighlightTokens.getId() >= highlightTokens.getId()) {
             return;
@@ -427,13 +424,7 @@ public class CodeEditText extends AppCompatEditText {
 
     @Override
     public void setSelection(int index) {
-        if (index < 0) {
-            index = 0;
-        }
-        if (index > getText().length()) {
-            index = getText().length();
-        }
-        super.setSelection(index);
+        super.setSelection(Math.max(Math.min(index, getText().length()), 0));
     }
 
 

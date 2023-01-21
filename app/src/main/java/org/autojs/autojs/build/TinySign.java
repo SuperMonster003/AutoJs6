@@ -69,6 +69,7 @@ public class TinySign {
         return Base64.encodeToString(data, Base64.NO_WRAP);
     }
 
+    @SuppressWarnings("CharsetObjectCanBeUsed")
     private static Manifest generateSF(Manifest manifest) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest md = MessageDigest.getInstance("SHA1");
         PrintStream print = new PrintStream(new DigestOutputStream(new OutputStream() {

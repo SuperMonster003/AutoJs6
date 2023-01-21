@@ -1,14 +1,15 @@
 package org.autojs.autojs.model.sample;
 
 import android.content.res.AssetManager;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stardust.autojs.script.JavaScriptSource;
-import com.stardust.autojs.script.ScriptSource;
-import com.stardust.pio.PFiles;
-import com.stardust.pio.UncheckedIOException;
 import org.autojs.autojs.model.script.ScriptFile;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.pio.UncheckedIOException;
+import org.autojs.autojs.script.JavaScriptSource;
+import org.autojs.autojs.script.ScriptSource;
 
 import java.io.File;
 import java.io.IOException;

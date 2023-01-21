@@ -11,7 +11,7 @@
                 <size
                     android:width="12dp"
                     android:height="12dp"/>
-                <solid android:color="@color/bubble_bg"/>
+                <solid android:color="@color/layout_window_bubble_bg"/>
             </shape>
         </rotate>
     </item>

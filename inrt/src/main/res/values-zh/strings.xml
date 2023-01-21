@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="summary_not_showing_main_activity">启动应用后直接运行脚本</string>
-    <string name="text_a11y_service_enabled_but_not_running">无障碍服务已启用但未运行 (尝试重新启用或重启设备)</string>
-    <string name="text_not_showing_main_activity">不显示主界面</string>
-    <string name="text_settings">设置</string>
-</resources>

@@ -3,9 +3,13 @@ package org.autojs.autojs.ui.widget;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
-import androidx.core.view.MenuItemCompat;
-import androidx.appcompat.widget.SearchView;
 import android.view.MenuItem;
+import android.widget.EditText;
+
+import androidx.appcompat.widget.SearchView;
+import androidx.core.view.MenuItemCompat;
+
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/10/25.
@@ -27,6 +31,10 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
             return;
         }
         searchView.setSearchableInfo(searchManager.getSearchableInfo(activity.getComponentName()));
+        EditText textview = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        if (textview != null) {
+            textview.setHintTextColor(activity.getColor(R.color.night_day));
+        }
         MenuItemCompat.setOnActionExpandListener(searchMenuItem, this);
         searchView.setOnQueryTextListener(this);
     }
@@ -68,8 +76,20 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
     }
 
 
+    public void expand() {
+        mSearchMenuItem.expandActionView();
+    }
+
+    public boolean isExpanded() {
+        return mSearchMenuItem.isActionViewExpanded();
+    }
+
     public void collapse() {
         mSearchMenuItem.collapseActionView();
+    }
+
+    public boolean isCollapsed() {
+        return !isExpanded();
     }
 
 }

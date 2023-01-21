@@ -4,7 +4,6 @@ package org.autojs.autojs.ui.edit.editor;
  * THIS CLASS IS PROVIDED TO THE PUBLIC DOMAIN FOR FREE WITHOUT ANY
  * RESTRICTIONS OR ANY WARRANTY.
  */
-
 import java.util.LinkedList;
 
 import android.content.SharedPreferences;
@@ -118,7 +117,7 @@ public class TextViewUndoRedo {
      * Can undo be performed?
      */
     public boolean canUndo() {
-        return (mEditHistory.mmPosition > 0);
+        return mEditHistory.mmPosition > 0;
     }
 
     /**
@@ -413,7 +412,6 @@ public class TextViewUndoRedo {
             if (mIsUndoOrRedo || !mEnabled) {
                 return;
             }
-
             mAfterChange = s.subSequence(start, start + count);
             mTextChangeId++;
             mEditHistory.add(new EditItem(start, mBeforeChange, mAfterChange));

@@ -12,8 +12,7 @@
         android:clipToPadding="false"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-
-        <com.stardust.theme.widget.ThemeColorToolbar
+        <org.autojs.autojs.theme.widget.ThemeColorToolbar
             android:id="@+id/toolbar"
             android:theme="@style/ToolBarStyle"
             android:layout_width="match_parent"
@@ -22,7 +21,7 @@
             app:title="@string/app_name">
 
 
-        </com.stardust.theme.widget.ThemeColorToolbar>
+        </org.autojs.autojs.theme.widget.ThemeColorToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <org.autojs.autojs.ui.explorer.ExplorerView

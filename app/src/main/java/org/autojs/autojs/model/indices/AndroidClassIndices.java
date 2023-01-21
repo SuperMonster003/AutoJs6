@@ -8,7 +8,7 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.autojs.autojs.tool.Observers;
+import org.autojs.autojs.util.Observers;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

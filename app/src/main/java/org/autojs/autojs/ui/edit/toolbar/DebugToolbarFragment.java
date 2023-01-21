@@ -2,31 +2,30 @@ package org.autojs.autojs.ui.edit.toolbar;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
-
-import com.stardust.autojs.execution.ScriptExecution;
-import com.stardust.autojs.rhino.debug.DebugCallback;
-import com.stardust.autojs.rhino.debug.Debugger;
-import com.stardust.autojs.rhino.debug.Dim;
-import com.stardust.autojs.runtime.exception.ScriptInterruptedException;
-import com.stardust.pio.PFiles;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EFragment;
-import org.autojs.autojs6.R;
+import org.autojs.autojs.execution.ScriptExecution;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.rhino.debug.DebugCallback;
+import org.autojs.autojs.rhino.debug.Debugger;
+import org.autojs.autojs.rhino.debug.Dim;
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.ui.edit.EditorView;
 import org.autojs.autojs.ui.edit.debug.CodeEvaluator;
 import org.autojs.autojs.ui.edit.debug.DebugBar;
 import org.autojs.autojs.ui.edit.debug.DebuggerSingleton;
 import org.autojs.autojs.ui.edit.debug.WatchingVariable;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -223,7 +222,7 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
             mEditorView.getDebugBar().setTitle(PFiles.getName(mCurrentEditorSourceUrl));
             setInterrupted(true);
             if (message != null && !message.equals(ScriptInterruptedException.class.getName())) {
-                Toast.makeText(mEditorView.getContext(), message, Toast.LENGTH_LONG).show();
+                ViewUtils.showToast(mEditorView.getContext(), message, true);
             }
         });
     }

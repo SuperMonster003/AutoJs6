@@ -1,81 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<!--    <color name="colorPrimary">#009688</color>-->
-<!--    <color name="colorPrimaryDark">#009688</color>-->
-<!--    <color name="colorAccent">#03a9f4</color>-->
-    <color name="colorPrimary">#37474F</color>
-    <color name="colorPrimaryDark">#37474F</color>
-    <color name="colorAccent">#03a9f4</color>
-    <color name="sliding_up_panel_shadow_color">#99444444</color>
-    <color name="bubble_bg">#eef2f3f9</color>
-    <color name="color_r">#FD999A</color>
-    <color name="color_j">#99CC99</color>
-    <color name="prefTextColorSecondary">#9DA0A2</color>
-    <color name="prefTextColorPrimary">#282C2F</color>
-    <color name="divider_functions_keyboard">#f0f0f0</color>
-    <color name="theme_color_black">#111214</color>
 
+    <color name="day_night">#DE212121</color>
+    <color name="night_day">#DEFBFBFB</color>
     <color name="window_background">#FFFFFF</color>
+    <color name="text_color_primary">@color/day_night</color>
+    <color name="text_color_secondly">#9DA0A2</color>
+
+    <color name="colorAccent">#03A9F4</color>
+    <color name="colorPrimary">@color/theme_color_default</color>
+    <color name="colorPrimaryDark">@color/theme_color_default</color>
+
+    <color name="theme_color_black">#111214</color>
+    <color name="theme_color_default">@color/md_teal_800</color>
+
+    <color name="console_view_debug">#CC000000</color>
+    <color name="console_view_verbose">#DFC0C0C0</color>
+    <color name="console_view_info">#FF43A047</color>
+    <color name="console_view_warn">#FF1976D2</color>
+    <color name="console_view_error">#FFC62828</color>
+    <color name="console_view_assert">#FFE254FF</color>
+
+    <!--<color name="floating_console_view_debug">#FFFFFF</color>-->
+    <!--<color name="floating_console_view_verbose">#ECEFF1</color>-->
+    <!--<color name="floating_console_view_info">#E0F2F1</color>-->
+    <!--<color name="floating_console_view_warn">#E3F2FD</color>-->
+    <!--<color name="floating_console_view_error">#FFEBEE</color>-->
+    <!--<color name="floating_console_view_assert">#FCE4EC</color>-->
+
+    <color name="floating_console_view_debug">#FFFFFF</color>
+    <color name="floating_console_view_verbose">#E0E0E0</color>
+    <color name="floating_console_view_info">#DCEDC8</color>
+    <color name="floating_console_view_warn">#B3E5FC</color>
+    <color name="floating_console_view_error">#FFCDD2</color>
+    <color name="floating_console_view_assert">#FCE4EC</color>
+
+    <color name="dialog_button_attraction">#7B1FA2</color>
+    <color name="dialog_button_caution">#FF3D00</color>
+    <color name="dialog_button_default">#03A9F4</color>
+    <color name="dialog_button_error">#003C8F</color>
+    <color name="dialog_button_failure">@color/dialog_button_error</color>
+    <color name="dialog_button_finish">#009624</color>
+    <color name="dialog_button_hint">#0DA798</color>
+    <color name="dialog_button_reset">#A1887F</color>
+    <color name="dialog_button_success">@color/dialog_button_finish</color>
+    <color name="dialog_button_unavailable">#BDBDBD</color>
+    <color name="dialog_button_warn">#F57C00</color>
+    <color name="dialog_progress_backup_act_btn">#1C313A</color>
+    <color name="dialog_progress_backup_bg_tint">#ECEFF1</color>
+    <color name="dialog_progress_backup_tint">#455A64</color>
+    <color name="dialog_progress_download_act_btn">#C43E00</color>
+    <color name="dialog_progress_download_bg_tint">#FFECB3</color>
+    <color name="dialog_progress_download_tint">#FF6F00</color>
+    <color name="dialog_progress_error_act_btn">#003C8F</color>
+    <color name="dialog_progress_error_bg_tint">#BBDEFB</color>
+    <color name="dialog_progress_error_tint">#1565C0</color>
+    <color name="dialog_progress_failure_act_btn">#003C8F</color>
+    <color name="dialog_progress_failure_bg_tint">#BBDEFB</color>
+    <color name="dialog_progress_failure_tint">#1565C0</color>
+    <color name="dialog_progress_files_act_btn">#C17900</color>
+    <color name="dialog_progress_files_bg_tint">#FFF59D</color>
+    <color name="dialog_progress_files_tint">#F9A825</color>
+    <color name="dialog_progress_finish_act_btn">#009624</color>
+    <color name="dialog_progress_finish_bg_tint">#DCEDC8</color>
+    <color name="dialog_progress_finish_tint">#00C853</color>
+    <color name="dialog_progress_indeterminate_act_btn">#005B4F</color>
+    <color name="dialog_progress_indeterminate_bg_tint">#B2DFDB</color>
+    <color name="dialog_progress_indeterminate_tint">#00897B</color>
+    <color name="dialog_progress_restore_act_btn">#790E8B</color>
+    <color name="dialog_progress_restore_bg_tint">#F3E5F5</color>
+    <color name="dialog_progress_restore_tint">#AB47BC</color>
+    <color name="dialog_progress_success_act_btn">#009624</color>
+    <color name="dialog_progress_success_bg_tint">#DCEDC8</color>
+    <color name="dialog_progress_success_tint">#00C853</color>
+
     <color name="item_background">#FFFFFF</color>
     <color name="item_background_dark">#FFFFFF</color>
-    <color name="text_color_secondary">#484C4F</color>
-    <color name="text_color_thirdly">#9DA0A2</color>
-    <color name="divider">#f2f3f5</color>
-    <color name="drawer_menu_item_text_color">#484C4F</color>
-    <color name="drawer_menu_group_text_color">#999999</color>
-    <color name="tab_indicator">@android:color/white</color>
-    <color name="tab_text">#a0ffffff</color>
-    <color name="toolbar">@android:color/white</color>
-    <color name="toolbar_disabled">#77e0e0e0</color>
-    <color name="console_debug">#cc000000</color>
-    <color name="console_verbose">#dfc0c0c0</color>
-    <color name="market_button_selected">#e14123</color>
-    <color name="market_button_unselected">#939393</color>
+
+    <color name="divider">#F2F3F5</color>
+    <color name="divider_functions_keyboard">#F0F0F0</color>
+    <color name="divider_app_settings_list">#F3F5F9</color>
+
+    <color name="about_app_function_buttons">#414141</color>
+    <color name="about_app_version_info">@color/about_app_function_buttons</color>
+    <color name="about_app_svg_view_trace_color">#93BF38</color>
+    <color name="about_app_dev_info_dialog_background">#DEECEFF1</color>
     <color name="github_avatar_border">#261B1F24</color>
     <color name="github_color_fg_default">#24292F</color>
     <color name="github_color_fg_muted">#57606A</color>
     <color name="tint_1st_developer_identifier">#2B7A85</color>
     <color name="tint_2nd_developer_identifier">#CC7A34</color>
-    <color name="title_material_toolbar">#ffffff</color>
 
-    <color name="dialog_button_default">#03A9F4</color>
-    <color name="dialog_button_caution">#FF3D00</color>
-    <color name="dialog_button_warn">#F57C00</color>
-    <color name="dialog_button_attraction">#7B1FA2</color>
-    <color name="dialog_button_hint">#0DA798</color>
-    <color name="dialog_button_reset">#A1887F</color>
-    <color name="dialog_button_unavailable">#BDBDBD</color>
-    <color name="dialog_button_finish">#009624</color>
-    <color name="dialog_button_success">@color/dialog_button_finish</color>
-    <color name="dialog_button_error">#003C8F</color>
-    <color name="dialog_button_failure">@color/dialog_button_error</color>
+    <color name="drawer_menu_group_text_color">#999999</color>
+    <color name="drawer_menu_item_text_color">#484C4F</color>
 
-    <color name="dialog_progress_download_tint">#FF6F00</color>
-    <color name="dialog_progress_download_bg_tint">#FFECB3</color>
-    <color name="dialog_progress_download_act_btn">#C43E00</color>
-    <color name="dialog_progress_files_tint">#F9A825</color>
-    <color name="dialog_progress_files_bg_tint">#FFF59D</color>
-    <color name="dialog_progress_files_act_btn">#C17900</color>
-    <color name="dialog_progress_backup_tint">#455A64</color>
-    <color name="dialog_progress_backup_bg_tint">#ECEFF1</color>
-    <color name="dialog_progress_backup_act_btn">#1C313A</color>
-    <color name="dialog_progress_restore_tint">#AB47BC</color>
-    <color name="dialog_progress_restore_bg_tint">#F3E5F5</color>
-    <color name="dialog_progress_restore_act_btn">#790E8B</color>
-    <color name="dialog_progress_indeterminate_tint">#00897B</color>
-    <color name="dialog_progress_indeterminate_bg_tint">#B2DFDB</color>
-    <color name="dialog_progress_indeterminate_act_btn">#005B4F</color>
-    <color name="dialog_progress_finish_tint">#00C853</color>
-    <color name="dialog_progress_finish_bg_tint">#DCEDC8</color>
-    <color name="dialog_progress_finish_act_btn">#009624</color>
-    <color name="dialog_progress_success_tint">#00C853</color>
-    <color name="dialog_progress_success_bg_tint">#DCEDC8</color>
-    <color name="dialog_progress_success_act_btn">#009624</color>
-    <color name="dialog_progress_error_tint">#1565C0</color>
-    <color name="dialog_progress_error_bg_tint">#BBDEFB</color>
-    <color name="dialog_progress_error_act_btn">#003C8F</color>
-    <color name="dialog_progress_failure_tint">#1565C0</color>
-    <color name="dialog_progress_failure_bg_tint">#BBDEFB</color>
-    <color name="dialog_progress_failure_act_btn">#003C8F</color>
+    <color name="market_button_selected">#E14123</color>
+    <color name="market_button_unselected">#939393</color>
+
+    <color name="tab_indicator">#A0FFFFFF</color>
+    <color name="tab_text">#A0FFFFFF</color>
+    <color name="tab_selected_text">#FFFFFF</color>
+
+    <color name="toolbar_text">@color/night_day</color>
+    <color name="toolbar_disabled">#6EE0E0E0</color>
+
+    <color name="prefTextColorPrimary">#282C2F</color>
+    <color name="prefTextColorSecondary">#9DA0A2</color>
+
+    <color name="project_toolbar_button">#606366</color>
+    <color name="project_toolbar_title">#606366</color>
+
+    <color name="layout_window_bubble_bg">#DEF5F5F5</color>
+    <color name="layout_bounds_view_shadow">#5E212121</color>
+    <color name="layout_hierarchy_window_node_bounds">#D32F2F</color>
+    <color name="layout_node_info_view_decoration_line">#1B212121</color>
+    <color name="layout_hierarchy_window_background">#CCE2F1F8</color>
+    <color name="layout_hierarchy_window_clicked_background">#BF90A4AE</color>
+
+    <color name="sliding_up_panel_shadow_color">#99444444</color>
+    <color name="color_selector_item_text">#DE111214</color>
+    <color name="floating_action_menu_label_bg">#CCE0E0E0</color>
+    <color name="navigation_bar_background">@color/window_background</color>
+    <color name="navigation_bar_background_before_android_o">#212121</color>
+    <color name="swipe_refresh_background">#F8F8F8</color>
+    <color name="circular_menu_icon_red">#ef5350</color>
+    <color name="circular_menu_icon_white">#ffffff</color>
+    <color name="drawer_item_subtitle_color">#616161</color>
 
 </resources>

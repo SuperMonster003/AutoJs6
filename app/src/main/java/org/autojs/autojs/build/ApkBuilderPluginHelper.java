@@ -4,11 +4,11 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
-import com.stardust.pio.UncheckedIOException;
+import org.autojs.autojs.pio.UncheckedIOException;
 
 import org.autojs.autojs6.BuildConfig;
 
-import com.stardust.util.DeveloperUtils;
+import org.autojs.autojs.util.DeveloperUtils;
 
 import java.io.IOException;
 import java.io.InputStream;

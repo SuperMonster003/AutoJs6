@@ -1,8 +1,7 @@
 package org.autojs.autojs.ui.viewmodel;
 
+import android.content.Context;
 import android.content.SharedPreferences;
-
-import com.stardust.app.GlobalAppContext;
 
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.model.explorer.ExplorerPage;
@@ -17,74 +16,21 @@ import java.util.Comparator;
  */
 public class ExplorerItemList {
 
-    public static class SortConfig {
-
-        private static final String CLASS_NAME = "org.autojs.autojs.ui.viewmodel.ScriptList.SortConfig";
-
-        private int mDirSortType = SORT_TYPE_NAME;
-        private boolean mDirSortedAscending;
-        private boolean mFileSortedAscending;
-        private int mFileSortType = SORT_TYPE_NAME;
-
-        public int getDirSortType() {
-            return mDirSortType;
-        }
-
-        public void setDirSortType(int dirSortType) {
-            mDirSortType = dirSortType;
-        }
-
-        public boolean isDirSortedAscending() {
-            return mDirSortedAscending;
-        }
-
-        public void setDirSortedAscending(boolean dirSortedAscending) {
-            mDirSortedAscending = dirSortedAscending;
-        }
-
-        public boolean isFileSortedAscending() {
-            return mFileSortedAscending;
-        }
-
-        public void setFileSortedAscending(boolean fileSortedAscending) {
-            mFileSortedAscending = fileSortedAscending;
-        }
-
-        public int getFileSortType() {
-            return mFileSortType;
-        }
-
-        public void setFileSortType(int fileSortType) {
-            mFileSortType = fileSortType;
-        }
-
-        public void saveInto(SharedPreferences preferences) {
-            preferences.edit()
-                    .putInt(CLASS_NAME + "." + "file_sort_type", mFileSortType)
-                    .putInt(CLASS_NAME + "." + "dir_sort_type", mDirSortType)
-                    .putBoolean(CLASS_NAME + "." + "file_ascending", mFileSortedAscending)
-                    .putBoolean(CLASS_NAME + "." + "dir_ascending", mDirSortedAscending)
-                    .apply();
-        }
-
-        public static SortConfig from(SharedPreferences preferences) {
-            SortConfig config = new SortConfig();
-            config.setDirSortedAscending(preferences.getBoolean(CLASS_NAME + "." + "dir_ascending", false));
-            config.setFileSortedAscending(preferences.getBoolean(CLASS_NAME + "." + "file_ascending", false));
-            config.setDirSortType(preferences.getInt(CLASS_NAME + "." + "dir_sort_type", SORT_TYPE_NAME));
-            config.setFileSortType(preferences.getInt(CLASS_NAME + "." + "file_sort_type", SORT_TYPE_NAME));
-            return config;
-        }
-    }
-
     public static final int SORT_TYPE_NAME = 0x10;
     public static final int SORT_TYPE_TYPE = 0x20;
     public static final int SORT_TYPE_SIZE = 0x30;
     public static final int SORT_TYPE_DATE = 0x40;
 
-    private SortConfig mSortConfig = new SortConfig();
+    private final Context mContext;
+
+    private SortConfig mSortConfig;
     private final ArrayList<ExplorerItem> mItems = new ArrayList<>();
     private final ArrayList<ExplorerPage> mItemGroups = new ArrayList<>();
+
+    public ExplorerItemList(Context context) {
+        mContext = context;
+        mSortConfig = new SortConfig();
+    }
 
     public boolean isDirSortedAscending() {
         return mSortConfig.mDirSortedAscending;
@@ -121,7 +67,7 @@ public class ExplorerItemList {
             case SORT_TYPE_TYPE:
                 return ExplorerSorter.TYPE;
         }
-        throw new IllegalArgumentException(GlobalAppContext.getString(R.string.error_illegal_argument, "sortType", sortType));
+        throw new IllegalArgumentException(mContext.getString(R.string.error_illegal_argument, "sortType", sortType));
     }
 
     public int groupCount() {
@@ -222,8 +168,69 @@ public class ExplorerItemList {
     }
 
     public ExplorerItemList cloneConfig() {
-        ExplorerItemList list = new ExplorerItemList();
+        ExplorerItemList list = new ExplorerItemList(mContext);
         list.mSortConfig = mSortConfig;
         return list;
     }
+
+    public static class SortConfig {
+
+        private static final String CLASS_NAME = "org.autojs.autojs.ui.viewmodel.ScriptList.SortConfig";
+
+        private int mDirSortType = SORT_TYPE_NAME;
+        private boolean mDirSortedAscending;
+        private boolean mFileSortedAscending;
+        private int mFileSortType = SORT_TYPE_NAME;
+
+        public int getDirSortType() {
+            return mDirSortType;
+        }
+
+        public void setDirSortType(int dirSortType) {
+            mDirSortType = dirSortType;
+        }
+
+        public boolean isDirSortedAscending() {
+            return mDirSortedAscending;
+        }
+
+        public void setDirSortedAscending(boolean dirSortedAscending) {
+            mDirSortedAscending = dirSortedAscending;
+        }
+
+        public boolean isFileSortedAscending() {
+            return mFileSortedAscending;
+        }
+
+        public void setFileSortedAscending(boolean fileSortedAscending) {
+            mFileSortedAscending = fileSortedAscending;
+        }
+
+        public int getFileSortType() {
+            return mFileSortType;
+        }
+
+        public void setFileSortType(int fileSortType) {
+            mFileSortType = fileSortType;
+        }
+
+        public void saveInto(SharedPreferences preferences) {
+            preferences.edit()
+                    .putInt(CLASS_NAME + "." + "file_sort_type", mFileSortType)
+                    .putInt(CLASS_NAME + "." + "dir_sort_type", mDirSortType)
+                    .putBoolean(CLASS_NAME + "." + "file_ascending", mFileSortedAscending)
+                    .putBoolean(CLASS_NAME + "." + "dir_ascending", mDirSortedAscending)
+                    .apply();
+        }
+
+        public static SortConfig from(SharedPreferences preferences) {
+            SortConfig config = new SortConfig();
+            config.setDirSortedAscending(preferences.getBoolean(CLASS_NAME + "." + "dir_ascending", false));
+            config.setFileSortedAscending(preferences.getBoolean(CLASS_NAME + "." + "file_ascending", false));
+            config.setDirSortType(preferences.getInt(CLASS_NAME + "." + "dir_sort_type", SORT_TYPE_NAME));
+            config.setFileSortType(preferences.getInt(CLASS_NAME + "." + "file_sort_type", SORT_TYPE_NAME));
+            return config;
+        }
+    }
+
 }

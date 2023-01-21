@@ -2,17 +2,19 @@ package org.autojs.autojs.ui.floating;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.preference.PreferenceManager;
+import android.graphics.PixelFormat;
 import android.view.Gravity;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.preference.PreferenceManager;
+
 import com.stardust.enhancedfloaty.FloatyService;
 import com.stardust.enhancedfloaty.FloatyWindow;
 import com.stardust.enhancedfloaty.WindowBridge;
-import com.stardust.util.ScreenMetrics;
 
+import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.ui.floating.gesture.BounceDragGesture;
 
 public class CircularMenuWindow extends FloatyWindow {
@@ -22,13 +24,13 @@ public class CircularMenuWindow extends FloatyWindow {
 
     protected CircularMenuFloaty mFloaty;
     protected CircularActionMenu mCircularActionMenu;
-    protected View mCircularActionView;
+    protected CircularActionView mCircularActionView;
     protected BounceDragGesture mDragGesture;
     protected OrientationAwareWindowBridge mActionViewWindowBridge;
     protected WindowBridge mMenuWindowBridge;
     protected WindowManager.LayoutParams mActionViewWindowLayoutParams;
     protected WindowManager.LayoutParams mMenuWindowLayoutParams;
-    protected View.OnClickListener mActionViewOnClickListener;
+    protected CircularActionView.OnClickListener mActionViewOnClickListener;
     protected float mKeepToSideHiddenWidthRadio;
     protected float mActiveAlpha = 1.0F;
     protected float mInactiveAlpha = 0.4F;
@@ -104,9 +106,12 @@ public class CircularMenuWindow extends FloatyWindow {
 
     private WindowManager.LayoutParams createWindowLayoutParams() {
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
-                FloatyWindowManger.getWindowType(), 520, -3);
-        layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                FloatyWindowManger.getWindowType(),
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+        layoutParams.gravity = Gravity.START | Gravity.TOP;
         return layoutParams;
     }
 
@@ -117,12 +122,10 @@ public class CircularMenuWindow extends FloatyWindow {
             } else {
                 expand();
             }
-
         });
         if (mActionViewOnClickListener != null) {
             mDragGesture.setOnDraggedViewClickListener(mActionViewOnClickListener);
         }
-
         mCircularActionMenu.addOnStateChangeListener(new CircularActionMenu.OnStateChangeListenerAdapter() {
             public void onCollapsed(CircularActionMenu menu) {
                 mCircularActionView.setAlpha(mInactiveAlpha);
@@ -142,29 +145,27 @@ public class CircularMenuWindow extends FloatyWindow {
         }
     }
 
-    public void expand() {
-        mDragGesture.setEnabled(false);
-        setMenuPositionAtActionView();
-        if (mActionViewWindowBridge.getX() > mActionViewWindowBridge.getScreenWidth() / 2) {
-            mCircularActionMenu.expand(3);
-        } else {
-            mCircularActionMenu.expand(5);
-        }
-
-    }
-
     public void setActiveAlpha(float activeAlpha) {
         mActiveAlpha = activeAlpha;
         if (mDragGesture != null) {
             mDragGesture.setPressedAlpha(activeAlpha);
         }
-
     }
 
     public void setInactiveAlpha(float inactiveAlpha) {
         mInactiveAlpha = inactiveAlpha;
         if (mDragGesture != null) {
             mDragGesture.setUnpressedAlpha(mInactiveAlpha);
+        }
+    }
+
+    public void expand() {
+        mDragGesture.setEnabled(false);
+        setMenuPositionAtActionView();
+        if (mActionViewWindowBridge.getX() > mActionViewWindowBridge.getScreenWidth() / 2) {
+            mCircularActionMenu.expand(Gravity.START);
+        } else {
+            mCircularActionMenu.expand(Gravity.END);
         }
 
     }
@@ -181,15 +182,23 @@ public class CircularMenuWindow extends FloatyWindow {
     }
 
     private void setMenuPositionAtActionView() {
-        int y = mActionViewWindowBridge.getY() - mCircularActionMenu.getMeasuredHeight() / 2 + mCircularActionView.getMeasuredHeight() / 2;
-        int x;
-        if (mActionViewWindowBridge.getX() > mActionViewWindowBridge.getScreenWidth() / 2) {
-            x = mActionViewWindowBridge.getX() - mCircularActionMenu.getExpandedWidth() + mCircularActionView.getMeasuredWidth() / 2;
-        } else {
-            x = mActionViewWindowBridge.getX() - mCircularActionMenu.getExpandedWidth() + mCircularActionView.getMeasuredWidth();
-        }
+        int measuredMenuHeightHalf = mCircularActionMenu.getMeasuredHeight() / 2;
+        int measuredViewHeightHalf = mCircularActionView.getMeasuredHeight() / 2;
+        int measuredViewWidth = mCircularActionView.getMeasuredWidth();
+        int measuredViewWidthHalf = measuredViewWidth / 2;
+        int expandedMenuWidth = mCircularActionMenu.getExpandedWidth();
+        int bridgeScreenWidthHalf = mActionViewWindowBridge.getScreenWidth() / 2;
+        int bridgeY = mActionViewWindowBridge.getY();
+        int bridgeX = mActionViewWindowBridge.getX();
 
-        mMenuWindowBridge.updatePosition(x, y);
+        int x = bridgeX > bridgeScreenWidthHalf
+                ? bridgeX - expandedMenuWidth + measuredViewWidthHalf
+                : bridgeX - expandedMenuWidth + measuredViewWidth;
+        int y = bridgeY - measuredMenuHeightHalf + measuredViewHeightHalf;
+
+        if (mCircularActionMenu.isAttachedToWindow()) {
+            mMenuWindowBridge.updatePosition(x, y);
+        }
     }
 
     private void inflateWindowViews(FloatyService service) {
@@ -212,9 +221,16 @@ public class CircularMenuWindow extends FloatyWindow {
                 .apply();
         try {
             mOrientationEventListener.disable();
-            getWindowManager().removeView(mCircularActionMenu);
-            getWindowManager().removeView(mCircularActionView);
             FloatyService.removeWindow(this);
+            FloatyWindowManger.clearCircularMenu();
+            if (mCircularActionMenu.isAttachedToWindow()) {
+                getWindowManager().removeView(mCircularActionMenu);
+            }
+            mCircularActionMenu.removeFromWindow(getWindowManager());
+            mCircularActionView.removeFromWindow(getWindowManager());
+            if (mCircularActionView.isAttachedToWindow()) {
+                getWindowManager().removeView(mCircularActionView);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
