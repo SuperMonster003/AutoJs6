@@ -1,47 +1,45 @@
 package org.autojs.autojs.ui.project;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.material.textfield.TextInputLayout;
-import com.stardust.autojs.project.ProjectConfig;
-import com.stardust.util.IntentUtil;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.autojs.autojs.Pref;
-import org.autojs.autojs6.R;
-import org.autojs.autojs.autojs.build.ApkBuilder;
+import org.autojs.autojs.build.ApkBuilder;
 import org.autojs.autojs.build.ApkBuilderPluginHelper;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.script.ScriptFile;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
-import org.autojs.autojs.tool.BitmapTool;
+import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
-import org.autojs.autojs.ui.shortcut.ShortcutIconSelectActivity;
-import org.autojs.autojs.ui.shortcut.ShortcutIconSelectActivity_;
+import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
+import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity_;
+import org.autojs.autojs.util.BitmapUtils;
+import org.autojs.autojs.util.EnvironmentUtils;
+import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs.util.WorkingDirectoryUtils;
+import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import io.reactivex.Observable;
@@ -100,7 +98,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @AfterViews
     void setupViews() {
-        setToolbarAsBack(getString(R.string.text_build_apk));
+        setToolbarAsBack(R.string.text_build_apk);
         mSource = getIntent().getStringExtra(EXTRA_SOURCE);
         if (mSource != null) {
             setupWithSourceFile(new ScriptFile(mSource));
@@ -108,25 +106,28 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         checkApkBuilderPlugin();
     }
 
-    private void checkApkBuilderPlugin() {
+    private boolean checkApkBuilderPlugin() {
         if (!ApkBuilderPluginHelper.isPluginAvailable(this) || ApkBuilderPluginHelper.getPluginVersion(this) < 0) {
-            showPluginDownloadDialog(R.string.no_apk_builder_plugin);
+            showPluginDownloadDialog();
+            return false;
         }
+        return true;
     }
 
-    private void showPluginDownloadDialog(int msgRes) {
-        new ThemeColorMaterialDialogBuilder(this)
-                .content(msgRes)
+    private void showPluginDownloadDialog() {
+        new MaterialDialog.Builder(this)
+                .title(R.string.text_prompt)
+                .content(R.string.no_apk_builder_plugin)
                 .positiveText(R.string.text_download)
                 .negativeText(R.string.text_cancel)
                 .onPositive((dialog, which) -> downloadPlugin())
-                .onNegative((dialog, which) -> finish())
+                .dismissListener(dialog -> finish())
                 .show();
 
     }
 
     private void downloadPlugin() {
-        IntentUtil.browse(this, "https://raw.githubusercontent.com/SuperMonster002/Hello-Sockpuppet/master/" +
+        IntentUtils.browse(this, "https://raw.githubusercontent.com/SuperMonster002/Hello-Sockpuppet/master/" +
                 "%5B" + "auto.js" + "%5D" +
                 "%5B" + "apk_builder_plugin_4.1.1_alpha2" + "%5D" +
                 "%5B" + "arm-v7a" + "%5D" +
@@ -136,7 +137,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private void setupWithSourceFile(ScriptFile file) {
         String dir = file.getParent();
         if (dir != null && dir.startsWith(getFilesDir().getPath())) {
-            dir = Pref.getScriptDirPath();
+            dir = WorkingDirectoryUtils.getPath();
         }
         mOutputPath.setText(dir);
         mAppName.setText(file.getSimplifiedName());
@@ -147,7 +148,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-
     }
 
     @Click(R.id.select_source)
@@ -155,8 +155,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         String initialDir = new File(mSourcePath.getText().toString()).getParent();
         new FileChooserDialogBuilder(this)
                 .title(R.string.text_source_file_path)
-                .dir(Environment.getExternalStorageDirectory().getPath(),
-                        initialDir == null ? Pref.getScriptDirPath() : initialDir)
+                .dir(EnvironmentUtils.getExternalStoragePath(),
+                        initialDir == null ? WorkingDirectoryUtils.getPath() : initialDir)
                 .singleChoice(this::setSource)
                 .show();
     }
@@ -177,8 +177,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @Click(R.id.select_output)
     void selectOutputDirPath() {
-        String initialDir = new File(mOutputPath.getText().toString()).exists() ?
-                mOutputPath.getText().toString() : Pref.getScriptDirPath();
+        String initialDir = new File(mOutputPath.getText().toString()).exists()
+                ? mOutputPath.getText().toString()
+                : WorkingDirectoryUtils.getPath();
         new FileChooserDialogBuilder(this)
                 .title(R.string.text_output_apk_path)
                 .dir(initialDir)
@@ -189,14 +190,14 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @Click(R.id.icon)
     void selectIcon() {
-        ShortcutIconSelectActivity_.intent(this)
+        AppsIconSelectActivity_.intent(this)
                 .startForResult(REQUEST_CODE);
     }
 
     @Click(R.id.fab)
     void buildApk() {
         if (!ApkBuilderPluginHelper.isPluginAvailable(this)) {
-            Toast.makeText(this, R.string.text_apk_builder_plugin_unavailable, Toast.LENGTH_SHORT).show();
+            ViewUtils.showToast(this, R.string.text_apk_builder_plugin_unavailable);
             return;
         }
         if (!checkInputs()) {
@@ -268,9 +269,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .setPackageName(packageName)
                 .setVersionCode(versionCode)
                 .setVersionName(versionName)
-                .setIcon(mIsDefaultIcon ? null : () ->
-                        BitmapTool.drawableToBitmap(mIcon.getDrawable())
-                );
+                .setIcon(mIsDefaultIcon ? null : () -> BitmapUtils.drawableToBitmap(mIcon.getDrawable()));
     }
 
     private ApkBuilder callApkBuilder(File tmpDir, File outApk, ApkBuilder.AppConfig appConfig) throws Exception {
@@ -297,8 +296,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             mProgressDialog.dismiss();
             mProgressDialog = null;
         }
-        Toast.makeText(this, getString(R.string.text_build_failed) + "\n" + error.getMessage(), Toast.LENGTH_SHORT).show();
-        Log.e(LOG_TAG, "Build failed", error);
+        String message = getString(R.string.text_failed_to_build) + "\n" + error.getMessage();
+        ViewUtils.showToast(this, message, true);
+        Log.e(LOG_TAG, "Failed to build", error);
     }
 
     private void onBuildSuccessful(File outApk) {
@@ -309,9 +309,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .content(getString(R.string.format_build_successfully, outApk.getPath()))
                 .positiveText(R.string.text_install)
                 .negativeText(R.string.text_cancel)
-                .onPositive((dialog, which) ->
-                        IntentUtil.installApkOrToast(BuildActivity.this, outApk.getPath(), AppFileProvider.AUTHORITY)
-                )
+                .onPositive((dialog, which) -> IntentUtils.installApkOrToast(BuildActivity.this, outApk.getPath(), AppFileProvider.AUTHORITY))
                 .show();
 
     }
@@ -338,12 +336,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mProgressDialog.setContent(R.string.apk_builder_clean);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint({"CheckResult", "MissingSuperCall"})
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            //noinspection ResultOfMethodCallIgnored
-            ShortcutIconSelectActivity.getBitmapFromIntent(getApplicationContext(), data)
+            AppsIconSelectActivity.getBitmapFromIntent(getApplicationContext(), data)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(bitmap -> {
@@ -351,6 +349,20 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                         mIsDefaultIcon = false;
                     }, Throwable::printStackTrace);
         }
+    }
+
+    public static class IntentBuilder {
+
+        private final BuildActivity_.IntentBuilder_ mIntentBuilder;
+
+        public IntentBuilder(Context context) {
+            mIntentBuilder = BuildActivity_.intent(context);
+        }
+
+        public BuildActivity_.IntentBuilder_ extra(String extraSource) {
+            return mIntentBuilder.extra(BuildActivity.EXTRA_SOURCE, extraSource);
+        }
+
     }
 
 }

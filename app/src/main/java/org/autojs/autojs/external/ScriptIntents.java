@@ -2,17 +2,16 @@ package org.autojs.autojs.external;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 
-import com.stardust.autojs.execution.ExecutionConfig;
-import com.stardust.autojs.script.JavaScriptFileSource;
-import com.stardust.autojs.script.ScriptSource;
-import com.stardust.autojs.script.SequenceScriptSource;
-import com.stardust.autojs.script.StringScriptSource;
-
-import org.autojs.autojs.Pref;
-import org.autojs.autojs.autojs.AutoJs;
+import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.model.script.PathChecker;
+import org.autojs.autojs.script.JavaScriptFileSource;
+import org.autojs.autojs.script.ScriptSource;
+import org.autojs.autojs.script.SequenceScriptSource;
+import org.autojs.autojs.script.StringScriptSource;
+import org.autojs.autojs.util.WorkingDirectoryUtils;
+import org.json.JSONObject;
 
 import java.io.File;
 
@@ -27,8 +26,8 @@ public class ScriptIntents {
     public static final String EXTRA_KEY_LOOP_INTERVAL = "interval";
     public static final String EXTRA_KEY_DELAY = "delay";
 
-    public static boolean isTaskerBundleValid(Bundle bundle) {
-        return bundle.containsKey(ScriptIntents.EXTRA_KEY_PATH) || bundle.containsKey(EXTRA_KEY_PRE_EXECUTE_SCRIPT);
+    public static boolean isTaskerJsonObjectValid(JSONObject json) {
+        return json.has(ScriptIntents.EXTRA_KEY_PATH) || json.has(EXTRA_KEY_PRE_EXECUTE_SCRIPT);
     }
 
     public static boolean handleIntent(Context context, Intent intent) {
@@ -52,9 +51,12 @@ public class ScriptIntents {
             } else {
                 source = fileScriptSource;
             }
-            config.setWorkingDirectory(new File(path).getParent());
+            String workingDirectory = new File(path).getParent();
+            if (workingDirectory != null) {
+                config.setWorkingDirectory(workingDirectory);
+            }
         } else {
-            config.setWorkingDirectory(Pref.getScriptDirPath());
+            config.setWorkingDirectory(WorkingDirectoryUtils.getPath());
         }
         if (source == null) {
             return false;

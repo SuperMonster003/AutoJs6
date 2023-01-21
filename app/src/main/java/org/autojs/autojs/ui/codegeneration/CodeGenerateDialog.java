@@ -1,29 +1,31 @@
 package org.autojs.autojs.ui.codegeneration;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bignerdranch.expandablerecyclerview.ChildViewHolder;
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 import com.bignerdranch.expandablerecyclerview.model.Parent;
-import com.stardust.app.DialogUtils;
-import com.stardust.autojs.codegeneration.CodeGenerator;
-import org.autojs.autojs6.R;
+
+import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
+import org.autojs.autojs.app.DialogUtils;
+import org.autojs.autojs.codegeneration.CodeGenerator;
+import org.autojs.autojs.core.accessibility.NodeInfo;
+import org.autojs.autojs.theme.util.ListBuilder;
 import org.autojs.autojs.ui.widget.CheckBoxCompat;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
-import com.stardust.theme.util.ListBuilder;
-import com.stardust.util.ClipboardUtil;
-import com.stardust.view.accessibility.NodeInfo;
+import org.autojs.autojs.util.ClipboardUtils;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +37,7 @@ import butterknife.OnCheckedChanged;
 /**
  * Created by Stardust on 2017/11/6.
  */
-public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
-
+public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
     private final List<OptionGroup> mOptionGroups = new ListBuilder<OptionGroup>()
             .add(new OptionGroup(R.string.text_options, false)
                     .addOption(R.string.text_using_id_selector, true)
@@ -53,39 +54,52 @@ public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
                     .addOption(R.string.text_act_by_set_text)
                     .addOption(R.string.text_act_by_scroll_forward)
                     .addOption(R.string.text_act_by_scroll_backward))
-            .list();
+            .build();
 
     @BindView(R.id.options)
     RecyclerView mOptionsRecyclerView;
 
+    private final Context mServiceContext;
     private final NodeInfo mRootNode;
     private final NodeInfo mTargetNode;
     private Adapter mAdapter;
 
-    public CodeGenerateDialog(@NonNull Context context, NodeInfo rootNode, NodeInfo targetNode) {
+    public CodeGenerateDialog(@NonNull Context serviceContext, @NonNull Context context, NodeInfo rootNode, NodeInfo targetNode) {
         super(context);
+
         mRootNode = rootNode;
         mTargetNode = targetNode;
-        positiveText(R.string.text_generate);
+        mServiceContext = serviceContext;
+
         negativeText(R.string.text_cancel);
+        positiveText(R.string.text_generate);
         onPositive(((dialog, which) -> generateCodeAndShow()));
+
         setupViews();
     }
 
     private void generateCodeAndShow() {
         String code = generateCode();
-        if (code == null) {
-            Toast.makeText(getContext(), R.string.text_generate_fail, Toast.LENGTH_SHORT).show();
-            return;
+        AppLevelThemeDialogBuilder builder = new AppLevelThemeDialogBuilder(mServiceContext);
+        if (code != null) {
+            DialogUtils.showDialog(builder
+                    .title(R.string.text_generated_code)
+                    .content(code)
+                    .negativeText(R.string.dialog_button_back)
+                    .positiveText(R.string.dialog_button_copy)
+                    .onPositive(((dialog, which) -> {
+                        ClipboardUtils.setClip(mServiceContext, code);
+                        ViewUtils.showToast(mServiceContext, R.string.text_already_copied_to_clip);
+                    }))
+                    .build());
+        } else {
+            DialogUtils.showDialog(builder
+                    .title(R.string.text_prompt)
+                    .content(R.string.text_failed_to_generate)
+                    .positiveText(R.string.dialog_button_back)
+                    .build());
         }
-        DialogUtils.showDialog(new ThemeColorMaterialDialogBuilder(getContext())
-                .title(R.string.text_generated_code)
-                .content(code)
-                .positiveText(R.string.text_copy)
-                .onPositive(((dialog, which) -> ClipboardUtil.setClip(getContext(), code)))
-                .build());
     }
-
 
     private String generateCode() {
         CodeGenerator generator = new CodeGenerator(mRootNode, mTargetNode);
@@ -116,30 +130,28 @@ public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
 
     private int getSearchMode() {
         OptionGroup selectMode = getOptionGroup(R.string.text_select);
-        if (selectMode.getOption(R.string.text_select_by_find_one).checked) {
-            return CodeGenerator.FIND_ONE;
-        }
-        if (selectMode.getOption(R.string.text_select_by_until_find).checked) {
-            return CodeGenerator.UNTIL_FIND;
-        }
-        if (selectMode.getOption(R.string.text_select_by_wait_for).checked) {
-            return CodeGenerator.WAIT_FOR;
-        }
-        if (selectMode.getOption(R.string.text_select_by_exists).checked) {
-            return CodeGenerator.EXISTS;
+        if (!selectMode.getOption(R.string.text_select_by_find_one).checked) {
+            if (selectMode.getOption(R.string.text_select_by_until_find).checked) {
+                return CodeGenerator.UNTIL_FIND;
+            }
+            if (selectMode.getOption(R.string.text_select_by_wait_for).checked) {
+                return CodeGenerator.WAIT_FOR;
+            }
+            if (selectMode.getOption(R.string.text_select_by_exists).checked) {
+                return CodeGenerator.EXISTS;
+            }
         }
         return CodeGenerator.FIND_ONE;
     }
 
     private void setupViews() {
-        View view = View.inflate(context, R.layout.dialog_code_generate, null);
+        View view = View.inflate(mServiceContext, R.layout.dialog_code_generate, null);
         ButterKnife.bind(this, view);
         customView(view, false);
-        mOptionsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mOptionsRecyclerView.setLayoutManager(new LinearLayoutManager(mServiceContext));
         mAdapter = new Adapter(mOptionGroups);
         mOptionsRecyclerView.setAdapter(mAdapter);
     }
-
 
     private OptionGroup getOptionGroup(int title) {
         for (OptionGroup group : mOptionGroups) {
@@ -149,7 +161,6 @@ public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
         }
         throw new IllegalArgumentException();
     }
-
 
     private void uncheckOthers(int parentAdapterPosition, Option child) {
         boolean notify = false;
@@ -245,8 +256,7 @@ public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
         }
     }
 
-
-    private class OptionGroupViewHolder extends ParentViewHolder<OptionGroup, Option> {
+    private static class OptionGroupViewHolder extends ParentViewHolder<OptionGroup, Option> {
 
         TextView title;
         ImageView icon;
@@ -301,6 +311,7 @@ public class CodeGenerateDialog extends ThemeColorMaterialDialogBuilder {
             viewHolder.title.setText(option.titleRes);
             viewHolder.checkBox.setChecked(option.checked, false);
         }
+
     }
 
 }

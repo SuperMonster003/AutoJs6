@@ -1,0 +1,1 @@
+toast("Hello, Auto.js");

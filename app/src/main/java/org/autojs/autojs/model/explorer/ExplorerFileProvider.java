@@ -1,8 +1,7 @@
 package org.autojs.autojs.model.explorer;
 
-import com.stardust.pio.PFile;
-
-import com.stardust.autojs.core.pref.Pref;
+import org.autojs.autojs.pio.PFile;
+import org.autojs.autojs.pref.Pref;
 
 import java.io.FileFilter;
 
@@ -42,7 +41,7 @@ public class ExplorerFileProvider implements ExplorerProvider {
     }
 
     protected Observable<PFile> listFiles(PFile directory) {
-        boolean isShowHidden = Pref.INSTANCE.isHiddenFilesShow();
+        boolean isShowHidden = Pref.isHiddenFilesShow();
         return Observable.just(directory)
                 .flatMap(dir -> {
                     PFile[] files;

@@ -1,24 +1,24 @@
 package org.autojs.autojs.pluginclient;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.stardust.app.GlobalAppContext;
-import com.stardust.autojs.execution.ScriptExecution;
-import com.stardust.autojs.project.ProjectLauncher;
-import com.stardust.autojs.script.StringScriptSource;
-import com.stardust.io.Zip;
-import com.stardust.pio.PFiles;
-import com.stardust.util.MD5;
 
-import org.autojs.autojs.Pref;
-import org.autojs.autojs6.R;
-import org.autojs.autojs.autojs.AutoJs;
+import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.execution.ScriptExecution;
+import org.autojs.autojs.io.Zip;
 import org.autojs.autojs.model.script.Scripts;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.project.ProjectLauncher;
+import org.autojs.autojs.script.StringScriptSource;
+import org.autojs.autojs.util.MD5Utils;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs.util.WorkingDirectoryUtils;
+import org.autojs.autojs6.R;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -38,48 +38,18 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class DevPluginResponseHandler implements Handler {
 
+    private final Context mContext;
     public static final String TYPE_COMMAND = DevPluginService.TYPE_COMMAND;
     public static final String TYPE_BYTES_COMMAND = DevPluginService.TYPE_BYTES_COMMAND;
 
-    private final Router mRouter = new Router.RootRouter("type")
-            .handler(TYPE_COMMAND, new Router("command")
-                    .handler("run", data -> {
-                        String script = data.get("script").getAsString();
-                        String name = getName(data);
-                        String id = data.get("id").getAsString();
-                        runScript(id, name, script);
-                        return true;
-                    })
-                    .handler("stop", data -> {
-                        String id = data.get("id").getAsString();
-                        stopScript(id);
-                        return true;
-                    })
-                    .handler("save", data -> {
-                        String script = data.get("script").getAsString();
-                        String name = getName(data);
-                        saveScript(name, script);
-                        return true;
-                    })
-                    .handler("stopAll", data -> {
-                        AutoJs.getInstance().getScriptEngineService().stopAllAndToast();
-                        return true;
-                    }))
-            .handler(TYPE_BYTES_COMMAND, new Router("command")
-                    .handler("run_project", data -> {
-                        launchProject(data.get("dir").getAsString());
-                        return true;
-                    })
-                    .handler("save_project", data -> {
-                        saveProject(data.get("name").getAsString(), data.get("dir").getAsString());
-                        return true;
-                    }));
+    private final Router mRouter;
 
     private final HashMap<String, ScriptExecution> mScriptExecutions = new HashMap<>();
     private final File mCacheDir;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public DevPluginResponseHandler(File cacheDir) {
+    public DevPluginResponseHandler(Context context, File cacheDir) {
+        mContext = context;
         mCacheDir = cacheDir;
         if (cacheDir.exists()) {
             if (cacheDir.isDirectory()) {
@@ -89,6 +59,39 @@ public class DevPluginResponseHandler implements Handler {
                 cacheDir.mkdirs();
             }
         }
+        mRouter = new Router.RootRouter("type")
+                .handler(TYPE_COMMAND, new Router("command")
+                        .handler("run", data -> {
+                            String script = data.get("script").getAsString();
+                            String name = getName(data);
+                            String id = data.get("id").getAsString();
+                            runScript(mContext, id, name, script);
+                            return true;
+                        })
+                        .handler("stop", data -> {
+                            String id = data.get("id").getAsString();
+                            stopScript(id);
+                            return true;
+                        })
+                        .handler("save", data -> {
+                            String script = data.get("script").getAsString();
+                            String name = getName(data);
+                            saveScript(name, script);
+                            return true;
+                        })
+                        .handler("stopAll", data -> {
+                            AutoJs.getInstance().getScriptEngineService().stopAllAndToast();
+                            return true;
+                        }))
+                .handler(TYPE_BYTES_COMMAND, new Router("command")
+                        .handler("run_project", data -> {
+                            launchProject(data.get("dir").getAsString());
+                            return true;
+                        })
+                        .handler("save_project", data -> {
+                            saveProject(data.get("name").getAsString(), data.get("dir").getAsString());
+                            return true;
+                        }));
     }
 
     @Override
@@ -98,7 +101,7 @@ public class DevPluginResponseHandler implements Handler {
 
     public Observable<File> handleBytes(JsonObject data, JsonSocket.Bytes bytes) {
         String id = data.get("data").getAsJsonObject().get("id").getAsString();
-        String idMd5 = MD5.md5(id);
+        String idMd5 = MD5Utils.md5(id);
         return Observable
                 .fromCallable(() -> {
                     File dir = new File(mCacheDir, idMd5);
@@ -108,22 +111,23 @@ public class DevPluginResponseHandler implements Handler {
                 .subscribeOn(Schedulers.io());
     }
 
-    private void runScript(String viewId, String name, String script) {
+    private void runScript(Context mContext, String viewId, String name, String script) {
         if (TextUtils.isEmpty(name)) {
             name = "[" + viewId + "]";
         } else {
             name = PFiles.getNameWithoutExtension(name);
         }
-        mScriptExecutions.put(viewId, Scripts.INSTANCE.run(new StringScriptSource("[remote]" + name, script)));
+        StringScriptSource scriptSource = new StringScriptSource(name, script);
+        scriptSource.setPrefix(mContext.getString(R.string.text_remote) + "$");
+        mScriptExecutions.put(viewId, Scripts.run(mContext, scriptSource));
     }
 
     private void launchProject(String dir) {
         try {
-            new ProjectLauncher(dir)
-                    .launch(AutoJs.getInstance().getScriptEngineService());
+            new ProjectLauncher(dir).launch(AutoJs.getInstance().getScriptEngineService());
         } catch (Exception e) {
             e.printStackTrace();
-            GlobalAppContext.toast(R.string.text_invalid_project, Toast.LENGTH_LONG);
+            ViewUtils.showToast(mContext, R.string.text_invalid_project, true);
         }
     }
 
@@ -151,10 +155,10 @@ public class DevPluginResponseHandler implements Handler {
         if (!name.endsWith(".js")) {
             name = name + ".js";
         }
-        File file = new File(Pref.getScriptDirPath(), name);
+        File file = new File(WorkingDirectoryUtils.getPath(), name);
         PFiles.ensureDir(file.getPath());
         PFiles.write(file, script);
-        GlobalAppContext.toast(R.string.text_script_save_successfully, Toast.LENGTH_LONG);
+        ViewUtils.showToast(mContext, R.string.text_script_save_successfully, true);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -165,16 +169,16 @@ public class DevPluginResponseHandler implements Handler {
         }
         name = PFiles.getNameWithoutExtension(name);
 
-        File toDir = new File(Pref.getScriptDirPath(), name);
+        File toDir = new File(WorkingDirectoryUtils.getPath(), name);
         Callable<String> stringCallable = () -> {
             copyDir(new File(dir), toDir);
             return toDir.getPath();
         };
 
-        Consumer<String> stringConsumer = dest -> GlobalAppContext
-                .toast(R.string.text_project_save_success + "\n" + dest, Toast.LENGTH_LONG);
-        Consumer<Throwable> throwableConsumer = err -> GlobalAppContext
-                .toast(R.string.text_project_save_error + "\n" + err.getMessage(), Toast.LENGTH_LONG);
+        Consumer<String> stringConsumer = dest -> ViewUtils
+                .showToast(mContext, mContext.getString(R.string.text_project_save_success) + "\n" + dest);
+        Consumer<Throwable> throwableConsumer = err -> ViewUtils
+                .showToast(mContext, mContext.getString(R.string.text_project_save_error) + "\n" + err.getMessage());
 
         Observable
                 .fromCallable(stringCallable)

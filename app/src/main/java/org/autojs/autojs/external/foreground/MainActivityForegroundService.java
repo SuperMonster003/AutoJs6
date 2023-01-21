@@ -1,17 +1,15 @@
 package org.autojs.autojs.external.foreground;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import com.stardust.autojs.util.ForegroundServiceCreator;
-import com.stardust.autojs.util.ForegroundServiceUtils;
-
-import org.autojs.autojs6.R;
+import org.autojs.autojs.tool.ForegroundServiceCreator;
 import org.autojs.autojs.ui.main.MainActivity_;
+import org.autojs.autojs.util.ForegroundServiceUtils;
+import org.autojs.autojs6.R;
 
 /**
  * Modified by SuperMonster003 as of Apr 10, 2022.
@@ -21,24 +19,16 @@ public class MainActivityForegroundService extends Service {
     private static final int NOTIFICATION_ID = 1;
     private static final Class<MainActivityForegroundService> sClassName = MainActivityForegroundService.class;
 
-    public static void start(Context context) {
-        ForegroundServiceUtils.startService(context, sClassName);
-    }
-
-    public static void stop(Context context) {
-        ForegroundServiceUtils.stopServiceIfNeeded(context, sClassName);
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        startForeground();
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        startForeground();
     }
 
     private void startForeground() {

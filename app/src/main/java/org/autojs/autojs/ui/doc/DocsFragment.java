@@ -1,25 +1,26 @@
 package org.autojs.autojs.ui.doc;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import android.text.TextUtils;
 import android.webkit.WebView;
 
-import org.autojs.autojs.Pref;
-import org.autojs.autojs6.R;
-import org.autojs.autojs.ui.main.QueryEvent;
-import org.autojs.autojs.ui.main.ViewPagerFragment;
+import androidx.annotation.Nullable;
 
-import com.stardust.util.BackPressedHandler;
-
-import org.autojs.autojs.ui.widget.EWebView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.ViewById;
+import org.autojs.autojs.event.BackPressedHandler;
+import org.autojs.autojs.ui.main.QueryEvent;
+import org.autojs.autojs.ui.main.ViewPagerFragment;
+import org.autojs.autojs.ui.widget.EWebView;
+import org.autojs.autojs.ui.widget.NestedWebView;
+import org.autojs.autojs.util.DocsUtils;
+import org.autojs.autojs.util.WebViewUtils;
+import org.autojs.autojs6.R;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -33,11 +34,11 @@ public class DocsFragment extends ViewPagerFragment implements BackPressedHandle
 
     @ViewById(R.id.eweb_view)
     EWebView mEWebView;
-    WebView mWebView;
+    NestedWebView mWebView;
 
     private String mIndexUrl;
     private String mPreviousQuery;
-
+    private Context mContext;
 
     public DocsFragment() {
         super(ROTATION_GONE);
@@ -48,28 +49,33 @@ public class DocsFragment extends ViewPagerFragment implements BackPressedHandle
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
+        mContext = requireContext();
     }
 
     @AfterViews
     void setUpViews() {
         mWebView = mEWebView.getWebView();
-        mEWebView.getSwipeRefreshLayout().setOnRefreshListener(() -> {
-            if (TextUtils.equals(mWebView.getUrl(), mIndexUrl)) {
-                loadUrl();
-            } else {
-                mEWebView.onRefresh();
-            }
-        });
+
+        WebViewUtils.adaptDarkMode(mContext, mWebView);
+
+        // mEWebView.getSwipeRefreshLayout().setOnRefreshListener(() -> {
+        //     if (TextUtils.equals(mWebView.getUrl(), mIndexUrl)) {
+        //         loadMainPage();
+        //     } else {
+        //         mEWebView.onRefresh();
+        //     }
+        // });
+
         Bundle savedWebViewState = getArguments().getBundle("savedWebViewState");
         if (savedWebViewState != null) {
             mWebView.restoreState(savedWebViewState);
         } else {
-            loadUrl();
+            loadMainPage();
         }
     }
 
-    private void loadUrl() {
-        mIndexUrl = getArguments().getString(ARGUMENT_URL, Pref.getDocumentationUrl() + "index.html");
+    public void loadMainPage() {
+        mIndexUrl = getArguments().getString(ARGUMENT_URL, DocsUtils.getUrl("index.html"));
         mWebView.loadUrl(mIndexUrl);
     }
 
@@ -123,4 +129,13 @@ public class DocsFragment extends ViewPagerFragment implements BackPressedHandle
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
+
+    // FIXME by SuperMonster003 on Aug 24, 2022.
+    //  ! In normal circumstances, getWebView() should not be nullable.
+    //  ! Exception occurs after switching night mode (any times over once).
+    @Nullable
+    public WebView getWebView() {
+        return mWebView;
+    }
+
 }

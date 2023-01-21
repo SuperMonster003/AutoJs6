@@ -18,10 +18,10 @@
         <LinearLayout
                 android:id="@+id/about_functions_button_licenses"
                 android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:background="?selectableItemBackground"
-                android:gravity="center"
+                android:gravity="top|center"
                 android:layout_marginHorizontal="3dp"
                 android:focusable="true"
                 android:clickable="true">
@@ -39,18 +39,20 @@
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="6dp"
                     android:text="@string/text_about_functions_licenses"
+                    android:maxLines="2"
+                    android:gravity="center"
                     android:textSize="13sp"
-                    android:textColor="#414141" />
+                    android:textColor="@color/about_app_function_buttons" />
 
         </LinearLayout>
 
         <LinearLayout
                 android:id="@+id/about_functions_button_update"
                 android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:background="?selectableItemBackground"
-                android:gravity="center"
+                android:gravity="top|center"
                 android:layout_marginHorizontal="3dp"
                 android:focusable="true"
                 android:clickable="true">
@@ -67,19 +69,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="6dp"
+                    android:maxLines="2"
+                    android:gravity="center"
                     android:text="@string/text_about_functions_update"
                     android:textSize="13sp"
-                    android:textColor="#414141" />
+                    android:textColor="@color/about_app_function_buttons" />
 
         </LinearLayout>
 
         <LinearLayout
                 android:id="@+id/about_functions_button_feedback"
                 android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:background="?selectableItemBackground"
-                android:gravity="center"
+                android:gravity="top|center"
                 android:layout_marginHorizontal="3dp"
                 android:focusable="true"
                 android:clickable="true">
@@ -96,9 +100,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="6dp"
+                    android:maxLines="2"
+                    android:gravity="center"
                     android:text="@string/text_about_functions_feedback"
                     android:textSize="13sp"
-                    android:textColor="#414141" />
+                    android:textColor="@color/about_app_function_buttons" />
 
         </LinearLayout>
 

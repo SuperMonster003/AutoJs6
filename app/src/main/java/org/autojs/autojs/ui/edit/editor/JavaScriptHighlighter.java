@@ -7,12 +7,10 @@ import android.util.TimingLogger;
 
 import androidx.annotation.NonNull;
 
-import com.stardust.autojs.rhino.TokenStream;
-import com.stardust.pio.UncheckedIOException;
-
+import org.autojs.autojs.pio.UncheckedIOException;
+import org.autojs.autojs.rhino.TokenStream;
 import org.autojs.autojs.ui.edit.theme.Theme;
 import org.autojs.autojs.ui.widget.SimpleTextWatcher;
-
 import org.mozilla.javascript.Token;
 
 import java.io.IOException;

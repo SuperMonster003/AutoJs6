@@ -1,12 +1,11 @@
 package org.autojs.autojs.model.explorer;
 
-import com.stardust.autojs.project.ProjectConfig;
-import com.stardust.pio.PFile;
+import org.autojs.autojs.pio.PFile;
+import org.autojs.autojs.project.ProjectConfig;
 
 import java.io.File;
 
 public class ExplorerProjectPage extends ExplorerDirPage {
-
     private final ProjectConfig mProjectConfig;
 
     public ExplorerProjectPage(PFile file, ExplorerPage parent, ProjectConfig projectConfig) {
@@ -32,4 +31,5 @@ public class ExplorerProjectPage extends ExplorerDirPage {
     public ExplorerFileItem rename(String newName) {
         return new ExplorerProjectPage(getFile().renameTo(newName), getParent(), mProjectConfig);
     }
+
 }

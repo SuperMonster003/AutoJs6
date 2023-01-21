@@ -1,53 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="32dp"
-    android:padding="5dp">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:padding="5dp">
 
     <org.autojs.autojs.ui.widget.LevelBeamView
-        android:id="@+id/dataItemLevelBeam"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"/>
+            android:id="@+id/dataItemLevelBeam"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp"
-        android:layout_toLeftOf="@+id/dataItemArrow"
-        android:layout_toRightOf="@+id/dataItemLevelBeam"
-        android:gravity="left|center_vertical"
-        android:orientation="vertical">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_toStartOf="@+id/dataItemArrow"
+            android:layout_toEndOf="@+id/dataItemLevelBeam"
+            android:gravity="start|center_vertical"
+            android:orientation="vertical">
 
         <TextView
-            android:id="@+id/dataItemName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            tools:text="TextView"/>
+                android:id="@+id/dataItemName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="@color/day_night"
+                android:textSize="16sp"
+                tools:text="TextView" />
 
         <TextView
-            android:id="@+id/dataItemInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textColor="@android:color/black"
-            android:textSize="12sp"
-            android:visibility="gone"/>
+                android:id="@+id/dataItemInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="@color/day_night"
+                android:textSize="12sp"
+                android:visibility="gone" />
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/dataItemArrow"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="10dp"
-        android:src="@drawable/arrow_down"/>
+            android:id="@+id/dataItemArrow"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/arrow_down"
+            android:alpha="0.8"
+            app:tint="@color/day_night" />
 
 </RelativeLayout>

@@ -1,10 +1,12 @@
 package org.autojs.autojs.ui.floating.gesture;
 
-import androidx.core.view.GestureDetectorCompat;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.core.view.GestureDetectorCompat;
 
 import com.stardust.enhancedfloaty.WindowBridge;
 
@@ -115,17 +117,23 @@ public class DragGesture extends GestureDetector.SimpleOnGestureListener {
     }
 
     @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        if (!mEnabled) {
-            return false;
+    public boolean onSingleTapUp(@NonNull MotionEvent e) {
+        if (mOnClickListener != null) {
+            mOnClickListener.onClick(mView);
         }
-        mWindowBridge.updatePosition(mInitialX + (int) ((e2.getRawX() - mInitialTouchX)),
-                mInitialY + (int) ((e2.getRawY() - mInitialTouchY)));
-        setAlphaPressed();
-        Log.d("DragGesture", "onScroll");
-        return false;
+        return super.onSingleTapUp(e);
     }
 
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        if (mEnabled) {
+            mWindowBridge.updatePosition(mInitialX + (int) ((e2.getRawX() - mInitialTouchX)),
+                    mInitialY + (int) ((e2.getRawY() - mInitialTouchY)));
+            setAlphaPressed();
+            Log.d("DragGesture", "onScroll");
+        }
+        return false;
+    }
 
     public void keepToEdge() {
         int x = mWindowBridge.getX();
@@ -136,14 +144,8 @@ public class DragGesture extends GestureDetector.SimpleOnGestureListener {
             mWindowBridge.updatePosition(-hiddenWidth, mWindowBridge.getY());
     }
 
-    @Override
-    public boolean onSingleTapConfirmed(MotionEvent e) {
-        if (mOnClickListener != null)
-            mOnClickListener.onClick(mView);
-        return super.onSingleTapConfirmed(e);
-    }
-
     public void setOnDraggedViewClickListener(View.OnClickListener onClickListener) {
         mOnClickListener = onClickListener;
     }
+
 }

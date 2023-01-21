@@ -3,7 +3,6 @@ package org.autojs.autojs.network.download;
 /**
  * Created by SuperMonster003 on May 30, 2022.
  */
-
 public class ProgressInfo {
     private long mRead = 0;
     private long mTotal;

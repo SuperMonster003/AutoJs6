@@ -1,11 +1,6 @@
 package org.autojs.autojs.ui.common;
 
 import android.content.Context;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +8,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.autojs.autojs6.R;
 
@@ -25,7 +25,6 @@ import butterknife.ButterKnife;
  * Created by Stardust on 2017/10/20.
  */
 public class OptionListView extends LinearLayout {
-
 
     public static class Builder {
 

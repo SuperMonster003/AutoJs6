@@ -7,10 +7,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.autojs.autojs6.R;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
 import org.autojs.autojs.ui.widget.PrefSwitch;
 import org.autojs.autojs.ui.widget.SwitchCompat;
+import org.autojs.autojs6.R;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
  */
 public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem> {
 
-    private static final long CLICK_TIMEOUT = 540;
+    public static final long CLICK_TIMEOUT = 540;
     @BindView(R.id.sw)
     PrefSwitch mSwitchCompat;
 
@@ -36,8 +36,8 @@ public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem>
     @BindView(R.id.title)
     TextView mTitle;
 
-    @BindView(R.id.notifications)
-    TextView mNotifications;
+    @BindView(R.id.subtitle)
+    TextView mSubtitle;
 
     private boolean mAntiShake;
     private long mLastClickMillis;
@@ -71,19 +71,14 @@ public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem>
         mDrawerMenuItem = item;
         mIcon.setImageResource(item.getIcon());
         mTitle.setText(item.getTitle());
+
+        String subtitle = item.getSubtitle();
+        mSubtitle.setText(subtitle);
+        mSubtitle.setVisibility(subtitle != null ? VISIBLE : GONE);
+
         mAntiShake = item.antiShake();
         setSwitch(item);
         setProgress(item.isProgress());
-        setNotifications(item.getNotificationCount());
-    }
-
-    private void setNotifications(int notificationCount) {
-        if (notificationCount == 0) {
-            mNotifications.setVisibility(View.GONE);
-        } else {
-            mNotifications.setVisibility(View.VISIBLE);
-            mNotifications.setText(String.valueOf(notificationCount));
-        }
     }
 
     private void setSwitch(DrawerMenuItem item) {
@@ -93,7 +88,7 @@ public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem>
         }
         mSwitchCompat.setVisibility(VISIBLE);
         int prefKey = item.getPrefKey();
-        if (prefKey == 0) {
+        if (prefKey == DrawerMenuItem.DEFAULT_PREFERENCE_KEY) {
             mSwitchCompat.setChecked(item.isChecked(), false);
             mSwitchCompat.setPrefKey(null);
         } else {
@@ -104,7 +99,6 @@ public class DrawerMenuItemViewHolder extends BindableViewHolder<DrawerMenuItem>
     private void onClick() throws IOException {
         mDrawerMenuItem.setChecked(mSwitchCompat.isChecked());
         if (mAntiShake && (System.currentTimeMillis() - mLastClickMillis < CLICK_TIMEOUT)) {
-            // Toast.makeText(itemView.getContext(), R.string.text_click_too_frequently, Toast.LENGTH_SHORT).show();
             mSwitchCompat.setChecked(!mSwitchCompat.isChecked(), false);
             return;
         }

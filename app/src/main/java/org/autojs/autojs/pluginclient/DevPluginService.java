@@ -1,14 +1,11 @@
 package org.autojs.autojs.pluginclient;
 
-import android.os.Handler;
-import android.os.Looper;
+import android.content.Context;
 
 import androidx.annotation.AnyThread;
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
-import com.stardust.app.GlobalAppContext;
-
-import org.autojs.autojs.tool.ThreadTool;
+import org.autojs.autojs.util.ThreadUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,9 +20,7 @@ import io.reactivex.subjects.PublishSubject;
  */
 public class DevPluginService {
 
-    public static DevPluginService getInstance() {
-        return sInstance;
-    }
+    private final Context mContext;
 
     public static class State {
 
@@ -73,33 +68,48 @@ public class DevPluginService {
     public static final String TYPE_BYTES_COMMAND = "bytes_command";
     public static final int HANDSHAKE_TIMEOUT = JsonSocket.HANDSHAKE_TIMEOUT;
 
-    private static final DevPluginService sInstance = new DevPluginService();
-
-    public final DevPluginResponseHandler mResponseHandler;
-    public final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final DevPluginResponseHandler mResponseHandler;
 
     private volatile JsonSocketClient mJsonSocketClient;
     private volatile JsonSocketServer mJsonSocketServer;
     private volatile ServerSocket mServerSocket;
 
-    public DevPluginService() {
-        File cache = new File(GlobalAppContext.get().getCacheDir(), "remote_project");
-        mResponseHandler = new DevPluginResponseHandler(cache);
+    public DevPluginService(@NonNull Context context) {
+        mContext = context;
+        File cache = new File(context.getCacheDir(), "remote_project");
+        mResponseHandler = new DevPluginResponseHandler(context, cache);
     }
 
-    @Nullable
-    public JsonSocketClient getJsonSocketClient() {
-        return mJsonSocketClient;
+    public DevPluginResponseHandler getResponseHandler() {
+        return mResponseHandler;
     }
 
-    @Nullable
-    public JsonSocketServer getJsonSocketServer() {
-        return mJsonSocketServer;
+    public Context getContext() {
+        return mContext;
     }
 
-    @Nullable
-    public ServerSocket getServerSocket() {
-        return mServerSocket;
+    public void disconnectJsonSocketClient() {
+        try {
+            mJsonSocketClient.switchOff();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isJsonSocketClientConnected() {
+        return mJsonSocketClient != null && mJsonSocketClient.isSocketReady();
+    }
+
+    public boolean isServerSocketConnected() {
+        return mServerSocket != null && !mServerSocket.isClosed();
+    }
+
+    public void disconnectJsonSocketServer() {
+        try {
+            mJsonSocketServer.switchOff();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @AnyThread
@@ -113,12 +123,12 @@ public class DevPluginService {
         }
 
         return Observable
-                .just(new JsonSocketClient(ip, port))
+                .just(new JsonSocketClient(this, ip, port))
                 .observeOn(Schedulers.newThread())
                 .doOnNext(jsonSocketClient -> {
                     try {
                         mJsonSocketClient = jsonSocketClient;
-                        if (ThreadTool.wait(jsonSocketClient::isSocketReady, HANDSHAKE_TIMEOUT)) {
+                        if (ThreadUtils.wait(jsonSocketClient::isSocketReady, HANDSHAKE_TIMEOUT)) {
                             jsonSocketClient
                                     .subscribeMessage()
                                     .monitorMessage()
@@ -135,7 +145,7 @@ public class DevPluginService {
     @AnyThread
     public Observable<JsonSocketServer> enableLocalServer() {
         return Observable
-                .just(new JsonSocketServer(Port.AJ_SERVER))
+                .just(new JsonSocketServer(this, Port.AJ_SERVER))
                 .observeOn(Schedulers.newThread())
                 .doOnNext(jsonSocketServer -> {
                     try {
@@ -177,4 +187,5 @@ public class DevPluginService {
             mJsonSocketServer.writeLog(log);
         }
     }
+
 }

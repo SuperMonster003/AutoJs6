@@ -6,7 +6,7 @@ package org.autojs.autojs.ui.main.drawer;
 public class DrawerMenuGroup extends DrawerMenuItem {
 
     public DrawerMenuGroup(int title) {
-        super(0, title, null);
+        super(0, title);
     }
 
 }

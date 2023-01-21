@@ -1,22 +1,25 @@
 package org.autojs.autojs.external.tile;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.stardust.app.GlobalAppContext;
-import com.stardust.autojs.core.accessibility.AccessibilityServiceTool;
-import com.stardust.view.accessibility.AccessibilityService;
-import com.stardust.view.accessibility.LayoutInspector;
-import com.stardust.view.accessibility.NodeInfo;
+import com.afollestad.materialdialogs.MaterialDialog;
 
-import org.autojs.autojs.autojs.AutoJs;
+import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.app.GlobalAppContext;
+import org.autojs.autojs.core.accessibility.AccessibilityServiceTool;
+import org.autojs.autojs.core.accessibility.AccessibilityService;
+import org.autojs.autojs.core.accessibility.LayoutInspector;
+import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 public abstract class LayoutInspectTileService extends TileService implements LayoutInspector.CaptureAvailableListener {
@@ -47,24 +50,44 @@ public abstract class LayoutInspectTileService extends TileService implements La
 
     @Override
     public void onClick() {
-        // FIXME by SuperMonster003 as of Mar 19, 2022.
+        super.onClick();
+
+        Log.d(getClass().getName(), "onClick");
+
+        // FIXME by SuperMonster003 on Mar 19, 2022.
         //   ! Collapse quick settings panel.
         //   ! Sometimes, there'll be a delay for a few seconds.
         //   ! Dunno whether a better way exists.
-        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                collapseTile();
+            } else {
+                sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+            }
+        } catch (Exception e) {
+            // Ignored.
+            // FIXME by SuperMonster003 on Sep 4, 2022.
+            //  ! Maybe GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE could be helpful ?
+        }
 
-        super.onClick();
-        Log.d(getClass().getName(), "onClick");
-        if (AccessibilityService.Companion.getInstance() == null) {
-            Toast.makeText(this, R.string.text_no_accessibility_permission_to_capture, Toast.LENGTH_SHORT).show();
-            if (!getAccessibilityServiceTool().enableAccessibilityServiceAutomaticallyIfNeeded()) {
+        if (AccessibilityService.isRunning()) {
+            mCapturing = true;
+            GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindow(), 1000);
+        } else {
+            ViewUtils.showToast(this, R.string.text_no_accessibility_permission_to_capture);
+            if (!getAccessibilityServiceTool().autoEnableIfNeeded()) {
                 getAccessibilityServiceTool().goToAccessibilitySetting();
             }
             updateTile();
-        } else {
-            mCapturing = true;
-            GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindow(), 1000);
         }
+    }
+
+    // @Hint by SuperMonster003 on Oct 8, 2022.
+    //  ! Apparently not a good idea.
+    private void collapseTile() {
+        MaterialDialog dialog = new MaterialDialog.Builder(getApplicationContext()).build();
+        showDialog(dialog);
+        dialog.dismiss();
     }
 
     @NonNull
@@ -94,19 +117,20 @@ public abstract class LayoutInspectTileService extends TileService implements La
     }
 
     @Override
-    public void onCaptureAvailable(NodeInfo capture) {
+    public void onCaptureAvailable(NodeInfo capture, @NonNull Context context) {
         Log.d(getClass().getName(), "onCaptureAvailable: capturing = " + mCapturing);
         if (!mCapturing) {
             return;
         }
         mCapturing = false;
         GlobalAppContext.post(() -> {
-            FullScreenFloatyWindow window = onCreateWindow(capture);
-            if (!FloatyWindowManger.addWindow(getApplicationContext(), window)) {
+            FullScreenFloatyWindow window = onCreateWindow(capture, context);
+            if (!FloatyWindowManger.addWindow(context, window)) {
                 updateTile();
             }
         });
     }
 
-    protected abstract FullScreenFloatyWindow onCreateWindow(NodeInfo capture);
+    protected abstract FullScreenFloatyWindow onCreateWindow(NodeInfo capture, Context context);
+
 }

@@ -11,22 +11,6 @@
         android:orientation="vertical"
         android:focusable="true">
 
-    <RelativeLayout
-            android:id="@+id/header"
-            android:layout_width="match_parent"
-            android:layout_height="25dp"
-            android:layout_marginBottom="5dp">
-
-        <View
-                android:id="@+id/shadow"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/drawer_header_shadow"
-                android:visibility="gone" />
-
-    </RelativeLayout>
-
-
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -50,14 +34,13 @@
                 android:baselineAligned="false">
 
             <LinearLayout
-                    android:id="@+id/setting"
+                    android:id="@+id/settings"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="?selectableItemBackground"
                     android:gravity="center"
-                    android:orientation="horizontal"
-                    android:onClick="startSettingActivity">
+                    android:orientation="horizontal">
 
                 <ImageView
                         android:layout_width="16dp"
@@ -65,7 +48,7 @@
                         android:layout_gravity="center"
                         android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_ali_settings"
-                        app:tint="#666666"
+                        app:tint="?android:textColorPrimary"
                         tools:ignore="ContentDescription" />
 
                 <TextView
@@ -74,7 +57,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginEnd="4dp"
                         android:gravity="center"
-                        android:text="@string/text_setting"
+                        android:text="@string/text_settings"
                         android:textColor="?android:textColorPrimary"
                         android:textSize="15sp" />
             </LinearLayout>
@@ -86,8 +69,7 @@
                     android:layout_weight="1"
                     android:background="?selectableItemBackground"
                     android:gravity="center"
-                    android:orientation="horizontal"
-                    android:onClick="restartAfterPendingIntent">
+                    android:orientation="horizontal">
 
                 <ImageView
                         android:layout_width="16dp"
@@ -95,7 +77,7 @@
                         android:layout_gravity="center"
                         android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_refresh_white_24dp"
-                        app:tint="#666666"
+                        app:tint="?android:textColorPrimary"
                         tools:ignore="ContentDescription" />
 
                 <TextView
@@ -107,6 +89,7 @@
                         android:text="@string/text_restart_app"
                         android:textColor="?android:textColorPrimary"
                         android:textSize="15sp" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -116,8 +99,7 @@
                     android:layout_weight="1"
                     android:background="?selectableItemBackground"
                     android:gravity="center"
-                    android:orientation="horizontal"
-                    android:onClick="exitCompletely">
+                    android:orientation="horizontal">
 
                 <ImageView
                         android:layout_width="16dp"
@@ -125,7 +107,7 @@
                         android:layout_gravity="center"
                         android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_ali_exit"
-                        app:tint="#666666"
+                        app:tint="?android:textColorPrimary"
                         tools:ignore="ContentDescription" />
 
                 <TextView

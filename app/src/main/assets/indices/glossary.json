@@ -1,5 +1,5 @@
 {
-  "AXR": "Arrow function returns without (X) the Return keyword",
+  "AXR": "Arrow function returns without (X) the 'return' keyword",
   "a11y": "accessibility",
   "acc": "account",
   "accu": "accumulated",

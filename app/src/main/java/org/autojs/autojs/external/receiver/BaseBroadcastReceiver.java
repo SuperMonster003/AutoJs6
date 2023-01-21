@@ -5,15 +5,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.stardust.app.GlobalAppContext;
-import com.stardust.autojs.execution.ExecutionConfig;
-
-import org.autojs.autojs.autojs.AutoJs;
+import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.timing.IntentTask;
 import org.autojs.autojs.timing.TimedTaskManager;
+import org.autojs.autojs.util.ViewUtils;
 
 import java.util.Objects;
 
@@ -34,7 +32,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(intentTask -> runTask(context, intent, intentTask), Throwable::printStackTrace);
         } catch (Exception e) {
-            GlobalAppContext.toast(e.getMessage(), Toast.LENGTH_LONG);
+            ViewUtils.showToast(context, e.getMessage(), true);
         }
     }
 
@@ -48,7 +46,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
             AutoJs.getInstance().getScriptEngineService().execute(file.toSource(), config);
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+            ViewUtils.showToast(context, e.getMessage(), true);
         }
     }
 

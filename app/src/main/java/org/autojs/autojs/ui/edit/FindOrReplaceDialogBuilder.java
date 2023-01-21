@@ -1,18 +1,18 @@
 package org.autojs.autojs.ui.edit;
 
 import android.content.Context;
-import androidx.preference.PreferenceManager;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
+
 import com.afollestad.materialdialogs.MaterialDialog;
 
-import org.autojs.autojs6.R;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
+import org.autojs.autojs6.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -22,7 +22,7 @@ import butterknife.OnTextChanged;
 /**
  * Created by Stardust on 2017/9/28.
  */
-public class FindOrReplaceDialogBuilder extends ThemeColorMaterialDialogBuilder {
+public class FindOrReplaceDialogBuilder extends MaterialDialog.Builder {
 
     private static final String KEY_KEYWORDS = "...";
 

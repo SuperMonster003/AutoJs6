@@ -1,24 +1,23 @@
 package org.autojs.autojs.theme.widget;
 
 import android.content.Context;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import android.util.AttributeSet;
 
-import com.stardust.theme.ThemeColor;
-import com.stardust.theme.ThemeColorManager;
-import com.stardust.theme.ThemeColorMutable;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import org.autojs.autojs.theme.ThemeColor;
+import org.autojs.autojs.theme.ThemeColorManager;
+import org.autojs.autojs.theme.ThemeColorMutable;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2018/1/23.
  */
 public class ThemeColorSwipeRefreshLayout extends SwipeRefreshLayout implements ThemeColorMutable {
+
     public ThemeColorSwipeRefreshLayout(Context context) {
         super(context);
         init();
-    }
-
-    private void init() {
-        ThemeColorManager.add(this);
     }
 
     public ThemeColorSwipeRefreshLayout(Context context, AttributeSet attrs) {
@@ -26,8 +25,14 @@ public class ThemeColorSwipeRefreshLayout extends SwipeRefreshLayout implements 
         init();
     }
 
+    private void init() {
+        ThemeColorManager.add(this);
+        setProgressBackgroundColorSchemeResource(R.color.swipe_refresh_background);
+    }
+
     @Override
     public void setThemeColor(ThemeColor themeColor) {
         setColorSchemeColors(themeColor.colorPrimary);
     }
+
 }

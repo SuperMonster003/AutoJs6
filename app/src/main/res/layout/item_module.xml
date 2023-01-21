@@ -4,8 +4,8 @@
           android:layout_height="50dp"
           android:background="@drawable/bg_item_module"
           android:gravity="center"
-          android:paddingLeft="12dp"
-          android:paddingRight="12dp"
+          android:paddingStart="12dp"
+          android:paddingEnd="12dp"
           android:textColor="#616161"
           android:textSize="16sp">
 

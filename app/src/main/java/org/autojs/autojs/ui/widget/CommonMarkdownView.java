@@ -3,16 +3,15 @@ package org.autojs.autojs.ui.widget;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-
-import androidx.annotation.NonNull;
-
 import android.util.AttributeSet;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
+import androidx.annotation.NonNull;
+
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.commonmark.ext.heading.anchor.HeadingAnchorExtension;
 import org.commonmark.node.Node;
@@ -121,7 +120,7 @@ public class CommonMarkdownView extends WebView {
         }
     }
 
-    public static class DialogBuilder extends ThemeColorMaterialDialogBuilder {
+    public static class DialogBuilder extends MaterialDialog.Builder {
 
         private final CommonMarkdownView mMarkdownView;
         private final FrameLayout mContainer;
@@ -146,4 +145,5 @@ public class CommonMarkdownView extends WebView {
         }
 
     }
+
 }

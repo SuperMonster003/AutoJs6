@@ -2,14 +2,13 @@ package org.autojs.autojs.ui.doc;
 
 import android.webkit.WebView;
 
-import org.autojs.autojs.Pref;
-import org.autojs.autojs6.R;
-import org.autojs.autojs.ui.BaseActivity;
-import org.autojs.autojs.ui.widget.EWebView;
-
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.autojs.autojs.ui.BaseActivity;
+import org.autojs.autojs.ui.widget.EWebView;
+import org.autojs.autojs.util.DocsUtils;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/10/24.
@@ -26,11 +25,11 @@ public class DocumentationActivity extends BaseActivity {
 
     @AfterViews
     void setUpViews() {
-        setToolbarAsBack(getString(R.string.text_tutorial));
+        setToolbarAsBack(R.string.text_tutorial);
         mWebView = mEWebView.getWebView();
         String url = getIntent().getStringExtra(EXTRA_URL);
         if (url == null) {
-            url = Pref.getDocumentationUrl() + "index.html";
+            url = DocsUtils.getUrl("index.html");
         }
         mWebView.loadUrl(url);
     }

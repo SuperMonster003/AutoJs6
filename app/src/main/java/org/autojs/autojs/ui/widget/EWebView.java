@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
-
 import android.util.AttributeSet;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -19,16 +18,16 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
-import com.stardust.app.OnActivityResultDelegate;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import org.autojs.autojs6.R;
+import org.autojs.autojs.app.OnActivityResultDelegate;
 import org.autojs.autojs.tool.ImageSelector;
+import org.autojs.autojs6.R;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
@@ -38,9 +37,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefreshListener, OnActivityResultDelegate {
 
     private static final List<String> IMAGE_TYPES = Arrays.asList("png", "jpg", "bmp");
-    private static final int CHOOSE_IMAGE = 42222;
 
-    private WebView mWebView;
+    private NestedWebView mWebView;
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -60,11 +58,14 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
 
     private void init() {
         inflate(getContext(), R.layout.ewebview, this);
+
         mWebView = findViewById(R.id.web_view);
-        mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
-        mProgressBar = findViewById(R.id.progress_bar);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
         setUpWebView();
+
+        mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+
+        mProgressBar = findViewById(R.id.progress_bar);
     }
 
     private void setUpWebView() {
@@ -80,7 +81,7 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
         mWebView.setWebChromeClient(new MyWebChromeClient());
     }
 
-    public WebView getWebView() {
+    public NestedWebView getWebView() {
         return mWebView;
     }
 
@@ -144,7 +145,6 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
             }, fileChooserParams.getAcceptTypes());
             return true;
         }
-
 
     }
 
@@ -212,6 +212,6 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
             return true;
         }
 
-
     }
+
 }

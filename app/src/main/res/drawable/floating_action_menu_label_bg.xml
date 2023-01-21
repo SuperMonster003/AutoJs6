@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <solid android:color="#cc424347"/>
+    <solid android:color="@color/floating_action_menu_label_bg"/>
 
     <corners android:radius="2dp"/>
+
 </shape>

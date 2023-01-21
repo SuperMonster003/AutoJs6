@@ -8,11 +8,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
-import com.stardust.util.ClipboardUtil
-import com.stardust.util.sortedArrayOf
-import com.stardust.view.accessibility.NodeInfo
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration
+import org.autojs.autojs.core.accessibility.NodeInfo
+import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.lang.reflect.Field
 
@@ -21,25 +20,40 @@ import java.lang.reflect.Field
  */
 class NodeInfoView : RecyclerView {
 
-    private val mData = Array(FIELDS.size + 1) { Array(2) { "" } }
+    private val data = Array(FIELDS.size + 1) { Array(2) { "" } }
 
-    constructor(context: Context) : super(context) {
-        init()
-    }
+    constructor(context: Context) : super(context)
 
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        init()
-    }
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle) {
-        init()
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
+
+    init {
+        initData()
+        adapter = Adapter()
+        layoutManager = LinearLayoutManager(context)
+        addItemDecoration(
+            HorizontalDividerItemDecoration.Builder(context)
+                .color(context.getColor(R.color.layout_node_info_view_decoration_line))
+                .size(context.resources.getInteger(R.integer.layout_node_info_view_decoration_line))
+                .build()
+        )
     }
 
     fun setNodeInfo(nodeInfo: NodeInfo) {
         for (i in FIELDS.indices) {
             try {
-                val value = FIELDS[i].get(nodeInfo)
-                mData[i + 1][1] = value?.toString() ?: ""
+                data[i + 1][1] = when (val value = FIELDS[i].get(nodeInfo)) {
+                    is List<*> -> {
+                        when (FIELDS[i].name) {
+                            "actionNames" -> value.joinToString("\n") {
+                                it.toString().replace("^ACTION_".toRegex(), "")
+                            }
+                            else -> value.joinToString("\n")
+                        }
+                    }
+                    else -> value?.toString() ?: ""
+                }
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
@@ -48,47 +62,38 @@ class NodeInfoView : RecyclerView {
         adapter!!.notifyDataSetChanged()
     }
 
-    private fun init() {
-        initData()
-        adapter = Adapter()
-        layoutManager = LinearLayoutManager(context)
-        addItemDecoration(HorizontalDividerItemDecoration.Builder(context)
-                .color(0x1e000000)
-                .size(2)
-                .build())
-    }
-
     private fun initData() {
-        mData[0][0] = resources.getString(R.string.text_attribute)
-        mData[0][1] = resources.getString(R.string.text_value)
-        for (i in 1 until mData.size) {
-            mData[i][0] = FIELD_NAMES[i - 1]
-            mData[i][1] = ""
+        data[0][0] = resources.getString(R.string.text_attribute)
+        data[0][1] = resources.getString(R.string.text_value)
+        for (i in 1 until data.size) {
+            data[i][0] = FIELD_NAMES[i - 1]
+            data[i][1] = ""
         }
     }
 
     private inner class Adapter : RecyclerView.Adapter<ViewHolder>() {
 
-        val VIEW_TYPE_HEADER = 0
-        val VIEW_TYPE_ITEM = 1
+        val mViewTypeHeader = 0
+        val mViewTypeItem = 1
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val layoutRes = if (viewType == VIEW_TYPE_HEADER) R.layout.node_info_view_header else R.layout.node_info_view_item
-            return ViewHolder(LayoutInflater.from(parent.context).inflate(layoutRes, parent, false))
-        }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = when (viewType) {
+            mViewTypeHeader -> R.layout.node_info_view_header
+            else -> R.layout.node_info_view_item
+        }.let { ViewHolder(LayoutInflater.from(parent.context).inflate(it, parent, false)) }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.attrName.text = mData[position][0]
-            holder.attrValue.text = mData[position][1]
+            holder.apply {
+                data[position].let {
+                    attrName.text = it[0]
+                    attrValue.text = it[1]
+                }
+            }
         }
 
-        override fun getItemCount(): Int {
-            return mData.size
-        }
+        override fun getItemCount(): Int = data.size
 
-        override fun getItemViewType(position: Int): Int {
-            return if (position == 0) VIEW_TYPE_HEADER else VIEW_TYPE_ITEM
-        }
+        override fun getItemViewType(position: Int): Int = if (position == 0) mViewTypeHeader else mViewTypeItem
+
     }
 
     internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -98,52 +103,55 @@ class NodeInfoView : RecyclerView {
 
         init {
             itemView.setOnClickListener {
-                val pos = adapterPosition
-                if (pos < 1 || pos >= mData.size)
-                    return@setOnClickListener
-                ClipboardUtil.setClip(context, mData[pos][0] + " = " + mData[pos][1])
-                Snackbar.make(this@NodeInfoView, R.string.text_already_copied_to_clip, Snackbar.LENGTH_SHORT).show()
+                bindingAdapterPosition.takeIf { it in 1.until(data.size) }?.let { i ->
+                    ClipboardUtils.setClip(context, dataToFx(this@NodeInfoView.data[i]))
+                    ViewUtils.showSnack(this@NodeInfoView, R.string.text_already_copied_to_clip)
+                }
             }
         }
 
     }
 
+    private fun dataToFx(data: Array<String>): String {
+        val attr = data[0]
+        var value = data[1]
+        when (attr) {
+            "className" -> value = value.replace("^android\\.widget\\.".toRegex(), "")
+            "actionNames" -> return "action(${value.split("\n").joinToString(", ") { "'$it'" }})"
+            "bounds" -> return "$attr(${value.replace("[^\\d,]".toRegex(), "").replace(",", ", ")})"
+        }
+        return when (NodeInfo::class.java.getDeclaredField(attr).type) {
+            java.lang.String::class.java -> "$attr('$value')"
+            else -> "$attr($value)"
+        }
+    }
+
     companion object {
 
-        private val FIELD_NAMES = sortedArrayOf(
-                "id",
-                "idHex",
-                "fullId",
-                "bounds",
-                "depth",
-                "desc",
-                "className",
-                "packageName",
-                "text",
-                "drawingOrder",
-                "accessibilityFocused",
-                "checked",
-                "clickable",
-                "contextClickable",
-                "dismissable",
-                "editable",
-                "enabled",
-                "focusable",
-                "indexInParent",
-                "longClickable",
-                "row",
-                "rowCount",
-                "rowSpan",
-                "column",
-                "columnCount",
-                "columnSpan",
-                "selected",
-                "scrollable")
+        private val FIELD_NAMES = arrayOf(
+            // Common
+            "packageName", "simpleId", "fullId", "idHex",
+            "desc", "text",
+            "bounds", "className",
+            "clickable", "longClickable", "scrollable",
+            "indexInParent", "childCount", "depth",
+
+            // Regular
+            "checked", "enabled", "editable", "focusable", "selected", "dismissable",
+
+            // Rare
+            "contextClickable", "accessibilityFocused",
+            "rowCount", "columnCount", "row", "column", "rowSpan", "columnSpan",
+            "drawingOrder",
+
+            // Arrays
+            "actionNames",
+        )
+
         private val FIELDS = Array<Field>(FIELD_NAMES.size) {
-            val field = NodeInfo::class.java.getDeclaredField(FIELD_NAMES[it])
-            field.isAccessible = true
-            field
+            NodeInfo::class.java.getDeclaredField(FIELD_NAMES[it]).apply { isAccessible = true }
         }
+
     }
 
 }

@@ -1,108 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-
-        <com.stardust.theme.widget.ThemeColorToolbar
-            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:theme="@style/ToolBarStyle"
-            android:background="?attr/colorPrimary"
-            android:title="@string/app_name"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            android:fitsSystemWindows="true">
+
+        <org.autojs.autojs.theme.widget.ThemeColorToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:theme="@style/ToolBarStyle"
+                android:background="?attr/colorPrimary"
+                android:title="@string/app_name"
+                app:popupTheme="@style/PopupMenuTheme">
 
             <FrameLayout
-                android:id="@+id/toolbar_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="right"/>
+                    android:id="@+id/toolbar_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end" />
 
-        </com.stardust.theme.widget.ThemeColorToolbar>
-
+        </org.autojs.autojs.theme.widget.ThemeColorToolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-
     <androidx.drawerlayout.widget.DrawerLayout
-        android:id="@+id/drawer_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            android:id="@+id/drawer_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
             <org.autojs.autojs.ui.edit.editor.CodeEditor
-                android:id="@+id/editor"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-
+                    android:id="@+id/editor"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
 
             <RelativeLayout
-                android:id="@+id/input_method_enhance_bar"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:background="#77f2f3f7">
+                    android:id="@+id/input_method_enhance_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:background="#77f2f3f7">
 
                 <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
-                    android:id="@+id/symbol_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_alignParentBottom="true"/>
+                        android:id="@+id/symbol_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp"
+                        android:layout_alignParentBottom="true" />
 
                 <ImageView
-                    android:id="@+id/functions"
-                    android:layout_width="40dp"
-                    android:layout_height="35dp"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentTop="true"
-                    android:background="?selectableItemBackgroundBorderless"
-                    android:padding="6dp"
-                    android:src="@drawable/ic_ali_fx"
-                    android:tint="#222329"/>
+                        android:id="@+id/functions"
+                        android:layout_width="40dp"
+                        android:layout_height="35dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_ali_fx"
+                        app:tint="#222329" />
 
                 <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
-                    android:id="@+id/code_completion_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="35dp"
-                    android:layout_above="@+id/symbol_bar"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_toRightOf="@+id/functions"/>
+                        android:id="@+id/code_completion_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp"
+                        android:layout_above="@+id/symbol_bar"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_toEndOf="@+id/functions" />
 
             </RelativeLayout>
 
             <org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
-                android:id="@+id/functions_keyboard"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"/>
-
+                    android:id="@+id/functions_keyboard"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone" />
 
             <org.autojs.autojs.ui.edit.debug.DebugBar
-                android:id="@+id/debug_bar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"/>
+                    android:id="@+id/debug_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
 
         </LinearLayout>
 
         <org.autojs.autojs.ui.widget.EWebView
-            android:id="@+id/docs"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"/>
+                android:id="@+id/docs"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="start" />
+
     </androidx.drawerlayout.widget.DrawerLayout>
 
 </LinearLayout>

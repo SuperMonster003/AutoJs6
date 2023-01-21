@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.stardust.app.GlobalAppContext;
+import org.autojs.autojs.app.GlobalAppContext;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
  * Created by Stardust on 2017/7/11.
  */
 public class ScriptWidgets {
-
 
     private static final String LOG_TAG = "ScriptWidgets";
     private static final SharedPreferences widgets = GlobalAppContext.get().getSharedPreferences("ScriptWidgets", Context.MODE_PRIVATE);

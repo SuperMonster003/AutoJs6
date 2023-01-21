@@ -1,5 +1,7 @@
 package org.autojs.autojs.ui.main.drawer;
 
+import androidx.annotation.Nullable;
+
 import java.io.IOException;
 
 /**
@@ -11,39 +13,57 @@ public class DrawerMenuItem {
         void onClick(DrawerMenuItemViewHolder holder) throws IOException;
     }
 
+    public static final int DEFAULT_DIALOG_CONTENT = 0;
+
+    public static final int DEFAULT_PREFERENCE_KEY = 0;
+
     private final int mIcon;
     private final int mTitle;
-    private final Action mAction;
+    private String mSubtitle;
+    @Nullable
+    private CharSequence mContent;
+    @Nullable
+    private Action mAction;
+    private boolean mIsHidden;
     private boolean mAntiShake;
     private boolean mOnProgress;
     private boolean mSwitchEnabled;
     private boolean mSwitchChecked;
     private int mPrefKey;
-    private int mNotificationCount;
 
-    public DrawerMenuItem(int icon, int title, Action action) {
+    public DrawerMenuItem(int icon, int title) {
         mIcon = icon;
         mTitle = title;
-        mAction = action;
     }
 
-    public DrawerMenuItem(int icon, int title, int prefKey, Action action) {
+    public DrawerMenuItem(int icon, int title, int prefKey) {
         mIcon = icon;
         mTitle = title;
-        mAction = action;
-        if (prefKey == 0) {
+        if (prefKey == DEFAULT_PREFERENCE_KEY) {
             mAntiShake = true;
         }
         mPrefKey = prefKey;
         mSwitchEnabled = true;
     }
 
-    public int getNotificationCount() {
-        return mNotificationCount;
+    public void setAction(Action action) {
+        mAction = action;
     }
 
-    public void setNotificationCount(int notificationCount) {
-        mNotificationCount = notificationCount;
+    public void setContent(CharSequence content) {
+        mContent = content;
+    }
+
+    public void setHidden(boolean isHidden) {
+        mIsHidden = isHidden;
+    }
+
+    public void setSubtitle(String subtitle) {
+        mSubtitle = subtitle;
+    }
+
+    public boolean isHidden() {
+        return mIsHidden;
     }
 
     public int getIcon() {
@@ -52,6 +72,14 @@ public class DrawerMenuItem {
 
     public int getTitle() {
         return mTitle;
+    }
+
+    public String getSubtitle() {
+        return mSubtitle;
+    }
+
+    public CharSequence getContent() {
+        return mContent;
     }
 
     public boolean antiShake() {

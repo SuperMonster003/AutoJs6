@@ -1,6 +1,6 @@
 package org.autojs.autojs.storage.file;
 
-import com.stardust.pio.PFiles;
+import org.autojs.autojs.pio.PFiles;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,11 +37,15 @@ public class FileObservable {
             return;
         }
         File[] files = fromDir.listFiles();
-        if (files == null || files.length == 0) {
+        if (files == null) {
             return;
         }
-        for (File file : files) {
-            copy(file, new File(toDir, file.getName()), deleteOld, progress);
+        if (files.length > 0) {
+            for (File file : files) {
+                copy(file, new File(toDir, file.getName()), deleteOld, progress);
+            }
+        } else {
+            toDir.mkdirs();
         }
     }
 

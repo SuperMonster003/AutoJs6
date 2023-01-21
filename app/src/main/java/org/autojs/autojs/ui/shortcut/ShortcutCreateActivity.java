@@ -10,25 +10,25 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.autojs.autojs6.R;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.external.shortcut.Shortcut;
 import org.autojs.autojs.external.shortcut.ShortcutActivity;
 import org.autojs.autojs.external.shortcut.ShortcutManager;
 import org.autojs.autojs.model.script.ScriptFile;
-import org.autojs.autojs.tool.BitmapTool;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
+import org.autojs.autojs.util.BitmapUtils;
+import org.autojs.autojs6.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -69,7 +69,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         mUseAndroidNShortcut.setVisibility(Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1
                 ? View.VISIBLE : View.GONE);
         mName.setText(mScriptFile.getSimplifiedName());
-        new ThemeColorMaterialDialogBuilder(this)
+        new MaterialDialog.Builder(this)
                 .customView(view, false)
                 .title(R.string.text_send_shortcut)
                 .positiveText(R.string.text_ok)
@@ -84,7 +84,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
 
     @OnClick(R.id.icon)
     void selectIcon() {
-        ShortcutIconSelectActivity_.intent(this)
+        AppsIconSelectActivity_.intent(this)
                 .startForResult(21209);
     }
 
@@ -100,7 +100,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         if (mIsDefaultIcon) {
             shortcut.iconRes(R.drawable.ic_node_js_black);
         } else {
-            Bitmap bitmap = BitmapTool.drawableToBitmap(mIcon.getDrawable());
+            Bitmap bitmap = BitmapUtils.drawableToBitmap(mIcon.getDrawable());
             shortcut.icon(bitmap);
         }
         shortcut.name(mName.getText().toString())
@@ -115,7 +115,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         if (mIsDefaultIcon) {
             icon = Icon.createWithResource(this, R.drawable.ic_file_type_js);
         } else {
-            Bitmap bitmap = BitmapTool.drawableToBitmap(mIcon.getDrawable());
+            Bitmap bitmap = BitmapUtils.drawableToBitmap(mIcon.getDrawable());
             icon = Icon.createWithBitmap(bitmap);
         }
         PersistableBundle extras = new PersistableBundle(1);
@@ -139,7 +139,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         if (resultCode != RESULT_OK) {
             return;
         }
-        String packageName = data.getStringExtra(ShortcutIconSelectActivity.EXTRA_PACKAGE_NAME);
+        String packageName = data.getStringExtra(AppsIconSelectActivity.EXTRA_PACKAGE_NAME);
         if (packageName != null) {
             try {
                 mIcon.setImageDrawable(getPackageManager().getApplicationIcon(packageName));

@@ -8,9 +8,10 @@
     <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:theme="@style/AppTheme.AppBarOverlay"
+            android:fitsSystemWindows="true">
 
-        <com.stardust.theme.widget.ThemeColorToolbar
+        <org.autojs.autojs.theme.widget.ThemeColorToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -36,8 +37,8 @@
                 <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="6dp"
-                        android:layout_marginRight="6dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="6dp"
                         app:cardCornerRadius="2dp"
                         app:cardElevation="1dp"
                         app:cardUseCompatPadding="true">
@@ -120,8 +121,8 @@
                         android:id="@+id/app_config"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="6dp"
-                        android:layout_marginRight="6dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="6dp"
                         app:cardCornerRadius="2dp"
                         app:cardElevation="1dp"
                         app:cardUseCompatPadding="true">
@@ -225,8 +226,8 @@
                                         android:layout_width="64dp"
                                         android:layout_height="64dp"
                                         android:layout_gravity="center"
-                                        android:layout_marginLeft="16dp"
-                                        android:layout_marginRight="16dp"
+                                        android:layout_marginStart="16dp"
+                                        android:layout_marginEnd="16dp"
                                         android:background="@drawable/shortcut_create_dialog_icon_bg"
                                         android:padding="12dp"
                                         android:src="@drawable/ic_add_white_48dp" />
@@ -241,13 +242,15 @@
             </LinearLayout>
         </ScrollView>
 
-        <com.stardust.theme.widget.ThemeColorFloatingActionButton
+        <org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
                 android:id="@+id/fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
-                android:src="@drawable/ic_done_white_48dp" />
+                android:src="@drawable/ic_done_white_48dp"
+                app:backgroundTint="?attr/colorPrimary"
+                android:tint="@color/toolbar_text" />
     </FrameLayout>
 
 

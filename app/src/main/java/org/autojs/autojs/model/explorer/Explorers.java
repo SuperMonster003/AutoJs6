@@ -1,9 +1,8 @@
 package org.autojs.autojs.model.explorer;
 
-import com.stardust.app.GlobalAppContext;
+import org.autojs.autojs.app.GlobalAppContext;
 
 public class Explorers {
-
 
     private static final Explorer sWorkspaceExplorer = new Explorer(Providers.workspace(), 20);
 

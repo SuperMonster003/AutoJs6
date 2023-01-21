@@ -1,26 +1,27 @@
 package org.autojs.autojs.tool;
 
-/* Created by Stardust on 2017/2/2 */
-
 import android.content.Intent;
 import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.stardust.app.GlobalAppContext;
-
-import org.autojs.autojs6.BuildConfig;
-import org.mozilla.javascript.RhinoException;
-
-import com.stardust.view.accessibility.AccessibilityService;
 import com.tencent.bugly.crashreport.BuglyLog;
 import com.tencent.bugly.crashreport.CrashReport;
+
+import org.autojs.autojs.app.GlobalAppContext;
+import org.autojs.autojs.core.accessibility.AccessibilityService;
+import org.autojs.autojs6.BuildConfig;
+import org.mozilla.javascript.RhinoException;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Map;
 
+/**
+ * Created by Stardust on 2017/2/2
+ */
 public class CrashHandler extends CrashReport.CrashHandleCallback implements UncaughtExceptionHandler {
+
     private static final String TAG = "CrashHandler";
     private static int crashCount = 0;
     private static long firstCrashMillis = 0;
@@ -40,7 +41,7 @@ public class CrashHandler extends CrashReport.CrashHandleCallback implements Unc
     public void uncaughtException(@NonNull Thread thread, @NonNull Throwable ex) {
         Log.e(TAG, "Uncaught Exception", ex);
         if (thread != Looper.getMainLooper().getThread()) {
-            if(!(ex instanceof RhinoException)){
+            if (!(ex instanceof RhinoException)) {
                 CrashReport.postCatchedException(ex, thread);
             }
             return;

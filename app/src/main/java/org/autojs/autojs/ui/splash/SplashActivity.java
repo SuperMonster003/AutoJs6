@@ -1,21 +1,27 @@
 package org.autojs.autojs.ui.splash;
 
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+
 import android.os.Bundle;
 import android.os.Handler;
+
 import androidx.annotation.Nullable;
 
-import org.autojs.autojs6.R;
+import org.autojs.autojs.app.tool.FloatingButtonTool;
 import org.autojs.autojs.ui.BaseActivity;
+import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.main.MainActivity_;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/7/7.
  */
 public class SplashActivity extends BaseActivity {
 
-
-    private static final String LOG_TAG = SplashActivity.class.getSimpleName();
-    private static final long INIT_TIMEOUT = 800;
+    private static final long INIT_TIMEOUT = 700;
 
     private boolean mAlreadyEnterNextActivity = false;
     private boolean mPaused;
@@ -23,9 +29,12 @@ public class SplashActivity extends BaseActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         init();
         mHandler.postDelayed(SplashActivity.this::enterNextActivity, INIT_TIMEOUT);
+        if (FloatyWindowManger.isCircularMenuShowing()) {
+            FloatyWindowManger.hideCircularMenu();
+        }
+        super.onCreate(savedInstanceState);
     }
 
     private void init() {

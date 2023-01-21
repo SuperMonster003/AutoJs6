@@ -1,63 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <org.autojs.autojs.ui.floating.CircularActionMenu xmlns:android="http://schemas.android.com/apk/res/android"
-                                                            xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                            android:layout_width="wrap_content"
-                                                            android:layout_height="wrap_content"
-                                                            android:clickable="false"
-                                                            app:cam_angle="165"
-                                                            app:cam_radius="80dp">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        app:cam_angle="165"
+        app:cam_radius="80dp">
 
     <ImageView
-        android:id="@+id/script_list"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="center"
-        android:background="@drawable/circle_green"
-        android:foreground="?selectableItemBackgroundBorderless"
-        android:padding="8dp"
-        android:src="@drawable/ic_menu"
-        android:tint="@android:color/white"/>
+            android:id="@+id/script_list"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_green"
+            android:foreground="?selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_menu"
+            android:tint="@android:color/white"
+            tools:ignore="UseAppTint" />
 
     <ImageView
-        android:id="@+id/record"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="center"
-        android:background="@drawable/circle_red"
-        android:foreground="?selectableItemBackgroundBorderless"
-        android:padding="8dp"
-        android:src="@drawable/ic_ali_record"/>
+            android:id="@+id/record"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_red"
+            android:foreground="?selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_ali_record" />
 
     <ImageView
-        android:id="@+id/layout_inspect"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="center"
-        android:background="@drawable/circle_blue"
-        android:foreground="?selectableItemBackgroundBorderless"
-        android:padding="8dp"
-        android:src="@drawable/ic_circular_menu_bounds"/>
+            android:id="@+id/layout_inspect"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_blue"
+            android:foreground="?selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_circular_menu_bounds" />
 
     <ImageView
-        android:id="@+id/stop_all_scripts"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="center"
-        android:background="@drawable/circle_yellow"
-        android:foreground="?selectableItemBackgroundBorderless"
-        android:padding="8dp"
-        android:src="@drawable/ic_close_white_48dp"/>
+            android:id="@+id/stop_all_scripts"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_purple"
+            android:foreground="?selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_close_white_48dp" />
 
 
     <ImageView
-        android:id="@+id/settings"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="center"
-        android:background="@drawable/circle_gray"
-        android:foreground="?selectableItemBackgroundBorderless"
-        android:padding="8dp"
-        android:src="@drawable/ic_circular_menu_settings"/>
+            android:id="@+id/action_menu_more"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle_gray"
+            android:foreground="?selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_more_horiz_white_48dp" />
 
 
 </org.autojs.autojs.ui.floating.CircularActionMenu>

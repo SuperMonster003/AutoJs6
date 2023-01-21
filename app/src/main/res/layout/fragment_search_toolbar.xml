@@ -3,7 +3,7 @@
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="wrap_content"
               android:layout_height="match_parent"
-              android:layout_gravity="right"
+              android:layout_gravity="end"
               android:orientation="horizontal">
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
@@ -11,33 +11,31 @@
         android:layout_width="40dp"
         android:layout_height="match_parent"
         app:icon="@drawable/ic_ali_replace"
-        app:icon_color="@color/toolbar"
-        app:text="@string/text_replace"/>
+        app:icon_color="@color/toolbar_text"
+        app:text="@string/text_replace_simplified"/>
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
         android:id="@+id/find_prev"
         android:layout_width="40dp"
         android:layout_height="match_parent"
         app:icon="@drawable/ic_ali_up"
-        app:icon_color="@color/toolbar"
-        app:text="@string/text_find_prev"/>
+        app:icon_color="@color/toolbar_text"
+        app:text="@string/text_find_prev_simplified"/>
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
         android:id="@+id/find_next"
         android:layout_width="40dp"
         android:layout_height="match_parent"
         app:icon="@drawable/ic_ali_down"
-        app:icon_color="@color/toolbar"
-        app:text="@string/text_find_next"/>
-
+        app:icon_color="@color/toolbar_text"
+        app:text="@string/text_find_next_simplified"/>
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
         android:id="@+id/cancel_search"
         android:layout_width="40dp"
         android:layout_height="match_parent"
         app:icon="@drawable/ic_close_white_48dp"
-        app:icon_color="@color/toolbar"
-        app:text="@string/text_cancel"/>
-
+        app:icon_color="@color/toolbar_text"
+        app:text="@string/text_cancel_simplified"/>
 
 </LinearLayout>

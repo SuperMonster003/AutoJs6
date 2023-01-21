@@ -19,9 +19,10 @@
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:gravity="center"
         android:textColor="@android:color/primary_text_light"
         android:textSize="16sp"
-        tools:text="红色" />
+        tools:text="@string/md_amber_800" />
+
 </LinearLayout>

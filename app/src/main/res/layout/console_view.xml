@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/log_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    <LinearLayout
+            android:id="@+id/input_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:orientation="horizontal"
+            android:visibility="visible">
+
+        <EditText
+                android:id="@+id/input"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:lines="1"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:visibility="gone"/>
+
+        <Button
+                android:id="@+id/submit"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/text_ok"
+                android:textColor="@android:color/white"
+                android:theme="@style/ConsoleTheme"
+                android:visibility="gone"/>
+
+    </LinearLayout>
+
+</LinearLayout>

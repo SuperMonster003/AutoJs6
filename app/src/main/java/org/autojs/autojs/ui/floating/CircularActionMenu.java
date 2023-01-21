@@ -5,17 +5,19 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.PointF;
-import androidx.annotation.AttrRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.FrameLayout;
+
+import androidx.annotation.AttrRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 import org.autojs.autojs6.R;
 
@@ -27,6 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class CircularActionMenu extends FrameLayout {
 
     public interface OnStateChangeListener {
+
         void onExpanding(CircularActionMenu menu);
 
         void onExpanded(CircularActionMenu menu);
@@ -36,6 +39,7 @@ public class CircularActionMenu extends FrameLayout {
         void onCollapsed(CircularActionMenu menu);
 
         void onMeasured(CircularActionMenu menu);
+
     }
 
     public static class OnStateChangeListenerAdapter implements OnStateChangeListener {
@@ -64,6 +68,7 @@ public class CircularActionMenu extends FrameLayout {
         public void onMeasured(CircularActionMenu menu) {
 
         }
+
     }
 
     private PointF[] mItemExpandedPositionOffsets;
@@ -106,7 +111,7 @@ public class CircularActionMenu extends FrameLayout {
         for (int i = 0; i < getItemCount(); i++) {
             View v = getItemAt(i);
             LayoutParams params = (LayoutParams) v.getLayoutParams();
-            params.gravity = Gravity.START | Gravity.LEFT | Gravity.CENTER_VERTICAL;
+            params.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
             // FIXME: 2017/10/17 Not working
             updateViewLayout(v, params);
         }
@@ -143,11 +148,11 @@ public class CircularActionMenu extends FrameLayout {
             }
         };
         ScaleAnimation scaleAnimation = createScaleAnimation(0, 1);
-        direction = (direction == Gravity.RIGHT ? 1 : -1);
+        int byX = direction == Gravity.END ? 1 : -1;
         for (int i = 0; i < getItemCount(); i++) {
             View item = getItemAt(i);
             item.animate()
-                    .translationXBy(direction * mItemExpandedPositionOffsets[i].x)
+                    .translationXBy(mItemExpandedPositionOffsets[i].x * byX)
                     .translationYBy(mItemExpandedPositionOffsets[i].y)
                     .setListener(listener)
                     .setDuration(mDuration)
@@ -157,18 +162,6 @@ public class CircularActionMenu extends FrameLayout {
         for (OnStateChangeListener l : mOnStateChangeListeners) {
             l.onExpanding(CircularActionMenu.this);
         }
-    }
-
-    private ScaleAnimation createScaleAnimation(float fromScale, float toScale) {
-        ScaleAnimation scaleAnimation = new ScaleAnimation(fromScale, toScale, fromScale, toScale, Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0.5f);
-        scaleAnimation.setDuration(mDuration);
-        scaleAnimation.setFillAfter(true);
-        scaleAnimation.setInterpolator(mInterpolator);
-        return scaleAnimation;
-    }
-
-    public View getItemAt(int i) {
-        return getChildAt(i);
     }
 
     public void collapse() {
@@ -201,6 +194,18 @@ public class CircularActionMenu extends FrameLayout {
         }
     }
 
+    private ScaleAnimation createScaleAnimation(float fromScale, float toScale) {
+        ScaleAnimation scaleAnimation = new ScaleAnimation(fromScale, toScale, fromScale, toScale, Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0.5f);
+        scaleAnimation.setDuration(mDuration);
+        scaleAnimation.setFillAfter(true);
+        scaleAnimation.setInterpolator(mInterpolator);
+        return scaleAnimation;
+    }
+
+    public View getItemAt(int i) {
+        return getChildAt(i);
+    }
+
     public void addOnStateChangeListener(OnStateChangeListener onStateChangeListener) {
         mOnStateChangeListeners.add(onStateChangeListener);
     }
@@ -220,7 +225,6 @@ public class CircularActionMenu extends FrameLayout {
     public boolean isCollapsing() {
         return mCollapsing;
     }
-
 
     public int getItemCount() {
         return getChildCount();
@@ -280,6 +284,12 @@ public class CircularActionMenu extends FrameLayout {
 
     public int getExpandedWidth() {
         return mExpandedWidth;
+    }
+
+    public void removeFromWindow(WindowManager windowManager) {
+        if (isAttachedToWindow()) {
+            windowManager.removeView(this);
+        }
     }
 
 }

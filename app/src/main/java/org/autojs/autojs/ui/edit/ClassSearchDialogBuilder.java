@@ -3,29 +3,29 @@ package org.autojs.autojs.ui.edit;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
-import org.autojs.autojs6.R;
 import org.autojs.autojs.model.indices.AndroidClassIndices;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
 import org.autojs.autojs.ui.widget.AutoAdapter;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
 import org.autojs.autojs.ui.widget.SimpleTextWatcher;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-public class ClassSearchDialogBuilder extends ThemeColorMaterialDialogBuilder {
+public class ClassSearchDialogBuilder extends MaterialDialog.Builder {
 
     public interface OnItemClickListener {
         void onItemClick(MaterialDialog dialog, ClassSearchingItem item, int position);
@@ -104,7 +104,7 @@ public class ClassSearchDialogBuilder extends ThemeColorMaterialDialogBuilder {
                 }, t -> {
                     t.printStackTrace();
                     mProgressBar.setVisibility(View.GONE);
-                    Toast.makeText(context, t.getMessage(), Toast.LENGTH_LONG).show();
+                    ViewUtils.showToast(context, t.getMessage(), true);
                 });
     }
 

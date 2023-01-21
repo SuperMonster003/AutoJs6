@@ -4,33 +4,34 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.google.android.material.textfield.TextInputLayout;
-import com.stardust.autojs.project.ProjectConfig;
-import com.stardust.pio.PFiles;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.autojs.autojs6.R;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileItem;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.project.ProjectTemplate;
-import org.autojs.autojs.theme.dialog.ThemeColorMaterialDialogBuilder;
+import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.ui.BaseActivity;
-import org.autojs.autojs.ui.shortcut.ShortcutIconSelectActivity;
-import org.autojs.autojs.ui.shortcut.ShortcutIconSelectActivity_;
+import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
+import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity_;
 import org.autojs.autojs.ui.widget.SimpleTextWatcher;
+import org.autojs.autojs.util.ViewUtils;
+import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -101,7 +102,7 @@ public class ProjectConfigActivity extends BaseActivity {
             mDirectory = new File(dir);
             mProjectConfig = ProjectConfig.fromProjectDir(dir);
             if (mProjectConfig == null) {
-                new ThemeColorMaterialDialogBuilder(this)
+                new MaterialDialog.Builder(this)
                         .title(R.string.text_invalid_project)
                         .positiveText(R.string.text_ok)
                         .dismissListener(dialogInterface -> finish())
@@ -115,13 +116,12 @@ public class ProjectConfigActivity extends BaseActivity {
         if (mProjectConfig == null) {
             return;
         }
-        setToolbarAsBack(mNewProject ? getString(R.string.text_new_project) : mProjectConfig.getName());
         if (mNewProject) {
-            mAppName.addTextChangedListener(new SimpleTextWatcher(s ->
-                    mProjectLocation.setText(new File(mParentDirectory, s.toString()).getPath()))
-            );
+            mAppName.addTextChangedListener(new SimpleTextWatcher(s -> mProjectLocation.setText(new File(mParentDirectory, s.toString()).getPath())));
+            setToolbarAsBack(R.string.text_new_project);
         } else {
             mAppName.setText(mProjectConfig.getName());
+            setToolbarAsBack(mProjectConfig.getName());
             mVersionCode.setText(String.valueOf(mProjectConfig.getVersionCode()));
             mPackageName.setText(mProjectConfig.getPackageName());
             mVersionName.setText(mProjectConfig.getVersionName());
@@ -147,7 +147,7 @@ public class ProjectConfigActivity extends BaseActivity {
             saveIcon(mIconBitmap)
                     .subscribe(ignored -> saveProjectConfig(), e -> {
                         e.printStackTrace();
-                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        ViewUtils.showToast(this, e.getMessage(), true);
                     });
         } else {
             saveProjectConfig();
@@ -165,14 +165,14 @@ public class ProjectConfigActivity extends BaseActivity {
                         finish();
                     }, e -> {
                         e.printStackTrace();
-                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        ViewUtils.showToast(this, e.getMessage(), true);
                     });
         } else {
             Observable.fromCallable(() -> {
-                PFiles.write(ProjectConfig.configFileOfDir(mDirectory.getPath()),
-                        mProjectConfig.toJson());
-                return Void.TYPE;
-            })
+                        PFiles.write(ProjectConfig.configFileOfDir(mDirectory.getPath()),
+                                mProjectConfig.toJson());
+                        return Void.TYPE;
+                    })
                     .observeOn(Schedulers.io())
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .subscribe(ignored -> {
@@ -181,14 +181,14 @@ public class ProjectConfigActivity extends BaseActivity {
                         finish();
                     }, e -> {
                         e.printStackTrace();
-                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        ViewUtils.showToast(this, e.getMessage(), true);
                     });
         }
     }
 
     @Click(R.id.icon)
     void selectIcon() {
-        ShortcutIconSelectActivity_.intent(this)
+        AppsIconSelectActivity_.intent(this)
                 .startForResult(REQUEST_CODE);
     }
 
@@ -217,11 +217,11 @@ public class ProjectConfigActivity extends BaseActivity {
     private boolean checkPackageNameValid(EditText editText) {
         Editable text = editText.getText();
         String hint = ((TextInputLayout) editText.getParent().getParent()).getHint().toString();
-        if(TextUtils.isEmpty(text)){
+        if (TextUtils.isEmpty(text)) {
             editText.setError(hint + getString(R.string.text_should_not_be_empty));
             return false;
         }
-        if(!REGEX_PACKAGE_NAME.matcher(text).matches()){
+        if (!REGEX_PACKAGE_NAME.matcher(text).matches()) {
             editText.setError(getString(R.string.text_invalid_package_name));
             return false;
         }
@@ -245,7 +245,7 @@ public class ProjectConfigActivity extends BaseActivity {
         if (resultCode != RESULT_OK) {
             return;
         }
-        ShortcutIconSelectActivity.getBitmapFromIntent(getApplicationContext(), data)
+        AppsIconSelectActivity.getBitmapFromIntent(getApplicationContext(), data)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bitmap -> {

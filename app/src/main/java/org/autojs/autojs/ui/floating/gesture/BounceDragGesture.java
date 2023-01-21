@@ -5,6 +5,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
 
+import androidx.annotation.NonNull;
+
 import com.stardust.enhancedfloaty.WindowBridge;
 
 /**
@@ -29,7 +31,7 @@ public class BounceDragGesture extends DragGesture {
     }
 
     @Override
-    public boolean onDown(MotionEvent event) {
+    public boolean onDown(@NonNull MotionEvent event) {
         return super.onDown(event);
     }
 
@@ -52,4 +54,5 @@ public class BounceDragGesture extends DragGesture {
         animator.setInterpolator(mBounceInterpolator);
         animator.start();
     }
+
 }

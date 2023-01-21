@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <com.stardust.theme.widget.ThemeColorToolbar
+        <org.autojs.autojs.theme.widget.ThemeColorToolbar
             android:id="@+id/toolbar"
             android:theme="@style/ToolBarStyle"
             android:layout_width="match_parent"
@@ -19,7 +19,7 @@
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
-        </com.stardust.theme.widget.ThemeColorToolbar>
+        </org.autojs.autojs.theme.widget.ThemeColorToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
     <TextView

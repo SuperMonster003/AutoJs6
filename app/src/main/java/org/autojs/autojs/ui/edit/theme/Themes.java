@@ -2,8 +2,9 @@ package org.autojs.autojs.ui.edit.theme;
 
 import android.content.Context;
 
-import com.stardust.pio.UncheckedIOException;
-import org.autojs.autojs.Pref;
+import org.autojs.autojs.pio.UncheckedIOException;
+import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.util.ViewUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,6 +29,7 @@ public class Themes {
     private static List<Theme> sThemes;
     private static Theme sDefaultTheme;
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static Observable<List<Theme>> getAllThemes(Context context) {
         if (sThemes != null) {
             return Observable.just(sThemes);
@@ -79,17 +81,18 @@ public class Themes {
     }
 
     public static Observable<Theme> getCurrent(Context context) {
-        String currentTheme = Pref.isNightModeEnabled() ? DARK_THEME : Pref.getCurrentTheme();
-        if (currentTheme == null)
+        String currentTheme = ViewUtils.isNightModeYes(context) ? DARK_THEME : Pref.getCurrentTheme();
+        if (currentTheme == null) {
             return getDefault(context);
-        return getAllThemes(context)
-                .map(themes -> {
-                    for (Theme theme : themes) {
-                        if (currentTheme.equals(theme.getName()))
-                            return theme;
-                    }
-                    return themes.get(0);
-                });
+        }
+        return getAllThemes(context).map(themes -> {
+            for (Theme theme : themes) {
+                if (currentTheme.equals(theme.getName())) {
+                    return theme;
+                }
+            }
+            return themes.get(0);
+        });
     }
 
     public static void setCurrent(String name) {
