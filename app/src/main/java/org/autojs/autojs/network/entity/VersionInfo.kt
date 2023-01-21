@@ -1,128 +1,106 @@
-package org.autojs.autojs.network.entity;
+package org.autojs.autojs.network.entity
 
-import static org.autojs.autojs.util.StringUtils.str;
-
-import androidx.annotation.NonNull;
-
-import org.autojs.autojs.util.UpdateUtils;
-import org.autojs.autojs6.BuildConfig;
-import org.autojs.autojs6.R;
-
-import java.text.MessageFormat;
+import org.autojs.autojs.util.StringUtils.str
+import org.autojs.autojs.util.UpdateUtils.isVersionIgnored
+import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on 2017/9/20.
  * Modified by SuperMonster003 as of May 29, 2022.
  */
-public class VersionInfo implements ExtendedVersionInfo {
+class VersionInfo : ExtendedVersionInfo {
+    var versionName: String? = null
+        private set
+    var versionCode = 0
+        private set
+    private var mSize: Long = -1
+    private var mDownloadUrl: String? = null
+    private var mAbi: String? = null
+    private var mFileName: String? = null
 
-    private String mVersionName;
-    private int mVersionCode;
-
-    private long mSize = -1;
-    private String mDownloadUrl;
-    private String mAbi;
-    private String mFileName;
-
-    public VersionInfo(@NonNull String propertiesFileRawString) {
-        String regexVersionName = "VERSION_NAME=.+";
-        String regexVersionCode = "VERSION_BUILD=.+";
-        for (String string : propertiesFileRawString.split("\n")) {
+    constructor(propertiesFileRawString: String) {
+        val regexVersionName = "VERSION_NAME=.+".toRegex()
+        val regexVersionCode = "VERSION_BUILD=.+".toRegex()
+        for (string in propertiesFileRawString.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
             if (string.matches(regexVersionName)) {
-                mVersionName = string.split("=")[1];
+                versionName = string.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
             } else if (string.matches(regexVersionCode)) {
-                mVersionCode = Integer.parseInt(string.split("=")[1]);
+                versionCode = string.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1].toInt()
             }
-            if (mVersionName != null && mVersionCode > 0) {
-                break;
-            }
-        }
-    }
-
-    public VersionInfo(@NonNull String versionName, int versionCode) {
-        mVersionName = versionName;
-        mVersionCode = versionCode;
-    }
-
-    public boolean isNewer() {
-        return mVersionCode > BuildConfig.VERSION_CODE;
-    }
-
-    public boolean isNotIgnored() {
-        return !UpdateUtils.isVersionIgnored(this);
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        if (mAbi == null) {
-            return MessageFormat.format("{0}: {1} ({2})", str(R.string.text_version), mVersionName, mVersionCode);
-        }
-        return MessageFormat.format("{0}: {1} ({2}) [{3}]", str(R.string.text_version), mVersionName, mVersionCode, mAbi);
-    }
-
-    public String toSummary() {
-        return MessageFormat.format("{0} ({1})", mVersionName, mVersionCode);
-    }
-
-    public static SimpleVersionInfo parseSummary(CharSequence summary) {
-        int indexForVersionName = 0;
-        int indexForVersionCode = 1;
-
-        String versionName = null;
-        int versionCode = -1;
-
-        String[] split = summary.toString().split(" ");
-
-        for (int i = 0; i < split.length; i++) {
-            if (i == indexForVersionName) {
-                versionName = split[i];
-            } else if (i == indexForVersionCode) {
-                versionCode = Integer.parseInt(split[i].replaceAll("[()]", ""));
+            if (versionName != null && versionCode > 0) {
+                break
             }
         }
-        return new SimpleVersionInfo(versionName, versionCode);
     }
 
-    public String getVersionName() {
-        return mVersionName;
+    constructor(versionName: String, versionCode: Int) {
+        this.versionName = versionName
+        this.versionCode = versionCode
     }
 
-    public int getVersionCode() {
-        return mVersionCode;
+    val isNewer: Boolean
+        get() = versionCode > BuildConfig.VERSION_CODE
+    val isNotIgnored: Boolean
+        get() = !isVersionIgnored(this)
+
+    override fun toString(): String {
+        return if (mAbi == null) {
+            "${str(R.string.text_version)}: $versionName ($versionCode)"
+        } else "${str(R.string.text_version)}: $versionName ($versionCode) [$mAbi]"
     }
 
-    public void setFileName(String fileName) {
-        this.mFileName = fileName;
+    fun toSummary(): String {
+        return "$versionName ($versionCode)"
     }
 
-    public void setSize(long size) {
-        mSize = size;
+    fun setFileName(fileName: String?) {
+        mFileName = fileName
     }
 
-    public void setDownloadUrl(String downloadUrl) {
-        mDownloadUrl = downloadUrl;
+    fun setSize(size: Long) {
+        mSize = size
     }
 
-    public String getFileName() {
-        return mFileName;
+    fun setDownloadUrl(downloadUrl: String?) {
+        mDownloadUrl = downloadUrl
     }
 
-    public void setAbi(String abi) {
-        mAbi = abi;
+    override fun getFileName(): String {
+        return mFileName!!
     }
 
-    public long getSize() {
-        return mSize;
+    fun setAbi(abi: String?) {
+        mAbi = abi
     }
 
-    public String getDownloadUrl() {
-        return mDownloadUrl;
+    override fun getSize(): Long {
+        return mSize
     }
 
-    @Override
-    public String getAbi() {
-        return mAbi;
+    override fun getDownloadUrl(): String {
+        return mDownloadUrl!!
     }
 
+    override fun getAbi(): String {
+        return mAbi!!
+    }
+
+    companion object {
+        fun parseSummary(summary: CharSequence): SimpleVersionInfo {
+            val indexForVersionName = 0
+            val indexForVersionCode = 1
+            var versionName: String? = null
+            var versionCode = -1
+            val split = summary.toString().split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            for (i in split.indices) {
+                if (i == indexForVersionName) {
+                    versionName = split[i]
+                } else if (i == indexForVersionCode) {
+                    versionCode = split[i].replace("[()]".toRegex(), "").toInt()
+                }
+            }
+            return SimpleVersionInfo(versionName, versionCode)
+        }
+    }
 }
