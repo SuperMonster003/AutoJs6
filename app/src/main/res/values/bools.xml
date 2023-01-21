@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="pref_compatibility_with_classes_for_ver_4_x">false</bool>
+    <bool name="pref_extending_js_build_in_objects">false</bool>
+    <bool name="pref_use_volume_control_running">true</bool>
+    <bool name="pref_auto_check_for_updates">true</bool>
+    <bool name="pref_enable_a11y_service_with_root_access">true</bool>
+    <bool name="pref_enable_a11y_service_with_secure_settings">true</bool>
+    <bool name="pref_stable_mode">false</bool>
+    <bool name="pref_gesture_observing">false</bool>
+    <bool name="pref_record_toast">true</bool>
+    <bool name="pref_guard_mode">false</bool>
+    <bool name="pref_use_volume_control_record">true</bool>
+</resources>
