@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>术语 (Glossaries) | AutoJs6 文档 - 6.2.0</title>
+    <title>术语 (Glossaries) | AutoJs6 文档 - 6.3.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
     <link rel="canonical" href="https://nodejs.org/api/glossaries.html">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="viewport" content="user-scalable=no">
@@ -21,15 +23,14 @@
         <ul>
 <li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
 <li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
-<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
-<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
-<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
-<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
 </ul>
 <div class="line"></div>
 
@@ -40,6 +41,7 @@
 <li><a class="nav-app" href="app.html">App - 通用应用</a></li>
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -48,6 +50,8 @@
 <li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
 <li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
 <li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
@@ -66,36 +70,33 @@
 <li><a class="nav-base64" href="base64.html">Base64</a></li>
 <li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
 <li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
 <li><a class="nav-e4x" href="e4x.html">E4X</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-glossaries active" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
 <li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
 <li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
 <li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
 <li><a class="nav-context" href="context.html">Context - 上下文</a></li>
 <li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
-<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
-<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
-<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
-<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
-<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
-<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
-<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
-<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
 </ul>
 <div class="line"></div>
 
@@ -107,15 +108,51 @@
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+<li><a class="nav-glossaries active" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
 </ul>
 
     </div>
 
     <div id="column1" data-id="glossaries" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <h1>AutoJs6 文档 - 6.3.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -164,6 +201,23 @@
 <li><span class="stability_undefined"><a href="#glossaries_18">子项信息集控件</a></span></li>
 <li><span class="stability_undefined"><a href="#glossaries_19">控件矩形外展</a></span></li>
 <li><span class="stability_undefined"><a href="#glossaries_20">控件矩形内收</a></span></li>
+<li><span class="stability_undefined"><a href="#glossaries_21">阈值</a></span><ul>
+<li><span class="stability_undefined"><a href="#glossaries_22">相似度</a></span></li>
+<li><span class="stability_undefined"><a href="#glossaries_23">颜色匹配阈值</a></span></li>
+<li><span class="stability_undefined"><a href="#glossaries_24">图像匹配阈值</a></span></li>
+<li><span class="stability_undefined"><a href="#glossaries_25">图像阈值化阈值</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#glossaries_26">亮度</a></span><ul>
+<li><span class="stability_undefined"><a href="#glossaries_luminance">Luminance</a></span></li>
+<li><span class="stability_undefined"><a href="#glossaries_brightness">Brightness</a></span></li>
+<li><span class="stability_undefined"><a href="#glossaries_lightness">Lightness</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#glossaries_27">注入</a></span></li>
+<li><span class="stability_undefined"><a href="#glossaries_28">占位符替换参数</a></span></li>
+<li><span class="stability_undefined"><a href="#glossaries_http">HTTP 标头</a></span></li>
+<li><span class="stability_undefined"><a href="#glossaries_mime">MIME 类型</a></span></li>
 </ul>
 </li>
 </ul>
@@ -180,15 +234,15 @@
 <h2>内置模块<span><a class="mark" href="#glossaries" id="glossaries">#</a></span></h2>
 <p>AutoJs6 内置模块指脚本可全局使用的 JavaScript 模块.<br>这些模块多数已在文档中列出, 如 <code>app</code>, <code>images</code>, <code>device</code> 等.</p>
 <h3>查看内置模块源代码<span><a class="mark" href="#glossaries_1" id="glossaries_1">#</a></span></h3>
-<p>除 <a href="https://github.com/SuperMonster003/AutoJs6/tree/master/app/src/main/assets/modules">直接查看开源代码</a> 外, 还可以将内置模块解压到本地存储后查看:<br>下载 <a href="https://github.com/SuperMonster003/AutoJs6/releases/latest">AutoJs6 APK</a> 并使用压缩软件将 APK 内的 <code>\assets\modules</code> 文件夹解压到本地.<br>模块通常以 <code>__%name%__.js</code> 格式命名, 其中 <code>%name%</code> 对应模块名.<br>可使用文本编辑器等软件查看模块源代码.</p>
+<p>除 <a href="http://project.autojs6.com/tree/master/app/src/main/assets/modules">直接查看开源代码</a> 外, 还可以将内置模块解压到本地存储后查看:<br>下载 <a href="http://download.autojs6.com">AutoJs6 APK</a> 并使用压缩软件将 APK 内的 <code>\assets\modules</code> 文件夹解压到本地.<br>模块通常以 <code>__%name%__.js</code> 格式命名, 其中 <code>%name%</code> 对应模块名.<br>可使用文本编辑器等软件查看模块源代码.</p>
 <h3>修改或增加内置模块<span><a class="mark" href="#glossaries_2" id="glossaries_2">#</a></span></h3>
 <blockquote>
 <p>注: 此小节内容可能需要用户具备一定的编程基础及开发经验.</p>
 </blockquote>
 <blockquote>
-<p>注: 此操作需要重新打包生成 <code>新的 AutoJs6 APK</code> (下文作 <code>新生 APK</code>).<br>因 <code>新生 APK</code> 包名发生变化, 需卸载已安装的 <code>开源 AutoJs6 APK</code> (下文作 <code>开源 APK</code>) 后再安装 <code>新生 APK</code>.<br>当 <code>开源 APK</code> 出现新版本时, 同样需卸载 <code>新生 APK</code> 才能安装新版本的 <code>开源 APK</code>.<br>此时, 修改或增加的内置模块将失效.<br>如欲将自己的代码整合到 <code>开源 APK</code> 中, 可向开源项目提交 <a href="https://github.com/SuperMonster003/AutoJs6/pulls">Pull Request (PR)</a>.</p>
+<p>注: 此操作需要重新打包生成 <code>新的 AutoJs6 APK</code> (下文作 <code>新生 APK</code>).<br>因 <code>新生 APK</code> 包名发生变化, 需卸载已安装的 <code>开源 AutoJs6 APK</code> (下文作 <code>开源 APK</code>) 后再安装 <code>新生 APK</code>.<br>当 <code>开源 APK</code> 出现新版本时, 同样需卸载 <code>新生 APK</code> 才能安装新版本的 <code>开源 APK</code>.<br>此时, 修改或增加的内置模块将失效.<br>如欲将自己的代码整合到 <code>开源 APK</code> 中, 可向开源项目提交 <a href="http://pr.autojs6.com">Pull Request (PR)</a>.</p>
 </blockquote>
-<p>克隆 (Clone) <a href="https://github.com/SuperMonster003/AutoJs6">AutoJs6 源码</a>.<br>使用 <a href="https://developer.android.com/studio/archive">Android Studio</a> 打开并完成项目构建 (Build).<br>定位 <code>\app\src\main\assets\modules</code> 目录.</p>
+<p>克隆 (Clone) <a href="http://project.autojs6.com">AutoJs6 源码</a>.<br>使用 <a href="https://developer.android.com/studio/archive">Android Studio</a> 打开并完成项目构建 (Build).<br>定位 <code>\app\src\main\assets\modules</code> 目录.</p>
 <h4>修改模块<span><a class="mark" href="#glossaries_3" id="glossaries_3">#</a></span></h4>
 <p>修改目录中的模块代码后直接打包生成新的 APK.</p>
 <h4>增加模块<span><a class="mark" href="#glossaries_4" id="glossaries_4">#</a></span></h4>
@@ -253,7 +307,7 @@ let $ = {
 <p>如字符串模式为 <code>/\d/</code>, 则要求给定的字符串 <code>str</code> 满足以下语句:</p>
 <pre><code class="lang-js">/\d/.test(str) === true;
 </code></pre>
-<p>因此以下示例均满足要求:<br><code>&quot;1&quot;</code>, <code>&quot;1a&quot;</code>, <code>&quot;a1&quot;</code>, <code>&quot;hello 2011&quot;</code>.</p>
+<p>因此以下示例均满足要求:<br><code>&#39;1&#39;</code>, <code>&#39;1a&#39;</code>, <code>&#39;a1&#39;</code>, <code>&quot;hello 2011&quot;</code>.</p>
 <p>字符串模式支持正则表达式的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#%E9%80%9A%E8%BF%87%E6%A0%87%E5%BF%97%E8%BF%9B%E8%A1%8C%E9%AB%98%E7%BA%A7%E6%90%9C%E7%B4%A2">标记参数</a>, 如 <code>/hello/i</code>.</p>
 <h2>NaN<span><a class="mark" href="#glossaries_nan" id="glossaries_nan">#</a></span></h2>
 <p>NaN 表示 &quot;不是一个数字&quot;, 即 <strong>N</strong>ot <strong>A</strong> <strong>N</strong>umber.</p>
@@ -569,20 +623,20 @@ scrollable().find().some((w) =&gt; {
 <li><code>[m#]</code> getColumnTitle / <code>[p#]</code> columnTitle</li>
 </ul>
 <h2>控件矩形外展<span><a class="mark" href="#glossaries_19" id="glossaries_19">#</a></span></h2>
-<p><a href="dataTypes.md.html#datatypes.md_androidrect">控件矩形</a> 边界为非整数时, 外展将对各个边界做如下取整操作:</p>
+<p><a href="androidRectType.html">控件矩形</a> 边界为非整数时, 外展将对各个边界做如下取整操作:</p>
 <ul>
 <li>left - 左边界左移, 即向下取整, 类似 JavaScript 语言的 Math.floor(left)</li>
 <li>top - 上边界上移, 即向下取整, 类似 JavaScript 语言的 Math.floor(top)</li>
 <li>right - 右边界右移, 即向上取整, 类似 JavaScript 语言的 Math.ceil(right)</li>
 <li>bottom - 下边界下移, 即向上取整, 类似 JavaScript 语言的 Math.ceil(bottom)</li>
 </ul>
-<p>例如:  </p>
+<p>例如:</p>
 <p><code>Rect(10.9, 12.6 - 120.37, 1882.02)</code> 外展后得到<br><code>Rect(10, 12, 121, 1883)</code></p>
 <blockquote>
 <p>注: &quot;外展&quot; 源自健身术语</p>
 </blockquote>
 <h2>控件矩形内收<span><a class="mark" href="#glossaries_20" id="glossaries_20">#</a></span></h2>
-<p><a href="dataTypes.md.html#datatypes.md_androidrect">控件矩形</a> 边界为非整数时, 外展将对各个边界做如下取整操作:</p>
+<p><a href="androidRectType.html">控件矩形</a> 边界为非整数时, 外展将对各个边界做如下取整操作:</p>
 <ul>
 <li>left - 左边界右移, 即向上取整, 类似 JavaScript 语言的 Math.ceil(left)</li>
 <li>top - 上边界下移, 即向上取整, 类似 JavaScript 语言的 Math.ceil(top)</li>
@@ -594,17 +648,183 @@ scrollable().find().some((w) =&gt; {
 <blockquote>
 <p>注: &quot;内收&quot; 源自健身术语</p>
 </blockquote>
+<h2>阈值<span><a class="mark" href="#glossaries_21" id="glossaries_21">#</a></span></h2>
+<p>阈值, 英文 threshold, 也称 &quot;临界值&quot;.<br>阈值是令对象发生某种变化所需某种条件的值.</p>
+<p>在 AutoJs6 中, 图像与颜色相关的许多方法, 均支持通过参数传入不同类型和数值的阈值.</p>
+<p>阈值的范围通常为 <code>IntRange[0..255]</code> 和 <code>Range[0..1]</code>.</p>
+<h3>相似度<span><a class="mark" href="#glossaries_22" id="glossaries_22">#</a></span></h3>
+<p>阈值通常可与 <code>相似度 (Similarity)</code> 进行转换, 作为参数时通常也支持互相替代:</p>
+<pre><code class="lang-text">%Similarity% = 1 - %Threshold% / 255
+%Threshold% = (1 - %Similarity%) * 255
+</code></pre>
+<p><code>阈值 0</code> 等效于 <code>相似度 1</code> (完全匹配, 不允许丝毫误差)<br><code>阈值 4</code> 约等效于 <code>相似度 0.984</code> (匹配时可以容忍一点误差)<br><code>阈值 128</code> 等效于 <code>相似度 0.5</code> (匹配时误差容忍相对宽松)<br><code>阈值 255</code> 等效于 <code>相似度 0</code> (完全容忍, 不常用)</p>
+<h3>颜色匹配阈值<span><a class="mark" href="#glossaries_23" id="glossaries_23">#</a></span></h3>
+<p>取值范围: IntRange[0..255]</p>
+<p>参数类型与此类阈值相关的常用方法:</p>
+<ul>
+<li><a href="color.html#color_m_issimilar">colors.isSimilar</a></li>
+<li>images.findColor</li>
+<li>images.findColorInRegion</li>
+<li>images.findMultiColors</li>
+<li>images.detectsColor</li>
+</ul>
+<h3>图像匹配阈值<span><a class="mark" href="#glossaries_24" id="glossaries_24">#</a></span></h3>
+<p>取值范围: Range[0..1]</p>
+<p>参数类型与此类阈值相关的常用方法:</p>
+<ul>
+<li>images.findImage</li>
+<li>images.findImageInRegion</li>
+<li>images.matchTemplate</li>
+</ul>
+<h3>图像阈值化阈值<span><a class="mark" href="#glossaries_25" id="glossaries_25">#</a></span></h3>
+<p>取值范围: IntRange[0..255]</p>
+<p>参数类型与此类阈值相关的常用方法:</p>
+<ul>
+<li>images.threshold(a, b, <i><strong>threshold</strong></i>, c)</li>
+<li>images.adaptiveThreshold ... (此处内容待完善)</li>
+</ul>
+<h2>亮度<span><a class="mark" href="#glossaries_26" id="glossaries_26">#</a></span></h2>
+<p>亮度既可指物理上对于光的量度, 也可指颜色上色彩的明亮程度.</p>
+<p>Luminance, Lightness 和 Brightness 都与 &quot;亮度&quot; 有关.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">术语</th>
+<th style="text-align:center">常用译名</th>
+<th style="text-align:center">性质</th>
+<th style="text-align:center">可测量或计算</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><a href="#glossaries_luminance">Luminance</a></td>
+<td style="text-align:center">亮度</td>
+<td style="text-align:center">物理量</td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td style="text-align:center"><a href="#glossaries_brightness">Brightness</a></td>
+<td style="text-align:center">视亮度</td>
+<td style="text-align:center">感知量</td>
+<td style="text-align:center">×</td>
+</tr>
+<tr>
+<td style="text-align:center"><a href="#glossaries_lightness">Lightness</a></td>
+<td style="text-align:center">明度</td>
+<td style="text-align:center">感知量</td>
+<td style="text-align:center">×</td>
+</tr>
+</tbody>
+</table>
+<h3>Luminance<span><a class="mark" href="#glossaries_luminance" id="glossaries_luminance">#</a></span></h3>
+<p>在光度学和色度学中, 亮度 (luminance) 表示人眼对光强度实际感受的物理量, 即单位面积看上去有多明亮.</p>
+<p>国际单位制规定亮度的符号是 <code>Lv</code>, 单位为 <code>坎德拉每平方米 (cd/m²)</code>, 另一个常用非国际单位为 <code>尼特 (nit)</code>.<br>亮度是一个物理量, 它可被测量及计算.</p>
+<p><a href="#glossaries_lightness">Lightness</a> 和 <a href="#glossaries_brightness">Brightness</a> 用于表示人眼对光亮的实际感受.<br>这个感受是一个感知量, 与物理量不同, 感知量不可测量, 也不可计算.</p>
+<p>相同的食盐, 不同人品尝有不同的咸度感受; 同样地, 相同的颜色, 不同人观察也会有不同的亮度感受.</p>
+<p>与 Luminance 相关的参考资料:</p>
+<ul>
+<li>亮度 (Luminance) - <a href="https://en.wikipedia.org/wiki/Luminance">Wikipedia (英)</a></li>
+</ul>
+<h3>Brightness<span><a class="mark" href="#glossaries_brightness" id="glossaries_brightness">#</a></span></h3>
+<p>视亮度 (Brightness) 是对于光源或物体表面明暗的视知觉特性, 是一个感知量.<br>视亮度是视觉的特性, 对视觉目标的辐射或反射的光亮度的感知.<br>这种感知对于光的亮度不是线性的, 而是依赖于视觉环境.</p>
+<p>与 Brightness 相关的参考资料:</p>
+<ul>
+<li>视亮度 (Brightness) - <a href="https://en.wikipedia.org/wiki/Brightness">Wikipedia (英)</a></li>
+<li>芒克-怀特错觉 (White&#39;s Illusion) - <a href="https://en.wikipedia.org/wiki/White%27s_illusion">Wikipedia (英)</a></li>
+<li>侧抑制 (Lateral Inhibition) - <a href="https://en.wikipedia.org/wiki/Lateral_inhibition">Wikipedia (英)</a></li>
+</ul>
+<h3>Lightness<span><a class="mark" href="#glossaries_lightness" id="glossaries_lightness">#</a></span></h3>
+<p>明度 (Lightness) 是一个物体与同样亮的白色物体相比后的明亮程度.</p>
+<p>与 Lightness 相关的参考资料:</p>
+<ul>
+<li>明度 (Lightness) - <a href="https://en.wikipedia.org/wiki/Lightness">Wikipedia (英)</a></li>
+</ul>
+<h2>注入<span><a class="mark" href="#glossaries_27" id="glossaries_27">#</a></span></h2>
+<p>代码注入 (Code Injection) 是因处理无效数据的而引发的非预期运行结果.</p>
+<p>代码注入可被攻击者用来导入代码到某特定的计算机程序, 以改变程序的执行进程或目的.</p>
+<p>常用的代码注入包含 [ 脚本注入 (XSS) / SQL 注入 / PHP 注入 / ASP 注入 ] 等.</p>
+<blockquote>
+<p>参阅: <a href="https://en.wikipedia.org/wiki/Code_injection">Wikipedia (英)</a> / <a href="https://zh.wikipedia.org/wiki/%E4%BB%A3%E7%A2%BC%E6%B3%A8%E5%85%A5">Wikipedia (中)</a></p>
+</blockquote>
+<h2>占位符替换参数<span><a class="mark" href="#glossaries_28" id="glossaries_28">#</a></span></h2>
+<p>AutoJs6 提供了简化的占位符格式化参数功能, 类似 Java 语言的 <code>String.format</code> 方法.</p>
+<pre><code class="lang-js">console.log(&#39;%s 获得了 %d 个奖章&#39;, &#39;大卫&#39;, 23);
+</code></pre>
+<p>上述示例中 <code>console.log</code> 方法提供了占位符格式化参数支持, 运行后控制台将显示一条消息, &quot;大卫 获得了 23 个奖章&quot;.</p>
+<p>其中, <code>%s</code> 和 <code>%d</code> 是占位符, 分别表示接受字符串类型和数字类型的参数, 因此后面的剩余参数将依次进行占位符替换, 替换时, JavaScript 将进行参数的隐式转换.</p>
+<p>AutoJs6 支持的所有占位符如下:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"><span style="white-space:nowrap">占位符</span></th>
+<th>简述</th>
+<th>示例</th>
+<th>示例结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">%s</td>
+<td><span style="white-space:nowrap">字符串占位符</span></td>
+<td><span style="white-space:nowrap">&quot;状态: %s&quot;, &quot;开启&quot;<br/>&quot;状态: %s&quot;, 100</span></td>
+<td><span style="white-space:nowrap">&quot;状态: 开启&quot;<br/>&quot;状态: 100&quot;</span></td>
+</tr>
+<tr>
+<td style="text-align:center">%d</td>
+<td><span style="white-space:nowrap">数字占位符</span></td>
+<td><span style="white-space:nowrap">&quot;数量: %d&quot;, 5<br/>&quot;数量: %d&quot;, &quot;hello&quot;</span></td>
+<td><span style="white-space:nowrap">&quot;数量: 5&quot;<br/>&quot;数量: NaN&quot;</span></td>
+</tr>
+<tr>
+<td style="text-align:center">%j</td>
+<td><span style="white-space:nowrap">JSON 对象占位符</span></td>
+<td><span style="white-space:nowrap">&quot;o: %j&quot;, { <span class="type">a: 1, b: 2</span> }</span></td>
+<td><span style="white-space:nowrap">&#39;o: { <span class="type">&quot;a&quot;:1,&quot;b&quot;:2</span> }&#39;</span></td>
+</tr>
+<tr>
+<td style="text-align:center">%%</td>
+<td><span style="white-space:nowrap">转义 % 符号<br/>%% 将转换为 %</span></td>
+<td><span style="white-space:nowrap">&quot;1%% is 0.01&quot;<br/>&quot;1%%%% is 0.0001&quot;</span></td>
+<td><span style="white-space:nowrap">&quot;1% is 0.01&quot;<br/>&quot;1%% is 0.0001&quot;</span></td>
+</tr>
+</tbody>
+</table>
+<p>JavaScript 的模板字符串也可以很好地完成占位符格式化功能:</p>
+<pre><code class="lang-js">let person = &#39;John&#39;;
+let score = 91;
+let subject = &#39;Chinese&#39;;
+
+/* 使用占位符替换参数. */
+console.log(&#39;%s got a %s score of %d&#39;, person, subject, score);
+
+/* 使用 JavaScript 模板字符串. */
+console.log(`${person} got a ${subject} score of ${score}`);
+
+/* 上述两种方法均可在控制台显示预期输出内容. */
+// &quot;John got a Chinese score of 91&quot;
+</code></pre>
+<h2>HTTP 标头<span><a class="mark" href="#glossaries_http" id="glossaries_http">#</a></span></h2>
+<p>参阅 <a href="httpHeaderGlossary.html">HTTP 标头</a> 术语章节.</p>
+<h2>MIME 类型<span><a class="mark" href="#glossaries_mime" id="glossaries_mime">#</a></span></h2>
+<p>参阅 <a href="mimeTypeGlossary.html">MIME 类型</a> 术语章节.</p>
 
         </div>
     </div>
 </div>
+
 <script src="assets/sh_javascript.js"></script>
 <script src="assets/sh_java.js"></script>
 <script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
 <script>
     highlight(void 0, void 0, 'pre');
     highlight(void 0, void 0, 'tt');
 </script>
+
 <!-- __TRACKING__ -->
+
 </body>
 </html>

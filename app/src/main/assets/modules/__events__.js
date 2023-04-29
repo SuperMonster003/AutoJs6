@@ -7,7 +7,7 @@
  */
 module.exports = function (scriptRuntime, scope) {
     let _ = {
-        Events: ( /* @IIFE */ () => {
+        Events: (/* @IIFE */ () => {
             /**
              * @extends Internal.Events
              */
@@ -32,7 +32,7 @@ module.exports = function (scriptRuntime, scope) {
 
             return Events;
         })(),
-        Keys: ( /* @IIFE */ () => {
+        Keys: (/* @IIFE */ () => {
             /**
              * @implements Internal.Keys
              */

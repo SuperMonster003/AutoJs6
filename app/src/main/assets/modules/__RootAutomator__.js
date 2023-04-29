@@ -19,7 +19,7 @@ module.exports = function (scriptRuntime, scope) {
                 throw Error('RootAutomator must be instantiated with root access');
             }
 
-            this.__ra__ = Object.create(new RootAutomator(scope.context, ( /* @IIFE */ () => {
+            this.__ra__ = Object.create(new RootAutomator(scope.context, (/* @IIFE */ () => {
                 if (typeof waitForReady === 'number') {
                     return waitForReady;
                 }

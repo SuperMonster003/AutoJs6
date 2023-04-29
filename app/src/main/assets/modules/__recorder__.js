@@ -7,7 +7,7 @@
  */
 module.exports = function (scriptRuntime, scope) {
     let _ = {
-        Recorder: ( /* @IIFE */ () => {
+        Recorder: (/* @IIFE */ () => {
             /**
              * @implements Internal.Recorder
              */

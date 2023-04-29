@@ -14,7 +14,7 @@ module.exports = function (scriptRuntime, scope) {
     const Result = org.autojs.autojs.rhino.continuation.Continuation.Result;
 
     let _ = {
-        Creator: ( /* @IIFE */ () => {
+        Creator: (/* @IIFE */ () => {
             /**
              * @extends Internal.Continuation.Creator
              */
@@ -58,7 +58,7 @@ module.exports = function (scriptRuntime, scope) {
 
             return Creator;
         })(),
-        Continuation: ( /* @IIFE */ () => {
+        Continuation: (/* @IIFE */ () => {
             /**
              * @implements Internal.Continuation
              */

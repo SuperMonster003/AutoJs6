@@ -7,7 +7,7 @@ import android.view.animation.BounceInterpolator;
 
 import androidx.annotation.NonNull;
 
-import com.stardust.enhancedfloaty.WindowBridge;
+import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 
 /**
  * Created by Stardust on 2017/9/26.

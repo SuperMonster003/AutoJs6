@@ -18,6 +18,8 @@ import androidx.appcompat.content.res.AppCompatResources;
 import org.autojs.autojs.core.ui.inflater.ImageLoader;
 
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -131,6 +133,8 @@ public class Drawables {
 
     private static class DefaultImageLoader implements ImageLoader {
 
+        private ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+
         @Override
         public void loadInto(final ImageView view, Uri uri) {
             load(view, uri, view::setImageDrawable);
@@ -159,7 +163,7 @@ public class Drawables {
 
         @Override
         public void load(final View view, final Uri uri, final BitmapCallback callback) {
-            new Thread(() -> {
+            mExecutor.execute(() -> {
                 try {
                     URL url = new URL(uri.toString());
                     final Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
@@ -167,7 +171,7 @@ public class Drawables {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }).start();
+            });
         }
     }
 }

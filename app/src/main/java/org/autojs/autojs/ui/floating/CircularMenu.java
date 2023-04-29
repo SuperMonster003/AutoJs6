@@ -11,14 +11,14 @@ import androidx.annotation.NonNull;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.makeramen.roundedimageview.RoundedImageView;
-import com.stardust.enhancedfloaty.FloatyService;
-import com.stardust.enhancedfloaty.FloatyWindow;
+import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
+import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
 
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
 import org.autojs.autojs.app.CircularMenuOperationDialogBuilder;
 import org.autojs.autojs.app.DialogUtils;
-import org.autojs.autojs.core.accessibility.AccessibilityServiceTool;
+import org.autojs.autojs.core.accessibility.AccessibilityTool;
 import org.autojs.autojs.core.accessibility.AccessibilityService;
 import org.autojs.autojs.core.accessibility.LayoutInspector;
 import org.autojs.autojs.core.accessibility.NodeInfo;
@@ -229,8 +229,8 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
             mLayoutInspectDialog = null;
         }
         if (AccessibilityService.isNotRunning()) {
-            ViewUtils.showToast(mContext, R.string.text_no_accessibility_permission_to_capture);
-            getAccessibilityServiceTool().goToAccessibilitySetting();
+            ViewUtils.showToast(mContext, R.string.error_no_accessibility_permission_to_capture);
+            getAccessibilityTool().launchSettings();
         } else {
             mCaptureDeferred.promise().then(capture -> {
                 mActionViewIcon.post(() -> FloatyService.addWindow(windowCreator.call(capture)));
@@ -238,8 +238,8 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         }
     }
 
-    private AccessibilityServiceTool getAccessibilityServiceTool() {
-        return new AccessibilityServiceTool(mContext);
+    private AccessibilityTool getAccessibilityTool() {
+        return new AccessibilityTool(mContext);
     }
 
     @Optional
@@ -310,7 +310,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
     @OnClick(R.id.accessibility_service)
     void enableAccessibilityService() {
         dismissSettingsDialog();
-        getAccessibilityServiceTool().enableAccessibilityService();
+        getAccessibilityTool().getService().enable();
     }
 
     private void dismissSettingsDialog() {

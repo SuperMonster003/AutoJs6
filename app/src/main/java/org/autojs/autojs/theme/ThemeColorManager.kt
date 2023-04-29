@@ -17,7 +17,8 @@ object ThemeColorManager {
     @JvmStatic
     var defaultThemeColor = ThemeColor(ColorUtils.get(R.color.theme_color_default))
 
-    private lateinit var currentThemeColor: ThemeColor
+    @JvmStatic
+    lateinit var currentThemeColor: ThemeColor
 
     @JvmStatic
     val colorPrimary: Int

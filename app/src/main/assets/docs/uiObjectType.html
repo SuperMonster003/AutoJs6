@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>控件节点 (UiObject) | AutoJs6 文档 - 6.2.0</title>
+    <title>控件节点 (UiObject) | AutoJs6 文档 - 6.3.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
     <link rel="canonical" href="https://nodejs.org/api/uiObjectType.html">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="viewport" content="user-scalable=no">
@@ -21,15 +23,14 @@
         <ul>
 <li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
 <li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
-<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
-<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
-<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
-<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
 </ul>
 <div class="line"></div>
 
@@ -40,6 +41,7 @@
 <li><a class="nav-app" href="app.html">App - 通用应用</a></li>
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -48,6 +50,8 @@
 <li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
 <li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
 <li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
@@ -66,36 +70,33 @@
 <li><a class="nav-base64" href="base64.html">Base64</a></li>
 <li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
 <li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
 <li><a class="nav-e4x" href="e4x.html">E4X</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType active" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
 <li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
 <li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
 <li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
 <li><a class="nav-context" href="context.html">Context - 上下文</a></li>
 <li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
-<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
-<li><a class="nav-uiObjectType active" href="uiObjectType.html">UiObject - 控件节点</a></li>
-<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
-<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
-<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
-<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
-<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
-<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
 </ul>
 <div class="line"></div>
 
@@ -107,15 +108,51 @@
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
 </ul>
 
     </div>
 
     <div id="column1" data-id="uiObjectType" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <h1>AutoJs6 文档 - 6.3.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -796,10 +833,10 @@ console.log(w.findOne(contentMatch(/\s*.{10,}\s*/)));
 <h3>bounds()<span><a class="mark" href="#uiobjecttype_bounds" id="uiobjecttype_bounds">#</a></span></h3>
 <p><strong><code>A11Y</code></strong></p>
 <ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_androidrect">AndroidRect</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="androidRectType.html">AndroidRect</a></span> }</li>
 </ul>
 <p>方法 <a href="#uiobjecttype_m_boundsinscreen">boundsInScreen</a> 的别名.</p>
-<p>返回一个 <a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a>, 表示控件在屏幕的相对位置及空间范围.</p>
+<p>返回一个 <a href="androidRectType.html">控件矩形 (Rect)</a>, 表示控件在屏幕的相对位置及空间范围.</p>
 <pre><code class="lang-js">let bounds = contentMatch(/.+/).findOnce().bounds();
 console.log(bounds); // e.g. Rect(0, 48 - 112, 160)
 </code></pre>
@@ -811,9 +848,9 @@ console.log(bounds); // e.g. Rect(0, 48 - 112, 160)
 <h3>boundsInScreen()<span><a class="mark" href="#uiobjecttype_boundsinscreen" id="uiobjecttype_boundsinscreen">#</a></span></h3>
 <p><strong><code>A11Y</code></strong></p>
 <ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_androidrect">AndroidRect</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="androidRectType.html">AndroidRect</a></span> }</li>
 </ul>
-<p>返回一个 <a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a>, 表示控件在屏幕的相对位置及空间范围.</p>
+<p>返回一个 <a href="androidRectType.html">控件矩形 (Rect)</a>, 表示控件在屏幕的相对位置及空间范围.</p>
 <pre><code class="lang-js">let bounds = contentMatch(/.+/).findOnce().boundsInScreen();
 console.log(bounds); // e.g. Rect(0, 48 - 112, 160)
 </code></pre>
@@ -826,9 +863,9 @@ console.log(bounds); // e.g. Rect(0, 48 - 112, 160)
 <p><strong><code>A11Y</code></strong></p>
 <p><strong><code>DEPRECATED</code></strong></p>
 <ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_androidrect">AndroidRect</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="androidRectType.html">AndroidRect</a></span> }</li>
 </ul>
-<p>返回一个 <a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a>, 表示控件于其父控件的相对位置及空间范围.</p>
+<p>返回一个 <a href="androidRectType.html">控件矩形 (Rect)</a>, 表示控件于其父控件的相对位置及空间范围.</p>
 <p>因其父控件实际上是 <code>View#getParentForAccessibility()</code> 的结果, 而非此控件的 <code>viewParent</code>, 所以得到的结果是不可靠的.</p>
 <pre><code class="lang-js">let bounds = contentMatch(/.+/).findOnce().boundsInParent();
 console.log(bounds); // e.g. Rect(0, 0 - 112, 112)
@@ -1081,9 +1118,9 @@ console.log(wC.boundsExactCenterY()); // e.g. -16.5
 <h3>point()<span><a class="mark" href="#uiobjecttype_point" id="uiobjecttype_point">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
 <ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_opencvpoint">OpencvPoint</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="opencvPointType.html">OpencvPoint</a></span> }</li>
 </ul>
-<p>返回控件矩形的中心点 (<a href="dataTypes.html#datatypes_opencvpoint">Point</a>).</p>
+<p>返回控件矩形的中心点 (<a href="opencvPointType.html">Point</a>).</p>
 <p>该中心点坐标由 <a href="#uiobjecttype_m_exactcenterx">exactCenterX</a> 和 <a href="#uiobjecttype_m_exactcentery">exactCenterY</a> 计算获得, 因此会保留精度.</p>
 <pre><code class="lang-js">let wA = pickup(/.+/);
 console.log(wA.bounds()); // e.g. Rect(0, 0 - 10, 12)
@@ -1099,9 +1136,9 @@ console.log(wB.point().y); // e.g. 6.5
 <h3>size()<span><a class="mark" href="#uiobjecttype_size" id="uiobjecttype_size">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
 <ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_opencvsize">OpencvSize</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="opencvSizeType.html">OpencvSize</a></span> }</li>
 </ul>
-<p>返回控件矩形的尺寸 (<a href="dataTypes.html#datatypes_opencvsize">Size</a>).</p>
+<p>返回控件矩形的尺寸 (<a href="opencvSizeType.html">Size</a>).</p>
 <pre><code class="lang-js">let w = pickup(/.+/);
 console.log(w.bounds()); // e.g. Rect(0, 0 - 10, 12)
 console.log(w.size()); // e.g. 10x12
@@ -1199,7 +1236,7 @@ console.log(idMatch(/.+/).findOnce().simpleId()); /* 同上. */
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
 </ul>
-<p>返回节点的 <a href="#uiobjecttype_m_fullid">ID 资源全称</a> 的 <a href="glossaries.md.html#glossaries.md_资源_ID">资源 ID</a> 十六进制字符串值, 简称 <code>ID 资源十六进制代表值</code>.</p>
+<p>返回节点的 <a href="#uiobjecttype_m_fullid">ID 资源全称</a> 的 <a href="glossaries.html#glossaries_资源_ID">资源 ID</a> 十六进制字符串值, 简称 <code>ID 资源十六进制代表值</code>.</p>
 <ol>
 <li>获取 <code>ID 资源全称</code> 对应的 <code>资源 ID</code></li>
 <li>将 <code>资源 ID</code> 的十六进制值以 <code>0x</code> 作为前缀进行组合</li>
@@ -2249,13 +2286,20 @@ console.log(detect(w, &#39;p2c1&gt;0&#39;, &#39;bounds&#39;)); /* 空指针安�
         </div>
     </div>
 </div>
+
 <script src="assets/sh_javascript.js"></script>
 <script src="assets/sh_java.js"></script>
 <script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
 <script>
     highlight(void 0, void 0, 'pre');
     highlight(void 0, void 0, 'tt');
 </script>
+
 <!-- __TRACKING__ -->
+
 </body>
 </html>

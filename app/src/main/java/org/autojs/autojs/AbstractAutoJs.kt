@@ -3,14 +3,15 @@ package org.autojs.autojs
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.WindowManager
 import org.autojs.autojs.app.SimpleActivityLifecycleCallbacks
 import org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl
 import org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver
 import org.autojs.autojs.core.accessibility.AccessibilityService.Companion.addDelegate
 import org.autojs.autojs.core.accessibility.LayoutInspector
 import org.autojs.autojs.core.activity.ActivityInfoProvider
-import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequesterImpl
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
@@ -19,6 +20,7 @@ import org.autojs.autojs.engine.RootAutomatorEngine
 import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.engine.ScriptEngineServiceBuilder
+import org.autojs.autojs.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.rhino.InterruptibleAndroidContextFactory
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
@@ -30,6 +32,9 @@ import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.util.ResourceMonitor
 import org.autojs.autojs.util.ResourceMonitor.UnclosedResourceException
+import org.autojs.autojs.util.StringUtils
+import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.R
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.WrappedException
 import java.io.File
@@ -84,7 +89,7 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     }
 
     protected open fun createRuntime(): ScriptRuntime = ScriptRuntime.Builder()
-        .setConsole(ConsoleImpl(uiHandler, globalConsole))
+        .setConsole(globalConsole)
         .setUiHandler(uiHandler)
         .setScreenCaptureRequester(ScreenCaptureRequesterImpl(this))
         .setAccessibilityBridge(AccessibilityBridgeImpl(this))
@@ -105,12 +110,27 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 ScreenMetrics.initIfNeeded(activity)
                 appUtils.setCurrentActivity(activity)
+                registerOnSharedPreferenceChangeListener(SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                    if (key == StringUtils.key(R.string.key_keep_screen_on_when_in_foreground)) {
+                        configKeepScreenOnWhenInForeground(activity)
+                    }
+                })
             }
 
             override fun onActivityPaused(activity: Activity) = appUtils.setCurrentActivity(null)
 
-            override fun onActivityResumed(activity: Activity) = appUtils.setCurrentActivity(activity)
+            override fun onActivityResumed(activity: Activity) {
+                configKeepScreenOnWhenInForeground(activity)
+                appUtils.setCurrentActivity(activity)
+            }
 
+            private fun configKeepScreenOnWhenInForeground(activity: Activity) {
+                if (ViewUtils.isKeepScreenOnWhenInForegroundAllPages) {
+                    activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                } else {
+                    activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
+            }
         })
     }
 

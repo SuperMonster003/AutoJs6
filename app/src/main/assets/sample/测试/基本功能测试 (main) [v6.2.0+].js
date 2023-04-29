@@ -102,7 +102,6 @@ assert(isFunc(random), 'random()');
 assert(isFunc(setScreenMetrics), 'setScreenMetrics()');
 assert(isFunc(requiresApi), 'requiresApi()');
 assert(isFunc(requiresAutojsVersion), 'requiresAutojsVersion()');
-assert(isFunc(isObjectSpecies), 'isObjectSpecies()');
 assert(isFunc(isInteger), 'isInteger()');
 assert(isFunc(isNullish), 'isNullish()');
 assert(isFunc(isPrimitive), 'isPrimitive()');
@@ -286,7 +285,7 @@ assert(isFunc(launch), 'global.launch()');
 assert(isFunc(launchApp), 'global.launchApp()');
 assert(isFunc(getPackageName), 'global.getPackageName()');
 assert(isFunc(getAppName), 'global.getAppName()');
-assert(isFunc(openAppSettings), 'global.openAppSettings()');
+assert(isFunc(launchSettings), 'global.launchSettings()');
 assert(new RegExp('-n \'[.\\w]+\\/Test\'' +
     ' --ei \'a\' 1' +
     ' --eia \'b\' 2,2' +

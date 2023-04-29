@@ -14,6 +14,7 @@ module.exports = function (scriptRuntime, scope) {
     const Uri = android.net.Uri;
     const JavaInteger = java.lang.Integer;
     const FileProvider = androidx.core.content.FileProvider;
+    const AppUtils = org.autojs.autojs.runtime.api.AppUtils;
 
     /**
      * @type {org.autojs.autojs.runtime.api.AppUtils}
@@ -24,7 +25,7 @@ module.exports = function (scriptRuntime, scope) {
 
     // noinspection SpellCheckingInspection
     let _ = {
-        App: ( /* @IIFE */ () => {
+        App: (/* @IIFE */ () => {
             /**
              * @extends Internal.App
              */
@@ -38,17 +39,21 @@ module.exports = function (scriptRuntime, scope) {
                 versionCode: packageInfo.versionCode,
                 versionName: packageInfo.versionName,
                 /**
-                 * @param {App.Intent.Preset.AppAlias | App.PackageName} app
+                 * @param {App.Alias | App.PackageName} app
                  * @returns {boolean}
                  */
                 launch(app) {
                     return this.launchPackage(app);
                 },
                 /**
-                 * @param {App.Intent.Common} o
+                 * @param {Intent.Common | Intent} o
                  * @return {Intent}
                  */
                 intent(o) {
+                    if (o instanceof Intent) {
+                        return o;
+                    }
+
                     let intent = new Intent();
 
                     if (o.url) {
@@ -108,7 +113,7 @@ module.exports = function (scriptRuntime, scope) {
                     return intent;
                 },
                 /**
-                 * @param {App.Intent.Common} i
+                 * @param {Intent.Common} i
                  * @return {string}
                  */
                 intentToShell(i) {
@@ -152,7 +157,7 @@ module.exports = function (scriptRuntime, scope) {
                                     return p.isQuote ? this.quote(p.body) : p.body;
                                 }).join('\x20');
                             }
-                            let body = isObjectSpecies(o) ? o.body : o;
+                            let body = species.isObject(o) ? o.body : o;
                             return o.isQuote ? this.quote(body) : body;
                         },
                     };
@@ -262,22 +267,32 @@ module.exports = function (scriptRuntime, scope) {
                     if (o instanceof Intent) {
                         return context.startActivity(o.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                     }
+                    if (o instanceof URI) {
+                        return this.openUrl(o);
+                    }
                     if (typeof o === 'string') {
-                        let prop = runtime.getProperty(`class.${o}`);
+                        if (o.includes('://')) {
+                            return this.openUrl(o);
+                        }
+                        let rexWebSiteWithoutProtocol = /^(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
+                        if (rexWebSiteWithoutProtocol.test(o)) {
+                            return this.openUrl(`http://${o}`);
+                        }
+                        let prop = runtime.getProperty(`${AppUtils.Companion.getActivityShortFormPrefix()}${o}`);
                         if (!prop) {
-                            throw Error(`Class ${o} not found`);
+                            throw Error(`Activity short form ${o} not found`);
                         }
                         let intent = new Intent(context, prop).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         return context.startActivity(intent);
                     }
-                    if (isObjectSpecies(o) && o.root) {
+                    if (species.isObject(o) && o.root) {
                         shell(`am start ${this.intentToShell(o)}`, true);
                     } else {
                         context.startActivity(this.intent(o).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                     }
                 },
                 startService(i) {
-                    if (isObjectSpecies(i) && i.root) {
+                    if (species.isObject(i) && i.root) {
                         // noinspection SpellCheckingInspection
                         shell(`am startservice ${this.intentToShell(i)}`, true);
                     } else {
@@ -285,7 +300,7 @@ module.exports = function (scriptRuntime, scope) {
                     }
                 },
                 /**
-                 * @param {App.Intent.Email} [options]
+                 * @param {Intent.Email} [options]
                  */
                 sendEmail(options) {
                     let i = new Intent(Intent.ACTION_SEND);
@@ -315,12 +330,13 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 sendBroadcast(i) {
                     if (typeof i === 'string') {
-                        let property = runtime.getProperty(`broadcast.${i}`);
-                        if (property) {
-                            this.sendLocalBroadcastSync(this.intent({ action: property }));
+                        let property = runtime.getProperty(`${AppUtils.Companion.getBroadcastShortFormPrefix()}${i}`);
+                        if (!property) {
+                            throw Error(`Broadcast short form ${i} not found`);
                         }
+                        this.sendLocalBroadcastSync(this.intent({ action: property }));
                     } else {
-                        if (isObjectSpecies(i) && i.root) {
+                        if (species.isObject(i) && i.root) {
                             shell(`am broadcast ${this.intentToShell(i)}`, true);
                         } else {
                             context.sendBroadcast(this.intent(i));
@@ -328,7 +344,13 @@ module.exports = function (scriptRuntime, scope) {
                     }
                 },
                 parseUri(uri) {
-                    return uri.startsWith(_.protocol.file) ? this.getUriForFile(uri) : Uri.parse(uri);
+                    if (typeof uri === 'string') {
+                        return uri.startsWith(_.protocol.file) ? this.getUriForFile(uri) : Uri.parse(uri);
+                    }
+                    if (uri instanceof URI) {
+                        return this.parseUri(uri.getHost());
+                    }
+                    return null;
                 },
                 getUriForFile(path) {
                     if (path.startsWith(_.protocol.file)) {
@@ -371,14 +393,14 @@ module.exports = function (scriptRuntime, scope) {
                     return preset ? preset.getPackageName() : rtApp.getPackageName(String(app));
                 },
                 openAppSetting(app) {
-                    return this.openAppSettings(app);
+                    return this.launchSettings(app);
                 },
-                openAppSettings(app) {
+                launchSettings(app) {
                     if (app instanceof App) {
                         app = app.getPackageName();
                     }
                     let preset = _.getAppByAlias(app);
-                    return rtApp.openAppSettings(preset ? preset.getPackageName() : app);
+                    return rtApp.launchSettings(preset ? preset.getPackageName() : app);
                 },
                 uninstall(app) {
                     if (app instanceof App) {
@@ -390,6 +412,12 @@ module.exports = function (scriptRuntime, scope) {
                 isVersionNewer(name, version) {
                     //// -=-= PENDING =-=- ////
                 },
+                viewFile(path) {
+                    return _.performFileAction('view', path);
+                },
+                editFile(path) {
+                    return _.performFileAction('edit', path);
+                },
             };
 
             Object.setPrototypeOf(App.prototype, rtApp);
@@ -400,7 +428,7 @@ module.exports = function (scriptRuntime, scope) {
             file: 'file://',
         },
         /**
-         * @returns {Object.<App.Intent.Preset.AppAlias, string>}
+         * @returns {Object.<App.Alias, string>}
          */
         getPresetPackageNames() {
             if (_._presetPackageNames === undefined) {
@@ -469,7 +497,7 @@ module.exports = function (scriptRuntime, scope) {
                         }
                         return Object.keys(query).map((key) => {
                             let val = query[key];
-                            if (isObjectSpecies(val)) {
+                            if (species.isObject(val)) {
                                 val = key === 'url' ? __.parseUrlObject(val) : parse(val);
                                 val = (key === '__webview_options__' ? '&' : '') + val;
                             }
@@ -485,7 +513,7 @@ module.exports = function (scriptRuntime, scope) {
             return typeof url === 'object' ? __.parseUrlObject(url) : url;
         },
         /**
-         * @param {App.Intent.Common} intent
+         * @param {Intent.Common} intent
          * @returns {string}
          */
         parseClassName(intent) {
@@ -501,8 +529,26 @@ module.exports = function (scriptRuntime, scope) {
             /**
              * @type {(keyof Internal.App)[]}
              */
-            let methods = [ 'launchPackage', 'launch', 'launchApp', 'getPackageName', 'getAppName', 'openAppSetting', 'openAppSettings' ];
+            let methods = [ 'launchPackage', 'launch', 'launchApp', 'getPackageName', 'getAppName', 'openAppSetting', 'launchSettings' ];
             __asGlobal__(app, methods, scope);
+        },
+        /**
+         * @param {'edit'|'view'} actionName
+         * @param {string} path
+         * @returns {boolean}
+         */
+        performFileAction(actionName, path) {
+            if (typeof path !== 'string') {
+                throw TypeError(`Can't ${actionName} "${path}" as it isn't a string`);
+            }
+            let nicePath = files.path(path);
+            if (!files.exists(nicePath)) {
+                throw Error(`Can't ${actionName} "${path}" as it doesn't exist`);
+            }
+            if (!files.isFile(nicePath)) {
+                throw Error(`Can't ${actionName} "${path}" as it isn't a file`);
+            }
+            return rtApp[`${actionName}File`].call(rtApp, nicePath);
         },
     };
 

@@ -12,6 +12,7 @@
             android:layout_weight="1"
             android:background="?selectableItemBackground"
             android:clickable="true"
+            android:focusable="true"
             android:orientation="horizontal"
             android:paddingVertical="8dp">
 
@@ -26,8 +27,7 @@
 
         <TextView
                 android:id="@+id/title"
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:text="@string/text_directory"
@@ -45,18 +45,7 @@
             android:padding="8dp"
             android:layout_marginHorizontal="3dp"
             android:src="@drawable/ic_dir_up"
-            app:tint="#828384" />
-
-    <ImageView
-            android:id="@+id/order"
-            android:layout_width="32dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:background="?selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:padding="8dp"
-            android:layout_marginHorizontal="3dp"
-            android:src="@drawable/ic_descending_order"
+            android:focusable="true"
             app:tint="#828384" />
 
     <ImageView
@@ -68,6 +57,20 @@
             android:clickable="true"
             android:padding="8dp"
             android:layout_marginHorizontal="3dp"
+            android:src="@drawable/ic_ascending_order"
+            android:focusable="true"
+            app:tint="#828384" />
+
+    <ImageView
+            android:id="@+id/sort_type"
+            android:layout_width="32dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:padding="8dp"
+            android:layout_marginHorizontal="3dp"
             android:src="@drawable/ic_sort"
+            android:focusable="true"
             app:tint="#828384" />
 </LinearLayout>

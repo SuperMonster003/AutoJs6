@@ -27,7 +27,7 @@ object FileUtils {
         }
     }
 
-    enum class TYPE(typeName: String) {
+    enum class TYPE(val typeName: String, private val iconName: String? = null) {
 
         DIRECTORY("/"),
         JAVASCRIPT("js"),
@@ -39,26 +39,15 @@ object FileUtils {
         UNKNOWN("?"),
         ;
 
-        var typeName: String
-            private set
-
-        private var mAlias: String? = null
-
-        constructor(type: String, alias: String) : this(type) {
-            mAlias = alias
-        }
-
-        init {
-            this.typeName = typeName.lowercase(Locale.getDefault())
-        }
+        val iconText
+            get() = iconName ?: typeName
 
         val extension
-            get() = when (typeName.matches("\\w+".toRegex())) {
-                true -> typeName.split("\\W".toRegex()).last { it.isNotEmpty() }
+            get() = when (Regex("[\\w.]+").containsMatchIn(typeName)) {
+                true -> typeName.split("[^\\w.]".toRegex()).last { it.isNotEmpty() }
                 else -> ""
             }
-        val alias
-            get() = mAlias ?: typeName
 
     }
+
 }

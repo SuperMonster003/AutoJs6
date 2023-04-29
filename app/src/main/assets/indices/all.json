@@ -1506,12 +1506,12 @@
       },
       {
         "key": "vibrate",
-        "summary": "震动",
+        "summary": "振动",
         "url": "device.html#device_device_vibrate_millis"
       },
       {
         "key": "cancelVibration",
-        "summary": "取消震动",
+        "summary": "取消振动",
         "url": "device.html#device_device_cancelvibration"
       }
     ],

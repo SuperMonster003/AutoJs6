@@ -9,7 +9,7 @@ let { plugins, Arrayx, Numberx } = global;
  */
 module.exports = (scriptRuntime, scope) => {
     let _ = {
-        MathxCtor: ( /* @IIFE */ () => {
+        MathxCtor: (/* @IIFE */ () => {
             /**
              * @implements Internal.Mathx
              */
@@ -193,7 +193,7 @@ module.exports = (scriptRuntime, scope) => {
             if (o instanceof org.opencv.core.Point) {
                 return { x: o.x, y: o.y };
             }
-            return isObjectSpecies(o) ? o : {};
+            return species.isObject(o) ? o : {};
         },
         registerPluginModule() {
             plugins.extend.registerModule({

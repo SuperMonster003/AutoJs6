@@ -83,7 +83,7 @@ public class DevPluginResponseHandler implements Handler {
                             AutoJs.getInstance().getScriptEngineService().stopAllAndToast();
                             return true;
                         }))
-                .handler(TYPE_BYTES_COMMAND, new Router("command")
+                .handler(TYPE_BYTES_COMMAND, new Router("bytes_command")
                         .handler("run_project", data -> {
                             launchProject(data.get("dir").getAsString());
                             return true;

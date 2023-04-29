@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tool="http://schemas.android.com/tools"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -14,6 +14,7 @@
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
+                android:id="@+id/title_bar"
                 android:background="@drawable/floating_console_bg_top"
                 android:orientation="horizontal">
 
@@ -75,17 +76,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/floating_console_bg_bottom"
-                android:minHeight="240dp" />
+                android:padding="8dp" />
+
     </LinearLayout>
 
     <ImageView
             android:id="@+id/move_cursor"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:background="@drawable/circle_cool_black"
-            android:padding="5dp"
+            android:padding="4dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_move_cursor"
             android:visibility="gone"
@@ -95,12 +97,12 @@
 
     <ImageView
             android:id="@+id/resizer"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:background="@drawable/circle_cool_black"
-            android:padding="6dp"
+            android:padding="5dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_resizer"
             android:tint="@android:color/white"

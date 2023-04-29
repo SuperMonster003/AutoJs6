@@ -47,6 +47,7 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
             } else {
                 setCheckedIfNeeded(aimState)
             }
+            mItemHelper.refreshSubtitle()
         }
     }
 

@@ -4,6 +4,7 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Строительство...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Очистка...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Упаковка...</string>
@@ -12,16 +13,25 @@
     <string name="confirm_overwrite_file">Файл уже существует.\nПерезаписать?</string>
     <string name="content_about_app_tips">1. Нажмите и удерживайте название приложения (AutoJs6) на главной странице, чтобы перейти на страницу настроек.\n2. Нажмите и удерживайте определенную опцию настроек на странице настроек, чтобы просмотреть подробную информацию.</string>
     <string name="content_github_feedback">Для сообщения о проблеме будет открыта веб-страница.\nМожет потребоваться учетная запись на GitHub.</string>
+    <string name="content_way_of_output_for_recorded_script">Выберите способ вывода для переработанных сценариев</string>
     <string name="crash_feedback">Скопируйте журнал отладки или выйдите напрямую</string>
+    <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
+    <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
+    <string name="default_script_notification_content">Уведомление из сценария</string>
+    <string name="default_script_notification_title">Уведомление от скрипта</string>
     <string name="default_value_working_directory">/Сценарии</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 - это автоматизированный инструмент JavaScript для android, который является открытым исходным кодом и клонирован из \"hyb1996/Auto.js\".\n\nЧтобы попросить о помощи или обратной связи, посетите GitHub issues или присоединитесь к группе Tencent QQ 690946137.</string>
     <string name="description_about_app_tips_preference">1. Нажмите и удерживайте значок приложения на странице \"О приложении и разработчике\", чтобы перейти на страницу параметров разработчика AutoJs6.</string>
     <string name="description_app_language_preference">Это предпочтение для изменения языка отображения AutoJs6, включая сообщения исключений от запущенных скриптов.\n\nПримечание: может потребоваться перезапуск приложения, чтобы язык был применен так, как ожидается.</string>
     <string name="description_change_working_dir_preference">Измените путь к директории, содержащей скрипты</string>
     <string name="description_check_for_updates_preference">AutoJs6 получает и загружает обновления с GitHub.\n\nПримечание: обновление пока не обеспечивает многоязыковую поддержку.</string>
+    <string name="description_compatibility_with_classes_for_ver_4_x">Обеспечивает определенную совместимость имен классов Java для версий 4.x путем переименования имен классов.\nПри включении этой опции при каждом запуске скрипта будет происходить задержка запуска (от десятков до сотен миллисекунд).\nРекомендуется всегда держать эту опцию выключенной, если в ней нет особой необходимости.</string>
+    <string name="description_documentation_launcher_icon_preference">Значок запуска документации облегчает доступ к документам и может переключаться как отдельное приложение.</string>
     <string name="description_documentation_source_preference">Локальная документация: Использование встроенных файлов AutoJs6 в качестве источников документации, подключение к сети не требуется. Содержание меняется по мере обновления AutoJs6.\nОнлайн-документы: Использование страниц GitHub в качестве источников документации, требуется подключение к сети. Содержимое всегда обновляется.\n\nПримечание: Чтобы максимально улучшить качество чтения онлайн-документов, рекомендуется использовать широкоформатное устройство отображения, например настольный монитор.\nПримечание: Начиная с версии 6.2.0, документация находится на предварительной стадии разработки, и большая часть содержимого еще не была написана или обновлена.</string>
-    <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P]: версия >= 105</string>
+    <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P] и ниже: версия >= 105</string>
+    <string name="description_extending_js_build_in_objects">Расширение встроенных объектов JavaScript может повысить гибкость кода и обеспечить более богатую функциональность, но может привести к конфликтам и даже поломкам.\nВсе сценарии имеют встроенные расширения, включенные по умолчанию, когда опция включена.\nВстроенные расширения часто небезопасны, и их не рекомендуется использовать, пока принципы и риски встроенных расширений не будут четко поняты.\nКогда опция выключена, встроенные расширения все еще можно включить через глобальный объект plugins, как описано в документации проекта.</string>
     <string name="description_hidden_files_preference">Используется для установки того, показывать или нет скрытые файлы и папки (обычно начинающиеся с \".\") в файловом проводнике AutoJs6.</string>
+    <string name="description_keep_screen_on_when_in_foreground_preference">Предпочтение для сохранения экрана устройства включенным и ярким, когда AutoJs6 находится на переднем плане.\nЧтобы это происходило только на главной странице среди всех страниц приложения AutoJs6, выберите опцию \"Только главная страница\".</string>
     <string name="description_manage_ignored_updates_preference">Нажмите для просмотра или управления элементами списка.\nДлинное нажатие для удаления элемента списка.</string>
     <string name="description_night_mode_preference">Ночной режим (также известный как темная тема) применяется как к системному пользовательскому интерфейсу Android, так и к приложениям, запущенным на устройстве, что улучшает видимость для пользователей со слабым зрением и тех, кто чувствителен к яркому свету, а также облегчает любому человеку использование устройства в условиях недостаточной освещенности.\n\nСистема слежения: AutoJs6 имеет настройки ночного режима, такие же, как и система Android\nВсегда включен: AutoJs6 держит Ночной режим включенным (независимо от настроек системы Android)\nВсегда выключен: AutoJs6 отключает ночной режим (независимо от настроек системы Android)\n\nПримечание: Опция \"Следовать за системой\" доступна только для Android API Level 28 (Android 9) [P] и выше.</string>
     <string name="description_night_mode_preference_more">Чтобы включить Ночной режим в системе Android:\n- Android API Level 29 (Android 10) [Q] и выше: Настройки -> Дисплей -> Тема.\n- Android API Уровень 28 (Android 9) [P]: Параметры разработчика -> Ночной режим.\n\nДля применения ночного режима (темной темы) к веб-контенту с помощью компонента WebView (например, страницы документации AutoJs6) должны быть выполнены следующие условия:\n1. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P]: версия >= 105\n2. Веб-содержимое в компоненте WebView адаптировано к теме Dark (с помощью CSS или ресурсов Android XML и т.д.).</string>
@@ -38,6 +48,7 @@
     <string name="dialog_button_download_with_browser">Браузер</string>
     <string name="dialog_button_history">История</string>
     <string name="dialog_button_ignore_current_update">Игнорировать</string>
+    <string name="dialog_button_join_group">Вступить группу</string>
     <string name="dialog_button_more">Еще</string>
     <string name="dialog_button_quit">Выйти</string>
     <string name="dialog_button_remove">Удалить</string>
@@ -47,13 +58,22 @@
     <string name="dialog_button_system_settings_simplified">Система</string>
     <string name="dialog_button_update_now">Обновить</string>
     <string name="dialog_button_use_default">Использовать по умолчанию</string>
+    <string name="docs_app_name">AutoJs6 документы</string>
     <string name="edit_and_run_handle_intent_error">Невозможно обработать файл</string>
     <string name="edit_exit_without_save_warn">Содержимое не было сохранено, вы уверены в выходе?</string>
     <string name="entry_app_language_auto">Следовать за системой</string>
+    <string name="entry_documentation_launcher_icon_hide">Скрыть значок из пусковой установки</string>
+    <string name="entry_documentation_launcher_icon_show">Показать значок в пусковой установке</string>
     <string name="entry_documentation_source_local">Локальные документы</string>
     <string name="entry_documentation_source_online">Онлайн-документы</string>
+    <string name="entry_editor_pinch_to_zoom_change_text_size">размер текста</string>
+    <string name="entry_editor_pinch_to_zoom_disable">Отключить</string>
+    <string name="entry_editor_pinch_to_zoom_scale_view">Масштабировать вид</string>
     <string name="entry_hidden_files_not_show">Не показывать скрытые файлы и папки</string>
     <string name="entry_hidden_files_show">Показывать скрытые файлы и папки</string>
+    <string name="entry_keep_screen_on_when_in_foreground_all_pages">Все страницы</string>
+    <string name="entry_keep_screen_on_when_in_foreground_disabled">Отключено</string>
+    <string name="entry_keep_screen_on_when_in_foreground_homepage_only">Только домашняя страница</string>
     <string name="entry_night_mode_always_off">Всегда выключено</string>
     <string name="entry_night_mode_always_on">Всегда включено</string>
     <string name="entry_night_mode_follow_system">Следовать за системой</string>
@@ -103,9 +123,17 @@
     <string name="error_max_listeners_exceeded">Превышено максимальное количество слушателей: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 может не иметь root-доступа для запуска файла \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() вызвана с нулевым аргументом: %s</string>
+    <string name="error_no_accessibility_permission">Служба доступности отключена, и сценарий остановлен</string>
+    <string name="error_no_accessibility_permission_to_capture">Служба доступности не активирована</string>
     <string name="error_no_accessibility_service">Нет службы доступности</string>
+    <string name="error_no_draw_overlays_permission">Нет разрешения \"отображать поверх других приложений\"</string>
+    <string name="error_no_post_notifications_permission">Нет разрешения на \"уведомления о сообщениях\"</string>
+    <string name="error_no_read_phone_state_permission">Нет разрешения \"читать состояние телефона\"</string>
     <string name="error_no_screen_capture_permission">Нет разрешения на захват экрана</string>
+    <string name="error_no_storage_rw_permission">Нет разрешения \"хранение r/w\"</string>
     <string name="error_no_such_selector_method" formatted="false">Нет такого метода селектора %s(%s: %s)</string>
+    <string name="error_no_usage_stats_permission">Нет разрешения \"статистика использования\"</string>
+    <string name="error_no_write_settings_permission">Нет разрешения \"запись настроек\"</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView может содержать только одного прямого дочернего элемента</string>
     <string name="error_parse_github_release_assets">Не удалось разобрать активы релиза GitHub</string>
     <string name="error_parse_version_info">Не удалось разобрать информацию о версии</string>
@@ -119,12 +147,12 @@
     <string name="error_thread_is_not_alive">Нить не жива</string>
     <string name="error_unknown">Неизвестная ошибка</string>
     <string name="error_unknown_algorithm_selector_param">Неизвестный параметр селектора алгоритма: %s</string>
+    <string name="error_unknown_color_name">Неизвестное имя цвета: %s</string>
     <string name="error_unknown_operation">Неизвестная операция</string>
     <string name="error_unknown_picker_result_type">Неизвестный тип результата {имя: %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Неизвестный тип результата {имя: %s, params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">Неизвестный селектор {имя: %s, тип: %s}</string>
     <string name="error_unknown_type">Неизвестный тип: %s</string>
-    <string name="error_unknown_color_name">Неизвестное имя цвета: %s</string>
     <string name="file_not_exist_or_readable">\"Файл не существует или не доступен для чтения: %s\".</string>
     <string name="foreground_notification_channel_name">Служба AutoJs6 в фоновом режиме</string>
     <string name="foreground_notification_text">Нажмите для запуска AutoJs6</string>
@@ -149,8 +177,10 @@
     <string name="screen_capturer_foreground_notification_text">Это уведомление отображается для захвата экрана</string>
     <string name="screen_capturer_foreground_notification_title">Служба захвата экрана на переднем плане</string>
     <string name="summary_about_app_tips">Лучший пользовательский опыт</string>
+    <string name="summary_compatibility_with_classes_for_ver_4_x">Обеспечить определенную совместимость имен классов Java для версий 4.x</string>
     <string name="summary_enable_a11y_service_with_root_access">Автоматическое включение службы доступности с корневым доступом при необходимости</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Автоматическое включение службы доступности с безопасными настройками при необходимости</string>
+    <string name="summary_extending_js_build_in_objects">Повысить гибкость кода и обеспечить более богатую функциональность за счет расширения встроенных объектов JavaScript</string>
     <string name="summary_guard_mode">Предотвращение действий автоматизации из скриптов, когда AutoJs6 находится на переднем плане</string>
     <string name="summary_not_showing_main_activity">Выполнять скрипт напрямую, не показывая основную активность</string>
     <string name="summary_pre_execute_script">Выполнять перед файлом сценария</string>
@@ -162,6 +192,9 @@
     <string name="text_a11y_service_description">Требуется для автоматической работы сценария (щелчок, длительное нажатие, скольжение и т.д.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Служба доступности включена, но не работает (Включите или перезагрузите устройство)</string>
     <string name="text_a11y_service_may_be_needed">Может потребоваться служба доступности</string>
+    <string name="text_abis">ABIs</string>
+    <string name="text_abis_32bit">ABIs (32-bit)</string>
+    <string name="text_abis_64bit">ABIs (64-bit)</string>
     <string name="text_about">Об</string>
     <string name="text_about_all_files_access">О доступе ко всем файлам</string>
     <string name="text_about_app_and_developer">О приложении и разработчике</string>
@@ -184,6 +217,10 @@
     <string name="text_already_copied_to_clip">Скопировано в буфер обмена</string>
     <string name="text_already_created">Создано</string>
     <string name="text_already_deleted">Удалено</string>
+    <string name="text_android_build_id">Идентификатор сборки Android</string>
+    <string name="text_android_build_version">Версия сборки Android</string>
+    <string name="text_android_release_version">Версия релиза Android</string>
+    <string name="text_android_sdk_version">Версия SDK для Android</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder недоступен</string>
     <string name="text_app_and_device_info">Информация о приложении и устройстве</string>
     <string name="text_app_crashed">AutoJs6 поврежден</string>
@@ -209,6 +246,8 @@
     <string name="text_app_name_qqmusic">QQMusic</string>
     <string name="text_app_name_wechat">WeChat</string>
     <string name="text_app_source_code">Исходный код</string>
+    <string name="text_app_version_code">Код версии приложения</string>
+    <string name="text_app_version_name">Название версии приложения</string>
     <string name="text_appearance">Внешний вид</string>
     <string name="text_attribute">Атрибут</string>
     <string name="text_auto_check_for_updates">Автоматическая проверка обновлений</string>
@@ -240,6 +279,8 @@
     <string name="text_code">Код</string>
     <string name="text_code_beautify">Улучшить код</string>
     <string name="text_command_already_copied_to_clip">Команда скопирована в буфер обмена</string>
+    <string name="text_compatibility">Совместимость</string>
+    <string name="text_compatibility_with_classes_for_ver_4_x">Совместимость с классами Java для версии 4.x</string>
     <string name="text_config">Конфигурация</string>
     <string name="text_confirm_to_delete">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_remove">Вы уверены, что хотите удалить?</string>
@@ -255,6 +296,7 @@
     <string name="text_copy_to_clip">Копировать в буфер обмена</string>
     <string name="text_copy_value">Копировать значение</string>
     <string name="text_daily_task">Ежедневная задача</string>
+    <string name="text_date">Дата</string>
     <string name="text_day1">Пн</string>
     <string name="text_day2">Вторник</string>
     <string name="text_day3">Ср.</string>
@@ -272,6 +314,13 @@
     <string name="text_detail">Детали</string>
     <string name="text_developer_details_under_development">Детали разработчика находятся в стадии разработки</string>
     <string name="text_developer_options">Параметры разработчика</string>
+    <string name="text_device_brand">Бренд устройства</string>
+    <string name="text_device_hardware_name">Название аппаратного обеспечения устройства</string>
+    <string name="text_device_hardware_serial_number">Серийный номер устройства</string>
+    <string name="text_device_manufacturer">Производитель устройства</string>
+    <string name="text_device_model">Модель устройства</string>
+    <string name="text_device_name">Название устройства</string>
+    <string name="text_device_product_name">Название продукта устройства</string>
     <string name="text_directly_download">Загрузить сейчас</string>
     <string name="text_directory">Каталог</string>
     <string name="text_display_over_other_app">Отображать поверх других приложений</string>
@@ -281,6 +330,7 @@
     <string name="text_do_not_ask_again_for_this_version">Не показывать снова эту версию</string>
     <string name="text_do_not_show_again">Не показывать снова</string>
     <string name="text_documentation">Документы</string>
+    <string name="text_documentation_launcher_icon">Значок пусковой установки документации</string>
     <string name="text_documentation_source">Источник документации</string>
     <string name="text_done">Готово</string>
     <string name="text_download">Скачать</string>
@@ -312,6 +362,8 @@
     <string name="text_exit">Выход</string>
     <string name="text_exit_directly">Выйти</string>
     <string name="text_exit_floating_window">Выход из плавающего окна</string>
+    <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
+    <string name="text_extensibility">Расширяемость</string>
     <string name="text_failed">Не удалось</string>
     <string name="text_failed_to_build">Не удалось создать</string>
     <string name="text_failed_to_create">Не удалось создать</string>
@@ -342,6 +394,7 @@
     <string name="text_force_stop">Принудительная остановка</string>
     <string name="text_foreground_service">Служба переднего плана</string>
     <string name="text_foreground_service_description">Службы переднего плана выполняют операции, заметные для пользователя.\nПередние службы отображают уведомление в строке состояния, чтобы пользователи были в курсе, что ваше приложение выполняет задачу на переднем плане и потребляет системные ресурсы.\nУведомление не может быть отменено, пока служба не будет остановлена или удалена с переднего плана.\nУведомление можно установить на низкий приоритет и даже отключить, долго нажимая на него.</string>
+    <string name="text_fx_keyboard">Fx клавиатура</string>
     <string name="text_generate">Сгенерировать</string>
     <string name="text_generate_code">Сгенерировать код</string>
     <string name="text_generated_code">Сгенерированный код</string>
@@ -379,6 +432,7 @@
     <string name="text_jump_to_line_end">Перейти к концу строки</string>
     <string name="text_jump_to_line_start">Перейти к началу строки</string>
     <string name="text_jump_to_start">Перейти к началу</string>
+    <string name="text_keep_screen_on_when_in_foreground">Не выключать экран, когда он находится на переднем плане</string>
     <string name="text_last_updates_checked_time">Последняя проверка: %s</string>
     <string name="text_latest_activity">Последняя активность</string>
     <string name="text_latest_package">Последний пакет</string>
@@ -413,19 +467,12 @@
     <string name="text_new_watching_variables">Новые наблюдающие переменные</string>
     <string name="text_next_run_time">Следующий запуск</string>
     <string name="text_night_mode">Ночной режим</string>
-    <string name="text_no_accessibility_permission">Служба доступности отключена, и сценарий остановлен</string>
-    <string name="text_no_accessibility_permission_to_capture">Служба доступности не активирована</string>
     <string name="text_no_browser">Не установлен браузер</string>
-    <string name="text_no_draw_overlays_permission">Нет разрешения \"отображать поверх других приложений\"</string>
     <string name="text_no_histories">Нет истории</string>
     <string name="text_no_ignored_updates">Нет проигнорированных обновлений</string>
-    <string name="text_no_read_phone_state_permission">Нет разрешения \"читать состояние телефона\"</string>
     <string name="text_no_root">Не root</string>
     <string name="text_no_root_access">Нет root-доступа</string>
     <string name="text_no_scripts_to_stop_running">Нет скриптов для остановки выполнения</string>
-    <string name="text_no_storage_rw_permission">Нет разрешения \"хранение r/w\"</string>
-    <string name="text_no_usage_stats_permission">Нет разрешения \"статистика использования\"</string>
-    <string name="text_no_write_settings_permission">Нет разрешения \"запись настроек\"</string>
     <string name="text_not_granted">Не предоставляется</string>
     <string name="text_not_showing_main_activity">Не показывает основную деятельность</string>
     <string name="text_notification">Уведомление</string>
@@ -458,6 +505,7 @@
     <string name="text_permission_revoked_with_root">Разрешение отозвано (с root)</string>
     <string name="text_permission_test">Проверка разрешения</string>
     <string name="text_permissions">Разрешения</string>
+    <string name="text_pinch_to_zoom">Уменьшение масштаба</string>
     <string name="text_please_choose">Пожалуйста, выберите</string>
     <string name="text_please_choose_a_script">Выберите сценарий</string>
     <string name="text_please_input_name">Имя ввода</string>
@@ -477,8 +525,9 @@
     <string name="text_project_save_success">Проект сохранен</string>
     <string name="text_prompt">Запрос</string>
     <string name="text_quit">Выйти</string>
-    <string name="text_record_prompt">Запрос записи</string>
     <string name="text_record_finished">Запись завершена</string>
+    <string name="text_record_prompt">Запрос записи</string>
+    <string name="text_record_stopped">Запись остановлена</string>
     <string name="text_recorded_output_file_type">Тип выходного файла записи</string>
     <string name="text_redo">Повторить</string>
     <string name="text_redo_simplified">Повто</string>
@@ -555,18 +604,18 @@
     <string name="text_show_layout_bounds">Вид в границах макета</string>
     <string name="text_show_layout_hierarchy">Вид в иерархии макета</string>
     <string name="text_show_widget_information">Показать информацию о виджете</string>
-    <string name="text_size">Размер текста</string>
-    <string name="text_size_current_value" formatted="true">Размер текста: %d</string>
+    <string name="text_size">Размер</string>
     <string name="text_source_file_path">Путь к исходному коду</string>
     <string name="text_stable_mode">Стабильный режим</string>
     <string name="text_star">Звезда</string>
     <string name="text_start_record">Начало записи</string>
-    <string name="text_record_stopped">Запись остановлена</string>
     <string name="text_start_running">Выполнение</string>
     <string name="text_stop">Остановить</string>
+    <string name="text_symbols_settings">Настройки символов</string>
     <string name="text_tailor_made_developer">Индивидуальный разработчик</string>
     <string name="text_task">Задание</string>
     <string name="text_text_size">Размер текста</string>
+    <string name="text_text_size_current_value" formatted="true">Размер текста: %d</string>
     <string name="text_theme_color">Цвет темы</string>
     <string name="text_time">Время</string>
     <string name="text_timed_task">Задание по времени</string>
@@ -606,44 +655,15 @@
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="theme_color_default">По умолчанию</string>
-    <string name="content_way_of_output_for_recorded_script">Выберите способ вывода для переработанных сценариев</string>
-    <string name="dialog_button_join_group">Вступить группу</string>
-    <string name="text_app_version_name">Название версии приложения</string>
-    <string name="text_app_version_code">Код версии приложения</string>
-    <string name="text_android_build_version">Версия сборки Android</string>
-    <string name="text_android_release_version">Версия релиза Android</string>
-    <string name="text_android_sdk_version">Версия SDK для Android</string>
-    <string name="text_android_build_id">Идентификатор сборки Android</string>
-    <string name="text_device_brand">Бренд устройства</string>
-    <string name="text_device_manufacturer">Производитель устройства</string>
-    <string name="text_device_name">Название устройства</string>
-    <string name="text_device_model">Модель устройства</string>
-    <string name="text_device_product_name">Название продукта устройства</string>
-    <string name="text_device_hardware_name">Название аппаратного обеспечения устройства</string>
-    <string name="text_device_hardware_serial_number">Серийный номер устройства</string>
-    <string name="text_abis">ABIs</string>
-    <string name="text_abis_32bit">ABIs (32-bit)</string>
-    <string name="text_abis_64bit">ABIs (64-bit)</string>
-    <string name="text_fx_keyboard">Fx клавиатура</string>
-    <string name="text_symbols_settings">Настройки символов</string>
-    <string name="text_pinch_to_zoom">Уменьшение масштаба</string>
-    <string name="entry_editor_pinch_to_zoom_change_text_size">размер текста</string>
-    <string name="entry_editor_pinch_to_zoom_scale_view">Масштабировать вид</string>
-    <string name="entry_editor_pinch_to_zoom_disable">Отключить</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">Обеспечивает определенную совместимость имен классов Java для версий 4.x путем переименования имен классов.\nПри включении этой опции при каждом запуске скрипта будет происходить задержка запуска (от десятков до сотен миллисекунд).\nРекомендуется всегда держать эту опцию выключенной, если в ней нет особой необходимости.</string>
-    <string name="description_extending_js_build_in_objects">Расширение встроенных объектов JavaScript может повысить гибкость кода и обеспечить более богатую функциональность, но может привести к конфликтам и даже поломкам.\nВсе сценарии имеют встроенные расширения, включенные по умолчанию, когда опция включена.\nВстроенные расширения часто небезопасны, и их не рекомендуется использовать, пока принципы и риски встроенных расширений не будут четко поняты.\nКогда опция выключена, встроенные расширения все еще можно включить через глобальный объект plugins, как описано в документации проекта.</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">Обеспечить определенную совместимость имен классов Java для версий 4.x</string>
-    <string name="summary_extending_js_build_in_objects">Повысить гибкость кода и обеспечить более богатую функциональность за счет расширения встроенных объектов JavaScript</string>
-    <string name="text_compatibility">Совместимость</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">Совместимость с классами Java для версии 4.x</string>
-    <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
-    <string name="text_extensibility">Расширяемость</string>
+
     <plurals name="text_items_total_sum">
         <item quantity="one">Всего: %d элемент</item>
         <item quantity="other">Всего: %d элементов</item>
     </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d скрипт остановлен</item>
         <item quantity="other">%d скрипта остановлены</item>
     </plurals>
+
 </resources>

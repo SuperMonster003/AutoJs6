@@ -23,9 +23,9 @@ class VersionInfo : ExtendedVersionInfo {
         val regexVersionName = "VERSION_NAME=.+".toRegex()
         val regexVersionCode = "VERSION_BUILD=.+".toRegex()
         for (string in propertiesFileRawString.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
-            if (string.matches(regexVersionName)) {
+            if (string.contains(regexVersionName)) {
                 versionName = string.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
-            } else if (string.matches(regexVersionCode)) {
+            } else if (string.contains(regexVersionCode)) {
                 versionCode = string.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1].toInt()
             }
             if (versionName != null && versionCode > 0) {

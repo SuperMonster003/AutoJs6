@@ -12,8 +12,6 @@ import org.mozilla.javascript.Scriptable;
 
 public class NativeView extends NativeJavaObjectWithPrototype {
 
-    private static final String LOG_TAG = "NativeView";
-
     public static class ScrollEvent {
         public int scrollX;
         public int scrollY;

@@ -39,8 +39,8 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
     public TextSizeSettingDialogBuilder(@NonNull Context context) {
         super(context);
 
-        mMinTextSize = Integer.parseInt(context.getString(R.string.text_size_min_value));
-        mMaxTextSize = Integer.parseInt(context.getString(R.string.text_size_max_value));
+        mMinTextSize = Integer.parseInt(context.getString(R.string.text_text_size_min_value));
+        mMaxTextSize = Integer.parseInt(context.getString(R.string.text_text_size_max_value));
 
         View view = View.inflate(context, R.layout.dialog_text_size_setting, null);
         customView(view, false);
@@ -53,7 +53,7 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
 
         neutralText(R.string.dialog_button_use_default);
         neutralColorRes(R.color.dialog_button_reset);
-        onNeutral((dialog, which) -> initialValue(Integer.parseInt(getContext().getString(R.string.text_size_default_value))));
+        onNeutral((dialog, which) -> initialValue(Integer.parseInt(getContext().getString(R.string.text_text_size_default_value))));
         negativeText(R.string.text_cancel);
         onNegative((dialog, which) -> dialog.dismiss());
         positiveText(R.string.text_ok);
@@ -62,7 +62,7 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
 
     private void setTextSize(int textSize) {
         mTextSize = textSize;
-        String title = getContext().getString(R.string.text_size_current_value, textSize);
+        String title = getContext().getString(R.string.text_text_size_current_value, textSize);
         if (mMaterialDialog != null) {
             mMaterialDialog.setTitle(title);
         } else {

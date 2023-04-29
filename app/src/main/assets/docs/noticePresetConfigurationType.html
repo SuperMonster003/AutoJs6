@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>NoticePresetConfiguration | AutoJs6 文档 - 6.3.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/noticePresetConfigurationType.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-noticePresetConfigurationType">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType active" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="noticePresetConfigurationType" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_noticepresetconfiguration">NoticePresetConfiguration</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaulttitle">[p?] defaultTitle</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultcontent">[p?] defaultContent</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultbigcontent">[p?] defaultBigContent</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultissilent">[p?] defaultIsSilent</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultautocancel">[p?] defaultAutoCancel</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultappendscriptname">[p?] defaultAppendScriptName</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultpriority">[p?] defaultPriority</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultchannelname">[p?] defaultChannelName</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultchanneldescription">[p?] defaultChannelDescription</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultimportanceforchannel">[p?] defaultImportanceForChannel</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultenablevibrationforchannel">[p?] defaultEnableVibrationForChannel</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultvibrationpatternforchannel">[p?] defaultVibrationPatternForChannel</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultenablelightsforchannel">[p?] defaultEnableLightsForChannel</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultlightcolorforchannel">[p?] defaultLightColorForChannel</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_defaultlockscreenvisibilityforchannel">[p?] defaultLockscreenVisibilityForChannel</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_usedynamicdefaultnotificationid">[p?] useDynamicDefaultNotificationId</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_usescriptnameasdefaultchannelid">[p?] useScriptNameAsDefaultChannelId</a></span></li>
+<li><span class="stability_undefined"><a href="#noticepresetconfigurationtype_p_enablechannelinvalidmodificationwarnings">[p?] enableChannelInvalidModificationWarnings</a></span></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>NoticePresetConfiguration<span><a class="mark" href="#noticepresetconfigurationtype_noticepresetconfiguration" id="noticepresetconfigurationtype_noticepresetconfiguration">#</a></span></h1>
+<p>NoticePresetConfiguration 是一个发送 AutoJs6 通知时用于设置通知及 <a href="notice.html#notice_通知渠道">渠道</a> 默认行为及默认样式的接口.</p>
+<p>常见参数中使用此接口类型的方法:</p>
+<ul>
+<li><a href="notice.html#notice_m_config">notice.config</a>(<strong>preset</strong>)</li>
+</ul>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">NoticePresetConfiguration</p>
+
+<hr>
+<h2>[p?] defaultTitle<span><a class="mark" href="#noticepresetconfigurationtype_p_defaulttitle" id="noticepresetconfigurationtype_p_defaulttitle">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 默认通知标题</li>
+</ul>
+</div><p><code>defaultTitle</code> 用于为通知标题指定一个默认值.</p>
+<p><code>defaultTitle</code> 为 <code>null</code> 时, 通知标题的值取决于 <code>content</code> 属性值:</p>
+<ol>
+<li><code>content</code> 为空或未设置<ul>
+<li>默认值为资源 <code>R.string.default_script_notification_title</code> 代表值</li>
+<li>如简体中文语言对应 &quot;脚本通知&quot;, English 语言对应 &quot;Script notification&quot;</li>
+</ul>
+</li>
+<li><code>content</code> 已设置<ul>
+<li>默认值由系统决定显示文本</li>
+<li>如应用名称 (AutoJs6)</li>
+</ul>
+</li>
+</ol>
+<pre><code class="lang-js">/* 假设默认配置 config.defaultTitle 未设置. */
+
+/* title 为 &quot;脚本通知&quot; (简体中文语言). */
+notice();
+
+/* title 可能显示为 AutoJs6 (由系统决定), 因为 content 已设置. */
+notice(&#39;hello&#39;);
+notice({ content: &#39;hello&#39; }); /* 效果同上. */
+</code></pre>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeOptionsType.html#noticeoptionstype_p_title">NoticeOptions#title</a></li>
+</ul>
+<h2>[p?] defaultContent<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultcontent" id="noticepresetconfigurationtype_p_defaultcontent">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 默认通知内容</li>
+</ul>
+</div><p><code>defaultContent</code> 用于为通知内容指定一个默认值.</p>
+<p><code>defaultContent</code> 为 <code>null</code> 时, 通知内容的值取决于 <code>title</code> 属性值:</p>
+<ol>
+<li><code>title</code> 为空或未设置<ul>
+<li>默认值为资源 <code>R.string.default_script_notification_content</code> 代表值</li>
+<li>如简体中文语言对应 &quot;来自脚本的通知&quot;, English 语言对应 &quot;Notification from script&quot;</li>
+</ul>
+</li>
+<li><code>title</code> 已设置<ul>
+<li>默认值为空 (不显示任何内容)</li>
+</ul>
+</li>
+</ol>
+<pre><code class="lang-js">/* 假设默认配置 config.defaultContent 未设置. */
+
+/* content 为 &quot;来自脚本的通知&quot; (简体中文语言). */
+notice();
+
+/* content 为空, 不显示通知内容, 仅显示标题. */
+notice({ title: &#39;hello&#39; });
+notice(&#39;&#39;, &#39;hello&#39;); /* 效果同上, 但不常用. */
+</code></pre>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeOptionsType.html#noticeoptionstype_p_content">NoticeOptions#content</a></li>
+</ul>
+<h2>[p?] defaultBigContent<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultbigcontent" id="noticepresetconfigurationtype_p_defaultbigcontent">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 默认通知长文本内容</li>
+</ul>
+</div><p><code>defaultBigContent</code> 用于为通知长文本内容指定一个默认值.</p>
+<p><code>defaultBigContent</code> 为 <code>null</code> 时, 通知消息中将不显示长文本内容.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeOptionsType.html#noticeoptionstype_p_bigcontent">NoticeOptions#bigContent</a></li>
+</ul>
+<h2>[p?] defaultIsSilent<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultissilent" id="noticepresetconfigurationtype_p_defaultissilent">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 默认的通知安静模式</li>
+</ul>
+</div><p><code>defaultIsSilent</code> 用于为通知的安静模式指定一个默认值.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeOptionsType.html#noticeoptionstype_p_issilent">NoticeOptions#isSilent</a></li>
+</ul>
+<h2>[p?] defaultAutoCancel<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultautocancel" id="noticepresetconfigurationtype_p_defaultautocancel">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 通知消息是否自动消除的默认值</li>
+</ul>
+</div><p><code>defaultAutoCancel</code> 用于为通知在用户点击时是否自动消除指定一个默认值.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeOptionsType.html#noticeoptionstype_p_autocancel">NoticeOptions#autoCancel</a></li>
+</ul>
+<h2>[p?] defaultAppendScriptName<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultappendscriptname" id="noticepresetconfigurationtype_p_defaultappendscriptname">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <a href="dataTypes.html#datatypes_boolean">boolean</a> | <code>&#39;auto&#39;</code> | <code>&#39;title&#39;</code> | <code>&#39;content&#39;</code> | <code>&#39;bigContent&#39;</code> } - 默认的脚本文件全名附加目标</li>
+</ul>
+</div><p><code>defaultAppendScriptName</code> 用于指定通知消息中附加脚本文件全名的默认附加目标.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeOptionsType.html#noticeoptionstype_p_appendscriptname">NoticeOptions#appendScriptName</a></li>
+</ul>
+<h2>[p?] defaultPriority<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultpriority" id="noticepresetconfigurationtype_p_defaultpriority">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <a href="dataTypes.html#datatypes_number">number</a> | <code>&#39;default&#39;</code> | <code>&#39;low&#39;</code> | <code>&#39;min&#39;</code> | <code>&#39;high&#39;</code> | <code>&#39;max&#39;</code> } - 默认优先级</li>
+</ul>
+</div><p><code>defaultPriority</code> 用于为通知消息指定一个默认优先级.</p>
+<p><code>defaultPriority</code> 为 <code>null</code> 时, 通知默认优先级将恢复为 <code>&#39;high&#39;</code>.</p>
+<p><code>defaultPriority</code> 仅适用于以下操作系统:</p>
+<ul>
+<li><code>Android API 24 (7.0) [N]</code></li>
+<li><code>Android API 25 (7.1-7.1.2) [N_MR1]</code></li>
+</ul>
+<p>其他版本操作系统将忽略此设置项.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeOptionsType.html#noticeoptionstype_p_priority">NoticeOptions#priority</a></li>
+</ul>
+<h2>[p?] defaultChannelName<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultchannelname" id="noticepresetconfigurationtype_p_defaultchannelname">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 默认渠道名称</li>
+</ul>
+</div><p><code>defaultChannelName</code> 用于为通知渠道名称指定一个默认值.</p>
+<p><code>defaultChannelName</code> 为 <code>null</code> 时, 渠道名称默认值与通知标题默认值相同, 如 &quot;脚本通知&quot;.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_name">NoticeChannelOptions#name</a></li>
+</ul>
+<h2>[p?] defaultChannelDescription<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultchanneldescription" id="noticepresetconfigurationtype_p_defaultchanneldescription">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 默认渠道描述</li>
+</ul>
+</div><p><code>defaultChannelDescription</code> 用于为通知渠道描述指定一个默认值.</p>
+<p><code>defaultChannelDescription</code> 为 <code>null</code> 时, 渠道描述默认值与通知内容默认值相同, 如 &quot;来自脚本的通知&quot;.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_description">NoticeChannelOptions#description</a></li>
+</ul>
+<h2>[p?] defaultImportanceForChannel<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultimportanceforchannel" id="noticepresetconfigurationtype_p_defaultimportanceforchannel">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <a href="dataTypes.html#datatypes_number">number</a> | <code>&#39;default&#39;</code> | <code>&#39;high&#39;</code> | <code>&#39;low&#39;</code> | <code>&#39;max&#39;</code> | <code>&#39;min&#39;</code> | <code>&#39;none&#39;</code> | <code>&#39;unspecified&#39;</code> } - 默认的渠道通知重要性级别</li>
+</ul>
+</div><p><code>defaultImportanceForChannel</code> 用于为通知渠道指定一个默认重要性级别.</p>
+<p><code>defaultImportanceForChannel</code> 为 <code>null</code> 时, 渠道默认优先级将恢复为 <code>&#39;high&#39;</code>.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_importance">NoticeChannelOptions#importance</a></li>
+</ul>
+<h2>[p?] defaultEnableVibrationForChannel<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultenablevibrationforchannel" id="noticepresetconfigurationtype_p_defaultenablevibrationforchannel">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 默认渠道振动状态</li>
+</ul>
+</div><p><code>defaultEnableVibrationForChannel</code> 属性可设置默认的渠道振动状态.</p>
+<p><code>defaultEnableVibrationForChannel</code> 为 <code>null</code> 时, 渠道振动状态将恢复为 <code>false</code>, 即禁用振动.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_enablevibration">NoticeChannelOptions#enableVibration</a></li>
+</ul>
+<h2>[p?] defaultVibrationPatternForChannel<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultvibrationpatternforchannel" id="noticepresetconfigurationtype_p_defaultvibrationpatternforchannel">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="omniTypes.html#omnitypes_omnivibrationpattern">OmniVibrationPattern</a></span> } - 默认渠道振动模式</li>
+</ul>
+</div><p><code>defaultVibrationPatternForChannel</code> 属性可设置默认的渠道振动模式.</p>
+<p><code>defaultVibrationPatternForChannel</code> 为 <code>null</code> 时, 渠道振动模式将恢复为 <code>null</code>.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_vibrationpattern">NoticeChannelOptions#vibrationPattern</a></li>
+</ul>
+<h2>[p?] defaultEnableLightsForChannel<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultenablelightsforchannel" id="noticepresetconfigurationtype_p_defaultenablelightsforchannel">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 渠道的通知指示灯默认行为</li>
+</ul>
+</div><p><code>defaultEnableLightsForChannel</code> 属性可设置渠道的通知指示灯默认行为.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_enableLights">NoticeChannelOptions#enableLights</a></li>
+</ul>
+<h2>[p?] defaultLightColorForChannel<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultlightcolorforchannel" id="noticepresetconfigurationtype_p_defaultlightcolorforchannel">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 渠道的通知指示灯默认颜色</li>
+</ul>
+</div><p><code>defaultLightColorForChannel</code> 属性可设置渠道的通知指示灯默认颜色.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_lightcolor">NoticeChannelOptions#lightColor</a></li>
+</ul>
+<h2>[p?] defaultLockscreenVisibilityForChannel<span><a class="mark" href="#noticepresetconfigurationtype_p_defaultlockscreenvisibilityforchannel" id="noticepresetconfigurationtype_p_defaultlockscreenvisibilityforchannel">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <a href="dataTypes.html#datatypes_number">number</a> | <code>&#39;public&#39;</code> | <code>&#39;private&#39;</code> | <code>&#39;secret&#39;</code> | <code>&#39;no_override&#39;</code> } - 渠道的通知可见详情的默认级别</li>
+</ul>
+</div><p><code>defaultLockscreenVisibilityForChannel</code> 属性可设置渠道的通知可见详情的默认级别.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_lockscreenvisibility">NoticeChannelOptions#lockscreenVisibility</a></li>
+</ul>
+<h2>[p?] useDynamicDefaultNotificationId<span><a class="mark" href="#noticepresetconfigurationtype_p_usedynamicdefaultnotificationid" id="noticepresetconfigurationtype_p_usedynamicdefaultnotificationid">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>true</code> ] { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否使用动态通知 ID</li>
+</ul>
+</div><p><code>useDynamicDefaultNotificationId</code> 属性可设置发送的通知是否使用动态通知 ID.</p>
+<p>默认值情况:</p>
+<ul>
+<li><code>true</code> - 动态值 <code>(System.currentTimeMillis() % Int.MAX_VALUE).toInt()</code></li>
+<li><code>false</code> - 常量值 <code>String(&#39;script_notification&#39;).hashCode()</code></li>
+</ul>
+<p>设置 <code>true</code> 时, 每一个通知将独立显示, 否则后续通知将覆盖之前的通知.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeOptionsType.html#noticeoptionstype_p_notificationid">NoticeOptions#notificationId</a></li>
+</ul>
+<h2>[p?] useScriptNameAsDefaultChannelId<span><a class="mark" href="#noticepresetconfigurationtype_p_usescriptnameasdefaultchannelid" id="noticepresetconfigurationtype_p_usescriptnameasdefaultchannelid">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>true</code> ] { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否使用脚本全程作为默认渠道 ID</li>
+</ul>
+</div><p>通知渠道使用 <code>渠道 ID (Channel ID)</code> 作为唯一标识, <code>useScriptNameAsDefaultChannelId</code> 属性可设置当前发送通知的默认渠道 ID 是否为动态 ID.</p>
+<p>默认值情况:</p>
+<ul>
+<li><code>true</code> - 当前运行的脚本文件全名 (如 <code>test.js</code>)</li>
+<li><code>false</code> - 常量值 <code>script_channel</code></li>
+</ul>
+<p>设置 <code>true</code> 时, 默认渠道 ID 为动态 ID, 使用脚本文件全名作为 ID 值, 如 <code>test.js</code>. 此时, 在不指定渠道 ID 发送通知时, 将默认在 <code>test.js</code> 渠道上发送.</p>
+<p>否则, 默认渠道 ID 将固定为 <code>script_channel</code> 常量值.</p>
+<p>相关的接口属性:</p>
+<ul>
+<li><a href="noticeOptionsType.html#noticeoptionstype_p_channelid">NoticeOptions#channelId</a></li>
+<li><a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_id">NoticeChannelOptions#id</a></li>
+</ul>
+<h2>[p?] enableChannelInvalidModificationWarnings<span><a class="mark" href="#noticepresetconfigurationtype_p_enablechannelinvalidmodificationwarnings" id="noticepresetconfigurationtype_p_enablechannelinvalidmodificationwarnings">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>true</code> ] { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否在通知渠道修改无作用时显示控制台警告信息</li>
+</ul>
+</div><p><code>enableChannelInvalidModificationWarnings</code> 属性可设置在通知渠道修改无作用时, 是否在显示控制台相关警告信息.</p>
+<p>渠道创建后, 将无法通过代码更改渠道的设置 (除名称, 描述, 和受条件限制的优先级之外), 对于渠道的设置, 用户拥有最终控制权:</p>
+<pre><code class="lang-js">/* 创建一个全新的通知渠道, 并设置通知指示灯为蓝色. */
+
+let channelId = `test_channel_id_${Date.now()}`;
+notice.channel.create(channelId, { lightColor: &#39;blue&#39; });
+
+/* 通知渠道创建后, 将无法再通过代码更改其配置, 只能由用户更改. */
+
+/* 尝试通过代码修改渠道配置, 将通知指示灯修改为红色. */
+notice.channel.create(channelId, { lightColor: &#39;red&#39; });
+
+/* 此时如果 enableChannelInvalidModificationWarnings 配置为 true, */
+/* 将在控制台显示一条警告信息. */
+/* 因为修改不会生效, 指示灯依然为蓝色. */
+
+/* 如不希望出现这些警告信息, 可配置选项为 false. */
+notice.config({ enableChannelInvalidModificationWarnings: false });
+</code></pre>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

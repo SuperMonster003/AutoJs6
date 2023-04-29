@@ -1,4 +1,4 @@
-( /* @IIFE */ () => {
+(/* @IIFE */ () => {
     // Sample A - Simple time-consumed function
     // zh-CN: 示例 A - 简单的耗时函数
 

@@ -136,7 +136,7 @@ public abstract class AccessibilityBridge {
         if ((mFlags & FLAG_USE_USAGE_STATS) != 0) {
             if (!mUsageStatsPerm.has()) {
                 mUsageStatsPerm.config();
-                throw new SecurityException(mContext.getString(R.string.text_no_usage_stats_permission));
+                throw new SecurityException(mContext.getString(R.string.error_no_usage_stats_permission));
             }
         }
         getInfoProvider().setUseUsageStats((mFlags & FLAG_USE_USAGE_STATS) != 0);

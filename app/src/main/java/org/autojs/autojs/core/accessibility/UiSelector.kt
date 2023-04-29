@@ -1082,7 +1082,7 @@ open class UiSelector : UiObjectActions {
 
                 fun setCallback(callback: BaseFunction?) = also { callback?.let { mCallback = it } }
 
-                fun build() = Picker(mRoot, mSelector, mCompass, mResultType)
+                fun build() = Picker(mRoot, mSelector, mCompass, mResultType, mCallback)
 
             }
 

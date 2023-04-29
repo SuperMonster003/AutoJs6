@@ -37,7 +37,8 @@
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
+    <uses-permission
+            android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
             tools:ignore="ProtectedPermissions" />
 
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
@@ -96,11 +97,11 @@
             android:icon="@drawable/autojs6_material"
             android:label="@string/app_name"
             android:largeHeap="true"
+            android:hardwareAccelerated="true"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true"
             android:requestLegacyExternalStorage="true"
-            tools:replace="android:label, android:allowBackup"
             tools:ignore="DataExtractionRules">
 
         <meta-data
@@ -109,7 +110,6 @@
 
         <activity
                 android:name="org.autojs.autojs.ui.splash.SplashActivity"
-                android:hardwareAccelerated="true"
                 android:theme="@style/AppTheme.Splash"
                 android:exported="true">
             <intent-filter>
@@ -123,7 +123,6 @@
 
         <activity
                 android:name="org.autojs.autojs.ui.main.MainActivity_"
-                android:hardwareAccelerated="true"
                 android:launchMode="singleTask"
                 android:theme="@style/AppTheme.FullScreen" />
 
@@ -134,9 +133,9 @@
                 android:exported="true">
             <intent-filter>
 
-                <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="android.intent.action.MAIN" />
 
             </intent-filter>
         </activity>
@@ -185,7 +184,23 @@
 
         <activity android:name="org.autojs.autojs.ui.log.LogActivity_" />
 
-        <activity android:name="org.autojs.autojs.ui.doc.DocumentationActivity_" />
+        <activity
+                android:name="org.autojs.autojs.ui.doc.DocumentationActivity_"
+                android:label="@string/docs_app_name"
+                android:icon="@drawable/ic_docs_app"
+                android:taskAffinity="org.autojs.autojs.ui.doc.DocumentationActivity_"
+                android:theme="@style/AppTheme.FullScreen"
+                android:exported="true">
+
+            <intent-filter>
+
+                <category android:name="android.intent.category.LAUNCHER" />
+
+                <action android:name="android.intent.action.MAIN" />
+
+            </intent-filter>
+
+        </activity>
 
         <activity android:name="org.autojs.autojs.ui.shortcut.AppsIconSelectActivity_" />
 
@@ -212,6 +227,8 @@
             </intent-filter>
 
         </activity>
+
+        <service android:name="org.autojs.autojs.ui.enhancedfloaty.FloatyService"/>
 
         <service android:name="org.autojs.autojs.external.foreground.MainActivityForegroundService" />
 
@@ -490,7 +507,7 @@
                 android:theme="@style/ScriptTheme.Transparent" />
 
         <service
-                android:name="org.autojs.autojs.core.accessibility.ApplicationAccessibilityService"
+                android:name="org.autojs.autojs.core.accessibility.AccessibilityService"
                 android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
                 android:exported="true">
 

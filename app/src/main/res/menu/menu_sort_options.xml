@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/action_sort_by_name"
-        android:title="@string/text_name"/>
-    <item
-        android:id="@+id/action_sort_by_date"
-        android:title="@string/text_time"
-        />
-    <item
-        android:id="@+id/action_sort_by_size"
-        android:title="@string/text_size"
-        />
-    <item
-        android:id="@+id/action_sort_by_type"
-        android:title="@string/text_type"
-        />
+    <group
+            android:id="@+id/group"
+            android:checkableBehavior="single">
+
+        <item
+                android:id="@+id/action_sort_by_name"
+                android:title="@string/text_name"
+                android:orderInCategory="0"/>
+        <item
+                android:id="@+id/action_sort_by_date"
+                android:title="@string/text_date"
+                android:orderInCategory="1"/>
+        <item
+                android:id="@+id/action_sort_by_size"
+                android:title="@string/text_size"
+                android:orderInCategory="2"/>
+        <item
+                android:id="@+id/action_sort_by_type"
+                android:title="@string/text_type"
+                android:orderInCategory="3"/>
+
+    </group>
+
 </menu>

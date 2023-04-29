@@ -3,7 +3,6 @@ package org.autojs.autojs.model.script
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.annotation.Nullable
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.execution.ExecutionConfig
@@ -106,16 +105,14 @@ object Scripts {
     }
 
     @JvmStatic
-    fun run(context: Context, file: ScriptFile) {
-        try {
-            val parent = file.parent
-            if (parent != null) {
-                AutoJs.instance.scriptEngineService.execute(file.toSource(), ExecutionConfig(workingDirectory = parent))
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            ViewUtils.showToast(context, e.message, true)
+    fun run(context: Context, file: ScriptFile): ScriptExecution? = try {
+        file.parent?.let {
+            AutoJs.instance.scriptEngineService.execute(file.toSource(), ExecutionConfig(workingDirectory = it))
         }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ViewUtils.showToast(context, e.message, true)
+        null
     }
 
 
@@ -152,7 +149,6 @@ object Scripts {
         }
     }
 
-    @Nullable
     fun getRhinoException(throwable: Throwable?): RhinoException? {
         var e = throwable
         while (e != null) {

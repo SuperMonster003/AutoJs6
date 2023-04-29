@@ -1,6 +1,11 @@
 .sh_sourceCode {
     font-weight: normal;
     font-style: normal;
+    position: relative;
+}
+
+.codeWrapper {
+    position: relative;
 }
 
 .sh_sourceCode .sh_symbol,

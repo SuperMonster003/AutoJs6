@@ -1,6 +1,6 @@
 'ui';
 
-( /* @IIFE */ () => {
+(/* @IIFE */ () => {
     //ui布局为一块画布和一些函数调整控件
     ui.layout(
         <vertical>

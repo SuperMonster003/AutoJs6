@@ -5,7 +5,7 @@
  */
 module.exports = function (scriptRuntime, scope) {
     let _ = {
-        Plugins: ( /* @IIFE */ () => {
+        Plugins: (/* @IIFE */ () => {
             /**
              * @implements Internal.Plugins
              */
@@ -18,7 +18,7 @@ module.exports = function (scriptRuntime, scope) {
                 /**
                  * @type {Internal.Plugins.Extend}
                  */
-                extend: ( /* @IIFE */ () => {
+                extend: (/* @IIFE */ () => {
                     /**
                      * @implements Internal.Plugins.Extend
                      */
@@ -96,7 +96,7 @@ module.exports = function (scriptRuntime, scope) {
             if (!name.endsWith('x')) {
                 name += 'x';
             }
-            return name[0].toUpperCase() + name.slice(1);
+            return StringUtils.toUpperCaseFirst(name);
         },
     };
 

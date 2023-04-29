@@ -14,7 +14,6 @@ import org.autojs.autojs.timing.TimedTaskManager;
 import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -65,10 +64,10 @@ public abstract class TaskGroup implements Parent<Task> {
         @Override
         public void refresh() {
             mTasks.clear();
-            for (TimedTask timedTask : TimedTaskManager.getInstance().getAllTasksAsList()) {
+            for (TimedTask timedTask : TimedTaskManager.getAllTasksAsList()) {
                 mTasks.add(new Task.PendingTask(getContext(), timedTask));
             }
-            for (IntentTask intentTask : TimedTaskManager.getInstance().getAllIntentTasksAsList()) {
+            for (IntentTask intentTask : TimedTaskManager.getAllIntentTasksAsList()) {
                 mTasks.add(new Task.PendingTask(getContext(), intentTask));
             }
         }
@@ -134,24 +133,32 @@ public abstract class TaskGroup implements Parent<Task> {
 
         @Override
         public void refresh() {
-            Collection<ScriptExecution> executions = AutoJs.getInstance().getScriptEngineService().getScriptExecutions();
             mTasks.clear();
-            for (ScriptExecution execution : executions) {
-                mTasks.add(new Task.RunningTask(getContext(), execution));
-            }
+            AutoJs.getInstance().getScriptEngineService().getScriptExecutions().forEach(this::addTask);
         }
 
         public int addTask(ScriptExecution engine) {
-            int pos = mTasks.size();
-            mTasks.add(new Task.RunningTask(getContext(), engine));
-            return pos;
+            // @Overwrite by SuperMonster003 on Apr 1, 2023.
+            //  ! On homepage of AutoJs6, if we run a script
+            //  ! and then switch from FILE tab to TASK tab rapidly,
+            //  ! there will be two tasks of the same instance in the list.
+            //  ! Checking its existence before invoking `mTasks.add` solved the problem.
+
+            // int pos = mTasks.size();
+            // mTasks.add(new Task.RunningTask(getContext(), engine));
+            // return pos;
+
+            int size = mTasks.size();
+            if (size == 0 || indexOf(engine) == -1) {
+                mTasks.add(new Task.RunningTask(getContext(), engine));
+                return size;
+            }
+            return -1;
         }
 
         public int removeTask(ScriptExecution engine) {
             int i = indexOf(engine);
-            if (i >= 0) {
-                mTasks.remove(i);
-            }
+            if (i != -1) mTasks.remove(i);
             return i;
         }
 

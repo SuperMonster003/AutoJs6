@@ -13,6 +13,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityBridge;
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator;
 import org.autojs.autojs.core.accessibility.UiSelector;
 import org.autojs.autojs.core.activity.ActivityInfoProvider;
+import org.autojs.autojs.core.console.GlobalConsole;
 import org.autojs.autojs.core.image.Colors;
 import org.autojs.autojs.core.image.ImageWrapper;
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester;
@@ -25,7 +26,6 @@ import org.autojs.autojs.rhino.TopLevelScope;
 import org.autojs.autojs.rhino.continuation.Continuation;
 import org.autojs.autojs.runtime.api.AbstractShell;
 import org.autojs.autojs.runtime.api.AppUtils;
-import org.autojs.autojs.runtime.api.Console;
 import org.autojs.autojs.runtime.api.Device;
 import org.autojs.autojs.runtime.api.Dialogs;
 import org.autojs.autojs.runtime.api.Engines;
@@ -34,6 +34,7 @@ import org.autojs.autojs.runtime.api.Files;
 import org.autojs.autojs.runtime.api.Floaty;
 import org.autojs.autojs.runtime.api.Images;
 import org.autojs.autojs.runtime.api.Media;
+import org.autojs.autojs.runtime.api.MlKitOCR;
 import org.autojs.autojs.runtime.api.Plugins;
 import org.autojs.autojs.runtime.api.ProcessShell;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
@@ -74,7 +75,7 @@ public class ScriptRuntime {
 
     public static class Builder {
         private UiHandler mUiHandler;
-        private Console mConsole;
+        private GlobalConsole mConsole;
         private AccessibilityBridge mAccessibilityBridge;
         private Supplier<AbstractShell> mShellSupplier;
         private ScreenCaptureRequester mScreenCaptureRequester;
@@ -94,12 +95,12 @@ public class ScriptRuntime {
             return mUiHandler;
         }
 
-        public Builder setConsole(Console console) {
+        public Builder setConsole(GlobalConsole console) {
             mConsole = console;
             return this;
         }
 
-        public Console getConsole() {
+        public GlobalConsole getConsole() {
             return mConsole;
         }
 
@@ -158,7 +159,7 @@ public class ScriptRuntime {
     public final AppUtils app;
 
     @ScriptVariable
-    public final Console console;
+    public final GlobalConsole console;
 
     @ScriptVariable
     public final SimpleActionAutomator automator;
@@ -217,7 +218,11 @@ public class ScriptRuntime {
     @ScriptVariable
     public final Plugins plugins;
 
+    @ScriptVariable
     private final Images images;
+
+    @ScriptVariable
+    public final MlKitOCR mlKitOCR;
 
     private static WeakReference<Context> applicationContext;
     private final Map<String, Object> mProperties = new ConcurrentHashMap<>();
@@ -252,6 +257,8 @@ public class ScriptRuntime {
         device = new Device(context);
         media = new Media(context, this);
         plugins = new Plugins(context, this);
+
+        mlKitOCR = new MlKitOCR();
     }
 
     public void init() {
@@ -370,7 +377,7 @@ public class ScriptRuntime {
     public void loadJar(String path) {
         path = files.path(path);
         try {
-            ((AndroidClassLoader) ContextFactory.getGlobal().getApplicationClassLoader()).loadJar(new File(path));
+            getClassLoader().loadJar(new File(path));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -379,10 +386,14 @@ public class ScriptRuntime {
     public void loadDex(String path) {
         path = files.path(path);
         try {
-            ((AndroidClassLoader) ContextFactory.getGlobal().getApplicationClassLoader()).loadDex(new File(path));
+            getClassLoader().loadDex(new File(path));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static AndroidClassLoader getClassLoader() {
+        return (AndroidClassLoader) ContextFactory.getGlobal().getApplicationClassLoader();
     }
 
     public void exit() {
@@ -420,6 +431,12 @@ public class ScriptRuntime {
     public void onExit() {
         Log.d(TAG, "on exit");
 
+        ignoresException(() -> {
+            if (console.getConfigurator().isExitOnClose()) {
+                console.hideDelayed();
+            }
+        });
+
         ignoresException(RootUtils::resetRuntimeOverriddenRootModeState);
         ignoresException(ImageWrapper::recycleAll);
 
@@ -438,6 +455,7 @@ public class ScriptRuntime {
         ignoresException(loopers::recycle);
         ignoresException(this::recycleShell);
         ignoresException(images::releaseScreenCapturer);
+        ignoresException(mlKitOCR::release);
         ignoresException(sensors::unregisterAll);
         ignoresException(timers::recycle);
         ignoresException(ui::recycle);

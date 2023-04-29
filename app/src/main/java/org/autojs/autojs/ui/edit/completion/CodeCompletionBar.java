@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.autojs.autojs.model.autocomplete.CodeCompletions;
-import org.autojs.autojs.workground.WrapContentLinearLayoutManager;
+import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
 import org.autojs.autojs6.R;
 
 /**

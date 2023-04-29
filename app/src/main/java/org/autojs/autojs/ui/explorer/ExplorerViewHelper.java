@@ -41,12 +41,12 @@ public class ExplorerViewHelper {
         TYPE type = item.getType();
         switch (type) {
             case UNKNOWN:
-                return UNKNOWN.getAlias();
+                return UNKNOWN.getIconText();
             case AUTO:
-                return AUTO.getAlias();
+                return AUTO.getIconText();
         }
         if (item.getName().equalsIgnoreCase(PROJECT.getTypeName())) {
-            return PROJECT.getAlias();
+            return PROJECT.getIconText();
         }
         return type.getTypeName().substring(0, 1).toUpperCase();
     }

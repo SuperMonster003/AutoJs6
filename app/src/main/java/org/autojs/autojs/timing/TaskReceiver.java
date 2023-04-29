@@ -20,7 +20,7 @@ public class TaskReceiver extends BroadcastReceiver {
         ScriptIntents.handleIntent(context, intent);
         long id = intent.getLongExtra(EXTRA_TASK_ID, -1);
         if (id >= 0) {
-            TimedTaskManager.getInstance().notifyTaskFinished(id);
+            TimedTaskManager.notifyTaskFinished(id);
         }
     }
 }

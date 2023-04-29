@@ -9,7 +9,7 @@ let { util, plugins } = global;
  */
 module.exports = (scriptRuntime, scope) => {
     let _ = {
-        ArrayxCtor: ( /* @IIFE */ () => {
+        ArrayxCtor: (/* @IIFE */ () => {
             /**
              * @implements Internal.Arrayx
              */
@@ -23,7 +23,7 @@ module.exports = (scriptRuntime, scope) => {
                 //     if (Array.isArray(o)) {
                 //         return o;
                 //     }
-                //     if (isObjectSpecies(o) && typeof o.length === 'number' && o.length >= 0) {
+                //     if (species.isObject(o) && typeof o.length === 'number' && o.length >= 0) {
                 //         return Array.from(o);
                 //     }
                 //     return [ o ];

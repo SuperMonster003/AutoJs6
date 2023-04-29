@@ -3,7 +3,7 @@ package org.autojs.autojs.permission
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import com.stardust.enhancedfloaty.util.FloatingWindowPermissionUtil
+import org.autojs.autojs.ui.enhancedfloaty.util.FloatingWindowPermissionUtil
 import ezy.assist.compat.SettingsCompat
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
@@ -46,7 +46,7 @@ class DisplayOverOtherAppsPermission(override val context: Context) : Permission
         }
         val r = Runnable {
             toggle()
-            ViewUtils.showToast(context, R.string.text_no_draw_overlays_permission)
+            ViewUtils.showToast(context, R.string.error_no_draw_overlays_permission)
         }
         if (Looper.myLooper() != Looper.getMainLooper()) {
             Handler(Looper.getMainLooper()).post(r)

@@ -1,6 +1,6 @@
 package org.autojs.autojs.ui.floating;
 
-import com.stardust.enhancedfloaty.FloatyService;
+import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
 
 public interface CircularMenuFloaty {
 

@@ -5,6 +5,7 @@ import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.tool.Func1;
+import org.autojs.autojs.util.EnvironmentUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -166,7 +167,7 @@ public class Files {
     }
 
     public String getSdcardPath() {
-        return PFiles.getSdcardPath();
+        return EnvironmentUtils.getExternalStoragePath();
     }
 
     public String[] listDir(String path) {

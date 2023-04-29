@@ -22,8 +22,7 @@ class NotificationListenerService : android.service.notification.NotificationLis
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         for (listener in mNotificationListeners) {
-            listener.onNotification(org.autojs.autojs.core.notification.Notification.create(
-                    sbn.notification, sbn.packageName))
+            listener.onNotification(Notification.create(sbn.notification, sbn.packageName))
         }
     }
 

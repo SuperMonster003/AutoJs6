@@ -8,7 +8,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.core.view.GestureDetectorCompat;
 
-import com.stardust.enhancedfloaty.WindowBridge;
+import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 
 /**
  * Created by Stardust on 2017/4/18.

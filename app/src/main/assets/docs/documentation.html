@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>关于文档 (About) | AutoJs6 文档 - 6.2.0</title>
+    <title>关于文档 (About) | AutoJs6 文档 - 6.3.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
     <link rel="canonical" href="https://nodejs.org/api/documentation.html">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="viewport" content="user-scalable=no">
@@ -21,15 +23,14 @@
         <ul>
 <li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
 <li><a class="nav-documentation active" href="documentation.html">About - 关于文档</a></li>
-<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
-<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
-<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
-<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
 </ul>
 <div class="line"></div>
 
@@ -40,6 +41,7 @@
 <li><a class="nav-app" href="app.html">App - 通用应用</a></li>
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -48,6 +50,8 @@
 <li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
 <li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
 <li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
@@ -66,36 +70,33 @@
 <li><a class="nav-base64" href="base64.html">Base64</a></li>
 <li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
 <li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
 <li><a class="nav-e4x" href="e4x.html">E4X</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
 <li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
 <li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
 <li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
 <li><a class="nav-context" href="context.html">Context - 上下文</a></li>
 <li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
-<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
-<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
-<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
-<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
-<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
-<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
-<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
-<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
 </ul>
 <div class="line"></div>
 
@@ -107,15 +108,51 @@
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
 </ul>
 
     </div>
 
     <div id="column1" data-id="documentation" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <h1>AutoJs6 文档 - 6.3.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -196,7 +233,7 @@
         <div id="apicontent">
             <h1>关于文档 (About)<span><a class="mark" href="#documentation_about" id="documentation_about">#</a></span></h1>
 <!-- type=misc -->
-<p>AutoJs6 文档, 包含模块 API 使用方法及用例.<br>项目复刻 (Fork) 自 <a href="https://github.com/hyb1996/AutoJs-Docs/">hyb1996/AutoJs-Docs</a> (GitHub).<br>项目地址: <a href="https://github.com/SuperMonster003/AutoJs6-Documentation/">SuperMonster003/AutoJs6-Documentation</a> (GitHub).</p>
+<p>AutoJs6 文档, 包含模块 API 使用方法及用例.<br>项目复刻 (Fork) 自 <a href="https://github.com/hyb1996/AutoJs-Docs/">hyb1996/AutoJs-Docs</a> (GitHub).<br>项目地址: <a href="http://docs-project.autojs6.com">SuperMonster003/AutoJs6-Documentation</a> (GitHub).</p>
 <hr>
 <h2>文档阅读示例<span><a class="mark" href="#documentation" id="documentation">#</a></span></h2>
 <h3>基础<span><a class="mark" href="#documentation_1" id="documentation_1">#</a></span></h3>
@@ -245,13 +282,16 @@
 </div><p>属性类型包裹在一对花括号中.<br>上述示例表示 colors 的 RED 属性是 <a href="dataTypes.html#datatypes_number">number</a> 类型数据.</p>
 <p>对象字面量形式的类型则用一对双花括号表示:</p>
 <ul>
-<li>{ <span class="type">{ name: <a href="dataTypes.html#datatypes_string">string</a>; age: <a href="dataTypes.html#datatypes_number">number</a></span> }}</li>
+<li><strong>properties</strong> { <span class="type">{ name: <a href="dataTypes.html#datatypes_string">string</a>; age: <a href="dataTypes.html#datatypes_number">number</a></span> }}</li>
 </ul>
 <p>多行形式:</p>
 <ul>
-<li>{{</li>
-<li>-- name: <a href="dataTypes.html#datatypes_string">string</a>;</li>
-<li>-- age: <a href="dataTypes.html#datatypes_number">number</a>;</li>
+<li><strong>properties</strong> {{<ul>
+<li>name: <a href="dataTypes.html#datatypes_string">string</a>;</li>
+<li>age: <a href="dataTypes.html#datatypes_number">number</a>;</li>
+<li>laugh(decibel?: <a href="dataTypes.html#datatypes_number">number</a>);</li>
+</ul>
+</li>
 <li>}}</li>
 </ul>
 <p>一个符合上述示例期望的变量:</p>
@@ -259,7 +299,7 @@
 </code></pre>
 <p>可存取的属性在读取时如果有非 undefined 默认值, 则以一对方括号表示:</p>
 <ul>
-<li>[ 1200 ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+<li>[ <code>1200</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
 </ul>
 <p>上述示例表示一个默认值为 1200 的可存取属性.</p>
 <p>以一对双方括号表示常量:</p>
@@ -353,7 +393,7 @@ device.vibrate(&quot;hello&quot;); /* 无延迟. */
 <h4>device.vibrate(text, delay?)<span><a class="mark" href="#documentation_device_vibrate_text_delay_1" id="documentation_device_vibrate_text_delay_1">#</a></span></h4>
 <div class="signature"><ul>
 <li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 需转换为摩斯码的文本</li>
-<li><strong>[ delay = 0 ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 震动延迟</li>
+<li><strong>[ delay = 0 ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 振动延迟</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 </div><p>上述示例的 delay 参数是可选的 (以 &quot;?&quot; 标注) 且包含默认值 (以 &quot;=&quot; 标注).<br>因此以下两种调用方式等效:</p>
@@ -420,7 +460,8 @@ requestScreenCapture(false);
 <li><code>Getter/Setter</code>: 可存值且可取值属性, 即同时使用 Setter 及 Getter 定义的对象属性.</li>
 <li><code>Enum</code>: 枚举类.</li>
 <li><code>CONSTANT</code>: 常量.</li>
-<li><code>DEPRECATED</code>: 已弃用的属性或方法.</li>
+<li><code>DEPRECATED</code>: 已弃用的属性或方法. 表示不推荐使用, 通常会有替代属性或替代方法.</li>
+<li><code>ABANDONED</code>: 已废弃的属性或方法. 表示不再提供功能支持, 使用后功能将无效.</li>
 <li><code>xProto</code>: 针对原型的内置对象扩展.</li>
 <li><code>xObject</code>: 针对对象的内置对象扩展.</li>
 <li><code>xAlias</code>: 内置对象扩展时使用不同的方法或属性名称 (别名).</li>
@@ -438,7 +479,7 @@ requestScreenCapture(false);
 <li>以下两种调用方式均可用: <code>auto()</code> 及 <code>auto.waitFor()</code>.</li>
 </ul>
 </li>
-<li>[p]: 属性.<ul>
+<li>[p]: 普通对象属性或类静态成员属性或接口变量属性.<ul>
 <li>例如在 <code>device</code> 作为 <a href="#documentation_临时作用域对象">临时作用域对象</a> 时:</li>
 <li><code>[p] height</code> 代表 <code>device.height</code> 属性, 而非方法.</li>
 <li>此标签对 [ Getter / Setter / &quot;类&quot; 属性 / 对象属性 / 方法扩展属性 ] 等不作区分.</li>
@@ -486,7 +527,7 @@ requestScreenCapture(false);
 <li><code>[3]</code> 代表 apple 的一个方法, 名称为 &quot;getColor&quot;,</li>
 <li>由 <code>[4]</code> 得知, 其调用方式为 <code>apple.getColor()</code>.</li>
 <li>注意 <code>[6]</code> 与 <code>[2]</code> 不同:</li>
-<li>[<code>6</code>] 代表 banana 的一个方法, 名称为 &quot;banana&quot;,</li>
+<li><code>[6]</code> 代表 banana 的一个方法, 名称为 &quot;banana&quot;,</li>
 <li>由 <code>[7]</code> 和 <code>[8]</code> 得知, 其调用方式有两种,</li>
 <li><code>banana.banana(x)</code> 和 <code>banana.banana(x, y)</code>.</li>
 </ul>
@@ -528,18 +569,25 @@ console.log(UiObject.bounds()); /* 访问的是类 UiObject 的静态方法 boun
 <p>参阅: <a href="dataTypes.html#datatypes_generic">泛型</a></p>
 </blockquote>
 <h2>声明<span><a class="mark" href="#documentation_17" id="documentation_17">#</a></span></h2>
-<p>当前项目 (文档) 及 <a href="https://github.com/SuperMonster003/AutoJs6/">AutoJs6</a> (App) 均为二次开发.<br>相对于 <a href="https://github.com/hyb1996/Auto.js/">原始 App</a>, 二次开发的 App 中会增加或修改部分模块功能.<br>相对于 <a href="https://github.com/hyb1996/AutoJs-Docs/">原始文档</a>, 二次开发的文档将进行部分增删或重新编写.<br>开发者无法保证对 API 的完全理解及文档的无纰漏撰写.<br>如有任何不当之处, 欢迎提交 <a href="https://github.com/SuperMonster003/AutoJs6-Documentation/issues/">Issue</a> 或 <a href="https://github.com/SuperMonster003/AutoJs6-Documentation/pulls/">PR</a>.  </p>
+<p>当前项目 (文档) 及 <a href="http://project.autojs6.com">AutoJs6</a> (App) 均为二次开发.<br>相对于 <a href="https://github.com/hyb1996/Auto.js/">原始 App</a>, 二次开发的 App 中会增加或修改部分模块功能.<br>相对于 <a href="https://github.com/hyb1996/AutoJs-Docs/">原始文档</a>, 二次开发的文档将进行部分增删或重新编写.<br>开发者无法保证对 API 的完全理解及文档的无纰漏撰写.<br>如有任何不当之处, 欢迎提交 <a href="http://docs-issues.autojs6.com">Issue</a> 或 <a href="http://docs-pr.autojs6.com">PR</a>.  </p>
 
         </div>
     </div>
 </div>
+
 <script src="assets/sh_javascript.js"></script>
 <script src="assets/sh_java.js"></script>
 <script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
 <script>
     highlight(void 0, void 0, 'pre');
     highlight(void 0, void 0, 'tt');
 </script>
+
 <!-- __TRACKING__ -->
+
 </body>
 </html>

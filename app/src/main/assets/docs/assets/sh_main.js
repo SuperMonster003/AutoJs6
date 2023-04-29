@@ -498,6 +498,13 @@ function highlight(prefix, suffix, tag) {
     var nodeList = document.getElementsByTagName(tag);
     for (var i = 0; i < nodeList.length; i++) {
         var element = nodeList.item(i);
+
+        var wrapper = document.createElement('div');
+        wrapper.classList.add('codeWrapper');
+        //
+        element.parentNode.insertBefore(wrapper, element);
+        wrapper.appendChild(element);
+
         var htmlClasses = sh_getClasses(element);
         var highlighted = false;
         var donthighlight = false;

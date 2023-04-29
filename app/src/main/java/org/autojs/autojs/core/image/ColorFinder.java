@@ -38,6 +38,7 @@ public class ColorFinder {
 
     public Point findColor(ImageWrapper image, int color, int threshold, Rect rect) {
         MatOfPoint matOfPoint = findColorInner(image, color, threshold, rect);
+        image.shoot();
         if (matOfPoint == null) {
             return null;
         }
@@ -52,6 +53,7 @@ public class ColorFinder {
 
     public Point[] findAllPointsForColor(ImageWrapper image, int color, int threshold, Rect rect) {
         MatOfPoint matOfPoint = findColorInner(image, color, threshold, rect);
+        image.shoot();
         if (matOfPoint == null) {
             return new Point[0];
         }
@@ -94,17 +96,20 @@ public class ColorFinder {
 
     public Point findMultiColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
         Point[] firstPoints = findAllPointsForColor(image, firstColor, threshold, rect);
+        Point result = null;
         for (Point firstPoint : firstPoints) {
-            if (firstPoint == null)
-                continue;
-            if (checksPath(image, firstPoint, threshold, rect, points)) {
-                return firstPoint;
+            if (firstPoint != null) {
+                if (checksPath(image, firstPoint, threshold, points)) {
+                    result = firstPoint;
+                    break;
+                }
             }
         }
-        return null;
+        image.shoot();
+        return result;
     }
 
-    private boolean checksPath(ImageWrapper image, Point startingPoint, int threshold, Rect rect, int[] points) {
+    private boolean checksPath(ImageWrapper image, Point startingPoint, int threshold, int[] points) {
         for (int i = 0; i < points.length; i += 3) {
             int x = points[i];
             int y = points[i + 1];
@@ -112,15 +117,13 @@ public class ColorFinder {
             ColorDetector colorDetector = new ColorDetector.DifferenceDetector(color, threshold);
             x += startingPoint.x;
             y += startingPoint.y;
-            if (x >= image.getWidth() || y >= image.getHeight()
-                    || x < 0 || y < 0) {
+            if (x >= image.getWidth() || y >= image.getHeight() || x < 0 || y < 0) {
                 return false;
             }
             int c = image.pixel(x, y);
             if (!colorDetector.detectsColor(Color.red(c), Color.green(c), Color.blue(c))) {
                 return false;
             }
-
         }
         return true;
     }

@@ -9,13 +9,13 @@ import org.autojs.autojs6.R
 
 class HiddenFilesPreference : MaterialListPreference {
 
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+
     constructor(context: Context) : super(context)
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     override fun onChangeConfirmed(dialog: MaterialDialog) {
         ViewUtils.showToast(prefContext, R.string.text_refresh_explorer_may_needed, true)

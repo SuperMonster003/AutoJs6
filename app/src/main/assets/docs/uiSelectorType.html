@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>选择器 (UiSelector) | AutoJs6 文档 - 6.2.0</title>
+    <title>选择器 (UiSelector) | AutoJs6 文档 - 6.3.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
     <link rel="canonical" href="https://nodejs.org/api/uiSelectorType.html">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="viewport" content="user-scalable=no">
@@ -21,15 +23,14 @@
         <ul>
 <li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
 <li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
-<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
-<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
-<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
-<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
 </ul>
 <div class="line"></div>
 
@@ -40,6 +41,7 @@
 <li><a class="nav-app" href="app.html">App - 通用应用</a></li>
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -48,6 +50,8 @@
 <li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
 <li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
 <li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
@@ -66,36 +70,33 @@
 <li><a class="nav-base64" href="base64.html">Base64</a></li>
 <li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
 <li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
 <li><a class="nav-e4x" href="e4x.html">E4X</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-uiSelectorType active" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
 <li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
 <li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
 <li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
 <li><a class="nav-context" href="context.html">Context - 上下文</a></li>
 <li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
-<li><a class="nav-uiSelectorType active" href="uiSelectorType.html">UiSelector - 选择器</a></li>
-<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
-<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
-<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
-<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
-<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
-<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
-<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
 </ul>
 <div class="line"></div>
 
@@ -107,15 +108,51 @@
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
 </ul>
 
     </div>
 
     <div id="column1" data-id="uiSelectorType" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <h1>AutoJs6 文档 - 6.3.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -910,7 +947,7 @@
 
         <div id="apicontent">
             <h1>选择器 (UiSelector)<span><a class="mark" href="#uiselectortype_uiselector" id="uiselectortype_uiselector">#</a></span></h1>
-<p>UiSelector (选择器), 亦可看作是 <a href="uiObjectType.html">控件节点</a> 的条件筛选器, 用于通过附加不同的条件, 筛选出一个或一组活动窗口中的 <code>控件节点</code>, 并做进一步处理, 如 [ 执行 <a href="uiObjectActionsType.html">控件行为</a> (点击, 长按, 设置文本等) / 判断位置 / 获取文本内容 / 获取控件特定状态 / 在 <a href="glossaries.html#glossaries_控件层级">控件层级</a> 中进行 <a href="uiObjectType.md.html#uiobjecttype.md_m_compass">罗盘</a> 导航 ] 等.</p>
+<p>UiSelector (选择器), 亦可看作是 <a href="uiObjectType.html">控件节点</a> 的条件筛选器, 用于通过附加不同的条件, 筛选出一个或一组活动窗口中的 <code>控件节点</code>, 并做进一步处理, 如 [ 执行 <a href="uiObjectActionsType.html">控件行为</a> (点击, 长按, 设置文本等) / 判断位置 / 获取文本内容 / 获取控件特定状态 / 在 <a href="glossaries.html#glossaries_控件层级">控件层级</a> 中进行 <a href="uiObjectType.html#uiobjecttype_m_compass">罗盘</a> 导航 ] 等.</p>
 <pre><code class="lang-js">text(&quot;立即开始&quot;);
 </code></pre>
 <p>上述示例是一个选择器, 要求控件满足文本为 &quot;立即开始&quot; 的条件.</p>
@@ -1113,7 +1150,7 @@ pickup({ idContains: [ &#39;some_&#39; ] }, &#39;@&#39;);
 <h3>idMatches(regex)<span><a class="mark" href="#uiselectortype_idmatches_regex" id="uiselectortype_idmatches_regex">#</a></span></h3>
 <p><strong><code>Global</code></strong> <strong><code>DEPRECATED</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_id">ID 资源选择器</a> 的 <a href="#uiselectortype_xxxmatches">正则全匹配筛选器</a>.</p>
@@ -1146,7 +1183,7 @@ pickup({ idMatches: [ /.*some_.*/ ] }, &#39;@&#39;);
 <h3>idMatch(regex)<span><a class="mark" href="#uiselectortype_idmatch_regex" id="uiselectortype_idmatch_regex">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_id">ID 资源选择器</a> 的 <a href="#uiselectortype_xxxmatch">正则匹配筛选器</a>.</p>
@@ -1284,7 +1321,7 @@ pickup({ textContains: [ &#39;on&#39; ] }, &#39;@&#39;);
 <h3>textMatches(regex)<span><a class="mark" href="#uiselectortype_textmatches_regex" id="uiselectortype_textmatches_regex">#</a></span></h3>
 <p><strong><code>Global</code></strong> <strong><code>DEPRECATED</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_text">文本选择器</a> 的 <a href="#uiselectortype_xxxmatches">正则全匹配筛选器</a>.</p>
@@ -1316,7 +1353,7 @@ pickup({ textMatches: [ /.*t\w{0,3}/ ] }, &#39;@&#39;);
 <h3>textMatch(regex)<span><a class="mark" href="#uiselectortype_textmatch_regex" id="uiselectortype_textmatch_regex">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_text">文本选择器</a> 的 <a href="#uiselectortype_xxxmatch">正则匹配筛选器</a>.</p>
@@ -1443,7 +1480,7 @@ pickup({ descContains: [ &#39;on&#39; ] }, &#39;@&#39;);
 <h3>descMatches(regex)<span><a class="mark" href="#uiselectortype_descmatches_regex" id="uiselectortype_descmatches_regex">#</a></span></h3>
 <p><strong><code>Global</code></strong> <strong><code>DEPRECATED</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_desc">内容描述标签选择器</a> 的 <a href="#uiselectortype_xxxmatches">正则全匹配筛选器</a>.</p>
@@ -1475,7 +1512,7 @@ pickup({ descMatches: [ /.*t\w{0,3}/ ] }, &#39;@&#39;);
 <h3>descMatch(regex)<span><a class="mark" href="#uiselectortype_descmatch_regex" id="uiselectortype_descmatch_regex">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_desc">内容描述标签选择器</a> 的 <a href="#uiselectortype_xxxmatch">正则匹配筛选器</a>.</p>
@@ -1602,7 +1639,7 @@ pickup({ contentContains: [ &#39;on&#39; ] }, &#39;@&#39;);
 <h3>contentMatches(regex)<span><a class="mark" href="#uiselectortype_contentmatches_regex" id="uiselectortype_contentmatches_regex">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>DEPRECATED</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_content">内容选择器</a> 的 <a href="#uiselectortype_xxxmatches">正则全匹配筛选器</a>.</p>
@@ -1634,7 +1671,7 @@ pickup({ contentMatches: [ /.*t\w{0,3}/ ] }, &#39;@&#39;);
 <h3>contentMatch(regex)<span><a class="mark" href="#uiselectortype_contentmatch_regex" id="uiselectortype_contentmatch_regex">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_content">内容选择器</a> 的 <a href="#uiselectortype_xxxmatch">正则匹配筛选器</a>.</p>
@@ -1778,7 +1815,7 @@ pickup({ classNameContains: [ &#39;Button&#39; ] }, &#39;@&#39;);
 <h3>classNameMatches(regex)<span><a class="mark" href="#uiselectortype_classnamematches_regex" id="uiselectortype_classnamematches_regex">#</a></span></h3>
 <p><strong><code>Global</code></strong> <strong><code>DEPRECATED</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_classname">类名选择器</a> 的 <a href="#uiselectortype_xxxmatches">正则全匹配筛选器</a>.</p>
@@ -1810,7 +1847,7 @@ pickup({ classNameMatches: [ /.*V\w{0,3}/ ] }, &#39;@&#39;);
 <h3>classNameMatch(regex)<span><a class="mark" href="#uiselectortype_classnamematch_regex" id="uiselectortype_classnamematch_regex">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_classname">类名选择器</a> 的 <a href="#uiselectortype_xxxmatch">正则匹配筛选器</a>.</p>
@@ -1826,7 +1863,7 @@ wD.className(); // androidx.recyclerview.widget.RecyclerView
 </code></pre>
 <p><code>classNameMatch(/EditText/)</code> 或 <code>classNameMatch(&#39;EditText&#39;)</code> 可以匹配 <code>wC</code> 控件.<br><code>classNameMatch(/Edit/)</code> 或 <code>classNameMatch(&#39;Edit&#39;)</code> 也可以匹配 <code>wC</code> 控件.</p>
 <p><code>classNameMatch(/^android/)</code> 或 <code>classNameMatch(&#39;^android&#39;)</code> 可以匹配 <code>wA</code>, <code>wB</code>, <code>wC</code> 和 <code>wD</code> 控件.</p>
-<p><code>classNameMatch(/V\w{0,3}$/)</code> 或 <code>classNameMatch(&#39;V\\w{0,3}__CONTENT__#39;)</code> 可以匹配控件 <code>wA</code> 和 <code>wD</code>.</p>
+<p><code>classNameMatch(/V\w{0,3}$/)</code> 或 <code>classNameMatch(&#39;V\\w{0,3}$')</code> 可以匹配控件 <code>wA</code> 和 <code>wD</code>.</p>
 <p><a href="#uiselectortype_m_pickup">拾取选择器</a> 示例:</p>
 <pre><code class="lang-js">pickup(classNameMatch(/V\w{0,3}$/), &#39;@&#39;);
 pickup({ classNameMatch: /V\w{0,3}$/ }, &#39;@&#39;);
@@ -1960,7 +1997,7 @@ pickup({ packageNameContains: [ &#39;office&#39; ] }, &#39;@&#39;);
 <h3>packageNameMatches(regex)<span><a class="mark" href="#uiselectortype_packagenamematches_regex" id="uiselectortype_packagenamematches_regex">#</a></span></h3>
 <p><strong><code>Global</code></strong> <strong><code>DEPRECATED</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_packagename">包名选择器</a> 的 <a href="#uiselectortype_xxxmatches">正则全匹配筛选器</a>.</p>
@@ -1992,7 +2029,7 @@ pickup({ packageNameMatches: [ /.*\.\w*r\w*d/ ] }, &#39;@&#39;);
 <h3>packageNameMatch(regex)<span><a class="mark" href="#uiselectortype_packagenamematch_regex" id="uiselectortype_packagenamematch_regex">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
 <ul>
-<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.md.html#datatypes.md_regexp">RegExp</a></span> }</li>
+<li><strong>regex</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_regexp">RegExp</a></span> }</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
 <p><a href="#uiselectortype_m_packagename">包名选择器</a> 的 <a href="#uiselectortype_xxxmatch">正则匹配筛选器</a>.</p>
@@ -2007,8 +2044,8 @@ wC.packageName(); // com.twitter.android
 wD.packageName(); // com.accuweather.android
 </code></pre>
 <p><code>packageNameMatch(/office/)</code> 或 <code>packageNameMatch(&#39;office&#39;)</code> 可以匹配 <code>wC</code> 控件.</p>
-<p><code>packageNameMatch(/android$/)</code> 或 <code>packageNameMatch(&#39;android__CONTENT__#39;)</code> 可以匹配 <code>wC</code> 和 <code>wD</code> 控件.</p>
-<p><code>packageNameMatch(/\.\w*r\w*d$/)</code> 或 <code>packageNameMatch(&#39;\\.\\w*r\\w*d__CONTENT__#39;)</code> 可以匹配控件 <code>wB</code>, <code>wC</code> 和 <code>wD</code>.</p>
+<p><code>packageNameMatch(/android$/)</code> 或 <code>packageNameMatch(&#39;android$')</code> 可以匹配 <code>wC</code> 和 <code>wD</code> 控件.</p>
+<p><code>packageNameMatch(/\.\w*r\w*d$/)</code> 或 <code>packageNameMatch(&#39;\\.\\w*r\\w*d$')</code> 可以匹配控件 <code>wB</code>, <code>wC</code> 和 <code>wD</code>.</p>
 <p><a href="#uiselectortype_m_pickup">拾取选择器</a> 示例:</p>
 <pre><code class="lang-js">pickup(packageNameMatch(/\.\w*r\w*d$/), &#39;@&#39;);
 pickup({ packageNameMatch: /\.\w*r\w*d$/ }, &#39;@&#39;);
@@ -2078,7 +2115,7 @@ pickup({ currentApp: [ &#39;alipay&#39; ] }, &#39;@&#39;);
 <li><strong>bottom</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形下边界 Y 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形完全匹配指定的边界参数</li>
 <li>关联控件属性: <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a></li>
@@ -2124,7 +2161,7 @@ pickup({ bounds: [ 0, 192, -1, -1 ] }, &#39;@&#39;);
 <li><strong>bottom</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形下边界 Y 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形完全位于指定的边界内</li>
 <li>关联控件属性: <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a></li>
@@ -2171,7 +2208,7 @@ pickup({ boundsInside: [ 0, 0.02, 0.95, 0.95 ] }, &#39;@&#39;);
 <li><strong>bottom</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形下边界 Y 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形完全包含指定的边界</li>
 <li>关联控件属性: <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a></li>
@@ -2222,7 +2259,7 @@ pickup({ boundsContains: [ 0, 0.3, 0.85, 0.85 ] }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形左边界 X 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的左边界与指定边界相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsleft">boundsLeft</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2246,7 +2283,7 @@ pickup({ boundsLeft: 0.1 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的左边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的左边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsleft">boundsLeft</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2270,7 +2307,7 @@ pickup({ boundsLeft: [ 0.05, 0.15 ] }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形上边界 Y 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的上边界与指定边界相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundstop">boundsTop</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2294,7 +2331,7 @@ pickup({ boundsTop: 0.1 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的上边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的上边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundstop">boundsTop</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2318,7 +2355,7 @@ pickup({ boundsTop: [ 0.02, 0.12 ] }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形右边界 X 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的右边界与指定边界相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsright">boundsRight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2342,7 +2379,7 @@ pickup({ boundsRight: 0.237 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的右边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的右边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsright">boundsRight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2366,7 +2403,7 @@ pickup({ boundsRight: [ 0.2, 0.25 ] }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形下边界 Y 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的下边界与指定边界相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsbottom">boundsBottom</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2390,7 +2427,7 @@ pickup({ boundsBottom: 0.85 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的下边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的下边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsbottom">boundsBottom</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2414,7 +2451,7 @@ pickup({ boundsBottom: [ 0.8, 0.9 ] }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形横向宽度或百分比度量</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的宽度与指定度量相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2441,7 +2478,7 @@ pickup({ boundsWidth: 206 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形横向宽度或百分比度量的最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的宽度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2468,7 +2505,7 @@ pickup({ boundsWidth: [ 0.139, 0.278 ] }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形纵向高度或百分比度量</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的高度与指定度量相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2495,7 +2532,7 @@ pickup({ boundsHeight: 0.8 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形纵向高度或百分比度量的最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的高度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2522,7 +2559,7 @@ pickup({ boundsHeight: [ 0.781, 0.982 ] }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形中心点 X 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 X 坐标与指定的坐标相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2549,7 +2586,7 @@ pickup({ boundsCenterX: 0.142 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以坐标值或百分比表示的中心点 X 坐标最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明:控件矩形中心点 X 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2576,7 +2613,7 @@ pickup({ boundsCenterX: [ 0.111, 0.222 ] }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形中心点 Y 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与指定的坐标相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2603,7 +2640,7 @@ pickup({ boundsCenterY: 0.45 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以坐标值或百分比表示的中心点 Y 坐标最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2630,7 +2667,7 @@ pickup({ boundsCenterY: [ 0.417, 0.469 ] }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的左边界最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的左边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsleft">boundsLeft</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2654,7 +2691,7 @@ pickup({ boundsMinLeft: 0.05 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的上边界最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的上边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundstop">boundsTop</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2678,7 +2715,7 @@ pickup({ boundsMinTop: 0.02 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的右边界最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的右边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsright">boundsRight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2702,7 +2739,7 @@ pickup({ boundsMinRight: 0.2 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的下边界最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的下边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsbottom">boundsBottom</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2726,7 +2763,7 @@ pickup({ boundsMinBottom: 0.8 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形横向宽度或百分比度量的最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的宽度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2753,7 +2790,7 @@ pickup({ boundsMinWidth: 0.139 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形纵向高度或百分比度量的最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的高度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2780,7 +2817,7 @@ pickup({ boundsMinHeight: 0.781 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以坐标值或百分比表示的中心点 X 坐标最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明:控件矩形中心点 X 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2807,7 +2844,7 @@ pickup({ boundsMinCenterX: 0.111 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以坐标值或百分比表示的中心点 Y 坐标最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2834,7 +2871,7 @@ pickup({ boundsMinCenterY: 0.417 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的左边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的左边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsleft">boundsLeft</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2858,7 +2895,7 @@ pickup({ boundsMaxLeft: 0.15 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的上边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的上边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundstop">boundsTop</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2882,7 +2919,7 @@ pickup({ boundsMaxTop: 0.12 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的右边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的右边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsright">boundsRight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2906,7 +2943,7 @@ pickup({ boundsMaxRight: 0.25 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的下边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的下边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsbottom">boundsBottom</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2930,7 +2967,7 @@ pickup({ boundsMaxBottom: 0.9 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形横向宽度或百分比度量的最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的宽度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2957,7 +2994,7 @@ pickup({ boundsMaxWidth: 0.278 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形纵向高度或百分比度量的最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的高度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -2984,7 +3021,7 @@ pickup({ boundsMaxHeight: 0.982 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以坐标值或百分比表示的中心点 X 坐标最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明:控件矩形中心点 X 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3011,7 +3048,7 @@ pickup({ boundsMaxCenterX: 0.222 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以坐标值或百分比表示的中心点 Y 坐标最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3038,7 +3075,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形左边界 X 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的左边界与指定边界相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsleft">boundsLeft</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3051,7 +3088,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的左边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的左边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsleft">boundsLeft</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3064,7 +3101,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形上边界 Y 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的上边界与指定边界相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundstop">boundsTop</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3077,7 +3114,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的上边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的上边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundstop">boundsTop</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3090,7 +3127,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形右边界 X 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的右边界与指定边界相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsright">boundsRight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3103,7 +3140,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的右边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的右边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsright">boundsRight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3116,7 +3153,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形下边界 Y 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的下边界与指定边界相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsbottom">boundsBottom</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3129,7 +3166,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的下边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的下边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsbottom">boundsBottom</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3142,7 +3179,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形横向宽度或百分比度量</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的宽度与指定度量相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3155,7 +3192,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形横向宽度或百分比度量的最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的宽度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3168,7 +3205,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形纵向高度或百分比度量</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的高度与指定度量相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3181,7 +3218,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形纵向高度或百分比度量的最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的高度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3194,7 +3231,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形中心点 X 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 X 坐标与指定的坐标相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3207,7 +3244,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以坐标值或百分比表示的中心点 X 坐标最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明:控件矩形中心点 X 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3220,7 +3257,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形中心点 Y 坐标或百分比</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与指定的坐标相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3233,7 +3270,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以坐标值或百分比表示的中心点 Y 坐标最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3246,7 +3283,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的左边界最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的左边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsleft">boundsLeft</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3259,7 +3296,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的上边界最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的上边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundstop">boundsTop</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3272,7 +3309,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的右边界最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的右边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsright">boundsRight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3285,7 +3322,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的下边界最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的下边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsbottom">boundsBottom</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3298,7 +3335,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形横向宽度或百分比度量的最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的宽度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3311,7 +3348,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形纵向高度或百分比度量的最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的高度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3324,7 +3361,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以坐标值或百分比表示的中心点 X 坐标最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明:控件矩形中心点 X 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3337,7 +3374,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以坐标值或百分比表示的中心点 Y 坐标最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3350,7 +3387,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的左边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的左边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsleft">boundsLeft</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3363,7 +3400,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的上边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的上边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundstop">boundsTop</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3376,7 +3413,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以 X 坐标或百分比表示的右边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的右边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsright">boundsRight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3389,7 +3426,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以 Y 坐标或百分比表示的下边界最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的下边界与指定的边界限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsbottom">boundsBottom</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3402,7 +3439,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形横向宽度或百分比度量的最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的尺寸选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的尺寸选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的宽度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3415,7 +3452,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形纵向高度或百分比度量的最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形的高度与指定的度量限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3428,7 +3465,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span> } - 矩形以坐标值或百分比表示的中心点 X 坐标最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明:控件矩形中心点 X 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3441,7 +3478,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> } - 矩形以坐标值或百分比表示的中心点 Y 坐标最大值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的边界选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的边界选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与指定的坐标限制相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3455,7 +3492,7 @@ pickup({ boundsMaxCenterY: 0.469 }, &#39;@&#39;);
 <li><strong>tolerance</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 居中误差容限</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 X 坐标与屏幕中点 X 坐标的差值是否在误差容限内的情况与指定参数 (b) 相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3487,7 +3524,7 @@ pickup({ screenCenterX: 0.1 }, &#39;@&#39;);
 <li><strong>b</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - X 坐标是否居中</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 X 坐标与屏幕中点 X 坐标的差值是否在误差容限内的情况与指定参数 (b) 相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3499,7 +3536,7 @@ pickup({ screenCenterX: 0.1 }, &#39;@&#39;);
 <li><strong>tolerance</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 居中误差容限</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 X 坐标与屏幕中点 X 坐标的差值在误差容限内</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3510,7 +3547,7 @@ pickup({ screenCenterX: 0.1 }, &#39;@&#39;);
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 X 坐标与屏幕中点 X 坐标的差值不大于 0.016</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscenterx">boundsCenterX</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3524,7 +3561,7 @@ pickup({ screenCenterX: 0.1 }, &#39;@&#39;);
 <li><strong>tolerance</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 居中误差容限</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与屏幕中点 Y 坐标的差值是否在误差容限内的情况与指定参数 (b) 相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3556,7 +3593,7 @@ pickup({ screenCenterY: 0.1 }, &#39;@&#39;);
 <li><strong>b</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - Y 坐标是否居中</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与屏幕中点 Y 坐标的差值是否在误差容限内的情况与指定参数 (b) 相符</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3568,7 +3605,7 @@ pickup({ screenCenterY: 0.1 }, &#39;@&#39;);
 <li><strong>tolerance</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 居中误差容限</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与屏幕中点 Y 坐标的差值在误差容限内</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3579,7 +3616,7 @@ pickup({ screenCenterY: 0.1 }, &#39;@&#39;);
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的中心点选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的中心点选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形中心点 Y 坐标与屏幕中点 Y 坐标的差值不大于 0.016</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundscentery">boundsCenterY</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3592,7 +3629,7 @@ pickup({ screenCenterY: 0.1 }, &#39;@&#39;);
 <li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 矩形可视化部分的空间占比最小值</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的空间选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的空间选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形可视化部分的空间占比 (即屏幕覆盖率) 满足指定的参数</li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -3630,7 +3667,7 @@ pickup({ screenCoverage: 0.7 }, &#39;@&#39;);
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</li>
 </ul>
-<p><a href="dataTypes.html#datatypes_androidrect">控件矩形 (Rect)</a> 的空间选择器.</p>
+<p><a href="androidRectType.html">控件矩形 (Rect)</a> 的空间选择器.</p>
 <ul>
 <li>筛选条件说明: 控件矩形可视化部分的屏幕占比不小于 <code>94.8%</code></li>
 <li>关联控件属性: [ <a href="uiObjectType.html#uiobjecttype_m_boundswidth">boundsWidth</a> / <a href="uiObjectType.html#uiobjecttype_m_boundsheight">boundsHeight</a> / <a href="uiObjectType.html#uiobjecttype_m_bounds">bounds</a> ]</li>
@@ -4610,7 +4647,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] dragStart<span><a class="mark" href="#uiselectortype_m_dragstart" id="uiselectortype_m_dragstart">#</a></span></h2>
 <h3>dragStart()<span><a class="mark" href="#uiselectortype_dragstart" id="uiselectortype_dragstart">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=32`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=32</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4618,7 +4655,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] dragDrop<span><a class="mark" href="#uiselectortype_m_dragdrop" id="uiselectortype_m_dragdrop">#</a></span></h2>
 <h3>dragDrop()<span><a class="mark" href="#uiselectortype_dragdrop" id="uiselectortype_dragdrop">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=32`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=32</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4626,7 +4663,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] dragCancel<span><a class="mark" href="#uiselectortype_m_dragcancel" id="uiselectortype_m_dragcancel">#</a></span></h2>
 <h3>dragCancel()<span><a class="mark" href="#uiselectortype_dragcancel" id="uiselectortype_dragcancel">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=32`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=32</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4634,7 +4671,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] imeEnter<span><a class="mark" href="#uiselectortype_m_imeenter" id="uiselectortype_m_imeenter">#</a></span></h2>
 <h3>imeEnter()<span><a class="mark" href="#uiselectortype_imeenter" id="uiselectortype_imeenter">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=30`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=30</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4642,7 +4679,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] moveWindow<span><a class="mark" href="#uiselectortype_m_movewindow" id="uiselectortype_m_movewindow">#</a></span></h2>
 <h3>moveWindow(x, y)<span><a class="mark" href="#uiselectortype_movewindow_x_y" id="uiselectortype_movewindow_x_y">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=26`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=26</code></strong></p>
 <ul>
 <li><strong>x</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - X 坐标</li>
 <li><strong>y</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - Y 坐标</li>
@@ -4671,7 +4708,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] pageLeft<span><a class="mark" href="#uiselectortype_m_pageleft" id="uiselectortype_m_pageleft">#</a></span></h2>
 <h3>pageLeft()<span><a class="mark" href="#uiselectortype_pageleft" id="uiselectortype_pageleft">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=29`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4679,7 +4716,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] pageUp<span><a class="mark" href="#uiselectortype_m_pageup" id="uiselectortype_m_pageup">#</a></span></h2>
 <h3>pageUp()<span><a class="mark" href="#uiselectortype_pageup" id="uiselectortype_pageup">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=29`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4687,7 +4724,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] pageRight<span><a class="mark" href="#uiselectortype_m_pageright" id="uiselectortype_m_pageright">#</a></span></h2>
 <h3>pageRight()<span><a class="mark" href="#uiselectortype_pageright" id="uiselectortype_pageright">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=29`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4695,7 +4732,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] pageDown<span><a class="mark" href="#uiselectortype_m_pagedown" id="uiselectortype_m_pagedown">#</a></span></h2>
 <h3>pageDown()<span><a class="mark" href="#uiselectortype_pagedown" id="uiselectortype_pagedown">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=29`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4703,7 +4740,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] pressAndHold<span><a class="mark" href="#uiselectortype_m_pressandhold" id="uiselectortype_m_pressandhold">#</a></span></h2>
 <h3>pressAndHold()<span><a class="mark" href="#uiselectortype_pressandhold" id="uiselectortype_pressandhold">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=30`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=30</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4730,7 +4767,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] showTextSuggestions<span><a class="mark" href="#uiselectortype_m_showtextsuggestions" id="uiselectortype_m_showtextsuggestions">#</a></span></h2>
 <h3>showTextSuggestions()<span><a class="mark" href="#uiselectortype_showtextsuggestions" id="uiselectortype_showtextsuggestions">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=33`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=33</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4738,7 +4775,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] showTooltip<span><a class="mark" href="#uiselectortype_m_showtooltip" id="uiselectortype_m_showtooltip">#</a></span></h2>
 <h3>showTooltip()<span><a class="mark" href="#uiselectortype_showtooltip" id="uiselectortype_showtooltip">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=28`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=28</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -4746,7 +4783,7 @@ console.log(wc.length);
 <p>因 <a href="#uiselectortype_选择器行为">选择器行为</a> 存在潜在的永久阻塞风险且全局行为缺少针对性, 因此此方法不建议使用.</p>
 <h2>[m#] hideTooltip<span><a class="mark" href="#uiselectortype_m_hidetooltip" id="uiselectortype_m_hidetooltip">#</a></span></h2>
 <h3>hideTooltip()<span><a class="mark" href="#uiselectortype_hidetooltip" id="uiselectortype_hidetooltip">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong>`AP</strong><code>Global</code><strong> I&gt;=28`</strong></p>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=28</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已全部执行且执行过程中无异常</li>
 </ul>
@@ -5307,7 +5344,7 @@ descMatches(/.+/); /* 可匹配 w. */
 /* 相当于 descMatch(/^(?:)$/) . */
 descMatches(/(?:)/); /* 不可匹配 w. */
 /* 相当于 descMatch(/^spl\.?.+$/) . */
-descMatches(new RegExp(&#39;spl\\.?.+__CONTENT__#39;)); /* 不可匹配 w. */
+descMatches(new RegExp(&#39;spl\\.?.+$')); /* 不可匹配 w. */
 </code></pre>
 <h3>字符串类型<span><a class="mark" href="#uiselectortype_2" id="uiselectortype_2">#</a></span></h3>
 <p>筛选条件为字符串类型时, 相当于 JavaScript 的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp">RegExp.prototype.constructor</a> 构造函数的 <code>pattern (模式)</code> 参数, 但依照起止位置做完全匹配, 相当于自动添加匹配起始位置的 <code>^</code> 与匹配结束位置的 <code>$</code>.</p>
@@ -5318,7 +5355,7 @@ descMatches(&#39;s.*did&#39;); /* 不可匹配 w. */
 /* 相当于 descMatch(/^did$/) . */
 descMatches(&#39;did&#39;); /* 不可匹配 w. */
 /* 相当于 descMatch(/^did$/) . */
-descMatches(&#39;did__CONTENT__#39;); /* 不可匹配 w. */
+descMatches(&#39;did$'); /* 不可匹配 w. */
 /* 相当于 descMatch(/^did$/) . */
 descMatches(&#39;^did&#39;); /* 不可匹配 w. */
 /* 相当于 descMatch(/^.*did.*$/) . */
@@ -5330,7 +5367,7 @@ descMatches(&#39;.+&#39;); /* 可匹配 w. */
 /* 相当于 descMatch(/^$/) . */
 descMatches(&#39;&#39;); /* 不可匹配 w. */
 /* 相当于 descMatch(/^spl\.?.+$/) . */
-descMatches(&#39;spl\\.?.+__CONTENT__#39;); /* 不可匹配 w. */
+descMatches(&#39;spl\\.?.+$'); /* 不可匹配 w. */
 </code></pre>
 <p>对于 xxxMatches, 会经常出现类似如下的匹配方式:</p>
 <pre><code class="lang-js">/* 相当于 descMatch(/^.*word.*$/) . */
@@ -5356,7 +5393,7 @@ descMatch(/did$/); /* 可匹配 w. */
 descMatch(/^did/); /* 不可匹配 w. */
 descMatch(/l[ae]ng?/); /* 可匹配 w. */
 descMatch(/.+/); /* 可匹配 w, 与 descMatch(/(?:)/) 效果相同. */
-descMatch(new RegExp(&#39;spl\\.?.+__CONTENT__#39;)); /* 可匹配 w. */
+descMatch(new RegExp(&#39;spl\\.?.+$')); /* 可匹配 w. */
 </code></pre>
 <p>筛选条件为正则表达式类型时, 支持 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#%E9%80%9A%E8%BF%87%E6%A0%87%E5%BF%97%E8%BF%9B%E8%A1%8C%E9%AB%98%E7%BA%A7%E6%90%9C%E7%B4%A2">修饰符</a> (又称 <code>标志</code>):</p>
 <pre><code class="lang-js">w.desc(); // AutoJs6
@@ -5375,7 +5412,7 @@ descMatch(&#39;s.*did&#39;); /* 可匹配 w. */
 /* 相当于 descMatch(/did/) . */
 descMatch(&#39;did&#39;); /* 可匹配 w. */
 /* 相当于 descMatch(/did$/) . */
-descMatch(&#39;did__CONTENT__#39;); /* 可匹配 w. */
+descMatch(&#39;did$'); /* 可匹配 w. */
 /* 相当于 descMatch(/^did/) . */
 descMatch(&#39;^did&#39;); /* 不可匹配 w. */
 /* 相当于 descMatch(/l[ae]ng?/) . */
@@ -5383,7 +5420,7 @@ descMatch(&#39;l[ae]ng?&#39;); /* 可匹配 w. */
 /* 相当于 descMatch(/.+/) . */
 descMatch(&#39;.+&#39;); /* 可匹配 w, 与 descMatch(&#39;&#39;) 效果相同. */
 /* 相当于 descMatch(/spl\.?.+$/) . */
-descMatch(&#39;spl\\.?.+__CONTENT__#39;); /* 可匹配 w. */
+descMatch(&#39;spl\\.?.+$'); /* 可匹配 w. */
 </code></pre>
 <h1>选择器行为<span><a class="mark" href="#uiselectortype_5" id="uiselectortype_5">#</a></span></h1>
 <p>通常执行控件行为时, 按以下过程进行:</p>
@@ -5408,13 +5445,20 @@ descMatch(&#39;spl\\.?.+__CONTENT__#39;); /* 可匹配 w. */
         </div>
     </div>
 </div>
+
 <script src="assets/sh_javascript.js"></script>
 <script src="assets/sh_java.js"></script>
 <script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
 <script>
     highlight(void 0, void 0, 'pre');
     highlight(void 0, void 0, 'tt');
 </script>
+
 <!-- __TRACKING__ -->
+
 </body>
 </html>

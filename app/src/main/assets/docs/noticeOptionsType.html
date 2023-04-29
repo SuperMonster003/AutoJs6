@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>NoticeOptions | AutoJs6 文档 - 6.3.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/noticeOptionsType.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-noticeOptionsType">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType active" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="noticeOptionsType" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_noticeoptions">NoticeOptions</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_title">[p?] title</a></span></li>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_content">[p?] content</a></span></li>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_bigcontent">[p?] bigContent</a></span></li>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_issilent">[p?] isSilent</a></span></li>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_autocancel">[p?] autoCancel</a></span></li>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_intent">[p?] intent</a></span></li>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_appendscriptname">[p?] appendScriptName</a></span></li>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_priority">[p?] priority</a></span></li>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_notificationid">[p?] notificationId</a></span></li>
+<li><span class="stability_undefined"><a href="#noticeoptionstype_p_channelid">[p?] channelId</a></span></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>NoticeOptions<span><a class="mark" href="#noticeoptionstype_noticeoptions" id="noticeoptionstype_noticeoptions">#</a></span></h1>
+<p>NoticeOptions 是一个发送 AutoJs6 通知时用于设置通知选项的接口.<br>这些选项将影响通知的 [ 文本内容 / 发送方式 / 主题样式 / 视听反馈 ] 等.</p>
+<p>常见参数中使用此接口类型的方法:</p>
+<ul>
+<li><a href="notice.html#notice_notice">notice</a>(<strong>options</strong>)</li>
+<li><a href="notice.html#notice_notice">notice</a>(content, <strong>options</strong>)</li>
+<li><a href="notice.html#notice_notice">notice</a>(title, content, <strong>options</strong>)</li>
+<li><a href="notice.html#notice_notice">notice</a>(builder, <strong>options</strong>)</li>
+</ul>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">NoticeOptions</p>
+
+<hr>
+<h2>[p?] title<span><a class="mark" href="#noticeoptionstype_p_title" id="noticeoptionstype_p_title">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 通知标题</li>
+</ul>
+</div><p>指定通知标题.</p>
+<pre><code class="lang-js">notice({ title: &#39;New message&#39; });
+notice(&#39;New message&#39;, &#39;&#39;); /* 效果同上, 但不常用. */
+</code></pre>
+<p>此属性值会覆盖 <code>notice(title, content, options)</code> 方法的 <code>title</code> 参数值:</p>
+<pre><code class="lang-js">/* 标题被覆盖为 Overridden title. */
+notice(&#39;New message&#39;, &#39;&#39;, { title: &#39;Overridden title&#39; });
+</code></pre>
+<picture>
+  <source srcset="images/autojs6-notification-title-sample-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="760px">
+    <source srcset="images/autojs6-notification-title-sample-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="411px">
+    <source srcset="images/autojs6-notification-title-sample.png" media="(min-width: 1024px)" width="411px">
+    <img src="images/autojs6-notification-title-sample.png" alt="autojs6-notification-title-sample" width="760">
+</picture>
+
+<p>上述示例图片仅包含通知标题, 而没有通知内容.</p>
+<p>当 <code>title</code> 不指定时, 其默认值的情况取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_defaulttitle">config.defaultTitle</a> 配置值.</p>
+<h2>[p?] content<span><a class="mark" href="#noticeoptionstype_p_content" id="noticeoptionstype_p_content">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 通知内容</li>
+</ul>
+</div><p>设置通知内容.</p>
+<pre><code class="lang-js">notice({ content: &#39;New message&#39; });
+notice(&#39;New message&#39;); /* 效果同上, 且相对便捷. */
+</code></pre>
+<p>此属性值会覆盖 <code>notice(title, content, options)</code> 及 <code>notice(content, options)</code> 方法的 <code>content</code> 参数值:</p>
+<pre><code class="lang-js">/* 内容会被覆盖为 Overridden content. */
+notice(&#39;Some text&#39;, { content: &#39;Overridden content&#39; });
+
+/* 内容同样会被覆盖为 Overridden content. */
+notice(&#39;Some text&#39;, &#39;New message&#39;, { content: &#39;Overridden content&#39; });
+</code></pre>
+<picture>
+  <source srcset="images/autojs6-notification-content-sample-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="760px">
+    <source srcset="images/autojs6-notification-content-sample-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="411px">
+    <source srcset="images/autojs6-notification-content-sample.png" media="(min-width: 1024px)" width="411px">
+    <img src="images/autojs6-notification-content-sample.png" alt="autojs6-notification-content-sample" width="760">
+</picture>
+
+<p>上述示例图片同时包含了通知标题及通知内容.</p>
+<p>当 <code>content</code> 不指定时, 其默认值的情况取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_defaultcontent">config.defaultContent</a> 配置值.</p>
+<h2>[p?] bigContent<span><a class="mark" href="#noticeoptionstype_p_bigcontent" id="noticeoptionstype_p_bigcontent">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 通知长文本内容</li>
+</ul>
+</div><p>设置通知长文本内容.</p>
+<p>当需要在通知消息中显示长度较长的文本内容时, 使用 <code>content</code> 往往会导致内容无法完整显示:</p>
+<pre><code class="lang-js">let content = &#39;Note that a specific charset should be specified whenever possible. Relying on the platform default means that the code is Locale-dependent. Only use the default if the files are known to always use the platform default.&#39;;
+notice({ content: content });
+</code></pre>
+<picture>
+  <source srcset="images/autojs6-notification-big-text-for-content-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="760px">
+    <source srcset="images/autojs6-notification-big-text-for-content-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="411px">
+    <source srcset="images/autojs6-notification-big-text-for-content.png" media="(min-width: 1024px)" width="411px">
+    <img src="images/autojs6-notification-big-text-for-content.png" alt="autojs6-notification-big-text-for-content" width="760">
+</picture>
+
+<p>示例图片中只能显示部分文本内容, 因为通知内容应秉持的简洁原则.</p>
+<p>而 <code>bigContent</code> 属性则可满足长文本通知内容的需求:</p>
+<pre><code class="lang-js">let content = &#39;Note that a specific charset should be specified whenever possible. Relying on the platform default means that the code is Locale-dependent. Only use the default if the files are known to always use the platform default.&#39;;
+notice({ bigContent: content });
+</code></pre>
+<picture>
+  <source srcset="images/autojs6-notification-big-content-sample-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="760px">
+    <source srcset="images/autojs6-notification-big-content-sample-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="411px">
+    <source srcset="images/autojs6-notification-big-content-sample.png" media="(min-width: 1024px)" width="411px">
+    <img src="images/autojs6-notification-big-content-sample.png" alt="autojs6-notification-big-text-for-big-content" width="760">
+</picture>
+
+<p>示例图片中完整显示了长文本通知内容.</p>
+<p>当 <code>bigContent</code> 不指定时, 其默认值的情况取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_defaultbigcontent">config.defaultBigContent</a> 配置值.</p>
+<h2>[p?] isSilent<span><a class="mark" href="#noticeoptionstype_p_issilent" id="noticeoptionstype_p_issilent">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>false</code> ] { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 通知消息是否为安静模式</li>
+</ul>
+</div><p>设置通知消息是否为安静模式, 即不发出声音或产生振动.</p>
+<p>需额外注意, <code>isSilent</code> 只能强制通知消息静音免振, 而不会使原本没有声音或振动反馈的通知发出声音或产生振动.</p>
+<pre><code class="lang-js">/* 强制通知消息静音免振. */
+notice({ isSilent: true });
+</code></pre>
+<p>当 <code>isSilent</code> 不指定时, 其默认值的情况取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_defaultissilent">config.defaultIsSilent</a> 配置值.</p>
+<h2>[p?] autoCancel<span><a class="mark" href="#noticeoptionstype_p_autocancel" id="noticeoptionstype_p_autocancel">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>false</code> ] { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 通知消息是否自动消除</li>
+</ul>
+</div><p>设置通知消息是否在用户点击时自动消除.</p>
+<pre><code class="lang-js">notice({ autoCancel: true });
+</code></pre>
+<p>当 <code>autoCancel</code> 不指定时, 其默认值的情况取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_defaultautocancel">config.defaultAutoCancel</a> 配置值.</p>
+<p>使用 <a href="notice.html#notice_m_cancel">notice.cancel</a> 也可实现通知消除.</p>
+<p>如需增加通知消息的点击事件, 如点击后跳转到指定页面, 可使用 <a href="#noticeoptionstype_p_intent">intent</a> 选项参数.</p>
+<h2>[p?] intent<span><a class="mark" href="#noticeoptionstype_p_intent" id="noticeoptionstype_p_intent">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <span class="type"><a href="omniTypes.html#omnitypes_omniintent">OmniIntent</a></span> } - 通知消息点击时的执行动作</li>
+</ul>
+</div><p>设置通知消息点击时的执行动作.</p>
+<pre><code class="lang-js">/* 显示一条通知, 点击通知后自动消除并跳转到 AutoJs6 文档页面. */
+notice({ intent: &#39;docs&#39;, autoCancel: true });
+
+/* 显示一条通知, 点击通知后自动消除并跳转到浏览器, 导航至 msn 主页. */
+notice({ intent: &#39;msn.com&#39;, autoCancel: true });
+
+/* 显示一条通知, 点击通知后自动消除并执行自定义意图行为 (分享消息至 QQ 应用). */
+notice({
+    intent: {
+        action: &#39;android.intent.action.SEND&#39;,
+        type: &#39;text/*&#39;,
+        extras: { &#39;android.intent.extra.TEXT&#39;: &#39;HELLO WORLD&#39; },
+        packageName: App.QQ.getPackageName(),
+        className: &#39;@{packageName}.activity.JumpActivity&#39;,
+    },
+    autoCancel: true,
+});
+</code></pre>
+<h2>[p?] appendScriptName<span><a class="mark" href="#noticeoptionstype_p_appendscriptname" id="noticeoptionstype_p_appendscriptname">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>null</code> ] { <a href="dataTypes.html#datatypes_boolean">boolean</a> | <code>&#39;auto&#39;</code> | <code>&#39;title&#39;</code> | <code>&#39;content&#39;</code> | <code>&#39;bigContent&#39;</code> } - 附加脚本文件全名</li>
+</ul>
+</div><p>设置通知消息中是否附加脚本文件全名, 并支持指定附加目标.</p>
+<ul>
+<li><code>&#39;title&#39;</code> - 附加目标为通知标题</li>
+<li><code>&#39;content&#39;</code> - 附加目标为通知内容</li>
+<li><code>&#39;bigContent&#39;</code> - 附加目标为通知长文本内容</li>
+<li><code>&#39;auto&#39;</code> - 根据通知内容自动选择附加目标 (优先级: bigContent &gt; content &gt; title)</li>
+<li><code>true</code> - 相当于 <code>&#39;auto&#39;</code> 选项</li>
+<li><code>false</code> - 不做任何附加</li>
+<li><code>null</code> - 取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_defaultappendscriptname">config.defaultAppendScriptName</a> 配置值</li>
+</ul>
+<p>附加的文本格式为 <code>%空格%(%脚本文件名%.%脚本扩展名%)</code>.</p>
+<p>以下是附加到通知 <code>标题 (title)</code> 上的一个示例:</p>
+<pre><code class="lang-js">let title = `\u65b0\u6d88\u606f`;
+let sender = `\u7ea6\u7ff0`;
+let moment = `\u4e0b\u5348 2 \u70b9`;
+let event = `\u5e03\u62c9\u683c\u5e7f\u573a\u65c1\u7684\u96c5\u514b\u5496\u5561\u9986\u89c1`;
+
+notice(title, `${sender}: ${moment}${event}`, {
+    appendScriptName: &#39;title&#39;,
+});
+</code></pre>
+<picture>
+  <source srcset="images/autojs6-notification-append-script-name-on-title-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="760px">
+    <source srcset="images/autojs6-notification-append-script-name-on-title-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="411px">
+    <source srcset="images/autojs6-notification-append-script-name-on-title.png" media="(min-width: 1024px)" width="411px">
+    <img src="images/autojs6-notification-append-script-name-on-title.png" alt="autojs6-notification-append-script-name-on-title" width="760">
+</picture>
+
+<p>上述示例图片中的脚本文件全名为 <code>main.js</code>.</p>
+<p>当 <code>appendScriptName</code> 不指定时, 其默认值的情况取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_defaultappendscriptname">config.defaultAppendScriptName</a> 配置值.</p>
+<h2>[p?] priority<span><a class="mark" href="#noticeoptionstype_p_priority" id="noticeoptionstype_p_priority">#</a></span></h2>
+<div class="signature"><ul>
+<li>[ <code>&#39;high&#39;</code> ] { <a href="dataTypes.html#datatypes_number">number</a> | <code>&#39;default&#39;</code> | <code>&#39;low&#39;</code> | <code>&#39;min&#39;</code> | <code>&#39;high&#39;</code> | <code>&#39;max&#39;</code> } - 优先级</li>
+</ul>
+</div><p>设置通知消息的优先级 (仅适用于部分系统).</p>
+<p><code>priority</code> 参数接收由整形常量转化而来的字符串简化形式:</p>
+<table>
+<thead>
+<tr>
+<th>字符串</th>
+<th>整形常量</th>
+<th>简述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&#39;min&#39;</td>
+<td><span style="white-space:nowrap">NotificationCompat.PRIORITY_MIN = -2</span></td>
+<td><span style="white-space:nowrap">通知最低优先级, 适于无需引起注意的条目.</span></td>
+</tr>
+<tr>
+<td>&#39;low&#39;</td>
+<td><span style="white-space:nowrap">NotificationCompat.PRIORITY_LOW = -1</span></td>
+<td><span style="white-space:nowrap">通知低优先级, 适于无关紧要的条目.</span></td>
+</tr>
+<tr>
+<td>&#39;default&#39;</td>
+<td><span style="white-space:nowrap">NotificationCompat.PRIORITY_DEFAULT = 0</span></td>
+<td><span style="white-space:nowrap">通知默认优先级.</span></td>
+</tr>
+<tr>
+<td><strong>&#39;high&#39;</strong></td>
+<td><span style="white-space:nowrap">NotificationCompat.PRIORITY_HIGH = 1</span></td>
+<td><span style="white-space:nowrap">通知高优先级, 适于重要通知或警示.</span></td>
+</tr>
+<tr>
+<td>&#39;max&#39;</td>
+<td><span style="white-space:nowrap">NotificationCompat.PRIORITY_MAX = 2</span></td>
+<td><span style="white-space:nowrap">通知最高优先级, 适于紧急条目.</span></td>
+</tr>
+</tbody>
+</table>
+<p><code>priority</code> 仅适用于以下操作系统:</p>
+<ul>
+<li><code>Android API 24 (7.0) [N]</code></li>
+<li><code>Android API 25 (7.1-7.1.2) [N_MR1]</code></li>
+</ul>
+<p>其他版本操作系统将忽略此设置项.</p>
+<pre><code class="lang-js">/* 使用最小优先级显示通知. */
+notice({ priority: &#39;min&#39; });
+</code></pre>
+<p>自 <code>Android API 26 (8.0) [O]</code> 起, 通知消息优先级由通知渠道管理, 因此需使用 <a href="noticeChannelOptionsType.html#noticechanneloptionstype_p_importance">channel.importance</a> 按渠道设置通知消息的优先级.</p>
+<p>当 <code>priority</code> 不指定时, 其默认值的情况取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_defaultpriority">config.defaultPriority</a> 配置值.</p>
+<h2>[p?] notificationId<span><a class="mark" href="#noticeoptionstype_p_notificationid" id="noticeoptionstype_p_notificationid">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 通知 ID</li>
+</ul>
+</div><p><code>notificationId</code> 属性可指定通知 ID, 即通知消息的唯一识别 ID.</p>
+<p>通知 ID 相同时, 后续的通知将覆盖掉之前的通知:</p>
+<pre><code class="lang-js">notice(&#39;A&#39;, { notificationId: 10 });
+notice(&#39;B&#39;, { notificationId: 10 });
+notice(&#39;C&#39;, { notificationId: 10 });
+</code></pre>
+<p>上述示例代码运行后, 只会显示最后一个通知, 内容为 &#39;C&#39;, 因为它们的通知 ID 相同, 之前的通知被覆盖.</p>
+<pre><code class="lang-js">notice(&#39;A&#39;, { notificationId: 10 });
+sleep(1e3);
+notice(&#39;B&#39;, { notificationId: 10 });
+sleep(1e3);
+notice(&#39;C&#39;, { notificationId: 10 });
+</code></pre>
+<p>加上适当间隔后可以看到覆盖的过程.</p>
+<p>一个进度更新的示例:</p>
+<pre><code class="lang-js">let notificationId = 20;
+let current = 0;
+let max = 100;
+let step = 1;
+while (current &lt;= 100) {
+    notice(`Progress: ${current}%`, {
+        notificationId: notificationId,
+        isSilent: true,
+    });
+    current += step;
+    sleep(50);
+}
+</code></pre>
+<p>上述示例中, <a href="#noticeoptionstype_p_issilent">isSilent</a> 用于控制通知消息不发出声音及产生振动, 否则进度更新过程中, 用户将不断收到打扰.<br><code>notificationId</code> 设置为统一的值, 如果每个通知使用不同的 ID, 进度更新过程中, 将在通知栏布满上百条通知.</p>
+<p>当 <code>notificationId</code> 不指定时, 其默认值的情况取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_usedynamicdefaultnotificationid">config.useDynamicDefaultNotificationId</a> 配置值.<br>配置值为 <code>true</code> 时, 将以时间戳为参考量生成不同的通知 ID , 否则以内置的固定值作为通知 ID.</p>
+<p>因此, 默认情况下, 通知 ID 是动态的:</p>
+<pre><code class="lang-js">notice(&#39;hello&#39;);
+notice(&#39;world&#39;);
+</code></pre>
+<p>上述示例中的两个 <code>notice</code> 方法没有指定通知 ID, 因此它们的通知 ID 默认是不同的.<br>通知栏会显示两个通知, &#39;world&#39; 不会覆盖 &#39;hello&#39;.</p>
+<p>使用 console.log 方法在控制台打印 <code>notice</code> 的结果, 也可以看出通知 ID 的情况:</p>
+<pre><code class="lang-js">console.log(notice(&#39;hello&#39;)); /* 某个数值 A. */
+console.log(notice(&#39;world&#39;)); /* 不同于 A 的数值 B. */
+</code></pre>
+<p>使用 <code>useDynamicDefaultNotificationId</code> 禁用动态通知 ID 可改变默认行为:</p>
+<pre><code class="lang-js">notice.config({ useDynamicDefaultNotificationId: false });
+console.log(notice(&#39;hello&#39;)); /* 某个数值 A. */
+console.log(notice(&#39;world&#39;)); /* 同上. */
+</code></pre>
+<p>此时, 通知栏仅显示 &#39;world&#39;, 而 &#39;hello&#39; 被覆盖.</p>
+<blockquote>
+<p>注: 动态通知 ID 的内部实现代码片段:</p>
+<pre><code class="lang-kotlin">(System.currentTimeMillis() % Int.MAX_VALUE).toInt()
+</code></pre>
+</blockquote>
+<h2>[p?] channelId<span><a class="mark" href="#noticeoptionstype_p_channelid" id="noticeoptionstype_p_channelid">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 渠道 ID</li>
+</ul>
+</div><p><a href="notificationChannelGlossary.html">通知渠道</a> 使用 <code>渠道 ID (Channel ID)</code> 作为唯一标识, <code>channelId</code> 属性可指定当前发送通知的目标渠道.</p>
+<pre><code class="lang-js">/* 在 exercise 渠道上发送一条通知, 内容为 &quot;hello&quot;. */
+notice(&#39;hello&#39;, { channelId: &#39;exercise&#39; });
+
+/* 在 12 渠道上发送一条通知, 内容同样为 &quot;hello&quot;. */
+notice(&#39;hello&#39;, { channelId: 12 });
+
+/* 虽然上面两个通知内容相同, 但渠道 ID 不同, 通知的行为及样式也会不同. */
+/* 例如 exercise 渠道设置了启用振动及声音, 而 12 渠道设置了通知静音. */
+</code></pre>
+<p>当 <code>channelId</code> 不指定时, 其默认值的情况取决于 <a href="noticePresetConfigurationType.html#noticepresetconfigurationtype_p_usescriptnameasdefaultchannelid">config.useScriptNameAsDefaultChannelId</a> 配置值.<br>配置值为 <code>true</code> 时, 将以脚本文件全名作为目标渠道 ID , 否则以内置的固定值作为目标渠道 ID.</p>
+<pre><code class="lang-js">/* 1. useScriptNameAsDefaultChannelId 启用 (默认). */
+notice.config({ useScriptNameAsDefaultChannelId: true });
+
+/* 不指定渠道 ID, 此时渠道 ID 默认为脚本文件全名. */
+notice(&#39;hello&#39;);
+
+/* 2. useScriptNameAsDefaultChannelId 禁用. */
+notice.config({ useScriptNameAsDefaultChannelId: false });
+
+/* 不指定渠道 ID, 此时渠道 ID 默认为一个内置固定值. */
+notice(&#39;hello&#39;);
+</code></pre>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

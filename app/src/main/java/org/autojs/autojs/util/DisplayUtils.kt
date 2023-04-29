@@ -2,6 +2,11 @@ package org.autojs.autojs.util
 
 import android.content.Context
 import android.util.DisplayMetrics.DENSITY_DEFAULT
+import org.autojs.autojs.runtime.api.ScreenMetrics
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.round
+import kotlin.math.roundToInt
 
 object DisplayUtils {
     /**
@@ -26,5 +31,69 @@ object DisplayUtils {
 
     @JvmStatic
     fun pxToSp(ctx: Context, px: Float) = px / ctx.resources.displayMetrics.scaledDensity
+
+    @JvmOverloads
+    @JvmStatic
+    fun toRoundIntX(value: Double, enableMinusOneMetric: Boolean = true) = when {
+        value == -1.0 && enableMinusOneMetric -> ScreenMetrics.deviceScreenWidth
+        -1.0 < value && value < 1.0 -> (value * ScreenMetrics.deviceScreenWidth).roundToInt()
+        else -> value.roundToInt()
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun toRoundDoubleX(value: Double, enableMinusOneMetric: Boolean = true) = when {
+        value == -1.0 && enableMinusOneMetric -> ScreenMetrics.deviceScreenWidth.toDouble()
+        -1.0 < value && value < 1.0 -> round(value * ScreenMetrics.deviceScreenWidth)
+        else -> value
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun toRoundIntY(value: Double, enableMinusOneMetric: Boolean = true) = when {
+        value == -1.0 && enableMinusOneMetric -> ScreenMetrics.deviceScreenHeight
+        -1.0 < value && value < 1.0 -> (value * ScreenMetrics.deviceScreenHeight).roundToInt()
+        else -> value.roundToInt()
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun toRoundDoubleY(value: Double, enableMinusOneMetric: Boolean = true) = when {
+        value == -1.0 && enableMinusOneMetric -> ScreenMetrics.deviceScreenHeight.toDouble()
+        -1.0 < value && value < 1.0 -> round(value * ScreenMetrics.deviceScreenHeight)
+        else -> value
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun toFloorIntX(value: Double, enableMinusOneMetric: Boolean = true) = when {
+        value == -1.0 && enableMinusOneMetric -> ScreenMetrics.deviceScreenWidth
+        -1.0 < value && value < 1.0 -> floor(value * ScreenMetrics.deviceScreenWidth).toInt()
+        else -> floor(value).toInt()
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun toFloorIntY(value: Double, enableMinusOneMetric: Boolean = true) = when {
+        value == -1.0 && enableMinusOneMetric -> ScreenMetrics.deviceScreenHeight
+        -1.0 < value && value < 1.0 -> floor(value * ScreenMetrics.deviceScreenHeight).toInt()
+        else -> floor(value).toInt()
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun toCeilIntX(value: Double, enableMinusOneMetric: Boolean = true) = when {
+        value == -1.0 && enableMinusOneMetric -> ScreenMetrics.deviceScreenWidth
+        -1.0 < value && value < 1.0 -> ceil(value * ScreenMetrics.deviceScreenWidth).toInt()
+        else -> ceil(value).toInt()
+    }
+
+    @JvmOverloads
+    @JvmStatic
+    fun toCeilIntY(value: Double, enableMinusOneMetric: Boolean = true) = when {
+        value == -1.0 && enableMinusOneMetric -> ScreenMetrics.deviceScreenHeight
+        -1.0 < value && value < 1.0 -> ceil(value * ScreenMetrics.deviceScreenHeight).toInt()
+        else -> ceil(value).toInt()
+    }
 
 }

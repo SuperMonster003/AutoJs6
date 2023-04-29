@@ -4,6 +4,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs6.R
+import kotlin.math.roundToInt
 
 class ColorUtils {
 
@@ -348,6 +349,16 @@ class ColorUtils {
 
         @ColorInt
         fun get(@ColorRes colorRes: Int) = globalAppContext.getColor(colorRes)
+
+        @JvmStatic
+        @JvmOverloads
+        fun toUnit8(component: Double, takeNumOneAsPercent: Boolean = false) = when {
+            component < 1 -> (component * 255).roundToInt()
+            else -> when {
+                component == 1.0 && takeNumOneAsPercent -> 255
+                else -> 255.coerceAtMost(component.roundToInt())
+            }
+        }
 
     }
 

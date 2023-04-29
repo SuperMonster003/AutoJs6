@@ -12,8 +12,8 @@ import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoAllocator
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.accessibility.UiSelector.Companion.ID_IDENTIFIER
-import org.autojs.autojs.runtime.api.ScreenMetrics.Companion.toRoundIntX
-import org.autojs.autojs.runtime.api.ScreenMetrics.Companion.toRoundIntY
+import org.autojs.autojs.util.DisplayUtils.toRoundIntX
+import org.autojs.autojs.util.DisplayUtils.toRoundIntY
 import org.autojs.autojs.util.KotlinUtils
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.StringUtils.str
@@ -251,7 +251,7 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
             val mP = "^p[p\\d]*".toRegex().find(compass)
             if (mP != null) {
                 var upMax: Int = "^p\\d+|^p+(?!\\d)".toRegex().findAll(compass).fold(0) { acc: Int, result ->
-                    result.value.let { acc + if (it matches ".*\\d.*".toRegex()) it.substring(1).toInt() else it.length }
+                    result.value.let { acc + if (it.contains("\\d".toRegex())) it.substring(1).toInt() else it.length }
                 }
                 while (upMax-- > 0) {
                     w = w.parent() ?: return null
@@ -386,7 +386,7 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
 
         @JvmStatic
         fun isCompass(s: Any?): Boolean {
-            return (s as? CharSequence)?.run { this == COMPASS_PASS_ON || isEmpty() || matches("(([pkc>]|s[<>]?)-?\\d*)+".toRegex()) } ?: false
+            return (s as? CharSequence)?.run { this == COMPASS_PASS_ON || isEmpty() || contains("^(([pkc>]|s[<>]?)-?\\d*)+$".toRegex()) } ?: false
         }
 
         @JvmStatic

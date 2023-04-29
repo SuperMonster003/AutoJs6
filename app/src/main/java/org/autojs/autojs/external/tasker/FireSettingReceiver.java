@@ -29,7 +29,7 @@ public class FireSettingReceiver extends AbstractPluginSettingReceiver {
     @Override
     protected void firePluginSetting(@NonNull Context context, @NonNull JSONObject jsonObject) {
         context.startActivity(new Intent(context, RunIntentActivity.class)
-                .putExtra("json", jsonObject.toString())
+                .putExtra(ScriptIntents.EXTRA_KEY_JSON, jsonObject.toString())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 

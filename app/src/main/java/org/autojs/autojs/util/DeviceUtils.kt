@@ -81,7 +81,7 @@ object DeviceUtils {
     fun getSerial() = try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) Build.getSerial() else Build.SERIAL
     } catch (e: SecurityException) {
-        null.also { e.printStackTrace() }
+        null
     }
 
     @JvmStatic
@@ -91,7 +91,7 @@ object DeviceUtils {
         val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) telephonyManager.imei else telephonyManager.deviceId
     } catch (e: SecurityException) {
-        null.also { e.printStackTrace() }
+        null
     }
 
 }

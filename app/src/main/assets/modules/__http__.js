@@ -20,7 +20,7 @@ module.exports = function (scriptRuntime, scope) {
     const MimeTypeMap = android.webkit.MimeTypeMap;
 
     let _ = {
-        Http: ( /* @IIFE */ () => {
+        Http: (/* @IIFE */ () => {
             /**
              * @implements Internal.Http
              */
@@ -32,14 +32,8 @@ module.exports = function (scriptRuntime, scope) {
                 constructor: Http,
                 __okhttp__: new MutableOkHttp(),
                 /**
-                 * @returns {okhttp3.OkHttpClient}
-                 */
-                client() {
-                    return this.__okhttp__.client();
-                },
-                /**
                  * @param {string} url
-                 * @param {Http.RequestOptions} [options]
+                 * @param {Http.RequestBuilderOptions} [options]
                  * @return {okhttp3.Request}
                  */
                 buildRequest(url, options) {
@@ -52,6 +46,9 @@ module.exports = function (scriptRuntime, scope) {
                             // noinspection HttpUrlsUsage
                             return url.match(/^https?:\/\//) ? url : `http://${url}`;
                         },
+                        /**
+                         * @param {okhttp3.Request.Builder} request
+                         */
                         setHeaders(request) {
                             Object.entries(this.options.headers || {}).forEach((entries) => {
                                 let [ key, value ] = entries;
@@ -140,6 +137,9 @@ module.exports = function (scriptRuntime, scope) {
                     };
 
                     let $$ = {
+                        /**
+                         * @type {okhttp3.Request.Builder}
+                         */
                         request: new Request.Builder(),
                         build() {
                             this.setUrl();
@@ -163,7 +163,7 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 /**
                  * @param {string} url
-                 * @param {Http.RequestOptions} [options]
+                 * @param {Http.RequestBuilderOptions} [options]
                  * @param {(response: Http.WrappedResponse, ex?: java.io.IOException) => void} [callback]
                  * @return {Http.WrappedResponse | void}
                  */
@@ -171,10 +171,14 @@ module.exports = function (scriptRuntime, scope) {
                     let cont = !callback && ui.isUiThread() && continuation.enabled
                         ? continuation.create() : null;
 
+                    let opt = options || {};
+
+                    this.__okhttp__.setTimeout((/* milliseconds = */ (opt.timeout || _.constants.DEFAULT_TIMEOUT)));
+
                     /**
                      * @type {okhttp3.Call}
                      */
-                    let call = this.client().newCall(this.buildRequest(url, options));
+                    let call = this.__okhttp__.client().newCall(this.buildRequest(url, opt));
 
                     if (!callback && !cont) {
                         return _.wrapResponse(call.execute());
@@ -203,7 +207,7 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 post(url, data, options, callback) {
                     let opt = Object.assign({
-                        contentType: _.constants.DEF_CONTENT_TYPE,
+                        contentType: _.constants.DEFAULT_CONTENT_TYPE,
                     }, options, {
                         method: 'POST',
                     });
@@ -227,7 +231,8 @@ module.exports = function (scriptRuntime, scope) {
             return Http;
         })(),
         constants: {
-            DEF_CONTENT_TYPE: 'application/x-www-form-urlencoded',
+            DEFAULT_CONTENT_TYPE: 'application/x-www-form-urlencoded',
+            DEFAULT_TIMEOUT: 30e3,
         },
         /**
          * @param {okhttp3.Response} res
@@ -236,6 +241,7 @@ module.exports = function (scriptRuntime, scope) {
         wrapResponse: (res) => /* @AXR */ ({
             request: res.request(),
             getResponse() {
+                /** @type {Http.WrappedResponse} */
                 return {
                     request: this.request,
                     statusMessage: res.message(),
@@ -250,7 +256,7 @@ module.exports = function (scriptRuntime, scope) {
                 let result = {};
                 let headers = res.headers();
                 for (let i = 0; i < headers.size(); i += 1) {
-                    let name = headers.name(i);
+                    let name = headers.name(i).toLowerCase();
                     let value = headers.value(i);
                     if (!(name in result)) {
                         result[name] = value;
@@ -265,28 +271,26 @@ module.exports = function (scriptRuntime, scope) {
                 return result;
             },
             getBody() {
-                let body = res.body();
-                return {
-                    string: body.string.bind(body),
-                    bytes: body.bytes.bind(body),
-                    contentType: body.contentType(),
+                return Object.setPrototypeOf({
                     json() {
+                        /* "java.lang.IllegalStateException: closed" may happen. */
+                        let str = this.string();
                         try {
-                            return JSON.parse(this.string());
+                            return JSON.parse(str);
                         } catch (e) {
                             throw Error('Failed to parse JSON. Body string may be not in JSON format');
                         }
                     },
-                };
+                }, res.body());
             },
         }.getResponse()),
         /**
-         * @param {Http.RequestOptions} options
+         * @param {Http.RequestBuilderOptions} options
          * @param {?Object.<string, string> | string} data
          */
         fillPostData(options, data) {
             data = data || {};
-            if (options.contentType === _.constants.DEF_CONTENT_TYPE) {
+            if (options.contentType === _.constants.DEFAULT_CONTENT_TYPE) {
                 let b = new FormBody.Builder();
                 Object.entries(data).forEach((entries) => {
                     let [ key, value ] = entries;

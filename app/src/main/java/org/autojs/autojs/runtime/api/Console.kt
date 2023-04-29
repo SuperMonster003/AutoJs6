@@ -63,13 +63,13 @@ interface Console {
     fun println(level: Int, charSequence: CharSequence): String?
 
     @ScriptInterface
-    fun setTitle(title: CharSequence)
+    fun setTitle(title: CharSequence?)
 
     @ScriptInterface
-    fun setSize(w: Int, h: Int)
+    fun setSize(w: Double, h: Double)
 
     @ScriptInterface
-    fun setPosition(x: Int, y: Int)
+    fun setPosition(x: Double, y: Double)
 
     @ScriptInterface
     fun rawInput(): String?

@@ -4,6 +4,7 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">建築...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">洗浄...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">パッケージング...</string>
@@ -12,16 +13,25 @@
     <string name="confirm_overwrite_file">ファイルはすでに存在します。\n上書きしますか？</string>
     <string name="content_about_app_tips">1. ホーム画面でアプリケーション名 (AutoJs6) を長押しして、設定画面にジャンプする\n2. 設定ページで特定の設定オプションを長押しすると、詳細情報が表示されます。</string>
     <string name="content_github_feedback">問題を報告するためのウェブページが起動します。\nGitHub のアカウントが必要な場合があります。</string>
+    <string name="content_way_of_output_for_recorded_script">回収したスクリプトの出力方法を選択する</string>
     <string name="crash_feedback">デバッグログをコピーするか、直接終了する</string>
+    <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
+    <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
+    <string name="default_script_notification_content">スクリプトからの通知</string>
+    <string name="default_script_notification_title">スクリプト通知</string>
     <string name="default_value_working_directory">/スクリプト</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 は、Android 用の JavaScript 自動化ツールで、「hyb1996/Auto.js」をクローンしたオープンソースです。\n\nヘルプやフィードバックを求めるには、GitHub issues に行くか、Tencent QQ チャットグループ 690946137 に参加してください。</string>
     <string name="description_about_app_tips_preference">1. アプリと開発者について」ページでアプリのアイコンを長押しすると、AutoJs6 の開発者向けオプションページにジャンプします</string>
     <string name="description_app_language_preference">この環境設定は、実行中のスクリプトからの例外メッセージを含む、AutoJs6 の表示言語を変更するためのものです。\n\n注: 言語を期待通りに適用するには、アプリの再起動が必要な場合があります。</string>
     <string name="description_change_working_dir_preference">スクリプトを含むディレクトリのパスを変更する</string>
     <string name="description_check_for_updates_preference">AutoJs6 は、GitHub からアップデートを取得し、ダウンロードします。\n\n注: このアップデートでは、まだ多言語サポートは提供されていません。</string>
+    <string name="description_compatibility_with_classes_for_ver_4_x">クラス名のリマッピングにより、4.x バージョンの Java クラス名の互換性をある程度確保します。\nこのオプションをオンにすると、スクリプトを起動するたびにさまざまな程度 (数十から数百ミリ秒) の起動遅延が発生するようになる。\n特に必要でない場合は、このオプションを常にオフにしておくことをお勧めします。</string>
+    <string name="description_documentation_launcher_icon_preference">ドキュメントランチャーアイコンは、ドキュメントへのアクセスを容易にし、スタンドアロンアプリケーションのように切り替えることができます。</string>
     <string name="description_documentation_source_preference">ローカルドキュメント AutoJs6 に組み込まれたファイルをドキュメントソースとして使用するため、ネットワーク接続は必要ありません。AutoJs6 が更新されると内容も変わります。\nオンライン・ドキュメント。GitHub のページをドキュメントソースとして使用し、ネットワーク接続が必要です。コンテンツは常に最新の状態に保たれます。\n\n注: オンラインドキュメントを最大限に活用するために、デスクトップモニターなどのワイドスクリーンディスプレイを使用することをお勧めします。\n注意: バージョン 6.2.0 時点では、ドキュメントはまだ開発の初期段階にあり、ほとんどのコンテンツはまだ執筆・更新されていません。</string>
-    <string name="description_documentation_source_preference_more">ドキュメントページでダークテーマをサポートするには、以下の条件を満たす必要があります。\n1. AutoJs6 でナイトモードが有効になっている\n2. Android System WebView (または Google Chrome などのブラウザ) 。\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P]: バージョン >= 105</string>
+    <string name="description_documentation_source_preference_more">ドキュメントページでダークテーマをサポートするには、以下の条件を満たす必要があります。\n1. AutoJs6 でナイトモードが有効になっている\n2. Android System WebView (または Google Chrome などのブラウザ) 。\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P] 以下: バージョン >= 105</string>
+    <string name="description_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張すると、コードの柔軟性が増し、より豊かな機能を実現できますが、衝突や破損を引き起こす可能性もあります。\nこのオプションをオンにすると、すべてのスクリプトはデフォルトで組み込みの拡張機能を有効にします。\n組み込みの拡張機能は安全でないことが多いので、組み込みの拡張機能の原理とリスクが明確に理解されていない限り、推奨されません。\nこのオプションをオフにした場合でも、プロジェクトのドキュメントで説明されているように、plugins グローバルオブジェクトを使用して組み込み拡張機能を有効にすることができます。</string>
     <string name="description_hidden_files_preference">AutoJs6 ファイルエクスプローラーで隠しファイルや隠しフォルダ (通常は「.」で始まる) を表示するかどうかを設定するために使用します。</string>
+    <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 がフォアグラウンドにあるとき、デバイスの画面をオンにして明るく保つための設定です。\nAutoJs6 アプリケーションの全ページのうち、ホームページでのみ使用する場合は、\"ホームページのみ\" オプションを選択します。</string>
     <string name="description_manage_ignored_updates_preference">クリックすると、リストアイテムを表示または管理できます。\nリストアイテムを削除するには、長押しします。</string>
     <string name="description_night_mode_preference">ナイトモード (ダークテーマとも呼ばれる) は、Android システムの UI と端末上で動作するアプリケーションの両方に適用され、弱視のユーザーや明るい光に敏感なユーザーの視認性を向上させ、誰でも簡単に暗い環境下で端末を使用できるようにします。\n\nフォローシステム AutoJs6 では、Android と同じ Night モードが設定できます。\n常にオン Android のシステム設定に関係なく、常に Night モードが ON になります。\n常にオフ Android のシステム設定に関係なく、AutoJs6 はナイトモードをオフにします。\n\n注: Follow system オプションは、Android API Level 28 (Android 9) [P] 以上の場合のみです。</string>
     <string name="description_night_mode_preference_more">Android システムでナイトモードを有効にするには\n- Android API Level 29 (Android 10) [Q] 以上の場合: [設定] -> [ディスプレイ] -> [テーマ].\n- Android API Level 28 (Android 9) [P]: [開発者向けオプション] -> [ナイトモード].\n\nWebView コンポーネント (AutoJs6 のドキュメントページなど) を使って、Web ベースのコンテンツにナイトモード (ダークテーマ) を適用するには、以下の条件を満たす必要があります。\n1. Android System WebView (または Google Chrome のようなブラウザ) 。\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P]: バージョン >= 105\n2. WebView コンポーネントの Web ベースのコンテンツは、Dark テーマに適合している (CSS や Android XML リソースなどによる) 。</string>
@@ -38,6 +48,7 @@
     <string name="dialog_button_download_with_browser">ブラウザ</string>
     <string name="dialog_button_history">履歴</string>
     <string name="dialog_button_ignore_current_update">無視する</string>
+    <string name="dialog_button_join_group">グループ参加</string>
     <string name="dialog_button_more">詳細</string>
     <string name="dialog_button_quit">終了する</string>
     <string name="dialog_button_remove">削除</string>
@@ -47,13 +58,22 @@
     <string name="dialog_button_system_settings_simplified">システム</string>
     <string name="dialog_button_update_now">更新</string>
     <string name="dialog_button_use_default">デフォルトを使用</string>
+    <string name="docs_app_name">AutoJs6 文書</string>
     <string name="edit_and_run_handle_intent_error">ファイルを処理できません</string>
     <string name="edit_exit_without_save_warn">内容が保存されていませんので、本当に終了しますか？</string>
     <string name="entry_app_language_auto">システムに従ってください</string>
+    <string name="entry_documentation_launcher_icon_hide">ランチャーからアイコンを隠す</string>
+    <string name="entry_documentation_launcher_icon_show">ランチャーにアイコンを表示する</string>
     <string name="entry_documentation_source_local">ローカルドキュメント</string>
     <string name="entry_documentation_source_online">オンラインドキュメント</string>
+    <string name="entry_editor_pinch_to_zoom_change_text_size">文字サイズ</string>
+    <string name="entry_editor_pinch_to_zoom_disable">無効化</string>
+    <string name="entry_editor_pinch_to_zoom_scale_view">ズームビュー</string>
     <string name="entry_hidden_files_not_show">「隠しファイルや隠しフォルダーを表示しない</string>
     <string name="entry_hidden_files_show">隠しファイルや隠しフォルダーを表示する</string>
+    <string name="entry_keep_screen_on_when_in_foreground_all_pages">全ページ</string>
+    <string name="entry_keep_screen_on_when_in_foreground_disabled">使用不可</string>
+    <string name="entry_keep_screen_on_when_in_foreground_homepage_only">ホームページのみ</string>
     <string name="entry_night_mode_always_off">常にオフ</string>
     <string name="entry_night_mode_always_on">常にオン</string>
     <string name="entry_night_mode_follow_system">システムに従う</string>
@@ -103,9 +123,17 @@
     <string name="error_max_listeners_exceeded">リスナーの最大数を超えています: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 は \"auto\" ファイルを実行するためのルート・アクセス権を持っていない可能性があります。</string>
     <string name="error_method_called_with_null_argument" formatted="false">null 引数で %s() が呼び出されました: %s</string>
+    <string name="error_no_accessibility_permission">アクセシビリティサービスが無効で、スクリプトが停止しています。</string>
+    <string name="error_no_accessibility_permission_to_capture">アクセシビリティサービスが有効になっていない</string>
     <string name="error_no_accessibility_service">アクセシビリティ・サービスがありません。</string>
+    <string name="error_no_draw_overlays_permission">他のアプリの上に表示する」権限がない</string>
+    <string name="error_no_post_notifications_permission">\"投稿通知\" 許可なし</string>
+    <string name="error_no_read_phone_state_permission">電話の状態を読む」権限がない</string>
     <string name="error_no_screen_capture_permission">画面キャプチャ許可がありません。</string>
+    <string name="error_no_storage_rw_permission">\"ストレージ R/W\" 権限なし</string>
     <string name="error_no_such_selector_method" formatted="false">そのようなセレクタ・メソッドはありません %s(%s: %s)。</string>
+    <string name="error_no_usage_stats_permission">\"使用統計\" 権限がありません</string>
+    <string name="error_no_write_settings_permission">\"設定の書き込み\" 権限なし</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView は 1 つの直接の子だけをホストできます。</string>
     <string name="error_parse_github_release_assets">GitHub リリース・アセットの解析に失敗しました。</string>
     <string name="error_parse_version_info">バージョン情報の解析に失敗しました。</string>
@@ -119,12 +147,12 @@
     <string name="error_thread_is_not_alive">スレッドが生きていない</string>
     <string name="error_unknown">不明なエラー</string>
     <string name="error_unknown_algorithm_selector_param">不明なアルゴリズム・セレクタ・パラメータ: %s</string>
+    <string name="error_unknown_color_name">不明な色名: %s</string>
     <string name="error_unknown_operation">不明な操作</string>
     <string name="error_unknown_picker_result_type">不明な結果タイプ {name: %s} です。</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">不明な結果タイプ {name: %s、params: %s}。</string>
     <string name="error_unknown_picker_selector_type" formatted="false">不明なセレクタ {name: %s、type: %s} です。</string>
     <string name="error_unknown_type">不明なタイプ: %s</string>
-    <string name="error_unknown_color_name">不明な色名: %s</string>
     <string name="file_not_exist_or_readable">ファイルが存在しないか、読み取り可能でない: %s</string>
     <string name="foreground_notification_channel_name">AutoJs6 のフォアグラウンド サービス</string>
     <string name="foreground_notification_text">クリックすると、AutoJs6 が起動します。</string>
@@ -149,8 +177,10 @@
     <string name="screen_capturer_foreground_notification_text">画面のキャプチャを行うため、この通知が表示される</string>
     <string name="screen_capturer_foreground_notification_title">スクリーンキャプチャーのフォアグラウンドサービス</string>
     <string name="summary_about_app_tips">より良いユーザーエクスペリエンス</string>
+    <string name="summary_compatibility_with_classes_for_ver_4_x">4.x バージョンの Java クラス名の互換性をある程度提供する。</string>
     <string name="summary_enable_a11y_service_with_root_access">必要なときに自動的に root 権限でアクセシビリティサービスを有効にする</string>
     <string name="summary_enable_a11y_service_with_secure_settings">必要なときに自動的にセキュアな設定のアクセシビリティサービスを有効にする</string>
+    <string name="summary_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張することで、コードの柔軟性を高め、より豊かな機能を実現します。</string>
     <string name="summary_guard_mode">AutoJs6 がフォアグラウンドにあるときにスクリプトから自動化アクションが実行されないようにする</string>
     <string name="summary_not_showing_main_activity">メインのアクティビティを表示せずにスクリプトを直接実行</string>
     <string name="summary_pre_execute_script">スクリプトファイルの前に実行する</string>
@@ -162,6 +192,9 @@
     <string name="text_a11y_service_description">スクリプトの自動操作 (クリック、長押し、スライドなど) で必要です。</string>
     <string name="text_a11y_service_enabled_but_not_running">アクセシビリティサービスが有効だが、実行されていない (デバイスを再有効化または再起動する)</string>
     <string name="text_a11y_service_may_be_needed">アクセシビリティサービスが必要な場合がある</string>
+    <string name="text_abis">ABI</string>
+    <string name="text_abis_32bit">ABI (32ビット)</string>
+    <string name="text_abis_64bit">ABI (64ビット)</string>
     <string name="text_about">について</string>
     <string name="text_about_all_files_access">全ファイルのアクセスについて</string>
     <string name="text_about_app_and_developer">アプリと開発者について</string>
@@ -184,6 +217,10 @@
     <string name="text_already_copied_to_clip">クリップボードにコピーされる</string>
     <string name="text_already_created">作成</string>
     <string name="text_already_deleted">削除</string>
+    <string name="text_android_build_id">Android ビルド ID</string>
+    <string name="text_android_build_version">Android ビルドバージョン</string>
+    <string name="text_android_release_version">Android リリースバージョン</string>
+    <string name="text_android_sdk_version">Android SDK バージョン</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builderは使用できません</string>
     <string name="text_app_and_device_info">アプリとデバイスの情報</string>
     <string name="text_app_crashed">AutoJs6がクラッシュしました</string>
@@ -209,6 +246,8 @@
     <string name="text_app_name_qqmusic">QQMusic</string>
     <string name="text_app_name_wechat">ウィーチャット</string>
     <string name="text_app_source_code">ソースコード</string>
+    <string name="text_app_version_code">アプリバージョンコード</string>
+    <string name="text_app_version_name">アプリのバージョン名</string>
     <string name="text_appearance">外観</string>
     <string name="text_attribute">属性</string>
     <string name="text_auto_check_for_updates">更新の自動チェック</string>
@@ -240,6 +279,8 @@
     <string name="text_code">コード</string>
     <string name="text_code_beautify">コードの美化</string>
     <string name="text_command_already_copied_to_clip">クリップボードにコピーされたコマンド</string>
+    <string name="text_compatibility">互換性</string>
+    <string name="text_compatibility_with_classes_for_ver_4_x">バージョン 4.x の Java クラスとの互換性</string>
     <string name="text_config">設定</string>
     <string name="text_confirm_to_delete">本当に削除しますか？</string>
     <string name="text_confirm_to_remove">本当に削除しますか？</string>
@@ -255,6 +296,7 @@
     <string name="text_copy_to_clip">クリップボードにコピーする</string>
     <string name="text_copy_value">値をコピーする</string>
     <string name="text_daily_task">デイリータスク</string>
+    <string name="text_date">日付</string>
     <string name="text_day1">月</string>
     <string name="text_day2">火</string>
     <string name="text_day3">水</string>
@@ -272,6 +314,13 @@
     <string name="text_detail">詳細</string>
     <string name="text_developer_details_under_development">デベロッパーの詳細については、現在開発中です。</string>
     <string name="text_developer_options">デベロッパーオプション</string>
+    <string name="text_device_brand">デバイスブランド</string>
+    <string name="text_device_hardware_name">デバイスのハードウェア名</string>
+    <string name="text_device_hardware_serial_number">デバイスのシリアル番号</string>
+    <string name="text_device_manufacturer">デバイスメーカー</string>
+    <string name="text_device_model">デバイスのモデル</string>
+    <string name="text_device_name">デバイス名</string>
+    <string name="text_device_product_name">デバイスの製品名</string>
     <string name="text_directly_download">今すぐダウンロード</string>
     <string name="text_directory">ディレクトリ</string>
     <string name="text_display_over_other_app">他のアプリの上に表示する</string>
@@ -281,6 +330,7 @@
     <string name="text_do_not_ask_again_for_this_version">このバージョンでは再表示を要求しない</string>
     <string name="text_do_not_show_again">再表示禁止</string>
     <string name="text_documentation">ドキュメント</string>
+    <string name="text_documentation_launcher_icon">ドキュメントのランチャーアイコン</string>
     <string name="text_documentation_source">ドキュメントのソース</string>
     <string name="text_done">完了</string>
     <string name="text_download">ダウンロード</string>
@@ -312,6 +362,8 @@
     <string name="text_exit">終了</string>
     <string name="text_exit_directly">終了</string>
     <string name="text_exit_floating_window">フローティングウィンドウを終了する</string>
+    <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
+    <string name="text_extensibility">拡張性</string>
     <string name="text_failed">失敗</string>
     <string name="text_failed_to_build">ビルドに失敗しました</string>
     <string name="text_failed_to_create">作成に失敗しました</string>
@@ -342,6 +394,7 @@
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">フォアグラウンドサービス</string>
     <string name="text_foreground_service_description">フォアグラウンド・サービスは、ユーザーにとって目に付く操作を実行します。\nフォアグラウンド・サービスはステータス・バーに通知を表示し、アプリがフォアグラウンドでタスクを実行し、システム・リソースを消費していることをユーザーが積極的に認識できるようにします。\nこの通知は、サービスが停止されるか、フォアグラウンドから削除されない限り、解除されません。\n通知を長押しすることで、通知の優先度を低く設定したり、通知をオフにしたりすることができます。</string>
+    <string name="text_fx_keyboard">Fx キーボード</string>
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成されるコード</string>
     <string name="text_generated_code">生成されたコード</string>
@@ -379,6 +432,7 @@
     <string name="text_jump_to_line_end">行末へジャンプ</string>
     <string name="text_jump_to_line_start">行頭へジャンプ</string>
     <string name="text_jump_to_start">開始位置へジャンプ</string>
+    <string name="text_keep_screen_on_when_in_foreground">フォアグラウンドの時に画面を表示し続ける</string>
     <string name="text_last_updates_checked_time">最終チェック: %s</string>
     <string name="text_latest_activity">最新の活動</string>
     <string name="text_latest_package">最新のパッケージ</string>
@@ -413,19 +467,12 @@
     <string name="text_new_watching_variables">新しいウォッチング変数</string>
     <string name="text_next_run_time">次回の実行</string>
     <string name="text_night_mode">夜間モード</string>
-    <string name="text_no_accessibility_permission">アクセシビリティサービスが無効で、スクリプトが停止しています。</string>
-    <string name="text_no_accessibility_permission_to_capture">アクセシビリティサービスが有効になっていない</string>
     <string name="text_no_browser">ブラウザがインストールされていない</string>
-    <string name="text_no_draw_overlays_permission">他のアプリの上に表示する」権限がない</string>
     <string name="text_no_histories">履歴がない</string>
     <string name="text_no_ignored_updates">無視された更新がない</string>
-    <string name="text_no_read_phone_state_permission">電話の状態を読む」権限がない</string>
     <string name="text_no_root">非ルート</string>
     <string name="text_no_root_access">ルートアクセス不可</string>
     <string name="text_no_scripts_to_stop_running">実行を停止するスクリプトなし</string>
-    <string name="text_no_storage_rw_permission">\"ストレージ R/W\" 権限なし</string>
-    <string name="text_no_usage_stats_permission">\"使用統計\" 権限がありません</string>
-    <string name="text_no_write_settings_permission">\"設定の書き込み\" 権限なし</string>
     <string name="text_not_granted">許可されない</string>
     <string name="text_not_showing_main_activity">メインのアクティビティが表示されない</string>
     <string name="text_notification">通知</string>
@@ -458,6 +505,7 @@
     <string name="text_permission_revoked_with_root">(root で) 権限が取り消された</string>
     <string name="text_permission_test">許可テスト</string>
     <string name="text_permissions">許可</string>
+    <string name="text_pinch_to_zoom">ピンチ操作</string>
     <string name="text_please_choose">選択してください</string>
     <string name="text_please_choose_a_script">スクリプトを選択してください</string>
     <string name="text_please_input_name">入力名</string>
@@ -477,8 +525,9 @@
     <string name="text_project_save_success">プロジェクトの保存</string>
     <string name="text_prompt">プロンプト</string>
     <string name="text_quit">終了</string>
-    <string name="text_record_prompt">録画のプロンプト</string>
     <string name="text_record_finished">記録終了</string>
+    <string name="text_record_prompt">録画のプロンプト</string>
+    <string name="text_record_stopped">記録停止</string>
     <string name="text_recorded_output_file_type">記録された出力ファイルの種類</string>
     <string name="text_redo">やり直し</string>
     <string name="text_redo_simplified">やり直</string>
@@ -555,18 +604,18 @@
     <string name="text_show_layout_bounds">レイアウト境界内のビュー</string>
     <string name="text_show_layout_hierarchy">レイアウト階層内の表示</string>
     <string name="text_show_widget_information">ウィジェット情報を表示する</string>
-    <string name="text_size">テキストサイズ</string>
-    <string name="text_size_current_value" formatted="true">テキストサイズ: %d</string>
+    <string name="text_size">サイズ</string>
     <string name="text_source_file_path">ソースコードのパス</string>
     <string name="text_stable_mode">安定モード</string>
     <string name="text_star">スター</string>
     <string name="text_start_record">記録開始</string>
-    <string name="text_record_stopped">記録停止</string>
     <string name="text_start_running">実行中</string>
     <string name="text_stop">停止</string>
+    <string name="text_symbols_settings">シンボル設定</string>
     <string name="text_tailor_made_developer">テーラーメイド開発者</string>
     <string name="text_task">タスク</string>
     <string name="text_text_size">文字サイズ</string>
+    <string name="text_text_size_current_value" formatted="true">テキストサイズ: %d</string>
     <string name="text_theme_color">テーマカラー</string>
     <string name="text_time">時間</string>
     <string name="text_timed_task">時間指定タスク</string>
@@ -606,43 +655,14 @@
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが、書き込むことはできないシステム環境設定を含む、安全なシステム設定です。\nこれは、ユーザーがシステムアプリのUIを通じて明示的に変更する必要がある環境設定のためのものです。\nセキュアなシステム設定を許可すると、通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります。</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="theme_color_default">デフォルト</string>
-    <string name="content_way_of_output_for_recorded_script">回収したスクリプトの出力方法を選択する</string>
-    <string name="dialog_button_join_group">グループ参加</string>
-    <string name="text_app_version_name">アプリのバージョン名</string>
-    <string name="text_app_version_code">アプリバージョンコード</string>
-    <string name="text_android_build_version">Android ビルドバージョン</string>
-    <string name="text_android_release_version">Android リリースバージョン</string>
-    <string name="text_android_sdk_version">Android SDK バージョン</string>
-    <string name="text_android_build_id">Android ビルド ID</string>
-    <string name="text_device_brand">デバイスブランド</string>
-    <string name="text_device_manufacturer">デバイスメーカー</string>
-    <string name="text_device_name">デバイス名</string>
-    <string name="text_device_model">デバイスのモデル</string>
-    <string name="text_device_product_name">デバイスの製品名</string>
-    <string name="text_device_hardware_name">デバイスのハードウェア名</string>
-    <string name="text_device_hardware_serial_number">デバイスのシリアル番号</string>
-    <string name="text_abis">ABI</string>
-    <string name="text_abis_32bit">ABI (32ビット)</string>
-    <string name="text_abis_64bit">ABI (64ビット)</string>
-    <string name="text_fx_keyboard">Fx キーボード</string>
-    <string name="text_symbols_settings">シンボル設定</string>
-    <string name="text_pinch_to_zoom">ピンチ操作</string>
-    <string name="entry_editor_pinch_to_zoom_change_text_size">文字サイズ</string>
-    <string name="entry_editor_pinch_to_zoom_scale_view">ズームビュー</string>
-    <string name="entry_editor_pinch_to_zoom_disable">無効化</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">クラス名のリマッピングにより、4.x バージョンの Java クラス名の互換性をある程度確保します。\nこのオプションをオンにすると、スクリプトを起動するたびにさまざまな程度 (数十から数百ミリ秒) の起動遅延が発生するようになる。\n特に必要でない場合は、このオプションを常にオフにしておくことをお勧めします。</string>
-    <string name="description_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張すると、コードの柔軟性が増し、より豊かな機能を実現できますが、衝突や破損を引き起こす可能性もあります。\nこのオプションをオンにすると、すべてのスクリプトはデフォルトで組み込みの拡張機能を有効にします。\n組み込みの拡張機能は安全でないことが多いので、組み込みの拡張機能の原理とリスクが明確に理解されていない限り、推奨されません。\nこのオプションをオフにした場合でも、プロジェクトのドキュメントで説明されているように、plugins グローバルオブジェクトを使用して組み込み拡張機能を有効にすることができます。</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">4.x バージョンの Java クラス名の互換性をある程度提供する。</string>
-    <string name="summary_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張することで、コードの柔軟性を高め、より豊かな機能を実現します。</string>
-    <string name="text_compatibility">互換性</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">バージョン 4.x の Java クラスとの互換性</string>
-    <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
-    <string name="text_extensibility">拡張性</string>
+
     <plurals name="text_items_total_sum">
         <item quantity="other">合計: %d 件</item>
     </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d スクリプト停止</item>
         <item quantity="other">%d つのスクリプトが停止している</item>
     </plurals>
+
 </resources>

@@ -17,19 +17,19 @@
 #}
 
 -dontwarn org.mozilla.javascript.**
--dontwarn com.jecelyin.editor.**
+#-dontwarn com.jecelyin.editor.**
 -dontwarn com.makeramen.**
 -dontwarn org.junit.**
 -dontwarn junit.**
 -dontwarn jackpal.androidterm.**
 -dontwarn com.iwebpp.nodeandroid.**
--dontwarn org.msgpack.core.**
+#-dontwarn org.msgpack.core.**
 -dontwarn com.pushtorefresh.storio.**
 -dontwarn java.lang.invoke.*
 -dontwarn **$$Lambda$*
 
 -keep class org.mozilla.javascript.** { *; }
--keep class com.jecelyin.editor.** { *; }
+#-keep class com.jecelyin.editor.** { *; }
 -keep class org.autojs.autojs.core.automator.** { *; }
 -keep class org.autojs.autojs.** { *; }
 -keep class org.greenrobot.eventbus.** { *; }
@@ -54,7 +54,7 @@
     @org.autojs.autojs.annotation.ScriptInterface <methods>;
 }
 # 920 editor
--keep class org.msgpack.** { *; }
+#-keep class org.msgpack.** { *; }
 
 # gson
 -keep class * extends org.json.JSONObject {

@@ -1,8 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.automator.UiObject
-import org.autojs.autojs.runtime.api.ScreenMetrics.Companion.deviceScreenHeight
-import org.autojs.autojs.runtime.api.ScreenMetrics.Companion.deviceScreenWidth
 
 /**
  * Created by Stardust on 2017/3/9.

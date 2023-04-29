@@ -13,8 +13,8 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.app.GlobalAppContext;
-import org.autojs.autojs.core.accessibility.AccessibilityServiceTool;
 import org.autojs.autojs.core.accessibility.AccessibilityService;
+import org.autojs.autojs.core.accessibility.AccessibilityTool;
 import org.autojs.autojs.core.accessibility.LayoutInspector;
 import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
@@ -74,9 +74,9 @@ public abstract class LayoutInspectTileService extends TileService implements La
             mCapturing = true;
             GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindow(), 1000);
         } else {
-            ViewUtils.showToast(this, R.string.text_no_accessibility_permission_to_capture);
-            if (!getAccessibilityServiceTool().autoEnableIfNeeded()) {
-                getAccessibilityServiceTool().goToAccessibilitySetting();
+            ViewUtils.showToast(this, R.string.error_no_accessibility_permission_to_capture);
+            if (!getAccessibilityTool().getService().enableIfNeeded()) {
+                getAccessibilityTool().launchSettings();
             }
             updateTile();
         }
@@ -91,8 +91,8 @@ public abstract class LayoutInspectTileService extends TileService implements La
     }
 
     @NonNull
-    private AccessibilityServiceTool getAccessibilityServiceTool() {
-        return new AccessibilityServiceTool(this);
+    private AccessibilityTool getAccessibilityTool() {
+        return new AccessibilityTool(this);
     }
 
     protected void updateTile() {

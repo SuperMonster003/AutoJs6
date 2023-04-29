@@ -4,6 +4,7 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">مبنى...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">تنظيف...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">التغليف ...</string>
@@ -12,16 +13,25 @@
     <string name="confirm_overwrite_file">ملف موجود بالفعل.\nالكتابة فوق؟</string>
     <string name="content_about_app_tips">1. اضغط مع الاستمرار على اسم التطبيق (AutoJs6) في الصفحة الرئيسية للانتقال إلى صفحة الإعدادات\n2. اضغط مع الاستمرار على خيار إعدادات معين في صفحة الإعدادات لعرض معلومات مفصلة</string>
     <string name="content_github_feedback">سيتم إطلاق صفحة ويب للإبلاغ عن مشكلة.\nقد تكون هناك حاجة إلى حساب GitHub.</string>
+    <string name="content_way_of_output_for_recorded_script">اختر طريقة إخراج للنصوص المعاد تصميمها</string>
     <string name="crash_feedback">نسخ سجل الأخطاء أو الخروج مباشرة</string>
+    <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
+    <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
+    <string name="default_script_notification_content">إعلام من البرنامج النصي</string>
+    <string name="default_script_notification_title">إخطار البرنامج النصي</string>
     <string name="default_value_working_directory">/نصوص</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 هي أداة آلية لجافا سكريبت لنظام أندرويد ، وهي مفتوحة المصدر ومستنسخة من \"hyb1996 / Auto.js\".\n\nلطلب المساعدة أو التعليقات ، انتقل إلى مشكلات GitHub أو انضم إلى مجموعة Tencent QQ 690946137.</string>
     <string name="description_about_app_tips_preference">1. اضغط مع الاستمرار على رمز التطبيق في صفحة \"حول التطبيق والمطور\" للانتقال إلى صفحة خيارات مطور AutoJs6</string>
     <string name="description_app_language_preference">هذا التفضيل لتغيير لغة العرض لـ AutoJs6 ، بما في ذلك رسائل الاستثناء من تشغيل البرامج النصية.\n\nملاحظة: قد تكون هناك حاجة إلى إعادة تشغيل التطبيق لجعل اللغة تطبيقها كما هو متوقع.</string>
     <string name="description_change_working_dir_preference">قم بتغيير مسار الدليل الذي يحتوي على البرامج النصية</string>
     <string name="description_check_for_updates_preference">يحصل AutoJs6 على التحديثات وتنزيلها من GitHub.\n\nملاحظة: لا يوفر التحديث دعمًا متعدد اللغات حتى الآن.</string>
+    <string name="description_compatibility_with_classes_for_ver_4_x">يوفر درجة توافق اسم فئة Java لإصدارات 4.x من خلال إعادة تعيين اسم الفئة.\nعند تشغيل هذا الخيار ، سيكون هناك درجة متفاوتة من تأخير بدء التشغيل (عشرات إلى مئات المللي ثانية) في كل مرة يبدأ فيها البرنامج النصي.\nيوصى بإيقاف تشغيل الخيار في جميع الأوقات إذا لم يكن مطلوبًا على وجه التحديد.</string>
+    <string name="description_documentation_launcher_icon_preference">تسهل أيقونة مشغل الوثائق الوصول إلى المستندات ويمكن تبديلها مثل تطبيق مستقل.</string>
     <string name="description_documentation_source_preference">المستندات المحلية: باستخدام ملفات AutoJs6 المضمنة كمصادر توثيق ، لا يلزم الاتصال بالشبكة. يتغير المحتوى مع تحديث AutoJs6.\nالمستندات عبر الإنترنت: استخدام صفحات GitHub كمصادر توثيق تتطلب اتصالاً بالشبكة. المحتوى دائما محدث.\n\nملاحظة: لزيادة تجربة قراءة المستندات عبر الإنترنت إلى الحد الأقصى ، يوصى باستخدام جهاز عرض بشاشة عريضة مثل شاشة سطح المكتب.\nملاحظة: اعتبارًا من الإصدار 6.2.0 ، لا تزال الوثائق في المراحل الأولية من التطوير ، ومعظم المحتوى لم تتم كتابته أو تحديثه بعد.</string>
-    <string name="description_documentation_source_preference_more">يجب استيفاء الشروط التالية لدعم النسق الداكن على صفحات المستند:\n1. تم تمكين الوضع الليلي AutoJs6\n2.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P]: الإصدار> = 105</string>
+    <string name="description_documentation_source_preference_more">يجب استيفاء الشروط التالية لدعم النسق الداكن على صفحات المستند:\n1. تم تمكين الوضع الليلي AutoJs6\n2.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P] وما دون: الإصدار> = 105</string>
+    <string name="description_extending_js_build_in_objects">يمكن أن يؤدي توسيع كائنات JavaScript المضمنة إلى زيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً ، ولكن يمكن أن يتسبب في حدوث تعارضات وحتى حدوث تعطل.\nتحتوي جميع البرامج النصية على امتدادات مضمنة يتم تمكينها افتراضيًا عند تشغيل الخيار.\nغالبًا ما تكون الامتدادات المضمنة غير آمنة ، ولا يوصى بها ما لم يتم فهم مبادئ ومخاطر الإضافات المضمنة بوضوح.\nعند إيقاف تشغيل الخيار ، لا يزال من الممكن تمكين الامتدادات المضمنة من خلال الكائن العام للمكونات الإضافية ، كما هو موضح في وثائق المشروع.</string>
     <string name="description_hidden_files_preference">تُستخدم لتعيين إظهار الملفات والمجلدات المخفية (تبدأ عادةً بـ \".\") في مستكشف الملفات AutoJs6 أم لا.</string>
+    <string name="description_keep_screen_on_when_in_foreground_preference">تفضيل إبقاء شاشة الجهاز قيد التشغيل وساطعة عندما يكون AutoJs6 في المقدمة.\nلتحقيق ذلك فقط على الصفحة الرئيسية بين جميع صفحات تطبيق AutoJs6 ، اختر خيار \"الصفحة الرئيسية فقط\".</string>
     <string name="description_manage_ignored_updates_preference">انقر لعرض أو إدارة عناصر القائمة.\nاضغط لفترة طويلة لإزالة عنصر القائمة.</string>
     <string name="description_night_mode_preference">ينطبق الوضع الليلي (المعروف أيضًا باسم Dark theme) على كل من واجهة مستخدم نظام Android والتطبيقات التي تعمل على الجهاز ، مما يحسن الرؤية للمستخدمين ضعاف البصر وأولئك الذين لديهم حساسية للضوء الساطع ، ويسهل على أي شخص استخدام الجهاز. في بيئة الإضاءة المنخفضة.\n\nنظام المتابعة: يحتوي AutoJs6 على إعدادات الوضع الليلي مثل نظام Android\nيعمل دائمًا: يحافظ AutoJs6 على تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\nإيقاف التشغيل دائمًا: يقوم AutoJs6 بإيقاف تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\n\nملاحظة: خيار متابعة النظام متاح فقط لـ Android API Level 28 (Android 9) [P] وما فوق.</string>
     <string name="description_night_mode_preference_more">لتمكين الوضع الليلي في نظام Android:\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإعدادات -> العرض -> المظهر.\n- Android API المستوى 28 (Android 9) [P]: خيارات المطور -> الوضع الليلي.\n\nيجب استيفاء الشروط التالية لتطبيق الوضع الليلي (المظهر الداكن) على المحتوى المستند إلى الويب باستخدام مكون WebView (مثل صفحة وثائق AutoJs6):\n1.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P]: الإصدار> = 105\n2. تم تكييف المحتوى المستند إلى الويب في مكون WebView مع المظهر الداكن (عن طريق موارد CSS أو Android XML وما إلى ذلك)</string>
@@ -38,6 +48,7 @@
     <string name="dialog_button_download_with_browser">متصفح</string>
     <string name="dialog_button_history">تاريخ</string>
     <string name="dialog_button_ignore_current_update">يتجاهل</string>
+    <string name="dialog_button_join_group">إنضم للمجموعة</string>
     <string name="dialog_button_more">أكثر</string>
     <string name="dialog_button_quit">يترك</string>
     <string name="dialog_button_remove">إزالة</string>
@@ -47,13 +58,22 @@
     <string name="dialog_button_system_settings_simplified">النظام</string>
     <string name="dialog_button_update_now">تحديث</string>
     <string name="dialog_button_use_default">استخدم الافتراضي</string>
+    <string name="docs_app_name">AutoJs6 توثيق</string>
     <string name="edit_and_run_handle_intent_error">لا يمكن معالجة الملف</string>
     <string name="edit_exit_without_save_warn">لم يتم حفظ المحتوى ، هل أنت متأكد من الخروج؟</string>
     <string name="entry_app_language_auto">اتبع النظام</string>
+    <string name="entry_documentation_launcher_icon_hide">إخفاء الرمز من المشغل</string>
+    <string name="entry_documentation_launcher_icon_show">إظهار الرمز في المشغل</string>
     <string name="entry_documentation_source_local">مستندات محلية</string>
     <string name="entry_documentation_source_online">مستندات عبر الإنترنت</string>
+    <string name="entry_editor_pinch_to_zoom_change_text_size">تغيير حجم النص</string>
+    <string name="entry_editor_pinch_to_zoom_disable">تعطيل</string>
+    <string name="entry_editor_pinch_to_zoom_scale_view">عرض مقياس</string>
     <string name="entry_hidden_files_not_show">لا تعرض الملفات أو المجلدات المخفية</string>
     <string name="entry_hidden_files_show">إظهار الملفات و المجلدات المخفية</string>
+    <string name="entry_keep_screen_on_when_in_foreground_all_pages">كل الصفحات</string>
+    <string name="entry_keep_screen_on_when_in_foreground_disabled">عاجز</string>
+    <string name="entry_keep_screen_on_when_in_foreground_homepage_only">الصفحة الرئيسية فقط</string>
     <string name="entry_night_mode_always_off">دائما خارج</string>
     <string name="entry_night_mode_always_on">دائما متاح</string>
     <string name="entry_night_mode_follow_system">اتبع النظام</string>
@@ -103,9 +123,17 @@
     <string name="error_max_listeners_exceeded">تم تجاوز مستمعي أقصى: %s</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">قد لا يكون لدى AutoJs6 ملف الجذر لتشغيل ملف \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() دعا مع الوسيطة الفارغة: %s</string>
+    <string name="error_no_accessibility_permission">يتم تعطيل خدمة إمكانية الوصول وتوقف البرنامج النصي</string>
+    <string name="error_no_accessibility_permission_to_capture">لم يتم تنشيط خدمة إمكانية الوصول</string>
     <string name="error_no_accessibility_service">لا توجد خدمة إمكانية الوصول</string>
+    <string name="error_no_draw_overlays_permission">لا يوجد إذن \"عرض عبر التطبيقات الأخرى\"</string>
+    <string name="error_no_post_notifications_permission">لا يوجد إذن \"نشر الإخطارات\"</string>
+    <string name="error_no_read_phone_state_permission">لا يوجد إذن \"اقرأ حالة الهاتف\"</string>
     <string name="error_no_screen_capture_permission">لا يوجد إذن التقاط الشاشة</string>
+    <string name="error_no_storage_rw_permission">لا يوجد إذن \"تخزين R/W\"</string>
     <string name="error_no_such_selector_method" formatted="false">لا توجد طريقة محددة %s (%s: %s)</string>
+    <string name="error_no_usage_stats_permission">لا يوجد إذن \"إحصائيات الاستخدام\"</string>
+    <string name="error_no_write_settings_permission">لا يوجد إذن \"إعدادات الكتابة\"</string>
     <string name="error_only_one_child_for_scroll_view">يمكن أن تستضيف Scrollview طفلًا مباشرًا واحد فقط</string>
     <string name="error_parse_github_release_assets">فشل في تحليل أصول الإفراج عن جيثب</string>
     <string name="error_parse_version_info">فشل في تحليل معلومات الإصدار</string>
@@ -119,12 +147,12 @@
     <string name="error_thread_is_not_alive">الموضوع ليس على قيد الحياة</string>
     <string name="error_unknown">خطأ غير معروف</string>
     <string name="error_unknown_algorithm_selector_param">محدد خوارزمية غير معروف بارام: %s</string>
+    <string name="error_unknown_color_name">اسم لون غير معروف: %s</string>
     <string name="error_unknown_operation">عملية غير معروفة</string>
     <string name="error_unknown_picker_result_type">نوع نتيجة غير معروف {name: %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">نوع نتيجة غير معروف {name: %s ، params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">محدد غير معروف {الاسم: %s ، اكتب: %s}</string>
     <string name="error_unknown_type">نوع غير معروف: %s</string>
-    <string name="error_unknown_color_name">اسم لون غير معروف: %s</string>
     <string name="file_not_exist_or_readable">الملف غير موجود أو قابلاً للقراءة: %s</string>
     <string name="foreground_notification_channel_name">خدمة مقدمة AutoJs6</string>
     <string name="foreground_notification_text">انقر لإطلاق AutoJs6</string>
@@ -149,8 +177,10 @@
     <string name="screen_capturer_foreground_notification_text">يتم عرض هذا الإشعار لالتقاط الشاشة</string>
     <string name="screen_capturer_foreground_notification_title">شاشة كابتوري فريجرونيد خدمة</string>
     <string name="summary_about_app_tips">تجربة مستخدم أفضل</string>
+    <string name="summary_compatibility_with_classes_for_ver_4_x">قم بتوفير درجة توافق اسم فئة Java لإصدارات 4.x</string>
     <string name="summary_enable_a11y_service_with_root_access">تمكين خدمة إمكانية الوصول مع الوصول إلى الجذر تلقائيًا عند الحاجة</string>
     <string name="summary_enable_a11y_service_with_secure_settings">تمكين خدمة إمكانية الوصول مع إعدادات آمنة تلقائيًا عند الحاجة</string>
+    <string name="summary_extending_js_build_in_objects">قم بزيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً من خلال توسيع كائنات JavaScript المضمنة</string>
     <string name="summary_guard_mode">منع إجراءات الأتمتة من البرامج النصية عندما يكون AutoJs6 في المقدمة</string>
     <string name="summary_not_showing_main_activity">قم بتشغيل البرنامج النصي مباشرة دون إظهار النشاط الرئيسي</string>
     <string name="summary_pre_execute_script">تنفيذ قبل ملف البرنامج النصي</string>
@@ -162,6 +192,9 @@
     <string name="text_a11y_service_description">مطلوب من خلال العملية التلقائية البرنامج النصي (انقر فوق ، اضغط لفترة طويلة ، شريحة ، إلخ).</string>
     <string name="text_a11y_service_enabled_but_not_running">تم تمكين خدمة إمكانية الوصول ولكن لا تعمل (إعادة تمكين أو إعادة تشغيل الجهاز)</string>
     <string name="text_a11y_service_may_be_needed">قد تكون هناك حاجة إلى خدمة إمكانية الوصول</string>
+    <string name="text_abis">قيم ABIs</string>
+    <string name="text_abis_32bit">ABIs (32 بت)</string>
+    <string name="text_abis_64bit">ABIs (64 بت)</string>
     <string name="text_about">حول</string>
     <string name="text_about_all_files_access">حول كل الملفات وصول</string>
     <string name="text_about_app_and_developer">حول التطبيق والمطور</string>
@@ -184,6 +217,10 @@
     <string name="text_already_copied_to_clip">نسخ إلى الحافظة</string>
     <string name="text_already_created">مخلوق</string>
     <string name="text_already_deleted">تم الحذف</string>
+    <string name="text_android_build_id">معرّف إصدار Android</string>
+    <string name="text_android_build_version">نسخة بناء أندرويد</string>
+    <string name="text_android_release_version">نسخة إصدار أندرويد</string>
+    <string name="text_android_sdk_version">إصدار Android SDK</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder غير متوفر</string>
     <string name="text_app_and_device_info">معلومات التطبيق والجهاز</string>
     <string name="text_app_crashed">تحطمت AutoJs6</string>
@@ -209,6 +246,8 @@
     <string name="text_app_name_qqmusic">qqmusic</string>
     <string name="text_app_name_wechat">WeChat</string>
     <string name="text_app_source_code">مصدر الرمز</string>
+    <string name="text_app_version_code">كود إصدار التطبيق</string>
+    <string name="text_app_version_name">اسم إصدار التطبيق</string>
     <string name="text_appearance">مظهر</string>
     <string name="text_attribute">ينسب</string>
     <string name="text_auto_check_for_updates">تحقق من التحديثات التلقائية</string>
@@ -240,6 +279,8 @@
     <string name="text_code">شفرة</string>
     <string name="text_code_beautify">رمز تجميل</string>
     <string name="text_command_already_copied_to_clip">تم نسخ الأمر إلى الحافظة</string>
+    <string name="text_compatibility">التوافق</string>
+    <string name="text_compatibility_with_classes_for_ver_4_x">التوافق مع فئات Java للإصدار 4.x</string>
     <string name="text_config">تكوين</string>
     <string name="text_confirm_to_delete">هل انت متأكد من الحذف؟</string>
     <string name="text_confirm_to_remove">هل أنت متأكد من إزالته؟</string>
@@ -255,6 +296,7 @@
     <string name="text_copy_to_clip">نسخ إلى الحافظة</string>
     <string name="text_copy_value">نسخ القيمة</string>
     <string name="text_daily_task">مهام يومية</string>
+    <string name="text_date">تاريخ</string>
     <string name="text_day1">الاثنين</string>
     <string name="text_day2">الثلاثاء</string>
     <string name="text_day3">تزوج</string>
@@ -272,6 +314,13 @@
     <string name="text_detail">تفاصيل</string>
     <string name="text_developer_details_under_development">تفاصيل المطور قيد التطوير</string>
     <string name="text_developer_options">خيارات للمطور</string>
+    <string name="text_device_brand">العلامة التجارية للجهاز</string>
+    <string name="text_device_hardware_name">اسم جهاز الجهاز</string>
+    <string name="text_device_hardware_serial_number">الرقم التسلسلي للجهاز</string>
+    <string name="text_device_manufacturer">الشركة المصنعة للجهاز</string>
+    <string name="text_device_model">طراز الجهاز</string>
+    <string name="text_device_name">اسم الجهاز</string>
+    <string name="text_device_product_name">اسم منتج الجهاز</string>
     <string name="text_directly_download">التحميل الان</string>
     <string name="text_directory">الدليل</string>
     <string name="text_display_over_other_app">عرض على تطبيقات أخرى</string>
@@ -281,6 +330,7 @@
     <string name="text_do_not_ask_again_for_this_version">لا تسأل مرة أخرى عن هذا الإصدار</string>
     <string name="text_do_not_show_again">لا تظهر مرة أخرى</string>
     <string name="text_documentation">وثائق</string>
+    <string name="text_documentation_launcher_icon">رمز مشغل الوثائق</string>
     <string name="text_documentation_source">مصدر الوثائق</string>
     <string name="text_done">فعله</string>
     <string name="text_download">تحميل</string>
@@ -312,6 +362,8 @@
     <string name="text_exit">مخرج</string>
     <string name="text_exit_directly">مخرج</string>
     <string name="text_exit_floating_window">خروج نافذة عائمة</string>
+    <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
+    <string name="text_extensibility">التمدد</string>
     <string name="text_failed">باءت بالفشل</string>
     <string name="text_failed_to_build">فشل في البناء</string>
     <string name="text_failed_to_create">فشل في انشاء</string>
@@ -342,6 +394,7 @@
     <string name="text_force_stop">توقف إجباري</string>
     <string name="text_foreground_service">خدمة المقدمة</string>
     <string name="text_foreground_service_description">تقوم الخدمات الأمامية بإجراء عمليات ملحوظة للمستخدم.\nتُظهر الخدمات المقدمة إخطار شريط الحالة ، بحيث يدرك المستخدمون بنشاط أن تطبيقك يقوم بمهمة في المقدمة ويستهلك موارد النظام.\nلا يمكن رفض الإشعار ما لم يتم إيقاف الخدمة أو إزالتها من المقدمة.\nقد يتم تحديد الإخطار أولوية منخفضة ، حتى يتم إيقاف تشغيله ، عن طريق الإخطار الطويل.</string>
+    <string name="text_fx_keyboard">لوحة مفاتيح Fx</string>
     <string name="text_generate">يولد</string>
     <string name="text_generate_code">إنشاء التعليمات البرمجية</string>
     <string name="text_generated_code">رمز تم إنشاؤه</string>
@@ -379,6 +432,7 @@
     <string name="text_jump_to_line_end">القفز إلى نهاية الخط</string>
     <string name="text_jump_to_line_start">قفز إلى خط البداية</string>
     <string name="text_jump_to_start">القفز للبدء</string>
+    <string name="text_keep_screen_on_when_in_foreground">حافظ على الشاشة قيد التشغيل عندما تكون في المقدمة</string>
     <string name="text_last_updates_checked_time">آخر فحص: %s</string>
     <string name="text_latest_activity">النشاط الاخير</string>
     <string name="text_latest_package">أحدث حزمة</string>
@@ -413,19 +467,12 @@
     <string name="text_new_watching_variables">متغيرات مشاهدة جديدة</string>
     <string name="text_next_run_time">الجولة التالية</string>
     <string name="text_night_mode">وضع الليل</string>
-    <string name="text_no_accessibility_permission">يتم تعطيل خدمة إمكانية الوصول وتوقف البرنامج النصي</string>
-    <string name="text_no_accessibility_permission_to_capture">لم يتم تنشيط خدمة إمكانية الوصول</string>
     <string name="text_no_browser">لم يتم تثبيت متصفح</string>
-    <string name="text_no_draw_overlays_permission">لا يوجد إذن \"عرض عبر التطبيقات الأخرى\"</string>
     <string name="text_no_histories">لا تاريخ</string>
     <string name="text_no_ignored_updates">لا تحديثات تم تجاهلها</string>
-    <string name="text_no_read_phone_state_permission">لا يوجد إذن \"اقرأ حالة الهاتف\"</string>
     <string name="text_no_root">غير الجذر</string>
     <string name="text_no_root_access">لا الوصول إلى الجذر</string>
     <string name="text_no_scripts_to_stop_running">لا توجد نصوص للتوقف عن الجري</string>
-    <string name="text_no_storage_rw_permission">لا يوجد إذن \"تخزين R/W\"</string>
-    <string name="text_no_usage_stats_permission">لا يوجد إذن \"إحصائيات الاستخدام\"</string>
-    <string name="text_no_write_settings_permission">لا يوجد إذن \"إعدادات الكتابة\"</string>
     <string name="text_not_granted">لم تمنح</string>
     <string name="text_not_showing_main_activity">لا تظهر النشاط الرئيسي</string>
     <string name="text_notification">تنبيه</string>
@@ -458,6 +505,7 @@
     <string name="text_permission_revoked_with_root">إلغاء الإذن (مع الجذر)</string>
     <string name="text_permission_test">اختبار بيرم</string>
     <string name="text_permissions">أذونات</string>
+    <string name="text_pinch_to_zoom">قرصة للتكبير</string>
     <string name="text_please_choose">اختر من فضلك</string>
     <string name="text_please_choose_a_script">اختر نصًا</string>
     <string name="text_please_input_name">اسم الإدخال</string>
@@ -477,8 +525,9 @@
     <string name="text_project_save_success">تم حفظ المشروع</string>
     <string name="text_prompt">مستعجل</string>
     <string name="text_quit">يترك</string>
-    <string name="text_record_prompt">موجه التسجيل</string>
     <string name="text_record_finished">انتهى التسجيل</string>
+    <string name="text_record_prompt">موجه التسجيل</string>
+    <string name="text_record_stopped">توقف التسجيل</string>
     <string name="text_recorded_output_file_type">نوع ملف الإخراج المسجل</string>
     <string name="text_redo">إعادة</string>
     <string name="text_redo_simplified">إعادة</string>
@@ -555,18 +604,18 @@
     <string name="text_show_layout_bounds">عرض في حدود التصميم</string>
     <string name="text_show_layout_hierarchy">عرض في التسلسل الهرمي للتخطيط</string>
     <string name="text_show_widget_information">إظهار معلومات القطعة</string>
-    <string name="text_size">حجم الخط</string>
-    <string name="text_size_current_value" formatted="true">حجم النص: %d</string>
+    <string name="text_size">مقاس</string>
     <string name="text_source_file_path">مسار رمز المصدر</string>
     <string name="text_stable_mode">وضع مستقر</string>
     <string name="text_star">نجمة</string>
     <string name="text_start_record">ابدأ التسجيل</string>
-    <string name="text_record_stopped">توقف التسجيل</string>
     <string name="text_start_running">ادارة</string>
     <string name="text_stop">قف</string>
+    <string name="text_symbols_settings">إعدادات الرموز</string>
     <string name="text_tailor_made_developer">مطور مصممة خصيصا</string>
     <string name="text_task">مهمة</string>
     <string name="text_text_size">حجم الخط</string>
+    <string name="text_text_size_current_value" formatted="true">حجم النص: %d</string>
     <string name="text_theme_color">لون الموضوع</string>
     <string name="text_time">زمن</string>
     <string name="text_timed_task">مهمة توقيت</string>
@@ -606,44 +655,15 @@
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="theme_color_default">تقصير</string>
-    <string name="content_way_of_output_for_recorded_script">اختر طريقة إخراج للنصوص المعاد تصميمها</string>
-    <string name="dialog_button_join_group">إنضم للمجموعة</string>
-    <string name="text_app_version_name">اسم إصدار التطبيق</string>
-    <string name="text_app_version_code">كود إصدار التطبيق</string>
-    <string name="text_android_build_version">نسخة بناء أندرويد</string>
-    <string name="text_android_release_version">نسخة إصدار أندرويد</string>
-    <string name="text_android_sdk_version">إصدار Android SDK</string>
-    <string name="text_android_build_id">معرّف إصدار Android</string>
-    <string name="text_device_brand">العلامة التجارية للجهاز</string>
-    <string name="text_device_manufacturer">الشركة المصنعة للجهاز</string>
-    <string name="text_device_name">اسم الجهاز</string>
-    <string name="text_device_model">طراز الجهاز</string>
-    <string name="text_device_product_name">اسم منتج الجهاز</string>
-    <string name="text_device_hardware_name">اسم جهاز الجهاز</string>
-    <string name="text_device_hardware_serial_number">الرقم التسلسلي للجهاز</string>
-    <string name="text_abis">قيم ABIs</string>
-    <string name="text_abis_32bit">ABIs (32 بت)</string>
-    <string name="text_abis_64bit">ABIs (64 بت)</string>
-    <string name="text_fx_keyboard">لوحة مفاتيح Fx</string>
-    <string name="text_symbols_settings">إعدادات الرموز</string>
-    <string name="text_pinch_to_zoom">قرصة للتكبير</string>
-    <string name="entry_editor_pinch_to_zoom_change_text_size">تغيير حجم النص</string>
-    <string name="entry_editor_pinch_to_zoom_scale_view">عرض مقياس</string>
-    <string name="entry_editor_pinch_to_zoom_disable">تعطيل</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">يوفر درجة توافق اسم فئة Java لإصدارات 4.x من خلال إعادة تعيين اسم الفئة.\nعند تشغيل هذا الخيار ، سيكون هناك درجة متفاوتة من تأخير بدء التشغيل (عشرات إلى مئات المللي ثانية) في كل مرة يبدأ فيها البرنامج النصي.\nيوصى بإيقاف تشغيل الخيار في جميع الأوقات إذا لم يكن مطلوبًا على وجه التحديد.</string>
-    <string name="description_extending_js_build_in_objects">يمكن أن يؤدي توسيع كائنات JavaScript المضمنة إلى زيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً ، ولكن يمكن أن يتسبب في حدوث تعارضات وحتى حدوث تعطل.\nتحتوي جميع البرامج النصية على امتدادات مضمنة يتم تمكينها افتراضيًا عند تشغيل الخيار.\nغالبًا ما تكون الامتدادات المضمنة غير آمنة ، ولا يوصى بها ما لم يتم فهم مبادئ ومخاطر الإضافات المضمنة بوضوح.\nعند إيقاف تشغيل الخيار ، لا يزال من الممكن تمكين الامتدادات المضمنة من خلال الكائن العام للمكونات الإضافية ، كما هو موضح في وثائق المشروع.</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">قم بتوفير درجة توافق اسم فئة Java لإصدارات 4.x</string>
-    <string name="summary_extending_js_build_in_objects">قم بزيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً من خلال توسيع كائنات JavaScript المضمنة</string>
-    <string name="text_compatibility">التوافق</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">التوافق مع فئات Java للإصدار 4.x</string>
-    <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
-    <string name="text_extensibility">التمدد</string>
+
     <plurals name="text_items_total_sum">
         <item quantity="one">المجموع: عنصر واحد</item>
         <item quantity="other">المجموع: %d عنصرًا</item>
     </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d توقف البرنامج النصي</item>
         <item quantity="other">توقف %d نصوص</item>
     </plurals>
+
 </resources>

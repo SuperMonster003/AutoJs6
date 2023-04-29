@@ -58,10 +58,7 @@ public abstract class JavaScriptSource extends ScriptSource {
     @NonNull
     public String toString() {
         String prefix = getPrefix();
-        if (prefix == null) {
-            return getName() + getExtension();
-        }
-        return prefix + getName() + getExtension();
+        return prefix == null ? getFullName() : prefix + getFullName();
     }
 
     public int getExecutionMode() {

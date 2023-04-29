@@ -13,6 +13,8 @@ abstract class ScriptSource(val name: String) : Serializable {
 
     val extension = FileUtils.TYPE.JAVASCRIPT.extension
 
+    val fullName = "$name.$extension"
+
     fun getPrefix() = mPrefix
 
     fun setPrefix(prefix: String) {

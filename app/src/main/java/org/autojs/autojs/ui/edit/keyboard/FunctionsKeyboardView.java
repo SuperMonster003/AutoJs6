@@ -24,7 +24,7 @@ import org.autojs.autojs.model.indices.Module;
 import org.autojs.autojs.model.indices.Modules;
 import org.autojs.autojs.model.indices.Property;
 import org.autojs.autojs.ui.widget.GridDividerDecoration;
-import org.autojs.autojs.workground.WrapContentGridLayoutManger;
+import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
 import org.autojs.autojs6.R;
 
 import java.util.ArrayList;

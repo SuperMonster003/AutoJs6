@@ -90,7 +90,7 @@ let $ = {
             // e.g. versionCode -> Version Code
             // e.g. platformVersion -> Platform Version
             let prop = key.replace(/^([a-z]+)(([A-Z][a-z]+)*)$/, ($, $1, $2) => /* @AXR */ (
-                $1[0].toUpperCase() + $1.slice(1) + $2.replace(/[A-Z](?=[a-z])/g, ' $&')
+                StringUtils.toUpperCaseFirst($1) + $2.replace(/[A-Z](?=[a-z])/g, ' $&')
             ));
             infoView['text'].setText(`${prop}: ${info[key]}`);
             infoView['text'].setTextSize(_.textSize);

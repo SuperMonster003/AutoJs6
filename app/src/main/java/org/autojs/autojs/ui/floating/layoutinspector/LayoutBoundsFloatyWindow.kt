@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.floating.layoutinspector
 import android.content.Context
 import android.view.KeyEvent
 import android.view.View
-import com.stardust.enhancedfloaty.FloatyService
+import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.ui.floating.LayoutFloatyWindow
 import org.autojs.autojs.util.EventUtils.isKeyBackAndActionUp

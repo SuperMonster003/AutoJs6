@@ -21,6 +21,7 @@ import org.autojs.autojs.util.ViewUtils.isNightModeYes
 import org.autojs.autojs6.R
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import java.util.LinkedList
 
 /**
  * Created by Stardust on 2017/1/31.
@@ -97,6 +98,13 @@ object Pref {
             resources.getBoolean(R.bool.pref_auto_check_for_updates),
         )
 
+    @JvmStatic
+    val isDocumentationLauncherIconShouldShow: Boolean
+        get() {
+            val shouldShow = key(R.string.key_documentation_launcher_icon_show)
+            return getString(R.string.key_documentation_launcher_icon, shouldShow) == shouldShow
+        }
+
     private val lastUpdatesCheckedTimestamp: Long
         get() = getTimestamp(R.string.key_last_updates_checked)
 
@@ -123,6 +131,10 @@ object Pref {
     @JvmStatic
     val lastUpdatesAutoCheckedTimestamp: Long
         get() = getTimestamp(R.string.key_last_updates_auto_checked)
+
+    @JvmStatic
+    val keyKeepScreenOnWhenInForeground: String?
+        get() = getString(R.string.key_keep_screen_on_when_in_foreground, key(R.string.default_key_keep_screen_on_when_in_foreground))
 
     @JvmStatic
     var rootMode: RootUtils.RootMode
@@ -289,8 +301,19 @@ object Pref {
     }
 
     @JvmStatic
-    fun setLinkedHashSet(@KeyRes keyRes: Int, value: LinkedHashSet<String>) {
+    fun putLinkedHashSet(@KeyRes keyRes: Int, value: LinkedHashSet<String>) {
         putString(keyRes, Gson().toJson(value))
+    }
+
+    @JvmStatic
+    fun getLinkedList(key: String): LinkedList<String> = when {
+        !containsKey(key) -> LinkedList()
+        else -> Gson().fromJson(getString(key, null), LinkedList<String>().javaClass)
+    }
+
+    @JvmStatic
+    fun putLinkedList(key: String, value: LinkedList<String>) {
+        putString(key, Gson().toJson(value))
     }
 
 }

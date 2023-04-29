@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>消息浮动框 (Toast) | AutoJs6 文档 - 6.3.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/toast.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-toast">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast active" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="toast" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#toast_toast">消息浮动框 (Toast)</a></span><ul>
+<li><span class="stability_undefined"><a href="#toast_toast_1">[@] toast</a></span><ul>
+<li><span class="stability_undefined"><a href="#toast_toast_text">toast(text)</a></span></li>
+<li><span class="stability_undefined"><a href="#toast_toast_text_islong">toast(text, isLong)</a></span></li>
+<li><span class="stability_undefined"><a href="#toast_toast_text_islong_isforcible">toast(text, isLong, isForcible)</a></span></li>
+<li><span class="stability_undefined"><a href="#toast_toast_text_isforcible">toast(text, isForcible)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#toast_m_dismissall">[m] dismissAll</a></span><ul>
+<li><span class="stability_undefined"><a href="#toast_dismissall">dismissAll()</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>消息浮动框 (Toast)<span><a class="mark" href="#toast_toast" id="toast_toast">#</a></span></h1>
+<p>toast 模块用于 <a href="https://developer.android.com/guide/topics/ui/notifiers/toasts?hl=zh-cn">消息浮动框</a> 的 [ 显示 / 消除 / 定制 ] 等.</p>
+<p>部分操作系统的 toast 消息可能无法按队列依次显示, 新的 toast 消息直接覆盖之前的 toast 消息.</p>
+<p>可能出现上述异常的操作系统:</p>
+<ul>
+<li>API 级别 28 (安卓 9) [P]</li>
+<li>鸿蒙 (HarmonyOS) 2</li>
+</ul>
+<p>部分机型需授予 &quot;后台弹出页面&quot; 权限才能正常显示 toast 消息.</p>
+<p>可能依赖上述权限的设备及操作系统:</p>
+<ul>
+<li>小米 (XiaoMi / Redmi / BlackShark) - MIUI</li>
+<li>维沃 (VIVO / IQOO) - Funtouch OS / OriginOS</li>
+<li>欧珀 (OPPO / Realme) - ColorOS</li>
+</ul>
+<p>部分机型的 toast 消息正常显示依赖通知权限, 当未授予通知权限或通知被 <code>阻止 (block)</code> 时, toast 可能无法正常显示, 参阅 <a href="notice.html#notice_m_isenabled">notice.isEnabled</a> 小节.</p>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">toast</p>
+
+<hr>
+<h2>[@] toast<span><a class="mark" href="#toast_toast_1" id="toast_toast_1">#</a></span></h2>
+<p>toast 可作为全局对象使用:</p>
+<pre><code class="lang-js">typeof toast; // &quot;function&quot;
+typeof toast.dismissAll; // &quot;function&quot;
+</code></pre>
+<h3>toast(text)<span><a class="mark" href="#toast_toast_text" id="toast_toast_text">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 1/4</code></strong> <strong><code>Async</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>显示一个消息浮动框.</p>
+<p>消息框的显示默认是依次进行的:</p>
+<pre><code class="lang-js">/* 显示消息框 2 秒钟. */
+toast(&quot;hello&quot;);
+/* 显示消息框 2 秒钟, 且在前一个消息框消失后才显示. */
+toast(&quot;world&quot;);
+/* 显示消息框 2 秒钟, 且在前一个消息框消失后才显示. */
+toast(&quot;hello world&quot;);
+</code></pre>
+<h3>toast(text, isLong)<span><a class="mark" href="#toast_toast_text_islong" id="toast_toast_text_islong">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 2/4</code></strong> <strong><code>Async</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
+<li><strong>isLong = false</strong> { <span class="type">&quot;long&quot;</span> | <span class="type">&quot;l&quot;</span> | <span class="type">&quot;short&quot;</span> | <span class="type">&quot;s&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否以较长时间显示</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>控制单个消息框显示时长:</p>
+<pre><code class="lang-js">toast(&quot;hello&quot;, &#39;long&#39;); /* 显示消息框 3.5 秒钟. */
+toast(&quot;hello&quot;, true); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: 仅有 [ 长 / 短 ] 两种时长, 此时长由安卓系统决定.<br>通常, 短时为 2 秒, 长时为 3.5 秒.</p>
+</blockquote>
+<h3>toast(text, isLong, isForcible)<span><a class="mark" href="#toast_toast_text_islong_isforcible" id="toast_toast_text_islong_isforcible">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 3/4</code></strong> <strong><code>Async</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
+<li><strong>isLong = false</strong> { <span class="type">&quot;long&quot;</span> | <span class="type">&quot;l&quot;</span> | <span class="type">&quot;short&quot;</span> | <span class="type">&quot;s&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否以较长时间显示</li>
+<li><strong>isForcible = false</strong> { <span class="type">&quot;forcible&quot;</span> | <span class="type">&quot;f&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否强制覆盖显示</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>使用 &quot;强制覆盖显示&quot; 参数可立即显示消息框:</p>
+<pre><code class="lang-js">toast(&quot;hello&quot;);
+/* 显示消息框 2 秒钟, 且立即显示, 前一个消息框 &quot;hello&quot; 被 &quot;覆盖&quot;. */
+toast(&quot;world&quot;, &quot;short&quot;, &quot;forcible&quot;);
+</code></pre>
+<blockquote>
+<p>注: 强制覆盖仅对当前脚本有效, 对其他脚本及应用程序无效.</p>
+</blockquote>
+<h3>toast(text, isForcible)<span><a class="mark" href="#toast_toast_text_isforcible" id="toast_toast_text_isforcible">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 4/4</code></strong> <strong><code>Async</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
+<li><strong>isForcible</strong> { <span class="type">&quot;forcible&quot;</span> | <span class="type">&quot;f&quot;</span> } - 强制覆盖显示 (字符标识)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>此方法相当于忽略 isLong 参数:</p>
+<pre><code class="lang-js">toast(&quot;hello&quot;);
+/* 显示消息框 2 秒钟, 且立即显示, 前一个消息框 &quot;hello&quot; 被 &quot;覆盖&quot;. */
+toast(&quot;world&quot;, &quot;forcible&quot;);
+</code></pre>
+<blockquote>
+<p>注: 此方法的 isForcible 参数只能为具有明确意义的字符标识, 不能为 boolean 类型或其他类型, 否则 isForcible 将被视为 isLong.</p>
+</blockquote>
+<h2>[m] dismissAll<span><a class="mark" href="#toast_m_dismissall" id="toast_m_dismissall">#</a></span></h2>
+<h3>dismissAll()<span><a class="mark" href="#toast_dismissall" id="toast_dismissall">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</p>
+<p>强制消除所有由 AutoJs6 产生的消息框, 包括正在显示的及等待显示的.</p>
+<p>使用方式:</p>
+<pre><code class="lang-js">toast.dismissAll(); /* 立即消除所有消息框. */
+</code></pre>
+<p>示例:</p>
+<pre><code class="lang-js">toast(&quot;hello&quot;);
+toast(&quot;world&quot;);
+toast(&quot;of&quot;);
+toast(&quot;JavaScript&quot;);
+
+sleep(1e3);
+
+/* &quot;hello&quot; 显示 1 秒后消失, &quot;world&quot; 及其他消息框均不再显示. */
+/* 若无 sleep 语句, 由于 toast 是异步的, 上述消息框均不会显示. */
+toast.dismissAll();
+
+/* dismissAll 仅对已在队列中的消息框有效, 因此下述消息框正常显示. */
+toast(&quot;forcibly dismissed&quot;);
+</code></pre>
+<blockquote>
+<p>注: 强制取消显示仅对当前脚本有效, 对其他脚本及应用程序无效.</p>
+</blockquote>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

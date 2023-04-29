@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>数据类型 (Data Types) | AutoJs6 文档 - 6.2.0</title>
+    <title>数据类型 (Data Types) | AutoJs6 文档 - 6.3.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
     <link rel="canonical" href="https://nodejs.org/api/dataTypes.html">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="viewport" content="user-scalable=no">
@@ -21,15 +23,14 @@
         <ul>
 <li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
 <li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
-<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
-<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
-<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
-<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
 </ul>
 <div class="line"></div>
 
@@ -40,6 +41,7 @@
 <li><a class="nav-app" href="app.html">App - 通用应用</a></li>
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -48,6 +50,8 @@
 <li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
 <li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
 <li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
@@ -66,36 +70,33 @@
 <li><a class="nav-base64" href="base64.html">Base64</a></li>
 <li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
 <li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
 <li><a class="nav-e4x" href="e4x.html">E4X</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
 <li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
 <li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
 <li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
 <li><a class="nav-context" href="context.html">Context - 上下文</a></li>
 <li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-dataTypes active" href="dataTypes.html">Data Types - 数据类型</a></li>
-<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
-<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
-<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
-<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
-<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
-<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
-<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
-<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
 </ul>
 <div class="line"></div>
 
@@ -107,15 +108,51 @@
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes active" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
 </ul>
 
     </div>
 
     <div id="column1" data-id="dataTypes" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <h1>AutoJs6 文档 - 6.3.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -171,88 +208,17 @@
 <li><span class="stability_undefined"><a href="#datatypes_capitalize">Capitalize</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_ignorecase">IgnoreCase</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_pattern">Pattern</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_javaarray">JavaArray</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_javaarraylist">JavaArrayList</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_anybut">AnyBut</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#datatypes_6">自定义类型</a></span><ul>
+<li><span class="stability_undefined"><a href="#datatypes_javaarray">JavaArray</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_javaarraylist">JavaArrayList</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_numberstring">NumberString</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_comparisonoperatorstring">ComparisonOperatorString</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_screenmetricnumberx">ScreenMetricNumberX</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_opencvpoint">OpencvPoint</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_c_org_opencv_core_point">[C] org.opencv.core.Point</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_c_x_y">[c] (x, y)</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_c">[c] ()</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_c_points">[c] (points)</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_p_x">[p#] x</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_p_y">[p#] y</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_opencvsize">OpencvSize</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_c_org_opencv_core_size">[C] org.opencv.core.Size</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_c_width_height">[c] (width, height)</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_c_1">[c] ()</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_c_point">[c] (point)</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_c_dimensions">[c] (dimensions)</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_p_width">[p#] width</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_p_height">[p#] height</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_androidrect">AndroidRect</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_c_android_graphics_rect">[C] android.graphics.Rect</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_c_left_top_right_bottom">[c] (left, top, right, bottom)</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_c_2">[c] ()</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_c_rect">[c] (rect)</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_p_left">[p#] left</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_p_top">[p#] top</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_p_right">[p#] right</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_p_bottom">[p#] bottom</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_m_width">[m#] width</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_width">width()</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_m_height">[m#] height</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_height">height()</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_m_centerx">[m#] centerX</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_centerx">centerX()</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_m_centery">[m#] centerY</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_centery">centerY()</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_m_exactcenterx">[m#] exactCenterX</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_exactcenterx">exactCenterX()</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_m_exactcentery">[m#] exactCenterY</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_exactcentery">exactCenterY()</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_m_contains">[m#] contains</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_contains_rect">contains(rect)</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_m_intersect">[m#] intersect</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_intersect_rect">intersect(rect)</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_m_intersects">[m] intersects</a></span><ul>
-<li><span class="stability_undefined"><a href="#datatypes_intersects_recta_rectb">intersects(rectA, rectB)</a></span></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#datatypes_androidbundle">AndroidBundle</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_scriptexecuteactivity">ScriptExecuteActivity</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_detectcompass">DetectCompass</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_detectresult">DetectResult</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_detectcallback">DetectCallback</a></span></li>
@@ -290,8 +256,38 @@
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#datatypes_colorcomponents">ColorComponents</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_colordetectionalgorithm">ColorDetectionAlgorithm</a></span><ul>
+<li><span class="stability_undefined"><a href="#datatypes_rgb_1">RGB 差值检测</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_rgb_2">RGB 距离检测</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_rgb_3">加权 RGB 距离检测</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_h">H 距离检测</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_hs">HS 距离检测</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#datatypes_range">Range</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_intrange">IntRange</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_standardcharset">StandardCharset</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_extendmodulesnames">ExtendModulesNames</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_activityshortform">ActivityShortForm</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_broadcastshortform">BroadcastShortForm</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_ocrresult">OcrResult</a></span><ul>
+<li><span class="stability_undefined"><a href="#datatypes_p_label">[p] label</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_p_confidence">[p] confidence</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_p_bounds">[p] bounds</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_m_tostring">[m] toString</a></span><ul>
+<li><span class="stability_undefined"><a href="#datatypes_tostring">toString()</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#datatypes_themecolor">ThemeColor</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_injectablewebview">InjectableWebView</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_injectablewebclient">InjectableWebClient</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_storage">Storage</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_opencvpoint">OpencvPoint</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_opencvsize">OpencvSize</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_androidrect">AndroidRect</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_androidbundle">AndroidBundle</a></span></li>
 </ul>
 </li>
 </ul>
@@ -302,13 +298,14 @@
             <h1>数据类型 (Data Types)<span><a class="mark" href="#datatypes_data_types" id="datatypes_data_types">#</a></span></h1>
 <hr>
 <p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
-<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 22, 2022.</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Feb 22, 2023.</p>
 
 <hr>
 <p>数据类型是用来约束数据的解释.<br>本章节的数据类型包括 [ number / void / any / object / 泛型 / 交叉类型 ] 等.</p>
 <blockquote>
 <p>注: 此章节的类型概念 与 JavaScript 数据类型 (如 <a href="https://developer.mozilla.org/zh-CN/docs/Glossary/Primitive/">基本类型</a>) 以及 TypeScript 数据类型 (如 <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html">基础类型</a>) 在概念上可能存在出入, 因此仅适用于对文档内容的辅助理解, 不适用于严格的概念参考.</p>
 </blockquote>
+<hr>
 <h2>Boolean<span><a class="mark" href="#datatypes_boolean" id="datatypes_boolean">#</a></span></h2>
 <p>布尔类型.</p>
 <p><strong>foo(bar)</strong></p>
@@ -668,8 +665,6 @@ foo(&quot;1.3&quot;); /* 不符合预期. */
 <h2>Capitalize<span><a class="mark" href="#datatypes_capitalize" id="datatypes_capitalize">#</a></span></h2>
 <p><strong>Capitalize&lt;T&gt;: string</strong></p>
 <p>通常用于输出转换.<br>接受 string 类型并生成首字母大写的同类型数据.</p>
-<pre><code class="lang-js">
-</code></pre>
 <h2>IgnoreCase<span><a class="mark" href="#datatypes_ignorecase" id="datatypes_ignorecase">#</a></span></h2>
 <p><strong>IgnoreCase&lt;T extends string&gt;: T</strong></p>
 <p>通常用于参数值的输入转换.<br>接受 string 类型并生成忽略大小写的同类型数据.</p>
@@ -704,6 +699,15 @@ foo(&quot;heroes&quot;); /* 不符合预期. */
 <blockquote>
 <p>注: 目前 (2022/08) 在 JSDoc 及 TypeScript 中,<br>均不存在使用正则表达式字面量检查字符串的类型检查 (参阅 <a href="https://stackoverflow.com/questions/51445767/how-to-define-a-regex-matched-string-type-in-typescript">StackOverflow</a>),<br>上述 Pattern 类型仅适用于对文档内容的辅助理解.</p>
 </blockquote>
+<h2>AnyBut<span><a class="mark" href="#datatypes_anybut" id="datatypes_anybut">#</a></span></h2>
+<p><strong>AnyBut&lt;T&gt;</strong></p>
+<p>任意类型但排除 T.</p>
+<p><strong>foo(bar)</strong></p>
+<ul>
+<li><strong>bar</strong> { <span class="type"><a href="#datatypes_anybut">AnyBut</a><a href="#datatypes_generic">&lt;</a><a href="#datatypes_number">number</a><a href="#datatypes_generic">&gt;</a></span> }</li>
+</ul>
+<p>上述示例的 bar 参数接受除 <a href="#datatypes_number">number</a> 外的任意类型.</p>
+<h1>自定义类型<span><a class="mark" href="#datatypes_6" id="datatypes_6">#</a></span></h1>
 <h2>JavaArray<span><a class="mark" href="#datatypes_javaarray" id="datatypes_javaarray">#</a></span></h2>
 <p>Java Array (Java 数组).</p>
 <pre><code class="lang-js">let javaArr = java.lang.reflect.Array
@@ -799,7 +803,6 @@ console.log(arrList.length); // 0
 <blockquote>
 <p>参阅: <a href="https://docs.oracle.com/javase/8/docs/api/java/util/ArrayList.html">Oracle Docs</a></p>
 </blockquote>
-<h1>自定义类型<span><a class="mark" href="#datatypes_6" id="datatypes_6">#</a></span></h1>
 <h2>NumberString<span><a class="mark" href="#datatypes_numberstring" id="datatypes_numberstring">#</a></span></h2>
 <p>数字字符串.</p>
 <p><a href="glossaries.html#glossaries_字符串模式">字符串模式</a>: <code>/[+-]?(\d+(\.\d+)?(e\d+)?)/</code>.</p>
@@ -839,427 +842,23 @@ console.log(arrList.length); // 0
 <p>例如, 对于下面的参数:</p>
 <p><strong>top</strong> { <span class="type"><a href="dataTypes.html#datatypes_screenmetricnumbery">ScreenMetricNumberY</a></span> }</p>
 <p>top 赋值为 50, 表示 Y 坐标为 50.<br>top 赋值为 -80, 表示 Y 坐标为 -80.<br>top 赋值为 0.5, 表示 Y 坐标为 50% 纵向屏幕高度, 即 <code>0.5 * device.height</code>.<br>top 赋值为 -0.1, 表示 Y 坐标为 -10% 纵向屏幕高度, 即 <code>-0.1 * device.height</code>.<br>top 赋值为 -1, 表示 Y 坐标为纵向屏幕高度的代指值, 即 <code>device.height</code>.</p>
-<h2>OpencvPoint<span><a class="mark" href="#datatypes_opencvpoint" id="datatypes_opencvpoint">#</a></span></h2>
-<p>org.opencv.core.Point 别名.
-表示一个点, 作为控件信息时则表示点在屏幕的相对位置.</p>
-<pre><code class="lang-js">let point = pickup(/.+/, &#39;.&#39;);
-console.log(`${point.x}, ${point.y}`);
+<h2>ScriptExecuteActivity<span><a class="mark" href="#datatypes_scriptexecuteactivity" id="datatypes_scriptexecuteactivity">#</a></span></h2>
+<p><a href="https://developer.android.com/reference/android/app/Activity">android.app.Activity</a> 的子类.</p>
+<p>ScriptExecuteActivity 是 UI 模式下, 全局对象 activity 的类型:</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+activity instanceof org.autojs.autojs.execution.ScriptExecuteActivity; // true
 </code></pre>
-<p>部分属性或方法:</p>
-<ul>
-<li><code>[p#]</code> <a href="#datatypes_p_x">x</a></li>
-<li><code>[p#]</code> <a href="#datatypes_p_y">y</a></li>
-</ul>
-<p>常见可以返回此类型的方法:</p>
-<ul>
-<li><a href="uiSelectorType.html#uiselectortype_m_pickup">UiSelector.pickup</a></li>
-</ul>
-<blockquote>
-<p>参阅: <a href="https://docs.opencv.org/4.x/javadoc/org/opencv/core/Point.html">OpenCV Docs</a></p>
-</blockquote>
-<hr>
-<p style="font: bold 2em sans-serif; color: #FF7043">org.opencv.core.Point</p>
-
-<hr>
-<h3>[C] org.opencv.core.Point<span><a class="mark" href="#datatypes_c_org_opencv_core_point" id="datatypes_c_org_opencv_core_point">#</a></span></h3>
-<h4>[c] (x, y)<span><a class="mark" href="#datatypes_c_x_y" id="datatypes_c_x_y">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>x</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 点 X 坐标</li>
-<li><strong>y</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 点 Y 坐标</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_orgopencvcorepoint">org.opencv.core.Point</a></span> }</li>
-</ul>
-</div><p>生成一个点.</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Point(10, 20)); // {10.0, 20.0}
+<p>一些 activity 相关的示例:</p>
+<pre><code class="lang-js">/* 结束当前 activity. */
+activity.finish();
+/* 设置状态栏颜色为深红色. */
+activity.getWindow().setStatusBarColor(colors.toInt(&#39;dark-red&#39;));
+/* 将视图对象作为内容加载. */
+activity.setContentView(web.newInjectableWebView(&#39;www.github.com&#39;));
+/* 获取顶层窗口的高度. */
+activity.getWindow().getDecorView().getRootView().getHeight();
 </code></pre>
-<p>坐标不会被化为整型:</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Point(10.8, 20.44)); // {10.8, 20.44}
-</code></pre>
-<h4>[c] ()<span><a class="mark" href="#datatypes_c" id="datatypes_c">#</a></span></h4>
-<div class="signature"><ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_orgopencvcorepoint">org.opencv.core.Point</a></span> }</li>
-</ul>
-</div><p>生成一个点, 并初始化为 <code>{0, 0}</code> 坐标.</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Point()); // {0.0, 0.0}
-</code></pre>
-<h4>[c] (points)<span><a class="mark" href="#datatypes_c_points" id="datatypes_c_points">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>points</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 点坐标数组</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_orgopencvcorepoint">org.opencv.core.Point</a></span> }</li>
-</ul>
-</div><p>生成一个点, 并按指定参数初始化坐标.</p>
-<p>两个坐标:</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Point([ 5, 23 ])); // {5.0, 23.0}
-</code></pre>
-<p>一个坐标, 此坐标作为 X 坐标, Y 坐标初始化为 0:</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Point([ 5 ])); // {5.0, 0.0}
-</code></pre>
-<p>空数组, X 与 Y 坐标均为 0:</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Point([])); // {0.0, 0.0}
-</code></pre>
-<p>超过两个坐标, 多余坐标将被忽略:</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Point([ 5, 23, 7, 8, 9 ])); // {5.0, 23.0}
-</code></pre>
-<h3>[p#] x<span><a class="mark" href="#datatypes_p_x" id="datatypes_p_x">#</a></span></h3>
-<div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>点 X 坐标.</p>
-<p>如: Point(<strong>180</strong>, 440) 表示点距屏幕左边缘 180 像素.</p>
-<h3>[p#] y<span><a class="mark" href="#datatypes_p_y" id="datatypes_p_y">#</a></span></h3>
-<div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>点 Y 坐标.</p>
-<p>如: Point(180, <strong>440</strong>) 表示点距屏幕上边缘 440 像素.</p>
-<h2>OpencvSize<span><a class="mark" href="#datatypes_opencvsize" id="datatypes_opencvsize">#</a></span></h2>
-<p>org.opencv.core.Size 别名.
-表示一个长宽尺寸对象, 作为控件信息时则表示控件矩形在屏幕的控件占用尺寸.</p>
-<pre><code class="lang-js">let size = pickup(/.+/, &#39;size&#39;);
-console.log(`${size.width}x${size.height}`);
-</code></pre>
-<p>部分属性或方法:</p>
-<ul>
-<li><code>[p#]</code> <a href="#datatypes_p_width">x</a></li>
-<li><code>[p#]</code> <a href="#datatypes_p_height">y</a></li>
-</ul>
-<p>常见可以返回此类型的方法:</p>
-<ul>
-<li><a href="uiobjectType.html#uiobjecttype_m_size">UiObject.size</a></li>
-</ul>
-<blockquote>
-<p>参阅: <a href="https://docs.opencv.org/4.x/javadoc/org/opencv/core/Size.html">OpenCV Docs</a></p>
-</blockquote>
-<hr>
-<p style="font: bold 2em sans-serif; color: #FF7043">org.opencv.core.Size</p>
-
-<hr>
-<h3>[C] org.opencv.core.Size<span><a class="mark" href="#datatypes_c_org_opencv_core_size" id="datatypes_c_org_opencv_core_size">#</a></span></h3>
-<h4>[c] (width, height)<span><a class="mark" href="#datatypes_c_width_height" id="datatypes_c_width_height">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>width</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 宽度值</li>
-<li><strong>height</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 高度值</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_orgopencvcoresize">org.opencv.core.Size</a></span> }</li>
-</ul>
-</div><p>生成一个尺寸对象.</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Size(100, 200)); // 100x200
-</code></pre>
-<p>坐标不会被化为整型:</p>
-<pre><code class="lang-js">/* 打印时, 数值会转换为整数. */
-console.log(new org.opencv.core.Size(1.8, 3.2)); // 1x3
-/* 但获取宽高值时, 依然保留原始值, 不会被化为整型. */
-console.log(new org.opencv.core.Size(1.8, 3.2).width); // 1.8
-console.log(new org.opencv.core.Size(1.8, 3.2).height); // 3.2
-</code></pre>
-<h4>[c] ()<span><a class="mark" href="#datatypes_c_1" id="datatypes_c_1">#</a></span></h4>
-<div class="signature"><ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_orgopencvcoresize">org.opencv.core.Size</a></span> }</li>
-</ul>
-</div><p>生成一个尺寸对象, 并初始化为 <code>0x0</code> 宽高尺寸.</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Size()); // 0x0
-</code></pre>
-<h4>[c] (point)<span><a class="mark" href="#datatypes_c_point" id="datatypes_c_point">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>point</strong> { <span class="type"><a href="#datatypes_opencvpoint">OpencvPoint</a></span> } - 用于表示尺寸的 &quot;点&quot;</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_orgopencvcoresize">org.opencv.core.Size</a></span> }</li>
-</ul>
-</div><p>生成一个尺寸对象, 并按参数初始化宽高尺寸.</p>
-<pre><code class="lang-js">const { Size, Point } = org.opencv.core;
-console.log(new Size(new Point(5, 23))); // 5x23
-</code></pre>
-<h4>[c] (dimensions)<span><a class="mark" href="#datatypes_c_dimensions" id="datatypes_c_dimensions">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>dimensions</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 尺寸值数组</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_orgopencvcoresize">org.opencv.core.Size</a></span> }</li>
-</ul>
-</div><p>生成一个尺寸对象, 并按指定参数初始化宽高尺寸.</p>
-<p>两个尺寸值:</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Size([ 5, 23 ])); // 5x23
-</code></pre>
-<p>一个尺寸值, 此尺寸值作为宽度值, 高度值初始化为 0:</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Size([ 5 ])); // 5x0
-</code></pre>
-<p>空数组, 宽度尺寸值均为 0:</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Size([])); // 0x0
-</code></pre>
-<p>超过两个尺寸值, 多余尺寸值将被忽略:</p>
-<pre><code class="lang-js">console.log(new org.opencv.core.Size([ 5, 23, 7, 8, 9 ])); // 5x23
-</code></pre>
-<h3>[p#] width<span><a class="mark" href="#datatypes_p_width" id="datatypes_p_width">#</a></span></h3>
-<div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>尺寸宽度值.</p>
-<h3>[p#] height<span><a class="mark" href="#datatypes_p_height" id="datatypes_p_height">#</a></span></h3>
-<div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>尺寸高度值.</p>
-<h2>AndroidRect<span><a class="mark" href="#datatypes_androidrect" id="datatypes_androidrect">#</a></span></h2>
-<p>android.graphics.Rect 别名.<br>表示一个矩形, 作为控件信息时则用于表示控件在屏幕的相对位置及空间范围, 又称 <strong>控件矩形</strong>.</p>
-<pre><code class="lang-js">let bounds = pickup(/.+/, &#39;bounds&#39;);
-console.log(`${bounds.centerX()}, ${bounds.centerY()}`);
-</code></pre>
-<p>部分属性或方法:</p>
-<ul>
-<li><code>[p#]</code> <a href="#datatypes_p_left">left</a></li>
-<li><code>[p#]</code> <a href="#datatypes_p_top">top</a></li>
-<li><code>[p#]</code> <a href="#datatypes_p_right">right</a></li>
-<li><code>[p#]</code> <a href="#datatypes_p_bottom">bottom</a></li>
-<li><code>[m#]</code> <a href="#datatypes_m_width">width()</a></li>
-<li><code>[m#]</code> <a href="#datatypes_m_height">height()</a></li>
-<li><code>[m#]</code> <a href="#datatypes_m_centerx">centerX()</a></li>
-<li><code>[m#]</code> <a href="#datatypes_m_centery">centerY()</a></li>
-<li><code>[m#]</code> <a href="#datatypes_m_exactcenterx">exactCenterX()</a></li>
-<li><code>[m#]</code> <a href="#datatypes_m_exactcentery">exactCenterY()</a></li>
-<li><code>[m#]</code> <a href="#datatypes_m_contains">contains()</a></li>
-<li><code>[m#]</code> <a href="#datatypes_m_intersect">intersect()</a></li>
-<li><code>[m#]</code> <a href="#datatypes_m_intersects">intersects()</a></li>
-</ul>
-<p>常见可以返回此类型的方法:</p>
-<ul>
-<li><a href="uiObjectType.html#uiobjecttype_m_bounds">UiObject#bounds</a></li>
-<li><a href="uiSelectorType.html#uiselectortype_m_pickup">UiSelector.pickup</a></li>
-</ul>
-<blockquote>
-<p>参阅: <a href="https://developer.android.com/reference/android/graphics/Rect">Android Docs</a></p>
-</blockquote>
-<hr>
-<p style="font: bold 2em sans-serif; color: #FF7043">android.graphics.Rect</p>
-
-<hr>
-<h3>[C] android.graphics.Rect<span><a class="mark" href="#datatypes_c_android_graphics_rect" id="datatypes_c_android_graphics_rect">#</a></span></h3>
-<h4>[c] (left, top, right, bottom)<span><a class="mark" href="#datatypes_c_left_top_right_bottom" id="datatypes_c_left_top_right_bottom">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>left</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 矩形左边界 X 坐标</li>
-<li><strong>top</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 矩形上边界 Y 坐标</li>
-<li><strong>right</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 矩形右边界 X 坐标</li>
-<li><strong>bottom</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 矩形下边界 Y 坐标</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_androidgraphicsrect">android.graphics.Rect</a></span> }</li>
-</ul>
-</div><p>生成一个矩形.</p>
-<pre><code class="lang-js">let rect = new android.graphics.Rect(10, 20, 80, 90);
-console.log(rect); // Rect(10, 20 - 80, 90)
-</code></pre>
-<p>如果坐标值为浮点数, 将做向下取整处理:</p>
-<pre><code class="lang-js">let rect = new android.graphics.Rect(10.2, 20.7, 80.1, 90.92);
-console.log(rect); // Rect(10, 20 - 80, 90)
-</code></pre>
-<p>坐标值可以为 0 或负数:</p>
-<pre><code class="lang-js">let rect = new android.graphics.Rect(0, 0, -80, -90);
-console.log(rect); // Rect(0, 0 - -80, -90)
-</code></pre>
-<h4>[c] ()<span><a class="mark" href="#datatypes_c_2" id="datatypes_c_2">#</a></span></h4>
-<div class="signature"><ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_androidgraphicsrect">android.graphics.Rect</a></span> }</li>
-</ul>
-</div><p>生成一个空矩形.</p>
-<pre><code class="lang-js">let rect = new android.graphics.Rect();
-console.log(rect); // Rect(0, 0 - 0, 0)
-</code></pre>
-<h4>[c] (rect)<span><a class="mark" href="#datatypes_c_rect" id="datatypes_c_rect">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>rect</strong> { <span class="type"><a href="#datatypes_c_androidgraphicsrect">android.graphics.Rect</a></span> } - 参照矩形</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#datatypes_c_androidgraphicsrect">android.graphics.Rect</a></span> }</li>
-</ul>
-</div><p>生成一个新矩形, 并按照参照矩形的参数初始化.</p>
-<pre><code class="lang-js">let rectA = new android.graphics.Rect(10, 20, 80, 90);
-let rectB = new android.graphics.Rect(rectA);
-console.log(rectB); // Rect(10, 20 - 80, 90)
-rectB.top = 1;
-rectB.bottom = 0;
-console.log(rectB); // Rect(10, 1 - 80, 0)
-console.log(rectA); // Rect(10, 20 - 80, 90)
-</code></pre>
-<h3>[p#] left<span><a class="mark" href="#datatypes_p_left" id="datatypes_p_left">#</a></span></h3>
-<div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形左边界 X 坐标.</p>
-<p>如: Rect(<strong>180</strong>, 440, 750, 1200) 表示矩形左边界距屏幕左边缘 180 像素.</p>
-<h3>[p#] top<span><a class="mark" href="#datatypes_p_top" id="datatypes_p_top">#</a></span></h3>
-<div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形上边界 Y 坐标.</p>
-<p>如: Rect(180, <strong>440</strong>, 750, 1200) 表示矩形上边界距屏幕上边缘 440 像素.</p>
-<h3>[p#] right<span><a class="mark" href="#datatypes_p_right" id="datatypes_p_right">#</a></span></h3>
-<div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形右边界 X 坐标.</p>
-<p>如: Rect(180, 440, <strong>750</strong>, 1200) 表示矩形右边界距屏幕左边缘 750 像素.</p>
-<h3>[p#] bottom<span><a class="mark" href="#datatypes_p_bottom" id="datatypes_p_bottom">#</a></span></h3>
-<div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形下边界 Y 坐标.</p>
-<p>如: Rect(180, 440, 750, <strong>1200</strong>) 表示矩形下边界距屏幕上边缘 1200 像素.</p>
-<h3>[m#] width<span><a class="mark" href="#datatypes_m_width" id="datatypes_m_width">#</a></span></h3>
-<h4>width()<span><a class="mark" href="#datatypes_width" id="datatypes_width">#</a></span></h4>
-<div class="signature"><ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形宽度.</p>
-<pre><code class="lang-js">let rect = new android.graphics.Rect(180, 440, 750, 1200);
-console.log(rect.width()); // 570
-</code></pre>
-<p>宽度可能为 0 或负数:</p>
-<pre><code class="lang-js">let rectA = new android.graphics.Rect(0, 440, 0, 1200);
-console.log(rectA.width()); // 0
-let rectB = new android.graphics.Rect(30, 440, 10, 1200);
-console.log(rectB.width()); // -20
-</code></pre>
-<h3>[m#] height<span><a class="mark" href="#datatypes_m_height" id="datatypes_m_height">#</a></span></h3>
-<h4>height()<span><a class="mark" href="#datatypes_height" id="datatypes_height">#</a></span></h4>
-<div class="signature"><ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形高度.</p>
-<pre><code class="lang-js">let rect = new android.graphics.Rect(180, 440, 750, 1200);
-console.log(rect.height()); // 760
-</code></pre>
-<p>高度可能为 0 或负数:</p>
-<pre><code class="lang-js">let rectA = new android.graphics.Rect(180, 1200, 750, 1200);
-console.log(rectA.height()); // 0
-let rectB = new android.graphics.Rect(180, 40, 750, 10);
-console.log(rectB.height()); // -30
-</code></pre>
-<h3>[m#] centerX<span><a class="mark" href="#datatypes_m_centerx" id="datatypes_m_centerx">#</a></span></h3>
-<h4>centerX()<span><a class="mark" href="#datatypes_centerx" id="datatypes_centerx">#</a></span></h4>
-<div class="signature"><ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形中点 X 坐标 (向下取整).</p>
-<pre><code class="lang-js">let rectA = new android.graphics.Rect(180, 440, 750, 1200);
-console.log(rectA.centerX()); // 465
-
-let rectB = new android.graphics.Rect(100, 200, 101, 201);
-console.log(rectB.centerX()); // 100
-</code></pre>
-<h3>[m#] centerY<span><a class="mark" href="#datatypes_m_centery" id="datatypes_m_centery">#</a></span></h3>
-<h4>centerY()<span><a class="mark" href="#datatypes_centery" id="datatypes_centery">#</a></span></h4>
-<div class="signature"><ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形中点 Y 坐标 (向下取整).</p>
-<pre><code class="lang-js">let rectA = new android.graphics.Rect(180, 440, 750, 1200);
-console.log(rectA.centerY()); // 820
-
-let rectB = new android.graphics.Rect(100, 200, 101, 201);
-console.log(rectB.centerY()); // 200
-</code></pre>
-<h3>[m#] exactCenterX<span><a class="mark" href="#datatypes_m_exactcenterx" id="datatypes_m_exactcenterx">#</a></span></h3>
-<h4>exactCenterX()<span><a class="mark" href="#datatypes_exactcenterx" id="datatypes_exactcenterx">#</a></span></h4>
-<div class="signature"><ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形中点 X 坐标 (浮点数).</p>
-<pre><code class="lang-js">let rectA = new android.graphics.Rect(180, 440, 750, 1200);
-console.log(rectA.exactCenterX()); // 465
-
-let rectB = new android.graphics.Rect(100, 200, 101, 201);
-console.log(rectB.exactCenterX()); // 100.5
-</code></pre>
-<h3>[m#] exactCenterY<span><a class="mark" href="#datatypes_m_exactcentery" id="datatypes_m_exactcentery">#</a></span></h3>
-<h4>exactCenterY()<span><a class="mark" href="#datatypes_exactcentery" id="datatypes_exactcentery">#</a></span></h4>
-<div class="signature"><ul>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
-</ul>
-</div><p>矩形中点 Y 坐标 (浮点数).</p>
-<pre><code class="lang-js">let rectA = new android.graphics.Rect(180, 440, 750, 1200);
-console.log(rectA.exactCenterY()); // 820
-
-let rectB = new android.graphics.Rect(100, 200, 101, 201);
-console.log(rectB.exactCenterY()); // 200.5
-</code></pre>
-<h3>[m#] contains<span><a class="mark" href="#datatypes_m_contains" id="datatypes_m_contains">#</a></span></h3>
-<h4>contains(rect)<span><a class="mark" href="#datatypes_contains_rect" id="datatypes_contains_rect">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>rect</strong> { <span class="type"><a href="#datatypes_c_androidgraphicsrect">android.graphics.Rect</a></span> } - 参照矩形</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
-</ul>
-</div><p>返回是否包含另一个矩形.<br>参照矩形的所有边均在当前矩形内 (包含边重叠情况) 则满足包含条件.<br>空矩形与任何矩形不存在包含关系.</p>
-<pre><code class="lang-js">let rectThis = new android.graphics.Rect(180, 440, 750, 1200);
-
-let rectRefA = new android.graphics.Rect(rectThis);
-console.log(rectThis.contains(rectRefA)); // true
-
-let rectRefB = new android.graphics.Rect(200, 440, 750, 1200);
-console.log(rectThis.contains(rectRefB)); // true
-
-let rectRefC = new android.graphics.Rect(); /* 空矩形. */
-console.log(rectThis.contains(rectRefC)); // false
-</code></pre>
-<h3>[m#] intersect<span><a class="mark" href="#datatypes_m_intersect" id="datatypes_m_intersect">#</a></span></h3>
-<h4>intersect(rect)<span><a class="mark" href="#datatypes_intersect_rect" id="datatypes_intersect_rect">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>rect</strong> { <span class="type"><a href="#datatypes_c_androidgraphicsrect">android.graphics.Rect</a></span> } - 参照矩形</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
-</ul>
-</div><p>返回是否与参展矩形相交 (不包括边界或点重叠的情况).<br>如果相交, 则返回 true, <strong>且当前矩形被设置为相交部分的矩形</strong>.</p>
-<pre><code class="lang-js">let rectThis = new android.graphics.Rect(0, 0, 600, 600);
-let rectRef = new android.graphics.Rect(200, 0, 800, 800);
-
-console.log(rectThis.intersect(rectRef)); // true
-
-/* rectThis 被修改. */
-console.log(rectThis); // Rect(200, 0 - 600, 600) 
-</code></pre>
-<p>如果不相交, 则返回 false, 当前矩形不会被修改:</p>
-<pre><code class="lang-js">let rectThis = new android.graphics.Rect(0, 0, 100, 100);
-let rectRef = new android.graphics.Rect(100, 0, 800, 800);
-
-console.log(rectThis.intersect(rectRef)); // false
-
-/* rectThis 保持原来的值. */
-console.log(rectThis); // Rect(0, 0 - 100, 100)
-</code></pre>
-<p>空矩形与任意矩形不相交:</p>
-<pre><code class="lang-js">let rectThis = new android.graphics.Rect(0, 0, 100, 100);
-let rectRef = new android.graphics.Rect();
-console.log(rectThis.intersect(rectRef)); // false
-</code></pre>
-<h3>[m] intersects<span><a class="mark" href="#datatypes_m_intersects" id="datatypes_m_intersects">#</a></span></h3>
-<h4>intersects(rectA, rectB)<span><a class="mark" href="#datatypes_intersects_recta_rectb" id="datatypes_intersects_recta_rectb">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>rect</strong> { <span class="type"><a href="#datatypes_c_androidgraphicsrect">android.graphics.Rect</a></span> } - 参照矩形</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
-</ul>
-</div><p>返回是否和另一个长方形相交.</p>
-<p>此方法近判断是否相交, 不改变任何矩形:</p>
-<pre><code class="lang-js">let rectA = new android.graphics.Rect(0, 0, 600, 600);
-let rectB = new android.graphics.Rect(200, 0, 800, 800);
-
-console.log(android.graphics.Rect.intersects(rectA, rectB)); // true
-
-/* rectA 和 refB 均保持原来的值. */
-console.log(rectA); // Rect(0, 0 - 600, 600)
-console.log(rectB); // Rect(200, 0 - 800, 800)
-</code></pre>
-<p>需额外留意 <a href="#datatypes_m_intersects">intersects</a> 与 <a href="#datatypes_m_intersect">intersect</a> 的区别:</p>
-<ul>
-<li><p><code>[m#] intersect</code> 为实例方法, <code>rectA.intersect(rectB)</code> 需传入一个参数, 当相交时 <code>rectA</code> 会被改变, 返回结果为 &quot;是否相交&quot;.</p>
-</li>
-<li><p><code>[m] intersects</code> 为静态方法, <code>Rect.intersects(rectA, rectB)</code> 需传入两个参数, 且不改变任何矩形, 仅返回 &quot;是否相交&quot; 结果.</p>
-</li>
-</ul>
-<h2>AndroidBundle<span><a class="mark" href="#datatypes_androidbundle" id="datatypes_androidbundle">#</a></span></h2>
-<p>android.os.Bundle 别名.<br>表示一个会被打包成捆的容器, 容器内可存储 <code>键值对 (Key-Value Pair)</code> 形式的数据.</p>
-<pre><code class="lang-js">let bundleA = new android.os.Bundle();
-bundleA.putInt(&quot;num_key&quot;, 23);
-console.log(bundleA.getInt(&quot;num_key&quot;) === 23); // true
-
-let bundleB = new android.os.Bundle();
-let arrList = new java.util.ArrayList(2);
-arrList.add(&quot;A&quot;);
-arrList.add(&quot;B&quot;);
-bundleB.putStringArrayList(&quot;arr_list_key&quot;, arrList);
-console.log(bundleB.getStringArrayList(&quot;arr_list_key&quot;).get(0) === &quot;A&quot;); // true
-console.log(bundleB.getStringArrayList(&quot;arr_list_key&quot;).get(1) === &quot;B&quot;); // true
-</code></pre>
-<blockquote>
-<p>参阅: <a href="https://developer.android.com/reference/android/os/Bundle">Android Docs</a></p>
-</blockquote>
+<p>因 ScriptExecuteActivity 继承了 android.app.Activity 等非常多的 Java 类, 因此 activity 获得了非常丰富的属性和方法, 详情参阅 <a href="https://developer.android.com/reference/android/app/Activity">Android Docs</a> 及 <a href="http://project.autojs6.com/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/execution/ScriptExecuteActivity.java#L30">AutoJs6 源码</a>.</p>
 <h2>DetectCompass<span><a class="mark" href="#datatypes_detectcompass" id="datatypes_detectcompass">#</a></span></h2>
 <p>用于传递给 <a href="uiObjectType.html#uiobjecttype_m_compass">控件罗盘</a> 的参数类型, 又称 <code>罗盘参数</code>.</p>
 <p>罗盘参数是 <a href="dataTypes.html#datatypes_string">字符串</a> 类型, 支持单独或组合使用.</p>
@@ -1292,7 +891,7 @@ detect(w, &#39;w&#39;); /* 同上. */
 detect(w, &#39;widget&#39;); /* 同上. */
 
 /* 文本内容. */
-detect(w, &#39;__CONTENT__#39;);
+detect(w, &#39;$');
 detect(w, &#39;txt&#39;); /* 同上. */
 detect(w, &#39;content&#39;); /* 同上. */
 
@@ -1386,7 +985,7 @@ pickup(sel, &#39;w&#39;); /* 同上. */
 pickup(sel, &#39;widget&#39;); /* 同上. */
 
 /* 文本内容. */
-pickup(sel, &#39;__CONTENT__#39;);
+pickup(sel, &#39;$');
 pickup(sel, &#39;txt&#39;); /* 同上. */
 pickup(sel, &#39;content&#39;); /* 同上. */
 
@@ -1431,24 +1030,24 @@ detect(w, [ &#39;setSelection&#39;, 2, 3 ]); /* i.e. w.setSelection(2, 3) */
 <tr>
 <th>枚举实例名</th>
 <th>描述</th>
-<th>JavaScript 代表参数</th>
+<th><span style="white-space:nowrap">JavaScript 代表参数</span></th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>AUTO_DETECT</td>
-<td>自动检测 Root 权限</td>
-<td>&#39;auto&#39; / -1</td>
+<td><span style="white-space:nowrap">自动检测 Root 权限</span></td>
+<td>&#39;<span style="white-space:nowrap">auto&#39; / -1</span></td>
 </tr>
 <tr>
 <td>FORCE_ROOT</td>
-<td>强制 Root 模式</td>
-<td>&#39;root&#39; / 1 / true</td>
+<td><span style="white-space:nowrap">强制 Root 模式</span></td>
+<td><span style="white-space:nowrap"> &#39;root&#39; / 1 / true</span></td>
 </tr>
 <tr>
 <td>FORCE_NON_ROOT</td>
-<td>强制非 Root 模式</td>
-<td>&#39;non-root&#39; / 0 / false</td>
+<td><span style="white-space:nowrap">强制非 Root 模式</span></td>
+<td><span style="white-space:nowrap">&#39;non-root&#39; / 0 / false</span></td>
 </tr>
 </tbody>
 </table>
@@ -1503,17 +1102,18 @@ colors.alpha(&#39;#BF3&#39;) === 255; // true
 </code></pre>
 <h2>ColorInt<span><a class="mark" href="#datatypes_colorint" id="datatypes_colorint">#</a></span></h2>
 <p>颜色整数 (Color Integer).</p>
-<p>多数情况下, 使用颜色整数代表一个颜色, 在安卓源码中, 颜色整数用 <code>ColorInt</code> 表示, 其值的范围由 <code>Java</code> 的 <code>Integer</code> 类型决定, 即 <code>-2^31..2^31-1</code>.<br>例如数字 <code>0xBF110523</code> 对应十进制的 <code>3205563683</code>, 超出了上述 <code>ColorInt</code> 的范围, 因此相关的 <code>colors</code> 方法 (如 <a href="color.html#color_m_toint">colors.toInt</a>, <a href="color.html#color_m_tohex">colors.toHex</a> 等) 会将此数值通过 <code>2^32</code> 偏移量移动至合适的范围内, 于是得到结果 <code>-1089403613</code>.</p>
+<p>多数情况下, 使用颜色整数代表一个颜色.<br>在安卓源码中, 颜色整数用 <code>ColorInt</code> 表示, 其值的范围由 <code>Java</code> 的 <code>Integer</code> 类型决定, 即 <code>[-2^31..2^31-1]</code>.<br>例如数字 <code>0xBF110523</code> 对应十进制的 <code>3205563683</code>, 超出了上述 <code>ColorInt</code> 的范围, 因此相关方法 (如 <a href="color.html#color_m_toint">colors.toInt</a>) 会将此数值通过 <code>2^32</code> 偏移量移动至合适的范围内, 最终得到结果 <code>-1089403613</code>.</p>
 <pre><code class="lang-js">colors.toInt(0xBF110523); // -1089403613
 colors.toInt(&#39;#BF110523&#39;); /* 结果同上. */
 
 console.log(0xBF110523); // 3205563683
 console.log(0xBF110523 - 2 ** 32); // -1089403613
 </code></pre>
-<p><code>ColorInt</code> 作为参数类型传入时, 没有范围限制, 因为参数会通过 <code>2^32</code> 偏移量移动至上述合法范围内.</p>
-<p>如 <code>colors.toHex(0xFFFF3300)</code> 将返回 <code>&quot;#FF3300&quot;</code>, 虽然参数 <code>0xFFFF3300</code> 并不在 <code>-2^31</code> 与 <code>2^31-1</code> 之间.</p>
-<p><code>ColorInt</code> 作为返回值类型时, 将确保其值位于 <code>-2^31</code> 与 <code>2^31-1</code> 之间, 且因 <code>JavaScript</code> 默认将数字以十进制显示 <code>number</code> 变量, 导致 <code>ColorInt</code> 结果缺乏可读性.</p>
-<p>如 <code>colors.toInt(0xFFFF3300)</code> 返回 <code>-52480</code>, 这个值不适于阅读, 但可用于参数传入其他方法.</p>
+<p>由此可知, 当 <code>ColorInt</code> 作为参数类型传入时, 没有范围限制, 因为参数会通过 <code>2^32</code> 偏移量移动至上述合法范围内. 如 <code>colors.toHex(0xFFFF3300)</code> 将正确返回 <code>&quot;#FF3300&quot;</code>, 虽然参数 <code>0xFFFF3300</code> 并不在 <code>[-2^31..2^31-1]</code> 范围内.</p>
+<p>当 <code>ColorInt</code> 作为返回值类型时, 其返回值一定位于 <code>[-2^31..2^31-1]</code> 范围内. 如 <code>colors.toInt(0xFFFF3300)</code> 返回 <code>-52480</code>, 此返回值缺乏可读性, 通常只用于作为新的参数传入其他方法.</p>
+<blockquote>
+<p>注:<br>事实上, <code>-52480</code> 是 <code>0xFFFF3300 - 2 ** 32</code> 的结果.<br>如需将 <code>-52480</code> 这样的值还原为具有可读性的颜色代码, 可使用 <a href="color.html#color_m_tohex">colors.toHex</a> 等方法.</p>
+</blockquote>
 <h2>ColorName<span><a class="mark" href="#datatypes_colorname" id="datatypes_colorname">#</a></span></h2>
 <p>颜色名称.</p>
 <p><a href="colorTable.html">颜色列表 (Color Table)</a> 章节中, 各个颜色列表中 &quot;变量名&quot; 的字符串形式可直接作为颜色名称使用:</p>
@@ -1745,7 +1345,74 @@ console.log(`R: ${components[0]}, G: ${components[1]}, B: ${components[2]}`);
 let [ r, g, b ] = components;
 console.log(`R: ${r}, G: ${g}, B: ${b}`);
 </code></pre>
-<p>colors 全局对象的很多 <code>&quot;to&quot;</code> 开头的方法都可返回颜色分量数组,<br>如 <a href="color.html#color_m_torgb">toRgb</a>, <a href="color.html#color_m_tohsv">toHsv</a>, <a href="color.html#color_m_tohsl">toHsl</a>, <a href="color.html#color_m_torgba">toRgba</a>, <a href="color.html#color_m_toargb">toArgb</a> 等.</p>
+<p>colors 全局对象的很多 &quot;to&quot; 开头的方法都可返回颜色分量数组, 如 <a href="color.html#color_m_torgb">toRgb</a>, <a href="color.html#color_m_tohsv">toHsv</a>, <a href="color.html#color_m_tohsl">toHsl</a>, <a href="color.html#color_m_torgba">toRgba</a>, <a href="color.html#color_m_toargb">toArgb</a> 等.</p>
+<p>需额外注意 <a href="color.html#color_m_torgba">toRgba</a> 和 <a href="color.html#color_m_toargb">toArgb</a> 结果中的 <code>A (alpha)</code> 分量, 默认范围为 <code>0-255</code>, 而其他方法则恒为 <code>0-1</code>:</p>
+<pre><code class="lang-js">colors.toRgba(&#39;blue-grey&#39;)[3]; /* A 分量为 255. */
+colors.toArgb(&#39;blue-grey&#39;)[0]; /* A 分量为 255. */
+colors.toHsva(&#39;blue-grey&#39;)[3]; /* A 分量为 1. */
+colors.toHsla(&#39;blue-grey&#39;)[3]; /* A 分量为 1. */
+</code></pre>
+<p>如需使 <code>toRgba</code> 和 <code>toArgb</code> 结果中 <code>A (alpha)</code> 分量范围也为 <code>0-1</code>, 可使用 <code>maxAlpha</code> 参数:</p>
+<pre><code class="lang-js">colors.toRgba(&#39;blue-grey&#39;, { maxAlpha: 1 })[3]; /* A 分量为 1. */
+</code></pre>
+<h2>ColorDetectionAlgorithm<span><a class="mark" href="#datatypes_colordetectionalgorithm" id="datatypes_colordetectionalgorithm">#</a></span></h2>
+<p>颜色检测算法, 用于检测两个颜色之间的差异程度, 即颜色差异.</p>
+<p><a href="https://zh.wikipedia.org/wiki/%E9%A2%9C%E8%89%B2%E5%B7%AE%E5%BC%82">颜色差异</a> (<a href="https://en.wikipedia.org/wiki/Color_difference">Color Difference</a>), 也称为颜色距离, 是色彩学领域的一个参量.<br>颜色差异将一个抽象概念进行了量化, 例如可以通过色彩空间内的 <a href="https://zh.wikipedia.org/wiki/%E6%AC%A7%E6%B0%8F%E8%B7%9D%E7%A6%BB">欧氏距离</a> (<a href="https://en.wikipedia.org/wiki/Euclidean_distance">Euclidean Distance</a>) 计算出一个具体的差异量.</p>
+<p>量化颜色差异时, 存在多种不同的量化方法, 通常使用颜色检测算法计算欧式距离, 由此距离进行颜色差异的量化.</p>
+<p>AutoJs6 内置了几种不同的颜色检测算法, 这些算法通常作为参数传入到某个函数中.</p>
+<h3>RGB 差值检测<span><a class="mark" href="#datatypes_rgb_1" id="datatypes_rgb_1">#</a></span></h3>
+<p>参数名称: <code>diff</code></p>
+<p>计算两个 RGB 颜色各分量的差值:</p>
+<picture>
+  <source srcset="images/rgb-difference-color-detection-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="430px">
+    <source srcset="images/rgb-difference-color-detection-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="215px">
+    <source srcset="images/rgb-difference-color-detection.png" media="(min-width: 1024px)" width="215px">
+    <img src="images/rgb-difference-color-detection.png" alt="rgb-difference-color-detection" width="430">
+</picture>
+
+<h3>RGB 距离检测<span><a class="mark" href="#datatypes_rgb_2" id="datatypes_rgb_2">#</a></span></h3>
+<p>参数名称: <code>rgb</code></p>
+<p>计算 RGB 色彩空间中两点间距离:</p>
+<picture>
+  <source srcset="images/rgb-distance-color-detection-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="508px">
+    <source srcset="images/rgb-distance-color-detection-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="254px">
+    <source srcset="images/rgb-distance-color-detection.png" media="(min-width: 1024px)" width="254px">
+    <img src="images/rgb-distance-color-detection.png" alt="rgb-distance-color-detection" width="508">
+</picture>
+
+<h3>加权 RGB 距离检测<span><a class="mark" href="#datatypes_rgb_3" id="datatypes_rgb_3">#</a></span></h3>
+<p>参数名称: <code>rgb+</code></p>
+<p>带有权重的 RGB 距离检测 (Delta E):</p>
+<picture>
+  <source srcset="images/weighted-rgb-distance-color-detection-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="1070px">
+    <source srcset="images/weighted-rgb-distance-color-detection-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="535px">
+    <source srcset="images/weighted-rgb-distance-color-detection.png" media="(min-width: 1024px)" width="535px">
+    <img src="images/weighted-rgb-distance-color-detection.png" alt="weighted-rgb-distance-color-detection" width="1070">
+</picture>
+
+<blockquote>
+<p>参阅:<br><a href="https://www.compuphase.com/cmetric.htm">Colour metric (from compuphase.com)</a><br><a href="https://en.wikipedia.org/wiki/Color_difference#CIELAB_%CE%94E*">CIELAB Delta E* (from Wikipedia)</a></p>
+</blockquote>
+<h3>H 距离检测<span><a class="mark" href="#datatypes_h" id="datatypes_h">#</a></span></h3>
+<p>参数名称: <code>h</code></p>
+<p>HSV 色彩空间中 <code>H (hue)</code> 分量的距离检测:</p>
+<picture>
+  <source srcset="images/h-distance-color-detection-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="821px">
+    <source srcset="images/h-distance-color-detection-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="411px">
+    <source srcset="images/h-distance-color-detection.png" media="(min-width: 1024px)" width="411px">
+    <img src="images/h-distance-color-detection.png" alt="h-distance-color-detection" width="821">
+</picture>
+
+<h3>HS 距离检测<span><a class="mark" href="#datatypes_hs" id="datatypes_hs">#</a></span></h3>
+<p>参数名称: <code>hs</code></p>
+<p>HSV 色彩空间中 <code>H (hue)</code> 及 <code>S (saturation)</code> 的相关距离检测:</p>
+<picture>
+  <source srcset="images/hs-distance-color-detection-dark.png" media="(prefers-color-scheme: dark) and (max-width: 1024px)" width="695px">
+    <source srcset="images/hs-distance-color-detection-dark.png" media="(prefers-color-scheme: dark) and (min-width: 1024px)" width="348px">
+    <source srcset="images/hs-distance-color-detection.png" media="(min-width: 1024px)" width="348px">
+    <img src="images/hs-distance-color-detection.png" alt="hs-distance-color-detection" width="695">
+</picture>
+
 <h2>Range<span><a class="mark" href="#datatypes_range" id="datatypes_range">#</a></span></h2>
 <p>表示一个数字的数值范围.</p>
 <table>
@@ -1798,17 +1465,220 @@ console.log(`R: ${r}, G: ${g}, B: ${b}`);
 <h2>IntRange<span><a class="mark" href="#datatypes_intrange" id="datatypes_intrange">#</a></span></h2>
 <p>表示一个整数的取值范围. 其表示法可参阅 <a href="#datatypes_range">Range</a> 小节.</p>
 <p>如 <code>IntRange[10..30]</code> 表示整数 <code>x</code> 位于 <code>10 &lt;= x &lt;= 30</code> 范围内, 而 <code>IntRange[0..100)</code> 表示整数 <code>x</code> 位于 <code>0 &lt;= x &lt; 100</code> 范围内.</p>
+<h2>StandardCharset<span><a class="mark" href="#datatypes_standardcharset" id="datatypes_standardcharset">#</a></span></h2>
+<p>StandardCharset 类型支持 Java 字符集 (Charset 类) 形式及字符串形式: </p>
+<table>
+<thead>
+<tr>
+<th>Charset</th>
+<th>String</th>
+<th style="text-align:center">Wikipedia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ISO_8859_1</td>
+<td>&quot;ISO_8859_1&quot; / &quot;iso-8859-1&quot;</td>
+<td style="text-align:center"><a href="https://en.wikipedia.org/wiki/ISO/IEC_8859-1">英</a> / <a href="https://zh.wikipedia.org/zh-hans/ISO/IEC_8859-1">中</a></td>
+</tr>
+<tr>
+<td>US_ASCII</td>
+<td>&quot;US_ASCII&quot; / &quot;us-ascii&quot;</td>
+<td style="text-align:center"><a href="https://en.wikipedia.org/wiki/ASCII">英</a> / <a href="https://zh.wikipedia.org/wiki/ASCII">中</a></td>
+</tr>
+<tr>
+<td>UTF_8</td>
+<td>&quot;UTF_8&quot; / &quot;utf-8&quot;</td>
+<td style="text-align:center"><a href="https://en.wikipedia.org/wiki/UTF-8">英</a> / <a href="https://zh.wikipedia.org/wiki/UTF-8">中</a></td>
+</tr>
+<tr>
+<td>UTF_16</td>
+<td>&quot;UTF_16&quot; / &quot;utf-16&quot;</td>
+<td style="text-align:center"><a href="https://en.wikipedia.org/wiki/UTF-16">英</a> / <a href="https://zh.wikipedia.org/wiki/UTF-16">中</a></td>
+</tr>
+<tr>
+<td>UTF_16BE</td>
+<td>&quot;UTF_16BE&quot; / &quot;utf-16be&quot;</td>
+<td style="text-align:center"><a href="https://en.wikipedia.org/wiki/UTF-16#Byte-order_encoding_schemes">英</a></td>
+</tr>
+<tr>
+<td>UTF_16LE</td>
+<td>&quot;UTF_16LE&quot; / &quot;utf-16le&quot;</td>
+<td style="text-align:center"><a href="https://en.wikipedia.org/wiki/UTF-16#Byte-order_encoding_schemes">英</a></td>
+</tr>
+</tbody>
+</table>
+<p>Charset 类可由 StandardCharsets 的静态常量获取, 如 <code>StandardCharsets.UTF_8</code>.<br>字符串表示 StandardCharset 类型时, 支持与上述静态常量同名的大写形式, 如 <code>&#39;UTF_8&#39;</code>, 以及带连字符的小写形式, 如 <code>&#39;utf-8&#39;</code>.</p>
+<p>Typescript declaration (TS 声明):</p>
+<pre><code class="lang-ts">declare type StandardCharset = java.nio.charset.StandardCharsets 
+    | &#39;US_ASCII&#39; | &#39;ISO_8859_1&#39; | &#39;UTF_8&#39; | &#39;UTF_16BE&#39; | &#39;UTF_16LE&#39; | &#39;UTF_16&#39; 
+    | &#39;us-ascii&#39; | &#39;iso-8859-1&#39; | &#39;utf-8&#39; | &#39;utf-16be&#39; | &#39;utf-16le&#39; | &#39;utf-16&#39;;
+</code></pre>
+<p>JavaScript 实例:</p>
+<pre><code class="lang-js">/**
+ * @param {StandardCharset} char
+ * @returns void
+ */
+function test(char) {
+    /* ... */
+}
+
+test(StandardCharsets.UTF_8); /* Charset 类形式. */
+test(&#39;UTF_8&#39;); /* 字符串大写形式. */
+test(&#39;utf-8&#39;); /* 字符串小写形式. */
+</code></pre>
+<blockquote>
+<p>注: 在 AutoJs6 中, StandardCharsets 支持全局化调用.</p>
+</blockquote>
+<blockquote>
+<p>参阅: <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/charset/StandardCharsets.html">Java 文档 (标准版) (英)</a></p>
+</blockquote>
+<h2>ExtendModulesNames<span><a class="mark" href="#datatypes_extendmodulesnames" id="datatypes_extendmodulesnames">#</a></span></h2>
+<p>AutoJs6 <a href="plugins.html#plugins_内置扩展插件">内置扩展插件</a> 的插件名称.</p>
+<p>支持的字符串常量:</p>
+<ul>
+<li><code>&#39;Arrayx&#39;</code>&#39; 或 <code>&#39;Array&#39;</code></li>
+<li><code>&#39;Numberx&#39;</code>&#39; 或 <code>&#39;Number&#39;</code></li>
+<li><code>&#39;Mathx&#39;</code>&#39; 或 <code>&#39;Math&#39;</code></li>
+</ul>
+<pre><code class="lang-js">/* 启用 Array 内置扩展插件. */
+plugins.extend(&#39;Arrayx&#39;);
+plugins.extend(&#39;Arrayx&#39;); /* 同上. */
+</code></pre>
+<h2>ActivityShortForm<span><a class="mark" href="#datatypes_activityshortform" id="datatypes_activityshortform">#</a></span></h2>
+<p>AutoJs6 跳转内部 Activity 的页面简称.</p>
+<p>这些简称全部对应于 AutoJs6 内置的 Activity 页面, 如 AutoJs6 的日志页面和设置页面等.</p>
+<pre><code class="lang-js">/* 跳转至 AutoJs6 日志页面. */
+app.startActivity(&#39;console&#39;);
+app.startActivity(&#39;log&#39;); /* 同上. */
+
+/* 跳转至 AutoJs6 主页页面. */
+app.startActivity(&#39;homepage&#39;);
+app.startActivity(&#39;home&#39;); /* 同上. */
+</code></pre>
+<p>支持的全部页面简称:</p>
+<ul>
+<li>日志页面 - <code>console</code> / <code>log</code> </li>
+<li>设置页面 - <code>settings</code> / <code>preferences</code> / <code>pref</code></li>
+<li>主页页面 - <code>homepage</code> / <code>home</code></li>
+<li>关于页面 - <code>about</code></li>
+<li>打包页面 - <code>build</code></li>
+<li>文档页面 - <code>documentation</code> / <code>doc</code> / <code>docs</code></li>
+</ul>
+<h2>BroadcastShortForm<span><a class="mark" href="#datatypes_broadcastshortform" id="datatypes_broadcastshortform">#</a></span></h2>
+<p>AutoJs6 可接收的广播行为简称.</p>
+<p>这些简称全部对应于 AutoJs6 可接收的广播行为, 如进行布局范围分析等.</p>
+<pre><code class="lang-js">/* 发送 &quot;布局范围分析&quot; 广播. */
+app.sendBroadcast(&#39;inspect_layout_bounds&#39;);
+app.sendBroadcast(&#39;bounds&#39;); /* 同上. */
+
+/* 发送 &quot;布局层次分析&quot; 广播. */
+app.sendBroadcast(&#39;inspect_layout_hierarchy&#39;);
+app.sendBroadcast(&#39;hierarchy&#39;); /* 同上. */
+</code></pre>
+<p>支持的全部广播行为简称:</p>
+<ul>
+<li>布局范围分析 - <code>inspect_layout_bounds</code> / <code>bounds</code></li>
+<li>布局层次分析 - <code>inspect_layout_hierarchy</code> / <code>hierarchy</code></li>
+</ul>
+<h2>OcrResult<span><a class="mark" href="#datatypes_ocrresult" id="datatypes_ocrresult">#</a></span></h2>
+<p>OcrResult 是一个代表 OCR 识别结果的接口.</p>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">OcrResult</p>
+
+<hr>
+<h3>[p] label<span><a class="mark" href="#datatypes_p_label" id="datatypes_p_label">#</a></span></h3>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+</div><p>OCR 识别结果的标签, 通常可用于最终的文字识别结果.</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+let results = ocr.detect(img);
+results.map(o =&gt; o.label); /* 将识别结果全部映射为标签 (文本). */
+</code></pre>
+<h3>[p] confidence<span><a class="mark" href="#datatypes_p_confidence" id="datatypes_p_confidence">#</a></span></h3>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+</div><p>OCR 识别结果的置信度, 置信度越高, 意味着识别结果可能越准确.</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+let results = ocr.detect(img);
+results.filter(o =&gt; o.confidence &gt; 0.9); /* 筛选置信度高于 0.9 的结果. */
+</code></pre>
+<h3>[p] bounds<span><a class="mark" href="#datatypes_p_bounds" id="datatypes_p_bounds">#</a></span></h3>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="androidRectType.html">AndroidRect</a></span> }</li>
+</ul>
+</div><p>OCR 识别结果的位置矩形, 用 <a href="androidRectType.html">AndroidRect</a> 表示.</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+let results = ocr.detect(img);
+let clickToStart = results.find(o =&gt; o.label === &#39;点击开始&#39;);
+if (!isNullish(clickToStart)) {
+    /* 点击 OCR 识别结果的位置矩形. */
+    click(clickToStart.bounds);
+}
+</code></pre>
+<h3>[m] toString<span><a class="mark" href="#datatypes_m_tostring" id="datatypes_m_tostring">#</a></span></h3>
+<h4>toString()<span><a class="mark" href="#datatypes_tostring" id="datatypes_tostring">#</a></span></h4>
+<div class="signature"><ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+</div><p>OCR 识别结果的 <code>toString</code> 覆写方法, 格式示例:</p>
+<pre><code class="lang-text">OcrResult@46a77f4{label=19:43:52, confidence=0.9165039, bounds=Rect(14, 15 - 121, 35)}
+OcrResult@9fed472{label=Service, confidence=0.88002235, bounds=Rect(30, 76 - 106, 97)}
+OcrResult@59cab38{label=Tools, confidence=0.8421875, bounds=Rect(30, 324 - 88, 345)}
+</code></pre>
+<h2>ThemeColor<span><a class="mark" href="#datatypes_themecolor" id="datatypes_themecolor">#</a></span></h2>
+<p>AutoJs6 内置类 <code>org.autojs.autojs.theme.ThemeColor</code> 的别名.</p>
+<p>ThemeColor 表示一个主题颜色.</p>
+<p>常见可以返回此类型的方法或属性:</p>
+<ul>
+<li><a href="autojs.html#autojs_p_themecolor">autojs.themeColor</a></li>
+</ul>
+<p>常见参数中使用此类型的方法:</p>
+<ul>
+<li><a href="colorType.html">Color</a>(<strong>themeColor</strong>)</li>
+</ul>
+<p>当 ThemeColor 作为 <a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a> 使用时, 将使用其 &quot;主色&quot; 作为色值:</p>
+<pre><code class="lang-js">let themeColor = autojs.themeColor;
+Color(themeColor).toInt() === Color(themeColor.getColorPrimary()).toInt(); // true
+</code></pre>
+<p>### </p>
+<h2>InjectableWebView<span><a class="mark" href="#datatypes_injectablewebview" id="datatypes_injectablewebview">#</a></span></h2>
+<p>参阅 <a href="injectableWebViewType.html">InjectableWebView</a> 类型章节.</p>
+<h2>InjectableWebClient<span><a class="mark" href="#datatypes_injectablewebclient" id="datatypes_injectablewebclient">#</a></span></h2>
+<p>参阅 <a href="injectableWebClientType.html">InjectableWebClient</a> 类型章节.</p>
+<h2>Storage<span><a class="mark" href="#datatypes_storage" id="datatypes_storage">#</a></span></h2>
+<p>参阅 <a href="storageType.html">Storage</a> 类型章节.</p>
+<h2>OpencvPoint<span><a class="mark" href="#datatypes_opencvpoint" id="datatypes_opencvpoint">#</a></span></h2>
+<p>参阅 <a href="opencvPointType.html">OpencvPoint</a> 类型章节.</p>
+<h2>OpencvSize<span><a class="mark" href="#datatypes_opencvsize" id="datatypes_opencvsize">#</a></span></h2>
+<p>参阅 <a href="opencvSizeType.html">OpencvSize</a> 类型章节.</p>
+<h2>AndroidRect<span><a class="mark" href="#datatypes_androidrect" id="datatypes_androidrect">#</a></span></h2>
+<p>参阅 <a href="androidRectType.html">AndroidRect</a> 类型章节.</p>
+<h2>AndroidBundle<span><a class="mark" href="#datatypes_androidbundle" id="datatypes_androidbundle">#</a></span></h2>
+<p>参阅 <a href="androidBundleType.html">AndroidBundle</a> 类型章节.</p>
 
         </div>
     </div>
 </div>
+
 <script src="assets/sh_javascript.js"></script>
 <script src="assets/sh_java.js"></script>
 <script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
 <script>
     highlight(void 0, void 0, 'pre');
     highlight(void 0, void 0, 'tt');
 </script>
+
 <!-- __TRACKING__ -->
+
 </body>
 </html>

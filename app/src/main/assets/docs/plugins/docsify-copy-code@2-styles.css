@@ -1,0 +1,72 @@
+.docsify-copy-code-button, .docsify-copy-code-button span {
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.docsify-copy-code-button {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    overflow: visible;
+    padding: 0.65em 0.8em;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    font-size: 1em;
+    background: #9E9E9E;
+    background: var(--theme-color, #9E9E9E);
+    color: #fff;
+    opacity: 0;
+}
+
+/* special for local documentation */
+.codeWrapper .docsify-copy-code-button {
+    margin-right: 1em;
+}
+
+.docsify-copy-code-button span {
+    border-radius: 3px;
+    background: inherit;
+    pointer-events: none;
+}
+
+.docsify-copy-code-button .error, .docsify-copy-code-button .success {
+    position: absolute;
+    z-index: -100;
+    top: 50%;
+    right: 0;
+    padding: 0.5em 0.65em;
+    font-size: 0.825em;
+    opacity: 0;
+    transform: translate(0, -50%);
+}
+
+.docsify-copy-code-button.error .error, .docsify-copy-code-button.success .success {
+    right: 100%;
+    opacity: 1;
+    transform: translate(-38.2%, -50%);
+    -webkit-transform: translate(-38.2%, -50%);
+}
+
+.docsify-copy-code-button:focus {
+    opacity: 1;
+}
+
+/* special for online documentation */
+pre:hover .docsify-copy-code-button {
+    opacity: 1;
+}
+
+/* special for local documentation */
+.codeWrapper:hover .docsify-copy-code-button {
+    opacity: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+    .docsify-copy-code-button {
+        background: #37474F;
+        background: var(--theme-color, #37474F);
+        color: #B0BEC5;
+    }
+}

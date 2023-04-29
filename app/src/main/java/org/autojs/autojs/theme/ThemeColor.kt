@@ -1,0 +1,97 @@
+package org.autojs.autojs.theme
+
+import android.content.Context
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
+import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.pref.Pref.containsKey
+import org.autojs.autojs.pref.Pref.getInt
+import org.autojs.autojs.pref.Pref.putInt
+import org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor
+import org.autojs.autojs6.R
+
+/**
+ * Created by Stardust on 2017/3/5.
+ * Modified by SuperMonster003 as of Mar 30, 2023.
+ * Transformed by SuperMonster003 on Mar 30, 2023.
+ */
+class ThemeColor {
+
+    @JvmField
+    var colorPrimary = 0
+
+    @JvmField
+    var colorAccent = 0
+
+    @JvmField
+    var colorPrimaryDark = 0
+
+    @ScriptInterface
+    fun getColorPrimary() = colorPrimary
+
+    @ScriptInterface
+    fun getColorAccent() = colorAccent
+
+    @ScriptInterface
+    fun getColorPrimaryDark() = colorPrimaryDark
+
+    constructor()
+
+    constructor(color: Int) : this(color, color, color)
+
+    constructor(colorPrimary: Int, colorPrimaryDark: Int, colorAccent: Int) {
+        this.colorPrimary = colorPrimary
+        this.colorPrimaryDark = colorPrimaryDark
+        this.colorAccent = colorAccent
+    }
+
+    fun colorPrimary(colorPrimary: Int) = also { this.colorPrimary = colorPrimary }
+
+    fun colorPrimaryDark(colorPrimaryDark: Int) = also { this.colorPrimaryDark = colorPrimaryDark }
+
+    fun colorAccent(colorAccent: Int) = also { this.colorAccent = colorAccent }
+
+    fun saveIn() {
+        putInt(R.string.key_theme_color_primary, colorPrimary)
+        putInt(R.string.key_theme_color_primary_dark, colorPrimaryDark)
+        putInt(R.string.key_theme_color_accent, colorAccent)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other is ThemeColor) {
+            return colorPrimary == other.colorPrimary && colorPrimaryDark == other.colorPrimaryDark && colorAccent == other.colorAccent
+        }
+        return false
+    }
+
+    fun readFrom() = also {
+        colorPrimary = getInt(R.string.key_theme_color_primary, defaultThemeColor.colorPrimary)
+        colorAccent = getInt(R.string.key_theme_color_accent, defaultThemeColor.colorAccent)
+        colorPrimaryDark = getInt(R.string.key_theme_color_primary_dark, defaultThemeColor.colorPrimaryDark)
+    }
+
+    companion object {
+
+        fun fromPreferences(): ThemeColor? {
+            return if (containsKey(
+                    R.string.key_theme_color_primary,
+                    R.string.key_theme_color_primary_dark,
+                    R.string.key_theme_color_accent
+                )
+            ) ThemeColor().readFrom() else null
+        }
+
+        @JvmOverloads
+        fun fromColorRes(context: Context?, @ColorRes colorPrimaryRes: Int, @ColorRes colorPrimaryDarkRes: Int = colorPrimaryRes, @ColorRes colorAccentRes: Int = colorPrimaryRes): ThemeColor {
+            return ThemeColor()
+                .colorPrimary(ContextCompat.getColor(context!!, colorPrimaryRes))
+                .colorPrimaryDark(ContextCompat.getColor(context, colorPrimaryDarkRes))
+                .colorAccent(ContextCompat.getColor(context, colorAccentRes))
+        }
+
+    }
+
+}

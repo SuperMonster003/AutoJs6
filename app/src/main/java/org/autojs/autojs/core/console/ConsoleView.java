@@ -1,10 +1,12 @@
 package org.autojs.autojs.core.console;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.SparseIntArray;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -18,10 +20,11 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.stardust.enhancedfloaty.ResizableExpandableFloatyWindow;
-
 import org.autojs.autojs.tool.MapBuilder;
+import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow;
+import org.autojs.autojs.util.DisplayUtils;
 import org.autojs.autojs6.R;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -35,7 +38,7 @@ import java.util.Objects;
 public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener {
 
     private final static int sRefreshInterval = 100;
-    private final SparseIntArray mColors = new SparseIntArray();
+    private final Map<Integer, Integer> mColors = new MapBuilder<Integer, Integer>().build();
     private ConsoleImpl mConsole;
     private RecyclerView mLogListRecyclerView;
     private EditText mEditText;
@@ -43,46 +46,115 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     private boolean mShouldStopRefresh = false;
     private final ArrayList<ConsoleImpl.LogEntry> mLogEntries = new ArrayList<>();
 
+    private float mLastScaleFactor = 1;
+    private float mLastTextSize = 0;
+
+    private final float mMinTextSize = 8.0f;
+    private final float mMaxTextSize = 56.0f;
+
     public ConsoleView(Context context) {
         super(context);
-        init(null);
+        init();
     }
 
     public ConsoleView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(attrs);
+        init();
     }
 
     public ConsoleView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(attrs);
+        init();
     }
 
-    private void init(AttributeSet attrs) {
+    @SuppressLint("ClickableViewAccessibility")
+    private void init() {
         inflate(getContext(), R.layout.console_view, this);
-        if (attrs != null) {
-            for (Map.Entry<Integer, Integer> map : getLogLevelMap().entrySet()) {
-                int colorResKey = map.getKey();
-                int logLevel = map.getValue();
-                mColors.put(logLevel, getContext().getColor(colorResKey));
-            }
+
+        for (Map.Entry<Integer, Integer> map : getLogLevelMap().entrySet()) {
+            int logLevel = map.getKey();
+            int colorResKey = map.getValue();
+            mColors.put(logLevel, getContext().getColor(colorResKey));
         }
+
+        ScaleGestureDetector mScaleGestureDetector = new ScaleGestureDetector(getContext(), getSimpleOnScaleGestureListener());
+
         mLogListRecyclerView = findViewById(R.id.log_list);
-        LinearLayoutManager manager = new LinearLayoutManager(getContext());
-        mLogListRecyclerView.setLayoutManager(manager);
+        mLogListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mLogListRecyclerView.setAdapter(new Adapter());
+
+        mLogListRecyclerView.setOnTouchListener((v, event) -> {
+            mScaleGestureDetector.onTouchEvent(event);
+            return !mScaleGestureDetector.isInProgress() && super.onTouchEvent(event);
+        });
+
         initEditText();
         initSubmitButton();
     }
 
+    @NonNull
+    private ScaleGestureDetector.SimpleOnScaleGestureListener getSimpleOnScaleGestureListener() {
+        return new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            @Override
+            public boolean onScale(@NonNull ScaleGestureDetector detector) {
+                float currentFactor = (float) (Math.floor(detector.getScaleFactor() * 10) / 10);
+                if (mLastTextSize <= 0) {
+                    mLastTextSize = getTextSize();
+                }
+                if (currentFactor > 0 && mLastScaleFactor != currentFactor) {
+                    float currentTextSize = mLastTextSize + (currentFactor > mLastScaleFactor ? 1 : -1);
+                    mLastTextSize = Math.max(mMinTextSize, Math.min(mMaxTextSize, currentTextSize));
+                    setTextSize(mLastTextSize);
+
+                    mLastScaleFactor = currentFactor;
+                }
+                return super.onScale(detector);
+            }
+
+            @Override
+            public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
+                return super.onScaleBegin(detector);
+            }
+
+            @Override
+            public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
+                mLastScaleFactor = 1.0f;
+                super.onScaleEnd(detector);
+            }
+        };
+    }
+
+    public void setTextSize(float size) {
+        mLastTextSize = size;
+        Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setTextSize(size);
+        }
+    }
+
+    public float getTextSize() {
+        Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
+        if (adapter != null) {
+            return adapter.getTextSize();
+        }
+        return /* default text size */ 14;
+    }
+
+    public void setTextColors(@NotNull Integer[] colors) {
+        Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setTextColors(colors);
+        }
+    }
+
     protected Map<Integer, Integer> getLogLevelMap() {
         return new MapBuilder<Integer, Integer>()
-                .put(R.color.console_view_verbose, Log.VERBOSE)
-                .put(R.color.console_view_debug, Log.DEBUG)
-                .put(R.color.console_view_info, Log.INFO)
-                .put(R.color.console_view_warn, Log.WARN)
-                .put(R.color.console_view_error, Log.ERROR)
-                .put(R.color.console_view_assert, Log.ASSERT)
+                .put(Log.VERBOSE, R.color.console_view_verbose)
+                .put(Log.DEBUG, R.color.console_view_debug)
+                .put(Log.INFO, R.color.console_view_info)
+                .put(Log.WARN, R.color.console_view_warn)
+                .put(Log.ERROR, R.color.console_view_error)
+                .put(Log.ASSERT, R.color.console_view_assert)
                 .build();
     }
 
@@ -161,8 +233,8 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         if (mConsole == null)
             return;
         int oldSize = mLogEntries.size();
-        ArrayList<ConsoleImpl.LogEntry> logEntries = mConsole.getAllLogs();
-        synchronized (mConsole.getAllLogs()) {
+        ArrayList<ConsoleImpl.LogEntry> logEntries = mConsole.getLogEntries();
+        synchronized (mConsole.getLogEntries()) {
             final int size = logEntries.size();
             if (size == 0) {
                 return;
@@ -194,7 +266,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         });
     }
 
-    private static class ViewHolder extends RecyclerView.ViewHolder {
+    private class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView textView;
 
@@ -207,6 +279,8 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
+        private float textSize;
+
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -216,15 +290,51 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             ConsoleImpl.LogEntry logEntry = mLogEntries.get(position);
-            holder.textView.setText(logEntry.content);
-            holder.textView.setTextColor(mColors.get(logEntry.level));
+
+            TextView textView = holder.textView;
+
+            textView.setText(logEntry.content);
+            Integer color = mColors.get(logEntry.level);
+            if (color != null) {
+                textView.setTextColor(color);
+            }
+            if (textSize > 0) {
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+            } else {
+                textSize = DisplayUtils.pxToSp(getContext(), textView.getTextSize());
+            }
+            textView.setClickable(false);
+            textView.setLongClickable(false);
+            textView.setTextIsSelectable(false);
+        }
+
+        public void setTextSize(float size) {
+            textSize = size;
+            notifyDataSetChanged();
+        }
+
+        public float getTextSize() {
+            return textSize;
+        }
+
+        public void setTextColors(Integer[] colors) {
+            int[] levels = new int[]{Log.VERBOSE, Log.DEBUG, Log.INFO, Log.WARN, Log.ERROR, Log.ASSERT};
+            boolean isReplaced = false;
+            for (int i = 0; i < colors.length; i++) {
+                if (colors[i] != null) {
+                    mColors.replace(levels[i], colors[i]);
+                    isReplaced = true;
+                }
+            }
+            if (isReplaced) {
+                notifyDataSetChanged();
+            }
         }
 
         @Override
         public int getItemCount() {
             return mLogEntries.size();
         }
-
     }
 
 }

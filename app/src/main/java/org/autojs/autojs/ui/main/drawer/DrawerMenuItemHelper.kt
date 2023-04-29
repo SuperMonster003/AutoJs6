@@ -24,4 +24,8 @@ interface DrawerMenuItemHelper {
             toggle()
         }
     }
+
+    fun refreshSubtitle() {
+        // Nothing to do by default.
+    }
 }

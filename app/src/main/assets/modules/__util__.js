@@ -1,4 +1,4 @@
-// noinspection JSUnusedGlobalSymbols
+// noinspection JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -33,7 +33,7 @@ module.exports = function (scriptRuntime, scope) {
     const JavaUtils = org.autojs.autojs.util.JavaUtils;
 
     let _ = {
-        Util: ( /* @IIFE */ () => {
+        Util: (/* @IIFE */ () => {
             /**
              * @implements Internal.Util
              */
@@ -43,6 +43,7 @@ module.exports = function (scriptRuntime, scope) {
 
             Util.prototype = {
                 constructor: Util,
+
                 /**
                  * NOTE: These type checking functions (isXXX) intentionally don't use `instanceof`
                  * because it is fragile and can be easily faked with `Object.create()`.
@@ -77,16 +78,16 @@ module.exports = function (scriptRuntime, scope) {
                     return arg === void 0;
                 },
                 isRegExp(re) {
-                    return this.isObjectSpecies(re) && species(re) === 'RegExp';
+                    return this.isObject(re) && species(re) === 'RegExp';
                 },
-                isObjectSpecies(arg) {
+                isObject(arg) {
                     return typeof arg === 'object' && arg !== null;
                 },
                 isDate(d) {
-                    return this.isObjectSpecies(d) && species(d) === 'Date';
+                    return this.isObject(d) && species(d) === 'Date';
                 },
                 isError(e) {
-                    return this.isObjectSpecies(e) && (species(e) === 'Error' || e instanceof Error);
+                    return this.isObject(e) && (species(e) === 'Error' || e instanceof Error);
                 },
                 isFunction(arg) {
                     return typeof arg === 'function';
@@ -150,7 +151,7 @@ module.exports = function (scriptRuntime, scope) {
                 version: {
                     sdkInt: Build.VERSION.SDK_INT,
                 },
-                versionCodes: ( /* @IIFE */ () => {
+                versionCodes: (/* @IIFE */ () => {
                     let _ = {
                         // @Semantic {versionCode: [releaseName, internalCodename, platformVersion, apiLevel, releaseDate]}
                         raw: {
@@ -474,343 +475,339 @@ module.exports = function (scriptRuntime, scope) {
                     _.extendStatics(C, P);
                     _.setPrototype(C, P);
                 },
-                inspect(obj, options) {
-                    return (this.inspect = ( /* @IIFE */ () => /* @AXR */ ({
-                        getMethod() {
-                            this.selfAugment();
+                inspect: ({
+                    getMethod() {
+                        this.selfAugment();
 
-                            return this.inspect.bind(this);
-                        },
+                        return this.inspect.bind(this);
+                    },
+                    /**
+                     * Echos the value of a value. Trys to print the value out
+                     * in the best way possible given the different types.
+                     *
+                     * Legacy params: [ obj, showHidden, depth, colors ]
+                     *
+                     * @param {Object} obj - The object to print out.
+                     * @param {{
+                     *      showHidden: boolean;
+                     *      depth: number;
+                     *      colors: boolean;
+                     * } | boolean} [options] - Optional options object that alters the output.
+                     * @see Internal.Util.inspect
+                     * @return {string}
+                     */
+                    inspect(obj, options) {
+                        let ctx = Object.assign({
+                            seen: [],
+                            showHidden: typeof arguments[1] === 'boolean' ? arguments[1] : false,
+                            depth: typeof arguments[2] === 'number' ? arguments[2] : 2,
+                            colors: typeof arguments[3] === 'boolean' ? arguments[3] : false,
+                            customInspect: true,
+                            stylize: /* @SatisfyIDE */ () => void 0,
+                        }, species.isObject(options) ? options : {});
+
+                        if (ctx.colors) {
+                            ctx.stylize = this.stylizeWithColor.bind(this);
+                        } else {
+                            ctx.stylize = this.stylizeWithoutColor.bind(this);
+                        }
+
+                        return _.formatValue(ctx, obj, ctx.depth);
+                    },
+                    selfAugment() {
+                        // noinspection SpellCheckingInspection
                         /**
-                         * Echos the value of a value. Trys to print the value out
-                         * in the best way possible given the different types.
-                         *
-                         * Legacy params: [ obj, showHidden, depth, colors ]
-                         *
-                         * @param {Object} obj - The object to print out.
-                         * @param {{
-                         *      showHidden: boolean;
-                         *      depth: number;
-                         *      colors: boolean;
-                         * } | boolean} [options] - Optional options object that alters the output.
-                         * @see Internal.Util.inspect
-                         * @return {string}
+                         * SGR (Select Graphic Rendition) parameters
+                         * @see https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
                          */
-                        inspect(obj, options) {
-                            let ctx = Object.assign({
-                                seen: [],
-                                showHidden: typeof arguments[1] === 'boolean' ? arguments[1] : false,
-                                depth: typeof arguments[2] === 'number' ? arguments[2] : 2,
-                                colors: typeof arguments[3] === 'boolean' ? arguments[3] : false,
-                                customInspect: true,
-                                stylize: /* @SatisfyIDE */ () => void 0,
-                            }, isObjectSpecies(options) ? options : {});
+                        let srg = {
+                            /**
+                             * Foreground colors
+                             */
+                            fg: {
+                                BLACK: 30,
+                                RED: 31,
+                                GREEN: 32,
+                                YELLOW: 33,
+                                BLUE: 34,
+                                MAGENTA: 35,
+                                CYAN: 36,
+                                WHITE: 37,
+                                GRAY: 90,
+                                BRIGHT_BLACK: 90,
+                                BRIGHT_RED: 91,
+                                BRIGHT_GREEN: 92,
+                                BRIGHT_YELLOW: 93,
+                                BRIGHT_BLUE: 94,
+                                BRIGHT_MAGENTA: 95,
+                                BRIGHT_CYAN: 96,
+                                BRIGHT_WHITE_: 97,
+                            },
+                            /**
+                             * Background colors
+                             */
+                            bg: {
+                                BLACK: 40,
+                                RED: 41,
+                                GREEN: 42,
+                                YELLOW: 43,
+                                BLUE: 44,
+                                MAGENTA: 45,
+                                CYAN: 46,
+                                WHITE: 47,
+                                GRAY: 100,
+                                BRIGHT_BLACK: 100,
+                                BRIGHT_RED: 101,
+                                BRIGHT_GREEN: 102,
+                                BRIGHT_YELLOW: 103,
+                                BRIGHT_BLUE: 104,
+                                BRIGHT_MAGENTA: 105,
+                                BRIGHT_CYAN: 106,
+                                BRIGHT_WHITE_: 107,
+                            },
+                            RESET: 0,
+                            BOLD: 1,
+                            DIM: 2,
+                            ITALIC: 3,
+                            UNDERLINE: 4,
+                            SLOW_BLINK: 5,
+                            RAPID_BLINK: 6,
+                            INVERT: 7,
+                            CONCEAL: 8,
+                            STRIKE: 9,
+                            PRIMARY_FONT: 10,
+                            ALTERNATIVE_FONT_1: 11,
+                            ALTERNATIVE_FONT_2: 12,
+                            ALTERNATIVE_FONT_3: 13,
+                            ALTERNATIVE_FONT_4: 14,
+                            ALTERNATIVE_FONT_5: 15,
+                            ALTERNATIVE_FONT_6: 16,
+                            ALTERNATIVE_FONT_7: 17,
+                            ALTERNATIVE_FONT_8: 18,
+                            ALTERNATIVE_FONT_9: 19,
+                            FRAKTUR: 20,
+                            DOUBLY_UNDERLINED: 21,
+                            NORMAL_INTENSITY: 22,
+                            NEITHER_ITALIC_NOR_BLACKLETTER: 23,
+                            NOT_UNDERLINED: 24,
+                            NOT_BLINKING: 25,
+                            PROPORTIONAL_SPACING: 26,
+                            NOT_REVERSED: 27,
+                            REVEAL: 28,
+                            NOT_CROSSED_OUT: 29,
+                            SET_FOREGROUND_COLOR: 38,
+                            DEFAULT_FOREGROUND_COLOR: 39,
+                            SET_BACKGROUND_COLOR: 48,
+                            DEFAULT_BACKGROUND_COLOR: 49,
+                            DISABLE_PROPORTIONAL_SPACING: 50,
+                            FRAMED: 51,
+                            ENCIRCLED: 52,
+                            OVERLINED: 53,
+                            NEITHER_FRAMED_NOR_ENCIRCLED: 54,
+                            NOT_OVERLINED: 55,
+                            SET_UNDERLINE_COLOR: 58,
+                            DEFAULT_UNDERLINE_COLOR: 59,
+                            IDEOGRAM_UNDERLINE_OR_RIGHT_SIDE_LINE: 60,
+                            IDEOGRAM_DOUBLE_UNDERLINE: 61,
+                            IDEOGRAM_OVERLINE_OR_LEFT_SIDE_LINE: 62,
+                            IDEOGRAM_DOUBLE_OVERLINE: 63,
+                            IDEOGRAM_STRESS_MARKING: 64,
+                            NO_IDEOGRAM_ATTRIBUTES: 65,
+                            SUPERSCRIPT: 73,
+                            SUBSCRIPT: 74,
+                            NEITHER_SUPERSCRIPT_NOR_SUBSCRIPT: 75,
+                        };
 
-                            if (ctx.colors) {
-                                ctx.stylize = this.stylizeWithColor.bind(this);
-                            } else {
-                                ctx.stylize = this.stylizeWithoutColor.bind(this);
+                        Object.assign(this.inspect, {
+                            srg: srg,
+                            /**
+                             * @see http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+                             */
+                            colors: {
+                                bold: [ srg.BOLD, srg.NORMAL_INTENSITY ],
+                                italic: [ srg.ITALIC, srg.NEITHER_ITALIC_NOR_BLACKLETTER ],
+                                underline: [ srg.UNDERLINE, srg.NOT_UNDERLINED ],
+                                inverse: [ srg.INVERT, srg.NOT_REVERSED ],
+                                white: [ srg.fg.WHITE, srg.DEFAULT_FOREGROUND_COLOR ],
+                                gray: [ srg.fg.GRAY, srg.DEFAULT_FOREGROUND_COLOR ],
+                                grey: [ srg.fg.GRAY, srg.DEFAULT_FOREGROUND_COLOR ],
+                                black: [ srg.fg.BLACK, srg.DEFAULT_FOREGROUND_COLOR ],
+                                blue: [ srg.fg.BLUE, srg.DEFAULT_FOREGROUND_COLOR ],
+                                cyan: [ srg.fg.CYAN, srg.DEFAULT_FOREGROUND_COLOR ],
+                                green: [ srg.fg.GREEN, srg.DEFAULT_FOREGROUND_COLOR ],
+                                magenta: [ srg.fg.MAGENTA, srg.DEFAULT_FOREGROUND_COLOR ],
+                                red: [ srg.fg.RED, srg.DEFAULT_FOREGROUND_COLOR ],
+                                yellow: [ srg.fg.YELLOW, srg.DEFAULT_FOREGROUND_COLOR ],
+                            },
+                            /**
+                             * Avoid using 'blue' when printing on a certain platform
+                             * like cmd.exe on Microsoft Windows.
+                             */
+                            styles: {
+                                regexp: 'red',
+                                date: 'magenta',
+                                special: 'cyan',
+                                number: 'yellow',
+                                boolean: 'yellow',
+                                string: 'green',
+                                undefined: 'gray',
+                                null: 'bold',
+                            },
+                        });
+                    },
+                    stylizeWithoutColor(str) {
+                        return str;
+                    },
+                    stylizeWithColor(str, styleType) {
+                        let style = this.inspect.styles[styleType];
+                        return !style ? str : this.inspect.colors[style]
+                            .slice(0, 2) // just in case
+                            .map(c => '\x1b[' + c + 'm').join(str);
+                    },
+                }).getMethod(),
+                morseCode: (/* @IIFE */ () => {
+                    let _2_ = {
+                        morse: {
+                            defaultUnit: 100,
+                            /* a.k.a short mark or dot */
+                            dit: '1',
+                            /* a.k.a longer mark or dash */
+                            dah: '111',
+                            /* between the dots and dashes within a character */
+                            intraCharacterGap: '0',
+                            /* between letters */
+                            shortGap: '000',
+                            /* between words */
+                            mediumGap: '0000000',
+                            charsString: {
+                                'A': '·-', 'B': '-···', 'C': '-·-·', 'D': '-··', 'E': '·', 'F': '··-·', 'G': '--·', 'H': '····', 'I': '··',
+                                'J': '·---', 'K': '-·-', 'L': '·-··', 'M': '--', 'N': '-·', 'O': '---', 'P': '·--·', 'Q': '--·-', 'R': '·-·',
+                                'S': '···', 'T': '-', 'U': '··-', 'V': '···-', 'W': '·--', 'X': '-··-', 'Y': '-·--', 'Z': '--··', '1': '·----',
+                                '2': '··---', '3': '···--', '4': '····-', '5': '·····', '6': '-····', '7': '--···', '8': '---··', '9': '----·',
+                                '0': '-----', '.': '·-·-·-', ':': '---···', ',': '--··--', ';': '-·-·-·', '?': '··--··', '=': '-···-',
+                                '\'': '·----·', '/': '-··-·', '!': '-·-·--', '-': '-····-', '_': '··--·-', '"': '·-··-·', '(': '-·--·',
+                                ')': '-·--·-', '$': '···-··-', '&': '·-···', '@': '·--·-·', '+': '·-·-·',
+                            },
+                            charsPattern: { /* to be parsed by parseMorse() */ },
+                        },
+                        parseSource(source, timeUnit) {
+                            util.ensureStringType(source);
+
+                            this.source = source;
+                            this.words = source.split(/\s+/);
+
+                            let defaultUnit = this.morse.defaultUnit;
+                            let parsedUnit = typeof timeUnit === 'number' ? timeUnit : defaultUnit;
+                            this.timeUnit = Math.max(parsedUnit, defaultUnit);
+                        },
+                        // @Cache
+                        parseMorse() {
+                            if (this._morseCharsStringParsed) {
+                                return;
                             }
 
-                            return _.formatValue(ctx, obj, ctx.depth);
-                        },
-                        selfAugment() {
-                            // noinspection SpellCheckingInspection
-                            /**
-                             * SGR (Select Graphic Rendition) parameters
-                             * @see https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
-                             */
-                            let srg = {
-                                /**
-                                 * Foreground colors
-                                 */
-                                fg: {
-                                    BLACK: 30,
-                                    RED: 31,
-                                    GREEN: 32,
-                                    YELLOW: 33,
-                                    BLUE: 34,
-                                    MAGENTA: 35,
-                                    CYAN: 36,
-                                    WHITE: 37,
-                                    GRAY: 90,
-                                    BRIGHT_BLACK: 90,
-                                    BRIGHT_RED: 91,
-                                    BRIGHT_GREEN: 92,
-                                    BRIGHT_YELLOW: 93,
-                                    BRIGHT_BLUE: 94,
-                                    BRIGHT_MAGENTA: 95,
-                                    BRIGHT_CYAN: 96,
-                                    BRIGHT_WHITE_: 97,
-                                },
-                                /**
-                                 * Background colors
-                                 */
-                                bg: {
-                                    BLACK: 40,
-                                    RED: 41,
-                                    GREEN: 42,
-                                    YELLOW: 43,
-                                    BLUE: 44,
-                                    MAGENTA: 45,
-                                    CYAN: 46,
-                                    WHITE: 47,
-                                    GRAY: 100,
-                                    BRIGHT_BLACK: 100,
-                                    BRIGHT_RED: 101,
-                                    BRIGHT_GREEN: 102,
-                                    BRIGHT_YELLOW: 103,
-                                    BRIGHT_BLUE: 104,
-                                    BRIGHT_MAGENTA: 105,
-                                    BRIGHT_CYAN: 106,
-                                    BRIGHT_WHITE_: 107,
-                                },
-                                RESET: 0,
-                                BOLD: 1,
-                                DIM: 2,
-                                ITALIC: 3,
-                                UNDERLINE: 4,
-                                SLOW_BLINK: 5,
-                                RAPID_BLINK: 6,
-                                INVERT: 7,
-                                CONCEAL: 8,
-                                STRIKE: 9,
-                                PRIMARY_FONT: 10,
-                                ALTERNATIVE_FONT_1: 11,
-                                ALTERNATIVE_FONT_2: 12,
-                                ALTERNATIVE_FONT_3: 13,
-                                ALTERNATIVE_FONT_4: 14,
-                                ALTERNATIVE_FONT_5: 15,
-                                ALTERNATIVE_FONT_6: 16,
-                                ALTERNATIVE_FONT_7: 17,
-                                ALTERNATIVE_FONT_8: 18,
-                                ALTERNATIVE_FONT_9: 19,
-                                FRAKTUR: 20,
-                                DOUBLY_UNDERLINED: 21,
-                                NORMAL_INTENSITY: 22,
-                                NEITHER_ITALIC_NOR_BLACKLETTER: 23,
-                                NOT_UNDERLINED: 24,
-                                NOT_BLINKING: 25,
-                                PROPORTIONAL_SPACING: 26,
-                                NOT_REVERSED: 27,
-                                REVEAL: 28,
-                                NOT_CROSSED_OUT: 29,
-                                SET_FOREGROUND_COLOR: 38,
-                                DEFAULT_FOREGROUND_COLOR: 39,
-                                SET_BACKGROUND_COLOR: 48,
-                                DEFAULT_BACKGROUND_COLOR: 49,
-                                DISABLE_PROPORTIONAL_SPACING: 50,
-                                FRAMED: 51,
-                                ENCIRCLED: 52,
-                                OVERLINED: 53,
-                                NEITHER_FRAMED_NOR_ENCIRCLED: 54,
-                                NOT_OVERLINED: 55,
-                                SET_UNDERLINE_COLOR: 58,
-                                DEFAULT_UNDERLINE_COLOR: 59,
-                                IDEOGRAM_UNDERLINE_OR_RIGHT_SIDE_LINE: 60,
-                                IDEOGRAM_DOUBLE_UNDERLINE: 61,
-                                IDEOGRAM_OVERLINE_OR_LEFT_SIDE_LINE: 62,
-                                IDEOGRAM_DOUBLE_OVERLINE: 63,
-                                IDEOGRAM_STRESS_MARKING: 64,
-                                NO_IDEOGRAM_ATTRIBUTES: 65,
-                                SUPERSCRIPT: 73,
-                                SUBSCRIPT: 74,
-                                NEITHER_SUPERSCRIPT_NOR_SUBSCRIPT: 75,
-                            };
-
-                            Object.assign(this.inspect, {
-                                srg: srg,
-                                /**
-                                 * @see http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-                                 */
-                                colors: {
-                                    bold: [ srg.BOLD, srg.NORMAL_INTENSITY ],
-                                    italic: [ srg.ITALIC, srg.NEITHER_ITALIC_NOR_BLACKLETTER ],
-                                    underline: [ srg.UNDERLINE, srg.NOT_UNDERLINED ],
-                                    inverse: [ srg.INVERT, srg.NOT_REVERSED ],
-                                    white: [ srg.fg.WHITE, srg.DEFAULT_FOREGROUND_COLOR ],
-                                    gray: [ srg.fg.GRAY, srg.DEFAULT_FOREGROUND_COLOR ],
-                                    grey: [ srg.fg.GRAY, srg.DEFAULT_FOREGROUND_COLOR ],
-                                    black: [ srg.fg.BLACK, srg.DEFAULT_FOREGROUND_COLOR ],
-                                    blue: [ srg.fg.BLUE, srg.DEFAULT_FOREGROUND_COLOR ],
-                                    cyan: [ srg.fg.CYAN, srg.DEFAULT_FOREGROUND_COLOR ],
-                                    green: [ srg.fg.GREEN, srg.DEFAULT_FOREGROUND_COLOR ],
-                                    magenta: [ srg.fg.MAGENTA, srg.DEFAULT_FOREGROUND_COLOR ],
-                                    red: [ srg.fg.RED, srg.DEFAULT_FOREGROUND_COLOR ],
-                                    yellow: [ srg.fg.YELLOW, srg.DEFAULT_FOREGROUND_COLOR ],
-                                },
-                                /**
-                                 * Avoid using 'blue' when printing on a certain platform
-                                 * like cmd.exe on Microsoft Windows.
-                                 */
-                                styles: {
-                                    regexp: 'red',
-                                    date: 'magenta',
-                                    special: 'cyan',
-                                    number: 'yellow',
-                                    boolean: 'yellow',
-                                    string: 'green',
-                                    undefined: 'gray',
-                                    null: 'bold',
-                                },
-                            });
-                        },
-                        stylizeWithoutColor(str) {
-                            return str;
-                        },
-                        stylizeWithColor(str, styleType) {
-                            let style = this.inspect.styles[styleType];
-                            return !style ? str : this.inspect.colors[style]
-                                .slice(0, 2) // just in case
-                                .map(c => '\x1b[' + c + 'm').join(str);
-                        },
-                    }).getMethod())()).call(this, obj, options);
-                },
-                morseCode(source, timeUnit) {
-                    return (this.morseCode = ( /* @IIFE */ () => {
-                        let _2_ = {
-                            morse: {
-                                defaultUnit: 100,
-                                /* a.k.a short mark or dot */
-                                dit: '1',
-                                /* a.k.a longer mark or dash */
-                                dah: '111',
-                                /* between the dots and dashes within a character */
-                                intraCharacterGap: '0',
-                                /* between letters */
-                                shortGap: '000',
-                                /* between words */
-                                mediumGap: '0000000',
-                                charsString: {
-                                    'A': '·-', 'B': '-···', 'C': '-·-·', 'D': '-··', 'E': '·', 'F': '··-·', 'G': '--·', 'H': '····', 'I': '··',
-                                    'J': '·---', 'K': '-·-', 'L': '·-··', 'M': '--', 'N': '-·', 'O': '---', 'P': '·--·', 'Q': '--·-', 'R': '·-·',
-                                    'S': '···', 'T': '-', 'U': '··-', 'V': '···-', 'W': '·--', 'X': '-··-', 'Y': '-·--', 'Z': '--··', '1': '·----',
-                                    '2': '··---', '3': '···--', '4': '····-', '5': '·····', '6': '-····', '7': '--···', '8': '---··', '9': '----·',
-                                    '0': '-----', '.': '·-·-·-', ':': '---···', ',': '--··--', ';': '-·-·-·', '?': '··--··', '=': '-···-',
-                                    '\'': '·----·', '/': '-··-·', '!': '-·-·--', '-': '-····-', '_': '··--·-', '"': '·-··-·', '(': '-·--·',
-                                    ')': '-·--·-', '$': '···-··-', '&': '·-···', '@': '·--·-·', '+': '·-·-·',
-                                },
-                                charsPattern: { /* to be parsed by parseMorse() */ },
-                            },
-                            parseSource(source, timeUnit) {
-                                util.ensureStringType(source);
-
-                                this.source = source;
-                                this.words = source.split(/\s+/);
-
-                                let defaultUnit = this.morse.defaultUnit;
-                                let parsedUnit = typeof timeUnit === 'number' ? timeUnit : defaultUnit;
-                                this.timeUnit = Math.max(parsedUnit, defaultUnit);
-                            },
-                            // @Cache
-                            parseMorse() {
-                                if (this._morseCharsStringParsed) {
-                                    return;
-                                }
-
-                                Object.entries(this.morse.charsString).forEach((entry) => {
-                                    let [ char, code ] = entry;
-                                    this.morse.charsPattern[char] = ( /* @IIFE */ () => {
-                                        let res = [];
-                                        code.split('').forEach((s, i) => {
-                                            if (s === '·') {
-                                                res.push(this.morse.dit.length * this.timeUnit);
-                                            } else if (s === '-') {
-                                                res.push(this.morse.dah.length * this.timeUnit);
-                                            } else {
-                                                throw Error(`Invalid internal morse code: ${code}`);
-                                            }
-                                            if (i !== code.length - 1) {
-                                                res.push(this.morse.intraCharacterGap.length * this.timeUnit);
-                                            }
-                                        });
-                                        return res;
-                                    })();
-                                });
-
-                                this._morseCharsStringParsed = true;
-                            },
-                            parsePattern() {
-                                this.pattern = [];
-                                this.code = String();
-                                this.words.forEach((word, i) => {
-                                    word.split('').forEach((letter, j) => {
-                                        this.appendVibrationForLetter(letter);
-                                        if (j !== word.length - 1) {
-                                            this.appendGapForLetters();
+                            Object.entries(this.morse.charsString).forEach((entry) => {
+                                let [ char, code ] = entry;
+                                this.morse.charsPattern[char] = (/* @IIFE */ () => {
+                                    let res = [];
+                                    code.split('').forEach((s, i) => {
+                                        if (s === '·') {
+                                            res.push(this.morse.dit.length * this.timeUnit);
+                                        } else if (s === '-') {
+                                            res.push(this.morse.dah.length * this.timeUnit);
+                                        } else {
+                                            throw Error(`Invalid internal morse code: ${code}`);
+                                        }
+                                        if (i !== code.length - 1) {
+                                            res.push(this.morse.intraCharacterGap.length * this.timeUnit);
                                         }
                                     });
-                                    if (i !== this.words.length - 1) {
-                                        this.appendGapForWords();
+                                    return res;
+                                })();
+                            });
+
+                            this._morseCharsStringParsed = true;
+                        },
+                        parsePattern() {
+                            this.pattern = [];
+                            this.code = String();
+                            this.words.forEach((word, i) => {
+                                word.split('').forEach((letter, j) => {
+                                    this.appendVibrationForLetter(letter);
+                                    if (j !== word.length - 1) {
+                                        this.appendGapForLetters();
                                     }
                                 });
-                            },
-                            vibrate(delay) {
-                                if (this.pattern.length > 0) {
-                                    scriptRuntime.device.vibrate([ this.parseVibrationDelay(delay) ].concat(this.pattern));
+                                if (i !== this.words.length - 1) {
+                                    this.appendGapForWords();
                                 }
+                            });
+                        },
+                        vibrate(delay) {
+                            if (this.pattern.length > 0) {
+                                scriptRuntime.device.vibrate([ this.parseVibrationDelay(delay) ].concat(this.pattern));
+                            }
+                        },
+                        parseVibrationDelay(delay) {
+                            if (typeof delay !== 'number') {
+                                return 0;
+                            }
+                            return Math.max(0, delay);
+                        },
+                        appendVibrationForLetter(letter) {
+                            letter = String(letter).toUpperCase();
+                            if (letter.length !== 1) {
+                                throw Error(`Invalid letter length: ${letter.length}`);
+                            }
+                            if (!(letter in this.morse.charsPattern)) {
+                                throw Error(`Letter ${letter} is not in the internal dictionary`);
+                            }
+                            this.pattern = this.pattern.concat(this.morse.charsPattern[letter]);
+                            this.code = this.code.concat(this.morse.charsString[letter]);
+                        },
+                        appendGapForLetters() {
+                            this.pattern.push(this.morse.shortGap.length * this.timeUnit);
+                            this.code = this.code.concat(this.morse.shortGap.replace(/./g, ' '));
+                        },
+                        appendGapForWords() {
+                            this.pattern.push(this.morse.mediumGap.length * this.timeUnit);
+                            this.code = this.code.concat(this.morse.mediumGap.replace(/./g, ' '));
+                        },
+                    };
+
+                    let morseCode = function (source, timeUnit) {
+                        _2_.parseSource(source, timeUnit);
+                        _2_.parseMorse();
+                        _2_.parsePattern();
+
+                        return {
+                            vibrate: _2_.vibrate.bind(_2_),
+                            get pattern() {
+                                return _2_.pattern;
                             },
-                            parseVibrationDelay(delay) {
-                                if (typeof delay !== 'number') {
-                                    return 0;
-                                }
-                                return Math.max(0, delay);
+                            get code() {
+                                return _2_.code;
                             },
-                            appendVibrationForLetter(letter) {
-                                letter = String(letter).toUpperCase();
-                                if (letter.length !== 1) {
-                                    throw Error(`Invalid letter length: ${letter.length}`);
-                                }
-                                if (!(letter in this.morse.charsPattern)) {
-                                    throw Error(`Letter ${letter} is not in the internal dictionary`);
-                                }
-                                this.pattern = this.pattern.concat(this.morse.charsPattern[letter]);
-                                this.code = this.code.concat(this.morse.charsString[letter]);
+                            getPattern() {
+                                return this.pattern;
                             },
-                            appendGapForLetters() {
-                                this.pattern.push(this.morse.shortGap.length * this.timeUnit);
-                                this.code = this.code.concat(this.morse.shortGap.replace(/./g, ' '));
+                            getCode() {
+                                return this.code;
                             },
-                            appendGapForWords() {
-                                this.pattern.push(this.morse.mediumGap.length * this.timeUnit);
-                                this.code = this.code.concat(this.morse.mediumGap.replace(/./g, ' '));
+                            toString() {
+                                return `MorseCode{code='${this.code}', pattern=[${this.pattern.join(', ')}]}`;
                             },
                         };
+                    };
 
-                        let morseCode = function (text, timeUnit) {
-                            _2_.parseSource(text, timeUnit);
-                            _2_.parseMorse();
-                            _2_.parsePattern();
+                    Object.assign(morseCode, {
+                        getPattern: source => morseCode(source).pattern,
+                        getCode: source => morseCode(source).code,
+                        vibrate: (source, delay) => morseCode(source).vibrate(delay),
+                    });
 
-                            return {
-                                vibrate: _2_.vibrate.bind(_2_),
-                                get pattern() {
-                                    return _2_.pattern;
-                                },
-                                get code() {
-                                    return _2_.code;
-                                },
-                                getPattern() {
-                                    return this.pattern;
-                                },
-                                getCode() {
-                                    return this.code;
-                                },
-                                toString() {
-                                    return `MorseCode{code='${this.code}', pattern=[${this.pattern.join(', ')}]}`;
-                                },
-                            };
-                        };
-
-                        Object.assign(morseCode, {
-                            getPattern: source => morseCode(source).pattern,
-                            getCode: source => morseCode(source).code,
-                            vibrate: (source, delay) => morseCode(source).vibrate(delay),
-                        });
-
-                        return morseCode;
-                    })()).call(this, source, timeUnit);
-                },
+                    return morseCode;
+                })(),
                 /**
                  * @param {object} src
                  * @param {object} target
@@ -853,7 +850,7 @@ module.exports = function (scriptRuntime, scope) {
                         }
                     });
                     for (let x = arguments[index]; index < len; x = arguments[++index]) {
-                        if (x === null || !this.isObjectSpecies(x)) {
+                        if (x === null || !this.isObject(x)) {
                             str += ' ' + x;
                         } else {
                             str += ' ' + this.inspect(x);
@@ -950,16 +947,14 @@ module.exports = function (scriptRuntime, scope) {
                     return new RegExp(pattern, 'i').test(src.trim());
                 },
                 assureStringStartsWith(s, start) {
-                    this.ensureStringType(s);
-                    this.ensureStringType(start);
+                    this.ensureStringType(s, start);
                     if (s.startsWith(start)) {
                         return s;
                     }
                     return start + s;
                 },
                 assureStringEndsWith(s, end) {
-                    this.ensureStringType(s);
-                    this.ensureStringType(end);
+                    this.ensureStringType(s, end);
                     if (s.endsWith(end)) {
                         return s;
                     }
@@ -978,37 +973,55 @@ module.exports = function (scriptRuntime, scope) {
                         throw TypeError(`Param ${o} must be type of ${type} instead of ${species(o)}`);
                     }
                 },
-                ensureStringType(o) {
-                    this.ensureType(o, 'string');
+                ensureStringType() {
+                    Array.from(arguments).forEach((o) => {
+                        this.ensureType(o, 'string');
+                    });
                 },
-                ensureNumberType(o) {
-                    this.ensureType(o, 'number');
+                ensureNumberType() {
+                    Array.from(arguments).forEach((o) => {
+                        this.ensureType(o, 'number');
+                    });
                 },
-                ensureUndefinedType(o) {
-                    this.ensureType(o, 'undefined');
+                ensureUndefinedType() {
+                    Array.from(arguments).forEach((o) => {
+                        this.ensureType(o, 'undefined');
+                    });
                 },
-                ensureBooleanType(o) {
-                    this.ensureType(o, 'boolean');
+                ensureBooleanType() {
+                    Array.from(arguments).forEach((o) => {
+                        this.ensureType(o, 'boolean');
+                    });
                 },
-                ensureSymbolType(o) {
-                    this.ensureType(o, 'symbol');
+                ensureSymbolType() {
+                    Array.from(arguments).forEach((o) => {
+                        this.ensureType(o, 'symbol');
+                    });
                 },
-                ensureBigintType(o) {
-                    this.ensureType(o, 'bigint');
+                ensureBigintType() {
+                    Array.from(arguments).forEach((o) => {
+                        this.ensureType(o, 'bigint');
+                    });
                 },
-                ensureObjectType(o) {
-                    this.ensureType(o, 'object');
+                ensureObjectType() {
+                    Array.from(arguments).forEach((o) => {
+                        this.ensureType(o, 'object');
+                    });
                 },
-                ensureNonNullObjectType(o) {
-                    this.ensureObjectType(o);
-                    if (o === null) {
-                        throw Error(`Param must be type of object and non-null`);
-                    }
+                ensureNonNullObjectType() {
+                    Array.from(arguments).forEach((o) => {
+                        this.ensureObjectType(o);
+                        if (o === null) {
+                            throw Error(`Param must be type of object and non-null`);
+                        }
+                    });
                 },
-                ensureArrayType(o) {
-                    if (!Array.isArray(o)) {
-                        throw TypeError(`Param ${o} must be type of Array instead of ${species(o)}`);
-                    }
+                ensureArrayType() {
+                    Array.from(arguments).forEach((o) => {
+                        if (!Array.isArray(o)) {
+                            throw TypeError(`Param ${o} must be type of Array instead of ${species(o)}`);
+                        }
+                    });
                 },
                 toRegular(f) {
                     if (typeof f !== 'function') {
@@ -1032,7 +1045,7 @@ module.exports = function (scriptRuntime, scope) {
             return Util;
         })(),
         extendStatics(C, P) {
-            return (this.extendStatics = ( /* @IIFE */ () => /* @AXR */ ({
+            return (this.extendStatics = (/* @IIFE */ () => /* @AXR */ ({
                 getMethod() {
                     return this.getSetPrototypeOf()
                         || this.getInternalProto()
@@ -1114,7 +1127,7 @@ module.exports = function (scriptRuntime, scope) {
 
             // noinspection JSIncompatibleTypesComparison
             if (ctx.customInspect
-                && isObjectSpecies(value)
+                && species.isObject(value)
                 && typeof value.inspect === 'function'
                 // Filter out the util module, it's inspect function is special
                 && value.inspect !== util.inspect

@@ -12,11 +12,11 @@
 
     <ImageView
             android:id="@+id/resizer"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="bottom|end"
             android:background="@drawable/circle_cool_black"
-            android:padding="6dp"
+            android:padding="5dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_resizer"
             android:visibility="gone"
@@ -26,11 +26,11 @@
 
     <ImageView
             android:id="@+id/close"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="top|end"
             android:background="@drawable/circle_cool_black"
-            android:padding="5dp"
+            android:padding="4dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_close_white_24dp"
             android:visibility="gone"
@@ -40,11 +40,11 @@
 
     <ImageView
             android:id="@+id/move_cursor"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_gravity="center"
             android:background="@drawable/circle_cool_black"
-            android:padding="5dp"
+            android:padding="4dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_move_cursor"
             android:visibility="gone"

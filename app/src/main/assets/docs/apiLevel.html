@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>安卓 API 级别 (Android API Level) | AutoJs6 文档 - 6.2.0</title>
+    <title>安卓 API 级别 (Android API Level) | AutoJs6 文档 - 6.3.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
     <link rel="canonical" href="https://nodejs.org/api/apiLevel.html">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="viewport" content="user-scalable=no">
@@ -21,15 +23,14 @@
         <ul>
 <li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
 <li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
-<li><a class="nav-progress" href="progress.html">Progress - 完善进度</a></li>
-<li><a class="nav-changelog" href="changelog.html">Changelog - 更新日志</a></li>
-<li><a class="nav-qa" href="qa.html">Q&amp;A - 疑难解答</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-developer-mozilla-org-zh-CN-docs-Web-JavaScript-" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/">MDN - JavaScript 基础</a></li>
-<li><a class="nav-https-zh-javascript-info-" href="https://zh.javascript.info/">JavaScript.info - JavaScript 教程</a></li>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
 </ul>
 <div class="line"></div>
 
@@ -40,6 +41,7 @@
 <li><a class="nav-app" href="app.html">App - 通用应用</a></li>
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -48,6 +50,8 @@
 <li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
 <li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
 <li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
@@ -66,36 +70,33 @@
 <li><a class="nav-base64" href="base64.html">Base64</a></li>
 <li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
 <li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
 <li><a class="nav-e4x" href="e4x.html">E4X</a></li>
 </ul>
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
 <li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
 <li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
 <li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
 <li><a class="nav-context" href="context.html">Context - 上下文</a></li>
 <li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
-<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
-<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
-<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
-<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
-<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
-</ul>
-<div class="line"></div>
-
-<ul>
-<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
-<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
-<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
-<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
 </ul>
 <div class="line"></div>
 
@@ -107,15 +108,51 @@
 <div class="line"></div>
 
 <ul>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-" href="https://github.com/SuperMonster003/AutoJs6/">GitHub - 应用项目地址</a></li>
-<li><a class="nav-https-github-com-SuperMonster003-AutoJs6-Documentation" href="https://github.com/SuperMonster003/AutoJs6-Documentation">GitHub - 文档项目地址</a></li>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
 </ul>
 
     </div>
 
     <div id="column1" data-id="apiLevel" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.2.0</h1>
+            <h1>AutoJs6 文档 - 6.3.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -157,7 +194,7 @@
 <td style="text-align:left">?</td>
 <td style="text-align:left">14</td>
 <td style="text-align:left">Upside Down Cake</td>
-<td style="text-align:left">Q3 2023</td>
+<td style="text-align:left">Feb 8, 2023</td>
 </tr>
 <tr>
 <td style="text-align:left">33</td>
@@ -165,7 +202,7 @@
 <td style="text-align:left">TIRAMISU</td>
 <td style="text-align:left">13</td>
 <td style="text-align:left">Tiramisu</td>
-<td style="text-align:left">August 15, 2022</td>
+<td style="text-align:left">Aug 15, 2022</td>
 </tr>
 <tr>
 <td style="text-align:left">32</td>
@@ -173,7 +210,7 @@
 <td style="text-align:left">S_V2</td>
 <td style="text-align:left">12.1</td>
 <td style="text-align:left">Snow Cone v2</td>
-<td style="text-align:left">March 7, 2022</td>
+<td style="text-align:left">Mar 7, 2022</td>
 </tr>
 <tr>
 <td style="text-align:left">31</td>
@@ -181,7 +218,7 @@
 <td style="text-align:left">S</td>
 <td style="text-align:left">12</td>
 <td style="text-align:left">Snow Cone</td>
-<td style="text-align:left">October 4, 2021</td>
+<td style="text-align:left">Oct 4, 2021</td>
 </tr>
 <tr>
 <td style="text-align:left">30</td>
@@ -189,7 +226,7 @@
 <td style="text-align:left">R</td>
 <td style="text-align:left">11</td>
 <td style="text-align:left">Red Velvet Cake</td>
-<td style="text-align:left">September 8, 2020</td>
+<td style="text-align:left">Sep 8, 2020</td>
 </tr>
 <tr>
 <td style="text-align:left">29</td>
@@ -197,7 +234,7 @@
 <td style="text-align:left">Q</td>
 <td style="text-align:left">10</td>
 <td style="text-align:left">Quince Tart</td>
-<td style="text-align:left">September 3, 2019</td>
+<td style="text-align:left">Sep 3, 2019</td>
 </tr>
 <tr>
 <td style="text-align:left">28</td>
@@ -205,7 +242,7 @@
 <td style="text-align:left">P</td>
 <td style="text-align:left">9</td>
 <td style="text-align:left">Pistachio Ice Cream</td>
-<td style="text-align:left">August 6, 2018</td>
+<td style="text-align:left">Aug 6, 2018</td>
 </tr>
 <tr>
 <td style="text-align:left">27</td>
@@ -213,7 +250,7 @@
 <td style="text-align:left">O_MR1</td>
 <td style="text-align:left">8.1</td>
 <td style="text-align:left">Oatmeal Cookie</td>
-<td style="text-align:left">December 5, 2017</td>
+<td style="text-align:left">Dec 5, 2017</td>
 </tr>
 <tr>
 <td style="text-align:left">26</td>
@@ -221,7 +258,7 @@
 <td style="text-align:left">O</td>
 <td style="text-align:left">8.0</td>
 <td style="text-align:left">Oatmeal Cookie</td>
-<td style="text-align:left">August 21, 2017</td>
+<td style="text-align:left">Aug 21, 2017</td>
 </tr>
 <tr>
 <td style="text-align:left">25</td>
@@ -229,7 +266,7 @@
 <td style="text-align:left">N_MR1</td>
 <td style="text-align:left">7.1-7.1.2</td>
 <td style="text-align:left">New York Cheesecake</td>
-<td style="text-align:left">October 4, 2016</td>
+<td style="text-align:left">Oct 4, 2016</td>
 </tr>
 <tr>
 <td style="text-align:left">24</td>
@@ -237,7 +274,7 @@
 <td style="text-align:left">N</td>
 <td style="text-align:left">7.0</td>
 <td style="text-align:left">New York Cheesecake</td>
-<td style="text-align:left">August 22, 2016</td>
+<td style="text-align:left">Aug 22, 2016</td>
 </tr>
 <tr>
 <td style="text-align:left">23</td>
@@ -245,7 +282,7 @@
 <td style="text-align:left">M</td>
 <td style="text-align:left">6.0-6.0.1</td>
 <td style="text-align:left">Macadamia Nut Cookie</td>
-<td style="text-align:left">October 2, 2015</td>
+<td style="text-align:left">Oct 2, 2015</td>
 </tr>
 <tr>
 <td style="text-align:left">22</td>
@@ -253,7 +290,7 @@
 <td style="text-align:left">LOLLIPOP_MR1</td>
 <td style="text-align:left">5.1-5.1.1</td>
 <td style="text-align:left">Lemon Meringue Pie</td>
-<td style="text-align:left">March 2, 2015</td>
+<td style="text-align:left">Mar 2, 2015</td>
 </tr>
 <tr>
 <td style="text-align:left">21</td>
@@ -261,7 +298,7 @@
 <td style="text-align:left">LOLLIPOP</td>
 <td style="text-align:left">5.0-5.0.2</td>
 <td style="text-align:left">Lemon Meringue Pie</td>
-<td style="text-align:left">November 4, 2014</td>
+<td style="text-align:left">Nov 4, 2014</td>
 </tr>
 <tr>
 <td style="text-align:left">20</td>
@@ -269,7 +306,7 @@
 <td style="text-align:left">KITKAT_WATCH</td>
 <td style="text-align:left">4.4W-4.4W.2</td>
 <td style="text-align:left">Key Lime Pie</td>
-<td style="text-align:left">June 25, 2014</td>
+<td style="text-align:left">Jun 25, 2014</td>
 </tr>
 <tr>
 <td style="text-align:left">19</td>
@@ -277,7 +314,7 @@
 <td style="text-align:left">KITKAT</td>
 <td style="text-align:left">4.4-4.4.4</td>
 <td style="text-align:left">Key Lime Pie</td>
-<td style="text-align:left">October 31, 2013</td>
+<td style="text-align:left">Oct 31, 2013</td>
 </tr>
 <tr>
 <td style="text-align:left">18</td>
@@ -285,7 +322,7 @@
 <td style="text-align:left">JELLY_BEAN_MR2</td>
 <td style="text-align:left">4.3-4.3.1</td>
 <td style="text-align:left">Jelly Bean</td>
-<td style="text-align:left">July 24, 2013</td>
+<td style="text-align:left">Jul 24, 2013</td>
 </tr>
 <tr>
 <td style="text-align:left">17</td>
@@ -293,7 +330,7 @@
 <td style="text-align:left">JELLY_BEAN_MR1</td>
 <td style="text-align:left">4.2-4.2.2</td>
 <td style="text-align:left">Jelly Bean</td>
-<td style="text-align:left">November 13, 2012</td>
+<td style="text-align:left">Nov 13, 2012</td>
 </tr>
 <tr>
 <td style="text-align:left">16</td>
@@ -301,7 +338,7 @@
 <td style="text-align:left">JELLY_BEAN</td>
 <td style="text-align:left">4.1-4.1.2</td>
 <td style="text-align:left">Jelly Bean</td>
-<td style="text-align:left">July 9, 2012</td>
+<td style="text-align:left">Jul 9, 2012</td>
 </tr>
 <tr>
 <td style="text-align:left">15</td>
@@ -309,7 +346,7 @@
 <td style="text-align:left">ICE_CREAM_SANDWICH_MR1</td>
 <td style="text-align:left">4.0.3-4.0.4</td>
 <td style="text-align:left">Ice Cream Sandwich</td>
-<td style="text-align:left">December 16, 2011</td>
+<td style="text-align:left">Dec 16, 2011</td>
 </tr>
 <tr>
 <td style="text-align:left">14</td>
@@ -317,7 +354,7 @@
 <td style="text-align:left">ICE_CREAM_SANDWICH</td>
 <td style="text-align:left">4.0-4.0.2</td>
 <td style="text-align:left">Ice Cream Sandwich</td>
-<td style="text-align:left">October 18, 2011</td>
+<td style="text-align:left">Oct 18, 2011</td>
 </tr>
 <tr>
 <td style="text-align:left">13</td>
@@ -325,7 +362,7 @@
 <td style="text-align:left">HONEYCOMB_MR2</td>
 <td style="text-align:left">3.2-3.2.6</td>
 <td style="text-align:left">Honeycomb</td>
-<td style="text-align:left">July 15, 2011</td>
+<td style="text-align:left">Jul 15, 2011</td>
 </tr>
 <tr>
 <td style="text-align:left">12</td>
@@ -341,7 +378,7 @@
 <td style="text-align:left">HONEYCOMB</td>
 <td style="text-align:left">3.0</td>
 <td style="text-align:left">Honeycomb</td>
-<td style="text-align:left">February 22, 2011</td>
+<td style="text-align:left">Feb 22, 2011</td>
 </tr>
 <tr>
 <td style="text-align:left">10</td>
@@ -349,7 +386,7 @@
 <td style="text-align:left">GINGERBREAD_MR1</td>
 <td style="text-align:left">2.3.3-2.3.7</td>
 <td style="text-align:left">Gingerbread</td>
-<td style="text-align:left">February 9, 2011</td>
+<td style="text-align:left">Feb 9, 2011</td>
 </tr>
 <tr>
 <td style="text-align:left">9</td>
@@ -357,7 +394,7 @@
 <td style="text-align:left">GINGERBREAD</td>
 <td style="text-align:left">2.3-2.3.2</td>
 <td style="text-align:left">Gingerbread</td>
-<td style="text-align:left">December 6, 2010</td>
+<td style="text-align:left">Dec 6, 2010</td>
 </tr>
 <tr>
 <td style="text-align:left">8</td>
@@ -373,7 +410,7 @@
 <td style="text-align:left">ECLAIR_MR1</td>
 <td style="text-align:left">2.1</td>
 <td style="text-align:left">Eclair</td>
-<td style="text-align:left">January 11, 2010</td>
+<td style="text-align:left">Jan 11, 2010</td>
 </tr>
 <tr>
 <td style="text-align:left">6</td>
@@ -381,7 +418,7 @@
 <td style="text-align:left">ECLAIR_0_1</td>
 <td style="text-align:left">2.0.1</td>
 <td style="text-align:left">Eclair</td>
-<td style="text-align:left">December 3, 2009</td>
+<td style="text-align:left">Dec 3, 2009</td>
 </tr>
 <tr>
 <td style="text-align:left">5</td>
@@ -389,7 +426,7 @@
 <td style="text-align:left">ECLAIR</td>
 <td style="text-align:left">2.0</td>
 <td style="text-align:left">Eclair</td>
-<td style="text-align:left">October 27, 2009</td>
+<td style="text-align:left">Oct 27, 2009</td>
 </tr>
 <tr>
 <td style="text-align:left">4</td>
@@ -397,7 +434,7 @@
 <td style="text-align:left">DONUT</td>
 <td style="text-align:left">1.6</td>
 <td style="text-align:left">Donut</td>
-<td style="text-align:left">September 15, 2009</td>
+<td style="text-align:left">Sep 15, 2009</td>
 </tr>
 <tr>
 <td style="text-align:left">3</td>
@@ -405,7 +442,7 @@
 <td style="text-align:left">CUPCAKE</td>
 <td style="text-align:left">1.5</td>
 <td style="text-align:left">Cupcake</td>
-<td style="text-align:left">April 27, 2009</td>
+<td style="text-align:left">Apr 27, 2009</td>
 </tr>
 <tr>
 <td style="text-align:left">2</td>
@@ -413,7 +450,7 @@
 <td style="text-align:left">BASE_1_1</td>
 <td style="text-align:left">1.1</td>
 <td style="text-align:left">Petit Four</td>
-<td style="text-align:left">February 9, 2009</td>
+<td style="text-align:left">Feb 9, 2009</td>
 </tr>
 <tr>
 <td style="text-align:left">1</td>
@@ -421,7 +458,7 @@
 <td style="text-align:left">BASE</td>
 <td style="text-align:left">1.0</td>
 <td style="text-align:left">-</td>
-<td style="text-align:left">September 23, 2008</td>
+<td style="text-align:left">Sep 23, 2008</td>
 </tr>
 </tbody>
 </table>
@@ -440,19 +477,29 @@
 runtime.requiresApi(30);
 </code></pre>
 <blockquote>
-<p>注: AutoJs6 安装及使用需满足的最低 API 级别为 24.</p>
+<p>注: AutoJs6 安装及使用需满足的最低 API 级别为 24 (7.0) [N].</p>
+</blockquote>
+<blockquote>
+<p>参阅: <a href="https://en.wikipedia.org/wiki/Android_version_history">Wikipedia (英)</a> / <a href="https://zh.wikipedia.org/wiki/Android%E7%89%88%E6%9C%AC%E5%88%97%E8%A1%A8">Wikipedia (中)</a></p>
 </blockquote>
 
         </div>
     </div>
 </div>
+
 <script src="assets/sh_javascript.js"></script>
 <script src="assets/sh_java.js"></script>
 <script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
 <script>
     highlight(void 0, void 0, 'pre');
     highlight(void 0, void 0, 'tt');
 </script>
+
 <!-- __TRACKING__ -->
+
 </body>
 </html>

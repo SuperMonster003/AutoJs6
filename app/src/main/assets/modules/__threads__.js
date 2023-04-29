@@ -13,7 +13,7 @@ module.exports = function (scriptRuntime, scope) {
     const rtThreads = runtime.threads;
 
     let _ = {
-        Threads: ( /* @IIFE */ () => {
+        Threads: (/* @IIFE */ () => {
             /**
              * @implements Internal.Threads
              */

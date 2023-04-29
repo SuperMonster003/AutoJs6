@@ -16,7 +16,7 @@ case 0:
 case 1:
     //打开应用详情页
     appName = rawInput("请输入应用名称", "微信");
-    openAppSetting(getPackageName(appName));
+    launchSettings(getPackageName(appName));
     break;
 case 2:
     //卸载应用

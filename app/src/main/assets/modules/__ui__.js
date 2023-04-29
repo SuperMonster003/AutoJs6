@@ -27,7 +27,7 @@ module.exports = function (scriptRuntime, scope) {
     let _ = {
         // @Coerce by SuperMonster003 on Nov 9, 2022.
         /** @type {Internal.UI} */
-        rtUi: ( /* @IIFE */ () => {
+        rtUi: (/* @IIFE */ () => {
             let inRtUi = scriptRuntime.ui;
             inRtUi.bindingContext = scope;
             inRtUi.__proxy__ = {
@@ -46,7 +46,7 @@ module.exports = function (scriptRuntime, scope) {
             };
             return inRtUi;
         })(),
-        UI: ( /* @IIFE */ () => {
+        UI: (/* @IIFE */ () => {
             /**
              * @extends Internal.UI
              */
@@ -57,7 +57,7 @@ module.exports = function (scriptRuntime, scope) {
             UI.prototype = {
                 constructor: UI,
                 __widgets__: {},
-                Widget: ( /* @IIFE */ () => {
+                Widget: (/* @IIFE */ () => {
                     /**
                      * @extends Internal.UI.Widget
                      */
@@ -200,7 +200,7 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 statusBarColor(color) {
                     _.ensureActivity();
-                    let colorInt = ( /* @IIFE */ () => {
+                    let colorInt = (/* @IIFE */ () => {
                         if (typeof color === 'string') {
                             if (Number(color).toString() === color) {
                                 color = Number(color);
@@ -306,7 +306,7 @@ module.exports = function (scriptRuntime, scope) {
                 let isDynamic = layoutInflater.isDynamicValue(value);
                 return isDynamic && layoutInflater.getInflateFlags() === DynamicLayoutInflater.FLAG_IGNORES_DYNAMIC_ATTRS
                     || !isDynamic && layoutInflater.getInflateFlags() === DynamicLayoutInflater.FLAG_JUST_DYNAMIC_ATTRS
-                    || ( /* @IIFE */ () => {
+                    || (/* @IIFE */ () => {
                         value = _.bind(value);
                         let widget = context.get('widget');
                         if (widget !== null && widget.hasAttr(attrName)) {
@@ -351,7 +351,7 @@ module.exports = function (scriptRuntime, scope) {
                 // @ScopeBinding
                 // noinspection WithStatementJS
                 with (ctx) {
-                    return ( /* @IIFE */ function () {
+                    return (/* @IIFE */ function () {
                         return eval(expression);
                     })();
                 }

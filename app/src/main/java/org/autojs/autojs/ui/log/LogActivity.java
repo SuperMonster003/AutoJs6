@@ -7,8 +7,8 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
 import org.autojs.autojs.AutoJs;
-import org.autojs.autojs.core.console.ConsoleImpl;
 import org.autojs.autojs.core.console.ConsoleView;
+import org.autojs.autojs.core.console.GlobalConsole;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs6.R;
 
@@ -18,7 +18,7 @@ public class LogActivity extends BaseActivity {
     @ViewById(R.id.console)
     ConsoleView mConsoleView;
 
-    private ConsoleImpl mConsoleImpl;
+    private GlobalConsole mConsoleImpl;
 
     @AfterViews
     void setupViews() {
