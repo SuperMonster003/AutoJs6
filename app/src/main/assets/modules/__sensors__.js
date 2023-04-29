@@ -5,7 +5,7 @@
  */
 module.exports = function (scriptRuntime, scope) {
     let _ = {
-        Sensors: ( /* @IIFE */ () => {
+        Sensors: (/* @IIFE */ () => {
             /**
              * @extends Internal.Sensors
              */

@@ -43,17 +43,28 @@ object ViewUtils {
         ;
     }
 
+    @JvmStatic
+    var isKeepScreenOnWhenInForegroundEnabled
+        get() = Pref.getBoolean(R.string.key_keep_screen_on_when_in_foreground_enabled, false)
+        private set(b) = Pref.putBoolean(R.string.key_keep_screen_on_when_in_foreground_enabled, b)
+
+    val isKeepScreenOnWhenInForegroundDisabled
+        get() = Pref.keyKeepScreenOnWhenInForeground == key(R.string.key_keep_screen_on_when_in_foreground_disabled)
+
+    val isKeepScreenOnWhenInForegroundAllPages
+        get() = Pref.keyKeepScreenOnWhenInForeground == key(R.string.key_keep_screen_on_when_in_foreground_all_pages)
+
+    private var keepScreenOnWhenInForegroundFromLastEnabledState: String
+        get() = Pref.getString(R.string.key_keep_screen_on_when_in_foreground_last_enabled, key(R.string.key_keep_screen_on_when_in_foreground_homepage_only))!!
+        set(s) = Pref.putString(R.string.key_keep_screen_on_when_in_foreground_last_enabled, s)
+
     var isAutoNightModeEnabled: Boolean
         get() = Pref.getBoolean(R.string.key_auto_night_mode_enabled, AutoNightMode.isFunctional())
-        set(b) {
-            Pref.putBoolean(R.string.key_auto_night_mode_enabled, b)
-        }
+        set(b) = Pref.putBoolean(R.string.key_auto_night_mode_enabled, b)
 
     var isNightModeEnabled: Boolean
         get() = Pref.getBoolean(R.string.key_night_mode_enabled, false)
-        set(b) {
-            Pref.putBoolean(R.string.key_night_mode_enabled, b)
-        }
+        set(b) = Pref.putBoolean(R.string.key_night_mode_enabled, b)
 
     @JvmStatic
     @Suppress("FunctionName")
@@ -256,6 +267,28 @@ object ViewUtils {
 
     @JvmStatic
     fun showSnack(view: View, string: CharSequence, duration: Int) = Snackbar.make(view, string, duration).show()
+
+    fun setKeepScreenOnWhenInForegroundDisabled() {
+        Pref.putString(R.string.key_keep_screen_on_when_in_foreground, key(R.string.key_keep_screen_on_when_in_foreground_disabled))
+        isKeepScreenOnWhenInForegroundEnabled = false
+    }
+
+    fun setKeepScreenOnWhenInForegroundAllPages() {
+        Pref.putString(R.string.key_keep_screen_on_when_in_foreground, key(R.string.key_keep_screen_on_when_in_foreground_all_pages))
+        keepScreenOnWhenInForegroundFromLastEnabledState = key(R.string.key_keep_screen_on_when_in_foreground_all_pages)
+        isKeepScreenOnWhenInForegroundEnabled = true
+    }
+
+    fun setKeepScreenOnWhenInForegroundHomepageOnly() {
+        Pref.putString(R.string.key_keep_screen_on_when_in_foreground, key(R.string.key_keep_screen_on_when_in_foreground_homepage_only))
+        keepScreenOnWhenInForegroundFromLastEnabledState = key(R.string.key_keep_screen_on_when_in_foreground_homepage_only)
+        isKeepScreenOnWhenInForegroundEnabled = true
+    }
+
+    fun setKeepScreenOnWhenInForegroundFromLastEnabledState() {
+        Pref.putString(R.string.key_keep_screen_on_when_in_foreground, keepScreenOnWhenInForegroundFromLastEnabledState)
+        isKeepScreenOnWhenInForegroundEnabled = true
+    }
 
     class AutoNightMode {
 

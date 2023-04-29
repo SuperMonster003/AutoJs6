@@ -25,7 +25,7 @@
     const Thread = java.lang.Thread;
 
     let _ = {
-        Module: ( /* @IIFE */ () => {
+        Module: (/* @IIFE */ () => {
             /**
              * @extends Internal.Require.Module
              */
@@ -72,7 +72,7 @@
 
             return Module;
         })(),
-        RequireCtor: ( /* @IIFE */ () => {
+        RequireCtor: (/* @IIFE */ () => {
             /**
              * @implements Internal.Require
              */
@@ -164,7 +164,7 @@
 
             return RequireCtor;
         })(),
-        ModuleError: ( /* @IIFE */ () => {
+        ModuleError: (/* @IIFE */ () => {
             /**
              * @param {?string} [message]
              * @param {?string} [code]
@@ -265,7 +265,7 @@
         },
     };
 
-    let NativeRequire = ( /* @IIFE */ function () {
+    let NativeRequire = (/* @IIFE */ function () {
         const o = this['NativeRequire'] || {};
         if (!o.require && typeof this.require === 'function') {
             o.require = this.require;

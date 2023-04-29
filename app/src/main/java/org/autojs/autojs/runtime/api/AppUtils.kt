@@ -1,11 +1,12 @@
 package org.autojs.autojs.runtime.api
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.NameNotFoundException
+import android.content.pm.PackageManager.*
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -15,6 +16,7 @@ import org.autojs.autojs.util.App
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
+import java.net.URI
 
 /**
  * Created by Stardust on 2017/4/2.
@@ -86,17 +88,17 @@ class AppUtils {
     @Suppress("DEPRECATION")
     private fun getApplicationInfoCompat(packageManager: PackageManager, packageName: String, flags: Int) = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-            packageManager.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(flags.toLong()))
+            packageManager.getApplicationInfo(packageName, ApplicationInfoFlags.of(flags.toLong()))
         }
         else -> packageManager.getApplicationInfo(packageName, flags)
     }
 
-    @ScriptInterface
-    @Deprecated("Use openAppSettings instead.", ReplaceWith("this.openAppSettings(packageName)"))
-    fun openAppSetting(packageName: String): Boolean = openAppSettings(packageName)
+    // @ScriptInterface
+    // @Deprecated("Use openAppSettings instead.", ReplaceWith("this.launchSettings(packageName)"))
+    // fun openAppSetting(packageName: String): Boolean = launchSettings(packageName)
 
     @ScriptInterface
-    fun openAppSettings(packageName: String): Boolean = IntentUtils.goToAppDetailSettings(mContext, packageName)
+    fun launchSettings(packageName: String): Boolean = IntentUtils.goToAppDetailSettings(mContext, packageName)
 
     val currentActivity: Activity?
         get() {
@@ -116,7 +118,7 @@ class AppUtils {
     @Suppress("DEPRECATION")
     private fun getPackageInfoCompat(packageManager: PackageManager, packageName: String, flags: Int) = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-            packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flags.toLong()))
+            packageManager.getPackageInfo(packageName, PackageInfoFlags.of(flags.toLong()))
         }
         else -> packageManager.getPackageInfo(packageName, flags)
     }
@@ -156,39 +158,22 @@ class AppUtils {
     }
 
     @ScriptInterface
-    fun viewFile(path: String?) {
-        if (path == null) {
-            throw NullPointerException(
-                mContext.getString(
-                    R.string.error_method_called_with_null_argument,
-                    "AppUtils.viewFile", "path"
-                )
-            )
-        }
-        IntentUtils.viewFile(mContext, path, fileProviderAuthority)
-    }
+    fun viewFile(path: String) = IntentUtils.viewFile(mContext, path, fileProviderAuthority)
 
     @ScriptInterface
-    fun editFile(path: String?) {
-        if (path == null) {
-            throw NullPointerException(
-                mContext.getString(
-                    R.string.error_method_called_with_null_argument,
-                    "AppUtils.editFile", "path"
-                )
-            )
-        }
-        IntentUtils.editFile(mContext, path, fileProviderAuthority)
-    }
+    fun editFile(path: String) = IntentUtils.editFile(mContext, path, fileProviderAuthority)
 
     @ScriptInterface
     fun openUrl(url: String) {
-        val prefix = "http://".takeUnless { url.matches("^https?://".toRegex()) } ?: ""
+        val prefix = "http://".takeUnless { url.contains("://") } ?: ""
         Intent(Intent.ACTION_VIEW)
             .setData(Uri.parse(prefix + url))
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .let { mContext.startActivity(it) }
     }
+
+    @ScriptInterface
+    fun openUrl(url: URI) = openUrl(url.host)
 
     fun setCurrentActivity(currentActivity: Activity?) {
         currentActivity.let {
@@ -199,14 +184,75 @@ class AppUtils {
 
     companion object {
 
+        @JvmStatic
+        val activityShortFormPrefix = "class."
+
+        @JvmStatic
+        val broadcastShortFormPrefix = "broadcast."
+
+        enum class ActivityShortForm(val shortName: String) {
+
+            SETTINGS("settings"),
+            PREFERENCES("preferences"),
+            PREF("pref"),
+
+            DOCUMENTATION("documentation"),
+            DOCS("docs"),
+            DOC("doc"),
+
+            CONSOLE("console"),
+            LOG("log"),
+
+            HOMEPAGE("homepage"),
+            HOME("home"),
+
+            ABOUT("about"),
+
+            BUILD("build"),
+            ;
+
+            val fullName
+                get() = activityShortFormPrefix + shortName
+
+        }
+
+        enum class BroadcastShortForm(val shortName: String) {
+
+            INSPECT_LAYOUT_BOUNDS("inspect_layout_bounds"),
+            BOUNDS("bounds"),
+            INSPECT_LAYOUT_HIERARCHY("inspect_layout_hierarchy"),
+            HIERARCHY("hierarchy"),
+            ;
+
+            val fullName
+                get() = broadcastShortFormPrefix + shortName
+
+        }
+
+        @JvmStatic
+        fun isBroadcastShortForm(s: String) = BroadcastShortForm.values().any { it.shortName.contentEquals(s) }
+
+        @JvmStatic
+        fun isActivityShortForm(s: String) = ActivityShortForm.values().any { it.shortName.contentEquals(s) }
+
+        @JvmStatic
+        fun showLauncherIcon(context: Context, cls: Class<*>) {
+            context.packageManager.setComponentEnabledSetting(ComponentName(context, cls), COMPONENT_ENABLED_STATE_ENABLED, DONT_KILL_APP)
+        }
+
+        @JvmStatic
+        fun hideLauncherIcon(context: Context, cls: Class<*>) {
+            context.packageManager.setComponentEnabledSetting(ComponentName(context, cls), COMPONENT_ENABLED_STATE_DISABLED, DONT_KILL_APP)
+        }
+
         fun getInstalledApplications(context: Context): List<ApplicationInfo> = context.packageManager.let {
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                    it.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong()))
+                    it.getInstalledApplications(ApplicationInfoFlags.of(GET_META_DATA.toLong()))
                 }
                 else -> {
                     @Suppress("DEPRECATION")
-                    it.getInstalledApplications(PackageManager.GET_META_DATA)
+                    it.getInstalledApplications(GET_META_DATA)
                 }
             }
         }

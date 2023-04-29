@@ -1,6 +1,5 @@
 package org.autojs.autojs.core.automator.filter
 
-import androidx.core.util.rangeTo
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.util.StringUtils.formatDouble

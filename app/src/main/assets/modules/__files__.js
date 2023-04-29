@@ -7,7 +7,7 @@ module.exports = function (scriptRuntime, scope) {
     const RtFiles = org.autojs.autojs.runtime.api.Files;
 
     let _ = {
-        Files: ( /* @IIFE */ () => {
+        Files: (/* @IIFE */ () => {
             /**
              * @extends Internal.Files
              */
@@ -19,6 +19,9 @@ module.exports = function (scriptRuntime, scope) {
                 constructor: Files,
                 join(parent, children) {
                     return RtFiles.join.apply(RtFiles, arguments);
+                },
+                toFile(path) {
+                    return new java.io.File(this.path(path));
                 },
             };
 

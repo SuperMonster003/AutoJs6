@@ -1,7 +1,6 @@
 package org.autojs.autojs.core.image;
 
 import android.graphics.Color;
-import android.os.Build;
 
 import androidx.annotation.ColorInt;
 

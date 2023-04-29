@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 
 public class ExplorerFileItem implements ExplorerItem {
@@ -88,22 +89,12 @@ public class ExplorerFileItem implements ExplorerItem {
             return FileUtils.TYPE.PROJECT;
         }
         String extension = mFile.getExtension();
-        if (FileUtils.TYPE.JAVASCRIPT.getExtension().equals(extension)) {
-            return FileUtils.TYPE.JAVASCRIPT;
-        }
-        if (FileUtils.TYPE.AUTO.getExtension().equals(extension)) {
-            return FileUtils.TYPE.AUTO;
-        }
-        if (FileUtils.TYPE.XML.getExtension().equals(extension)) {
-            return FileUtils.TYPE.XML;
-        }
-        if (FileUtils.TYPE.APK.getExtension().equals(extension)) {
-            return FileUtils.TYPE.APK;
-        }
-        if (FileUtils.TYPE.JSON.getExtension().equals(extension)) {
-            return FileUtils.TYPE.JSON;
-        }
-        return FileUtils.TYPE.UNKNOWN;
+        @NonNull Stream<FileUtils.TYPE> values = Arrays.stream(FileUtils.TYPE.values())
+                .filter(type -> type.getTypeName().matches("[\\w.]+"));
+        return (FileUtils.TYPE) Arrays.stream(values.toArray())
+                .filter(value -> ((FileUtils.TYPE) value).getExtension().equals(extension))
+                .findFirst()
+                .orElse(FileUtils.TYPE.UNKNOWN);
     }
 
     public String getExtension() {

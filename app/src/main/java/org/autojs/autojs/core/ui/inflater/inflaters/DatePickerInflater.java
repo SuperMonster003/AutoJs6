@@ -22,7 +22,7 @@ import java.util.Objects;
  */
 public class DatePickerInflater extends BaseViewInflater<DatePicker> {
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("mm/dd/yyyy", Locale.getDefault());
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
 
     public DatePickerInflater(ResourceParser resourceParser) {
         super(resourceParser);

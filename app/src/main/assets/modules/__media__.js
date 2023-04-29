@@ -5,7 +5,7 @@
  */
 module.exports = function (scriptRuntime, scope) {
     let _ = {
-        Media: ( /* @IIFE */ () => {
+        Media: (/* @IIFE */ () => {
             /**
              * @extends Internal.Media
              */

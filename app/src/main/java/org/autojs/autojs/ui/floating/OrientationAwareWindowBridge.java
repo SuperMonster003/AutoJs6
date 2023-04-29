@@ -5,7 +5,7 @@ import android.content.res.Configuration;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.stardust.enhancedfloaty.WindowBridge;
+import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 
 public class OrientationAwareWindowBridge extends WindowBridge.DefaultImpl {
 

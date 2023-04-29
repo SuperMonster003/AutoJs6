@@ -1,5 +1,8 @@
 package org.autojs.autojs.ui.doc;
 
+import android.app.Activity;
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.webkit.WebView;
 
 import org.androidannotations.annotations.AfterViews;
@@ -25,7 +28,7 @@ public class DocumentationActivity extends BaseActivity {
 
     @AfterViews
     void setUpViews() {
-        setToolbarAsBack(R.string.text_tutorial);
+        // setToolbarAsBack(R.string.text_documentation);
         mWebView = mEWebView.getWebView();
         String url = getIntent().getStringExtra(EXTRA_URL);
         if (url == null) {
@@ -42,4 +45,5 @@ public class DocumentationActivity extends BaseActivity {
             super.onBackPressed();
         }
     }
+
 }

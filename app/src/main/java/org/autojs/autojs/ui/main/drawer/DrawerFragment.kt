@@ -72,6 +72,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mProjectMediaAccessItem: DrawerMenuToggleableItem
     private lateinit var mNightModeItem: DrawerMenuToggleableItem
     private lateinit var mAutoNightModeItem: DrawerMenuToggleableItem
+    private lateinit var mKeepScreenOnWhenInForegroundItem: DrawerMenuToggleableItem
     private lateinit var mThemeColorItem: DrawerMenuShortcutItem
     private lateinit var mAboutAppAndDevItem: DrawerMenuShortcutItem
 
@@ -253,7 +254,6 @@ open class DrawerFragment : Fragment() {
                             ViewUtils.setDefaultNightMode(MODE.NIGHT)
                             Pref.putString(R.string.key_night_mode, MODE.NIGHT.key)
                         }
-
                         else -> {
                             ViewUtils.setDefaultNightMode(MODE.DAY)
                             Pref.putString(R.string.key_night_mode, MODE.DAY.key)
@@ -270,6 +270,35 @@ open class DrawerFragment : Fragment() {
             R.string.text_night_mode,
             DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
             R.string.key_night_mode_enabled,
+        )
+
+        mKeepScreenOnWhenInForegroundItem = DrawerMenuToggleableItem(
+            object : DrawerMenuItemCustomHelper(mContext) {
+                override val isActive: Boolean
+                    get() = ViewUtils.isKeepScreenOnWhenInForegroundEnabled
+
+                override fun toggle() {
+                    when (/* isTurningOn */ !isActive) {
+                        true -> ViewUtils.setKeepScreenOnWhenInForegroundFromLastEnabledState()
+                        else -> ViewUtils.setKeepScreenOnWhenInForegroundDisabled()
+                    }
+                    refreshSubtitle()
+                }
+
+                override fun refreshSubtitle() {
+                    val aimSubtitle = if (ViewUtils.isKeepScreenOnWhenInForegroundDisabled) null else {
+                        val i = resources.getStringArray(R.array.keys_keep_screen_on_when_in_foreground).indexOf(Pref.keyKeepScreenOnWhenInForeground!!)
+                        resources.getStringArray(R.array.values_keep_screen_on_when_in_foreground)[i]
+                    }
+                    if (mKeepScreenOnWhenInForegroundItem.subtitle != aimSubtitle) {
+                        mKeepScreenOnWhenInForegroundItem.subtitle = aimSubtitle
+                        mKeepScreenOnWhenInForegroundItem.isChecked = mKeepScreenOnWhenInForegroundItem.isChecked
+                    }
+                }
+            },
+            R.drawable.ic_lightbulb_outline_black_48dp,
+            R.string.text_keep_screen_on_when_in_foreground,
+            DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
         )
 
         mThemeColorItem = DrawerMenuShortcutItem(R.drawable.ic_personalize, R.string.text_theme_color)
@@ -324,7 +353,7 @@ open class DrawerFragment : Fragment() {
     )
 
     @Click(R.id.restart)
-    fun onClickForIdRestart(view: View) = mActivity.restartAfterPendingIntent(view.context)
+    fun onClickForIdRestart(view: View) = mActivity.rebirth(view)
 
     @Click(R.id.exit)
     fun onClickForIdExit(view: View) = mActivity.exitCompletely(view)
@@ -350,6 +379,7 @@ open class DrawerFragment : Fragment() {
             DrawerMenuGroup(R.string.text_appearance),
             mAutoNightModeItem,
             mNightModeItem,
+            mKeepScreenOnWhenInForegroundItem,
             mThemeColorItem,
             DrawerMenuGroup(R.string.text_about),
             mAboutAppAndDevItem,
@@ -380,6 +410,7 @@ open class DrawerFragment : Fragment() {
         mWriteSystemSettingsItem,
         mWriteSecuritySettingsItem,
         mProjectMediaAccessItem,
+        mKeepScreenOnWhenInForegroundItem,
     ).forEach { it.sync() }
 
     private fun consumeJsonSocketItemState(item: DrawerMenuToggleableItem, state: DevPluginService.State) {

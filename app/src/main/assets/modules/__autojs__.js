@@ -19,7 +19,7 @@ module.exports = function (scriptRuntime, scope) {
     const System = Settings.System;
 
     let _ = {
-        Autojs: ( /* @IIFE */ () => {
+        Autojs: (/* @IIFE */ () => {
             /**
              * @implements Internal.Autojs
              */
@@ -61,7 +61,7 @@ module.exports = function (scriptRuntime, scope) {
                     return RootUtils.getRootMode();
                 },
                 setRootMode(mode, isWriteIntoPreference) {
-                    let isWriteIntoPref = ( /* @IIFE */ () => {
+                    let isWriteIntoPref = (/* @IIFE */ () => {
                         if (typeof isWriteIntoPreference === 'undefined') {
                             return false;
                         }
@@ -99,6 +99,9 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 getLanguageTag() {
                     return this.getLanguage().toLanguageTag();
+                },
+                get themeColor() {
+                    return org.autojs.autojs.theme.ThemeColorManager.getCurrentThemeColor();
                 },
             };
 

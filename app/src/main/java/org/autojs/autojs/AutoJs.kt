@@ -7,23 +7,28 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Looper
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import org.autojs.autojs.core.accessibility.AccessibilityServiceTool
 import org.autojs.autojs.core.accessibility.AccessibilityService
+import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.LayoutInspector.CaptureAvailableListener
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.execution.ScriptExecutionGlobalListener
 import org.autojs.autojs.external.fileprovider.AppFileProvider
-import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils
+import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
+import org.autojs.autojs.runtime.api.AppUtils.Companion.BroadcastShortForm
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.ui.doc.DocumentationActivity_
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.log.LogActivity_
+import org.autojs.autojs.ui.main.MainActivity_
+import org.autojs.autojs.ui.project.BuildActivity_
+import org.autojs.autojs.ui.settings.AboutActivity_
 import org.autojs.autojs.ui.settings.SettingsActivity_
 import org.autojs.autojs6.R
 import java.util.concurrent.Executors
@@ -38,8 +43,8 @@ class AutoJs private constructor(private val appContext: Application) : Abstract
     // @Thank to Zen2H
     private val printExecutor = Executors.newSingleThreadExecutor()
 
-    private val accessibilityTool: AccessibilityServiceTool
-        get() = AccessibilityServiceTool(appContext)
+    private val accessibilityTool: AccessibilityTool
+        get() = AccessibilityTool(appContext)
 
     init {
         scriptEngineService.registerGlobalScriptExecutionListener(ScriptExecutionGlobalListener())
@@ -106,7 +111,7 @@ class AutoJs private constructor(private val appContext: Application) : Abstract
     override fun ensureAccessibilityServiceEnabled() {
         if (AccessibilityService.isNotRunning()) {
             tryEnableAccessibilityService()?.let {
-                accessibilityTool.goToAccessibilitySetting()
+                accessibilityTool.launchSettings()
                 throw ScriptException(it)
             }
         }
@@ -115,7 +120,7 @@ class AutoJs private constructor(private val appContext: Application) : Abstract
     override fun waitForAccessibilityServiceEnabled(timeout: Long) {
         if (AccessibilityService.isNotRunning()) {
             tryEnableAccessibilityService()?.let {
-                accessibilityTool.goToAccessibilitySetting()
+                accessibilityTool.launchSettings()
                 if (!AccessibilityService.waitForEnabled(timeout)) {
                     throw ScriptInterruptedException()
                 }
@@ -124,19 +129,43 @@ class AutoJs private constructor(private val appContext: Application) : Abstract
     }
 
     private fun tryEnableAccessibilityService(): String? {
-        if (accessibilityTool.isAccessibilityServiceEnabled()) {
+        if (accessibilityTool.service.isEnabled()) {
             return context.getString(R.string.text_auto_operate_service_enabled_but_not_working)
         }
-        return if (!accessibilityTool.enableAccessibilityServiceAutomaticallyIfNeededAndWaitFor(2000)) {
-            context.getString(R.string.text_no_accessibility_permission)
+        return if (!accessibilityTool.service.enableIfNeededAndWaitFor(2000)) {
+            context.getString(R.string.error_no_accessibility_permission)
         } else null
     }
 
     override fun createRuntime(): ScriptRuntime = super.createRuntime().apply {
-        putProperty("class.settings", SettingsActivity_::class.java)
-        putProperty("class.console", LogActivity_::class.java)
-        putProperty("broadcast.inspect_layout_bounds", LayoutBoundsFloatyWindow::class.java.name)
-        putProperty("broadcast.inspect_layout_hierarchy", LayoutHierarchyFloatyWindow::class.java.name)
+
+        /* Activities. */
+
+        putProperty(ActivityShortForm.SETTINGS.fullName, SettingsActivity_::class.java)
+        putProperty(ActivityShortForm.PREFERENCES.fullName, SettingsActivity_::class.java)
+        putProperty(ActivityShortForm.PREF.fullName, SettingsActivity_::class.java)
+
+        putProperty(ActivityShortForm.CONSOLE.fullName, LogActivity_::class.java)
+        putProperty(ActivityShortForm.LOG.fullName, LogActivity_::class.java)
+
+        putProperty(ActivityShortForm.HOMEPAGE.fullName, MainActivity_::class.java)
+        putProperty(ActivityShortForm.HOME.fullName, MainActivity_::class.java)
+
+        putProperty(ActivityShortForm.ABOUT.fullName, AboutActivity_::class.java)
+
+        putProperty(ActivityShortForm.BUILD.fullName, BuildActivity_::class.java)
+
+        putProperty(ActivityShortForm.DOCUMENTATION.fullName, DocumentationActivity_::class.java)
+        putProperty(ActivityShortForm.DOC.fullName, DocumentationActivity_::class.java)
+        putProperty(ActivityShortForm.DOCS.fullName, DocumentationActivity_::class.java)
+
+        /* Broadcasts. */
+
+        putProperty(BroadcastShortForm.INSPECT_LAYOUT_BOUNDS.fullName, LayoutBoundsFloatyWindow::class.java.name)
+        putProperty(BroadcastShortForm.BOUNDS.fullName, LayoutBoundsFloatyWindow::class.java.name)
+
+        putProperty(BroadcastShortForm.INSPECT_LAYOUT_HIERARCHY.fullName, LayoutHierarchyFloatyWindow::class.java.name)
+        putProperty(BroadcastShortForm.HIERARCHY.fullName, LayoutHierarchyFloatyWindow::class.java.name)
     }
 
     companion object {

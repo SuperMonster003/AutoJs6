@@ -11,7 +11,7 @@ module.exports = function (scriptRuntime, scope) {
     const InjectableWebClient = org.autojs.autojs.core.web.InjectableWebClient;
 
     let _ = {
-        Web: ( /* @IIFE */ () => {
+        Web: (/* @IIFE */ () => {
             /**
              * @implements Internal.Web
              */
@@ -21,26 +21,33 @@ module.exports = function (scriptRuntime, scope) {
 
             Web.prototype = {
                 constructor: Web,
+                newInjectableWebView(activity, url) {
+                    if (arguments.length === 2) {
+                        return new InjectableWebView(activity, Context.getCurrentContext(), scope, url);
+                    }
+                    if (arguments.length === 1) {
+                        if (typeof arguments[0] === 'string') {
+                            return this.newInjectableWebView(scope.activity, /* url = */ arguments[0]);
+                        }
+                        return this.newInjectableWebView(activity, /* url = */ null);
+                    }
+                    if (arguments.length === 0) {
+                        return this.newInjectableWebView(scope.activity);
+                    }
+                },
+                newInjectableWebClient() {
+                    return new InjectableWebClient(Context.getCurrentContext(), scope);
+                },
             };
 
             return Web;
         })(),
         scopeAugment() {
-            Object.assign(scope, {
-                /**
-                 * @global
-                 */
-                newInjectableWebClient() {
-                    return new InjectableWebClient(Context.getCurrentContext(), scope);
-                },
-                /**
-                 * @global
-                 */
-                newInjectableWebView(activity) {
-                    let ctx = activity || scope.activity;
-                    return new InjectableWebView(ctx, Context.getCurrentContext(), scope);
-                },
-            });
+            /**
+             * @type {(keyof Internal.Web)[]}
+             */
+            let methods = [ 'newInjectableWebView', 'newInjectableWebClient' ];
+            __asGlobal__(web, methods, scope);
         },
     };
 

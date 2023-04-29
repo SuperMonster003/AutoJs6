@@ -157,7 +157,7 @@ module.exports = function (scriptRuntime, scope) {
                 //  ! Reappearance: `let f = idMatches; f(/.+/).findOnce();`
                 //  ! TypeError: Cannot find function findOnce in object true.
                 // @ScopeBinding
-                scope[method] = ( /* @IIFE */ (method) => {
+                scope[method] = (/* @IIFE */ (method) => {
                     return function () {
                         let s = selector();
                         try {

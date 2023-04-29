@@ -7,7 +7,7 @@ module.exports = function (scriptRuntime, scope) {
     const LocalStorage = org.autojs.autojs.core.storage.LocalStorage;
 
     let _ = {
-        ProxyStorage: ( /* @IIFE */ () => {
+        ProxyStorage: (/* @IIFE */ () => {
             /**
              * @implements Internal.LocalStorage
              */
@@ -19,9 +19,10 @@ module.exports = function (scriptRuntime, scope) {
                 constructor: ProxyStorage,
                 put(key, value) {
                     if (value === undefined) {
-                        throw TypeError('Value cannot be undefined');
+                        throw TypeError(`Value can't be undefined`);
                     }
                     this._storage.put(key, JSON.stringify(value));
+                    return this;
                 },
                 get(key, def) {
                     let value = this._storage.getString(key, null);
@@ -29,6 +30,7 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 remove(key) {
                     this._storage.remove(key);
+                    return this;
                 },
                 contains(key) {
                     return this._storage.contains(key);
@@ -40,7 +42,7 @@ module.exports = function (scriptRuntime, scope) {
 
             return ProxyStorage;
         })(),
-        Storages: ( /* @IIFE */ () => {
+        Storages: (/* @IIFE */ () => {
             /**
              * @implements Internal.Storages
              */
@@ -62,9 +64,8 @@ module.exports = function (scriptRuntime, scope) {
         })(),
     };
 
-    /**
-     * @type {Internal.Storages}
-     */
+    // noinspection UnnecessaryLocalVariableJS
+    /** @type {Internal.Storages} */
     const storages = new _.Storages();
 
     return storages;

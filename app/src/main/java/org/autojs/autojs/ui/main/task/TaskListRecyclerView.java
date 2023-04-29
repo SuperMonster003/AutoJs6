@@ -29,7 +29,7 @@ import org.autojs.autojs.timing.TimedTaskManager;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity_;
 import org.autojs.autojs.ui.widget.FirstCharView;
-import org.autojs.autojs.workground.WrapContentLinearLayoutManager;
+import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
 import org.autojs.autojs6.R;
 
 import java.util.ArrayList;
@@ -57,7 +57,10 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
     private final ScriptExecutionListener mScriptExecutionListener = new SimpleScriptExecutionListener() {
         @Override
         public void onStart(final ScriptExecution execution) {
-            post(() -> mAdapter.notifyChildInserted(0, mRunningTaskGroup.addTask(execution)));
+            int i = mRunningTaskGroup.addTask(execution);
+            if (i != -1) {
+                post(() -> mAdapter.notifyChildInserted(0, i));
+            }
         }
 
         @Override
@@ -99,39 +102,47 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
 
     private void init() {
         setLayoutManager(new WrapContentLinearLayoutManager(getContext()));
+
         addItemDecoration(new HorizontalDividerItemDecoration.Builder(getContext())
                 .color(ContextCompat.getColor(getContext(), R.color.divider))
                 .size(2)
                 .marginResId(R.dimen.script_and_folder_list_divider_left_margin, R.dimen.script_and_folder_list_divider_right_margin)
                 .showLastDivider()
                 .build());
+
         mRunningTaskGroup = new TaskGroup.RunningTaskGroup(getContext());
         mTaskGroups.add(mRunningTaskGroup);
+
         mPendingTaskGroup = new TaskGroup.PendingTaskGroup(getContext());
         mTaskGroups.add(mPendingTaskGroup);
+
         mAdapter = new Adapter(mTaskGroups);
         setAdapter(mAdapter);
     }
 
     public void refresh() {
+        mAdapter = new Adapter(mTaskGroups);
+        setAdapter(mAdapter);
         for (TaskGroup group : mTaskGroups) {
             group.refresh();
         }
-        mAdapter = new Adapter(mTaskGroups);
-        setAdapter(mAdapter);
-        //notifyDataSetChanged not working...
+        // notifyDataSetChanged doesn't work ?
+        // mAdapter.notifyDataSetChanged();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+
+        mTimedTaskChangeDisposable = TimedTaskManager.getTimeTaskChanges()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onTaskChange);
+
+        mIntentTaskChangeDisposable = TimedTaskManager.getIntentTaskChanges()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onTaskChange);
+
         AutoJs.getInstance().getScriptEngineService().registerGlobalScriptExecutionListener(mScriptExecutionListener);
-        mTimedTaskChangeDisposable = TimedTaskManager.getInstance().getTimeTaskChanges()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onTaskChange);
-        mIntentTaskChangeDisposable = TimedTaskManager.getInstance().getIntentTaskChanges()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onTaskChange);
     }
 
     @Override
@@ -210,8 +221,8 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         @BindView(R.id.name)
         TextView mName;
 
-        @BindView(R.id.desc)
-        TextView mDesc;
+        @BindView(R.id.task_list_file_path)
+        TextView mFilePath;
 
         private Task mTask;
 
@@ -224,8 +235,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         public void bind(Task task) {
             mTask = task;
             mName.setText(task.getName());
-            mDesc.setText(task.getDesc());
-
+            mFilePath.setText(task.getDesc());
             mFirstChar
                     .setIconText(AutoFileSource.ENGINE.equals(mTask.getEngineName()) ? "R" : "J")
                     .setIconTextThemeColor()
@@ -242,7 +252,8 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
 
         void onItemClick(View view) {
             if (mTask instanceof Task.PendingTask task) {
-                String extra = task.getTimedTask() == null ? TimedTaskSettingActivity.EXTRA_INTENT_TASK_ID
+                String extra = task.getTimedTask() == null
+                        ? TimedTaskSettingActivity.EXTRA_INTENT_TASK_ID
                         : TimedTaskSettingActivity.EXTRA_TASK_ID;
                 TimedTaskSettingActivity_.intent(getContext())
                         .extra(extra, task.getId())
@@ -273,6 +284,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         public void onExpansionToggled(boolean expanded) {
             icon.setRotation(expanded ? -90 : 0);
         }
+
     }
 
 }

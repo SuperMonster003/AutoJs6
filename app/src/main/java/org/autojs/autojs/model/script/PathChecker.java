@@ -46,7 +46,7 @@ public class PathChecker {
 
     private int checkWithStoragePermission(String path) {
         if (mContext instanceof Activity && !hasStorageReadPermission((Activity) mContext)) {
-            return R.string.text_no_storage_rw_permission;
+            return R.string.error_no_storage_rw_permission;
         }
         return check(path);
     }

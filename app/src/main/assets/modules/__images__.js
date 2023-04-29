@@ -1,4 +1,4 @@
-// noinspection NpmUsedModulesInstalled,JSUnusedGlobalSymbols
+// noinspection NpmUsedModulesInstalled,JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 
 /* Overwritten protection. */
 
@@ -13,7 +13,6 @@ module.exports = function (scriptRuntime, scope) {
     const ResultAdapter = require('result-adapter');
 
     const Point = org.opencv.core.Point;
-    const Rect = org.opencv.core.Rect;
     const Scalar = org.opencv.core.Scalar;
     const Size = org.opencv.core.Size;
     const Core = org.opencv.core.Core;
@@ -23,7 +22,6 @@ module.exports = function (scriptRuntime, scope) {
     const Images = org.autojs.autojs.runtime.api.Images;
     const ColorDetector = org.autojs.autojs.core.image.ColorDetector;
     const ScreenCapturer = org.autojs.autojs.core.image.capture.ScreenCapturer;
-    const ColorStateList = android.content.res.ColorStateList;
     const Bitmap = android.graphics.Bitmap;
     const BitmapFactory = android.graphics.BitmapFactory;
     const ByteArrayOutputStream = java.io.ByteArrayOutputStream;
@@ -34,13 +32,11 @@ module.exports = function (scriptRuntime, scope) {
      */
     const rtImages = scriptRuntime.getImages();
 
-    /**
-     * @type {org.autojs.autojs.core.image.Colors}
-     */
-    const rtColors = scriptRuntime.colors;
-
     let _ = {
-        Images: ( /* @IIFE */ () => {
+        /**
+         * @implements {Internal.Images}
+         */
+        Images: (/* @IIFE */ () => {
             /**
              * @implements {Internal.Images}
              */
@@ -67,6 +63,14 @@ module.exports = function (scriptRuntime, scope) {
                     return rtImages.load(src);
                 },
                 clip(img, x, y, w, h) {
+                    if (arguments.length === 2) {
+                        if (isNullish(arguments[1])) {
+                            img.shoot();
+                            return img;
+                        }
+                        let rect = this.buildRegion(img, /* region = */ arguments[1]);
+                        return this.clip(img, rect.x, rect.y, rect.width, rect.height);
+                    }
                     return rtImages.clip(img, x, y, w, h);
                 },
                 /**
@@ -93,9 +97,7 @@ module.exports = function (scriptRuntime, scope) {
                     }
                 },
                 save(img, path, format, quality) {
-                    let res = rtImages.save(img, path, format || 'png', _.parseQuality(quality));
-                    img.shoot();
-                    return res;
+                    return rtImages.save(img, path, _.parseFormat(format), _.parseQuality(quality));
                 },
                 saveImage(img, path, format, quality) {
                     return this.save(img, path, format, quality);
@@ -106,7 +108,7 @@ module.exports = function (scriptRuntime, scope) {
                 threshold(img, threshold, maxVal, type) {
                     _.initIfNeeded();
                     let mat = new Mat();
-                    Imgproc.threshold(img.mat, mat, threshold, maxVal, Imgproc[`THRESH_${type || 'BINARY'}`]);
+                    Imgproc.threshold(img.mat, mat, threshold, maxVal, _.parseThresholdType(type));
                     img.shoot();
                     return this.matToImage(mat);
                 },
@@ -147,8 +149,20 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 medianBlur(img, size) {
                     _.initIfNeeded();
+                    if (Array.isArray(size)) {
+                        if (size.length !== 2) {
+                            throw TypeError(`Argument size for images.medianBlur must be either a number or an array with same TWO number elements`);
+                        }
+                        if (size.every(x => typeof x === 'number')) {
+                            throw TypeError(`Argument size for images.medianBlur must be either a number or an array with same two NUMBER elements`);
+                        }
+                        if (size[0] !== size[1]) {
+                            throw TypeError(`Argument size for images.medianBlur must be either a number or an array with SAME two number elements`);
+                        }
+                    }
+                    let ksize = Array.isArray(size) ? [ size ][0] : size;
                     let mat = new Mat();
-                    Imgproc.medianBlur(img.mat, mat, size);
+                    Imgproc.medianBlur(img.mat, mat, ksize);
                     img.shoot();
                     return this.matToImage(mat);
                 },
@@ -208,7 +222,7 @@ module.exports = function (scriptRuntime, scope) {
                         },
                         parseImage() {
                             this.image = this.region
-                                ? new Mat(grayImg.mat, _.buildRegion(grayImg, this))
+                                ? new Mat(grayImg.mat, _.buildRegion(grayImg, this.region))
                                 : grayImg.mat;
                         },
                         parseCircles() {
@@ -259,26 +273,20 @@ module.exports = function (scriptRuntime, scope) {
                     _.initIfNeeded();
                     x = _.parseNumber(x, () => img.width / 2);
                     y = _.parseNumber(y, () => img.height / 2);
-                    let res = rtImages.rotate(img, x, y, degree);
-                    img.shoot();
-                    return res;
+                    return rtImages.rotate(img, x, y, degree);
                 },
                 concat(imgA, imgB, direction) {
                     _.initIfNeeded();
-                    let res = RtImages.concat(imgA, imgB, Gravity[(direction || 'right').toUpperCase()]);
-                    imgA.shoot();
-                    imgB.shoot();
-                    return res;
+                    return RtImages.concat(imgA, imgB, _.directionToGravity(direction));
                 },
                 detectsColor(img, color, x, y, threshold, algorithm) {
                     _.initIfNeeded();
                     let pixel = images.pixel(img, x, y);
-                    img.shoot();
-                    return _
-                        .getColorDetector(
+                    return ColorDetector
+                        .get(
                             colors.toInt(color),
                             algorithm || _.constants.DEF_COLOR_ALGORITHM,
-                            threshold || _.constants.DEF_COLOR_THRESHOLD)
+                            _.parseNumber(threshold, _.constants.DEF_COLOR_THRESHOLD))
                         .detectsColor(
                             colors.red(pixel),
                             colors.green(pixel),
@@ -287,7 +295,10 @@ module.exports = function (scriptRuntime, scope) {
                 findColor(img, color, options) {
                     _.initIfNeeded();
                     let opt = options || {};
-                    let res = rtImages.colorFinder.findColor(img, colors.toInt(color), _.parseThreshold(opt), _.buildRegion(img, opt));
+                    let res = rtImages.colorFinder.findColor(img,
+                        colors.toInt(color),
+                        _.parseThreshold(opt),
+                        'region' in opt ? _.buildRegion(img, opt.region) : null);
                     img.shoot();
                     return res;
                 },
@@ -306,10 +317,11 @@ module.exports = function (scriptRuntime, scope) {
                 findAllPointsForColor(img, color, options) {
                     _.initIfNeeded();
                     let opt = options || {};
-                    let o = rtImages.colorFinder.findAllPointsForColor(img, colors.toInt(color), _.parseThreshold(opt), _.buildRegion(img, opt));
-                    let res = _.toPointArray(o);
-                    img.shoot();
-                    return res;
+                    let o = rtImages.colorFinder.findAllPointsForColor(img,
+                        colors.toInt(color),
+                        _.parseThreshold(opt),
+                        'region' in opt ? _.buildRegion(img, opt.region) : null);
+                    return _.toPointArray(o);
                 },
                 findMultiColors(img, firstColor, paths, options) {
                     _.initIfNeeded();
@@ -321,21 +333,20 @@ module.exports = function (scriptRuntime, scope) {
                         list[i * 3 + 2] = colors.toInt(color);
                     }
                     let opt = options || {};
-                    let res = rtImages.colorFinder.findMultiColors(img, colors.toInt(firstColor), _.parseThreshold(opt), _.buildRegion(img, opt), list);
-                    img.shoot();
-                    return res;
+                    return rtImages.colorFinder.findMultiColors(img,
+                        colors.toInt(firstColor),
+                        _.parseThreshold(opt),
+                        'region' in opt ? _.buildRegion(img, opt.region) : null,
+                        list);
                 },
                 findImage(img, template, options) {
                     _.initIfNeeded();
                     let opt = options || {};
-                    const res = rtImages.findImage(img, template,
+                    return rtImages.findImage(img, template,
                         _.parseWeakThreshold(opt, 0.6),
                         _.parseThreshold(opt, 0.9),
-                        _.buildRegion(img, opt),
+                        'region' in opt ? _.buildRegion(img, opt.region) : null,
                         _.parseNumber(opt.level, -1));
-                    img.shoot();
-                    template.shoot();
-                    return res;
                 },
                 findImageInRegion(img, template, x, y, width, height, threshold) {
                     return this.findImage(img, template, {
@@ -349,29 +360,22 @@ module.exports = function (scriptRuntime, scope) {
                     let list = rtImages.matchTemplate(img, template,
                         _.parseWeakThreshold(opt, 0.6),
                         _.parseThreshold(opt, 0.9),
-                        _.buildRegion(img, opt),
+                        'region' in opt ? _.buildRegion(img, opt.region) : null,
                         _.parseNumber(opt.level, -1),
                         _.parseNumber(opt.max, 5));
-                    let res = new _.MatchingResult(list);
-                    img.shoot();
-                    template.shoot();
-                    return res;
+                    return new _.MatchingResult(list);
                 },
                 fromBase64(base64) {
                     return rtImages.fromBase64(base64);
                 },
                 toBase64(img, format, quality) {
-                    const res = rtImages.toBase64(img, format || 'png', _.parseQuality(quality));
-                    img.shoot();
-                    return res;
+                    return rtImages.toBase64(img, _.parseFormat(format), _.parseQuality(quality));
                 },
                 fromBytes(bytes) {
                     return rtImages.fromBytes(bytes);
                 },
                 toBytes(img, format, quality) {
-                    const res = rtImages.toBytes(img, format || 'png', _.parseQuality(quality));
-                    img.shoot();
-                    return res;
+                    return rtImages.toBytes(img, _.parseFormat(format), _.parseQuality(quality));
                 },
                 readPixels(path) {
                     let img = this.read(path);
@@ -491,361 +495,19 @@ module.exports = function (scriptRuntime, scope) {
                     }
                     throw TypeError(`Unknown source to parse its height: ${img}`);
                 },
+                buildRegion(img, region) {
+                    if (isNullish(region)
+                        || Array.isArray(region)
+                        || region instanceof org.opencv.core.Rect
+                        || region instanceof android.graphics.Rect
+                    ) return _.buildRegion(img, region);
+                    else throw TypeError(`Argument region with species "${species(region)}" is invalid for images.buildRegion`);
+                },
             };
 
             return Images;
         })(),
-        Colors: ( /* @IIFE */ () => {
-            /**
-             * @extends Internal.Colors
-             */
-            const Colors = function () {
-                // Empty class body.
-            };
-
-            Colors.prototype = {
-                constructor: Colors,
-                android: ColorTable.Android,
-                web: ColorTable.Web,
-                css: ColorTable.Css,
-                material: ColorTable.Material,
-                alpha(color) {
-                    return this.toInt(color) >>> 24;
-                },
-                alphaDouble(color) {
-                    return _.toDouble(this.alpha(color), 255);
-                },
-                red(color) {
-                    return (this.toInt(color) >> 16) & 0xFF;
-                },
-                green(color) {
-                    return (this.toInt(color) >> 8) & 0xFF;
-                },
-                blue(color) {
-                    return this.toInt(color) & 0xFF;
-                },
-                isSimilar(colorA, colorB, threshold, algorithm) {
-                    return _
-                        .getColorDetector(
-                            this.toInt(colorA),
-                            algorithm || _.constants.DEF_COLOR_ALGORITHM,
-                            _.parseNumber(threshold, _.constants.DEF_COLOR_THRESHOLD))
-                        .detectsColor(
-                            colors.red(this.toInt(colorB)),
-                            colors.green(this.toInt(colorB)),
-                            colors.blue(this.toInt(colorB)));
-                },
-                /**
-                 * @param {Color$} color
-                 * @return {number}
-                 */
-                toInt(color) {
-                    _.ensureColorType(color);
-                    try {
-                        return _.parseColor(typeof color === 'number' ? _.toJavaIntegerRange(color) : this.toFullHex(color));
-                    } catch (e) {
-                        scriptRuntime.console.error(`Passed color: ${color}`);
-                        throw Error(e + '\n' + e.stack);
-                    }
-                },
-                toHex(color, alphaOrLength) {
-                    let [ _ignoredArg0, arg1 /* alpha | length */ ] = arguments;
-                    _.ensureColorType(color);
-
-                    if (typeof color === 'number') {
-                        color = rtColors.toString(_.toJavaIntegerRange(color));
-                    }
-                    if (color.startsWith('#')) {
-                        if (color.length === 4) {
-                            color = color.replace(/(#)(\w)(\w)(\w)/, '$1$2$2$3$3$4$4');
-                        }
-                    } else {
-                        let colorByName = ColorTable.getColorByName(color, true);
-                        if (colorByName !== null) {
-                            color = this.toHex(colorByName.intValue());
-                        }
-                    }
-
-                    return ( /* @IIFE(toColorHex) */ () => {
-                        if (arg1 /* alpha */ === true || arg1 /* alpha */ === 'keep' || arg1 /* length */ === 8) {
-                            if (color.length === 7) {
-                                color = `#FF${color.slice(1)}`;
-                            }
-                            return color;
-                        }
-                        if (arg1 /* alpha */ === false || arg1 /* alpha */ === 'none' || arg1 /* length */ === 6) {
-                            return `#${color.slice(-6)}`;
-                        }
-                        if (arg1 /* length */ === 3) {
-                            if (!/^#(?:([A-F\d]){2})?([A-F\d])\2([A-F\d])\3([A-F\d])\4$/i.test(color)) {
-                                throw TypeError(`Can't convert color ${color} to #RGB with unexpected color format.`);
-                            }
-                            let [ r, g, b ] = [ color.slice(-6, -5), color.slice(-4, -3), color.slice(-2, -1) ];
-                            return `#${r}${g}${b}`;
-                        }
-                        if (arg1 /* alpha */ === undefined || arg1 /* alpha */ === 'auto') {
-                            return /^#FF([A-F\d]){6}$/i.test(color) ? `#${color.slice(3)}` : color;
-                        }
-                        throw TypeError('Unknown type of alpha for colors.toString()');
-                    })().toUpperCase();
-                },
-                /**
-                 * Color to full hex like '#BF110523'.
-                 */
-                toFullHex(color) {
-                    return this.toHex(color, 8);
-                },
-                /**
-                 * Get hex code string of a color.
-                 *
-                 * @deprecated
-                 * @replaceWith colors.toHex
-                 *
-                 * @Overwrite by SuperMonster003 on Apr 22, 2022.
-                 * Substitution of legacy method.
-                 * Signature: colors.toString(color: number): string
-                 */
-                toString() {
-                    return this.toHex.apply(this, arguments);
-                },
-                rgb() {
-                    if (Array.isArray(arguments[0])) {
-                        return this.rgb.apply(this, arguments[0]);
-                    }
-                    if (arguments.length === 3) {
-                        let [ r, g, b ] = _.toUnit8RgbList(arguments);
-                        return rtColors.rgb(r, g, b);
-                    } else /* arguments.length was taken as 1 */ {
-                        return this.toInt(this.toHex(arguments[0], 6));
-                    }
-                },
-                argb() {
-                    if (Array.isArray(arguments[0])) {
-                        return this.argb.apply(this, arguments[0]);
-                    }
-                    if (arguments.length === 4) {
-                        let [ r, g, b ] = _.toUnit8RgbList(Array.from(arguments).slice(1));
-                        return rtColors.argb(_.parseAlphaComponent(/* a = */ arguments[0]), r, g, b);
-                    } else /* arguments.length was taken as 1 */ {
-                        return this.toInt(this.toHex(arguments[0], 8));
-                    }
-                },
-                rgba() {
-                    if (Array.isArray(arguments[0])) {
-                        if (arguments.length === 1) {
-                            let [ r, g, b, a ] = arguments[0];
-                            return this.rgba(r, g, b, a);
-                        }
-                        let [ r, g, b ] = arguments[0];
-                        return this.rgba(r, g, b, /* a = */ arguments[1]);
-                    }
-                    if (arguments.length === 4) {
-                        let [ r, g, b ] = _.toUnit8RgbList(Array.from(arguments).slice(0, 3));
-                        return rtColors.argb(_.parseAlphaComponent(/* a = */ arguments[3]), r, g, b);
-                    } else /* arguments.length was taken as 1 */ {
-                        if (typeof arguments[0] === 'string' && arguments[0].startsWith('#')) {
-                            let colorString = this.toFullHex(arguments[0]);
-                            return this.toInt(colorString.replace(/^(#)(\w{6})(\w{2}$)/, '$1$3$2'));
-                        }
-                        return this.argb(this.toFullHex(arguments[0]));
-                    }
-                },
-                hsv(h, s, v) {
-                    if (Array.isArray(arguments[0])) {
-                        let [ h, s, v ] = arguments[0];
-                        return this.hsv(h, s, v);
-                    }
-                    if (arguments.length < 3) {
-                        throw TypeError(`Can't convert hsv arguments [${Array.from(arguments)}] to color int.`);
-                    }
-                    let hsvComponents = [ _.parseHueComponent(h), _.toPercentage(s), _.toPercentage(v) ];
-                    return android.graphics.Color.HSVToColor(hsvComponents);
-                },
-                hsva(h, s, v, a) {
-                    if (Array.isArray(arguments[0])) {
-                        if (arguments.length === 1) {
-                            let [ h, s, v, a ] = arguments[0];
-                            return this.hsva(h, s, v, a);
-                        }
-                        let [ h, s, v ] = arguments[0];
-                        return this.hsva(h, s, v, /* a = */ arguments[1]);
-                    }
-                    if (arguments.length < 4) {
-                        throw TypeError(`Can't convert hsva arguments [${Array.from(arguments)}] to color int.`);
-                    }
-                    let hsvComponents = [ _.parseHueComponent(h), _.toPercentage(s), _.toPercentage(v) ];
-                    return android.graphics.Color.HSVToColor(_.parseAlphaComponent(a), hsvComponents);
-                },
-                /**
-                 * @Reference to https://stackoverflow.com/questions/36721830/convert-hsl-to-rgb-and-hex
-                 */
-                hsl(h, s, l) {
-                    if (Array.isArray(arguments[0])) {
-                        return this.hsl.apply(this, arguments[0]);
-                    }
-                    if (arguments.length !== 3) {
-                        throw TypeError(`Can't convert hsl arguments [${Array.from(arguments)}] to color int.`);
-                    }
-                    let hslComponents = [ _.parseHueComponent(h), _.toPercentage(s), _.toPercentage(l) ];
-                    return androidx.core.graphics.ColorUtils.HSLToColor(hslComponents);
-                },
-                hsla(h, s, l, a) {
-                    if (Array.isArray(arguments[0])) {
-                        if (arguments.length === 1) {
-                            let [ h, s, l, a ] = arguments[0];
-                            return this.hsla(h, s, l, a);
-                        }
-                        let [ h, s, l ] = arguments[0];
-                        return this.hsla(h, s, l, /* a = */ arguments[1]);
-                    }
-                    if (arguments.length !== 4) {
-                        throw TypeError(`Can't convert hsla arguments [${Array.from(arguments)}] to color int.`);
-                    }
-                    let cInt = this.hsl(h, s, l);
-                    return colors.rgba(colors.red(cInt), colors.green(cInt), colors.blue(cInt), _.parseAlphaComponent(a));
-                },
-                toRgb(color) {
-                    return [ this.red(color), this.green(color), this.blue(color) ];
-                },
-                toRgba(color) {
-                    return [ this.red(color), this.green(color), this.blue(color), _.toDoubleAlphaComponent(this.alpha(color)) ];
-                },
-                toArgb(color) {
-                    return [ _.toDoubleAlphaComponent(this.alpha(color)), this.red(color), this.green(color), this.blue(color) ];
-                },
-                toHsv(color) {
-                    if (arguments.length === 4) {
-                        let [ r, g, b, hsv ] = arguments;
-                        return this.toHsv(this.rgb(r, g, b), hsv);
-                    }
-                    if (arguments.length === 3) {
-                        let hsv = util.java.array('float', 3);
-                        let [ r, g, b ] = arguments;
-                        return this.toHsv(this.rgb(r, g, b), hsv);
-                    }
-                    if (arguments.length === 2) {
-                        let [ , hsv ] = arguments;
-                        _.ensureJavaArray(hsv, 3);
-                        let r = this.red(color);
-                        let g = this.green(color);
-                        let b = this.blue(color);
-                        rtColors.RGBToHSV(r, g, b, hsv);
-                        return Array.from(hsv);
-                    } else /* arguments.length taken as 1 . */ {
-                        let hsv = util.java.array('float', 3);
-                        return this.toHsv(this.rgb(color), hsv);
-                    }
-                },
-                toHsva(color) {
-                    if (arguments.length === 5) {
-                        let [ r, g, b, a, hsva ] = arguments;
-                        return this.toHsva(this.rgba(r, g, b, a), hsva);
-                    }
-                    if (arguments.length === 4) {
-                        let hsva = util.java.array('float', 4);
-                        let [ r, g, b, a ] = arguments;
-                        return this.toHsva(this.rgba(r, g, b, a), hsva);
-                    }
-                    if (arguments.length === 2) {
-                        let [ , hsva ] = arguments;
-                        _.ensureJavaArray(hsva, 4);
-
-                        let r = this.red(color);
-                        let g = this.green(color);
-                        let b = this.blue(color);
-                        let a = this.alpha(color);
-
-                        let hsv = util.java.array('float', 3);
-                        rtColors.RGBToHSV(r, g, b, hsv);
-
-                        let newHsva = Array.from(hsv).concat(_.toDoubleAlphaComponent(a));
-                        newHsva.forEach((val, idx) => hsva[idx] = val);
-
-                        return newHsva;
-                    } else /* arguments.length taken as 1 . */ {
-                        let hsva = util.java.array('float', 4);
-                        return this.toHsva(color, hsva);
-                    }
-                },
-                toHsl(color) {
-                    if (arguments.length === 4) {
-                        let [ r, g, b, hsl ] = arguments;
-                        return this.toHsl(this.rgb(r, g, b), hsl);
-                    }
-                    if (arguments.length === 3) {
-                        let hsv = util.java.array('float', 3);
-                        let [ r, g, b ] = arguments;
-                        return this.toHsl(this.rgb(r, g, b), hsv);
-                    }
-                    if (arguments.length === 2) {
-                        let [ , hsl ] = arguments;
-                        _.ensureJavaArray(hsl, 3);
-                        let r = this.red(color);
-                        let g = this.green(color);
-                        let b = this.blue(color);
-                        androidx.core.graphics.ColorUtils.RGBToHSL(r, g, b, hsl);
-                        return Array.from(hsl);
-                    } else /* arguments.length taken as 1 . */ {
-                        let hsv = util.java.array('float', 3);
-                        return this.toHsl(this.rgb(color), hsv);
-                    }
-                },
-                toHsla(color) {
-                    if (arguments.length === 4) {
-                        let [ r, g, b, a ] = arguments;
-                        let [ h, s, l ] = this.toHsl(this.rgb(r, g, b));
-                        return [ h, s, l, _.toDoubleAlphaComponent(a) ];
-                    } else /* arguments.length taken as 1 . */ {
-                        let r = this.red(color);
-                        let g = this.green(color);
-                        let b = this.blue(color);
-                        let a = this.alpha(color);
-                        return this.toHsla(r, g, b, a);
-                    }
-                },
-                /**
-                 * @param {Color$} color
-                 * @return {android.content.res.ColorStateList}
-                 */
-                toColorStateList(color) {
-                    return ColorStateList.valueOf(this.toInt(color));
-                },
-                /**
-                 * @param {Paint} paint
-                 * @param {Color$} color
-                 */
-                setPaintColor(paint, color) {
-                    if (util.version.sdkInt >= util.versionCodes.Q) {
-                        paint.setARGB(colors.alpha(color),
-                            colors.red(color),
-                            colors.green(color),
-                            colors.blue(color));
-                    } else {
-                        paint.setColor(colors.toInt(color));
-                    }
-                },
-                luminance(color) {
-                    return rtColors.luminance(this.toInt(color));
-                },
-            };
-
-            ( /* @IIFE(assignAndroidColors) */ () => {
-                let androidColorsMap = {};
-
-                void /* androidColorsKeyList = */ [
-                    'BLACK', 'BLUE', 'CYAN', 'AQUA', 'DARK_GRAY', 'DARK_GREY', 'DKGRAY', 'GRAY', 'GREY',
-                    'GREEN', 'LIME', 'LIGHT_GRAY', 'LIGHT_GREY', 'LTGRAY', 'MAGENTA', 'FUCHSIA', 'MAROON',
-                    'NAVY', 'OLIVE', 'PURPLE', 'RED', 'SILVER', 'TEAL', 'WHITE', 'YELLOW', 'TRANSPARENT',
-                ].forEach(k => androidColorsMap[k] = ColorTable.Android[k]);
-
-                Object.assign(Colors.prototype, androidColorsMap);
-            })();
-
-            Object.setPrototypeOf(Colors.prototype, rtColors);
-
-            return Colors;
-        })(),
-        MatchingResult: ( /* @IIFE */ () => {
+        MatchingResult: (/* @IIFE */ () => {
             let comparators = {
                 left: (l, r) => l.point.x - r.point.x,
                 top: (l, r) => l.point.y - r.point.y,
@@ -946,18 +608,7 @@ module.exports = function (scriptRuntime, scope) {
                 'requestScreenCapture', 'captureScreen', 'findImage', 'findImageInRegion',
                 'findColor', 'findColorInRegion', 'findColorEquals', 'findMultiColors',
             ];
-            __asGlobal__(images, methods);
-
-            /**
-             * @Caution by SuperMonster003 on Apr 23, 2022.
-             * Bind "this" will make bound function lose appended properties.
-             *
-             * @example
-             * let f = function () {}; f.code = 1;
-             * let g = f; console.log(g.code); // 1
-             * let h = f.bind({}); console.log(h.code); // undefined
-             */
-            scope.colors = colors;
+            __asGlobal__(images, methods, scope);
         },
         initIfNeeded() {
             rtImages.initOpenCvIfNeeded();
@@ -1023,7 +674,7 @@ module.exports = function (scriptRuntime, scope) {
          */
         parseColor(color) {
             if (typeof color === 'string') {
-                return rtColors.parseColor(color);
+                return scriptRuntime.colors.parseColor(color);
             }
             return color;
         },
@@ -1038,6 +689,26 @@ module.exports = function (scriptRuntime, scope) {
         parseQuality(q) {
             return this.clamp(q, 0, 100, 100);
         },
+        /**
+         * @param {Images.Format} fmt
+         */
+        parseFormat(fmt) {
+            if (typeof fmt === 'string') {
+                // noinspection JSValidateTypes
+                fmt = fmt.toLowerCase();
+            }
+            switch (fmt) {
+                case undefined:
+                    return 'png';
+                case 'png':
+                case 'jpg':
+                case 'jpeg':
+                case 'webp':
+                    return fmt;
+                default:
+                    throw TypeError(`Unknown image format: ${fmt}`);
+            }
+        },
         parseScalar(color, offset) {
             let d = this.clamp(offset, -255, 255, 0);
             return new Scalar(colors.red(color) + d, colors.green(color) + d, colors.blue(color) + d, colors.alpha(color));
@@ -1050,7 +721,14 @@ module.exports = function (scriptRuntime, scope) {
             };
         },
         parseBorderType(type) {
-            return Core['BORDER_' + (type || 'DEFAULT')];
+            const PREFIX = 'BORDER_';
+            if (typeof type === 'string') {
+                type = type.toUpperCase();
+                if (!type.startsWith(PREFIX)) {
+                    type = PREFIX + type;
+                }
+            }
+            return type === undefined ? Core.BORDER_DEFAULT : Core[type];
         },
         /**
          * @param {{
@@ -1062,10 +740,16 @@ module.exports = function (scriptRuntime, scope) {
          */
         parseThreshold(options, def) {
             let opt = options || {};
-            if (opt.similarity) {
-                return Math.trunc(255 * (1 - opt.similarity));
+            if ('similarity' in opt) {
+                if ('threshold' in opt) {
+                    throw Error(`Options can't hold both 'similarity' and 'threshold' properties`);
+                }
+                return Math.round(255 * (1 - opt.similarity));
             }
-            return opt.threshold || (def === undefined ? _.constants.DEF_COLOR_THRESHOLD : def);
+            if (typeof opt.threshold === 'number') {
+                return opt.threshold;
+            }
+            return def === undefined ? _.constants.DEF_COLOR_THRESHOLD : def;
         },
         /**
          * @param {{
@@ -1078,42 +762,34 @@ module.exports = function (scriptRuntime, scope) {
             let opt = options || {};
             return opt.weakThreshold || def;
         },
-        parseHueComponent(component) {
-            let c = Numberx.parseAny(component);
-            if (isNaN(c)) {
-                throw TypeError(`Can't convert ${component} into hue component`);
-            }
-            if (Math.abs(c) < 1) {
-                c *= 360;
-            }
-            return Numberx.clampTo(c, [ 0, 360 ]);
-        },
-        parseAlphaComponent(component) {
-            return component === 1 ? 255 : this.toUnit8(component);
-        },
-        toDoubleAlphaComponent(component) {
-            return _.toDouble(component, 255);
-        },
         resize(img, mat, size, fx, fy, interpolation) {
-            Imgproc.resize(img.mat, mat, this.parseSize(size), fx, fy, Imgproc['INTER_' + (interpolation || 'LINEAR')]);
+            Imgproc.resize(img.mat, mat, this.parseSize(size), fx, fy, _.parseInterpolation(interpolation));
         },
         /**
          * @param {ImageWrapper} img
-         * @param {{region?: number[]}} [o]
-         * @returns {?org.opencv.core.Rect}
+         * @param {[X?, Y?, Width?, Height?] | org.opencv.core.Rect | android.graphics.Rect} [region]
+         * @returns {org.opencv.core.Rect}
          */
-        buildRegion(img, o) {
-            if (!o || !o.region) {
-                return null;
-            }
+        buildRegion(img, region) {
+            let [ x, y, w, h ] = region instanceof org.opencv.core.Rect
+                ? [ region.x, region.y, region.width, region.height ]
+                : region instanceof android.graphics.Rect
+                    ? [ region.left, region.top, region.width(), region.height() ]
+                    : Array.isArray(region) ? region : [];
 
-            let [ x, y, w, h ] = o.region;
             x = _.parseNumber(x, 0);
-            y = _.parseNumber(y, 0);
-            w = _.parseNumber(w, () => img.getWidth() - x);
-            h = _.parseNumber(h, () => img.getHeight() - y);
+            x = x === -1 ? WIDTH : x > 0 && x < 1 ? cX(x) : x;
 
-            return _.checkAndGetImageRect(new Rect(x, y, w, h), img);
+            y = _.parseNumber(y, 0);
+            y = y === -1 ? HEIGHT : y > 0 && y < 1 ? cY(y) : y;
+
+            w = _.parseNumber(w, () => img.getWidth() - x);
+            w = w === -1 ? WIDTH : w > 0 && w < 1 ? cX(w) : w;
+
+            h = _.parseNumber(h, () => img.getHeight() - y);
+            h = h === -1 ? HEIGHT : h > 0 && h < 1 ? cY(h) : h;
+
+            return _.checkAndGetImageRect(new org.opencv.core.Rect(x, y, w, h), img);
         },
         /**
          * @param {org.opencv.core.Point[]} points - Java Array
@@ -1147,138 +823,43 @@ module.exports = function (scriptRuntime, scope) {
             }
             return rect;
         },
-        getColorDetector(color, algorithm, threshold) {
-            switch (algorithm) {
-                case 'rgb':
-                    return new ColorDetector.RGBDistanceDetector(color, threshold);
-                case 'equal':
-                    return new ColorDetector.EqualityDetector(color);
-                case 'diff':
-                    return new ColorDetector.DifferenceDetector(color, threshold);
-                case 'rgb+':
-                    return new ColorDetector.WeightedRGBDistanceDetector(color, threshold);
-                case 'hs':
-                    return new ColorDetector.HSDistanceDetector(color, threshold);
+        directionToGravity(direction) {
+            if (typeof direction === 'string') {
+                direction = direction.toLowerCase();
             }
-            throw Error('Unknown algorithm for detector: ' + algorithm);
+            switch (direction) {
+                case undefined:
+                case 'right':
+                    return Gravity.RIGHT;
+                case 'left':
+                    return Gravity.LEFT;
+                case 'top':
+                    return Gravity.TOP;
+                case 'bottom':
+                    return Gravity.BOTTOM;
+                default:
+                    throw TypeError(`Unknown image concat direction: ${direction}`);
+            }
         },
-        ensureColorType(color) {
-            if (typeof color !== 'string' && typeof color !== 'number') {
-                throw TypeError('Color must be either a string or number');
-            }
-            if (typeof color === 'string') {
-                if (!color.startsWith('#')) {
-                    if (ColorTable.getColorByName(color) !== null) {
-                        return;
-                    }
-                    throw TypeError('Color string must start with "#"');
-                }
-                if (!/^#[A-F\d]{3}([A-F\d]{3}([A-F\d]{2})?)?$/i.test(color)) {
-                    throw TypeError(`Invalid color string format: ${color}`);
+        parseThresholdType(type) {
+            const PREFIX = 'THRESH_';
+            if (typeof type === 'string') {
+                type = type.toUpperCase();
+                if (!type.startsWith(PREFIX)) {
+                    type = PREFIX + type;
                 }
             }
+            return type === undefined ? Imgproc.THRESH_BINARY : Imgproc[type];
         },
-        ensureJavaArray(arr, length) {
-            if (!/^\[[A-Z]/.test(util.getClassName(arr))) {
-                throw TypeError('Param arr must be a Java array');
-            }
-            if (typeof length === 'number' && arr.length !== length) {
-                throw Error(`Param arr must be of length ${length}`);
-            }
-        },
-        /**
-         * [0..255] or [0..100] to [0..1].
-         * Number 1 would be taken as 1 itself (100%).
-         */
-        toDouble(o, by) {
-            if (typeof o !== 'number') {
-                throw TypeError('Argument o must be of type number');
-            }
-            if (Numberx.check(0, '<=', o, '<=', 1)) {
-                return o;
-            }
-            if (Numberx.check(1, '<', o, '<=', by)) {
-                return o / by;
-            }
-            throw TypeError('Argument o must be in the range 0..255');
-        },
-        /**
-         * [0..1) or other to [0..255].
-         * Number 1 would be taken as 1 itself (0x1).
-         *
-         * @param {number} o
-         * @returns {number}
-         */
-        toUnit8(o) {
-            if (typeof o !== 'number') {
-                let num = Numberx.parseAny(o);
-                if (!isNaN(num)) {
-                    return this.toUnit8(num);
-                }
-                throw TypeError(`Argument o (${o}) can't be parsed as a number`);
-            }
-            if (o >= 1) {
-                return Math.min(255, Math.round(o));
-            }
-            if (o < 0) {
-                throw TypeError('Number should not be negative.');
-            }
-            return Math.round(o * 255);
-        },
-        /**
-         * @param {IArguments | number[]} a
-         * @returns {number[]}
-         */
-        toComponents(a) {
-            return Array.from(a).map((o) => {
-                if (typeof o === 'number') {
-                    return o;
-                }
-                if (typeof o === 'string') {
-                    let num = Numberx.parseAny(o);
-                    if (isNaN(num)) {
-                        throw TypeError(`Can't convert ${a} into a color component`);
-                    }
-                    return num;
-                }
-            });
-        },
-        /**
-         * @param {IArguments | number[]} components
-         * @returns {number[]}
-         */
-        toUnit8RgbList(components) {
-            let compList = this.toComponents(components);
-            let isPercentNums = compList.every(x => x <= 1) && !compList.every(x => x === 1);
-            if (isPercentNums) {
-                return compList.map(x => x === 1 ? 255 : this.toUnit8(x));
-            }
-            return compList.map(x => this.toUnit8(x));
-        },
-        /**
-         * [0..1] or [0..255] to hex string like 'FF'.
-         * Number 1 would be taken as 1 itself (0x1).
-         */
-        toUnit8Hex(o, maxLength) {
-            return this.toUnit8(o).toString(16).padStart(maxLength || 2, '0');
-        },
-        /**
-         * Number to percentage like 0.8 .
-         */
-        toPercentage(x) {
-            if (typeof x !== 'number') {
-                let num = Numberx.parseAny(x);
-                if (!isNaN(num)) {
-                    x = num;
+        parseInterpolation(it) {
+            const PREFIX = 'INTER_';
+            if (typeof it === 'string') {
+                it = it.toUpperCase();
+                if (!it.startsWith(PREFIX)) {
+                    it = PREFIX + it;
                 }
             }
-            return Numberx.check(0, '<=', x, '<=', 1) ? x : x / 100;
-        },
-        toJavaIntegerRange(x) {
-            let t = 2 ** 32;
-            let min = -(2 ** 31);
-            let max = 2 ** 31 - 1;
-            return Numberx.clampTo(x, [ min, max ], t);
+            return it === undefined ? Imgproc.INTER_LINEAR : Imgproc[it];
         },
     };
 
@@ -1286,11 +867,6 @@ module.exports = function (scriptRuntime, scope) {
      * @type {Internal.Images}
      */
     const images = new _.Images();
-
-    /**
-     * @type {Internal.Colors}
-     */
-    const colors = new _.Colors();
 
     _.scopeAugment();
 

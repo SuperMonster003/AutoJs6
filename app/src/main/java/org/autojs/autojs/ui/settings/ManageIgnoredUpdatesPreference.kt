@@ -36,8 +36,6 @@ class ManageIgnoredUpdatesPreference : MaterialPreference, SharedPreferences.OnS
         super.onClick()
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        notifyChanged()
-    }
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) = notifyChanged()
 
 }

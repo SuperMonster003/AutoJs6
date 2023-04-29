@@ -17,7 +17,7 @@ object WorkingDirectoryUtils {
 
     var histories: LinkedHashSet<String>
         get() = Pref.getLinkedHashSet(workingDirKeyRes)
-        private set(value) = Pref.setLinkedHashSet(workingDirKeyRes, value)
+        private set(value) = Pref.putLinkedHashSet(workingDirKeyRes, value)
 
     @JvmStatic
     var path: String

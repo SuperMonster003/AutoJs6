@@ -20,7 +20,7 @@ import com.tencent.bugly.crashreport.CrashReport
 import com.zeugmasolutions.localehelper.LocaleHelper
 import com.zeugmasolutions.localehelper.LocaleHelperApplicationDelegate
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.core.accessibility.AccessibilityServiceTool
+import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.event.GlobalKeyObserver
@@ -67,7 +67,7 @@ class App : MultiDexApplication() {
         initDynamicBroadcastReceivers()
 
         setUpDefaultNightMode()
-        AccessibilityServiceTool(this).autoEnableIfNeeded()
+        AccessibilityTool(this).service.enableIfNeeded()
 
         devPluginService = DevPluginService(this)
     }
@@ -119,7 +119,7 @@ class App : MultiDexApplication() {
         dynamicBroadcastReceivers = DynamicBroadcastReceivers(this)
         val localActions = ArrayList<String>()
         val actions = ArrayList<String>()
-        TimedTaskManager.getInstance().allIntentTasks
+        TimedTaskManager.allIntentTasks
             .filter { task -> task.action != null }
             .doOnComplete {
                 if (localActions.isNotEmpty()) {

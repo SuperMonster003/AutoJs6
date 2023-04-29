@@ -2,6 +2,7 @@
 
 import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
@@ -25,7 +26,7 @@ dependencies /* Unclassified */ {
     // Android supports
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.multidex:multidex:2.0.1")
-    implementation("com.google.android.material:material:1.7.0")
+    implementation("com.google.android.material:material:1.8.0")
 
     // SwipeRefreshLayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
@@ -46,14 +47,14 @@ dependencies /* Unclassified */ {
     implementation("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
 
     // Glide
-    implementation("com.github.bumptech.glide:glide:4.14.2")
-    kapt("com.github.bumptech.glide:compiler:4.14.2")
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
 
     // Joda Time
-    implementation("joda-time:joda-time:2.12.2")
+    implementation("joda-time:joda-time:2.12.5")
 
     // Flurry
-    implementation("com.flurry.android:analytics:14.0.0")
+    implementation("com.flurry.android:analytics:14.2.0")
 
     // Bugly
     implementation(project(":libs:com.tencent.bugly.crashreport-4.0.4"))
@@ -62,13 +63,13 @@ dependencies /* Unclassified */ {
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
 
     // Webkit
-    implementation("androidx.webkit:webkit:1.5.0")
+    implementation("androidx.webkit:webkit:1.6.1")
 
     // Gson
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Zip4j
-    implementation("net.lingala.zip4j:zip4j:2.11.2")
+    implementation("net.lingala.zip4j:zip4j:2.11.5")
 
     // Log4j
     implementation("de.mindpipe.android:android-logging-log4j:1.0.3")
@@ -93,7 +94,7 @@ dependencies /* Unclassified */ {
     // Version Compare
     implementation("io.github.g00fy2:versioncompare:1.5.0")
 
-    // Terminal emulator
+    // Terminal Emulator
     implementation(project(":libs:jackpal.androidterm.libtermexec-1.0"))
     implementation(project(":libs:jackpal.androidterm.emulatorview-1.0.42"))
     implementation(project(":libs:jackpal.androidterm-1.0.70"))
@@ -113,21 +114,26 @@ dependencies /* Unclassified */ {
     // Rhino
     implementation(files("$rootDir/libs/org.mozilla.rhino-1.7.15-snapshot.jar"))
 
+    // Tiny Sign
+    implementation(files("$rootDir/libs/tiny-sign-0.9.jar"))
+
     // Tasker Plugin
-    implementation(files("$rootDir/libs/android-plugin-client-sdk-for-locale-9.0.0.jar"))
+    implementation(project(":libs:android-spackle-9.0.0"))
+    implementation(project(":libs:android-assertion-9.0.0"))
+    implementation(project(":libs:android-plugin-client-sdk-for-locale-9.0.0"))
 }
 
 dependencies /* Test */ {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
 }
 
 dependencies /* Annotations */ {
     // Android Annotations
     kapt("org.androidannotations:androidannotations:4.8.0")
     implementation("org.androidannotations:androidannotations-api:4.8.0")
-    implementation("androidx.annotation:annotation:1.5.0")
+    implementation("androidx.annotation:annotation:1.6.0")
 
     // JCIP Annotations
     implementation("net.jcip:jcip-annotations:1.0")
@@ -202,33 +208,41 @@ dependencies /* GitHub API */ {
         }
     }
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.1") {
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2") {
         because("compatibility for Android API Level < 26 (Android 8.0) [O]")
     }
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.0") {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3") {
         because("compatibility of java.time.* for Android API Level < 26 (Android 8.0) [O]")
     }
 }
 
+dependencies /* MLKit */ {
+    implementation("com.google.mlkit:text-recognition-chinese:16.0.0-beta6")
+}
+
 dependencies /* Auto.js Extensions */ {
     // Settings Compat
-    implementation("com.github.hyb1996:settingscompat:1.1.5")
+    // @Integrated by SuperMonster003 on Mar 30, 2023.
+    // implementation("com.github.hyb1996:settingscompat:1.1.5")
 
     // Enhanced Floaty
-    implementation("com.github.hyb1996:EnhancedFloaty:0.31")
+    // @Integrated by SuperMonster003 on Mar 30, 2023.
+    // implementation("com.github.hyb1996:EnhancedFloaty:0.31")
 
     // MultiLevelListView
-    implementation("com.github.hyb1996:android-multi-level-listview:1.1")
+    // @Integrated by SuperMonster003 on Mar 30, 2023.
+    // implementation("com.github.hyb1996:android-multi-level-listview:1.1")
+
+    // Auto.js APK Builder
+    // @Integrated by SuperMonster003 on Mar 30, 2023.
+    // implementation(project(":libs:Auto.js-ApkBuilder-1.0.3"))
 
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
     // @Legacy com.jrummyapps:colorpicker:2.1.7
     implementation("com.jaredrummler:colorpicker:1.1.0")
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.0")
     implementation("com.github.ozodrukh:CircularReveal:2.0.1")
-
-    // Auto.js APK Builder
-    implementation("com.github.hyb1996:Auto.js-ApkBuilder:1.0.3")
 }
 
 dependencies /* Archived */ {
@@ -266,6 +280,9 @@ android {
         targetCompatibility = versions.javaVersion
     }
 
+    // Utils.Version(ANDROID_GRADLE_PLUGIN_VERSION) < Utils.Version("8.0")
+
+    @Suppress("DEPRECATION")
     packagingOptions {
         arrayOf(
             "META-INF/DEPENDENCIES",
@@ -431,7 +448,20 @@ class Versions(filePath: String) {
     val sdkVersionCompile = properties["COMPILE_SDK_VERSION"].let { it as String }.toInt()
     val appVersionName = properties["VERSION_NAME"] as String
     val appVersionCode = properties["VERSION_BUILD"].let { it as String }.toInt()
-    val javaVersion = JavaVersion.toVersion(properties["JAVA_VERSION"] as String)
+
+    private val javaVersionRaw = properties["JAVA_VERSION"] as String
+
+    val javaVersion: JavaVersion by lazy {
+        val minSupportedVersion = 17
+        var versionInt = javaVersionRaw.toInt()
+        while (versionInt > minSupportedVersion) {
+            if (JvmTarget.values().any { it.name.contains(Regex("_$versionInt$")) }) {
+                break
+            }
+            versionInt -= 1
+        }
+        JavaVersion.toVersion(versionInt.toString())
+    }
 
     private var isBuildNumberAutoIncremented = false
     private val minBuildTimeGap = Utils.hours2Millis(0.5)
@@ -463,7 +493,7 @@ class Versions(filePath: String) {
         "Version name: $appVersionName",
         "Version code: $appVersionCode${" [auto-incremented]".takeIf { isBuildNumberAutoIncremented } ?: ""}",
         "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]",
-        "Java version: $javaVersion",
+        "Java version: $javaVersion${" [fallback]".takeUnless { javaVersion.isCompatibleWith(JavaVersion.toVersion(javaVersionRaw)) } ?: ""}",
     ).forEach { println(it) }
 
     fun handleIfNeeded(project: Project) = assembleTargets.forEach {
@@ -491,9 +521,9 @@ object Utils {
 
     fun hours2Millis(hour: Double) = hour * 3.6e6
 
-    fun getDateString(format: String, timeZone: String): String {
+    fun getDateString(format: String, zone: String): String {
         // e.g. May 23, 2011
-        return SimpleDateFormat(format).also { it.timeZone = TimeZone.getTimeZone(timeZone) }.format(Date())
+        return SimpleDateFormat(format).apply { timeZone = TimeZone.getTimeZone(zone) }.format(Date())
     }
 
     fun getOutputFileName(variant: ApplicationVariantImpl, output: BaseVariantOutputImpl): String {
@@ -502,7 +532,7 @@ object Utils {
         val architecture = output.getFilter("ABI") ?: "universal"
         val extension = FILE_EXTENSION_APK
 
-        return "$autojs-v$version-$architecture.$extension".toLowerCase()
+        return "$autojs-v$version-$architecture.$extension".lowercase(Locale.getDefault())
     }
 
     fun getAssembleTaskName(buildType: String) = "assemble${capitalize(buildType)}"
@@ -510,19 +540,18 @@ object Utils {
     fun getAssembleFullTaskName(name: String, buildType: String) = ":$name:${getAssembleTaskName(buildType)}"
 
     fun digestCRC32(file: File): String {
-        val instance = CRC32()
-
         val fis = FileInputStream(file)
         val buffer = ByteArray(4096)
         var read: Int
 
-        while (fis.read(buffer).also { read = it } > 0) {
-            instance.update(buffer, 0, read)
+        return CRC32().let { o ->
+            while (fis.read(buffer).also { read = it } > 0) {
+                o.update(buffer, 0, read)
+            }
+            String.format("%08x", o.value)
         }
-
-        return String.format("%08x", instance.value)
     }
 
-    private fun capitalize(s: String) = "${s[0].toUpperCase()}${s.substring(1)}"
+    private fun capitalize(s: String) = "${s[0].uppercase(Locale.getDefault())}${s.substring(1)}"
 
 }

@@ -4,6 +4,7 @@
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">構建中...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">清理臨時檔案...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">打包中...</string>
@@ -12,16 +13,25 @@
     <string name="confirm_overwrite_file">檔案已存在, 是否覆蓋</string>
     <string name="content_about_app_tips">1. 長按主頁應用名稱 (AutoJs6) 可跳轉至設定頁面\n2. 設定頁面長按設定選項可檢視詳細資訊</string>
     <string name="content_github_feedback">即將跳轉到專案議題反饋 WEB 頁面.\n可能需要 GitHub 賬戶以完成問題反饋.</string>
+    <string name="content_way_of_output_for_recorded_script">選擇一個已錄製指令碼的輸出方式</string>
     <string name="crash_feedback">可複製除錯資訊到剪貼簿或直接退出應用</string>
+    <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
+    <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
+    <string name="default_script_notification_content">來自指令碼的通知</string>
+    <string name="default_script_notification_title">指令碼通知</string>
     <string name="default_value_working_directory">/指令碼</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 是 Android 平臺支援無障礙服務的 JavaScript 自動化工具, 克隆 (clone) 自 \"hyb1996/Auto.js\" 且保持開源.\n\n如需獲取幫助或提交反饋, 可瀏覽專案的 GitHub 議題 (issues) 板塊, 或加入騰訊 (Tencent) QQ 群組 690946137.</string>
     <string name="description_about_app_tips_preference">1. 在 \"關於應用與開發者\" 頁面長按應用圖示可跳轉至 AutoJs6 開發者選項頁面</string>
     <string name="description_app_language_preference">設定選項用於修改 AutoJs6 應用的文字內容顯示語言, 同時包括指令碼執行產生的錯誤訊息等.\n\n注: 部分內容可能需要重啟應用才能完成語言切換.</string>
     <string name="description_change_working_dir_preference">更改包含指令碼的資料夾路徑</string>
     <string name="description_check_for_updates_preference">AutoJs6 從 GitHub 獲取並下載更新.\n\n注: 版本更新內容暫未提供多語言支援.</string>
+    <string name="description_compatibility_with_classes_for_ver_4_x">透過類名重對映, 提供一定程度上的 4.x 版本 Java 類名相容.\n開啟選項後, 每次啟動指令碼將出現不同程度的啟動延遲 (幾十到幾百毫秒不等).\n如無特別需求, 建議始終保持選項關閉.</string>
+    <string name="description_documentation_launcher_icon_preference">文件啟動器圖示便於直接訪問文件, 並可像獨立應用程式一樣進行切換.</string>
     <string name="description_documentation_source_preference">本地文件: AutoJs6 內建檔案作為文件來源, 無需網路連線, 隨 AutoJs6 應用更新而發生內容變動.\n線上文件: 使用 GitHub 網頁作為文件來源, 需網路連線, 可隨時保持文件內容為最新.\n\n注: 為最大化線上文件的閱讀體驗, 建議使用桌面顯示器等寬屏顯示裝置閱讀.\n注: 截至 6.2.0 版本, 文件尚處於初步編寫階段, 大部分內容尚未完成編寫或更新.</string>
-    <string name="description_documentation_source_preference_more">文件頁面的深色主題支援需要滿足以下條件:\n1. AutoJs6 開啟夜間模式\n2. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P]: 版本不低於 105</string>
+    <string name="description_documentation_source_preference_more">文件頁面的深色主題支援需要滿足以下條件:\n1. AutoJs6 開啟夜間模式\n2. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P] 及以下: 版本不低於 105</string>
+    <string name="description_extending_js_build_in_objects">擴充套件 JavaScript 內建物件可以增加程式碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啟後所有指令碼均預設啟用內建擴充套件.\n內建擴充套件往往是不安全的, 除非明確瞭解內建擴充套件的原理及風險, 否則不建議啟用.\n選項關閉後, 仍然可以透過 plugins 全域性物件啟用內建擴充套件, 詳見專案文件.</string>
     <string name="description_hidden_files_preference">用於設定是否在 AutoJs6 檔案管理器中顯示隱藏檔案和資料夾 (通常以 \".\" 開頭).</string>
+    <string name="description_keep_screen_on_when_in_foreground_preference">用於當 AutoJs6 位於前臺時使裝置螢幕保持常亮.\n如需在 AutoJs6 應用的所有頁面中, 僅在主頁時保持裝置螢幕常亮, 可選擇 \"僅限主頁\" 選項.</string>
     <string name="description_manage_ignored_updates_preference">點選可檢視或管理列表項.\n長按可移除列表項.</string>
     <string name="description_night_mode_preference">夜間模式, 亦稱 [ 暗黑模式 / 深色主題 ] 等.\n夜間模式應用於安卓系統 UI (如通知欄和導航欄) 及 AutoJs6 應用頁面.\n夜間模式可提升裝置在低光環境下的易用性, 同時有助於提升弱視或光敏感使用者的視覺體驗.\n\n跟隨系統: AutoJs6 與安卓作業系統的夜間模式設定一致\n總是開啟: AutoJs6 保持開啟夜間模式 (忽略作業系統設定)\n總是關閉: AutoJs6 保持關閉夜間模式 (忽略作業系統設定)\n\n注: 跟隨系統功能僅支援安卓 API 級別 28 (安卓 9) [P] 及以上作業系統.</string>
     <string name="description_night_mode_preference_more">啟用安卓系統的夜間模式:\n- API 級別 29 (安卓 10) [Q] 及以上: 透過 [ 設定 -> 顯示 -> 主題 ] 開啟.\n- API 級別 28 (安卓 9) [P]: 透過 [ 開發者選項 -> 夜間模式 ] 開啟.\n\n對於基於 WebView 元件的內容 (如 AutoJs6 的文件頁面), 夜間模式支援需要滿足以下條件:\n1. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P]: 版本不低於 105\n2. WebView 元件頁面內容可適配夜間模式 (透過 CSS 或 安卓 XML 資源等方式實現)</string>
@@ -38,6 +48,7 @@
     <string name="dialog_button_download_with_browser">瀏覽器下載</string>
     <string name="dialog_button_history">歷史記錄</string>
     <string name="dialog_button_ignore_current_update">忽略此版本</string>
+    <string name="dialog_button_join_group">加入群組</string>
     <string name="dialog_button_more">瞭解更多</string>
     <string name="dialog_button_quit">放棄</string>
     <string name="dialog_button_remove">移除</string>
@@ -47,13 +58,22 @@
     <string name="dialog_button_system_settings_simplified">@string/dialog_button_system_settings</string>
     <string name="dialog_button_update_now">立即更新</string>
     <string name="dialog_button_use_default">使用預設值</string>
+    <string name="docs_app_name">AutoJs6 文件</string>
     <string name="edit_and_run_handle_intent_error">無法處理檔案</string>
     <string name="edit_exit_without_save_warn">內容尚未儲存, 確定要退出嗎</string>
     <string name="entry_app_language_auto">跟隨系統</string>
+    <string name="entry_documentation_launcher_icon_hide">隱藏啟動器圖示</string>
+    <string name="entry_documentation_launcher_icon_show">顯示啟動器圖示</string>
     <string name="entry_documentation_source_local">本地文件</string>
     <string name="entry_documentation_source_online">線上文件</string>
+    <string name="entry_editor_pinch_to_zoom_change_text_size">更改字型大小</string>
+    <string name="entry_editor_pinch_to_zoom_disable">禁用</string>
+    <string name="entry_editor_pinch_to_zoom_scale_view">縮放檢視</string>
     <string name="entry_hidden_files_not_show">不顯示隱藏檔案或資料夾</string>
     <string name="entry_hidden_files_show">顯示隱藏檔案和資料夾</string>
+    <string name="entry_keep_screen_on_when_in_foreground_all_pages">所有頁面</string>
+    <string name="entry_keep_screen_on_when_in_foreground_disabled">禁用</string>
+    <string name="entry_keep_screen_on_when_in_foreground_homepage_only">僅限主頁</string>
     <string name="entry_night_mode_always_off">總是關閉</string>
     <string name="entry_night_mode_always_on">總是開啟</string>
     <string name="entry_night_mode_follow_system">跟隨系統</string>
@@ -103,9 +123,17 @@
     <string name="error_max_listeners_exceeded">超出最大監聽器數量限制: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 可能因缺少 Root 許可權而無法執行 \"auto\" 檔案</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() 傳入的 %s 引數為空</string>
+    <string name="error_no_accessibility_permission">無障礙服務未啟用</string>
+    <string name="error_no_accessibility_permission_to_capture">無障礙服務未啟用</string>
     <string name="error_no_accessibility_service">沒有無障礙服務</string>
+    <string name="error_no_draw_overlays_permission">缺少 \"顯示在其他應用上層\" 許可權</string>
+    <string name="error_no_post_notifications_permission">缺少 \"釋出通知\" 許可權</string>
+    <string name="error_no_read_phone_state_permission">缺少 \"讀取手機狀態\" 許可權</string>
     <string name="error_no_screen_capture_permission">缺少螢幕捕獲許可權</string>
+    <string name="error_no_storage_rw_permission">缺少 \"讀寫儲存空間\" 許可權</string>
     <string name="error_no_such_selector_method" formatted="false">不存在的選擇器方法 %s(%s: %s)</string>
+    <string name="error_no_usage_stats_permission">缺少 \"檢視使用情況\" 許可權</string>
+    <string name="error_no_write_settings_permission">缺少 \"修改系統設定\" 許可權</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView 只能擁有至多一個直接子控制元件</string>
     <string name="error_parse_github_release_assets">解析 GitHub 發行版資源資訊失敗</string>
     <string name="error_parse_version_info">無法解析版本資訊</string>
@@ -119,12 +147,12 @@
     <string name="error_thread_is_not_alive">執行緒處於非活動狀態</string>
     <string name="error_unknown">未知錯誤</string>
     <string name="error_unknown_algorithm_selector_param">未知的 algorithm 選擇器引數: %s</string>
+    <string name="error_unknown_color_name">未知顏色名稱: %s</string>
     <string name="error_unknown_operation">未知操作指令</string>
     <string name="error_unknown_picker_result_type">未知結果型別 {名稱: %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">未知結果型別 {名稱: %s, 引數: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">未知選擇器 {名稱: %s, 型別: %s}</string>
     <string name="error_unknown_type">未知型別: %s</string>
-    <string name="error_unknown_color_name">未知顏色名稱: %s</string>
     <string name="file_not_exist_or_readable">檔案不存在或不可讀: %s</string>
     <string name="foreground_notification_channel_name">AutoJs6 前臺服務</string>
     <string name="foreground_notification_text">點選返回 AutoJs6 主介面</string>
@@ -149,8 +177,10 @@
     <string name="screen_capturer_foreground_notification_text">此通知用於捕獲螢幕截圖</string>
     <string name="screen_capturer_foreground_notification_title">螢幕捕獲器前臺服務</string>
     <string name="summary_about_app_tips">更佳的使用者使用體驗</string>
+    <string name="summary_compatibility_with_classes_for_ver_4_x">提供一定程度上的 4.x 版本 Java 類名相容</string>
     <string name="summary_enable_a11y_service_with_root_access">自動嘗試使用 root 許可權啟用無障礙服務</string>
     <string name="summary_enable_a11y_service_with_secure_settings">自動嘗試使用修改安全設定許可權啟用無障礙服務</string>
+    <string name="summary_extending_js_build_in_objects">擴充套件 JavaScript 內建物件以增加程式碼靈活性</string>
     <string name="summary_guard_mode">當 AutoJs6 前置時禁用自動化行為以避免誤操作</string>
     <string name="summary_not_showing_main_activity">啟動應用後直接執行指令碼</string>
     <string name="summary_pre_execute_script">在指令碼檔案之前執行</string>
@@ -162,6 +192,9 @@
     <string name="text_a11y_service_description">指令碼自動操作 (點選/長按/滑動等) 所需</string>
     <string name="text_a11y_service_enabled_but_not_running">無障礙服務已啟用但未執行 (嘗試重新啟用或重啟裝置)</string>
     <string name="text_a11y_service_may_be_needed">可能需要啟用無障礙服務</string>
+    <string name="text_abis">支援 ABI</string>
+    <string name="text_abis_32bit">支援 ABI (32 位)</string>
+    <string name="text_abis_64bit">支援 ABI (64 位)</string>
     <string name="text_about">關於</string>
     <string name="text_about_all_files_access">關於所有檔案訪問許可權</string>
     <string name="text_about_app_and_developer">關於應用與開發者</string>
@@ -184,6 +217,10 @@
     <string name="text_already_copied_to_clip">已複製到剪貼簿</string>
     <string name="text_already_created">已建立</string>
     <string name="text_already_deleted">已刪除</string>
+    <string name="text_android_build_id">安卓構建 ID</string>
+    <string name="text_android_build_version">安卓構建版本</string>
+    <string name="text_android_release_version">安卓發行版本</string>
+    <string name="text_android_sdk_version">安卓 SDK 版本</string>
     <string name="text_apk_builder_plugin_unavailable">打包外掛不可用</string>
     <string name="text_app_and_device_info">應用及裝置資訊</string>
     <string name="text_app_crashed">AutoJs6 應用崩潰</string>
@@ -209,6 +246,8 @@
     <string name="text_app_name_qqmusic">QQ音樂</string>
     <string name="text_app_name_wechat">微信</string>
     <string name="text_app_source_code">軟體原始碼</string>
+    <string name="text_app_version_code">應用版本號</string>
+    <string name="text_app_version_name">應用版本名</string>
     <string name="text_appearance">外觀</string>
     <string name="text_attribute">屬性</string>
     <string name="text_auto_check_for_updates">自動檢查更新</string>
@@ -240,6 +279,8 @@
     <string name="text_code">程式碼</string>
     <string name="text_code_beautify">格式化程式碼</string>
     <string name="text_command_already_copied_to_clip">指令已複製到剪貼簿</string>
+    <string name="text_compatibility">相容性</string>
+    <string name="text_compatibility_with_classes_for_ver_4_x">Java 類名 4.x 版本相容</string>
     <string name="text_config">配置</string>
     <string name="text_confirm_to_delete">是否確定刪除</string>
     <string name="text_confirm_to_remove">確定移除嗎?</string>
@@ -255,6 +296,7 @@
     <string name="text_copy_to_clip">複製到剪貼簿</string>
     <string name="text_copy_value">複製值</string>
     <string name="text_daily_task">每日任務</string>
+    <string name="text_date">日期</string>
     <string name="text_day1">一</string>
     <string name="text_day2">二</string>
     <string name="text_day3">三</string>
@@ -272,6 +314,13 @@
     <string name="text_detail">詳情</string>
     <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"開發者詳情\" 正在開發中...</string>
     <string name="text_developer_options">開發者選項</string>
+    <string name="text_device_brand">裝置品牌</string>
+    <string name="text_device_hardware_name">裝置硬體名稱</string>
+    <string name="text_device_hardware_serial_number">裝置硬體序列號</string>
+    <string name="text_device_manufacturer">裝置廠商</string>
+    <string name="text_device_model">裝置型號</string>
+    <string name="text_device_name">裝置名稱</string>
+    <string name="text_device_product_name">裝置產品名稱</string>
     <string name="text_directly_download">直接下載</string>
     <string name="text_directory">資料夾</string>
     <string name="text_display_over_other_app">顯示在其他應用上層</string>
@@ -281,6 +330,7 @@
     <string name="text_do_not_ask_again_for_this_version">此版本不再提示</string>
     <string name="text_do_not_show_again">不再提示</string>
     <string name="text_documentation">文件</string>
+    <string name="text_documentation_launcher_icon">文件啟動器圖示</string>
     <string name="text_documentation_source">文件源</string>
     <string name="text_done">完成</string>
     <string name="text_download">下載</string>
@@ -312,6 +362,8 @@
     <string name="text_exit">退出</string>
     <string name="text_exit_directly">直接退出</string>
     <string name="text_exit_floating_window">退出懸浮窗</string>
+    <string name="text_extending_js_build_in_objects">JavaScript 內建物件擴充套件</string>
+    <string name="text_extensibility">擴充套件性</string>
     <string name="text_failed">失敗</string>
     <string name="text_failed_to_build">打包失敗</string>
     <string name="text_failed_to_create">建立失敗</string>
@@ -342,6 +394,7 @@
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">前臺服務</string>
     <string name="text_foreground_service_description">前臺服務執行一些使用者能注意到的操作.\n前臺服務必須顯示通知, 確保使用者知道應用正在執行的任務.\n前臺服務通知無法移除, 除非服務停止執行.\n可透過長按通知將通知優先順序降低 (部分系統支援關閉前臺服務通知), 以減少通知對使用者的影響.</string>
+    <string name="text_fx_keyboard">多功能鍵盤</string>
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成程式碼</string>
     <string name="text_generated_code">已生成程式碼</string>
@@ -379,6 +432,7 @@
     <string name="text_jump_to_line_end">跳轉到行尾</string>
     <string name="text_jump_to_line_start">跳轉到行首</string>
     <string name="text_jump_to_start">跳轉到檔案開始</string>
+    <string name="text_keep_screen_on_when_in_foreground">前臺時保持螢幕常亮</string>
     <string name="text_last_updates_checked_time">上次檢查: %s</string>
     <string name="text_latest_activity">最近活動</string>
     <string name="text_latest_package">最近包名</string>
@@ -413,19 +467,12 @@
     <string name="text_new_watching_variables">增加監視的變數或表示式</string>
     <string name="text_next_run_time">下次執行</string>
     <string name="text_night_mode">夜間模式</string>
-    <string name="text_no_accessibility_permission">無障礙服務未啟用</string>
-    <string name="text_no_accessibility_permission_to_capture">無障礙服務未啟用</string>
     <string name="text_no_browser">未安裝瀏覽器應用</string>
-    <string name="text_no_draw_overlays_permission">缺少 \"顯示在其他應用上層\" 許可權</string>
     <string name="text_no_histories">無歷史記錄</string>
     <string name="text_no_ignored_updates">暫無已忽略更新</string>
-    <string name="text_no_read_phone_state_permission">缺少 \"讀取手機狀態\" 許可權</string>
     <string name="text_no_root">免 root</string>
     <string name="text_no_root_access">無 root 許可權</string>
     <string name="text_no_scripts_to_stop_running">無執行中的指令碼</string>
-    <string name="text_no_storage_rw_permission">缺少 \"讀寫儲存空間\" 許可權</string>
-    <string name="text_no_usage_stats_permission">缺少 \"檢視使用情況\" 許可權</string>
-    <string name="text_no_write_settings_permission">缺少 \"修改系統設定\" 許可權</string>
     <string name="text_not_granted">未授予</string>
     <string name="text_not_showing_main_activity">不顯示主介面</string>
     <string name="text_notification">通知</string>
@@ -458,6 +505,7 @@
     <string name="text_permission_revoked_with_root">已撤消授權 (with root)</string>
     <string name="text_permission_test">許可權測試</string>
     <string name="text_permissions">許可權</string>
+    <string name="text_pinch_to_zoom">手勢縮放</string>
     <string name="text_please_choose">請選擇</string>
     <string name="text_please_choose_a_script">請選擇指令碼</string>
     <string name="text_please_input_name">請輸入名稱</string>
@@ -477,8 +525,9 @@
     <string name="text_project_save_success">專案已儲存</string>
     <string name="text_prompt">提示</string>
     <string name="text_quit">放棄</string>
-    <string name="text_record_prompt">錄製提示</string>
     <string name="text_record_finished">錄製完成</string>
+    <string name="text_record_prompt">錄製提示</string>
+    <string name="text_record_stopped">錄製已停止</string>
     <string name="text_recorded_output_file_type">錄製生成檔案型別</string>
     <string name="text_redo">重做</string>
     <string name="text_redo_simplified">重做</string>
@@ -555,18 +604,18 @@
     <string name="text_show_layout_bounds">在佈局範圍中檢視</string>
     <string name="text_show_layout_hierarchy">在佈局層次中檢視</string>
     <string name="text_show_widget_information">顯示控制元件資訊</string>
-    <string name="text_size">字型大小</string>
-    <string name="text_size_current_value">字型大小: %d</string>
+    <string name="text_size">大小</string>
     <string name="text_source_file_path">原始碼路徑</string>
     <string name="text_stable_mode">穩定模式</string>
     <string name="text_star">收藏</string>
     <string name="text_start_record">開始錄製</string>
-    <string name="text_record_stopped">錄製已停止</string>
     <string name="text_start_running">開始執行</string>
     <string name="text_stop">停止</string>
+    <string name="text_symbols_settings">符號設定</string>
     <string name="text_tailor_made_developer">二次開發者</string>
     <string name="text_task">任務</string>
     <string name="text_text_size">字型大小</string>
+    <string name="text_text_size_current_value">字型大小: %d</string>
     <string name="text_theme_color">主題色</string>
     <string name="text_time">時間</string>
     <string name="text_timed_task">定時任務</string>
@@ -606,42 +655,13 @@
     <string name="text_write_secure_settings_description">安全設定包含應用程式可讀但不可寫入的設定選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設定許可權\" 後, 普通應用可直接修改上述安全設定 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設定</string>
     <string name="theme_color_default">預設</string>
-    <string name="content_way_of_output_for_recorded_script">選擇一個已錄製指令碼的輸出方式</string>
-    <string name="dialog_button_join_group">加入群組</string>
-    <string name="text_app_version_name">應用版本名</string>
-    <string name="text_app_version_code">應用版本號</string>
-    <string name="text_android_build_version">安卓構建版本</string>
-    <string name="text_android_release_version">安卓發行版本</string>
-    <string name="text_android_sdk_version">安卓 SDK 版本</string>
-    <string name="text_android_build_id">安卓構建 ID</string>
-    <string name="text_device_brand">裝置品牌</string>
-    <string name="text_device_manufacturer">裝置廠商</string>
-    <string name="text_device_name">裝置名稱</string>
-    <string name="text_device_model">裝置型號</string>
-    <string name="text_device_product_name">裝置產品名稱</string>
-    <string name="text_device_hardware_name">裝置硬體名稱</string>
-    <string name="text_device_hardware_serial_number">裝置硬體序列號</string>
-    <string name="text_abis">支援 ABI</string>
-    <string name="text_abis_32bit">支援 ABI (32 位)</string>
-    <string name="text_abis_64bit">支援 ABI (64 位)</string>
-    <string name="text_fx_keyboard">多功能鍵盤</string>
-    <string name="text_symbols_settings">符號設定</string>
-    <string name="text_pinch_to_zoom">手勢縮放</string>
-    <string name="entry_editor_pinch_to_zoom_change_text_size">更改字型大小</string>
-    <string name="entry_editor_pinch_to_zoom_scale_view">縮放檢視</string>
-    <string name="entry_editor_pinch_to_zoom_disable">禁用</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">透過類名重對映, 提供一定程度上的 4.x 版本 Java 類名相容.\n開啟選項後, 每次啟動指令碼將出現不同程度的啟動延遲 (幾十到幾百毫秒不等).\n如無特別需求, 建議始終保持選項關閉.</string>
-    <string name="description_extending_js_build_in_objects">擴充套件 JavaScript 內建物件可以增加程式碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啟後所有指令碼均預設啟用內建擴充套件.\n內建擴充套件往往是不安全的, 除非明確瞭解內建擴充套件的原理及風險, 否則不建議啟用.\n選項關閉後, 仍然可以透過 plugins 全域性物件啟用內建擴充套件, 詳見專案文件.</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">提供一定程度上的 4.x 版本 Java 類名相容</string>
-    <string name="summary_extending_js_build_in_objects">擴充套件 JavaScript 內建物件以增加程式碼靈活性</string>
-    <string name="text_compatibility">相容性</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">Java 類名 4.x 版本相容</string>
-    <string name="text_extending_js_build_in_objects">JavaScript 內建物件擴充套件</string>
-    <string name="text_extensibility">擴充套件性</string>
+
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>
     </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="other">已停止執行 %d 個指令碼</item>
     </plurals>
+
 </resources>

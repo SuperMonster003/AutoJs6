@@ -1,4 +1,4 @@
-// noinspection JSUnusedGlobalSymbols
+// noinspection JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 
 /* Overwritten protection. */
 
@@ -17,7 +17,7 @@ module.exports = function (scriptRuntime, scope) {
     const DynamicBroadcastReceivers = org.autojs.autojs.external.receiver.DynamicBroadcastReceivers;
 
     let _ = {
-        Tasks: ( /* @IIFE */ () => {
+        Tasks: (/* @IIFE */ () => {
             /**
              * @implements Internal.Tasks
              */
@@ -27,7 +27,6 @@ module.exports = function (scriptRuntime, scope) {
 
             Task.prototype = {
                 constructor: Task,
-                timedTaskManager: TimedTaskManager.getInstance(),
                 /**
                  * @template {TimedTask$|IntentTask$|null} T
                  * @param {T} task
@@ -35,7 +34,7 @@ module.exports = function (scriptRuntime, scope) {
                  */
                 addTask(task) {
                     if (task) {
-                        this.timedTaskManager.addTask(task);
+                        TimedTaskManager.addTask(task);
                     }
                     return task || null;
                 },
@@ -134,14 +133,14 @@ module.exports = function (scriptRuntime, scope) {
                  * @return {TimedTask$}
                  */
                 getTimedTask(id) {
-                    return this.timedTaskManager.getTimedTask(id);
+                    return TimedTaskManager.getTimedTask(id);
                 },
                 /**
                  * @param {number} id
                  * @return {IntentTask$}
                  */
                 getIntentTask(id) {
-                    return this.timedTaskManager.getIntentTask(id);
+                    return TimedTaskManager.getIntentTask(id);
                 },
                 /**
                  * @param {TimedTask$|IntentTask$|null} task
@@ -149,7 +148,7 @@ module.exports = function (scriptRuntime, scope) {
                  */
                 removeTask(task) {
                     if (task) {
-                        this.timedTaskManager.removeTask(task);
+                        TimedTaskManager.removeTask(task);
                     }
                     return task;
                 },
@@ -186,7 +185,7 @@ module.exports = function (scriptRuntime, scope) {
                         return null;
                     }
                     task.setScheduled(false);
-                    this.timedTaskManager.updateTask(task);
+                    TimedTaskManager.updateTask(task);
                     return task;
                 },
                 /**
@@ -196,7 +195,7 @@ module.exports = function (scriptRuntime, scope) {
                 queryTimedTasks(options) {
                     let opt = options || {};
                     let path = opt.path;
-                    let list = this.timedTaskManager.getAllTasksAsList().toArray();
+                    let list = TimedTaskManager.getAllTasksAsList().toArray();
                     return path ? list.filter(task => task.getScriptPath() === path) : list;
                 },
                 /**
@@ -207,7 +206,7 @@ module.exports = function (scriptRuntime, scope) {
                     let opt = options || {};
                     let { path, action } = opt;
 
-                    let list = this.timedTaskManager.getAllIntentTasksAsList().toArray();
+                    let list = TimedTaskManager.getAllIntentTasksAsList().toArray();
 
                     if (!path && !action) {
                         return list;
@@ -284,7 +283,7 @@ module.exports = function (scriptRuntime, scope) {
          * @return {org.joda.time.LocalTime|org.joda.time.LocalDateTime}
          */
         parseDateTime(clazz, dateTime) {
-            let clz = ( /* @IIFE */ () => {
+            let clz = (/* @IIFE */ () => {
                 switch (clazz) {
                     case 'LocalTime':
                         return org.joda.time.LocalTime;
@@ -345,9 +344,8 @@ module.exports = function (scriptRuntime, scope) {
         },
     };
 
-    /**
-     * @type {Internal.Tasks}
-     */
+    // noinspection UnnecessaryLocalVariableJS
+    /** @type {Internal.Tasks} */
     const tasks = new _.Tasks();
 
     return tasks;

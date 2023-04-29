@@ -37,7 +37,7 @@ object StringUtils {
     fun convertRegex(regex: String) = regex.apply { if (shouldTakenAsRegex(this)) return replace(regexPattern, "$1") }
 
     @JvmStatic
-    fun shouldTakenAsRegex(s: String) = s.matches(regexPattern)
+    fun shouldTakenAsRegex(s: String) = regexPattern.containsMatchIn(s)
 
     @JvmStatic
     fun join(delimiter: CharSequence?, vararg tokens: Any?): String = TextUtils.join(delimiter!!, tokens)
@@ -190,6 +190,12 @@ object StringUtils {
                 else -> s
             }
         }
+    }
+
+    @JvmStatic
+    fun toUpperCaseFirst(str: String) = if (str.isEmpty()) str else {
+        val pre = str[0].toString()
+        str.replaceFirst(pre.toRegex(), pre.uppercase(Locale.getDefault()))
     }
 
 }

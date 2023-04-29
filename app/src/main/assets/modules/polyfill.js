@@ -20,7 +20,7 @@ module.exports = {
         if (!Array.prototype.flat) {
             Object.defineProperty(Array.prototype, 'flat', {
                 value(depth) {
-                    return ( /* @IIFE */ function flat(arr, d) {
+                    return (/* @IIFE */ function flat(arr, d) {
                         return d <= 0 ? arr : arr.reduce((a, b) => {
                             return a.concat(Array.isArray(b) ? flat(b, d - 1) : b);
                         }, []);
@@ -32,7 +32,7 @@ module.exports = {
         if (!Array.prototype.at) {
             Object.defineProperty(Array.prototype, 'at', {
                 value(index) {
-                    let relIdx = ( /* @IIFE */ () => {
+                    let relIdx = (/* @IIFE */ () => {
                         const num = Number(index);
                         return isNaN(num) ? 0 : isFinite(num) ? Math.trunc(num) : num;
                     })();

@@ -101,7 +101,7 @@ class NodeInfo(private val resources: Resources?, private val node: UiObject, va
 
     companion object {
 
-        fun boundsToString(rect: Rect) = rect.toString().replace('-', ',').replace(" ", "").substring(4)
+        fun boundsToString(rect: Rect) = rect.toString().replace(" - ", " , ").replace(" ", "").substring(4)
 
         internal fun capture(resourcesCache: HashMap<String, Resources>, context: Context, uiObject: UiObject, parent: NodeInfo?): NodeInfo {
             val resources: Resources? = uiObject.packageName()?.let { pkg ->

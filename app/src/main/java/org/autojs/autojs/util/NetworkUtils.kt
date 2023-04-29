@@ -27,12 +27,13 @@ object NetworkUtils {
 
     private val globalAppContext = GlobalAppContext.get()
 
-    private fun getConnectivityManager() = globalAppContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val connectivityManager
+        get() = globalAppContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    private fun getNetworkInfo() = getConnectivityManager().activeNetworkInfo
+    private fun getNetworkInfo() = connectivityManager.activeNetworkInfo
 
     @JvmStatic
-    fun isActiveNetworkMetered() = getConnectivityManager().isActiveNetworkMetered
+    fun isActiveNetworkMetered() = connectivityManager.isActiveNetworkMetered
 
     @JvmStatic
     fun isConnectedOrConnecting() = getNetworkInfo()?.isConnectedOrConnecting == true
@@ -154,8 +155,8 @@ object NetworkUtils {
 
     /**
      * Get IP address from first non-localhost interface
-     * @param useIPv4   true=return ipv4, false=return ipv6
-     * @return  address or empty string
+     * @param useIPv4  true=return ipv4, false=return ipv6
+     * @return  address
      */
     @JvmStatic
     fun getIpAddress(useIPv4: Boolean): String {

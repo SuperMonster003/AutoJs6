@@ -2,6 +2,7 @@ package org.autojs.autojs.external;
 
 import android.app.IntentService;
 import android.content.Intent;
+
 import androidx.annotation.Nullable;
 
 /**
@@ -19,7 +20,7 @@ public class ScriptExecutionIntentService extends IntentService {
             return;
         try {
             ScriptIntents.handleIntent(this, intent);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

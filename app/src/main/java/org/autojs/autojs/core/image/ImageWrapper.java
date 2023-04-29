@@ -42,21 +42,8 @@ public class ImageWrapper implements Recyclable {
     private final static ArrayList<WeakReference<Object>> imageList = new ArrayList<>();
     private boolean mOneShot;
 
-    @NonNull
-    public static ArrayList<Object> getImageList() {
-        ArrayList<Object> list = new ArrayList<>();
-        for (WeakReference<Object> ref : imageList) {
-            Object image = ref.get();
-            if (image != null) {
-                list.add(image);
-            }
-        }
-        return list;
-    }
-
-    public static Object addToList(Object image) {
+    private void addToList(Object image) {
         imageList.add(new WeakReference<>(image));
-        return image;
     }
 
     public static synchronized void recycleAll() {
@@ -182,11 +169,14 @@ public class ImageWrapper implements Recyclable {
 
     public int pixel(int x, int y) {
         ensureNotRecycled();
+        int result;
         if (mBitmap != null) {
-            return mBitmap.getPixel(x, y);
+            result = mBitmap.getPixel(x, y);
+        } else {
+            double[] channels = mMat.get(x, y);
+            result = Color.argb((int) channels[3], (int) channels[0], (int) channels[1], (int) channels[2]);
         }
-        double[] channels = mMat.get(x, y);
-        return Color.argb((int) channels[3], (int) channels[0], (int) channels[1], (int) channels[2]);
+        return result;
     }
 
     public Bitmap getBitmap() {
@@ -239,13 +229,15 @@ public class ImageWrapper implements Recyclable {
     @NonNull
     public ImageWrapper clone() {
         ensureNotRecycled();
+        ImageWrapper imageWrapper;
         if (mBitmap == null) {
-            return ImageWrapper.ofMat(mMat.clone());
+            imageWrapper = ImageWrapper.ofMat(mMat.clone());
+        } else if (mMat == null) {
+            imageWrapper = ImageWrapper.ofBitmap(mBitmap.copy(mBitmap.getConfig(), true));
+        } else {
+            imageWrapper = new ImageWrapper(mBitmap.copy(mBitmap.getConfig(), true), mMat.clone());
         }
-        if (mMat == null) {
-            return ImageWrapper.ofBitmap(mBitmap.copy(mBitmap.getConfig(), true));
-        }
-        return new ImageWrapper(mBitmap.copy(mBitmap.getConfig(), true), mMat.clone());
+        return imageWrapper;
     }
 
 }

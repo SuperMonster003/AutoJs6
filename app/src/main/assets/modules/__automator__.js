@@ -28,7 +28,7 @@ module.exports = function (scriptRuntime, scope) {
     const a11yBridge = scriptRuntime.accessibilityBridge;
 
     let _ = {
-        Auto: ( /* @IIFE */ () => {
+        Auto: (/* @IIFE */ () => {
             /**
              * @implements Internal.Auto
              */
@@ -100,7 +100,7 @@ module.exports = function (scriptRuntime, scope) {
 
             return Auto;
         })(),
-        Automator: ( /* @IIFE */ () => {
+        Automator: (/* @IIFE */ () => {
             /**
              * @implements Internal.Automator
              */
@@ -330,7 +330,7 @@ module.exports = function (scriptRuntime, scope) {
                 'back', 'home', 'powerDialog', 'notifications',
                 'quickSettings', 'recents', 'splitScreen',
             ];
-            __asGlobal__(rtAutomator, methodsRt);
+            __asGlobal__(rtAutomator, methodsRt, scope);
 
             /**
              * @Caution by SuperMonster003 on Apr 23, 2022.

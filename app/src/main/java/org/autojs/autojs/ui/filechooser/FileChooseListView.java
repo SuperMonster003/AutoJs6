@@ -108,8 +108,8 @@ public class FileChooseListView extends ExplorerView {
         FirstCharView mFirstChar;
         @BindView(R.id.checkbox)
         CheckBoxCompat mCheckBox;
-        @BindView(R.id.desc)
-        TextView mDesc;
+        @BindView(R.id.script_file_size)
+        TextView mFileSize;
         GradientDrawable mFirstCharBackground;
 
         private ExplorerItem mExplorerItem;
@@ -124,7 +124,7 @@ public class FileChooseListView extends ExplorerView {
         public void bind(ExplorerItem item, int position) {
             mExplorerItem = item;
             mName.setText(ExplorerViewHelper.getDisplayName(getContext(), item));
-            mDesc.setText(PFiles.getHumanReadableSize(item.getSize()));
+            mFileSize.setText(PFiles.getHumanReadableSize(item.getSize()));
 
             switch (item.getType()) {
                 case JAVASCRIPT, AUTO -> mFirstChar

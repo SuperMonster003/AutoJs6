@@ -4,7 +4,7 @@ import android.content.Context
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
-import com.stardust.enhancedfloaty.FloatyService
+import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder
 import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs.core.accessibility.NodeInfo

@@ -9,6 +9,10 @@ include(
     ":libs:jackpal.androidterm.libtermexec-1.0",
     ":libs:org.opencv-4.5.5",
 
+    ":libs:android-spackle-9.0.0",
+    ":libs:android-assertion-9.0.0",
+    ":libs:android-plugin-client-sdk-for-locale-9.0.0",
+
     // ":libs:android-plugin-client-sdk-for-locale-9.0.0",
     // ":libs:com.android.dx-1.7.0",
     // ":libs:github-api-1.306",

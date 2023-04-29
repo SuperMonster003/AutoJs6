@@ -8,7 +8,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by Stardust on 2017/10/19.
@@ -37,6 +40,11 @@ public class PFile extends File {
     public PFile(@NonNull URI uri) {
         super(uri);
         init();
+    }
+
+    public static CharSequence getFullDateString(long date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+        return dateFormat.format(new Date(date));
     }
 
 

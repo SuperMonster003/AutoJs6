@@ -11,7 +11,7 @@ let { files } = global;
  */
 module.exports = function (scriptRuntime, scope) {
     let _ = {
-        I18n: ( /* @IIFE */ () => {
+        I18n: (/* @IIFE */ () => {
             /**
              * @type {Internal.Banana}
              */

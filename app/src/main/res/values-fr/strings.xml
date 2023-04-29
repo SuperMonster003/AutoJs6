@@ -4,6 +4,7 @@
 <!-- Proofreader: [ Bastien ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Construire...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Nettoyage...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Emballage...</string>
@@ -12,16 +13,25 @@
     <string name="confirm_overwrite_file">Fichier déjà existant.>Surécrire?</string>
     <string name="content_about_app_tips">1. Appuyez et maintenez le nom de l\'application (AutoJs6) sur la page d\'accueil pour accéder à la page des paramètres.\n2. Appuyez et maintenez une certaine option de paramètres sur la page de paramètres pour afficher des informations détaillées.</string>
     <string name="content_github_feedback">Une page web sera lancée pour signaler un problème.\nUn compte pour GitHub peut être nécessaire.</string>
+    <string name="content_way_of_output_for_recorded_script">Sélectionnez un mode de sortie pour le script enregistré</string>
     <string name="crash_feedback">Copier le journal de débogage ou quitter directement</string>.
+    <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
+    <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
+    <string name="default_script_notification_content">Notification à partir d\'un script</string>
+    <string name="default_script_notification_title">Notification de script</string>
     <string name="default_value_working_directory">/Scripts</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 est un outil JavaScript automatisé pour Android, qui est open-source et cloné de \"hyb1996/Auto.js\".\n\nPour demander de l\'aide ou des commentaires, allez sur GitHub issues ou rejoignez le groupe Tencent QQ 690946137.</string>
     <string name="description_about_app_tips_preference">1. Maintenez enfoncée l\'icône de l\'application sur la page \"À propos de l\'application et du développeur\" pour accéder à la page des options de développement d\'AutoJs6.</string>
     <string name="description_app_language_preference">Cette préférence permet de modifier la langue d\'affichage d\'AutoJs6, y compris les messages d\'exception des scripts en cours d\'exécution.\n\nNote: un redémarrage de l\'application peut être nécessaire pour que la langue s\'applique comme prévu.</string>
     <string name="description_change_working_dir_preference">Changer le chemin du répertoire contenant les scripts</string>.
     <string name="description_check_for_updates_preference">AutoJs6 obtient et télécharge les mises à jour depuis GitHub.\n\nNote: La mise à jour ne fournit pas encore de support multilingue.</string>
+    <string name="description_compatibility_with_classes_for_ver_4_x">Assure un certain degré de compatibilité des noms de classe Java pour les versions 4.x grâce au remappage des noms de classe.\nSi cette option est activée, il y aura un délai de démarrage plus ou moins long (de quelques dizaines à quelques centaines de millisecondes) à chaque fois que le script sera lancé.\nIl est recommandé de laisser l\'option désactivée à tout moment si elle n\'est pas spécifiquement requise.</string>
+    <string name="description_documentation_launcher_icon_preference">Une icône de lancement de la documentation facilite l\'accès aux documents et peut être commutée comme une application autonome.</string>
     <string name="description_documentation_source_preference">Documentation locale: Utilisation des fichiers intégrés d\'AutoJs6 comme sources de documentation, aucune connexion réseau n\'est nécessaire. Le contenu change au fur et à mesure que AutoJs6 est mis à jour.\nDocumentation en ligne: Utilisation des pages GitHub comme sources de documentation, nécessitant une connexion réseau. Le contenu est toujours à jour.\n\nRemarque: pour optimiser l\'expérience de lecture des documents en ligne, il est recommandé d\'utiliser un dispositif d\'affichage grand écran tel qu\'un moniteur de bureau.\nRemarque: à partir de la version 6.2.0, la documentation est encore dans les phases préliminaires de développement, et la plupart du contenu n\'a pas encore été écrit ou mis à jour.</string>
-    <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur: version >= 76\n- Android API Niveau 28 (Android 9) [P]: version >= 105</string>
+    <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur: version >= 76\n- Android API Niveau 28 (Android 9) [P] et inférieur: version >= 105</string>
+    <string name="description_extending_js_build_in_objects">L\'extension des objets JavaScript intégrés peut augmenter la flexibilité du code et permettre des fonctionnalités plus riches, mais elle peut provoquer des conflits et même des pannes.\nTous les scripts ont des extensions intégrées activées par défaut lorsque l\'option est activée.\nLes extensions intégrées sont souvent peu sûres et ne sont pas recommandées, sauf si les principes et les risques des extensions intégrées sont clairement compris.\nLorsque l\'option est désactivée, les extensions intégrées peuvent toujours être activées via l\'objet global plugins, comme décrit dans la documentation du projet.</string>
     <string name="description_hidden_files_preference">Permet d\'afficher ou non les fichiers et dossiers cachés (commençant généralement par \".\") dans l\'explorateur de fichiers d\'AutoJs6.</string>
+    <string name="description_keep_screen_on_when_in_foreground_preference">Préférence pour que l\'écran de l\'appareil reste allumé et lumineux lorsque AutoJs6 est au premier plan.\nPour que cela se produise uniquement sur la page d\'accueil parmi toutes les pages de l\'application AutoJs6, choisissez l\'option \"page d\'accueil uniquement\".</string>
     <string name="description_manage_ignored_updates_preference">Cliquez pour afficher ou gérer les éléments de la liste.\nAppuyez longuement pour supprimer l\'élément de la liste.</string>
     <string name="description_night_mode_preference">Le mode nuit (également connu sous le nom de thème sombre) s\'applique à la fois à l\'interface utilisateur du système Android et aux applications exécutées sur l\'appareil, ce qui améliore la visibilité pour les utilisateurs malvoyants et ceux qui sont sensibles à la lumière vive, et facilite l\'utilisation d\'un appareil par quiconque dans un environnement à faible luminosité.\n\nSystème de suivi: AutoJs6 possède des paramètres de mode nuit identiques à ceux du système Android\nToujours activé: AutoJs6 maintient le mode Nuit activé (indépendamment des paramètres du système Android).\nToujours désactivé: AutoJs6 désactive le mode Nuit (indépendamment des paramètres du système Android).\n\nRemarque: l\'option Suivre le système n\'est disponible qu\'à partir du niveau 28 de l\'API Android (Android 9) [P].</string>
     <string name="description_night_mode_preference_more">Pour activer le mode Nuit dans le système Android :\n- Niveau 29 de l\'API Android (Android 10) [Q] et supérieur: Paramètres -> Affichage -> Thème.\n- Niveau 28 de l\'API Android (Android 9) [P]: Options du développeur -> Mode nuit.\n\nLes conditions suivantes doivent être remplies pour appliquer un mode nuit (thème sombre) à un contenu Web à l\'aide d\'un composant WebView (comme la page de documentation AutoJs6) :\n1. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et plus: version >= 76\n- API Android Niveau 28 (Android 9) [P]: version >= 105\n2. Le contenu Web du composant WebView est adapté au thème sombre (par des ressources CSS ou Android XML, etc.).</string>
@@ -38,6 +48,7 @@
     <string name="dialog_button_download_with_browser">Navigateur</string>
     <string name="dialog_button_history">Histoire</string>
     <string name="dialog_button_ignore_current_update">Ignorer</string>
+    <string name="dialog_button_join_group">Joindre groupe</string>
     <string name="dialog_button_more">Plus</string>
     <string name="dialog_button_quit">Quit</string>
     <string name="dialog_button_remove">Supprimer</string>
@@ -47,13 +58,22 @@
     <string name="dialog_button_system_settings_simplified">Système</string>
     <string name="dialog_button_update_now">Mise à jour</string>
     <string name="dialog_button_use_default">Par défaut</string>
+    <string name="docs_app_name">AutoJs6 Docs</string>
     <string name="edit_and_run_handle_intent_error">Can\'t process file</string>
     <string name="edit_exit_without_save_warn">Le contenu n\'a pas été enregistré, êtes-vous sûr de vouloir quitter?</string>
     <string name="entry_app_language_auto">Suivre le système</string>
+    <string name="entry_documentation_launcher_icon_hide">Masquer l\'icône du lanceur</string>
+    <string name="entry_documentation_launcher_icon_show">Afficher l\'icône dans le lanceur</string>
     <string name="entry_documentation_source_local">Documents locaux</string>
     <string name="entry_documentation_source_online">Documents en ligne</string>
+    <string name="entry_editor_pinch_to_zoom_change_text_size">Taille du texte</string>
+    <string name="entry_editor_pinch_to_zoom_disable">Désactiver</string>
+    <string name="entry_editor_pinch_to_zoom_scale_view">Vue à l\'échelle</string>
     <string name="entry_hidden_files_not_show">N\'affiche pas les fichiers ou dossiers cachés</string>
     <string name="entry_hidden_files_show">Afficher les fichiers et dossiers cachés</string>
+    <string name="entry_keep_screen_on_when_in_foreground_all_pages">Toutes les pages</string>
+    <string name="entry_keep_screen_on_when_in_foreground_disabled">Désactiver</string>
+    <string name="entry_keep_screen_on_when_in_foreground_homepage_only">Page d\'accueil uniquement</string>
     <string name="entry_night_mode_always_off">Always off</string>
     <string name="entry_night_mode_always_on">Always on</string>
     <string name="entry_night_mode_follow_system">Suivre le système</string>
@@ -103,9 +123,17 @@
     <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 peut ne pas avoir l\'accès root pour exécuter le fichier \"auto\"</string>.
     <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
+    <string name="error_no_accessibility_permission">Le service d\'accessibilité est désactivé et le script s\'est arrêté</string>.
+    <string name="error_no_accessibility_permission_to_capture">Le service d\'accessibilité n\'est pas activé</string>.
     <string name="error_no_accessibility_service">No accessibility service</string>
+    <string name="error_no_draw_overlays_permission">Aucune permission \"display over other apps\"</string>
+    <string name="error_no_post_notifications_permission">Pas d\'autorisation pour les \"notifications d\'envoi\"</string>
+    <string name="error_no_read_phone_state_permission">Aucune autorisation de \"lire l\'état du téléphone\"</string>
     <string name="error_no_screen_capture_permission">Aucune autorisation de capture d\'écran</string>
+    <string name="error_no_storage_rw_permission">Aucune autorisation \"storage r/w\"</string>
     <string name="error_no_such_selector_method" formatted="false">No such selector method %s(%s: %s)</string>
+    <string name="error_no_usage_stats_permission">Aucune autorisation de type \"usage stats\"</string>
+    <string name="error_no_write_settings_permission">Non \"write settings\" permission</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView ne peut accueillir qu\'un seul enfant direct</string>.
     <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
     <string name="error_parse_version_info">Fail to parse version information</string>
@@ -119,12 +147,12 @@
     <string name="error_thread_is_not_alive">Thread n\'est pas vivant</string>
     <string name="error_unknown">Erreur inconnue</string>
     <string name="error_unknown_algorithm_selector_param">Param inconnu du sélecteur d\'algorithme: %s</string>
+    <string name="error_unknown_color_name">Nom de couleur inconnu: %s</string>
     <string name="error_unknown_operation">Opération inconnue</string>
     <string name="error_unknown_picker_result_type">Unknown result type {name: %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Type de résultat inconnu {nom: %s, params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">Sélecteur inconnu {nom: %s, type: %s}</string>
     <string name="error_unknown_type">Type inconnu: %s</string>
-    <string name="error_unknown_color_name">Nom de couleur inconnu: %s</string>
     <string name="file_not_exist_or_readable">Le fichier n\'existe pas ou n\'est pas lisible: %s</string>
     <string name="foreground_notification_channel_name">Service d\'avant-plan AutoJs6</string>
     <string name="foreground_notification_text">Cliquez pour lancer AutoJs6</string>
@@ -149,8 +177,10 @@
     <string name="screen_capturer_foreground_notification_text">Cette notification s\'affiche pour la capture d\'écran</string>.
     <string name="screen_capturer_foreground_notification_title">Service de capture d\'écran en avant-plan</string>
     <string name="summary_about_app_tips">Meilleure expérience utilisateur</string>
+    <string name="summary_compatibility_with_classes_for_ver_4_x">Fournir un degré de compatibilité des noms de classe Java pour les versions 4.x.</string>
     <string name="summary_enable_a11y_service_with_root_access">Activer le service d\'accessibilité avec accès root automatiquement lorsque cela est nécessaire</string>.
     <string name="summary_enable_a11y_service_with_secure_settings">Activer le service d\'accessibilité avec des paramètres sécurisés automatiquement lorsque cela est nécessaire</string>.
+    <string name="summary_extending_js_build_in_objects">Augmenter la flexibilité du code et permettre une fonctionnalité plus riche en étendant les objets intégrés JavaScript.</string>
     <string name="summary_guard_mode">Prévenir les actions d\'automatisation des scripts lorsque AutoJs6 est au premier plan</string>.
     <string name="summary_not_showing_main_activity">Exécutez directement le script sans afficher l\'activité principale</string>.
     <string name="summary_pre_execute_script">Exécuter avant le fichier script</string>
@@ -162,6 +192,9 @@
     <string name="text_a11y_service_description">Requise par le fonctionnement automatique du script (clic, appui long, glissement, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Service d\'accessibilité activé mais non exécuté (réactivation ou redémarrage du périphérique)</string>.
     <string name="text_a11y_service_may_be_needed">Un service d\'accessibilité peut être nécessaire</string>
+    <string name="text_abis">ABIs</string>
+    <string name="text_abis_32bit">ABIs (32-bit)</string>
+    <string name="text_abis_64bit">ABIs (64-bit)</string>
     <string name="text_about">A propos</string>
     <string name="text_about_all_files_access">A propos de l\'accès à tous les fichiers</string>
     <string name="text_about_app_and_developer">A propos de l\'application et du développeur</string>
@@ -184,6 +217,10 @@
     <string name="text_already_copied_to_clip">Copié dans le presse-papiers</string>
     <string name="text_already_created">Créé</string>
     <string name="text_already_deleted">Deleted</string>
+    <string name="text_android_build_id">ID de la version Android</string>
+    <string name="text_android_build_version">Version de construction Android</string>
+    <string name="text_android_release_version">Version de la version Android</string>
+    <string name="text_android_sdk_version">Version du SDK Android</string>
     <string name="text_apk_builder_plugin_unavailable">APK Builder est indisponible</string>
     <string name="text_app_and_device_info">Infos sur les applications et les appareils</string>
     <string name="text_app_crashed">AutoJs6 s\'est écrasé</string>
@@ -209,6 +246,8 @@
     <string name="text_app_name_qqmusic">QQMusic</string>
     <string name="text_app_name_wechat">WeChat</string>
     <string name="text_app_source_code">Code source</string>
+    <string name="text_app_version_code">Code de la version de l\'application</string>
+    <string name="text_app_version_name">Nom de la version de l\'application</string>
     <string name="text_appearance">Appearance</string>
     <string name="text_attribute">Attribut</string>
     <string name="text_auto_check_for_updates">Vérification automatique des mises à jour</string>
@@ -240,6 +279,8 @@
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautifier le code</string>
     <string name="text_command_already_copied_to_clip">Commande copiée dans le presse-papiers</string>
+    <string name="text_compatibility">Compatibilité</string>
+    <string name="text_compatibility_with_classes_for_ver_4_x">Compatibilité avec les classes Java pour la version 4.x</string>
     <string name="text_config">Configuration</string>
     <string name="text_confirm_to_delete">Vous êtes sûr de vouloir supprimer?</string>
     <string name="text_confirm_to_remove">Etes-vous sûr de supprimer?</string>
@@ -255,6 +296,7 @@
     <string name="text_copy_to_clip">Copie vers le presse-papiers</string>
     <string name="text_copy_value">Copie de la valeur</string>
     <string name="text_daily_task">Tâche quotidienne</string>
+    <string name="text_date">Date</string>
     <string name="text_day1">Mon</string>
     <string name="text_day2">Mar</string>
     <string name="text_day3">Med</string>
@@ -272,6 +314,13 @@
     <string name="text_detail">Détails</string>
     <string name="text_developer_details_under_development">Les détails du développeur sont en cours de développement</string>
     <string name="text_developer_options">Les options du développeur</string>
+    <string name="text_device_brand">Marque de l\'appareil</string>
+    <string name="text_device_hardware_name">Nom du matériel du dispositif</string>
+    <string name="text_device_hardware_serial_number">Numéro de série du dispositif</string>
+    <string name="text_device_manufacturer">Fabricant de l\'appareil</string>
+    <string name="text_device_model">Modèle de l\'appareil</string>
+    <string name="text_device_name">Nom de l\'appareil</string>
+    <string name="text_device_product_name">Nom du produit de l\'appareil</string>
     <string name="text_directly_download">Téléchargement immédiat</string>
     <string name="text_directory">Directory</string>
     <string name="text_display_over_other_app">Affichage sur les autres apps</string>
@@ -281,6 +330,7 @@
     <string name="text_do_not_ask_again_for_this_version">Ne pas redemander cette version</string>
     <string name="text_do_not_show_again">Ne pas montrer à nouveau</string>
     <string name="text_documentation">Documents</string>
+    <string name="text_documentation_launcher_icon">Icône du lanceur de documentation</string>
     <string name="text_documentation_source">Source de la documentation</string>
     <string name="text_done">Done</string>
     <string name="text_download">Téléchargement</string>
@@ -312,6 +362,8 @@
     <string name="text_exit">Sortir</string>
     <string name="text_exit_directly">Exit</string>
     <string name="text_exit_floating_window">Exit floating window</string>
+    <string name="text_extending_js_build_in_objects">Extension des objets intégrés de JavaScript</string>
+    <string name="text_extensibility">Extensibilité</string>
     <string name="text_failed">Failed</string>
     <string name="text_failed_to_build">Failed to build</string>
     <string name="text_failed_to_create">Fail to create</string>
@@ -342,6 +394,7 @@
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Service d\'avant-plan</string>
     <string name="text_foreground_service_description">Les services d\'avant-plan effectuent des opérations qui sont perceptibles par l\'utilisateur\nLes services d\'avant-plan affichent une notification dans la barre d\'état, de sorte que les utilisateurs sont activement conscients que votre application effectue une tâche en avant-plan et consomme des ressources système.\nLa notification ne peut pas être rejetée à moins que le service ne soit arrêté ou supprimé de l\'avant-plan.\nLa notification peut avoir une faible priorité, voire être désactivée, en appuyant longuement sur la notification.</string>
+    <string name="text_fx_keyboard">Fx clavier</string>
     <string name="text_generate">Générer</string>
     <string name="text_generate_code">Générer un code</string>
     <string name="text_generated_code">Code généré</string>
@@ -379,6 +432,7 @@
     <string name="text_jump_to_line_end">Sauter à la fin de la ligne</string>
     <string name="text_jump_to_line_start">Sauter au début de la ligne</string>
     <string name="text_jump_to_start">Sauter pour commencer</string>
+    <string name="text_keep_screen_on_when_in_foreground">Garder l\'écran allumé lorsqu\'il est au premier plan</string>
     <string name="text_last_updates_checked_time">Dernière vérification: %s</string>
     <string name="text_latest_activity">Dernière activité</string>
     <string name="text_latest_package">Dernier paquet</string>
@@ -413,19 +467,12 @@
     <string name="text_new_watching_variables">Nouvelles variables de surveillance</string>
     <string name="text_next_run_time">Prochaine exécution</string>
     <string name="text_night_mode">Mode nuit</string>
-    <string name="text_no_accessibility_permission">Le service d\'accessibilité est désactivé et le script s\'est arrêté</string>.
-    <string name="text_no_accessibility_permission_to_capture">Le service d\'accessibilité n\'est pas activé</string>.
     <string name="text_no_browser">Aucun navigateur n\'est installé</string>
-    <string name="text_no_draw_overlays_permission">Aucune permission \"display over other apps\"</string>
     <string name="text_no_histories">Aucun Histoire</string>
     <string name="text_no_ignored_updates">Aucune mise à jour ignorée</string>
-    <string name="text_no_read_phone_state_permission">Aucune autorisation de \"lire l\'état du téléphone\"</string>
     <string name="text_no_root">Non-root</string>
     <string name="text_no_root_access">Aucun accès root</string>
     <string name="text_no_scripts_to_stop_running">Pas de scripts à arrêter de fonctionner</string>
-    <string name="text_no_storage_rw_permission">Aucune autorisation \"storage r/w\"</string>
-    <string name="text_no_usage_stats_permission">Aucune autorisation de type \"usage stats\"</string>
-    <string name="text_no_write_settings_permission">Non \"write settings\" permission</string>
     <string name="text_not_granted">Non accordée</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
     <string name="text_notification">Notification</string>
@@ -458,6 +505,7 @@
     <string name="text_permission_revoked_with_root">Permission révoquée (avec root)</string>
     <string name="text_permission_test">Test de permission</string>
     <string name="text_permissions">Permissions</string>
+    <string name="text_pinch_to_zoom">Pincez pour zoomer</string>
     <string name="text_please_choose">Veuillez choisir</string>
     <string name="text_please_choose_a_script">Choisissez un script</string>
     <string name="text_please_input_name">Nom de l\'entrée</string>
@@ -477,8 +525,9 @@
     <string name="text_project_save_success">Projet enregistré</string>
     <string name="text_prompt">Prompt</string>
     <string name="text_quit">Quit</string>
-    <string name="text_record_prompt">Demande d\'enregistrement</string>
     <string name="text_record_finished">Enregistrement terminé</string>
+    <string name="text_record_prompt">Demande d\'enregistrement</string>
+    <string name="text_record_stopped">Enregistrement arrêté</string>
     <string name="text_recorded_output_file_type">Type de fichier de sortie enregistré</string>
     <string name="text_redo">Refaire</string>
     <string name="text_redo_simplified">Refai</string>
@@ -555,18 +604,18 @@
     <string name="text_show_layout_bounds">Afficher les bords de la disposition</string>
     <string name="text_show_layout_hierarchy">Afficher la hiérarchie de la disposition</string>
     <string name="text_show_widget_information">Afficher les informations du widget</string>
-    <string name="text_size">Taille du texte</string>
-    <string name="text_size_current_value" formatted="true">Taille du texte: %d</string>
+    <string name="text_size">Taille</string>
     <string name="text_source_file_path">Chemin du code source</string>
     <string name="text_stable_mode">Mode stable</string>
     <string name="text_star">Star</string>
     <string name="text_start_record">Démarrer l\'enregistrement</string>
-    <string name="text_record_stopped">Enregistrement arrêté</string>
     <string name="text_start_running">Running</string>
     <string name="text_stop">Stop</string>
+    <string name="text_symbols_settings">Param des symboles</string>
     <string name="text_tailor_made_developer">Développeur sur mesure</string>
     <string name="text_task">Task</string>
     <string name="text_text_size">Taille du texte</string>
+    <string name="text_text_size_current_value" formatted="true">Taille du texte: %d</string>
     <string name="text_theme_color">Couleur du thème</string>
     <string name="text_time">Heure</string>
     <string name="text_timed_task">Tâche chronométrée</string>
@@ -606,44 +655,15 @@
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="theme_color_default">Default</string>
-    <string name="content_way_of_output_for_recorded_script">Sélectionnez un mode de sortie pour le script enregistré</string>
-    <string name="dialog_button_join_group">Joindre groupe</string>
-    <string name="text_app_version_name">Nom de la version de l\'application</string>
-    <string name="text_app_version_code">Code de la version de l\'application</string>
-    <string name="text_android_build_version">Version de construction Android</string>
-    <string name="text_android_release_version">Version de la version Android</string>
-    <string name="text_android_sdk_version">Version du SDK Android</string>
-    <string name="text_android_build_id">ID de la version Android</string>
-    <string name="text_device_brand">Marque de l\'appareil</string>
-    <string name="text_device_manufacturer">Fabricant de l\'appareil</string>
-    <string name="text_device_name">Nom de l\'appareil</string>
-    <string name="text_device_model">Modèle de l\'appareil</string>
-    <string name="text_device_product_name">Nom du produit de l\'appareil</string>
-    <string name="text_device_hardware_name">Nom du matériel du dispositif</string>
-    <string name="text_device_hardware_serial_number">Numéro de série du dispositif</string>
-    <string name="text_abis">ABIs</string>
-    <string name="text_abis_32bit">ABIs (32-bit)</string>
-    <string name="text_abis_64bit">ABIs (64-bit)</string>
-    <string name="text_fx_keyboard">Fx clavier</string>
-    <string name="text_symbols_settings">Param des symboles</string>
-    <string name="text_pinch_to_zoom">Pincez pour zoomer</string>
-    <string name="entry_editor_pinch_to_zoom_change_text_size">Taille du texte</string>
-    <string name="entry_editor_pinch_to_zoom_scale_view">Vue à l\'échelle</string>
-    <string name="entry_editor_pinch_to_zoom_disable">Désactiver</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">Assure un certain degré de compatibilité des noms de classe Java pour les versions 4.x grâce au remappage des noms de classe.\nSi cette option est activée, il y aura un délai de démarrage plus ou moins long (de quelques dizaines à quelques centaines de millisecondes) à chaque fois que le script sera lancé.\nIl est recommandé de laisser l\'option désactivée à tout moment si elle n\'est pas spécifiquement requise.</string>
-    <string name="description_extending_js_build_in_objects">L\'extension des objets JavaScript intégrés peut augmenter la flexibilité du code et permettre des fonctionnalités plus riches, mais elle peut provoquer des conflits et même des pannes.\nTous les scripts ont des extensions intégrées activées par défaut lorsque l\'option est activée.\nLes extensions intégrées sont souvent peu sûres et ne sont pas recommandées, sauf si les principes et les risques des extensions intégrées sont clairement compris.\nLorsque l\'option est désactivée, les extensions intégrées peuvent toujours être activées via l\'objet global plugins, comme décrit dans la documentation du projet.</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">Fournir un degré de compatibilité des noms de classe Java pour les versions 4.x.</string>
-    <string name="summary_extending_js_build_in_objects">Augmenter la flexibilité du code et permettre une fonctionnalité plus riche en étendant les objets intégrés JavaScript.</string>
-    <string name="text_compatibility">Compatibilité</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">Compatibilité avec les classes Java pour la version 4.x</string>
-    <string name="text_extending_js_build_in_objects">Extension des objets intégrés de JavaScript</string>
-    <string name="text_extensibility">Extensibilité</string>
+
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d article</item>
         <item quantity="other">Total: %d articles</item>
     </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d script arrêté</item>
         <item quantity="other">%d scripts arrêtés</item>
     </plurals>
+
 </resources>

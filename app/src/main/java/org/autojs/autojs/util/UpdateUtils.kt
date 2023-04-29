@@ -162,14 +162,14 @@ object UpdateUtils {
     @JvmStatic
     fun addIgnoredVersion(versionInfo: VersionInfo) {
         ignoredVersions.add(versionInfo.toSummary())
-        Pref.setLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
+        Pref.putLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
     }
 
     private fun removeIgnoredVersion(versionInfo: VersionInfo) = removeIgnoredVersion(versionInfo.toSummary())
 
     private fun removeIgnoredVersion(versionSummary: CharSequence) {
         ignoredVersions.remove(versionSummary.toString())
-        Pref.setLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
+        Pref.putLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
     }
 
     @JvmStatic

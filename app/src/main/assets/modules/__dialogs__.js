@@ -14,7 +14,7 @@ module.exports = function (scriptRuntime, scope) {
     const ColorDrawable = android.graphics.drawable.ColorDrawable;
 
     let _ = {
-        Dialogs: ( /* @IIFE */ () => {
+        Dialogs: (/* @IIFE */ () => {
             /**
              * @implements Internal.Dialogs
              */
@@ -186,7 +186,7 @@ module.exports = function (scriptRuntime, scope) {
         applyDialogProperty(builder, name, value) {
             if (_.propertySetters.hasOwnProperty(name)) {
                 let propertySetter = _.propertySetters[name];
-                if (isObjectSpecies(propertySetter)) {
+                if (species.isObject(propertySetter)) {
                     if (propertySetter.method === undefined) {
                         propertySetter.method = name;
                     }
@@ -287,7 +287,7 @@ module.exports = function (scriptRuntime, scope) {
          */
         applyBuiltDialogProperties(dialog, props) {
             if (props.linkify !== undefined && Boolean(props.linkify) !== false) {
-                let linkify = ( /* @IIFE */ () => {
+                let linkify = (/* @IIFE */ () => {
                     let linkify = typeof props.linkify === 'string' ? props.linkify : 'all';
                     if (_.linkifyMask.includes(linkify)) {
                         linkify = linkify.replace(/[A-Z]/g, '_$&').toUpperCase();
@@ -361,7 +361,7 @@ module.exports = function (scriptRuntime, scope) {
                     if (animation === 'default') {
                         win.setWindowAnimations(android.R.style.Animation);
                     } else {
-                        let suffix = animation[0].toUpperCase() + animation.slice(1);
+                        let suffix = StringUtils.toUpperCaseFirst(animation);
                         win.setWindowAnimations(android.R.style[`Animation_${suffix}`]);
                     }
                 });
@@ -404,7 +404,7 @@ module.exports = function (scriptRuntime, scope) {
              * @type {(keyof Internal.Dialogs)[]}
              */
             let methods = [ 'rawInput', 'alert', 'confirm', 'prompt' ];
-            __asGlobal__(dialogs, methods);
+            __asGlobal__(dialogs, methods, scope);
         },
     };
 

@@ -64,7 +64,7 @@ public class CodeEditor extends HVScrollView {
     private Matcher mMatcher;
     private int mFoundIndex = -1;
 
-    private double mLastScaleFactor = 0;
+    private double mLastScaleFactor = 1;
     private int mLastTextSize = 0;
 
     private int mMinTextSize = 0;
@@ -90,8 +90,8 @@ public class CodeEditor extends HVScrollView {
         mCodeEditText = findViewById(R.id.code_edit_text);
         mCodeEditText.addTextChangedListener(new AutoIndent(mCodeEditText));
         mLastTextSize = Pref.getEditorTextSize((int) DisplayUtils.pxToSp(getContext(), mCodeEditText.getTextSize()));
-        mMinTextSize = Integer.parseInt(getContext().getString(R.string.text_size_min_value));
-        mMaxTextSize = Integer.parseInt(getContext().getString(R.string.text_size_max_value));
+        mMinTextSize = Integer.parseInt(getContext().getString(R.string.text_text_size_min_value));
+        mMaxTextSize = Integer.parseInt(getContext().getString(R.string.text_text_size_max_value));
         mTextViewRedoUndo = new TextViewUndoRedo(mCodeEditText);
         mJavaScriptHighlighter = new JavaScriptHighlighter(mTheme, mCodeEditText);
         mJsBeautifier = new JsBeautifier(this, "js-beautify");

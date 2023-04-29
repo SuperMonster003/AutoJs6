@@ -15,7 +15,7 @@ module.exports = function (scriptRuntime, scope) {
     const rtDevice = scriptRuntime.device;
 
     let _ = {
-        Device: ( /* @IIFE */ () => {
+        Device: (/* @IIFE */ () => {
             /**
              * @extends Internal.Device
              */
@@ -37,10 +37,10 @@ module.exports = function (scriptRuntime, scope) {
                 get density() {
                     return ScreenMetrics.getDeviceScreenDensity();
                 },
-                get summary() {
+                summary() {
                     return DeviceUtils.getDeviceSummary(context);
                 },
-                get digest() {
+                digest() {
                     let digestList = [
                         `${this.brand}${this.manufacturer === this.brand ? `` : ` (${this.manufacturer})`}`,
                         `${this.device}${this.model === this.device ? `` : ` (${this.model})`}`,
@@ -48,12 +48,17 @@ module.exports = function (scriptRuntime, scope) {
                     ];
                     return digestList.join(' / ');
                 },
-                vibrate(off, millis) {
+                vibrate() {
                     if (typeof arguments[0] === 'string') {
                         util.morseCode.vibrate.apply(util.morseCode, arguments);
-                    } else {
-                        rtDevice.vibrate.apply(rtDevice, arguments);
+                        return;
                     }
+                    if (Array.isArray(arguments[0]) && typeof arguments[1] === 'number') {
+                        let args = [ [ arguments[1] ].concat(arguments[0]) ]
+                            .concat(Array.from(arguments).slice(2));
+                        return this.vibrate.apply(this, args);
+                    }
+                    rtDevice.vibrate.apply(rtDevice, arguments);
                 },
                 isScreenOff() {
                     return !rtDevice.isScreenOn();

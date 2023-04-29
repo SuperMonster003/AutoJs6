@@ -1,8 +1,8 @@
 package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.automator.UiObject
-import org.autojs.autojs.runtime.api.ScreenMetrics.Companion.toRoundIntX
-import org.autojs.autojs.runtime.api.ScreenMetrics.Companion.toRoundIntY
+import org.autojs.autojs.util.DisplayUtils.toRoundIntX
+import org.autojs.autojs.util.DisplayUtils.toRoundIntY
 import org.autojs.autojs.util.StringUtils.formatDouble
 
 /**

@@ -7,14 +7,12 @@ module.exports = function (scriptRuntime, scope) {
     const rtRootShell = scriptRuntime.getRootShell();
 
     let _ = {
-        ShellCtor: ( /* @IIFE */ () => {
+        ShellCtor: (/* @IIFE */ () => {
             /**
              * @implements Internal.Shell
              */
             const ShellCtor = function () {
-                /**
-                 * @global
-                 */
+                /** @global */
                 const shell = function (cmd, root) {
                     return scriptRuntime.shell(cmd, Number(Boolean(root)));
                 };

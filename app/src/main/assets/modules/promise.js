@@ -10,7 +10,7 @@
 /**
  * @type {PromiseConstructorLike}
  */
-module.exports = ( /* @IIFE */ () => {
+module.exports = (/* @IIFE */ () => {
     let _ = {
         isArray(x) {
             return Boolean(x && typeof x.length !== 'undefined');

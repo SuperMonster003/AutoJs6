@@ -104,7 +104,7 @@ enum class App(private val appNameResId: Int, val packageName: String, alias: St
     fun launch() = appUtils.launchPackage(packageName)
 
     @ScriptInterface
-    fun openSettings() = appUtils.openAppSettings(packageName)
+    fun launchSettings() = appUtils.launchSettings(packageName)
 
     @ScriptInterface
     fun uninstall() = appUtils.uninstall(packageName)

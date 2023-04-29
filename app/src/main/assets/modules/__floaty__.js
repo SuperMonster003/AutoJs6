@@ -4,12 +4,10 @@
  * @return {Internal.Floaty}
  */
 module.exports = function (scriptRuntime, scope) {
-    const ProxyJavaObject = org.autojs.autojs.rhino.ProxyJavaObject;
-
     const rtFloaty = scriptRuntime.floaty;
 
     let _ = {
-        Floaty: ( /* @IIFE */ () => {
+        Floaty: (/* @IIFE */ () => {
             /**
              * @implements Internal.Floaty
              */
@@ -28,6 +26,8 @@ module.exports = function (scriptRuntime, scope) {
                 rawWindow(xml) {
                     return _.wrap(rtFloaty.rawWindow.bind(rtFloaty), xml);
                 },
+                hasPermission: () => rtFloaty.hasPermission(),
+                requestPermission: () => rtFloaty.requestPermission(),
             };
 
             return Floaty;
@@ -49,25 +49,15 @@ module.exports = function (scriptRuntime, scope) {
                 layoutInflater.setContext(context);
                 return layoutInflater.inflate(_.toXMLStringIfNeeded(xml), parent, true);
             });
-            let proxyObject = new ProxyJavaObject(scope, window, getClass(window));
-            proxyObject.__proxy__ = {
+            return Object.assign(new ProxyJavaObject(scope, window, {
                 set(name, value) {
                     window[name] = value;
                 },
                 get(name) {
                     let value = window[name];
-                    if (typeof value === 'undefined') {
-                        if (!value) {
-                            value = window.findView(name);
-                        }
-                        if (!value) {
-                            value = undefined;
-                        }
-                    }
-                    return value;
+                    return typeof value !== 'undefined' ? value : window.findView(name) || undefined;
                 },
-            };
-            return proxyObject;
+            }));
         },
     };
 

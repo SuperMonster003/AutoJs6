@@ -39,7 +39,7 @@
                 tools:text="@string/text_sample_name" />
 
         <TextView
-                android:id="@+id/desc"
+                android:id="@+id/task_list_file_path"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|center_vertical"
@@ -50,7 +50,7 @@
                 android:maxLines="1"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="11sp"
-                tools:text="@string/text_sample_desc" />
+                tools:text="@string/text_sample_file_path" />
 
     </LinearLayout>
 

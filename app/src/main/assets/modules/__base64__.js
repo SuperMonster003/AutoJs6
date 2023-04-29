@@ -5,11 +5,8 @@
  */
 module.exports = function (scriptRuntime, scope) {
     const Base64 = android.util.Base64;
-    const JavaString = java.lang.String;
-    const StandardCharsets = java.nio.charset.StandardCharsets;
-
     let _ = {
-        Base64Ctor: ( /* @IIFE */ () => {
+        Base64Ctor: (/* @IIFE */ () => {
             /**
              * @implements Internal.Base64
              */
@@ -19,41 +16,38 @@ module.exports = function (scriptRuntime, scope) {
 
             Base64Ctor.prototype = {
                 constructor: Base64Ctor,
-                /**
-                 * @param str
-                 * @param {string} encoding
-                 * @return {string}
-                 */
                 encode(str, encoding) {
                     // noinspection JSValidateTypes
-                    /**
-                     * @type {java.lang.String}
-                     */
-                    let string = new JavaString(str);
-                    return _.isValidEncoding(encoding)
-                        ? Base64.encodeToString(string.getBytes(encoding), Base64.NO_WRAP)
+                    let string = new java.lang.String(str);
+                    let niceEncoding = _.parseEncoding(encoding);
+                    return niceEncoding !== undefined
+                        ? Base64.encodeToString(string.getBytes(niceEncoding), Base64.NO_WRAP)
                         : Base64.encodeToString(string.getBytes(), Base64.NO_WRAP);
                 },
                 decode(str, encoding) {
-                    // noinspection JSValidateTypes
-                    return _.isValidEncoding(encoding)
-                        ? String(new JavaString(Base64.decode(str, Base64.NO_WRAP), encoding))
-                        : String(new JavaString(Base64.decode(str, Base64.NO_WRAP)));
+                    let niceEncoding = _.parseEncoding(encoding);
+                    return niceEncoding !== undefined
+                        ? String(new java.lang.String(Base64.decode(str, Base64.NO_WRAP), niceEncoding))
+                        : String(new java.lang.String(Base64.decode(str, Base64.NO_WRAP)));
                 },
             };
 
             return Base64Ctor;
         })(),
-        isValidEncoding: (encode) => [
-            StandardCharsets.US_ASCII,
-            StandardCharsets.ISO_8859_1,
-            StandardCharsets.UTF_8,
-            StandardCharsets.UTF_16BE,
-            StandardCharsets.UTF_16LE,
-            StandardCharsets.UTF_16,
-        ].map((javaCharset) => {
-            return javaCharset.name().toLowerCase();
-        }).includes(String(encode).toLowerCase()),
+        /**
+         * Ignored (but not fuzzy) regex matching for non-word characters.
+         */
+        parseEncoding: (encoding) => {
+            return [
+                StandardCharsets.ISO_8859_1,
+                StandardCharsets.US_ASCII,
+                StandardCharsets.UTF_8,
+                StandardCharsets.UTF_16,
+                StandardCharsets.UTF_16BE,
+                StandardCharsets.UTF_16LE,
+            ].find((cs) => cs.name().toLowerCase().replace(/\W+/g, '')
+                === String(encoding).trim().toLowerCase().replace(/\W+/g, ''));
+        },
     };
 
     /**

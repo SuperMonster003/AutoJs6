@@ -165,14 +165,14 @@ public class TimedTaskSettingActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         long taskId = getIntent().getLongExtra(EXTRA_TASK_ID, -1);
         if (taskId != -1) {
-            mTimedTask = TimedTaskManager.getInstance().getTimedTask(taskId);
+            mTimedTask = TimedTaskManager.getTimedTask(taskId);
             if (mTimedTask != null) {
                 mScriptFile = new ScriptFile(mTimedTask.getScriptPath());
             }
         } else {
             long intentTaskId = getIntent().getLongExtra(EXTRA_INTENT_TASK_ID, -1);
             if (intentTaskId != -1) {
-                mIntentTask = TimedTaskManager.getInstance().getIntentTask(intentTaskId);
+                mIntentTask = TimedTaskManager.getIntentTask(intentTaskId);
                 if (mIntentTask != null) {
                     mScriptFile = new ScriptFile(mIntentTask.getScriptPath());
                 }
@@ -389,14 +389,14 @@ public class TimedTaskSettingActivity extends BaseActivity {
         if (task == null)
             return;
         if (mTimedTask == null) {
-            TimedTaskManager.getInstance().addTask(task);
+            TimedTaskManager.addTask(task);
             if (mIntentTask != null) {
-                TimedTaskManager.getInstance().removeTask(mIntentTask);
+                TimedTaskManager.removeTask(mIntentTask);
             }
             ViewUtils.showToast(this, R.string.text_already_created);
         } else {
             task.setId(mTimedTask.getId());
-            TimedTaskManager.getInstance().updateTask(task);
+            TimedTaskManager.updateTask(task);
         }
         finish();
     }
@@ -423,12 +423,12 @@ public class TimedTaskSettingActivity extends BaseActivity {
         task.setLocal(action != null && action.equals(DynamicBroadcastReceivers.ACTION_STARTUP));
         if (mIntentTask != null) {
             task.setId(mIntentTask.getId());
-            TimedTaskManager.getInstance().updateTask(task);
+            TimedTaskManager.updateTask(task);
             ViewUtils.showToast(this, R.string.text_already_created);
         } else {
-            TimedTaskManager.getInstance().addTask(task);
+            TimedTaskManager.addTask(task);
             if (mTimedTask != null) {
-                TimedTaskManager.getInstance().removeTask(mTimedTask);
+                TimedTaskManager.removeTask(mTimedTask);
             }
         }
 

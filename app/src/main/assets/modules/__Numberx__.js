@@ -16,7 +16,7 @@ module.exports = (scriptRuntime, scope) => {
             '>=': (a, b) => a >= b,
             '=': (a, b) => a === b,
         },
-        NumberxCtor: ( /* @IIFE */ () => {
+        NumberxCtor: (/* @IIFE */ () => {
             /**
              * @implements Internal.Numberx
              */
@@ -26,7 +26,7 @@ module.exports = (scriptRuntime, scope) => {
 
             NumberxCtor.prototype = {
                 constructor: NumberxCtor,
-                ICU: ( /* @IIFE */ () => {
+                ICU: (/* @IIFE */ () => {
                     const workdays = 5;
                     const weekends = 2;
                     const health = 'Your health';

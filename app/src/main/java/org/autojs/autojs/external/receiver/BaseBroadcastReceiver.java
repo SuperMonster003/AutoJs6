@@ -27,7 +27,7 @@ public class BaseBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.d(LOG_TAG, "onReceive: intent = " + intent + ", this = " + this);
         try {
-            TimedTaskManager.getInstance().getIntentTaskOfAction(intent.getAction())
+            TimedTaskManager.getIntentTaskOfAction(intent.getAction())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(intentTask -> runTask(context, intent, intentTask), Throwable::printStackTrace);

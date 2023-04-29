@@ -2,7 +2,7 @@
 
 /* Overwritten protection. */
 
-let { autojs, console, device, pickup, ui, util, Numberx } = global;
+let { autojs, console, device, pickup, ui, s13n, Numberx } = global;
 
 /* Here, importClass() is not recommended for intelligent code completion in IDE like WebStorm. */
 /* The same is true of destructuring assignment syntax (like `let {Uri} = android.net`). */
@@ -45,70 +45,8 @@ module.exports = function (runtime, scope) {
                 }
             },
         },
-        uiHandler: runtime.getUiHandler(),
         buildTypes: {
             release: 100, beta: 50, alpha: 0,
-        },
-        toasts: {
-            /**
-             * @type {Set<android.widget.Toast>}
-             */
-            pool: new Set(),
-            lock: new ReentrantLock(),
-            add(t) {
-                if (t instanceof Toast) {
-                    this.lock.lock();
-                    this.pool.add(t);
-                    this.addCallback(t);
-                    this.lock.unlock();
-                }
-            },
-            /**
-             * @param {android.widget.Toast} t
-             */
-            addCallback(t) {
-                const remove = () => _.toasts.remove(t);
-
-                if (util.version.sdkInt >= util.versionCodes.R) {
-                    t.addCallback(new JavaAdapter(Toast.Callback, {
-                        onToastShown: () => void 0,
-                        onToastHidden: remove,
-                    }));
-                } else {
-                    _.uiHandler.postDelayed(new JavaAdapter(java.lang.Runnable, {
-                        run: remove,
-                    }), this.getDuration(t) + 1e3 /* As toast may show with some delay. */);
-                }
-            },
-            remove(t) {
-                if (this.pool.has(t)) {
-                    this.lock.lock();
-                    this.pool.delete(t);
-                    this.lock.unlock();
-                }
-            },
-            dismissAll() {
-                if (this.pool.size > 0) {
-                    this.lock.lock();
-                    this.pool.forEach((t) => t.cancel());
-                    this.pool.clear();
-                    this.lock.unlock();
-                }
-            },
-            getDuration(t) {
-                let du = {
-                    SHORT_DELAY: 2e3,
-                    LONG_DELAY: 3.5e3,
-                };
-                switch (t.getDuration()) {
-                    case Toast.LENGTH_SHORT:
-                        return du.SHORT_DELAY;
-                    case Toast.LENGTH_LONG:
-                        return du.LONG_DELAY;
-                    default:
-                        return Math.max.apply(null, Object.values(du));
-                }
-            },
         },
         extensions: {
             /** @global */
@@ -119,84 +57,9 @@ module.exports = function (runtime, scope) {
             get HEIGHT() {
                 return ScreenMetrics.getDeviceScreenHeight();
             },
-            // @Caution by SuperMonster003 on Oct 11, 2022.
-            //  ! android.widget.Toast.makeText() doesn't work well on Android API Level 28 (Android 9) [P].
-            //  ! There hasn't been a solution for this so far.
-            //  ! Tested devices:
-            //  ! 1. SONY XPERIA XZ1 Compact (G8441)
-            //  ! 2. Android Studio AVD (Android 9.0 x86)
-            /** @global */
-            toast(msg, isLong, isForcible) {
-                let $ = {
-                    rex: {
-                        long: /^l(ong)?$/i,
-                        short: /^s(hort)?$/i,
-                        forcible: /^f(orcible)?$/i,
-                    },
-                    toast() {
-                        this.init(arguments);
-                        this.show();
-                    },
-                    init() {
-                        this.message = isNullish(msg) ? '' : String(msg);
-                        this.isForcible = this.parseIsForcible(isForcible);
-                        this.isLong = this.parseIsLong(isLong);
-                    },
-                    parseIsLong(isLong) {
-                        if (typeof isLong === 'boolean') {
-                            return isLong;
-                        }
-                        if (typeof isLong === 'number') {
-                            return Boolean(isLong);
-                        }
-                        if (typeof isLong === 'string') {
-                            if (this.rex.long.test(isLong)) {
-                                return true;
-                            }
-                            if (this.rex.short.test(isLong)) {
-                                return false;
-                            }
-                            if (this.rex.forcible.test(isLong)) {
-                                this.isForcible = true;
-                                return false;
-                            }
-                            throw Error(`Invalid param: {name: isLong, value: ${isLong}, type: ${species(isLong)}.`);
-                        }
-                        return false;
-                    },
-                    parseIsForcible(isForcible) {
-                        if (typeof isForcible === 'boolean') {
-                            return isForcible;
-                        }
-                        if (typeof isForcible === 'number') {
-                            return Boolean(isForcible);
-                        }
-                        if (typeof isForcible === 'string') {
-                            if (this.rex.forcible.test(isForcible)) {
-                                return true;
-                            }
-                            throw Error(`Invalid param: {name: isForcible, value: ${isForcible}, type: ${species(isForcible)}.`);
-                        }
-                        return false;
-                    },
-                    show() {
-                        _.uiHandler.post(() => {
-                            if ($.isForcible) {
-                                _.toasts.dismissAll();
-                            }
-                            let len = $.isLong ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT;
-                            let o = Toast.makeText(_.uiHandler.getContext(), $.message, len);
-                            _.toasts.add(o);
-                            o.show();
-                        });
-                    },
-                };
-
-                $.toast();
-            },
             /** @global */
             toastLog(msg, isLong, isForcible) {
-                this.toast.apply(this, arguments);
+                toast.apply(this, arguments);
                 console.log(msg);
             },
             /** @global */
@@ -286,12 +149,8 @@ module.exports = function (runtime, scope) {
             exit(e) {
                 if (typeof e === 'undefined') {
                     runtime.exit();
-                } else if (typeof e === 'string') {
-                    runtime.exit(new java.lang.Exception(e));
-                } else if (typeof e instanceof java.lang.Throwable) {
-                    runtime.exit(e);
                 } else {
-                    throw TypeError(`Unknown type of argument "e" with value ${e}} for exit()`);
+                    runtime.exit(s13n.throwable(e));
                 }
             },
             /** @global */
@@ -325,12 +184,12 @@ module.exports = function (runtime, scope) {
              * @return {any}
              */
             wait(condition, limit, interval, callback) {
-                if (isObjectSpecies(arguments[1])) {
+                if (species.isObject(arguments[1])) {
                     // @Overload wait(condition, callback): any
                     return this.wait(condition, /* limit = */ null, /* interval = */ null, /* callback = */ arguments[1]);
                 }
 
-                if (isObjectSpecies(arguments[2])) {
+                if (species.isObject(arguments[2])) {
                     // @Overload wait(condition, limit, callback): any
                     return this.wait(condition, limit, /* interval = */ null, /* callback = */ arguments[2]);
                 }
@@ -581,18 +440,9 @@ module.exports = function (runtime, scope) {
                 }
                 return Math.round(num * H / base);
             },
-            $bind() {
-                this.toast.dismissAll = () => {
-                    _.uiHandler.post(() => {
-                        _.toasts.dismissAll();
-                    });
-                };
-                delete this.$bind;
-                return this;
-            },
             // $selfProtect() {
             //     /* Protection of global properties from being modified or deleted. */
-            //     ( /* @IIFE */ () => [
+            //     (/* @IIFE */ () => [
             //         [ 'auto', 'colors' ],
             //
             //         [ 'android', 'com', 'edu', 'java', 'javax', 'net', 'org' ],
@@ -683,7 +533,7 @@ module.exports = function (runtime, scope) {
         },
     };
 
-    Object.assign(scope, _.extensions.$bind());
+    Object.assign(scope, _.extensions);
 
     // Object.keys(_.extensions)
     //     .filter(key => !key.startsWith('$'))

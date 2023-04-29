@@ -13,7 +13,7 @@ module.exports = function (scriptRuntime, scope) {
     const rtEngines = scriptRuntime.engines;
 
     let _ = {
-        Engines: ( /* @IIFE */ () => {
+        Engines: (/* @IIFE */ () => {
             /**
              * @extends Internal.Engines
              */
@@ -69,7 +69,7 @@ module.exports = function (scriptRuntime, scope) {
             return executionConfig;
         },
         setEngineExecArgv() {
-            engines.myEngine().setExecArgv( /* @IIFE */ ((e) => {
+            engines.myEngine().setExecArgv(/* @IIFE */ ((e) => {
                 let execArgv = {};
                 let iterator = e.getTag(ExecutionConfig.CREATOR.getTag()).arguments.entrySet().iterator();
                 while (iterator.hasNext()) {

@@ -31,7 +31,7 @@ import kotlin.text.Regex;
  */
 public class DeveloperUtils {
 
-    private static final Regex SIGNATURE_REX = new Regex(".*(CbKua77m59vis|N7YkpKxKjsPWe).*");
+    private static final Regex SIGNATURE_REX = new Regex("CbKua77m59vis|N7YkpKxKjsPWe");
     private static final ExecutorService sExecutor = UnderUseExecutors.getExecutor();
     private static final String SALT = "let\nlife\nbe\nbeautiful\nlike\nsummer\nflowers\nand\ndeath\nlike\nautumn\nleaves\n.";
 
@@ -84,7 +84,7 @@ public class DeveloperUtils {
         if (sha.endsWith("\n")) {
             sha = sha.substring(0, sha.length() - 1);
         }
-        return SIGNATURE_REX.matches(sha);
+        return SIGNATURE_REX.containsMatchIn(sha);
     }
 
     public static String selfPackage() {

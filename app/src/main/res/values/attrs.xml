@@ -7,6 +7,16 @@
     <attr name="drawer_group_text_color" format="color|reference" />
     <attr name="itemBackgroundDark" format="color|reference" />
 
+    <declare-styleable name="MultiLevelListView">
+        <attr name="nestType">
+            <enum name="single" value="0" />
+            <enum name="multiple" value="1" />
+        </attr>
+
+        <attr name="alwaysExtended" format="boolean" />
+        <attr name="list" format="reference" />
+    </declare-styleable>
+
     <declare-styleable name="MaterialDialogPreference">
         <attr name="dialogTitle" format="string" />
         <attr name="dialogContent" format="string" />

@@ -10,9 +10,9 @@ import android.view.WindowManager;
 
 import androidx.preference.PreferenceManager;
 
-import com.stardust.enhancedfloaty.FloatyService;
-import com.stardust.enhancedfloaty.FloatyWindow;
-import com.stardust.enhancedfloaty.WindowBridge;
+import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
+import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
+import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 
 import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.ui.floating.gesture.BounceDragGesture;

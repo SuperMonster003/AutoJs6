@@ -72,8 +72,6 @@ class MutableOkHttp : OkHttpClient() {
     }
 
     @Synchronized
-    private fun muteClient() {
-        mOkHttpClient = newClient(mOkHttpClient.newBuilder())
-    }
+    private fun muteClient() = muteClient(mOkHttpClient.newBuilder())
 
 }

@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.accessibility
 
+import android.accessibilityservice.AccessibilityServiceInfo
+import android.os.Build
 import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
@@ -7,6 +9,7 @@ import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
 import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.event.EventDispatcher
+import org.autojs.autojs.pref.Pref
 import java.util.TreeMap
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -88,6 +91,17 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
     override fun onServiceConnected() {
         instance = this
+
+        serviceInfo = serviceInfo.apply {
+            AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.let {
+                flags = (if (Pref.isStableModeEnabled) flags and it.inv() else flags or it)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE.let {
+                    flags = (if (Pref.isGestureObservingEnabled) flags or it else flags and it.inv())
+                }
+            }
+        }
 
         super.onServiceConnected()
 

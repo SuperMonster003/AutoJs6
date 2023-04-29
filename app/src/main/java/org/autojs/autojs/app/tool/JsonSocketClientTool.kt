@@ -49,7 +49,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                         val fullText = dest.substring(0, dstart) +
                                        source.subSequence(start, end) +
                                        dest.substring(dend)
-                        if (!fullText.matches(rexIp)) {
+                        if (!fullText.contains(rexIp)) {
                             return@InputFilter ""
                         }
                         fullText.split(rexDot.toRegex()).dropLastWhile { it.isEmpty() }.forEach { s ->

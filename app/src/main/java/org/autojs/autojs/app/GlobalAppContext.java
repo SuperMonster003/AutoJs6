@@ -15,9 +15,9 @@ public class GlobalAppContext {
     private static Context sApplicationContext;
     private static Handler sHandler;
 
-    public static void set(Application a) {
+    public static void set(Application app) {
         sHandler = new Handler(Looper.getMainLooper());
-        sApplicationContext = a.getApplicationContext();
+        sApplicationContext = app.getApplicationContext();
     }
 
     public static Context get() {

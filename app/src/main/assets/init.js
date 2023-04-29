@@ -15,6 +15,7 @@ let RootMode = org.autojs.autojs.util.RootUtils.RootMode;
 let Pref = org.autojs.autojs.pref.Pref;
 let Shell = org.autojs.autojs.runtime.api.Shell;
 let Intent = global.Intent = android.content.Intent;
+let PendingIntent = android.app.PendingIntent;
 let Toast = android.widget.Toast;
 let KeyEvent = android.view.KeyEvent;
 let Version = Packages.io.github.g00fy2.versioncompare.Version;
@@ -31,6 +32,20 @@ let OkHttpClient = Packages.okhttp3.OkHttpClient;
 let ScriptInterruptedException = org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 let ReentrantLock = java.util.concurrent.locks.ReentrantLock;
 let ScreenMetrics = org.autojs.autojs.runtime.api.ScreenMetrics;
+let StandardCharsets = java.nio.charset.StandardCharsets;
+let WebView = android.webkit.WebView;
+let WebViewClient = android.webkit.WebViewClient;
+let WebChromeClient = android.webkit.WebChromeClient;
+let GlobalAppContext = org.autojs.autojs.app.GlobalAppContext;
+let DisplayUtils = org.autojs.autojs.util.DisplayUtils;
+let StringUtils = org.autojs.autojs.util.StringUtils;
+let ColorUtils = org.autojs.autojs.util.ColorUtils;
+let ProxyObject = org.autojs.autojs.rhino.ProxyObject;
+let ProxyJavaObject = org.autojs.autojs.rhino.ProxyJavaObject;
+let NotificationManager = android.app.NotificationManager;
+let NotificationCompat = Packages.androidx.core.app.NotificationCompat;
+let URI = java.net.URI;
+let File = java.io.File;
 
 /* Global assignment. */
 
@@ -45,7 +60,7 @@ Object.assign(this, {
         // nullish coalescing operator: ??
         return o === null || o === undefined;
     },
-    isObjectSpecies(o) {
+    isObject(o) {
         return species(o) === 'Object';
     },
     isJavaClass(o) {
@@ -92,9 +107,53 @@ Object.assign(this, {
         }
         return true;
     },
-    species(o) {
-        return Object.prototype.toString.call(o).slice('[Object\x20'.length, ']'.length * -1);
-    },
+    species: (/* @IIFE */ () => {
+        const getSpecies = (o) => Object.prototype.toString.call(o)
+            .slice('[Object\x20'.length, ']'.length * -1);
+
+        function Species() {
+            return Object.assign(o => getSpecies(o), Species.prototype);
+        }
+
+        Species.prototype.isArray = o => getSpecies(o) === 'Array';
+        Species.prototype.isArrayBuffer = o => getSpecies(o) === 'ArrayBuffer';
+        Species.prototype.isBigInt = o => getSpecies(o) === 'BigInt';
+        Species.prototype.isBoolean = o => getSpecies(o) === 'Boolean';
+        Species.prototype.isContinuation = o => getSpecies(o) === 'Continuation';
+        Species.prototype.isDataView = o => getSpecies(o) === 'DataView';
+        Species.prototype.isDate = o => getSpecies(o) === 'Date';
+        Species.prototype.isError = o => getSpecies(o) === 'Error';
+        Species.prototype.isFloat32Array = o => getSpecies(o) === 'Float32Array';
+        Species.prototype.isFloat64Array = o => getSpecies(o) === 'Float64Array';
+        Species.prototype.isFunction = o => getSpecies(o) === 'Function';
+        Species.prototype.isHTMLDocument = o => getSpecies(o) === 'HTMLDocument';
+        Species.prototype.isInt16Array = o => getSpecies(o) === 'Int16Array';
+        Species.prototype.isInt32Array = o => getSpecies(o) === 'Int32Array';
+        Species.prototype.isInt8Array = o => getSpecies(o) === 'Int8Array';
+        Species.prototype.isJavaObject = o => getSpecies(o) === 'JavaObject';
+        Species.prototype.isJavaPackage = o => getSpecies(o) === 'JavaPackage';
+        Species.prototype.isMap = o => getSpecies(o) === 'Map';
+        Species.prototype.isNamespace = o => getSpecies(o) === 'Namespace';
+        Species.prototype.isNull = o => getSpecies(o) === 'Null';
+        Species.prototype.isNumber = o => getSpecies(o) === 'Number';
+        Species.prototype.isObject = o => getSpecies(o) === 'Object';
+        Species.prototype.isQName = o => getSpecies(o) === 'QName';
+        Species.prototype.isRegExp = o => getSpecies(o) === 'RegExp';
+        Species.prototype.isSet = o => getSpecies(o) === 'Set';
+        Species.prototype.isString = o => getSpecies(o) === 'String';
+        Species.prototype.isUint16Array = o => getSpecies(o) === 'Uint16Array';
+        Species.prototype.isUint32Array = o => getSpecies(o) === 'Uint32Array';
+        Species.prototype.isUint8Array = o => getSpecies(o) === 'Uint8Array';
+        Species.prototype.isUint8ClampedArray = o => getSpecies(o) === 'Uint8ClampedArray';
+        Species.prototype.isUndefined = o => getSpecies(o) === 'Undefined';
+        Species.prototype.isWeakMap = o => getSpecies(o) === 'WeakMap';
+        Species.prototype.isWeakSet = o => getSpecies(o) === 'WeakSet';
+        Species.prototype.isWindow = o => getSpecies(o) === 'Window';
+        Species.prototype.isXML = o => getSpecies(o) === 'XML';
+        Species.prototype.isXMLList = o => getSpecies(o) === 'XMLList';
+
+        return new Species();
+    })(),
     /**
      * @param {{getClass(): java.lang.Class<?>}} o
      * @return {*}
@@ -204,7 +263,10 @@ Object.assign(this, {
                     try {
                         if (typeof global[module] === 'object') {
                             if (!(Object.hasOwn(global[module], 'toString'))) {
-                                global[module].toString = () => module;
+                                // noinspection JSPotentiallyInvalidConstructorUsage
+                                if (typeof global[module].constructor.prototype.toString !== 'function') {
+                                    global[module].toString = () => module;
+                                }
                             }
                         }
                     } catch (e) {
@@ -214,9 +276,10 @@ Object.assign(this, {
             });
         },
         getProxyObjectInstance(getter, setter) {
-            let object = new org.autojs.autojs.rhino.ProxyObject();
-            object.__proxy__ = Object.assign({}, getter ? { get: getter } : {}, setter ? { set: setter } : {});
-            return object;
+            return new ProxyObject(global, Object.assign(
+                getter ? { get: getter } : {},
+                setter ? { set: setter } : {},
+            ));
         },
     };
 
@@ -266,7 +329,7 @@ Object.assign(this, {
                         return this.__asGlobal__(obj, functions, global);
                     }
                     functions.forEach((name) => {
-                        let { objKey, scopeKey } = ( /* @IIFE */ () => {
+                        let { objKey, scopeKey } = (/* @IIFE */ () => {
                             if (typeof name === 'string') {
                                 let objKey = scopeKey = name;
                                 return { objKey, scopeKey };
@@ -339,7 +402,7 @@ Object.assign(this, {
                 /* ! threads < images # threads.atomic() */
                 /* ! ui < images */
                 /* ! ui < dialogs # ui.run() */
-                /* ! images < dialogs # colors */
+                /* ! colors < dialogs # colors */
                 /* ! engines < continuation # engines.myEngine() */
                 /* ! continuation < http */
                 /* ! ui < http */
@@ -350,7 +413,7 @@ Object.assign(this, {
                 /* ! files < images */
                 [ 'threads', 'ui', 'tasks' ],
                 [ 'engines', 'continuation', 'http' ],
-                [ 'images', 'dialogs' ],
+                [ 'images', 'colors', 'dialogs' ],
 
                 /* ! files < i18n */
                 /* ! i18n < selector */
@@ -360,16 +423,22 @@ Object.assign(this, {
                 [ 'RootAutomator' ],
 
                 /* ! files < console */
-                [ 'console' ],
+                /* ! colors < console */
+                /* ! s13n < console */
+                [ 's13n', 'console' ],
 
                 /* ! plugins < %extensions% */
                 /* ! Arrayx < Mathx */
                 /* ! Numberx < Mathx */
                 [ 'plugins', 'Arrayx', 'Numberx', 'Mathx' ],
 
+                /* ! ocr < images */
+                /* ! ocr < files */
+                [ 'ocr' ],
+
                 /* Safe to put last regardless of the order, no guarantee ;). */
-                [ 'floaty', 'storages', 'device', 'recorder' ],
-                [ 'media', 'sensors', 'web', 'events', 'base64' ],
+                [ 'floaty', 'storages', 'device', 'recorder', 'toast' ],
+                [ 'media', 'sensors', 'web', 'events', 'base64', 'notice' ],
 
                 /* Last but not the least */
                 [ 'globals' ],

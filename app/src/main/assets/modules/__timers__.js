@@ -62,7 +62,7 @@ module.exports = function (scriptRuntime, scope) {
                 'setInterval', 'clearInterval',
                 'setImmediate', 'clearImmediate',
             ];
-            __asGlobal__(scriptRuntime.timers, methods);
+            __asGlobal__(scriptRuntime.timers, methods, scope);
 
             Object.assign(scope, {
                 /**

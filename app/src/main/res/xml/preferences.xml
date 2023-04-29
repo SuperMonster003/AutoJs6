@@ -33,6 +33,15 @@
                 app:title="@string/text_theme_color"
                 app:longClickPrompt="@string/description_theme_color_preference" />
 
+        <org.autojs.autojs.ui.settings.KeepScreenOnWhenInForegroundPreference
+                app:layout="@layout/preference_custom"
+                app:key="@string/key_keep_screen_on_when_in_foreground"
+                app:title="@string/text_keep_screen_on_when_in_foreground"
+                app:itemKeys="@array/keys_keep_screen_on_when_in_foreground"
+                app:itemValues="@array/values_keep_screen_on_when_in_foreground"
+                app:itemDefaultKey="@string/key_keep_screen_on_when_in_foreground_disabled"
+                app:longClickPrompt="@string/description_keep_screen_on_when_in_foreground_preference" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
@@ -49,6 +58,15 @@
                 app:onConfirmPrompt="@string/prompt_restart_is_needed_for_docs_source_switch"
                 app:longClickPrompt="@string/description_documentation_source_preference"
                 app:longClickPromptMore="@string/description_documentation_source_preference_more" />
+
+        <org.autojs.autojs.ui.settings.DocumentationLauncherIconPreference
+                app:layout="@layout/preference_custom"
+                app:key="@string/key_documentation_launcher_icon"
+                app:title="@string/text_documentation_launcher_icon"
+                app:itemKeys="@array/keys_documentation_launcher_icon"
+                app:itemValues="@array/values_documentation_launcher_icon"
+                app:itemDefaultKey="@string/key_documentation_launcher_icon_show"
+                app:longClickPrompt="@string/description_documentation_launcher_icon_preference" />
 
         <org.autojs.autojs.ui.settings.WorkingDirectoryPreference
                 app:layout="@layout/preference_custom"

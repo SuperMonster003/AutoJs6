@@ -8,8 +8,9 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stardust.enhancedfloaty.FloatyService;
-import com.stardust.enhancedfloaty.FloatyWindow;
+import org.autojs.autojs.core.console.GlobalConsole;
+import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
+import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
 
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission;
 import org.autojs.autojs.util.ViewUtils;
@@ -36,11 +37,11 @@ public class FloatyWindowManger {
             // SecurityException: https://github.com/hyb1996-guest/AutoJsIssueReport/issues/4781
         } catch (Exception e) {
             e.printStackTrace();
-            if (!getDisplayOverOtherAppsPerm(context).has()) {
-                ViewUtils.showToast(context, R.string.text_no_draw_overlays_permission, true);
-            }
+            // if (!getDisplayOverOtherAppsPerm(context).has()) {
+            //     ViewUtils.showToast(context, R.string.error_no_draw_overlays_permission, true);
+            // }
+            return false;
         }
-        return false;
     }
 
     public static boolean isCircularMenuShowing() {
@@ -77,7 +78,7 @@ public class FloatyWindowManger {
             context.startService(new Intent(context, FloatyService.class));
             setCircularMenuContext(context);
         } else {
-            ViewUtils.showToast(context, R.string.text_no_draw_overlays_permission);
+            ViewUtils.showToast(context, R.string.error_no_draw_overlays_permission);
             getDisplayOverOtherAppsPerm(context).config();
         }
         sCircularMenuShown = true;
@@ -89,6 +90,12 @@ public class FloatyWindowManger {
 
     public static void hideCircularMenu() {
         hideCircularMenu(false);
+    }
+
+    public static void hideCircularMenuIfNeeded() {
+        if (isCircularMenuShowing()) {
+            hideCircularMenu(false);
+        }
     }
 
     public static void hideCircularMenu(boolean isSaveState) {

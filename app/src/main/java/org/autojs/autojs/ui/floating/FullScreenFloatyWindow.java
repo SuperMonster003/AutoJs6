@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.floating;
 import android.graphics.PixelFormat;
 import android.view.WindowManager;
 
-import com.stardust.enhancedfloaty.FloatyWindow;
+import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
 
 /**
  * Created by Stardust on 2017/10/18.
