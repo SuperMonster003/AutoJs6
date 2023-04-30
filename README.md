@@ -288,12 +288,10 @@
 > - IntelliJ IDEA 版本建议不低于 `2022.3.3 (Ultimate Edition)`
 > - IntelliJ IDEA 的 Gradle JVM 版本不低于 `19`
 > - 回退 Gradle 构建工具版本至 IDEA 支持的版本
-    >
-- 如 `classpath("com.android.tools.build:gradle:7.4.0")`
+>   - 如 `classpath("com.android.tools.build:gradle:7.4.0")`
 >   - 具体版本可根据 IDEA 的错误提示获知
 > - 回退 Kotlin 脚本 (KTS) 语法
-    >
-- 如 ` com.android.build.api.dsl.CommonExtension#options` 需回退为 `packagingOptions`
+>   - 如 ` com.android.build.api.dsl.CommonExtension#options` 需回退为 `packagingOptions`
 > - ... ...
 
 #### Android Studio 准备
@@ -412,11 +410,11 @@ Gradle
 
 | 项目                                                                | 简介                                     | 开发者                                                   |
 |-------------------------------------------------------------------|----------------------------------------|-------------------------------------------------------|
-| [AutoX (Autox.js)](https://github.com/kkevsekk1/AutoX)            | 安卓平台 JavaScript 自动化工具 (Auto.js 二次开发项目) | [kkevsekk1](https://github.com/kkevsekk1)             |
-| [AutoJs6-Documentation](http://docs-project.autojs6.com)          | AutoJs6 应用文档                           | [SuperMonster003](https://github.com/SuperMonster003) |
-| [AutoJs6-VSCode-Extension](http://vscext-project.autojs6.com)     | AutoJs6 调试器 (VSCode 平台插件)              | [SuperMonster003](https://github.com/SuperMonster003) |
-| [AutoJs6-TypeScript-Declarations](http://dts-project.autojs6.com) | AutoJs6 声明文件 (代码智能补全)                  | [SuperMonster003](https://github.com/SuperMonster003) |
-| [Ant-Forest](https://github.com/SuperMonster003/Ant-Forest)       | 蚂蚁森林能量自动收取脚本 (AutoJs6 示例脚本项目)          | [SuperMonster003](https://github.com/SuperMonster003) |
+| <span style="white-space:nowrap">[AutoX (Autox.js)](https://github.com/kkevsekk1/AutoX)</span>            | <span style="white-space:nowrap">安卓平台 JavaScript 自动化工具 (Auto.js 二次开发项目)</span> | <span style="white-space:nowrap">[kkevsekk1](https://github.com/kkevsekk1)</span>             |
+| <span style="white-space:nowrap">[AutoJs6-Documentation](http://docs-project.autojs6.com)</span>          | <span style="white-space:nowrap">AutoJs6 应用文档</span>                           | <span style="white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> |
+| <span style="white-space:nowrap">[AutoJs6-VSCode-Extension](http://vscext-project.autojs6.com)</span>     | <span style="white-space:nowrap">AutoJs6 调试器 (VSCode 平台插件)</span>              | <span style="white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> |
+| <span style="white-space:nowrap">[AutoJs6-TypeScript-Declarations](http://dts-project.autojs6.com)</span> | <span style="white-space:nowrap">AutoJs6 声明文件 (代码智能补全)</span>                  | <span style="white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> |
+| <span style="white-space:nowrap">[Ant-Forest](https://github.com/SuperMonster003/Ant-Forest)</span>       | <span style="white-space:nowrap">蚂蚁森林能量自动收取脚本 (AutoJs6 示例脚本项目)</span>          | <span style="white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span> |
 
 [//]: # (
     # --------------------------------------------------------------#
