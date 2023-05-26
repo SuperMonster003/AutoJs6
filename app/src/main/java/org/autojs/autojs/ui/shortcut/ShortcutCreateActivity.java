@@ -29,10 +29,8 @@ import org.autojs.autojs.external.shortcut.ShortcutManager;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs6.R;
+import org.autojs.autojs6.databinding.ShortcutCreateDialogBinding;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -47,25 +45,28 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     private ScriptFile mScriptFile;
     private boolean mIsDefaultIcon = true;
 
-    @BindView(R.id.name)
     TextView mName;
-
-    @BindView(R.id.icon)
     ImageView mIcon;
-
-    @BindView(R.id.use_android_n_shortcut)
     CheckBox mUseAndroidNShortcut;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        View view = View.inflate(this, R.layout.shortcut_create_dialog, null);
+        ShortcutCreateDialogBinding binding = ShortcutCreateDialogBinding.bind(view);
+
+        mName = binding.name;
+        mIcon = binding.icon;
+        mUseAndroidNShortcut = binding.useAndroidNShortcut;
+
+        mIcon.setOnClickListener(v -> AppsIconSelectActivity.launchForResult(this, 21209));
+
         mScriptFile = (ScriptFile) getIntent().getSerializableExtra(EXTRA_FILE);
-        showDialog();
+        showDialog(view);
     }
 
-    private void showDialog() {
-        View view = View.inflate(this, R.layout.shortcut_create_dialog, null);
-        ButterKnife.bind(this, view);
+    private void showDialog(View view) {
         mUseAndroidNShortcut.setVisibility(Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1
                 ? View.VISIBLE : View.GONE);
         mName.setText(mScriptFile.getSimplifiedName());
@@ -80,14 +81,6 @@ public class ShortcutCreateActivity extends AppCompatActivity {
                 .cancelListener(dialog -> finish())
                 .show();
     }
-
-
-    @OnClick(R.id.icon)
-    void selectIcon() {
-        AppsIconSelectActivity_.intent(this)
-                .startForResult(21209);
-    }
-
 
     @SuppressLint("NewApi") //for fool android studio
     private void createShortcut() {
@@ -133,6 +126,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     }
 
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint({"CheckResult", "MissingSuperCall"})
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

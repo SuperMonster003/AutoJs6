@@ -10,6 +10,8 @@
     <color name="console_view_debug">#DFE0E0E0</color>
     <color name="console_view_verbose">#7F7F80</color>
 
+    <color name="layout_hierarchy_view_level_beam_5">@color/md_lime_500</color>
+
     <color name="dialog_button_default">#03A9F4</color>
     <color name="dialog_button_caution">#E57373</color>
     <color name="dialog_button_warn">#F57C00</color>

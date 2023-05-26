@@ -5,8 +5,6 @@
  * @see https://raw.githubusercontent.com/taylorhakes/promise-polyfill/master/dist/polyfill.js
  */
 
-'use strict';
-
 /**
  * @type {PromiseConstructorLike}
  */

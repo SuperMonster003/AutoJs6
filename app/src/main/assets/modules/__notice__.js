@@ -14,7 +14,13 @@ module.exports = function (scriptRuntime, scope) {
     const BigTextStyle = androidx.core.app.NotificationCompat.BigTextStyle;
     const Notification = android.app.Notification;
     const NotificationManager = android.app.NotificationManager;
-    const NotificationManagerCompat = androidx.core.app.NotificationManagerCompat;
+
+    // @Caution by SuperMonster003 on May 6, 2023.
+    //  ! On device running with Android 7.x,
+    //  ! importing NotificationManagerCompat will cause java.lang.ClassNotFoundException:
+    //  ! Didn't find class "android.app.NotificationChannel" on path: DexPathList ...
+
+    //  const NotificationManagerCompat = androidx.core.app.NotificationManagerCompat;
 
     const configDefaults = {
         /**
@@ -511,7 +517,9 @@ module.exports = function (scriptRuntime, scope) {
                     if (!isNullish(id)) {
                         let niceId = Number(id);
                         if (!isNaN(niceId)) {
-                            NotificationManagerCompat.from(context).cancel(niceId);
+                            if (util.version.sdkInt >= util.versionCodes.O) {
+                                androidx.core.app.NotificationManagerCompat.from(context).cancel(niceId);
+                            }
                         }
                     }
                 },

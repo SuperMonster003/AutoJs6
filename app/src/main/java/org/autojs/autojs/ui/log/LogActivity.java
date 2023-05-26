@@ -1,36 +1,46 @@
 package org.autojs.autojs.ui.log;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
 
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.Click;
-import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
+import androidx.annotation.Nullable;
+
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.core.console.ConsoleView;
 import org.autojs.autojs.core.console.GlobalConsole;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs6.R;
+import org.autojs.autojs6.databinding.ActivityLogBinding;
+import org.autojs.autojs6.databinding.ConsoleViewBinding;
+import org.jetbrains.annotations.NotNull;
 
-@EActivity(R.layout.activity_log)
 public class LogActivity extends BaseActivity {
 
-    @ViewById(R.id.console)
-    ConsoleView mConsoleView;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    private GlobalConsole mConsoleImpl;
+        ActivityLogBinding activityLogBinding = ActivityLogBinding.inflate(getLayoutInflater());
+        setContentView(activityLogBinding.getRoot());
 
-    @AfterViews
-    void setupViews() {
         setToolbarAsBack(R.string.text_log);
-        mConsoleImpl = AutoJs.getInstance().getGlobalConsole();
+
+        ConsoleView mConsoleView = activityLogBinding.console;
+
+        GlobalConsole mConsoleImpl = AutoJs.getInstance().getGlobalConsole();
         mConsoleView.setConsole(mConsoleImpl);
-        mConsoleView.findViewById(R.id.input_container).setVisibility(View.GONE);
+        mConsoleView.setPinchToZoomEnabled(true);
+
+        ConsoleViewBinding consoleViewBinding = ConsoleViewBinding.inflate(getLayoutInflater());
+        consoleViewBinding.inputContainer.setVisibility(View.GONE);
+
+        activityLogBinding.fab.setOnClickListener(v -> mConsoleImpl.clear());
     }
 
-    @Click(R.id.fab)
-    public void clearConsole() {
-        mConsoleImpl.clear();
+    public static void launch(@NotNull Context context) {
+        context.startActivity(new Intent(context, LogActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
-
 }

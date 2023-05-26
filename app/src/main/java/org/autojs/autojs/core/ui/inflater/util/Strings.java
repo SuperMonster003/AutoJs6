@@ -9,7 +9,6 @@ import android.view.View;
  */
 public class Strings {
 
-
     public static String parse(Context context, String str) {
         if (str.startsWith("@string/")) {
             Resources resources = context.getResources();

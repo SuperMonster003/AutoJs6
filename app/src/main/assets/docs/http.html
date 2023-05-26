@@ -203,7 +203,7 @@
 <p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Mar 21, 2023.</p>
 
 <hr>
-<p>http模块提供一些进行http请求的函数.</p>
+<p>http 模块主要用于发送 HTTP 请求, 获取并解析 HTTP 响应.</p>
 <blockquote>
 <p>注: 与 <a href="web.html">web</a> 模块不同, web 模块主要用于 WebView 网页的注入及客户端构建.</p>
 </blockquote>
@@ -340,11 +340,11 @@ log(res.body.string());
 <p>选项options可以包含以下属性：</p>
 <ul>
 <li><code>headers</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="type">Object</a> } 键值对形式的HTTP头部信息. 有关HTTP头部信息, 参见<a href="http://www.runoob.com/http/http-header-fields.html">菜鸟教程：HTTP响应头信息</a>.</li>
-<li><code>method</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } HTTP请求方法. 包括&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELET&quot;, &quot;PATCH&quot;.</li>
+<li><code>method</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } HTTP请求方法. 包括&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;.</li>
 <li><code>contentType</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } HTTP头部信息中的&quot;Content-Type&quot;, 表示HTTP请求的内容类型. 例如&quot;text/plain&quot;, &quot;application/json&quot;. 更多信息参见<a href="http://www.runoob.com/http/http-content-type.html">菜鸟教程：HTTP contentType</a>.</li>
 <li><code>body</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } | { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="type">Array</a> } | { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" class="type">Function</a> } HTTP请求的内容. 可以是一个字符串, 也可以是一个字节数组；或者是一个以<a href="https://github.com/square/okio/blob/master/okio/src/main/java/okio/BufferedSink.java/">BufferedSink</a>为参数的函数.</li>
 </ul>
-<p>该函数是get, post, postJson等函数的基础函数. 因此除非是PUT, DELET等请求, 或者需要更高定制的HTTP请求, 否则直接使用get, post, postJson等函数会更加方便.</p>
+<p>该函数是get, post, postJson等函数的基础函数. 因此除非是PUT, DELETE等请求, 或者需要更高定制的HTTP请求, 否则直接使用get, post, postJson等函数会更加方便.</p>
 <h2>[m] buildRequest<span><a class="mark" href="#http_m_buildrequest" id="http_m_buildrequest">#</a></span></h2>
 <h3>buildRequest(url, options)<span><a class="mark" href="#http_buildrequest_url_options" id="http_buildrequest_url_options">#</a></span></h3>
 <p>... ...</p>

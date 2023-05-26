@@ -3,7 +3,6 @@ package org.autojs.autojs.ui.edit.editor;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.TimingLogger;
 
 import androidx.annotation.NonNull;
 
@@ -71,7 +70,6 @@ public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChanged
     private final ThreadPoolExecutor mExecutorService = new ThreadPoolExecutor(3, 6,
             2L, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
     private final AtomicInteger mRunningHighlighterId = new AtomicInteger();
-    private final TimingLogger mLogger = new TimingLogger(CodeEditText.LOG_TAG, "highlight");
     private final TextWatcher mTextWatcher;
 
     public JavaScriptHighlighter(Theme theme, CodeEditText codeEditText) {
@@ -101,10 +99,7 @@ public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChanged
         }
         mExecutorService.execute(() -> {
             try {
-                mLogger.reset();
                 updateTokens(sourceString, id);
-                mLogger.addSplit("parse tokens");
-                mLogger.dumpToLog();
             } catch (IOException neverHappen) {
                 throw new UncheckedIOException(neverHappen);
             }

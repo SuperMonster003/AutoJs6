@@ -9,6 +9,7 @@ import androidx.annotation.WorkerThread;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import org.autojs.autojs.pref.Pref;
 import org.autojs.autojs6.R;
 
 import java.io.IOException;
@@ -22,6 +23,8 @@ import io.reactivex.subjects.PublishSubject;
 
 @SuppressWarnings({"UnusedReturnValue", "resource"})
 public class JsonSocketServer extends JsonSocket {
+
+    private final static String prefKeyServerSocketNormallyClosed = "key_$_server_socket_normally_closed";
 
     private static final String TAG = JsonSocketServer.class.getSimpleName();
 
@@ -69,6 +72,14 @@ public class JsonSocketServer extends JsonSocket {
         return mServerSocket != null && !mServerSocket.isClosed();
     }
 
+    public static boolean isServerSocketNormallyClosed() {
+        return Pref.getBoolean(prefKeyServerSocketNormallyClosed, true);
+    }
+
+    public static void setServerSocketNormallyClosed(boolean state) {
+        Pref.putBoolean(prefKeyServerSocketNormallyClosed, state);
+    }
+
     @Override
     public Socket getSocket() {
         return mSocket;
@@ -102,6 +113,7 @@ public class JsonSocketServer extends JsonSocket {
         }
         close();
         setStateDisconnected();
+        setServerSocketNormallyClosed(true);
     }
 
     public void close() throws IOException {
@@ -136,7 +148,7 @@ public class JsonSocketServer extends JsonSocket {
 
         try {
             if (!element.isJsonObject()) {
-                onSocketError(new Error("Not a JSON object"));
+                onSocketError(new Exception("Not a JSON object"));
                 return;
             }
             JsonObject obj = element.getAsJsonObject();

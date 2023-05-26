@@ -110,6 +110,38 @@
 
 [comment]: <> "Version history only shows last 3 versions"
 
+# v6.3.1
+
+###### 2023/05/26
+
+* `新增` 发布通知权限及主页抽屉开关 _[`issue #55`](http://issues.autojs6.com/55)_
+* `新增` UI 模式支持简单的 Android 布局解析 (参阅 示例代码 > 布局 > 简单安卓布局)
+* `新增` UI 模式增加 console / imagebutton / ratingbar / switch / textclock / togglebutton 等控件
+* `新增` UI 模式控件的颜色色值支持 [OmniColor](https://docs.autojs6.com/#/omniTypes?id=omnicolor) 类型 (如 color="orange")
+* `新增` UI 模式的控件完全支持 attr 方法设置控件属性 (如 ui.text.attr('color', 'blue'))
+* `新增` UI 模式控件支持布尔类型属性值的缺省形式 (如 clickable="true" 可简写为 clickable 或 isClickable)
+* `新增` button 控件支持 isColored 及 isBorderless 布尔类型属性
+* `新增` console.resetGlobalLogConfig 方法用于重置全局日志配置
+* `新增` web.newWebSocket 方法用于创建 Web Socket 实例 (参阅 项目文档 > [万维网](https://docs.autojs6.com/#/web?id=m-newwebsocket))
+* `修复` 文件管理器的文件夹排序异常
+* `修复` floaty 模块构建的浮动窗口无法调节样式及位置的问题 _[`issue #60`](http://issues.autojs6.com/60)_
+* `修复` floaty 模块构建的浮动窗口与系统状态栏重叠的问题
+* `修复` http.postMultipart 方法功能异常 _[`issue #56`](http://issues.autojs6.com/56)_
+* `修复` Android 7.x 无法运行任何脚本的问题 _[`issue #61`](http://issues.autojs6.com/61)_
+* `修复` sign.property 文件不存在时无法构建项目的问题
+* `修复` 高版本系统 AutoJs6 置于后台时可能因无前台通知权限而崩溃的问题 (API >= 33)
+* `修复` 调用 console.show 方法后日志窗口点击 FAB 按钮无法清空日志的问题
+* `修复` 脚本编辑器调试时出现的 prototype 空指针异常
+* `修复` 脚本编辑器运行脚本时在缓存文件夹运行临时脚本而非先保存再在原始位置运行以避免可能的脚本内容丢失问题
+* `修复` 调整布局层次分析的层级色条宽度避免层级过多时控件名称无法显示的问题 _[`issue #46`](http://issues.autojs6.com/46)_
+* `优化` 布局分析浮动窗口增加退出按钮以关闭窗口 _[`issue #63`](http://issues.autojs6.com/63)_
+* `优化` 脚本绝对路径使用简称形式以缩减文本长度并增加可读性
+* `优化` 将 Error 替换为 Exception 避免出现异常时 AutoJs6 应用崩溃
+* `优化` 视图 (View) 绑定方式由 ButterKnife 迁移至 View Binding _[`issue #48`](http://issues.autojs6.com/48)_
+* `优化` 服务端模式非正常关闭时将于 AutoJs6 启动时自动开启 _[`issue #64`](http://issues.autojs6.com/64)_
+* `优化` 客户端模式非正常关闭时将于 AutoJs6 启动时按最近一次的历史地址自动连接
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v631)_
+
 # v6.3.0
 
 ###### 2023/04/29
@@ -259,19 +291,6 @@
 * `优化` 重新设计 colors 全局对象并增加 HSV / HSL 等色彩模式支持 (参阅 项目文档 > [颜色](https://docs.autojs6.com/#/color))
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v620)_
 
-# v6.1.1
-
-###### 2022/05/31
-
-* `新增` 检查更新/下载更新/更新提示功能 (参阅 设置页面) (暂不支持安卓 7.x 系统)
-* `修复` 应用在安卓 10 系统无法读写外部存储的问题 _[`issue #17`](http://issues.autojs6.com/17)_
-* `修复` 编辑器页面长按时可能导致应用崩溃的问题 _[`issue #18`](http://issues.autojs6.com/18)_
-* `修复` 编辑器页面长按菜单 "删除行" 和 "复制行" 功能无效的问题
-* `修复` 编辑器页面选项菜单中 "粘贴" 功能缺失的问题
-* `优化` 部分异常消息字符串资源化 (en / zh)
-* `优化` 调整内容未保存对话框的按钮布局并增加颜色区分
-* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v611)_
-
 ##### 更多版本历史可参阅
 
 * [CHANGELOG.md](http://changelog.autojs6.com)
@@ -297,12 +316,12 @@
 
 #### Android Studio 准备
 
-下载 `Android Studio Flamingo | 2022.2.1` 版本 (按需选择其一):
+下载 `Android Studio Flamingo | 2022.2.1 Patch 2` 版本 (按需选择其一):
 
-- [android-studio-2022.2.1.18-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2022.2.1.18/android-studio-2022.2.1.18-windows.exe) (1.0 GB)
-- [android-studio-2022.2.1.18-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.2.1.18/android-studio-2022.2.1.18-windows.zip) (1.0 GB)
+- [android-studio-2022.2.1.20-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2022.2.1.20/android-studio-2022.2.1.20-windows.exe) (1.0 GB)
+- [android-studio-2022.2.1.20-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.2.1.20/android-studio-2022.2.1.20-windows.zip) (1.0 GB)
 
-> 注: 如需下载其他版本, 或上述链接已失效, 可前往 [Android Studio 发行版本归档](https://developer.android.com/studio/archive) 页面.
+> 注: 上述版本发布时间为 2023 年 5 月 24 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 

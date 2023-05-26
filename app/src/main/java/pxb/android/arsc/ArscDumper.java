@@ -32,16 +32,16 @@ public class ArscDumper {
         for (int x = 0; x < pkgs.size(); x++) {
             Pkg pkg = pkgs.get(x);
 
-            System.out.println(String.format("  Package %d id=%d name=%s typeCount=%d", x, pkg.id, pkg.name,
-                    pkg.types.size()));
+            System.out.printf("  Package %d id=%d name=%s typeCount=%d%n", x, pkg.id, pkg.name,
+                    pkg.types.size());
             for (Type type : pkg.types.values()) {
-                System.out.println(String.format("    type %d %s", type.id - 1, type.name));
+                System.out.printf("    type %d %s%n", type.id - 1, type.name);
 
                 int resPrefix = pkg.id << 24 | type.id << 16;
                 for (int i = 0; i < type.specs.length; i++) {
                     ResSpec spec = type.getSpec(i);
-                    System.out.println(String.format("      spec 0x%08x 0x%08x %s", resPrefix | spec.id, spec.flags,
-                            spec.name));
+                    System.out.printf("      spec 0x%08x 0x%08x %s%n", resPrefix | spec.id, spec.flags,
+                            spec.name);
                 }
                 for (int i = 0; i < type.configs.size(); i++) {
                     Config config = type.configs.get(i);
@@ -50,8 +50,8 @@ public class ArscDumper {
                     List<ResEntry> entries = new ArrayList<ResEntry>(config.resources.values());
                     for (int j = 0; j < entries.size(); j++) {
                         ResEntry entry = entries.get(j);
-                        System.out.println(String.format("        resource 0x%08x %-20s: %s",
-                                resPrefix | entry.spec.id, entry.spec.name, entry.value));
+                        System.out.printf("        resource 0x%08x %-20s: %s%n",
+                                resPrefix | entry.spec.id, entry.spec.name, entry.value);
                     }
                 }
             }

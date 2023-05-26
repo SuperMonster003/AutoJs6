@@ -8,8 +8,9 @@
 
     <org.autojs.autojs.ui.widget.LevelBeamView
             android:id="@+id/dataItemLevelBeam"
+            android:layout_centerVertical="true"
             android:layout_width="wrap_content"
-            android:layout_height="32dp" />
+            android:layout_height="28dp" />
 
     <LinearLayout
             android:layout_width="wrap_content"
@@ -28,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:textColor="@color/day_night"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 tools:text="TextView" />
 
         <TextView

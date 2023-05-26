@@ -1,24 +1,36 @@
 package org.autojs.autojs.core.inputevent;
 
+import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_POSITION_X;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_POSITION_Y;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_SLOT;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_TOUCH_MAJOR;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_TRACKING_ID;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_WIDTH_MAJOR;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.BTN_TOUCH;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.DOWN;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.EV_ABS;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.EV_KEY;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.EV_SYN;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.SYN_MT_REPORT;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.SYN_REPORT;
+import static org.autojs.autojs.core.inputevent.InputEventCodes.UP;
+
 import android.content.Context;
 import android.os.SystemClock;
-
-import androidx.annotation.Nullable;
-
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.ViewConfiguration;
 
-import org.autojs.autojs.runtime.api.Shell;
+import androidx.annotation.Nullable;
+
 import org.autojs.autojs.engine.RootAutomatorEngine;
-import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
+import org.autojs.autojs.runtime.api.Shell;
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 
 import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.autojs.autojs.core.inputevent.InputEventCodes.*;
 
 /**
  * Created by Stardust on 2017/7/16.

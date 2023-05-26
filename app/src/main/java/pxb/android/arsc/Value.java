@@ -15,6 +15,8 @@
  */
 package pxb.android.arsc;
 
+import androidx.annotation.NonNull;
+
 public class Value {
     public final int data;
     public final int type;
@@ -27,6 +29,7 @@ public class Value {
         this.raw = raw;
     }
 
+    @NonNull
     public String toString() {
         if (type == 0x03) {
             return raw;

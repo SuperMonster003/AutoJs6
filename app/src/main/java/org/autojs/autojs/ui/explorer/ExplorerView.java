@@ -2,19 +2,14 @@ package org.autojs.autojs.ui.explorer;
 
 import static org.autojs.autojs.model.explorer.ExplorerDirPage.createRoot;
 import static org.autojs.autojs.model.explorer.Explorers.workspace;
-import static org.autojs.autojs.model.explorer.WorkspaceFileProvider.SAMPLE_PATH;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,26 +22,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent;
-import org.autojs.autojs.model.explorer.ExplorerFileItem;
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.model.explorer.ExplorerPage;
-import org.autojs.autojs.model.explorer.ExplorerSamplePage;
-import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
-import org.autojs.autojs.model.script.Scripts;
-import org.autojs.autojs.pio.PFile;
-import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pref.Pref;
 import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout;
-import org.autojs.autojs.ui.common.ScriptLoopDialog;
-import org.autojs.autojs.ui.common.ScriptOperations;
-import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.ui.viewmodel.ExplorerItemList;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
-import org.autojs.autojs.ui.widget.FirstCharView;
 import org.autojs.autojs.util.EnvironmentUtils;
-import org.autojs.autojs.util.Observers;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
@@ -60,9 +44,6 @@ import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
@@ -95,19 +76,24 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
 
     private static final int positionOfCategoryDir = 0;
 
-    private ExplorerItemList mExplorerItemList = new ExplorerItemList(getContext());
+    protected OnItemClickListener onItemClickListener;
+    protected ExplorerItem selectedItem;
+
     private RecyclerView mExplorerItemListView;
     private ExplorerProjectToolbar mProjectToolbar;
     private final ExplorerAdapter mExplorerAdapter = new ExplorerAdapter();
-    protected OnItemClickListener mOnItemClickListener;
     private Function<ExplorerItem, Boolean> mFilter;
     private OnItemOperateListener mOnItemOperateListener;
-    protected ExplorerItem mSelectedItem;
     private Explorer mExplorer;
     private final Stack<ExplorerPageState> mPageStateHistories = new Stack<>();
-    private ExplorerPageState mCurrentPageState = new ExplorerPageState();
-    private boolean mDirSortMenuShowing = false;
+
     private int mDirectorySpanSize = 2;
+
+    boolean isDirSortMenuShowing = false;
+
+    ExplorerPageState currentPageState = new ExplorerPageState();
+
+    ExplorerItemList explorerItemList = new ExplorerItemList(getContext());
 
     public ExplorerView(Context context) {
         super(context);
@@ -120,7 +106,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
     }
 
     public ExplorerPage getCurrentPage() {
-        return mCurrentPageState.page;
+        return currentPageState.page;
     }
 
     public void setRootPage(ExplorerPage page) {
@@ -129,7 +115,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
     }
 
     private void setCurrentPageState(ExplorerPageState currentPageState) {
-        mCurrentPageState = currentPageState;
+        this.currentPageState = currentPageState;
         if (isProjectRecognitionEnabled() && ProjectConfig.isProject(getCurrentPage())) {
             mProjectToolbar.setVisibility(VISIBLE);
             mProjectToolbar.setProject(currentPageState.page.toScriptFile());
@@ -150,21 +136,21 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         mProjectToolbar.setRunnableOnly(b);
     }
 
-    protected void enterDirectChildPage(ExplorerPage childItemGroup) {
+    public void enterDirectChildPage(ExplorerPage childItemGroup) {
         LinearLayoutManager layoutManager = (LinearLayoutManager) mExplorerItemListView.getLayoutManager();
         if (layoutManager != null) {
             // @Overwrite by SuperMonster003 on Apr 3, 2023.
             //  ! Should be "first" instead of "last".
             // mCurrentPageState.scrollY = layoutManager.findLastCompletelyVisibleItemPosition();
-            mCurrentPageState.scrollY = layoutManager.findFirstCompletelyVisibleItemPosition();
+            currentPageState.scrollY = layoutManager.findFirstCompletelyVisibleItemPosition();
         }
-        mPageStateHistories.push(mCurrentPageState);
+        mPageStateHistories.push(currentPageState);
         setCurrentPageState(new ExplorerPageState(childItemGroup));
         loadItemList();
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
-        mOnItemClickListener = onItemClickListener;
+        this.onItemClickListener = onItemClickListener;
     }
 
     public void setExplorer(Explorer explorer, ExplorerPage rootPage) {
@@ -231,11 +217,11 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
     }
 
     private void saveSortConfig() {
-        mExplorerItemList.getSortConfig().saveInto(Pref.get());
+        explorerItemList.saveSortConfig();
     }
 
     private void restoreSortConfig() {
-        mExplorerItemList.setSortConfig(ExplorerItemList.SortConfig.from(Pref.get()));
+        explorerItemList.restoreSortConfig();
     }
 
     private void savePageState() {
@@ -249,7 +235,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
     private void restorePageState() {
         int scrollY = Pref.getInt(getPrefKey("page_state"), -1);
         if (scrollY > 0) {
-            mCurrentPageState.scrollY = scrollY;
+            currentPageState.scrollY = scrollY;
             Observable.empty()
                     .subscribeOn(Schedulers.io())
                     .subscribe(o -> {
@@ -326,7 +312,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
     }
 
     public void goUp() {
-        mPageStateHistories.push(mCurrentPageState);
+        mPageStateHistories.push(currentPageState);
         setCurrentPageState(new ExplorerPageState(createRoot(new File(getCurrentPage().getPath()).getParent())));
         loadItemList();
     }
@@ -373,9 +359,9 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
     }
 
     private int positionOfCategoryFile() {
-        if (mCurrentPageState.dirsCollapsed)
+        if (currentPageState.dirsCollapsed)
             return 1;
-        return mExplorerItemList.groupCount() + 1;
+        return explorerItemList.groupCount() + 1;
     }
 
     private void loadItemList() {
@@ -383,16 +369,16 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         mExplorer.fetchChildren(getCurrentPage())
                 .subscribeOn(Schedulers.io())
                 .flatMapObservable(page -> {
-                    mCurrentPageState.page = page;
+                    currentPageState.page = page;
                     return Observable.fromIterable(page);
                 })
                 .filter(f -> mFilter == null || mFilter.apply(f))
-                .collectInto(mExplorerItemList.cloneConfig(), ExplorerItemList::add)
+                .collectInto(explorerItemList.cloneConfig(), ExplorerItemList::add)
                 .observeOn(Schedulers.computation())
                 .doOnSuccess(ExplorerItemList::sort)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(list -> {
-                    mExplorerItemList = list;
+                    explorerItemList = list;
                     notifyDataSetChanged();
                     setRefreshing(false);
                     post(this::scrollToPositionSmoothly);
@@ -401,7 +387,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
 
     private void scrollToPositionOrdinarily() {
         RecyclerView.LayoutManager layoutManager = mExplorerItemListView.getLayoutManager();
-        int position = mCurrentPageState.scrollY;
+        int position = currentPageState.scrollY;
 
         if (layoutManager != null) {
             layoutManager.scrollToPosition(position);
@@ -410,7 +396,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
 
     private void scrollToPositionSmoothly() {
         RecyclerView.LayoutManager layoutManager = mExplorerItemListView.getLayoutManager();
-        int position = mCurrentPageState.scrollY;
+        int position = currentPageState.scrollY;
 
         RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(getContext()) {
             @Override
@@ -450,17 +436,17 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
             int i;
             switch (event.getAction()) {
                 case ExplorerChangeEvent.CHANGE -> {
-                    i = mExplorerItemList.update(item, event.getNewItem());
+                    i = explorerItemList.update(item, event.getNewItem());
                     if (i >= 0) {
                         mExplorerAdapter.notifyItemChanged(item, i);
                     }
                 }
                 case ExplorerChangeEvent.CREATE -> {
-                    mExplorerItemList.insertAtFront(event.getNewItem());
+                    explorerItemList.insertAtFront(event.getNewItem());
                     mExplorerAdapter.notifyItemInserted(event.getNewItem(), 0);
                 }
                 case ExplorerChangeEvent.REMOVE -> {
-                    i = mExplorerItemList.remove(item);
+                    i = explorerItemList.remove(item);
                     if (i >= 0) {
                         mExplorerAdapter.notifyItemRemoved(item, i);
                     }
@@ -471,7 +457,7 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
 
     @Override
     public void onRefresh() {
-        mCurrentPageState.scrollY = 0;
+        currentPageState.scrollY = 0;
         mExplorer.notifyChildrenChanged(getCurrentPage());
         mProjectToolbar.refresh();
     }
@@ -480,30 +466,30 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         return getCurrentPage().toScriptFile();
     }
 
-    private void resetSucceeded() {
+    void resetSucceeded() {
         ViewUtils.showSnack(this, R.string.text_reset_succeed);
     }
 
-    private void resetFailed() {
+    void resetFailed() {
         ViewUtils.showSnack(this, R.string.text_reset_to_initial_content_only_for_assets, true);
     }
 
     protected void notifyItemOperated() {
         if (mOnItemOperateListener != null) {
-            mOnItemOperateListener.onItemOperated(mSelectedItem);
+            mOnItemOperateListener.onItemOperated(selectedItem);
         }
     }
 
-    private void sort(final int sortType, final boolean isDir, boolean isFileSortedAscending) {
+    void sort(final int sortType, final boolean isDir, boolean isFileSortedAscending) {
         setRefreshing(true);
 
         Callable<ExplorerItemList> explorerItemListCallable = () -> {
             if (isDir) {
-                mExplorerItemList.sortItemGroup(sortType, isFileSortedAscending);
+                explorerItemList.sortDirs(sortType, isFileSortedAscending);
             } else {
-                mExplorerItemList.sortFile(sortType, isFileSortedAscending);
+                explorerItemList.sortFiles(sortType, isFileSortedAscending);
             }
-            return mExplorerItemList;
+            return explorerItemList;
         };
         Observable.fromCallable(explorerItemListCallable)
                 .subscribeOn(Schedulers.computation())
@@ -531,11 +517,11 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
 
     protected BindableViewHolder<?> onCreateViewHolder(LayoutInflater inflater, ViewGroup parent, int viewType) {
         if (viewType == VIEW_TYPE_ITEM) {
-            return new ExplorerItemViewHolder(inflater.inflate(R.layout.script_file_list_file, parent, false));
+            return new ExplorerItemViewHolder(this, inflater.inflate(R.layout.explorer_file, parent, false));
         } else if (viewType == VIEW_TYPE_PAGE) {
-            return new ExplorerPageViewHolder(inflater.inflate(R.layout.script_file_list_directory, parent, false));
+            return new ExplorerPageViewHolder(this, inflater.inflate(R.layout.explorer_directory, parent, false));
         } else {
-            return new CategoryViewHolder(inflater.inflate(R.layout.script_file_list_category, parent, false));
+            return new ExplorerCategoryViewHolder(this, inflater.inflate(R.layout.explorer_category, parent, false));
         }
     }
 
@@ -561,10 +547,10 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
                 return;
             }
             if (position < positionOfCategoryFile) {
-                ((BindableViewHolder<ExplorerPage>) holder).bind(mExplorerItemList.getItemGroup(position - 1), position);
+                ((BindableViewHolder<ExplorerPage>) holder).bind(explorerItemList.getDirItem(position - 1), position);
                 return;
             }
-            ((BindableViewHolder<ExplorerItem>) holder).bind(mExplorerItemList.getItem(position - positionOfCategoryFile - 1), position);
+            ((BindableViewHolder<ExplorerItem>) holder).bind(explorerItemList.getFileItem(position - positionOfCategoryFile - 1), position);
         }
 
         @Override
@@ -601,358 +587,17 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
         @Override
         public int getItemCount() {
             int count = 0;
-            if (!mCurrentPageState.dirsCollapsed) {
-                count += mExplorerItemList.groupCount();
+            if (!currentPageState.dirsCollapsed) {
+                count += explorerItemList.groupCount();
             }
-            if (!mCurrentPageState.filesCollapsed) {
-                count += mExplorerItemList.itemCount();
+            if (!currentPageState.filesCollapsed) {
+                count += explorerItemList.itemCount();
             }
             return count + 2;
         }
     }
 
-    protected class ExplorerItemViewHolder extends BindableViewHolder<ExplorerItem> {
-
-        @BindView(R.id.name)
-        TextView mName;
-        @BindView(R.id.first_char)
-        FirstCharView mFirstChar;
-        @BindView(R.id.script_file_date)
-        TextView mFileDate;
-        @BindView(R.id.script_file_size)
-        TextView mFileSize;
-        @BindView(R.id.more)
-        View mOptions;
-        @BindView(R.id.edit)
-        View mEdit;
-        @BindView(R.id.run)
-        View mRun;
-
-        private ExplorerItem mExplorerItem;
-
-        ExplorerItemViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-        }
-
-        @Override
-        public void bind(ExplorerItem item, int position) {
-            mExplorerItem = item;
-            setFirstChar();
-            mName.setText(ExplorerViewHelper.getDisplayName(getContext(), item));
-            mFileDate.setText(PFile.getFullDateString(item.lastModified()));
-            mFileSize.setText(PFiles.getHumanReadableSize(item.getSize()));
-            mEdit.setVisibility(item.isEditable() ? VISIBLE : GONE);
-            mRun.setVisibility(item.isExecutable() ? VISIBLE : GONE);
-        }
-
-        private void setFirstChar() {
-            mFirstChar.setIconText(ExplorerViewHelper.getIconText(mExplorerItem));
-            switch (mExplorerItem.getType()) {
-                case JAVASCRIPT, AUTO -> mFirstChar
-                        .setIconTextColorNightDay()
-                        .setStrokeThemeColor()
-                        .setFillThemeColor();
-
-                // @Hint by SuperMonster003 on Aug 26, 2022.
-                //  ! These default setters could be placed into its class as an initializer.
-                //  ! Even though, code below is still necessary to avoid abnormal icon behaviours.
-                default -> mFirstChar
-                        .setIconTextColorDayNight()
-                        .setStrokeColorDayNight()
-                        .setFillTransparent();
-            }
-        }
-
-        @OnClick(R.id.item)
-        void onItemClick() {
-            if (mOnItemClickListener != null) {
-                mOnItemClickListener.onItemClick(itemView, mExplorerItem);
-            }
-            notifyItemOperated();
-        }
-
-        @OnClick(R.id.run)
-        void run() {
-            Scripts.run(getContext(), new ScriptFile(mExplorerItem.getPath()));
-            notifyItemOperated();
-        }
-
-        @OnClick(R.id.edit)
-        void edit() {
-            Scripts.edit(getContext(), new ScriptFile(mExplorerItem.getPath()));
-            notifyItemOperated();
-        }
-
-        @OnClick(R.id.more)
-        void showOptionMenu() {
-            mSelectedItem = mExplorerItem;
-            PopupMenu popupMenu = new PopupMenu(getContext(), mOptions);
-            popupMenu.inflate(R.menu.menu_script_options);
-            Menu menu = popupMenu.getMenu();
-            if (!mExplorerItem.isExecutable()) {
-                menu.removeItem(R.id.run_repeatedly);
-                menu.removeItem(R.id.more);
-            }
-            if (!mExplorerItem.canDelete()) {
-                menu.removeItem(R.id.delete);
-            }
-            if (!mExplorerItem.canRename()) {
-                menu.removeItem(R.id.rename);
-            }
-            String samplePath = new PFile(getContext().getFilesDir(), SAMPLE_PATH).getPath();
-            if (!(mExplorerItem.getPath().startsWith(samplePath))) {
-                menu.removeItem(R.id.reset);
-            }
-            popupMenu.setOnMenuItemClickListener(item -> {
-                switch (item.getItemId()) {
-                    case R.id.rename:
-                        new ScriptOperations(getContext(), ExplorerView.this, getCurrentPage())
-                                .rename((ExplorerFileItem) mSelectedItem)
-                                .subscribe(Observers.emptyObserver());
-                        break;
-                    case R.id.delete:
-                        new ScriptOperations(getContext(), ExplorerView.this, getCurrentPage())
-                                .delete(mSelectedItem.toScriptFile());
-                        break;
-                    case R.id.run_repeatedly:
-                        new ScriptLoopDialog(getContext(), mSelectedItem.toScriptFile())
-                                .show();
-                        notifyItemOperated();
-                        break;
-                    case R.id.create_shortcut:
-                        new ScriptOperations(getContext(), ExplorerView.this, getCurrentPage())
-                                .createShortcut(mSelectedItem.toScriptFile());
-                        break;
-                    case R.id.open_by_other_apps:
-                        Scripts.openByOtherApps(mSelectedItem.toScriptFile());
-                        notifyItemOperated();
-                        break;
-                    case R.id.send:
-                        Scripts.send(getContext(), mSelectedItem.toScriptFile());
-                        notifyItemOperated();
-                        break;
-                    case R.id.timed_task:
-                        new ScriptOperations(getContext(), ExplorerView.this, getCurrentPage())
-                                .timedTask(mSelectedItem.toScriptFile());
-                        notifyItemOperated();
-                        break;
-                    case R.id.action_build_apk:
-                        new BuildActivity.IntentBuilder(getContext())
-                                .extra(mSelectedItem.getPath())
-                                .start();
-                        notifyItemOperated();
-                        break;
-                    case R.id.reset:
-                        Observable<ScriptFile> o = Explorers.Providers.workspace()
-                                .resetSample(mSelectedItem.toScriptFile());
-                        if (o == null) {
-                            resetFailed();
-                        } else {
-                            o.observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(file -> {
-                                        if (file.exists()) {
-                                            resetSucceeded();
-                                        } else {
-                                            resetFailed();
-                                        }
-                                    }, Observers.toastMessage());
-                        }
-                        break;
-                    default:
-                        return false;
-                }
-                return true;
-            });
-            popupMenu.show();
-        }
-    }
-
-    protected class ExplorerPageViewHolder extends BindableViewHolder<ExplorerPage> {
-
-        @BindView(R.id.name)
-        public TextView mName;
-
-        @BindView(R.id.script_dir_date)
-        public TextView mDirDate;
-
-        @BindView(R.id.more)
-        public View mOptions;
-
-        @BindView(R.id.icon)
-        public ImageView mIcon;
-
-        private ExplorerPage mExplorerPage;
-
-        ExplorerPageViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-        }
-
-        @Override
-        public void bind(ExplorerPage data, int position) {
-            mName.setText(ExplorerViewHelper.getDisplayName(getContext(), data));
-            mDirDate.setText(PFile.getFullDateString(data.lastModified()));
-            mIcon.setImageResource(ExplorerViewHelper.getIcon(data));
-            mOptions.setVisibility(data instanceof ExplorerSamplePage ? GONE : VISIBLE);
-            mExplorerPage = data;
-        }
-
-        @OnClick(R.id.item)
-        void onItemClick() {
-            enterDirectChildPage(mExplorerPage);
-        }
-
-        @OnClick(R.id.more)
-        void showOptionMenu() {
-            mSelectedItem = mExplorerPage;
-            PopupMenu popupMenu = new PopupMenu(getContext(), mOptions);
-            popupMenu.inflate(R.menu.menu_dir_options);
-            popupMenu.setOnMenuItemClickListener(item -> {
-                switch (item.getItemId()) {
-                    case R.id.rename:
-                        new ScriptOperations(getContext(), ExplorerView.this, getCurrentPage())
-                                .rename((ExplorerFileItem) mSelectedItem)
-                                .subscribe(Observers.emptyObserver());
-                        break;
-                    case R.id.delete:
-                        new ScriptOperations(getContext(), ExplorerView.this, getCurrentPage())
-                                .delete(mSelectedItem.toScriptFile());
-                        break;
-                    case R.id.set_as_working_dir:
-                        new ScriptOperations(getContext(), ExplorerView.this, getCurrentPage())
-                                .setAsWorkingDir(mSelectedItem.toScriptFile());
-                        break;
-                    default:
-                        return false;
-                }
-                return true;
-            });
-            popupMenu.show();
-        }
-    }
-
-    class CategoryViewHolder extends BindableViewHolder<Boolean> {
-
-        @BindView(R.id.title)
-        TextView mTitle;
-
-        @BindView(R.id.sort_type)
-        ImageView mSort;
-
-        @BindView(R.id.sort)
-        ImageView mSortOrder;
-
-        @BindView(R.id.up)
-        ImageView mGoUp;
-
-        @BindView(R.id.collapse)
-        ImageView mArrow;
-
-        private boolean mIsDir;
-
-        CategoryViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-        }
-
-        @Override
-        public void bind(Boolean isDirCategory, int position) {
-            mTitle.setText(isDirCategory ? R.string.text_directory : R.string.text_file);
-            mIsDir = isDirCategory;
-            if (isDirCategory && canGoUp()) {
-                mGoUp.setVisibility(VISIBLE);
-            } else {
-                mGoUp.setVisibility(GONE);
-            }
-            if (isDirCategory) {
-                mArrow.setRotation(mCurrentPageState.dirsCollapsed ? -90 : 0);
-                setDirOrderIconWithCurrentState();
-            } else {
-                mArrow.setRotation(mCurrentPageState.filesCollapsed ? -90 : 0);
-                setFileOrderIconWithCurrentState();
-            }
-        }
-
-        @OnClick(R.id.sort)
-        void changeSortOrder() {
-            if (mIsDir) {
-                sort(mExplorerItemList.getDirSortType(), mIsDir, !mExplorerItemList.isDirSortedAscending());
-                setDirOrderIconWithCurrentState();
-            } else {
-                sort(mExplorerItemList.getFileSortType(), mIsDir, !mExplorerItemList.isFileSortedAscending());
-                setFileOrderIconWithCurrentState();
-            }
-        }
-
-        @OnClick(R.id.sort_type)
-        void showSortOptions() {
-            PopupMenu popupMenu = new PopupMenu(getContext(), mSort);
-            popupMenu.inflate(R.menu.menu_sort_options);
-
-            mDirSortMenuShowing = mIsDir;
-
-            int currentSortType = mIsDir ? mExplorerItemList.getDirSortType() : mExplorerItemList.getFileSortType();
-            switch (currentSortType) {
-                case ExplorerItemList.SORT_TYPE_DATE -> popupMenu.getMenu().findItem(R.id.action_sort_by_date).setChecked(true);
-                case ExplorerItemList.SORT_TYPE_SIZE -> popupMenu.getMenu().findItem(R.id.action_sort_by_size).setChecked(true);
-                case ExplorerItemList.SORT_TYPE_TYPE -> popupMenu.getMenu().findItem(R.id.action_sort_by_type).setChecked(true);
-                default -> popupMenu.getMenu().findItem(R.id.action_sort_by_name).setChecked(true);
-            }
-
-            popupMenu.setOnMenuItemClickListener(item -> {
-                item.setChecked(true);
-                switch (item.getItemId()) {
-                    case R.id.action_sort_by_name:
-                        sort(ExplorerItemList.SORT_TYPE_NAME, mDirSortMenuShowing, true);
-                        break;
-                    case R.id.action_sort_by_date:
-                        sort(ExplorerItemList.SORT_TYPE_DATE, mDirSortMenuShowing, false);
-                        break;
-                    case R.id.action_sort_by_size:
-                        sort(ExplorerItemList.SORT_TYPE_SIZE, mDirSortMenuShowing, false);
-                        break;
-                    case R.id.action_sort_by_type:
-                        sort(ExplorerItemList.SORT_TYPE_TYPE, mDirSortMenuShowing, true);
-                        break;
-                    default:
-                        return false;
-                }
-                return true;
-            });
-            popupMenu.show();
-        }
-
-        @OnClick(R.id.up)
-        void up() {
-            if (canGoUp()) {
-                goUp();
-            }
-        }
-
-        @OnClick(R.id.title_container)
-        void collapseOrExpand() {
-            if (mIsDir) {
-                mCurrentPageState.dirsCollapsed = !mCurrentPageState.dirsCollapsed;
-            } else {
-                mCurrentPageState.filesCollapsed = !mCurrentPageState.filesCollapsed;
-            }
-            notifyDataSetChanged();
-        }
-
-        private void setFileOrderIconWithCurrentState() {
-            mSortOrder.setImageResource(mExplorerItemList.isFileSortedAscending() ?
-                    R.drawable.ic_ascending_order : R.drawable.ic_descending_order);
-        }
-
-        private void setDirOrderIconWithCurrentState() {
-            mSortOrder.setImageResource(mExplorerItemList.isDirSortedAscending() ?
-                    R.drawable.ic_ascending_order : R.drawable.ic_descending_order);
-        }
-
-    }
-
-    private static class ExplorerPageState {
+    static class ExplorerPageState {
 
         ExplorerPage page;
 

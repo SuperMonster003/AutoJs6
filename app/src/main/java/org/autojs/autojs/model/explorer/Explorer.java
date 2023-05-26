@@ -51,7 +51,7 @@ public class Explorer {
     }
 
     private ExplorerPage getFromCache(ExplorerPage parent) {
-        if(mExplorerPageLruCache == null || parent == null){
+        if (mExplorerPageLruCache == null || parent == null) {
             return null;
         }
         return mExplorerPageLruCache.get(parent.getPath());

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,17 +23,15 @@ import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.codegeneration.CodeGenerator;
 import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.theme.util.ListBuilder;
-import org.autojs.autojs.ui.widget.CheckBoxCompat;
+import org.autojs.autojs.core.ui.widget.JsCheckBox;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
+import org.autojs.autojs6.databinding.DialogCodeGenerateBinding;
+import org.autojs.autojs6.databinding.DialogCodeGenerateOptionBinding;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
 
 /**
  * Created by Stardust on 2017/11/6.
@@ -56,16 +55,20 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
                     .addOption(R.string.text_act_by_scroll_backward))
             .build();
 
-    @BindView(R.id.options)
     RecyclerView mOptionsRecyclerView;
 
     private final Context mServiceContext;
     private final NodeInfo mRootNode;
     private final NodeInfo mTargetNode;
-    private Adapter mAdapter;
+    private final Adapter mAdapter;
 
     public CodeGenerateDialog(@NonNull Context serviceContext, @NonNull Context context, NodeInfo rootNode, NodeInfo targetNode) {
         super(context);
+
+        DialogCodeGenerateBinding binding = DialogCodeGenerateBinding.inflate(LayoutInflater.from(context));
+        LinearLayout view = binding.getRoot();
+
+        mOptionsRecyclerView = binding.options;
 
         mRootNode = rootNode;
         mTargetNode = targetNode;
@@ -75,7 +78,10 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
         positiveText(R.string.text_generate);
         onPositive(((dialog, which) -> generateCodeAndShow()));
 
-        setupViews();
+        customView(view, false);
+        mOptionsRecyclerView.setLayoutManager(new LinearLayoutManager(mServiceContext));
+        mAdapter = new Adapter(mOptionGroups);
+        mOptionsRecyclerView.setAdapter(mAdapter);
     }
 
     private void generateCodeAndShow() {
@@ -144,15 +150,6 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
         return CodeGenerator.FIND_ONE;
     }
 
-    private void setupViews() {
-        View view = View.inflate(mServiceContext, R.layout.dialog_code_generate, null);
-        ButterKnife.bind(this, view);
-        customView(view, false);
-        mOptionsRecyclerView.setLayoutManager(new LinearLayoutManager(mServiceContext));
-        mAdapter = new Adapter(mOptionGroups);
-        mOptionsRecyclerView.setAdapter(mAdapter);
-    }
-
     private OptionGroup getOptionGroup(int title) {
         for (OptionGroup group : mOptionGroups) {
             if (group.titleRes == title) {
@@ -190,18 +187,21 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
 
     class OptionViewHolder extends ChildViewHolder<Option> {
 
-        @BindView(R.id.title)
         TextView title;
-        @BindView(R.id.checkbox)
-        CheckBoxCompat checkBox;
+        JsCheckBox checkBox;
 
         OptionViewHolder(@NonNull View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            DialogCodeGenerateOptionBinding binding = DialogCodeGenerateOptionBinding.bind(itemView);
+
+            title = binding.title;
+
+            checkBox = binding.checkbox;
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> onCheckedChanged());
+
             itemView.setOnClickListener(view -> checkBox.toggle());
         }
 
-        @OnCheckedChanged(R.id.checkbox)
         void onCheckedChanged() {
             getChild().checked = checkBox.isChecked();
             if (checkBox.isChecked() && getChild().group.titleRes != R.string.text_options)

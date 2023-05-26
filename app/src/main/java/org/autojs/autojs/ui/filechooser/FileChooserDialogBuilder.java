@@ -60,7 +60,7 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
     private void notifySelected() {
         if (mCallback == null)
             return;
-        List<PFile> selectedFiles = mFileChooseListView.getSelectedFiles();
+        List<PFile> selectedFiles = mFileChooseListView.getSelectedFilesList();
         if (selectedFiles.isEmpty()) {
             mCallback.onSelected(Collections.singletonList(mFileChooseListView.getCurrentDirectory()));
         } else {

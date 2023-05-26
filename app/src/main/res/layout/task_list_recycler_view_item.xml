@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
+        android:focusable="true"
         android:foreground="?selectableItemBackground"
         android:orientation="horizontal"
         android:padding="8dp">
 
     <include
-            layout="@layout/first_char_icon"
+            layout="@layout/explorer_first_char_icon"
             android:layout_gravity="center_vertical"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            android:layout_width="wrap_content" />
 
     <LinearLayout
             android:layout_width="0dp"
@@ -60,10 +61,11 @@
             android:layout_height="match_parent"
             android:background="?selectableItemBackgroundBorderless"
             android:clickable="true"
+            android:focusable="true"
             android:padding="6dp"
             android:src="@drawable/ic_close_gray600_48dp"
             app:tint="#A9AAAB" />
 
-</LinearLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>
 
 

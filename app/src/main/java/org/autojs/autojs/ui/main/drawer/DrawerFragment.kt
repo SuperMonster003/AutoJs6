@@ -1,24 +1,22 @@
 package org.autojs.autojs.ui.main.drawer
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.android.schedulers.AndroidSchedulers
-import org.androidannotations.annotations.AfterViews
-import org.androidannotations.annotations.Click
-import org.androidannotations.annotations.EFragment
-import org.androidannotations.annotations.ViewById
 import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.permission.MediaProjectionPermission
+import org.autojs.autojs.permission.PostNotificationPermission
 import org.autojs.autojs.permission.UsageStatsPermission
 import org.autojs.autojs.permission.WriteSecureSettingsPermission
 import org.autojs.autojs.permission.WriteSystemSettingsPermission
@@ -33,13 +31,14 @@ import org.autojs.autojs.theme.app.ColorSelectActivity
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.settings.AboutActivity
-import org.autojs.autojs.ui.settings.SettingsActivity_
+import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.MODE
 import org.autojs.autojs.util.ViewUtils.isNightModeYes
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.FragmentDrawerBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -48,13 +47,11 @@ import org.greenrobot.eventbus.Subscribe
  * Modified by SuperMonster003 as of Nov 16, 2021.
  * Transformed by SuperMonster003 on Sep 19, 2022.
  */
-@SuppressLint("NonConstantResourceId")
-@EFragment(R.layout.fragment_drawer)
 open class DrawerFragment : Fragment() {
 
-    @ViewById(R.id.drawer_menu)
-    lateinit var mDrawerMenu: RecyclerView
+    private lateinit var binding: FragmentDrawerBinding
 
+    private lateinit var mDrawerMenu: RecyclerView
     private lateinit var mContext: Context
     private lateinit var mActivity: MainActivity
 
@@ -63,6 +60,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mFloatingWindowItem: DrawerMenuToggleableItem
     private lateinit var mClientModeItem: DrawerMenuDisposableItem
     private lateinit var mServerModeItem: DrawerMenuDisposableItem
+    private lateinit var mNotificationPostItem: DrawerMenuToggleableItem
     private lateinit var mNotificationAccessItem: DrawerMenuToggleableItem
     private lateinit var mUsageStatsPermissionItem: DrawerMenuToggleableItem
     private lateinit var mIgnoreBatteryOptimizationsItem: DrawerMenuToggleableItem
@@ -121,13 +119,13 @@ open class DrawerFragment : Fragment() {
                 }
             },
             R.drawable.ic_robot_64,
-            R.string.text_floating_window,
+            R.string.text_floating_button,
             DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
             R.string.key_floating_menu_shown,
         )
 
         mClientModeItem = DrawerMenuDisposableItem(
-            JsonSocketClientTool(mContext)
+            JsonSocketClientTool(mContext).apply { connectIfNotNormallyClosed() }
                 .setStateDisposable(JsonSocketClient.cxnState
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { state: DevPluginService.State ->
@@ -146,7 +144,7 @@ open class DrawerFragment : Fragment() {
         )
 
         mServerModeItem = DrawerMenuDisposableItem(
-            JsonSocketServerTool(mContext)
+            JsonSocketServerTool(mContext).apply { connectIfNotNormallyClosed() }
                 .setStateDisposable(JsonSocketServer.cxnState
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { state: DevPluginService.State ->
@@ -165,10 +163,16 @@ open class DrawerFragment : Fragment() {
             R.string.text_server_mode,
         )
 
+        mNotificationPostItem = DrawerMenuToggleableItem(
+            PostNotificationPermission(mContext),
+            R.drawable.ic_ali_notification,
+            R.string.text_post_notifications_permission,
+        )
+
         mNotificationAccessItem = DrawerMenuToggleableItem(
             NotificationService(mContext),
             R.drawable.ic_ali_notification,
-            R.string.text_notification_permission,
+            R.string.text_notification_access_permission,
         )
 
         mUsageStatsPermissionItem = DrawerMenuToggleableItem(
@@ -309,6 +313,30 @@ open class DrawerFragment : Fragment() {
             .apply { subtitle = BuildConfig.VERSION_NAME }
     }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return FragmentDrawerBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mDrawerMenu = binding.drawerMenu
+        initMenuItems()
+        initMenuItemStates()
+        syncMenuItemStates()
+        setupListeners()
+    }
+
+    private fun setupListeners() {
+        binding.settings.setOnClickListener { view ->
+            startActivity(
+                Intent(view.context, PreferencesActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        }
+        binding.restart.setOnClickListener { view -> mActivity.rebirth(view) }
+        binding.exit.setOnClickListener { mActivity.exitCompletely() }
+    }
+
     override fun onResume() {
         super.onResume()
         syncMenuItemStates()
@@ -319,13 +347,6 @@ open class DrawerFragment : Fragment() {
         mClientModeItem.dispose()
         mServerModeItem.dispose()
         EventBus.getDefault().unregister(this)
-    }
-
-    @AfterViews
-    fun setUpViews() {
-        initMenuItems()
-        initMenuItemStates()
-        syncMenuItemStates()
     }
 
     // @Subscribe
@@ -346,18 +367,6 @@ open class DrawerFragment : Fragment() {
         // ViewCompat.getWindowInsetsController(mActivity.window.decorView)?.show(WindowInsets.Type.systemBars())
     }
 
-    @Click(R.id.settings)
-    fun onClickForIdSettings(view: View) = startActivity(
-        Intent(view.context, SettingsActivity_::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    )
-
-    @Click(R.id.restart)
-    fun onClickForIdRestart(view: View) = mActivity.rebirth(view)
-
-    @Click(R.id.exit)
-    fun onClickForIdExit(view: View) = mActivity.exitCompletely(view)
-
     private fun initMenuItems() {
         drawerMenuAdapter = listOf(
             DrawerMenuGroup(R.string.text_service),
@@ -369,6 +378,7 @@ open class DrawerFragment : Fragment() {
             mClientModeItem,
             mServerModeItem,
             DrawerMenuGroup(R.string.text_permissions),
+            mNotificationPostItem,
             mNotificationAccessItem,
             mUsageStatsPermissionItem,
             mIgnoreBatteryOptimizationsItem,
@@ -403,6 +413,7 @@ open class DrawerFragment : Fragment() {
         mFloatingWindowItem,
         mClientModeItem,
         mServerModeItem,
+        mNotificationPostItem,
         mNotificationAccessItem,
         mUsageStatsPermissionItem,
         mIgnoreBatteryOptimizationsItem,

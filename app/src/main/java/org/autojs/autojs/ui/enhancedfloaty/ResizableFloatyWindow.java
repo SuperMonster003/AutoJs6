@@ -6,6 +6,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import org.autojs.autojs.ui.enhancedfloaty.gesture.DragGesture;
 import org.autojs.autojs.ui.enhancedfloaty.gesture.ResizeGesture;
@@ -19,12 +20,10 @@ import org.autojs.autojs6.R;
 
 public class ResizableFloatyWindow extends FloatyWindow {
 
-    private static final String TAG = "ResizableFloatyWindow";
-
     private View mView;
-    private View mResizer;
-    private View mMoveCursor;
-    private ResizableFloaty mFloaty;
+    private ImageView mResizer;
+    private ImageView mMoveCursor;
+    private final ResizableFloaty mFloaty;
 
     public ResizableFloatyWindow(ResizableFloaty floaty) {
         if (floaty == null) {

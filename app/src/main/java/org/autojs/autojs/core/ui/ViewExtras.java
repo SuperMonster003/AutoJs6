@@ -31,7 +31,6 @@ public class ViewExtras {
         return extras;
     }
 
-
     public static ViewAttributes getViewAttributes(View view, ResourceParser parser) {
         ViewExtras extras = get(view);
         ViewAttributes attributes = extras.getViewAttributes();
@@ -41,7 +40,6 @@ public class ViewExtras {
         }
         return attributes;
     }
-
 
     public static NativeView getNativeView(Scriptable scope, View view, Class<?> staticType, ScriptRuntime runtime) {
         ViewExtras extras = get(view);
@@ -73,4 +71,5 @@ public class ViewExtras {
     public final void setViewAttributes(ViewAttributes viewAttributes) {
         mViewAttributes = viewAttributes;
     }
+
 }

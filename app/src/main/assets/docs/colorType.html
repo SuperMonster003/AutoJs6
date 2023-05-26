@@ -404,7 +404,7 @@ c.getRed(); // 255
 c.getRedDouble(); // 1
 </code></pre>
 <p>Color 类是对 <a href="color.html">colors</a> 模块的一种变式封装, 用于解决 colors 模块冗余嵌套的难题.</p>
-<p>如需对颜色 <code>hsv(174,100,59)</code> 设置 <code>80%</code> 透明度然后返回其 Hex 代码:</p>
+<p>例如需要对颜色 <code>hsv(174,100,59)</code> 设置 <code>80%</code> 透明度然后返回其 Hex 代码:</p>
 <pre><code class="lang-js">colors.toHex(colors.setAlpha(colors.hsv(174, 100, 59), 0.8));
 </code></pre>
 <p>或使用变量拆写形式以增加可读性:</p>
@@ -422,7 +422,7 @@ colors.toHex(colorWithAlpha);
     .toHex();
 </code></pre>
 <blockquote>
-<p>注: 上述示例仅用于演示, 否则可使用 colors.hsva 或 Color#setHsva 同时设置 HSV 分量与 A 分量.</p>
+<p>注: 上述示例仅用于演示, 实际可使用 colors.hsva 或 Color#setHsva 同时设置 HSV 分量与 A 分量.</p>
 </blockquote>
 <p>Color 实例方法的使用方式与 colors 模块对应方法多数情况是类似的, 因此某些情况下可用于替代 colors 模块.</p>
 <p>以 <code>set</code> 或 <code>remove</code> 为前缀的方法, 通常都会返回 Color 自身类型, 从而支持链式调用, 如 <a href="#colortype_m_setalpha">setAlpha</a>, <a href="#colortype_m_removealpha">removeAlpha</a>, <a href="#colortype_m_setred">setRed</a>, <a href="#colortype_m_removered">removeRed</a>, <a href="#colortype_m_sethsv">setHsv</a>, <a href="#colortype_m_setrgba">setRgba</a> 等.</p>

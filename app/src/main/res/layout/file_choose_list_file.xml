@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
             android:orientation="horizontal"
             android:padding="8dp">
 
-        <org.autojs.autojs.ui.widget.CheckBoxCompat
+        <org.autojs.autojs.core.ui.widget.JsCheckBox
                 android:id="@+id/checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
                 android:gravity="center" />
 
         <include
-                layout="@layout/first_char_icon"
+                layout="@layout/explorer_first_char_icon"
                 android:layout_gravity="center_vertical"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
@@ -73,5 +73,5 @@
             android:layout_height="1px"
             android:background="#EDEEEF" />
 
-</LinearLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>
 

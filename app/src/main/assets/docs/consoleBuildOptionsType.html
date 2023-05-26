@@ -309,7 +309,8 @@ console.build({ titleIconsTint: &#39;green&#39; }).show();
 console.build({ contentTextSize: 18 }).show();
 </code></pre>
 <h2>[p?] contentTextColor<span><a class="mark" href="#consolebuildoptionstype_p_contenttextcolor" id="consolebuildoptionstype_p_contenttextcolor">#</a></span></h2>
-<div class="signature"><ul>
+<p><strong><code>Overload 1/2</code></strong></p>
+<ul>
 <li>{{<ul>
 <li>verbose?: <a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a>;</li>
 <li>log?: <a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a>;</li>
@@ -319,9 +320,9 @@ console.build({ contentTextSize: 18 }).show();
 <li>assert?: <a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a>;</li>
 </ul>
 </li>
-<li>} | <a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a> } - 浮动窗口日志文本字体颜色</li>
+<li>}} - 浮动窗口日志文本字体颜色</li>
 </ul>
-</div><p>设置控制台浮动窗口的日志文本字体颜色, 按日志等级设置一个或多个不同的字体颜色.</p>
+<p>设置控制台浮动窗口的日志文本字体颜色, 按日志等级设置一个或多个不同的字体颜色.</p>
 <pre><code class="lang-js">/* 设置 LOG 等级日志字体颜色为深橙色. */
 console.build({ contentTextColor: { log: &#39;dark-orange&#39; } }).show();
 console.log(&#39;content text color test for console.log&#39;);
@@ -344,7 +345,11 @@ console.build({
     console[fName].call(console, `content text color test for console.${fName}`);
 });
 </code></pre>
-<p>如果希望不区分日志等级, 统一设置所有日志的文本颜色, 可参考下述示例:</p>
+<p><strong><code>Overload 2/2</code></strong></p>
+<ul>
+<li>{ <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 浮动窗口日志文本统一字体颜色</li>
+</ul>
+<p>使用 <code>{ contentTextColor: OmniColor }</code> 时, 不区分日志等级, 统一设置所有日志的文本颜色:</p>
 <pre><code class="lang-js">/* 所有日志本文的颜色统一设置为深绿色. */
 console.build({
     contentTextColor: &#39;dark-green&#39;,

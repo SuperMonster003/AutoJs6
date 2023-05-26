@@ -11,7 +11,7 @@ import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow
 import org.autojs.autojs.ui.enhancedfloaty.util.WindowTypeCompat
 import org.autojs.autojs.concurrent.VolatileDispose
-import org.autojs.autojs.core.ui.inflater.inflaters.Exceptions
+import org.autojs.autojs.core.ui.inflater.Exceptions
 import org.autojs.autojs6.R
 
 /**
@@ -57,39 +57,37 @@ class RawWindow(rawFloaty: RawFloaty, context: Context) : FloatyWindow() {
 
     // fun waitForCreation(): RuntimeException = mInflateException.blockedGetOrThrow(ScriptInterruptedException::class.java)
 
-    @Suppress("DEPRECATION")
     private fun createWindowLayoutParams() = LayoutParams(
         LayoutParams.WRAP_CONTENT,
         LayoutParams.WRAP_CONTENT,
         WindowTypeCompat.getWindowType(),
-        LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                or LayoutParams.FLAG_NOT_TOUCH_MODAL
-                or LayoutParams.FLAG_FULLSCREEN
-                or LayoutParams.FLAG_NOT_FOCUSABLE
-                or LayoutParams.FLAG_TRANSLUCENT_STATUS,
+        LayoutParams.FLAG_LAYOUT_NO_LIMITS or LayoutParams.FLAG_NOT_FOCUSABLE,
         PixelFormat.TRANSLUCENT
     ).apply { gravity = Gravity.TOP or Gravity.START }
 
     fun disableWindowFocus() {
-        val windowLayoutParams = windowLayoutParams
-        windowLayoutParams.flags = windowLayoutParams.flags or LayoutParams.FLAG_NOT_FOCUSABLE
-        updateWindowLayoutParams(windowLayoutParams)
+        windowLayoutParams.apply {
+            flags = flags or LayoutParams.FLAG_NOT_FOCUSABLE
+            updateWindowLayoutParams(this)
+        }
     }
 
     fun requestWindowFocus() {
-        val windowLayoutParams = windowLayoutParams
-        windowLayoutParams.flags = windowLayoutParams.flags and LayoutParams.FLAG_NOT_FOCUSABLE.inv()
-        updateWindowLayoutParams(windowLayoutParams)
+        windowLayoutParams.apply {
+            flags = flags and LayoutParams.FLAG_NOT_FOCUSABLE.inv()
+            updateWindowLayoutParams(this)
+        }
         windowView.requestLayout()
     }
 
     fun setTouchable(touchable: Boolean) {
-        val windowLayoutParams = windowLayoutParams
-        if (touchable) {
-            windowLayoutParams.flags = windowLayoutParams.flags and LayoutParams.FLAG_NOT_TOUCHABLE.inv()
-        } else {
-            windowLayoutParams.flags = windowLayoutParams.flags or LayoutParams.FLAG_NOT_TOUCHABLE
+        windowLayoutParams.apply {
+            flags = if (touchable) {
+                flags and LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+            } else {
+                flags or LayoutParams.FLAG_NOT_TOUCHABLE
+            }
+            updateWindowLayoutParams(this)
         }
-        updateWindowLayoutParams(windowLayoutParams)
     }
 }

@@ -117,7 +117,7 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
                     }
                 }
                 .autoDismiss(false)
-        } ?: throw Error("Checker is required")
+        } ?: throw Exception("A checker is required for AdbDialogBuilder")
 
     }
 

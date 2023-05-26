@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.theme.preference.MaterialListPreference
-import org.autojs.autojs.ui.doc.DocumentationActivity_
+import org.autojs.autojs.ui.doc.DocumentationActivity
 import org.autojs.autojs6.R
 
 class DocumentationLauncherIconPreference : MaterialListPreference {
@@ -23,10 +23,10 @@ class DocumentationLauncherIconPreference : MaterialListPreference {
 
         when (dialog.items?.get(dialog.selectedIndex)?.toString()) {
             prefContext.getString(R.string.entry_documentation_launcher_icon_show) -> {
-                AppUtils.showLauncherIcon(prefContext, DocumentationActivity_::class.java)
+                AppUtils.showLauncherIcon(prefContext, DocumentationActivity::class.java)
             }
             prefContext.getString(R.string.entry_documentation_launcher_icon_hide) -> {
-                AppUtils.hideLauncherIcon(prefContext, DocumentationActivity_::class.java)
+                AppUtils.hideLauncherIcon(prefContext, DocumentationActivity::class.java)
             }
             else -> Unit
         }

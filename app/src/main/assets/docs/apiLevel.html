@@ -189,12 +189,20 @@
 </thead>
 <tbody>
 <tr>
+<td style="text-align:left">35 (?)</td>
+<td style="text-align:left">Android 15</td>
+<td style="text-align:left">VANILLA_ICE_CREAM</td>
+<td style="text-align:left">15</td>
+<td style="text-align:left">Vanilla Ice Cream</td>
+<td style="text-align:left">Q3, 2024 (?)</td>
+</tr>
+<tr>
 <td style="text-align:left">34</td>
 <td style="text-align:left">Android 14</td>
-<td style="text-align:left">?</td>
+<td style="text-align:left">UPSIDE_DOWN_CAKE</td>
 <td style="text-align:left">14</td>
 <td style="text-align:left">Upside Down Cake</td>
-<td style="text-align:left">Feb 8, 2023</td>
+<td style="text-align:left">Q3, 2023 (?)</td>
 </tr>
 <tr>
 <td style="text-align:left">33</td>
@@ -475,6 +483,7 @@
 <p>要求设备 API 级别不低于指定值:</p>
 <pre><code class="lang-js">/* 在 API 级别低于 30 的设备上将抛出异常. */
 runtime.requiresApi(30);
+runtime.requiresApi(util.versionCodes.R); /* 效果同上. */
 </code></pre>
 <blockquote>
 <p>注: AutoJs6 安装及使用需满足的最低 API 级别为 24 (7.0) [N].</p>

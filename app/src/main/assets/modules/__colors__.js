@@ -62,6 +62,9 @@ module.exports = function (scriptRuntime, scope) {
 
             Color.prototype = {
                 constructor: Color,
+                toString() {
+                    return this.digest();
+                },
                 digest() {
                     return colors.digest.apply(colors, [ this.color ].concat(Array.from(arguments)));
                 },
@@ -77,6 +80,9 @@ module.exports = function (scriptRuntime, scope) {
                 setAlpha(alpha) {
                     this.color = colors.setAlpha(this.color, alpha);
                     return this;
+                },
+                setAlphaRelative(percentage) {
+                    return this.setAlpha(this.getAlpha() * _.parseRelativePercentage(percentage));
                 },
                 getAlpha() {
                     return colors.alpha(this.color);
@@ -98,6 +104,9 @@ module.exports = function (scriptRuntime, scope) {
                     this.color = colors.setRed(this.color, red);
                     return this;
                 },
+                setRedRelative(percentage) {
+                    return this.setRed(this.getRed() * _.parseRelativePercentage(percentage));
+                },
                 getRed() {
                     return colors.red(this.color);
                 },
@@ -118,6 +127,9 @@ module.exports = function (scriptRuntime, scope) {
                     this.color = colors.setGreen(this.color, green);
                     return this;
                 },
+                setGreenRelative(percentage) {
+                    return this.setGreen(this.getGreen() * _.parseRelativePercentage(percentage));
+                },
                 getGreen() {
                     return colors.green(this.color);
                 },
@@ -137,6 +149,9 @@ module.exports = function (scriptRuntime, scope) {
                 setBlue(blue) {
                     this.color = colors.setBlue(this.color, blue);
                     return this;
+                },
+                setBlueRelative(percentage) {
+                    return this.setBlue(this.getBlue() * _.parseRelativePercentage(percentage));
                 },
                 getBlue() {
                     return colors.blue(this.color);
@@ -267,6 +282,9 @@ module.exports = function (scriptRuntime, scope) {
                     let [ r, g, b ] = this.toRgb(color);
                     return this.toInt(this.argb(alpha, r, g, b));
                 },
+                setAlphaRelative(color, percentage) {
+                    return this.setAlpha(color, this.getAlpha(color) * _.parseRelativePercentage(percentage));
+                },
                 removeAlpha(color) {
                     return this.setAlpha(color, 0);
                 },
@@ -292,6 +310,9 @@ module.exports = function (scriptRuntime, scope) {
                 setRed(color, red) {
                     let [ a, , g, b ] = this.toArgb(color);
                     return this.toInt(this.argb(a, red, g, b));
+                },
+                setRedRelative(color, percentage) {
+                    return this.setRed(color, this.getRed(color) * _.parseRelativePercentage(percentage));
                 },
                 removeRed(color) {
                     return this.setRed(color, 0);
@@ -319,6 +340,9 @@ module.exports = function (scriptRuntime, scope) {
                     let [ a, r, , b ] = this.toArgb(color);
                     return this.toInt(this.argb(a, r, green, b));
                 },
+                setGreenRelative(color, percentage) {
+                    return this.getGreen(color, this.getGreen(color) * _.parseRelativePercentage(percentage));
+                },
                 removeGreen(color) {
                     return this.setGreen(color, 0);
                 },
@@ -345,75 +369,27 @@ module.exports = function (scriptRuntime, scope) {
                     let [ a, r, g ] = this.toArgb(color);
                     return this.toInt(this.argb(a, r, g, blue));
                 },
+                setBlueRelative(color, percentage) {
+                    return this.setBlue(color, this.getBlue(color) * _.parseRelativePercentage(percentage));
+                },
                 removeBlue(color) {
                     return this.setBlue(color, 0);
                 },
                 toInt(color) {
-                    try {
-                        return _.parseColor(typeof color === 'number' ? _.toJavaIntegerRange(color) : this.toFullHex(color));
-                    } catch (e) {
-                        scriptRuntime.console.error(`Passed color: ${color}`);
-                        throw Error(e + '\n' + e.stack);
+                    if (color instanceof _.Color) {
+                        color = color.color;
                     }
+                    return ColorUtils.toInt.apply(ColorUtils, [ color ]);
                 },
                 toHex(color, alphaOrLength) {
-                    let [ _ignoredArg0, arg1 /* alpha | length */ ] = arguments;
-
-                    if (color instanceof _.Color) {
-                        return this.toHex.apply(this, [ color.color ].concat(Array.from(arguments).slice(1)));
-                    }
-                    if (color instanceof ThemeColor) {
-                        return this.toHex.apply(this, [ color.getColorPrimary() ].concat(Array.from(arguments).slice(1)));
-                    }
-                    if (typeof color === 'number') {
-                        color = rtColors.toString(_.toJavaIntegerRange(color));
+                    if (isNullish(alphaOrLength)) {
+                        return ColorUtils.toHex.apply(ColorUtils, [ color ]);
                     } else {
-                        color = String(color);
+                        return ColorUtils.toHex.apply(ColorUtils, [ color, alphaOrLength ]);
                     }
-                    if (color.startsWith('#')) {
-                        if (color.length === 4) {
-                            color = color.replace(/(#)(\w)(\w)(\w)/, '$1$2$2$3$3$4$4');
-                        }
-                    } else {
-                        if (color === parseInt(color).toString()) {
-                            return this.toHex.apply(this, [ parseInt(color) ].concat(Array.from(arguments).slice(1)));
-                        }
-                        let colorByName = ColorTable.getColorByName(color, true);
-                        if (colorByName !== null) {
-                            return this.toHex.apply(this, [ colorByName.intValue() ].concat(Array.from(arguments).slice(1)));
-                        }
-                    }
-                    if (!/^#[A-F\d]{3}([A-F\d]{3}([A-F\d]{2})?)?$/i.test(color)) {
-                        throw TypeError(`Invalid color string format: ${color}`);
-                    }
-                    return ( /* @IIFE(toColorHex) */ () => {
-                        if (arg1 /* alpha */ === true || arg1 /* alpha */ === 'keep' || arg1 /* length */ === 8) {
-                            if (color.length === 7) {
-                                color = `#FF${color.slice(1)}`;
-                            }
-                            return color;
-                        }
-                        if (arg1 /* alpha */ === false || arg1 /* alpha */ === 'none' || arg1 /* length */ === 6) {
-                            return `#${color.slice(-6)}`;
-                        }
-                        if (arg1 /* length */ === 3) {
-                            if (!/^#(?:([A-F\d]){2})?([A-F\d])\2([A-F\d])\3([A-F\d])\4$/i.test(color)) {
-                                throw TypeError(`Can't convert color ${color} to #RGB with unexpected color format.`);
-                            }
-                            let [ r, g, b ] = [ color.slice(-6, -5), color.slice(-4, -3), color.slice(-2, -1) ];
-                            return `#${r}${g}${b}`;
-                        }
-                        if (arg1 /* alpha */ === undefined || arg1 /* alpha */ === 'auto') {
-                            return /^#FF([A-F\d]){6}$/i.test(color) ? `#${color.slice(3)}` : color;
-                        }
-                        throw TypeError('Unknown type of alpha for colors.toString()');
-                    })().toUpperCase();
                 },
-                /**
-                 * Color to full hex like '#BF110523'.
-                 */
                 toFullHex(color) {
-                    return this.toHex(color, 8);
+                    return ColorUtils.toFullHex.apply(ColorUtils, [ color ]);
                 },
                 /**
                  * Get hex code string of a color.
@@ -870,15 +846,12 @@ module.exports = function (scriptRuntime, scope) {
         parseNumber(num, def) {
             return typeof num === 'number' ? num : typeof def === 'function' ? def() : def || 0;
         },
-        /**
-         * @param {number|string} color
-         * @returns {number}
-         */
-        parseColor(color) {
-            if (typeof color === 'string') {
-                return rtColors.parseColor(color);
+        parseRelativePercentage(percentage) {
+            let p = Numberx.parseAny(percentage);
+            if (isNaN(p) || p < 0) {
+                throw TypeError(`Relative percentage must be in range 0..255, instead of ${percentage}`)
             }
-            return color;
+            return p;
         },
     };
 

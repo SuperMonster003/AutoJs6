@@ -61,6 +61,9 @@
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- To allow posting notifications on Android 13. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-permission
@@ -122,7 +125,7 @@
         </activity>
 
         <activity
-                android:name="org.autojs.autojs.ui.main.MainActivity_"
+                android:name="org.autojs.autojs.ui.main.MainActivity"
                 android:launchMode="singleTask"
                 android:theme="@style/AppTheme.FullScreen" />
 
@@ -151,7 +154,7 @@
         </provider>
 
         <activity
-                android:name="org.autojs.autojs.ui.edit.EditActivity_"
+                android:name="org.autojs.autojs.ui.edit.EditActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize|locale"
                 android:launchMode="standard"
                 android:multiprocess="true"
@@ -159,36 +162,36 @@
                 android:theme="@style/EditorTheme" />
 
         <activity
-                android:name="org.autojs.autojs.ui.settings.AboutActivity_"
+                android:name="org.autojs.autojs.ui.settings.AboutActivity"
                 android:theme="@style/AppTheme.Settings" />
 
         <activity
-                android:name="org.autojs.autojs.ui.settings.SettingsActivity_"
+                android:name="org.autojs.autojs.ui.settings.PreferencesActivity"
                 android:theme="@style/AppTheme.Settings" />
 
         <activity
-                android:name="org.autojs.autojs.ui.settings.DeveloperOptionsActivity_"
+                android:name="org.autojs.autojs.ui.settings.DeveloperOptionsActivity"
                 android:theme="@style/AppTheme.Settings" />
 
         <activity android:name="org.autojs.autojs.ui.error.ErrorReportActivity" />
 
         <activity
-                android:name="org.autojs.autojs.external.tasker.TaskerScriptEditActivity_"
+                android:name="org.autojs.autojs.external.tasker.TaskerScriptEditActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize|locale" />
 
         <activity
-                android:name="org.autojs.autojs.ui.project.BuildActivity_"
+                android:name="org.autojs.autojs.ui.project.BuildActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize|locale" />
 
-        <activity android:name="org.autojs.autojs.ui.project.ProjectConfigActivity_" />
+        <activity android:name="org.autojs.autojs.ui.project.ProjectConfigActivity" />
 
-        <activity android:name="org.autojs.autojs.ui.log.LogActivity_" />
+        <activity android:name="org.autojs.autojs.ui.log.LogActivity" />
 
         <activity
-                android:name="org.autojs.autojs.ui.doc.DocumentationActivity_"
+                android:name="org.autojs.autojs.ui.doc.DocumentationActivity"
                 android:label="@string/docs_app_name"
                 android:icon="@drawable/ic_docs_app"
-                android:taskAffinity="org.autojs.autojs.ui.doc.DocumentationActivity_"
+                android:taskAffinity="org.autojs.autojs.ui.doc.DocumentationActivity"
                 android:theme="@style/AppTheme.FullScreen"
                 android:exported="true">
 
@@ -202,16 +205,16 @@
 
         </activity>
 
-        <activity android:name="org.autojs.autojs.ui.shortcut.AppsIconSelectActivity_" />
+        <activity android:name="org.autojs.autojs.ui.shortcut.AppsIconSelectActivity" />
 
-        <activity android:name="org.autojs.autojs.ui.timing.TimedTaskSettingActivity_" />
+        <activity android:name="org.autojs.autojs.ui.timing.TimedTaskSettingActivity" />
 
         <activity
                 android:name="org.autojs.autojs.ui.shortcut.ShortcutCreateActivity"
                 android:theme="@style/AppTheme.Transparent" />
 
         <activity
-                android:name="org.autojs.autojs.external.widget.ScriptWidgetSettingsActivity_"
+                android:name="org.autojs.autojs.external.widget.ScriptWidgetSettingsActivity"
                 android:exported="false">
 
             <intent-filter>
@@ -234,7 +237,7 @@
 
         <service android:name="org.autojs.autojs.external.ScriptExecutionIntentService" />
 
-        <activity android:name="org.autojs.autojs.external.tasker.TaskPrefEditActivity_" />
+        <activity android:name="org.autojs.autojs.external.tasker.TaskPrefEditActivity" />
 
         <service
                 android:name="org.autojs.autojs.external.tile.LayoutBoundsTile"
@@ -275,7 +278,7 @@
                 android:exported="true"
                 android:icon="@drawable/autojs6_material"
                 android:label="@string/app_name"
-                android:targetActivity="org.autojs.autojs.external.tasker.TaskPrefEditActivity_"
+                android:targetActivity="org.autojs.autojs.external.tasker.TaskPrefEditActivity"
                 tools:ignore="ExportedActivity">
 
             <intent-filter>

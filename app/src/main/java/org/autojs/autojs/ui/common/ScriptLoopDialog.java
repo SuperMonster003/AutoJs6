@@ -1,9 +1,10 @@
 package org.autojs.autojs.ui.common;
 
 import android.content.Context;
-import android.view.View;
+import android.view.LayoutInflater;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
@@ -12,9 +13,7 @@ import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import org.autojs.autojs6.databinding.DialogScriptLoopBinding;
 
 /**
  * Created by Stardust on 2017/7/8.
@@ -24,26 +23,27 @@ public class ScriptLoopDialog {
     private final ScriptFile mScriptFile;
     private final MaterialDialog mDialog;
 
-    @BindView(R.id.loop_times)
-    EditText mLoopTimes;
-
-    @BindView(R.id.loop_interval)
-    EditText mLoopInterval;
-
-    @BindView(R.id.loop_delay)
-    EditText mLoopDelay;
+    private final EditText mLoopTimes;
+    private final EditText mLoopInterval;
+    private final EditText mLoopDelay;
 
 
     public ScriptLoopDialog(Context context, ScriptFile file) {
         mScriptFile = file;
-        View view = View.inflate(context, R.layout.dialog_script_loop, null);
+
+        DialogScriptLoopBinding binding = DialogScriptLoopBinding.inflate(LayoutInflater.from(context));
+        LinearLayout view = binding.getRoot();
+
+        mLoopTimes = binding.loopTimes;
+        mLoopInterval = binding.loopInterval;
+        mLoopDelay = binding.loopDelay;
+
         mDialog = new MaterialDialog.Builder(context)
                 .title(R.string.text_run_repeatedly)
                 .customView(view, true)
                 .positiveText(R.string.text_ok)
                 .onPositive((dialog, which) -> startScriptRunningLoop())
                 .build();
-        ButterKnife.bind(this, view);
     }
 
     private void startScriptRunningLoop() {

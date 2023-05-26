@@ -484,6 +484,11 @@ module.exports = function (runtime, scope) {
                 delete this.$appropriateProtect;
             },
         },
+        legacies: {
+            isObjectSpecies(o) {
+                return species.isObject(o);
+            },
+        },
         ensureNonUiThread() {
             if (ui.isUiThread()) {
                 throw Error('不能在ui线程执行阻塞操作，请在子线程或子脚本执行，或者使用setInterval循环检测当前activity和package.');
@@ -533,7 +538,7 @@ module.exports = function (runtime, scope) {
         },
     };
 
-    Object.assign(scope, _.extensions);
+    Object.assign(scope, _.extensions, _.legacies);
 
     // Object.keys(_.extensions)
     //     .filter(key => !key.startsWith('$'))

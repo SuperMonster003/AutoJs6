@@ -47,7 +47,7 @@ public class Debugger implements DebugCallbackInternal {
         }
         mScriptExecution = execution;
         mSkipOtherFileBreakpoint = true;
-        mSourceUrl = execution.getSource().toString();
+        mSourceUrl = execution.getSource().getFullPath();
         mDim.attachTo(mScriptEngineService, mContextFactory);
     }
 

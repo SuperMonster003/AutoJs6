@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.text.TextUtils
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.pref.Language
 import org.autojs.autojs.tool.Func1
 import org.autojs.autojs.util.EnvironmentUtils
 import org.autojs.autojs6.R
@@ -17,7 +18,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.Charset
-import java.util.Locale
 import kotlin.math.ln
 import kotlin.math.pow
 
@@ -452,24 +452,48 @@ object PFiles {
 
         @Suppress("SpellCheckingInspection")
         val pre = "KMGTPE".substring(exp - 1, exp)
-        return String.format(Locale.getDefault(), "%.1f %sB", bytes / unit.toDouble().pow(exp.toDouble()), pre)
+        return String.format(Language.getPrefLanguage().locale, "%.1f %sB", bytes / unit.toDouble().pow(exp.toDouble()), pre)
     }
 
     @JvmStatic
-    fun getRelativePath(path: String) = getRelativePath(path, null, false)
+    fun getElegantPath(path: String) = getElegantPath(path, null, false)
 
     @JvmStatic
-    fun getRelativePath(path: String, reference: String?, hasPrefix: Boolean): String {
-        if (reference != null && path.startsWith(reference)) {
-            return (if (hasPrefix) "." else "") + path.substring(reference.length)
+    fun getElegantPath(path: String, workingDirectory: String?, hasPrefix: Boolean): String {
+        if (workingDirectory != null && path.startsWith(workingDirectory)) {
+            return (if (hasPrefix) "\$cwd" else "") + path.substring(workingDirectory.length)
         }
         if (path.startsWith(EnvironmentUtils.externalStoragePath)) {
-            return (if (hasPrefix) "~" else "") + path.substring(EnvironmentUtils.externalStoragePath.length)
+            return (if (hasPrefix) "\$sdcard" else "") + path.substring(EnvironmentUtils.externalStoragePath.length)
         }
-        return if (path.startsWith(sGlobalAppContext.filesDir.path)) {
-            (if (hasPrefix) "\$files" else "") + path.substring(sGlobalAppContext.filesDir.path.length)
-        } else path
+
+        val filesPrefix = sGlobalAppContext.filesDir.path
+        val samplePrefix = filesPrefix + separator + "sample"
+
+        if (path.startsWith(samplePrefix)) {
+            return (if (hasPrefix) "\$sample" else "") + path.substring(samplePrefix.length)
+        }
+        if (path.startsWith(filesPrefix)) {
+            return (if (hasPrefix) "\$files" else "") + path.substring(filesPrefix.length)
+        }
+
+        val cachePrefix = sGlobalAppContext.cacheDir.path
+
+        if (isCachePrefix(path)) {
+            return (if (hasPrefix) "\$cache" else "") + path.substring(cachePrefix.length)
+        }
+
+        val dataPrefix = sGlobalAppContext.dataDir.path
+
+        if (path.startsWith(dataPrefix)) {
+            return (if (hasPrefix) "\$data" else "") + path.substring(dataPrefix.length)
+        }
+
+        return path
     }
+
+    @JvmStatic
+    fun isCachePrefix(path: String) = path.startsWith(sGlobalAppContext.cacheDir.path)
 
     @JvmStatic
     fun readBytes(path: String?): ByteArray {

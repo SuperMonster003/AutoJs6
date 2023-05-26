@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
+import org.autojs.autojs.core.ui.widget.JsSwitch;
 import org.autojs.autojs.pref.Pref;
 import org.autojs.autojs.theme.ThemeColor;
 import org.autojs.autojs.theme.ThemeColorHelper;
@@ -15,7 +16,7 @@ import org.autojs.autojs6.R;
 /**
  * Created by Stardust on 2017/8/6.
  */
-public class PrefSwitch extends SwitchCompat implements SharedPreferences.OnSharedPreferenceChangeListener, ThemeColorMutable {
+public class PrefSwitch extends JsSwitch implements SharedPreferences.OnSharedPreferenceChangeListener, ThemeColorMutable {
 
     private String mPrefKey;
     private boolean mDefaultChecked;
@@ -56,9 +57,9 @@ public class PrefSwitch extends SwitchCompat implements SharedPreferences.OnShar
     }
 
     private void readInitialState() {
-        if (mPrefKey == null)
-            return;
-        setChecked(Pref.getBoolean(mPrefKey, mDefaultChecked), false);
+        if (mPrefKey != null) {
+            setChecked(Pref.getBoolean(mPrefKey, mDefaultChecked), false);
+        }
     }
 
     private void notifyPrefChanged(boolean isChecked) {

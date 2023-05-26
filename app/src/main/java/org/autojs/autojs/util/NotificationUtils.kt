@@ -1,5 +1,6 @@
 package org.autojs.autojs.util
 
+import android.Manifest.permission.POST_NOTIFICATIONS
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,6 +8,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.app.GlobalAppContext
@@ -156,6 +158,15 @@ object NotificationUtils {
             localIntent.putExtra("app_uid", globalAppContext.applicationInfo.uid)
         }
         globalAppContext.startActivity(localIntent)
+    }
+
+    @JvmStatic
+    fun requestPermission(launcher: ActivityResultLauncher<Array<String>>) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            launcher.launch(arrayOf(POST_NOTIFICATIONS))
+        } else {
+            launchSettings()
+        }
     }
 
     @JvmStatic

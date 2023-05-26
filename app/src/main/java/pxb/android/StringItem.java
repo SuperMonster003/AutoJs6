@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2009-2013 Panxiaobo
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 package pxb.android;
+
+import androidx.annotation.NonNull;
+
+import org.autojs.autojs.pref.Language;
+
+import java.util.Objects;
 
 public class StringItem {
     public String data;
@@ -31,27 +37,7 @@ public class StringItem {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null) {
-            return false;
-        }
-
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-
-        StringItem other = (StringItem) obj;
-
-        if (data == null) {
-            if (other.data != null)
-                return false;
-        } else if (!data.equals(other.data)) {
-            return false;
-        }
-        return true;
+        return this == obj || obj != null && getClass() == obj.getClass() && Objects.equals(data, ((StringItem) obj).data);
     }
 
     @Override
@@ -62,7 +48,8 @@ public class StringItem {
         return result;
     }
 
+    @NonNull
     public String toString() {
-        return String.format("S%04d %s", index, data);
+        return String.format(Language.getPrefLanguage().getLocale(), "S%04d %s", index, data);
     }
 }

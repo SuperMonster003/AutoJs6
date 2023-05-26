@@ -9,6 +9,7 @@ import androidx.annotation.WorkerThread;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import org.autojs.autojs.pref.Pref;
 import org.autojs.autojs6.R;
 
 import java.io.IOException;
@@ -23,6 +24,8 @@ import io.reactivex.subjects.PublishSubject;
 
 @SuppressWarnings({"resource", "UnusedReturnValue"})
 public class JsonSocketClient extends JsonSocket {
+
+    private final static String prefKeyClientSocketNormallyClosed = "key_$_client_socket_normally_closed";
 
     private static final String TAG = JsonSocketClient.class.getSimpleName();
 
@@ -65,6 +68,14 @@ public class JsonSocketClient extends JsonSocket {
         return this;
     }
 
+    public static boolean isClientSocketNormallyClosed() {
+        return Pref.getBoolean(prefKeyClientSocketNormallyClosed, true);
+    }
+
+    public static void setClientSocketNormallyClosed(boolean state) {
+        Pref.putBoolean(prefKeyClientSocketNormallyClosed, state);
+    }
+
     @Override
     public PublishSubject<JsonElement> getJsonElementPublishSubject() {
         return mJsonElementPublishSubject;
@@ -79,6 +90,7 @@ public class JsonSocketClient extends JsonSocket {
     public void switchOff() throws IOException {
         close();
         setStateDisconnected();
+        setClientSocketNormallyClosed(true);
     }
 
     public void close() throws IOException {
@@ -116,7 +128,7 @@ public class JsonSocketClient extends JsonSocket {
 
         try {
             if (!element.isJsonObject()) {
-                onSocketError(new Error("Not a JSON object"));
+                onSocketError(new Exception("Not a JSON object"));
                 return;
             }
             JsonObject obj = element.getAsJsonObject();
@@ -160,14 +172,14 @@ public class JsonSocketClient extends JsonSocket {
         Log.w(TAG, "onSocketError");
         e.printStackTrace();
         setStateDisconnected(e);
-        close();
+        switchOff();
     }
 
     @MainThread
     public void onHandshakeTimeout() throws IOException {
         Log.i(TAG, "onHandshakeTimeout");
         setStateDisconnected(new SocketTimeoutException(getContext().getString(R.string.error_handshake_timed_out, HANDSHAKE_TIMEOUT)));
-        close();
+        switchOff();
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

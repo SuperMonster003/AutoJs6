@@ -1,7 +1,5 @@
 ( /* @ModuleIIFE */ () => {
 
-    "use strict";
-
     var _createClass = function () {
         function defineProperties(target, props) {
             for (var i = 0; i < props.length; i++) {

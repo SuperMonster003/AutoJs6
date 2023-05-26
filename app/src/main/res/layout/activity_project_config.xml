@@ -201,7 +201,7 @@
 
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <org.autojs.autojs.ui.widget.CheckBoxCompat
+                        <org.autojs.autojs.core.ui.widget.JsCheckBox
                                 android:id="@+id/default_stable_mode"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"

@@ -61,7 +61,7 @@ public abstract class Task {
 
         @Override
         public String getName() {
-            return PFiles.getRelativePath(getScriptPath(), WorkingDirectoryUtils.getPath(), true);
+            return PFiles.getElegantPath(getScriptPath(), WorkingDirectoryUtils.getPath(), true);
         }
 
         @Override
@@ -148,8 +148,7 @@ public abstract class Task {
 
         @Override
         public String getDesc() {
-            String fullPath =  mScriptExecution.getSource().toString();
-            return PFiles.getRelativePath(fullPath, WorkingDirectoryUtils.getPath(), true);
+            return mScriptExecution.getSource().getElegantPath();
         }
 
         @Override

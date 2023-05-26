@@ -240,6 +240,35 @@ console.show(); /* 显示控制台悬浮窗. */
 </tr>
 </tbody>
 </table>
+<p><code>OmniColor</code> 不仅可用于参数传入方法中, 还可以作为 XML 元素的属性值:</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+
+ui.layout(&lt;vertical&gt;
+    &lt;button text=&quot;click to start&quot; color=&quot;#006400&quot;/&gt;
+&lt;/vertical&gt;);
+</code></pre>
+<p>上述示例设置按钮布局的文字颜色为深绿色, 使用了 <a href="dataTypes.html#datatypes_colorhex">ColorHex</a> 作为颜色值.</p>
+<p>使用 <a href="dataTypes.html#datatypes_colorname">ColorName</a> 作为颜色值也可达到相同的效果:</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+
+ui.layout(&lt;vertical&gt;
+    &lt;button text=&quot;click to start&quot; color=&quot;dark-green&quot;/&gt;
+&lt;/vertical&gt;);
+</code></pre>
+<p>使用 <a href="dataTypes.html#datatypes_colorint">ColorInt</a> 作为颜色值同样可以达到相同的效果:</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+
+ui.layout(&lt;vertical&gt;
+    &lt;button text=&quot;click to start&quot; color=&quot;-16751616&quot;/&gt;
+&lt;/vertical&gt;);
+</code></pre>
+<p>如需使用主题色作为颜色值, 需要使用一对花括号以及绑定全局作用域的表达式:</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+
+ui.layout(&lt;vertical&gt;
+    &lt;button text=&quot;click to start&quot; color=&quot;{{autojs.themeColor}}&quot;/&gt;
+&lt;/vertical&gt;);
+</code></pre>
 <h2>OmniIntent<span><a class="mark" href="#omnitypes_omniintent" id="omnitypes_omniintent">#</a></span></h2>
 <p>Intent 聚合类型.</p>
 <table>

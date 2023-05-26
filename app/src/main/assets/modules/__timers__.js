@@ -65,11 +65,11 @@ module.exports = function (scriptRuntime, scope) {
             __asGlobal__(scriptRuntime.timers, methods, scope);
 
             Object.assign(scope, {
-                /**
-                 * @global
-                 */
+                /** @global */
                 loop() {
-                    return scriptRuntime.console.warn('Method loop() is deprecated and has no effect.');
+                    // @Abandoned by SuperMonster003 as of May 3, 2023.
+                    // scriptRuntime.console.warn('Method loop() is deprecated and has no effect.');
+                    throw Error(context.getString(R.strings.error_abandoned_method, 'global.loop'));
                 },
             });
         },

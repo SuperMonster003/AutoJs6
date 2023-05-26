@@ -17,6 +17,7 @@ import java.lang.reflect.Field
 
 /**
  * Created by Stardust on 2017/3/10.
+ * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 class NodeInfoView : RecyclerView {
 
@@ -57,7 +58,6 @@ class NodeInfoView : RecyclerView {
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
-
         }
         adapter!!.notifyDataSetChanged()
     }

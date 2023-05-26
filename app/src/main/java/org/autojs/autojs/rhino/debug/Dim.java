@@ -350,8 +350,7 @@ public class Dim {
                 is.close();
             }
         } catch (IOException ex) {
-            System.err.println
-                    ("Failed to load source from " + sourceUrl + ": " + ex);
+            System.err.println("Failed to load source from " + sourceUrl + ": " + ex);
         }
         return source;
     }
@@ -740,8 +739,7 @@ public class Dim {
     /**
      * Interrupts script execution.
      */
-    private void interrupted(Context cx, final StackFrame frame,
-                             Throwable scriptException) {
+    private void interrupted(Context cx, final StackFrame frame, Throwable scriptException) {
         ContextData contextData = frame.contextData();
         boolean eventThreadFlag = callback.isGuiEventThread();
         contextData.eventThreadFlag = eventThreadFlag;

@@ -14,6 +14,10 @@ class FloatingConsoleView : ConsoleView {
 
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    init {
+        setPinchToZoomEnabled(true)
+    }
+
     override fun getLogLevelMap(): MutableMap<Int, Int> = MapBuilder<Int, Int>()
         .put(Log.VERBOSE,R.color.floating_console_view_verbose)
         .put(Log.DEBUG,R.color.floating_console_view_debug)

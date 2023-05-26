@@ -1,5 +1,9 @@
 // noinspection JSUnusedGlobalSymbols
 
+/* Overwritten protection. */
+
+let { http } = global;
+
 /**
  * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
@@ -38,6 +42,9 @@ module.exports = function (scriptRuntime, scope) {
                 newInjectableWebClient() {
                     return new InjectableWebClient(Context.getCurrentContext(), scope);
                 },
+                newWebSocket(url) {
+                    return new org.autojs.autojs.core.web.WebSocket(http.__okhttp__, url);
+                },
             };
 
             return Web;
@@ -46,7 +53,7 @@ module.exports = function (scriptRuntime, scope) {
             /**
              * @type {(keyof Internal.Web)[]}
              */
-            let methods = [ 'newInjectableWebView', 'newInjectableWebClient' ];
+            let methods = [ 'newInjectableWebView', 'newInjectableWebClient', 'newWebSocket' ];
             __asGlobal__(web, methods, scope);
         },
     };

@@ -3,7 +3,9 @@ package org.autojs.autojs.ui.explorer;
 import static org.autojs.autojs.util.ViewUtils.showToast;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,19 +23,20 @@ import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.project.ProjectLauncher;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.ui.project.ProjectConfigActivity;
-import org.autojs.autojs.ui.project.ProjectConfigActivity_;
 import org.autojs.autojs6.R;
+import org.autojs.autojs6.databinding.ExplorerProjectToolbarBinding;
 import org.greenrobot.eventbus.Subscribe;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
+/**
+ * Modified by SuperMonster003 as of May 26, 2022.
+ * Transformed by SuperMonster003 on May 12, 2023.
+ */
 public class ExplorerProjectToolbar extends CardView {
+
+    private ExplorerProjectToolbarBinding binding;
 
     private PFile mDirectory;
 
-    @BindView(R.id.project_name)
     TextView mProjectName;
 
     private OnOperateListener mOnOperateListener;
@@ -54,9 +57,14 @@ public class ExplorerProjectToolbar extends CardView {
     }
 
     private void init() {
-        inflate(getContext(), R.layout.explorer_project_toolbar, this);
-        ButterKnife.bind(this);
-        setOnClickListener(view -> edit());
+        binding = ExplorerProjectToolbarBinding.inflate(LayoutInflater.from(getContext()), this, true);
+
+        mProjectName = binding.projectName;
+        binding.projectRun.setOnClickListener(v -> run());
+        binding.projectBuild.setOnClickListener(v -> build());
+        binding.projectEdit.setOnClickListener(v -> edit());
+
+        this.setOnClickListener(v -> edit());
     }
 
     public void setProject(PFile dir) {
@@ -75,7 +83,6 @@ public class ExplorerProjectToolbar extends CardView {
         }
     }
 
-    @OnClick(R.id.project_run)
     void run() {
         notifyOperated();
         try {
@@ -89,15 +96,12 @@ public class ExplorerProjectToolbar extends CardView {
 
     private void notifyOperated() {
         if (mOnOperateListener != null) {
-            mOnOperateListener.onOperated(findViewById(R.id.commands));
+            mOnOperateListener.onOperated(binding.commands);
         }
     }
 
-    @OnClick(R.id.project_build)
     void build() {
-        new BuildActivity.IntentBuilder(getContext())
-                .extra(mDirectory.getPath())
-                .start();
+        BuildActivity.launch(getContext(), mDirectory.getPath());
     }
 
     @Override
@@ -124,15 +128,15 @@ public class ExplorerProjectToolbar extends CardView {
         }
     }
 
-    @OnClick(R.id.project_edit)
     void edit() {
-        ProjectConfigActivity_.intent(getContext())
-                .extra(ProjectConfigActivity.EXTRA_DIRECTORY, mDirectory.getPath())
-                .start();
+        Intent intent = new Intent(getContext(), ProjectConfigActivity.class)
+                .putExtra(ProjectConfigActivity.EXTRA_DIRECTORY, mDirectory.getPath())
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(intent);
     }
 
     public void setRunnableOnly(boolean b) {
-        ViewGroup viewGroup = (ViewGroup) findViewById(R.id.commands);
+        ViewGroup viewGroup = binding.commands;
         for (int i = 0; i < viewGroup.getChildCount(); i += 1) {
             ImageView view = (ImageView) viewGroup.getChildAt(i);
             view.setVisibility(!b || view.getId() == R.id.project_run ? VISIBLE : GONE);

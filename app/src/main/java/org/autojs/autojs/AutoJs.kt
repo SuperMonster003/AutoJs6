@@ -20,16 +20,16 @@ import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
 import org.autojs.autojs.runtime.api.AppUtils.Companion.BroadcastShortForm
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
-import org.autojs.autojs.ui.doc.DocumentationActivity_
+import org.autojs.autojs.ui.doc.DocumentationActivity
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
-import org.autojs.autojs.ui.log.LogActivity_
-import org.autojs.autojs.ui.main.MainActivity_
-import org.autojs.autojs.ui.project.BuildActivity_
-import org.autojs.autojs.ui.settings.AboutActivity_
-import org.autojs.autojs.ui.settings.SettingsActivity_
+import org.autojs.autojs.ui.log.LogActivity
+import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.ui.project.BuildActivity
+import org.autojs.autojs.ui.settings.AboutActivity
+import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs6.R
 import java.util.concurrent.Executors
 
@@ -141,23 +141,23 @@ class AutoJs private constructor(private val appContext: Application) : Abstract
 
         /* Activities. */
 
-        putProperty(ActivityShortForm.SETTINGS.fullName, SettingsActivity_::class.java)
-        putProperty(ActivityShortForm.PREFERENCES.fullName, SettingsActivity_::class.java)
-        putProperty(ActivityShortForm.PREF.fullName, SettingsActivity_::class.java)
+        putProperty(ActivityShortForm.SETTINGS.fullName, PreferencesActivity::class.java)
+        putProperty(ActivityShortForm.PREFERENCES.fullName, PreferencesActivity::class.java)
+        putProperty(ActivityShortForm.PREF.fullName, PreferencesActivity::class.java)
 
-        putProperty(ActivityShortForm.CONSOLE.fullName, LogActivity_::class.java)
-        putProperty(ActivityShortForm.LOG.fullName, LogActivity_::class.java)
+        putProperty(ActivityShortForm.CONSOLE.fullName, LogActivity::class.java)
+        putProperty(ActivityShortForm.LOG.fullName, LogActivity::class.java)
 
-        putProperty(ActivityShortForm.HOMEPAGE.fullName, MainActivity_::class.java)
-        putProperty(ActivityShortForm.HOME.fullName, MainActivity_::class.java)
+        putProperty(ActivityShortForm.HOMEPAGE.fullName, MainActivity::class.java)
+        putProperty(ActivityShortForm.HOME.fullName, MainActivity::class.java)
 
-        putProperty(ActivityShortForm.ABOUT.fullName, AboutActivity_::class.java)
+        putProperty(ActivityShortForm.ABOUT.fullName, AboutActivity::class.java)
 
-        putProperty(ActivityShortForm.BUILD.fullName, BuildActivity_::class.java)
+        putProperty(ActivityShortForm.BUILD.fullName, BuildActivity::class.java)
 
-        putProperty(ActivityShortForm.DOCUMENTATION.fullName, DocumentationActivity_::class.java)
-        putProperty(ActivityShortForm.DOC.fullName, DocumentationActivity_::class.java)
-        putProperty(ActivityShortForm.DOCS.fullName, DocumentationActivity_::class.java)
+        putProperty(ActivityShortForm.DOCUMENTATION.fullName, DocumentationActivity::class.java)
+        putProperty(ActivityShortForm.DOC.fullName, DocumentationActivity::class.java)
+        putProperty(ActivityShortForm.DOCS.fullName, DocumentationActivity::class.java)
 
         /* Broadcasts. */
 

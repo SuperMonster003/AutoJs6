@@ -175,6 +175,10 @@
 <li><span class="stability_undefined"><a href="#web_newinjectablewebclient">newInjectableWebClient()</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#web_m_newwebsocket">[m] newWebSocket</a></span><ul>
+<li><span class="stability_undefined"><a href="#web_newwebsocket_url">newWebSocket(url)</a></span></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -287,6 +291,73 @@ settings.setDisplayZoomControls(false);
 <p>新建并返回一个 <a href="injectableWebClientType.html">InjectableWebClient</a> (可 <a href="glossaries.html#glossaries_注入">注入</a> 的 <a href="https://developer.android.com/reference/android/webkit/WebViewClient">WebViewClient</a>) 实例.</p>
 <pre><code class="lang-js">/* 为 webView 对象重新设置一个新的客户端. */
 webView.setWebViewClient(newInjectableWebClient());
+</code></pre>
+<h2>[m] newWebSocket<span><a class="mark" href="#web_m_newwebsocket" id="web_m_newwebsocket">#</a></span></h2>
+<h3>newWebSocket(url)<span><a class="mark" href="#web_newwebsocket_url" id="web_newwebsocket_url">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong> <strong><code>Global</code></strong></p>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="webSocketType.html">WebSocket</a></span> }</li>
+</ul>
+<p>新建并返回一个 <a href="webSocketType.html">WebSocket</a> 实例.</p>
+<pre><code class="lang-js">console.setExitOnClose(7e3).show();
+
+let ws = web.newWebSocket(&#39;wss://echo.websocket.events&#39;);
+
+ws
+    .on(&#39;open&#39;, (res, ws) =&gt; {
+        console.log(&#39;WebSocket 已连接&#39;);
+    })
+    .on(&#39;message&#39;, (message, ws) =&gt; {
+        console.log(&#39;接收到消息&#39;);
+        // if (message instanceof okio.ByteString) {
+        //     console.log(`消息类型: ByteString`);
+        // } else if (typeof message === &#39;string&#39;) {
+        //     console.log(`消息类型: String`);
+        // } else {
+        //     throw TypeError(&#39;Should never happen&#39;);
+        // }
+    })
+    .on(&#39;text&#39;, (text, ws) =&gt; {
+        console.info(&#39;接收到文本消息:&#39;);
+        console.info(`text: ${text}`);
+    })
+    .on(&#39;bytes&#39;, (bytes, ws) =&gt; {
+        console.info(&#39;接收到字节数组消息:&#39;);
+        console.info(`utf8: ${bytes.utf8()}`);
+        console.info(`base64: ${bytes.base64()}`);
+        console.info(`md5: ${bytes.md5()}`);
+        console.info(`hex: ${bytes.hex()}`);
+    })
+    .on(&#39;closing&#39;, (code, reason, ws) =&gt; {
+        console.log(&#39;WebSocket 关闭中&#39;);
+    })
+    .on(&#39;closed&#39;, (code, reason, ws) =&gt; {
+        console.log(&#39;WebSocket 已关闭&#39;);
+        console.log(`code: ${code}`);
+        if (reason) console.log(`reason: ${reason}`);
+    })
+    .on(&#39;failure&#39;, (err, res, ws) =&gt; {
+        console.error(&#39;WebSocket 连接失败&#39;);
+        console.error(err);
+    });
+
+/* 发送文本消息. */
+ws.send(&#39;Hello WebSocket&#39;);
+
+/* 发送字节数组消息. */
+ws.send(new okio.ByteString(new java.lang.String(&#39;Hello WebSocket&#39;).getBytes()));
+
+setTimeout(() =&gt; {
+    console.log(&#39;断开 WebSocket&#39;);
+
+    /* code 支持的范围 [1000,5000). */
+    /* 1000 表示成功操作或常规的 Socket 关闭操作. */
+    /* 参阅 https://github.com/Luka967/websocket-close-codes */
+    ws.close(1000, &#39;Closed by user&#39;);
+}, 8e3);
+
+setTimeout(() =&gt; console.log(&#39;Exit&#39;), 9e3);
 </code></pre>
 
         </div>

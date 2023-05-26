@@ -4,6 +4,7 @@ import static org.autojs.autojs.util.StringUtils.key;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -15,6 +16,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.pref.Language;
 import org.autojs.autojs.pref.Pref;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
@@ -48,7 +50,7 @@ public class EditorMenu {
     public EditorMenu(EditorView editorView) {
         mEditorView = editorView;
         mContext = editorView.getContext();
-        mEditor = editorView.getEditor();
+        mEditor = editorView.editor;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -196,9 +198,10 @@ public class EditorMenu {
     }
 
     private void startBuildApkActivity() {
-        new BuildActivity.IntentBuilder(mContext)
-                .extra(mEditorView.getUri().getPath())
-                .start();
+        Uri uri = mEditorView.getUri();
+        if (uri != null) {
+            BuildActivity.launch(mContext, uri.getPath());
+        }
     }
 
     private void setPinchToZoomStrategy() {
@@ -218,7 +221,7 @@ public class EditorMenu {
                     String newKey = itemKeys.get(which);
                     if (!Objects.equals(newKey, itemKey)) {
                         Pref.putString(key, newKey);
-                        mEditorView.getEditor().notifyPinchToZoomStrategyChanged(newKey);
+                        mEditorView.editor.notifyPinchToZoomStrategyChanged(newKey);
                     }
                     return true;
                 })
@@ -312,11 +315,12 @@ public class EditorMenu {
                 .show();
     }
 
+    @SuppressLint("StringFormatMatches")
     private void showInfo() {
         Observable
                 .zip(Observable.just(mEditor.getText()), mEditor.getLineCount(), (text, lineCount) -> {
                     String size = PFiles.getHumanReadableSize(text.length());
-                    return String.format(Locale.getDefault(), mContext.getString(R.string.format_editor_info),
+                    return String.format(Language.getPrefLanguage().getLocale(), mContext.getString(R.string.format_editor_info),
                             text.length(), lineCount, size);
                 })
                 .observeOn(AndroidSchedulers.mainThread())

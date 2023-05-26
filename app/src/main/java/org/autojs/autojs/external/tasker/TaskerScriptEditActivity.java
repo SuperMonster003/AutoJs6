@@ -8,41 +8,38 @@ import static org.autojs.autojs.ui.edit.EditorView.EXTRA_SAVE_ENABLED;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
-import org.autojs.autojs.timing.TaskReceiver;
+import androidx.annotation.Nullable;
+
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.edit.EditorView;
+import org.autojs.autojs.ui.edit.editor.CodeEditor;
 import org.autojs.autojs.util.Observers;
 import org.autojs.autojs.util.ViewUtils;
-import org.autojs.autojs6.R;
+import org.autojs.autojs6.databinding.ActivityTaskerScriptEditBinding;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Stardust on 2017/4/5.
+ * Modified by SuperMonster003 as of May 26, 2022.
  */
-@EActivity(R.layout.activity_tasker_script_edit)
 public class TaskerScriptEditActivity extends BaseActivity {
 
     public static final int REQUEST_CODE = 10016;
-    public static final String EXTRA_TASK_ID = TaskReceiver.EXTRA_TASK_ID;
 
-    public static void edit(Activity activity, String title, String summary, String content) {
-        activity.startActivityForResult(new Intent(activity, TaskerScriptEditActivity_.class)
-                .putExtra(EXTRA_CONTENT, content)
-                .putExtra("summary", summary)
-                .putExtra(EXTRA_NAME, title), REQUEST_CODE);
-    }
-
-    @ViewById(R.id.editor_view)
-    EditorView mEditorView;
+    private EditorView mEditorView;
 
     @SuppressLint("CheckResult")
-    @AfterViews
-    void setUpViews() {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ActivityTaskerScriptEditBinding binding = ActivityTaskerScriptEditBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        mEditorView = binding.editorView;
         mEditorView.handleIntent(getIntent()
                         .putExtra(EXTRA_RUN_ENABLED, false)
                         .putExtra(EXTRA_SAVE_ENABLED, false))
@@ -54,10 +51,19 @@ public class TaskerScriptEditActivity extends BaseActivity {
         setToolbarAsBack(mEditorView.getName());
     }
 
+    public static void edit(Activity activity, String title, String summary, String content) {
+        activity.startActivityForResult(new Intent(activity, TaskerScriptEditActivity.class)
+                .putExtra(EXTRA_CONTENT, content)
+                .putExtra("summary", summary)
+                .putExtra(EXTRA_NAME, title), REQUEST_CODE);
+    }
 
     @Override
     public void finish() {
-        setResult(RESULT_OK, new Intent().putExtra(EXTRA_CONTENT, mEditorView.getEditor().getText()));
+        CodeEditor editor = mEditorView.editor;
+        if (editor != null) {
+            setResult(RESULT_OK, new Intent().putExtra(EXTRA_CONTENT, editor.getText()));
+        }
         TaskerScriptEditActivity.super.finish();
     }
 
@@ -66,4 +72,5 @@ public class TaskerScriptEditActivity extends BaseActivity {
         mEditorView.destroy();
         super.onDestroy();
     }
+
 }

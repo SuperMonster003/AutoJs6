@@ -25,6 +25,8 @@ import java.util.*;
 
 import static pxb.android.axml.AxmlParser.*;
 
+import org.autojs.autojs.pref.Language;
+
 /**
  * a class to write android axml
  *
@@ -102,7 +104,7 @@ public class AxmlWriter extends AxmlVisitor {
                     e.setValue(ns);
                 }
                 if (ns.prefix == null) {
-                    ns.prefix = new StringItem(String.format("axml_auto_%02d", a++));
+                    ns.prefix = new StringItem(String.format(Language.getPrefLanguage().getLocale(), "axml_auto_%02d", a++));
                 }
                 ns.prefix = update(ns.prefix);
                 ns.uri = update(ns.uri);

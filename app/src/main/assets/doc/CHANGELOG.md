@@ -4,6 +4,42 @@
 
 ******
 
+# v6.3.1
+
+###### 2023/05/26
+
+* `新增` 发布通知权限及主页抽屉开关 _[`issue #55`](http://issues.autojs6.com/55)_
+* `新增` UI 模式支持简单的 Android 布局解析 (参阅 示例代码 > 布局 > 简单安卓布局)
+* `新增` UI 模式增加 console / imagebutton / ratingbar / switch / textclock / togglebutton 等控件
+* `新增` UI 模式控件的颜色色值支持 [OmniColor](https://docs.autojs6.com/#/omniTypes?id=omnicolor) 类型 (如 color="orange")
+* `新增` UI 模式的控件完全支持 attr 方法设置控件属性 (如 ui.text.attr('color', 'blue'))
+* `新增` UI 模式控件支持布尔类型属性值的缺省形式 (如 clickable="true" 可简写为 clickable 或 isClickable)
+* `新增` button 控件支持 isColored 及 isBorderless 布尔类型属性
+* `新增` console.resetGlobalLogConfig 方法用于重置全局日志配置
+* `新增` web.newWebSocket 方法用于创建 Web Socket 实例 (参阅 项目文档 > [万维网](https://docs.autojs6.com/#/web?id=m-newwebsocket))
+* `修复` 文件管理器的文件夹排序异常
+* `修复` floaty 模块构建的浮动窗口无法调节样式及位置的问题 _[`issue #60`](http://issues.autojs6.com/60)_
+* `修复` floaty 模块构建的浮动窗口与系统状态栏重叠的问题
+* `修复` http.postMultipart 方法功能异常 _[`issue #56`](http://issues.autojs6.com/56)_
+* `修复` Android 7.x 无法运行任何脚本的问题 _[`issue #61`](http://issues.autojs6.com/61)_
+* `修复` sign.property 文件不存在时无法构建项目的问题
+* `修复` 高版本系统 AutoJs6 置于后台时可能因无前台通知权限而崩溃的问题 (API >= 33)
+* `修复` 调用 console.show 方法后日志窗口点击 FAB 按钮无法清空日志的问题
+* `修复` 脚本编辑器调试时出现的 prototype 空指针异常
+* `修复` 脚本编辑器运行脚本时在缓存文件夹运行临时脚本而非先保存再在原始位置运行以避免可能的脚本内容丢失问题
+* `修复` 调整布局层次分析的层级色条宽度避免层级过多时控件名称无法显示的问题 _[`issue #46`](http://issues.autojs6.com/46)_
+* `优化` 布局分析浮动窗口增加退出按钮以关闭窗口 _[`issue #63`](http://issues.autojs6.com/63)_
+* `优化` 脚本绝对路径使用简称形式以缩减文本长度并增加可读性
+* `优化` 将 Error 替换为 Exception 避免出现异常时 AutoJs6 应用崩溃
+* `优化` 视图 (View) 绑定方式由 ButterKnife 迁移至 View Binding _[`issue #48`](http://issues.autojs6.com/48)_
+* `优化` 服务端模式非正常关闭时将于 AutoJs6 启动时自动开启 _[`issue #64`](http://issues.autojs6.com/64)_
+* `优化` 客户端模式非正常关闭时将于 AutoJs6 启动时按最近一次的历史地址自动连接
+* `优化` 升级 Leakcanary 版本 2.10 -> 2.11
+* `优化` 升级 Android Material 版本 1.8.0 -> 1.9.0
+* `优化` 升级 Androidx WebKit 版本 1.6.1 -> 1.7.0
+* `优化` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11
+* `优化` 升级 MLKit Text Recognition Chinese 版本 16.0.0-beta6 -> 16.0.0
+
 # v6.3.0
 
 ###### 2023/04/29
@@ -347,7 +383,7 @@
 * `新增` 主页抽屉底部增加重启应用按钮
 * `新增` 主页抽屉增加忽略电池优化/显示在其他应用上层等开关
 * `修复` 应用初始安装后部分区域主题颜色渲染异常的问题
-* `修复` sign.property 不存在时无法 build 的问题
+* `修复` sign.property 文件不存在时无法构建项目的问题
 * `修复` 定时任务面板一次性任务的月份存取错误
 * `修复` 应用设置页面开关颜色不随主题变更的问题
 * `修复` 无法识别打包插件及打包插件下载地址无效的问题

@@ -1532,6 +1532,10 @@
 <li><span class="stability_undefined"><a href="#console_setgloballogconfig_config">setGlobalLogConfig(config)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#console_m_resetgloballogconfig">[m] resetGlobalLogConfig</a></span><ul>
+<li><span class="stability_undefined"><a href="#console_resetgloballogconfig">resetGlobalLogConfig()</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#console_m_input">[m] input</a></span><ul>
 <li><span class="stability_undefined"><a href="#console_input_data_args">input(data, ...args)</a></span></li>
 </ul>
@@ -2015,6 +2019,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#web_m_newinjectablewebclient">[m] newInjectableWebClient</a></span><ul>
 <li><span class="stability_undefined"><a href="#web_newinjectablewebclient">newInjectableWebClient()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#web_m_newwebsocket">[m] newWebSocket</a></span><ul>
+<li><span class="stability_undefined"><a href="#web_newwebsocket_url">newWebSocket(url)</a></span></li>
 </ul>
 </li>
 </ul>
@@ -2541,7 +2549,7 @@ console.log(UiObject.bounds()); /* 访问的是类 UiObject 的静态方法 boun
 <h3>OCR 特性<span><a class="mark" href="#qa_ocr" id="qa_ocr">#</a></span></h3>
 <p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 实现的.</p>
 <blockquote>
-<p>注: AutoJs6 的 <a href="http://project.autojs6.com/blob/master/app/src/main/java/org/autojs/autojs/runtime/api/MlKitOCR.kt">OCR 实现源码</a> 参考自 <a href="https://github.com/TonyJiangWJ">TonyJiangWJ</a> 的开源项目.</p>
+<p>注: AutoJs6 的 <a href="http://project.autojs6.com/blob/master/app/src/main/java/org/autojs/autojs/runtime/api/MlKitOCR.kt">OCR 实现源码</a> 参考自 <a href="https://github.com/TonyJiangWJ">TonyJiangWJ</a> 的 <a href="https://github.com/TonyJiangWJ/Auto.js">开源项目</a>.</p>
 </blockquote>
 <blockquote>
 <p>参阅: <a href="ocr.html">光学字符识别 (OCR)</a> 模块</p>
@@ -7615,7 +7623,7 @@ ocr.recognizeText(img, [ 0, 0, 100, 150 ]).filter(text =&gt; text.includes(&#39;
 <pre><code class="lang-js">ocr.recognizeText(&#39;./picture.jpg&#39;); /* 获取本地图像文件中的所有文本. */
 </code></pre>
 <h3>recognizeText(imgPath, region)<span><a class="mark" href="#ocr_recognizetext_imgpath_region" id="ocr_recognizetext_imgpath_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/6</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
@@ -10278,6 +10286,14 @@ console.timeEnd(&#39;fruit&#39;);
     maxFileSize: 384 &lt;&lt; 10, /* 384 KB. */
 });
 </code></pre>
+<h2>[m] resetGlobalLogConfig<span><a class="mark" href="#console_m_resetgloballogconfig" id="console_m_resetgloballogconfig">#</a></span></h2>
+<h3>resetGlobalLogConfig()<span><a class="mark" href="#console_resetgloballogconfig" id="console_resetgloballogconfig">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>重置全局日志写入配置.</p>
+<p>此方法可重置 <a href="#all_m_setgloballogconfig">setGlobalLogConfig</a> 的全部选项配置.</p>
 <h2>[m] input<span><a class="mark" href="#console_m_input" id="console_m_input">#</a></span></h2>
 <h3>input(data, ...args)<span><a class="mark" href="#console_input_data_args" id="console_input_data_args">#</a></span></h3>
 <p><strong><code>ABANDONED</code></strong></p>
@@ -10286,7 +10302,7 @@ console.timeEnd(&#39;fruit&#39;);
 <li><strong>args</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_any">any</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - <a href="glossaries.html#glossaries_占位符替换参数">占位符替换参数</a></li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
-<p>此方法已于 <code>6.3.0</code> 版本被废弃, 使用后将无任何效果.</p>
+<p>此方法已于 <code>6.3.1</code> 版本被废弃, 使用后将无任何效果.</p>
 <h2>[m] rawInput<span><a class="mark" href="#console_m_rawinput" id="console_m_rawinput">#</a></span></h2>
 <h3>rawInput(data, ...args)<span><a class="mark" href="#console_rawinput_data_args" id="console_rawinput_data_args">#</a></span></h3>
 <p><strong><code>ABANDONED</code></strong></p>
@@ -10295,7 +10311,7 @@ console.timeEnd(&#39;fruit&#39;);
 <li><strong>args</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_any">any</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - <a href="glossaries.html#glossaries_占位符替换参数">占位符替换参数</a></li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
-<p>此方法已于 <code>6.3.0</code> 版本被废弃, 使用后将无任何效果.
+<p>此方法已于 <code>6.3.1</code> 版本被废弃, 使用后将无任何效果.
 <!-- [end-include:console.md] --></p>
 <!-- [start-include:shell.md] -->
 <h1>Shell<span><a class="mark" href="#shell_shell" id="shell_shell">#</a></span></h1>
@@ -13433,6 +13449,73 @@ settings.setDisplayZoomControls(false);
 <pre><code class="lang-js">/* 为 webView 对象重新设置一个新的客户端. */
 webView.setWebViewClient(newInjectableWebClient());
 </code></pre>
+<h2>[m] newWebSocket<span><a class="mark" href="#web_m_newwebsocket" id="web_m_newwebsocket">#</a></span></h2>
+<h3>newWebSocket(url)<span><a class="mark" href="#web_newwebsocket_url" id="web_newwebsocket_url">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong> <strong><code>Global</code></strong></p>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="webSocketType.html">WebSocket</a></span> }</li>
+</ul>
+<p>新建并返回一个 <a href="webSocketType.html">WebSocket</a> 实例.</p>
+<pre><code class="lang-js">console.setExitOnClose(7e3).show();
+
+let ws = web.newWebSocket(&#39;wss://echo.websocket.events&#39;);
+
+ws
+    .on(&#39;open&#39;, (res, ws) =&gt; {
+        console.log(&#39;WebSocket 已连接&#39;);
+    })
+    .on(&#39;message&#39;, (message, ws) =&gt; {
+        console.log(&#39;接收到消息&#39;);
+        // if (message instanceof okio.ByteString) {
+        //     console.log(`消息类型: ByteString`);
+        // } else if (typeof message === &#39;string&#39;) {
+        //     console.log(`消息类型: String`);
+        // } else {
+        //     throw TypeError(&#39;Should never happen&#39;);
+        // }
+    })
+    .on(&#39;text&#39;, (text, ws) =&gt; {
+        console.info(&#39;接收到文本消息:&#39;);
+        console.info(`text: ${text}`);
+    })
+    .on(&#39;bytes&#39;, (bytes, ws) =&gt; {
+        console.info(&#39;接收到字节数组消息:&#39;);
+        console.info(`utf8: ${bytes.utf8()}`);
+        console.info(`base64: ${bytes.base64()}`);
+        console.info(`md5: ${bytes.md5()}`);
+        console.info(`hex: ${bytes.hex()}`);
+    })
+    .on(&#39;closing&#39;, (code, reason, ws) =&gt; {
+        console.log(&#39;WebSocket 关闭中&#39;);
+    })
+    .on(&#39;closed&#39;, (code, reason, ws) =&gt; {
+        console.log(&#39;WebSocket 已关闭&#39;);
+        console.log(`code: ${code}`);
+        if (reason) console.log(`reason: ${reason}`);
+    })
+    .on(&#39;failure&#39;, (err, res, ws) =&gt; {
+        console.error(&#39;WebSocket 连接失败&#39;);
+        console.error(err);
+    });
+
+/* 发送文本消息. */
+ws.send(&#39;Hello WebSocket&#39;);
+
+/* 发送字节数组消息. */
+ws.send(new okio.ByteString(new java.lang.String(&#39;Hello WebSocket&#39;).getBytes()));
+
+setTimeout(() =&gt; {
+    console.log(&#39;断开 WebSocket&#39;);
+
+    /* code 支持的范围 [1000,5000). */
+    /* 1000 表示成功操作或常规的 Socket 关闭操作. */
+    /* 参阅 https://github.com/Luka967/websocket-close-codes */
+    ws.close(1000, &#39;Closed by user&#39;);
+}, 8e3);
+
+setTimeout(() =&gt; console.log(&#39;Exit&#39;), 9e3);
+</code></pre>
 <!-- [end-include:web.md] -->
 <!-- [start-include:http.md] -->
 <h1>HTTP<span><a class="mark" href="#http_http" id="http_http">#</a></span></h1>
@@ -13441,7 +13524,7 @@ webView.setWebViewClient(newInjectableWebClient());
 <p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Mar 21, 2023.</p>
 
 <hr>
-<p>http模块提供一些进行http请求的函数.</p>
+<p>http 模块主要用于发送 HTTP 请求, 获取并解析 HTTP 响应.</p>
 <blockquote>
 <p>注: 与 <a href="web.html">web</a> 模块不同, web 模块主要用于 WebView 网页的注入及客户端构建.</p>
 </blockquote>
@@ -13578,11 +13661,11 @@ log(res.body.string());
 <p>选项options可以包含以下属性：</p>
 <ul>
 <li><code>headers</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="type">Object</a> } 键值对形式的HTTP头部信息. 有关HTTP头部信息, 参见<a href="http://www.runoob.com/http/http-header-fields.html">菜鸟教程：HTTP响应头信息</a>.</li>
-<li><code>method</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } HTTP请求方法. 包括&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELET&quot;, &quot;PATCH&quot;.</li>
+<li><code>method</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } HTTP请求方法. 包括&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;.</li>
 <li><code>contentType</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } HTTP头部信息中的&quot;Content-Type&quot;, 表示HTTP请求的内容类型. 例如&quot;text/plain&quot;, &quot;application/json&quot;. 更多信息参见<a href="http://www.runoob.com/http/http-content-type.html">菜鸟教程：HTTP contentType</a>.</li>
 <li><code>body</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } | { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="type">Array</a> } | { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" class="type">Function</a> } HTTP请求的内容. 可以是一个字符串, 也可以是一个字节数组；或者是一个以<a href="https://github.com/square/okio/blob/master/okio/src/main/java/okio/BufferedSink.java/">BufferedSink</a>为参数的函数.</li>
 </ul>
-<p>该函数是get, post, postJson等函数的基础函数. 因此除非是PUT, DELET等请求, 或者需要更高定制的HTTP请求, 否则直接使用get, post, postJson等函数会更加方便.</p>
+<p>该函数是get, post, postJson等函数的基础函数. 因此除非是PUT, DELETE等请求, 或者需要更高定制的HTTP请求, 否则直接使用get, post, postJson等函数会更加方便.</p>
 <h2>[m] buildRequest<span><a class="mark" href="#http_m_buildrequest" id="http_m_buildrequest">#</a></span></h2>
 <h3>buildRequest(url, options)<span><a class="mark" href="#http_buildrequest_url_options" id="http_buildrequest_url_options">#</a></span></h3>
 <p>... ...

@@ -29,8 +29,6 @@ import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import java.io.File
 
-// @RefactorNeeded by SuperMonster003 on Sep 25, 2022.
-//  ! WorkingDirectoryPreference : EditTextPreference : Preference
 class WorkingDirectoryPreference : MaterialPreference {
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)

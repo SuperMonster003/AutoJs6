@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.main.task;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,26 +24,24 @@ import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.execution.ScriptExecutionListener;
 import org.autojs.autojs.execution.SimpleScriptExecutionListener;
+import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
 import org.autojs.autojs.script.AutoFileSource;
 import org.autojs.autojs.storage.database.ModelChange;
 import org.autojs.autojs.timing.TimedTaskManager;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
-import org.autojs.autojs.ui.timing.TimedTaskSettingActivity_;
-import org.autojs.autojs.ui.widget.FirstCharView;
-import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
 import org.autojs.autojs6.R;
+import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding;
+import org.autojs.autojs6.databinding.TaskListRecyclerViewItemBinding;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
 /**
  * Created by Stardust on 2017/3/24.
+ * Modified by SuperMonster003 as of May 26, 2022.
  */
 public class TaskListRecyclerView extends ThemeColorRecyclerView {
 
@@ -215,39 +214,35 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
 
     class TaskViewHolder extends ChildViewHolder<Task> {
 
-        @BindView(R.id.first_char)
-        FirstCharView mFirstChar;
+        @NonNull
+        private final ExplorerFirstCharIconBinding firstCharIconBinding;
 
-        @BindView(R.id.name)
-        TextView mName;
-
-        @BindView(R.id.task_list_file_path)
-        TextView mFilePath;
+        @NonNull
+        private final TaskListRecyclerViewItemBinding itemBinding;
 
         private Task mTask;
 
         TaskViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this::onItemClick);
-            ButterKnife.bind(this, itemView);
+            itemBinding = TaskListRecyclerViewItemBinding.bind(itemView);
+            firstCharIconBinding = ExplorerFirstCharIconBinding.bind(itemView);
         }
 
         public void bind(Task task) {
             mTask = task;
-            mName.setText(task.getName());
-            mFilePath.setText(task.getDesc());
-            mFirstChar
+            firstCharIconBinding.firstChar
                     .setIconText(AutoFileSource.ENGINE.equals(mTask.getEngineName()) ? "R" : "J")
                     .setIconTextThemeColor()
                     .setStrokeThemeColor()
                     .setFillTransparent();
-        }
-
-        @OnClick(R.id.stop)
-        void stop() {
-            if (mTask != null) {
-                mTask.cancel();
-            }
+            itemBinding.name.setText(task.getName());
+            itemBinding.taskListFilePath.setText(task.getDesc());
+            itemBinding.stop.setOnClickListener(v -> {
+                if (mTask != null) {
+                    mTask.cancel();
+                }
+            });
         }
 
         void onItemClick(View view) {
@@ -255,14 +250,14 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
                 String extra = task.getTimedTask() == null
                         ? TimedTaskSettingActivity.EXTRA_INTENT_TASK_ID
                         : TimedTaskSettingActivity.EXTRA_TASK_ID;
-                TimedTaskSettingActivity_.intent(getContext())
-                        .extra(extra, task.getId())
-                        .start();
+                Intent intent = new Intent(getContext(), TimedTaskSettingActivity.class)
+                        .putExtra(extra, task.getId());
+                getContext().startActivity(intent);
             }
         }
     }
 
-    private class TaskGroupViewHolder extends ParentViewHolder<TaskGroup, Task> {
+    private static class TaskGroupViewHolder extends ParentViewHolder<TaskGroup, Task> {
 
         TextView title;
         ImageView icon;

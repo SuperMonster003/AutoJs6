@@ -361,7 +361,7 @@
     <string name="text_execution_finished" formatted="false">[%s] انتهى في %s.\n</string>
     <string name="text_exit">مخرج</string>
     <string name="text_exit_directly">مخرج</string>
-    <string name="text_exit_floating_window">خروج نافذة عائمة</string>
+    <string name="text_close_floating_button">إغلاق الزر العائم</string>
     <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
     <string name="text_extensibility">التمدد</string>
     <string name="text_failed">باءت بالفشل</string>
@@ -390,7 +390,7 @@
     <string name="text_find_next_simplified">التالي</string>
     <string name="text_find_or_replace">البحث / استبدال</string>
     <string name="text_find_prev_simplified">سابق</string>
-    <string name="text_floating_window">نافذة عائمة</string>
+    <string name="text_floating_button">زر عائم</string>
     <string name="text_force_stop">توقف إجباري</string>
     <string name="text_foreground_service">خدمة المقدمة</string>
     <string name="text_foreground_service_description">تقوم الخدمات الأمامية بإجراء عمليات ملحوظة للمستخدم.\nتُظهر الخدمات المقدمة إخطار شريط الحالة ، بحيث يدرك المستخدمون بنشاط أن تطبيقك يقوم بمهمة في المقدمة ويستهلك موارد النظام.\nلا يمكن رفض الإشعار ما لم يتم إيقاف الخدمة أو إزالتها من المقدمة.\nقد يتم تحديد الإخطار أولوية منخفضة ، حتى يتم إيقاف تشغيله ، عن طريق الإخطار الطويل.</string>
@@ -476,7 +476,8 @@
     <string name="text_not_granted">لم تمنح</string>
     <string name="text_not_showing_main_activity">لا تظهر النشاط الرئيسي</string>
     <string name="text_notification">تنبيه</string>
-    <string name="text_notification_permission">الوصول إلى الإخطار</string>
+    <string name="text_post_notifications_permission">نشر الإخطارات</string>
+    <string name="text_notification_access_permission">الوصول إلى الإخطار</string>
     <string name="text_notification_service_disabled">خدمة الإخطار لا تعمل</string>
     <string name="text_null">لا شيء</string>
     <string name="text_number_format_error">تنسيق رقم غير صالح</string>
@@ -655,6 +656,7 @@
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="theme_color_default">تقصير</string>
+    <string name="error_abandoned_method">تم التخلي عن الأسلوب %s ويجب عدم استخدامه</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">المجموع: عنصر واحد</item>

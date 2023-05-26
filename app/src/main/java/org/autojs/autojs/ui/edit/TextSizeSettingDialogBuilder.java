@@ -1,7 +1,8 @@
 package org.autojs.autojs.ui.edit;
 
 import android.content.Context;
-import android.view.View;
+import android.view.LayoutInflater;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -10,9 +11,7 @@ import androidx.annotation.NonNull;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.autojs.autojs6.R;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import org.autojs.autojs6.databinding.DialogTextSizeSettingBinding;
 
 /**
  * Created by Stardust on 2018/2/24.
@@ -27,11 +26,8 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
     private final int mMinTextSize;
     private final int mMaxTextSize;
 
-    @BindView(R.id.seekbar)
-    SeekBar mSeekBar;
-
-    @BindView(R.id.preview_text)
-    TextView mPreviewText;
+    private final SeekBar mSeekBar;
+    private final TextView mPreviewText;
 
     private int mTextSize;
     private MaterialDialog mMaterialDialog;
@@ -39,14 +35,18 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
     public TextSizeSettingDialogBuilder(@NonNull Context context) {
         super(context);
 
+        DialogTextSizeSettingBinding binding = DialogTextSizeSettingBinding.inflate(LayoutInflater.from(context));
+
+        mSeekBar = binding.seekbar;
+        mPreviewText = binding.previewText;
+
         mMinTextSize = Integer.parseInt(context.getString(R.string.text_text_size_min_value));
         mMaxTextSize = Integer.parseInt(context.getString(R.string.text_text_size_max_value));
 
-        View view = View.inflate(context, R.layout.dialog_text_size_setting, null);
+        LinearLayout view = binding.getRoot();
         customView(view, false);
         title(R.string.text_text_size);
 
-        ButterKnife.bind(this, view);
         mSeekBar.setOnSeekBarChangeListener(this);
         mSeekBar.setMax(mMaxTextSize - mMinTextSize);
         autoDismiss(false);

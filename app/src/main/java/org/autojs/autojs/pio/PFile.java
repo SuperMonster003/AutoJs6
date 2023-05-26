@@ -54,7 +54,7 @@ public class PFile extends File {
         } else {
             mSimplifiedName = PFiles.getNameWithoutExtension(getName());
         }
-        mSimplifyPath = PFiles.getRelativePath(getPath());
+        mSimplifyPath = PFiles.getElegantPath(getPath());
     }
 
 

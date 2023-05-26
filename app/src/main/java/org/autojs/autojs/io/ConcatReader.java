@@ -156,7 +156,7 @@ public class ConcatReader extends Reader {
      * @since ostermillerutils 1.04.01
      */
     public ConcatReader() {
-        // Empty Constructor
+        // Empty constructor
     }
 
     /**

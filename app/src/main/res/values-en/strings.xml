@@ -359,7 +359,7 @@
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
     <string name="text_exit">Exit</string>
     <string name="text_exit_directly">Exit</string>
-    <string name="text_exit_floating_window">Exit floating window</string>
+    <string name="text_close_floating_button">Close floating button</string>
     <string name="text_extending_js_build_in_objects">Extending JavaScript build-in objects</string>
     <string name="text_extensibility">Extensibility</string>
     <string name="text_failed">Failed</string>
@@ -388,7 +388,7 @@
     <string name="text_find_next_simplified">Next</string>
     <string name="text_find_or_replace">Find / Replace</string>
     <string name="text_find_prev_simplified">Prev</string>
-    <string name="text_floating_window">Floating window</string>
+    <string name="text_floating_button">Floating button</string>
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Foreground service</string>
     <string name="text_foreground_service_description">Foreground services perform operations that are noticeable to the user.\nForeground services show a status bar notification, so that users are actively aware that your app is performing a task in the foreground and is consuming system resources.\nThe notification cannot be dismissed unless the service is either stopped or removed from the foreground.\nNotification may be set low priority, even be turned off, by long-pressing notification.</string>
@@ -474,7 +474,8 @@
     <string name="text_not_granted">Not granted</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
     <string name="text_notification">Notification</string>
-    <string name="text_notification_permission">Notification access</string>
+    <string name="text_post_notifications_permission">Post notifications</string>
+    <string name="text_notification_access_permission">Notification access</string>
     <string name="text_notification_service_disabled">Notification service is not working</string>
     <string name="text_null">Null</string>
     <string name="text_number_format_error">Invalid number format</string>
@@ -653,6 +654,7 @@
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="theme_color_default">Default</string>
+    <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>

@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import androidx.appcompat.content.res.AppCompatResources;
 
 import org.autojs.autojs.core.ui.inflater.ImageLoader;
+import org.autojs.autojs.util.ColorUtils;
 
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
@@ -44,7 +45,7 @@ public class Drawables {
 
     public Drawable parse(Context context, String value) {
         if (value.startsWith("@color/") || value.startsWith("@android:color/") || value.startsWith("#")) {
-            return new ColorDrawable(Colors.parse(context, value));
+            return new ColorDrawable(ColorUtils.parse(context, value));
         }
         if (value.startsWith("?")) {
             return loadAttrResources(context, value);
@@ -52,7 +53,11 @@ public class Drawables {
         if (value.startsWith("file://")) {
             return decodeImage(context, value.substring(7));
         }
-        return loadDrawableResources(context, value);
+        try {
+            return loadDrawableResources(context, value);
+        } catch (Exception e) {
+            return new ColorDrawable(ColorUtils.toInt(value));
+        }
     }
 
     public Drawable loadDrawableResources(Context context, String value) {

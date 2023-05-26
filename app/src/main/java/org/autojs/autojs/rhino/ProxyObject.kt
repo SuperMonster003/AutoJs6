@@ -27,7 +27,7 @@ open class ProxyObject() : NativeObject() {
         }
     }
 
-    override fun put(name: String, start: Scriptable, value: Any) {
+    override fun put(name: String, start: Scriptable, value: Any?) {
         if (name == "__proxy__") {
             val proxy = value as NativeObject
             val getter = proxy["get", start]
