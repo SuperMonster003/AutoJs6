@@ -10,10 +10,10 @@
     <dimen name="github_font_size_nickname">15sp</dimen>
     <dimen name="icon_developer_identifier_image_padding">5dp</dimen>
     <dimen name="icon_developer_identifier_image_side_length">48dp</dimen>
-    <dimen name="level_beam_view_line_offset">2dp</dimen>
-    <dimen name="level_beam_view_line_width">6dp</dimen>
-    <dimen name="level_beam_view_padding_left">3dp</dimen>
-    <dimen name="level_beam_view_padding_right">-4dp</dimen>
+    <dimen name="level_beam_view_line_offset">3dp</dimen>
+    <dimen name="level_beam_view_line_width">2dp</dimen>
+    <dimen name="level_beam_view_padding_left">2dp</dimen>
+    <dimen name="level_beam_view_padding_right">-2dp</dimen>
     <dimen name="padding_circular_menu_normal">5dp</dimen>
     <dimen name="padding_circular_menu_recording">8dp</dimen>
     <dimen name="script_and_folder_list_divider_left_margin">0dp</dimen>
@@ -27,6 +27,7 @@
     <dimen name="first_char_view_stroke_width">2dp</dimen>
     <dimen name="expanded_view_initial_width">280dp</dimen>
     <dimen name="expanded_view_initial_height">518dp</dimen>
+    <dimen name="toolbar_content_inset_start_with_navigation">64dp</dimen>
     <integer name="snackbar_text_max_lines">2</integer>
     <integer name="layout_node_info_view_decoration_line">2</integer>
 </resources>

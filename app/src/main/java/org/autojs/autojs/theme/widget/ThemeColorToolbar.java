@@ -9,9 +9,11 @@ import androidx.appcompat.widget.Toolbar;
 import org.autojs.autojs.theme.ThemeColor;
 import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.theme.ThemeColorMutable;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/3/5.
+ * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 public class ThemeColorToolbar extends Toolbar implements ThemeColorMutable {
 
@@ -32,6 +34,8 @@ public class ThemeColorToolbar extends Toolbar implements ThemeColorMutable {
 
     private void init() {
         ThemeColorManager.add(this);
+
+        setContentInsetStartWithNavigation(getContext().getResources().getDimensionPixelSize(R.dimen.toolbar_content_inset_start_with_navigation));
     }
 
     @Override

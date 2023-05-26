@@ -35,6 +35,7 @@
 -keep class org.greenrobot.eventbus.** { *; }
 -keep class * extends c
 -keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
 # Event bus
 -keepclassmembers class ** {
     @org.greenrobot.eventbus.Subscribe <methods>;
@@ -108,6 +109,7 @@
 
 -keepclasseswithmembers class * {
 	public <init>(android.content.Context, android.util.AttributeSet, int);
+	public <init>(android.content.Context, android.util.AttributeSet, int, int);
 }
 # Google Play Services library
 -keep class * extends java.util.ListResourceBundle {

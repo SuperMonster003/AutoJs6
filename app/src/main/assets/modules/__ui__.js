@@ -12,16 +12,19 @@ let { files } = global;
 module.exports = function (scriptRuntime, scope) {
     const Looper = android.os.Looper;
     const Runnable = java.lang.Runnable;
-    const Color = android.graphics.Color;
     const ContextThemeWrapper = android.view.ContextThemeWrapper;
     const ViewExtras = org.autojs.autojs.core.ui.ViewExtras;
     const JsListView = org.autojs.autojs.core.ui.widget.JsListView;
     const JsGridView = org.autojs.autojs.core.ui.widget.JsGridView;
     const JsViewHelper = org.autojs.autojs.core.ui.JsViewHelper;
+    const ThemeColor = org.autojs.autojs.theme.ThemeColor;
     const DynamicLayoutInflater = org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater;
+    const ColorDrawable = android.graphics.drawable.ColorDrawable;
 
     require('object-observe-lite.min').call(scope);
     require('array-observe.min').call(scope);
+
+    let isAndroidLayout = null;
 
     // noinspection JSValidateTypes
     let _ = {
@@ -142,6 +145,15 @@ module.exports = function (scriptRuntime, scope) {
                         : activity);
                     return layoutInflater.inflate(_.toXMLString(xml), parent || null, Boolean(isAttachedToParent));
                 },
+                useAndroidLayout(b) {
+                    if (typeof b === 'boolean') {
+                        isAndroidLayout = b;
+                    } else if (b === undefined) {
+                        isAndroidLayout = true;
+                    } else {
+                        isAndroidLayout = null;
+                    }
+                },
                 run(action) {
                     if (this.isUiThread()) {
                         return action();
@@ -175,11 +187,16 @@ module.exports = function (scriptRuntime, scope) {
                         scriptRuntime.getUiHandler().postDelayed(_.wrapUiAction(action), delay);
                     }
                 },
-                layout(layout) {
+                layout(xml) {
                     _.ensureActivity();
-                    layoutInflater.setContext(activity);
                     // noinspection JSCheckFunctionSignatures
-                    this.setContentView(layoutInflater.inflate(layout, activity.window.decorView, false));
+                    layoutInflater.setContext(activity);
+                    // noinspection JSCheckFunctionSignatures,JSTypeOfValues
+                    this.setContentView(layoutInflater.inflate(
+                        typeof xml === 'xml' ? xml.toXMLString() : String(xml),
+                        activity.window.decorView,
+                        false,
+                    ));
                 },
                 layoutFile(path) {
                     this.layout(files.read(path));
@@ -200,18 +217,13 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 statusBarColor(color) {
                     _.ensureActivity();
-                    let colorInt = (/* @IIFE */ () => {
-                        if (typeof color === 'string') {
-                            if (Number(color).toString() === color) {
-                                color = Number(color);
-                            }
-                        }
-                        if (typeof color === 'number') {
-                            return color;
-                        }
-                        return scriptRuntime.colors.parseColor(String(color));
-                    })();
-                    this.run(() => activity.window.setStatusBarColor(colorInt));
+                    this.run(() => activity.window.setStatusBarColor(colors.toInt(color)));
+                },
+                backgroundColor(color) {
+                    _.ensureActivity();
+                    this.run(() => activity.window.setBackgroundDrawable(new ColorDrawable(
+                        Color(color).setAlpha(1.0).toInt(),
+                    )));
                 },
                 findById(id) {
                     return this.view ? this.findByStringId(this.view, id) : null;
@@ -235,28 +247,19 @@ module.exports = function (scriptRuntime, scope) {
          */
         layoutInflaterDelegate: {
             beforeConvertXml(context, xml) {
+                if (isAndroidLayout === true || isAndroidLayout === null && /\bxmlns:\w+="\w+:\/\/|\b(android|app):\w+=".+"/.test(xml)) {
+                    // noinspection JSTypeOfValues
+                    return typeof xml === 'xml' ? xml.toXMLString() : String(xml);
+                }
                 return null;
             },
             afterConvertXml(context, xml) {
                 return xml;
             },
-            beforeInflation(context, xml, parent) {
-                return null;
-            },
-            afterInflation(context, result, xml, parent) {
-                return result;
-            },
             beforeInflateView(context, node, parent, attachToParent) {
                 return null;
             },
-            afterInflateView(context, view, node, parent, attachToParent) {
-                let { widget } = view;
-                if (widget && context.get('root') !== widget) {
-                    widget.notifyAfterInflation(view);
-                }
-                return view;
-            },
-            beforeCreateView(context, node, viewName, parent, attrs) {
+            beforeCreateView(context, node, viewName, parent) {
                 if (uiProxy.__widgets__.hasOwnProperty(viewName)) {
                     let Widget = uiProxy.__widgets__[viewName];
                     let widget = new Widget();
@@ -267,7 +270,13 @@ module.exports = function (scriptRuntime, scope) {
                 }
                 return null;
             },
-            afterCreateView(context, view, node, viewName, parent, attrs) {
+            beforeInflation(context, xml, parent) {
+                return null;
+            },
+            afterInflation(context, result, xml, parent) {
+                return result;
+            },
+            afterCreateView(context, view, node, viewName, parent) {
                 if (view instanceof JsListView || view instanceof JsGridView) {
                     _.initListView(view);
                 }
@@ -275,17 +284,40 @@ module.exports = function (scriptRuntime, scope) {
                 if (widget !== null) {
                     widget.view = view;
                     view.widget = widget;
-                    ViewExtras.getViewAttributes(view, layoutInflater.getResourceParser()).setViewAttributeDelegate({
-                        has: name => widget.hasAttr(name),
-                        get: (view, name, getter) => widget.getAttr(view, name, getter),
-                        set: (view, name, value, setter) => widget.setAttr(view, name, value, setter),
-                    });
+                    ViewExtras
+                        .getViewAttributes(view, layoutInflater.getResourceParser())
+                        .setViewAttributeDelegate({
+                            has: name => widget.hasAttr(name),
+                            get: (view, name, getter) => widget.getAttr(view, name, getter),
+                            set: (view, name, value, setter) => widget.setAttr(view, name, value, setter),
+                        });
                     widget.notifyViewCreated(view);
                 }
                 return view;
             },
             beforeApplyAttributes(context, view, inflater, attrs, parent) {
                 return false;
+            },
+            beforeApplyAttribute(context, inflater, view, ns, attrName, value, parent) {
+                let isDynamic = layoutInflater.isDynamicValue(value);
+                return isDynamic && layoutInflater.getInflateFlags() === DynamicLayoutInflater.FLAG_IGNORES_DYNAMIC_ATTRS
+                    || !isDynamic && layoutInflater.getInflateFlags() === DynamicLayoutInflater.FLAG_JUST_DYNAMIC_ATTRS
+                    || (/* @IIFE */ () => {
+                        value = _.bind(value);
+                        let widget = context.get('widget');
+                        if (widget !== null && widget.hasAttr(attrName)) {
+                            widget.setAttr(view, attrName, value, (view, attrName, value) => {
+                                inflater.setAttr(view, ns, attrName, value, parent);
+                            });
+                        } else {
+                            inflater.setAttr(view, ns, attrName, value, parent);
+                        }
+                        this.afterApplyAttribute(context, inflater, view, ns, attrName, value, parent);
+                        return true;
+                    })();
+            },
+            afterApplyAttribute(context, inflater, view, ns, attrName, value, parent) {
+                // Empty method body
             },
             afterApplyAttributes(context, view, inflater, attrs, parent) {
                 context.remove('widget');
@@ -302,26 +334,12 @@ module.exports = function (scriptRuntime, scope) {
             afterApplyPendingAttributesOfChildren(context, inflater, view) {
                 // Empty method body
             },
-            beforeApplyAttribute(context, inflater, view, ns, attrName, value, parent, attrs) {
-                let isDynamic = layoutInflater.isDynamicValue(value);
-                return isDynamic && layoutInflater.getInflateFlags() === DynamicLayoutInflater.FLAG_IGNORES_DYNAMIC_ATTRS
-                    || !isDynamic && layoutInflater.getInflateFlags() === DynamicLayoutInflater.FLAG_JUST_DYNAMIC_ATTRS
-                    || (/* @IIFE */ () => {
-                        value = _.bind(value);
-                        let widget = context.get('widget');
-                        if (widget !== null && widget.hasAttr(attrName)) {
-                            widget.setAttr(view, attrName, value, (view, attrName, value) => {
-                                inflater.setAttr(view, ns, attrName, value, parent, attrs);
-                            });
-                        } else {
-                            inflater.setAttr(view, ns, attrName, value, parent, attrs);
-                        }
-                        this.afterApplyAttribute(context, inflater, view, ns, attrName, value, parent, attrs);
-                        return true;
-                    })();
-            },
-            afterApplyAttribute(context, inflater, view, ns, attrName, value, parent, attrs) {
-                // Empty method body
+            afterInflateView(context, view, node, parent, attachToParent) {
+                let { widget } = view;
+                if (widget && context.get('root') !== widget) {
+                    widget.notifyAfterInflation(view);
+                }
+                return view;
             },
         },
         bind(value) {
@@ -333,7 +351,8 @@ module.exports = function (scriptRuntime, scope) {
                     if (j < 0) {
                         return value;
                     }
-                    value = value.slice(0, i) + _.evalInContext(value.slice(i + 2, j), ctx) + value.slice(j + 2);
+                    let evaluated = _.evalInContext(value.slice(i + 2, j), ctx);
+                    value = value.slice(0, i) + _.attrValueConvert(evaluated) + value.slice(j + 2);
                     i = j + 1;
                 }
                 return value;
@@ -400,6 +419,18 @@ module.exports = function (scriptRuntime, scope) {
         },
         setLayoutInflaterDelegate() {
             layoutInflater.setLayoutInflaterDelegate(this.layoutInflaterDelegate);
+        },
+        attrValueConvert(o) {
+            if (typeof o === 'string') {
+                return o;
+            }
+            if (o instanceof scope.Color) {
+                return o.toHex();
+            }
+            if (o instanceof ThemeColor) {
+                return o.getColorPrimary();
+            }
+            return o;
         },
     };
 

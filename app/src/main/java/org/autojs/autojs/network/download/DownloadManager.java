@@ -19,6 +19,7 @@ import org.autojs.autojs.concurrent.VolatileBox;
 import org.autojs.autojs.network.api.DownloadApi;
 import org.autojs.autojs.network.entity.VersionInfo;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.pref.Language;
 import org.autojs.autojs.tool.SimpleObserver;
 import org.autojs.autojs.util.StreamUtils;
 import org.autojs.autojs.util.UpdateUtils;
@@ -253,13 +254,13 @@ public class DownloadManager {
     }
 
     private String getProgressKiloBytesFormat(Context context, float readKiloBytes, float totalKiloBytes) {
-        return String.format(Locale.getDefault(),
+        return String.format(Language.getPrefLanguage().getLocale(),
                 context.getString(R.string.format_dialog_progress_number_format_kilo_bytes),
                 readKiloBytes, totalKiloBytes);
     }
 
     private String getProgressMegaBytesFormat(Context context, float readMegaBytes, float totalMegaBytes) {
-        return String.format(Locale.getDefault(),
+        return String.format(Language.getPrefLanguage().getLocale(),
                 context.getString(R.string.format_dialog_progress_number_format_mega_bytes),
                 readMegaBytes, totalMegaBytes);
     }

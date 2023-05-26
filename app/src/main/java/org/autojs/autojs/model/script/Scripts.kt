@@ -126,13 +126,12 @@ object Scripts {
     }
 
     @JvmStatic
-    fun runWithBroadcastSender(file: File): ScriptExecution? {
-        return file.parent?.let {
-            AutoJs.instance.scriptEngineService.execute(
-                ScriptFile(file).toSource(), BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
-                ExecutionConfig(workingDirectory = it)
-            )
-        }
+    fun runWithBroadcastSender(file: File, workingDirectory: String?, overriddenFullPath: String?): ScriptExecution? {
+        return AutoJs.instance.scriptEngineService.execute(
+            ScriptFile(file).toSource().apply { this.overriddenFullPath = overriddenFullPath },
+            BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER,
+            ExecutionConfig(workingDirectory ?: file.parent ?: "")
+        )
     }
 
     @JvmStatic

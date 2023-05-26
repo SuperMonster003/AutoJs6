@@ -51,6 +51,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
 
     private final float mMinTextSize = 8.0f;
     private final float mMaxTextSize = 56.0f;
+    private boolean mIsPinchToZoomEnabled;
 
     public ConsoleView(Context context) {
         super(context);
@@ -84,6 +85,9 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         mLogListRecyclerView.setAdapter(new Adapter());
 
         mLogListRecyclerView.setOnTouchListener((v, event) -> {
+            if (!mIsPinchToZoomEnabled) {
+                return super.onTouchEvent(event);
+            }
             mScaleGestureDetector.onTouchEvent(event);
             return !mScaleGestureDetector.isInProgress() && super.onTouchEvent(event);
         });
@@ -145,6 +149,48 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         if (adapter != null) {
             adapter.setTextColors(colors);
         }
+    }
+
+    public void setVerboseTextColor(int color) {
+        Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setVerboseTextColor(color);
+        }
+    }
+
+    public void setDebugTextColor(int color) {
+        Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setDebugTextColor(color);
+        }
+    }
+    public void setInfoTextColor(int color) {
+        Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setInfoTextColor(color);
+        }
+    }
+    public void setWarnTextColor(int color) {
+        Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setWarnTextColor(color);
+        }
+    }
+    public void setErrorTextColor(int color) {
+        Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setErrorTextColor(color);
+        }
+    }
+    public void setAssertTextColor(int color) {
+        Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setAssertTextColor(color);
+        }
+    }
+
+    public void setPinchToZoomEnabled(boolean enabled) {
+        mIsPinchToZoomEnabled = enabled;
     }
 
     protected Map<Integer, Integer> getLogLevelMap() {
@@ -329,6 +375,36 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
             if (isReplaced) {
                 notifyDataSetChanged();
             }
+        }
+
+        public void setVerboseTextColor(int color) {
+            mColors.replace(Log.VERBOSE, color);
+            notifyDataSetChanged();
+        }
+
+        public void setDebugTextColor(int color) {
+            mColors.replace(Log.DEBUG, color);
+            notifyDataSetChanged();
+        }
+
+        public void setInfoTextColor(int color) {
+            mColors.replace(Log.INFO, color);
+            notifyDataSetChanged();
+        }
+
+        public void setWarnTextColor(int color) {
+            mColors.replace(Log.WARN, color);
+            notifyDataSetChanged();
+        }
+
+        public void setErrorTextColor(int color) {
+            mColors.replace(Log.ERROR, color);
+            notifyDataSetChanged();
+        }
+
+        public void setAssertTextColor(int color) {
+            mColors.replace(Log.ASSERT, color);
+            notifyDataSetChanged();
         }
 
         @Override

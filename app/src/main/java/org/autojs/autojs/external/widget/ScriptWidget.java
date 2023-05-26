@@ -19,6 +19,7 @@ import java.util.Set;
 
 /**
  * Created by Stardust on 2017/7/11.
+ * Modified by SuperMonster003 as of May 6, 2022.
  */
 public class ScriptWidget extends AppWidgetProvider {
 
@@ -32,8 +33,9 @@ public class ScriptWidget extends AppWidgetProvider {
             updateWidget(context, appWidgetId, ScriptWidgets.getPathForAppWidgetId(appWidgetId));
             appWidgetIdSet.add(appWidgetId);
         }
-        if (appWidgetIdSet.size() > 1)
+        if (appWidgetIdSet.size() > 1) {
             ScriptWidgets.removeAllNotIn(appWidgetIdSet);
+        }
     }
 
     static boolean updateWidget(Context context, int widgetId, String path) {
@@ -48,7 +50,7 @@ public class ScriptWidget extends AppWidgetProvider {
         views.setOnClickPendingIntent(R.id.widget, PendingIntent.getActivity(context, requestCode,
                 new Intent(context, RunIntentActivity.class)
                         .putExtra(ScriptIntents.EXTRA_KEY_PATH, path)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT));
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         views.setTextViewText(R.id.name, name);
         appWidgetManager.updateAppWidget(widgetId, views);
         ScriptWidgets.setPathForAppWidgetId(widgetId, path);

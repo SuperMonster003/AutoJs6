@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.text.TextUtils
 import org.autojs.autojs.annotation.LocaleNonRelated
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.pref.Language
 import java.util.Locale
 import kotlin.math.min
 import kotlin.math.pow
@@ -184,7 +185,7 @@ object StringUtils {
             }
             frac += 1
         }
-        return String.format(Locale.getDefault(), "%.${frac}f", d).let { s ->
+        return String.format(Language.getPrefLanguage().locale, "%.${frac}f", d).let { s ->
             when {
                 s.contains('.') -> s.replace("\\.?0+$".toRegex(), "")
                 else -> s

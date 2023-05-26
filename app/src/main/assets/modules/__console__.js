@@ -11,8 +11,9 @@ let { files, util, s13n } = global;
 module.exports = function (scriptRuntime, scope) {
     const Log = android.util.Log;
     const Level = org.apache.log4j.Level;
-    const ConsoleUtils = org.autojs.autojs.util.ConsoleUtils;
+    const LogManager = org.apache.log4j.LogManager;
     const LogConfigurator = de.mindpipe.android.logging.log4j.LogConfigurator;
+    const ConsoleUtils = org.autojs.autojs.util.ConsoleUtils;
 
     // noinspection JSValidateTypes
     /** @type {org.autojs.autojs.core.console.GlobalConsole} */
@@ -92,8 +93,14 @@ module.exports = function (scriptRuntime, scope) {
                         Boolean(typeof value === 'function' ? value() : value),
                         message || util.getClassName(java.lang.AssertionError));
                 },
-                input(data, param) {
-                    return eval(String(this.rawInput(data, param)));
+                input() {
+                    // @Abandoned by SuperMonster003 as of May 3, 2023.
+                    // return eval(String(this.rawInput(data, param)));
+                    throw Error(context.getString(R.strings.error_abandoned_method, 'console.input'));
+                },
+                rawInput() {
+                    // @Abandoned by SuperMonster003 as of May 3, 2023.
+                    throw Error(context.getString(R.strings.error_abandoned_method, 'console.rawInput'));
                 },
                 log() {
                     rtConsole.log(util.format.apply(util, arguments));
@@ -246,6 +253,9 @@ module.exports = function (scriptRuntime, scope) {
                     configurator.setMaxBackupSize(_.parseOption(config.maxBackupSize, 5));
                     configurator.setResetConfiguration(_.parseOption(config.resetConfiguration, true));
                     configurator.configure();
+                },
+                resetGlobalLogConfig() {
+                    LogManager.getLoggerRepository().resetConfiguration();
                 },
                 launch() {
                     ConsoleUtils.launch();

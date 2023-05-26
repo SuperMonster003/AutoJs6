@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.ColorStateList
 import android.view.ContextThemeWrapper
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -17,11 +18,16 @@ import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloaty.AbstractRes
 import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow
 import org.autojs.autojs.util.ViewUtils.setViewMeasure
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.FloatingConsoleExpandBinding
+import org.autojs.autojs6.databinding.FloatingWindowCollapseBinding
 
 /**
  * Created by Stardust on 2017/4/20.
  */
 class ConsoleFloaty(private val mConsole: ConsoleImpl) : AbstractResizableExpandableFloaty() {
+
+    private lateinit var expandedBinding: FloatingConsoleExpandBinding
+    private lateinit var collapsedBinding: FloatingWindowCollapseBinding
 
     private var mContextWrapper: ContextWrapper? = null
     private var mResizer: View? = null
@@ -58,7 +64,7 @@ class ConsoleFloaty(private val mConsole: ConsoleImpl) : AbstractResizableExpand
 
     override fun inflateCollapsedView(service: FloatyService, window: ResizableExpandableFloatyWindow): View {
         ensureContextWrapper(service)
-        return View.inflate(mContextWrapper, R.layout.floating_window_collapse, null)
+        return FloatingWindowCollapseBinding.inflate(LayoutInflater.from(mContextWrapper)).also { collapsedBinding = it }.root
     }
 
     private fun ensureContextWrapper(context: Context) {
@@ -67,9 +73,9 @@ class ConsoleFloaty(private val mConsole: ConsoleImpl) : AbstractResizableExpand
 
     override fun inflateExpandedView(service: FloatyService, window: ResizableExpandableFloatyWindow): View {
         ensureContextWrapper(service)
-        return View.inflate(mContextWrapper, R.layout.floating_console_expand, null).also { view ->
+        return FloatingConsoleExpandBinding.inflate(LayoutInflater.from(mContextWrapper)).also { expandedBinding = it }.root.also { view ->
             expandedView = view
-            setUpConsole(view, window)
+            setUpConsole(window)
             setInitialMeasure(service)
         }
     }
@@ -94,20 +100,20 @@ class ConsoleFloaty(private val mConsole: ConsoleImpl) : AbstractResizableExpand
         }
     }
 
-    private fun initConsoleTitleBar(view: View, window: ResizableExpandableFloatyWindow) {
-        mTitleView = view.findViewById<TextView?>(R.id.title)?.apply {
+    private fun initConsoleTitleBar(window: ResizableExpandableFloatyWindow) {
+        mTitleView = expandedBinding.title.apply {
             text = mTitleText
         }
-        titleBarView = view.findViewById<LinearLayout?>(R.id.title_bar).apply {
+        titleBarView = expandedBinding.titleBar.apply {
             mTitleBackgroundColor?.let { setBackgroundColor(it) }
             mTitleBackgroundAlpha?.let { background.alpha = it }
         }
-        view.findViewById<ImageView>(R.id.close).let {
+        expandedBinding.close.let {
             it.setOnClickListener { mConsole.hide() }
             mtTitleIconsTint?.let { color -> it.imageTintList = ColorStateList.valueOf(color) }
             mCloseButton = it
         }
-        view.findViewById<ImageView>(R.id.move_or_resize).let {
+        expandedBinding.moveOrResize.let {
             it.setOnClickListener {
                 mMoveCursor?.run {
                     if (visibility == View.VISIBLE) {
@@ -122,27 +128,27 @@ class ConsoleFloaty(private val mConsole: ConsoleImpl) : AbstractResizableExpand
             mtTitleIconsTint?.let { color -> it.imageTintList = ColorStateList.valueOf(color) }
             mControllingButton = it
         }
-        view.findViewById<ImageView>(R.id.minimize).let {
+        expandedBinding.minimize.let {
             it.setOnClickListener { window.collapse() }
             mtTitleIconsTint?.let { color -> it.imageTintList = ColorStateList.valueOf(color) }
             mMinimizeButton = it
         }
     }
 
-    private fun setUpConsole(view: View, window: ResizableExpandableFloatyWindow) {
-        view.findViewById<FloatingConsoleView>(R.id.console).apply {
+    private fun setUpConsole(window: ResizableExpandableFloatyWindow) {
+        expandedBinding.console.apply {
             setConsole(mConsole)
             setWindow(window)
         }
-        initConsoleTitleBar(view, window)
+        initConsoleTitleBar(window)
     }
 
-    override fun getResizerView(expandedView: View): View? {
-        return expandedView.findViewById<View?>(R.id.resizer).also { mResizer = it }
+    override fun getResizerView(expandedView: View): View {
+        return expandedBinding.resizer.also { mResizer = it }
     }
 
-    override fun getMoveCursorView(expandedView: View): View? {
-        return expandedView.findViewById<View?>(R.id.move_cursor).also { mMoveCursor = it }
+    override fun getMoveCursorView(expandedView: View): View {
+        return expandedBinding.moveCursor.also { mMoveCursor = it }
     }
 
     fun setTitle(title: CharSequence?) {

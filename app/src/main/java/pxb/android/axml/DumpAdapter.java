@@ -47,23 +47,22 @@ public class DumpAdapter extends AxmlVisitor {
             System.out.print("  ");
         }
         if (ns != null) {
-            System.out.print(String.format("%s:", getPrefix(ns)));
+            System.out.printf("%s:", getPrefix(ns));
         }
         System.out.print(name);
         if (resourceId != -1) {
-            System.out.print(String.format("(%08x)", resourceId));
+            System.out.printf("(%08x)", resourceId);
         }
         if (obj instanceof String) {
-            System.out.print(String.format("=[%08x]\"%s\"", type, obj));
+            System.out.printf("=[%08x]\"%s\"", type, obj);
         } else if (obj instanceof Boolean) {
-            System.out.print(String.format("=[%08x]\"%b\"", type, obj));
-        } else if (obj instanceof ValueWrapper) {
-            ValueWrapper w = (ValueWrapper) obj;
-            System.out.print(String.format("=[%08x]@%08x, raw: \"%s\"", type, w.ref, w.raw));
+            System.out.printf("=[%08x]\"%b\"", type, obj);
+        } else if (obj instanceof ValueWrapper w) {
+            System.out.printf("=[%08x]@%08x, raw: \"%s\"", type, w.ref, w.raw);
         } else if (type == TYPE_REFERENCE) {
-            System.out.print(String.format("=[%08x]@%08x", type, obj));
+            System.out.printf("=[%08x]@%08x", type, obj);
         } else {
-            System.out.print(String.format("=[%08x]%08x", type, obj));
+            System.out.printf("=[%08x]%08x", type, obj);
         }
         System.out.println();
         super.attr(ns, name, resourceId, type, obj);

@@ -38,7 +38,7 @@
     <string name="description_root_mode_preference">如果設備使用非常規 Root 方式或 Root 權限檢測結果異常, 可設置 \"強制 Root 模式\" 或 \"強制非 Root 模式\".</string>
     <string name="description_root_record_out_file_type_preference">二進制文件: 不可編輯, 文件擴展名為 \"auto\"\nJavaScript 文件: 可編輯或直接複製, 文件擴展名為 \"js\"</string>
     <string name="description_stable_mode">穩定模式省略佈局細節, 腳本分析佈局時更穩定, 但可能影響獲取的控件總量.\n需重啓無障礙服務.</string>
-    <string name="description_theme_color_preference">主題色的應用範圍包括但不限於以下部件:\n系統通知欄\n應用欄 (AppBar)\n文件圖標\n任務項圖標\n懸浮操作按鈕 (Fab)\n設置頁面類別標題\n按鈕開關\n\n注: 截至 6.2.0 版本, AutoJs6 主題色暫未對 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 強調色 (Accent Color) ] 作出區分.</string>
+    <string name="description_theme_color_preference">主題色的應用範圍包括但不限於以下部件:\n系統通知欄\n應用欄 (AppBar)\n文件圖標\n任務項圖標\n浮動操作按鈕 (Fab)\n設置頁面類別標題\n按鈕開關\n\n注: 截至 6.2.0 版本, AutoJs6 主題色暫未對 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 強調色 (Accent Color) ] 作出區分.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消下載</string>
@@ -186,7 +186,7 @@
     <string name="summary_pre_execute_script">在腳本文件之前執行</string>
     <string name="summary_record_prompt">錄製開始及停止時顯示提示消息</string>
     <string name="summary_stable_mode">增強佈局分析穩定性但降低代碼兼容性 (需重啓無障礙服務)</string>
-    <string name="summary_use_volume_control_record">按 \"音量減\" 鍵開始或停止腳本錄製 (需開啓懸浮窗)</string>
+    <string name="summary_use_volume_control_record">按 \"音量減\" 鍵開始或停止腳本錄製 (需開啓浮動按鈕)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 鍵停止所有正在運行的腳本</string>
     <string name="text_a11y_service">無障礙服務</string>
     <string name="text_a11y_service_description">腳本自動操作 (點擊/長按/滑動等) 所需</string>
@@ -361,7 +361,7 @@
     <string name="text_execution_finished" formatted="false">[%s] 運行結束 (用時 %s 秒)\n</string>
     <string name="text_exit">退出</string>
     <string name="text_exit_directly">直接退出</string>
-    <string name="text_exit_floating_window">退出懸浮窗</string>
+    <string name="text_close_floating_button">關閉浮動按鈕</string>
     <string name="text_extending_js_build_in_objects">JavaScript 內置對象擴展</string>
     <string name="text_extensibility">擴展性</string>
     <string name="text_failed">失敗</string>
@@ -390,7 +390,7 @@
     <string name="text_find_next_simplified">下一個</string>
     <string name="text_find_or_replace">查找 / 替換</string>
     <string name="text_find_prev_simplified">上一個</string>
-    <string name="text_floating_window">懸浮窗</string>
+    <string name="text_floating_button">浮動按鈕</string>
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">前台服務</string>
     <string name="text_foreground_service_description">前台服務執行一些用户能注意到的操作.\n前台服務必須顯示通知, 確保用户知道應用正在執行的任務.\n前台服務通知無法移除, 除非服務停止運行.\n可通過長按通知將通知優先級降低 (部分系統支持關閉前台服務通知), 以減少通知對用户的影響.</string>
@@ -476,7 +476,8 @@
     <string name="text_not_granted">未授予</string>
     <string name="text_not_showing_main_activity">不顯示主界面</string>
     <string name="text_notification">通知</string>
-    <string name="text_notification_permission">通知讀取權限</string>
+    <string name="text_post_notifications_permission">發佈通知權限</string>
+    <string name="text_notification_access_permission">通知讀取權限</string>
     <string name="text_notification_service_disabled">通知服務未運行</string>
     <string name="text_null">無</string>
     <string name="text_number_format_error">數字格式無效</string>
@@ -655,6 +656,7 @@
     <string name="text_write_secure_settings_description">安全設置包含應用程序可讀但不可寫入的設置選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設置權限\" 後, 普通應用可直接修改上述安全設置 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設置</string>
     <string name="theme_color_default">默認</string>
+    <string name="error_abandoned_method">方法 %s 已被廢棄, 應避免使用</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

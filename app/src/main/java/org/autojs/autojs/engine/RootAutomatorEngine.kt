@@ -58,7 +58,7 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
             }
         } catch (e: IOException) {
             if (e.message?.contains("\\bsu\\b[\\s\\S]+[Nn]o such file or dir\\w*".toRegex()) == true) {
-                throw Error(mContext.getString(R.string.error_may_not_have_root_access_to_run_auto_file))
+                throw Exception(mContext.getString(R.string.error_may_not_have_root_access_to_run_auto_file))
             }
             throw ScriptException(e)
         } catch (e: InterruptedException) {

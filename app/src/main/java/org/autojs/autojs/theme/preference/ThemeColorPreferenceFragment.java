@@ -24,8 +24,9 @@ public class ThemeColorPreferenceFragment extends PreferenceFragmentCompat imple
 
     }
 
-    public void addPreferencesFromResource(int resId) {
-        super.addPreferencesFromResource(resId);
+    @Override
+    public void setPreferencesFromResource(int preferencesResId, @Nullable String key) {
+        super.setPreferencesFromResource(preferencesResId, key);
         ThemeColorManager.add(this);
     }
 

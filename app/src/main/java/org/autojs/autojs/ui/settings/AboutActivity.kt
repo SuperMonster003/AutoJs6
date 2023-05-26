@@ -2,22 +2,15 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import android.view.animation.AlphaAnimation
-import android.widget.ImageView
-import android.widget.TextView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.jaredrummler.android.widget.AnimatedSvgView
 import de.psdev.licensesdialog.LicenseResolver
 import de.psdev.licensesdialog.LicensesDialog
-import org.androidannotations.annotations.AfterViews
-import org.androidannotations.annotations.Click
-import org.androidannotations.annotations.EActivity
-import org.androidannotations.annotations.LongClick
-import org.androidannotations.annotations.ViewById
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.ClipboardUtils
@@ -26,33 +19,60 @@ import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivityAboutBinding
+import org.autojs.autojs6.databinding.ActivityAboutFunctionButtonsBinding
+import org.autojs.autojs6.databinding.ActivityAboutItemsBinding
 
 /**
  * Created by Stardust on 2017/2/2.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 
-@EActivity(R.layout.activity_about)
 open class AboutActivity : BaseActivity() {
 
-    @ViewById(R.id.version)
-    lateinit var mVersionView: TextView
+    private lateinit var activityBinding: ActivityAboutBinding
+    private lateinit var itemsBinding: ActivityAboutItemsBinding
+    private lateinit var functionsButtonsBinding: ActivityAboutFunctionButtonsBinding
 
-    @ViewById(R.id.since)
-    lateinit var mSinceView: TextView
-
-    @AfterViews
-    fun setUpViews() {
-        setVersionName()
-        setSinceDate()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activityBinding = ActivityAboutBinding.inflate(layoutInflater).also {
+            setContentView(it.root)
+            it.version.text = BuildConfig.VERSION_NAME
+            it.since.text = BuildConfig.VERSION_DATE
+            itemsBinding = it.activityAboutItems
+            functionsButtonsBinding = it.activityAboutFunctionButtons
+        }
         setToolbarAsBack(R.string.text_about)
+        setupBindingListeners()
+    }
+
+    private fun setupBindingListeners() {
+        itemsBinding.avatarOriginalDeveloper.setOnClickListener { toastForUnderDevelopment() }
+        itemsBinding.avatarDeveloper.setOnClickListener { toastForUnderDevelopment() }
+
+        itemsBinding.avatarOriginalDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
+        itemsBinding.avatarDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
+
+        itemsBinding.icon1stDeveloperIdentifier.setOnClickListener { toastForFirstDeveloperIdentifier() }
+        itemsBinding.icon2ndDeveloperIdentifier.setOnClickListener { toastForSecondDeveloperIdentifier() }
+
+        activityBinding.iconAboutAppSvgView.setOnClickListener { showDeviceInfo() }
+        activityBinding.iconAboutAppSvgView.setOnLongClickListener { true.also { launchDeveloperOptions() } }
+
+        activityBinding.iconAboutApp.setOnClickListener { showDeviceInfo() }
+        activityBinding.iconAboutApp.setOnLongClickListener { true.also { launchDeveloperOptions() } }
+
+        functionsButtonsBinding.aboutFunctionsButtonLicenses.setOnClickListener { showLicensesDialog() }
+        functionsButtonsBinding.aboutFunctionsButtonUpdate.setOnClickListener { checkForUpdates() }
+        functionsButtonsBinding.aboutFunctionsButtonFeedback.setOnClickListener { startFeedbackActivity() }
     }
 
     override fun onResume() {
         super.onResume()
 
-        val iconView = findViewById<ImageView>(R.id.icon_about_app)
-        val animatedSvgView = findViewById<AnimatedSvgView>(R.id.icon_about_app_svg_view)
+        val appIconView = activityBinding.iconAboutApp
+        val animatedSvgView = activityBinding.iconAboutAppSvgView
 
         val animationDuration: Long = 500
 
@@ -60,7 +80,7 @@ open class AboutActivity : BaseActivity() {
             if (state == AnimatedSvgView.STATE_FINISHED) {
                 AlphaAnimation(0f, 1f).also {
                     it.duration = animationDuration
-                    iconView.apply { visibility = View.VISIBLE }.startAnimation(it)
+                    appIconView.apply { visibility = View.VISIBLE }.startAnimation(it)
                 }
                 AlphaAnimation(1f, 0f).also {
                     it.duration = animationDuration
@@ -75,14 +95,6 @@ open class AboutActivity : BaseActivity() {
                 start()
             }
         }, 100)
-    }
-
-    private fun setVersionName() {
-        mVersionView.text = BuildConfig.VERSION_NAME
-    }
-
-    private fun setSinceDate() {
-        mSinceView.text = BuildConfig.VERSION_DATE
     }
 
     //    @Click(R.id.github_1)
@@ -101,13 +113,11 @@ open class AboutActivity : BaseActivity() {
     //        IntentUtils.shareText(this, getString(R.string.share_app));
     //    }
 
-    @Click(R.id.avatar_original_developer, R.id.avatar_developer, R.id.avatar_original_developer_user_contents, R.id.avatar_developer_user_contents)
-    fun toastForUnderDevelopment() {
+    private fun toastForUnderDevelopment() {
         ViewUtils.showToast(this, R.string.text_developer_details_under_development)
     }
 
-    @Click(R.id.icon_about_app_svg_view, R.id.icon_about_app)
-    fun showDeviceInfo() {
+    private fun showDeviceInfo() {
         MaterialDialog.Builder(this)
             .title(R.string.text_app_and_device_info)
             .content(DeviceUtils.getDeviceSummaryWithSimpleAppInfo(this))
@@ -123,23 +133,19 @@ open class AboutActivity : BaseActivity() {
             .show()
     }
 
-    @LongClick(R.id.icon_about_app_svg_view, R.id.icon_about_app)
-    fun launchDeveloperOptions() {
-        startActivity(Intent(this, DeveloperOptionsActivity_::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    private fun launchDeveloperOptions() {
+        startActivity(Intent(this, DeveloperOptionsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    @Click(R.id.icon_1st_developer_identifier)
-    fun toastForFirstDeveloperIdentifier() {
+    private fun toastForFirstDeveloperIdentifier() {
         ViewUtils.showToast(this, R.string.text_original_developer)
     }
 
-    @Click(R.id.icon_2nd_developer_identifier)
-    fun toastForSecondDeveloperIdentifier() {
+    private fun toastForSecondDeveloperIdentifier() {
         ViewUtils.showToast(this, R.string.text_tailor_made_developer)
     }
 
-    @Click(R.id.about_functions_button_licenses)
-    fun showLicensesDialog() {
+    private fun showLicensesDialog() {
         LicenseResolver.registerLicense(MozillaPublicLicense20.instance)
         LicensesDialog.Builder(this)
             .setTitle(R.string.text_licenses)
@@ -153,13 +159,11 @@ open class AboutActivity : BaseActivity() {
             .show()
     }
 
-    @Click(R.id.about_functions_button_update)
-    fun checkForUpdates() {
+    private fun checkForUpdates() {
         UpdateUtils.getDialogChecker(this).checkNow()
     }
 
-    @Click(R.id.about_functions_button_feedback)
-    fun startFeedbackActivity() {
+    private fun startFeedbackActivity() {
         val key = "${AboutActivity::class.simpleName}.start_feedback_activity"
         NotAskAgainDialog.Builder(this, key)
             .title(R.string.text_prompt)
@@ -182,7 +186,7 @@ open class AboutActivity : BaseActivity() {
     companion object {
 
         fun startActivity(context: Context) {
-            Intent(context, AboutActivity_::class.java)
+            Intent(context, AboutActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .let { context.startActivity(it) }
         }

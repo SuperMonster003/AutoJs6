@@ -4,14 +4,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.androidannotations.annotations.Click;
-import org.androidannotations.annotations.EFragment;
 import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.rhino.debug.DebugCallback;
@@ -26,12 +26,12 @@ import org.autojs.autojs.ui.edit.debug.WatchingVariable;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
+import org.autojs.autojs6.databinding.FragmentDebugToolbarBinding;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 
-@EFragment(R.layout.fragment_debug_toolbar)
 public class DebugToolbarFragment extends ToolbarFragment implements DebugCallback, CodeEditor.CursorChangeCallback, CodeEvaluator {
 
     private static final String LOG_TAG = "DebugToolbarFragment";
@@ -62,11 +62,19 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
             mDebugger.clearAllBreakpoints();
         }
     };
+    private FragmentDebugToolbarBinding binding;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mHandler = new Handler();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentDebugToolbarBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -77,7 +85,7 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         mDebugger.setWeakDebugCallback(new WeakReference<>(this));
         setInterrupted(false);
         mCurrentEditorSourceUrl = mInitialEditorSourceUrl = mEditorView.getUri().toString();
-        mInitialEditorSource = mEditorView.getEditor().getText();
+        mInitialEditorSource = mEditorView.editor.getText();
         setupEditor();
         ScriptExecution execution = mEditorView.run(false);
         if (execution != null) {
@@ -85,15 +93,25 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         } else {
             mEditorView.exitDebugging();
         }
+
         Log.d(LOG_TAG, "onViewCreated");
+
+        // @Caution by SuperMonster003 on May 13, 2023.
+        //  ! Do not place these listeners into onCreateView method.
+
+        binding.stepOver.setOnClickListener(v -> stepOver());
+        binding.stepInto.setOnClickListener(v -> stepInto());
+        binding.stepOut.setOnClickListener(v -> stepOut());
+        binding.stopScript.setOnClickListener(v -> stopScript());
+        binding.resumeScript.setOnClickListener(v -> resumeScript());
     }
 
     private void setupEditor() {
-        CodeEditor editor = mEditorView.getEditor();
+        CodeEditor editor = mEditorView.editor;
         editor.setRedoUndoEnabled(false);
         editor.addCursorChangeCallback(this);
         editor.setBreakpointChangeListener(mBreakpointChangeListener);
-        DebugBar debugBar = mEditorView.getDebugBar();
+        DebugBar debugBar = mEditorView.debugBar;
         debugBar.registerVariableChangeObserver(mVariableChangeObserver);
         debugBar.setCodeEvaluator(this);
     }
@@ -104,7 +122,7 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         setMenuItemStatus(R.id.step_out, interrupted);
         setMenuItemStatus(R.id.resume_script, interrupted);
         if (!interrupted && mEditorView != null) {
-            mEditorView.getEditor().setDebuggingLine(-1);
+            mEditorView.editor.setDebuggingLine(-1);
         }
     }
 
@@ -117,40 +135,35 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         if (mEditorView == null) {
             return;
         }
-        CodeEditor editor = mEditorView.getEditor();
+        CodeEditor editor = mEditorView.editor;
         if (!TextUtils.equals(mInitialEditorSourceUrl, mCurrentEditorSourceUrl)) {
             editor.setText(mInitialEditorSource);
         }
         editor.setRedoUndoEnabled(true);
-        DebugBar debugBar = mEditorView.getDebugBar();
+        DebugBar debugBar = mEditorView.debugBar;
         debugBar.setTitle(null);
         debugBar.setCodeEvaluator(null);
     }
 
-    @Click(R.id.step_over)
     void stepOver() {
         setInterrupted(false);
         mDebugger.stepOver();
     }
 
-    @Click(R.id.step_into)
     void stepInto() {
         setInterrupted(false);
         mDebugger.stepInto();
     }
 
-    @Click(R.id.step_out)
     void stepOut() {
         setInterrupted(false);
         mDebugger.stepOut();
     }
 
-    @Click(R.id.stop_script)
     void stopScript() {
         mEditorView.forceStop();
     }
 
-    @Click(R.id.resume_script)
     void resumeScript() {
         setInterrupted(false);
         mDebugger.resume();
@@ -160,7 +173,7 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
     public void updateSourceText(Dim.SourceInfo sourceInfo) {
         Log.d(LOG_TAG, "updateSourceText: url = " + sourceInfo.url());
         sourceInfo.removeAllBreakpoints();
-        for (CodeEditor.Breakpoint breakpoint : mEditorView.getEditor().getBreakpoints().values()) {
+        for (CodeEditor.Breakpoint breakpoint : mEditorView.editor.getBreakpoints().values()) {
             int line = breakpoint.line + 1;
             if (sourceInfo.breakableLine(line)) {
                 sourceInfo.breakpoint(line, breakpoint.enabled);
@@ -176,14 +189,14 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
     }
 
     private void updateWatchingVariables() {
-        updateWatchingVariables(0, mEditorView.getDebugBar().getWatchingVariables().size());
+        updateWatchingVariables(0, mEditorView.debugBar.getWatchingVariables().size());
     }
 
     private void updateWatchingVariables(int start, int end) {
         if (!mDebugger.isAttached()) {
             return;
         }
-        DebugBar debugBar = mEditorView.getDebugBar();
+        DebugBar debugBar = mEditorView.debugBar;
         List<WatchingVariable> variables = debugBar.getWatchingVariables();
         for (int i = start; i < end; i++) {
             WatchingVariable variable = variables.get(i);
@@ -214,12 +227,12 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
                 return;
             }
             if (shouldChangeText) {
-                mEditorView.getEditor().setText(source);
+                mEditorView.editor.setText(source);
             }
             mCursorChangeFromUser = false;
-            mEditorView.getEditor().setDebuggingLine(line);
-            mEditorView.getEditor().jumpTo(line, 0);
-            mEditorView.getDebugBar().setTitle(PFiles.getName(mCurrentEditorSourceUrl));
+            mEditorView.editor.setDebuggingLine(line);
+            mEditorView.editor.jumpTo(line, 0);
+            mEditorView.debugBar.setTitle(PFiles.getName(mCurrentEditorSourceUrl));
             setInterrupted(true);
             if (message != null && !message.equals(ScriptInterruptedException.class.getName())) {
                 ViewUtils.showToast(mEditorView.getContext(), message, true);
@@ -241,7 +254,7 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         String variable = findVariableOnCursor(line, ch);
         Log.d(LOG_TAG, "onCursorChange: variable = " + variable + ", ch = " + ch + ", line = " + line);
         String value = eval(variable);
-        mEditorView.getDebugBar().updateCurrentVariable(variable, value);
+        mEditorView.debugBar.updateCurrentVariable(variable, value);
     }
 
     private String findVariableOnCursor(String line, int ch) {
@@ -279,10 +292,10 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         if (mEditorView == null) {
             return;
         }
-        CodeEditor editor = mEditorView.getEditor();
+        CodeEditor editor = mEditorView.editor;
         editor.removeCursorChangeCallback(this);
         editor.setBreakpointChangeListener(null);
-        DebugBar debugBar = mEditorView.getDebugBar();
+        DebugBar debugBar = mEditorView.debugBar;
         debugBar.unregisterVariableChangeObserver(mVariableChangeObserver);
     }
 }

@@ -35,7 +35,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     private val mDefaultSafeDelay: Long = 360
 
-    private var mLogListener: WeakReference<LogListener?>? = null
+    private var mLogListeners = ArrayList<WeakReference<LogListener?>>()
     private var mConsoleView: WeakReference<ConsoleView?>? = null
 
     @get:Synchronized
@@ -67,7 +67,6 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
 
     init {
         synchronized(mLockWindowCreated) {
-            startFloatyService()
             mConsoleFloaty = ConsoleFloaty(this)
             mFloatyWindow = ResizableExpandableFloatyWindow(mConsoleFloaty)
             mLockWindowCreated.notify()
@@ -86,13 +85,13 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     fun setConsoleView(consoleView: ConsoleView?) {
         consoleView.let {
             mConsoleView = WeakReference(it)
-            setLogListener(it)
+            addLogListener(it)
         }
         synchronized(mLockConsoleView) { mLockConsoleView.notify() }
     }
 
-    private fun setLogListener(logListener: LogListener?) {
-        mLogListener = WeakReference(logListener)
+    private fun addLogListener(logListener: LogListener?) {
+        mLogListeners.add(WeakReference(logListener))
     }
 
     fun printAllStackTrace(t: Throwable?) {
@@ -104,7 +103,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     override fun println(level: Int, charSequence: CharSequence): String? {
         val logEntry = LogEntry(mIdCounter.getAndIncrement(), level, charSequence)
         synchronized(logEntries) { logEntries.add(logEntry) }
-        mLogListener?.get()?.onNewLog(logEntry)
+        mLogListeners.forEach { it.get()?.onNewLog(logEntry) }
         return null
     }
 
@@ -115,7 +114,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     @ScriptInterface
     override fun clear() {
         synchronized(logEntries) { logEntries.clear() }
-        mLogListener?.get()?.onLogClear()
+        mLogListeners.forEach { it.get()?.onLogClear() }
     }
 
     override fun show() = show(false)

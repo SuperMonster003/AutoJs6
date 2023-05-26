@@ -78,8 +78,7 @@ public class ResFlagsAttr extends ResAttr {
 		FlagItem[] flagItems = new FlagItem[mFlags.length];
 		int[] flags = new int[mFlags.length];
 		int flagsCount = 0;
-		for (int i = 0; i < mFlags.length; i++) {
-			FlagItem flagItem = mFlags[i];
+		for (FlagItem flagItem : mFlags) {
 			int flag = flagItem.flag;
 
 			if ((intVal & flag) != flag) {
@@ -95,8 +94,8 @@ public class ResFlagsAttr extends ResAttr {
 	}
 
 	private boolean isSubpartOf(int flag, int[] flags) {
-		for (int i = 0; i < flags.length; i++) {
-			if ((flags[i] & flag) == flag) {
+		for (int j : flags) {
+			if ((j & flag) == flag) {
 				return true;
 			}
 		}
@@ -113,8 +112,7 @@ public class ResFlagsAttr extends ResAttr {
 		FlagItem[] flags = new FlagItem[mItems.length];
 		int flagsCount = 0;
 
-		for (int i = 0; i < mItems.length; i++) {
-			FlagItem item = mItems[i];
+		for (FlagItem item : mItems) {
 			if (item.flag == 0) {
 				zeroFlags[zeroFlagsCount++] = item;
 			} else {
@@ -128,26 +126,22 @@ public class ResFlagsAttr extends ResAttr {
 		Arrays.sort(mFlags, new Comparator<FlagItem>() {
 			@Override
 			public int compare(FlagItem o1, FlagItem o2) {
-				return Integer.valueOf(Integer.bitCount(o2.flag)).compareTo(Integer.bitCount(o1.flag));
+				return Integer.compare(Integer.bitCount(o2.flag), Integer.bitCount(o1.flag));
 			}
 		});
 	}
 
 	private String renderFlags(FlagItem[] flags) throws IOException {
-		String ret = "";
-		for (int i = 0; i < flags.length; i++) {
-			ret += "|" + flags[i].getValue();
+		StringBuilder ret = new StringBuilder();
+		for (FlagItem flag : flags) {
+			ret.append("|").append(flag.getValue());
 		}
-		if (ret.equals("")) {
-			return ret;
-		}
-		return ret.substring(1);
+		return ret.toString().equals("") ? ret.toString() : ret.substring(1);
 	}
 
 	@Override
-	protected void serializeBody(ARSCCallBack back, ResResource res) throws IOException, IOException {
-		for (int i = 0; i < mItems.length; i++) {
-			FlagItem item = mItems[i];
+	protected void serializeBody(ARSCCallBack back, ResResource res) throws IOException {
+		for (FlagItem item : mItems) {
 			back.back(res.getConfig().toString(), res.getResSpec().getType().getName(), item.getValue(),
 					String.format("0x%08x", item.flag));
 		}

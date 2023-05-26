@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 import org.autojs.autojs.model.editor.EditorTheme;
 import org.autojs.autojs.model.editor.TokenColor;
+import org.autojs.autojs.util.ColorUtils;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,7 +44,7 @@ public class Theme {
             String foregroundStr = tokenColor.getSettings().getForeground();
             if (foregroundStr == null)
                 continue;
-            int foreground = Color.parseColor(foregroundStr);
+            int foreground = ColorUtils.toInt(foregroundStr);
             for (String scope : tokenColor.getScope()) {
                 setTokenColor(scope, foreground);
             }
@@ -54,7 +55,7 @@ public class Theme {
         if (color == null)
             return defaultValue;
         try {
-            return Color.parseColor(color);
+            return ColorUtils.toInt(color);
         } catch (Exception ignored) {
             return defaultValue;
         }

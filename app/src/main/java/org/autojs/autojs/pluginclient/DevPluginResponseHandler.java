@@ -118,7 +118,10 @@ public class DevPluginResponseHandler implements Handler {
             name = PFiles.getNameWithoutExtension(name);
         }
         StringScriptSource scriptSource = new StringScriptSource(name, script);
-        scriptSource.setPrefix(mContext.getString(R.string.text_remote) + "$");
+
+        // scriptSource.setPrefix(mContext.getString(R.string.text_remote) + "$");
+        scriptSource.setPrefix("$remote/");
+
         mScriptExecutions.put(viewId, Scripts.run(mContext, scriptSource));
     }
 

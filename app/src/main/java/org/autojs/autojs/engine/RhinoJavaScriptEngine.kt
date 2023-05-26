@@ -33,17 +33,18 @@ import java.util.concurrent.ConcurrentHashMap
 open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Context) : JavaScriptEngine() {
 
     val context: Context
-    private val mScriptable: TopLevelScope
+
     lateinit var thread: Thread
         private set
 
-    private val initScript: Script
+    private val mScriptable: TopLevelScope
+    private val mInitScript: Script
         get() {
             return sInitScript ?: try {
-                val reader = InputStreamReader(mAndroidContext.assets.open("init.js"))
-                val script = context.compileReader(reader, SOURCE_NAME_INIT, 1, null)
-                sInitScript = script
-                script
+                val reader = InputStreamReader(mAndroidContext.assets.open(SOURCE_FILE_INIT))
+                context.compileReader(reader, SOURCE_NAME_INIT, 1, null).also {
+                    sInitScript = it
+                }
             } catch (e: IOException) {
                 throw UncheckedIOException(e)
             }
@@ -67,10 +68,9 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
     }
 
     public override fun doExecution(source: JavaScriptSource): Any? {
-        var reader = source.nonNullScriptReader
         try {
-            reader = preprocess(reader)
-            val script = context.compileReader(reader, source.toString(), 1, null)
+            val reader = preprocess(source.nonNullScriptReader)
+            val script = context.compileReader(reader, source.fullPath, 1, null)
             return if (hasFeature(ScriptConfig.FEATURE_CONTINUATION)) {
                 context.executeScriptWithContinuations(script, mScriptable)
             } else {
@@ -79,28 +79,24 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         }
-
     }
 
     fun hasFeature(feature: String): Boolean {
-        val config = getTag(ExecutionConfig.tag) as ExecutionConfig?
-        return config != null && config.scriptConfig.hasFeature(feature)
+        return (getTag(ExecutionConfig.tag) as ExecutionConfig? ?: return false).scriptConfig.hasFeature(feature)
     }
 
     @Throws(IOException::class)
-    protected fun preprocess(script: Reader): Reader {
-        return script
-    }
+    protected fun preprocess(script: Reader) = script
 
     override fun forceStop() {
-        Log.d(LOG_TAG, "forceStop: interrupt Thread: $thread")
+        Log.d(TAG, "forceStop: interrupt Thread: $thread")
         thread.interrupt()
     }
 
     @Synchronized
     override fun destroy() {
         super.destroy()
-        Log.d(LOG_TAG, "on destroy")
+        Log.d(TAG, "on destroy")
         sContextEngineMap.remove(context)
         Context.exit()
     }
@@ -110,10 +106,10 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
         ScriptableObject.putProperty(mScriptable, "__engine__", this)
         initRequireBuilder(context, mScriptable)
         try {
-            context.executeScriptWithContinuations(initScript, mScriptable)
+            context.executeScriptWithContinuations(mInitScript, mScriptable)
         } catch (e: IllegalArgumentException) {
-            if ("Script argument was not a script or was not created by interpreted mode " == e.message) {
-                initScript.exec(context, mScriptable)
+            if (e.message?.contains("Script argument was not a script or was not created by interpreted mode") == true) {
+                mInitScript.exec(context, mScriptable)
             } else {
                 throw e
             }
@@ -130,27 +126,24 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
             .setSandboxed(true)
             .createRequire(context, scope)
             .install(scope)
-
     }
 
     protected fun createScope(context: Context): TopLevelScope {
-        val topLevelScope = TopLevelScope()
-        topLevelScope.initStandardObjects(context, false)
-        return topLevelScope
+        return TopLevelScope().apply {
+            initStandardObjects(context, false)
+        }
     }
 
     fun enterContext(): Context {
-        val context = RhinoAndroidHelper(mAndroidContext).enterContext()
-        setupContext(context)
-        sContextEngineMap[context] = this
-        return context
-    }
-
-    protected fun setupContext(context: Context) {
-        context.optimizationLevel = -1
-        context.languageVersion = Context.VERSION_ES6
-        context.locale = Locale.getDefault()
-        context.wrapFactory = WrapFactory()
+        return RhinoAndroidHelper(mAndroidContext).enterContext().also {
+            it.apply {
+                optimizationLevel = -1
+                languageVersion = Context.VERSION_ES6
+                locale = Locale.getDefault()
+                wrapFactory = WrapFactory()
+            }
+            sContextEngineMap[it] = this
+        }
     }
 
     private inner class WrapFactory : org.mozilla.javascript.WrapFactory() {
@@ -164,7 +157,7 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
 
         override fun wrapAsJavaObject(cx: Context?, scope: Scriptable, javaObject: Any?, staticType: Class<*>?): Scriptable? {
             return when (javaObject) {
-                is View -> ViewExtras.getNativeView(scope, javaObject, staticType, runtime)
+                is View -> ViewExtras.getNativeView(scope, /* view = */ javaObject, staticType, runtime)
                 else -> super.wrapAsJavaObject(cx, scope, javaObject, staticType)
             }
         }
@@ -173,17 +166,16 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
 
     companion object {
 
+        const val SOURCE_FILE_INIT = "init.js"
         const val SOURCE_NAME_INIT = "<init>"
 
-        private const val LOG_TAG = "RhinoJavaScriptEngine"
-
         private const val MODULES_PATH = "modules"
+
         private var sInitScript: Script? = null
         private val sContextEngineMap = ConcurrentHashMap<Context, RhinoJavaScriptEngine>()
+        private val TAG = RhinoJavaScriptEngine::class.java.simpleName
 
-        fun getEngineOfContext(context: Context): RhinoJavaScriptEngine? {
-            return sContextEngineMap[context]
-        }
+        fun getEngineOfContext(context: Context) = sContextEngineMap[context]
 
     }
 

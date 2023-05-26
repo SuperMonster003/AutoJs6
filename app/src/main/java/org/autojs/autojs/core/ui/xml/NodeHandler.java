@@ -70,6 +70,13 @@ public interface NodeHandler {
             mNameMap.put(oldName, newName);
             return this;
         }
+
+        public MapNameHandler map(String[] oldNames, String newName) {
+            for (String oldName : oldNames) {
+                map(oldName, newName);
+            }
+            return this;
+        }
     }
 
     class VerticalHandler extends Adapter {

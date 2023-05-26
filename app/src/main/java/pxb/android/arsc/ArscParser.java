@@ -89,7 +89,7 @@ public class ArscParser implements ResConst {
 
     private static void D(String fmt, Object... args) {
         if (DEBUG) {
-            System.out.println(String.format(fmt, args));
+            System.out.printf(fmt + "%n", args);
         }
     }
 

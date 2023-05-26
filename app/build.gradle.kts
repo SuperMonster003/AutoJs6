@@ -21,12 +21,12 @@ plugins {
 
 dependencies /* Unclassified */ {
     // LeakCanary
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.10")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.11")
 
     // Android supports
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.multidex:multidex:2.0.1")
-    implementation("com.google.android.material:material:1.8.0")
+    implementation("com.google.android.material:material:1.9.0")
 
     // SwipeRefreshLayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
@@ -60,10 +60,10 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:com.tencent.bugly.crashreport-4.0.4"))
 
     // OkHttp
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.9")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
 
     // Webkit
-    implementation("androidx.webkit:webkit:1.6.1")
+    implementation("androidx.webkit:webkit:1.7.0")
 
     // Gson
     implementation("com.google.code.gson:gson:2.10.1")
@@ -76,6 +76,7 @@ dependencies /* Unclassified */ {
     implementation("log4j:log4j:1.2.17")
 
     // Preference
+    implementation("androidx.preference:preference:1.2.0")
     implementation("androidx.preference:preference-ktx:1.2.0")
 
     // RootShell
@@ -137,10 +138,6 @@ dependencies /* Annotations */ {
 
     // JCIP Annotations
     implementation("net.jcip:jcip-annotations:1.0")
-
-    // ButterKnife
-    kapt("com.jakewharton:butterknife-compiler:10.2.3")
-    implementation("com.jakewharton:butterknife:10.2.3")
 
     // EventBus
     implementation("org.greenrobot:eventbus:3.3.1")
@@ -218,7 +215,7 @@ dependencies /* GitHub API */ {
 }
 
 dependencies /* MLKit */ {
-    implementation("com.google.mlkit:text-recognition-chinese:16.0.0-beta6")
+    implementation("com.google.mlkit:text-recognition-chinese:16.0.0")
 }
 
 dependencies /* Auto.js Extensions */ {
@@ -319,21 +316,27 @@ android {
     }
 
     buildTypes {
-        arrayOf(
+        val proguardFiles = arrayOf(
             getDefaultProguardFile("proguard-android.txt"),
             "proguard-rules.pro",
-        ).let { proguardFiles ->
-            getByName("release") {
-                isMinifyEnabled = false
-                proguardFiles(*proguardFiles)
-                signingConfig = takeIf { sign.isValid }?.let { signingConfigs.getByName("release") }
-            }
-            getByName("debug") {
-                isMinifyEnabled = getByName("release").isMinifyEnabled
-                proguardFiles(*proguardFiles)
-                signingConfig = getByName("release").signingConfig
-            }
+        )
+        val niceSigningConfig = takeIf { sign.isValid }?.let {
+            signingConfigs.getByName("release")
         }
+        getByName("release") {
+            isMinifyEnabled = false
+            proguardFiles(*proguardFiles)
+            niceSigningConfig?.let { signingConfig = it }
+        }
+        getByName("debug") {
+            isMinifyEnabled = getByName("release").isMinifyEnabled
+            proguardFiles(*proguardFiles)
+            niceSigningConfig?.let { signingConfig = it }
+        }
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     defaultConfig {
@@ -348,7 +351,7 @@ android {
                 ).let { arguments(it) }
             }
         }
-        buildConfigField("String", "VERSION_DATE", "\"${Utils.getDateString("MMM dd, yyyy", "GMT+08:00")}\"")
+        buildConfigField("String", "VERSION_DATE", "\"${Utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
     }
 
     applicationVariants.all {

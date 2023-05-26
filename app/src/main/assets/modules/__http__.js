@@ -1,4 +1,4 @@
-// noinspection JSUnusedGlobalSymbols
+// noinspection JSUnusedGlobalSymbols,JSUnusedLocalSymbols,UnnecessaryLocalVariableJS
 
 /* Overwritten protection. */
 
@@ -10,7 +10,8 @@ let { ui } = global;
  * @return {Internal.Http}
  */
 module.exports = function (scriptRuntime, scope) {
-    const PFile = org.autojs.pio.PFile;
+
+    const PFile = org.autojs.autojs.pio.PFile;
     const Request = okhttp3.Request;
     const RequestBody = okhttp3.RequestBody;
     const MultipartBody = okhttp3.MultipartBody;
@@ -31,6 +32,13 @@ module.exports = function (scriptRuntime, scope) {
             Http.prototype = {
                 constructor: Http,
                 __okhttp__: new MutableOkHttp(),
+                /**
+                 * @example
+                 * http.client() === http.client(); // true
+                 */
+                client() {
+                    return this.__okhttp__.client();
+                },
                 /**
                  * @param {string} url
                  * @param {Http.RequestBuilderOptions} [options]
@@ -83,6 +91,7 @@ module.exports = function (scriptRuntime, scope) {
                                 return body;
                             }
                             if (typeof body === 'string') {
+                                // noinspection JSDeprecatedSymbols
                                 return RequestBody.create(MediaType.parse(this.options.contentType), body);
                             }
                             if (typeof body === 'function') {
@@ -119,6 +128,7 @@ module.exports = function (scriptRuntime, scope) {
                                 let file = new PFile(path);
                                 fileName = fileName || file.getName();
                                 mimeType = mimeType || this.parseMimeType(file.getExtension());
+                                // noinspection JSDeprecatedSymbols
                                 let requestBody = RequestBody.create(MediaType.parse(mimeType), file);
                                 builder.addFormDataPart(key, fileName, requestBody);
                             });

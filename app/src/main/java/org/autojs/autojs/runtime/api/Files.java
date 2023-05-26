@@ -199,7 +199,7 @@ public class Files {
     }
 
     public String getSimplifiedPath(String path) {
-        return PFiles.getRelativePath(path);
+        return PFiles.getElegantPath(path);
     }
 
 }

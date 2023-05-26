@@ -1,0 +1,17 @@
+package org.autojs.autojs.core.ui.inflater.inflaters
+
+import org.autojs.autojs.core.ui.inflater.ResourceParser
+import org.autojs.autojs.core.ui.inflater.ViewCreator
+import org.autojs.autojs.core.ui.widget.JsImageView
+
+/**
+ * Created by Stardust on 2017/11/30.
+ * Transformed by SuperMonster003 on May 20, 2023.
+ */
+class JsImageViewInflater(resourceParser: ResourceParser) : RoundedImageViewInflater<JsImageView>(resourceParser) {
+
+    override fun getCreator(): ViewCreator<JsImageView> = ViewCreator { context, _ ->
+        JsImageView(context).also { it.drawables = drawables }
+    }
+
+}

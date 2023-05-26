@@ -19,6 +19,8 @@ package zhao.arsceditor.ResDecoder;
 
 import android.util.TypedValue;
 
+import org.autojs.autojs.pref.Language;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -247,10 +249,10 @@ public class ARSCDecoder {
     private void checkChunkType(int expectedType) throws IOException {
         if (mHeader.type != expectedType) {
             /*
-			 * throw new IOException(String.format(
-			 * "Invalid chunk type: expected=0x%08x, got=0x%08x", expectedType,
-			 * mHeader.type));
-			 */
+             * throw new IOException(String.format(
+             * "Invalid chunk type: expected=0x%08x, got=0x%08x", expectedType,
+             * mHeader.type));
+             */
         }
     }
 
@@ -369,14 +371,14 @@ public class ARSCDecoder {
         byte keyboard = mIn.readByte();
         byte navigation = mIn.readByte();
         byte inputFlags = mIn.readByte();
-		/* inputPad0 */
+        /* inputPad0 */
         mIn.skipBytes(1);
 
         short screenWidth = mIn.readShort();
         short screenHeight = mIn.readShort();
 
         short sdkVersion = mIn.readShort();
-		/* minorVersion, now must always be 0 */
+        /* minorVersion, now must always be 0 */
         mIn.skipBytes(2);
 
         byte screenLayout = 0;
@@ -420,12 +422,9 @@ public class ARSCDecoder {
             BigInteger exceedingBI = new BigInteger(1, buf);
 
             if (exceedingBI.equals(BigInteger.ZERO)) {
-                LOGGER.fine(
-                        String.format("Config flags size > %d, but exceeding bytes are all zero, so it should be ok.",
-                                KNOWN_CONFIG_BYTES));
+                LOGGER.fine(String.format(Language.getPrefLanguage().getLocale(), "Config flags size > %d, but exceeding bytes are all zero, so it should be ok.", KNOWN_CONFIG_BYTES));
             } else {
-                LOGGER.warning(String.format("Config flags size > %d. Exceeding bytes: 0x%X.", KNOWN_CONFIG_BYTES,
-                        exceedingBI));
+                LOGGER.warning(String.format(Language.getPrefLanguage().getLocale(), "Config flags size > %d. Exceeding bytes: 0x%X.", KNOWN_CONFIG_BYTES, exceedingBI));
                 isInvalid = true;
             }
         }
@@ -441,7 +440,7 @@ public class ARSCDecoder {
     }
 
     private void readEntry() throws IOException {
-		/* size */
+        /* size */
         mIn.skipBytes(2);
         short flags = mIn.readShort();
         int specNamesId = mIn.readInt();
@@ -489,7 +488,7 @@ public class ARSCDecoder {
         for (int i = 0; i < libraryCount; i++) {
             packageId = mIn.readInt();
             packageName = mIn.readNulEndedString(128, true);
-            LOGGER.info(String.format("Decoding Shared Library (%s), pkgId: %d", packageName, packageId));
+            LOGGER.info(String.format(Language.getPrefLanguage().getLocale(), "Decoding Shared Library (%s), pkgId: %d", packageName, packageId));
         }
 
         while (nextChunk().type == Header.TYPE_TYPE) {
@@ -516,13 +515,13 @@ public class ARSCDecoder {
         }
         // 包名
         packageName = mIn.readNulEndedString(128, true);
-		/* typeNameStrings */
+        /* typeNameStrings */
         mIn.skipInt();
-		/* typeNameCount */
+        /* typeNameCount */
         mIn.skipInt();
-		/* specNameStrings */
+        /* specNameStrings */
         mIn.skipInt();
-		/* specNameCount */
+        /* specNameCount */
         mIn.skipInt();
 
         // 读取资源类型常量池
@@ -570,7 +569,7 @@ public class ARSCDecoder {
         mIn.skipBytes(3);
         int entryCount = mIn.readInt();
 
-		/* flags */
+        /* flags */
         mIn.skipBytes(entryCount * 4);
         mTypeSpec = new ResTypeSpec(mTypeNames.getString(id - 1), mResTable, mPkg, id, entryCount);
         mPkg.addType(mTypeSpec);
@@ -626,10 +625,10 @@ public class ARSCDecoder {
             mTypeSpec = mResTypeSpecs.get(typeId);
         }
 
-		/* res0, res1 */
+        /* res0, res1 */
         mIn.skipBytes(3);
         int entryCount = mIn.readInt();
-		/* entriesStart */
+        /* entriesStart */
         mIn.skipInt();
 
         mMissingResSpecs = new boolean[entryCount];
@@ -684,9 +683,9 @@ public class ARSCDecoder {
     }
 
     private ResValue readValue() throws IOException {
-		/* size */
+        /* size */
         mIn.skipCheckShort((short) 8);
-		/* zero */
+        /* zero */
         mIn.skipCheckByte((byte) 0);
         byte type = mIn.readByte();
         int data = mIn.readInt();

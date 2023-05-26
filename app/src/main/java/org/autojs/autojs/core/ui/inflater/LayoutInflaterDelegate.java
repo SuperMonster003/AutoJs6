@@ -4,10 +4,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.autojs.autojs.core.ui.inflater.inflaters.ViewGroupInflater;
+import org.autojs.autojs.core.ui.inflater.inflaters.ViewInflater;
 import org.w3c.dom.Node;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Stardust on 2018/3/29.
@@ -28,9 +28,9 @@ public interface LayoutInflaterDelegate {
 
     View afterInflateView(InflateContext inflateContext, View view, Node node, ViewGroup parent, boolean attachToParent);
 
-    View beforeCreateView(InflateContext inflateContext, Node node, String viewName, ViewGroup parent, HashMap<String, String> attrs);
+    View beforeCreateView(InflateContext inflateContext, Node node, String viewName, ViewGroup parent);
 
-    View afterCreateView(InflateContext inflateContext, View view, Node node, String viewName, ViewGroup parent, HashMap<String, String> attrs);
+    View afterCreateView(InflateContext inflateContext, View view, Node node, String viewName, ViewGroup parent);
 
     boolean beforeApplyAttributes(InflateContext inflateContext, View view, ViewInflater<View> inflater, HashMap<String, String> attrs, ViewGroup parent);
 
@@ -44,11 +44,9 @@ public interface LayoutInflaterDelegate {
 
     boolean beforeApplyPendingAttributesOfChildren(InflateContext inflateContext, ViewGroupInflater inflater, ViewGroup view);
 
-    boolean beforeApplyAttribute(InflateContext inflateContext, ViewInflater<View> inflater, View view, String ns, String attrName, String value, ViewGroup parent, Map<String, String> attrs);
+    boolean beforeApplyAttribute(InflateContext inflateContext, ViewInflater<View> inflater, View view, String ns, String attrName, String value, ViewGroup parent);
 
-
-    void afterApplyAttribute(InflateContext inflateContext, ViewInflater<View> inflater, View view, String ns, String attrName, String value, ViewGroup parent, Map<String, String> attrs);
-
+    void afterApplyAttribute(InflateContext inflateContext, ViewInflater<View> inflater, View view, String ns, String attrName, String value, ViewGroup parent);
 
     class NoOp implements LayoutInflaterDelegate {
         @Override
@@ -82,12 +80,12 @@ public interface LayoutInflaterDelegate {
         }
 
         @Override
-        public View beforeCreateView(InflateContext inflateContext, Node node, String viewName, ViewGroup parent, HashMap<String, String> attrs) {
+        public View beforeCreateView(InflateContext inflateContext, Node node, String viewName, ViewGroup parent) {
             return null;
         }
 
         @Override
-        public View afterCreateView(InflateContext inflateContext, View view, Node node, String viewName, ViewGroup parent, HashMap<String, String> attrs) {
+        public View afterCreateView(InflateContext inflateContext, View view, Node node, String viewName, ViewGroup parent) {
             return view;
         }
 
@@ -122,12 +120,12 @@ public interface LayoutInflaterDelegate {
         }
 
         @Override
-        public boolean beforeApplyAttribute(InflateContext inflateContext, ViewInflater<View> inflater, View view, String ns, String attrName, String value, ViewGroup parent, Map<String, String> attrs) {
+        public boolean beforeApplyAttribute(InflateContext inflateContext, ViewInflater<View> inflater, View view, String ns, String attrName, String value, ViewGroup parent) {
             return false;
         }
 
         @Override
-        public void afterApplyAttribute(InflateContext inflateContext, ViewInflater<View> inflater, View view, String ns, String attrName, String value, ViewGroup parent, Map<String, String> attrs) {
+        public void afterApplyAttribute(InflateContext inflateContext, ViewInflater<View> inflater, View view, String ns, String attrName, String value, ViewGroup parent) {
 
         }
     }

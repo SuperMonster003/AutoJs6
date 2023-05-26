@@ -361,7 +361,7 @@
     <string name="text_execution_finished" formatted="false">[%s] は %s 秒で終了しました。\n</string>
     <string name="text_exit">終了</string>
     <string name="text_exit_directly">終了</string>
-    <string name="text_exit_floating_window">フローティングウィンドウを終了する</string>
+    <string name="text_close_floating_button">フローティングボタンを閉じる</string>
     <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
     <string name="text_extensibility">拡張性</string>
     <string name="text_failed">失敗</string>
@@ -390,7 +390,7 @@
     <string name="text_find_next_simplified">次へ</string>
     <string name="text_find_or_replace">検索・置換</string>
     <string name="text_find_prev_simplified">前へ</string>
-    <string name="text_floating_window">フローティングウィンドウ</string>
+    <string name="text_floating_button">フローティングボタン</string>
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">フォアグラウンドサービス</string>
     <string name="text_foreground_service_description">フォアグラウンド・サービスは、ユーザーにとって目に付く操作を実行します。\nフォアグラウンド・サービスはステータス・バーに通知を表示し、アプリがフォアグラウンドでタスクを実行し、システム・リソースを消費していることをユーザーが積極的に認識できるようにします。\nこの通知は、サービスが停止されるか、フォアグラウンドから削除されない限り、解除されません。\n通知を長押しすることで、通知の優先度を低く設定したり、通知をオフにしたりすることができます。</string>
@@ -476,7 +476,8 @@
     <string name="text_not_granted">許可されない</string>
     <string name="text_not_showing_main_activity">メインのアクティビティが表示されない</string>
     <string name="text_notification">通知</string>
-    <string name="text_notification_permission">通知へのアクセス</string>
+    <string name="text_post_notifications_permission">ゆうびんけいほう</string>
+    <string name="text_notification_access_permission">通知へのアクセス</string>
     <string name="text_notification_service_disabled">通知サービスが機能していない</string>
     <string name="text_null">無効</string>
     <string name="text_number_format_error">無効な番号形式</string>
@@ -655,6 +656,7 @@
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが、書き込むことはできないシステム環境設定を含む、安全なシステム設定です。\nこれは、ユーザーがシステムアプリのUIを通じて明示的に変更する必要がある環境設定のためのものです。\nセキュアなシステム設定を許可すると、通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります。</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="theme_color_default">デフォルト</string>
+    <string name="error_abandoned_method">メソッド %s は放棄されたので、使用しないでください</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">合計: %d 件</item>

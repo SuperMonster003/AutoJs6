@@ -60,13 +60,9 @@ public class NativeView extends NativeJavaObjectWithPrototype {
     public Object get(String name, Scriptable start) {
         if (super.has(name, start)) {
             return super.get(name, start);
-        } else {
-            View view = JsViewHelper.findViewByStringId(mView, name);
-            if (view != null) {
-                return view;
-            }
         }
-        return Scriptable.NOT_FOUND;
+        View view = JsViewHelper.findViewByStringId(mView, name);
+        return view != null ? view : Scriptable.NOT_FOUND;
     }
 
     public ViewPrototype getViewPrototype() {

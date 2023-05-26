@@ -17,55 +17,52 @@ import org.mozilla.javascript.Undefined
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
-class ViewPrototype(private val mView: View, private val viewAttributes: ViewAttributes, scope: Scriptable, runtime: ScriptRuntime) {
-
-    private val mEventEmitter: EventEmitter
-    private val mRegisteredEvents = Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
-    private val mScope: Scriptable
-
-    val maxListeners: Int
+class ViewPrototype(
+    private val view: View,
+    private val viewAttributes: ViewAttributes,
+    private val scope: Scriptable,
+    runtime: ScriptRuntime,
+) {
+    var widget: Any? = null
+    val maxListeners
         get() = mEventEmitter.maxListeners
 
-    var widget: Any? = null
+    private val mEventEmitter = runtime.events.emitter()
+    private val mRegisteredEvents = Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
 
-    init {
-        mEventEmitter = runtime.events.emitter()
-        mScope = scope
-    }
+    fun attr(name: String): Any = viewAttributes[name]?.get() ?: Undefined.SCRIPTABLE_UNDEFINED
 
-    fun attr(name: String?): Any = viewAttributes[name]?.get() ?: Undefined.SCRIPTABLE_UNDEFINED
-
-    fun attr(name: String?, value: Any?) {
+    fun attr(name: String, value: Any?) {
         viewAttributes[name]?.set(org.mozilla.javascript.ScriptRuntime.toString(value))
     }
 
     fun click() {
-        mView.performClick()
+        view.performClick()
     }
 
     fun longClick() {
-        mView.performLongClick()
+        view.performLongClick()
     }
 
-    fun click(listener: Any?) {
+    fun click(listener: Any) {
         on("click", listener)
     }
 
-    fun longClick(listener: Any?) {
+    fun longClick(listener: Any) {
         on("long_click", listener)
     }
 
-    fun once(eventName: String, listener: Any?): EventEmitter {
+    fun once(eventName: String, listener: Any): EventEmitter {
         registerEventIfNeeded(eventName)
         return mEventEmitter.once(eventName, listener)
     }
 
-    fun on(eventName: String, listener: Any?): EventEmitter {
+    fun on(eventName: String, listener: Any): EventEmitter {
         registerEventIfNeeded(eventName)
         return mEventEmitter.on(eventName, listener)
     }
 
-    fun addListener(eventName: String, listener: Any?): EventEmitter {
+    fun addListener(eventName: String, listener: Any): EventEmitter {
         registerEventIfNeeded(eventName)
         return mEventEmitter.addListener(eventName, listener)
     }
@@ -74,16 +71,16 @@ class ViewPrototype(private val mView: View, private val viewAttributes: ViewAtt
         if (!mRegisteredEvents.contains(eventName)) {
             when (Looper.getMainLooper() == Looper.myLooper()) {
                 true -> eventName.takeIf { registerEvent(it) }?.let { mRegisteredEvents.add(it) }
-                else -> mView.post { eventName.takeIf { registerEvent(it) }?.let { mRegisteredEvents.add(it) } }
+                else -> view.post { eventName.takeIf { registerEvent(it) }?.let { mRegisteredEvents.add(it) } }
             }
         }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun registerEvent(eventName: String): Boolean = when (eventName) {
-        "touch_down", "touch_up", "touch" -> run {
-            mView.setOnTouchListener { v: View?, event: MotionEvent ->
-                val e = BaseEvent(mScope, event, event.javaClass)
+        "touch", "touch_down", "touch_up", "touch_move" -> run {
+            view.setOnTouchListener { v: View, event: MotionEvent ->
+                val e = BaseEvent(scope, event, event.javaClass)
                 // Log.d(LOG_TAG, "this = " + NativeView.this + ", emitter = " + mEventEmitter + ", view = " + mView);
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> emit("touch_down", e, v)
@@ -96,20 +93,20 @@ class ViewPrototype(private val mView: View, private val viewAttributes: ViewAtt
             true
         }
         "click" -> run {
-            mView.setOnClickListener { v: View? -> emit("click", v) }
+            view.setOnClickListener { v: View -> emit("click", v) }
             true
         }
         "long_click" -> run {
-            mView.setOnLongClickListener { v: View? ->
-                val e = BaseEvent(mScope, LongClickEvent(v))
+            view.setOnLongClickListener { v: View ->
+                val e = BaseEvent(scope, LongClickEvent(v))
                 emit("long_click", e, v)
                 e.isConsumed
             }
             true
         }
-        "key" -> run {
-            mView.setOnKeyListener { v: View?, keyCode: Int, event: KeyEvent ->
-                val e = BaseEvent(mScope, event, event.javaClass)
+        "key", "key_up", "key_down" -> run {
+            view.setOnKeyListener { v: View, keyCode: Int, event: KeyEvent ->
+                val e = BaseEvent(scope, event, event.javaClass)
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     emit("key_down", keyCode, e, v)
                 } else if (event.action == MotionEvent.ACTION_UP) {
@@ -121,25 +118,25 @@ class ViewPrototype(private val mView: View, private val viewAttributes: ViewAtt
             true
         }
         "scroll_change" -> run {
-            mView.setOnScrollChangeListener { v: View?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
-                val e = BaseEvent(mScope, NativeView.ScrollEvent(scrollX, scrollY, oldScrollX, oldScrollY))
+            view.setOnScrollChangeListener { v: View, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int ->
+                val e = BaseEvent(scope, NativeView.ScrollEvent(scrollX, scrollY, oldScrollX, oldScrollY))
                 emit("scroll_change", e, v)
             }
             true
         }
         "check" -> run {
-            if (mView is CompoundButton) {
-                mView.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean -> emit("check", isChecked, buttonView) }
+            if (view is CompoundButton) {
+                view.setOnCheckedChangeListener { buttonView: CompoundButton, isChecked: Boolean -> emit("check", isChecked, buttonView) }
                 return@run true
             }
-            if (mView is JsListView) {
-                mView.setOnItemTouchListener(object : JsListView.OnItemTouchListener {
+            if (view is JsListView) {
+                view.setOnItemTouchListener(object : JsListView.OnItemTouchListener {
                     override fun onItemClick(listView: JsListView, itemView: View, item: Any, pos: Int) {
                         emit("item_click", item, pos, itemView, listView)
                     }
 
                     override fun onItemLongClick(listView: JsListView, itemView: View, item: Any, pos: Int): Boolean {
-                        val e = BaseEvent(mScope, LongClickEvent(itemView))
+                        val e = BaseEvent(scope, LongClickEvent(itemView))
                         emit("item_long_click", e, item, pos, itemView, listView)
                         return e.isConsumed
                     }
@@ -149,14 +146,14 @@ class ViewPrototype(private val mView: View, private val viewAttributes: ViewAtt
             false
         }
         "item_click", "item_long_click" -> run {
-            if (mView is JsListView) {
-                mView.setOnItemTouchListener(object : JsListView.OnItemTouchListener {
+            if (view is JsListView) {
+                view.setOnItemTouchListener(object : JsListView.OnItemTouchListener {
                     override fun onItemClick(listView: JsListView, itemView: View, item: Any, pos: Int) {
                         emit("item_click", item, pos, itemView, listView)
                     }
 
                     override fun onItemLongClick(listView: JsListView, itemView: View, item: Any, pos: Int): Boolean {
-                        val e = BaseEvent(mScope, LongClickEvent(itemView))
+                        val e = BaseEvent(scope, LongClickEvent(itemView))
                         emit("item_long_click", e, item, pos, itemView, listView)
                         return e.isConsumed
                     }
@@ -168,23 +165,23 @@ class ViewPrototype(private val mView: View, private val viewAttributes: ViewAtt
         else -> false
     }
 
-    fun emit(eventName: String?, vararg args: Any?): Boolean = mEventEmitter.emit(eventName, *args)
+    fun emit(eventName: String, vararg args: Any): Boolean = mEventEmitter.emit(eventName, *args)
 
     fun eventNames(): Array<String> = mEventEmitter.eventNames()
 
-    fun listenerCount(eventName: String?): Int = mEventEmitter.listenerCount(eventName)
+    fun listenerCount(eventName: String): Int = mEventEmitter.listenerCount(eventName)
 
-    fun listeners(eventName: String?): Array<Any> = mEventEmitter.listeners(eventName)
+    fun listeners(eventName: String): Array<Any> = mEventEmitter.listeners(eventName)
 
-    fun prependListener(eventName: String?, listener: Any?): EventEmitter = mEventEmitter.prependListener(eventName, listener)
+    fun prependListener(eventName: String, listener: Any): EventEmitter = mEventEmitter.prependListener(eventName, listener)
 
-    fun prependOnceListener(eventName: String?, listener: Any?): EventEmitter = mEventEmitter.prependOnceListener(eventName, listener)
+    fun prependOnceListener(eventName: String, listener: Any): EventEmitter = mEventEmitter.prependOnceListener(eventName, listener)
 
     fun removeAllListeners(): EventEmitter = mEventEmitter.removeAllListeners()
 
-    fun removeAllListeners(eventName: String?): EventEmitter = mEventEmitter.removeAllListeners(eventName)
+    fun removeAllListeners(eventName: String): EventEmitter = mEventEmitter.removeAllListeners(eventName)
 
-    fun removeListener(eventName: String?, listener: Any?): EventEmitter = mEventEmitter.removeListener(eventName, listener)
+    fun removeListener(eventName: String, listener: Any): EventEmitter = mEventEmitter.removeListener(eventName, listener)
 
     fun setMaxListeners(n: Int): EventEmitter = mEventEmitter.setMaxListeners(n)
 

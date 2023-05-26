@@ -1,7 +1,5 @@
 // noinspection JSUnusedGlobalSymbols,NpmUsedModulesInstalled,JSUnusedLocalSymbols
 
-'use strict';
-
 // @Caution by SuperMonster003 on Apr 19, 2022.
 //  ! Do not declare with const because variable has already
 //  ! declared globally in RhinoJavaScriptEngine.kt.
@@ -15,9 +13,11 @@ let RootMode = org.autojs.autojs.util.RootUtils.RootMode;
 let Pref = org.autojs.autojs.pref.Pref;
 let Shell = org.autojs.autojs.runtime.api.Shell;
 let Intent = global.Intent = android.content.Intent;
+let Context = global.Context = android.content.Context;
 let PendingIntent = android.app.PendingIntent;
 let Toast = android.widget.Toast;
 let KeyEvent = android.view.KeyEvent;
+let MotionEvent = android.view.MotionEvent;
 let Version = Packages.io.github.g00fy2.versioncompare.Version;
 let Image = org.autojs.autojs.core.image.ImageWrapper;
 let ColorTable = org.autojs.autojs.core.image.ColorTable;
@@ -40,17 +40,59 @@ let GlobalAppContext = org.autojs.autojs.app.GlobalAppContext;
 let DisplayUtils = org.autojs.autojs.util.DisplayUtils;
 let StringUtils = org.autojs.autojs.util.StringUtils;
 let ColorUtils = org.autojs.autojs.util.ColorUtils;
+let TextUtils = org.autojs.autojs.util.TextUtils;
 let ProxyObject = org.autojs.autojs.rhino.ProxyObject;
 let ProxyJavaObject = org.autojs.autojs.rhino.ProxyJavaObject;
 let NotificationManager = android.app.NotificationManager;
 let NotificationCompat = Packages.androidx.core.app.NotificationCompat;
+let SecurityException = java.lang.SecurityException;
+let Locale = java.util.Locale;
 let URI = java.net.URI;
 let File = java.io.File;
+
+/* Global View classes. */
+
+let JsAppBarLayout = org.autojs.autojs.core.ui.widget.JsAppBarLayout;
+let JsButton = org.autojs.autojs.core.ui.widget.JsButton;
+let JsCanvasView = org.autojs.autojs.core.ui.widget.JsCanvasView;
+let JsCardView = org.autojs.autojs.core.ui.widget.JsCardView;
+let JsCheckBox = org.autojs.autojs.core.ui.widget.JsCheckBox;
+let JsConsoleView = org.autojs.autojs.core.ui.widget.JsConsoleView;
+let JsDatePicker = org.autojs.autojs.core.ui.widget.JsDatePicker;
+let JsDrawerLayout = org.autojs.autojs.core.ui.widget.JsDrawerLayout;
+let JsEditText = org.autojs.autojs.core.ui.widget.JsEditText;
+let JsFloatingActionButton = org.autojs.autojs.core.ui.widget.JsFloatingActionButton;
+let JsFrameLayout = org.autojs.autojs.core.ui.widget.JsFrameLayout;
+let JsGridView = org.autojs.autojs.core.ui.widget.JsGridView;
+let JsImageButton = org.autojs.autojs.core.ui.widget.JsImageButton;
+let JsImageView = org.autojs.autojs.core.ui.widget.JsImageView;
+let JsLinearLayout = org.autojs.autojs.core.ui.widget.JsLinearLayout;
+let JsListView = org.autojs.autojs.core.ui.widget.JsListView;
+let JsProgressBar = org.autojs.autojs.core.ui.widget.JsProgressBar;
+let JsRadioButton = org.autojs.autojs.core.ui.widget.JsRadioButton;
+let JsRadioGroup = org.autojs.autojs.core.ui.widget.JsRadioGroup;
+let JsRatingBar = org.autojs.autojs.core.ui.widget.JsRatingBar;
+let JsRelativeLayout = org.autojs.autojs.core.ui.widget.JsRelativeLayout;
+let JsScrollView = org.autojs.autojs.core.ui.widget.JsScrollView;
+let JsSeekBar = org.autojs.autojs.core.ui.widget.JsSeekBar;
+let JsSpinner = org.autojs.autojs.core.ui.widget.JsSpinner;
+let JsSwitch = org.autojs.autojs.core.ui.widget.JsSwitch;
+let JsTabLayout = org.autojs.autojs.core.ui.widget.JsTabLayout;
+let JsTextClock = org.autojs.autojs.core.ui.widget.JsTextClock;
+let JsTextView = android.os.Build.VERSION.SDK_INT < 26 /* Android API 26 (8.0) [O] */
+    ? org.autojs.autojs.core.ui.widget.JsTextViewLegacy
+    : org.autojs.autojs.core.ui.widget.JsTextView;
+let JsTimePicker = org.autojs.autojs.core.ui.widget.JsTimePicker;
+let JsToggleButton = org.autojs.autojs.core.ui.widget.JsToggleButton;
+let JsToolbar = org.autojs.autojs.core.ui.widget.JsToolbar;
+let JsViewPager = org.autojs.autojs.core.ui.widget.JsViewPager;
+let JsWebView = org.autojs.autojs.core.ui.widget.JsWebView;
 
 /* Global assignment. */
 
 Object.assign(this, {
     io: Packages.io,
+    okio: Packages.okio,
     de: Packages.de,
     ezy: Packages.ezy,
     kotlin: Packages.kotlin,
@@ -264,8 +306,11 @@ Object.assign(this, {
                         if (typeof global[module] === 'object') {
                             if (!(Object.hasOwn(global[module], 'toString'))) {
                                 // noinspection JSPotentiallyInvalidConstructorUsage
-                                if (typeof global[module].constructor.prototype.toString !== 'function') {
-                                    global[module].toString = () => module;
+                                let prototype = global[module].constructor.prototype;
+                                if (prototype !== undefined) /* For AutoJs6 debugger. */ {
+                                    if (typeof prototype.toString !== 'function') {
+                                        global[module].toString = () => module;
+                                    }
                                 }
                             }
                         }
@@ -415,6 +460,9 @@ Object.assign(this, {
                 [ 'engines', 'continuation', 'http' ],
                 [ 'images', 'colors', 'dialogs' ],
 
+                /* ! http < web */
+                [ 'web' ],
+
                 /* ! files < i18n */
                 /* ! i18n < selector */
                 [ 'i18n', 'selector' ],
@@ -438,7 +486,7 @@ Object.assign(this, {
 
                 /* Safe to put last regardless of the order, no guarantee ;). */
                 [ 'floaty', 'storages', 'device', 'recorder', 'toast' ],
-                [ 'media', 'sensors', 'web', 'events', 'base64', 'notice' ],
+                [ 'media', 'sensors', 'events', 'base64', 'notice' ],
 
                 /* Last but not the least */
                 [ 'globals' ],

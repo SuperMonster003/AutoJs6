@@ -8,7 +8,9 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/floaty_window_offset" />
+            android:layout_margin="@dimen/floaty_window_offset"
+            tools:layout_width="150dp"
+            tools:layout_height="150dp" />
 
     <ImageView
             android:id="@+id/resizer"
@@ -42,7 +44,7 @@
             android:id="@+id/move_cursor"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="center"
+            android:layout_gravity="top|start"
             android:background="@drawable/circle_cool_black"
             android:padding="4dp"
             android:scaleType="fitXY"

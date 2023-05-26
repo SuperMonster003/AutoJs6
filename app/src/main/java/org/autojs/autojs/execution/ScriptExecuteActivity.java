@@ -29,7 +29,6 @@ import org.mozilla.javascript.ContinuationPending;
  */
 public class ScriptExecuteActivity extends AppCompatActivity {
 
-
     private static final String LOG_TAG = "ScriptExecuteActivity";
     private static final String EXTRA_EXECUTION_ID = ScriptExecuteActivity.class.getName() + ".execution_id";
     private Object mResult;

@@ -1,12 +1,15 @@
 package org.autojs.autojs.core.ui.widget;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.core.ui.ViewExtras;
 import org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater;
 import org.autojs.autojs.core.ui.nativeview.NativeView;
@@ -38,14 +41,22 @@ public class JsListView extends RecyclerView {
 
     private Node mItemTemplate;
     private DynamicLayoutInflater mDynamicLayoutInflater;
-    private final ScriptRuntime mScriptRuntime;
     private Object mDataSource;
     private DataSourceAdapter mDataSourceAdapter;
     private OnItemTouchListener mOnItemTouchListener;
 
-    public JsListView(Context context, ScriptRuntime scriptRuntime) {
+    public JsListView(Context context) {
         super(context);
-        mScriptRuntime = scriptRuntime;
+        init();
+    }
+
+    public JsListView(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    public JsListView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         init();
     }
 
@@ -55,7 +66,7 @@ public class JsListView extends RecyclerView {
     }
 
     protected ScriptRuntime getScriptRuntime() {
-        return mScriptRuntime;
+        return AutoJs.getInstance().getRuntime();
     }
 
     public void setOnItemTouchListener(OnItemTouchListener onItemTouchListener) {
@@ -125,7 +136,6 @@ public class JsListView extends RecyclerView {
             }
         }
 
-
     }
 
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
@@ -137,7 +147,7 @@ public class JsListView extends RecyclerView {
                 mDynamicLayoutInflater.setInflateFlags(DynamicLayoutInflater.FLAG_IGNORES_DYNAMIC_ATTRS);
                 return new ViewHolder(mDynamicLayoutInflater.inflate(mDynamicLayoutInflater.newInflateContext(), mItemTemplate, parent, false));
             } catch (Exception e) {
-                mScriptRuntime.exit(e);
+                getScriptRuntime().exit(e);
                 return new ViewHolder(new View(parent.getContext()));
             } finally {
                 mDynamicLayoutInflater.setInflateFlags(DynamicLayoutInflater.FLAG_DEFAULT);
@@ -146,6 +156,7 @@ public class JsListView extends RecyclerView {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            ScriptRuntime mScriptRuntime = getScriptRuntime();
             try {
                 Object oldCtx = mScriptRuntime.ui.getBindingContext();
                 Object item = mDataSourceAdapter.getItem(mDataSource, position);

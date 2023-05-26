@@ -14,19 +14,40 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     override val isConnected
         get() = devPlugin.isJsonSocketClientConnected
 
+    private var isNormallyClosed
+        get() = devPlugin.isClientSocketNormallyClosed
+        set(state) {
+            devPlugin.isClientSocketNormallyClosed = state
+        }
+
     override val isInMainThread = true
 
-    override fun connect() = inputRemoteHost()
+    override fun connect() {
+        inputRemoteHost(isAutoConnect = !isNormallyClosed)
+    }
 
-    override fun disconnect() = devPlugin.disconnectJsonSocketClient()
+    internal fun connectIfNotNormallyClosed() {
+        if (!isNormallyClosed) connect()
+    }
+
+    override fun disconnect() {
+        devPlugin.disconnectJsonSocketClient()
+        isNormallyClosed = true
+    }
 
     override fun dispose() {
         stateDisposable?.dispose()
     }
 
     @SuppressLint("CheckResult")
-    private fun inputRemoteHost() {
+    private fun inputRemoteHost(isAutoConnect: Boolean) {
         val host = Pref.getServerAddress()
+        if (isAutoConnect) {
+            devPlugin
+                .connectToRemoteServer(host, true)
+                .subscribe(Observers.emptyConsumer(), Observers.emptyConsumer())
+            return
+        }
         MaterialDialog.Builder(context)
             .title(R.string.text_pc_server_address)
             .input(context.getString(R.string.text_pc_server_address), host) { _, input ->

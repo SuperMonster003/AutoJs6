@@ -25,7 +25,7 @@ public class TmpScriptFiles {
     }
 
     public static File getTmpDir(Context context) {
-        return new File(context.getCacheDir(), "tmp_scripts/");
+        return new File(context.getCacheDir(), "tmp-scripts/");
     }
 
     private static void ensureTmpDir(Context context) {

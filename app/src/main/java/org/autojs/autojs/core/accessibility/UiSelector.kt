@@ -54,9 +54,6 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeJavaMethod
 import org.mozilla.javascript.regexp.NativeRegExp
-import java.lang.Boolean.parseBoolean
-import java.lang.Float.parseFloat
-import java.lang.Integer.parseInt
 import java.math.BigInteger
 
 /**
@@ -993,43 +990,43 @@ open class UiSelector : UiObjectActions {
                                         doubleTypes.containsKey(key) -> when (val types = doubleTypes.getValue(key)) {
                                             cDouble -> tmp::class.java
                                                 .getMethod(key, cDouble)
-                                                .invoke(tmp, *value.map { parseFloat(it.toString()).toDouble() }.toTypedArray())
+                                                .invoke(tmp, *value.map { it.toString().toDouble() }.toTypedArray())
                                             is Array<*> -> when ( /* isOverloaded */ types.any { it is Array<*> }) {
                                                 true -> when (value.size) {
                                                     1 -> types.find { it == cDouble }?.let {
                                                         tmp::class.java
                                                             .getMethod(key, cDouble)
-                                                            .invoke(tmp, parseFloat(value[0].toString()).toDouble())
-                                                    } ?: throw Error()
+                                                            .invoke(tmp, value[0].toString().toDouble())
+                                                    } ?: throw Exception("UiSelector: $key($value)")
                                                     2 -> types.find { it is Array<*> }?.let { type: Any ->
                                                         val t = type as Array<*>
                                                         when {
                                                             t[0] == cDouble && t[1] == cDouble -> tmp::class.java
                                                                 .getMethod(key, cDouble, cDouble)
-                                                                .invoke(tmp, *value.map { parseFloat(it.toString()).toDouble() }.toTypedArray())
+                                                                .invoke(tmp, *value.map { it.toString().toDouble() }.toTypedArray())
                                                             t[0] == cBoolean && t[1] == cDouble -> tmp::class.java
                                                                 .getMethod(key, cBoolean, cDouble)
                                                                 .invoke(tmp, *value.mapIndexed { index, any ->
                                                                     when (index) {
-                                                                        0 -> parseBoolean(any.toString())
-                                                                        1 -> parseFloat(any.toString()).toDouble()
-                                                                        else -> throw Error()
+                                                                        0 -> any.toString().toBoolean()
+                                                                        1 -> any.toString().toDouble()
+                                                                        else -> throw Exception("UiSelector: $key($value)")
                                                                     }
                                                                 }.toTypedArray())
-                                                            else -> throw Error()
+                                                            else -> throw Exception("UiSelector: $key($value)")
                                                         }
-                                                    } ?: throw Error()
-                                                    else -> throw Error()
+                                                    } ?: throw Exception("UiSelector: $key($value)")
+                                                    else -> throw Exception("UiSelector: $key($value)")
                                                 }
                                                 else -> @Suppress("UNCHECKED_CAST") tmp::class.java
                                                     .getMethod(key, *(types as Array<out Class<*>>))
-                                                    .invoke(tmp, *value.map { parseFloat(it.toString()).toDouble() }.toTypedArray())
+                                                    .invoke(tmp, *value.map { it.toString().toDouble() }.toTypedArray())
                                             }
-                                            else -> throw Error()
+                                            else -> throw Exception("UiSelector: $key($value)")
                                         }
                                         intTypes.contains(key) -> tmp::class.java
                                             .getMethod(key, cInt)
-                                            .invoke(tmp, parseInt(value[0].toString()))
+                                            .invoke(tmp, value[0].toString().toInt())
                                         stringTypes.contains(key) -> tmp::class.java
                                             .getMethod(key, cString)
                                             .invoke(tmp, value[0])
@@ -1040,7 +1037,7 @@ open class UiSelector : UiObjectActions {
                                             is String -> tmp::class.java
                                                 .getMethod(key, cString)
                                                 .invoke(tmp, value[0])
-                                            else -> throw Error()
+                                            else -> throw Exception("UiSelector: $key($value)")
                                         }
                                         appTypes.contains(key) -> when (value[0]) {
                                             is App -> tmp::class.java
@@ -1049,7 +1046,7 @@ open class UiSelector : UiObjectActions {
                                             is String -> tmp::class.java
                                                 .getMethod(key, cString)
                                                 .invoke(tmp, value[0])
-                                            else -> throw Error()
+                                            else -> throw Exception("UiSelector: $key($value)")
                                         }
                                         nullableBoolTypes.contains(key) -> when (value.size) {
                                             0 -> tmp::class.java
@@ -1057,12 +1054,12 @@ open class UiSelector : UiObjectActions {
                                                 .invoke(tmp)
                                             1 -> tmp::class.java
                                                 .getMethod(key, cBoolean)
-                                                .invoke(tmp, parseBoolean(value[0].toString()))
-                                            else -> throw Error()
+                                                .invoke(tmp, value[0].toString().toBoolean())
+                                            else -> throw Exception("UiSelector: $key($value)")
                                         }
-                                        else -> throw Error()
+                                        else -> throw Exception("UiSelector: $key($value)")
                                     }
-                                    else -> throw Error()
+                                    else -> throw Exception("UiSelector: $key($value)")
                                 }
                             }
                         } catch (e: NoSuchMethodException) {

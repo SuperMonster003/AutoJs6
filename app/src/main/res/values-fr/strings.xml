@@ -361,7 +361,7 @@
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
     <string name="text_exit">Sortir</string>
     <string name="text_exit_directly">Exit</string>
-    <string name="text_exit_floating_window">Exit floating window</string>
+    <string name="text_close_floating_button">Fermer le bouton flottant</string>
     <string name="text_extending_js_build_in_objects">Extension des objets intégrés de JavaScript</string>
     <string name="text_extensibility">Extensibilité</string>
     <string name="text_failed">Failed</string>
@@ -390,7 +390,7 @@
     <string name="text_find_next_simplified">Suiv</string>
     <string name="text_find_or_replace">Recherche / Remplacement</string>
     <string name="text_find_prev_simplified">Précé</string>
-    <string name="text_floating_window">Fenêtre flottante</string>
+    <string name="text_floating_button">Bouton flottant</string>
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Service d\'avant-plan</string>
     <string name="text_foreground_service_description">Les services d\'avant-plan effectuent des opérations qui sont perceptibles par l\'utilisateur\nLes services d\'avant-plan affichent une notification dans la barre d\'état, de sorte que les utilisateurs sont activement conscients que votre application effectue une tâche en avant-plan et consomme des ressources système.\nLa notification ne peut pas être rejetée à moins que le service ne soit arrêté ou supprimé de l\'avant-plan.\nLa notification peut avoir une faible priorité, voire être désactivée, en appuyant longuement sur la notification.</string>
@@ -476,7 +476,8 @@
     <string name="text_not_granted">Non accordée</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
     <string name="text_notification">Notification</string>
-    <string name="text_notification_permission">Accès à la notification</string>
+    <string name="text_post_notifications_permission">Notifications postales</string>
+    <string name="text_notification_access_permission">Accès à la notification</string>
     <string name="text_notification_service_disabled">Le service de notification ne fonctionne pas</string>
     <string name="text_null">Null</string>
     <string name="text_number_format_error">Format de numéro invalide</string>
@@ -655,6 +656,7 @@
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="theme_color_default">Default</string>
+    <string name="error_abandoned_method">La méthode %s a été abandonnée et ne doit pas être utilisée</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d article</item>

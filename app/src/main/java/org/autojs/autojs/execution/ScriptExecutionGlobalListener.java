@@ -5,6 +5,7 @@ import static org.autojs.autojs.util.StringUtils.str;
 import android.annotation.SuppressLint;
 
 import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.pref.Language;
 import org.autojs.autojs.runtime.api.Console;
 import org.autojs.autojs6.R;
 
@@ -34,13 +35,14 @@ public class ScriptExecutionGlobalListener implements ScriptExecutionListener {
 
     private void printSeconds(ScriptExecution execution, Long millis) {
         double seconds = (System.currentTimeMillis() - millis) / 1000.0;
-        String secondsString = String.format("%.3f", seconds).stripTrailing();
+        String secondsString = String.format(Language.getPrefLanguage().getLocale(), "%.3f", seconds).stripTrailing();
         printSeconds(execution, secondsString);
     }
 
     private void printSeconds(ScriptExecution execution, String seconds) {
         Console console = AutoJs.getInstance().getScriptEngineService().getGlobalConsole();
-        console.verbose(str(R.string.text_execution_finished, execution.getSource().toString(), seconds));
+        String path = execution.getSource().getElegantPath();
+        console.verbose(str(R.string.text_execution_finished, path, seconds));
     }
 
     @Override

@@ -17,10 +17,6 @@ import androidx.cardview.widget.CardView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.Click;
-import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.ViewById;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
 import org.autojs.autojs.apkbuilder.ApkBuilderPluginHelper;
 import org.autojs.autojs.external.fileprovider.AppFileProvider;
@@ -29,13 +25,13 @@ import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
-import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity_;
 import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs.util.EnvironmentUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
+import org.autojs.autojs6.databinding.ActivityBuildBinding;
 
 import java.io.File;
 import java.io.InputStream;
@@ -48,8 +44,8 @@ import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Stardust on 2017/10/22.
+ * Modified by SuperMonster003 as of Dec 1, 2023.
  */
-@EActivity(R.layout.activity_build)
 public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCallback {
 
     private static final int REQUEST_CODE = 44401;
@@ -58,32 +54,14 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private static final String LOG_TAG = "BuildActivity";
     private static final Pattern REGEX_PACKAGE_NAME = Pattern.compile("^([A-Za-z][A-Za-z\\d_]*\\.)+([A-Za-z][A-Za-z\\d_]*)$");
-
-    @ViewById(R.id.source_path)
     EditText mSourcePath;
-
-    @ViewById(R.id.source_path_container)
     View mSourcePathContainer;
-
-    @ViewById(R.id.output_path)
     EditText mOutputPath;
-
-    @ViewById(R.id.app_name)
     EditText mAppName;
-
-    @ViewById(R.id.package_name)
     EditText mPackageName;
-
-    @ViewById(R.id.version_name)
     EditText mVersionName;
-
-    @ViewById(R.id.version_code)
     EditText mVersionCode;
-
-    @ViewById(R.id.icon)
     ImageView mIcon;
-
-    @ViewById(R.id.app_config)
     CardView mAppConfig;
 
     private ProjectConfig mProjectConfig;
@@ -94,10 +72,25 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
 
-    @AfterViews
-    void setupViews() {
+        ActivityBuildBinding binding = ActivityBuildBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        mSourcePath = binding.sourcePath;
+        mSourcePathContainer = binding.sourcePathContainer;
+        mOutputPath = binding.outputPath;
+        mAppName = binding.appName;
+        mPackageName = binding.packageName;
+        mVersionName = binding.versionName;
+        mVersionCode = binding.versionCode;
+        mIcon = binding.icon;
+        mAppConfig = binding.appConfig;
+
+        binding.fab.setOnClickListener(v -> buildApk());
+        binding.selectSource.setOnClickListener(v -> selectSourceFilePath());
+        binding.selectOutput.setOnClickListener(v -> selectOutputDirPath());
+        mIcon.setOnClickListener(v -> selectIcon());
+
         setToolbarAsBack(R.string.text_build_apk);
         mSource = getIntent().getStringExtra(EXTRA_SOURCE);
         if (mSource != null) {
@@ -106,12 +99,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         checkApkBuilderPlugin();
     }
 
-    private boolean checkApkBuilderPlugin() {
+    private void checkApkBuilderPlugin() {
         if (!ApkBuilderPluginHelper.isPluginAvailable(this) || ApkBuilderPluginHelper.getPluginVersion(this) < 0) {
             showPluginDownloadDialog();
-            return false;
         }
-        return true;
     }
 
     private void showPluginDownloadDialog() {
@@ -150,7 +141,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         super.onNewIntent(intent);
     }
 
-    @Click(R.id.select_source)
     void selectSourceFilePath() {
         String initialDir = new File(mSourcePath.getText().toString()).getParent();
         new FileChooserDialogBuilder(this)
@@ -175,7 +165,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mSourcePathContainer.setVisibility(View.GONE);
     }
 
-    @Click(R.id.select_output)
     void selectOutputDirPath() {
         String initialDir = new File(mOutputPath.getText().toString()).exists()
                 ? mOutputPath.getText().toString()
@@ -188,13 +177,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .show();
     }
 
-    @Click(R.id.icon)
     void selectIcon() {
-        AppsIconSelectActivity_.intent(this)
-                .startForResult(REQUEST_CODE);
+        AppsIconSelectActivity.launchForResult(this, REQUEST_CODE);
     }
 
-    @Click(R.id.fab)
     void buildApk() {
         if (!ApkBuilderPluginHelper.isPluginAvailable(this)) {
             ViewUtils.showToast(this, R.string.text_apk_builder_plugin_unavailable);
@@ -240,6 +226,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         return false;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     private void doBuildingApk() {
         ApkBuilder.AppConfig appConfig = createAppConfig();
@@ -351,18 +338,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         }
     }
 
-    public static class IntentBuilder {
-
-        private final BuildActivity_.IntentBuilder_ mIntentBuilder;
-
-        public IntentBuilder(Context context) {
-            mIntentBuilder = BuildActivity_.intent(context);
-        }
-
-        public BuildActivity_.IntentBuilder_ extra(String extraSource) {
-            return mIntentBuilder.extra(BuildActivity.EXTRA_SOURCE, extraSource);
-        }
-
+    public static void launch(Context context, String extraSource) {
+        Intent intent = new Intent(context, BuildActivity.class)
+                .putExtra(BuildActivity.EXTRA_SOURCE, extraSource);
+        context.startActivity(intent);
     }
 
 }

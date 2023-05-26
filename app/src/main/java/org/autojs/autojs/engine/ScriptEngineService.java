@@ -40,11 +40,11 @@ public class ScriptEngineService {
     private static final ScriptExecutionListener GLOBAL_LISTENER = new SimpleScriptExecutionListener() {
         @Override
         public void onStart(ScriptExecution execution) {
+            ScriptSource scriptSource = execution.getSource();
             if (execution.getEngine() instanceof JavaScriptEngine) {
-                ((JavaScriptEngine) execution.getEngine()).getRuntime()
-                        .console.setTitle(execution.getSource().getName());
+                ((JavaScriptEngine) execution.getEngine()).getRuntime().console.setTitle(scriptSource.getName());
             }
-            EVENT_BUS.post(new ScriptExecutionEvent(ScriptExecutionEvent.ON_START, execution.getSource().toString()));
+            EVENT_BUS.post(new ScriptExecutionEvent(ScriptExecutionEvent.ON_START, scriptSource.getElegantPath()));
         }
 
         @Override

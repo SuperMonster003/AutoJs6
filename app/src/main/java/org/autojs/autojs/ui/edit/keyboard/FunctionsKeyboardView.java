@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.edit.keyboard;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -10,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,20 +20,19 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
 import org.autojs.autojs.model.indices.Module;
 import org.autojs.autojs.model.indices.Modules;
 import org.autojs.autojs.model.indices.Property;
 import org.autojs.autojs.ui.widget.GridDividerDecoration;
-import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
 import org.autojs.autojs6.R;
+import org.autojs.autojs6.databinding.FunctionsKeyboardViewBinding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
@@ -50,11 +49,9 @@ public class FunctionsKeyboardView extends FrameLayout {
     }
 
     private static final int SPAN_COUNT = 4;
-    @BindView(R.id.module_list)
-    RecyclerView mModulesView;
 
-    @BindView(R.id.properties)
-    RecyclerView mPropertiesView;
+    private RecyclerView mModulesView;
+    private RecyclerView mPropertiesView;
 
     private List<Module> mModules;
     private final Map<Module, List<Integer>> mSpanSizes = new HashMap<>();
@@ -88,8 +85,11 @@ public class FunctionsKeyboardView extends FrameLayout {
     }
 
     private void init() {
-        inflate(getContext(), R.layout.functions_keyboard_view, this);
-        ButterKnife.bind(this);
+        FunctionsKeyboardViewBinding binding = FunctionsKeyboardViewBinding.inflate(LayoutInflater.from(getContext()));
+
+        mModulesView = binding.moduleList;
+        mPropertiesView = binding.properties;
+
         initModulesView();
         initPropertiesView();
     }
@@ -161,10 +161,11 @@ public class FunctionsKeyboardView extends FrameLayout {
     }
 
     private void initModulesView() {
-        mModulesView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayout.HORIZONTAL, false));
+        mModulesView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
         mModulesView.setAdapter(new ModulesAdapter());
     }
 
+    @SuppressLint("CheckResult")
     private void loadModules() {
         Modules.getInstance().getModules(getContext())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -80,6 +80,10 @@ public class DevPluginService {
         mResponseHandler = new DevPluginResponseHandler(context, cache);
     }
 
+    public JsonSocketServer getJsonSocketServer() {
+        return mJsonSocketServer;
+    }
+
     public DevPluginResponseHandler getResponseHandler() {
         return mResponseHandler;
     }
@@ -104,6 +108,22 @@ public class DevPluginService {
         return mServerSocket != null && !mServerSocket.isClosed();
     }
 
+    public boolean isServerSocketNormallyClosed() {
+        return JsonSocketServer.isServerSocketNormallyClosed();
+    }
+
+    public void setServerSocketNormallyClosed(boolean state) {
+        JsonSocketServer.setServerSocketNormallyClosed(state);
+    }
+
+    public boolean isClientSocketNormallyClosed() {
+        return JsonSocketClient.isClientSocketNormallyClosed();
+    }
+
+    public void setClientSocketNormallyClosed(boolean state) {
+        JsonSocketClient.setClientSocketNormallyClosed(state);
+    }
+
     public void disconnectJsonSocketServer() {
         try {
             mJsonSocketServer.switchOff();
@@ -114,6 +134,11 @@ public class DevPluginService {
 
     @AnyThread
     public Observable<JsonSocketClient> connectToRemoteServer(String host) {
+        return connectToRemoteServer(host, false);
+    }
+
+    @AnyThread
+    public Observable<JsonSocketClient> connectToRemoteServer(String host, boolean ignoreExceptions) {
         int port = Port.PC_SERVER;
         String ip = host;
         int i = host.lastIndexOf(':');
@@ -129,15 +154,24 @@ public class DevPluginService {
                     try {
                         mJsonSocketClient = jsonSocketClient;
                         if (ThreadUtils.wait(jsonSocketClient::isSocketReady, HANDSHAKE_TIMEOUT)) {
+                            setClientSocketNormallyClosed(false);
                             jsonSocketClient
                                     .subscribeMessage()
                                     .monitorMessage()
                                     .sayHello();
                         } else {
-                            jsonSocketClient.onHandshakeTimeout();
+                            if (!ignoreExceptions) {
+                                jsonSocketClient.onHandshakeTimeout();
+                            } else {
+                                jsonSocketClient.switchOff();
+                            }
                         }
                     } catch (IOException e) {
-                        jsonSocketClient.onSocketError(e);
+                        if (!ignoreExceptions) {
+                            jsonSocketClient.onSocketError(e);
+                        } else {
+                            jsonSocketClient.switchOff();
+                        }
                     }
                 });
     }

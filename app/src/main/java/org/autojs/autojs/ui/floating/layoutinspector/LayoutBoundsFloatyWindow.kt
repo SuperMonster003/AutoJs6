@@ -22,6 +22,7 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(private val rootNo
             put(R.string.text_show_widget_information, Runnable { showNodeInfo() })
             put(R.string.text_show_layout_hierarchy, Runnable { showLayoutHierarchy() })
             put(R.string.text_generate_code, Runnable { generateCode() })
+            put(R.string.text_exit, Runnable { close() })
         })
 
         return object : LayoutBoundsView(context) {

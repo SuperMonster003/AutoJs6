@@ -111,6 +111,7 @@
                     android:orientation="vertical">
 
                 <include
+                        android:id="@+id/activity_about_items"
                         layout="@layout/activity_about_items"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent" />
@@ -122,6 +123,7 @@
                         android:gravity="center|bottom">
 
                     <include
+                            android:id="@+id/activity_about_function_buttons"
                             layout="@layout/activity_about_function_buttons"
                             android:layout_height="wrap_content"
                             android:layout_width="match_parent" />

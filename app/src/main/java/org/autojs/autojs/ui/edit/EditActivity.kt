@@ -14,53 +14,52 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.androidannotations.annotations.AfterViews
-import org.androidannotations.annotations.EActivity
-import org.androidannotations.annotations.ViewById
 import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
 import org.autojs.autojs.core.permission.OnRequestPermissionsResultCallback
 import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
-import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.BaseActivity
-import org.autojs.autojs.ui.main.MainActivity_
+import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
 import java.io.IOException
 
 /**
  * Created by Stardust on 2017/1/29.
+ * Modified by SuperMonster003 as of Jan 21, 2023.
  */
-@EActivity(R.layout.activity_edit)
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
 
     private val mMediator = OnActivityResultDelegate.Mediator()
 
-    @ViewById(R.id.editor_view)
-    lateinit var mEditorView: EditorView
-
+    private lateinit var mEditorView: EditorView
     private lateinit var mEditorMenu: EditorMenu
 
     private val mRequestPermissionCallbacks = RequestPermissionCallbacks()
     private var mNewTask = false
 
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mNewTask = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0
-    }
 
-    @SuppressLint("CheckResult")
-    @AfterViews
-    fun setUpViews() {
-        mEditorView.handleIntent(intent)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(Observers.emptyConsumer()) { ex: Throwable -> onLoadFileError(ex.message) }
+        val binding = ActivityEditBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        mEditorView = binding.editorView.apply {
+            handleIntent(intent)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(Observers.emptyConsumer()) { ex: Throwable -> onLoadFileError(ex.message) }
+        }
+
         mEditorMenu = EditorMenu(mEditorView)
+
+        mNewTask = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0
         setUpToolbar()
         window.statusBarColor = ThemeColorManager.colorPrimary
     }
@@ -99,9 +98,9 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         Log.d(LOG_TAG, "onPrepareOptionsMenu: $menu")
 
-        val isScriptRunning = mEditorView.scriptExecutionId != ScriptExecution.NO_ID
-        val forceStopItem = menu.findItem(R.id.action_force_stop)
-        forceStopItem.isEnabled = isScriptRunning
+        // val isScriptRunning = mEditorView.scriptExecutionId != ScriptExecution.NO_ID
+        // val forceStopItem = menu.findItem(R.id.action_force_stop)
+        // forceStopItem.isEnabled = isScriptRunning
 
         return super.onPrepareOptionsMenu(menu)
     }
@@ -136,26 +135,6 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         }
     }
 
-    override fun onSupportActionModeStarted(mode: androidx.appcompat.view.ActionMode) {
-        Log.d(LOG_TAG, "onSupportActionModeStarted: mode = $mode")
-        super.onSupportActionModeStarted(mode)
-    }
-
-    override fun onWindowStartingSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
-        Log.d(LOG_TAG, "onWindowStartingSupportActionMode: callback = $callback")
-        return super.onWindowStartingSupportActionMode(callback)
-    }
-
-    override fun startActionMode(callback: ActionMode.Callback, type: Int): ActionMode? {
-        Log.d(LOG_TAG, "startActionMode: callback = $callback, type = $type")
-        return super.startActionMode(callback, type)
-    }
-
-    override fun startActionMode(callback: ActionMode.Callback): ActionMode? {
-        Log.d(LOG_TAG, "startActionMode: callback = $callback")
-        return super.startActionMode(callback)
-    }
-
     @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
     override fun onBackPressed() {
         if (!mEditorView.onBackPressed()) {
@@ -173,8 +152,9 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     private fun finishAndRemoveFromRecents() {
         finishAndRemoveTask()
+        mEditorView.cleanBeforeExit()
         if (mNewTask) {
-            startActivity(Intent(this, MainActivity_::class.java))
+            MainActivity.launch(this)
         }
     }
 
@@ -204,16 +184,16 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         return mMediator
     }
 
+    @SuppressLint("MissingSuperCall")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         mMediator.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
         if (!mEditorView.isTextChanged) {
             return
         }
-        val text = mEditorView.editor.text
+        val text = mEditorView.editor!!.text
         if (text.length < 256 * 1024) {
             outState.putString("text", text)
         } else {
@@ -222,8 +202,10 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 outState.putString("path", tmp.path)
             }
         }
+        super.onSaveInstanceState(outState)
     }
 
+    @SuppressLint("CheckResult")
     private fun saveToTmpFile(text: String): File? = try {
         TmpScriptFiles.create(this).also { tmp ->
             Observable.just(text)
@@ -246,7 +228,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 .observeOn(Schedulers.io())
                 .map { PFiles.read(it) }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ mEditorView.editor.text = it }, Throwable::printStackTrace)
+                .subscribe({ mEditorView.editor!!.text = it }, Throwable::printStackTrace)
         }
     }
 
@@ -320,7 +302,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
             //  ! and Android Studio AVD (from API Level 24 to 33),
             //  ! but not on other systems like MIUI, EMUI, ColorOS, Oxygen OS and so forth.
             //  ! There, therefor, is a fallback named "newIntentFallback".
-            return Intent(context, EditActivity_::class.java)
+            return Intent(context, EditActivity::class.java)
         }
 
         private fun newIntentFallback(context: Context, newTask: Boolean): Intent {

@@ -16,7 +16,9 @@ class MlKitOCR {
     private var recognizer: TextRecognizer? = null
 
     private fun initIfNeeded() {
-        recognizer = recognizer ?: TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build())
+        recognizer?:let {
+            recognizer = TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build())
+        }
     }
 
     fun release() {
@@ -26,9 +28,9 @@ class MlKitOCR {
     fun detect(image: ImageWrapper?): List<OcrResult> {
         initIfNeeded()
 
-        image ?: return emptyList()
+        image?.takeUnless { image.isRecycled } ?: return emptyList()
 
-        val bitmap = image.bitmap ?: return emptyList<OcrResult>().also { image.shoot() }
+        val bitmap = image.bitmap
         if (bitmap.isRecycled) return emptyList<OcrResult>().also { image.shoot() }
 
         val inputImage = InputImage.fromBitmap(bitmap, 0)

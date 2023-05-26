@@ -37,7 +37,7 @@ import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
-import org.autojs.autojs.ui.timing.TimedTaskSettingActivity_;
+import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
 import org.autojs.autojs.util.EnvironmentUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
@@ -406,9 +406,9 @@ public class ScriptOperations {
     }
 
     public void timedTask(ScriptFile scriptFile) {
-        TimedTaskSettingActivity_.intent(mContext)
-                .extra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.getPath())
-                .start();
+        Intent intent = new Intent(mContext, TimedTaskSettingActivity.class)
+                .putExtra(ScriptIntents.EXTRA_KEY_PATH, scriptFile.getPath());
+        mContext.startActivity(intent);
     }
 
     private class InputCallback implements MaterialDialog.InputCallback {

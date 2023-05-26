@@ -22,6 +22,7 @@
         <item name="android:textColorPrimary">@color/toolbar_text</item>
         <item name="android:textColorSecondary">@color/toolbar_text</item>
         <item name="actionMenuTextColor">@color/toolbar_text</item>
+        <item name="titleMarginStart">0dp</item>
         <item name="iconTint">@color/toolbar_text</item>
         <item name="popupTheme">@style/PopupMenuTheme</item>
     </style>
@@ -79,8 +80,6 @@
         <item name="android:textColorPrimary">#212121</item>
     </style>
 
-    <style name="TextAppearance.Design.Snackbar.Message" parent="android:TextAppearance" />
-
     <style name="ConsoleTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorButtonNormal">#cc181818</item>
@@ -114,5 +113,11 @@
     <style name="SearchViewActionBar" parent="@style/Widget.AppCompat.SearchView.ActionBar" />
 
     <style name="Material3DarkTheme" parent="@style/Theme.Material3.Dark" />
+
+    <style name="TextAppearanceEditorTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">middle</item>
+    </style>
 
 </resources>

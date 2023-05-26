@@ -38,6 +38,7 @@ class InjectableWebView(context: Context?, jsCtx: org.mozilla.javascript.Context
         if (url != null) {
             settings.takeIf { url.startsWith("file:") }?.apply {
                 allowFileAccess = true
+                @Suppress("DEPRECATION")
                 allowUniversalAccessFromFileURLs = true
             }
             loadUrl(url)

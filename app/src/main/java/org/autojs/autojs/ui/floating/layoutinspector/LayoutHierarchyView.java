@@ -33,6 +33,7 @@ import pl.openrnd.multilevellistview.OnItemClickListener;
 
 /**
  * Created by Stardust on 2017/3/10.
+ * Modified by SuperMonster003 as of May 26, 2022.
  */
 public class LayoutHierarchyView extends MultiLevelListView {
 
@@ -238,8 +239,9 @@ public class LayoutHierarchyView extends MultiLevelListView {
 
             if (itemInfo.isExpandable() && !isAlwaysExpanded()) {
                 viewHolder.arrowView.setVisibility(View.VISIBLE);
-                viewHolder.arrowView.setImageResource(itemInfo.isExpanded() ?
-                        R.drawable.arrow_up : R.drawable.arrow_down);
+                viewHolder.arrowView.setImageResource(itemInfo.isExpanded()
+                        ? R.drawable.arrow_up
+                        : R.drawable.arrow_down);
             } else {
                 viewHolder.arrowView.setVisibility(View.GONE);
             }
@@ -253,11 +255,13 @@ public class LayoutHierarchyView extends MultiLevelListView {
         }
 
         private String simplifyClassName(CharSequence className) {
-            if (className == null)
+            if (className == null) {
                 return null;
+            }
             String s = className.toString();
-            if (s.startsWith("android.widget.")) {
-                s = s.substring(15);
+            String prefix = "android.widget.";
+            if (s.startsWith(prefix)) {
+                s = s.substring(prefix.length());
             }
             return s;
         }

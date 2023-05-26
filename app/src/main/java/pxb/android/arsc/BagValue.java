@@ -15,14 +15,15 @@
  */
 package pxb.android.arsc;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 public class BagValue {
     public final int parent;
-    public List<Entry<Integer, Value>> map = new ArrayList<Entry<Integer, Value>>();
+    public List<Entry<Integer, Value>> map = new ArrayList<>();
 
     public BagValue(int parent) {
         this.parent = parent;
@@ -42,9 +43,7 @@ public class BagValue {
                 return false;
         } else if (!map.equals(other.map))
             return false;
-        if (parent != other.parent)
-            return false;
-        return true;
+        return parent == other.parent;
     }
 
     @Override
@@ -56,6 +55,7 @@ public class BagValue {
         return result;
     }
 
+    @NonNull
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("{bag%08x", parent));

@@ -16,6 +16,8 @@
 
 package zhao.arsceditor.ResDecoder.data;
 
+import androidx.annotation.NonNull;
+
 /**
  * @author Ryszard Wiśniewski <brut.alll@gmail.com>
  */
@@ -43,17 +45,7 @@ public class ResID {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final ResID other = (ResID) obj;
-		if (this.id != other.id) {
-			return false;
-		}
-		return true;
+		return obj != null && getClass() == obj.getClass() && this.id == ((ResID) obj).id;
 	}
 
 	@Override
@@ -63,6 +55,7 @@ public class ResID {
 		return hash;
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		return String.format("0x%08x", id);

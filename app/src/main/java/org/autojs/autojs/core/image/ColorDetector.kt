@@ -147,7 +147,7 @@ interface ColorDetector {
                 "hs" -> HSDistanceDetector(color, threshold)
                 "h" -> HDistanceDetector(color, threshold)
                 "equal" -> EqualityDetector(color)
-                else -> throw Error("Failed to get a color detector")
+                else -> throw Exception("Failed to get a color detector")
             }
         }
     }

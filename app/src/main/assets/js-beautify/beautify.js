@@ -350,7 +350,6 @@ var MODE = {
 };
 
 function Beautifier(js_source_text, options) {
-    "use strict";
     var output;
     var tokens = [],
         token_pos;

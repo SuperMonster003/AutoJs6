@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+            app:layout="@layout/preference_category_custom"
+            app:title="@string/text_updates">
+
+        <org.autojs.autojs.ui.settings.ClearUpdatesCheckedStatesPreference
+                app:layout="@layout/preference_custom"
+                app:key="@string/key_updates_checked_states_cleared"
+                app:title="@string/text_clear_updates_checked_states"
+                app:summary="@string/text_clear_updates_checked_states_description" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+</PreferenceScreen>

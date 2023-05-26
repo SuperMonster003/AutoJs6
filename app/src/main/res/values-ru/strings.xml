@@ -361,7 +361,7 @@
     <string name="text_execution_finished" formatted="false">[%s] завершилось через %s секунд.\n</string>
     <string name="text_exit">Выход</string>
     <string name="text_exit_directly">Выйти</string>
-    <string name="text_exit_floating_window">Выход из плавающего окна</string>
+    <string name="text_close_floating_button">Закрыть плавающую кнопку</string>
     <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
     <string name="text_extensibility">Расширяемость</string>
     <string name="text_failed">Не удалось</string>
@@ -390,7 +390,7 @@
     <string name="text_find_next_simplified">Следу</string>
     <string name="text_find_or_replace">Найти / Заменить</string>
     <string name="text_find_prev_simplified">Преды</string>
-    <string name="text_floating_window">Плавающее окно</string>
+    <string name="text_floating_button">Плавающая кнопка</string>
     <string name="text_force_stop">Принудительная остановка</string>
     <string name="text_foreground_service">Служба переднего плана</string>
     <string name="text_foreground_service_description">Службы переднего плана выполняют операции, заметные для пользователя.\nПередние службы отображают уведомление в строке состояния, чтобы пользователи были в курсе, что ваше приложение выполняет задачу на переднем плане и потребляет системные ресурсы.\nУведомление не может быть отменено, пока служба не будет остановлена или удалена с переднего плана.\nУведомление можно установить на низкий приоритет и даже отключить, долго нажимая на него.</string>
@@ -476,7 +476,8 @@
     <string name="text_not_granted">Не предоставляется</string>
     <string name="text_not_showing_main_activity">Не показывает основную деятельность</string>
     <string name="text_notification">Уведомление</string>
-    <string name="text_notification_permission">Доступ к уведомлениям</string>
+    <string name="text_post_notifications_permission">почтовые уведомления</string>
+    <string name="text_notification_access_permission">Доступ к уведомлениям</string>
     <string name="text_notification_service_disabled">Служба уведомлений не работает</string>
     <string name="text_null">Null</string>
     <string name="text_number_format_error">Неверный формат номера</string>
@@ -655,6 +656,7 @@
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="theme_color_default">По умолчанию</string>
+    <string name="error_abandoned_method">Метод %s был отменен и не должен использоваться</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Всего: %d элемент</item>
