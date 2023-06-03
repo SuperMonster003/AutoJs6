@@ -13,6 +13,10 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
+import java.util.List;
+import java.util.ArrayList;
+
+
 /**
  * Created by Stardust on 2017/5/18.
  */
@@ -108,6 +112,21 @@ public class ColorFinder {
         image.shoot();
         return result;
     }
+    
+    public Point[] findAllMultiColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
+    Point[] firstPoints = findAllPointsForColor(image, firstColor, threshold, rect);
+    List<Point> resultPoints = new ArrayList<>();
+    for (Point firstPoint : firstPoints) {
+        if (firstPoint != null) {
+            if (checksPath(image, firstPoint, threshold, points)) {
+                resultPoints.add(firstPoint);
+            }
+        }
+    }
+    image.shoot();
+    return resultPoints.toArray(new Point[0]);
+}
+
 
     private boolean checksPath(ImageWrapper image, Point startingPoint, int threshold, int[] points) {
         for (int i = 0; i < points.length; i += 3) {
