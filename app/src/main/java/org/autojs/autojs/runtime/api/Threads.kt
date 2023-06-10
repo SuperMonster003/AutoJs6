@@ -6,6 +6,8 @@ import org.autojs.autojs.core.looper.MainThreadProxy
 import org.autojs.autojs.core.looper.TimerThread
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Context
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.atomic.AtomicLong
@@ -23,7 +25,14 @@ class Threads(private val mRuntime: ScriptRuntime) {
     private var mExit = false
     private val looperTask = Loopers.AsyncTask("AsyncTaskThreadPool")
     private val threadPool = Executors.newFixedThreadPool(20, ThreadFactory {
-        val thread = Thread(it)
+        val thread = Thread(fun() {
+            Context.enter()
+            try {
+                it.run()
+            } finally {
+                Context.exit()
+            }
+        })
         thread.name = mainThread.name + " (AsyncThread)"
         thread
     })
@@ -33,17 +42,20 @@ class Threads(private val mRuntime: ScriptRuntime) {
         return if (thread === mainThread) mMainThreadProxy else thread
     }
 
-    fun runTaskForThreadPool(runnable: Runnable) {
+    fun runTaskForThreadPool(runnable: BaseFunction) {
         if (mTaskCount.addAndGet(1) == 1L) mRuntime.loopers.addAsyncTask(looperTask)
         threadPool.execute {
             try {
-                runnable.run()
+                runnable.call(
+                    Context.getCurrentContext(), runnable.parentScope, runnable,
+                    emptyArray()
+                )
             } catch (e: Throwable) {
                 if (!ScriptInterruptedException.causedByInterrupted(e)) {
                     mRuntime.console.error("$this: ", e)
                 }
             } finally {
-                if (mTaskCount.addAndGet(-1) == 0L){
+                if (mTaskCount.addAndGet(-1) == 0L) {
                     mRuntime.loopers.removeAsyncTask(looperTask)
                 }
             }
