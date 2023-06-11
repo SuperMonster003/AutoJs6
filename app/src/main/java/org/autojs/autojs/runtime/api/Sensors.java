@@ -22,7 +22,9 @@ import java.util.Set;
 /**
  * Created by Stardust on 2018/2/5.
  */
-public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
+
+public class Sensors extends EventEmitter {
+
 
     public class SensorEventEmitter extends EventEmitter implements SensorEventListener {
 
@@ -82,6 +84,13 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
     private final ScriptBridges mScriptBridges;
     private final SensorEventEmitter mNoOpSensorEventEmitter;
     private final ScriptRuntime mScriptRuntime;
+    private final Loopers.AsyncTask mAsyncTask = new Loopers.AsyncTask("Sensors"){
+        @Override
+        public boolean onFinish(@NonNull Loopers loopers) {
+            return !mSensorEventEmitters.isEmpty();
+        }
+    };
+
 
     public Sensors(Context context, ScriptRuntime runtime) {
         super(runtime.bridges);
@@ -89,7 +98,7 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
         mScriptBridges = runtime.bridges;
         mNoOpSensorEventEmitter = new SensorEventEmitter(runtime.bridges);
         mScriptRuntime = runtime;
-        runtime.loopers.addLooperQuitHandler(this);
+        runtime.loopers.addAsyncTask(mAsyncTask);
     }
 
     public SensorEventEmitter register(String sensorName) {
@@ -119,11 +128,6 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
             mSensorEventEmitters.add(emitter);
         }
         return emitter;
-    }
-
-    @Override
-    public boolean shouldQuit() {
-        return mSensorEventEmitters.isEmpty();
     }
 
     public Sensor getSensor(String sensorName) {
@@ -158,6 +162,6 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
             }
             mSensorEventEmitters.clear();
         }
-        mScriptRuntime.loopers.removeLooperQuitHandler(this);
+        mScriptRuntime.loopers.removeAsyncTask(mAsyncTask);
     }
 }
