@@ -248,7 +248,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     override fun onStart() {
         super.onStart()
-        verifyApkIfNeeded()
+        //   verifyApkIfNeeded()
     }
 
     private fun verifyApkIfNeeded() {
