@@ -5,7 +5,6 @@ import android.content.DialogInterface
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
 import org.autojs.autojs.App
-import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.ui.main.drawer.SocketItemHelper
 
 /**

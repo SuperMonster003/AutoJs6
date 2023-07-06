@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Color (颜色类) | AutoJs6 文档 - 6.3.0</title>
+    <title>Color (颜色类) | AutoJs6 文档 - 6.3.2</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -122,6 +122,9 @@
 <li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
 <li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
 <li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
 <li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
 <li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
 <li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
@@ -152,7 +155,7 @@
 
     <div id="column1" data-id="colorType" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <h1>AutoJs6 文档 - 6.3.2</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -212,6 +215,10 @@
 <li><span class="stability_undefined"><a href="#colortype_setalpha_alpha">setAlpha(alpha)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#colortype_m_setalpharelative">[m] setAlphaRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#colortype_setalpharelative_percentage">setAlphaRelative(percentage)</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#colortype_m_removealpha">[m#] removeAlpha</a></span><ul>
 <li><span class="stability_undefined"><a href="#colortype_removealpha">removeAlpha()</a></span></li>
 </ul>
@@ -236,6 +243,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#colortype_m_setred">[m#] setRed</a></span><ul>
 <li><span class="stability_undefined"><a href="#colortype_setred_red">setRed(red)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#colortype_m_setredrelative">[m] setRedRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#colortype_setredrelative_percentage">setRedRelative(percentage)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#colortype_m_removered">[m#] removeRed</a></span><ul>
@@ -264,6 +275,10 @@
 <li><span class="stability_undefined"><a href="#colortype_setgreen_green">setGreen(green)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#colortype_m_setgreenrelative">[m] setGreenRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#colortype_setgreenrelative_percentage">setGreenRelative(percentage)</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#colortype_m_removegreen">[m#] removeGreen</a></span><ul>
 <li><span class="stability_undefined"><a href="#colortype_removegreen">removeGreen()</a></span></li>
 </ul>
@@ -288,6 +303,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#colortype_m_setblue">[m#] setBlue</a></span><ul>
 <li><span class="stability_undefined"><a href="#colortype_setblue_blue">setBlue(blue)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#colortype_m_setbluerelative">[m] setBlueRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#colortype_setbluerelative_percentage">setBlueRelative(percentage)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#colortype_m_removeblue">[m#] removeBlue</a></span><ul>
@@ -810,6 +829,26 @@ Color(&#39;#663399&#39;).setAlpha(0.5).toHex(); /* 同上, 0.5 解析为百分�
 Color(&#39;#663399&#39;).setAlpha(255).toHex(); // #FF663399
 Color(&#39;#663399&#39;).setAlpha(1).toHex(); /* 同上, 1 默认作为百分数分量, 即 100%. */
 </code></pre>
+<h2>[m] setAlphaRelative<span><a class="mark" href="#colortype_m_setalpharelative" id="colortype_m_setalpharelative">#</a></span></h2>
+<h3>setAlphaRelative(percentage)<span><a class="mark" href="#colortype_setalpharelative_percentage" id="colortype_setalpharelative_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="colorType.html">Color</a></span> }</li>
+</ul>
+<p>针对 <code>A (alpha)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>A (alpha)</code> 分量为 <code>80</code>, 希望设置 <code>A</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">Color(color).setAlphaRelative(0.5);
+Color(color).setAlphaRelative(&#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>A</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">Color(color).setAlphaRelative(1.5);
+Color(color).setAlphaRelative(&#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">Color(color).setAlphaRelative(10); /* A 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>A</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>A</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m#] removeAlpha<span><a class="mark" href="#colortype_m_removealpha" id="colortype_m_removealpha">#</a></span></h2>
 <h3>removeAlpha()<span><a class="mark" href="#colortype_removealpha" id="colortype_removealpha">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
@@ -902,6 +941,26 @@ Color(&#39;#663399&#39;).setRed(0.5).toHex(); /* 同上, 0.5 解析为百分数�
 Color(&#39;#663399&#39;).setRed(255).toHex(); // #FF3399
 Color(&#39;#663399&#39;).setRed(1).toHex(); /* #013399, 不同上. 1 默认作为整数分量, 而非 100%. */
 </code></pre>
+<h2>[m] setRedRelative<span><a class="mark" href="#colortype_m_setredrelative" id="colortype_m_setredrelative">#</a></span></h2>
+<h3>setRedRelative(percentage)<span><a class="mark" href="#colortype_setredrelative_percentage" id="colortype_setredrelative_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="colorType.html">Color</a></span> }</li>
+</ul>
+<p>针对 <code>R (red)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>R (red)</code> 分量为 <code>80</code>, 希望设置 <code>R</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">Color(color).setRedRelative(0.5);
+Color(color).setRedRelative(&#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>R</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">Color(color).setRedRelative(1.5);
+Color(color).setRedRelative(&#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">Color(color).setRedRelative(10); /* R 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>R</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>R</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m#] removeRed<span><a class="mark" href="#colortype_m_removered" id="colortype_m_removered">#</a></span></h2>
 <h3>removeRed()<span><a class="mark" href="#colortype_removered" id="colortype_removered">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
@@ -994,6 +1053,26 @@ Color(&#39;#663399&#39;).setGreen(0.5).toHex(); /* 同上, 0.5 解析为百分�
 Color(&#39;#663399&#39;).setGreen(255).toHex(); // #66FF99
 Color(&#39;#663399&#39;).setGreen(1).toHex(); /* #660199, 不同上. 1 默认作为整数分量, 而非 100%. */
 </code></pre>
+<h2>[m] setGreenRelative<span><a class="mark" href="#colortype_m_setgreenrelative" id="colortype_m_setgreenrelative">#</a></span></h2>
+<h3>setGreenRelative(percentage)<span><a class="mark" href="#colortype_setgreenrelative_percentage" id="colortype_setgreenrelative_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="colorType.html">Color</a></span> }</li>
+</ul>
+<p>针对 <code>G (green)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>G (green)</code> 分量为 <code>80</code>, 希望设置 <code>G</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">Color(color).setGreenRelative(0.5);
+Color(color).setGreenRelative(&#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>G</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">Color(color).setGreenRelative(1.5);
+Color(color).setGreenRelative(&#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">Color(color).setGreenRelative(10); /* G 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>G</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>G</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m#] removeGreen<span><a class="mark" href="#colortype_m_removegreen" id="colortype_m_removegreen">#</a></span></h2>
 <h3>removeGreen()<span><a class="mark" href="#colortype_removegreen" id="colortype_removegreen">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
@@ -1086,6 +1165,26 @@ Color(&#39;#663399&#39;).setBlue(0.5).toHex(); /* 同上, 0.5 解析为百分数
 Color(&#39;#663399&#39;).setBlue(255).toHex(); // #6633FF
 Color(&#39;#663399&#39;).setBlue(1).toHex(); /* #663301, 不同上. 1 默认作为整数分量, 而非 100%. */
 </code></pre>
+<h2>[m] setBlueRelative<span><a class="mark" href="#colortype_m_setbluerelative" id="colortype_m_setbluerelative">#</a></span></h2>
+<h3>setBlueRelative(percentage)<span><a class="mark" href="#colortype_setbluerelative_percentage" id="colortype_setbluerelative_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="colorType.html">Color</a></span> }</li>
+</ul>
+<p>针对 <code>B (blue)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>B (blue)</code> 分量为 <code>80</code>, 希望设置 <code>B</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">Color(color).setBlueRelative(0.5);
+Color(color).setBlueRelative(&#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>B</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">Color(color).setBlueRelative(1.5);
+Color(color).setBlueRelative(&#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">Color(color).setBlueRelative(10); /* B 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>B</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>B</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m#] removeBlue<span><a class="mark" href="#colortype_m_removeblue" id="colortype_m_removeblue">#</a></span></h2>
 <h3>removeBlue()<span><a class="mark" href="#colortype_removeblue" id="colortype_removeblue">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>

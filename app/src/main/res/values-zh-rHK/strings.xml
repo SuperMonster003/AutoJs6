@@ -105,6 +105,7 @@
     <string name="error_empty_github_release_assets">無可供下載的 GitHub 發行版資源</string>
     <string name="error_empty_shell_command">命令為空</string>
     <string name="error_enable_server">AutoJs6 服務啓用失敗: %s</string>
+    <string name="error_failed_to_convert_into_drawable">無法將值 %s 轉換為 Drawable 實例</string>
     <string name="error_function_called_in_ui_thread">UI 線程內無法執行阻塞操作. 可嘗試在子線程或子腳本中執行 %s()</string>
     <string name="error_function_called_more_than_once">%s() 調用不能超過一次</string>
     <string name="error_get_github_latest_release">無法獲取最新的 GitHub 發行版</string>
@@ -288,6 +289,7 @@
     <string name="text_console">控制枱</string>
     <string name="text_continue">繼續</string>
     <string name="text_copy">複製</string>
+    <string name="text_export">導出</string>
     <string name="text_copy_all">複製全部</string>
     <string name="text_copy_all_files_to_new_directory">複製原目錄文件到新目錄</string>
     <string name="text_copy_command">複製指令</string>
@@ -657,6 +659,21 @@
     <string name="text_write_system_settings">修改系統設置</string>
     <string name="theme_color_default">默認</string>
     <string name="error_abandoned_method">方法 %s 已被廢棄, 應避免使用</string>
+    <string name="error_invalid_ip_address">無效的 IP 地址</string>
+    <string name="error_ip_address_should_not_be_empty">IP 地址不可為空</string>
+    <string name="error_unacceptable_character">不接受的字符</string>
+    <string name="error_port_num_over_65535">端口號超過 65535</string>
+    <string name="error_dot_decimal_notation_num_over_255">點分十進制數超過 255</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">冒號需跟隨有效的 IP 地址</string>
+    <string name="error_repeated_dot_symbol">重複的句點符號</string>
+    <string name="error_repeated_colon_symbol">重複的分號符號</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">VSCode 插件版本不符合要求</string>
+    <string name="text_min_version">最低版本</string>
+    <string name="text_current_version">當前版本</string>
+    <string name="text_lower_than">低於</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">VSCode 插件項目地址</string>
+    <string name="text_connection_cannot_be_established">無法建立連接</string>
+    <string name="text_min_version_of_vscode_vsc_ext">VSCode 插件最低版本</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

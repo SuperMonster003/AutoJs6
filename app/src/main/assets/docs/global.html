@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>全局对象 (Global) | AutoJs6 文档 - 6.3.0</title>
+    <title>全局对象 (Global) | AutoJs6 文档 - 6.3.2</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -122,6 +122,9 @@
 <li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
 <li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
 <li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
 <li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
 <li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
 <li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
@@ -152,7 +155,7 @@
 
     <div id="column1" data-id="global" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <h1>AutoJs6 文档 - 6.3.2</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -617,8 +620,8 @@ console.log(text);
 <h3>toastLog(text, isLong)<span><a class="mark" href="#global_toastlog_text_islong" id="global_toastlog_text_islong">#</a></span></h3>
 <p><strong><code>Global</code></strong> <strong><code>Overload 2/4</code></strong></p>
 <ul>
-<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
-<li><strong>isLong = false</strong> { <span class="type">&quot;long&quot;</span> | <span class="type">&quot;l&quot;</span> | <span class="type">&quot;short&quot;</span> | <span class="type">&quot;s&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否以较长时间显示</li>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容
+<strong>isLong = false</strong> { <code>&#39;long&#39;</code> | <code>&#39;l&#39;</code> | <code>&#39;short&#39;</code> | <code>&#39;s&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否以较长时间显示</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <blockquote>
@@ -627,9 +630,9 @@ console.log(text);
 <h3>toastLog(text, isLong, isForcible)<span><a class="mark" href="#global_toastlog_text_islong_isforcible" id="global_toastlog_text_islong_isforcible">#</a></span></h3>
 <p><strong><code>Global</code></strong> <strong><code>Overload 3/4</code></strong></p>
 <ul>
-<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
-<li><strong>isLong = false</strong> { <span class="type">&quot;long&quot;</span> | <span class="type">&quot;l&quot;</span> | <span class="type">&quot;short&quot;</span> | <span class="type">&quot;s&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否以较长时间显示</li>
-<li><strong>isForcible = false</strong> { <span class="type">&quot;forcible&quot;</span> | <span class="type">&quot;f&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否强制覆盖显示</li>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容
+<strong>isLong = false</strong> { <code>&#39;long&#39;</code> | <code>&#39;l&#39;</code> | <code>&#39;short&#39;</code> | <code>&#39;s&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否以较长时间显示
+<strong>isForcible = false</strong> { <code>&#39;forcible&#39;</code> | <code>&#39;f&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否强制覆盖显示</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <blockquote>
@@ -639,7 +642,7 @@ console.log(text);
 <p><strong><code>Global</code></strong> <strong><code>Overload 4/4</code></strong></p>
 <ul>
 <li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
-<li><strong>isForcible</strong> { <span class="type">&quot;forcible&quot;</span> | <span class="type">&quot;f&quot;</span> } - 强制覆盖显示 (字符标识)</li>
+<li><strong>isForcible</strong> { <code>&#39;forcible&#39;</code> | <code>&#39;f&#39;</code> } - 强制覆盖显示 (字符标识)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <blockquote>

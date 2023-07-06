@@ -196,7 +196,7 @@ object StringUtils {
     @JvmStatic
     fun toUpperCaseFirst(str: String) = if (str.isEmpty()) str else {
         val pre = str[0].toString()
-        str.replaceFirst(pre.toRegex(), pre.uppercase(Locale.getDefault()))
+        str.replaceFirst(pre.toRegex(), pre.uppercase(Language.getPrefLanguage().locale))
     }
 
 }

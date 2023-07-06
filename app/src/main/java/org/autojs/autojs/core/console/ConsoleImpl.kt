@@ -14,6 +14,8 @@ import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow
 import org.autojs.autojs.ui.enhancedfloaty.gesture.DragGesture
+import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.setViewMeasure
 import org.autojs.autojs6.R
 import org.opencv.core.Point
@@ -41,6 +43,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     @get:Synchronized
     private var mCountDownTimer: CountDownTimer? = null
 
+    private val context = uiHandler.context
     private val mLockWindowShow = Object()
     private val mLockWindowCreated = Object()
     private val mLockConsoleView = Object()
@@ -48,13 +51,16 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     private val mFloatyWindow: ResizableExpandableFloatyWindow
     private val mConsoleFloaty: ConsoleFloaty
     private val mInput: BlockingQueue<String> = ArrayBlockingQueue(1)
-    private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(uiHandler.context)
+    private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(context)
 
     val logEntries = ArrayList<LogEntry>()
 
     @Volatile
     var isShowing = false
         private set
+
+    private val logEntriesJoint
+        get() = logEntries.joinToString("\n") { it.content }
 
     // val size: Size
     //     get() = configurator.size ?: Size()
@@ -115,6 +121,26 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     override fun clear() {
         synchronized(logEntries) { logEntries.clear() }
         mLogListeners.forEach { it.get()?.onLogClear() }
+    }
+
+    fun copyAll() {
+        try {
+            ClipboardUtils.setClip(context, logEntriesJoint)
+            ViewUtils.showToast(context, R.string.text_already_copied_to_clip)
+        } catch (_: Exception) {
+            ViewUtils.showToast(context, R.string.text_failed)
+        }
+    }
+
+    fun export() {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, logEntriesJoint)
+            type = "text/plain"
+        }
+        context.startActivity(Intent.createChooser(sendIntent, null).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        })
     }
 
     override fun show() = show(false)
@@ -188,7 +214,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     private fun startFloatyService() {
-        uiHandler.context.startService(Intent(uiHandler.context, FloatyService::class.java))
+        context.startService(Intent(context, FloatyService::class.java))
     }
 
     @ScriptInterface

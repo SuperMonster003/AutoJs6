@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
+import android.content.Context
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.view.children
@@ -35,6 +36,10 @@ class JsFrameLayoutInflater(resourceParser: ResourceParser) : FrameLayoutInflate
         mGravity = null
     }
 
-    override fun getCreator(): ViewCreator<in JsFrameLayout> = ViewCreator { context, _ -> JsFrameLayout(context) }
+    override fun getCreator(): ViewCreator<in JsFrameLayout> = object : ViewCreator<JsFrameLayout> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsFrameLayout {
+            return JsFrameLayout(context)
+        }
+    }
 
 }

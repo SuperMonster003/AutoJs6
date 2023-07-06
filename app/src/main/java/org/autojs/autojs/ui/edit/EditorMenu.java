@@ -30,7 +30,6 @@ import org.autojs.autojs6.R;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import io.reactivex.Observable;
@@ -248,7 +247,7 @@ public class EditorMenu {
         builder.itemsDisabledIndices(i);
         MaterialDialog built = builder.build();
         assert built.getItems() != null;
-        built.getItems().set(i, built.getItems().get(i) + " (" + builder.getContext().getString(R.string.text_under_development_title).toLowerCase(Locale.ROOT) + ")");
+        built.getItems().set(i, built.getItems().get(i) + " (" + builder.getContext().getString(R.string.text_under_development_title).toLowerCase(Language.getPrefLanguage().getLocale()) + ")");
         built.show();
     }
 

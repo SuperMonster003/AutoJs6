@@ -5,7 +5,6 @@ import android.view.View
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
-import org.autojs.autojs.engine.module.ScopeRequire
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ScriptConfig
@@ -122,7 +121,11 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
             mAndroidContext, MODULES_PATH,
             listOf<URI>(File("/").toURI())
         )
-        ScopeRequire(context, scope,SoftCachingModuleScriptProvider(provider)).install(scope)
+        RequireBuilder()
+            .setModuleScriptProvider(SoftCachingModuleScriptProvider(provider))
+            .setSandboxed(true)
+            .createRequire(context, scope)
+            .install(scope)
     }
 
     protected fun createScope(context: Context): TopLevelScope {

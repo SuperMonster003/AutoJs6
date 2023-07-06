@@ -29,7 +29,7 @@ class JsImageView : RoundedImageView {
             }
         }
 
-    fun setSource(uri: String?) {
+    fun setSource(uri: String) {
         drawables?.setupWithImage(this, uri)
     }
 

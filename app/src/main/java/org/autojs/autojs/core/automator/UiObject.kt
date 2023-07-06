@@ -411,6 +411,7 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
         // @Hint by SuperMonster003 on May 12, 2022.
         //  ! Param root should be nullable because an exception
         //  ! will happen on devices with API Level >= 31 (Android 12) [S].
+        //  !
         //  ! Wrapped java.lang.NullPointerException: Parameter specified as non-null is null:
         //  ! method kotlin.jvm.internal.Intrinsics.checkNotNullParameter, parameter root.
         @JvmStatic

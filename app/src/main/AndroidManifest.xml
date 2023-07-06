@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature
+            android:name="android.hardware.telephony"
+            android:required="false" />
+
     <!--
          @Hint by SuperMonster003 on May 27, 2022.
           ! WRT: android.permission.WRITE_EXTERNAL_STORAGE
@@ -37,6 +41,8 @@
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
+    <uses-permission android:name="android.permission.READ_SMS" />
+
     <uses-permission
             android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
             tools:ignore="ProtectedPermissions" />
@@ -62,7 +68,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- To allow posting notifications on Android 13. -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
@@ -97,8 +103,8 @@
     <application
             android:name="org.autojs.autojs.App"
             android:allowBackup="false"
-            android:icon="@drawable/autojs6_material"
             android:label="@string/app_name"
+            android:icon="@drawable/autojs6_material"
             android:largeHeap="true"
             android:hardwareAccelerated="true"
             android:supportsRtl="true"
@@ -114,7 +120,10 @@
         <activity
                 android:name="org.autojs.autojs.ui.splash.SplashActivity"
                 android:theme="@style/AppTheme.Splash"
-                android:exported="true">
+                android:label="@string/app_name"
+                android:icon="@drawable/autojs6_material"
+                android:exported="true"
+                tools:ignore="RedundantLabel">
             <intent-filter>
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -231,7 +240,7 @@
 
         </activity>
 
-        <service android:name="org.autojs.autojs.ui.enhancedfloaty.FloatyService"/>
+        <service android:name="org.autojs.autojs.ui.enhancedfloaty.FloatyService" />
 
         <service android:name="org.autojs.autojs.external.foreground.MainActivityForegroundService" />
 
@@ -308,6 +317,8 @@
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
 
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+
+                <action android:name="android.intent.action.ACTION_BATTERY_CHANGED" />
 
                 <action android:name="android.intent.action.DATE_CHANGED" />
 
@@ -487,6 +498,16 @@
                 <action android:name="org.autojs.autojs.action.task" />
             </intent-filter>
         </receiver>
+
+        <!--<receiver-->
+        <!--        android:name="org.autojs.autojs.ui.main.drawer.DrawerFragment.BatteryChangedReceiver"-->
+        <!--        android:exported="true">-->
+        <!--    <intent-filter>-->
+        <!--        <action android:name="android.intent.action.ACTION_BATTERY_CHANGED" />-->
+        <!--        <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />-->
+        <!--        <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />-->
+        <!--    </intent-filter>-->
+        <!--</receiver>-->
 
         <activity
                 android:name="org.autojs.autojs.theme.app.ColorSelectActivity"

@@ -49,7 +49,7 @@
 
 * 可用作 JavaScript IDE (代码补全/变量重命名/代码格式化)
 * 支持基于 [无障碍服务](https://developer.android.com/reference/android/accessibilityservice/AccessibilityService) 的自动化操作
-* 支持悬浮窗快捷操作 (脚本录制及运行/查看包名及活动/布局分析)
+* 支持浮动按钮快捷操作 (脚本录制及运行/查看包名及活动/布局分析)
 * 支持选择器 API 并提供控件遍历/获取信息/控件操作 (类似 [UiAutomator](https://developer.android.com/training/testing/ui-automator))
 * 支持布局界面分析 (类似 Android Studio 的 LayoutInspector)
 * 支持录制功能及录制回放
@@ -70,37 +70,37 @@
 
 * 多语言适配 (西/法/俄/阿/日/韩/英/简中/繁中等)
 
-* 夜间模式适配 (设置页面/文档页面/布局分析页面/悬浮窗等)
+* 夜间模式适配 (设置页面/文档页面/布局分析页面/浮动窗口等)
 
 * [Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升级至 [v1.7.15-SNAPSHOT](http://rhino.autojs6.com/blob/dbe3f43ba5eb01e7f76139208f36c383dcd1c488/gradle.properties#L3)
 
-    * 支持 [Object.values()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
+  * 支持 [Object.values()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
 
-       ```javascript
-       Object.values({name: 'Max', age: 4}); // ['max', 4]
-       ```
+     ```javascript
+     Object.values({name: 'Max', age: 4}); // ['max', 4]
+     ```
 
-    * 支持 [Array.prototype.includes()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
+  * 支持 [Array.prototype.includes()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
 
-       ```javascript
-       [10, 20, NaN].includes(20); // true
-       ```
+     ```javascript
+     [10, 20, NaN].includes(20); // true
+     ```
 
-    * 支持 [BigInt](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/BigInt)
+  * 支持 [BigInt](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/BigInt)
 
-       ```javascript
-       typeof 567n === 'bigint'; // true
-       ```
+     ```javascript
+     typeof 567n === 'bigint'; // true
+     ```
 
-    * 支持 [模板字符串](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Template_literals)
+  * 支持 [模板字符串](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Template_literals)
 
-       ```javascript
-       `Lucky number: ${(Math.random() * 100).toFixed(0)}`
-       ```
+     ```javascript
+     `Lucky number: ${(Math.random() * 100).toFixed(0)}`
+     ```
 
-    * 查看 Rhino 引擎 [更多新特性](http://project.autojs6.com/blob/master/app/src/main/assets/doc/RHINO.md)
+  * 查看 Rhino 引擎 [更多新特性](http://project.autojs6.com/blob/master/app/src/main/assets/doc/RHINO.md)
 
-    * 查看 Rhino 引擎 [兼容性列表](https://mozilla.github.io/rhino/compat/engines.html)
+  * 查看 Rhino 引擎 [兼容性列表](https://mozilla.github.io/rhino/compat/engines.html)
 
 ******
 
@@ -109,6 +109,39 @@
 ******
 
 [comment]: <> "Version history only shows last 3 versions"
+
+# v6.3.2
+
+###### 2023/07/06
+
+* `新增` crypto 模块 (参阅 项目文档 > [密文](https://docs.autojs6.com/#/crypto)) _[`issue #70`](http://issues.autojs6.com/70)_
+* `新增` UI 模式增加 textswitcher / viewswitcher / viewflipper / numberpicker / video / search 等控件
+* `新增` 日志活动页面增加复制及导出日志等功能 _[`issue #76`](http://issues.autojs6.com/76)_
+* `新增` 客户端模式增加 IP 地址历史记录功能
+* `修复` 客户端模式自动连接或服务端模式自动开启后可能无法显示 IP 地址信息的问题
+* `修复` 客户端模式及服务端模式连接后在切换语言或夜间模式时连接断开且无法再次连接的问题
+* `修复` 客户端模式输入目标地址时无法使用自定义端口的问题
+* `修复` 客户端模式输入目标地址时某些字符将导致 AutoJs6 崩溃的问题
+* `修复` VSCode 插件远程命令可能出现解析失败造成命令无法响应的问题 (试修)
+* `修复` Android 7.x 发现新版本时无法获取版本详情的问题
+* `修复` images.pixel 无法获取无障碍服务截图的像素色值的问题 _[`issue #73`](http://issues.autojs6.com/73)_
+* `修复` UI 模式 Android 原生控件 (大写字母开头) 无法使用预置控件属性的问题
+* `修复` runtime.loadDex/loadJar 加载多个文件时仅第一个文件生效的问题 _[`issue #88`](http://issues.autojs6.com/88)_
+* `修复` 部分设备安装应用后启动器仅显示文档图标的问题 (试修) _[`issue #85`](http://issues.autojs6.com/85)_
+* `优化` 适配 VSCode 插件 1.0.5
+* `优化` 支持 cheerio 模块 (Ref to [aiselp](https://github.com/aiselp/AutoX/commit/7176f5ad52d6904383024fb700bf19af75e22903)) _[`issue #65`](http://issues.autojs6.com/65)_
+* `优化` JsWebSocket 实例支持使用 rebuild 方法重新重建实例并建立连接 _[`issue #69`](http://issues.autojs6.com/69)_
+* `优化` base64 模块支持 number 数组及 Java 字节数组作为主要参数的编解码
+* `优化` 增加对 JavaMail for Android 的支持 _[`issue #71`](http://issues.autojs6.com/71)_
+* `优化` 获取版本更新信息时使用 Blob 数据类型以增强无代理网络环境适应性
+* `优化` 客户端模式连接过程中在主页抽屉副标题显示目标 IP 地址
+* `优化` 客户端模式输入目标地址时支持对不合法的输入进行提示
+* `优化` 客户端模式支持使用软键盘回车键建立连接
+* `优化` 服务端模式开启后保持常开状态 (除非手动关闭或应用进程结束) _[`issue #64`](http://issues.autojs6.com/64#issuecomment-1596990158)_
+* `优化` 实现 AutoJs6 与 VSCode 插件的双向版本检测并提示异常检测结果 _[`issue #89`](http://issues.autojs6.com/89)_
+* `优化` 增加短信数据读取权限 (android.permission.READ_SMS) (默认关闭)
+* `优化` runtime.loadDex/loadJar/load 支持按目录级别加载或同时加载多个文件
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v632)_
 
 # v6.3.1
 
@@ -191,106 +224,6 @@
 * `优化` Gradle 构建脚本支持根据平台类型及版本自动选择合适的构建工具版本 (程度有限)
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v630)_
 
-# v6.2.0
-
-###### 2023/01/21
-
-* `新增` 重新设计及编写项目文档 (部分完成)
-* `新增` 西/法/俄/阿/日/韩/英/繁中等多语言适配
-* `新增` 工作路径设置选项增加路径选择/历史记录/默认值智能提示等功能
-* `新增` 文件管理器支持任意目录的上一级跳转 (直至 "内部存储" 目录)
-* `新增` 文件管理器支持将任意目录快捷设置为工作路径
-* `新增` 版本更新忽略及管理已忽略更新功能
-* `新增` 文本编辑器支持双指缩放调节字体大小
-* `新增` idHex 选择器 (UiSelector#idHex) (参阅 项目文档 > [选择器](https://docs.autojs6.com/#/uiSelectorType))
-* `新增` action 选择器 (UiSelector#action) (参阅 项目文档 > [选择器](https://docs.autojs6.com/#/uiSelectorType))
-* `新增` Match 系列选择器 (UiSelector#xxxMatch) (参阅 项目文档 > [选择器](https://docs.autojs6.com/#/uiSelectorType))
-* `新增` 拾取选择器 (UiSelector#pickup) (参阅 项目文档 > [选择器](https://docs.autojs6.com/#/uiSelectorType)) _[`issue #22`](http://issues.autojs6.com/22)_
-* `新增` 控件探测 (UiObject#detect) (参阅 项目文档 > [控件节点](https://docs.autojs6.com/#/uiObjectType))
-* `新增` 控件罗盘 (UiObject#compass) (参阅 项目文档 > [控件节点](https://docs.autojs6.com/#/uiObjectType)) _[`issue #23`](http://issues.autojs6.com/23)_
-* `新增` 全局等待方法 wait (参阅 项目文档 > [全局对象](https://docs.autojs6.com/#/global?id=m-wait))
-* `新增` 全局缩放方法 cX/cY/cYx (参阅 项目文档 > [全局对象](https://docs.autojs6.com/#/global?id=m-wait))
-* `新增` 全局 App 类型 (参阅 项目文档 > [应用枚举类](https://docs.autojs6.com/#/appType))
-* `新增` i18n 模块 (基于 banana-i18n 的 JavaScript 多语言方案) (参阅 项目文档 > 国际化)
-* `修复` 软件语言切换后可能导致的页面文字闪变及部分页面按钮功能异常
-* `修复` 工作路径为一个项目时软件启动后不显示项目工具栏的问题
-* `修复` 工作路径可能跟随软件语言切换而自动改变的问题 _[`issue #19`](http://issues.autojs6.com/19)_
-* `修复` 定时任务启动延时显著 (试修) _[`issue #21`](http://issues.autojs6.com/21)_
-* `修复` JavaScript 模块名被覆盖声明时导致存在依赖关系的内部模块无法正常使用的问题 _[`issue #29`](http://issues.autojs6.com/29)_
-* `修复` 高版本安卓系统点击快速设置面板中相关图标后面板可能无法自动收起的问题 (试修) _[`issue #7`](http://issues.autojs6.com/7)_
-* `修复` 高版本安卓系统可能出现部分页面与通知栏区域重叠的问题
-* `修复` 安卓 10 及以上系统无法正常运行有关设置画笔颜色的示例代码的问题
-* `修复` 示例代码 "音乐管理器" 更正文件名为 "文件管理器" 并恢复正常功能
-* `修复` 文件管理器下拉刷新时可能出现定位漂移的问题
-* `修复` ui 模块作用域绑定错误导致部分基于 UI 的脚本无法访问组件属性的问题
-* `修复` 录制脚本后的输入文件名对话框可能因外部区域点击导致已录制内容丢失的问题
-* `修复` 文档中部分章节标题超出屏幕宽度时无法自动换行造成内容丢失的问题
-* `修复` 文档中的示例代码区域无法正常左右滑动的问题
-* `修复` 文档页面下拉刷新时表现异常且无法撤销刷新操作的问题 (试修)
-* `修复` 应用初始安装后主页抽屉夜间模式开关联动失效的问题
-* `修复` 系统夜间模式开启时应用启动后强制开启夜间模式的问题
-* `修复` 夜间模式开启后已设置的主题色可能无法生效的问题
-* `修复` 夜间模式下部分设置选项文字与背景色相同而无法辨识的问题
-* `修复` 关于页面功能按钮文本长度过大导致文本显示不完全的问题
-* `修复` 主页抽屉设置项标题长度过大导致文本与按钮重叠的问题
-* `修复` 主页抽屉权限开关在提示消息对话框消失后可能出现状态未同步的问题
-* `修复` Root 权限修改主页抽屉权限开关失败时未继续弹出 ADB 工具对话框的问题
-* `修复` Root 权限显示指针位置在初次使用时提示无权限的问题
-* `修复` 图标选择页面的图标元素排版异常
-* `修复` 文本编辑器启动时可能因夜间模式设置导致闪屏的问题 (试修)
-* `修复` 文本编辑器设置字体大小时可用最大值受限的问题
-* `修复` 部分安卓系统脚本运行结束时日志中无法统计运行时长的问题
-* `修复` 使用悬浮窗菜单关闭悬浮窗后重启应用时悬浮窗依然开启的问题
-* `修复` 布局层次分析时长按列表项可能导致弹出菜单溢出下方屏幕的问题
-* `修复` 安卓 7.x 系统在夜间模式关闭时导航栏按钮难以辨识的问题
-* `修复` http.post 等方法可能出现的请求未关闭异常
-* `修复` colors.toString 方法在 Alpha 通道为 0 时其通道信息在结果中丢失的问题
-* `优化` 重定向 Auto.js 4.x 版本的公有类以实现尽可能的向下兼容 (程度有限)
-* `优化` 合并全部项目模块避免可能的循环引用等问题 (临时移除 inrt 模块)
-* `优化` Gradle 构建配置从 Groovy 迁移到 KTS
-* `优化` Rhino 异常消息增加多语言支持
-* `优化` 主页抽屉权限开关仅在开启时弹出提示消息
-* `优化` 主页抽屉布局紧贴于状态栏下方避免顶部颜色条的低兼容性
-* `优化` 检查更新/下载更新/更新提示功能兼容安卓 7.x 系统
-* `优化` 重新设计设置页面 (迁移至 AndroidX)
-* `优化` 设置页面支持长按设置选项获取详细信息
-* `优化` 夜间模式增加 "跟随系统" 设置选项 (安卓 9 及以上)
-* `优化` 应用启动画面适配夜间模式
-* `优化` 应用图标增加数字标识以提升多个开源版本共存用户的使用体验
-* `优化` 主题色增加更多 Material Design Color (材料设计颜色) 选项
-* `优化` 文件管理器/任务面板等列表项图标适当轻量化并适配主题色
-* `优化` 主页搜索框的提示文本颜色适配夜间模式
-* `优化` 对话框/文本/Fab/AppBar/列表项等部件适配夜间模式
-* `优化` 文档/设置/关于/主题色/布局分析等页面及悬浮窗适配夜间模式
-* `优化` 页面布局尽可能兼容 RTL (Right-To-Left) 布局
-* `优化` 关于页面增加图标动画效果
-* `优化` 关于页面版权声明文本自动更新年份信息
-* `优化` 应用初始安装后自动决定并设置合适的工作目录
-* `优化` 禁用文档页面双指缩放功能避免文档内容显示异常
-* `优化` 任务面板列表项按相对路径简化显示任务的名称及路径
-* `优化` 文本编辑器按钮文本适当缩写避免文本内容溢出
-* `优化` 文本编辑器设置字体大小支持恢复默认值
-* `优化` 提升悬浮窗点击响应速度
-* `优化` 点击悬浮窗布局分析按钮直接进行布局范围分析
-* `优化` 布局分析主题自适应 (悬浮窗跟随应用主题, 快速设置面板跟随系统主题)
-* `优化` 布局控件信息列表按可能的使用频率重新排序
-* `优化` 布局控件信息点击复制时根据选择器类型自动优化输出格式
-* `优化` 使用悬浮窗选择文件时按返回键可返回至上级目录而非直接关闭悬浮窗
-* `优化` 客户端模式连接计算机输入地址时支持数字有效性检测及点分符号自动转换
-* `优化` 客户端及服务端建立连接后在主页抽屉显示对应设备的 IP 地址
-* `优化` 部分全局对象及内置模块增加覆写保护 (参阅 项目文档 > 全局对象 > [覆写保护](https://docs.autojs6.com/#/global?id=%e8%a6%86%e5%86%99%e4%bf%9d%e6%8a%a4))
-* `优化` importClass 和 importPackage 支持字符串参数及不定长参数
-* `优化` ui.run 支持出现异常时打印栈追踪信息
-* `优化` ui.R 及 auto.R 可便捷获取 AutoJs6 的资源 ID
-* `优化` app 模块中与操作应用相关的方法支持 App 类型参数及应用别名参数
-* `优化` dialogs 模块中与异步回调相关的方法支持省略预填参数
-* `优化` app.startActivity 等支持 url 选项参数 (参阅 示例代码 > 应用 > 意图)
-* `优化` device 模块获取 IMEI 或硬件序列号失败时返回 null 而非抛出异常
-* `优化` 提升 console.show 显示的日志悬浮窗文字亮度以增强内容辨识度
-* `优化` ImageWrapper#saveTo 支持相对路径保存图像文件
-* `优化` 重新设计 colors 全局对象并增加 HSV / HSL 等色彩模式支持 (参阅 项目文档 > [颜色](https://docs.autojs6.com/#/color))
-* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v620)_
-
 ##### 更多版本历史可参阅
 
 * [CHANGELOG.md](http://changelog.autojs6.com)
@@ -308,10 +241,10 @@
 - IntelliJ IDEA 版本建议不低于 `2022.3.3 (Ultimate Edition)`
 - IntelliJ IDEA 的 Gradle JVM 版本不低于 `19`
 - 回退 Gradle 构建工具版本至 IDEA 支持的版本
-    - 如 `classpath("com.android.tools.build:gradle:7.4.0")`
-    - 具体版本可根据 IDEA 的错误提示获知
+  - 如 `classpath("com.android.tools.build:gradle:7.4.0")`
+  - 具体版本可根据 IDEA 的错误提示获知
 - 回退 Kotlin 脚本 (KTS) 语法
-    - 如 ` com.android.build.api.dsl.CommonExtension#options` 需回退为 `packagingOptions`
+  - 如 ` com.android.build.api.dsl.CommonExtension#options` 需回退为 `packagingOptions`
 - ... ...
 
 #### Android Studio 准备
@@ -363,11 +296,11 @@ Gradle
 `Gradle JDK` 处可选择或添加不同版本的 JDK.
 
 - 列表中存在合适版本的 JDK
-    - 直接选择即可
+  - 直接选择即可
 - 选择 `Download JDK (下载 JDK)` 下载新的 JDK
-    - 选择一个版本不低于 19 的 JDK, 点击 `Download (下载)` 按钮并等待下载完成
+  - 选择一个版本不低于 19 的 JDK, 点击 `Download (下载)` 按钮并等待下载完成
 - 选择 `Add JDK (添加 JDK)` 添加已存在的本地 JDK
-    - 如计算机系统已存在合适版本的 JDK, 可定位其目录并完成 JDK 添加
+  - 如计算机系统已存在合适版本的 JDK, 可定位其目录并完成 JDK 添加
 
 #### AutoJs6 资源克隆
 
@@ -389,14 +322,14 @@ Gradle
 打包项目并生成可安装到安卓设备的 APK 文件:
 
 - 调试版 (Debug Version)
-    - `Build (构建)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
-    - 生成带默认签名的调试版安装包
-    - 路径示例: `"D:\AutoJs6\app\build\outputs\apk\debug\"`
+  - `Build (构建)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
+  - 生成带默认签名的调试版安装包
+  - 路径示例: `"D:\AutoJs6\app\build\outputs\apk\debug\"`
 - 发布版 (Release Version)
-    - `Build (构建)` -> `Generate Signed Bundle / APK`
-    - 选择 `APK` 选项
-    - 准备好签名文件 (新建或选取), 生成已签名的发布版安装包
-    - 路径示例: `"D:\AutoJs6\app\release\"`
+  - `Build (构建)` -> `Generate Signed Bundle / APK`
+  - 选择 `APK` 选项
+  - 准备好签名文件 (新建或选取), 生成已签名的发布版安装包
+  - 路径示例: `"D:\AutoJs6\app\release\"`
 
 > 参阅: [Android Docs](https://developer.android.com/studio/run?hl=zh-cn)
 

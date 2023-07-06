@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.main.drawer
 
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -54,6 +55,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mDrawerMenu: RecyclerView
     private lateinit var mContext: Context
     private lateinit var mActivity: MainActivity
+    // private lateinit var mReceiver: BatteryChangedReceiver
 
     private lateinit var mAccessibilityServiceItem: DrawerMenuToggleableItem
     private lateinit var mForegroundServiceItem: DrawerMenuToggleableItem
@@ -74,13 +76,23 @@ open class DrawerFragment : Fragment() {
     private lateinit var mThemeColorItem: DrawerMenuShortcutItem
     private lateinit var mAboutAppAndDevItem: DrawerMenuShortcutItem
 
+    private val actionBatteryChangedIntentFilter = IntentFilter().apply {
+        addAction("android.intent.action.ACTION_BATTERY_CHANGED")
+        addAction("android.intent.action.ACTION_POWER_CONNECTED")
+        addAction("android.intent.action.ACTION_POWER_DISCONNECTED")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         EventBus.getDefault().register(this)
+        // mReceiver = BatteryChangedReceiver()
 
         mContext = requireContext()
-        mActivity = requireActivity() as MainActivity
+
+        mActivity = (requireActivity() as MainActivity).apply {
+            // registerReceiver(mReceiver, actionBatteryChangedIntentFilter)
+        }
 
         mAccessibilityServiceItem = DrawerMenuToggleableItem(
             AccessibilityService(mContext),
@@ -124,44 +136,42 @@ open class DrawerFragment : Fragment() {
             R.string.key_floating_menu_shown,
         )
 
-        mClientModeItem = DrawerMenuDisposableItem(
-            JsonSocketClientTool(mContext).apply { connectIfNotNormallyClosed() }
-                .setStateDisposable(JsonSocketClient.cxnState
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { state: DevPluginService.State ->
-                        mClientModeItem.subtitle = takeIf { state.state == DevPluginService.State.CONNECTED }?.let {
-                            Pref.getServerAddress()
-                        }
-                        consumeJsonSocketItemState(mClientModeItem, state)
-                    })
-                .setOnConnectionException { e: Throwable ->
-                    mClientModeItem.setCheckedIfNeeded(false)
-                    ViewUtils.showToast(mContext, getString(R.string.error_connect_to_remote, e.message), true)
-                }
-                .setOnConnectionDialogDismissed { mClientModeItem.setCheckedIfNeeded(false) },
-            R.drawable.ic_computer_black_48dp,
-            R.string.text_client_mode,
-        )
-
-        mServerModeItem = DrawerMenuDisposableItem(
-            JsonSocketServerTool(mContext).apply { connectIfNotNormallyClosed() }
-                .setStateDisposable(JsonSocketServer.cxnState
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { state: DevPluginService.State ->
-                        mServerModeItem.subtitle = takeIf { state.state == DevPluginService.State.CONNECTED }?.let {
-                            NetworkUtils.getIpAddress()
-                        }
-                        consumeJsonSocketItemState(mServerModeItem, state)
-                    })
-                .setOnConnectionException { e: Throwable ->
-                    mServerModeItem.setCheckedIfNeeded(false)
-                    getString(R.string.error_enable_server, e.message).let {
-                        ViewUtils.showToast(mContext, it, true)
+        JsonSocketClientTool(mContext).apply {
+            mClientModeItem = DrawerMenuDisposableItem(this, R.drawable.ic_computer_black_48dp, R.string.text_client_mode).also {
+                setClientModeItem(it)
+            }
+            setStateDisposable(JsonSocketClient.cxnState
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    if (it.state == DevPluginService.State.DISCONNECTED) {
+                        mClientModeItem.subtitle = null
                     }
-                },
-            R.drawable.ic_smartphone_black_48dp,
-            R.string.text_server_mode,
-        )
+                    consumeJsonSocketItemState(mClientModeItem, it)
+                })
+            setOnConnectionException { e: Throwable ->
+                mClientModeItem.setCheckedIfNeeded(false)
+                ViewUtils.showToast(mContext, getString(R.string.error_connect_to_remote, e.message), true)
+            }
+            setOnConnectionDialogDismissed { mClientModeItem.setCheckedIfNeeded(false) }
+            connectIfNotNormallyClosed()
+        }
+
+        JsonSocketServerTool(mContext).apply {
+            setStateDisposable(JsonSocketServer.cxnState
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { state: DevPluginService.State ->
+                    mServerModeItem.subtitle = takeIf { state.state == DevPluginService.State.CONNECTED }?.let {
+                        NetworkUtils.getIpAddress()
+                    }
+                    consumeJsonSocketItemState(mServerModeItem, state)
+                })
+            setOnConnectionException { e: Throwable ->
+                mServerModeItem.setCheckedIfNeeded(false)
+                ViewUtils.showToast(mContext, getString(R.string.error_enable_server, e.message), true)
+            }
+            mServerModeItem = DrawerMenuDisposableItem(this, R.drawable.ic_smartphone_black_48dp, R.string.text_server_mode)
+            connectIfNotNormallyClosed()
+        }
 
         mNotificationPostItem = DrawerMenuToggleableItem(
             PostNotificationPermission(mContext),
@@ -347,6 +357,7 @@ open class DrawerFragment : Fragment() {
         mClientModeItem.dispose()
         mServerModeItem.dispose()
         EventBus.getDefault().unregister(this)
+        // mActivity.unregisterReceiver(mReceiver)
     }
 
     // @Subscribe
@@ -427,10 +438,15 @@ open class DrawerFragment : Fragment() {
     private fun consumeJsonSocketItemState(item: DrawerMenuToggleableItem, state: DevPluginService.State) {
         item.setCheckedIfNeeded(state.state == DevPluginService.State.CONNECTED)
         item.isProgress = state.state == DevPluginService.State.CONNECTING
-        state.exception?.let { e -> ViewUtils.showToast(mContext, e.message) }
+        state.exception?.let { e ->
+            item.subtitle = null
+            ViewUtils.showToast(mContext, e.message)
+        }
     }
 
     companion object {
+
+        private val TAG = DrawerFragment::class.java.simpleName
 
         lateinit var drawerMenuAdapter: DrawerMenuAdapter
             private set
@@ -441,5 +457,28 @@ open class DrawerFragment : Fragment() {
         }
 
     }
+
+    // class BatteryChangedReceiver : BroadcastReceiver() {
+    //
+    //     override fun onReceive(context: Context, intent: Intent) {
+    //         val action = intent.action ?: return
+    //         when {
+    //             action.matches(Regex("android.intent.action.ACTION_(POWER_CONNECTED|BATTERY_CHANGED)", RegexOption.IGNORE_CASE)) -> {
+    //                 Log.d(TAG, "Received broadcast: $action")
+    //
+    //                 // FIXME by SuperMonster003 on Jun 7, 2023.
+    //                 //  ! Code below doesn't work.
+    //
+    //                 // if (DeviceUtils.isPowerSourceUSB(context)) {
+    //                 //     Log.d(TAG, "Current power source is USB")
+    //                 //     drawerMenuAdapter.drawerMenuItems.find { it.title == R.string.text_server_mode }
+    //                 //         ?.takeUnless { it.isChecked }
+    //                 //         ?.let { it.subtitle = "true" }
+    //                 // }
+    //             }
+    //         }
+    //     }
+    //
+    // }
 
 }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>密文 (Crypto) | AutoJs6 文档 - 6.3.0</title>
+    <title>密文 (Crypto) | AutoJs6 文档 - 6.3.2</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -122,6 +122,9 @@
 <li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
 <li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
 <li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
 <li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
 <li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
 <li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
@@ -152,7 +155,7 @@
 
     <div id="column1" data-id="crypto" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <h1>AutoJs6 文档 - 6.3.2</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -166,9 +169,47 @@
             <h2>目录</h2>
             <ul>
 <li><span class="stability_undefined"><a href="#crypto_crypto">密文 (Crypto)</a></span><ul>
-<li><span class="stability_undefined"><a href="#crypto_crypto_digest_message_algorithm_options">$crypto.digest(message, algorithm[, options])</a></span></li>
-<li><span class="stability_undefined"><a href="#crypto_crypto_encrypt_data_key_algorithm_options">$crypto.encrypt(data, key, algorithm, options)</a></span></li>
-<li><span class="stability_undefined"><a href="#crypto">输入和输出的类型和格式</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_m_digest">[m] digest</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_digest_message_algorithm">digest(message, algorithm)</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_digest_message">digest(message)</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_digest_message_algorithm_options">digest(message, algorithm, options)</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_digest_message_options">digest(message, options)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_m_encrypt">[m] encrypt</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_encrypt_data_key_transformation_options">encrypt(data, key, transformation, options?)</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto">输入</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_1">输出</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_2">加密</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_3">示例</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_4">可逆性</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_m_decrypt">[m] decrypt</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_decrypt_data_key_transformation_options">decrypt(data, key, transformation, options?)</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_5">输入</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_6">输出</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_7">解密</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_8">示例</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_9">可逆性</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_m_generatekeypair">[m] generateKeyPair</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_generatekeypair_algorithm_length">generateKeyPair(algorithm, length?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_c_key">[C] Key</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_c_data_options">[c] (data, options?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_c_keypair">[C] KeyPair</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_c_publickeydata_privatekeydata_options">[c] (publicKeyData, privateKeyData, options?)</a></span></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -177,64 +218,336 @@
 
         <div id="apicontent">
             <h1>密文 (Crypto)<span><a class="mark" href="#crypto_crypto" id="crypto_crypto">#</a></span></h1>
+<p>crypto 模块提供 [ 对称加密 (如 AES) / 非对称加密 (如 RSA) / 消息摘要 (如 MD5, SHA) ] 等支持.</p>
+<blockquote>
+<p>注: 本章节参考自 <a href="https://pro.autojs.org/docs/zh/v8/crypto.html">Auto.js Pro 文档</a>.</p>
+</blockquote>
 <hr>
-<p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
-<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 22, 2022.</p>
+<p style="font: bold 2em sans-serif; color: #FF7043">crypto</p>
 
 <hr>
-<p><strong> [<a href="https://pro.autojs.org/">Pro 8.0.0新增</a>] </strong></p>
-<p>$crypto模块提供了对称加密(例如AES)、非对称加密(例如RSA)、消息摘要(例如MD5, SHA)等支持.</p>
-<h2>$crypto.digest(message, algorithm[, options])<span><a class="mark" href="#crypto_crypto_digest_message_algorithm_options" id="crypto_crypto_digest_message_algorithm_options">#</a></span></h2>
-<div class="signature"><ul>
-<li><code>message</code> { <span class="type">any</span> }</li>
-<li><code>algorithm</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 消息摘要算法, 包括：<ul>
-<li>MD5</li>
-<li>SHA-1</li>
-<li>SHA-256</li>
-<li>SHA-384</li>
-<li>SHA-512</li>
-</ul>
-</li>
-<li><code>options</code> { <span class="type">any</span> }</li>
-</ul>
-</div><p>对信息message使用消息摘要算法<code>algorithm</code>进行摘要并返回结果, 默认的输出格式为hex.</p>
-<p>参数message的类型默认为字符串, 返回值默认为hex；可以通过options来指定参数message的类型和返回值的类型、格式, 比如文件、base64、字节数组、hex等. 参见《输入和输出的类型和格式》.</p>
-<pre><code class="lang-javascript">// 计算字符串abc的md5
-toastLog($crypto.digest(&quot;abc&quot;, &quot;MD5&quot;));
-// 计算字符串abc的sha-256
-toastLog($crypto.digest(&quot;abc&quot;, &quot;SHA-256&quot;));
-// 计算文件/sdcard/1.txt的md5
-toastLog($crypto.digest(&quot;/sdcard/1.txt&quot;, &quot;MD5&quot;, {
-    input: &quot;file&quot;
-}));
-</code></pre>
-<h2>$crypto.encrypt(data, key, algorithm, options)<span><a class="mark" href="#crypto_crypto_encrypt_data_key_algorithm_options" id="crypto_crypto_encrypt_data_key_algorithm_options">#</a></span></h2>
-<div class="signature"><ul>
-<li><code>data</code> { <span class="type">any</span> } 明文消息</li>
-<li><code>key</code> { <span class="type">Key</span> } 密钥</li>
-<li><p><code>algorithm</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 加密算法, 包括：</p>
+<h2>[m] digest<span><a class="mark" href="#crypto_m_digest" id="crypto_m_digest">#</a></span></h2>
+<h3>digest(message, algorithm)<span><a class="mark" href="#crypto_digest_message_algorithm" id="crypto_digest_message_algorithm">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload 1/4</code></strong></p>
 <ul>
-<li>AES</li>
-<li>AES/ECB/NoPadding</li>
-<li>AES/ECB/PKCS5Padding</li>
-<li>AES/CBC/NoPadding</li>
-<li>AES/CBC/PKCS5Padding</li>
-<li>AES/CFB/NoPadding</li>
-<li>AES/CFB/PKCS5Padding</li>
-<li>AES/CTR/NoPadding</li>
-<li>AES/CTR/PKCS5Padding</li>
-<li>AES/OFB/PKCS5Padding</li>
-<li>AES/OFB/PKCS5Padding</li>
-<li>RSA/ECB/PKCS1Padding</li>
-<li>RSA/ECB/NoPadding</li>
-<li>...
-具体可参阅 <a href="https://developer.android.com/reference/javax/crypto/Cipher/">javax.crypto.Cipher</a></li>
+<li><strong>message</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待获取摘要的消息</li>
+<li><strong>algorithm</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestalgorithm">CryptoDigestAlgorithm</a></span> } - 消息摘要算法</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>获取 <code>消息 (message)</code> 经指定 <code>算法 (algorithm)</code> 计算后的 <code>消息摘要 (message digest)</code>.</p>
+<pre><code class="lang-js">/* 获取字符串 &quot;hello&quot; 的 MD5 摘要. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;MD5&#39;)); // 5d41402abc4b2a76b9719d911017c592
+
+/* 获取字符串 &quot;hello&quot; 的 SHA-1 摘要. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;SHA-1&#39;)); // aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
+</code></pre>
+<h3>digest(message)<span><a class="mark" href="#crypto_digest_message" id="crypto_digest_message">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload 2/4</code></strong></p>
+<ul>
+<li><strong>message</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待获取摘要的消息</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取 <code>消息 (message)</code> 的 MD5 <code>消息摘要 (message digest)</code>.</p>
+<p>相当于 <code>crypto.digest(message, &#39;MD5&#39;)</code>.</p>
+<pre><code class="lang-js">/* 获取字符串 &quot;hello&quot; 的 MD5 摘要. */
+console.log(crypto.digest(&#39;hello&#39;)); // 5d41402abc4b2a76b9719d911017c592
+console.log(crypto.digest(&#39;hello&#39;, &#39;MD5&#39;)); /* 同上. */
+</code></pre>
+<h3>digest(message, algorithm, options)<span><a class="mark" href="#crypto_digest_message_algorithm_options" id="crypto_digest_message_algorithm_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload 3/4</code></strong></p>
+<ul>
+<li><strong>message</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待获取摘要的消息</li>
+<li><strong>algorithm</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestalgorithm">CryptoDigestAlgorithm</a></span> } - 消息摘要算法</li>
+<li><strong>options</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestoptions">CryptoDigestOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>获取 <code>消息 (message)</code> 经指定 <code>算法 (algorithm)</code> 计算后的 <code>消息摘要 (message digest)</code>.</p>
+<p>通过 <code>options</code> 参数可指定输入消息的类型 (文件, Base64, Hex, 字符串) 及摘要的类型 (字节数组, Base64, Hex, 字符串) 等.</p>
+<pre><code class="lang-js">/* 获取字符串 &quot;hello&quot; 的 MD5 摘要, 并输出其字节数组. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;MD5&#39;, { output: &#39;bytes&#39; })); // [93, 65, 64, 42, -68, 75, 42, 118, -71, 113, -99, -111, 16, 23, -59, -110]
+
+/* 获取字符串 &quot;hello&quot; 的 SHA-1 摘要, 并输出其 Base64 编码. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;SHA-1&#39;, { output: &#39;base64&#39; })); // qvTGHdzF6KLavt4PO0gs2a6pQ00=
+
+/* 获取 Base64 数据的 MD5 摘要. */
+console.log(crypto.digest(&#39;qvTGHdzF6KLavt4PO0gs2a6pQ00=&#39;, &#39;MD5&#39;, { input: &#39;base64&#39; })); // 406f65cdc25d6a9db86c06e4bc19a2cf
+
+/* 获取文件的 MD5 摘要. */
+let str = &#39;hello&#39;;
+let path = files.path(`./tmp-${Date.now()}`);
+files.create(path);
+files.write(path, str);
+console.log(crypto.digest(path, &#39;MD5&#39;, { input: &#39;file&#39; })); // 5d41402abc4b2a76b9719d911017c592
+files.remove(path);
+</code></pre>
+<h3>digest(message, options)<span><a class="mark" href="#crypto_digest_message_options" id="crypto_digest_message_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload 4/4</code></strong></p>
+<ul>
+<li><strong>message</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待获取摘要的消息</li>
+<li><strong>algorithm</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestalgorithm">CryptoDigestAlgorithm</a></span> } - 消息摘要算法</li>
+<li><strong>options</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestoptions">CryptoDigestOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>获取 <code>消息 (message)</code> 的 MD5 <code>消息摘要 (message digest)</code>.</p>
+<p>通过 <code>options</code> 参数可指定输入消息的类型 (文件, Base64, Hex, 字符串) 及摘要的类型 (字节数组, Base64, Hex, 字符串) 等.</p>
+<p>相当于 <code>crypto.digest(message, &#39;MD5&#39;, options)</code>.</p>
+<pre><code class="lang-js">/* 获取字符串 &quot;hello&quot; 的 MD5 摘要, 并输出其字节数组. */
+console.log(crypto.digest(&#39;hello&#39;, { output: &#39;bytes&#39; })); // [93, 65, 64, 42, -68, 75, 42, 118, -71, 113, -99, -111, 16, 23, -59, -110]
+
+/* 获取 Base64 数据的 MD5 摘要. */
+console.log(crypto.digest(&#39;qvTGHdzF6KLavt4PO0gs2a6pQ00=&#39;, { input: &#39;base64&#39; })); // 406f65cdc25d6a9db86c06e4bc19a2cf
+
+/* 获取文件的 MD5 摘要. */
+let str = &#39;hello&#39;;
+let path = files.path(`./tmp-${Date.now()}`);
+files.create(path);
+files.write(path, str);
+console.log(crypto.digest(path, { input: &#39;file&#39; })); // 5d41402abc4b2a76b9719d911017c592
+files.remove(path);
+</code></pre>
+<h2>[m] encrypt<span><a class="mark" href="#crypto_m_encrypt" id="crypto_m_encrypt">#</a></span></h2>
+<h3>encrypt(data, key, transformation, options?)<span><a class="mark" href="#crypto_encrypt_data_key_transformation_options" id="crypto_encrypt_data_key_transformation_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>data</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待加密数据</li>
+<li><strong>key</strong> { <span class="type"><a href="#crypto_c_key">crypto.Key</a></span> | <span class="type"><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/class-use/Key.html">java.security.Key</a></span> } - 加密密钥</li>
+<li><strong>transformation</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptociphertransformation">CryptoCipherTransformation</a></span> } - 密码转换名称</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>数据加密.</p>
+<h4>输入<span><a class="mark" href="#crypto" id="crypto">#</a></span></h4>
+<p><code>data</code> 参数的性质可借助 <code>options.input</code> 属性进行区分, 详见 <a href="cryptoCipherOptionsType.html#cryptocipheroptionstype_p_input">CryptoCipherOptions#input</a>.</p>
+<p>如果 <code>data</code> 参数为字节数组, 则 <code>options.input</code> 将被忽略. 因为字节数组可以唯一确定 <code>data</code> 的性质, 无需再通过 <code>options.input</code> 指定.</p>
+<h4>输出<span><a class="mark" href="#crypto_1" id="crypto_1">#</a></span></h4>
+<p><code>options.output</code> 指定输出的数据格式, 详见 <a href="cryptoCipherOptionsType.html#cryptocipheroptionstype_p_output">CryptoCipherOptions#output</a>.</p>
+<p>特别地, 当 <code>options.output</code> 为 <code>&#39;file&#39;</code> 时, 输出格式为十六进制值. 因为加密后写入文件的数据通常是不可读的 (常被视作乱码), 因此最终的返回值类型没有采用 <code>&#39;string&#39;</code>, 而是 <code>&#39;hex&#39;</code>.</p>
+<p><code>options.output</code> 影响的其实仅仅是加密结果的表现形式, 这些形式之前通常可以互相转换. 真正影响加密结果的, 是加密过程.</p>
+<h4>加密<span><a class="mark" href="#crypto_2" id="crypto_2">#</a></span></h4>
+<p>加密过程受 <code>key</code> 和 <code>transformation</code> 两个参数的影响. 详见 <a href="#crypto_c_key">crypto.Key</a> 及 <a href="dataTypes.html#datatypes_cryptociphertransformation">CryptoCipherTransformation</a> 小节.</p>
+<p>为保证最大兼容性, <code>key</code> 参数同时支持原生的 <code>java.security.Key</code> 类型, 此时 <code>key</code> 将自动按照 <code>new crypto.Key(key.encoded)</code> 进行转换.</p>
+<h4>示例<span><a class="mark" href="#crypto_3" id="crypto_3">#</a></span></h4>
+<p>AES 算法加密示例:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 创建密钥实例. */
+/* 密钥长度需为 [ 16, 24, 32 ] 之一. */
+let key = new crypto.Key(&#39;a&#39;.repeat(16));
+
+/* 加密数据, 输出格式保持默认, 即 bytes. */
+console.log(crypto.encrypt(message, key, &#39;AES&#39;)); // [-20, 97, -47, 124, 88, 10, 85, -42, -128, -117, 11, 98, -33, -85, 106, 13]
+
+/* 输出格式修改为 Base64. */
+console.log(crypto.encrypt(message, key, &#39;AES&#39;, { output: &#39;base64&#39; })); // 7GHRfFgKVdaAiwti36tqDQ==
+
+/* AES 默认工作模式为 ECB, 默认填充方式为 PKCS5Padding, 结果同上. */
+console.log(crypto.encrypt(message, key, &#39;AES/ECB/PKCS5Padding&#39;, { output: &#39;base64&#39; })); // 7GHRfFgKVdaAiwti36tqDQ==
+</code></pre>
+<p>RSA 算法加密示例:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 生成 RSA 密钥对. */
+let key = crypto.generateKeyPair(&#39;RSA&#39;, 2048);
+
+/* 使用公钥加密, 转换名称为 RSA/ECB/PKCS1Padding. */
+console.log(crypto.encrypt(message, key.publicKey, &#39;RSA/ECB/PKCS1Padding&#39;)); /* 结果随机, 因为生成的密钥是不确定的. */
+</code></pre>
+<h4>可逆性<span><a class="mark" href="#crypto_4" id="crypto_4">#</a></span></h4>
+<p>加密与解密具有可逆性:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+let key = new crypto.Key(&#39;a&#39;.repeat(16));
+let encrypted = crypto.encrypt(message, key, &#39;AES&#39;);
+
+/* 解密还原为 hello. */
+console.log(crypto.decrypt(encrypted, key, &#39;AES&#39;, { output: &#39;string&#39; }));
+</code></pre>
+<h2>[m] decrypt<span><a class="mark" href="#crypto_m_decrypt" id="crypto_m_decrypt">#</a></span></h2>
+<h3>decrypt(data, key, transformation, options?)<span><a class="mark" href="#crypto_decrypt_data_key_transformation_options" id="crypto_decrypt_data_key_transformation_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>data</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待解密数据</li>
+<li><strong>key</strong> { <span class="type"><a href="#crypto_c_key">crypto.Key</a></span> | <span class="type"><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/class-use/Key.html">java.security.Key</a></span> } - 解密密钥</li>
+<li><strong>transformation</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptociphertransformation">CryptoCipherTransformation</a></span> } - 密码转换名称</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>数据解密.</p>
+<h4>输入<span><a class="mark" href="#crypto_5" id="crypto_5">#</a></span></h4>
+<p><code>data</code> 参数的性质可借助 <code>options.input</code> 属性进行区分, 详见 <a href="cryptoCipherOptionsType.html#cryptocipheroptionstype_p_input">CryptoCipherOptions#input</a>.</p>
+<p>如果 <code>data</code> 参数为字节数组, 则 <code>options.input</code> 将被忽略. 因为字节数组可以唯一确定 <code>data</code> 的性质, 无需再通过 <code>options.input</code> 指定.</p>
+<h4>输出<span><a class="mark" href="#crypto_6" id="crypto_6">#</a></span></h4>
+<p><code>options.output</code> 指定输出的数据格式, 详见 <a href="cryptoCipherOptionsType.html#cryptocipheroptionstype_p_output">CryptoCipherOptions#output</a>.</p>
+<p>特别地, 当 <code>options.output</code> 为 <code>&#39;file&#39;</code> 时, 输出格式为十六进制值. 因为解密后写入文件的数据通常是不可读的 (常被视作乱码), 因此最终的返回值类型没有采用 <code>&#39;string&#39;</code>, 而是 <code>&#39;hex&#39;</code>.</p>
+<p><code>options.output</code> 影响的其实仅仅是解密结果的表现形式, 这些形式之前通常可以互相转换. 真正影响解密结果的, 是解密过程.</p>
+<h4>解密<span><a class="mark" href="#crypto_7" id="crypto_7">#</a></span></h4>
+<p>解密过程受 <code>key</code> 和 <code>transformation</code> 两个参数的影响. 详见 <a href="#crypto_c_key">crypto.Key</a> 及 <a href="dataTypes.html#datatypes_cryptociphertransformation">CryptoCipherTransformation</a> 小节.</p>
+<p>为保证最大兼容性, <code>key</code> 参数同时支持原生的 <code>java.security.Key</code> 类型, 此时 <code>key</code> 将自动按照 <code>new crypto.Key(key.encoded)</code> 进行转换.</p>
+<h4>示例<span><a class="mark" href="#crypto_8" id="crypto_8">#</a></span></h4>
+<p>AES 算法解密示例:</p>
+<pre><code class="lang-js">let ec = {
+    bytes: [
+        -20, 97, -47, 124, 88, 10, 85, -42, -128, -117, 11, 98, -33, -85, 106, 13,
+    ],
+    base64: &#39;7GHRfFgKVdaAiwti36tqDQ==&#39;,
+    hex: &#39;ec61d17c580a55d6808b0b62dfab6a0d&#39;,
+};
+
+/* 创建密钥实例. */
+/* 密钥长度需为 [ 16, 24, 32 ] 之一. */
+let key = new crypto.Key(&#39;a&#39;.repeat(16));
+
+/* 解密数据, 输入为字节数组形式, 输出字符串形式. */
+console.log(crypto.decrypt(ec.bytes, key, &#39;AES&#39;, { input: &#39;bytes&#39;, output: &#39;string&#39; })); // hello
+
+/* 解密数据, 输入为 Base64 形式, 输出字符串形式. */
+console.log(crypto.decrypt(ec.base64, key, &#39;AES&#39;, { input: &#39;base64&#39;, output: &#39;string&#39; })); // hello
+
+/* 解密数据, 输入为十六进制值形式, 输出字符串形式. */
+console.log(crypto.decrypt(ec.hex, key, &#39;AES&#39;, { input: &#39;hex&#39;, output: &#39;string&#39; })); // hello
+</code></pre>
+<p>RSA 算法解密示例:</p>
+<p>参阅下文 <code>可逆性</code> 小节.</p>
+<h4>可逆性<span><a class="mark" href="#crypto_9" id="crypto_9">#</a></span></h4>
+<p>加密与解密具有可逆性:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 生成 RSA 密钥对. */
+let key = crypto.generateKeyPair(&#39;RSA&#39;, 2048);
+
+/* 使用公钥加密, 转换名称为 RSA/ECB/OAEPwithSHA-224andMGF1Padding. */
+let ec = crypto.encrypt(message, key.publicKey, &#39;RSA/ECB/OAEPwithSHA-224andMGF1Padding&#39;);
+
+/* 使用私钥解密, 转换名称同样为 RSA/ECB/PKCS1Padding. */
+let dc = crypto.decrypt(ec, key.privateKey, &#39;RSA/ECB/OAEPwithSHA-224andMGF1Padding&#39;, { output: &#39;string&#39; });
+
+/* 解密还原为 message 变量的值, 即 &#39;hello&#39;. */
+console.log(dc); // hello
+console.log(dc === message); // true
+</code></pre>
+<h2>[m] generateKeyPair<span><a class="mark" href="#crypto_m_generatekeypair" id="crypto_m_generatekeypair">#</a></span></h2>
+<h3>generateKeyPair(algorithm, length?)<span><a class="mark" href="#crypto_generatekeypair_algorithm_length" id="crypto_generatekeypair_algorithm_length">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>algorithm</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptokeypairgeneratoralgorithm">CryptoKeyPairGeneratorAlgorithm</a></span> } - 密钥对生成器算法</li>
+<li><strong>[ length = <code>256</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 密钥长度</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="cryptoKeyPairType.html">CryptoKeyPair</a></span> } - 密钥对</li>
+</ul>
+<p>生成指定算法及长度的随机密钥对.</p>
+<blockquote>
+<p>注: 不同算法对密钥长度有不同的要求.</p>
+</blockquote>
+<p>如需生成固定密钥的密钥对, 可使用 <a href="#crypto_c_keypair">crypto.KeyPair</a> 直接构造.</p>
+<p>密钥对通常会参与非对称加密算法的加解密过程:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 生成 RSA 密钥对. */
+let key = crypto.generateKeyPair(&#39;RSA&#39;, 2048);
+
+/* 使用公钥加密, 转换名称为 RSA/ECB/OAEPwithSHA-224andMGF1Padding. */
+let ec = crypto.encrypt(message, key.publicKey, &#39;RSA/ECB/OAEPwithSHA-224andMGF1Padding&#39;);
+
+/* 使用私钥解密, 转换名称同样为 RSA/ECB/PKCS1Padding. */
+let dc = crypto.decrypt(ec, key.privateKey, &#39;RSA/ECB/OAEPwithSHA-224andMGF1Padding&#39;, { output: &#39;string&#39; });
+
+/* 解密还原为 message 变量的值, 即 &#39;hello&#39;. */
+console.log(dc); // hello
+console.log(dc === message); // true
+</code></pre>
+<p>但需额外注意, 某些算法生成的密钥对, 仅仅用作密钥交换, 密钥交换后将确定一个对称密钥, 最终使用一个对称密钥算法 (如 DES) 进行加解密. 因此密钥对不一定参与非对称加解密过程.</p>
+<p>上述情况典型的样例, 当属 Diffie-Hellman（迪菲-赫尔曼) 算法:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 生成 Diffie-Hellman（迪菲-赫尔曼) 密钥对. */
+let keyPair = crypto.generateKeyPair(&#39;DiffieHellman&#39;);
+
+/* 借助 Diffie-Hellman 密钥对, 使用 DES 算法生成一个确定的密钥. */
+let key = keyPair.toKeySpec(&#39;DES&#39;);
+
+/* 使用上述密钥加密, 转换名称 (此处可视为算法名称) 也为 DES. */
+/* 除 DES 外, 凡是对称加密算法均被支持, 如 AES. */
+/* 但需保证与上述 toKeySpec 方法传入的参数一致. */
+let ec = crypto.encrypt(message, key, &#39;DES&#39;);
+
+/* 使用上述同一个密钥解密, 转换名称同样为 DES (与加密算法一致). */
+let dc = crypto.decrypt(ec, key, &#39;DES&#39;, { output: &#39;string&#39; });
+
+/* 解密还原为 message 变量的值, 即 &#39;hello&#39;. */
+console.log(dc); // hello
+console.log(dc === message); // true
+</code></pre>
+<p>上述示例再次验证, 密钥对不一定会参与加解密过程. 例如 <code>DiffieHellman</code> 密钥对, 仅仅用于确定一个对称密钥.</p>
+<h2>[C] Key<span><a class="mark" href="#crypto_c_key" id="crypto_c_key">#</a></span></h2>
+<h3>[c] (data, options?)<span><a class="mark" href="#crypto_c_data_options" id="crypto_c_data_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>data</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 用于生成密钥的数据</li>
+<li><strong>[ options ]</strong> { <a href="cryptoCipherOptionsType.html">CryptoCipherOptions</a> &amp; {<ul>
+<li>keyPair?: <code>&#39;public&#39;</code> | <code>&#39;private&#39;</code> - 指定密钥的公私性质, 用于非对称加密</li>
 </ul>
 </li>
-<li><p><code>options</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="type">Object</a> } 加密选项</p>
-</li>
+<li>}} - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="cryptoKeyType.html">CryptoKey</a></span> }</li>
 </ul>
-</div><h2>输入和输出的类型和格式<span><a class="mark" href="#crypto" id="crypto">#</a></span></h2>
+<p>生成一个自定义密钥.</p>
+<p>关于自定义密钥的实例方法属性及相关示例, 参阅 <a href="cryptoKeyType.html">CryptoKey</a> 类型章节.</p>
+<p>使用 <code>crypto.Key</code> 构造函数可以很方便地复制密钥数据:</p>
+<pre><code class="lang-js">let key = new crypto.Key(&#39;string with length of thrity two&#39;);
+
+console.log(key);
+
+let copiedKeyA = new crypto.Key(base64.encode(key.data), { input: &quot;base64&quot; });
+
+console.log(copiedKeyA);
+
+let copiedKeyB = new crypto.Key(key.data, { input: &quot;bytes&quot; });
+
+console.log(copiedKeyB);
+
+let copiedKeyC = new crypto.Key(Crypto.toHex(key.data), { input: &quot;hex&quot; });
+
+console.log(copiedKeyC);
+</code></pre>
+<h2>[C] KeyPair<span><a class="mark" href="#crypto_c_keypair" id="crypto_c_keypair">#</a></span></h2>
+<h3>[c] (publicKeyData, privateKeyData, options?)<span><a class="mark" href="#crypto_c_publickeydata_privatekeydata_options" id="crypto_c_publickeydata_privatekeydata_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>publicKeyData</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 用于生成公钥的数据</li>
+<li><strong>privateKeyData</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 用于生成私钥的数据</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="cryptoKeyPairType.html">CryptoKeyPair</a></span> }</li>
+</ul>
+<p>生成一个固定密钥对.</p>
+<p>如需生成一个随机密钥对, 可使用 <a href="#crypto_m_generatekeypair">crypto.generateKeyPair</a>.</p>
+<p>关于密钥对的实例方法属性及相关示例, 参阅 <a href="cryptoKeyPairType.html">CryptoKeyPair</a> 类型章节.</p>
+<p>使用 <code>crypto.KeyPair</code> 构造函数可以很方便地复制密钥对数据:</p>
+<pre><code class="lang-js">let keyPair = crypto.generateKeyPair(&#39;RSA&#39;);
+
+console.log(keyPair);
+
+let copiedKeyPairA = new crypto.KeyPair(
+    base64.encode(keyPair.publicKey.data),
+    base64.encode(keyPair.privateKey.data),
+    { input: &#39;base64&#39; },
+);
+
+console.log(copiedKeyPairA);
+
+let copiedKeyPairB = new crypto.KeyPair(
+    keyPair.publicKey.data,
+    keyPair.privateKey.data,
+    { input: &#39;bytes&#39; },
+);
+
+console.log(copiedKeyPairB);
+
+let copiedKeyPairC = new crypto.KeyPair(
+    Crypto.toHex(keyPair.publicKey.data),
+    Crypto.toHex(keyPair.privateKey.data),
+    { input: &quot;hex&quot; },
+);
+
+console.log(copiedKeyPairC);
+</code></pre>
 
         </div>
     </div>
