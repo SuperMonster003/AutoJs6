@@ -2,24 +2,27 @@ package org.autojs.autojs.core.image;
 
 import android.graphics.Color;
 
+import org.autojs.autojs.annotation.CodeAuthor;
+import org.autojs.autojs.annotation.ScriptInterface;
+import org.autojs.autojs.core.opencv.Mat;
 import org.autojs.autojs.core.opencv.MatOfPoint;
 import org.autojs.autojs.core.opencv.OpenCVHelper;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
-
-import org.autojs.autojs.core.opencv.Mat;
 import org.opencv.core.Core;
-
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 
 /**
  * Created by Stardust on 2017/5/18.
  */
+@SuppressWarnings("unused")
 public class ColorFinder {
 
     private final ScreenMetrics mScreenMetrics;
@@ -28,19 +31,23 @@ public class ColorFinder {
         mScreenMetrics = screenMetrics;
     }
 
-    public Point findColorEquals(ImageWrapper imageWrapper, int color) {
-        return findColorEquals(imageWrapper, color, null);
+    @ScriptInterface
+    public Point findPointByColor(ImageWrapper imageWrapper, int color) {
+        return findPointByColor(imageWrapper, color, null);
     }
 
-    public Point findColorEquals(ImageWrapper imageWrapper, int color, Rect region) {
-        return findColor(imageWrapper, color, 0, region);
+    @ScriptInterface
+    public Point findPointByColor(ImageWrapper imageWrapper, int color, Rect region) {
+        return findPointByColor(imageWrapper, color, 0, region);
     }
 
-    public Point findColor(ImageWrapper imageWrapper, int color, int threshold) {
-        return findColor(imageWrapper, color, threshold, null);
+    @ScriptInterface
+    public Point findPointByColor(ImageWrapper imageWrapper, int color, int threshold) {
+        return findPointByColor(imageWrapper, color, threshold, null);
     }
 
-    public Point findColor(ImageWrapper image, int color, int threshold, Rect rect) {
+    @ScriptInterface
+    public Point findPointByColor(ImageWrapper image, int color, int threshold, Rect rect) {
         MatOfPoint matOfPoint = findColorInner(image, color, threshold, rect);
         image.shoot();
         if (matOfPoint == null) {
@@ -55,7 +62,8 @@ public class ColorFinder {
         return point;
     }
 
-    public Point[] findAllPointsForColor(ImageWrapper image, int color, int threshold, Rect rect) {
+    @ScriptInterface
+    public Point[] findPointsByColor(ImageWrapper image, int color, int threshold, Rect rect) {
         MatOfPoint matOfPoint = findColorInner(image, color, threshold, rect);
         image.shoot();
         if (matOfPoint == null) {
@@ -98,35 +106,44 @@ public class ColorFinder {
         return result;
     }
 
-    public Point findMultiColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
+    @ScriptInterface
+    public Point findPointByColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
+        Point[] firstPoints = findPointsByColor(image, firstColor, threshold, rect);
+        image.shoot();
+        return Arrays.stream(firstPoints)
+                .filter(Objects::nonNull)
+                .filter(firstPoint -> checksPath(image, firstPoint, threshold, points))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @ScriptInterface
+    public Point[] findPointsByColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
+        Point[] firstPoints = findPointsByColor(image, firstColor, threshold, rect);
+        image.shoot();
+        return Arrays.stream(firstPoints)
+                .filter(Objects::nonNull)
+                .filter(firstPoint -> checksPath(image, firstPoint, threshold, points))
+                .toArray(Point[]::new);
+    }
+
+    @Deprecated
+    @ScriptInterface
+    @SuppressWarnings("deprecation")
+    @CodeAuthor(name = "LYS", homepage = "https://github.com/LYS86")
+    public Point[] findAllMultiColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
         Point[] firstPoints = findAllPointsForColor(image, firstColor, threshold, rect);
-        Point result = null;
+        List<Point> resultPoints = new ArrayList<>();
         for (Point firstPoint : firstPoints) {
             if (firstPoint != null) {
                 if (checksPath(image, firstPoint, threshold, points)) {
-                    result = firstPoint;
-                    break;
+                    resultPoints.add(firstPoint);
                 }
             }
         }
         image.shoot();
-        return result;
+        return resultPoints.toArray(new Point[0]);
     }
-    
-    public Point[] findAllMultiColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
-    Point[] firstPoints = findAllPointsForColor(image, firstColor, threshold, rect);
-    List<Point> resultPoints = new ArrayList<>();
-    for (Point firstPoint : firstPoints) {
-        if (firstPoint != null) {
-            if (checksPath(image, firstPoint, threshold, points)) {
-                resultPoints.add(firstPoint);
-            }
-        }
-    }
-    image.shoot();
-    return resultPoints.toArray(new Point[0]);
-}
-
 
     private boolean checksPath(ImageWrapper image, Point startingPoint, int threshold, int[] points) {
         for (int i = 0; i < points.length; i += 3) {
@@ -140,10 +157,49 @@ public class ColorFinder {
                 return false;
             }
             int c = image.pixel(x, y);
-            if (!colorDetector.detectsColor(Color.red(c), Color.green(c), Color.blue(c))) {
+            if (!colorDetector.detectColor(Color.red(c), Color.green(c), Color.blue(c))) {
                 return false;
             }
         }
         return true;
     }
+
+    @Deprecated
+    @ScriptInterface
+    @SuppressWarnings("deprecation")
+    public Point findColorEquals(ImageWrapper imageWrapper, int color) {
+        return findColorEquals(imageWrapper, color, null);
+    }
+
+    @Deprecated
+    @ScriptInterface
+    @SuppressWarnings("deprecation")
+    public Point findColorEquals(ImageWrapper imageWrapper, int color, Rect region) {
+        return findColor(imageWrapper, color, 0, region);
+    }
+
+    @Deprecated
+    @ScriptInterface
+    public Point findColor(ImageWrapper imageWrapper, int color, int threshold) {
+        return findPointByColor(imageWrapper, color, threshold);
+    }
+
+    @Deprecated
+    @ScriptInterface
+    public Point findColor(ImageWrapper image, int color, int threshold, Rect rect) {
+        return findPointByColor(image, color, threshold, rect);
+    }
+
+    @Deprecated
+    @ScriptInterface
+    public Point[] findAllPointsForColor(ImageWrapper image, int color, int threshold, Rect rect) {
+        return findPointsByColor(image, color, threshold, rect);
+    }
+
+    @Deprecated
+    @ScriptInterface
+    public Point findMultiColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
+        return findPointByColors(image, firstColor, threshold, rect, points);
+    }
+
 }

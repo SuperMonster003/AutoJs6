@@ -1,6 +1,8 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
-import org.autojs.autojs.core.console.JsConsoleView
+import android.content.Context
+import android.view.ViewGroup
+import org.autojs.autojs.core.ui.widget.JsConsoleView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 
@@ -9,6 +11,10 @@ import org.autojs.autojs.core.ui.inflater.ViewCreator
  */
 class JsConsoleViewInflater(resourceParser: ResourceParser) : ConsoleViewInflater<JsConsoleView>(resourceParser) {
 
-    override fun getCreator(): ViewCreator<in JsConsoleView> = ViewCreator { context, _ -> JsConsoleView(context) }
+    override fun getCreator(): ViewCreator<in JsConsoleView> = object : ViewCreator<JsConsoleView> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsConsoleView {
+            return JsConsoleView(context)
+        }
+    }
 
 }

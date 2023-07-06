@@ -2,8 +2,10 @@ package org.autojs.autojs.core.ui.xml
 
 import android.os.Build
 import android.view.View
-import org.autojs.autojs.core.console.JsConsoleView
-import org.autojs.autojs.core.graphics.JsCanvasView
+import org.autojs.autojs.core.ui.widget.JsCheckedTextView
+import android.widget.Space
+import org.autojs.autojs.core.ui.widget.JsConsoleView
+import org.autojs.autojs.core.ui.widget.JsCanvasView
 import org.autojs.autojs.core.ui.widget.*
 import org.autojs.autojs.core.ui.widget.JsCheckBox
 import org.autojs.autojs.core.ui.widget.JsSwitch
@@ -36,11 +38,15 @@ object XmlConverter {
         .handler("vertical", VerticalHandler(JsLinearLayout::class.java.name))
         .defaultHandler(
             MapNameHandler()
+                .map("actionmenu", JsActionMenuView::class.java.name)
                 .map("appbar", JsAppBarLayout::class.java.name)
                 .map(arrayOf("button", "btn"), JsButton::class.java.name)
                 .map("canvas", JsCanvasView::class.java.name)
                 .map("card", JsCardView::class.java.name)
+                .map("calendar", JsCalendarView::class.java.name)
                 .map("checkbox", JsCheckBox::class.java.name)
+                .map("checkedtext", JsCheckedTextView::class.java.name)
+                .map("chronometer", JsChronometer::class.java.name)
                 .map("console", JsConsoleView::class.java.name)
                 .map("datepicker", JsDatePicker::class.java.name)
                 .map("drawer", JsDrawerLayout::class.java.name)
@@ -52,23 +58,29 @@ object XmlConverter {
                 .map(arrayOf("image", "img"), JsImageView::class.java.name)
                 .map(arrayOf("linear", "horizontal"), JsLinearLayout::class.java.name)
                 .map("list", JsListView::class.java.name)
+                .map("numberpicker", JsNumberPicker::class.java.name)
                 .map("progressbar", JsProgressBar::class.java.name)
+                .map("quickcontactbadge", JsQuickContactBadge::class.java.name)
                 .map(arrayOf("radio", "radiobutton"), JsRadioButton::class.java.name)
                 .map(arrayOf("radiogroup", "radios"), JsRadioGroup::class.java.name)
                 .map("ratingbar", JsRatingBar::class.java.name)
                 .map("relative", JsRelativeLayout::class.java.name)
                 .map("scroll", JsScrollView::class.java.name)
+                .map("search", JsSearchView::class.java.name)
                 .map("seekbar", JsSeekBar::class.java.name)
                 .map("spinner", JsSpinner::class.java.name)
                 .map("switch", JsSwitch::class.java.name)
                 .map(arrayOf("tabs", "tab"), JsTabLayout::class.java.name)
                 .map("textclock", JsTextClock::class.java.name)
+                .map("textswitcher", JsTextSwitcher::class.java.name)
                 .map("timepicker", JsTimePicker::class.java.name)
                 .map("togglebutton", JsToggleButton::class.java.name)
                 .map("toolbar", JsToolbar::class.java.name)
+                .map("video", JsVideoView::class.java.name)
+                .map("viewflipper", JsViewFlipper::class.java.name)
                 .map("viewpager", JsViewPager::class.java.name)
+                .map("viewswitcher", JsViewSwitcher::class.java.name)
                 .map(arrayOf("webview", "web"), JsWebView::class.java.name)
-                .map("view", View::class.java.name)
                 .map(
                     "text",
                     // @Reference to TonyJiangWJ/Auto.js on Mar 20, 2022
@@ -77,6 +89,8 @@ object XmlConverter {
                         else -> JsTextView::class.java.name
                     }
                 )
+                .map("space", Space::class.java.name)
+                .map("view", View::class.java.name)
         )
 
     private val ATTRIBUTE_HANDLER: AttributeHandler = AttrNameRouter()
@@ -92,6 +106,8 @@ object XmlConverter {
         .handler("marginBottom", DimenHandler("layout_marginBottom"))
         .handler("marginStart", DimenHandler("layout_marginStart"))
         .handler("marginEnd", DimenHandler("layout_marginEnd"))
+        .handler("marginVertical", DimenHandler("layout_marginVertical"))
+        .handler("marginHorizontal", DimenHandler("layout_marginHorizontal"))
         .handler("alignParentBottom", DimenHandler("layout_alignParentBottom"))
         .handler("alignParentTop", DimenHandler("layout_alignParentTop"))
         .handler("alignParentLeft", DimenHandler("layout_alignParentLeft"))

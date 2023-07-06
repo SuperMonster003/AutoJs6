@@ -201,7 +201,7 @@ class CodeEditText : AppCompatEditText {
             val lineEnd = layout.getLineVisibleEnd(line).coerceAtMost(highlightTokens.colors.size)
             val visibleCharStart = getVisibleCharIndex(paint, scrollX, lineStart, lineEnd)
             val visibleCharEnd = getVisibleCharIndex(paint, scrollX + mParentScrollView!!.width, lineStart, lineEnd) + 1
-            var previousColorPos = visibleCharStart
+            var previousColorPos = visibleCharStart.coerceAtMost(highlightTokens.colors.size - 1)
             var previousColor = when (previousColorPos) {
                 mUnmatchedBracket -> mTheme.getColorForToken(Token.ERROR)
                 mMatchingBrackets[0], mMatchingBrackets[1] -> mTheme.getColorForToken(TokenMapping.TOKEN_MATCHED_BRACKET)

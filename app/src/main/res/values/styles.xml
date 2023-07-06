@@ -15,6 +15,7 @@
         <item name="drawer_item_text_color">@color/drawer_menu_item_text_color</item>
         <item name="itemBackgroundDark">@color/item_background_dark</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
     </style>
 
     <style name="ToolBarStyle" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
@@ -118,6 +119,16 @@
         <item name="android:textSize">18sp</item>
         <item name="android:maxLines">2</item>
         <item name="android:ellipsize">middle</item>
+    </style>
+
+    <style name="OverflowIconDarkTheme" parent="@style/Widget.AppCompat.ActionButton.Overflow" >
+        <item name="android:tint">@color/md_white_1000</item>
+    </style>
+
+    <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:windowDisablePreview">true</item>
+        <item name="overlapAnchor">false</item>
+        <item name="android:dropDownVerticalOffset">5.0dp</item>
     </style>
 
 </resources>

@@ -26,9 +26,10 @@ import org.autojs.autojs6.R
  */
 object UpdateUtils {
 
-    const val BASE_URL = "https://raw.githubusercontent.com/"
-    private const val RELATIVE_URL = "/SuperMonster003/AutoJs6/master/version.properties"
-    var URL = BASE_URL + RELATIVE_URL.substring(1)
+    const val BASE_URL_RAW = "https://raw.githubusercontent.com/"
+    const val BASE_URL = "https://github.com/"
+    private const val RELATIVE_URL_RAW = "/SuperMonster003/AutoJs6/master/version.properties"
+    private const val RELATIVE_URL = "/SuperMonster003/AutoJs6/blob/master/version.properties"
 
     private val ignoredVersions: LinkedHashSet<String> by lazy {
         Pref.getLinkedHashSet(R.string.key_ignored_updates)

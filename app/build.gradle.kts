@@ -21,7 +21,7 @@ plugins {
 
 dependencies /* Unclassified */ {
     // LeakCanary
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.11")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.12")
 
     // Android supports
     implementation("androidx.cardview:cardview:1.0.0")
@@ -54,7 +54,7 @@ dependencies /* Unclassified */ {
     implementation("joda-time:joda-time:2.12.5")
 
     // Flurry
-    implementation("com.flurry.android:analytics:14.2.0")
+    implementation("com.flurry.android:analytics:14.3.0")
 
     // Bugly
     implementation(project(":libs:com.tencent.bugly.crashreport-4.0.4"))
@@ -122,6 +122,11 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:android-spackle-9.0.0"))
     implementation(project(":libs:android-assertion-9.0.0"))
     implementation(project(":libs:android-plugin-client-sdk-for-locale-9.0.0"))
+
+    // JavaMail for Android
+    implementation(files("$rootDir/libs/javamail-android/activation.jar"))
+    implementation(files("$rootDir/libs/javamail-android/additionnal.jar"))
+    implementation(files("$rootDir/libs/javamail-android/mail.jar"))
 }
 
 dependencies /* Test */ {
@@ -205,8 +210,12 @@ dependencies /* GitHub API */ {
         }
     }
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2") {
+    implementation("com.fasterxml.jackson.core:jackson-databind") {
         because("compatibility for Android API Level < 26 (Android 8.0) [O]")
+        version {
+            strictly("2.13.3")
+            because("Exception on 2.14.x: 'No virtual method getParameterCount()I in class Ljava/lang/reflect/Method'")
+        }
     }
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3") {
@@ -292,7 +301,7 @@ android {
             "META-INF/notice.*",
             "META-INF/ASL2.0",
             "META-INF/*.kotlin_module",
-        ).let { resources.excludes.addAll(it) }
+        ).let { resources.pickFirsts.addAll(it) }
     }
 
     kotlinOptions {

@@ -2,6 +2,8 @@ package org.autojs.autojs.core.ui.inflater.util;
 
 import android.view.Gravity;
 
+import org.autojs.autojs.pref.Language;
+
 /**
  * Created by Stardust on 2017/11/3.
  */
@@ -9,7 +11,7 @@ public class Gravities {
 
     public static int parse(String g) {
         int gravity = Gravity.NO_GRAVITY;
-        String[] parts = g.toLowerCase().split("[|]");
+        String[] parts = g.toLowerCase(Language.getPrefLanguage().getLocale()).split("[|]");
         for (String part : parts) {
             switch (part) {
                 case "center" -> gravity = gravity | Gravity.CENTER;

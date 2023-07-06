@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
+import android.content.Context
+import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
@@ -26,6 +28,10 @@ open class JsListViewInflater<V : JsListView>(resourceParser: ResourceParser) : 
         return false
     }
 
-    override fun getCreator(): ViewCreator<in V> = ViewCreator { context, _ -> JsListView(context) }
+    override fun getCreator(): ViewCreator<in V> = object : ViewCreator<JsListView> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsListView {
+            return JsListView(context)
+        }
+    }
 
 }

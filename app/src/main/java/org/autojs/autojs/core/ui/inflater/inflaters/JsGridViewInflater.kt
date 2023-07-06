@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
+import android.content.Context
+import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsGridView
@@ -10,6 +12,10 @@ import org.autojs.autojs.core.ui.widget.JsGridView
  */
 class JsGridViewInflater<V : JsGridView>(resourceParser: ResourceParser) : JsListViewInflater<V>(resourceParser) {
 
-    override fun getCreator(): ViewCreator<in V> = ViewCreator { context, _ -> JsGridView(context) }
+    override fun getCreator(): ViewCreator<in V> = object : ViewCreator<JsGridView> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsGridView {
+            return JsGridView(context)
+        }
+    }
 
 }

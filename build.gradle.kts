@@ -20,21 +20,24 @@ buildscript {
         "as" to mapOf(
             "abbr" to mapOf(
                 "Preview2023.1" to "H", /* May 13, 2023. */
+                "2022.3" to "G", /* Jul 3, 2023. */
                 "Preview2022.3" to "G", /* May 3, 2023. */
                 "2022.2" to "F", /* May 3, 2023. */
                 "Preview2022.2" to "F", /* May 3, 2023. */
                 "2022.1" to "E", /* May 3, 2023. */
             ),
             "android" to mapOf(
-                "Preview2023.1" to "8.2.0-alpha05", /* May 26, 2023. */
-                "Preview2022.3" to "8.1.0-beta03", /* May 26 2023. */
+                "Preview2023.1" to "8.2.0-alpha10", /* May 26, 2023. */
+                "2022.3" to "8.1.0-rc01", /* Jul 3 2023. */
+                "Preview2022.3" to "8.1.0-beta05", /* Jun 14 2023. */
                 "2022.2" to "8.0.2", /* May 26, 2023. */
                 "Preview2022.2" to "8.0.0-beta05", /* Mar 25, 2023. */
                 "2022.1" to "7.4.2", /* Mar 25, 2023. */
                 "fallback" to "7.4.2", /* May 3, 2023. */
             ),
             "kotlin" to mapOf(
-                "Preview2023.1" to "1.8.0", /* May 13, 2023. */
+                "Preview2023.1" to "1.9.0-RC", /* Jul 3, 2023. */
+                "2022.3" to "1.9.0-RC", /* Jul 3, 2023. */
                 "Preview2022.3" to "1.8.0", /* May 13, 2023. */
                 "2022.2" to "1.8.20-RC2", /* Mar 23, 2023. */
                 "Preview2022.2" to "1.8.0", /* Mar 23, 2023. */
@@ -49,8 +52,8 @@ buildscript {
                 "fallback" to "7.4.0", /* May 3, 2023. */
             ),
             "kotlin" to mapOf(
-                // CAUTION by SuperMonster003 on May 26, 2023.
-                //  ! Do not update to "1.9.0-Beta" for now.
+                // CAUTION by SuperMonster003 on Jul 3, 2023.
+                //  ! Do not set version to "1.9.0-Beta" or "1.9.0-RC".
                 "2023.1" to "1.8.21", /* Apr 25, 2023. */
                 "2022.3" to "1.8.21", /* Apr 25, 2023. */
                 "fallback" to "1.8.21", /* May 3, 2023. */
@@ -88,6 +91,8 @@ buildscript {
         "H" to "Hedgehog",
     )
 
+    /* --== functions ==-- */
+
     fun printCurrentPlatformInfo() = when {
         isPlatformAS -> {
             val platformNickAbbr = gradlePluginVersionList["as"]!!["abbr"]!![platformVersion]
@@ -114,7 +119,6 @@ buildscript {
         maven("https://maven.aliyun.com/repository/gradle-plugin")
         maven("https://maven.aliyun.com/repository/jcenter")
         maven("https://maven.aliyun.com/repository/public")
-        maven("https://repo.huaweicloud.com/repository/maven")
     }
 
     /* --== dependencies ==-- */
@@ -151,7 +155,6 @@ allprojects {
         maven("https://maven.aliyun.com/repository/jcenter")
         maven("https://maven.aliyun.com/repository/public")
         maven("https://jitpack.io")
-        maven("https://repo.huaweicloud.com/repository/maven")
     }
 }
 

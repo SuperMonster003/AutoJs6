@@ -5,7 +5,7 @@ import android.widget.AbsSeekBar
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.util.ColorUtils
 
-open class AbsSeekBarAttributes<V : AbsSeekBar>(resourceParser: ResourceParser, view: View) : ProgressBarAttributes<V>(resourceParser, view) {
+open class AbsSeekBarAttributes(resourceParser: ResourceParser, view: View) : ProgressBarAttributes(resourceParser, view) {
 
     override val view = super.view as AbsSeekBar
 

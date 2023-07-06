@@ -4,7 +4,7 @@ import android.view.View
 import android.widget.SeekBar
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 
-open class SeekBarAttributes<V : SeekBar>(resourceParser: ResourceParser, view: View) : AbsSeekBarAttributes<V>(resourceParser, view) {
+open class SeekBarAttributes(resourceParser: ResourceParser, view: View) : AbsSeekBarAttributes(resourceParser, view) {
 
     override val view = super.view as SeekBar
 

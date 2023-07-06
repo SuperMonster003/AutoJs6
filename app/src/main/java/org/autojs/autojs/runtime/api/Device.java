@@ -24,7 +24,6 @@ import androidx.annotation.Nullable;
 
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
-import org.autojs.autojs.runtime.exception.ScriptException;
 import org.autojs.autojs.util.DeviceUtils;
 import org.autojs.autojs6.R;
 
@@ -39,6 +38,8 @@ import ezy.assist.compat.SettingsCompat;
  * Created by Stardust on 2017/12/2.
  */
 public class Device {
+
+    private Intent mBatteryChangedActionIntent;
 
     private static int getWidth() {
         return ScreenMetrics.getDeviceScreenWidth();
@@ -205,12 +206,23 @@ public class Device {
     }
 
     public boolean isCharging() {
-        Intent intent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        if (intent == null) {
-            throw new ScriptException(mContext.getString(R.string.error_cannot_retrieve_battery_state));
-        }
-        int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-        return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+        return DeviceUtils.isCharging(mContext);
+    }
+
+    public boolean isPowerSourceAC() {
+        return DeviceUtils.isPowerSourceAC(mContext);
+    }
+
+    public boolean isPowerSourceUSB() {
+        return DeviceUtils.isPowerSourceUSB(mContext);
+    }
+
+    public boolean isPowerSourceWireless() {
+        return DeviceUtils.isPowerSourceWireless(mContext);
+    }
+
+    public boolean isPowerSourceDock() {
+        return DeviceUtils.isPowerSourceDock(mContext);
     }
 
     public void keepAwake(int flags, long timeout) {

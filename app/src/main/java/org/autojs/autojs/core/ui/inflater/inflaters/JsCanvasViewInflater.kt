@@ -1,6 +1,8 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
-import org.autojs.autojs.core.graphics.JsCanvasView
+import android.content.Context
+import android.view.ViewGroup
+import org.autojs.autojs.core.ui.widget.JsCanvasView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 
@@ -9,6 +11,10 @@ import org.autojs.autojs.core.ui.inflater.ViewCreator
  */
 class JsCanvasViewInflater(resourceParser: ResourceParser) : TextureViewInflater<JsCanvasView>(resourceParser) {
 
-    override fun getCreator() = ViewCreator { context, _ -> JsCanvasView(context) }
+    override fun getCreator() = object : ViewCreator<JsCanvasView> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsCanvasView {
+            return JsCanvasView(context)
+        }
+    }
 
 }

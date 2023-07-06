@@ -51,7 +51,7 @@ class UI(val context: Context, private val mRuntime: ScriptRuntime) : ProxyObjec
 
     private inner class Drawables : org.autojs.autojs.core.ui.inflater.util.Drawables() {
 
-        override fun decodeImage(context: Context, path: String): Drawable {
+        override fun decodeImage(context: Context, path: String?): Drawable? {
             return super.decodeImage(context, mRuntime.files.path(path))
         }
 

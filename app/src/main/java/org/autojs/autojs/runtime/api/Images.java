@@ -29,6 +29,7 @@ import org.autojs.autojs.core.opencv.Mat;
 import org.autojs.autojs.core.opencv.OpenCVHelper;
 import org.autojs.autojs.core.ui.inflater.util.Drawables;
 import org.autojs.autojs.pio.UncheckedIOException;
+import org.autojs.autojs.pref.Language;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs6.R;
 import org.opencv.core.Point;
@@ -104,14 +105,13 @@ public class Images {
             throw new SecurityException(mContext.getString(R.string.error_no_screen_capture_permission));
         }
         Image capture = mScreenCapturer.capture();
-        if (capture == mPreCapture && mPreCaptureImage != null) {
-            return mPreCaptureImage;
+        if (capture != mPreCapture || mPreCaptureImage == null) {
+            mPreCapture = capture;
+            if (mPreCaptureImage != null) {
+                mPreCaptureImage.recycle();
+            }
+            mPreCaptureImage = ImageWrapper.ofImage(capture);
         }
-        mPreCapture = capture;
-        if (mPreCaptureImage != null) {
-            mPreCaptureImage.recycle();
-        }
-        mPreCaptureImage = ImageWrapper.ofImage(capture);
         return mPreCaptureImage;
     }
 
@@ -224,7 +224,7 @@ public class Images {
     }
 
     private Bitmap.CompressFormat parseImageFormat(String format) {
-        return switch (format) {
+        return switch (format.toLowerCase(Language.getPrefLanguage().getLocale())) {
             case "png" -> Bitmap.CompressFormat.PNG;
             case "jpeg", "jpg" -> Bitmap.CompressFormat.JPEG;
             case "webp" -> Bitmap.CompressFormat.WEBP;

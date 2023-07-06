@@ -1,11 +1,17 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
+import android.content.Context
+import android.view.ViewGroup
 import androidx.drawerlayout.widget.DrawerLayout
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 
 open class DrawerLayoutInflater<V : DrawerLayout>(resourceParser: ResourceParser) : ViewGroupInflater<V>(resourceParser) {
 
-    override fun getCreator(): ViewCreator<in V> = ViewCreator { context, _ -> DrawerLayout(context) }
+    override fun getCreator(): ViewCreator<in V> = object : ViewCreator<DrawerLayout> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): DrawerLayout {
+            return DrawerLayout(context)
+        }
+    }
 
 }

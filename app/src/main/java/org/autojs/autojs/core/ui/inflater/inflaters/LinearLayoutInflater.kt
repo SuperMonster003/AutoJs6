@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
+import android.content.Context
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
@@ -10,6 +12,10 @@ import org.autojs.autojs.core.ui.inflater.ViewCreator
  */
 open class LinearLayoutInflater<V : LinearLayout>(resourceParser: ResourceParser) : ViewGroupInflater<V>(resourceParser) {
 
-    override fun getCreator(): ViewCreator<in V> = ViewCreator { context, _ -> LinearLayout(context) }
+    override fun getCreator(): ViewCreator<in V> = object : ViewCreator<LinearLayout> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): LinearLayout {
+            return LinearLayout(context)
+        }
+    }
 
 }

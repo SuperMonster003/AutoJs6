@@ -145,7 +145,7 @@ class App : MultiDexApplication() {
     }
 
     private fun setupDrawableImageLoader() {
-        Drawables.setDefaultImageLoader(object : ImageLoader {
+        Drawables.defaultImageLoader = object : ImageLoader {
             override fun loadInto(imageView: ImageView, uri: Uri) {
                 Glide.with(imageView)
                     .load(uri)
@@ -210,7 +210,7 @@ class App : MultiDexApplication() {
                         }
                     })
             }
-        })
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

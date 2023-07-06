@@ -25,6 +25,7 @@ import org.autojs.autojs.core.record.Recorder;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.Scripts;
+import org.autojs.autojs.pref.Language;
 import org.autojs.autojs.pref.Pref;
 import org.autojs.autojs.tool.Func1;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
@@ -306,8 +307,8 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
 
     private String getEmptyInfoHint() {
         return MessageFormat.format("{0} ({1})",
-                mContext.getString(R.string.text_null).toLowerCase(),
-                mContext.getString(R.string.text_a11y_service_may_be_needed).toLowerCase());
+                mContext.getString(R.string.text_null).toLowerCase(Language.getPrefLanguage().getLocale()),
+                mContext.getString(R.string.text_a11y_service_may_be_needed).toLowerCase(Language.getPrefLanguage().getLocale()));
     }
 
     @Override
@@ -327,7 +328,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
     private String getTextAlreadyCopied(int actionResId) {
         return MessageFormat.format("{0} ({1})",
                 mContext.getString(R.string.text_already_copied_to_clip),
-                mContext.getString(actionResId).toLowerCase());
+                mContext.getString(actionResId).toLowerCase(Language.getPrefLanguage().getLocale()));
     }
 
     public void close() {
