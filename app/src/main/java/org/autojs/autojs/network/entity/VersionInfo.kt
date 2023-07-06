@@ -33,21 +33,16 @@ class VersionInfo : ExtendedVersionInfo {
         val versionNameKey = str(R.string.property_key_app_version_name)
         val versionCodeKey = str(R.string.property_key_app_version_code)
 
-        val regexVersionName = "$versionNameKey(</\\w+>)?=.+".toRegex()
-        val regexVersionCode = "$versionCodeKey(</\\w+>)?=.+".toRegex()
+        val regexVersionName = "$versionNameKey(?:</\\w+>)?=([\\w.]+)".toRegex()
+        val regexVersionCode = "$versionCodeKey(?:</\\w+>)?=(\\d+)".toRegex()
 
-        for (string in propertiesFileRawString.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+        for (string in propertiesFileRawString.split("\\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
             if (versionName.isEmpty() && string.contains(regexVersionName)) {
-                string.split("$versionNameKey(</\\w+>)?=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
-                    .replace("<.+?>".toRegex(), "")
-                    .takeIf { it.isNotEmpty() }?.let { versionName = it }
+                versionName = regexVersionName.find(string)?.groupValues?.get(1) ?: ""
                 Log.d(TAG, "versionName: $versionName")
             }
             if (versionCode <= 0 && string.contains(regexVersionCode)) {
-                string.split("$versionCodeKey(</\\w+>)?=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
-                    .replace("<.+?>".toRegex(), "")
-                    .toInt()
-                    .takeIf { it > 0 }?.let { versionCode = it }
+                versionCode = regexVersionCode.find(string)?.groupValues?.get(1)?.toInt() ?: -1
                 Log.d(TAG, "versionCode: $versionCode")
             }
             if (versionName.isNotEmpty() && versionCode > 0) {
