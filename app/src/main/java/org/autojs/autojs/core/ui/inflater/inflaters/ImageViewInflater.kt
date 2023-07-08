@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
+import android.content.Context
+import android.view.ViewGroup
 import android.widget.ImageView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
@@ -11,6 +13,10 @@ import org.autojs.autojs.core.ui.inflater.ViewCreator
  */
 open class ImageViewInflater<V : ImageView>(resourceParser: ResourceParser) : BaseViewInflater<V>(resourceParser) {
 
-    override fun getCreator(): ViewCreator<in V> = ViewCreator { context, _ -> ImageView(context) }
+    override fun getCreator(): ViewCreator<in V> = object : ViewCreator<ImageView> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): ImageView {
+            return ImageView(context)
+        }
+    }
 
 }

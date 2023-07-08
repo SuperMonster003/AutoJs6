@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
+import android.content.Context
+import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.appcompat.R
 import org.autojs.autojs.core.ui.inflater.ResourceParser
@@ -12,15 +14,17 @@ import org.autojs.autojs.core.ui.inflater.util.Res
  */
 open class ProgressBarInflater<V : ProgressBar>(resourceParser: ResourceParser) : BaseViewInflater<V>(resourceParser) {
 
-    override fun getCreator(): ViewCreator<in V> = ViewCreator { context, attrs ->
-        fun hasTrueAttr(name: String) = attrs["android:$name"] == "true"
+    override fun getCreator(): ViewCreator<in V> = object : ViewCreator<ProgressBar> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): ProgressBar {
+            fun hasTrueAttr(name: String) = attrs["android:$name"] == "true"
 
-        attrs["style"]?.let { return@ViewCreator ProgressBar(context, null, 0, Res.parseStyle(context, it)) }
+            attrs["style"]?.let { return ProgressBar(context, null, 0, Res.parseStyle(context, it)) }
 
-        if (hasTrueAttr("isHorizontal") || hasTrueAttr("horizontal")) {
-            return@ViewCreator ProgressBar(context, null, 0, R.style.Base_Widget_AppCompat_ProgressBar_Horizontal)
+            if (hasTrueAttr("isHorizontal") || hasTrueAttr("horizontal")) {
+                return ProgressBar(context, null, 0, R.style.Base_Widget_AppCompat_ProgressBar_Horizontal)
+            }
+            return ProgressBar(context)
         }
-        return@ViewCreator ProgressBar(context)
     }
 
 }

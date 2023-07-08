@@ -36,7 +36,11 @@ public class Router implements Handler {
         JsonElement key = data.get(getKey());
         if (key == null || !key.isJsonPrimitive()) {
             Log.w(LOG_TAG, "no such key: " + getKey());
-            return false;
+            key = data.get("command");
+            if (key == null || !key.isJsonPrimitive()) {
+                Log.w(LOG_TAG, "no such key also: " + key);
+                return false;
+            }
         }
         Handler handler = mHandlerMap.get(key.getAsString());
         return handleInternal(data, key.getAsString(), handler);

@@ -9,8 +9,12 @@ import android.util.Log
 import android.view.InflateException
 import android.view.View
 import android.view.ViewGroup
-import org.autojs.autojs.core.console.JsConsoleView
-import org.autojs.autojs.core.graphics.JsCanvasView
+import org.autojs.autojs.core.ui.widget.JsCheckedTextView
+import android.widget.Space
+import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.ui.widget.JsConsoleView
+import org.autojs.autojs.core.ui.widget.JsCanvasView
 import org.autojs.autojs.core.ui.inflater.inflaters.*
 import org.autojs.autojs.core.ui.inflater.util.Res
 import org.autojs.autojs.core.ui.widget.*
@@ -23,9 +27,12 @@ open class DynamicLayoutInflater {
 
     private var mViewAttrSetters: MutableMap<String, ViewInflater<*>> = HashMap()
     private var mViewCreators: MutableMap<String, ViewCreator<*>> = HashMap()
-    private var mLayoutInflaterDelegate = LayoutInflaterDelegate.NO_OP
 
-    var context: Context? = null
+    @get:ScriptInterface
+    @set:ScriptInterface
+    var layoutInflaterDelegate: LayoutInflaterDelegate = LayoutInflaterDelegate.NO_OP
+
+    var context: Context? = GlobalAppContext.get()
     val resourceParser: ResourceParser
     var inflateFlags = 0
 
@@ -41,62 +48,75 @@ open class DynamicLayoutInflater {
         mViewCreators = HashMap(inflater.mViewCreators)
     }
 
-    var layoutInflaterDelegate: LayoutInflaterDelegate?
-        get() = mLayoutInflaterDelegate
-        set(layoutInflaterDelegate) {
-            var niceLayoutInflaterDelegate = layoutInflaterDelegate
-            if (niceLayoutInflaterDelegate == null) {
-                niceLayoutInflaterDelegate = LayoutInflaterDelegate.NO_OP
-            }
-            mLayoutInflaterDelegate = niceLayoutInflaterDelegate!!
-        }
-
     protected fun registerViewAttrSetters() {
+        registerViewAttrSetter(JsActionMenuView::class.java, JsActionMenuViewInflater(resourceParser))
         registerViewAttrSetter(JsAppBarLayout::class.java, JsAppBarLayoutInflater(resourceParser))
         registerViewAttrSetter(JsButton::class.java, JsButtonInflater(resourceParser))
         registerViewAttrSetter(JsCanvasView::class.java, JsCanvasViewInflater(resourceParser))
         registerViewAttrSetter(JsCardView::class.java, JsCardViewInflater(resourceParser))
+        registerViewAttrSetter(JsCalendarView::class.java, JsCalendarViewInflater(resourceParser))
         registerViewAttrSetter(JsCheckBox::class.java, JsCheckBoxInflater(resourceParser))
+        registerViewAttrSetter(JsCheckedTextView::class.java, JsCheckedTextViewInflater(resourceParser))
+        registerViewAttrSetter(JsChronometer::class.java, JsChronometerInflater(resourceParser))
         registerViewAttrSetter(JsConsoleView::class.java, JsConsoleViewInflater(resourceParser))
         registerViewAttrSetter(JsDatePicker::class.java, JsDatePickerInflater(resourceParser))
         registerViewAttrSetter(JsDrawerLayout::class.java, JsDrawerLayoutInflater(resourceParser))
-        registerViewAttrSetter(JsEditText::class.java, JsEditTextViewInflater(resourceParser))
+        registerViewAttrSetter(JsEditText::class.java, JsEditTextInflater(resourceParser))
         registerViewAttrSetter(JsFloatingActionButton::class.java, JsFloatingActionButtonInflater(resourceParser))
         registerViewAttrSetter(JsFrameLayout::class.java, JsFrameLayoutInflater(resourceParser))
         registerViewAttrSetter(JsGridView::class.java, JsGridViewInflater<JsGridView>(resourceParser))
         registerViewAttrSetter(JsImageButton::class.java, JsImageButtonInflater(resourceParser))
         registerViewAttrSetter(JsImageView::class.java, JsImageViewInflater(resourceParser))
+        registerViewAttrSetter(JsImageSwitcher::class.java, JsImageSwitcherInflater(resourceParser))
         registerViewAttrSetter(JsLinearLayout::class.java, JsLinearLayoutInflater(resourceParser))
         registerViewAttrSetter(JsListView::class.java, JsListViewInflater<JsListView>(resourceParser))
+        registerViewAttrSetter(JsNumberPicker::class.java, JsNumberPickerInflater(resourceParser))
         registerViewAttrSetter(JsProgressBar::class.java, JsProgressBarInflater(resourceParser))
+        registerViewAttrSetter(JsQuickContactBadge::class.java, JsQuickContactBadgeInflater(resourceParser))
         registerViewAttrSetter(JsRadioButton::class.java, JsRadioButtonInflater(resourceParser))
         registerViewAttrSetter(JsRadioGroup::class.java, JsRadioGroupInflater(resourceParser))
         registerViewAttrSetter(JsRatingBar::class.java, JsRatingBarInflater(resourceParser))
         registerViewAttrSetter(JsRelativeLayout::class.java, JsRelativeLayoutInflater(resourceParser))
         registerViewAttrSetter(JsScrollView::class.java, JsScrollViewInflater(resourceParser))
+        registerViewAttrSetter(JsSearchView::class.java, JsSearchViewInflater(resourceParser))
         registerViewAttrSetter(JsSeekBar::class.java, JsSeekBarInflater(resourceParser))
         registerViewAttrSetter(JsSpinner::class.java, JsSpinnerInflater(resourceParser))
         registerViewAttrSetter(JsSwitch::class.java, JsSwitchInflater(resourceParser))
         registerViewAttrSetter(JsTabLayout::class.java, JsTabLayoutInflater(resourceParser))
         registerViewAttrSetter(JsTextClock::class.java, JsTextClockInflater(resourceParser))
+        registerViewAttrSetter(JsTextSwitcher::class.java, JsTextSwitcherInflater(resourceParser))
         registerViewAttrSetter(JsTimePicker::class.java, JsTimePickerInflater(resourceParser))
         registerViewAttrSetter(JsToggleButton::class.java, JsToggleButtonInflater(resourceParser))
         registerViewAttrSetter(JsToolbar::class.java, JsToolbarInflater(resourceParser))
+        registerViewAttrSetter(JsVideoView::class.java, JsVideoViewInflater(resourceParser))
+        registerViewAttrSetter(JsViewFlipper::class.java, JsViewFlipperInflater(resourceParser))
         registerViewAttrSetter(JsViewPager::class.java, JsViewPagerInflater(resourceParser))
+        registerViewAttrSetter(JsViewSwitcher::class.java, JsViewSwitcherInflater(resourceParser))
         registerViewAttrSetter(JsWebView::class.java, JsWebViewInflater(resourceParser))
-
-        registerViewAttrSetter(ViewGroup::class.java, ViewGroupInflater<ViewGroup>(resourceParser))
-        registerViewAttrSetter(View::class.java, BaseViewInflater<View>(resourceParser))
 
         when (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             true -> registerViewAttrSetter(JsTextViewLegacy::class.java, JsTextViewLegacyInflater(resourceParser))
             else -> registerViewAttrSetter(JsTextView::class.java, JsTextViewInflater(resourceParser))
         }
+
+        // TODO by SuperMonster003 on Jun 8, 2023.
+        //  ! Android XML like menu, shape, paths and so forth.
+        //  ! Not easy as expected.
+
+        // registerViewAttrSetter("menu", JsMenuInflater(resourceParser))
+
+        registerViewAttrSetter(Space::class.java, SpaceInflater(resourceParser))
+        registerViewAttrSetter(ViewGroup::class.java, ViewGroupInflater<ViewGroup>(resourceParser))
+        registerViewAttrSetter(View::class.java, BaseViewInflater<View>(resourceParser))
     }
 
     fun registerViewAttrSetter(clazz: Class<*>, inflater: ViewInflater<*>) {
-        mViewAttrSetters[clazz.name] = inflater
-        inflater.getCreator()?.let { mViewCreators[clazz.name] = it }
+        registerViewAttrSetter(clazz.name, inflater)
+    }
+
+    fun registerViewAttrSetter(className: String, inflater: ViewInflater<*>) {
+        mViewAttrSetters[className] = inflater
+        inflater.getCreator()?.let { mViewCreators[className] = it }
     }
 
     @JvmOverloads
@@ -106,9 +126,9 @@ open class DynamicLayoutInflater {
     }
 
     fun inflate(context: InflateContext, xml: String, parent: ViewGroup?, attachToParent: Boolean): View {
-        mLayoutInflaterDelegate.beforeInflation(context, xml, parent)?.let { return it }
+        layoutInflaterDelegate.beforeInflation(context, xml, parent)?.let { return it }
         val niceXml = convertXml(context, xml)
-        return mLayoutInflaterDelegate.afterInflation(context, doInflation(context, niceXml, parent, attachToParent), niceXml, parent)
+        return layoutInflaterDelegate.afterInflation(context, doInflation(context, niceXml, parent, attachToParent), niceXml, parent)
     }
 
     fun newInflateContext() = InflateContext()
@@ -127,8 +147,8 @@ open class DynamicLayoutInflater {
     }
 
     protected fun convertXml(context: InflateContext?, xml: String?): String {
-        return mLayoutInflaterDelegate.beforeConvertXml(context, xml) ?: try {
-            mLayoutInflaterDelegate.afterConvertXml(context, XmlConverter.convertToAndroidLayout(xml))
+        return layoutInflaterDelegate.beforeConvertXml(context, xml) ?: try {
+            layoutInflaterDelegate.afterConvertXml(context, XmlConverter.convertToAndroidLayout(xml))
         } catch (e: Exception) {
             throw InflateException(e)
         }
@@ -141,12 +161,15 @@ open class DynamicLayoutInflater {
     }
 
     protected fun doInflation(context: InflateContext, node: Node, parent: ViewGroup?, attachToParent: Boolean): View {
-        var view = mLayoutInflaterDelegate.beforeInflateView(context, node, parent, attachToParent)
+        var view = layoutInflaterDelegate.beforeInflateView(context, node, parent, attachToParent)
         if (view != null) {
             return view
         }
         val attrs = getAttributesMap(node)
         view = doCreateView(context, node, node.nodeName, parent, attrs)
+        if (view is EmptyView) {
+            return view
+        }
         if (parent != null) {
             parent.addView(view) // have to add to parent to generate layout params
             if (!attachToParent) {
@@ -161,21 +184,21 @@ open class DynamicLayoutInflater {
                 applyPendingAttributesOfChildren(context, inflater as ViewGroupInflater<ViewGroup>, view)
             }
         }
-        return mLayoutInflaterDelegate.afterInflateView(context, view, node, parent, attachToParent)
+        return layoutInflaterDelegate.afterInflateView(context, view, node, parent, attachToParent)
     }
 
     protected fun applyPendingAttributesOfChildren(context: InflateContext, inflater: ViewGroupInflater<ViewGroup>, view: ViewGroup?) {
-        if (!mLayoutInflaterDelegate.beforeApplyPendingAttributesOfChildren(context, inflater, view)) {
+        if (!layoutInflaterDelegate.beforeApplyPendingAttributesOfChildren(context, inflater, view)) {
             view?.let { inflater.applyPendingAttributesOfChildren(it) }
-            mLayoutInflaterDelegate.afterApplyPendingAttributesOfChildren(context, inflater, view)
+            layoutInflaterDelegate.afterApplyPendingAttributesOfChildren(context, inflater, view)
         }
     }
 
     fun applyAttributes(context: InflateContext, view: View, attrs: HashMap<String, String>, parent: ViewGroup?): ViewInflater<View> {
         val inflater = getViewInflater(view)
-        if (!mLayoutInflaterDelegate.beforeApplyAttributes(context, view, inflater, attrs, parent)) {
+        if (!layoutInflaterDelegate.beforeApplyAttributes(context, view, inflater, attrs, parent)) {
             applyAttributes(context, view, inflater, attrs, parent)
-            mLayoutInflaterDelegate.afterApplyAttributes(context, view, inflater, attrs, parent)
+            layoutInflaterDelegate.afterApplyAttributes(context, view, inflater, attrs, parent)
         }
         return inflater
     }
@@ -192,14 +215,14 @@ open class DynamicLayoutInflater {
     }
 
     protected fun inflateChildren(context: InflateContext, inflater: ViewInflater<View>, node: Node, parent: ViewGroup?) {
-        if (mLayoutInflaterDelegate.beforeInflateChildren(context, inflater, node, parent)) {
+        if (layoutInflaterDelegate.beforeInflateChildren(context, inflater, node, parent)) {
             return
         }
         if (inflater.inflateChildren(this, node, parent)) {
             return
         }
         inflateChildren(context, node, parent)
-        mLayoutInflaterDelegate.afterInflateChildren(context, inflater, node, parent)
+        layoutInflaterDelegate.afterInflateChildren(context, inflater, node, parent)
     }
 
     fun inflateChildren(context: InflateContext, node: Node, parent: ViewGroup?) {
@@ -214,22 +237,25 @@ open class DynamicLayoutInflater {
     }
 
     protected fun doCreateView(context: InflateContext?, node: Node?, viewName: String, parent: ViewGroup?, attrs: HashMap<String, String>): View {
-        val view = mLayoutInflaterDelegate.beforeCreateView(context, node, viewName, parent)
-        return view ?: mLayoutInflaterDelegate.afterCreateView(context, createViewForName(viewName, attrs), node, viewName, parent)
+        val view = layoutInflaterDelegate.beforeCreateView(context, node, viewName, parent)
+        return view ?: layoutInflaterDelegate.afterCreateView(context, createViewForName(viewName, attrs, parent), node, viewName, parent)
     }
 
-    fun createViewForName(name: String, attrs: HashMap<String, String>): View {
+    fun createViewForName(name: String, attrs: HashMap<String, String>, parent: ViewGroup?): View {
         var niceName = name
+        val androidWidgetPrefixBlacklist = listOf(
+            "menu", "item", "shape", "paths", "set", "selector", "merge", "view",
+        )
         return try {
             if (niceName == "View") {
                 return View(context)
             }
-            if (!niceName.contains(".")) {
+            if (!niceName.contains(".") && !androidWidgetPrefixBlacklist.contains(niceName)) {
                 niceName = "android.widget.$niceName"
             }
             val creator = mViewCreators[niceName]
             if (creator != null) {
-                return creator.create(context, attrs)
+                context?.let { ctx -> return creator.create(ctx, attrs, parent) }
             }
             val clazz = Class.forName(niceName)
             val style = attrs["style"]
@@ -273,7 +299,7 @@ open class DynamicLayoutInflater {
     }
 
     protected fun applyAttribute(context: InflateContext, inflater: ViewInflater<View>, view: View, ns: String?, attrName: String, value: String, parent: ViewGroup?) {
-        if (mLayoutInflaterDelegate.beforeApplyAttribute(context, inflater, view, ns, attrName, value, parent)) {
+        if (layoutInflaterDelegate.beforeApplyAttribute(context, inflater, view, ns, attrName, value, parent)) {
             return
         }
         val isDynamic = isDynamicValue(value)
@@ -281,7 +307,7 @@ open class DynamicLayoutInflater {
             return
         }
         inflater.setAttr(view, ns, attrName, value, parent)
-        mLayoutInflaterDelegate.afterApplyAttribute(context, inflater, view, ns, attrName, value, parent)
+        layoutInflaterDelegate.afterApplyAttribute(context, inflater, view, ns, attrName, value, parent)
     }
 
     private val isJustDynamicFlags: Boolean

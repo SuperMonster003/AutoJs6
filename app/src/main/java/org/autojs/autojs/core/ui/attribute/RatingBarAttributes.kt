@@ -4,7 +4,7 @@ import android.view.View
 import android.widget.RatingBar
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 
-open class RatingBarAttributes<V : RatingBar>(resourceParser: ResourceParser, view: View) : AbsSeekBarAttributes<V>(resourceParser, view) {
+open class RatingBarAttributes(resourceParser: ResourceParser, view: View) : AbsSeekBarAttributes(resourceParser, view) {
 
     override val view = super.view as RatingBar
 

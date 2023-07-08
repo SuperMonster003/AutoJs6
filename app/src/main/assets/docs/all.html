@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>综述 (Overview) | AutoJs6 文档 - 6.3.0</title>
+    <title>综述 (Overview) | AutoJs6 文档 - 6.3.2</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -122,6 +122,9 @@
 <li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
 <li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
 <li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
 <li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
 <li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
 <li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
@@ -152,7 +155,7 @@
 
     <div id="column1" data-id="all" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <h1>AutoJs6 文档 - 6.3.2</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -799,6 +802,10 @@
 <li><span class="stability_undefined"><a href="#color_setalpha_color_alpha">setAlpha(color, alpha)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#color_m_setalpharelative">[m] setAlphaRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_setalpharelative_color_percentage">setAlphaRelative(color, percentage)</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#color_m_removealpha">[m] removeAlpha</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_removealpha_color">removeAlpha(color)</a></span></li>
 </ul>
@@ -825,6 +832,10 @@
 <li><span class="stability_undefined"><a href="#color_setred_color_red">setRed(color, red)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#color_m_setredrelative">[m] setRedRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_setredrelative_color_percentage">setRedRelative(color, percentage)</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#color_m_removered">[m] removeRed</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_removered_color">removeRed(color)</a></span></li>
 </ul>
@@ -840,6 +851,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#color_m_getgreen">[m] getGreen</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_getgreen_color">getGreen(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_setgreenrelative">[m] setGreenRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_setgreenrelative_color_percentage">setGreenRelative(color, percentage)</a></span></li>
 <li><span class="stability_undefined"><a href="#color_getgreen_color_options">getGreen(color, options)</a></span></li>
 </ul>
 </li>
@@ -875,6 +890,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#color_m_setblue">[m] setBlue</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_setblue_color_blue">setBlue(color, blue)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_setbluerelative">[m] setBlueRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_setbluerelative_color_percentage">setBlueRelative(color, percentage)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#color_m_removeblue">[m] removeBlue</a></span><ul>
@@ -1824,7 +1843,7 @@
 <li><span class="stability_undefined"><a href="#floaty_window_getx">window.getX()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_gety">window.getY()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_setsize_width_height">window.setSize(width, height)</a></span></li>
-<li><span class="stability_undefined"><a href="#floaty_window_getwidht">window.getWidht()</a></span></li>
+<li><span class="stability_undefined"><a href="#floaty_window_getwidth">window.getWidth()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_getheight">window.getHeight()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_close">window.close()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_exitonclose">window.exitOnClose()</a></span></li>
@@ -1836,7 +1855,7 @@
 <li><span class="stability_undefined"><a href="#floaty_window_getx_1">window.getX()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_gety_1">window.getY()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_setsize_width_height_1">window.setSize(width, height)</a></span></li>
-<li><span class="stability_undefined"><a href="#floaty_window_getwidht_1">window.getWidht()</a></span></li>
+<li><span class="stability_undefined"><a href="#floaty_window_getwidth_1">window.getWidth()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_getheight_1">window.getHeight()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_close_1">window.close()</a></span></li>
 <li><span class="stability_undefined"><a href="#floaty_window_exitonclose_1">window.exitOnClose()</a></span></li>
@@ -2057,19 +2076,57 @@
 <li><span class="stability_undefined"><a href="#base64_base64">Base64</a></span><ul>
 <li><span class="stability_undefined"><a href="#base64">可逆性</a></span></li>
 <li><span class="stability_undefined"><a href="#base64_m_encode">[m] encode</a></span><ul>
-<li><span class="stability_undefined"><a href="#base64_encode_str_encoding">encode(str, encoding?)</a></span></li>
+<li><span class="stability_undefined"><a href="#base64_encode_o_encoding">encode(o, encoding?)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#base64_m_decode">[m] decode</a></span><ul>
-<li><span class="stability_undefined"><a href="#base64_decode_str_encoding">decode(str, encoding?)</a></span></li>
+<li><span class="stability_undefined"><a href="#base64_decode_o_encoding">decode(o, encoding?)</a></span></li>
 </ul>
 </li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#crypto_crypto">密文 (Crypto)</a></span><ul>
-<li><span class="stability_undefined"><a href="#crypto_crypto_digest_message_algorithm_options">$crypto.digest(message, algorithm[, options])</a></span></li>
-<li><span class="stability_undefined"><a href="#crypto_crypto_encrypt_data_key_algorithm_options">$crypto.encrypt(data, key, algorithm, options)</a></span></li>
-<li><span class="stability_undefined"><a href="#crypto">输入和输出的类型和格式</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_m_digest">[m] digest</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_digest_message_algorithm">digest(message, algorithm)</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_digest_message">digest(message)</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_digest_message_algorithm_options">digest(message, algorithm, options)</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_digest_message_options">digest(message, options)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_m_encrypt">[m] encrypt</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_encrypt_data_key_transformation_options">encrypt(data, key, transformation, options?)</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto">输入</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_1">输出</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_2">加密</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_3">示例</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_4">可逆性</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_m_decrypt">[m] decrypt</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_decrypt_data_key_transformation_options">decrypt(data, key, transformation, options?)</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_5">输入</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_6">输出</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_7">解密</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_8">示例</a></span></li>
+<li><span class="stability_undefined"><a href="#crypto_9">可逆性</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_m_generatekeypair">[m] generateKeyPair</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_generatekeypair_algorithm_length">generateKeyPair(algorithm, length?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_c_key">[C] Key</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_c_data_options">[c] (data, options?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#crypto_c_keypair">[C] KeyPair</a></span><ul>
+<li><span class="stability_undefined"><a href="#crypto_c_publickeydata_privatekeydata_options">[c] (publicKeyData, privateKeyData, options?)</a></span></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#i18n_internationalization">国际化 (Internationalization)</a></span></li>
@@ -2374,6 +2431,7 @@ requestScreenCapture(false);
 <li><code>Getter/Setter</code>: 可存值且可取值属性, 即同时使用 Setter 及 Getter 定义的对象属性.</li>
 <li><code>Enum</code>: 枚举类.</li>
 <li><code>CONSTANT</code>: 常量.</li>
+<li><code>READONLY</code>: 只读属性或方法.</li>
 <li><code>DEPRECATED</code>: 已弃用的属性或方法. 表示不推荐使用, 通常会有替代属性或替代方法.</li>
 <li><code>ABANDONED</code>: 已废弃的属性或方法. 表示不再提供功能支持, 使用后功能将无效.</li>
 <li><code>xProto</code>: 针对原型的内置对象扩展.</li>
@@ -2749,7 +2807,7 @@ function rotate(src, degrees, px, py) {
 <p>关于脚本化 Java 的更多信息, 参阅 <a href="scriptingJava.html">Scripting Java - 脚本化 Java</a> 章节.</p>
 <h2>反馈<span><a class="mark" href="#qa_16" id="qa_16">#</a></span></h2>
 <p>如有任何问题或建议, 可在 GitHub 项目议题页面发起新的反馈.</p>
-<p>关于 <strong>项目文档</strong> 的反馈:<br><a href="http://docs-issues.autojs6.com">http://docs-issues.autojs6.com</a></p>
+<p>关于 <strong>应用文档</strong> 的反馈:<br><a href="http://docs-issues.autojs6.com">http://docs-issues.autojs6.com</a></p>
 <p>关于 <strong>AutoJs6</strong> 的反馈:<br><a href="http://issues.autojs6.com">http://issues.autojs6.com</a></p>
 <!-- [end-include:qa.md] -->
 <!-- [start-include:global.md] -->
@@ -2881,8 +2939,8 @@ console.log(text);
 <h3>toastLog(text, isLong)<span><a class="mark" href="#global_toastlog_text_islong" id="global_toastlog_text_islong">#</a></span></h3>
 <p><strong><code>Global</code></strong> <strong><code>Overload 2/4</code></strong></p>
 <ul>
-<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
-<li><strong>isLong = false</strong> { <span class="type">&quot;long&quot;</span> | <span class="type">&quot;l&quot;</span> | <span class="type">&quot;short&quot;</span> | <span class="type">&quot;s&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否以较长时间显示</li>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容
+<strong>isLong = false</strong> { <code>&#39;long&#39;</code> | <code>&#39;l&#39;</code> | <code>&#39;short&#39;</code> | <code>&#39;s&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否以较长时间显示</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <blockquote>
@@ -2891,9 +2949,9 @@ console.log(text);
 <h3>toastLog(text, isLong, isForcible)<span><a class="mark" href="#global_toastlog_text_islong_isforcible" id="global_toastlog_text_islong_isforcible">#</a></span></h3>
 <p><strong><code>Global</code></strong> <strong><code>Overload 3/4</code></strong></p>
 <ul>
-<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
-<li><strong>isLong = false</strong> { <span class="type">&quot;long&quot;</span> | <span class="type">&quot;l&quot;</span> | <span class="type">&quot;short&quot;</span> | <span class="type">&quot;s&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否以较长时间显示</li>
-<li><strong>isForcible = false</strong> { <span class="type">&quot;forcible&quot;</span> | <span class="type">&quot;f&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否强制覆盖显示</li>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容
+<strong>isLong = false</strong> { <code>&#39;long&#39;</code> | <code>&#39;l&#39;</code> | <code>&#39;short&#39;</code> | <code>&#39;s&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否以较长时间显示
+<strong>isForcible = false</strong> { <code>&#39;forcible&#39;</code> | <code>&#39;f&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否强制覆盖显示</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <blockquote>
@@ -2903,7 +2961,7 @@ console.log(text);
 <p><strong><code>Global</code></strong> <strong><code>Overload 4/4</code></strong></p>
 <ul>
 <li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
-<li><strong>isForcible</strong> { <span class="type">&quot;forcible&quot;</span> | <span class="type">&quot;f&quot;</span> } - 强制覆盖显示 (字符标识)</li>
+<li><strong>isForcible</strong> { <code>&#39;forcible&#39;</code> | <code>&#39;f&#39;</code> } - 强制覆盖显示 (字符标识)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <blockquote>
@@ -5356,7 +5414,7 @@ context.startActivity(i);
 <h3>toInt(color)<span><a class="mark" href="#color_toint_color" id="color_toint_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> } - 颜色整数</li>
 </ul>
 <p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
@@ -5377,7 +5435,7 @@ colors.toInt(&#39;burnt-orange&#39;); // -3386112
 <h3>toHex(color)<span><a class="mark" href="#color_tohex_color" id="color_tohex_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
 <p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>.</p>
@@ -5399,7 +5457,7 @@ colors.toHex(&#39;burnt-orange&#39;); // #CC5500
 <h3>toHex(color, alpha)<span><a class="mark" href="#color_tohex_color_alpha" id="color_tohex_color_alpha">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>[ alpha = <code>&#39;auto&#39;</code> ]</strong> { <a href="dataTypes.html#datatypes_boolean">boolean</a> | <code>&#39;keep&#39;</code> | <code>&#39;none&#39;</code> | <code>&#39;auto&#39;</code> } - A (alpha) 分量参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
@@ -5454,7 +5512,7 @@ colors.toHex(cC, &#39;keep&#39;); /* 同上. */
 <h3>toHex(color, length)<span><a class="mark" href="#color_tohex_color_length" id="color_tohex_color_length">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>length</strong> { <code>8</code> | <code>6</code> | <code>3</code> } - Hex 代码长度参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
@@ -5509,7 +5567,7 @@ colors.toHex(cD, 3); /* 抛出异常. */
 <h3>toFullHex(color)<span><a class="mark" href="#color_tofullhex_color" id="color_tofullhex_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码的完整形式</li>
 </ul>
 <p>将颜色参数强制转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a> 的完整形式 (#AARRGGBB).</p>
@@ -5521,7 +5579,7 @@ colors.toFullHex(&#39;#CC5500&#39;); // #FFCC5500
 <h3>build(color?)<span><a class="mark" href="#color_build_color" id="color_build_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload [1-2]/4</code></strong></p>
 <ul>
-<li><strong>[ color = <code>Colors.BLACK</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>[ color = <code>Colors.BLACK</code> ]</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="colorType.html">Color</a></span> } - Color 实例</li>
 </ul>
 <p>构建一个 <a href="colorType.html">Color</a> 实例, 相当于 <code>new Color(color?)</code> 或 <code>Color(color?)</code>.</p>
@@ -5551,7 +5609,7 @@ colors.build().setRgba(120, 60, 240, 0.85).toHex(); /* 同上. */
 <h3>digest(color)<span><a class="mark" href="#color_digest_color" id="color_digest_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 颜色摘要</li>
 </ul>
 <p>获取颜色摘要.</p>
@@ -5671,7 +5729,7 @@ colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
 <h3>toString(color)<span><a class="mark" href="#color_tostring_color" id="color_tostring_color">#</a></span></h3>
 <p><strong><code>[6.2.0]</code></strong> <strong><code>Overload 1/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
 <p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>.</p>
@@ -5679,7 +5737,7 @@ colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
 <h3>toString(color, alpha)<span><a class="mark" href="#color_tostring_color_alpha" id="color_tostring_color_alpha">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>[ alpha = <code>&#39;auto&#39;</code> ]</strong> { <a href="dataTypes.html#datatypes_boolean">boolean</a> | <code>&#39;keep&#39;</code> | <code>&#39;none&#39;</code> | <code>&#39;auto&#39;</code> } - A (alpha) 分量参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
@@ -5688,7 +5746,7 @@ colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
 <h3>toString(color, length)<span><a class="mark" href="#color_tostring_color_length" id="color_tostring_color_length">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>length</strong> { <code>8</code> | <code>6</code> | <code>3</code> } - Hex 代码长度参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
@@ -5698,7 +5756,7 @@ colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
 <h3>alpha(color)<span><a class="mark" href="#color_alpha_color" id="color_alpha_color">#</a></span></h3>
 <p><strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -5709,7 +5767,7 @@ colors.alpha(&#39;#05060708&#39;); // 5
 <h3>alpha(color, options)<span><a class="mark" href="#color_alpha_color_options" id="color_alpha_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -5732,7 +5790,7 @@ colors.alpha(&#39;#05060708&#39;); /* 同上. */
 <h3>alphaDouble(color)<span><a class="mark" href="#color_alphadouble_color" id="color_alphadouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -5747,7 +5805,7 @@ colors.alpha(&#39;#05060708&#39;, { max: 1 }); /* 同上. */
 <h3>getAlpha(color)<span><a class="mark" href="#color_getalpha_color" id="color_getalpha_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -5755,7 +5813,7 @@ colors.alpha(&#39;#05060708&#39;, { max: 1 }); /* 同上. */
 <h3>getAlpha(color, options)<span><a class="mark" href="#color_getalpha_color_options" id="color_getalpha_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -5769,7 +5827,7 @@ colors.alpha(&#39;#05060708&#39;, { max: 1 }); /* 同上. */
 <h3>getAlphaDouble(color)<span><a class="mark" href="#color_getalphadouble_color" id="color_getalphadouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -5778,7 +5836,7 @@ colors.alpha(&#39;#05060708&#39;, { max: 1 }); /* 同上. */
 <h3>setAlpha(color, alpha)<span><a class="mark" href="#color_setalpha_color_alpha" id="color_setalpha_color_alpha">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>alpha</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - A (alpha)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
@@ -5789,11 +5847,32 @@ colors.toHex(colors.setAlpha(&#39;#663399&#39;, 0.5)); /* 同上, 0.5 解析为�
 colors.toHex(colors.setAlpha(&#39;#663399&#39;, 255)); // #FF663399
 colors.toHex(colors.setAlpha(&#39;#663399&#39;, 1)); /* 同上, 1 默认作为百分数分量, 即 100%. */
 </code></pre>
+<h2>[m] setAlphaRelative<span><a class="mark" href="#color_m_setalpharelative" id="color_m_setalpharelative">#</a></span></h2>
+<h3>setAlphaRelative(color, percentage)<span><a class="mark" href="#color_setalpharelative_color_percentage" id="color_setalpharelative_color_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>针对 <code>A (alpha)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>A (alpha)</code> 分量为 <code>80</code>, 希望设置 <code>A</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">colors.setAlphaRelative(color, 0.5);
+colors.setAlphaRelative(color, &#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>A</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">colors.setAlphaRelative(color, 1.5);
+colors.setAlphaRelative(color, &#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">colors.setAlphaRelative(color, 10); /* A 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>A</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>A</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m] removeAlpha<span><a class="mark" href="#color_m_removealpha" id="color_m_removealpha">#</a></span></h2>
 <h3>removeAlpha(color)<span><a class="mark" href="#color_removealpha_color" id="color_removealpha_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>去除颜色的 <code>A (alpha)</code> 分量, 返回新颜色的颜色整数.</p>
@@ -5806,7 +5885,7 @@ colors.toHex(colors.removeAlpha(&#39;#CC5500&#39;)); // #CC5500
 <h3>red(color)<span><a class="mark" href="#color_red_color" id="color_red_color">#</a></span></h3>
 <p><strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>R (red)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -5817,7 +5896,7 @@ colors.red(&#39;#05060708&#39;); // 6
 <h3>red(color, options)<span><a class="mark" href="#color_red_color_options" id="color_red_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -5836,7 +5915,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>redDouble(color)<span><a class="mark" href="#color_reddouble_color" id="color_reddouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>R (red)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -5847,7 +5926,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>getRed(color)<span><a class="mark" href="#color_getred_color" id="color_getred_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>R (red)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -5855,7 +5934,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>getRed(color, options)<span><a class="mark" href="#color_getred_color_options" id="color_getred_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -5869,7 +5948,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>getRedDouble(color)<span><a class="mark" href="#color_getreddouble_color" id="color_getreddouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>R (red)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -5878,7 +5957,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>setRed(color, red)<span><a class="mark" href="#color_setred_color_red" id="color_setred_color_red">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>red</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - R (red)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
@@ -5889,11 +5968,32 @@ colors.toHex(colors.setRed(&#39;#663399&#39;, 0.5)); /* 同上, 0.5 解析为百
 colors.toHex(colors.setRed(&#39;#663399&#39;, 255)); // #FF3399
 colors.toHex(colors.setRed(&#39;#663399&#39;, 1)); /* #013399, 不同上. 1 默认作为整数分量, 而非 100%. */
 </code></pre>
+<h2>[m] setRedRelative<span><a class="mark" href="#color_m_setredrelative" id="color_m_setredrelative">#</a></span></h2>
+<h3>setRedRelative(color, percentage)<span><a class="mark" href="#color_setredrelative_color_percentage" id="color_setredrelative_color_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>针对 <code>R (red)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>R (red)</code> 分量为 <code>80</code>, 希望设置 <code>R</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">colors.setRedRelative(color, 0.5);
+colors.setRedRelative(color, &#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>R</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">colors.setRedRelative(color, 1.5);
+colors.setRedRelative(color, &#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">colors.setRedRelative(color, 10); /* R 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>R</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>R</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m] removeRed<span><a class="mark" href="#color_m_removered" id="color_m_removered">#</a></span></h2>
 <h3>removeRed(color)<span><a class="mark" href="#color_removered_color" id="color_removered_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>去除颜色的 <code>R (red)</code> 分量, 返回新颜色的颜色整数.</p>
@@ -5906,7 +6006,7 @@ colors.toHex(colors.removeRed(&#39;#CC5500&#39;)); // #005500
 <h3>green(color)<span><a class="mark" href="#color_green_color" id="color_green_color">#</a></span></h3>
 <p><strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>G (green)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -5917,7 +6017,7 @@ colors.green(&#39;#05060708&#39;); // 7
 <h3>green(color, options)<span><a class="mark" href="#color_green_color_options" id="color_green_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -5936,7 +6036,7 @@ colors.green(&#39;#663399&#39;); /* 同上. */
 <h3>greenDouble(color)<span><a class="mark" href="#color_greendouble_color" id="color_greendouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>G (green)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -5947,15 +6047,36 @@ colors.green(&#39;#663399&#39;); /* 同上. */
 <h3>getGreen(color)<span><a class="mark" href="#color_getgreen_color" id="color_getgreen_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>G (green)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
 <p><a href="#all_m_green">colors.green(color)</a> 的别名方法.</p>
+<h2>[m] setGreenRelative<span><a class="mark" href="#color_m_setgreenrelative" id="color_m_setgreenrelative">#</a></span></h2>
+<h3>setGreenRelative(color, percentage)<span><a class="mark" href="#color_setgreenrelative_color_percentage" id="color_setgreenrelative_color_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>针对 <code>G (green)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>G (green)</code> 分量为 <code>80</code>, 希望设置 <code>G</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">colors.setGreenRelative(color, 0.5);
+colors.setGreenRelative(color, &#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>G</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">colors.setGreenRelative(color, 1.5);
+colors.setGreenRelative(color, &#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">colors.setGreenRelative(color, 10); /* G 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>G</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>G</code> 分量均保持 <code>0</code> 值.</p>
 <h3>getGreen(color, options)<span><a class="mark" href="#color_getgreen_color_options" id="color_getgreen_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -5969,7 +6090,7 @@ colors.green(&#39;#663399&#39;); /* 同上. */
 <h3>getGreenDouble(color)<span><a class="mark" href="#color_getgreendouble_color" id="color_getgreendouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>G (green)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -5978,7 +6099,7 @@ colors.green(&#39;#663399&#39;); /* 同上. */
 <h3>setGreen(color, green)<span><a class="mark" href="#color_setgreen_color_green" id="color_setgreen_color_green">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>green</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - G (green)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
@@ -5993,7 +6114,7 @@ colors.toHex(colors.setGreen(&#39;#663399&#39;, 1)); /* #660199, 不同上. 1 �
 <h3>removeGreen(color)<span><a class="mark" href="#color_removegreen_color" id="color_removegreen_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>去除颜色的 <code>G (green)</code> 分量, 返回新颜色的颜色整数.</p>
@@ -6006,7 +6127,7 @@ colors.toHex(colors.removeGreen(&#39;#CC5500&#39;)); // #CC0000
 <h3>blue(color)<span><a class="mark" href="#color_blue_color" id="color_blue_color">#</a></span></h3>
 <p><strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>B (blue)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -6017,7 +6138,7 @@ colors.blue(&#39;#05060708&#39;); // 8
 <h3>blue(color, options)<span><a class="mark" href="#color_blue_color_options" id="color_blue_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -6036,7 +6157,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>blueDouble(color)<span><a class="mark" href="#color_bluedouble_color" id="color_bluedouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (blue)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -6047,7 +6168,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>getBlue(color)<span><a class="mark" href="#color_getblue_color" id="color_getblue_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>B (blue)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -6055,7 +6176,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>getBlue(color, options)<span><a class="mark" href="#color_getblue_color_options" id="color_getblue_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -6069,7 +6190,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>getBlueDouble(color)<span><a class="mark" href="#color_getbluedouble_color" id="color_getbluedouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (blue)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -6078,7 +6199,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>setBlue(color, blue)<span><a class="mark" href="#color_setblue_color_blue" id="color_setblue_color_blue">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>blue</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - B (blue)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
@@ -6089,11 +6210,32 @@ colors.toHex(colors.setBlue(&#39;#663399&#39;, 0.5)); /* 同上, 0.5 解析为�
 colors.toHex(colors.setBlue(&#39;#663399&#39;, 255)); // #6633FF
 colors.toHex(colors.setBlue(&#39;#663399&#39;, 1)); /* #663301, 不同上. 1 默认作为整数分量, 而非 100%. */
 </code></pre>
+<h2>[m] setBlueRelative<span><a class="mark" href="#color_m_setbluerelative" id="color_m_setbluerelative">#</a></span></h2>
+<h3>setBlueRelative(color, percentage)<span><a class="mark" href="#color_setbluerelative_color_percentage" id="color_setbluerelative_color_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>针对 <code>B (blue)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>B (blue)</code> 分量为 <code>80</code>, 希望设置 <code>B</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">colors.setBlueRelative(color, 0.5);
+colors.setBlueRelative(color, &#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>B</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">colors.setBlueRelative(color, 1.5);
+colors.setBlueRelative(color, &#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">colors.setBlueRelative(color, 10); /* B 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>B</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>B</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m] removeBlue<span><a class="mark" href="#color_m_removeblue" id="color_m_removeblue">#</a></span></h2>
 <h3>removeBlue(color)<span><a class="mark" href="#color_removeblue_color" id="color_removeblue_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>去除颜色的 <code>B (blue)</code> 分量, 返回新颜色的颜色整数.</p>
@@ -6106,7 +6248,7 @@ colors.toHex(colors.removeBlue(&#39;#CC5500&#39;)); // #CC5500
 <h3>rgb(color)<span><a class="mark" href="#color_rgb_color" id="color_rgb_color">#</a></span></h3>
 <p><strong><code>[6.2.0]</code></strong> <strong><code>Overload 1/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>获取 <code>color</code> 参数对应的 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
@@ -6399,7 +6541,7 @@ colors.hsla([ &#39;25%&#39;, &#39;80%&#39;, &#39;64%&#39;, &#39;25%&#39; ]); /* 
 <h3>toRgb(color)<span><a class="mark" href="#color_torgb_color" id="color_torgb_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 RGB <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -6410,7 +6552,7 @@ console.log(`R: ${r}, G: ${g}, B: ${b}`);
 <h3>toRgba(color)<span><a class="mark" href="#color_torgba_color" id="color_torgba_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 RGBA <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -6421,7 +6563,7 @@ console.log(`R: ${r}, G: ${g}, B: ${b}, A: ${a}`);
 <h3>toRgba(color, options)<span><a class="mark" href="#color_torgba_color_options" id="color_torgba_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ maxAlpha = <code>255</code> ]?: <code>1</code> | <code>255</code> - A (alpha) 分量的范围最大值</li>
 </ul>
@@ -6440,7 +6582,7 @@ console.log(`R: ${r2}, G: ${g2}, B: ${b2}, A: ${a2}`); /* A 分量范围为 [0..
 <h3>toArgb(color)<span><a class="mark" href="#color_toargb_color" id="color_toargb_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 ARGB <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -6450,7 +6592,7 @@ console.log(`A: ${a}, R: ${r}, G: ${g}, B: ${b}`);
 <h3>toArgb(color, options)<span><a class="mark" href="#color_toargb_color_options" id="color_toargb_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ maxAlpha = <code>255</code> ]?: <code>1</code> | <code>255</code> - A (alpha) 分量的范围最大值</li>
 </ul>
@@ -6469,7 +6611,7 @@ console.log(`A: ${a2}, R: ${r2}, G: ${g2}, B: ${b2}`); /* A 分量范围为 [0..
 <h3>toHsv(color)<span><a class="mark" href="#color_tohsv_color" id="color_tohsv_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 HSV <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -6492,7 +6634,7 @@ console.log(`H: ${h}, S: ${s}, V: ${v}`);
 <h3>toHsva(color)<span><a class="mark" href="#color_tohsva_color" id="color_tohsva_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 HSVA <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -6518,7 +6660,7 @@ console.log(`H: ${h}, S: ${s}, V: ${v}, A: ${a}`);
 <h3>toHsl(color)<span><a class="mark" href="#color_tohsl_color" id="color_tohsl_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 HSL <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -6541,7 +6683,7 @@ console.log(`H: ${h}, S: ${s}, L: ${l}`);
 <h3>toHsla(color)<span><a class="mark" href="#color_tohsla_color" id="color_tohsla_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 HSLA <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -6567,8 +6709,8 @@ console.log(`H: ${h}, S: ${s}, L: ${l}, A: ${a}`);
 <h3>isSimilar(colorA, colorB, threshold?, algorithm?)<span><a class="mark" href="#color_issimilar_colora_colorb_threshold_algorithm" id="color_issimilar_colora_colorb_threshold_algorithm">#</a></span></h3>
 <p><strong><code>[6.2.0]</code></strong> <strong><code>Overload [1-3]/4</code></strong></p>
 <ul>
-<li><strong>colorA</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
-<li><strong>colorB</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>colorA</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>colorB</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>[ threshold = <code>4</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> } - <a href="glossaries.html#glossaries_颜色匹配阈值">颜色匹配阈值</a></li>
 <li><strong>[ algorithm = <code>&#39;diff&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_colordetectionalgorithm">ColorDetectionAlgorithm</a></span> } - 颜色检测算法</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 两个颜色是否相似</li>
@@ -6590,8 +6732,8 @@ colors.isSimilar(&#39;orange&#39;, &#39;dark-orange&#39;, 8, &#39;hs&#39;); // t
 <h3>isSimilar(colorA, colorB, options)<span><a class="mark" href="#color_issimilar_colora_colorb_options" id="color_issimilar_colora_colorb_options">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 4/4</code></strong></p>
 <ul>
-<li><strong>colorA</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
-<li><strong>colorB</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>colorA</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>colorB</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ similarity ≈ <code>0.9843</code> ]?: <a href="dataTypes.html#datatypes_range">Range[0..1]</a> - <a href="glossaries.html#glossaries_相似度">颜色匹配相似度</a></li>
 <li>[ threshold = <code>4</code> ]?: <a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a> - <a href="glossaries.html#glossaries_颜色匹配阈值">颜色匹配阈值</a></li>
@@ -6609,8 +6751,8 @@ colors.isSimilar(&#39;orange&#39;, &#39;dark-orange&#39;, 8, &#39;hs&#39;); // t
 <h3>isEqual(colorA, colorB, alphaMatters?)<span><a class="mark" href="#color_isequal_colora_colorb_alphamatters" id="color_isequal_colora_colorb_alphamatters">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload[1-2]/2</code></strong></p>
 <ul>
-<li><strong>colorA</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
-<li><strong>colorB</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>colorA</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>colorB</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>[ alphaMatters = <code>false</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否考虑 <code>A (alpha)</code> 分量</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 两个颜色是否相等</li>
 </ul>
@@ -6662,7 +6804,7 @@ colors.equals(&#39;#FF0000&#39;, &#39;#F00&#39;); /* 抛出异常. */
 <h3>luminance(color)<span><a class="mark" href="#color_luminance_color" id="color_luminance_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> } - 颜色亮度</li>
 </ul>
 <p>获取颜色的 <a href="glossaries.html#glossaries_luminance">亮度 (Luminance)</a>, 取值范围 <code>[0..1]</code>.</p>
@@ -6680,7 +6822,7 @@ colors.luminance(colors.YELLOW); // 0.9278
 <h3>toColorStateList(...color)<span><a class="mark" href="#color_tocolorstatelist_color" id="color_tocolorstatelist_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a>(<a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a>)<a href="documentation.html#documentation_可变参数">[]</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="https://developer.android.com/reference/android/content/res/ColorStateList">android.content.res.ColorStateList</a></span> }</li>
 </ul>
 <p>将一个或多个颜色参数转换为 ColorStateList 实例.</p>
@@ -6692,7 +6834,7 @@ colors.toColorStateList(&#39;red&#39;, &#39;green&#39;, &#39;orange&#39;); /* �
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
 <li><strong>paint</strong> { <span class="type"><a href="https://developer.android.com/reference/android/graphics/Paint">android.graphics.Paint</a></span> } - 画笔参数</li>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <p>方法 <code>setPaintColor</code> 用于解决在 <code>Android API 29 (10) [Q]</code> 及以上系统中 <code>Paint#setColor(color)</code> 无法正常设置画笔颜色的问题.</p>
@@ -7504,6 +7646,10 @@ log(result.sortBy(&quot;top-right&quot;));
 <h1>光学字符识别 (OCR)<span><a class="mark" href="#ocr_ocr" id="ocr_ocr">#</a></span></h1>
 <p>ocr 模块用于识别图像中的文本.</p>
 <p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 实现的.</p>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">ocr</p>
+
+<hr>
 <h2>[@] ocr<span><a class="mark" href="#ocr_ocr_1" id="ocr_ocr_1">#</a></span></h2>
 <p>ocr 可作为全局对象使用:</p>
 <pre><code class="lang-js">typeof ocr; // &quot;function&quot;
@@ -8877,7 +9023,7 @@ toast(&quot;hello world&quot;);
 <p><strong><code>Global</code></strong> <strong><code>Overload 2/4</code></strong> <strong><code>Async</code></strong></p>
 <ul>
 <li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
-<li><strong>isLong = false</strong> { <span class="type">&quot;long&quot;</span> | <span class="type">&quot;l&quot;</span> | <span class="type">&quot;short&quot;</span> | <span class="type">&quot;s&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否以较长时间显示</li>
+<li><strong>isLong = false</strong> { <code>&#39;long&#39;</code> | <code>&#39;l&#39;</code> | <code>&#39;short&#39;</code> | <code>&#39;s&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否以较长时间显示</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <p>控制单个消息框显示时长:</p>
@@ -8891,8 +9037,8 @@ toast(&quot;hello&quot;, true); /* 同上. */
 <p><strong><code>Global</code></strong> <strong><code>Overload 3/4</code></strong> <strong><code>Async</code></strong></p>
 <ul>
 <li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
-<li><strong>isLong = false</strong> { <span class="type">&quot;long&quot;</span> | <span class="type">&quot;l&quot;</span> | <span class="type">&quot;short&quot;</span> | <span class="type">&quot;s&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否以较长时间显示</li>
-<li><strong>isForcible = false</strong> { <span class="type">&quot;forcible&quot;</span> | <span class="type">&quot;f&quot;</span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否强制覆盖显示</li>
+<li><strong>isLong = false</strong> { <code>&#39;long&#39;</code> | <code>&#39;l&#39;</code> | <code>&#39;short&#39;</code> | <code>&#39;s&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否以较长时间显示</li>
+<li><strong>isForcible = false</strong> { <code>&#39;forcible&#39;</code> | <code>&#39;f&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否强制覆盖显示</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <p>使用 &quot;强制覆盖显示&quot; 参数可立即显示消息框:</p>
@@ -8907,7 +9053,7 @@ toast(&quot;world&quot;, &quot;short&quot;, &quot;forcible&quot;);
 <p><strong><code>Global</code></strong> <strong><code>Overload 4/4</code></strong> <strong><code>Async</code></strong></p>
 <ul>
 <li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
-<li><strong>isForcible</strong> { <span class="type">&quot;forcible&quot;</span> | <span class="type">&quot;f&quot;</span> } - 强制覆盖显示 (字符标识)</li>
+<li><strong>isForcible</strong> { <code>&#39;forcible&#39;</code> | <code>&#39;f&#39;</code> } - 强制覆盖显示 (字符标识)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <p>此方法相当于忽略 isLong 参数:</p>
@@ -9551,6 +9697,9 @@ console.setContentBackgroundAlpha(0.5);
 console.setExitOnClose(6e3);
 console.show();
 </code></pre>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">console</p>
+
 <hr>
 <h2>[m] show<span><a class="mark" href="#console_m_show" id="console_m_show">#</a></span></h2>
 <h3>show()<span><a class="mark" href="#console_show" id="console_show">#</a></span></h3>
@@ -12366,7 +12515,7 @@ setTimeout(()=&gt;{
 <li><code>height</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 高度</li>
 </ul>
 </div><p>设置悬浮窗宽高.</p>
-<h2>window.getWidht()<span><a class="mark" href="#floaty_window_getwidht" id="floaty_window_getwidht">#</a></span></h2>
+<h2>window.getWidth()<span><a class="mark" href="#floaty_window_getwidth" id="floaty_window_getwidth">#</a></span></h2>
 <p>返回悬浮窗宽度.</p>
 <h2>window.getHeight()<span><a class="mark" href="#floaty_window_getheight" id="floaty_window_getheight">#</a></span></h2>
 <p>返回悬浮窗高度.</p>
@@ -12423,7 +12572,7 @@ setTimeout(()=&gt;{
     w.close();
 }, 2000);
 
-</code></pre><h2>window.getWidht()<span><a class="mark" href="#floaty_window_getwidht_1" id="floaty_window_getwidht_1">#</a></span></h2>
+</code></pre><h2>window.getWidth()<span><a class="mark" href="#floaty_window_getwidth_1" id="floaty_window_getwidth_1">#</a></span></h2>
 <p>返回悬浮窗宽度.</p>
 <h2>window.getHeight()<span><a class="mark" href="#floaty_window_getheight_1" id="floaty_window_getheight_1">#</a></span></h2>
 <p>返回悬浮窗高度.</p>
@@ -13528,6 +13677,10 @@ setTimeout(() =&gt; console.log(&#39;Exit&#39;), 9e3);
 <blockquote>
 <p>注: 与 <a href="web.html">web</a> 模块不同, web 模块主要用于 WebView 网页的注入及客户端构建.</p>
 </blockquote>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">http</p>
+
+<hr>
 <h2>[m] get<span><a class="mark" href="#http_m_get" id="http_m_get">#</a></span></h2>
 <h3>get(url, options?, callback?)<span><a class="mark" href="#http_get_url_options_callback" id="http_get_url_options_callback">#</a></span></h3>
 <div class="signature"><ul>
@@ -13682,112 +13835,414 @@ log(res.body.string());
 </blockquote>
 <h2>可逆性<span><a class="mark" href="#base64" id="base64">#</a></span></h2>
 <p>Base64 是一种可逆的编码方式:</p>
-<pre><code class="lang-js">base64.decode(base64.encode(&#39;orange&#39;)); // orange
-base64.decode(base64.encode(&#39;简体中文&#39;)); // 简体中文
+<pre><code class="lang-js">console.log(base64.decode(base64.encode(&#39;orange&#39;))); // orange
+console.log(base64.decode(base64.encode(&#39;简体中文&#39;))); // 简体中文
 </code></pre>
 <p>但需注意参数的字符编码方式 (默认为 <code>UTF-8</code>), 当存在超出编码表示范围的字符时, 可逆性将遭到破坏:</p>
 <pre><code class="lang-js">/* us-ascii 编码无法表示 &quot;出&quot; 和 &quot;口&quot;. */
-base64.decode(base64.encode(&#39;E2 出口&#39;, &#39;us-ascii&#39;), &#39;us-ascii&#39;); // E2 ??
+console.log(base64.decode(base64.encode(&#39;E2 出口&#39;, &#39;us-ascii&#39;), &#39;us-ascii&#39;)); // E2 ??
 </code></pre>
 <p>编解码使用了不同的编码方式, 也可能导致可逆性失效:</p>
 <pre><code class="lang-js">/* utf-16 与 utf-8 不一致. */
-base64.decode(base64.encode(&#39;简体中文&#39;, &#39;utf-16&#39;), &#39;utf-8&#39;); // ��{�OSN-e�
+console.log(base64.decode(base64.encode(&#39;简体中文&#39;, &#39;utf-16&#39;), &#39;utf-8&#39;)); // ��{�OSN-e�
 </code></pre>
 <hr>
 <p style="font: bold 2em sans-serif; color: #FF7043">base64</p>
 
 <hr>
 <h2>[m] encode<span><a class="mark" href="#base64_m_encode" id="base64_m_encode">#</a></span></h2>
-<h3>encode(str, encoding?)<span><a class="mark" href="#base64_encode_str_encoding" id="base64_encode_str_encoding">#</a></span></h3>
+<h3>encode(o, encoding?)<span><a class="mark" href="#base64_encode_o_encoding" id="base64_encode_o_encoding">#</a></span></h3>
 <div class="signature"><ul>
-<li><strong>str</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待编码字符串</li>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待编码数据</li>
 <li><strong>[ encoding = <code>&#39;UTF_8&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_standardcharset">StandardCharset</a></span> } - 字符编码</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
 </ul>
-</div><p>对字符串进行 Base64 编码.</p>
-<pre><code class="lang-js">base64.encode(&#39;hello&#39;, &#39;iso-8859-1&#39;); // aGVsbG8=
-base64.encode(&#39;hello&#39;, &#39;us-ascii&#39;); // aGVsbG8=
-base64.encode(&#39;hello&#39;, &#39;utf-8&#39;); // aGVsbG8=
-base64.encode(&#39;hello&#39;, &#39;utf-16&#39;); // /v8AaABlAGwAbABv
-base64.encode(&#39;hello&#39;, &#39;utf-16be&#39;); // AGgAZQBsAGwAbw==
-base64.encode(&#39;hello&#39;, &#39;utf-16le&#39;); // aABlAGwAbABvAA==
+</div><p>对数据进行 Base64 编码.</p>
+<pre><code class="lang-js">/* 字符串. */
+
+console.log(base64.encode(&#39;hello&#39;, &#39;iso-8859-1&#39;)); // aGVsbG8=
+console.log(base64.encode(&#39;hello&#39;, &#39;us-ascii&#39;)); // aGVsbG8=
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-8&#39;)); // aGVsbG8=
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-16&#39;)); // /v8AaABlAGwAbABv
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-16be&#39;)); // AGgAZQBsAGwAbw==
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-16le&#39;)); // aABlAGwAbABvAA==
+
+/* JavaScript 字节数组. */
+
+console.log(base64.encode([ 104, 101, 108, 108, 111 ], &#39;utf-8&#39;)); // aGVsbG8=
+
+/* Java 字节数组. */
+
+console.log(base64.encode(new java.lang.String(&#39;hello&#39;).getBytes(), &#39;utf-8&#39;)); // aGVsbG8=
+
+let jsArr = [ 104, 101, 108, 108, 111 ];
+let javaArr = util.java.array(&#39;byte&#39;, jsArr.length);
+jsArr.forEach((o, i) =&gt; javaArr[i] = o);
+console.log(base64.encode(javaArr, &#39;utf-8&#39;)); /* 效果同上. */
 </code></pre>
 <h2>[m] decode<span><a class="mark" href="#base64_m_decode" id="base64_m_decode">#</a></span></h2>
-<h3>decode(str, encoding?)<span><a class="mark" href="#base64_decode_str_encoding" id="base64_decode_str_encoding">#</a></span></h3>
+<h3>decode(o, encoding?)<span><a class="mark" href="#base64_decode_o_encoding" id="base64_decode_o_encoding">#</a></span></h3>
 <div class="signature"><ul>
-<li><strong>str</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待解码字符串</li>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待解码数据</li>
 <li><strong>[ encoding = <code>&#39;UTF_8&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_standardcharset">StandardCharset</a></span> } - 字符编码</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
 </ul>
-</div><p>对字符串进行 Base64 解码.</p>
-<pre><code class="lang-js">base64.decode(&#39;aGVsbG8=&#39;, &#39;iso-8859-1&#39;); // hello
-base64.decode(&#39;aGVsbG8=&#39;, &#39;us-ascii&#39;); // hello
-base64.decode(&#39;aGVsbG8=&#39;, &#39;utf-8&#39;); // hello
-base64.decode(&#39;/v8AaABlAGwAbABv&#39;, &#39;utf-16&#39;); // hello
-base64.decode(&#39;AGgAZQBsAGwAbw==&#39;, &#39;utf-16be&#39;); // hello
-base64.decode(&#39;aABlAGwAbABvAA==&#39;, &#39;utf-16le&#39;); // hello
+</div><p>对数据进行 Base64 解码.</p>
+<pre><code class="lang-js">/* 字符串. */
+
+console.log(base64.decode(&#39;aGVsbG8=&#39;, &#39;iso-8859-1&#39;)); // hello
+console.log(base64.decode(&#39;aGVsbG8=&#39;, &#39;us-ascii&#39;)); // hello
+console.log(base64.decode(&#39;aGVsbG8=&#39;, &#39;utf-8&#39;)); // hello
+console.log(base64.decode(&#39;/v8AaABlAGwAbABv&#39;, &#39;utf-16&#39;)); // hello
+console.log(base64.decode(&#39;AGgAZQBsAGwAbw==&#39;, &#39;utf-16be&#39;)); // hello
+console.log(base64.decode(&#39;aABlAGwAbABvAA==&#39;, &#39;utf-16le&#39;)); // hello
+
+/* JavaScript 字节数组. */
+
+console.log(base64.decode([ 97, 71, 86, 115, 98, 71, 56, 61 ], &#39;utf-8&#39;)); // hello
+
+/* Java 字节数组. */
+
+console.log(base64.decode(new java.lang.String(&#39;aGVsbG8=&#39;).getBytes(), &#39;utf-8&#39;)); // hello
+
+let jsArr = [ 97, 71, 86, 115, 98, 71, 56, 61 ];
+let javaArr = util.java.array(&#39;byte&#39;, jsArr.length);
+jsArr.forEach((o, i) =&gt; javaArr[i] = o);
+console.log(base64.decode(javaArr, &#39;utf-8&#39;)); /* 效果同上. */
 </code></pre>
 <!-- [end-include:base64.md] -->
 <!-- [start-include:crypto.md] -->
 <h1>密文 (Crypto)<span><a class="mark" href="#crypto_crypto" id="crypto_crypto">#</a></span></h1>
+<p>crypto 模块提供 [ 对称加密 (如 AES) / 非对称加密 (如 RSA) / 消息摘要 (如 MD5, SHA) ] 等支持.</p>
+<blockquote>
+<p>注: 本章节参考自 <a href="https://pro.autojs.org/docs/zh/v8/crypto.html">Auto.js Pro 文档</a>.</p>
+</blockquote>
 <hr>
-<p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
-<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 22, 2022.</p>
+<p style="font: bold 2em sans-serif; color: #FF7043">crypto</p>
 
 <hr>
-<p><strong> [<a href="https://pro.autojs.org/">Pro 8.0.0新增</a>] </strong></p>
-<p>$crypto模块提供了对称加密(例如AES)、非对称加密(例如RSA)、消息摘要(例如MD5, SHA)等支持.</p>
-<h2>$crypto.digest(message, algorithm[, options])<span><a class="mark" href="#crypto_crypto_digest_message_algorithm_options" id="crypto_crypto_digest_message_algorithm_options">#</a></span></h2>
-<div class="signature"><ul>
-<li><code>message</code> { <span class="type">any</span> }</li>
-<li><code>algorithm</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 消息摘要算法, 包括：<ul>
-<li>MD5</li>
-<li>SHA-1</li>
-<li>SHA-256</li>
-<li>SHA-384</li>
-<li>SHA-512</li>
-</ul>
-</li>
-<li><code>options</code> { <span class="type">any</span> }</li>
-</ul>
-</div><p>对信息message使用消息摘要算法<code>algorithm</code>进行摘要并返回结果, 默认的输出格式为hex.</p>
-<p>参数message的类型默认为字符串, 返回值默认为hex；可以通过options来指定参数message的类型和返回值的类型、格式, 比如文件、base64、字节数组、hex等. 参见《输入和输出的类型和格式》.</p>
-<pre><code class="lang-javascript">// 计算字符串abc的md5
-toastLog($crypto.digest(&quot;abc&quot;, &quot;MD5&quot;));
-// 计算字符串abc的sha-256
-toastLog($crypto.digest(&quot;abc&quot;, &quot;SHA-256&quot;));
-// 计算文件/sdcard/1.txt的md5
-toastLog($crypto.digest(&quot;/sdcard/1.txt&quot;, &quot;MD5&quot;, {
-    input: &quot;file&quot;
-}));
-</code></pre>
-<h2>$crypto.encrypt(data, key, algorithm, options)<span><a class="mark" href="#crypto_crypto_encrypt_data_key_algorithm_options" id="crypto_crypto_encrypt_data_key_algorithm_options">#</a></span></h2>
-<div class="signature"><ul>
-<li><code>data</code> { <span class="type">any</span> } 明文消息</li>
-<li><code>key</code> { <span class="type">Key</span> } 密钥</li>
-<li><p><code>algorithm</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 加密算法, 包括：</p>
+<h2>[m] digest<span><a class="mark" href="#crypto_m_digest" id="crypto_m_digest">#</a></span></h2>
+<h3>digest(message, algorithm)<span><a class="mark" href="#crypto_digest_message_algorithm" id="crypto_digest_message_algorithm">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload 1/4</code></strong></p>
 <ul>
-<li>AES</li>
-<li>AES/ECB/NoPadding</li>
-<li>AES/ECB/PKCS5Padding</li>
-<li>AES/CBC/NoPadding</li>
-<li>AES/CBC/PKCS5Padding</li>
-<li>AES/CFB/NoPadding</li>
-<li>AES/CFB/PKCS5Padding</li>
-<li>AES/CTR/NoPadding</li>
-<li>AES/CTR/PKCS5Padding</li>
-<li>AES/OFB/PKCS5Padding</li>
-<li>AES/OFB/PKCS5Padding</li>
-<li>RSA/ECB/PKCS1Padding</li>
-<li>RSA/ECB/NoPadding</li>
-<li>...
-具体可参阅 <a href="https://developer.android.com/reference/javax/crypto/Cipher/">javax.crypto.Cipher</a></li>
+<li><strong>message</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待获取摘要的消息</li>
+<li><strong>algorithm</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestalgorithm">CryptoDigestAlgorithm</a></span> } - 消息摘要算法</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>获取 <code>消息 (message)</code> 经指定 <code>算法 (algorithm)</code> 计算后的 <code>消息摘要 (message digest)</code>.</p>
+<pre><code class="lang-js">/* 获取字符串 &quot;hello&quot; 的 MD5 摘要. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;MD5&#39;)); // 5d41402abc4b2a76b9719d911017c592
+
+/* 获取字符串 &quot;hello&quot; 的 SHA-1 摘要. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;SHA-1&#39;)); // aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
+</code></pre>
+<h3>digest(message)<span><a class="mark" href="#crypto_digest_message" id="crypto_digest_message">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload 2/4</code></strong></p>
+<ul>
+<li><strong>message</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待获取摘要的消息</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取 <code>消息 (message)</code> 的 MD5 <code>消息摘要 (message digest)</code>.</p>
+<p>相当于 <code>crypto.digest(message, &#39;MD5&#39;)</code>.</p>
+<pre><code class="lang-js">/* 获取字符串 &quot;hello&quot; 的 MD5 摘要. */
+console.log(crypto.digest(&#39;hello&#39;)); // 5d41402abc4b2a76b9719d911017c592
+console.log(crypto.digest(&#39;hello&#39;, &#39;MD5&#39;)); /* 同上. */
+</code></pre>
+<h3>digest(message, algorithm, options)<span><a class="mark" href="#crypto_digest_message_algorithm_options" id="crypto_digest_message_algorithm_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload 3/4</code></strong></p>
+<ul>
+<li><strong>message</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待获取摘要的消息</li>
+<li><strong>algorithm</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestalgorithm">CryptoDigestAlgorithm</a></span> } - 消息摘要算法</li>
+<li><strong>options</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestoptions">CryptoDigestOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>获取 <code>消息 (message)</code> 经指定 <code>算法 (algorithm)</code> 计算后的 <code>消息摘要 (message digest)</code>.</p>
+<p>通过 <code>options</code> 参数可指定输入消息的类型 (文件, Base64, Hex, 字符串) 及摘要的类型 (字节数组, Base64, Hex, 字符串) 等.</p>
+<pre><code class="lang-js">/* 获取字符串 &quot;hello&quot; 的 MD5 摘要, 并输出其字节数组. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;MD5&#39;, { output: &#39;bytes&#39; })); // [93, 65, 64, 42, -68, 75, 42, 118, -71, 113, -99, -111, 16, 23, -59, -110]
+
+/* 获取字符串 &quot;hello&quot; 的 SHA-1 摘要, 并输出其 Base64 编码. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;SHA-1&#39;, { output: &#39;base64&#39; })); // qvTGHdzF6KLavt4PO0gs2a6pQ00=
+
+/* 获取 Base64 数据的 MD5 摘要. */
+console.log(crypto.digest(&#39;qvTGHdzF6KLavt4PO0gs2a6pQ00=&#39;, &#39;MD5&#39;, { input: &#39;base64&#39; })); // 406f65cdc25d6a9db86c06e4bc19a2cf
+
+/* 获取文件的 MD5 摘要. */
+let str = &#39;hello&#39;;
+let path = files.path(`./tmp-${Date.now()}`);
+files.create(path);
+files.write(path, str);
+console.log(crypto.digest(path, &#39;MD5&#39;, { input: &#39;file&#39; })); // 5d41402abc4b2a76b9719d911017c592
+files.remove(path);
+</code></pre>
+<h3>digest(message, options)<span><a class="mark" href="#crypto_digest_message_options" id="crypto_digest_message_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload 4/4</code></strong></p>
+<ul>
+<li><strong>message</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待获取摘要的消息</li>
+<li><strong>algorithm</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestalgorithm">CryptoDigestAlgorithm</a></span> } - 消息摘要算法</li>
+<li><strong>options</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptodigestoptions">CryptoDigestOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>获取 <code>消息 (message)</code> 的 MD5 <code>消息摘要 (message digest)</code>.</p>
+<p>通过 <code>options</code> 参数可指定输入消息的类型 (文件, Base64, Hex, 字符串) 及摘要的类型 (字节数组, Base64, Hex, 字符串) 等.</p>
+<p>相当于 <code>crypto.digest(message, &#39;MD5&#39;, options)</code>.</p>
+<pre><code class="lang-js">/* 获取字符串 &quot;hello&quot; 的 MD5 摘要, 并输出其字节数组. */
+console.log(crypto.digest(&#39;hello&#39;, { output: &#39;bytes&#39; })); // [93, 65, 64, 42, -68, 75, 42, 118, -71, 113, -99, -111, 16, 23, -59, -110]
+
+/* 获取 Base64 数据的 MD5 摘要. */
+console.log(crypto.digest(&#39;qvTGHdzF6KLavt4PO0gs2a6pQ00=&#39;, { input: &#39;base64&#39; })); // 406f65cdc25d6a9db86c06e4bc19a2cf
+
+/* 获取文件的 MD5 摘要. */
+let str = &#39;hello&#39;;
+let path = files.path(`./tmp-${Date.now()}`);
+files.create(path);
+files.write(path, str);
+console.log(crypto.digest(path, { input: &#39;file&#39; })); // 5d41402abc4b2a76b9719d911017c592
+files.remove(path);
+</code></pre>
+<h2>[m] encrypt<span><a class="mark" href="#crypto_m_encrypt" id="crypto_m_encrypt">#</a></span></h2>
+<h3>encrypt(data, key, transformation, options?)<span><a class="mark" href="#crypto_encrypt_data_key_transformation_options" id="crypto_encrypt_data_key_transformation_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>data</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待加密数据</li>
+<li><strong>key</strong> { <span class="type"><a href="#all_c_key">crypto.Key</a></span> | <span class="type"><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/class-use/Key.html">java.security.Key</a></span> } - 加密密钥</li>
+<li><strong>transformation</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptociphertransformation">CryptoCipherTransformation</a></span> } - 密码转换名称</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>数据加密.</p>
+<h4>输入<span><a class="mark" href="#crypto" id="crypto">#</a></span></h4>
+<p><code>data</code> 参数的性质可借助 <code>options.input</code> 属性进行区分, 详见 <a href="cryptoCipherOptionsType.html#cryptocipheroptionstype_p_input">CryptoCipherOptions#input</a>.</p>
+<p>如果 <code>data</code> 参数为字节数组, 则 <code>options.input</code> 将被忽略. 因为字节数组可以唯一确定 <code>data</code> 的性质, 无需再通过 <code>options.input</code> 指定.</p>
+<h4>输出<span><a class="mark" href="#crypto_1" id="crypto_1">#</a></span></h4>
+<p><code>options.output</code> 指定输出的数据格式, 详见 <a href="cryptoCipherOptionsType.html#cryptocipheroptionstype_p_output">CryptoCipherOptions#output</a>.</p>
+<p>特别地, 当 <code>options.output</code> 为 <code>&#39;file&#39;</code> 时, 输出格式为十六进制值. 因为加密后写入文件的数据通常是不可读的 (常被视作乱码), 因此最终的返回值类型没有采用 <code>&#39;string&#39;</code>, 而是 <code>&#39;hex&#39;</code>.</p>
+<p><code>options.output</code> 影响的其实仅仅是加密结果的表现形式, 这些形式之前通常可以互相转换. 真正影响加密结果的, 是加密过程.</p>
+<h4>加密<span><a class="mark" href="#crypto_2" id="crypto_2">#</a></span></h4>
+<p>加密过程受 <code>key</code> 和 <code>transformation</code> 两个参数的影响. 详见 <a href="#all_c_key">crypto.Key</a> 及 <a href="dataTypes.html#datatypes_cryptociphertransformation">CryptoCipherTransformation</a> 小节.</p>
+<p>为保证最大兼容性, <code>key</code> 参数同时支持原生的 <code>java.security.Key</code> 类型, 此时 <code>key</code> 将自动按照 <code>new crypto.Key(key.encoded)</code> 进行转换.</p>
+<h4>示例<span><a class="mark" href="#crypto_3" id="crypto_3">#</a></span></h4>
+<p>AES 算法加密示例:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 创建密钥实例. */
+/* 密钥长度需为 [ 16, 24, 32 ] 之一. */
+let key = new crypto.Key(&#39;a&#39;.repeat(16));
+
+/* 加密数据, 输出格式保持默认, 即 bytes. */
+console.log(crypto.encrypt(message, key, &#39;AES&#39;)); // [-20, 97, -47, 124, 88, 10, 85, -42, -128, -117, 11, 98, -33, -85, 106, 13]
+
+/* 输出格式修改为 Base64. */
+console.log(crypto.encrypt(message, key, &#39;AES&#39;, { output: &#39;base64&#39; })); // 7GHRfFgKVdaAiwti36tqDQ==
+
+/* AES 默认工作模式为 ECB, 默认填充方式为 PKCS5Padding, 结果同上. */
+console.log(crypto.encrypt(message, key, &#39;AES/ECB/PKCS5Padding&#39;, { output: &#39;base64&#39; })); // 7GHRfFgKVdaAiwti36tqDQ==
+</code></pre>
+<p>RSA 算法加密示例:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 生成 RSA 密钥对. */
+let key = crypto.generateKeyPair(&#39;RSA&#39;, 2048);
+
+/* 使用公钥加密, 转换名称为 RSA/ECB/PKCS1Padding. */
+console.log(crypto.encrypt(message, key.publicKey, &#39;RSA/ECB/PKCS1Padding&#39;)); /* 结果随机, 因为生成的密钥是不确定的. */
+</code></pre>
+<h4>可逆性<span><a class="mark" href="#crypto_4" id="crypto_4">#</a></span></h4>
+<p>加密与解密具有可逆性:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+let key = new crypto.Key(&#39;a&#39;.repeat(16));
+let encrypted = crypto.encrypt(message, key, &#39;AES&#39;);
+
+/* 解密还原为 hello. */
+console.log(crypto.decrypt(encrypted, key, &#39;AES&#39;, { output: &#39;string&#39; }));
+</code></pre>
+<h2>[m] decrypt<span><a class="mark" href="#crypto_m_decrypt" id="crypto_m_decrypt">#</a></span></h2>
+<h3>decrypt(data, key, transformation, options?)<span><a class="mark" href="#crypto_decrypt_data_key_transformation_options" id="crypto_decrypt_data_key_transformation_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>data</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待解密数据</li>
+<li><strong>key</strong> { <span class="type"><a href="#all_c_key">crypto.Key</a></span> | <span class="type"><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/security/class-use/Key.html">java.security.Key</a></span> } - 解密密钥</li>
+<li><strong>transformation</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptociphertransformation">CryptoCipherTransformation</a></span> } - 密码转换名称</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> }</li>
+</ul>
+<p>数据解密.</p>
+<h4>输入<span><a class="mark" href="#crypto_5" id="crypto_5">#</a></span></h4>
+<p><code>data</code> 参数的性质可借助 <code>options.input</code> 属性进行区分, 详见 <a href="cryptoCipherOptionsType.html#cryptocipheroptionstype_p_input">CryptoCipherOptions#input</a>.</p>
+<p>如果 <code>data</code> 参数为字节数组, 则 <code>options.input</code> 将被忽略. 因为字节数组可以唯一确定 <code>data</code> 的性质, 无需再通过 <code>options.input</code> 指定.</p>
+<h4>输出<span><a class="mark" href="#crypto_6" id="crypto_6">#</a></span></h4>
+<p><code>options.output</code> 指定输出的数据格式, 详见 <a href="cryptoCipherOptionsType.html#cryptocipheroptionstype_p_output">CryptoCipherOptions#output</a>.</p>
+<p>特别地, 当 <code>options.output</code> 为 <code>&#39;file&#39;</code> 时, 输出格式为十六进制值. 因为解密后写入文件的数据通常是不可读的 (常被视作乱码), 因此最终的返回值类型没有采用 <code>&#39;string&#39;</code>, 而是 <code>&#39;hex&#39;</code>.</p>
+<p><code>options.output</code> 影响的其实仅仅是解密结果的表现形式, 这些形式之前通常可以互相转换. 真正影响解密结果的, 是解密过程.</p>
+<h4>解密<span><a class="mark" href="#crypto_7" id="crypto_7">#</a></span></h4>
+<p>解密过程受 <code>key</code> 和 <code>transformation</code> 两个参数的影响. 详见 <a href="#all_c_key">crypto.Key</a> 及 <a href="dataTypes.html#datatypes_cryptociphertransformation">CryptoCipherTransformation</a> 小节.</p>
+<p>为保证最大兼容性, <code>key</code> 参数同时支持原生的 <code>java.security.Key</code> 类型, 此时 <code>key</code> 将自动按照 <code>new crypto.Key(key.encoded)</code> 进行转换.</p>
+<h4>示例<span><a class="mark" href="#crypto_8" id="crypto_8">#</a></span></h4>
+<p>AES 算法解密示例:</p>
+<pre><code class="lang-js">let ec = {
+    bytes: [
+        -20, 97, -47, 124, 88, 10, 85, -42, -128, -117, 11, 98, -33, -85, 106, 13,
+    ],
+    base64: &#39;7GHRfFgKVdaAiwti36tqDQ==&#39;,
+    hex: &#39;ec61d17c580a55d6808b0b62dfab6a0d&#39;,
+};
+
+/* 创建密钥实例. */
+/* 密钥长度需为 [ 16, 24, 32 ] 之一. */
+let key = new crypto.Key(&#39;a&#39;.repeat(16));
+
+/* 解密数据, 输入为字节数组形式, 输出字符串形式. */
+console.log(crypto.decrypt(ec.bytes, key, &#39;AES&#39;, { input: &#39;bytes&#39;, output: &#39;string&#39; })); // hello
+
+/* 解密数据, 输入为 Base64 形式, 输出字符串形式. */
+console.log(crypto.decrypt(ec.base64, key, &#39;AES&#39;, { input: &#39;base64&#39;, output: &#39;string&#39; })); // hello
+
+/* 解密数据, 输入为十六进制值形式, 输出字符串形式. */
+console.log(crypto.decrypt(ec.hex, key, &#39;AES&#39;, { input: &#39;hex&#39;, output: &#39;string&#39; })); // hello
+</code></pre>
+<p>RSA 算法解密示例:</p>
+<p>参阅下文 <code>可逆性</code> 小节.</p>
+<h4>可逆性<span><a class="mark" href="#crypto_9" id="crypto_9">#</a></span></h4>
+<p>加密与解密具有可逆性:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 生成 RSA 密钥对. */
+let key = crypto.generateKeyPair(&#39;RSA&#39;, 2048);
+
+/* 使用公钥加密, 转换名称为 RSA/ECB/OAEPwithSHA-224andMGF1Padding. */
+let ec = crypto.encrypt(message, key.publicKey, &#39;RSA/ECB/OAEPwithSHA-224andMGF1Padding&#39;);
+
+/* 使用私钥解密, 转换名称同样为 RSA/ECB/PKCS1Padding. */
+let dc = crypto.decrypt(ec, key.privateKey, &#39;RSA/ECB/OAEPwithSHA-224andMGF1Padding&#39;, { output: &#39;string&#39; });
+
+/* 解密还原为 message 变量的值, 即 &#39;hello&#39;. */
+console.log(dc); // hello
+console.log(dc === message); // true
+</code></pre>
+<h2>[m] generateKeyPair<span><a class="mark" href="#crypto_m_generatekeypair" id="crypto_m_generatekeypair">#</a></span></h2>
+<h3>generateKeyPair(algorithm, length?)<span><a class="mark" href="#crypto_generatekeypair_algorithm_length" id="crypto_generatekeypair_algorithm_length">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>algorithm</strong> { <span class="type"><a href="dataTypes.html#datatypes_cryptokeypairgeneratoralgorithm">CryptoKeyPairGeneratorAlgorithm</a></span> } - 密钥对生成器算法</li>
+<li><strong>[ length = <code>256</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 密钥长度</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="cryptoKeyPairType.html">CryptoKeyPair</a></span> } - 密钥对</li>
+</ul>
+<p>生成指定算法及长度的随机密钥对.</p>
+<blockquote>
+<p>注: 不同算法对密钥长度有不同的要求.</p>
+</blockquote>
+<p>如需生成固定密钥的密钥对, 可使用 <a href="#all_c_keypair">crypto.KeyPair</a> 直接构造.</p>
+<p>密钥对通常会参与非对称加密算法的加解密过程:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 生成 RSA 密钥对. */
+let key = crypto.generateKeyPair(&#39;RSA&#39;, 2048);
+
+/* 使用公钥加密, 转换名称为 RSA/ECB/OAEPwithSHA-224andMGF1Padding. */
+let ec = crypto.encrypt(message, key.publicKey, &#39;RSA/ECB/OAEPwithSHA-224andMGF1Padding&#39;);
+
+/* 使用私钥解密, 转换名称同样为 RSA/ECB/PKCS1Padding. */
+let dc = crypto.decrypt(ec, key.privateKey, &#39;RSA/ECB/OAEPwithSHA-224andMGF1Padding&#39;, { output: &#39;string&#39; });
+
+/* 解密还原为 message 变量的值, 即 &#39;hello&#39;. */
+console.log(dc); // hello
+console.log(dc === message); // true
+</code></pre>
+<p>但需额外注意, 某些算法生成的密钥对, 仅仅用作密钥交换, 密钥交换后将确定一个对称密钥, 最终使用一个对称密钥算法 (如 DES) 进行加解密. 因此密钥对不一定参与非对称加解密过程.</p>
+<p>上述情况典型的样例, 当属 Diffie-Hellman（迪菲-赫尔曼) 算法:</p>
+<pre><code class="lang-js">let message = &#39;hello&#39;;
+
+/* 生成 Diffie-Hellman（迪菲-赫尔曼) 密钥对. */
+let keyPair = crypto.generateKeyPair(&#39;DiffieHellman&#39;);
+
+/* 借助 Diffie-Hellman 密钥对, 使用 DES 算法生成一个确定的密钥. */
+let key = keyPair.toKeySpec(&#39;DES&#39;);
+
+/* 使用上述密钥加密, 转换名称 (此处可视为算法名称) 也为 DES. */
+/* 除 DES 外, 凡是对称加密算法均被支持, 如 AES. */
+/* 但需保证与上述 toKeySpec 方法传入的参数一致. */
+let ec = crypto.encrypt(message, key, &#39;DES&#39;);
+
+/* 使用上述同一个密钥解密, 转换名称同样为 DES (与加密算法一致). */
+let dc = crypto.decrypt(ec, key, &#39;DES&#39;, { output: &#39;string&#39; });
+
+/* 解密还原为 message 变量的值, 即 &#39;hello&#39;. */
+console.log(dc); // hello
+console.log(dc === message); // true
+</code></pre>
+<p>上述示例再次验证, 密钥对不一定会参与加解密过程. 例如 <code>DiffieHellman</code> 密钥对, 仅仅用于确定一个对称密钥.</p>
+<h2>[C] Key<span><a class="mark" href="#crypto_c_key" id="crypto_c_key">#</a></span></h2>
+<h3>[c] (data, options?)<span><a class="mark" href="#crypto_c_data_options" id="crypto_c_data_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>data</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 用于生成密钥的数据</li>
+<li><strong>[ options ]</strong> { <a href="cryptoCipherOptionsType.html">CryptoCipherOptions</a> &amp; {<ul>
+<li>keyPair?: <code>&#39;public&#39;</code> | <code>&#39;private&#39;</code> - 指定密钥的公私性质, 用于非对称加密</li>
 </ul>
 </li>
-<li><p><code>options</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="type">Object</a> } 加密选项</p>
-</li>
+<li>}} - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="cryptoKeyType.html">CryptoKey</a></span> }</li>
 </ul>
-</div><h2>输入和输出的类型和格式<span><a class="mark" href="#crypto" id="crypto">#</a></span></h2>
+<p>生成一个自定义密钥.</p>
+<p>关于自定义密钥的实例方法属性及相关示例, 参阅 <a href="cryptoKeyType.html">CryptoKey</a> 类型章节.</p>
+<p>使用 <code>crypto.Key</code> 构造函数可以很方便地复制密钥数据:</p>
+<pre><code class="lang-js">let key = new crypto.Key(&#39;string with length of thrity two&#39;);
+
+console.log(key);
+
+let copiedKeyA = new crypto.Key(base64.encode(key.data), { input: &quot;base64&quot; });
+
+console.log(copiedKeyA);
+
+let copiedKeyB = new crypto.Key(key.data, { input: &quot;bytes&quot; });
+
+console.log(copiedKeyB);
+
+let copiedKeyC = new crypto.Key(Crypto.toHex(key.data), { input: &quot;hex&quot; });
+
+console.log(copiedKeyC);
+</code></pre>
+<h2>[C] KeyPair<span><a class="mark" href="#crypto_c_keypair" id="crypto_c_keypair">#</a></span></h2>
+<h3>[c] (publicKeyData, privateKeyData, options?)<span><a class="mark" href="#crypto_c_publickeydata_privatekeydata_options" id="crypto_c_publickeydata_privatekeydata_options">#</a></span></h3>
+<p><strong><code>6.3.2</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>publicKeyData</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 用于生成公钥的数据</li>
+<li><strong>privateKeyData</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 用于生成私钥的数据</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></span> } - 选项参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="cryptoKeyPairType.html">CryptoKeyPair</a></span> }</li>
+</ul>
+<p>生成一个固定密钥对.</p>
+<p>如需生成一个随机密钥对, 可使用 <a href="#all_m_generatekeypair">crypto.generateKeyPair</a>.</p>
+<p>关于密钥对的实例方法属性及相关示例, 参阅 <a href="cryptoKeyPairType.html">CryptoKeyPair</a> 类型章节.</p>
+<p>使用 <code>crypto.KeyPair</code> 构造函数可以很方便地复制密钥对数据:</p>
+<pre><code class="lang-js">let keyPair = crypto.generateKeyPair(&#39;RSA&#39;);
+
+console.log(keyPair);
+
+let copiedKeyPairA = new crypto.KeyPair(
+    base64.encode(keyPair.publicKey.data),
+    base64.encode(keyPair.privateKey.data),
+    { input: &#39;base64&#39; },
+);
+
+console.log(copiedKeyPairA);
+
+let copiedKeyPairB = new crypto.KeyPair(
+    keyPair.publicKey.data,
+    keyPair.privateKey.data,
+    { input: &#39;bytes&#39; },
+);
+
+console.log(copiedKeyPairB);
+
+let copiedKeyPairC = new crypto.KeyPair(
+    Crypto.toHex(keyPair.publicKey.data),
+    Crypto.toHex(keyPair.privateKey.data),
+    { input: &quot;hex&quot; },
+);
+
+console.log(copiedKeyPairC);
+</code></pre>
 <!-- [end-include:crypto.md] -->
 <!-- [start-include:i18n.md] -->
 <h1>国际化 (Internationalization)<span><a class="mark" href="#i18n_internationalization" id="i18n_internationalization">#</a></span></h1>

@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
+
 /**
  * Created by Stardust on 2017/11/3.
  */
@@ -23,7 +25,7 @@ public interface ImageLoader {
 
     void loadIntoBackground(View view, Uri uri);
 
-    Drawable load(View view, Uri uri);
+    @Nullable Drawable load(View view, Uri uri);
 
     void load(View view, Uri uri, DrawableCallback callback);
 

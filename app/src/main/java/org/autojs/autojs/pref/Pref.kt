@@ -206,7 +206,7 @@ object Pref {
     private fun updateTimestamp(@KeyRes keyRes: Int) = putLong(keyRes, System.currentTimeMillis())
 
     @JvmStatic
-    fun getServerAddress(): String? = getString(R.string.key_server_address, NetworkUtils.getGatewayAddress())
+    fun getServerAddress(): String = getString(R.string.key_server_address, NetworkUtils.getGatewayAddress())!!
 
     @JvmStatic
     fun setServerAddress(address: String?) = putString(R.string.key_server_address, address)

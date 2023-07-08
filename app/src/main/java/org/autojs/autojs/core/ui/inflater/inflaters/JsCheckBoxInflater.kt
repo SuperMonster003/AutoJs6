@@ -1,11 +1,17 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
+import android.content.Context
+import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsCheckBox
 
 class JsCheckBoxInflater(resourceParser: ResourceParser) : AppCompatCheckBoxInflater<JsCheckBox>(resourceParser) {
 
-    override fun getCreator(): ViewCreator<in JsCheckBox> = ViewCreator { context, _ -> JsCheckBox(context) }
+    override fun getCreator(): ViewCreator<in JsCheckBox> = object : ViewCreator<JsCheckBox> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsCheckBox {
+            return JsCheckBox(context)
+        }
+    }
 
 }

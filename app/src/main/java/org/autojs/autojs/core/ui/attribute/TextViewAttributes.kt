@@ -42,20 +42,16 @@ open class TextViewAttributes(resourceParser: ResourceParser, view: View) : View
         registerAttr("autoLink") { view.autoLinkMask = TextViewInflater.AUTO_LINK_MASKS[it] }
         registerAttr("autoText") { mAutoText = it.toBoolean(); setKeyListener() }
         registerAttr("capitalize") { mCapitalize = TextViewInflater.CAPITALIZE[it]; setKeyListener() }
-        registerAttr("drawableLeft") { mDrawableLeft = drawables.parse(view, it); setDrawables() }
-        registerAttr("drawableTop") { mDrawableTop = drawables.parse(view, it); setDrawables() }
-        registerAttr("drawableRight") { mDrawableRight = drawables.parse(view, it); setDrawables() }
-        registerAttr("drawableBottom") { mDrawableBottom = drawables.parse(view, it); setDrawables() }
-        registerAttr("drawables") { setDrawables(it) }
-        registerAttrs(arrayOf("isCursorVisible", "cursorVisible")) { view.isCursorVisible = it.toBoolean() }
         registerAttr("digit") { setDigit(it) }
+        registerAttr("drawableBottom") { mDrawableBottom = drawables.parse(view, it); setDrawables() }
+        registerAttr("drawableLeft") { mDrawableLeft = drawables.parse(view, it); setDrawables() }
         registerAttr("drawablePadding") { view.compoundDrawablePadding = Dimensions.parseToIntPixel(it, view) }
-        registerAttrs(arrayOf("isElegantTextHeight", "elegantTextHeight")) { view.isElegantTextHeight = it.toBoolean() }
+        registerAttr("drawableRight") { mDrawableRight = drawables.parse(view, it); setDrawables() }
+        registerAttr("drawableTop") { mDrawableTop = drawables.parse(view, it); setDrawables() }
+        registerAttr("drawables") { setDrawables(it) }
         registerAttr("ellipsize") { it -> TextViewInflater.ELLIPSIZE[it]?.let { view.ellipsize = it } }
         registerAttr("ems") { view.setEms(it.toInt()) }
         registerAttr("fontFamily") { mFontFamily = it; setTypeface() }
-        registerAttr("textStyle") { mTextStyle = TextViewInflater.TEXT_STYLES.split(it); setTypeface() }
-        registerAttr("typeface") { mTypeface = it; setTypeface() }
         registerAttr("fontFeatureSettings") { view.fontFeatureSettings = Strings.parse(view, it) }
         registerAttr("freezesText") { view.freezesText = it.toBoolean() }
         registerAttr("gravity") { view.gravity = Gravities.parse(it) }
@@ -91,15 +87,19 @@ open class TextViewAttributes(resourceParser: ResourceParser, view: View) : View
         registerAttr("shadowDx") { view.setShadowLayer(view.shadowRadius, Dimensions.parseToPixel(it, view), view.shadowDy, view.shadowColor) }
         registerAttr("shadowDy") { view.setShadowLayer(view.shadowRadius, view.shadowDx, Dimensions.parseToPixel(it, view), view.shadowColor) }
         registerAttr("shadowRadius") { view.setShadowLayer(Dimensions.parseToPixel(it, view), view.shadowDx, view.shadowDy, view.shadowColor) }
-        registerAttrs(arrayOf("isSingleLine", "singleLine")) { view.isSingleLine = it.toBoolean() }
-        registerAttrs(arrayOf("isAllCaps", "allCaps", "textAllCaps")) { view.isAllCaps = it.toBoolean() }
+        registerAttr("text") { view.text = Strings.parse(view, it) }
         registerAttr("textAppearance") { view.setTextAppearance(Res.parseStyle(view, it)) }
-        registerAttrs(arrayOf("highlightTextColor", "textColorHighlight")) { view.highlightColor = parse(view, it) }
-        registerAttrs(arrayOf("hintTextColor", "textColorHint")) { view.setHintTextColor(parse(view, it)) }
-        registerAttrs(arrayOf("linkTextColor", "textColorLink")) { view.setLinkTextColor(parse(view, it)) }
         registerAttr("textIsSelectable") { view.setTextIsSelectable(it.toBoolean()) }
         registerAttr("textScaleX") { view.textScaleX = Dimensions.parseToPixel(it, view) }
-        registerAttr("text") { view.text = Strings.parse(view, it) }
+        registerAttr("textStyle") { mTextStyle = TextViewInflater.TEXT_STYLES.split(it); setTypeface() }
+        registerAttr("typeface") { mTypeface = it; setTypeface() }
+        registerAttrs(arrayOf("highlightTextColor", "textColorHighlight")) { view.highlightColor = parse(view, it) }
+        registerAttrs(arrayOf("hintTextColor", "textColorHint")) { view.setHintTextColor(parse(view, it)) }
+        registerAttrs(arrayOf("isAllCaps", "allCaps", "textAllCaps")) { view.isAllCaps = it.toBoolean() }
+        registerAttrs(arrayOf("isCursorVisible", "cursorVisible")) { view.isCursorVisible = it.toBoolean() }
+        registerAttrs(arrayOf("isElegantTextHeight", "elegantTextHeight")) { view.isElegantTextHeight = it.toBoolean() }
+        registerAttrs(arrayOf("isSingleLine", "singleLine")) { view.isSingleLine = it.toBoolean() }
+        registerAttrs(arrayOf("linkTextColor", "textColorLink")) { view.setLinkTextColor(parse(view, it)) }
         registerAttrs(arrayOf("textColor", "color")) { view.setTextColor(parse(view.context, it)) }
         registerAttrs(arrayOf("textSize", "size")) { view.setTextSize(TypedValue.COMPLEX_UNIT_PX, Dimensions.parseToPixel(it, view)) }
 

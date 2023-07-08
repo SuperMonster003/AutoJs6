@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>颜色 (Color) | AutoJs6 文档 - 6.3.0</title>
+    <title>颜色 (Color) | AutoJs6 文档 - 6.3.2</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -122,6 +122,9 @@
 <li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
 <li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
 <li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
 <li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
 <li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
 <li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
@@ -152,7 +155,7 @@
 
     <div id="column1" data-id="color" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <h1>AutoJs6 文档 - 6.3.2</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -222,6 +225,10 @@
 <li><span class="stability_undefined"><a href="#color_setalpha_color_alpha">setAlpha(color, alpha)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#color_m_setalpharelative">[m] setAlphaRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_setalpharelative_color_percentage">setAlphaRelative(color, percentage)</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#color_m_removealpha">[m] removeAlpha</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_removealpha_color">removeAlpha(color)</a></span></li>
 </ul>
@@ -248,6 +255,10 @@
 <li><span class="stability_undefined"><a href="#color_setred_color_red">setRed(color, red)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#color_m_setredrelative">[m] setRedRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_setredrelative_color_percentage">setRedRelative(color, percentage)</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#color_m_removered">[m] removeRed</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_removered_color">removeRed(color)</a></span></li>
 </ul>
@@ -263,6 +274,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#color_m_getgreen">[m] getGreen</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_getgreen_color">getGreen(color)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_setgreenrelative">[m] setGreenRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_setgreenrelative_color_percentage">setGreenRelative(color, percentage)</a></span></li>
 <li><span class="stability_undefined"><a href="#color_getgreen_color_options">getGreen(color, options)</a></span></li>
 </ul>
 </li>
@@ -298,6 +313,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#color_m_setblue">[m] setBlue</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_setblue_color_blue">setBlue(color, blue)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#color_m_setbluerelative">[m] setBlueRelative</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_setbluerelative_color_percentage">setBlueRelative(color, percentage)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#color_m_removeblue">[m] removeBlue</a></span><ul>
@@ -533,7 +552,7 @@
 <h3>toInt(color)<span><a class="mark" href="#color_toint_color" id="color_toint_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> } - 颜色整数</li>
 </ul>
 <p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
@@ -554,7 +573,7 @@ colors.toInt(&#39;burnt-orange&#39;); // -3386112
 <h3>toHex(color)<span><a class="mark" href="#color_tohex_color" id="color_tohex_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
 <p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>.</p>
@@ -576,7 +595,7 @@ colors.toHex(&#39;burnt-orange&#39;); // #CC5500
 <h3>toHex(color, alpha)<span><a class="mark" href="#color_tohex_color_alpha" id="color_tohex_color_alpha">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>[ alpha = <code>&#39;auto&#39;</code> ]</strong> { <a href="dataTypes.html#datatypes_boolean">boolean</a> | <code>&#39;keep&#39;</code> | <code>&#39;none&#39;</code> | <code>&#39;auto&#39;</code> } - A (alpha) 分量参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
@@ -631,7 +650,7 @@ colors.toHex(cC, &#39;keep&#39;); /* 同上. */
 <h3>toHex(color, length)<span><a class="mark" href="#color_tohex_color_length" id="color_tohex_color_length">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>length</strong> { <code>8</code> | <code>6</code> | <code>3</code> } - Hex 代码长度参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
@@ -686,7 +705,7 @@ colors.toHex(cD, 3); /* 抛出异常. */
 <h3>toFullHex(color)<span><a class="mark" href="#color_tofullhex_color" id="color_tofullhex_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码的完整形式</li>
 </ul>
 <p>将颜色参数强制转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a> 的完整形式 (#AARRGGBB).</p>
@@ -698,7 +717,7 @@ colors.toFullHex(&#39;#CC5500&#39;); // #FFCC5500
 <h3>build(color?)<span><a class="mark" href="#color_build_color" id="color_build_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload [1-2]/4</code></strong></p>
 <ul>
-<li><strong>[ color = <code>Colors.BLACK</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>[ color = <code>Colors.BLACK</code> ]</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="colorType.html">Color</a></span> } - Color 实例</li>
 </ul>
 <p>构建一个 <a href="colorType.html">Color</a> 实例, 相当于 <code>new Color(color?)</code> 或 <code>Color(color?)</code>.</p>
@@ -728,7 +747,7 @@ colors.build().setRgba(120, 60, 240, 0.85).toHex(); /* 同上. */
 <h3>digest(color)<span><a class="mark" href="#color_digest_color" id="color_digest_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 颜色摘要</li>
 </ul>
 <p>获取颜色摘要.</p>
@@ -848,7 +867,7 @@ colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
 <h3>toString(color)<span><a class="mark" href="#color_tostring_color" id="color_tostring_color">#</a></span></h3>
 <p><strong><code>[6.2.0]</code></strong> <strong><code>Overload 1/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
 <p>将颜色参数转换为 <a href="dataTypes.html#datatypes_colorhex">颜色代码 (ColorHex)</a>.</p>
@@ -856,7 +875,7 @@ colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
 <h3>toString(color, alpha)<span><a class="mark" href="#color_tostring_color_alpha" id="color_tostring_color_alpha">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>[ alpha = <code>&#39;auto&#39;</code> ]</strong> { <a href="dataTypes.html#datatypes_boolean">boolean</a> | <code>&#39;keep&#39;</code> | <code>&#39;none&#39;</code> | <code>&#39;auto&#39;</code> } - A (alpha) 分量参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
@@ -865,7 +884,7 @@ colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
 <h3>toString(color, length)<span><a class="mark" href="#color_tostring_color_length" id="color_tostring_color_length">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 3/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>length</strong> { <code>8</code> | <code>6</code> | <code>3</code> } - Hex 代码长度参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> } - 颜色代码</li>
 </ul>
@@ -875,7 +894,7 @@ colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
 <h3>alpha(color)<span><a class="mark" href="#color_alpha_color" id="color_alpha_color">#</a></span></h3>
 <p><strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -886,7 +905,7 @@ colors.alpha(&#39;#05060708&#39;); // 5
 <h3>alpha(color, options)<span><a class="mark" href="#color_alpha_color_options" id="color_alpha_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -909,7 +928,7 @@ colors.alpha(&#39;#05060708&#39;); /* 同上. */
 <h3>alphaDouble(color)<span><a class="mark" href="#color_alphadouble_color" id="color_alphadouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -924,7 +943,7 @@ colors.alpha(&#39;#05060708&#39;, { max: 1 }); /* 同上. */
 <h3>getAlpha(color)<span><a class="mark" href="#color_getalpha_color" id="color_getalpha_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -932,7 +951,7 @@ colors.alpha(&#39;#05060708&#39;, { max: 1 }); /* 同上. */
 <h3>getAlpha(color, options)<span><a class="mark" href="#color_getalpha_color_options" id="color_getalpha_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -946,7 +965,7 @@ colors.alpha(&#39;#05060708&#39;, { max: 1 }); /* 同上. */
 <h3>getAlphaDouble(color)<span><a class="mark" href="#color_getalphadouble_color" id="color_getalphadouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (alpha)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -955,7 +974,7 @@ colors.alpha(&#39;#05060708&#39;, { max: 1 }); /* 同上. */
 <h3>setAlpha(color, alpha)<span><a class="mark" href="#color_setalpha_color_alpha" id="color_setalpha_color_alpha">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>alpha</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - A (alpha)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
@@ -966,11 +985,32 @@ colors.toHex(colors.setAlpha(&#39;#663399&#39;, 0.5)); /* 同上, 0.5 解析为�
 colors.toHex(colors.setAlpha(&#39;#663399&#39;, 255)); // #FF663399
 colors.toHex(colors.setAlpha(&#39;#663399&#39;, 1)); /* 同上, 1 默认作为百分数分量, 即 100%. */
 </code></pre>
+<h2>[m] setAlphaRelative<span><a class="mark" href="#color_m_setalpharelative" id="color_m_setalpharelative">#</a></span></h2>
+<h3>setAlphaRelative(color, percentage)<span><a class="mark" href="#color_setalpharelative_color_percentage" id="color_setalpharelative_color_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>针对 <code>A (alpha)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>A (alpha)</code> 分量为 <code>80</code>, 希望设置 <code>A</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">colors.setAlphaRelative(color, 0.5);
+colors.setAlphaRelative(color, &#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>A</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">colors.setAlphaRelative(color, 1.5);
+colors.setAlphaRelative(color, &#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">colors.setAlphaRelative(color, 10); /* A 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>A</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>A</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m] removeAlpha<span><a class="mark" href="#color_m_removealpha" id="color_m_removealpha">#</a></span></h2>
 <h3>removeAlpha(color)<span><a class="mark" href="#color_removealpha_color" id="color_removealpha_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>去除颜色的 <code>A (alpha)</code> 分量, 返回新颜色的颜色整数.</p>
@@ -983,7 +1023,7 @@ colors.toHex(colors.removeAlpha(&#39;#CC5500&#39;)); // #CC5500
 <h3>red(color)<span><a class="mark" href="#color_red_color" id="color_red_color">#</a></span></h3>
 <p><strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>R (red)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -994,7 +1034,7 @@ colors.red(&#39;#05060708&#39;); // 6
 <h3>red(color, options)<span><a class="mark" href="#color_red_color_options" id="color_red_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -1013,7 +1053,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>redDouble(color)<span><a class="mark" href="#color_reddouble_color" id="color_reddouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>R (red)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -1024,7 +1064,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>getRed(color)<span><a class="mark" href="#color_getred_color" id="color_getred_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>R (red)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -1032,7 +1072,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>getRed(color, options)<span><a class="mark" href="#color_getred_color_options" id="color_getred_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -1046,7 +1086,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>getRedDouble(color)<span><a class="mark" href="#color_getreddouble_color" id="color_getreddouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>R (red)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -1055,7 +1095,7 @@ colors.red(&#39;#663399&#39;); /* 同上. */
 <h3>setRed(color, red)<span><a class="mark" href="#color_setred_color_red" id="color_setred_color_red">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>red</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - R (red)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
@@ -1066,11 +1106,32 @@ colors.toHex(colors.setRed(&#39;#663399&#39;, 0.5)); /* 同上, 0.5 解析为百
 colors.toHex(colors.setRed(&#39;#663399&#39;, 255)); // #FF3399
 colors.toHex(colors.setRed(&#39;#663399&#39;, 1)); /* #013399, 不同上. 1 默认作为整数分量, 而非 100%. */
 </code></pre>
+<h2>[m] setRedRelative<span><a class="mark" href="#color_m_setredrelative" id="color_m_setredrelative">#</a></span></h2>
+<h3>setRedRelative(color, percentage)<span><a class="mark" href="#color_setredrelative_color_percentage" id="color_setredrelative_color_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>针对 <code>R (red)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>R (red)</code> 分量为 <code>80</code>, 希望设置 <code>R</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">colors.setRedRelative(color, 0.5);
+colors.setRedRelative(color, &#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>R</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">colors.setRedRelative(color, 1.5);
+colors.setRedRelative(color, &#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">colors.setRedRelative(color, 10); /* R 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>R</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>R</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m] removeRed<span><a class="mark" href="#color_m_removered" id="color_m_removered">#</a></span></h2>
 <h3>removeRed(color)<span><a class="mark" href="#color_removered_color" id="color_removered_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>去除颜色的 <code>R (red)</code> 分量, 返回新颜色的颜色整数.</p>
@@ -1083,7 +1144,7 @@ colors.toHex(colors.removeRed(&#39;#CC5500&#39;)); // #005500
 <h3>green(color)<span><a class="mark" href="#color_green_color" id="color_green_color">#</a></span></h3>
 <p><strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>G (green)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -1094,7 +1155,7 @@ colors.green(&#39;#05060708&#39;); // 7
 <h3>green(color, options)<span><a class="mark" href="#color_green_color_options" id="color_green_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -1113,7 +1174,7 @@ colors.green(&#39;#663399&#39;); /* 同上. */
 <h3>greenDouble(color)<span><a class="mark" href="#color_greendouble_color" id="color_greendouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>G (green)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -1124,15 +1185,36 @@ colors.green(&#39;#663399&#39;); /* 同上. */
 <h3>getGreen(color)<span><a class="mark" href="#color_getgreen_color" id="color_getgreen_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>G (green)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
 <p><a href="#color_m_green">colors.green(color)</a> 的别名方法.</p>
+<h2>[m] setGreenRelative<span><a class="mark" href="#color_m_setgreenrelative" id="color_m_setgreenrelative">#</a></span></h2>
+<h3>setGreenRelative(color, percentage)<span><a class="mark" href="#color_setgreenrelative_color_percentage" id="color_setgreenrelative_color_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>针对 <code>G (green)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>G (green)</code> 分量为 <code>80</code>, 希望设置 <code>G</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">colors.setGreenRelative(color, 0.5);
+colors.setGreenRelative(color, &#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>G</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">colors.setGreenRelative(color, 1.5);
+colors.setGreenRelative(color, &#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">colors.setGreenRelative(color, 10); /* G 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>G</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>G</code> 分量均保持 <code>0</code> 值.</p>
 <h3>getGreen(color, options)<span><a class="mark" href="#color_getgreen_color_options" id="color_getgreen_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -1146,7 +1228,7 @@ colors.green(&#39;#663399&#39;); /* 同上. */
 <h3>getGreenDouble(color)<span><a class="mark" href="#color_getgreendouble_color" id="color_getgreendouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>G (green)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -1155,7 +1237,7 @@ colors.green(&#39;#663399&#39;); /* 同上. */
 <h3>setGreen(color, green)<span><a class="mark" href="#color_setgreen_color_green" id="color_setgreen_color_green">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>green</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - G (green)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
@@ -1170,7 +1252,7 @@ colors.toHex(colors.setGreen(&#39;#663399&#39;, 1)); /* #660199, 不同上. 1 �
 <h3>removeGreen(color)<span><a class="mark" href="#color_removegreen_color" id="color_removegreen_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>去除颜色的 <code>G (green)</code> 分量, 返回新颜色的颜色整数.</p>
@@ -1183,7 +1265,7 @@ colors.toHex(colors.removeGreen(&#39;#CC5500&#39;)); // #CC0000
 <h3>blue(color)<span><a class="mark" href="#color_blue_color" id="color_blue_color">#</a></span></h3>
 <p><strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>B (blue)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -1194,7 +1276,7 @@ colors.blue(&#39;#05060708&#39;); // 8
 <h3>blue(color, options)<span><a class="mark" href="#color_blue_color_options" id="color_blue_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -1213,7 +1295,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>blueDouble(color)<span><a class="mark" href="#color_bluedouble_color" id="color_bluedouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (blue)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -1224,7 +1306,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>getBlue(color)<span><a class="mark" href="#color_getblue_color" id="color_getblue_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>B (blue)</code> 分量, 取值范围 <code>[0..255]</code>.</p>
@@ -1232,7 +1314,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>getBlue(color, options)<span><a class="mark" href="#color_getblue_color_options" id="color_getblue_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ max = <code>255</code> ]?: <code>1</code> | <code>255</code> - 范围最大值</li>
 </ul>
@@ -1246,7 +1328,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>getBlueDouble(color)<span><a class="mark" href="#color_getbluedouble_color" id="color_getbluedouble_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> }</li>
 </ul>
 <p>获取颜色的 <code>A (blue)</code> 分量, 取值范围 <code>[0..1]</code>.</p>
@@ -1255,7 +1337,7 @@ colors.blue(&#39;#663399&#39;); /* 同上. */
 <h3>setBlue(color, blue)<span><a class="mark" href="#color_setblue_color_blue" id="color_setblue_color_blue">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>blue</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 颜色分量 - B (blue)</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
@@ -1266,11 +1348,32 @@ colors.toHex(colors.setBlue(&#39;#663399&#39;, 0.5)); /* 同上, 0.5 解析为�
 colors.toHex(colors.setBlue(&#39;#663399&#39;, 255)); // #6633FF
 colors.toHex(colors.setBlue(&#39;#663399&#39;, 1)); /* #663301, 不同上. 1 默认作为整数分量, 而非 100%. */
 </code></pre>
+<h2>[m] setBlueRelative<span><a class="mark" href="#color_m_setbluerelative" id="color_m_setbluerelative">#</a></span></h2>
+<h3>setBlueRelative(color, percentage)<span><a class="mark" href="#color_setbluerelative_color_percentage" id="color_setbluerelative_color_percentage">#</a></span></h3>
+<p><strong><code>6.3.1</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>percentage</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponent">ColorComponent</a></span> } - 相对百分数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+</ul>
+<p>针对 <code>B (blue)</code> 分量设置其相对百分比, 返回新颜色的颜色整数.</p>
+<p>如当前颜色 <code>B (blue)</code> 分量为 <code>80</code>, 希望设置 <code>B</code> 分量为 <code>50%</code> 相对量, 即 <code>40</code>:</p>
+<pre><code class="lang-js">colors.setBlueRelative(color, 0.5);
+colors.setBlueRelative(color, &#39;50%&#39;); /* 效果同上. */
+</code></pre>
+<p>同样地, 如希望设置 <code>B</code> 分量为 <code>1.5</code> 倍相对量, 即 <code>120</code>:</p>
+<pre><code class="lang-js">colors.setBlueRelative(color, 1.5);
+colors.setBlueRelative(color, &#39;150%&#39;);
+</code></pre>
+<p>当设置的相对量超过 <code>255</code> 时, 将以 <code>255</code> 为最终值:</p>
+<pre><code class="lang-js">colors.setBlueRelative(color, 10); /* B 分量最终值为 255, 而非 800. */
+</code></pre>
+<p>特别地, 当原本颜色的 <code>B</code> 分量为 <code>0</code> 时, 无论如何设置相对量, <code>B</code> 分量均保持 <code>0</code> 值.</p>
 <h2>[m] removeBlue<span><a class="mark" href="#color_m_removeblue" id="color_m_removeblue">#</a></span></h2>
 <h3>removeBlue(color)<span><a class="mark" href="#color_removeblue_color" id="color_removeblue_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>去除颜色的 <code>B (blue)</code> 分量, 返回新颜色的颜色整数.</p>
@@ -1283,7 +1386,7 @@ colors.toHex(colors.removeBlue(&#39;#CC5500&#39;)); // #CC5500
 <h3>rgb(color)<span><a class="mark" href="#color_rgb_color" id="color_rgb_color">#</a></span></h3>
 <p><strong><code>[6.2.0]</code></strong> <strong><code>Overload 1/3</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
 </ul>
 <p>获取 <code>color</code> 参数对应的 <a href="dataTypes.html#datatypes_colorint">颜色整数 (ColorInt)</a>.</p>
@@ -1576,7 +1679,7 @@ colors.hsla([ &#39;25%&#39;, &#39;80%&#39;, &#39;64%&#39;, &#39;25%&#39; ]); /* 
 <h3>toRgb(color)<span><a class="mark" href="#color_torgb_color" id="color_torgb_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 RGB <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -1587,7 +1690,7 @@ console.log(`R: ${r}, G: ${g}, B: ${b}`);
 <h3>toRgba(color)<span><a class="mark" href="#color_torgba_color" id="color_torgba_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 RGBA <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -1598,7 +1701,7 @@ console.log(`R: ${r}, G: ${g}, B: ${b}, A: ${a}`);
 <h3>toRgba(color, options)<span><a class="mark" href="#color_torgba_color_options" id="color_torgba_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ maxAlpha = <code>255</code> ]?: <code>1</code> | <code>255</code> - A (alpha) 分量的范围最大值</li>
 </ul>
@@ -1617,7 +1720,7 @@ console.log(`R: ${r2}, G: ${g2}, B: ${b2}, A: ${a2}`); /* A 分量范围为 [0..
 <h3>toArgb(color)<span><a class="mark" href="#color_toargb_color" id="color_toargb_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 ARGB <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -1627,7 +1730,7 @@ console.log(`A: ${a}, R: ${r}, G: ${g}, B: ${b}`);
 <h3>toArgb(color, options)<span><a class="mark" href="#color_toargb_color_options" id="color_toargb_color_options">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ maxAlpha = <code>255</code> ]?: <code>1</code> | <code>255</code> - A (alpha) 分量的范围最大值</li>
 </ul>
@@ -1646,7 +1749,7 @@ console.log(`A: ${a2}, R: ${r2}, G: ${g2}, B: ${b2}`); /* A 分量范围为 [0..
 <h3>toHsv(color)<span><a class="mark" href="#color_tohsv_color" id="color_tohsv_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 HSV <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -1669,7 +1772,7 @@ console.log(`H: ${h}, S: ${s}, V: ${v}`);
 <h3>toHsva(color)<span><a class="mark" href="#color_tohsva_color" id="color_tohsva_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 HSVA <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -1695,7 +1798,7 @@ console.log(`H: ${h}, S: ${s}, V: ${v}, A: ${a}`);
 <h3>toHsl(color)<span><a class="mark" href="#color_tohsl_color" id="color_tohsl_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 HSL <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -1718,7 +1821,7 @@ console.log(`H: ${h}, S: ${s}, L: ${l}`);
 <h3>toHsla(color)<span><a class="mark" href="#color_tohsla_color" id="color_tohsla_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_colorcomponents">ColorComponents</a></span> } - 颜色分量数组</li>
 </ul>
 <p>获取颜色参数的 HSLA <a href="dataTypes.html#datatypes_colorcomponents">颜色分量数组</a>.</p>
@@ -1744,8 +1847,8 @@ console.log(`H: ${h}, S: ${s}, L: ${l}, A: ${a}`);
 <h3>isSimilar(colorA, colorB, threshold?, algorithm?)<span><a class="mark" href="#color_issimilar_colora_colorb_threshold_algorithm" id="color_issimilar_colora_colorb_threshold_algorithm">#</a></span></h3>
 <p><strong><code>[6.2.0]</code></strong> <strong><code>Overload [1-3]/4</code></strong></p>
 <ul>
-<li><strong>colorA</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
-<li><strong>colorB</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>colorA</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>colorB</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>[ threshold = <code>4</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a></span> } - <a href="glossaries.html#glossaries_颜色匹配阈值">颜色匹配阈值</a></li>
 <li><strong>[ algorithm = <code>&#39;diff&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_colordetectionalgorithm">ColorDetectionAlgorithm</a></span> } - 颜色检测算法</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 两个颜色是否相似</li>
@@ -1767,8 +1870,8 @@ colors.isSimilar(&#39;orange&#39;, &#39;dark-orange&#39;, 8, &#39;hs&#39;); // t
 <h3>isSimilar(colorA, colorB, options)<span><a class="mark" href="#color_issimilar_colora_colorb_options" id="color_issimilar_colora_colorb_options">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload 4/4</code></strong></p>
 <ul>
-<li><strong>colorA</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
-<li><strong>colorB</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>colorA</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>colorB</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>options</strong> {{<ul>
 <li>[ similarity ≈ <code>0.9843</code> ]?: <a href="dataTypes.html#datatypes_range">Range[0..1]</a> - <a href="glossaries.html#glossaries_相似度">颜色匹配相似度</a></li>
 <li>[ threshold = <code>4</code> ]?: <a href="dataTypes.html#datatypes_intrange">IntRange[0..255]</a> - <a href="glossaries.html#glossaries_颜色匹配阈值">颜色匹配阈值</a></li>
@@ -1786,8 +1889,8 @@ colors.isSimilar(&#39;orange&#39;, &#39;dark-orange&#39;, 8, &#39;hs&#39;); // t
 <h3>isEqual(colorA, colorB, alphaMatters?)<span><a class="mark" href="#color_isequal_colora_colorb_alphamatters" id="color_isequal_colora_colorb_alphamatters">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Overload[1-2]/2</code></strong></p>
 <ul>
-<li><strong>colorA</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
-<li><strong>colorB</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>colorA</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
+<li><strong>colorB</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><strong>[ alphaMatters = <code>false</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否考虑 <code>A (alpha)</code> 分量</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 两个颜色是否相等</li>
 </ul>
@@ -1839,7 +1942,7 @@ colors.equals(&#39;#FF0000&#39;, &#39;#F00&#39;); /* 抛出异常. */
 <h3>luminance(color)<span><a class="mark" href="#color_luminance_color" id="color_luminance_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_range">Range[0..1]</a></span> } - 颜色亮度</li>
 </ul>
 <p>获取颜色的 <a href="glossaries.html#glossaries_luminance">亮度 (Luminance)</a>, 取值范围 <code>[0..1]</code>.</p>
@@ -1857,7 +1960,7 @@ colors.luminance(colors.YELLOW); // 0.9278
 <h3>toColorStateList(...color)<span><a class="mark" href="#color_tocolorstatelist_color" id="color_tocolorstatelist_color">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
-<li><strong>color</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a>(<a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a>)<a href="documentation.html#documentation_可变参数">[]</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="https://developer.android.com/reference/android/content/res/ColorStateList">android.content.res.ColorStateList</a></span> }</li>
 </ul>
 <p>将一个或多个颜色参数转换为 ColorStateList 实例.</p>
@@ -1869,7 +1972,7 @@ colors.toColorStateList(&#39;red&#39;, &#39;green&#39;, &#39;orange&#39;); /* �
 <p><strong><code>6.2.0</code></strong></p>
 <ul>
 <li><strong>paint</strong> { <span class="type"><a href="https://developer.android.com/reference/android/graphics/Paint">android.graphics.Paint</a></span> } - 画笔参数</li>
-<li><strong>color</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorhex">ColorHex</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> | <span class="type"><a href="dataTypes.html#datatypes_colorname">ColorName</a></span> } - 颜色参数</li>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
 </ul>
 <p>方法 <code>setPaintColor</code> 用于解决在 <code>Android API 29 (10) [Q]</code> 及以上系统中 <code>Paint#setColor(color)</code> 无法正常设置画笔颜色的问题.</p>

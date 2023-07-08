@@ -4,11 +4,29 @@
 
         <!ENTITY url_github_autojs6 "http://project.autojs6.com">
 
-        <!ENTITY url_github_autojs6_vscode_extension "http://vscext-project.autojs6.com">
+        <!ENTITY url_github_autojs6_vscode_extension "http://vsc_ext-project.autojs6.com">
 
         ]>
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="css_style_license_dialog_notices" translatable="false">
+        p.license {
+            background: grey;
+        }
+        body {
+            font-family: sans-serif;
+            overflow-wrap: break-word;
+        }
+        body a:link {
+            color: #00838F;
+        }
+        pre {
+            background-color: #F2F2F2;
+            padding: 1em;
+            white-space: pre-wrap;
+        }
+    </string>
 
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Building...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Cleaning...</string>
@@ -134,6 +152,7 @@
     <string name="error_empty_github_release_assets">No GitHub release assets to download</string>
     <string name="error_empty_shell_command">Command is empty</string>
     <string name="error_enable_server">Can\'t enable AutoJs6 server: %s</string>
+    <string name="error_failed_to_convert_into_drawable">Failed to convert value %s into a Drawable</string>
     <string name="error_function_called_in_ui_thread">UI thread can\'t be blocked. Try running %s() in sub-thread or sub-script</string>
     <string name="error_function_called_more_than_once">%s() called more than once</string>
     <string name="error_get_github_latest_release">Can\'t get latest GitHub release</string>
@@ -216,6 +235,7 @@
     <string name="key_auto_night_mode_enabled" translatable="false">key_$_auto_night_mode_enabled</string>
     <string name="key_change_working_dir" translatable="false">key_$_change_working_dir</string>
     <string name="key_check_for_updates" translatable="false">key_$_check_for_updates</string>
+    <string name="key_client_socket_normally_closed" translatable="false">key_$_client_socket_normally_closed</string>
     <string name="key_compatibility_with_classes_for_ver_4_x" translatable="false">key_$_compatibility_with_classes_for_ver_4_x</string>
     <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
     <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
@@ -274,6 +294,7 @@
     <string name="key_root_record_out_file_type_binary" translatable="false">key_$_root_record_out_file_type_binary</string>
     <string name="key_root_record_out_file_type_js" translatable="false">key_$_root_record_out_file_type_js</string>
     <string name="key_server_address" translatable="false">key_$_server_address</string>
+    <string name="key_server_socket_normally_closed" translatable="false">key_$_server_socket_normally_closed</string>
     <string name="key_stable_mode" translatable="false">key_$_stable_mode</string>
     <string name="key_theme_color" translatable="false">key_$_theme_color</string>
     <string name="key_theme_color_accent" translatable="false">key_$_theme_color_accent</string>
@@ -284,6 +305,7 @@
     <string name="key_use_volume_control_running" translatable="false">key_$_use_volume_control_running</string>
     <string name="key_working_directory" translatable="false">key_$_working_directory</string>
     <string name="key_working_directory_histories" translatable="false">key_$_working_directory_histories</string>
+    <string name="key_pc_server_address_histories" translatable="false">key_$_pc_server_address_histories</string>
     <string name="key_working_directory_initialized" translatable="false">key_$_working_directory_initialized</string>
     <string name="mt_color_picker_title">Color picker</string>
     <string name="mt_custom">Custom</string>
@@ -448,6 +470,7 @@
     <string name="text_console">Console</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copy</string>
+    <string name="text_export">Export</string>
     <string name="text_copy_all">Copy all</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_command">Copy cmd</string>
@@ -836,11 +859,27 @@
     <string name="url_github_autojs6" translatable="false">&url_github_autojs6;</string>
     <string name="url_github_autojs6_issues" translatable="false">&url_github_autojs6;/issues</string>
     <string name="url_github_autojs6_vscode_extension_usage" translatable="false">&url_github_autojs6_vscode_extension;/#%E4%BD%BF%E7%94%A8-usage</string>
+    <string name="url_github_autojs6_vscode_extension_repo" translatable="false">&url_github_autojs6_vscode_extension;</string>
     <string name="value_app_language_default" translatable="false">@string/value_app_language_follow_system</string>
     <string name="value_app_language_english" translatable="false">EN</string>
     <string name="value_app_language_follow_system" translatable="false">Auto</string>
     <string name="value_app_language_simplified_chinese" translatable="false">ZH_CN</string>
     <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
+    <string name="text_min_version">Minimum version</string>
+    <string name="text_current_version">Current version</string>
+    <string name="text_lower_than">Lower than</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">Repository URL of VSCode extension</string>
+    <string name="text_connection_cannot_be_established">Connection can\'t be established</string>
+    <string name="text_min_version_of_vscode_vsc_ext">Minimum version of VSCode extension</string>
+    <string name="error_invalid_ip_address">Invalid IP address</string>
+    <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
+    <string name="error_unacceptable_character">Unacceptable character</string>
+    <string name="error_port_num_over_65535">Port number over 65535</string>
+    <string name="error_dot_decimal_notation_num_over_255">Dot-decimal number over 255</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
+    <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
+    <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>
@@ -851,23 +890,5 @@
         <item quantity="one">%d script stopped</item>
         <item quantity="other">%d scripts stopped</item>
     </plurals>
-
-    <string name="css_style_license_dialog_notices" translatable="false">
-        p.license {
-            background: grey;
-        }
-        body {
-            font-family: sans-serif;
-            overflow-wrap: break-word;
-        }
-        body a:link {
-            color: #00838F;
-        }
-        pre {
-            background-color: #F2F2F2;
-            padding: 1em;
-            white-space: pre-wrap;
-        }
-    </string>
 
 </resources>

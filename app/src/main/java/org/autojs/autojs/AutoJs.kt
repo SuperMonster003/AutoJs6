@@ -52,14 +52,19 @@ class AutoJs private constructor(private val appContext: Application) : Abstract
         LocalBroadcastManager.getInstance(appContext).registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 try {
+                    val action = intent.action ?: return
                     ensureAccessibilityServiceEnabled()
-                    when (intent.action) {
-                        LayoutBoundsFloatyWindow::class.java.name -> capture(object : LayoutInspectFloatyWindow {
-                            override fun create(nodeInfo: NodeInfo?) = LayoutBoundsFloatyWindow(nodeInfo, context)
-                        })
-                        LayoutHierarchyFloatyWindow::class.java.name -> capture(object : LayoutInspectFloatyWindow {
-                            override fun create(nodeInfo: NodeInfo?) = LayoutHierarchyFloatyWindow(nodeInfo, context)
-                        })
+                    when {
+                        action.equals(LayoutBoundsFloatyWindow::class.java.name, true) -> {
+                            capture(object : LayoutInspectFloatyWindow {
+                                override fun create(nodeInfo: NodeInfo?) = LayoutBoundsFloatyWindow(nodeInfo, context)
+                            })
+                        }
+                        action.equals(LayoutHierarchyFloatyWindow::class.java.name, true) -> {
+                            capture(object : LayoutInspectFloatyWindow {
+                                override fun create(nodeInfo: NodeInfo?) = LayoutHierarchyFloatyWindow(nodeInfo, context)
+                            })
+                        }
                     }
                 } catch (e: Exception) {
                     if (Looper.myLooper() != Looper.getMainLooper()) {

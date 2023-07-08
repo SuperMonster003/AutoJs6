@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>数据类型 (Data Types) | AutoJs6 文档 - 6.3.0</title>
+    <title>数据类型 (Data Types) | AutoJs6 文档 - 6.3.2</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -122,6 +122,9 @@
 <li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
 <li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
 <li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
 <li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
 <li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
 <li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
@@ -152,7 +155,7 @@
 
     <div id="column1" data-id="dataTypes" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <h1>AutoJs6 文档 - 6.3.2</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -281,13 +284,34 @@
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#datatypes_themecolor">ThemeColor</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_injectablewebview">InjectableWebView</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_injectablewebclient">InjectableWebClient</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_jsbytearray">JsByteArray</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_bytearray">ByteArray</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_cryptodigestalgorithm">CryptoDigestAlgorithm</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_cryptokeypairgeneratoralgorithm">CryptoKeyPairGeneratorAlgorithm</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_cryptodigestoptions">CryptoDigestOptions</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_cryptociphertransformation">CryptoCipherTransformation</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_storage">Storage</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_opencvpoint">OpencvPoint</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_opencvsize">OpencvSize</a></span></li>
-<li><span class="stability_undefined"><a href="#datatypes_androidrect">AndroidRect</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_androidbundle">AndroidBundle</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_androidrect">AndroidRect</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_cryptocipheroptions">CryptoCipherOptions</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_consolebuildoptions">ConsoleBuildOptions</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_httprequestbuilderoptions">HttpRequestBuilderOptions</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_httprequestheaders">HttpRequestHeaders</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_httpresponsebody">HttpResponseBody</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_httpresponseheaders">HttpResponseHeaders</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_httpresponse">HttpResponse</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_injectablewebclient">InjectableWebClient</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_injectablewebview">InjectableWebView</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_noticeoptions">NoticeOptions</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_noticechanneloptions">NoticeChannelOptions</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_noticepresetconfiguration">NoticePresetConfiguration</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_noticebuilder">NoticeBuilder</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_okhttp3httpurl">Okhttp3HttpUrl</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_ocroptions">OcrOptions</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_okhttp3request">Okhttp3Request</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_opencvpoint">OpencvPoint</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_opencvrect">OpencvRect</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_opencvsize">OpencvSize</a></span></li>
 </ul>
 </li>
 </ul>
@@ -1466,7 +1490,7 @@ colors.toHsla(&#39;blue-grey&#39;)[3]; /* A 分量为 1. */
 <p>表示一个整数的取值范围. 其表示法可参阅 <a href="#datatypes_range">Range</a> 小节.</p>
 <p>如 <code>IntRange[10..30]</code> 表示整数 <code>x</code> 位于 <code>10 &lt;= x &lt;= 30</code> 范围内, 而 <code>IntRange[0..100)</code> 表示整数 <code>x</code> 位于 <code>0 &lt;= x &lt; 100</code> 范围内.</p>
 <h2>StandardCharset<span><a class="mark" href="#datatypes_standardcharset" id="datatypes_standardcharset">#</a></span></h2>
-<p>StandardCharset 类型支持 Java 字符集 (Charset 类) 形式及字符串形式: </p>
+<p>StandardCharset 类型支持 Java 字符集 (Charset 类) 形式及字符串形式:</p>
 <table>
 <thead>
 <tr>
@@ -1510,8 +1534,8 @@ colors.toHsla(&#39;blue-grey&#39;)[3]; /* A 分量为 1. */
 </table>
 <p>Charset 类可由 StandardCharsets 的静态常量获取, 如 <code>StandardCharsets.UTF_8</code>.<br>字符串表示 StandardCharset 类型时, 支持与上述静态常量同名的大写形式, 如 <code>&#39;UTF_8&#39;</code>, 以及带连字符的小写形式, 如 <code>&#39;utf-8&#39;</code>.</p>
 <p>Typescript declaration (TS 声明):</p>
-<pre><code class="lang-ts">declare type StandardCharset = java.nio.charset.StandardCharsets 
-    | &#39;US_ASCII&#39; | &#39;ISO_8859_1&#39; | &#39;UTF_8&#39; | &#39;UTF_16BE&#39; | &#39;UTF_16LE&#39; | &#39;UTF_16&#39; 
+<pre><code class="lang-ts">declare type StandardCharset = java.nio.charset.StandardCharsets
+    | &#39;US_ASCII&#39; | &#39;ISO_8859_1&#39; | &#39;UTF_8&#39; | &#39;UTF_16BE&#39; | &#39;UTF_16LE&#39; | &#39;UTF_16&#39;
     | &#39;us-ascii&#39; | &#39;iso-8859-1&#39; | &#39;utf-8&#39; | &#39;utf-16be&#39; | &#39;utf-16le&#39; | &#39;utf-16&#39;;
 </code></pre>
 <p>JavaScript 实例:</p>
@@ -1531,7 +1555,7 @@ test(&#39;utf-8&#39;); /* 字符串小写形式. */
 <p>注: 在 AutoJs6 中, StandardCharsets 支持全局化调用.</p>
 </blockquote>
 <blockquote>
-<p>参阅: <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/charset/StandardCharsets.html">Java 文档 (标准版) (英)</a></p>
+<p>参阅: <a href="https://docs.oracle.com/javase/8/docs/api/java/nio/charset/StandardCharsets.html">Oracle Docs</a></p>
 </blockquote>
 <h2>ExtendModulesNames<span><a class="mark" href="#datatypes_extendmodulesnames" id="datatypes_extendmodulesnames">#</a></span></h2>
 <p>AutoJs6 <a href="plugins.html#plugins_内置扩展插件">内置扩展插件</a> 的插件名称.</p>
@@ -1558,7 +1582,7 @@ app.startActivity(&#39;home&#39;); /* 同上. */
 </code></pre>
 <p>支持的全部页面简称:</p>
 <ul>
-<li>日志页面 - <code>console</code> / <code>log</code> </li>
+<li>日志页面 - <code>console</code> / <code>log</code></li>
 <li>设置页面 - <code>settings</code> / <code>preferences</code> / <code>pref</code></li>
 <li>主页页面 - <code>homepage</code> / <code>home</code></li>
 <li>关于页面 - <code>about</code></li>
@@ -1634,33 +1658,331 @@ OcrResult@59cab38{label=Tools, confidence=0.8421875, bounds=Rect(30, 324 - 88, 3
 <h2>ThemeColor<span><a class="mark" href="#datatypes_themecolor" id="datatypes_themecolor">#</a></span></h2>
 <p>AutoJs6 内置类 <code>org.autojs.autojs.theme.ThemeColor</code> 的别名.</p>
 <p>ThemeColor 表示一个主题颜色.</p>
-<p>常见可以返回此类型的方法或属性:</p>
+<p>常见相关方法或属性:</p>
 <ul>
 <li><a href="autojs.html#autojs_p_themecolor">autojs.themeColor</a></li>
-</ul>
-<p>常见参数中使用此类型的方法:</p>
-<ul>
 <li><a href="colorType.html">Color</a>(<strong>themeColor</strong>)</li>
 </ul>
 <p>当 ThemeColor 作为 <a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a> 使用时, 将使用其 &quot;主色&quot; 作为色值:</p>
 <pre><code class="lang-js">let themeColor = autojs.themeColor;
 Color(themeColor).toInt() === Color(themeColor.getColorPrimary()).toInt(); // true
 </code></pre>
-<p>### </p>
-<h2>InjectableWebView<span><a class="mark" href="#datatypes_injectablewebview" id="datatypes_injectablewebview">#</a></span></h2>
-<p>参阅 <a href="injectableWebViewType.html">InjectableWebView</a> 类型章节.</p>
-<h2>InjectableWebClient<span><a class="mark" href="#datatypes_injectablewebclient" id="datatypes_injectablewebclient">#</a></span></h2>
-<p>参阅 <a href="injectableWebClientType.html">InjectableWebClient</a> 类型章节.</p>
+<h2>JsByteArray<span><a class="mark" href="#datatypes_jsbytearray" id="datatypes_jsbytearray">#</a></span></h2>
+<p>JavaScript 用于表示 &quot;字节数组&quot; 的类型, 即 <a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a>.</p>
+<blockquote>
+<p>注: Java 使用 byte[] 类型表示字节数组.</p>
+</blockquote>
+<p>将 JavaScript 字节数组转换为 JavaScript 字符串:</p>
+<pre><code class="lang-js">let arr = [ 104, 101, 108, 108, 111 ];
+let string = ArrayUtils.jsBytesToString(arr);
+console.log(string); // hello
+</code></pre>
+<p>将 JavaScript 字符串转换为 Java 字节数组:</p>
+<pre><code class="lang-js">let str = &#39;hello&#39;;
+let bytes = new java.lang.String(str).getBytes();
+console.log(bytes); // [ 104, 101, 108, 108, 111 ]
+console.log(species(bytes)); // JavaArray
+</code></pre>
+<p>将 JavaScript 字节数组转换为 Java 字节数组:</p>
+<pre><code class="lang-js">let arr = [ 104, 101, 108, 108, 111 ];
+let bytes = ArrayUtils.jsBytesToByteArray(arr);
+console.log(bytes); // [ 104, 101, 108, 108, 111 ]
+console.log(species(bytes)); // JavaArray
+</code></pre>
+<h2>ByteArray<span><a class="mark" href="#datatypes_bytearray" id="datatypes_bytearray">#</a></span></h2>
+<p>Java 用于表示 &quot;字节数组&quot; 的类型, 即 <code>byte[]</code>.</p>
+<blockquote>
+<p>注: Kotlin 使用 ByteArray 类型表示字节数组.</p>
+</blockquote>
+<p>Java 字节数组不是 JavaScript 的 <code>number[]</code>:</p>
+<pre><code class="lang-js">console.log(util.getClass(new java.lang.String(&#39;hello&#39;).getBytes())); // class [B
+console.log(util.getClassName(new java.lang.String(&#39;hello&#39;).getBytes())); // [B
+</code></pre>
+<p>Java 字节数组转换为 JavaScript 字符串:</p>
+<pre><code class="lang-js">let bytes = new java.lang.String(&#39;hello&#39;).getBytes();
+console.log(bytes); // [ 104, 101, 108, 108, 111 ]
+let str = String(new java.lang.String(bytes));
+console.log(str); // hello
+</code></pre>
+<p>在 Java 中, 字节数组中的元素范围为 <code>[-127..128]</code>:</p>
+<pre><code class="lang-js">let key = new crypto.Key(&#39;a&#39;.repeat(16));
+console.log(
+    crypto.encrypt(&#39;hello world&#39;, key, &#39;AES&#39;)
+); // [ 105, -52, -100, 42, -7, 27, -87, -32, 83, -59, 25, 115, -103, -75, 98, 18 ]
+</code></pre>
+<p>如需转换为 <code>[0..255]</code> 范围, 可使用 <code>x &amp; 0xFF</code> 的转换方式:</p>
+<pre><code class="lang-js">let key = new crypto.Key(&#39;a&#39;.repeat(16));
+console.log(
+    crypto.encrypt(&#39;hello world&#39;, key, &#39;AES&#39;).map(x =&gt; x &amp; 0xFF)
+); // [ 105, 204, 156, 42, 249, 27, 169, 224, 83, 197, 25, 115, 153, 181, 98, 18 ]
+</code></pre>
+<h2>CryptoDigestAlgorithm<span><a class="mark" href="#datatypes_cryptodigestalgorithm" id="datatypes_cryptodigestalgorithm">#</a></span></h2>
+<p><a href="crypto.html">密文</a> 模块使用的消息摘要算法.</p>
+<table>
+<thead>
+<tr>
+<th>值 (字符串)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MD5</td>
+</tr>
+<tr>
+<td>SHA-1</td>
+</tr>
+<tr>
+<td>SHA-224</td>
+</tr>
+<tr>
+<td>SHA-256</td>
+</tr>
+<tr>
+<td>SHA-384</td>
+</tr>
+<tr>
+<td>SHA-512</td>
+</tr>
+</tbody>
+</table>
+<p>MD: 消息摘要算法 (Message-Digest algorithm), 其中 MD5 被广泛使用. MD5 是一种密码散列函数, 可生成一个 128 位散列值 (常表示为 32 位十六进制数字), 以确保信息传输完整一致.</p>
+<p>SHA: 安全散列算法 (Secure Hash Algorithm), 一个密码散列函数家族. 可计算出消息对应的长度固定的字符串 (即消息摘要) 的算法. 输入消息不同, 消息摘要有很高的概率会不同. 当不同消息得到相同的消息摘要 (即使概率很低) 时, 称为散列碰撞或哈希冲突.</p>
+<pre><code class="lang-js">/* 获取字符串 &quot;hello&quot; 的 MD5 摘要. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;MD5&#39;)); // 5d41402abc4b2a76b9719d911017c592
+
+/* 获取字符串 &quot;hello&quot; 的 SHA-1 摘要. */
+console.log(crypto.digest(&#39;hello&#39;, &#39;SHA-1&#39;)); // aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
+
+/* 空文 MD5. */
+console.log(crypto.digest(&#39;&#39;, &#39;MD5&#39;)); // d41d8cd98f00b204e9800998ecf8427e
+</code></pre>
+<blockquote>
+<p>参阅: <a href="https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard_names.html#https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard_names_keypairgenerator_algorithms">Oracle Docs</a> / <a href="http://www.semlinker.com/message-digest-intro">常用消息摘要算法简介</a></p>
+</blockquote>
+<h2>CryptoKeyPairGeneratorAlgorithm<span><a class="mark" href="#datatypes_cryptokeypairgeneratoralgorithm" id="datatypes_cryptokeypairgeneratoralgorithm">#</a></span></h2>
+<p><a href="crypto.html">密文</a> 模块使用的密钥对生成器算法.</p>
+<table>
+<thead>
+<tr>
+<th>值 (字符串)</th>
+<th>别名</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DH</td>
+<td>DiffieHellman</td>
+</tr>
+<tr>
+<td>DSA</td>
+<td>-</td>
+</tr>
+<tr>
+<td>RSA</td>
+<td>-</td>
+</tr>
+<tr>
+<td>EC</td>
+<td>-</td>
+</tr>
+<tr>
+<td>XDH</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p>例如, AutoJs6 的 <a href="crypto.html#crypto_m_generatekeypair">crypto.generateKeyPair</a> 方法可以生成用于非对称加密算法的公私密钥对:</p>
+<pre><code class="lang-js">let kp = crypto.generateKeyPair(&#39;DSA&#39;, 1024);
+console.log(kp.publicKey);
+console.log(kp.privateKey);
+</code></pre>
+<p>上述示例的 <code>&#39;DSA&#39;</code> 即为有效的密钥对生成器算法之一.</p>
+<blockquote>
+<p>参阅: <a href="https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard_names.html#https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard_names_keypairgenerator_algorithms">Oracle Docs</a></p>
+</blockquote>
+<h2>CryptoDigestOptions<span><a class="mark" href="#datatypes_cryptodigestoptions" id="datatypes_cryptodigestoptions">#</a></span></h2>
+<p>消息摘要生成选项, 主要用于 <a href="crypto.html">密文</a> 模块.</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>有效值</th>
+<th>简述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>input</td>
+<td>&#39;file&#39; / &#39;base64&#39; / &#39;hex&#39; / <strong>&#39;string&#39;</strong></td>
+<td>指定输入类型.</td>
+</tr>
+<tr>
+<td>output</td>
+<td>&#39;bytes&#39; / &#39;base64&#39; / <strong>&#39;hex&#39;</strong> / &#39;string&#39;</td>
+<td>指定输出类型.</td>
+</tr>
+<tr>
+<td>encoding</td>
+<td>&#39;US-ASCII&#39; / &#39;ISO-8859-1&#39; / <strong>&#39;UTF-8&#39;</strong><br> &#39;UTF-16BE&#39; / &#39;UTF-16LE&#39; / &#39;UTF-16&#39;</td>
+<td>指定输入或输出编码,<br>仅对 &#39;string&#39; 类型有效.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注: 上表中粗体值为属性默认值.</p>
+</blockquote>
+<h2>CryptoCipherTransformation<span><a class="mark" href="#datatypes_cryptociphertransformation" id="datatypes_cryptociphertransformation">#</a></span></h2>
+<p>密码转换名称, 主要用于 <a href="crypto.html">密文</a> 模块.</p>
+<p>Cipher, 可翻译为 &quot;密码&quot; 或 &quot;密码器&quot;.</p>
+<p>AutoJs6 的 <a href="crypto.html">crypto</a> 模块中, <a href="crypto.html#crypto_m_encrypt">encrypt</a> 和 <a href="crypto.html#crypto_m_decrypt">decrypt</a> 的内部实现均借助了 <code>javax.crypto.Cipher</code> 实例.</p>
+<p><code>javax.crypto.Cipher</code> 类提供加解密功能, 它构成了 <code>JCE (Java Cryptography Extension)</code> 的核心, 是 Java JDK 原生 API.</p>
+<p>Cipher 实例的初始化使用的是 <code>Cipher.getInstance(transformation: String)</code> 方法, 这个 <code>transformation</code> 参数, 即 &quot;转换名称&quot;, 其作用就是获取到不同加解密方式的 Cipher 实例.</p>
+<p>转换名称 <code>transformation</code> 参数的格式有两种:</p>
+<ul>
+<li>算法名称 (algorithm)</li>
+<li>算法名称/工作模式/填充方式 (algorithm/mode/padding)</li>
+</ul>
+<pre><code class="lang-js">/* 转换名称格式为 &quot;算法名称&quot; 的 Cipher 实例. */
+let cipherA = Cipher.getInstance(&quot;AES&quot;);
+
+/* 转换名称格式为 &quot;算法名称/工作模式/填充方式&quot; 的 Cipher 实例. */
+let cipherB = Cipher.getInstance(&quot;DES/CBC/PKCS5Padding&quot;);
+</code></pre>
+<p>常见相关方法或属性:</p>
+<ul>
+<li><a href="crypto.html#crypto_m_encrypt">crypto.encrypt</a>(data, key, <strong>transformation</strong>, options?)</li>
+<li><a href="crypto.html#crypto_m_decrypt">crypto.decrypt</a>(data, key, <strong>transformation</strong>, options?)</li>
+</ul>
+<p>下表列出了 AutoJs6 支持的转换名称构成要素, 可组合出多种不同的转换名称:</p>
+<table>
+<thead>
+<tr>
+<th>算法名称</th>
+<th>工作模式</th>
+<th>填充方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AES</td>
+<td>CBC<br>CFB<br>CTR<br>CTS<br>ECB<br>OFB</td>
+<td>ISO10126Padding<br>NoPadding<br>PKCS5Padding</td>
+</tr>
+<tr>
+<td>AES</td>
+<td>GCM</td>
+<td>NoPadding</td>
+</tr>
+<tr>
+<td>AES_128</td>
+<td>CBC<br>ECB</td>
+<td>NoPadding<br>PKCS5Padding</td>
+</tr>
+<tr>
+<td>AES_128</td>
+<td>GCM</td>
+<td>NoPadding</td>
+</tr>
+<tr>
+<td>AES_256</td>
+<td>CBC<br>ECB</td>
+<td>NoPadding<br>PKCS5Padding</td>
+</tr>
+<tr>
+<td>AES_256</td>
+<td>GCM</td>
+<td>NoPadding</td>
+</tr>
+<tr>
+<td>ARC4</td>
+<td>ECB</td>
+<td>NoPadding</td>
+</tr>
+<tr>
+<td>ARC4</td>
+<td>NONE</td>
+<td>NoPadding</td>
+</tr>
+<tr>
+<td>BLOWFISH</td>
+<td>CBC<br>CFB<br>CTR<br>CTS<br>ECB<br>OFB</td>
+<td>ISO10126Padding<br>NoPadding<br>PKCS5Padding</td>
+</tr>
+<tr>
+<td>ChaCha20</td>
+<td>NONE<br>Poly1305</td>
+<td>NoPadding</td>
+</tr>
+<tr>
+<td>DES</td>
+<td>CBC<br>CFB<br>CTR<br>CTS<br>ECB<br>OFB</td>
+<td>ISO10126Padding<br>NoPadding<br>PKCS5Padding</td>
+</tr>
+<tr>
+<td>DESede</td>
+<td>CBC<br>CFB<br>CTR<br>CTS<br>ECB<br>OFB</td>
+<td>ISO10126Padding<br>NoPadding<br>PKCS5Padding</td>
+</tr>
+<tr>
+<td>RSA</td>
+<td>ECB<br>NONE</td>
+<td>NoPadding<br>OAEPPadding<br>PKCS1Padding<br>OAEPwithSHA-1andMGF1Padding<br>OAEPwithSHA-224andMGF1Padding<br>OAEPwithSHA-256andMGF1Padding<br>OAEPwithSHA-384andMGF1Padding<br>OAEPwithSHA-512andMGF1Padding</td>
+</tr>
+</tbody>
+</table>
+<p>以 DES 算法为例, 以下均为有效的转换名称:</p>
+<ul>
+<li>DES</li>
+<li>DES/CBC/ISO10126Padding</li>
+<li>DES/CBC/PKCS5Padding</li>
+<li>DES/ECB/PKCS5Padding</li>
+<li>DES/ECB/NoPadding</li>
+<li>... ...</li>
+</ul>
 <h2>Storage<span><a class="mark" href="#datatypes_storage" id="datatypes_storage">#</a></span></h2>
-<p>参阅 <a href="storageType.html">Storage</a> 类型章节.</p>
-<h2>OpencvPoint<span><a class="mark" href="#datatypes_opencvpoint" id="datatypes_opencvpoint">#</a></span></h2>
-<p>参阅 <a href="opencvPointType.html">OpencvPoint</a> 类型章节.</p>
-<h2>OpencvSize<span><a class="mark" href="#datatypes_opencvsize" id="datatypes_opencvsize">#</a></span></h2>
-<p>参阅 <a href="opencvSizeType.html">OpencvSize</a> 类型章节.</p>
-<h2>AndroidRect<span><a class="mark" href="#datatypes_androidrect" id="datatypes_androidrect">#</a></span></h2>
-<p>参阅 <a href="androidRectType.html">AndroidRect</a> 类型章节.</p>
+<p>参阅 <a href="storageType.html">Storage - 存储类</a> 类型章节.</p>
 <h2>AndroidBundle<span><a class="mark" href="#datatypes_androidbundle" id="datatypes_androidbundle">#</a></span></h2>
 <p>参阅 <a href="androidBundleType.html">AndroidBundle</a> 类型章节.</p>
+<h2>AndroidRect<span><a class="mark" href="#datatypes_androidrect" id="datatypes_androidrect">#</a></span></h2>
+<p>参阅 <a href="androidRectType.html">AndroidRect</a> 类型章节.</p>
+<h2>CryptoCipherOptions<span><a class="mark" href="#datatypes_cryptocipheroptions" id="datatypes_cryptocipheroptions">#</a></span></h2>
+<p>参阅 <a href="cryptoCipherOptionsType.html">CryptoCipherOptions</a> 类型章节.</p>
+<h2>ConsoleBuildOptions<span><a class="mark" href="#datatypes_consolebuildoptions" id="datatypes_consolebuildoptions">#</a></span></h2>
+<p>参阅 <a href="consoleBuildOptionsType.html">ConsoleBuildOptions</a> 类型章节.</p>
+<h2>HttpRequestBuilderOptions<span><a class="mark" href="#datatypes_httprequestbuilderoptions" id="datatypes_httprequestbuilderoptions">#</a></span></h2>
+<p>参阅 <a href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a> 类型章节.</p>
+<h2>HttpRequestHeaders<span><a class="mark" href="#datatypes_httprequestheaders" id="datatypes_httprequestheaders">#</a></span></h2>
+<p>参阅 <a href="httpRequestHeadersType.html">HttpRequestHeaders</a> 类型章节.</p>
+<h2>HttpResponseBody<span><a class="mark" href="#datatypes_httpresponsebody" id="datatypes_httpresponsebody">#</a></span></h2>
+<p>参阅 <a href="httpResponseBodyType.html">HttpResponseBody</a> 类型章节.</p>
+<h2>HttpResponseHeaders<span><a class="mark" href="#datatypes_httpresponseheaders" id="datatypes_httpresponseheaders">#</a></span></h2>
+<p>参阅 <a href="httpResponseHeadersType.html">HttpResponseHeaders</a> 类型章节.</p>
+<h2>HttpResponse<span><a class="mark" href="#datatypes_httpresponse" id="datatypes_httpresponse">#</a></span></h2>
+<p>参阅 <a href="httpResponseType.html">HttpResponse</a> 类型章节.</p>
+<h2>InjectableWebClient<span><a class="mark" href="#datatypes_injectablewebclient" id="datatypes_injectablewebclient">#</a></span></h2>
+<p>参阅 <a href="injectableWebClientType.html">InjectableWebClient</a> 类型章节.</p>
+<h2>InjectableWebView<span><a class="mark" href="#datatypes_injectablewebview" id="datatypes_injectablewebview">#</a></span></h2>
+<p>参阅 <a href="injectableWebViewType.html">InjectableWebView</a> 类型章节.</p>
+<h2>NoticeOptions<span><a class="mark" href="#datatypes_noticeoptions" id="datatypes_noticeoptions">#</a></span></h2>
+<p>参阅 <a href="noticeOptionsType.html">NoticeOptions</a> 类型章节.</p>
+<h2>NoticeChannelOptions<span><a class="mark" href="#datatypes_noticechanneloptions" id="datatypes_noticechanneloptions">#</a></span></h2>
+<p>参阅 <a href="noticeChannelOptionsType.html">NoticeChannelOptions</a> 类型章节.</p>
+<h2>NoticePresetConfiguration<span><a class="mark" href="#datatypes_noticepresetconfiguration" id="datatypes_noticepresetconfiguration">#</a></span></h2>
+<p>参阅 <a href="noticePresetConfigurationType.html">NoticePresetConfiguration</a> 类型章节.</p>
+<h2>NoticeBuilder<span><a class="mark" href="#datatypes_noticebuilder" id="datatypes_noticebuilder">#</a></span></h2>
+<p>参阅 <a href="noticeBuilderType.html">NoticeBuilder</a> 类型章节.</p>
+<h2>Okhttp3HttpUrl<span><a class="mark" href="#datatypes_okhttp3httpurl" id="datatypes_okhttp3httpurl">#</a></span></h2>
+<p>参阅 <a href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a> 类型章节.</p>
+<h2>OcrOptions<span><a class="mark" href="#datatypes_ocroptions" id="datatypes_ocroptions">#</a></span></h2>
+<p>参阅 <a href="ocrOptionsType.html">OcrOptions</a> 类型章节.</p>
+<h2>Okhttp3Request<span><a class="mark" href="#datatypes_okhttp3request" id="datatypes_okhttp3request">#</a></span></h2>
+<p>参阅 <a href="okhttp3RequestType.html">Okhttp3Request</a> 类型章节.</p>
+<h2>OpencvPoint<span><a class="mark" href="#datatypes_opencvpoint" id="datatypes_opencvpoint">#</a></span></h2>
+<p>参阅 <a href="opencvPointType.html">OpencvPoint</a> 类型章节.</p>
+<h2>OpencvRect<span><a class="mark" href="#datatypes_opencvrect" id="datatypes_opencvrect">#</a></span></h2>
+<p>参阅 <a href="opencvRectType.html">OpencvRect</a> 类型章节.</p>
+<h2>OpencvSize<span><a class="mark" href="#datatypes_opencvsize" id="datatypes_opencvsize">#</a></span></h2>
+<p>参阅 <a href="opencvSizeType.html">OpencvSize</a> 类型章节.</p>
 
         </div>
     </div>

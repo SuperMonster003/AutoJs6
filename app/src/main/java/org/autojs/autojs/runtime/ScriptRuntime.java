@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
 
+import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.annotation.ScriptVariable;
 import org.autojs.autojs.concurrent.VolatileDispose;
 import org.autojs.autojs.core.accessibility.AccessibilityBridge;
@@ -20,6 +21,7 @@ import org.autojs.autojs.core.image.capture.ScreenCaptureRequester;
 import org.autojs.autojs.core.looper.Loopers;
 import org.autojs.autojs.engine.ScriptEngineService;
 import org.autojs.autojs.lang.ThreadCompat;
+import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.rhino.AndroidClassLoader;
 import org.autojs.autojs.rhino.TopLevelScope;
@@ -50,6 +52,7 @@ import org.autojs.autojs.tool.UiHandler;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.RootUtils;
 import org.autojs.autojs.util.SdkVersionUtils;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.RhinoException;
@@ -58,6 +61,7 @@ import org.mozilla.javascript.Scriptable;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -68,10 +72,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Stardust on 2017/1/27.
+ * Modified by SuperMonster003 as of Dec 1, 2021.
  */
+@SuppressWarnings("unused")
 public class ScriptRuntime {
 
     private static final String TAG = "ScriptRuntime";
+
+    public static void popException(String message) {
+        try {
+            throw new Exception(message);
+        } catch (Exception e) {
+            ViewUtils.showToast(getApplicationContext(), message, true);
+            AutoJs.getInstance().getRuntime().console.printAllStackTrace(e);
+            e.printStackTrace();
+        }
+    }
 
     public static class Builder {
         private UiHandler mUiHandler;
@@ -374,22 +390,97 @@ public class ScriptRuntime {
         }
     }
 
-    public void loadJar(String path) {
-        path = files.path(path);
+    public void loadDex(String... path) {
+        loadDex(ScriptRuntime::isDexFile, path);
+    }
+
+    public void loadDex(String dir, boolean isRecursive) {
+        loadDex(f -> isDexFile(f) || isRecursive && f.isDirectory(), dir);
+    }
+
+    private void loadDex(FileFilter filter, String... paths) {
         try {
-            getClassLoader().loadJar(new File(path));
+            AndroidClassLoader classLoader = getClassLoader();
+            for (String path : paths) {
+                File file = new File(files.path(path));
+                if (file.isDirectory()) {
+                    File[] filtered = file.listFiles(filter);
+                    if (filtered != null) {
+                        for (File f : filtered) {
+                            loadDex(f.getPath());
+                        }
+                    }
+                } else {
+                    classLoader.loadDex(file);
+                }
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    public void loadDex(String path) {
-        path = files.path(path);
+    public void loadJar(String... paths) {
+        loadJar(ScriptRuntime::isJarFile, paths);
+    }
+
+    public void loadJar(String dir, boolean isRecursive) {
+        loadJar(f -> isJarFile(f) || isRecursive && f.isDirectory(), dir);
+    }
+
+    private void loadJar(FileFilter filter, String... paths) {
         try {
-            getClassLoader().loadDex(new File(path));
+            AndroidClassLoader classLoader = getClassLoader();
+            for (String path : paths) {
+                File file = new File(files.path(path));
+                if (file.isDirectory()) {
+                    File[] filtered = file.listFiles(filter);
+                    if (filtered != null) {
+                        for (File f : filtered) {
+                            loadJar(f.getPath());
+                        }
+                    }
+                } else {
+                    classLoader.loadJar(file);
+                }
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public void load(String ...path) {
+        load(f -> isJarFile(f) || isDexFile(f), path);
+    }
+
+    public void load(String dir, boolean isRecursive) {
+        load(f -> isJarFile(f) || isDexFile(f) || isRecursive && f.isDirectory(), dir);
+    }
+
+    private void load(FileFilter filter, String... paths) {
+        AndroidClassLoader classLoader = getClassLoader();
+        for (String path : paths) {
+            File file = new File(files.path(path));
+            if (file.isDirectory()) {
+                File[] filtered = file.listFiles(filter);
+                if (filtered != null) {
+                    for (File f : filtered) {
+                        if (isJarFile(f)) loadJar(f.getPath());
+                        else if (isDexFile(f)) loadDex(f.getPath());
+                    }
+                }
+            } else {
+                if (isJarFile(file)) loadJar(file.getPath());
+                else if (isDexFile(file)) loadDex(file.getPath());
+            }
+        }
+    }
+
+    private static boolean isDexFile(File f) {
+        return PFiles.getExtension(f.getName()).equalsIgnoreCase("dex");
+    }
+
+    private static boolean isJarFile(File f) {
+        return PFiles.getExtension(f.getName()).equalsIgnoreCase("jar");
     }
 
     private static AndroidClassLoader getClassLoader() {
@@ -443,8 +534,8 @@ public class ScriptRuntime {
         // 清除 interrupt 状态
         ignoresException(ThreadCompat::interrupted);
 
-        // 悬浮窗需要第一时间关闭
-        // 以免出现恶意脚本全屏悬浮窗屏蔽屏幕并且在 exit 中写死循环的问题
+        // 浮动窗口需要第一时间关闭
+        // 以免出现恶意脚本全屏浮动窗口遮蔽屏幕并且在 exit 中写死循环的问题
         ignoresException(floaty::closeAll);
 
         ignoresException(() -> events.emit("exit"), "exception on exit: %s");

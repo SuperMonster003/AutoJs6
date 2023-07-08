@@ -15,6 +15,7 @@ import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.explorer.ExplorerProjectPage;
 import org.autojs.autojs.model.explorer.ExplorerSamplePage;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.pref.Language;
 import org.autojs.autojs.util.FileUtils.TYPE;
 import org.autojs.autojs6.R;
 
@@ -48,7 +49,7 @@ public class ExplorerViewHelper {
         if (item.getName().equalsIgnoreCase(PROJECT.getTypeName())) {
             return PROJECT.getIconText();
         }
-        return type.getTypeName().substring(0, 1).toUpperCase();
+        return type.getTypeName().substring(0, 1).toUpperCase(Language.getPrefLanguage().getLocale());
     }
 
     public static int getIcon(ExplorerPage page) {

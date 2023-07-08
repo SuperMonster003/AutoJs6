@@ -433,6 +433,11 @@
         "summary": "颜色检测"
       },
       {
+        "key": "detectColor",
+        "url": "images.html#images_images_detectcolor_image_color_x_y_threshold_16_algorithm_diff",
+        "summary": "颜色检测"
+      },
+      {
         "key": "findImage",
         "url":"images.html#images_images_findimage_img_template_options",
         "summary": "找图",
@@ -1261,7 +1266,7 @@
       }
     ],
     "url": "floaty.html",
-    "summary": "悬浮窗"
+    "summary": "浮动窗口"
   },
   {
     "name": "device",

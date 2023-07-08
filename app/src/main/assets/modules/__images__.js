@@ -160,7 +160,7 @@ module.exports = function (scriptRuntime, scope) {
                             throw TypeError(`Argument size for images.medianBlur must be either a number or an array with SAME two number elements`);
                         }
                     }
-                    let ksize = Array.isArray(size) ? [size][0] : size;
+                    let ksize = Array.isArray(size) ? [ size ][0] : size;
                     let mat = new Mat();
                     Imgproc.medianBlur(img.mat, mat, ksize);
                     img.shoot();
@@ -240,7 +240,7 @@ module.exports = function (scriptRuntime, scope) {
                             this.results = [];
                             for (let i = 0; i < cir.rows(); i++) {
                                 for (let j = 0; j < cir.cols(); j++) {
-                                    let [x, y, radius] = cir.get(i, j);
+                                    let [ x, y, radius ] = cir.get(i, j);
                                     this.results.push({ x, y, radius });
                                 }
                             }
@@ -279,77 +279,122 @@ module.exports = function (scriptRuntime, scope) {
                     _.initIfNeeded();
                     return RtImages.concat(imgA, imgB, _.directionToGravity(direction));
                 },
-                detectsColor(img, color, x, y, threshold, algorithm) {
+                detectColor(img, color, x, y, threshold, algorithm) {
                     _.initIfNeeded();
-                    let pixel = images.pixel(img, x, y);
+                    let pixel = this.pixel(img, x, y);
                     return ColorDetector
                         .get(
                             colors.toInt(color),
                             algorithm || _.constants.DEF_COLOR_ALGORITHM,
                             _.parseNumber(threshold, _.constants.DEF_COLOR_THRESHOLD))
-                        .detectsColor(
+                        .detectColor(
                             colors.red(pixel),
                             colors.green(pixel),
                             colors.blue(pixel));
                 },
-                findColor(img, color, options) {
+                /**
+                 * @deprecated
+                 */
+                detectsColor(img, color, x, y, threshold, algorithm) {
+                    return this.detectColor(img, color, x, y, threshold, algorithm);
+                },
+                findPointByColor(img, color, options) {
+                    if (arguments.length === 7) {
+                        let [ img, color, x, y, width, height, threshold ] = arguments;
+                        return this.findPointByColor(img, color, {
+                            region: [ x, y, width, height ],
+                            threshold: threshold,
+                        });
+                    }
                     _.initIfNeeded();
                     let opt = options || {};
-                    let res = rtImages.colorFinder.findColor(img,
+                    let res = rtImages.colorFinder.findPointByColor(img,
                         colors.toInt(color),
                         _.parseThreshold(opt),
                         'region' in opt ? _.buildRegion(img, opt.region) : null);
                     img.shoot();
                     return res;
                 },
-                findColorInRegion(img, color, x, y, width, height, threshold) {
-                    return this.findColor(img, color, {
-                        region: [x, y, width, height],
-                        threshold: threshold,
-                    });
+                /**
+                 * @deprecated
+                 */
+                findColor(img, color, options) {
+                    return this.findPointByColor(img, color, options);
                 },
-                findColorEquals(img, color, x, y, width, height) {
-                    return this.findColor(img, color, {
-                        region: [x, y, width, height],
+                /**
+                 * @deprecated
+                 */
+                findColorInRegion(img, color, x, y, width, height, threshold) {
+                    return this.findPointByColor(img, color, x, y, width, height);
+                },
+                findPointByColorExactly(img, color, x, y, width, height) {
+                    return this.findPointByColor(img, color, {
+                        region: [ x, y, width, height ],
                         threshold: 0,
                     });
                 },
-                findAllPointsForColor(img, color, options) {
+                /**
+                 * @deprecated
+                 */
+                findColorEquals(img, color, x, y, width, height) {
+                    return this.findPointByColorExactly(img, color, x, y, width, height);
+                },
+                findPointsByColor(img, color, options) {
                     _.initIfNeeded();
                     let opt = options || {};
-                    let o = rtImages.colorFinder.findAllPointsForColor(img,
+                    let o = rtImages.colorFinder.findPointsByColor(img,
                         colors.toInt(color),
                         _.parseThreshold(opt),
                         'region' in opt ? _.buildRegion(img, opt.region) : null);
                     return _.toPointArray(o);
                 },
-                 findMultiColors(img, firstColor, paths, options) {
+                findPointByColors(img, firstColor, paths, options) {
                     _.initIfNeeded();
                     let list = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, paths.length * 3);
                     for (let i = 0; i < paths.length; i += 1) {
-                        let [x, y, color] = paths[i];
+                        let [ x, y, color ] = paths[i];
                         list[i * 3] = x;
                         list[i * 3 + 1] = y;
                         list[i * 3 + 2] = colors.toInt(color);
                     }
                     let opt = options || {};
-                    let findAll = opt.All || false;
-                
-                    if (findAll) {
-                        return Array.from(rtImages.colorFinder.findAllMultiColors(img,
-                            colors.toInt(firstColor),
-                            _.parseThreshold(opt),
-                            'region' in opt ? _.buildRegion(img, opt.region) : null,
-                            list));
+                    let niceFirstColor = colors.toInt(firstColor);
+                    let niceThreshold = _.parseThreshold(opt);
+                    let rect = 'region' in opt ? _.buildRegion(img, opt.region) : null;
+                    if (opt.all) {
+                        return Array.from(rtImages.colorFinder.findPointsByColors(
+                            img, niceFirstColor, niceThreshold, rect, list,
+                        ));
                     } else {
-                        return rtImages.colorFinder.findMultiColors(img,
-                            colors.toInt(firstColor),
-                            _.parseThreshold(opt),
-                            'region' in opt ? _.buildRegion(img, opt.region) : null,
-                            list);
+                        return rtImages.colorFinder.findPointByColors(
+                            img, niceFirstColor, niceThreshold, rect, list,
+                        );
                     }
                 },
-                findImage(img, template, options) {
+                /**
+                 * @deprecated
+                 */
+                findAllPointsForColor(img, color, options) {
+                    return this.findPointsByColor(img, color, options);
+                },
+                findPointsByColors(img, firstColor, paths, options) {
+                    let niceOptions = Object.assign(options || {}, { all: true });
+                    return this.findPointByColors(img, firstColor, paths, niceOptions);
+                },
+                /**
+                 * @deprecated
+                 */
+                findMultiColors(img, firstColor, paths, options) {
+                    return this.findPointByColors(img, firstColor, paths, options);
+                },
+                findPointByImage(img, template, options) {
+                    if (arguments.length === 7) {
+                        let [ img, template, x, y, width, height, threshold ] = arguments;
+                        return this.findPointByImage(img, template, {
+                            region: [ x, y, width, height ],
+                            threshold: threshold,
+                        });
+                    }
                     _.initIfNeeded();
                     let opt = options || {};
                     return rtImages.findImage(img, template,
@@ -358,11 +403,17 @@ module.exports = function (scriptRuntime, scope) {
                         'region' in opt ? _.buildRegion(img, opt.region) : null,
                         _.parseNumber(opt.level, -1));
                 },
+                /**
+                 * @deprecated
+                 */
+                findImage(img, template, options) {
+                    return this.findPointByImage(img, template, options);
+                },
+                /**
+                 * @deprecated
+                 */
                 findImageInRegion(img, template, x, y, width, height, threshold) {
-                    return this.findImage(img, template, {
-                        region: [x, y, width, height],
-                        threshold: threshold,
-                    });
+                    return this.findPointByImage(img, template, x, y, width, height, threshold);
                 },
                 matchTemplate(img, template, options) {
                     _.initIfNeeded();
@@ -673,7 +724,7 @@ module.exports = function (scriptRuntime, scope) {
                 if (size.length === 1) {
                     width = height = size[0];
                 } else {
-                    [width, height] = size;
+                    [ width, height ] = size;
                 }
             }
             return new Size(width, height);
@@ -693,7 +744,7 @@ module.exports = function (scriptRuntime, scope) {
          * @returns {org.opencv.core.Point}
          */
         parsePoint(point) {
-            let [x, y] = point;
+            let [ x, y ] = point;
             return new Point(x, y);
         },
         parseQuality(q) {
@@ -781,10 +832,10 @@ module.exports = function (scriptRuntime, scope) {
          * @returns {org.opencv.core.Rect}
          */
         buildRegion(img, region) {
-            let [x, y, w, h] = region instanceof org.opencv.core.Rect
-                ? [region.x, region.y, region.width, region.height]
+            let [ x, y, w, h ] = region instanceof org.opencv.core.Rect
+                ? [ region.x, region.y, region.width, region.height ]
                 : region instanceof android.graphics.Rect
-                    ? [region.left, region.top, region.width(), region.height()]
+                    ? [ region.left, region.top, region.width(), region.height() ]
                     : Array.isArray(region) ? region : [];
 
             x = _.parseNumber(x, 0);

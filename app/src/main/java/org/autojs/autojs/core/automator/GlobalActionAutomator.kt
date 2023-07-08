@@ -16,6 +16,7 @@ import org.autojs.autojs.runtime.api.ScreenMetrics
 
 /**
  * Created by Stardust on 2017/5/16.
+ * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 class GlobalActionAutomator(private val mHandler: Handler?, private val serviceProvider: () -> AccessibilityService) {
 
@@ -102,10 +103,7 @@ class GlobalActionAutomator(private val mHandler: Handler?, private val serviceP
         false
     }
 
-    fun gesture(start: Long, duration: Long, vararg points: IntArray): Boolean {
-        val path = pointsToPath(points)
-        return gestures(GestureDescription.StrokeDescription(path, start, duration))
-    }
+    fun gesture(start: Long, duration: Long, vararg points: IntArray) = gestures(GestureDescription.StrokeDescription(pointsToPath(points), start, duration))
 
     private fun pointsToPath(points: Array<out IntArray>): Path {
         val path = Path()
@@ -122,17 +120,9 @@ class GlobalActionAutomator(private val mHandler: Handler?, private val serviceP
         gesturesAsync(GestureDescription.StrokeDescription(path, start, duration))
     }
 
-    fun gestures(vararg strokes: GestureDescription.StrokeDescription): Boolean {
-        val builder = GestureDescription.Builder()
-        for (stroke in strokes) {
-            builder.addStroke(stroke)
-        }
-        val handler = mHandler
-        return if (handler == null) {
-            gesturesWithoutHandler(builder.build())
-        } else {
-            gesturesWithHandler(handler, builder.build())
-        }
+    fun gestures(vararg strokes: GestureDescription.StrokeDescription) = GestureDescription.Builder().let { builder ->
+        val built = strokes.forEach { builder.addStroke(it) }.let { builder.build() }
+        mHandler?.let { gesturesWithHandler(it, built) } ?: gesturesWithoutHandler(built)
     }
 
     private fun gesturesWithHandler(handler: Handler, description: GestureDescription): Boolean {
@@ -152,9 +142,7 @@ class GlobalActionAutomator(private val mHandler: Handler?, private val serviceP
     private fun gesturesWithoutHandler(description: GestureDescription): Boolean {
         prepareLooperIfNeeded()
         val result = VolatileBox(false)
-        val myLooper = Looper.myLooper()
-        if (myLooper != null) {
-            val handler = Handler(myLooper)
+        Looper.myLooper()?.let { myLooper ->
             service.dispatchGesture(description, object : GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription) {
                     result.set(true)
@@ -165,41 +153,37 @@ class GlobalActionAutomator(private val mHandler: Handler?, private val serviceP
                     result.set(false)
                     quitLoop()
                 }
-            }, handler)
+            }, Handler(myLooper))
         }
         Looper.loop()
         return result.get()
     }
 
     fun gesturesAsync(vararg strokes: GestureDescription.StrokeDescription) {
-        val builder = GestureDescription.Builder()
-        for (stroke in strokes) {
-            builder.addStroke(stroke)
+        GestureDescription.Builder().let { builder ->
+            val built = strokes.forEach { builder.addStroke(it) }.let { builder.build() }
+            service.dispatchGesture(built, null, null)
         }
-        service.dispatchGesture(builder.build(), null, null)
     }
 
     private fun quitLoop() {
-        val looper = Looper.myLooper()
-        looper?.quit()
+        Looper.myLooper()?.quit()
     }
 
     private fun prepareLooperIfNeeded() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare()
-        }
+        Looper.myLooper() ?: Looper.prepare()
     }
 
-    fun click(x: Int, y: Int): Boolean = press(x, y, ViewConfiguration.getTapTimeout() + 50)
+    fun click(x: Int, y: Int) = press(x, y, ViewConfiguration.getTapTimeout() + 50)
 
-    fun press(x: Int, y: Int, delay: Int): Boolean = gesture(0, delay.toLong(), intArrayOf(x, y))
+    fun press(x: Int, y: Int, delay: Int) = gesture(0, delay.toLong(), intArrayOf(x, y))
 
-    fun longClick(x: Int, y: Int): Boolean = gesture(0, (ViewConfiguration.getLongPressTimeout() + 200).toLong(), intArrayOf(x, y))
+    fun longClick(x: Int, y: Int) = gesture(0, (ViewConfiguration.getLongPressTimeout() + 200).toLong(), intArrayOf(x, y))
 
-    private fun scaleX(x: Int): Int = mScreenMetrics?.scaleX(x) ?: x
+    private fun scaleX(x: Int) = mScreenMetrics?.scaleX(x) ?: x
 
-    private fun scaleY(y: Int): Int = mScreenMetrics?.scaleX(y) ?: y
+    private fun scaleY(y: Int) = mScreenMetrics?.scaleX(y) ?: y
 
-    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, delay: Long): Boolean = gesture(0, delay, intArrayOf(x1, y1), intArrayOf(x2, y2))
+    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, delay: Long) = gesture(0, delay, intArrayOf(x1, y1), intArrayOf(x2, y2))
 
 }

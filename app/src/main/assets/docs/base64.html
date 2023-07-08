@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Base64 | AutoJs6 文档 - 6.3.0</title>
+    <title>Base64 | AutoJs6 文档 - 6.3.2</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -122,6 +122,9 @@
 <li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
 <li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
 <li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
 <li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
 <li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
 <li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
@@ -152,7 +155,7 @@
 
     <div id="column1" data-id="base64" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <h1>AutoJs6 文档 - 6.3.2</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -168,11 +171,11 @@
 <li><span class="stability_undefined"><a href="#base64_base64">Base64</a></span><ul>
 <li><span class="stability_undefined"><a href="#base64">可逆性</a></span></li>
 <li><span class="stability_undefined"><a href="#base64_m_encode">[m] encode</a></span><ul>
-<li><span class="stability_undefined"><a href="#base64_encode_str_encoding">encode(str, encoding?)</a></span></li>
+<li><span class="stability_undefined"><a href="#base64_encode_o_encoding">encode(o, encoding?)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#base64_m_decode">[m] decode</a></span><ul>
-<li><span class="stability_undefined"><a href="#base64_decode_str_encoding">decode(str, encoding?)</a></span></li>
+<li><span class="stability_undefined"><a href="#base64_decode_o_encoding">decode(o, encoding?)</a></span></li>
 </ul>
 </li>
 </ul>
@@ -193,50 +196,80 @@
 </blockquote>
 <h2>可逆性<span><a class="mark" href="#base64" id="base64">#</a></span></h2>
 <p>Base64 是一种可逆的编码方式:</p>
-<pre><code class="lang-js">base64.decode(base64.encode(&#39;orange&#39;)); // orange
-base64.decode(base64.encode(&#39;简体中文&#39;)); // 简体中文
+<pre><code class="lang-js">console.log(base64.decode(base64.encode(&#39;orange&#39;))); // orange
+console.log(base64.decode(base64.encode(&#39;简体中文&#39;))); // 简体中文
 </code></pre>
 <p>但需注意参数的字符编码方式 (默认为 <code>UTF-8</code>), 当存在超出编码表示范围的字符时, 可逆性将遭到破坏:</p>
 <pre><code class="lang-js">/* us-ascii 编码无法表示 &quot;出&quot; 和 &quot;口&quot;. */
-base64.decode(base64.encode(&#39;E2 出口&#39;, &#39;us-ascii&#39;), &#39;us-ascii&#39;); // E2 ??
+console.log(base64.decode(base64.encode(&#39;E2 出口&#39;, &#39;us-ascii&#39;), &#39;us-ascii&#39;)); // E2 ??
 </code></pre>
 <p>编解码使用了不同的编码方式, 也可能导致可逆性失效:</p>
 <pre><code class="lang-js">/* utf-16 与 utf-8 不一致. */
-base64.decode(base64.encode(&#39;简体中文&#39;, &#39;utf-16&#39;), &#39;utf-8&#39;); // ��{�OSN-e�
+console.log(base64.decode(base64.encode(&#39;简体中文&#39;, &#39;utf-16&#39;), &#39;utf-8&#39;)); // ��{�OSN-e�
 </code></pre>
 <hr>
 <p style="font: bold 2em sans-serif; color: #FF7043">base64</p>
 
 <hr>
 <h2>[m] encode<span><a class="mark" href="#base64_m_encode" id="base64_m_encode">#</a></span></h2>
-<h3>encode(str, encoding?)<span><a class="mark" href="#base64_encode_str_encoding" id="base64_encode_str_encoding">#</a></span></h3>
+<h3>encode(o, encoding?)<span><a class="mark" href="#base64_encode_o_encoding" id="base64_encode_o_encoding">#</a></span></h3>
 <div class="signature"><ul>
-<li><strong>str</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待编码字符串</li>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待编码数据</li>
 <li><strong>[ encoding = <code>&#39;UTF_8&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_standardcharset">StandardCharset</a></span> } - 字符编码</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
 </ul>
-</div><p>对字符串进行 Base64 编码.</p>
-<pre><code class="lang-js">base64.encode(&#39;hello&#39;, &#39;iso-8859-1&#39;); // aGVsbG8=
-base64.encode(&#39;hello&#39;, &#39;us-ascii&#39;); // aGVsbG8=
-base64.encode(&#39;hello&#39;, &#39;utf-8&#39;); // aGVsbG8=
-base64.encode(&#39;hello&#39;, &#39;utf-16&#39;); // /v8AaABlAGwAbABv
-base64.encode(&#39;hello&#39;, &#39;utf-16be&#39;); // AGgAZQBsAGwAbw==
-base64.encode(&#39;hello&#39;, &#39;utf-16le&#39;); // aABlAGwAbABvAA==
+</div><p>对数据进行 Base64 编码.</p>
+<pre><code class="lang-js">/* 字符串. */
+
+console.log(base64.encode(&#39;hello&#39;, &#39;iso-8859-1&#39;)); // aGVsbG8=
+console.log(base64.encode(&#39;hello&#39;, &#39;us-ascii&#39;)); // aGVsbG8=
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-8&#39;)); // aGVsbG8=
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-16&#39;)); // /v8AaABlAGwAbABv
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-16be&#39;)); // AGgAZQBsAGwAbw==
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-16le&#39;)); // aABlAGwAbABvAA==
+
+/* JavaScript 字节数组. */
+
+console.log(base64.encode([ 104, 101, 108, 108, 111 ], &#39;utf-8&#39;)); // aGVsbG8=
+
+/* Java 字节数组. */
+
+console.log(base64.encode(new java.lang.String(&#39;hello&#39;).getBytes(), &#39;utf-8&#39;)); // aGVsbG8=
+
+let jsArr = [ 104, 101, 108, 108, 111 ];
+let javaArr = util.java.array(&#39;byte&#39;, jsArr.length);
+jsArr.forEach((o, i) =&gt; javaArr[i] = o);
+console.log(base64.encode(javaArr, &#39;utf-8&#39;)); /* 效果同上. */
 </code></pre>
 <h2>[m] decode<span><a class="mark" href="#base64_m_decode" id="base64_m_decode">#</a></span></h2>
-<h3>decode(str, encoding?)<span><a class="mark" href="#base64_decode_str_encoding" id="base64_decode_str_encoding">#</a></span></h3>
+<h3>decode(o, encoding?)<span><a class="mark" href="#base64_decode_o_encoding" id="base64_decode_o_encoding">#</a></span></h3>
 <div class="signature"><ul>
-<li><strong>str</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待解码字符串</li>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待解码数据</li>
 <li><strong>[ encoding = <code>&#39;UTF_8&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_standardcharset">StandardCharset</a></span> } - 字符编码</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
 </ul>
-</div><p>对字符串进行 Base64 解码.</p>
-<pre><code class="lang-js">base64.decode(&#39;aGVsbG8=&#39;, &#39;iso-8859-1&#39;); // hello
-base64.decode(&#39;aGVsbG8=&#39;, &#39;us-ascii&#39;); // hello
-base64.decode(&#39;aGVsbG8=&#39;, &#39;utf-8&#39;); // hello
-base64.decode(&#39;/v8AaABlAGwAbABv&#39;, &#39;utf-16&#39;); // hello
-base64.decode(&#39;AGgAZQBsAGwAbw==&#39;, &#39;utf-16be&#39;); // hello
-base64.decode(&#39;aABlAGwAbABvAA==&#39;, &#39;utf-16le&#39;); // hello
+</div><p>对数据进行 Base64 解码.</p>
+<pre><code class="lang-js">/* 字符串. */
+
+console.log(base64.decode(&#39;aGVsbG8=&#39;, &#39;iso-8859-1&#39;)); // hello
+console.log(base64.decode(&#39;aGVsbG8=&#39;, &#39;us-ascii&#39;)); // hello
+console.log(base64.decode(&#39;aGVsbG8=&#39;, &#39;utf-8&#39;)); // hello
+console.log(base64.decode(&#39;/v8AaABlAGwAbABv&#39;, &#39;utf-16&#39;)); // hello
+console.log(base64.decode(&#39;AGgAZQBsAGwAbw==&#39;, &#39;utf-16be&#39;)); // hello
+console.log(base64.decode(&#39;aABlAGwAbABvAA==&#39;, &#39;utf-16le&#39;)); // hello
+
+/* JavaScript 字节数组. */
+
+console.log(base64.decode([ 97, 71, 86, 115, 98, 71, 56, 61 ], &#39;utf-8&#39;)); // hello
+
+/* Java 字节数组. */
+
+console.log(base64.decode(new java.lang.String(&#39;aGVsbG8=&#39;).getBytes(), &#39;utf-8&#39;)); // hello
+
+let jsArr = [ 97, 71, 86, 115, 98, 71, 56, 61 ];
+let javaArr = util.java.array(&#39;byte&#39;, jsArr.length);
+jsArr.forEach((o, i) =&gt; javaArr[i] = o);
+console.log(base64.decode(javaArr, &#39;utf-8&#39;)); /* 效果同上. */
 </code></pre>
 
         </div>

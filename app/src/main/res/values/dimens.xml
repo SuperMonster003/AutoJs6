@@ -30,4 +30,15 @@
     <dimen name="toolbar_content_inset_start_with_navigation">64dp</dimen>
     <integer name="snackbar_text_max_lines">2</integer>
     <integer name="layout_node_info_view_decoration_line">2</integer>
+
+    <!-- Android Resources -->
+
+    <!-- Elevation when button is pressed -->
+    <dimen name="button_elevation_material">2dp</dimen>
+    <!-- Z translation to apply when button is pressed -->
+    <dimen name="button_pressed_z_material">4dp</dimen>
+    <!-- Dimensions for the translations of the default dialog animation. -->
+    <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
+    <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
+
 </resources>

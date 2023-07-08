@@ -5,10 +5,13 @@ package org.autojs.autojs.core.ui.attribute
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
+import android.view.InflateException
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.MarginLayoutParams
+import android.widget.CalendarView
+import android.widget.DatePicker
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -25,6 +28,11 @@ import org.autojs.autojs.core.ui.inflater.util.Ids
 import org.autojs.autojs.core.ui.inflater.util.Strings
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
 import org.autojs.autojs.util.ColorUtils
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
 
@@ -133,6 +141,8 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
         registerAttrs(arrayOf("layout_marginBottom", "layoutMarginBottom"), { parseDimension(it, false) }, ::setMarginBottom)
         registerAttrs(arrayOf("layout_marginStart", "layoutMarginStart"), { parseDimension(it, true) }, ::setMarginStart)
         registerAttrs(arrayOf("layout_marginEnd", "layoutMarginEnd"), { parseDimension(it, true) }, ::setMarginEnd)
+        registerAttrs(arrayOf("layout_marginVertical", "layoutMarginVertical"), { parseDimension(it, true) }, ::setMarginVertical)
+        registerAttrs(arrayOf("layout_marginHorizontal", "layoutMarginHorizontal"), { parseDimension(it, true) }, ::setMarginHorizontal)
         registerAttrs(arrayOf("layout_alignParentBottom", "layoutAlignParentBottom")) { setLayoutRule(RelativeLayout.ALIGN_PARENT_BOTTOM, false, it) }
         registerAttrs(arrayOf("layout_alignParentTop", "layoutAlignParentTop")) { setLayoutRule(RelativeLayout.ALIGN_PARENT_TOP, false, it) }
         registerAttrs(arrayOf("layout_alignParentLeft", "layoutAlignParentLeft")) { setLayoutRule(RelativeLayout.ALIGN_PARENT_LEFT, false, it) }
@@ -159,6 +169,8 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
         registerAttr("paddingBottom", { parseDimension(it, false) }, ::setPaddingBottom)
         registerAttr("paddingStart", { parseDimension(it, true) }, ::setPaddingStart)
         registerAttr("paddingEnd", { parseDimension(it, true) }, ::setPaddingEnd)
+        registerAttr("paddingVertical", { parseDimension(it, true) }, ::setPaddingVertical)
+        registerAttr("paddingHorizontal", { parseDimension(it, true) }, ::setPaddingHorizontal)
         registerAttr("alpha") { view.alpha = it.toFloat() }
         registerAttrs(arrayOf("isClickable", "clickable")) { view.isClickable = it.toBoolean() }
         registerAttr("contentDescription") { view.contentDescription = parseString(it) }
@@ -379,7 +391,7 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
         registerAttr(name) { applier(it.toBoolean()) }
     }
 
-    protected fun parseDrawable(value: String?): Drawable = drawables.parse(view, value)
+    protected fun parseDrawable(value: String): Drawable? = drawables.parse(view, value)
 
     protected fun setGravity(g: Int) = try {
         val setGravity = view.javaClass.getMethod("setGravity", Int::class.javaPrimitiveType)
@@ -411,27 +423,41 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
     }
 
     private fun setMarginLeft(margin: Int) {
-        (view.layoutParams as? MarginLayoutParams)?.run { leftMargin = margin }
+        (view.layoutParams as? MarginLayoutParams)?.let { it.leftMargin = margin }
     }
 
     private fun setMarginRight(margin: Int) {
-        (view.layoutParams as? MarginLayoutParams)?.run { rightMargin = margin }
+        (view.layoutParams as? MarginLayoutParams)?.let { it.rightMargin = margin }
     }
 
     private fun setMarginTop(margin: Int) {
-        (view.layoutParams as? MarginLayoutParams)?.run { topMargin = margin }
+        (view.layoutParams as? MarginLayoutParams)?.let { it.topMargin = margin }
     }
 
     private fun setMarginBottom(margin: Int) {
-        (view.layoutParams as? MarginLayoutParams)?.run { bottomMargin = margin }
+        (view.layoutParams as? MarginLayoutParams)?.let { it.bottomMargin = margin }
     }
 
     protected fun setMarginStart(margin: Int) {
-        (view.layoutParams as? MarginLayoutParams)?.run { marginStart = margin }
+        (view.layoutParams as? MarginLayoutParams)?.let { it.marginStart = margin }
     }
 
     protected fun setMarginEnd(margin: Int) {
-        (view.layoutParams as? MarginLayoutParams)?.run { marginEnd = margin }
+        (view.layoutParams as? MarginLayoutParams)?.let { it.marginEnd = margin }
+    }
+
+    protected fun setMarginVertical(margin: Int) {
+        (view.layoutParams as? MarginLayoutParams)?.let {
+            it.topMargin = margin
+            it.bottomMargin = margin
+        }
+    }
+
+    protected fun setMarginHorizontal(margin: Int) {
+        (view.layoutParams as? MarginLayoutParams)?.let {
+            it.marginStart = margin
+            it.marginEnd = margin
+        }
     }
 
     protected fun setPadding(padding: String) {
@@ -461,6 +487,14 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
 
     private fun setPaddingEnd(padding: Int) {
         view.setPaddingRelative(view.paddingStart, view.paddingTop, padding, view.paddingBottom)
+    }
+
+    private fun setPaddingVertical(padding: Int) {
+        view.setPaddingRelative(view.paddingStart, padding, view.paddingEnd, padding)
+    }
+
+    private fun setPaddingHorizontal(padding: Int) {
+        view.setPaddingRelative(padding, view.paddingTop, padding, view.paddingBottom)
     }
 
     protected fun setBackgroundTint(color: Int) {
@@ -534,6 +568,71 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
                 result.add(it)
             }
             return result
+        }
+
+        @JvmStatic
+        @Suppress("SpellCheckingInspection")
+        fun parseDayOfWeek(value: String) = when {
+            value.matches(Regex("MON(DAY)?", RegexOption.IGNORE_CASE)) -> Calendar.MONDAY
+            value.matches(Regex("TUE(SDAY)?", RegexOption.IGNORE_CASE)) -> Calendar.TUESDAY
+            value.matches(Regex("WED(NESDAY)?", RegexOption.IGNORE_CASE)) -> Calendar.WEDNESDAY
+            value.matches(Regex("THU(RSDAY)?", RegexOption.IGNORE_CASE)) -> Calendar.THURSDAY
+            value.matches(Regex("FRI(DAY)?", RegexOption.IGNORE_CASE)) -> Calendar.FRIDAY
+            value.matches(Regex("SAT(URDAY)?", RegexOption.IGNORE_CASE)) -> Calendar.SATURDAY
+            value.matches(Regex("SUN(DAY)?", RegexOption.IGNORE_CASE)) -> Calendar.SUNDAY
+            else -> {
+                // @Caution by SuperMonster003 on May 19, 2023.
+                //  ! Calendar.XXX is not as same as JavaScript Date.
+                //  ! Take Tuesday as an example,
+                //  ! for Java, Calendar.TUESDAY is 3,
+                //  ! for JavaScript, Date#getDay() is 2.
+
+                // Compatibility for 0 is not necessary.
+                // (value.toInt() + 6).mod(7) + 1
+
+                value.toInt()
+            }
+        }
+
+        fun setMaxDate(view: CalendarView, value: String) {
+            try {
+                parseDate(value)?.time?.let { view.maxDate = it }
+            } catch (e: ParseException) {
+                throw InflateException(e)
+            }
+        }
+
+        fun setMaxDate(view: DatePicker, value: String) {
+            try {
+                parseDate(value)?.time?.let { view.maxDate = it }
+            } catch (e: ParseException) {
+                throw InflateException(e)
+            }
+        }
+
+        fun setMinDate(view: CalendarView, value: String) {
+            try {
+                parseDate(value)?.time?.let { view.minDate = it }
+            } catch (e: ParseException) {
+                throw InflateException(e)
+            }
+        }
+
+        fun setMinDate(view: DatePicker, value: String) {
+            try {
+                parseDate(value)?.time?.let { view.minDate = it }
+            } catch (e: ParseException) {
+                throw InflateException(e)
+            }
+        }
+
+        fun parseDate(value: String): Date? = when {
+            value.matches(Regex("^\\d{4}/.+")) -> {
+                SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).parse(value)
+            }
+            else -> {
+                SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).parse(value)
+            }
         }
 
         @JvmField

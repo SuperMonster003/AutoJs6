@@ -105,6 +105,7 @@
     <string name="error_empty_github_release_assets">다운로드 할 자산이 없습니다</string>
     <string name="error_empty_shell_command">명령이 비어 있습니다</string>
     <string name="error_enable_server">AutoJs6 서버를 활성화 할 수 없습니다: %s</string>
+    <string name="error_failed_to_convert_into_drawable">%s 값을 Drawable로 변환하지 못했습니다</string>
     <string name="error_function_called_in_ui_thread">UI 스레드는 차단할 수 없습니다. 하위 스레드 또는 하위 스크립트에서 %s() 를 실행하십시오</string>
     <string name="error_function_called_more_than_once">%s() 가 두 번 이상 호출됩니다</string>
     <string name="error_get_github_latest_release">최신 GitHub 릴리스를 얻을 수 없습니다</string>
@@ -288,6 +289,7 @@
     <string name="text_console">콘솔</string>
     <string name="text_continue">계속하다</string>
     <string name="text_copy">복사</string>
+    <string name="text_export">내보내다</string>
     <string name="text_copy_all">모두 복사하십시오</string>
     <string name="text_copy_all_files_to_new_directory">모든 파일을 새 디렉토리로 복사하십시오</string>
     <string name="text_copy_command">CMD 를 복사하십시오</string>
@@ -657,6 +659,21 @@
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="theme_color_default">기본</string>
     <string name="error_abandoned_method">%s 메서드는 중단되었으며 사용해서는 안 됩니다</string>
+    <string name="error_invalid_ip_address">잘못된 IP 주소</string>
+    <string name="error_ip_address_should_not_be_empty">IP 주소는 비워둘 수 없습니다</string>
+    <string name="error_unacceptable_character">허용되지 않는 문자</string>
+    <string name="error_port_num_over_65535">65535 이상의 포트 번호</string>
+    <string name="error_dot_decimal_notation_num_over_255">255를 초과하는 점 십진수</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">콜론은 유효한 IP 주소를 따라야 합니다</string>
+    <string name="error_repeated_dot_symbol">반복되는 점 기호</string>
+    <string name="error_repeated_colon_symbol">반복 콜론 기호</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">VSCode 확장 버전이 요구 사항을 충족하지 않습니다</string>
+    <string name="text_min_version">최소 버전</string>
+    <string name="text_current_version">현재 버전</string>
+    <string name="text_lower_than">보다 낮은</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">VSCode 확장의 리포지토리 URL</string>
+    <string name="text_connection_cannot_be_established">연결을 설정할 수 없습니다</string>
+    <string name="text_min_version_of_vscode_vsc_ext">VSCode 확장의 최소 버전</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">총: %d 항목</item>

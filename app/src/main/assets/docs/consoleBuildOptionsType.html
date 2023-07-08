@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>ConsoleBuildOptions | AutoJs6 文档 - 6.3.0</title>
+    <title>ConsoleBuildOptions | AutoJs6 文档 - 6.3.2</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -122,6 +122,9 @@
 <li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
 <li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
 <li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
 <li><a class="nav-consoleBuildOptionsType active" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
 <li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
 <li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
@@ -152,7 +155,7 @@
 
     <div id="column1" data-id="consoleBuildOptionsType" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.0</h1>
+            <h1>AutoJs6 文档 - 6.3.2</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -192,7 +195,7 @@
         <div id="apicontent">
             <h1>ConsoleBuildOptions<span><a class="mark" href="#consolebuildoptionstype_consolebuildoptions" id="consolebuildoptionstype_consolebuildoptions">#</a></span></h1>
 <p>ConsoleBuildOptions 是一个显示控制台浮动窗口时用于设置窗口选项的接口.<br>这些选项将影响控制台浮动窗口的 [ 日志内容样式 / 标题样式 / 窗口尺寸 / 窗口位置 ] 等.</p>
-<p>常见参数中使用此接口类型的方法:</p>
+<p>常见相关方法或属性:</p>
 <ul>
 <li><a href="console.html#console_m_build">console.build</a>(<strong>options</strong>)</li>
 </ul>
@@ -202,7 +205,7 @@
 <hr>
 <h2>[p?] size<span><a class="mark" href="#consolebuildoptionstype_p_size" id="consolebuildoptionstype_p_size">#</a></span></h2>
 <div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">&#91;</a> width: <a href="dataTypes.html#datatypes_number">number</a>, height: <a href="dataTypes.html#datatypes_number">number</a> <a href="dataTypes.html#datatypes_string">&#93;</a></span> } - 浮动窗口尺寸</li>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_array">&#91;</a> width: <a href="dataTypes.html#datatypes_number">number</a>, height: <a href="dataTypes.html#datatypes_number">number</a> <a href="dataTypes.html#datatypes_array">&#93;</a></span> } - 浮动窗口尺寸</li>
 </ul>
 </div><p>设置控制台浮动窗口的尺寸.</p>
 <pre><code class="lang-js">/* 宽 500 像素, 高 800 像素. */
@@ -213,7 +216,7 @@ console.build({ size: [ 0.6, 0.7 ] }).show();
 </code></pre>
 <h2>[p?] position<span><a class="mark" href="#consolebuildoptionstype_p_position" id="consolebuildoptionstype_p_position">#</a></span></h2>
 <div class="signature"><ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">&#91;</a> x: <a href="dataTypes.html#datatypes_number">number</a>, y: <a href="dataTypes.html#datatypes_number">number</a> <a href="dataTypes.html#datatypes_string">&#93;</a></span> } - 浮动窗口位置</li>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_array">&#91;</a> x: <a href="dataTypes.html#datatypes_number">number</a>, y: <a href="dataTypes.html#datatypes_number">number</a> <a href="dataTypes.html#datatypes_array">&#93;</a></span> } - 浮动窗口位置</li>
 </ul>
 </div><p>设置控制台浮动窗口的位置.</p>
 <pre><code class="lang-js">/* X 坐标 150 像素, Y 坐标 100 像素. */

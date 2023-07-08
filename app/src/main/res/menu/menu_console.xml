@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:popupTheme="@style/Widget.AppCompat.PopupMenu">
+
+    <item
+        android:id="@+id/action_copy"
+        android:icon="@drawable/ic_content_copy_small_black_48dp"
+        android:title="@string/text_copy"
+        app:showAsAction="never"/>
+
+    <item
+            android:id="@+id/action_export"
+            android:icon="@drawable/ic_export_black_48dp"
+            android:title="@string/text_export"
+            app:showAsAction="never"/>
+
+    <item
+            android:id="@+id/action_clear"
+            android:icon="@drawable/ic_clear_black_48dp"
+            android:title="@string/text_clear"
+            app:showAsAction="never"/>
+
+    <item
+            android:id="@+id/action_settings"
+            android:icon="@drawable/ic_settings_black_48dp"
+            android:title="@string/text_settings"
+            app:showAsAction="never"/>
+
+</menu>

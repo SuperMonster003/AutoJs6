@@ -19,6 +19,7 @@ let Toast = android.widget.Toast;
 let KeyEvent = android.view.KeyEvent;
 let MotionEvent = android.view.MotionEvent;
 let Version = Packages.io.github.g00fy2.versioncompare.Version;
+let Crypto = org.autojs.autojs.core.crypto.Crypto;
 let Image = org.autojs.autojs.core.image.ImageWrapper;
 let ColorTable = org.autojs.autojs.core.image.ColorTable;
 let Canvas = org.autojs.autojs.core.graphics.ScriptCanvas;
@@ -37,6 +38,7 @@ let WebView = android.webkit.WebView;
 let WebViewClient = android.webkit.WebViewClient;
 let WebChromeClient = android.webkit.WebChromeClient;
 let GlobalAppContext = org.autojs.autojs.app.GlobalAppContext;
+let ArrayUtils = org.autojs.autojs.util.ArrayUtils;
 let DisplayUtils = org.autojs.autojs.util.DisplayUtils;
 let StringUtils = org.autojs.autojs.util.StringUtils;
 let ColorUtils = org.autojs.autojs.util.ColorUtils;
@@ -301,7 +303,7 @@ Object.assign(this, {
                     this.moduleSpecials[module].call();
                 } else {
                     // Object.defineProperty(global, module, { value: require(`__${module}__`)(runtime, global), enumerable: true });
-                    global[module] = require(`__${module}__`)(runtime, global);
+                    global[`$${module}`] = global[module] = require(`__${module}__`)(runtime, global);
                     try {
                         if (typeof global[module] === 'object') {
                             if (!(Object.hasOwn(global[module], 'toString'))) {
@@ -309,7 +311,7 @@ Object.assign(this, {
                                 let prototype = global[module].constructor.prototype;
                                 if (prototype !== undefined) /* For AutoJs6 debugger. */ {
                                     if (typeof prototype.toString !== 'function') {
-                                        global[module].toString = () => module;
+                                        global[`$${module}`].toString = global[module].toString = () => module;
                                     }
                                 }
                             }
@@ -437,7 +439,8 @@ Object.assign(this, {
                 /* ! autojs < app */
                 /* ! shell < app */
                 /* ! files < app */
-                [ 'autojs', 'shell', 'files', 'app' ],
+                /* ! files < crypto */
+                [ 'autojs', 'shell', 'files', 'app', 'crypto' ],
 
                 /* ! timers < promise # setTimeout() */
                 /* ! timers < automator # setTimeout() in result-adapter */

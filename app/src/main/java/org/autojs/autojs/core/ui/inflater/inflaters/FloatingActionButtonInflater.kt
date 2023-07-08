@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.ui.inflater.inflaters
 
+import android.content.Context
+import android.view.ViewGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
@@ -10,6 +12,10 @@ import org.autojs.autojs.core.ui.inflater.ViewCreator
  */
 open class FloatingActionButtonInflater<V : FloatingActionButton>(resourceParser: ResourceParser) : ImageViewInflater<V>(resourceParser) {
 
-    override fun getCreator(): ViewCreator<in V> = ViewCreator { context, _ -> FloatingActionButton(context) }
+    override fun getCreator(): ViewCreator<in V> = object : ViewCreator<FloatingActionButton> {
+        override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): FloatingActionButton {
+            return FloatingActionButton(context)
+        }
+    }
 
 }

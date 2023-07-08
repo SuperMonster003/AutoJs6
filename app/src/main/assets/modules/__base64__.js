@@ -16,19 +16,17 @@ module.exports = function (scriptRuntime, scope) {
 
             Base64Ctor.prototype = {
                 constructor: Base64Ctor,
-                encode(str, encoding) {
-                    // noinspection JSValidateTypes
-                    let string = new java.lang.String(str);
+                encode(o, encoding) {
                     let niceEncoding = _.parseEncoding(encoding);
-                    return niceEncoding !== undefined
-                        ? Base64.encodeToString(string.getBytes(niceEncoding), Base64.NO_WRAP)
-                        : Base64.encodeToString(string.getBytes(), Base64.NO_WRAP);
+                    return Base64.encodeToString(_.toBytes(o, niceEncoding), Base64.NO_WRAP);
                 },
-                decode(str, encoding) {
+                decode(o, encoding) {
                     let niceEncoding = _.parseEncoding(encoding);
-                    return niceEncoding !== undefined
-                        ? String(new java.lang.String(Base64.decode(str, Base64.NO_WRAP), niceEncoding))
-                        : String(new java.lang.String(Base64.decode(str, Base64.NO_WRAP)));
+                    let decoded = Base64.decode(_.toBytes(o, niceEncoding), Base64.NO_WRAP);
+                    // noinspection JSValidateTypes
+                    return typeof niceEncoding !== 'undefined'
+                        ? String(new java.lang.String(decoded, niceEncoding))
+                        : String(new java.lang.String(decoded));
                 },
             };
 
@@ -48,8 +46,31 @@ module.exports = function (scriptRuntime, scope) {
             ].find((cs) => cs.name().toLowerCase().replace(/\W+/g, '')
                 === String(encoding).trim().toLowerCase().replace(/\W+/g, ''));
         },
+        toBytes(o, encoding) {
+            if (typeof o === 'string') {
+                // noinspection JSValidateTypes
+                /** @type { java.lang.String } */
+                let string = new java.lang.String(o);
+                return typeof encoding !== 'undefined'
+                    ? string.getBytes(encoding)
+                    : string.getBytes();
+            }
+            if (util.getClassName(o) === '[B') {
+                return o;
+            }
+            if (Array.isArray(o)) {
+                return ArrayUtils.jsBytesToByteArray(o);
+            }
+            if (!isNullish(o)) {
+                if (typeof o.toString === 'function') {
+                    return this.toBytes(o.toString());
+                }
+            }
+            throw Error(`Can't convert o (${o}) to bytes`);
+        },
     };
 
+    // noinspection UnnecessaryLocalVariableJS
     /**
      * @type {Internal.Base64}
      */

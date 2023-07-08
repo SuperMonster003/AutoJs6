@@ -103,6 +103,7 @@
     <string name="error_empty_github_release_assets">No GitHub release assets to download</string>
     <string name="error_empty_shell_command">Command is empty</string>
     <string name="error_enable_server">Can\'t enable AutoJs6 server: %s</string>
+    <string name="error_failed_to_convert_into_drawable">Failed to convert value %s into a Drawable</string>
     <string name="error_function_called_in_ui_thread">UI thread can\'t be blocked. Try running %s() in sub-thread or sub-script</string>
     <string name="error_function_called_more_than_once">%s() called more than once</string>
     <string name="error_get_github_latest_release">Can\'t get latest GitHub release</string>
@@ -286,6 +287,7 @@
     <string name="text_console">Console</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copy</string>
+    <string name="text_export">Export</string>
     <string name="text_copy_all">Copy all</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_command">Copy cmd</string>
@@ -655,6 +657,21 @@
     <string name="text_write_system_settings">Write system settings</string>
     <string name="theme_color_default">Default</string>
     <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
+    <string name="error_invalid_ip_address">Invalid IP address</string>
+    <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
+    <string name="error_unacceptable_character">Unacceptable character</string>
+    <string name="error_port_num_over_65535">Port number over 65535</string>
+    <string name="error_dot_decimal_notation_num_over_255">Dot-decimal number over 255</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
+    <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
+    <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
+    <string name="text_min_version">Minimum version</string>
+    <string name="text_current_version">Current version</string>
+    <string name="text_lower_than">Lower than</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">Repository URL of VSCode extension</string>
+    <string name="text_connection_cannot_be_established">Connection can\'t be established</string>
+    <string name="text_min_version_of_vscode_vsc_ext">Minimum version of VSCode extension</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>
