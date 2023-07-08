@@ -9,7 +9,7 @@ import org.autojs.autojs.util.ColorUtils
 /**
  * Created by SuperMonster003 on May 20, 2023.
  */
-open class ProgressBarAttributes<V: ProgressBar>(resourceParser: ResourceParser, view: View) : ViewAttributes(resourceParser, view) {
+open class ProgressBarAttributes(resourceParser: ResourceParser, view: View) : ViewAttributes(resourceParser, view) {
 
     override val view = super.view as ProgressBar
 

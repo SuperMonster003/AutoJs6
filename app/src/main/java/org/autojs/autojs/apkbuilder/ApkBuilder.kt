@@ -23,69 +23,19 @@ import java.util.concurrent.Callable
  */
 open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: File, private val mWorkspacePath: String) {
 
-    interface ProgressCallback {
-        fun onPrepare(builder: ApkBuilder?)
-        fun onBuild(builder: ApkBuilder?)
-        fun onSign(builder: ApkBuilder?)
-        fun onClean(builder: ApkBuilder?)
-    }
-
-    class AppConfig {
-
-        var appName: String? = null
-            private set
-        var versionName: String? = null
-            private set
-        var versionCode = 0
-            private set
-        var sourcePath: String? = null
-            private set
-        var packageName: String? = null
-            private set
-        var ignoredDirs = ArrayList<File>()
-        var icon: Callable<Bitmap>? = null
-            private set
-
-        fun ignoreDir(dir: File) = also { ignoredDirs.add(dir) }
-
-        fun setAppName(appName: String?) = also { appName?.let { this.appName = it } }
-
-        fun setVersionName(versionName: String?) = also { versionName?.let { this.versionName = it } }
-
-        fun setVersionCode(versionCode: Int?) = also { versionCode?.let { this.versionCode = it } }
-
-        fun setSourcePath(sourcePath: String?) = also { sourcePath?.let { this.sourcePath = it } }
-
-        fun setPackageName(packageName: String?) = also { packageName?.let { this.packageName = it } }
-
-        fun setIcon(icon: Callable<Bitmap>?) = also { icon?.let { this.icon = it } }
-
-        fun setIcon(iconPath: String?) = also { iconPath?.let { this.icon = Callable { BitmapFactory.decodeFile(it) } } }
-
-        companion object {
-            @JvmStatic
-            fun fromProjectConfig(projectDir: String?, projectConfig: ProjectConfig) = AppConfig()
-                .setAppName(projectConfig.name)
-                .setPackageName(projectConfig.packageName)
-                .ignoreDir(File(projectDir, projectConfig.buildDir))
-                .setVersionCode(projectConfig.versionCode)
-                .setVersionName(projectConfig.versionName)
-                .setSourcePath(projectDir)
-                .setIcon(projectConfig.icon?.let { File(projectDir, it).path })
-        }
-    }
-
     private var mProgressCallback: ProgressCallback? = null
-    private val mApkPackager: ApkPackager
+    private val mApkPackager = ApkPackager(apkInputStream, mWorkspacePath)
     private var mArscPackageName: String? = null
     private var mManifestEditor: ManifestEditor? = null
     private var mInitVector: String? = null
     private var mKey: String? = null
 
+    private val mManifestFile
+        get() = File(mWorkspacePath, "AndroidManifest.xml")
+
     private lateinit var mAppConfig: AppConfig
 
     init {
-        mApkPackager = ApkPackager(apkInputStream, mWorkspacePath)
         PFiles.ensureDir(mOutApkFile.path)
     }
 
@@ -167,10 +117,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
     }
 
     @Throws(FileNotFoundException::class)
-    fun editManifest(): ManifestEditor = ManifestEditorWithAuthorities(FileInputStream(manifestFile)).also { mManifestEditor = it }
-
-    protected val manifestFile: File
-        get() = File(mWorkspacePath, "AndroidManifest.xml")
+    fun editManifest(): ManifestEditor = ManifestEditorWithAuthorities(FileInputStream(mManifestFile)).also { mManifestEditor = it }
 
     private fun updateProjectConfig(appConfig: AppConfig) {
         let {
@@ -211,7 +158,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
                 throw RuntimeException(e)
             }
         }
-        mManifestEditor?.apply { commit() }?.run { writeTo(FileOutputStream(manifestFile)) }
+        mManifestEditor?.apply { commit() }?.run { writeTo(FileOutputStream(mManifestFile)) }
         mArscPackageName?.let { buildArsc() }
     }
 
@@ -243,6 +190,60 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
 
     private fun delete(file: File) {
         file.apply { if (isDirectory) listFiles()?.forEach { delete(it) } }.also { it.delete() }
+    }
+
+    interface ProgressCallback {
+
+        fun onPrepare(builder: ApkBuilder)
+        fun onBuild(builder: ApkBuilder)
+        fun onSign(builder: ApkBuilder)
+        fun onClean(builder: ApkBuilder)
+
+    }
+
+    class AppConfig {
+
+        var appName: String? = null
+            private set
+        var versionName: String? = null
+            private set
+        var versionCode = 0
+            private set
+        var sourcePath: String? = null
+            private set
+        var packageName: String? = null
+            private set
+        var ignoredDirs = ArrayList<File>()
+        var icon: Callable<Bitmap>? = null
+            private set
+
+        fun ignoreDir(dir: File) = also { ignoredDirs.add(dir) }
+
+        fun setAppName(appName: String?) = also { appName?.let { this.appName = it } }
+
+        fun setVersionName(versionName: String?) = also { versionName?.let { this.versionName = it } }
+
+        fun setVersionCode(versionCode: Int?) = also { versionCode?.let { this.versionCode = it } }
+
+        fun setSourcePath(sourcePath: String?) = also { sourcePath?.let { this.sourcePath = it } }
+
+        fun setPackageName(packageName: String?) = also { packageName?.let { this.packageName = it } }
+
+        fun setIcon(icon: Callable<Bitmap>?) = also { icon?.let { this.icon = it } }
+
+        fun setIcon(iconPath: String?) = also { iconPath?.let { this.icon = Callable { BitmapFactory.decodeFile(it) } } }
+
+        companion object {
+            @JvmStatic
+            fun fromProjectConfig(projectDir: String?, projectConfig: ProjectConfig) = AppConfig()
+                .setAppName(projectConfig.name)
+                .setPackageName(projectConfig.packageName)
+                .ignoreDir(File(projectDir, projectConfig.buildDir))
+                .setVersionCode(projectConfig.versionCode)
+                .setVersionName(projectConfig.versionName)
+                .setSourcePath(projectDir)
+                .setIcon(projectConfig.icon?.let { File(projectDir, it).path })
+        }
     }
 
     private inner class ManifestEditorWithAuthorities(manifestInputStream: InputStream?) : ManifestEditor(manifestInputStream) {

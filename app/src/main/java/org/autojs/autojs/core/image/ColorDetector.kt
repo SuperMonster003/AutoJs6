@@ -17,7 +17,7 @@ import kotlin.math.sqrt
  */
 interface ColorDetector {
 
-    fun detectsColor(r: Int, g: Int, b: Int): Boolean
+    fun detectColor(r: Int, g: Int, b: Int): Boolean
 
     abstract class AbstractColorDetector(color: Int) : ColorDetector {
         protected open val colorR: Int = Color.red(color)
@@ -26,19 +26,19 @@ interface ColorDetector {
     }
 
     class EqualityDetector(color: Int) : AbstractColorDetector(color) {
-        override fun detectsColor(r: Int, g: Int, b: Int): Boolean {
+        override fun detectColor(r: Int, g: Int, b: Int): Boolean {
             return colorR == r && colorG == g && colorB == b
         }
     }
 
     class DifferenceDetector(color: Int, private val threshold: Int) : AbstractColorDetector(color) {
-        override fun detectsColor(r: Int, g: Int, b: Int): Boolean {
+        override fun detectColor(r: Int, g: Int, b: Int): Boolean {
             return (abs(r - colorR) + abs(g - colorG) + abs(b - colorB)) / 3.0 <= threshold
         }
     }
 
     class RGBDistanceDetector(color: Int, private val threshold: Int) : AbstractColorDetector(color) {
-        override fun detectsColor(r: Int, g: Int, b: Int): Boolean {
+        override fun detectColor(r: Int, g: Int, b: Int): Boolean {
             val dR = (r - colorR).toDouble()
             val dG = (g - colorG).toDouble()
             val dB = (b - colorB).toDouble()
@@ -51,7 +51,7 @@ interface ColorDetector {
         override val colorG = color and 0x00ff00 shr 8
         override val colorB = color and 0xff
 
-        override fun detectsColor(r: Int, g: Int, b: Int): Boolean {
+        override fun detectColor(r: Int, g: Int, b: Int): Boolean {
             val dR = (r - colorR).toDouble()
             val dG = (g - colorG).toDouble()
             val dB = (b - colorB).toDouble()
@@ -73,7 +73,7 @@ interface ColorDetector {
     }
 
     class HDistanceDetector(color: Int, private val threshold: Int) : AbstractColorDetector(color) {
-        override fun detectsColor(r: Int, g: Int, b: Int): Boolean {
+        override fun detectColor(r: Int, g: Int, b: Int): Boolean {
             // @Hint by SuperMonster003 on Feb 17, 2023.
             //  ! Code snippet in Auto.js 4.1.1 alpha2:
             //  !
@@ -98,7 +98,7 @@ interface ColorDetector {
 
         constructor(color: Int, similarity: Float) : this(color, ((1.0f - similarity) * 255).roundToInt())
 
-        override fun detectsColor(r: Int, g: Int, b: Int): Boolean {
+        override fun detectColor(r: Int, g: Int, b: Int): Boolean {
             val hs = getHnS(r, g, b)
             val dH = (hs and 0xffffffffL) - h
             val dS = (hs shr 32 and 0xffffffffL) - s

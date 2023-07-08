@@ -4,6 +4,8 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.autojs.autojs.pref.Language;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -113,11 +115,11 @@ public class RomUtil {
             sName = ROM_SMARTISAN;
         } else {
             sVersion = Build.DISPLAY;
-            if (sVersion.toUpperCase().contains(ROM_FLYME)) {
+            if (sVersion.toUpperCase(Language.getPrefLanguage().getLocale()).contains(ROM_FLYME)) {
                 sName = ROM_FLYME;
             } else {
                 sVersion = Build.UNKNOWN;
-                sName = Build.MANUFACTURER.toUpperCase();
+                sName = Build.MANUFACTURER.toUpperCase(Language.getPrefLanguage().getLocale());
             }
         }
         return sName.equals(rom);

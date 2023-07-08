@@ -1,15 +1,25 @@
+@file:Suppress("unused")
+
 package org.autojs.autojs.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.BatteryManager
 import android.os.Build
 import android.telephony.TelephonyManager
 import androidx.annotation.IntRange
+import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs6.R
 import java.util.Arrays
 
 object DeviceUtils {
+
+    private fun getBatteryChangedActionIntent(context: Context): Intent {
+        return context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: throw ScriptException(context.getString(R.string.error_cannot_retrieve_battery_state))
+    }
 
     @JvmStatic
     fun getDeviceSummary(context: Context) = DeviceInfo(context).toString()
@@ -92,6 +102,60 @@ object DeviceUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) telephonyManager.imei else telephonyManager.deviceId
     } catch (e: SecurityException) {
         null
+    }
+
+    @JvmStatic
+    fun isCharging(context: Context): Boolean {
+        val intent = getBatteryChangedActionIntent(context)
+
+        // @Comment by SuperMonster003 on Jun 7, 2023.
+        //  ! EXTRA_STATUS may be better than EXTRA_PLUGGED getting battery charging state.
+
+        // int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+        // return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+
+        val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+        return status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+    }
+
+    @JvmStatic
+    fun isPowerSourceAC(context: Context): Boolean {
+        if (!isCharging(context)) {
+            return false
+        }
+        val intent = getBatteryChangedActionIntent(context)
+        val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+        return plugged == BatteryManager.BATTERY_PLUGGED_AC
+    }
+
+    @JvmStatic
+    fun isPowerSourceUSB(context: Context): Boolean {
+        if (!isCharging(context)) {
+            return false
+        }
+        val intent = getBatteryChangedActionIntent(context)
+        val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+        return plugged == BatteryManager.BATTERY_PLUGGED_USB
+    }
+
+    @JvmStatic
+    fun isPowerSourceWireless(context: Context): Boolean {
+        if (!isCharging(context)) {
+            return false
+        }
+        val intent = getBatteryChangedActionIntent(context)
+        val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+        return plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
+    }
+
+    @JvmStatic
+    fun isPowerSourceDock(context: Context): Boolean {
+        if (!isCharging(context)) {
+            return false
+        }
+        val intent = getBatteryChangedActionIntent(context)
+        val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && plugged == BatteryManager.BATTERY_PLUGGED_DOCK
     }
 
 }

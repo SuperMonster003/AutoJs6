@@ -24,6 +24,7 @@ import org.autojs.autojs.core.looper.Loopers;
 import org.autojs.autojs.core.looper.Timer;
 import org.autojs.autojs.core.notification.Notification;
 import org.autojs.autojs.core.notification.NotificationListenerService;
+import org.autojs.autojs.pref.Language;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.exception.ScriptException;
 import org.autojs.autojs.tool.MapBuilder;
@@ -152,7 +153,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         mKeyInterceptor = event -> {
             if (mInterceptsAllKey)
                 return true;
-            String keyName = KeyEvent.keyCodeToString(event.getKeyCode()).substring(8).toLowerCase();
+            String keyName = KeyEvent.keyCodeToString(event.getKeyCode()).substring(8).toLowerCase(Language.getPrefLanguage().getLocale());
             return mInterceptedKeys.contains(keyName);
         };
         getAccessibilityService().getKeyInterrupterObserver().addKeyInterrupter(mKeyInterceptor);
@@ -281,7 +282,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
     @Override
     public void onKeyEvent(final int keyCode, @NonNull final KeyEvent event) {
         mHandler.post(() -> {
-            String keyName = KeyEvent.keyCodeToString(keyCode).substring(8).toLowerCase();
+            String keyName = KeyEvent.keyCodeToString(keyCode).substring(8).toLowerCase(Language.getPrefLanguage().getLocale());
             emit(keyName, event);
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 emit(PREFIX_KEY_DOWN + keyName, event);

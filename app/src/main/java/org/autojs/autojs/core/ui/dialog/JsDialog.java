@@ -112,6 +112,10 @@ public class JsDialog {
         return getActionButton(getDialogAction(action)).getText().toString();
     }
 
+    public MDButton getActionButton(@NonNull DialogAction which) {
+        return mDialog.getActionButton(which);
+    }
+
     public void setActionButton(String action, String text) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             setActionButton(getDialogAction(action), text);
@@ -120,6 +124,18 @@ public class JsDialog {
         }
     }
 
+    @UiThread
+    public void setActionButton(@NonNull DialogAction which, CharSequence title) {
+        mDialog.setActionButton(which, title);
+    }
+
+    public void setActionButton(DialogAction which, int titleRes) {
+        mDialog.setActionButton(which, titleRes);
+    }
+
+    public boolean hasActionButtons() {
+        return mDialog.hasActionButtons();
+    }
 
     public MaterialDialog.Builder getBuilder() {
         return mDialog.getBuilder();
@@ -154,10 +170,6 @@ public class JsDialog {
         mDialog.onClick(v);
     }
 
-    public MDButton getActionButton(@NonNull DialogAction which) {
-        return mDialog.getActionButton(which);
-    }
-
     public View getView() {
         return mDialog.getView();
     }
@@ -183,19 +195,6 @@ public class JsDialog {
     @Nullable
     public View getCustomView() {
         return mDialog.getCustomView();
-    }
-
-    @UiThread
-    public void setActionButton(@NonNull DialogAction which, CharSequence title) {
-        mDialog.setActionButton(which, title);
-    }
-
-    public void setActionButton(DialogAction which, int titleRes) {
-        mDialog.setActionButton(which, titleRes);
-    }
-
-    public boolean hasActionButtons() {
-        return mDialog.hasActionButtons();
     }
 
     public int numberOfActionButtons() {

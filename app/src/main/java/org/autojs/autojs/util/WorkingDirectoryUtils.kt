@@ -12,12 +12,9 @@ import java.io.File
 
 object WorkingDirectoryUtils {
 
-    private const val dirRes = R.string.default_value_working_directory
-    private const val workingDirKeyRes = R.string.key_working_directory_histories
-
     var histories: LinkedHashSet<String>
-        get() = Pref.getLinkedHashSet(workingDirKeyRes)
-        private set(value) = Pref.putLinkedHashSet(workingDirKeyRes, value)
+        get() = Pref.getLinkedHashSet(R.string.key_working_directory_histories)
+        private set(value) = Pref.putLinkedHashSet(R.string.key_working_directory_histories, value)
 
     @JvmStatic
     var path: String
@@ -51,7 +48,7 @@ object WorkingDirectoryUtils {
         Language.AUTO,
     ).plus(Language.values().filter { File(externalStorageDirectory, getDir(it)).exists() })
 
-    private fun getDir(language: Language) = LocaleUtils.getResources(language.locale).getString(dirRes)
+    private fun getDir(language: Language) = LocaleUtils.getResources(language.locale).getString(R.string.default_value_working_directory)
 
     @JvmStatic
     fun determineIfNeeded() {

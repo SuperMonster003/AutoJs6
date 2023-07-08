@@ -105,7 +105,8 @@ public class DevPluginResponseHandler implements Handler {
         return Observable
                 .fromCallable(() -> {
                     File dir = new File(mCacheDir, idMd5);
-                    Zip.unzip(new ByteArrayInputStream(bytes.byteString.toByteArray()), dir);
+                    byte[] byteArray = bytes.byteString.toByteArray();
+                    Zip.unzip(new ByteArrayInputStream(byteArray), dir);
                     return dir;
                 })
                 .subscribeOn(Schedulers.io());

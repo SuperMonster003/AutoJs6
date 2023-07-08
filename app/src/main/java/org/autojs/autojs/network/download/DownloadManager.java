@@ -31,7 +31,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
@@ -71,7 +70,7 @@ public class DownloadManager {
         mOkHttpClient = getOkHttpClient();
 
         Retrofit mRetrofit = new Retrofit.Builder()
-                .baseUrl(UpdateUtils.BASE_URL)
+                .baseUrl(UpdateUtils.BASE_URL_RAW)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(mOkHttpClient)
                 .build();

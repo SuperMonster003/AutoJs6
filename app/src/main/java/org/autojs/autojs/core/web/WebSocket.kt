@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.web
 
+import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request.Builder
 import okhttp3.Response
@@ -18,14 +19,34 @@ class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: Str
     runtime.bridges, runtime.timers.timerForCurrentThread.takeIf { isInCurrentThread }
 ), okhttp3.WebSocket {
 
+    private var maxRebuildTimes = Int.MAX_VALUE
+    private var currentRebuildTimes = 0
+
     private var listener: WebSocketMessageListener
-    private var webSocket: okhttp3.WebSocket
+    private lateinit var webSocket: okhttp3.WebSocket
 
     init {
-        WebSocketMessageListener(this).let {
-            listener = it
-            webSocket = client.newWebSocket(Builder().url(url).build(), it)
+        WebSocketMessageListener(this).also { listener = it }
+        build()
+    }
+
+    private fun build() {
+        webSocket = client.newWebSocket(Builder().url(url).build(), listener)
+    }
+
+    fun rebuild() {
+        cancel()
+        if (currentRebuildTimes < maxRebuildTimes) {
+            build()
+        } else {
+            emit("max_rebuild", maxRebuildTimes, this)
         }
+        currentRebuildTimes += 1
+    }
+
+    fun rebuild(maxRebuildTimes: Int) {
+        this.maxRebuildTimes = maxRebuildTimes
+        rebuild()
     }
 
     override fun cancel() = webSocket.cancel()
@@ -53,6 +74,8 @@ class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: Str
         }
 
         override fun onFailure(webSocket: okhttp3.WebSocket, t: Throwable, response: Response?) {
+            Log.w(Companion.TAG, "onFailure")
+            t.printStackTrace()
             ws.emit("failure", t, response, ws)
         }
 
@@ -69,6 +92,12 @@ class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: Str
         override fun onOpen(webSocket: okhttp3.WebSocket, response: Response) {
             ws.emit("open", response, ws)
         }
+
+    }
+
+    companion object {
+
+        private val TAG = WebSocket::class.java.simpleName
 
     }
 

@@ -184,11 +184,11 @@ class ColorSelectActivity : BaseActivity() {
                 }
             }
 
-            constructor(context: Context?) : super(context)
+            constructor(context: Context) : super(context)
 
-            constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+            constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-            constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
+            constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
             init {
                 adapter = Adapter()

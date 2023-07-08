@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -42,6 +43,7 @@ import org.kohsuke.github.PagedIterable;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 import java.util.Properties;
@@ -62,6 +64,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class UpdateChecker {
 
+    private static final String TAG = UpdateChecker.class.getSimpleName();
     private MaterialDialog mUpdateDialog;
     private MaterialDialog mPendingDialog;
 
@@ -112,39 +115,26 @@ public class UpdateChecker {
                             return;
                         }
 
-                        try {
-                            Properties prop = new Properties();
-                            prop.load(responseBody.byteStream());
+                        VersionInfo versionInfo = getVersionInfo(responseBody);
 
-                            String versionNameKey = mContext.getString(R.string.property_key_app_version_name);
-                            String versionName = prop.getProperty(versionNameKey);
-
-                            String versionCodeKey = mContext.getString(R.string.property_key_app_version_code);
-                            int versionCode = Integer.parseInt(prop.getProperty(versionCodeKey));
-
-                            VersionInfo versionInfo = new VersionInfo(versionName, versionCode);
-
-                            switch (mPromptMode) {
-                                case DIALOG -> {
-                                    if (versionInfo.isNewer() && versionInfo.isNotIgnored()) {
-                                        showDialog(versionInfo);
-                                    } else {
-                                        ViewUtils.showToast(mContext, R.string.text_is_latest_version);
-                                        Pref.refreshLastNoNewerUpdatesTimestamp();
-                                    }
+                        switch (mPromptMode) {
+                            case DIALOG -> {
+                                if (versionInfo == null) {
+                                    ViewUtils.showToast(mContext, R.string.error_parse_version_info);
+                                    return;
                                 }
-                                case SNACKBAR -> {
-                                    if (versionInfo.isNewer() && versionInfo.isNotIgnored()) {
-                                        showSnackBar(versionInfo);
-                                    }
+                                if (versionInfo.isNewer() && versionInfo.isNotIgnored()) {
+                                    showDialog(versionInfo);
+                                } else {
+                                    ViewUtils.showToast(mContext, R.string.text_is_latest_version);
+                                    Pref.refreshLastNoNewerUpdatesTimestamp();
                                 }
-                                default -> throw new IllegalStateException(mContext.getString(
-                                        R.string.error_illegal_argument,
-                                        "promptMode", mPromptMode));
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            ViewUtils.showToast(mContext, mContext.getString(R.string.error_parse_version_info));
+                            case SNACKBAR -> {
+                                if (versionInfo != null && versionInfo.isNewer() && versionInfo.isNotIgnored()) {
+                                    showSnackBar(versionInfo);
+                                }
+                            }
                         }
                     }
 
@@ -168,6 +158,55 @@ public class UpdateChecker {
                         }
                     }
                 });
+    }
+
+    @Nullable
+    private VersionInfo getVersionInfo(ResponseBody responseBody) {
+        VersionInfo versionInfoByBlob = getVersionInfoByBlob(responseBody);
+        if (versionInfoByBlob != null) {
+            Log.d(TAG, "VersionInfo parsed via blob");
+            return versionInfoByBlob;
+        }
+        // VersionInfo versionInfoByProperties = getVersionInfoByProperties(responseBody);
+        // if (versionInfoByProperties != null) {
+        //     Log.d(TAG, "VersionInfo parsed via properties");
+        //     return versionInfoByProperties;
+        // }
+        return null;
+    }
+
+    @Nullable
+    private VersionInfo getVersionInfoByProperties(ResponseBody responseBody) {
+        try {
+            Properties prop = new Properties();
+            prop.load(responseBody.byteStream());
+
+            String versionNameKey = mContext.getString(R.string.property_key_app_version_name);
+            String versionName = prop.getProperty(versionNameKey);
+
+            String versionCodeKey = mContext.getString(R.string.property_key_app_version_code);
+            int versionCode = Integer.parseInt(prop.getProperty(versionCodeKey));
+
+            return new VersionInfo(versionName, versionCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Nullable
+    private static VersionInfo getVersionInfoByBlob(ResponseBody responseBody) {
+        StringBuilder textBuilder = new StringBuilder();
+        try (Reader r = new BufferedReader(new InputStreamReader(responseBody.byteStream()), 1024)) {
+            int c;
+            while ((c = r.read()) != -1) {
+                textBuilder.append((char) c);
+            }
+            return new VersionInfo(textBuilder.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -263,7 +302,7 @@ public class UpdateChecker {
         //  ! VersionInfo: *.properties / *.json.
 
         String propVersion = versionInfo.getVersionName();
-        if (propVersion == null) {
+        if (propVersion.isEmpty()) {
             new Dialog.Builder
                     .Prompt(context, R.string.error_check_for_update, R.string.error_parse_version_info)
                     .build().show();
@@ -306,7 +345,7 @@ public class UpdateChecker {
             String repoName = context.getString(R.string.app_name);
             GHRepository repo = GHub.getRepo(github, userName, repoName);
             if (repo == null) {
-                Dialog.setDialogContent(mUpdateDialog, context.getString(R.string.error_invalid_github_repo, repoName));
+                Dialog.setDialogContent(mUpdateDialog, mUpdateDialog.getContext().getString(R.string.error_invalid_github_repo, repoName));
                 return;
             }
 

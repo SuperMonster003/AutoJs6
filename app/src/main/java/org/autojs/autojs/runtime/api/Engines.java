@@ -27,7 +27,9 @@ public class Engines {
     }
 
     public ScriptExecution execScript(String name, String script, ExecutionConfig config) {
-        return mEngineService.execute(new StringScriptSource(name, script), config);
+        StringScriptSource scriptSource = new StringScriptSource(name, script);
+        scriptSource.setPrefix("$engine/");
+        return mEngineService.execute(scriptSource, config);
     }
 
     public ScriptExecution execScriptFile(String path, ExecutionConfig config) {

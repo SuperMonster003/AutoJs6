@@ -36,6 +36,8 @@ class ViewPrototype(
         viewAttributes[name]?.set(org.mozilla.javascript.ScriptRuntime.toString(value))
     }
 
+    fun attrReset(name: String) = attr(name, attr(name))
+
     fun click() {
         view.performClick()
     }

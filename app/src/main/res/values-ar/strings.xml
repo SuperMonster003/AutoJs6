@@ -105,6 +105,7 @@
     <string name="error_empty_github_release_assets">لا توجد أصول إصدار GitHub للتنزيل</string>
     <string name="error_empty_shell_command">الأمر فارغ</string>
     <string name="error_enable_server">لا يمكن تمكين خادم AutoJs6: %s</string>
+    <string name="error_failed_to_convert_into_drawable">فشل تحويل القيمة %s إلى قابل للرسم</string>
     <string name="error_function_called_in_ui_thread">لا يمكن حظر مؤشر ترابط واجهة المستخدم. حاول تشغيل %s() في الخيط الفرعي أو النصف الفرعي</string>
     <string name="error_function_called_more_than_once">%s() دعا أكثر من مرة</string>
     <string name="error_get_github_latest_release">لا يمكن الحصول على أحدث إصدار من GitHub</string>
@@ -288,6 +289,7 @@
     <string name="text_console">وحدة التحكم</string>
     <string name="text_continue">يكمل</string>
     <string name="text_copy">ينسخ</string>
+    <string name="text_export">يصدّر</string>
     <string name="text_copy_all">نسخ جميع</string>
     <string name="text_copy_all_files_to_new_directory">انسخ جميع الملفات إلى دليل جديد</string>
     <string name="text_copy_command">نسخ CMD</string>
@@ -657,6 +659,21 @@
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="theme_color_default">تقصير</string>
     <string name="error_abandoned_method">تم التخلي عن الأسلوب %s ويجب عدم استخدامه</string>
+    <string name="error_invalid_ip_address">عنوان إب غير صالح</string>
+    <string name="error_ip_address_should_not_be_empty">لا يمكن أن يكون عنوان IP فارغًا</string>
+    <string name="error_unacceptable_character">الطابع غير المقبول</string>
+    <string name="error_port_num_over_65535">رقم المنفذ أكثر من 65535</string>
+    <string name="error_dot_decimal_notation_num_over_255">رقم عشري أكثر من 255</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">يجب أن يتبع القولون عنوان IP صالحًا</string>
+    <string name="error_repeated_dot_symbol">تكرار رمز النقطة</string>
+    <string name="error_repeated_colon_symbol">رمز القولون المتكرر</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">إصدار امتداد VSCode لا يفي بالمتطلبات</string>
+    <string name="text_min_version">الإصدار الأدنى</string>
+    <string name="text_current_version">النسخة الحالية</string>
+    <string name="text_lower_than">أقل من</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">عنوان URL لمستودع امتداد VSCode</string>
+    <string name="text_connection_cannot_be_established">لا يمكن إنشاء الاتصال</string>
+    <string name="text_min_version_of_vscode_vsc_ext">أدنى إصدار من امتداد VSCode</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">المجموع: عنصر واحد</item>

@@ -3,6 +3,7 @@
 *.iml
 *.jks
 *.log
+*.ffs_db
 
 .DS_Store
 .externalNativeBuild

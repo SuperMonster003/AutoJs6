@@ -105,6 +105,7 @@
     <string name="error_empty_github_release_assets">Aucun actif de la version GitHub à télécharger</string>.
     <string name="error_empty_shell_command">Command est vide</string>
     <string name="error_enable_server">Can\'t enable AutoJs6 server: %s</string>
+    <string name="error_failed_to_convert_into_drawable">Échec de la conversion de la valeur %s en un objet à dessiner</string>
     <string name="error_function_called_in_ui_thread">Le thread d\'interface utilisateur ne peut pas être bloqué. Essayez d\'exécuter %s() dans un sous-fil ou un sous-script</string>.
     <string name="error_function_called_more_than_once">%s() appelé plus d\'une fois</string>
     <string name="error_get_github_latest_release">Can\'t get latest GitHub release</string>
@@ -288,6 +289,7 @@
     <string name="text_console">Console</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copie</string>
+    <string name="text_export">Export</string>
     <string name="text_copy_all">Copier tout</string>
     <string name="text_copy_all_files_to_new_directory">Copier tous les fichiers dans un nouveau répertoire</string>
     <string name="text_copy_command">Copie de cmd</string>
@@ -657,6 +659,21 @@
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="theme_color_default">Default</string>
     <string name="error_abandoned_method">La méthode %s a été abandonnée et ne doit pas être utilisée</string>
+    <string name="error_invalid_ip_address">Adresse IP invalide</string>
+    <string name="error_ip_address_should_not_be_empty">L\'adresse IP ne peut pas être vide</string>
+    <string name="error_unacceptable_character">Caractère inacceptable</string>
+    <string name="error_port_num_over_65535">Numéro de port supérieur à 65535</string>
+    <string name="error_dot_decimal_notation_num_over_255">Nombre de points décimaux supérieur à 255</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">Les deux points doivent suivre une adresse IP valide</string>
+    <string name="error_repeated_dot_symbol">Symbole point répété</string>
+    <string name="error_repeated_colon_symbol">Symbole deux-points répété</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">La version de l\'extension VSCode ne répond pas aux exigences</string>
+    <string name="text_min_version">Version minimale</string>
+    <string name="text_current_version">Version actuelle</string>
+    <string name="text_lower_than">Inférieure à</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">URL du dépôt de l\'extension VSCode</string>
+    <string name="text_connection_cannot_be_established">La connexion ne peut pas être établie</string>
+    <string name="text_min_version_of_vscode_vsc_ext">Version minimale de l\'extension VSCode</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d article</item>

@@ -3,6 +3,7 @@ package org.autojs.autojs.app.tool
 import android.annotation.SuppressLint
 import android.content.Context
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.ViewUtils
 
 class JsonSocketServerTool(context: Context) : AbstractJsonSocketTool(context) {
 
@@ -19,7 +20,11 @@ class JsonSocketServerTool(context: Context) : AbstractJsonSocketTool(context) {
     override fun connect() {
         devPlugin
             .enableLocalServer()
-            .subscribe(Observers.emptyConsumer(), onConnectionException)
+            .subscribe(Observers.emptyConsumer()) {
+                disconnect()
+                ViewUtils.showToast(context, it.message)
+                onConnectionException.accept(it)
+            }
         isNormallyClosed = false
     }
 

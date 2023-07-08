@@ -23,10 +23,10 @@ class ToolbarMenuItem : LinearLayout {
     private var mEnabledDrawable: Drawable? = null
     private var mDisabledDrawable: Drawable? = null
 
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         inflate(context, R.layout.toolbar_menu_item, this)
 
-        val a = context!!.obtainStyledAttributes(attrs, R.styleable.ToolbarMenuItem)
+        val a = context.obtainStyledAttributes(attrs, R.styleable.ToolbarMenuItem)
 
         val iconText = a.getString(R.styleable.ToolbarMenuItem_text)
         val iconResId = a.getResourceId(R.styleable.ToolbarMenuItem_icon, 0)
@@ -47,9 +47,9 @@ class ToolbarMenuItem : LinearLayout {
         }
     }
 
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
 
-    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     override fun setEnabled(enabled: Boolean) {
         if (enabled != isEnabled) {

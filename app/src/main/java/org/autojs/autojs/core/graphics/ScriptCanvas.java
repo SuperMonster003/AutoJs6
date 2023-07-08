@@ -47,7 +47,7 @@ public class ScriptCanvas {
         return mCanvas;
     }
 
-    void setCanvas(Canvas canvas) {
+    public void setCanvas(Canvas canvas) {
         mCanvas = canvas;
     }
 

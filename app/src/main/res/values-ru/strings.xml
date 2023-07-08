@@ -105,6 +105,7 @@
     <string name="error_empty_github_release_assets">Нет активов релиза GitHub для загрузки</string>
     <string name="error_empty_shell_command">Команда пуста</string>
     <string name="error_enable_server">Не удается включить сервер AutoJs6: %s</string>
+    <string name="error_failed_to_convert_into_drawable">Не удалось преобразовать значение %s в Drawable</string>
     <string name="error_function_called_in_ui_thread">Поток пользовательского интерфейса не может быть заблокирован. Попробуйте запустить %s() в подпотоке или подскрипте</string>
     <string name="error_function_called_more_than_once">%s() вызывается более одного раза</string>
     <string name="error_get_github_latest_release">\"Не удается получить последний релиз GitHub\".</string>
@@ -288,6 +289,7 @@
     <string name="text_console">Консоль</string>
     <string name="text_continue">Продолжить</string>
     <string name="text_copy">Скопировать</string>
+    <string name="text_export">Экспорт</string>
     <string name="text_copy_all">Скопировать все</string>
     <string name="text_copy_all_files_to_new_directory">Скопировать все файлы в новый каталог</string>
     <string name="text_copy_command">Копировать cmd</string>
@@ -657,6 +659,21 @@
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="theme_color_default">По умолчанию</string>
     <string name="error_abandoned_method">Метод %s был отменен и не должен использоваться</string>
+    <string name="error_invalid_ip_address">Неверный IP-адрес</string>
+    <string name="error_ip_address_should_not_be_empty">IP-адрес не может быть пустым</string>
+    <string name="error_unacceptable_character">Недопустимый символ</string>
+    <string name="error_port_num_over_65535">Номер порта более 65535</string>
+    <string name="error_dot_decimal_notation_num_over_255">Точечно-десятичное число больше 255</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">Двоеточие должно следовать за действительным IP-адресом</string>
+    <string name="error_repeated_dot_symbol">Повторяющийся символ точки</string>
+    <string name="error_repeated_colon_symbol">Повторяющийся символ двоеточия</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">Версия расширения VSCode не соответствует требованиям</string>
+    <string name="text_min_version">Минимальная версия</string>
+    <string name="text_current_version">Текущая версия</string>
+    <string name="text_lower_than">Меньше, чем</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">URL репозитория расширения VSCode</string>
+    <string name="text_connection_cannot_be_established">Соединение не может быть установлено</string>
+    <string name="text_min_version_of_vscode_vsc_ext">Минимальная версия расширения VSCode</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Всего: %d элемент</item>
