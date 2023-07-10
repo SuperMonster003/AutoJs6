@@ -1,27 +1,35 @@
 package org.autojs.autojs.core.automator
 
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 
 class AccessibilityEventWrapper(event: AccessibilityEvent) {
-    private val node = event.source
+    val raw = event
+    val packageName: CharSequence? = event.packageName
+    val eventType = event.eventType
+    val eventTime = event.eventTime
+    val action = event.action
+    val isFullScreen = event.isFullScreen
+    val className = event.className
+    val source = event.source?.let { UiObject(it, getDepth(it), getIndexInParent(it)) }
 
-    val source = if (node != null) UiObject(node, null, getDepth(), getIndexInParent()) else null
-
-    private fun getDepth(): Int {
+    private fun getDepth(node: AccessibilityNodeInfo): Int {
         var depth = 0
-        if (node == null) return 0
-        while (node.parent != null) {
+        var father = node.parent
+        while (father != null) {
             depth++
+            father = father.parent
         }
         return depth
     }
 
-    private fun getIndexInParent(): Int {
-        val parent = node!!.parent
+    private fun getIndexInParent(node: AccessibilityNodeInfo): Int {
         var index = 0
+        val parent = node.parent ?: return 0
         while (parent.getChild(index) != node) {
             index++
         }
         return index
     }
 }
+
