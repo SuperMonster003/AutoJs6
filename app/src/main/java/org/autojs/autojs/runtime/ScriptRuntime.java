@@ -11,6 +11,7 @@ import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.annotation.ScriptVariable;
 import org.autojs.autojs.concurrent.VolatileDispose;
 import org.autojs.autojs.core.accessibility.AccessibilityBridge;
+import org.autojs.autojs.core.accessibility.AccessibilityService;
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator;
 import org.autojs.autojs.core.accessibility.UiSelector;
 import org.autojs.autojs.core.activity.ActivityInfoProvider;
@@ -527,7 +528,8 @@ public class ScriptRuntime {
                 console.hideDelayed();
             }
         });
-
+        //清空无障碍事件
+        ignoresException(AccessibilityService.Companion::clearAccessibilityEventCallback);
         ignoresException(RootUtils::resetRuntimeOverriddenRootModeState);
         ignoresException(ImageWrapper::recycleAll);
 

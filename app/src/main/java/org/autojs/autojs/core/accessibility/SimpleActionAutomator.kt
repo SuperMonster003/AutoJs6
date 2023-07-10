@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.accessibility.AccessibilityService.Companion.isRunning
+import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.core.automator.GlobalActionAutomator
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.action.ActionFactory
@@ -27,7 +28,11 @@ import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.util.DeveloperUtils
+import java.util.concurrent.atomic.AtomicInteger
 
+interface AccessibilityEventCallback {
+    fun onAccessibilityEvent(event: AccessibilityEventWrapper)
+}
 
 /**
  * Created by Stardust on 2017/4/2.
@@ -182,6 +187,18 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     @ScriptInterface
     fun ensureService() = accessibilityBridge.ensureServiceEnabled()
 
+    //todo:优化实现方式
+    fun registerEvents(eventName: String,callback: AccessibilityEventCallback) {
+        ensureService()
+        val service = org.autojs.autojs.core.accessibility.AccessibilityService.instance
+        service?.addAccessibilityEventCallback(eventName,callback)
+    }
+
+    fun removeEvents(eventName: String) {
+        val service = org.autojs.autojs.core.accessibility.AccessibilityService.instance
+        service?.removeAccessibilityEventCallback(eventName)
+    }
+
     private fun performAction(simpleAction: SimpleAction): Boolean {
         ensureService()
         if (AccessibilityConfig.isUnintendedGuardEnabled() && isRunningPackageSelf) {
@@ -239,7 +256,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     }
 
     companion object {
-
+        val accessibilityDelegateCounter = AtomicInteger(1000)
         val TAG: String = SimpleActionAutomator::class.java.name
 
     }

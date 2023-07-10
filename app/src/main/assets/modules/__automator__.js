@@ -61,8 +61,14 @@ module.exports = function (scriptRuntime, scope) {
                     return util.java.toJsArray(a11yBridge.windowRoots(), false)
                         .map(root => UiObject.createRoot(root));
                 },
-                stateListener(listener){
+                stateListener(listener) {
                     return a11yBridge.setAccessibilityListener(listener);
+                },
+                registerEvents(name, listener) {
+                    return rtAutomator.registerEvents(name, listener);
+                },
+                removeEvents(name) {
+                    return rtAutomator.removeEvents(name);
                 },
                 waitFor(timeout) {
                     automator.waitForService(timeout);
