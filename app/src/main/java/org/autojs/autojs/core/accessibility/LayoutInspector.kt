@@ -61,8 +61,7 @@ class LayoutInspector(private val mContext: Context) {
     }
 
     private fun refreshChildList(root: AccessibilityNodeInfo?) {
-        if (root == null)
-            return
+        if (root == null) return
         root.refresh()
         val childCount = root.childCount
         for (i in 0 until childCount) {
