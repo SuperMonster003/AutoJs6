@@ -20,7 +20,6 @@ interface AccessibilityServiceCallback {
     fun onServiceConnected()
     fun onServiceDisconnected()
 }
-
 /**
  * Created by Stardust on 2017/5/2.
  */
@@ -29,8 +28,6 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     val keyInterrupterObserver = KeyInterceptor.Observer()
     var fastRootInActiveWindow: AccessibilityNodeInfo? = null
     var bridge: AccessibilityBridge? = null
-
-    private var callback: AccessibilityServiceCallback? = null
 
     private val gestureEventDispatcher = EventDispatcher<GestureListener>()
 
@@ -120,10 +117,6 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         // FIXME: 2017/2/12 有时在无障碍中开启服务后这里不会调用服务也不会运行，安卓的BUG???
     }
 
-    fun setCallback(callback: AccessibilityServiceCallback) {
-        this.callback = callback
-    }
-
     companion object {
 
         private const val TAG = "AccessibilityService"
@@ -134,6 +127,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
         private val LOCK = ReentrantLock()
         private val ENABLED = LOCK.newCondition()
+        private var callback: AccessibilityServiceCallback? = null
 
         var instance: AccessibilityService? = null
             private set
@@ -189,6 +183,10 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             } finally {
                 LOCK.unlock()
             }
+        }
+
+        fun setCallback(listener: AccessibilityServiceCallback) {
+            callback = listener
         }
 
         interface GestureListener {
