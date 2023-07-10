@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.floating.layoutinspector
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -97,7 +98,7 @@ open class LayoutBoundsView : View {
             draw(canvas, child)
         }
     }
-
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (mRootNode != null) {
             setSelectedNode(findNodeAt(mRootNode!!, event.rawX.toInt(), event.rawY.toInt()))

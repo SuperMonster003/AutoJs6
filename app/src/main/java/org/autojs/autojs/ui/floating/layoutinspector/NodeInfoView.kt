@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.floating.layoutinspector
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -41,6 +42,7 @@ class NodeInfoView : RecyclerView {
         )
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setNodeInfo(nodeInfo: NodeInfo) {
         for (i in FIELDS.indices) {
             try {
