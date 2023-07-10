@@ -9,16 +9,17 @@ import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
 import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.event.EventDispatcher
 import org.autojs.autojs.pref.Pref
-import java.util.TreeMap
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 
 interface AccessibilityServiceCallback {
-    fun onServiceConnected()
-    fun onServiceDisconnected()
+    fun onConnected()
+    fun onDisconnected()
 }
 /**
  * Created by Stardust on 2017/5/2.
@@ -28,16 +29,38 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     val keyInterrupterObserver = KeyInterceptor.Observer()
     var fastRootInActiveWindow: AccessibilityNodeInfo? = null
     var bridge: AccessibilityBridge? = null
+    private val eventBox = TreeMap<Int, AccessibilityEventCallback>()
 
     private val gestureEventDispatcher = EventDispatcher<GestureListener>()
 
     private val eventExecutor by lazy { Executors.newSingleThreadExecutor() }
+
+    private fun eventNameToType(str: String): Int {
+        return try {
+            val sb = StringBuilder()
+            sb.append("TYPE_")
+            val upperCase = str.uppercase(Locale.getDefault())
+            sb.append(upperCase)
+            AccessibilityEvent::class.java.getField(sb.toString()).get(null) as Int
+        } catch (unused: NoSuchFieldException) {
+            throw IllegalArgumentException("unknown event type: $str")
+        }
+    }
+
+    fun addAccessibilityEventCallback(name: String, callback: AccessibilityEventCallback) {
+        eventBox[eventNameToType(name)] = callback
+    }
+
+    fun removeAccessibilityEventCallback(name: String) {
+        eventBox.remove(eventNameToType(name))
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (instance != this) {
             instance = this
         }
         val type = event.eventType
+        eventBox[type]?.onAccessibilityEvent(AccessibilityEventWrapper(event))
         if (containsAllEventTypes || eventTypes.contains(type)) {
             if (type == TYPE_WINDOW_STATE_CHANGED || type == TYPE_VIEW_FOCUSED) {
                 rootInActiveWindow?.also { fastRootInActiveWindow = it }
@@ -90,7 +113,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         instance = null
         bridge = null
         eventExecutor.shutdownNow()
-        callback?.onServiceDisconnected()
+        callback?.onDisconnected()
         super.onDestroy()
     }
 
@@ -107,7 +130,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
                 }
             }
         }
-        callback?.onServiceConnected()
+        callback?.onConnected()
         super.onServiceConnected()
 
         LOCK.lock()
@@ -147,6 +170,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         fun isNotRunning() = !isRunning()
 
         fun addDelegate(uniquePriority: Int, delegate: AccessibilityDelegate) {
+            //用于记录eventTypes中的事件id
             delegates[uniquePriority] = delegate
             val set = delegate.eventTypes
             if (set == null) {
@@ -184,7 +208,9 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
                 LOCK.unlock()
             }
         }
-
+        fun clearAccessibilityEventCallback() {
+            instance?.eventBox?.clear()
+        }
         fun setCallback(listener: AccessibilityServiceCallback) {
             callback = listener
         }
