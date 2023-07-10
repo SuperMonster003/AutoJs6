@@ -446,7 +446,10 @@ open class UiObject(
                 .flatten())
         }
 
-        private fun listAliases(@Suppress("SameParameterValue") symbol: String, vararg others: String): Array<String> {
+        private fun listAliases(
+            @Suppress("SameParameterValue") symbol: String,
+            @Suppress("SameParameterValue") vararg others: String
+        ): Array<String> {
             return arrayOf("$symbol{}", "{$symbol}").plus(others.map { listOf("$it{}", "{$it}") }.flatten())
         }
 
