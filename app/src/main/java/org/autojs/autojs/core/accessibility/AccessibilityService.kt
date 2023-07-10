@@ -8,6 +8,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
 import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 import android.view.accessibility.AccessibilityNodeInfo
+import org.autojs.autojs.AutoJs
 import org.autojs.autojs.event.EventDispatcher
 import org.autojs.autojs.pref.Pref
 import java.util.TreeMap
@@ -83,6 +84,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
     override fun onDestroy() {
         Log.v(TAG, "onDestroy: $instance")
+        AutoJs.instance.globalConsole.verbose("无障碍服务已关闭")
         instance = null
         bridge = null
         eventExecutor.shutdownNow()
@@ -91,7 +93,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
     override fun onServiceConnected() {
         instance = this
-
+        AutoJs.instance.globalConsole.verbose("无障碍服务已开启${instance}")
         serviceInfo = serviceInfo.apply {
             AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.let {
                 flags = (if (Pref.isStableModeEnabled) flags and it.inv() else flags or it)
