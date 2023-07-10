@@ -31,11 +31,21 @@ import org.opencv.core.Size
  */
 
 @Suppress("unused", "DEPRECATION")
-open class UiObject constructor(info: Any?, private val allocator: AccessibilityNodeInfoAllocator?, private val depth: Int, private val indexInParent: Int) : AccessibilityNodeInfoCompat(info), UiObjectActions {
+open class UiObject(
+    info: Any?,
+    private val allocator: AccessibilityNodeInfoAllocator?,
+    private val depth: Int,
+    private val indexInParent: Int
+) : AccessibilityNodeInfoCompat(info), UiObjectActions {
 
     private val bounds by lazy { AccessibilityNodeInfoHelper.getBoundsInScreen(this) }
 
-    constructor(info: Any?, allocator: AccessibilityNodeInfoAllocator, indexInParent: Int) : this(info, allocator, 0, indexInParent)
+    constructor(info: Any?, allocator: AccessibilityNodeInfoAllocator, indexInParent: Int) : this(
+        info,
+        allocator,
+        0,
+        indexInParent
+    )
 
     @JvmOverloads
     constructor(info: Any?, depth: Int = 0, indexInParent: Int = -1) : this(info, null, depth, indexInParent)
@@ -59,6 +69,8 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
         // FIXME: 2017/5/5
         null
     }
+
+    open fun brother(i: Int): UiObject? = parent()?.child(indexInParent() + i)
 
     open fun childCount() = childCount
 
@@ -342,18 +354,19 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
         false
     }
 
-    override fun getChild(index: Int): AccessibilityNodeInfoCompat = allocator?.getChild(this, index) ?: super.getChild(index)
+    override fun getChild(index: Int): AccessibilityNodeInfoCompat =
+        allocator?.getChild(this, index) ?: super.getChild(index)
 
     override fun getParent(): AccessibilityNodeInfoCompat = allocator?.getParent(this) ?: super.getParent()
 
     override fun findAccessibilityNodeInfosByText(text: String): List<AccessibilityNodeInfoCompat> {
         return allocator?.findAccessibilityNodeInfosByText(this, text)
-               ?: super.findAccessibilityNodeInfosByText(text)
+            ?: super.findAccessibilityNodeInfosByText(text)
     }
 
     override fun findAccessibilityNodeInfosByViewId(viewId: String): List<AccessibilityNodeInfoCompat> {
         return allocator?.findAccessibilityNodeInfosByViewId(this, viewId)
-               ?: super.findAccessibilityNodeInfosByViewId(viewId)
+            ?: super.findAccessibilityNodeInfosByViewId(viewId)
     }
 
     override fun recycle() {
@@ -375,7 +388,14 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
         private val cArray = Array::class.java
 
         private val RESULT_GROUP_WIDGET by lazy { arrayOf("#", "w", RESULT_TYPE_WIDGET) }
-        private val RESULT_GROUP_WIDGET_COLLECTION by lazy { arrayOf("{}", "wc", "collection", "list").plus(listAliases("#", "w")) }
+        private val RESULT_GROUP_WIDGET_COLLECTION by lazy {
+            arrayOf("{}", "wc", "collection", "list").plus(
+                listAliases(
+                    "#",
+                    "w"
+                )
+            )
+        }
         private val RESULT_GROUP_WIDGETS by lazy { arrayOf("[]", "ws", "widgets").plus(arrayAliases("#", "w")) }
         private val RESULT_GROUP_CONTENT by lazy { arrayOf("$", "txt", "content") }
         private val RESULT_GROUP_CONTENTS by lazy { arrayOf("contents").plus(arrayAliases("$", "txt", "content")) }
@@ -386,7 +406,8 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
 
         @JvmStatic
         fun isCompass(s: Any?): Boolean {
-            return (s as? CharSequence)?.run { this == COMPASS_PASS_ON || isEmpty() || contains("^(([pkc>]|s[<>]?)-?\\d*)+$".toRegex()) } ?: false
+            return (s as? CharSequence)?.run { this == COMPASS_PASS_ON || isEmpty() || contains("^(([pkc>]|s[<>]?)-?\\d*)+$".toRegex()) }
+                ?: false
         }
 
         @JvmStatic
@@ -417,10 +438,12 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
         @JvmStatic
         fun createRoot(root: AccessibilityNodeInfo?) = UiObject(root, null, 0, -1)
 
-        internal fun createRoot(root: AccessibilityNodeInfo?, allocator: AccessibilityNodeInfoAllocator?) = UiObject(root, allocator, 0, -1)
+        internal fun createRoot(root: AccessibilityNodeInfo?, allocator: AccessibilityNodeInfoAllocator?) =
+            UiObject(root, allocator, 0, -1)
 
         private fun arrayAliases(symbol: String, vararg others: String): Array<String> {
-            return arrayOf("$symbol$symbol", "$symbol[]", "[$symbol]").plus(others.map { listOf("$it[]", "[$it]") }.flatten())
+            return arrayOf("$symbol$symbol", "$symbol[]", "[$symbol]").plus(others.map { listOf("$it[]", "[$it]") }
+                .flatten())
         }
 
         private fun listAliases(@Suppress("SameParameterValue") symbol: String, vararg others: String): Array<String> {
@@ -478,7 +501,12 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
             }
         }
 
-        internal class Detector(private val compass: CharSequence? = COMPASS_PASS_ON, private val result: Result, val callback: BaseFunction? = null, private val selector: UiSelector? = UiSelector()) {
+        internal class Detector(
+            private val compass: CharSequence? = COMPASS_PASS_ON,
+            private val result: Result,
+            val callback: BaseFunction? = null,
+            private val selector: UiSelector? = UiSelector()
+        ) {
 
             fun detect(): Any? = when (val type = result.type.let { if (it is List<*>) it[0] else it }.toString()) {
                 in RESULT_GROUP_WIDGET -> getUiObject()
@@ -524,13 +552,17 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
 
             private fun getUiObject() = result.byOne()?.compass(compass)
 
-            private fun getUiObjectCollection(transformer: (UiObject?) -> UiObject?) = UiObjectCollection.transform(result.byAll(), transformer).let { RhinoUtils.wrap(it) }
+            private fun getUiObjectCollection(transformer: (UiObject?) -> UiObject?) =
+                UiObjectCollection.transform(result.byAll(), transformer).let { RhinoUtils.wrap(it) }
 
-            private fun getUiObjectArray(transformer: (UiObject?) -> Any?) = UiObjectCollection.mapNotNull(result.byAll(), transformer).let { RhinoUtils.toArray(it) }
+            private fun getUiObjectArray(transformer: (UiObject?) -> Any?) =
+                UiObjectCollection.mapNotNull(result.byAll(), transformer).let { RhinoUtils.toArray(it) }
 
-            private fun detectWithCallback(callback: BaseFunction?, args: Array<*>): Any? = callback?.let { RhinoUtils.callFunction(it, args) }
+            private fun detectWithCallback(callback: BaseFunction?, args: Array<*>): Any? =
+                callback?.let { RhinoUtils.callFunction(it, args) }
 
-            private fun detectWithCallback(callback: BaseFunction?, arg: Any?): Any? = callback?.let { detectWithCallback(it, arrayOf(arg)) }
+            private fun detectWithCallback(callback: BaseFunction?, arg: Any?): Any? =
+                callback?.let { detectWithCallback(it, arrayOf(arg)) }
 
         }
 
@@ -596,15 +628,45 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
                             "setLiveRegion", "setMaxTextLength", "setMovementGranularities",
                         ),
                         arrayOf(cString) to arrayOf(
-                            "compass", "findAccessibilityNodeInfosByText", "findAccessibilityNodeInfosByViewId", "setClassName", "setContentDescription",
-                            "setError", "setHintText", "setPackageName", "setPaneTitle", "setRoleDescription", "setStateDescription", "setText",
-                            "setTooltipText", "setViewIdResourceName",
+                            "compass",
+                            "findAccessibilityNodeInfosByText",
+                            "findAccessibilityNodeInfosByViewId",
+                            "setClassName",
+                            "setContentDescription",
+                            "setError",
+                            "setHintText",
+                            "setPackageName",
+                            "setPaneTitle",
+                            "setRoleDescription",
+                            "setStateDescription",
+                            "setText",
+                            "setTooltipText",
+                            "setViewIdResourceName",
                         ),
                         arrayOf(cBoolean) to arrayOf(
-                            "setAccessibilityFocused", "setCanOpenPopup", "setCheckable", "setChecked", "setClickable", "setEditable", "setEnabled",
-                            "setFocusable", "setFocused", "setHeading", "setImportantForAccessibility", "setLongClickable", "setMultiLine", "setPassword",
-                            "setScreenReaderFocusable", "setScrollable", "setSelected", "setShowingHintText", "setTextEntryKey", "setVisibleToUser",
-                            "setContentInvalid", "setContextClickable", "setDismissable",
+                            "setAccessibilityFocused",
+                            "setCanOpenPopup",
+                            "setCheckable",
+                            "setChecked",
+                            "setClickable",
+                            "setEditable",
+                            "setEnabled",
+                            "setFocusable",
+                            "setFocused",
+                            "setHeading",
+                            "setImportantForAccessibility",
+                            "setLongClickable",
+                            "setMultiLine",
+                            "setPassword",
+                            "setScreenReaderFocusable",
+                            "setScrollable",
+                            "setSelected",
+                            "setShowingHintText",
+                            "setTextEntryKey",
+                            "setVisibleToUser",
+                            "setContentInvalid",
+                            "setContextClickable",
+                            "setDismissable",
                         ),
                         arrayOf(cFloatPrim) to arrayOf("setProgress"),
                         arrayOf(cIntPrim, cIntPrim) to arrayOf("setTextSelection", "setSelection", "scrollTo"),
@@ -629,7 +691,11 @@ open class UiObject constructor(info: Any?, private val allocator: Accessibility
             constructor(resultType: String, resultParams: Array<Any?>?) : super(
                 when (resultParams) {
                     null -> str(R.string.error_unknown_picker_result_type, resultType)
-                    else -> str(R.string.error_unknown_picker_result_type_with_params, resultType, "[${resultParams.joinToString { it.toString() }}]")
+                    else -> str(
+                        R.string.error_unknown_picker_result_type_with_params,
+                        resultType,
+                        "[${resultParams.joinToString { it.toString() }}]"
+                    )
                 }
             )
 
