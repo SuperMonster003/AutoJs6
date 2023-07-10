@@ -56,9 +56,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        if (instance != this) {
-            instance = this
-        }
+        if (instance != this) instance = this
         val type = event.eventType
         eventBox[type]?.onAccessibilityEvent(AccessibilityEventWrapper(event))
         if (containsAllEventTypes || eventTypes.contains(type)) {
