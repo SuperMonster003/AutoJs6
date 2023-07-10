@@ -16,16 +16,21 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 
+interface AccessibilityServiceCallback {
+    fun onServiceConnected()
+    fun onServiceDisconnected()
+}
+
 /**
  * Created by Stardust on 2017/5/2.
  */
 open class AccessibilityService : android.accessibilityservice.AccessibilityService() {
-
     val onKeyObserver = OnKeyListener.Observer()
     val keyInterrupterObserver = KeyInterceptor.Observer()
     var fastRootInActiveWindow: AccessibilityNodeInfo? = null
-
     var bridge: AccessibilityBridge? = null
+
+    private var callback: AccessibilityServiceCallback? = null
 
     private val gestureEventDispatcher = EventDispatcher<GestureListener>()
 
@@ -88,6 +93,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         instance = null
         bridge = null
         eventExecutor.shutdownNow()
+        callback?.onServiceDisconnected()
         super.onDestroy()
     }
 
@@ -104,7 +110,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
                 }
             }
         }
-
+        callback?.onServiceConnected()
         super.onServiceConnected()
 
         LOCK.lock()
@@ -112,6 +118,10 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         LOCK.unlock()
 
         // FIXME: 2017/2/12 有时在无障碍中开启服务后这里不会调用服务也不会运行，安卓的BUG???
+    }
+
+    fun setCallback(callback: AccessibilityServiceCallback) {
+        this.callback = callback
     }
 
     companion object {
@@ -182,11 +192,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         }
 
         interface GestureListener {
-
             fun onGesture(gestureId: Int)
-
         }
-
     }
-
 }
