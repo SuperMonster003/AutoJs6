@@ -36,7 +36,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
     public interface OnItemLongClickListener {
         void onItemLongClick(View view, NodeInfo nodeInfo);
     }
-
+    private final Map<NodeInfo,ViewHolder> nodeMap = new LinkedHashMap<>();
     private Adapter mAdapter;
     private OnItemLongClickListener mOnItemLongClickListener;
     private final AdapterView.OnItemLongClickListener mOnItemLongClickListenerProxy = new AdapterView.OnItemLongClickListener() {
@@ -107,15 +107,39 @@ public class LayoutHierarchyView extends MultiLevelListView {
     }
 
     private void setClickedItem(View view, NodeInfo item) {
-        mClickedNodeInfo = item;
         if (mClickedView == null) {
             mOriginalBackground = view.getBackground();
         } else {
             mClickedView.setBackground(mOriginalBackground);
+            drawListItem(mClickedNodeInfo, false);
         }
         view.setBackgroundColor(mClickedColor);
+        drawListItem(item, true);
+        mClickedNodeInfo = item;
         mClickedView = view;
         invalidate();
+    }
+
+    private void drawListItem(NodeInfo info, Boolean draw) {
+        ArrayList<ViewHolder> list = new ArrayList<>();
+        NodeInfo currentInfo = info;
+        while (true) {
+            currentInfo = currentInfo.getParent();
+            if (currentInfo == null) break;
+            ViewHolder vh = nodeMap.get(currentInfo);
+            list.add(vh);
+        }
+        //todo：选用能适应深色模式的字体颜色
+        //fixme：列表滑动时listview数据错乱
+        if (draw) {
+            for (ViewHolder vh : list) {
+                vh.nameView.setTextColor(Color.RED); // 设置字体颜色为红色
+            }
+        } else {
+            for (ViewHolder vh : list) {
+                vh.nameView.setTextColor(Color.BLACK); // 设置字体颜色为红色
+            }
+        }
     }
 
     private void initPaint() {
@@ -228,7 +252,8 @@ public class LayoutHierarchyView extends MultiLevelListView {
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
-            //对于id,desc,text,clickable,longClickable不为空的显示信息
+            nodeMap.put(nodeInfo,viewHolder);
+            //对于id,desc,text,clickable,longClickable不为空的显示额外信息
             viewHolder.nameView.setText(extraInfo(nodeInfo));
             viewHolder.nodeInfo = nodeInfo;
             if (viewHolder.infoView.getVisibility() == VISIBLE)
@@ -274,6 +299,12 @@ public class LayoutHierarchyView extends MultiLevelListView {
             }
             if (nodeInfo.getDesc() != null) {
                 info.add("desc=" + nodeInfo.getDesc());
+            }
+            if (nodeInfo.getClickable()) {
+                info.add("clickable");
+            }
+            if (nodeInfo.getLongClickable()) {
+                info.add("longClickable");
             }
             //字符串拼接
             String others = String.join(", ", info);
