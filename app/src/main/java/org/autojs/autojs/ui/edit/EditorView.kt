@@ -285,7 +285,12 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             .setFunctionsView(mFunctionsKeyboard)
             .setEditView(editor!!.codeEditText)
             .build()
-        mFunctionsKeyboard!!.setClickCallback(this)
+        //todo：不清楚作用，暂时注释掉
+        //mFunctionsKeyboard!!.setClickCallback(this)
+        mShowFunctionsButton!!.setOnLongClickListener {
+            editor!!.beautifyCode()
+            true
+        }
     }
 
     private fun setUpInputMethodEnhancedBar() {
@@ -321,7 +326,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
         mAutoCompletion!!.onCursorChange(line, cursor)
     }
 
-    fun setTheme(theme: Theme?) {
+    private fun setTheme(theme: Theme?) {
         theme?.let {
             mEditorTheme = it
             editor!!.setTheme(it)
@@ -575,11 +580,19 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     override fun onHintClick(completions: CodeCompletions, pos: Int) {
         val completion = completions[pos]
-        editor!!.insert(completion.insertText)
+        //todo:增加行注释
+        if (completion.insertText=="/") {
+            editor!!.commentLine()
+        } else editor!!.insert(completion.insertText)
     }
 
     override fun onHintLongClick(completions: CodeCompletions, pos: Int) {
         val completion = completions[pos]
+        //todo:增加块注释
+        if (completion.insertText=="/") {
+            editor!!.commentBlock()
+            return
+        }
         if (completion.url == null) return
         showManual(completion.url, completion.hint)
     }

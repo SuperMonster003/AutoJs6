@@ -880,6 +880,7 @@
     <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
     <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
     <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
+    <string name="fun">函数</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>

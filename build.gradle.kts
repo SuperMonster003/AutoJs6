@@ -128,6 +128,7 @@ buildscript {
     }
 
     dependencies /* Android/Kotlin Gradle Plugin. */  {
+        classpath("com.android.tools.build:gradle:7.1.2")
         val android = gradlePluginVersionList[platformType]!!["android"]!!
         val kotlin = gradlePluginVersionList[platformType]!!["kotlin"]!!
 
