@@ -403,11 +403,14 @@ public class CodeEditor extends HVScrollView {
 
     public void beautifyCode() {
         setProgress(true);
+        int pos = mCodeEditText.getSelectionStart();
         mJsBeautifier.beautify(mCodeEditText.getText().toString(), new JsBeautifier.Callback() {
             @Override
             public void onSuccess(String beautifiedCode) {
                 setProgress(false);
                 mCodeEditText.setText(beautifiedCode);
+                //格式化后恢复光标位置
+                mCodeEditText.setSelection(pos);
             }
 
             @Override
@@ -418,6 +421,43 @@ public class CodeEditor extends HVScrollView {
         });
     }
 
+    public void commentLine() {
+        //如果没有选中，则添加文本/，否则选中的行前加//
+        String selectionText = getSelectionRaw();
+        if (selectionText.equals("")) {
+            insert("/");
+        } else {
+            String[] lines = selectionText.split("\\n");
+            StringBuilder commentedText = new StringBuilder();
+            //处理取消注释
+            if (lines[0].startsWith("//")) {
+                for (String line : lines) {
+                    commentedText.append(line.substring(2)).append("\n");
+                }
+            } else {
+                for (String line : lines) {
+                    commentedText.append("//").append(line).append("\n");
+                }
+            }
+            mReplacement = commentedText.toString().replaceAll("\\n$", "");
+            replaceSelection();
+        }
+    }
+
+    public void commentBlock() {
+        String selectionText = getSelectionRaw();
+        if (!selectionText.isEmpty()) {
+            String regex = "/\\*([^*]|\\*+[^*/])*\\*/";
+            if (selectionText.matches(regex)) {
+                // 取消块注释
+                mReplacement = selectionText.substring(2, selectionText.length() - 2);
+            } else {
+                // 增加块注释
+                mReplacement = "/*" + selectionText + "*/";
+            }
+            replaceSelection();
+        }
+    }
 
     public void insert(String insertText) {
         int selection = Math.max(mCodeEditText.getSelectionStart(), 0);
@@ -437,13 +477,17 @@ public class CodeEditor extends HVScrollView {
         return mCodeEditText.getText().toString();
     }
 
-    public Observable<String> getSelection() {
+    public String getSelectionRaw() {
         int s = mCodeEditText.getSelectionStart();
         int e = mCodeEditText.getSelectionEnd();
         if (s == e) {
-            return Observable.just("");
+            return "";
         }
-        return Observable.just(mCodeEditText.getText().toString().substring(s, e));
+        return mCodeEditText.getText().toString().substring(s, e);
+    }
+
+    public Observable<String> getSelection() {
+        return Observable.just(getSelectionRaw());
     }
 
 
