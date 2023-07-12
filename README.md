@@ -110,6 +110,18 @@
 
 [comment]: <> "Version history only shows last 3 versions"
 
+# v6.3.3
+
+###### 2023/07/12
+
+* `修复` VSCode 插件在脚本字符总长度超过四位十进制数时无法解析数据的问题 _[`issue #91`](http://issues.autojs6.com/91)_ _[`issue #93`](http://issues.autojs6.com/93)_
+* `修复` VSCode 插件无法正常保存文件的问题 _[`issue #92`](http://issues.autojs6.com/91)_ _[`issue #94`](http://issues.autojs6.com/93)_
+* `修复` 异步环境 (by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_
+* `优化` 调整模块作用域 (by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
+* `优化` 定时器调用性能 (by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
+* `优化` 移除发行版本应用启动时的签名校验 (by [LZX284](https://github.com/LZX284)) _[`pr #81`](http://pr.autojs6.com/81)_
+* `优化` 适配 VSCode 插件 1.0.6
+
 # v6.3.2
 
 ###### 2023/07/06
@@ -140,6 +152,7 @@
 * `优化` 服务端模式开启后保持常开状态 (除非手动关闭或应用进程结束) _[`issue #64`](http://issues.autojs6.com/64#issuecomment-1596990158)_
 * `优化` 实现 AutoJs6 与 VSCode 插件的双向版本检测并提示异常检测结果 _[`issue #89`](http://issues.autojs6.com/89)_
 * `优化` 增加短信数据读取权限 (android.permission.READ_SMS) (默认关闭)
+* `优化` findMultiColors 方法内部实现 (by [LYS](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
 * `优化` runtime.loadDex/loadJar/load 支持按目录级别加载或同时加载多个文件
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v632)_
 
@@ -174,55 +187,6 @@
 * `优化` 服务端模式非正常关闭时将于 AutoJs6 启动时自动开启 _[`issue #64`](http://issues.autojs6.com/64)_
 * `优化` 客户端模式非正常关闭时将于 AutoJs6 启动时按最近一次的历史地址自动连接
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v631)_
-
-# v6.3.0
-
-###### 2023/04/29
-
-* `新增` ocr 模块 (参阅 项目文档 > [光学字符识别](https://docs.autojs6.com/#/ocr)) _[`issue #8`](http://issues.autojs6.com/8)_
-* `新增` notice 模块 (参阅 项目文档 > [消息通知](https://docs.autojs6.com/#/notice))
-* `新增` s13n 模块 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))
-* `新增` Color 模块 (参阅 项目文档 > [颜色类](https://docs.autojs6.com/#/colorType))
-* `新增` 前台时保持屏幕常亮功能及设置选项
-* `新增` 额外的文档启动器 (launcher) 便于独立阅读应用文档 (支持在设置中隐藏或显示)
-* `修复` colors.toString 方法功能异常
-* `修复` app.openUrl 方法自动添加协议前缀功能异常
-* `修复` app.viewFile/editFile 在参数对应文件不存在时的行为异常
-* `修复` pickup 方法的回调函数无法被调用的问题
-* `修复` 布局分析显示的控件信息 bounds 属性值负数符号被替换为逗号的问题
-* `修复` bounds/boundsInside/boundsContains 选择器无法正常筛选狭义空矩形 (如边界倒置矩形) _[`issue #49`](http://issues.autojs6.com/49)_
-* `修复` 更换主题或修改语言后点击或长按主页文档标签将导致应用崩溃的问题
-* `修复` 文本编辑器双指缩放调节字体大小时可能出现抖动的问题
-* `修复` 构建脚本中部分依赖源无法下载的问题 (已全部整合) _[`issue #40`](http://issues.autojs6.com/40)_
-* `修复` Tasker 无法添加 AutoJs6 操作插件 (Action Plugin) 的问题 (试修) _[`issue #41`](http://issues.autojs6.com/41)_
-* `修复` 高版本 JDK 编译项目时 ButterKnife 注解无法解析资源 ID 的问题 _[`issue #48`](http://issues.autojs6.com/48)_
-* `修复` 无障碍服务较大概率出现服务异常的问题 (试修)
-* `修复` images.medianBlur 的 size 参数使用方式与文档不符的问题
-* `修复` engines 模块显示脚本全称时文件名与扩展名之间句点符号丢失的问题
-* `修复` 加权 RGB 距离检测算法内部实现可能存在的计算失误 (试修)
-* `修复` console 模块的浮动窗口相关方法无法在 show 方法之前使用的问题
-* `修复` console.setSize 等方法可能无法生效的问题 _[`issue #50`](http://issues.autojs6.com/50)_
-* `修复` colors.material 颜色空间的颜色常量赋值错误
-* `修复` UI 模式的日期选择控件 minDate 及 maxDate 属性无法正确解析日期格式的问题
-* `修复` 运行脚本后快速切换到主页 "任务" 标签页面将出现两个相同运行中任务的问题
-* `修复` 文件管理页面从其他页面返回时页面状态可能被重置的问题 _[`issue #52`](http://issues.autojs6.com/52)_
-* `修复` 文件管理页面排序状态与图标显示状态不符的问题
-* `优化` 文件管理页面增加文件及文件夹修改时间显示
-* `优化` 文件管理页面排序类型支持状态记忆
-* `优化` README.md 添加项目编译构建小节与脚本开发辅助小节 _[`issue #33`](http://issues.autojs6.com/33)_
-* `优化` images 模块相关方法的区域 (region) 选项参数支持更多传入方式 (参阅 项目文档 > [全能类型](https://docs.autojs6.com/#/omniTypes?id=omniregion))
-* `优化` app.startActivity 页面简写参数增加 pref/homepage/docs/about 等形式的支持
-* `优化` web 模块的全局方法挂载到模块本身以增强可用性 (参阅 项目文档 > [万维网](https://docs.autojs6.com/#/web))
-* `优化` web.newInjectableWebView 方法内部默认实现部分常用的 WebView 设置选项
-* `优化` colors 模块添加多种转换方法及工具方法并添加更多静态常量以及可直接作为参数的颜色名称
-* `优化` console 模块添加多种控制台浮动窗口的样式配置方法并支持 build 构建器统一配置窗口样式
-* `优化` 控制台浮动窗口支持拖动标题区域移动窗口位置
-* `优化` 控制台浮动窗口支持脚本结束后自动延迟关闭
-* `优化` 控制台浮动窗口及其 Activity 活动窗口支持双指缩放调整字体大小
-* `优化` http 模块相关方法支持超时参数 (timeout)
-* `优化` Gradle 构建脚本支持 JDK 版本主动降级 (fallback)
-* `优化` Gradle 构建脚本支持根据平台类型及版本自动选择合适的构建工具版本 (程度有限)
-* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v630)_
 
 ##### 更多版本历史可参阅
 

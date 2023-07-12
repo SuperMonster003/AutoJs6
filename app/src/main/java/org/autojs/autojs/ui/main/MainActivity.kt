@@ -54,13 +54,11 @@ import org.autojs.autojs.ui.pager.ViewPager
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.widget.DrawerAutoClose
 import org.autojs.autojs.ui.widget.SearchViewItem
-import org.autojs.autojs.util.DeveloperUtils
 import org.autojs.autojs.util.ForegroundServiceUtils
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.UpdateUtils.autoCheckForUpdatesIfNeededWithSnackbar
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityMainBinding
 import org.greenrobot.eventbus.EventBus
@@ -244,17 +242,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private fun getGrantResult(permissions: Array<String>, grantResults: IntArray): Int {
         val i = listOf(*permissions).indexOf(permission.READ_EXTERNAL_STORAGE)
         return if (i < 0) 2 else grantResults[i]
-    }
-
-    override fun onStart() {
-        super.onStart()
-        //   verifyApkIfNeeded()
-    }
-
-    private fun verifyApkIfNeeded() {
-        if (!BuildConfig.DEBUG) {
-            DeveloperUtils.verifyApk(this)
-        }
     }
 
     override fun getOnActivityResultDelegateMediator() = mActivityResultMediator
