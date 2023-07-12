@@ -409,7 +409,7 @@ public class CodeEditor extends HVScrollView {
             public void onSuccess(String beautifiedCode) {
                 setProgress(false);
                 mCodeEditText.setText(beautifiedCode);
-                //格式化后恢复光标位置
+                // 格式化后恢复光标位置
                 mCodeEditText.setSelection(pos);
             }
 

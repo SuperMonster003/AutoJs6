@@ -286,7 +286,11 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             .setEditView(editor!!.codeEditText)
             .build()
         //todo：不清楚作用，暂时注释掉
-        //mFunctionsKeyboard!!.setClickCallback(this)
+        // @Hint by SuperMonster003 on Jul 12, 2023.
+        //  ! 此处的点击事件回调注册是为了使功能键盘智能提示的属性可以实现其接口对应的功能:
+        //  ! 点击: 自动补全, 并根据情况添加括号或句点符号等.
+        //  ! 长按: 以浮动窗口形式展示 [方法/属性/模块] 对应的文档内容 (如果存在的话).
+        mFunctionsKeyboard!!.setClickCallback(this)
         mShowFunctionsButton!!.setOnLongClickListener {
             editor!!.beautifyCode()
             true

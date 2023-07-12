@@ -60,17 +60,34 @@ open class UiObject(
         }
     } catch (e: IllegalStateException) {
         // FIXME: 2017/5/5
-        null
+        null.also { e.printStackTrace() }
     }
 
     open fun child(i: Int): UiObject? = try {
         super.getChild(i)?.run { UiObject(unwrap(), depth + 1, i) }
     } catch (e: IllegalStateException) {
         // FIXME: 2017/5/5
-        null
+        null.also { e.printStackTrace() }
     }
 
-    open fun brother(i: Int): UiObject? = parent()?.child(indexInParent() + i)
+    @Deprecated("Deprecated in Java", ReplaceWith("offset(i)"))
+    open fun brother(i: Int): UiObject? = offset(i)
+
+    open fun offset(i: Int): UiObject? = try {
+        parent()?.child(indexInParent + i)
+    } catch (e: ArrayIndexOutOfBoundsException) {
+        null.also { e.printStackTrace() }
+    }
+
+    open fun sibling(i: Int): UiObject? = try {
+        parent()?.child(i)
+    } catch (e: ArrayIndexOutOfBoundsException) {
+        null.also { e.printStackTrace() }
+    }
+
+    open fun nextSibling() = sibling(1)
+
+    open fun previousSibling() = sibling(-1)
 
     open fun childCount() = childCount
 
@@ -344,14 +361,14 @@ open class UiObject(
         }
     } catch (e: IllegalStateException) {
         // FIXME: 2017/5/5
-        false
+        false.also { e.printStackTrace() }
     }
 
     override fun performAction(action: Int): Boolean = try {
         super.performAction(action)
     } catch (e: IllegalStateException) {
         // FIXME: 2017/5/5
-        false
+        false.also { e.printStackTrace() }
     }
 
     override fun getChild(index: Int): AccessibilityNodeInfoCompat =
