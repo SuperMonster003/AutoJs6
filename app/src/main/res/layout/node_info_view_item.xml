@@ -10,6 +10,11 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
+    <CheckBox
+        android:id="@+id/generate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:ignore="TouchTargetSizeCheck" />
     <TextView
             android:id="@+id/name"
             android:layout_width="0dp"
