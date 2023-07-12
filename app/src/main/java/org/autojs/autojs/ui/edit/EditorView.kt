@@ -285,7 +285,16 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             .setFunctionsView(mFunctionsKeyboard)
             .setEditView(editor!!.codeEditText)
             .build()
+        //todo：不清楚作用，暂时注释掉
+        // @Hint by SuperMonster003 on Jul 12, 2023.
+        //  ! 此处的点击事件回调注册是为了使功能键盘智能提示的属性可以实现其接口对应的功能:
+        //  ! 点击: 自动补全, 并根据情况添加括号或句点符号等.
+        //  ! 长按: 以浮动窗口形式展示 [方法/属性/模块] 对应的文档内容 (如果存在的话).
         mFunctionsKeyboard!!.setClickCallback(this)
+        mShowFunctionsButton!!.setOnLongClickListener {
+            editor!!.beautifyCode()
+            true
+        }
     }
 
     private fun setUpInputMethodEnhancedBar() {
@@ -321,7 +330,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
         mAutoCompletion!!.onCursorChange(line, cursor)
     }
 
-    fun setTheme(theme: Theme?) {
+    private fun setTheme(theme: Theme?) {
         theme?.let {
             mEditorTheme = it
             editor!!.setTheme(it)
@@ -575,11 +584,19 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     override fun onHintClick(completions: CodeCompletions, pos: Int) {
         val completion = completions[pos]
-        editor!!.insert(completion.insertText)
+        //todo:增加行注释
+        if (completion.insertText=="/") {
+            editor!!.commentLine()
+        } else editor!!.insert(completion.insertText)
     }
 
     override fun onHintLongClick(completions: CodeCompletions, pos: Int) {
         val completion = completions[pos]
+        //todo:增加块注释
+        if (completion.insertText=="/") {
+            editor!!.commentBlock()
+            return
+        }
         if (completion.url == null) return
         showManual(completion.url, completion.hint)
     }

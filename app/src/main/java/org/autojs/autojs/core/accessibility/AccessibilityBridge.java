@@ -150,4 +150,7 @@ public abstract class AccessibilityBridge {
         return mConfig;
     }
 
+    public void setAccessibilityListener(AccessibilityServiceCallback listener) {
+        AccessibilityService.Companion.setCallback(listener);
+    }
 }

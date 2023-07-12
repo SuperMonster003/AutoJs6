@@ -2,7 +2,6 @@
 
 package org.autojs.autojs.core.accessibility
 
-import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -15,7 +14,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.core.accessibility.AccessibilityService.Companion.isRunning
+import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.core.automator.GlobalActionAutomator
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.action.ActionFactory
@@ -27,7 +26,8 @@ import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.util.DeveloperUtils
-
+import java.util.concurrent.atomic.AtomicInteger
+import android.accessibilityservice.AccessibilityService as AndroidAccessibilityService
 
 /**
  * Created by Stardust on 2017/4/2.
@@ -177,10 +177,22 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     fun paste(target: ActionTarget) = performAction(target.createAction(AccessibilityNodeInfo.ACTION_PASTE))
 
     @ScriptInterface
-    fun isServiceRunning() = isRunning()
+    fun isServiceRunning() = AccessibilityService.isRunning()
 
     @ScriptInterface
     fun ensureService() = accessibilityBridge.ensureServiceEnabled()
+
+    //todo:优化实现方式
+    // TODO by SuperMonster003 on Jul 12, 2023.
+    //  ! Ref to Auto.js Pro
+    fun registerEvent(eventName: String, callback: AccessibilityEventCallback) {
+        ensureService()
+        AccessibilityService.instance?.addAccessibilityEventCallback(eventName, callback)
+    }
+
+    fun removeEvent(eventName: String) {
+        AccessibilityService.instance?.removeAccessibilityEventCallback(eventName)
+    }
 
     private fun performAction(simpleAction: SimpleAction): Boolean {
         ensureService()
@@ -204,8 +216,8 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
         val promiseAdapter = mPromiseAdapter ?: ScriptPromiseAdapter().also { mPromiseAdapter = it }
         val service = accessibilityBridge.service!!
         val executor = service.mainExecutor
-        val callback = object : AccessibilityService.TakeScreenshotCallback {
-            override fun onSuccess(screenshot: AccessibilityService.ScreenshotResult) {
+        val callback = object : AndroidAccessibilityService.TakeScreenshotCallback {
+            override fun onSuccess(screenshot: AndroidAccessibilityService.ScreenshotResult) {
                 val hardwareBuffer = Bitmap.wrapHardwareBuffer(screenshot.hardwareBuffer, screenshot.colorSpace)
 
                 // @Hint by SuperMonster003 on Jun 9, 2023.
@@ -222,7 +234,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
             }
 
             override fun onFailure(errorCode: Int) {
-                if (errorCode == AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT) {
+                if (errorCode == AndroidAccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT) {
                     Handler(Looper.getMainLooper()).postDelayed({
                         captureScreen()
                     }, 50)
@@ -239,9 +251,12 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     }
 
     companion object {
-
+        val accessibilityDelegateCounter = AtomicInteger(1000)
         val TAG: String = SimpleActionAutomator::class.java.name
 
+        interface AccessibilityEventCallback {
+            fun onAccessibilityEvent(event: AccessibilityEventWrapper)
+        }
     }
 
 }

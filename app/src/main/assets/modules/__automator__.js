@@ -61,6 +61,23 @@ module.exports = function (scriptRuntime, scope) {
                     return util.java.toJsArray(a11yBridge.windowRoots(), false)
                         .map(root => UiObject.createRoot(root));
                 },
+                stateListener(listener) {
+                    return a11yBridge.setAccessibilityListener(listener);
+                },
+                registerEvent(name, listener) {
+                    return rtAutomator.registerEvent(name, listener);
+                },
+                /** @deprecated */
+                registerEvents(name, listener) {
+                    return rtAutomator.registerEvent(name, listener);
+                },
+                removeEvent(name) {
+                    return rtAutomator.removeEvent(name);
+                },
+                /** @deprecated */
+                removeEvents(name) {
+                    return rtAutomator.removeEvent(name);
+                },
                 waitFor(timeout) {
                     automator.waitForService(timeout);
                 },

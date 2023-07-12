@@ -1,10 +1,12 @@
 package org.autojs.autojs.ui.floating.layoutinspector
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +22,7 @@ import java.lang.reflect.Field
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 class NodeInfoView : RecyclerView {
-
+    //todo:调整数据结构，对话框关闭后根据已勾选的属性，生成选择器
     private val data = Array(FIELDS.size + 1) { Array(2) { "" } }
 
     constructor(context: Context) : super(context)
@@ -41,6 +43,7 @@ class NodeInfoView : RecyclerView {
         )
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setNodeInfo(nodeInfo: NodeInfo) {
         for (i in FIELDS.indices) {
             try {
@@ -71,6 +74,14 @@ class NodeInfoView : RecyclerView {
         }
     }
 
+    fun getCheckedDate(): Array<String> {
+        //todo:数据增加checked属性，区分已选中项目
+        val checkedArr = data.filter { it[0] == "id" || it[0] == "text" }
+        return Array(checkedArr.size) {
+            dataToFx(checkedArr[it])
+        }
+    }
+
     private inner class Adapter : RecyclerView.Adapter<ViewHolder>() {
 
         val mViewTypeHeader = 0
@@ -84,6 +95,7 @@ class NodeInfoView : RecyclerView {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.apply {
                 data[position].let {
+                    //attrChecked.isChecked = false
                     attrName.text = it[0]
                     attrValue.text = it[1]
                 }
@@ -97,7 +109,7 @@ class NodeInfoView : RecyclerView {
     }
 
     internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
+        //val attrChecked: CheckBox = itemView.findViewById(R.id.generate)
         val attrName: TextView = itemView.findViewById(R.id.name)
         val attrValue: TextView = itemView.findViewById(R.id.value)
 
@@ -130,7 +142,7 @@ class NodeInfoView : RecyclerView {
 
         private val FIELD_NAMES = arrayOf(
             // Common
-            "packageName", "simpleId", "fullId", "idHex",
+            "packageName", "id", "fullId", "idHex",
             "desc", "text",
             "bounds", "className",
             "clickable", "longClickable", "scrollable",

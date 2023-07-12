@@ -1,3 +1,5 @@
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+
 include(
     ":app",
     ":libs:android-job-simplified-1.4.3",
