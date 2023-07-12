@@ -16,11 +16,13 @@ import org.autojs.autojs.pref.Pref.getBoolean
 import org.autojs.autojs.pref.Pref.putBoolean
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import java.io.IOException
 import java.net.Socket
 import java.net.SocketTimeoutException
 import java.util.concurrent.Executors
+
 
 class JsonSocketClient(service: DevPluginService?, host: String?, port: Int) : JsonSocket(service) {
 
@@ -83,7 +85,7 @@ class JsonSocketClient(service: DevPluginService?, host: String?, port: Int) : J
 
     private fun onHello(message: JsonObject) {
         var currentVersion: String? = null
-        val requiredVersion = REQUIRED_SERVER_VERSION
+        val requiredVersion = BuildConfig.VSCODE_EXT_REQUIRED_VERSION
         Log.i(TAG, "onHello: $message")
         val data = message["data"]
         if (data != null && data.isJsonObject) {
@@ -121,18 +123,20 @@ class JsonSocketClient(service: DevPluginService?, host: String?, port: Int) : J
             """.trimIndent()
 
         if (activity is Activity) {
-            MaterialDialog.Builder(activity)
-                .title(activity.getString(R.string.text_connection_cannot_be_established))
-                .content(msg)
-                .positiveText(R.string.dialog_button_back)
-                .build()
-                .also {
-                    it.contentView?.apply {
-                        autoLinkMask = Linkify.WEB_URLS
-                        text = text
+            activity.runOnUiThread {
+                MaterialDialog.Builder(activity)
+                    .title(activity.getString(R.string.text_connection_cannot_be_established))
+                    .content(msg)
+                    .positiveText(R.string.dialog_button_back)
+                    .build()
+                    .also {
+                        it.contentView?.apply {
+                            autoLinkMask = Linkify.WEB_URLS
+                            text = text
+                        }
+                        mHandler.post { it.show() }
                     }
-                    mHandler.post { it.show() }
-                }
+            }
         } else {
             val toastMsg = """
                 ${activity.getString(R.string.text_min_version_of_vscode_vsc_ext)}:
@@ -168,6 +172,7 @@ class JsonSocketClient(service: DevPluginService?, host: String?, port: Int) : J
                         sRequiredBytesCommands[md5] = obj
                     }
                 }
+
                 else -> service.responseHandler.handle(obj)
             }
         } catch (e: Exception) {
@@ -215,7 +220,6 @@ class JsonSocketClient(service: DevPluginService?, host: String?, port: Int) : J
 
     companion object {
 
-        private const val REQUIRED_SERVER_VERSION = "1.0.5"
         private val TAG = JsonSocketClient::class.java.simpleName
 
         var serverAddressHistories: LinkedHashSet<String>

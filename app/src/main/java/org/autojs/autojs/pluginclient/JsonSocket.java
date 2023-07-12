@@ -74,7 +74,7 @@ abstract public class JsonSocket extends Socket {
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public static final int HEADER_SIZE = 8;
+    public static final int HEADER_SIZE = 16;
     public static final int HANDSHAKE_TIMEOUT = 5 * 1000;
 
     public static final String TYPE_HELLO = DevPluginService.TYPE_HELLO;
@@ -196,10 +196,10 @@ abstract public class JsonSocket extends Socket {
         } else {
             String header = new String(Arrays.copyOfRange(bytes, 0, HEADER_SIZE));
 
-            int dataSize = parseHeaderInt(header, 0);
+            int dataSize = parseHeaderInt(header, 0, HEADER_SIZE - 2);
             Log.d(TAG, "Data length from header: " + dataSize);
 
-            int dataType = parseHeaderInt(header, 4);
+            int dataType = parseHeaderInt(header, HEADER_SIZE - 2, 2);
             Log.d(TAG, "Data type from header: " + dataType);
 
             mFragment = new Fragment(dataSize, dataType);
@@ -226,9 +226,9 @@ abstract public class JsonSocket extends Socket {
         }
     }
 
-    private static int parseHeaderInt(String header, int offset) {
+    private static int parseHeaderInt(String header, int offset, int length) {
         try {
-            return Integer.parseInt(new String(header.getBytes(UTF_8), offset, 4).replaceAll("\\D", ""));
+            return Integer.parseInt(new String(header.getBytes(UTF_8), offset, length).replaceAll("\\D", ""));
         } catch (Exception e) {
             e.printStackTrace();
             return 0;

@@ -5,6 +5,7 @@ import android.view.View
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
+import org.autojs.autojs.engine.module.ScopeRequire
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ScriptConfig
@@ -17,7 +18,6 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
 import java.io.File
 import java.io.IOException
@@ -121,11 +121,7 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
             mAndroidContext, MODULES_PATH,
             listOf<URI>(File("/").toURI())
         )
-        RequireBuilder()
-            .setModuleScriptProvider(SoftCachingModuleScriptProvider(provider))
-            .setSandboxed(true)
-            .createRequire(context, scope)
-            .install(scope)
+        ScopeRequire(context, scope, SoftCachingModuleScriptProvider(provider)).install(scope)
     }
 
     protected fun createScope(context: Context): TopLevelScope {

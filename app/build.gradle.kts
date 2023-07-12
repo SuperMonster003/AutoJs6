@@ -361,6 +361,7 @@ android {
             }
         }
         buildConfigField("String", "VERSION_DATE", "\"${Utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
+        buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
     }
 
     applicationVariants.all {
@@ -460,6 +461,7 @@ class Versions(filePath: String) {
     val sdkVersionCompile = properties["COMPILE_SDK_VERSION"].let { it as String }.toInt()
     val appVersionName = properties["VERSION_NAME"] as String
     val appVersionCode = properties["VERSION_BUILD"].let { it as String }.toInt()
+    val vscodeExtRequiredVersion = properties["VSCODE_EXT_REQUIRED_VERSION"] as String
 
     private val javaVersionRaw = properties["JAVA_VERSION"] as String
 

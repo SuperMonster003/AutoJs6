@@ -4,6 +4,18 @@
 
 ******
 
+# v6.3.3
+
+###### 2023/07/12
+
+* `修复` VSCode 插件在脚本字符总长度超过四位十进制数时无法解析数据的问题 _[`issue #91`](http://issues.autojs6.com/91)_ _[`issue #93`](http://issues.autojs6.com/93)_
+* `修复` VSCode 插件无法正常保存文件的问题 _[`issue #92`](http://issues.autojs6.com/91)_ _[`issue #94`](http://issues.autojs6.com/93)_
+* `修复` 异步环境 (by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_
+* `优化` 调整模块作用域 (by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
+* `优化` 定时器调用性能 (by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
+* `优化` 移除发行版本应用启动时的签名校验 (by [LZX284](https://github.com/LZX284)) _[`pr #81`](http://pr.autojs6.com/81)_
+* `优化` 升级 Gradle 版本 8.2 -> 8.2.1
+
 # v6.3.2
 
 ###### 2023/07/06
@@ -34,6 +46,7 @@
 * `优化` 服务端模式开启后保持常开状态 (除非手动关闭或应用进程结束) _[`issue #64`](http://issues.autojs6.com/64#issuecomment-1596990158)_
 * `优化` 实现 AutoJs6 与 VSCode 插件的双向版本检测并提示异常检测结果 _[`issue #89`](http://issues.autojs6.com/89)_
 * `优化` 增加短信数据读取权限 (android.permission.READ_SMS) (默认关闭)
+* `优化` findMultiColors 方法内部实现 (by [LYS](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
 * `优化` runtime.loadDex/loadJar/load 支持按目录级别加载或同时加载多个文件
 * `优化` 升级 Leakcanary 版本 2.11 -> 2.12
 * `优化` 升级 Android Analytics 版本 14.2.0 -> 14.3.0
@@ -382,7 +395,7 @@
 * `修复` toast.dismiss() 可能无效的问题
 * `修复` 客户端模式及服务端模式开关可能无法正常工作的问题
 * `修复` 客户端模式及服务端模式开关状态不能正常刷新的问题
-* `修复` Android 7.x 解析 UI 模式 text 元素异常 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`issue #4`](http://issues.autojs6.com/4)_ _[`#9`](http://issues.autojs6.com/9)_
+* `修复` Android 7.x 解析 UI 模式 text 元素异常 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`issue #4`](http://issues.autojs6.com/4)_ _[`issue #9`](http://issues.autojs6.com/9)_
 * `优化` 忽略 sleep() 的 ScriptInterruptedException 异常
 * `优化` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
 * `优化` 升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1
