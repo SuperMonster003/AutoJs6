@@ -2,6 +2,7 @@ package org.autojs.autojs.model.autocomplete
 
 /**
  * Created by Stardust on 2017/9/27.
+ * Transformed by 抠脚本人 on Jul 11, 2023.
  */
 class CodeCompletions(val from: Int, private val mCompletions: List<CodeCompletion>) {
     fun size(): Int {

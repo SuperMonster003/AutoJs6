@@ -3,6 +3,9 @@ package org.autojs.autojs.core.automator
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 
+/**
+ * Created by 抠脚本人 on Jul 10, 2023.
+ */
 class AccessibilityEventWrapper(event: AccessibilityEvent) {
     val raw = event
     val packageName: CharSequence? = event.packageName

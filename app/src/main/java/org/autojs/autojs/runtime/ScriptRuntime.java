@@ -528,8 +528,10 @@ public class ScriptRuntime {
                 console.hideDelayed();
             }
         });
-        //清空无障碍事件
-        ignoresException(AccessibilityService.Companion::clearAccessibilityEventCallback);
+
+        // 清空无障碍事件
+        ignoresException(AccessibilityService::clearAccessibilityEventCallback);
+
         ignoresException(RootUtils::resetRuntimeOverriddenRootModeState);
         ignoresException(ImageWrapper::recycleAll);
 

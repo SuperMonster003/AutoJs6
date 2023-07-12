@@ -64,11 +64,19 @@ module.exports = function (scriptRuntime, scope) {
                 stateListener(listener) {
                     return a11yBridge.setAccessibilityListener(listener);
                 },
-                registerEvents(name, listener) {
-                    return rtAutomator.registerEvents(name, listener);
+                registerEvent(name, listener) {
+                    return rtAutomator.registerEvent(name, listener);
                 },
+                /** @deprecated */
+                registerEvents(name, listener) {
+                    return rtAutomator.registerEvent(name, listener);
+                },
+                removeEvent(name) {
+                    return rtAutomator.removeEvent(name);
+                },
+                /** @deprecated */
                 removeEvents(name) {
-                    return rtAutomator.removeEvents(name);
+                    return rtAutomator.removeEvent(name);
                 },
                 waitFor(timeout) {
                     automator.waitForService(timeout);
