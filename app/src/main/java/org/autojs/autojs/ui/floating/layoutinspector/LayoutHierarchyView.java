@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.floating.layoutinspector;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -18,12 +19,7 @@ import org.autojs.autojs.ui.widget.LevelBeamView;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 import pl.openrnd.multilevellistview.ItemInfo;
 import pl.openrnd.multilevellistview.MultiLevelListAdapter;
@@ -40,7 +36,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
     public interface OnItemLongClickListener {
         void onItemLongClick(View view, NodeInfo nodeInfo);
     }
-
+    private final Map<NodeInfo,ViewHolder> nodeMap = new LinkedHashMap<>();
     private Adapter mAdapter;
     private OnItemLongClickListener mOnItemLongClickListener;
     private final AdapterView.OnItemLongClickListener mOnItemLongClickListenerProxy = new AdapterView.OnItemLongClickListener() {
@@ -111,15 +107,39 @@ public class LayoutHierarchyView extends MultiLevelListView {
     }
 
     private void setClickedItem(View view, NodeInfo item) {
-        mClickedNodeInfo = item;
         if (mClickedView == null) {
             mOriginalBackground = view.getBackground();
         } else {
             mClickedView.setBackground(mOriginalBackground);
+            drawListItem(mClickedNodeInfo, false);
         }
         view.setBackgroundColor(mClickedColor);
+        drawListItem(item, true);
+        mClickedNodeInfo = item;
         mClickedView = view;
         invalidate();
+    }
+
+    private void drawListItem(NodeInfo info, Boolean draw) {
+        ArrayList<ViewHolder> list = new ArrayList<>();
+        NodeInfo currentInfo = info;
+        while (true) {
+            currentInfo = currentInfo.getParent();
+            if (currentInfo == null) break;
+            ViewHolder vh = nodeMap.get(currentInfo);
+            list.add(vh);
+        }
+        //todo：选用能适应深色模式的字体颜色
+        //fixme：列表滑动时listview数据错乱
+        if (draw) {
+            for (ViewHolder vh : list) {
+                vh.nameView.setTextColor(Color.RED); // 设置字体颜色为红色
+            }
+        } else {
+            for (ViewHolder vh : list) {
+                vh.nameView.setTextColor(Color.BLACK); // 设置字体颜色为红色
+            }
+        }
     }
 
     private void initPaint() {
@@ -186,7 +206,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
         return found;
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         TextView nameView;
         TextView infoView;
         ImageView arrowView;
@@ -220,6 +240,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
             return mInitiallyExpandedNodes.contains((NodeInfo) object);
         }
 
+        @SuppressLint("InflateParams")
         @Override
         public View getViewForObject(Object object, View convertView, ItemInfo itemInfo) {
             NodeInfo nodeInfo = (NodeInfo) object;
@@ -231,8 +252,9 @@ public class LayoutHierarchyView extends MultiLevelListView {
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
-
-            viewHolder.nameView.setText(simplifyClassName(nodeInfo.getClassName()));
+            nodeMap.put(nodeInfo,viewHolder);
+            //对于id,desc,text,clickable,longClickable不为空的显示额外信息
+            viewHolder.nameView.setText(extraInfo(nodeInfo));
             viewHolder.nodeInfo = nodeInfo;
             if (viewHolder.infoView.getVisibility() == VISIBLE)
                 viewHolder.infoView.setText(getItemInfoDsc(itemInfo));
@@ -266,6 +288,31 @@ public class LayoutHierarchyView extends MultiLevelListView {
             return s;
         }
 
+        private String extraInfo(NodeInfo nodeInfo) {
+            String extra = simplifyClassName(nodeInfo.getClassName());
+            ArrayList<String> info = new ArrayList<>();
+            if (nodeInfo.getId() != null) {
+                info.add("id=" + nodeInfo.getId());
+            }
+            if (!nodeInfo.getText().equals("")) {
+                info.add("text=" + nodeInfo.getText());
+            }
+            if (nodeInfo.getDesc() != null) {
+                info.add("desc=" + nodeInfo.getDesc());
+            }
+            if (nodeInfo.getClickable()) {
+                info.add("clickable");
+            }
+            if (nodeInfo.getLongClickable()) {
+                info.add("longClickable");
+            }
+            //字符串拼接
+            String others = String.join(", ", info);
+            if (!others.isEmpty()) {
+                return extra + " [" + others + "]";
+            }
+            return extra;
+        }
 
         private String getItemInfoDsc(ItemInfo itemInfo) {
             StringBuilder builder = new StringBuilder();

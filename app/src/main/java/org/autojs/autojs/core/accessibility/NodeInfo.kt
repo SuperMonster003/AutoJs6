@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.accessibility
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -17,7 +18,7 @@ import java.util.HashMap
  * Modified by SuperMonster003 as of Jun 17, 2022.
  */
 
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 @Keep
 class NodeInfo(private val resources: Resources?, private val node: UiObject, var parent: NodeInfo?) {
 
@@ -27,8 +28,8 @@ class NodeInfo(private val resources: Resources?, private val node: UiObject, va
     val bounds = boundsToString(boundsInScreen)
 
     val children = ArrayList<NodeInfo>()
-    var fullId: String? = node.viewIdResourceName
-    val simpleId = node.simpleId()
+    val fullId = node.fullId()
+    val id = node.simpleId()
     val desc = node.desc()
     val text = node.text()
     val className = node.className()
@@ -59,6 +60,7 @@ class NodeInfo(private val resources: Resources?, private val node: UiObject, va
     val childCount = node.childCount()
     val actionNames = node.actionNames()
 
+    @SuppressLint("DiscouragedApi")
     val idHex = takeIf { resources != null && packageName != null && fullId != null }?.let {
         "0x${Integer.toHexString(resources!!.getIdentifier(fullId, null, null))}"
     }
@@ -68,7 +70,7 @@ class NodeInfo(private val resources: Resources?, private val node: UiObject, va
         "childCount=${children.size}, " +
         "boundsInScreen=$boundsInScreen, " +
         "boundsInParent=$boundsInParent, " +
-        "id='$simpleId', " +
+        "id='$id', " +
         "desc='$desc', " +
         "packageName='$packageName', " +
         "text='$text', " +

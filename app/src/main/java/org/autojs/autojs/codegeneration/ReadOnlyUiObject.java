@@ -70,7 +70,7 @@ public class ReadOnlyUiObject extends UiObject {
 
     @Override
     public String id() {
-        return mNodeInfo.getSimpleId();
+        return mNodeInfo.getId();
     }
 
     @Override

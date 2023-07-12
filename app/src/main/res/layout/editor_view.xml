@@ -63,15 +63,16 @@
                         android:layout_alignParentBottom="true" />
 
                 <ImageView
-                        android:id="@+id/functions"
-                        android:layout_width="40dp"
-                        android:layout_height="35dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentTop="true"
-                        android:background="?selectableItemBackgroundBorderless"
-                        android:padding="6dp"
-                        android:src="@drawable/ic_ali_fx"
-                        app:tint="#222329" />
+                    android:id="@+id/functions"
+                    android:layout_width="40dp"
+                    android:layout_height="35dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/fun"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_ali_fx"
+                    app:tint="#222329" />
 
                 <org.autojs.autojs.ui.edit.completion.CodeCompletionBar
                         android:id="@+id/code_completion_bar"
