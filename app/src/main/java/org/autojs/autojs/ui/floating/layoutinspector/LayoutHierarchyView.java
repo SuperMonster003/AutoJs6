@@ -291,8 +291,8 @@ public class LayoutHierarchyView extends MultiLevelListView {
         private String extraInfo(NodeInfo nodeInfo) {
             String extra = simplifyClassName(nodeInfo.getClassName());
             ArrayList<String> info = new ArrayList<>();
-            if (nodeInfo.getSimpleId() != null) {
-                info.add("id=" + nodeInfo.getSimpleId());
+            if (nodeInfo.getId() != null) {
+                info.add("id=" + nodeInfo.getId());
             }
             if (!nodeInfo.getText().equals("")) {
                 info.add("text=" + nodeInfo.getText());
