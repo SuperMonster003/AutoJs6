@@ -9,6 +9,7 @@
 output.json
 output-metadata.json
 desktop.ini
+sync.ffs_db
 
 .bak
 .git
