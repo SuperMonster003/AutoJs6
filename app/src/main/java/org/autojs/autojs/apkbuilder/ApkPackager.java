@@ -1,5 +1,7 @@
 package org.autojs.autojs.apkbuilder;
 
+import android.text.TextUtils;
+
 import org.autojs.autojs.apkbuilder.util.StreamUtils;
 
 import java.io.File;
@@ -36,7 +38,7 @@ public class ApkPackager {
         ZipInputStream zis = new ZipInputStream(mApkInputStream);
         for (ZipEntry e = zis.getNextEntry(); e != null; e = zis.getNextEntry()) {
             String name = e.getName();
-            if (!e.isDirectory()) {
+            if (!e.isDirectory() && !TextUtils.isEmpty(name)) {
                 File file = new File(mWorkspacePath, name);
                 System.out.println(file);
                 file.getParentFile().mkdirs();
