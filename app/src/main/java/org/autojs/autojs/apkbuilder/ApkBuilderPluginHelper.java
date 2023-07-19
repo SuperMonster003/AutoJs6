@@ -23,7 +23,13 @@ public class ApkBuilderPluginHelper {
     private static final boolean DEBUG_APK_PLUGIN = false;
 
     public static boolean isPluginAvailable(Context context) {
-        return DeveloperUtils.checkSignature(context, PLUGIN_PACKAGE_NAME);
+//        return DeveloperUtils.checkSignature(context, PLUGIN_PACKAGE_NAME);
+        try {
+            context.getPackageManager().getPackageInfo(PLUGIN_PACKAGE_NAME, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
     public static InputStream openTemplateApk(Context context) {
