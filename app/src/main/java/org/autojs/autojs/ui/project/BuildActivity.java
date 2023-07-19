@@ -34,9 +34,7 @@ import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityBuildBinding;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -98,7 +96,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (mSource != null) {
             setupWithSourceFile(new ScriptFile(mSource));
         }
-//        checkApkBuilderPlugin();
+        checkApkBuilderPlugin();
     }
 
     private void checkApkBuilderPlugin() {
@@ -184,16 +182,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     void buildApk() {
-//        if (!ApkBuilderPluginHelper.isPluginAvailable(this)) {
-//            ViewUtils.showToast(this, R.string.text_apk_builder_plugin_unavailable);
-//            return;
-//        }
-        try {
-            if (!Arrays.asList(getAssets().list("")).contains("template.apk")) {
-                return;
-            }
-        } catch (IOException e) {
-            Log.e(LOG_TAG, e.getMessage());
+        if (!ApkBuilderPluginHelper.isPluginAvailable(this)) {
+            ViewUtils.showToast(this, R.string.text_apk_builder_plugin_unavailable);
             return;
         }
         if (!checkInputs()) {
@@ -270,8 +260,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private ApkBuilder callApkBuilder(File tmpDir, File outApk, ApkBuilder.AppConfig appConfig) throws Exception {
-//        InputStream templateApk = ApkBuilderPluginHelper.openTemplateApk(BuildActivity.this);
-        InputStream templateApk = getAssets().open("template.apk");
+        InputStream templateApk = ApkBuilderPluginHelper.openTemplateApk(BuildActivity.this);
         return new ApkBuilder(templateApk, outApk, tmpDir.getPath())
                 .setProgressCallback(BuildActivity.this)
                 .prepare()
