@@ -69,7 +69,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:background="?selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/fun"
+                    android:contentDescription="@string/text_function"
                     android:padding="6dp"
                     android:src="@drawable/ic_ali_fx"
                     app:tint="#222329" />

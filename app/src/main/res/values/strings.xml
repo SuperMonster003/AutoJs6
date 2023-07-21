@@ -205,7 +205,7 @@
     <string name="foreground_notification_channel_name">AutoJs6 foreground service</string>
     <string name="foreground_notification_text">Click to launch AutoJs6</string>
     <string name="foreground_notification_title">AutoJs6 foreground service</string>
-    <string name="format_build_successfully" formatted="true">Build succeeded.\nFile path: %s</string>
+    <string name="format_build_succeeded" formatted="true">Build succeeded.\nFile path: %s</string>
     <string name="format_debug_bar_title">Debug [ %s ]</string>
     <string name="format_default_package_name" formatted="true" translatable="false">com.example.script%d</string>
     <string name="format_dialog_progress_number_format_kilo_bytes" translatable="false">%.1fKB/%.1fKB</string>
@@ -440,7 +440,7 @@
     <string name="text_broadcast_action_prefix" translatable="false">android.intent.action.</string>
     <string name="text_broadcast_task">Broadcast task</string>
     <string name="text_build_apk">Build APK</string>
-    <string name="text_build_successfully">Build succeeded</string>
+    <string name="text_build_succeeded">Build succeeded</string>
     <string name="text_cancel">Cancel</string>
     <string name="text_cancel_simplified">Cancel</string>
     <string name="text_cannot_read_file">Can\'t read file</string>
@@ -460,6 +460,7 @@
     <string name="text_close">Close</string>
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautify code</string>
+    <string name="text_comment">Comment</string>
     <string name="text_command_already_copied_to_clip">Command copied to clipboard</string>
     <string name="text_compatibility">Compatibility</string>
     <string name="text_compatibility_with_classes_for_ver_4_x">Compatibility with Java classes for version 4.x</string>
@@ -712,7 +713,7 @@
     <string name="text_project_media_access">Project media access</string>
     <string name="text_project_media_access_description">With project media access, security warning for screen recording will not prompt.</string>
     <string name="text_project_save_error">Failed to save project</string>
-    <string name="text_project_save_success">Project saved</string>
+    <string name="text_project_save_succeeded">Project saved</string>
     <string name="text_prompt">Prompt</string>
     <string name="text_quit">Quit</string>
     <string name="text_record_finished">Recording finished</string>
@@ -778,7 +779,7 @@
     <string name="text_save_to">Save to</string>
     <string name="text_script_record">Script recording</string>
     <string name="text_script_running">Script running</string>
-    <string name="text_script_save_successfully">Script saved succeeded (refresh is needed)</string>
+    <string name="text_script_save_succeeded">Script saved succeeded (refresh is needed)</string>
     <string name="text_search">Search</string>
     <string name="text_select">Select</string>
     <string name="text_select_by_exists">If clip exists (exists)</string>
@@ -880,7 +881,9 @@
     <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
     <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
     <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
-    <string name="fun">函数</string>
+    <string name="text_function">Function</string>
+    <string name="text_formatting_completed">Formatting completed</string>
+    <string name="text_failed_to_format">Failed to format</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>

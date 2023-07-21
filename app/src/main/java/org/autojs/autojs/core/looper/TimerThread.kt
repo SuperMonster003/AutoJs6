@@ -1,45 +1,58 @@
 package org.autojs.autojs.core.looper
 
+import android.os.Handler
 import android.os.Looper
 import androidx.annotation.CallSuper
+import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.util.StringUtils.str
+import org.autojs.autojs6.R
 import org.mozilla.javascript.Context
 import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Created by Stardust on 2017/12/27.
- * Transformed by aiselp on Jun 4, 2023.
+ * Modified by SuperMonster003 as of Jul 12, 2023.
+ * Transformed by SuperMonster003 on Jul 12, 2023.
  */
-open class TimerThread(private val mRuntime: ScriptRuntime, private val mTarget: Runnable) :
-    ThreadCompat(mTarget) {
+// @Overruled by SuperMonster003 on Jul 12, 2023.
+//  ! Author: aiselp
+//  ! Related PR:
+//  ! http://pr.autojs6.com/75
+//  ! Reason:
+//  ! Sorry but my current capabilities are not sufficient
+//  ! to fully understand everything from above pull request(s),
+//  ! so most of the code will remain as is. :)
+open class TimerThread(
+    private val scriptRuntime: ScriptRuntime,
+    private val maxCallbackUptimeMillisForAllThreads: VolatileBox<Long>,
+    private val target: Runnable
+) : ThreadCompat(target) {
+
     private var mTimer: Timer? = null
     private var mRunning = false
     private val mRunningLock = Object()
-    private val mAsyncTask = Loopers.AsyncTask("TimerThread")
-    var loopers: Loopers? = null
-
-    init {
-        mRuntime.loopers.addAsyncTask(mAsyncTask)
-    }
 
     override fun run() {
-        loopers = Loopers(mRuntime)
-        mTimer = loopers!!.mTimer
-        sTimerMap[currentThread()] = mTimer!!
-        (mRuntime.engines.myEngine() as RhinoJavaScriptEngine).enterContext()
+        scriptRuntime.loopers.prepare()
+        mTimer = Timer(scriptRuntime, maxCallbackUptimeMillisForAllThreads).also {
+            sTimerMap[currentThread()] = it
+        }
+        (scriptRuntime.engines.myEngine() as? RhinoJavaScriptEngine)?.enterContext()
         notifyRunning()
-        mTimer!!.post(mTarget)
+        Looper.myLooper()?.let {
+            Handler(it).post(target)
+        } ?: Handler().post(target)
         try {
             Looper.loop()
         } catch (e: Throwable) {
             if (!ScriptInterruptedException.causedByInterrupted(e)) {
-                mRuntime.console.error(currentThread().toString() + ": ", e)
+                scriptRuntime.console.error("${currentThread()}: $e")
             }
         } finally {
-            //mRuntime.console.log("TimerThread exit");
             onExit()
             mTimer = null
             Context.exit()
@@ -61,69 +74,49 @@ open class TimerThread(private val mRuntime: ScriptRuntime, private val mTarget:
 
     @CallSuper
     protected open fun onExit() {
-        mRuntime.loopers.removeAsyncTask(mAsyncTask)
-        mRuntime.loopers.notifyThreadExit(this)
-    }
-
-    fun setTimeout(callback: Any, delay: Long, vararg args: Any?): Int {
-        return timer.setTimeout(callback, delay, *args as Array<out Any>)
-    }
-
-    fun setTimeout(callback: Any): Int {
-        return setTimeout(callback, 1)
+        scriptRuntime.loopers.notifyThreadExit(this)
     }
 
     val timer: Timer
         get() {
-            checkNotNull(mTimer) { "thread is not alive" }
-            return mTimer as Timer
+            checkNotNull(mTimer) { str(R.string.error_thread_is_not_alive) }
+            return mTimer!!
         }
 
-    fun clearTimeout(id: Int): Boolean {
-        return timer.clearTimeout(id)
-    }
+    fun setTimeout(callback: Any, delay: Long, vararg args: Array<out Any?>) = timer.setTimeout(callback, delay, *args)
 
-    fun setInterval(listener: Any?, interval: Long, vararg args: Any?): Int {
-        return timer.setInterval(listener!!, interval, *args as Array<out Any>)
-    }
+    fun clearTimeout(id: Int) = timer.clearTimeout(id)
 
-    fun setInterval(listener: Any?): Int {
-        return setInterval(listener, 1)
-    }
+    fun setInterval(listener: Any, interval: Long, vararg args: Array<out Any?>) = timer.setInterval(listener, interval, *args)
 
-    fun clearInterval(id: Int): Boolean {
-        return timer.clearInterval(id)
-    }
+    fun clearInterval(id: Int) = timer.clearInterval(id)
 
-    fun setImmediate(listener: Any, vararg args: Any?): Int {
-        return timer.setImmediate(listener, *args as Array<out Any>)
-    }
+    fun setImmediate(listener: Any, vararg args: Array<out Any?>) = timer.setImmediate(listener, *args)
 
-    fun clearImmediate(id: Int): Boolean {
-        return timer.clearImmediate(id)
-    }
+    fun clearImmediate(id: Int) = timer.clearImmediate(id)
 
     @Throws(InterruptedException::class)
     fun waitFor() {
         synchronized(mRunningLock) {
-            if (mRunning) return
-            mRunningLock.wait()
+            if (!mRunning) {
+                mRunningLock.wait()
+            }
         }
     }
 
-    override fun toString(): String {
-        return "Thread[$name,$priority]"
-    }
+    override fun toString() = "Thread[$name,$priority]"
 
     companion object {
+
         private val sTimerMap = ConcurrentHashMap<Thread, Timer?>()
 
         @JvmStatic
-        fun getTimerForThread(thread: Thread): Timer? {
-            return sTimerMap[thread]
-        }
+        fun getTimerForThread(thread: Thread) = sTimerMap[thread]
 
-        val timerForCurrentThread: Timer?
+        @JvmStatic
+        val timerForCurrentThread
             get() = getTimerForThread(currentThread())
+
     }
+
 }

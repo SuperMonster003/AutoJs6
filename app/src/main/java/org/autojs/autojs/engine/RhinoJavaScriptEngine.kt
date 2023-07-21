@@ -5,8 +5,8 @@ import android.view.View
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
-import org.autojs.autojs.engine.module.ScopeRequire
 import org.autojs.autojs.execution.ExecutionConfig
+import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ScriptConfig
 import org.autojs.autojs.rhino.RhinoAndroidHelper
@@ -18,6 +18,7 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
 import java.io.File
 import java.io.IOException
@@ -118,10 +119,13 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
 
     private fun initRequireBuilder(context: Context, scope: Scriptable) {
         val provider = AssetAndUrlModuleSourceProvider(
-            mAndroidContext, MODULES_PATH,
-            listOf<URI>(File("/").toURI())
+            mAndroidContext, MODULES_ROOT_PATH, listOf<URI>(File(File.separator).toURI())
         )
-        ScopeRequire(context, scope, SoftCachingModuleScriptProvider(provider)).install(scope)
+        RequireBuilder()
+            .setModuleScriptProvider(SoftCachingModuleScriptProvider(provider))
+            .setSandboxed(true)
+            .createRequire(context, scope)
+            .install(scope)
     }
 
     protected fun createScope(context: Context): TopLevelScope {
@@ -164,8 +168,11 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
 
         const val SOURCE_FILE_INIT = "init.js"
         const val SOURCE_NAME_INIT = "<init>"
+        const val MODULES_ROOT_PATH = "modules"
+        const val JS_BEAUTIFY_PATH = "js-beautify"
 
-        private const val MODULES_PATH = "modules"
+        @JvmField
+        val JS_BEAUTIFY_FILE = PFiles.join(JS_BEAUTIFY_PATH, "beautify.js")
 
         private var sInitScript: Script? = null
         private val sContextEngineMap = ConcurrentHashMap<Context, RhinoJavaScriptEngine>()

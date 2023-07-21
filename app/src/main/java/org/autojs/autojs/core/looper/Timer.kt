@@ -3,134 +3,119 @@ package org.autojs.autojs.core.looper
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.util.SparseArray
+import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.mozilla.javascript.BaseFunction
-import org.mozilla.javascript.Context
-import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.Undefined
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.random.Random
+import kotlin.math.max
 
 /**
  * Created by Stardust on 2017/12/27.
- * Transformed by aiselp on Jun 4, 2023.
+ * Modified by SuperMonster003 as of Jul 12, 2023.
+ * Transformed by SuperMonster003 on Jul 12, 2023.
  */
-class Timer(
-    runtime: ScriptRuntime,
-    looper: Looper
-) {
-    private val myLooper: Looper = looper
-    private val mHandlerCallbacks = ConcurrentHashMap<Int, Runnable?>()
+// @Overruled by SuperMonster003 on Jul 12, 2023.
+//  ! Author: aiselp
+//  ! Related PR:
+//  ! http://pr.autojs6.com/75
+//  ! http://pr.autojs6.com/78
+//  ! Reason:
+//  ! Sorry but my current capabilities are not sufficient
+//  ! to fully understand everything from above pull request(s),
+//  ! so most of the code will remain as is. :)
+class Timer @JvmOverloads constructor(runtime: ScriptRuntime, maxCallbackMillisForAllThread: VolatileBox<Long>, private val looper: Looper? = Looper.myLooper()) {
+
+    private val mHandlerCallbacks = SparseArray<Runnable?>()
+    private var mCallbackMaxId = 0
     private val mRuntime: ScriptRuntime = runtime
-    private val mHandler: Handler = Handler(looper)
-    private val isUiLoop: Boolean = looper == Looper.getMainLooper()
-    private val context: Context? by lazy { Context.getCurrentContext() }
+    private val mHandler = looper?.let { Handler(it) } ?: Handler()
+    private var mMaxCallbackUptimeMillis: Long = 0
+    private val mMaxCallbackMillisForAllThread: VolatileBox<Long> = maxCallbackMillisForAllThread
 
-    constructor(runtime: ScriptRuntime) : this(runtime, Looper.myLooper()!!)
-
-    fun setTimeout(callback: Any, delay: Long, vararg args: Any?): Int {
-        val id = createTimerId()
+    fun setTimeout(callback: Any, delay: Long, vararg args: Array<out Any?>): Int {
+        mCallbackMaxId++
+        val id = mCallbackMaxId
         val r = Runnable {
-            callFunction(callback, null, args)
+            callFunction(callback, args)
             mHandlerCallbacks.remove(id)
         }
-        mHandlerCallbacks[id] = r
+        mHandlerCallbacks.put(id, r)
         postDelayed(r, delay)
         return id
     }
 
-    private fun callFunction(callback: Any, thisArg: Any?, args: Any?) {
-        val func = callback as BaseFunction
-        val map: Array<Any> =
-            (args as? Array<*>)?.map { Context.javaToJS(it, callback.parentScope) }
-                ?.toTypedArray() ?: emptyArray()
+    private fun callFunction(callback: Any, args: Array<out Any>) {
         try {
-            func.call(
-                context ?: Context.enter(), func.parentScope,
-                thisArg as? Scriptable ?: Undefined.SCRIPTABLE_UNDEFINED, map
-            )
+            mRuntime.bridges.callFunction(callback, null, args)
         } catch (e: Exception) {
-            if (isUiLoop) {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
                 mRuntime.exit(e)
-            } else throw e
-        } finally {
-            context ?: Context.exit()
+            } else {
+                throw e
+            }
         }
     }
 
-    @Synchronized
-    private fun createTimerId(): Int {
-        var id: Int
-        do {
-            id = Random.nextInt()
-        } while (mHandlerCallbacks.containsKey(id))
-        mHandlerCallbacks[id] = EMPTY_RUNNABLE
-        return id
-    }
+    fun clearTimeout(id: Int) = clearCallback(id)
 
-    fun setInterval(listener: Any, interval: Long, vararg args: Any?): Int {
-        val id = createTimerId()
-        val r: Runnable = object : Runnable {
+    fun setInterval(listener: Any, interval: Long, vararg args: Any): Int {
+        mCallbackMaxId++
+        val id = mCallbackMaxId
+        val r = object : Runnable {
             override fun run() {
-                if (mHandlerCallbacks[id] == null) return
-                callFunction(listener, null, args)
+                mHandlerCallbacks[id] ?: return
+                callFunction(listener, args)
                 postDelayed(this, interval)
             }
         }
-        mHandlerCallbacks[id] = r
+        mHandlerCallbacks.put(id, r)
         postDelayed(r, interval)
         return id
     }
 
     fun postDelayed(r: Runnable, interval: Long) {
-        synchronized(myLooper) {
-            val uptime = SystemClock.uptimeMillis() + interval
-            mHandler.postAtTime(r, uptime)
-        }
+        val uptime = SystemClock.uptimeMillis() + interval
+        mHandler.postAtTime(r, uptime)
+        mMaxCallbackUptimeMillis = mMaxCallbackUptimeMillis.coerceAtLeast(uptime)
+        synchronized(mMaxCallbackMillisForAllThread) { mMaxCallbackMillisForAllThread.set(max(mMaxCallbackMillisForAllThread.get(), uptime)) }
     }
 
+    // @Reference to aiselp (https://github.com/aiselp) on Jul 18, 2023.
     fun post(r: Runnable) {
-        synchronized(myLooper) {
-            mHandler.post(r)
+        looper?.let {
+            synchronized(it) {
+                mHandler.post(r)
+            }
         }
     }
 
-    fun clearInterval(id: Int): Boolean = clearCallback(id)
-    fun clearImmediate(id: Int): Boolean = clearCallback(id)
-    fun clearTimeout(id: Int): Boolean = clearCallback(id)
+    fun clearInterval(id: Int) = clearCallback(id)
 
-    fun setImmediate(listener: Any, vararg args: Any?): Int {
-        val id = createTimerId()
+    fun setImmediate(listener: Any, vararg args: Any): Int {
+        mCallbackMaxId++
+        val id = mCallbackMaxId
         val r = Runnable {
-            callFunction(listener, null, args)
+            callFunction(listener, args)
             mHandlerCallbacks.remove(id)
         }
-        mHandlerCallbacks[id] = r
-        post(r)
+        mHandlerCallbacks.put(id, r)
+        postDelayed(r, 0)
         return id
     }
 
+    fun clearImmediate(id: Int) = clearCallback(id)
 
     private fun clearCallback(id: Int): Boolean {
         val callback = mHandlerCallbacks[id]
         if (callback != null) {
             mHandler.removeCallbacks(callback)
             mHandlerCallbacks.remove(id)
-            if (mHandlerCallbacks.isEmpty()) mHandler.post(EMPTY_RUNNABLE)
             return true
         }
         return false
     }
 
-    fun hasPendingCallbacks(): Boolean {
-        return mHandlerCallbacks.size > 0
-    }
+    fun hasPendingCallbacks() = mMaxCallbackUptimeMillis > SystemClock.uptimeMillis()
 
-    fun removeAllCallbacks() {
-        mHandler.removeCallbacksAndMessages(null)
-    }
+    fun removeAllCallbacks() = mHandler.removeCallbacksAndMessages(null)
 
-    companion object {
-        private val EMPTY_RUNNABLE = Runnable {}
-    }
 }

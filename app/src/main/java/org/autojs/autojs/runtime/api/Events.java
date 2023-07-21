@@ -10,6 +10,7 @@ import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 
+import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.core.accessibility.AccessibilityBridge;
 import org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver;
 import org.autojs.autojs.core.accessibility.AccessibilityService;
@@ -21,6 +22,7 @@ import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.inputevent.InputEventObserver;
 import org.autojs.autojs.core.inputevent.TouchObserver;
 import org.autojs.autojs.core.looper.Loopers;
+import org.autojs.autojs.core.looper.MainThreadProxy;
 import org.autojs.autojs.core.looper.Timer;
 import org.autojs.autojs.core.notification.Notification;
 import org.autojs.autojs.core.notification.NotificationListenerService;
@@ -95,6 +97,11 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         return new EventEmitter(mBridges, timer);
     }
 
+    @SuppressWarnings("unused")
+    @ScriptInterface
+    public EventEmitter emitter(MainThreadProxy mainThreadProxy) {
+        return new EventEmitter(mBridges, mScriptRuntime.timers.getMainTimer());
+    }
 
     public void observeKey() {
         if (mListeningKey)

@@ -158,7 +158,7 @@
     <string name="foreground_notification_channel_name">Servicio de primer plano de AutoJs6</string>
     <string name="foreground_notification_text">Haga clic para iniciar AutoJs6</string>
     <string name="foreground_notification_title">Servicio de primer plano de AutoJs6</string>
-    <string name="format_build_successfully" formatted="true">La construcción se ha realizado con éxito.\nRuta del archivo: %s</string>
+    <string name="format_build_succeeded" formatted="true">La construcción se ha realizado con éxito.\nRuta del archivo: %s</string>
     <string name="format_debug_bar_title">Depuración [ %s ]</string>
     <string name="format_editor_info" formatted="false">Caracteres: %d\nLíneas: %d\nTamaño: %s</string>
     <string name="format_file_downloaded" formatted="true">Archivo descargado en %s</string>
@@ -260,7 +260,7 @@
     <string name="text_broadcast_action">Acción</string>
     <string name="text_broadcast_task">Tarea de difusión</string>
     <string name="text_build_apk">Construir APK</string>
-    <string name="text_build_successfully">Construir con éxito</string>
+    <string name="text_build_succeeded">Construir con éxito</string>
     <string name="text_cancel">Cancelar</string>
     <string name="text_cancel_simplified">Cancel</string>
     <string name="text_cannot_read_file">No se puede leer el archivo</string>
@@ -525,7 +525,7 @@
     <string name="text_project_media_access">Acceso a los medios del proyecto</string>
     <string name="text_project_media_access_description">Con el acceso a los medios del proyecto, la advertencia de seguridad para la grabación de la pantalla no aparecerá.</string>
     <string name="text_project_save_error">No se ha podido guardar el proyecto</string>
-    <string name="text_project_save_success">Proyecto guardado</string>
+    <string name="text_project_save_succeeded">Proyecto guardado</string>
     <string name="text_prompt">Indicación</string>
     <string name="text_quit">Salga de</string>
     <string name="text_record_finished">Grabación terminada</string>
@@ -585,7 +585,7 @@
     <string name="text_save_to">Guardar en</string>
     <string name="text_script_record">Grabación del script</string>
     <string name="text_script_running">Script en ejecución</string>
-    <string name="text_script_save_successfully">Guión guardado con éxito (es necesario refrescar)</string>
+    <string name="text_script_save_succeeded">Guión guardado con éxito (es necesario refrescar)</string>
     <string name="text_search">Buscar en</string>
     <string name="text_select">Seleccione</string>
     <string name="text_select_by_exists">Si el clip existe (exists)</string>
@@ -674,6 +674,10 @@
     <string name="text_repo_url_of_vscode_vsc_ext">URL del repositorio de la extensión VSCode</string>
     <string name="text_connection_cannot_be_established">No se puede establecer la conexión</string>
     <string name="text_min_version_of_vscode_vsc_ext">Versión mínima de la extensión VSCode</string>
+    <string name="text_function">Función</string>
+    <string name="text_formatting_completed">Formateo completado</string>
+    <string name="text_failed_to_format">Error de formato</string>
+    <string name="text_comment">Comente</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d artículo</item>

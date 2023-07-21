@@ -158,7 +158,7 @@
     <string name="foreground_notification_channel_name">AutoJs6 のフォアグラウンド サービス</string>
     <string name="foreground_notification_text">クリックすると、AutoJs6 が起動します</string>
     <string name="foreground_notification_title">AutoJs6 のフォアグラウンド・サービス</string>
-    <string name="format_build_successfully" formatted="true">ビルドに成功しました.\nファイル パス: %s</string>
+    <string name="format_build_succeeded" formatted="true">ビルドに成功しました.\nファイル パス: %s</string>
     <string name="format_debug_bar_title">デバッグ [ %s ]</string>
     <string name="format_editor_info" formatted="false">文字数: %d\n行数 %d\nサイズ: %s</string>
     <string name="format_file_downloaded" formatted="true">ファイルは %s にダウンロードされました</string>
@@ -260,7 +260,7 @@
     <string name="text_broadcast_action">動作</string>
     <string name="text_broadcast_task">タスクの実行</string>
     <string name="text_build_apk">APKのビルド</string>
-    <string name="text_build_successfully">ビルドに成功しました</string>
+    <string name="text_build_succeeded">ビルドに成功しました</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
     <string name="text_cannot_read_file">ファイルを読めません</string>
@@ -525,7 +525,7 @@
     <string name="text_project_media_access">プロジェクト・メディア・アクセス</string>
     <string name="text_project_media_access_description">プロジェクトのメディアアクセス権を使用すると、画面録画のセキュリティ警告が表示されなくなります</string>
     <string name="text_project_save_error">プロジェクトの保存に失敗しました</string>
-    <string name="text_project_save_success">プロジェクトの保存</string>
+    <string name="text_project_save_succeeded">プロジェクトの保存</string>
     <string name="text_prompt">プロンプト</string>
     <string name="text_quit">終了</string>
     <string name="text_record_finished">記録終了</string>
@@ -585,7 +585,7 @@
     <string name="text_save_to">保存先</string>
     <string name="text_script_record">スクリプトの記録</string>
     <string name="text_script_running">スクリプトの実行</string>
-    <string name="text_script_save_successfully">スクリプトの保存に成功 (リフレッシュが必要です)</string>
+    <string name="text_script_save_succeeded">スクリプトの保存に成功 (リフレッシュが必要です)</string>
     <string name="text_search">検索</string>
     <string name="text_select">選択</string>
     <string name="text_select_by_exists">クリップが存在する場合 (exists)</string>
@@ -674,6 +674,10 @@
     <string name="text_repo_url_of_vscode_vsc_ext">VSCode 拡張機能のリポジトリURL</string>
     <string name="text_connection_cannot_be_established">接続が確立できない</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 拡張機能の最小バージョン</string>
+    <string name="text_function">関数</string>
+    <string name="text_formatting_completed">フォーマット完了</string>
+    <string name="text_failed_to_format">フォーマット失敗</string>
+    <string name="text_comment">コメント</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">合計: %d 件</item>

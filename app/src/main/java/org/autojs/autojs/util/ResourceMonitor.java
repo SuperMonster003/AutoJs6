@@ -14,7 +14,7 @@ public final class ResourceMonitor {
 
     private static final String LOG_TAG = "ResourceMonitor";
 
-    // @Reference to TonyJiangWJ/Auto.js on Nov 22, 2021
+    // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on Nov 22, 2021
     private static class LockedResource {
         private ReentrantLock lock;
         private SparseArray<Exception> resource;

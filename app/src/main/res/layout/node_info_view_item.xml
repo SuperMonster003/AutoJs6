@@ -10,11 +10,20 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
-    <CheckBox
-        android:id="@+id/generate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:ignore="TouchTargetSizeCheck" />
+    <!-- @Overruled by SuperMonster003 on Jul 21, 2023.-->
+    <!-- ! Author: 抠脚本人-->
+    <!-- ! Related PR:-->
+    <!-- ! http://pr.autojs6.com/98-->
+    <!-- ! Reason:-->
+    <!-- ! Pending processing.-->
+    <!-- ! zh-CN: 将于后续版本继续处理.-->
+    <!-- ! -->
+    <!-- <CheckBox-->
+    <!--     android:id="@+id/generate"-->
+    <!--     android:layout_width="wrap_content"-->
+    <!--     android:layout_height="wrap_content"-->
+    <!--     tools:ignore="TouchTargetSizeCheck" />-->
+
     <TextView
             android:id="@+id/name"
             android:layout_width="0dp"
