@@ -198,7 +198,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             }
     }
 
-    fun setRestoredText(text: String?) {
+    fun setRestoredText(text: String) {
         mRestoredText = text
         editor!!.text = text
     }
@@ -231,7 +231,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     private fun setInitialText(text: String) {
         if (mRestoredText != null) {
-            editor!!.text = mRestoredText
+            editor!!.text = mRestoredText!!
             mRestoredText = null
             return
         }
@@ -281,19 +281,32 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     private fun setUpFunctionsKeyboard() {
         mFunctionsKeyboardHelper = FunctionsKeyboardHelper.with(context as Activity)
             .setContent(editor)
-            .setFunctionsTrigger(mShowFunctionsButton)
+
+            // @Hint by SuperMonster003 on Jul 20, 2023.
+            //  ! Note the order in which setFunctionsView and setFunctionsTrigger are called.
+            //  ! zh-CN: 需留意 setFunctionsView 与 setFunctionsTrigger 的先后顺序.
             .setFunctionsView(mFunctionsKeyboard)
+            .setFunctionsTrigger(mShowFunctionsButton)
+
             .setEditView(editor!!.codeEditText)
             .build()
-        //todo：不清楚作用，暂时注释掉
+
+        // @ArchivedTodo by 抠脚本人 on Jul 10, 2023.
+        //  ! 不清楚作用, 暂时注释掉.
         // @Hint by SuperMonster003 on Jul 12, 2023.
+        //  ! The click event callback is registered here
+        //  ! so that the properties name of the functional keyboard
+        //  ! can implement the functionality of the interface:
+        //  ! Click: auto-completion, with parentheses, periods, etc. as appropriate.
+        //  ! Long-press: display the method, property or module equivalent in a floating window (if exists).
+        //  ! zh-CN:
         //  ! 此处的点击事件回调注册是为了使功能键盘智能提示的属性可以实现其接口对应的功能:
         //  ! 点击: 自动补全, 并根据情况添加括号或句点符号等.
         //  ! 长按: 以浮动窗口形式展示 [方法/属性/模块] 对应的文档内容 (如果存在的话).
         mFunctionsKeyboard!!.setClickCallback(this)
+
         mShowFunctionsButton!!.setOnLongClickListener {
-            editor!!.beautifyCode()
-            true
+            true.also { editor!!.beautifyCode() }
         }
     }
 
@@ -321,7 +334,11 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
                 })
                 editText.textSize = getEditorTextSize(pxToSp(context, editText.textSize).toInt()).toFloat()
             }
-            editor.addCursorChangeCallback { line: String, cursor: Int -> autoComplete(line, cursor) }
+            editor.addCursorChangeCallback(object : CodeEditor.CursorChangeCallback {
+                override fun onCursorChange(line: String, cursor: Int) {
+                    autoComplete(line, cursor)
+                }
+            })
             editor.layoutDirection = LAYOUT_DIRECTION_LTR
         }
     }
@@ -507,7 +524,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     fun setTextSize(value: Int) {
         setEditorTextSize(value)
         editor!!.codeEditText.textSize = value.toFloat()
-        editor!!.setLastTextSize(value)
+        editor!!.lastTextSize = value
     }
 
     private fun selectEditorTheme(themes: List<Theme?>) {
@@ -529,7 +546,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     }
 
     @Throws(CheckedPatternSyntaxException::class)
-    fun find(keywords: String?, usingRegex: Boolean) {
+    fun find(keywords: String, usingRegex: Boolean) {
         editor!!.find(keywords, usingRegex)
         showSearchToolbar(false)
     }
@@ -544,13 +561,13 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     }
 
     @Throws(CheckedPatternSyntaxException::class)
-    fun replace(keywords: String?, replacement: String?, usingRegex: Boolean) {
+    fun replace(keywords: String, replacement: String, usingRegex: Boolean) {
         editor!!.replace(keywords, replacement, usingRegex)
         showSearchToolbar(true)
     }
 
     @Throws(CheckedPatternSyntaxException::class)
-    fun replaceAll(keywords: String?, replacement: String?, usingRegex: Boolean) {
+    fun replaceAll(keywords: String, replacement: String, usingRegex: Boolean) {
         editor!!.replaceAll(keywords, replacement, usingRegex)
     }
 
@@ -584,21 +601,52 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     override fun onHintClick(completions: CodeCompletions, pos: Int) {
         val completion = completions[pos]
-        //todo:增加行注释
-        if (completion.insertText=="/") {
-            editor!!.commentLine()
-        } else editor!!.insert(completion.insertText)
+
+        // @Overruled by SuperMonster003 on Jul 12, 2023.
+        //  ! Author: 抠脚本人
+        //  ! Related PR:
+        //  ! http://pr.autojs6.com/98
+        //  ! Reason:
+        //  ! In any case, only the simplest input functions should be realized
+        //  ! when clicking on the keys of the function keyboard.
+        //  ! zh-CN: 在任何情况下, 单击功能键盘的按键时, 均应实现且仅实现最简单的输入功能.
+        //  !
+        // @ArchivedTodo by 抠脚本人 on Jul 11, 2023.
+        //  ! 增加行注释
+        // if (completion.insertText == "/") {
+        //     editor!!.commentLine()
+        // } else editor!!.insert(completion.insertText)
+
+        editor!!.insert(completion.insertText)
     }
 
     override fun onHintLongClick(completions: CodeCompletions, pos: Int) {
-        val completion = completions[pos]
-        //todo:增加块注释
-        if (completion.insertText=="/") {
-            editor!!.commentBlock()
-            return
+
+        // @Overruled by SuperMonster003 on Jul 12, 2023.
+        //  ! Author: 抠脚本人
+        //  ! Related PR:
+        //  ! http://pr.autojs6.com/98
+        //  ! Reason:
+        //  ! Given the confusion caused by combinations of
+        //  ! block comments and certain syntactic of RegEx,
+        //  ! multi-line comments are also commented with double slashes.
+        //  ! zh-CN: 鉴于块注释与正则表达式的某些句法组合造成混淆, 多行注释也采用双斜杠注释方式.
+        //  !
+        // val completion = completions[pos]
+        // @ArchivedTodo by 抠脚本人 on Jul 10, 2023.
+        //  ! 增加块注释
+        // if (completion.insertText == "/") {
+        //     editor!!.commentBlock()
+        //     return
+        // }
+
+        completions[pos].let {
+            when {
+                // @Inspired by 抠脚本人 (https://github.com/little-alei) on Jul 13, 2023.
+                it.insertText == "/" -> editor!!.commentHelper.handle()
+                it.url != null -> showManual(it.url, it.hint)
+            }
         }
-        if (completion.url == null) return
-        showManual(completion.url, completion.hint)
     }
 
     private fun showManual(urlSuffix: String, title: String) {
@@ -654,6 +702,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     override fun onRestoreInstanceState(state: Parcelable) {
         val bundle = state as Bundle
+
         @Suppress("DEPRECATION")
         val superData = bundle.getParcelable<Parcelable>("super_data")
         scriptExecutionId = bundle.getInt("script_execution_id", ScriptExecution.NO_ID)
@@ -662,7 +711,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     }
 
     fun destroy() {
-        editor?.destroy()
+        editor!!.destroy()
         mAutoCompletion?.shutdown()
     }
 

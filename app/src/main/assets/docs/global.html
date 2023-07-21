@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>全局对象 (Global) | AutoJs6 文档 - 6.3.2</title>
+    <title>全局对象 (Global) | AutoJs6 文档 - 6.3.3</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -155,7 +155,7 @@
 
     <div id="column1" data-id="global" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.2</h1>
+            <h1>AutoJs6 文档 - 6.3.3</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -1976,7 +1976,7 @@ species.isRegExp(/test$/); // true
 <h3>[p+] anim<span><a class="mark" href="#global_p_anim" id="global_p_anim">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
 <p>动画资源.</p>
-<p>定义预先了确定的动画.<br>补间动画保存在 <code>res/anim/</code> 中, 可通过 <code>R.anim</code> 属性访问.<br>帧动画保存在 <code>res/drawable/</code> 中, 可通过 <code>R.drawable</code> 属性访问.</p>
+<p>定义了预先确定的动画.<br>补间动画保存在 <code>res/anim/</code> 中, 可通过 <code>R.anim</code> 属性访问.<br>帧动画保存在 <code>res/drawable/</code> 中, 可通过 <code>R.drawable</code> 属性访问.</p>
 <pre><code class="lang-js">&#39;ui&#39;;
 
 ui.layout(&lt;vertical id=&quot;main&quot;&gt;
@@ -2119,6 +2119,7 @@ const ContextThemeWrapper = android.view.ContextThemeWrapper;
 
 new MaterialDialog.Builder(new ContextThemeWrapper(activity, R.style.Material3DarkTheme))
     .title(&#39;Hello&#39;)
+    .content(&#39;This is a test for showing a dialog with material 3 dark theme.&#39;)
     .positiveText(&#39;OK&#39;)
     .onPositive(() =&gt; ui.finish())
     .cancelable(false)

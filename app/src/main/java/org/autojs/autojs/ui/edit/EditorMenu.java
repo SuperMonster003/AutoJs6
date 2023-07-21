@@ -153,13 +153,11 @@ public class EditorMenu {
     private void importJavaPackageOrClass() {
         mEditor.getSelection()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s ->
-                        new ClassSearchDialogBuilder(mContext)
-                                .setQuery(s)
-                                .itemClick((dialog, item, pos) -> showClassSearchingItem(dialog, item))
-                                .title(R.string.text_find_java_classes)
-                                .show()
-                );
+                .subscribe(s -> new ClassSearchDialogBuilder(mContext)
+                        .setQuery(s)
+                        .itemClick((dialog, item, pos) -> showClassSearchingItem(dialog, item))
+                        .title(R.string.text_find_java_classes)
+                        .show());
     }
 
     private void showClassSearchingItem(MaterialDialog dialog, ClassSearchingItem item) {
@@ -217,10 +215,12 @@ public class EditorMenu {
                 .title(R.string.text_pinch_to_zoom)
                 .items(R.array.values_editor_pinch_to_zoom_strategy)
                 .itemsCallbackSingleChoice(defSelectedIndex, (dialog, itemView, which, text) -> {
-                    String newKey = itemKeys.get(which);
-                    if (!Objects.equals(newKey, itemKey)) {
-                        Pref.putString(key, newKey);
-                        mEditorView.editor.notifyPinchToZoomStrategyChanged(newKey);
+                    if (mEditorView.editor != null) {
+                        String newKey = itemKeys.get(which);
+                        if (!Objects.equals(newKey, itemKey)) {
+                            Pref.putString(key, newKey);
+                            mEditorView.editor.notifyPinchToZoomStrategyChanged(newKey);
+                        }
                     }
                     return true;
                 })
@@ -282,6 +282,9 @@ public class EditorMenu {
         }
         if (itemId == R.id.action_clear) {
             return tryDoing(() -> mEditor.setText(""));
+        }
+        if (itemId == R.id.action_comment) {
+            return tryDoing(mEditor.commentHelper::handle);
         }
         if (itemId == R.id.action_beautify) {
             return tryDoing(mEditorView::beautifyCode);
@@ -359,12 +362,9 @@ public class EditorMenu {
     private void findOrReplace() {
         mEditor.getSelection()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s ->
-                        new FindOrReplaceDialogBuilder(mContext, mEditorView)
-                                .setQueryIfNotEmpty(s)
-                                .show()
-                );
-
+                .subscribe(s -> new FindOrReplaceDialogBuilder(mContext, mEditorView)
+                        .setQueryIfNotEmpty(s)
+                        .show());
     }
 
     private void copyAll() {

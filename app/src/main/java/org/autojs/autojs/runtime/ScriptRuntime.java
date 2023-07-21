@@ -7,7 +7,9 @@ import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
 
+import org.autojs.autojs.core.permission.Permissions;
 import org.autojs.autojs.AutoJs;
+import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.annotation.ScriptVariable;
 import org.autojs.autojs.concurrent.VolatileDispose;
 import org.autojs.autojs.core.accessibility.AccessibilityBridge;
@@ -449,7 +451,7 @@ public class ScriptRuntime {
         }
     }
 
-    public void load(String ...path) {
+    public void load(String... path) {
         load(f -> isJarFile(f) || isDexFile(f), path);
     }
 
@@ -529,17 +531,18 @@ public class ScriptRuntime {
             }
         });
 
-        // 清空无障碍事件
+        // @Hint by 抠脚本人 on Jul 10, 2023.
+        //  ! 清空无障碍事件.
         ignoresException(AccessibilityService::clearAccessibilityEventCallback);
 
         ignoresException(RootUtils::resetRuntimeOverriddenRootModeState);
         ignoresException(ImageWrapper::recycleAll);
 
-        // 清除 interrupt 状态
+        /* 清除 interrupt 状态. */
         ignoresException(ThreadCompat::interrupted);
 
-        // 浮动窗口需要第一时间关闭
-        // 以免出现恶意脚本全屏浮动窗口遮蔽屏幕并且在 exit 中写死循环的问题
+        /* 浮动窗口需要第一时间关闭. */
+        /* 以免出现恶意脚本全屏浮动窗口遮蔽屏幕并且在 exit 中写死循环的问题. */
         ignoresException(floaty::closeAll);
 
         ignoresException(() -> events.emit("exit"), "exception on exit: %s");
@@ -637,6 +640,15 @@ public class ScriptRuntime {
             e1.printStackTrace();
             return message;
         }
+    }
+
+    @ScriptInterface
+    public void requestPermissions(String[] permissions) {
+        Context context = uiHandler.getContext();
+        permissions = Permissions.getPermissionsNeedToRequest(context, permissions);
+        if (permissions.length == 0)
+            return;
+        Permissions.requestPermissions(context, permissions);
     }
 
 }

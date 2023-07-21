@@ -136,7 +136,6 @@ class CodeEditText : AppCompatEditText {
     }
 
     private fun drawLineHighlights(canvas: Canvas) {
-        val currentLine = currentLine
         val debugHighlightLine = mDebuggingLine
         if (debugHighlightLine != currentLine) {
             // 绘制当前行高亮
@@ -165,6 +164,7 @@ class CodeEditText : AppCompatEditText {
             setPadding(gutterWidth.toInt(), 0, 0, 0)
         }
     }
+
     // 该方法中内联了很多函数来提高效率 但是 这是必要的吗？？？
     // 绘制文本着色
     private fun drawText(canvas: Canvas) {
@@ -352,7 +352,7 @@ class CodeEditText : AppCompatEditText {
     }
 
     override fun setSelection(index: Int) {
-        super.setSelection(index.coerceAtMost(text!!.length).coerceAtLeast(0))
+        super.setSelection(index.coerceIn(0, text?.length ?: 0))
     }
 
     override fun onSaveInstanceState(): Parcelable {
@@ -402,7 +402,7 @@ class CodeEditText : AppCompatEditText {
                 mTouchValid = false
             }
             if (event.action == MotionEvent.ACTION_UP) {
-                //当触摸有效时, 对那一行设置断点或取消断点
+                // 当触摸有效时, 对那一行设置断点或取消断点
                 if (mTouchValid) {
                     if (!removeBreakpoint(mTouchedLine)) {
                         addBreakpoint(mTouchedLine)

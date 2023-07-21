@@ -1,160 +1,131 @@
 package org.autojs.autojs.engine.module
 
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.autojs.autojs.engine.encryption.ScriptEncryption.decrypt
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.EncryptedScriptFileHeader.isValidFile
 import org.mozilla.javascript.commonjs.module.provider.ModuleSource
-import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProviderBase
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.File.separator
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.io.Reader
 import java.net.URI
+import java.net.URISyntaxException
+import java.net.URLConnection
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
+/**
+ * Created by Stardust on 2017/5/9.
+ * Transformed by SuperMonster003 on Jul 14, 2023.
+ */
+// @Inspired by aiselp (https://github.com/aiselp) on Jul 14, 2023.
+//  ! Related PR:
+//  ! http://pr.autojs6.com/75
+//  ! http://pr.autojs6.com/78
+// @Hint by SuperMonster003 on Jul 17, 2023.
+//  ! Project-structured directories with package.json
+//  ! was not yet adapted,
+//  ! as it doesn't seem to matter as much. :)
 class AssetAndUrlModuleSourceProvider(
-    context: Context,
-    assetDirPath: String,
-    list: List<URI>? = null
-) : ModuleSourceProviderBase() {
-    val mContext = context
-    private val okHttpClient = OkHttpClient.Builder().followRedirects(true).build()
-    private val contentResolver: ContentResolver = context.contentResolver
-    private val moduleSources: ArrayList<URI> = arrayListOf(mBaseURI, npmModuleSource)
+    private val context: Context,
+    private val assetDirPath: String,
+    list: List<URI>
+) : UrlModuleSourceProvider(list, null) {
 
-    companion object {
-        val mBaseURI: URI = URI.create("file:/android_asset/modules")
-        val npmModuleSource: URI = URI.create("file:/android_asset/modules/npm")
-    }
+    private val mOkHttpClient by lazy { OkHttpClient.Builder().followRedirects(true).build() }
+    private val mAssetBaseURI = URI.create("file:///android_asset$separator$assetDirPath")
+    private val mAssetManager = context.assets
+    private val mJavaScriptExtensionName = ".js"
+    private val mRegexUrl = "^(https?|ftp|file)://[-a-zA-Z\\d+&@#/%?=~_|!:,.;]*[-a-zA-Z\\d+&@#/%=~_|]".toRegex()
 
-    // 初始化脚本以及启动文件只会从此方法加载模块，子模块加载没有以"./"或"../"开头的模块也会从此方法加载
+    @Throws(IOException::class, URISyntaxException::class)
     override fun loadFromPrivilegedLocations(moduleId: String, validator: Any?): ModuleSource? {
-        // println("加载私有模块：$moduleId")
-        val uri = if (moduleId.startsWith("/")) {
-            File(moduleId).toURI()
-        } else if (moduleId.startsWith("http://") || moduleId.startsWith("https://")) {
-            URI.create(moduleId)
-        } else null
-        if (uri != null) {
-            return loadFromUri(uri, File(uri.path).parentFile?.toURI(), validator)
-        }
-        for (baseUri in moduleSources) {
-            val sourceUri = URI.create("$baseUri/$moduleId")
-            val moduleSource = loadFromUri(sourceUri, baseUri, validator)
-            if (moduleSource != null) {
-                return moduleSource
+        return when (moduleId.matches(mRegexUrl)) {
+            true -> loadFromURL(moduleId, validator)
+            else -> try {
+                loadFromAsset(moduleId, validator)
+            } catch (e: Exception) {
+                return when (moduleId.startsWith(separator)) {
+                    true -> loadFromFile(File(moduleId), validator = validator)
+                    else -> null
+                }
             }
         }
-        return null
     }
 
-    // 这里处理node_module目录的模块
-    override fun loadFromFallbackLocations(moduleId: String, validator: Any?): ModuleSource? {
-        return super.loadFromFallbackLocations(moduleId, validator)
-    }
-
-    // 子模块以相对路径加载时调用此方法
-    override fun loadFromUri(uri: URI, base: URI?, validator: Any?): ModuleSource? {
-        var uri = uri
-        if (uri.scheme == null) uri = File(uri.path).toURI()
-        // println("加载模块：$uri")
-        if (uri.scheme == "http" || uri.scheme == "https") {
-            return loadFromHttp(uri, base, validator)
+    private fun loadFromAsset(moduleId: String, validator: Any?): ModuleSource? {
+        val moduleIdWithExtension = when (moduleId.endsWith(mJavaScriptExtensionName, true)) {
+            true -> moduleId
+            else -> moduleId + mJavaScriptExtensionName
         }
-        val moduleSource = loadAt(uri, base, validator) ?: loadAt(
-            File(uri.path + ".js").toURI(), base, validator
-        )
-        if (moduleSource != null) {
-            return moduleSource
-        }
-        // 尝试从目录加载
-        // 尝试读取package.json指定的文件
-        val mainFile: URI? = try {
-            val packageFile = File(uri.path, "package.json")
-            val json = Gson().fromJson<Map<String, Any>>(
-                InputStreamReader(packageFile.inputStream()),
-                Map::class.java
+        return try {
+            createModuleSource(
+                mAssetManager.open("$assetDirPath$separator$moduleIdWithExtension"),
+                URI("$mAssetBaseURI$separator$moduleIdWithExtension"),
+                mAssetBaseURI,
+                validator,
             )
-            val main = json["main"] as String
-            packageFile.toURI().resolve(main)
-        } catch (e: Exception) {
-            null
+        } catch (_: FileNotFoundException) {
+            super.loadFromPrivilegedLocations(moduleId, validator)
         }
-        val main: URI = mainFile ?: File(uri.path, "index.js").toURI()
-        return loadAt(main, uri, validator)
     }
 
-    private fun loadAt(uri: URI, base: URI?, validator: Any?): ModuleSource? {
-        if (uri.scheme == "http" || uri.scheme == "https") {
-            return loadFromHttp(uri, base, validator)
-        }
+    private fun loadFromURL(url: String, validator: Any?): ModuleSource? {
         return try {
-            val inputStream = if (uri.path.startsWith("/android_asset/")) {
-                mContext.assets.open(uri.path.replace("/android_asset/", ""))
-            } else contentResolver.openInputStream(Uri.parse(uri.toString()))
-            if (inputStream != null) {
-                createModuleEncryptionSource(inputStream, uri, base, validator)
-            } else null
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    private fun createModuleEncryptionSource(
-        inputStream: InputStream,
-        uri: URI,
-        base: URI?,
-        validator: Any?,
-    ): ModuleSource {
-        val bytes = ByteArray(inputStream.available())
-        inputStream.read(bytes)
-        inputStream.close()
-        val i = if (isValidFile(bytes)) {
-            val clearText = decrypt(bytes, EncryptedScriptFileHeader.BLOCK_SIZE, bytes.size)
-            ByteArrayInputStream(clearText)
-        } else ByteArrayInputStream(bytes)
-        return createModuleSource(i, uri, base, validator)
-    }
-
-    private fun loadFromHttp(uri: URI, base: URI?, validator: Any?): ModuleSource? {
-        return try {
-            Request.Builder().url(uri.toString()).build().let { request ->
-                val response = okHttpClient.newCall(request).execute()
+            Request.Builder().url(url).build().let { request ->
+                val response = mOkHttpClient.newCall(request).execute()
                 if (!response.isSuccessful) {
-                    response.close()
-                    return null
+                    return null.also { response.close() }
                 }
-                response.body?.let {
-                    val charset = it.contentType()?.charset()?.toString() ?: "utf-8"
-                    return createModuleSource(it.byteStream(), uri, base, validator, charset)
+                response.body.let {
+                    return createModuleSource(it.byteStream(), URI.create(url), null, validator, it.contentType()?.charset())
                 }
             }
         } catch (e: Exception) {
-            null
+            null.also { ScriptRuntime.popException(e.message) }
         }
     }
 
-    private fun createModuleSource(
-        inputStream: InputStream,
-        uri: URI,
-        base: URI?,
-        validator: Any?,
-        charset: String? = null
-    ): ModuleSource {
-        val id = if (uri.scheme == "file") {
-            URI.create(uri.path)
-        } else uri
-        return ModuleSource(
-            InputStreamReader(inputStream, charset ?: "utf-8"),
-            null,
-            id,
-            base,
-            validator
-        )
+    private fun loadFromFile(file: File, parentFile: File? = file.parentFile, validator: Any?): ModuleSource? {
+        return loadFromFile(file.toURI(), parentFile?.toURI(), validator)
     }
+
+    private fun loadFromFile(uri: URI, parent: URI?, validator: Any?): ModuleSource? {
+        val inputStream = context.contentResolver.openInputStream(Uri.parse(uri.toString())) ?: return null
+        return try {
+            createModuleSource(inputStream, uri, parent, validator)
+        } catch (e: FileNotFoundException) {
+            null.also { ScriptRuntime.popException(e.message) }
+        }
+    }
+
+    private fun createModuleSource(stream: InputStream, uri: URI, base: URI?, validator: Any?, charset: Charset? = null): ModuleSource {
+        val streamReader = InputStreamReader(stream, charset ?: StandardCharsets.UTF_8)
+        return ModuleSource(streamReader, null, uri, base, validator)
+    }
+
+    @Throws(IOException::class)
+    override fun getReader(urlConnection: URLConnection): Reader {
+        val stream = urlConnection.getInputStream()
+        val bytes = ByteArray(stream.available()).also {
+            stream.read(it)
+            stream.close()
+        }
+        return if (isValidFile(bytes)) {
+            val clearText = decrypt(bytes, EncryptedScriptFileHeader.BLOCK_SIZE, bytes.size)
+            InputStreamReader(ByteArrayInputStream(clearText))
+        } else {
+            InputStreamReader(ByteArrayInputStream(bytes))
+        }
+    }
+
 }

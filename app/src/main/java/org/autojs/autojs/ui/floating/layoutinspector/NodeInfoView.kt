@@ -22,7 +22,9 @@ import java.lang.reflect.Field
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 class NodeInfoView : RecyclerView {
-    //todo:调整数据结构，对话框关闭后根据已勾选的属性，生成选择器
+
+    // TODO by 抠脚本人 on Jul 12, 2023.
+    //  ! 调整数据结构, 对话框关闭后根据已勾选的属性, 生成选择器
     private val data = Array(FIELDS.size + 1) { Array(2) { "" } }
 
     constructor(context: Context) : super(context)
@@ -75,7 +77,8 @@ class NodeInfoView : RecyclerView {
     }
 
     fun getCheckedDate(): Array<String> {
-        //todo:数据增加checked属性，区分已选中项目
+        // TODO by 抠脚本人 on Jul 12, 2023.
+        //  ! 数据增加 checked 属性, 区分已选中项目
         val checkedArr = data.filter { it[0] == "id" || it[0] == "text" }
         return Array(checkedArr.size) {
             dataToFx(checkedArr[it])
@@ -95,7 +98,7 @@ class NodeInfoView : RecyclerView {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.apply {
                 data[position].let {
-                    //attrChecked.isChecked = false
+                    // attrChecked.isChecked = false
                     attrName.text = it[0]
                     attrValue.text = it[1]
                 }
@@ -109,7 +112,7 @@ class NodeInfoView : RecyclerView {
     }
 
     internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        //val attrChecked: CheckBox = itemView.findViewById(R.id.generate)
+        // val attrChecked: CheckBox = itemView.findViewById(R.id.generate)
         val attrName: TextView = itemView.findViewById(R.id.name)
         val attrValue: TextView = itemView.findViewById(R.id.value)
 

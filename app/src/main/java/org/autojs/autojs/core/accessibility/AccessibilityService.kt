@@ -11,16 +11,13 @@ import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
 import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.event.EventDispatcher
+import org.autojs.autojs.pref.Language
 import org.autojs.autojs.pref.Pref
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 
-interface AccessibilityServiceCallback {
-    fun onConnected()
-    fun onDisconnected()
-}
 /**
  * Created by Stardust on 2017/5/2.
  */
@@ -35,15 +32,13 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
     private val eventExecutor by lazy { Executors.newSingleThreadExecutor() }
 
-    private fun eventNameToType(str: String): Int {
+    private fun eventNameToType(event: String): Int {
         return try {
-            val sb = StringBuilder()
-            sb.append("TYPE_")
-            val upperCase = str.uppercase(Locale.getDefault())
-            sb.append(upperCase)
-            AccessibilityEvent::class.java.getField(sb.toString()).get(null) as Int
+            AccessibilityEvent::class.java.getField(
+                "TYPE_${event.uppercase(Language.getPrefLanguage().locale)}"
+            ).get(null) as Int
         } catch (unused: NoSuchFieldException) {
-            throw IllegalArgumentException("unknown event type: $str")
+            throw IllegalArgumentException("Unknown event: $event")
         }
     }
 
@@ -166,7 +161,8 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         fun isNotRunning() = !isRunning()
 
         fun addDelegate(uniquePriority: Int, delegate: AccessibilityDelegate) {
-            // 用于记录eventTypes中的事件id
+            // @Hint by 抠脚本人 on Jul 10, 2023.
+            //  ! 用于记录 eventTypes 中的事件 id.
             delegates[uniquePriority] = delegate
             val set = delegate.eventTypes
             if (set == null) {
@@ -204,10 +200,12 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
                 LOCK.unlock()
             }
         }
+
         @JvmStatic
         fun clearAccessibilityEventCallback() {
             instance?.eventBox?.clear()
         }
+
         fun setCallback(listener: AccessibilityServiceCallback) {
             callback = listener
         }

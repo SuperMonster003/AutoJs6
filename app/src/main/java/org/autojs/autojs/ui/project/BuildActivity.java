@@ -292,8 +292,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mProgressDialog.dismiss();
         mProgressDialog = null;
         new MaterialDialog.Builder(this)
-                .title(R.string.text_build_successfully)
-                .content(getString(R.string.format_build_successfully, outApk.getPath()))
+                .title(R.string.text_build_succeeded)
+                .content(getString(R.string.format_build_succeeded, outApk.getPath()))
                 .positiveText(R.string.text_install)
                 .negativeText(R.string.text_cancel)
                 .onPositive((dialog, which) -> IntentUtils.installApkOrToast(BuildActivity.this, outApk.getPath(), AppFileProvider.AUTHORITY))

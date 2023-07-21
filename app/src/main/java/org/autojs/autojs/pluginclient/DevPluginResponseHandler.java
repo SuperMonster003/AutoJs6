@@ -162,7 +162,7 @@ public class DevPluginResponseHandler implements Handler {
         File file = new File(WorkingDirectoryUtils.getPath(), name);
         PFiles.ensureDir(file.getPath());
         PFiles.write(file, script);
-        ViewUtils.showToast(mContext, R.string.text_script_save_successfully, true);
+        ViewUtils.showToast(mContext, R.string.text_script_save_succeeded, true);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -180,7 +180,7 @@ public class DevPluginResponseHandler implements Handler {
         };
 
         Consumer<String> stringConsumer = dest -> ViewUtils
-                .showToast(mContext, mContext.getString(R.string.text_project_save_success) + "\n" + dest);
+                .showToast(mContext, mContext.getString(R.string.text_project_save_succeeded) + "\n" + dest);
         Consumer<Throwable> throwableConsumer = err -> ViewUtils
                 .showToast(mContext, mContext.getString(R.string.text_project_save_error) + "\n" + err.getMessage());
 

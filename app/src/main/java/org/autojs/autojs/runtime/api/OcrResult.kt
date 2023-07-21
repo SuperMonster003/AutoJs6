@@ -4,6 +4,7 @@ import android.graphics.Rect
 import kotlin.math.abs
 
 // @Reference to com.baidu.paddle.lite.ocr.OcrResult on Mar 18, 2023.
+//  ! https://github.com/PaddlePaddle/PaddleOCR
 class OcrResult(@JvmField val label: String, @JvmField val confidence: Float, @JvmField val bounds: Rect) : Comparable<OcrResult> {
 
     override fun compareTo(other: OcrResult): Int {

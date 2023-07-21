@@ -30,9 +30,9 @@ import javax.crypto.spec.SecretKeySpec
 /**
  * Created by SuperMonster003 on Jun 15, 2023.
  */
-// @Reference to com.stardust.autojs.core.cypto.Crypto.class on Jun 15, 2023.
+// @Reference to com.stardust.autojs.core.cypto.Crypto.class from Auto.js Pro 9.3.11 on Jun 15, 2023.
 //  ! There is a strong possibility that "cypto" is a typo.
-// @Reference to Auto.js Pro 9.3.11 module __$crypto__.js on Jun 15, 2023.
+// @Reference to module __$crypto__.js from Auto.js Pro 9.3.11  on Jun 15, 2023.
 object Crypto {
 
     private val scriptRuntime by lazy { AutoJs.instance.runtime }

@@ -10,7 +10,7 @@ import org.autojs.autojs.core.image.ImageWrapper
 /**
  * Created by SuperMonster003 on Mar 18, 2023.
  */
-// @Reference to TonyJiangWJ/Auto.js on Mar 18, 2023.
+// @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on Mar 18, 2023.
 class MlKitOCR {
 
     private var recognizer: TextRecognizer? = null
