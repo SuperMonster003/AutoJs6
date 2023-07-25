@@ -1,5 +1,5 @@
 // @Reference
-//  ! Current library (OpenCV) was referred to TonyJiangWJ/Auto.js on Mar 18, 2022.
+//  ! Current library (OpenCV) was referred to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on Mar 18, 2022.
 
 "opencv-4.5.5.aar"
     .let { path ->

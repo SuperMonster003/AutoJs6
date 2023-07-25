@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>控件节点 (UiObject) | AutoJs6 文档 - 6.3.2</title>
+    <title>控件节点 (UiObject) | AutoJs6 文档 - 6.3.3</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -155,7 +155,7 @@
 
     <div id="column1" data-id="uiObjectType" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.2</h1>
+            <h1>AutoJs6 文档 - 6.3.3</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -171,15 +171,19 @@
 <li><span class="stability_undefined"><a href="#uiobjecttype_uiobject">控件节点 (UiObject)</a></span><ul>
 <li><span class="stability_undefined"><a href="#uiobjecttype_uiobject_1">[@] UiObject</a></span></li>
 <li><span class="stability_undefined"><a href="#uiobjecttype_m_parent">[m#] parent</a></span><ul>
-<li><span class="stability_undefined"><a href="#uiobjecttype_parent">parent()</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_parent_i">parent(i?)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#uiobjecttype_m_child">[m#] child</a></span><ul>
 <li><span class="stability_undefined"><a href="#uiobjecttype_child_i">child(i)</a></span></li>
 </ul>
 </li>
-<li><span class="stability_undefined"><a href="#uiobjecttype_m_children">[m#] children</a></span><ul>
-<li><span class="stability_undefined"><a href="#uiobjecttype_children">children()</a></span></li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_firstchild">[m#] firstChild</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_firstchild">firstChild()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_lastchild">[m#] lastChild</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_lastchild">lastChild()</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#uiobjecttype_m_childcount">[m#] childCount</a></span><ul>
@@ -188,6 +192,46 @@
 </li>
 <li><span class="stability_undefined"><a href="#uiobjecttype_m_haschildren">[m#] hasChildren</a></span><ul>
 <li><span class="stability_undefined"><a href="#uiobjecttype_haschildren">hasChildren()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_children">[m#] children</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_children">children()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_sibling">[m#] sibling</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_sibling_i">sibling(i)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_firstsibling">[m#] firstSibling</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_firstsibling">firstSibling()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_lastsibling">[m#] lastSibling</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_lastsibling">lastSibling()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_offset">[m#] offset</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_offset_i">offset(i)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_nextsibling">[m#] nextSibling</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_nextsibling">nextSibling()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_previoussibling">[m#] previousSibling</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_previoussibling">previousSibling()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_siblingcount">[m#] siblingCount</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_siblingcount">siblingCount()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_issingleton">[m#] isSingleton</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_issingleton">isSingleton()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_siblings">[m#] siblings</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_siblings">siblings()</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#uiobjecttype_m_indexinparent">[m#] indexInParent</a></span><ul>
@@ -681,29 +725,35 @@ console.log(w instanceof UiObject);
 w.parent().parent().parent().child(2);
 </code></pre>
 <h2>[m#] parent<span><a class="mark" href="#uiobjecttype_m_parent" id="uiobjecttype_m_parent">#</a></span></h2>
-<h3>parent()<span><a class="mark" href="#uiobjecttype_parent" id="uiobjecttype_parent">#</a></span></h3>
-<p><strong><code>A11Y</code></strong></p>
+<h3>parent(i?)<span><a class="mark" href="#uiobjecttype_parent_i" id="uiobjecttype_parent_i">#</a></span></h3>
+<p><strong><code>[6.3.3]</code></strong> <strong><code>A11Y</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
 <ul>
+<li><strong>[ i = <code>1</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 相对级数</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
 </ul>
 <p>返回其父控件.</p>
+<p>当指定级数 <code>i</code> 时, 返回其对应级数的父控件.</p>
+<p><code>i</code> 为 <code>0</code> 时, 返回控件自身,<br><code>i</code> 为正整数时, 返回第 <code>i</code> 级父控件,<br><code>i</code> 为负数时, 将抛出异常.</p>
 <pre><code class="lang-js">let w = pickup(/.+/);
 w.parent();
+w.parent(1); /* 同上. */
 w.compass(&#39;p&#39;); /* 同上. */
 detect(w, &#39;p&#39;); /* 同上. */
 
 w.parent().parent().parent();
+w.parent(3); /* 同上. */
 w.compass(&#39;p3&#39;); /* 同上. */
 detect(w, &#39;p3&#39;); /* 同上. */
 </code></pre>
 <h2>[m#] child<span><a class="mark" href="#uiobjecttype_m_child" id="uiobjecttype_m_child">#</a></span></h2>
 <h3>child(i)<span><a class="mark" href="#uiobjecttype_child_i" id="uiobjecttype_child_i">#</a></span></h3>
-<p><strong><code>A11Y</code></strong></p>
+<p><strong><code>[6.3.3]</code></strong> <strong><code>A11Y</code></strong></p>
 <ul>
 <li><strong>i</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 索引</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
 </ul>
-<p>返回其索引为 i 的子控件.</p>
+<p>返回其索引为 <code>i</code> 的子控件.</p>
+<p><code>i</code> 为正整数或 <code>0</code>, 返回正数索引子控件,<br><code>i</code> 为负整数, 返回倒数索引子控件,  </p>
 <pre><code class="lang-js">let w = pickup(/.+/);
 w.child(3);
 w.compass(&#39;c3&#39;); /* 同上. */
@@ -712,7 +762,48 @@ detect(w, &#39;c3&#39;); /* 同上. */
 w.child(3).child(1);
 w.compass(&#39;c3c1&#39;); /* 同上. */
 detect(w, &#39;c3&gt;1&#39;); /* 同上. */
+
+w.child(-1); /* 最后一个子控件. */
+
+w.child(-2); /* 倒数第 2 个子控件. */
+w.compass(&#39;c-2&#39;); /* 同上. */
+detect(w, &#39;c-2&#39;); /* 同上. */
 </code></pre>
+<h2>[m#] firstChild<span><a class="mark" href="#uiobjecttype_m_firstchild" id="uiobjecttype_m_firstchild">#</a></span></h2>
+<h3>firstChild()<span><a class="mark" href="#uiobjecttype_firstchild" id="uiobjecttype_firstchild">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> }</li>
+</ul>
+<p>返回第一个子控件.</p>
+<p>相当于 <code>child(0)</code>.</p>
+<h2>[m#] lastChild<span><a class="mark" href="#uiobjecttype_m_lastchild" id="uiobjecttype_m_lastchild">#</a></span></h2>
+<h3>lastChild()<span><a class="mark" href="#uiobjecttype_lastchild" id="uiobjecttype_lastchild">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> }</li>
+</ul>
+<p>返回最后一个子控件.</p>
+<p>相当于 <code>child(-1)</code>.</p>
+<h2>[m#] childCount<span><a class="mark" href="#uiobjecttype_m_childcount" id="uiobjecttype_m_childcount">#</a></span></h2>
+<h3>childCount()<span><a class="mark" href="#uiobjecttype_childcount" id="uiobjecttype_childcount">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回当前节点的子控件数量.</p>
+<p>别名属性或方法:</p>
+<ul>
+<li><code>[m#]</code> getChildCount</li>
+</ul>
+<h2>[m#] hasChildren<span><a class="mark" href="#uiobjecttype_m_haschildren" id="uiobjecttype_m_haschildren">#</a></span></h2>
+<h3>hasChildren()<span><a class="mark" href="#uiobjecttype_haschildren" id="uiobjecttype_haschildren">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回当前节点是否有子节点.</p>
+<p>相当于 <code>childCount() &gt; 0</code>.</p>
 <h2>[m#] children<span><a class="mark" href="#uiobjecttype_m_children" id="uiobjecttype_m_children">#</a></span></h2>
 <h3>children()<span><a class="mark" href="#uiobjecttype_children" id="uiobjecttype_children">#</a></span></h3>
 <p><strong><code>A11Y</code></strong></p>
@@ -733,25 +824,100 @@ cc.forEach((w) =&gt; {
 <pre><code class="lang-js">let w = pickup({ filter: w =&gt; w.children().length &gt; 5 });
 console.log(w.find().length); /* e.g. 20 */
 </code></pre>
-<h2>[m#] childCount<span><a class="mark" href="#uiobjecttype_m_childcount" id="uiobjecttype_m_childcount">#</a></span></h2>
-<h3>childCount()<span><a class="mark" href="#uiobjecttype_childcount" id="uiobjecttype_childcount">#</a></span></h3>
-<p><strong><code>A11Y</code></strong></p>
+<h2>[m#] sibling<span><a class="mark" href="#uiobjecttype_m_sibling" id="uiobjecttype_m_sibling">#</a></span></h2>
+<h3>sibling(i)<span><a class="mark" href="#uiobjecttype_sibling_i" id="uiobjecttype_sibling_i">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>i</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 索引</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回其索引为 <code>i</code> 的兄弟控件.</p>
+<p><code>i</code> 为正整数或 <code>0</code>, 返回正数索引兄弟控件,<br><code>i</code> 为负整数, 返回倒数索引兄弟控件,  </p>
+<p>当 <code>i</code> 与 <a href="#uiobjecttype_m_indexinparent">indexInParent()</a> 相同时, 返回其自身.</p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+w.sibling(0); /* 第 1 (索引为 0) 的兄弟控件. */
+w.compass(&#39;s0&#39;); /* 同上. */
+detect(w, &#39;s0&#39;); /* 同上. */
+
+w.sibling(-2); /* 倒数第 2 个兄弟控件. */
+w.compass(&#39;s-2&#39;); /* 同上. */
+detect(w, &#39;s-2&#39;); /* 同上. */
+</code></pre>
+<p>如需获取相邻的兄弟控件, 可使用 <a href="#uiobjecttype_m_offset">offset</a>, 或使用 <a href="#uiobjecttype_m_nextsibling">nextSibling</a> 与 <a href="#uiobjecttype_m_previoussibling">previousSibling</a>.</p>
+<h2>[m#] firstSibling<span><a class="mark" href="#uiobjecttype_m_firstsibling" id="uiobjecttype_m_firstsibling">#</a></span></h2>
+<h3>firstSibling()<span><a class="mark" href="#uiobjecttype_firstsibling" id="uiobjecttype_firstsibling">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> }</li>
+</ul>
+<p>返回第一个兄弟控件 (可能为自身).</p>
+<p>相当于 <code>sibling(0)</code>.</p>
+<h2>[m#] lastSibling<span><a class="mark" href="#uiobjecttype_m_lastsibling" id="uiobjecttype_m_lastsibling">#</a></span></h2>
+<h3>lastSibling()<span><a class="mark" href="#uiobjecttype_lastsibling" id="uiobjecttype_lastsibling">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> }</li>
+</ul>
+<p>返回最后一个兄弟控件 (可能为自身).</p>
+<p>相当于 <code>sibling(-1)</code>.</p>
+<h2>[m#] offset<span><a class="mark" href="#uiobjecttype_m_offset" id="uiobjecttype_m_offset">#</a></span></h2>
+<h3>offset(i)<span><a class="mark" href="#uiobjecttype_offset_i" id="uiobjecttype_offset_i">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>i</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 索引偏移量</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回其索引偏移量为 <code>i</code> 的兄弟控件.</p>
+<p><code>i</code> 为正整数, 返回后向兄弟控件,<br><code>i</code> 为负整数, 返回前向兄弟控件,<br><code>i</code> 为 <code>0</code>, 返回当前控件自身. </p>
+<pre><code class="lang-js">let w = pickup(/.+/);
+w.offset(3);
+w.compass(&#39;s&gt;3&#39;); /* 同上. */
+detect(w, &#39;s&gt;3&#39;); /* 同上. */
+
+w.offset(-2);
+w.compass(&#39;s&lt;2&#39;); /* 同上. */
+detect(w, &#39;s&lt;2&#39;); /* 同上. */
+</code></pre>
+<p>如需获取相邻的兄弟控件, 除 <a href="#uiobjecttype_m_offset">offset</a> 外, 还可使用 <a href="#uiobjecttype_m_nextsibling">nextSibling</a> 与 <a href="#uiobjecttype_m_previoussibling">previousSibling</a>.</p>
+<h2>[m#] nextSibling<span><a class="mark" href="#uiobjecttype_m_nextsibling" id="uiobjecttype_m_nextsibling">#</a></span></h2>
+<h3>nextSibling()<span><a class="mark" href="#uiobjecttype_nextsibling" id="uiobjecttype_nextsibling">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回后一个兄弟控件.</p>
+<p>相当于 <code>offset(1)</code>.</p>
+<h2>[m#] previousSibling<span><a class="mark" href="#uiobjecttype_m_previoussibling" id="uiobjecttype_m_previoussibling">#</a></span></h2>
+<h3>previousSibling()<span><a class="mark" href="#uiobjecttype_previoussibling" id="uiobjecttype_previoussibling">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectType.html">UiObject</a></span> | <span class="type"><a href="dataTypes.html#datatypes_null">null</a></span> }</li>
+</ul>
+<p>返回前一个兄弟控件.</p>
+<p>相当于 <code>offset(-1)</code>.</p>
+<h2>[m#] siblingCount<span><a class="mark" href="#uiobjecttype_m_siblingcount" id="uiobjecttype_m_siblingcount">#</a></span></h2>
+<h3>siblingCount()<span><a class="mark" href="#uiobjecttype_siblingcount" id="uiobjecttype_siblingcount">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
 </ul>
-<p>返回当前节点的子控件数量.</p>
-<p>别名属性或方法:</p>
-<ul>
-<li><code>[m#]</code> getChildCount</li>
-</ul>
-<h2>[m#] hasChildren<span><a class="mark" href="#uiobjecttype_m_haschildren" id="uiobjecttype_m_haschildren">#</a></span></h2>
-<h3>hasChildren()<span><a class="mark" href="#uiobjecttype_haschildren" id="uiobjecttype_haschildren">#</a></span></h3>
-<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<p>返回当前节点的兄弟控件总数量 (含自身).</p>
+<p><code>siblingCount</code> 返回一个总是大于等于 <code>1</code> 的数字.</p>
+<h2>[m#] isSingleton<span><a class="mark" href="#uiobjecttype_m_issingleton" id="uiobjecttype_m_issingleton">#</a></span></h2>
+<h3>isSingleton()<span><a class="mark" href="#uiobjecttype_issingleton" id="uiobjecttype_issingleton">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
 </ul>
-<p>返回当前节点是否有子节点.</p>
-<p>相当于 <code>childCount() &gt; 0</code>.</p>
+<p>返回当前节点是否为独身节点, 即除自身外没有其他兄弟节点.</p>
+<p>相当于 <code>siblingCount() === 1</code>.</p>
+<h2>[m#] siblings<span><a class="mark" href="#uiobjecttype_m_siblings" id="uiobjecttype_m_siblings">#</a></span></h2>
+<h3>siblings()<span><a class="mark" href="#uiobjecttype_siblings" id="uiobjecttype_siblings">#</a></span></h3>
+<p><strong><code>6.3.3</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="uiObjectCollectionType.html">UiObjectCollection</a></span> }</li>
+</ul>
+<p>返回当前节点的兄弟控件集合 (含自身).</p>
 <h2>[m#] indexInParent<span><a class="mark" href="#uiobjecttype_m_indexinparent" id="uiobjecttype_m_indexinparent">#</a></span></h2>
 <h3>indexInParent()<span><a class="mark" href="#uiobjecttype_indexinparent" id="uiobjecttype_indexinparent">#</a></span></h3>
 <p><strong><code>A11Y</code></strong></p>

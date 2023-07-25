@@ -158,7 +158,7 @@
     <string name="foreground_notification_channel_name">Служба AutoJs6 в фоновом режиме</string>
     <string name="foreground_notification_text">Нажмите для запуска AutoJs6</string>
     <string name="foreground_notification_title">Фоновая служба AutoJs6</string>
-    <string name="format_build_successfully" formatted="true">Сборка прошла успешно.\nПуть к файлу: %s</string>
+    <string name="format_build_succeeded" formatted="true">Сборка прошла успешно.\nПуть к файлу: %s</string>
     <string name="format_debug_bar_title">Отладка [ %s ]</string>
     <string name="format_editor_info" formatted="false">Заголовки: %d\nСтроки: %d\nРазмер: %s</string>
     <string name="format_file_downloaded" formatted="true">Файл загружен на %s</string>
@@ -260,7 +260,7 @@
     <string name="text_broadcast_action">Действие</string>
     <string name="text_broadcast_task">Трансляция задачи</string>
     <string name="text_build_apk">Сборка APK</string>
-    <string name="text_build_successfully">Сборка прошла успешно</string>
+    <string name="text_build_succeeded">Сборка прошла успешно</string>
     <string name="text_cancel">Отменить</string>
     <string name="text_cancel_simplified">Отмен</string>
     <string name="text_cannot_read_file">Невозможно прочитать файл</string>
@@ -525,7 +525,7 @@
     <string name="text_project_media_access">Доступ к носителям проекта</string>
     <string name="text_project_media_access_description">При наличии доступа к медиафайлам проекта предупреждение о безопасности при записи экрана не выдается.</string>
     <string name="text_project_save_error">Не удалось сохранить проект</string>
-    <string name="text_project_save_success">Проект сохранен</string>
+    <string name="text_project_save_succeeded">Проект сохранен</string>
     <string name="text_prompt">Запрос</string>
     <string name="text_quit">Выйти</string>
     <string name="text_record_finished">Запись завершена</string>
@@ -585,7 +585,7 @@
     <string name="text_save_to">Сохранить в</string>
     <string name="text_script_record">Запись сценария</string>
     <string name="text_script_running">Выполнение сценария</string>
-    <string name="text_script_save_successfully">Сценарий сохранен успешно (требуется обновление)</string>
+    <string name="text_script_save_succeeded">Сценарий сохранен успешно (требуется обновление)</string>
     <string name="text_search">Поиск</string>
     <string name="text_select">Выберите</string>
     <string name="text_select_by_exists">Если клип существует (существует)</string>
@@ -674,6 +674,10 @@
     <string name="text_repo_url_of_vscode_vsc_ext">URL репозитория расширения VSCode</string>
     <string name="text_connection_cannot_be_established">Соединение не может быть установлено</string>
     <string name="text_min_version_of_vscode_vsc_ext">Минимальная версия расширения VSCode</string>
+    <string name="text_function">Функция</string>
+    <string name="text_formatting_completed">Форматирование завершено</string>
+    <string name="text_failed_to_format">Не удалось отформатировать</string>
+    <string name="text_comment">Комментарий</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Всего: %d элемент</item>

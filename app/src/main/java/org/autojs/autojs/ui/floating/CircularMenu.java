@@ -186,7 +186,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
             mSettingsDialog = new CircularMenuOperationDialogBuilder(mContext)
                     .item(R.drawable.ic_accessibility_black_48dp, R.string.text_manage_a11y_service, v1 -> {
                         dismissSettingsDialog();
-                        getAccessibilityTool().getService().enable();
+                        getAccessibilityTool().getService().launchSettings();
                     })
                     .item(R.drawable.ic_text_fields_black_48dp, mContext.getString(R.string.text_latest_package) + ":\n" + getRunningPackage(), v1 -> {
                         dismissSettingsDialog();

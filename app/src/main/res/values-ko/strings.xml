@@ -158,7 +158,7 @@
     <string name="foreground_notification_channel_name">AutoJs6 전경 서비스</string>
     <string name="foreground_notification_text">AutoJs6 을 시작하려면 클릭하십시오</string>
     <string name="foreground_notification_title">AutoJs6 전경 서비스</string>
-    <string name="format_build_successfully" formatted="true">빌드가 성공했습니다.\n파일 경로: %s</string>
+    <string name="format_build_succeeded" formatted="true">빌드가 성공했습니다.\n파일 경로: %s</string>
     <string name="format_debug_bar_title">디버그 [%s]</string>
     <string name="format_editor_info" formatted="false">숯: %d\n라인: %d\n크기: %s</string>
     <string name="format_file_downloaded" formatted="true">파일은 %s 로 다운로드했습니다</string>
@@ -260,7 +260,7 @@
     <string name="text_broadcast_action">동작</string>
     <string name="text_broadcast_task">방송 작업</string>
     <string name="text_build_apk">APK 빌드</string>
-    <string name="text_build_successfully">빌드가 성공했습니다</string>
+    <string name="text_build_succeeded">빌드가 성공했습니다</string>
     <string name="text_cancel">취소</string>
     <string name="text_cancel_simplified">취소</string>
     <string name="text_cannot_read_file">파일을 읽을 수 없다</string>
@@ -525,7 +525,7 @@
     <string name="text_project_media_access">프로젝트 미디어 액세스</string>
     <string name="text_project_media_access_description">프로젝트 미디어 액세스를 사용하면 화면 기록에 대한 보안 경고가 중요하지 않습니다.</string>
     <string name="text_project_save_error">프로젝트를 저장하지 못했습니다</string>
-    <string name="text_project_save_success">프로젝트 저장</string>
+    <string name="text_project_save_succeeded">프로젝트 저장</string>
     <string name="text_prompt">즉각적인</string>
     <string name="text_quit">그만두다</string>
     <string name="text_record_finished">녹음 완료</string>
@@ -585,7 +585,7 @@
     <string name="text_save_to">저장</string>
     <string name="text_script_record">스크립트 녹음</string>
     <string name="text_script_running">스크립트 실행</string>
-    <string name="text_script_save_successfully">스크립트 저장 성공 (새로 고침이 필요합니다)</string>
+    <string name="text_script_save_succeeded">스크립트 저장 성공 (새로 고침이 필요합니다)</string>
     <string name="text_search">검색</string>
     <string name="text_select">고르다</string>
     <string name="text_select_by_exists">클립이 존재하는 경우 (exists)</string>
@@ -674,6 +674,10 @@
     <string name="text_repo_url_of_vscode_vsc_ext">VSCode 확장의 리포지토리 URL</string>
     <string name="text_connection_cannot_be_established">연결을 설정할 수 없습니다</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 확장의 최소 버전</string>
+    <string name="text_function">기능</string>
+    <string name="text_formatting_completed">포맷 완료</string>
+    <string name="text_failed_to_format">포맷 실패</string>
+    <string name="text_comment">논평</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">총: %d 항목</item>

@@ -17,7 +17,7 @@ import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
-abstract class LayoutFloatyWindow(private val rootNode: NodeInfo?, private val context: Context, private val isServiceRelied: Boolean) : FullScreenFloatyWindow(){
+abstract class LayoutFloatyWindow(private val rootNode: NodeInfo?, private val context: Context, private val isServiceRelied: Boolean) : FullScreenFloatyWindow() {
 
     private lateinit var mServiceContext: Context
     private lateinit var mActions: LinkedHashMap<Int, Runnable>
@@ -29,12 +29,22 @@ abstract class LayoutFloatyWindow(private val rootNode: NodeInfo?, private val c
     private val mNodeInfoDialog by lazy {
         AppLevelThemeDialogBuilder(mServiceContext)
             .customView(mNodeInfoView, false)
-            .positiveText("生成")
-            .onPositive { _, _ ->
-                ViewUtils.showToast(context, "TODO")
-                val selector = mNodeInfoView.getCheckedDate().joinToString(".")
-                if (selector.isNotEmpty()) ClipboardUtils.setClip(context, selector)
-            }
+
+            // @Overruled by SuperMonster003 on Jul 21, 2023.
+            //  ! Author: 抠脚本人
+            //  ! Related PR:
+            //  ! http://pr.autojs6.com/98
+            //  ! Reason:
+            //  ! Pending processing.
+            //  ! zh-CN: 将于后续版本继续处理.
+            //  !
+            // .positiveText("生成")
+            // .onPositive { _, _ ->
+            //     ViewUtils.showToast(context, "TODO")
+            //     val selector = mNodeInfoView.getCheckedDate().joinToString(".")
+            //     if (selector.isNotEmpty()) ClipboardUtils.setClip(context, selector)
+            // }
+
             .build()
             .also { it.window!!.setType(FloatyWindowManger.getWindowType()) }
     }

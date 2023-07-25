@@ -156,7 +156,7 @@
     <string name="foreground_notification_channel_name">AutoJs6 foreground service</string>
     <string name="foreground_notification_text">Click to launch AutoJs6</string>
     <string name="foreground_notification_title">AutoJs6 foreground service</string>
-    <string name="format_build_successfully" formatted="true">Build succeeded.\nFile path: %s</string>
+    <string name="format_build_succeeded" formatted="true">Build succeeded.\nFile path: %s</string>
     <string name="format_debug_bar_title">Debug [ %s ]</string>
     <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
     <string name="format_file_downloaded" formatted="true">File downloaded to %s</string>
@@ -258,7 +258,7 @@
     <string name="text_broadcast_action">Action</string>
     <string name="text_broadcast_task">Broadcast task</string>
     <string name="text_build_apk">Build APK</string>
-    <string name="text_build_successfully">Build succeeded</string>
+    <string name="text_build_succeeded">Build succeeded</string>
     <string name="text_cancel">Cancel</string>
     <string name="text_cancel_simplified">Cancel</string>
     <string name="text_cannot_read_file">Can\'t read file</string>
@@ -523,7 +523,7 @@
     <string name="text_project_media_access">Project media access</string>
     <string name="text_project_media_access_description">With project media access, security warning for screen recording will not prompt.</string>
     <string name="text_project_save_error">Failed to save project</string>
-    <string name="text_project_save_success">Project saved</string>
+    <string name="text_project_save_succeeded">Project saved</string>
     <string name="text_prompt">Prompt</string>
     <string name="text_quit">Quit</string>
     <string name="text_record_finished">Recording finished</string>
@@ -583,7 +583,7 @@
     <string name="text_save_to">Save to</string>
     <string name="text_script_record">Script recording</string>
     <string name="text_script_running">Script running</string>
-    <string name="text_script_save_successfully">Script saved succeeded (refresh is needed)</string>
+    <string name="text_script_save_succeeded">Script saved succeeded (refresh is needed)</string>
     <string name="text_search">Search</string>
     <string name="text_select">Select</string>
     <string name="text_select_by_exists">If clip exists (exists)</string>
@@ -672,6 +672,10 @@
     <string name="text_repo_url_of_vscode_vsc_ext">Repository URL of VSCode extension</string>
     <string name="text_connection_cannot_be_established">Connection can\'t be established</string>
     <string name="text_min_version_of_vscode_vsc_ext">Minimum version of VSCode extension</string>
+    <string name="text_function">Function</string>
+    <string name="text_formatting_completed">Formatting completed</string>
+    <string name="text_failed_to_format">Failed to format</string>
+    <string name="text_comment">Comment</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>

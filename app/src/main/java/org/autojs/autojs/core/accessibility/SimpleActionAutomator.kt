@@ -182,7 +182,9 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     @ScriptInterface
     fun ensureService() = accessibilityBridge.ensureServiceEnabled()
 
-    //todo:优化实现方式
+    // @Created by 抠脚本人 on Jul 10, 2023.
+    // TODO by 抠脚本人 on Jul 10, 2023.
+    //  ! 优化实现方式
     // TODO by SuperMonster003 on Jul 12, 2023.
     //  ! Ref to Auto.js Pro
     fun registerEvent(eventName: String, callback: AccessibilityEventCallback) {
@@ -190,6 +192,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
         AccessibilityService.instance?.addAccessibilityEventCallback(eventName, callback)
     }
 
+    // @Created by 抠脚本人 on Jul 10, 2023.
     fun removeEvent(eventName: String) {
         AccessibilityService.instance?.removeAccessibilityEventCallback(eventName)
     }
@@ -251,12 +254,17 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     }
 
     companion object {
+
         val accessibilityDelegateCounter = AtomicInteger(1000)
         val TAG: String = SimpleActionAutomator::class.java.name
 
+        /**
+         * Created by 抠脚本人 on Jul 10, 2023.
+         */
         interface AccessibilityEventCallback {
             fun onAccessibilityEvent(event: AccessibilityEventWrapper)
         }
+
     }
 
 }

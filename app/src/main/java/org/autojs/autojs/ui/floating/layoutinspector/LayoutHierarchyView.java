@@ -36,7 +36,8 @@ public class LayoutHierarchyView extends MultiLevelListView {
     public interface OnItemLongClickListener {
         void onItemLongClick(View view, NodeInfo nodeInfo);
     }
-    private final Map<NodeInfo,ViewHolder> nodeMap = new LinkedHashMap<>();
+
+    private final Map<NodeInfo, ViewHolder> nodeMap = new LinkedHashMap<>();
     private Adapter mAdapter;
     private OnItemLongClickListener mOnItemLongClickListener;
     private final AdapterView.OnItemLongClickListener mOnItemLongClickListenerProxy = new AdapterView.OnItemLongClickListener() {
@@ -121,25 +122,34 @@ public class LayoutHierarchyView extends MultiLevelListView {
     }
 
     private void drawListItem(NodeInfo info, Boolean draw) {
-        ArrayList<ViewHolder> list = new ArrayList<>();
-        NodeInfo currentInfo = info;
-        while (true) {
-            currentInfo = currentInfo.getParent();
-            if (currentInfo == null) break;
-            ViewHolder vh = nodeMap.get(currentInfo);
-            list.add(vh);
-        }
-        //todo：选用能适应深色模式的字体颜色
-        //fixme：列表滑动时listview数据错乱
-        if (draw) {
-            for (ViewHolder vh : list) {
-                vh.nameView.setTextColor(Color.RED); // 设置字体颜色为红色
-            }
-        } else {
-            for (ViewHolder vh : list) {
-                vh.nameView.setTextColor(Color.BLACK); // 设置字体颜色为红色
-            }
-        }
+
+        // @Overruled by SuperMonster003 on Jul 21, 2023.
+        //  ! Author: 抠脚本人
+        //  ! Related PR:
+        //  ! http://pr.autojs6.com/98
+        //  ! Reason:
+        //  ! Pending processing.
+        //  ! zh-CN: 将于后续版本继续处理.
+        //  !
+        // ArrayList<ViewHolder> list = new ArrayList<>();
+        // NodeInfo currentInfo = info;
+        // while (true) {
+        //     currentInfo = currentInfo.getParent();
+        //     if (currentInfo == null) break;
+        //     ViewHolder vh = nodeMap.get(currentInfo);
+        //     list.add(vh);
+        // }
+        // // TODO: 选用能适应深色模式的字体颜色
+        // // FIXME: 列表滑动时 ListView 数据错乱
+        // if (draw) {
+        //     for (ViewHolder vh : list) {
+        //         vh.nameView.setTextColor(Color.RED); // 设置字体颜色为红色
+        //     }
+        // } else {
+        //     for (ViewHolder vh : list) {
+        //         vh.nameView.setTextColor(Color.BLACK); // 设置字体颜色为红色
+        //     }
+        // }
     }
 
     private void initPaint() {
@@ -221,9 +231,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
         }
     }
 
-
     private class Adapter extends MultiLevelListAdapter {
-
 
         @Override
         protected List<?> getSubObjects(Object object) {
@@ -252,9 +260,21 @@ public class LayoutHierarchyView extends MultiLevelListView {
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
-            nodeMap.put(nodeInfo,viewHolder);
-            //对于id,desc,text,clickable,longClickable不为空的显示额外信息
-            viewHolder.nameView.setText(extraInfo(nodeInfo));
+            nodeMap.put(nodeInfo, viewHolder);
+
+            // @Overruled by SuperMonster003 on Jul 12, 2023.
+            //  ! Author: 抠脚本人
+            //  ! Related PR:
+            //  ! http://pr.autojs6.com/98
+            //  ! Reason:
+            //  ! Pending processing.
+            //  ! zh-CN: 将于后续版本继续处理.
+            //  !
+            // @Hint by 抠脚本人 on Jul 10, 2023.
+            //  ! 对于 id, desc, text, clickable, longClickable 不为空的显示额外信息
+            // viewHolder.nameView.setText(extraInfo(nodeInfo));
+            viewHolder.nameView.setText(simplifyClassName(nodeInfo.getClassName()));
+
             viewHolder.nodeInfo = nodeInfo;
             if (viewHolder.infoView.getVisibility() == VISIBLE)
                 viewHolder.infoView.setText(getItemInfoDsc(itemInfo));
@@ -306,7 +326,7 @@ public class LayoutHierarchyView extends MultiLevelListView {
             if (nodeInfo.getLongClickable()) {
                 info.add("longClickable");
             }
-            //字符串拼接
+            // 字符串拼接
             String others = String.join(", ", info);
             if (!others.isEmpty()) {
                 return extra + " [" + others + "]";

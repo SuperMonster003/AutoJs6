@@ -43,6 +43,10 @@ class AccessibilityTool(val context: Context) {
             enableIfNeeded().also { if (!it) launchSettings() }
         }
 
+        fun launchSettings() {
+            this@AccessibilityTool.launchSettings()
+        }
+
         fun enableIfNeeded() = when {
             enableWithRootIfNeeded() -> true
             enableWithSecureIfNeeded() -> true

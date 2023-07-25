@@ -29,6 +29,8 @@ import java.io.IOException
  */
 class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: File) : ClassLoader(), GeneratedClassLoader {
 
+    private val mDexClassLoaders = HashMap<String, DexClassLoader>()
+
     init {
         if (cacheDir.exists()) {
             deleteFilesOfDir(cacheDir)
@@ -52,7 +54,7 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
             throw FileNotFoundException(str(R.string.file_not_exist_or_readable, path))
         }
         return DexClassLoader(path, cacheDir.path, null, parent).also {
-            dexClassLoaders[path] = it
+            mDexClassLoaders[path] = it
         }
     }
 
@@ -99,7 +101,7 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
     @Throws(ClassNotFoundException::class)
     public override fun loadClass(name: String, resolve: Boolean): Class<*> {
         findLoadedClass(name)?.let { return it }
-        for (dex in dexClassLoaders.values) try {
+        for (dex in mDexClassLoaders.values) try {
             dex.loadClass(name)?.let { return it }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -114,7 +116,7 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
      * @param aClass ignored
      */
     override fun linkClass(aClass: Class<*>?) {
-        //doesn't make sense on android
+        // doesn't make sense on android
     }
 
     /**
@@ -182,7 +184,6 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
     companion object {
 
         private val TAG = AndroidClassLoader::class.java.simpleName
-        private val dexClassLoaders = HashMap<String, DexClassLoader>()
 
     }
 
