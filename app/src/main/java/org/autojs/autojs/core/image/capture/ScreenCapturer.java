@@ -44,7 +44,7 @@ public class ScreenCapturer {
     public static final int ORIENTATION_LANDSCAPE = Configuration.ORIENTATION_LANDSCAPE;
     public static final int ORIENTATION_PORTRAIT = Configuration.ORIENTATION_PORTRAIT;
 
-    // @Reference to TonyJiangWJ/Auto.js on May 19, 2022.
+    // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on May 19, 2022.
     //  ! Snippet:
     //  ! private final ConcurrentHashMap<ScriptRuntime, Boolean> registeredRuntimes = new ConcurrentHashMap<>();
     private static final List<ScriptRuntime> mScriptRuntimes = Collections.synchronizedList(new ArrayList<>());

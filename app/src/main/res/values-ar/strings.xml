@@ -158,7 +158,7 @@
     <string name="foreground_notification_channel_name">خدمة مقدمة AutoJs6</string>
     <string name="foreground_notification_text">انقر لإطلاق AutoJs6</string>
     <string name="foreground_notification_title">خدمة مقدمة AutoJs6</string>
-    <string name="format_build_successfully" formatted="true">نجح بناء.\nمسار الملف: %s</string>
+    <string name="format_build_succeeded" formatted="true">نجح بناء.\nمسار الملف: %s</string>
     <string name="format_debug_bar_title">تصحيح [%s]</string>
     <string name="format_editor_info" formatted="false">chars: %s\nالخطوط: %s\nبحجم: %s</string>
     <string name="format_file_downloaded" formatted="true">تم تنزيل الملف إلى %s</string>
@@ -260,7 +260,7 @@
     <string name="text_broadcast_action">عمل</string>
     <string name="text_broadcast_task">مهمة البث</string>
     <string name="text_build_apk">بناء APK</string>
-    <string name="text_build_successfully">نجح بناء</string>
+    <string name="text_build_succeeded">نجح بناء</string>
     <string name="text_cancel">يلغي</string>
     <string name="text_cancel_simplified">إلغاء</string>
     <string name="text_cannot_read_file">لا يمكن قراءة الملف</string>
@@ -525,7 +525,7 @@
     <string name="text_project_media_access">وصول وسائل الإعلام المشروع</string>
     <string name="text_project_media_access_description">مع الوصول إلى وسائل الإعلام ، لن يطالب التحذير الأمني ​​لتسجيل الشاشة.</string>
     <string name="text_project_save_error">فشل في حفظ المشروع</string>
-    <string name="text_project_save_success">تم حفظ المشروع</string>
+    <string name="text_project_save_succeeded">تم حفظ المشروع</string>
     <string name="text_prompt">مستعجل</string>
     <string name="text_quit">يترك</string>
     <string name="text_record_finished">انتهى التسجيل</string>
@@ -585,7 +585,7 @@
     <string name="text_save_to">حفظ في</string>
     <string name="text_script_record">تسجيل السيناريو</string>
     <string name="text_script_running">البرنامج النصي</string>
-    <string name="text_script_save_successfully">نجح النصي المحفوظ (هناك حاجة إلى تحديث)</string>
+    <string name="text_script_save_succeeded">نجح النصي المحفوظ (هناك حاجة إلى تحديث)</string>
     <string name="text_search">يبحث</string>
     <string name="text_select">يختار</string>
     <string name="text_select_by_exists">في حالة وجود مقطع (موجود)</string>
@@ -674,6 +674,10 @@
     <string name="text_repo_url_of_vscode_vsc_ext">عنوان URL لمستودع امتداد VSCode</string>
     <string name="text_connection_cannot_be_established">لا يمكن إنشاء الاتصال</string>
     <string name="text_min_version_of_vscode_vsc_ext">أدنى إصدار من امتداد VSCode</string>
+    <string name="text_function">وظيفة</string>
+    <string name="text_formatting_completed">اكتمل التنسيق</string>
+    <string name="text_failed_to_format">فشل التنسيق</string>
+    <string name="text_comment">تعليق</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">المجموع: عنصر واحد</item>

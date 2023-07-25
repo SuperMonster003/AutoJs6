@@ -2,7 +2,7 @@ package org.autojs.autojs.model.autocomplete
 
 /**
  * Created by Stardust on 2018/2/3.
- * Transformed by 抠脚本人 on Jul 11, 2023.
+ * Transformed by 抠脚本人 (https://github.com/little-alei) on Jul 11, 2023.
  */
 class CodeCompletion {
     val hint: String

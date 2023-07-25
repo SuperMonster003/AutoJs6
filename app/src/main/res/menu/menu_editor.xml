@@ -42,6 +42,11 @@
                     app:showAsAction="never" />
 
             <item
+                    android:id="@+id/action_comment"
+                    android:title="@string/text_comment"
+                    app:showAsAction="never" />
+
+            <item
                     android:id="@+id/action_beautify"
                     android:title="@string/text_code_beautify"
                     app:showAsAction="never" />

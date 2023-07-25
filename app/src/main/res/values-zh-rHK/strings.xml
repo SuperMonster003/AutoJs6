@@ -158,7 +158,7 @@
     <string name="foreground_notification_channel_name">AutoJs6 前台服務</string>
     <string name="foreground_notification_text">點擊返回 AutoJs6 主界面</string>
     <string name="foreground_notification_title">AutoJs6 前台服務</string>
-    <string name="format_build_successfully">構建成功.\n文件路徑: %s</string>
+    <string name="format_build_succeeded">構建成功.\n文件路徑: %s</string>
     <string name="format_debug_bar_title">調試 [ %s ]</string>
     <string name="format_editor_info" formatted="false">字符數: %d\n行數: %d\n大小: %s</string>
     <string name="format_file_downloaded">文件已下載至 %s</string>
@@ -260,7 +260,7 @@
     <string name="text_broadcast_action">動作 (Action)</string>
     <string name="text_broadcast_task">廣播觸發任務</string>
     <string name="text_build_apk">打包應用</string>
-    <string name="text_build_successfully">打包成功</string>
+    <string name="text_build_succeeded">打包成功</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
     <string name="text_cannot_read_file">無法讀取文件</string>
@@ -525,7 +525,7 @@
     <string name="text_project_media_access">投影媒體權限</string>
     <string name="text_project_media_access_description">被授予 \"投影媒體權限\" 後, 錄製屏幕的安全提示窗口將不再彈出.</string>
     <string name="text_project_save_error">項目保存失敗</string>
-    <string name="text_project_save_success">項目已保存</string>
+    <string name="text_project_save_succeeded">項目已保存</string>
     <string name="text_prompt">提示</string>
     <string name="text_quit">放棄</string>
     <string name="text_record_finished">錄製完成</string>
@@ -585,7 +585,7 @@
     <string name="text_save_to">保存到</string>
     <string name="text_script_record">錄製腳本</string>
     <string name="text_script_running">腳本運行</string>
-    <string name="text_script_save_successfully">保存成功 (需刷新目錄)</string>
+    <string name="text_script_save_succeeded">保存成功 (需刷新目錄)</string>
     <string name="text_search">搜索</string>
     <string name="text_select">選擇</string>
     <string name="text_select_by_exists">判斷控件存在 (exists)</string>
@@ -674,6 +674,10 @@
     <string name="text_repo_url_of_vscode_vsc_ext">VSCode 插件項目地址</string>
     <string name="text_connection_cannot_be_established">無法建立連接</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 插件最低版本</string>
+    <string name="text_function">函數</string>
+    <string name="text_formatting_completed">格式化已完成</string>
+    <string name="text_failed_to_format">格式化失敗</string>
+    <string name="text_comment">註釋</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

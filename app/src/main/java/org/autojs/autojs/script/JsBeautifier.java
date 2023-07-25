@@ -1,5 +1,8 @@
 package org.autojs.autojs.script;
 
+import static org.autojs.autojs.engine.RhinoJavaScriptEngine.JS_BEAUTIFY_PATH;
+import static org.autojs.autojs.engine.RhinoJavaScriptEngine.JS_BEAUTIFY_FILE;
+
 import android.content.Context;
 import android.view.View;
 
@@ -37,15 +40,12 @@ public class JsBeautifier {
     private Function mJsBeautifyFunction;
     private org.mozilla.javascript.Context mScriptContext;
     private Scriptable mScriptable;
-    private final String mBeautifyJsPath;
-    private final String mBeautifyJsDir;
+
     private View mView;
 
-    public JsBeautifier(View view, String beautifyJsDirPath) {
+    public JsBeautifier(View view) {
         mContext = view.getContext();
         mView = view;
-        mBeautifyJsDir = beautifyJsDirPath;
-        mBeautifyJsPath = PFiles.join(beautifyJsDirPath, "beautify.js");
     }
 
     public void beautify(final String code, final Callback callback) {
@@ -82,8 +82,11 @@ public class JsBeautifier {
             importerTopLevel.initStandardObjects(mScriptContext, false);
             mScriptable = importerTopLevel;
         }
-        AssetAndUrlModuleSourceProvider provider = new AssetAndUrlModuleSourceProvider(mContext, mBeautifyJsDir,
-                Collections.singletonList(new File("/").toURI()));
+        AssetAndUrlModuleSourceProvider provider = new AssetAndUrlModuleSourceProvider(
+                mContext,
+                JS_BEAUTIFY_PATH,
+                Collections.singletonList(new File(File.separator).toURI())
+        );
         new RequireBuilder()
                 .setModuleScriptProvider(new SoftCachingModuleScriptProvider(provider))
                 .setSandboxed(false)
@@ -111,7 +114,7 @@ public class JsBeautifier {
     private void compile() {
         try {
             enterContext();
-            InputStream is = mContext.getAssets().open(mBeautifyJsPath);
+            InputStream is = mContext.getAssets().open(JS_BEAUTIFY_FILE);
             mJsBeautifyFunction = (Function) mScriptContext.evaluateString(mScriptable, PFiles.read(is), "<js_beautify>", 1, null);
         } catch (IOException e) {
             exitContext();
@@ -119,7 +122,7 @@ public class JsBeautifier {
         }
     }
 
-    public void shutdown(){
+    public void shutdown() {
         mExecutor.shutdownNow();
         mView = null;
     }

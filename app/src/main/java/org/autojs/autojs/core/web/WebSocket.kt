@@ -14,7 +14,7 @@ val runtime = AutoJs.instance.runtime
 /**
  * Created by SuperMonster003 on Apr 30, 2023.
  */
-// @Reference to kkevsekk1/AutoX on Apr 30, 2023.
+// @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) on Apr 30, 2023.
 class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: String, isInCurrentThread: Boolean = true) : EventEmitter(
     runtime.bridges, runtime.timers.timerForCurrentThread.takeIf { isInCurrentThread }
 ), okhttp3.WebSocket {

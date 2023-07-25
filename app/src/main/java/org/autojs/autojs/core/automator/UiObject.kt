@@ -40,15 +40,18 @@ open class UiObject(
 
     private val bounds by lazy { AccessibilityNodeInfoHelper.getBoundsInScreen(this) }
 
-    constructor(info: Any?, allocator: AccessibilityNodeInfoAllocator, indexInParent: Int) : this(
-        info,
-        allocator,
-        0,
-        indexInParent
-    )
+    constructor(
+        info: Any?,
+        allocator: AccessibilityNodeInfoAllocator,
+        indexInParent: Int,
+    ) : this(info, allocator, 0, indexInParent)
 
     @JvmOverloads
-    constructor(info: Any?, depth: Int = 0, indexInParent: Int = -1) : this(info, null, depth, indexInParent)
+    constructor(
+        info: Any?,
+        depth: Int = 0,
+        indexInParent: Int = -1,
+    ) : this(info, null, depth, indexInParent)
 
     open fun parent(): UiObject? = try {
         super.getParent()?.let { node ->
@@ -63,37 +66,63 @@ open class UiObject(
         null.also { e.printStackTrace() }
     }
 
-    open fun child(i: Int): UiObject? = try {
-        super.getChild(i)?.run { UiObject(unwrap(), depth + 1, i) }
-    } catch (e: IllegalStateException) {
-        // FIXME: 2017/5/5
-        null.also { e.printStackTrace() }
+    fun parent(i: Int): UiObject? = if (i < 0) throw Exception("i < 0") else compass("p$i")
+
+    open fun child(i: Int): UiObject? {
+        if (i < 0) {
+            return (i + childCount).takeIf { it >= 0 }?.let { child(it) }
+        }
+        return try {
+            super.getChild(i)?.run { UiObject(unwrap(), depth + 1, i) }
+        } catch (e: IllegalStateException) {
+            // FIXME: 2017/5/5
+            null.also { e.printStackTrace() }
+        }
     }
 
+    // @Deprecated by SuperMonster003 on Jul 20, 2023.
+    //  ! Author: 抠脚本人
+    //  ! Reason: Replaced with offset(i).
     @Deprecated("Deprecated in Java", ReplaceWith("offset(i)"))
     open fun brother(i: Int): UiObject? = offset(i)
 
     open fun offset(i: Int): UiObject? = try {
-        parent()?.child(indexInParent + i)
+        if (i == 0) this
+        else parent()?.child(indexInParent + i)
     } catch (e: ArrayIndexOutOfBoundsException) {
         null.also { e.printStackTrace() }
     }
 
     open fun sibling(i: Int): UiObject? = try {
-        parent()?.child(i)
+        if (i == indexInParent) this
+        else parent()?.child(i)
     } catch (e: ArrayIndexOutOfBoundsException) {
         null.also { e.printStackTrace() }
     }
 
-    open fun nextSibling() = sibling(1)
+    fun siblingCount() = parent()?.childCount ?: 1
 
-    open fun previousSibling() = sibling(-1)
+    fun isSingleton() = siblingCount() == 1
+
+    fun firstSibling() = sibling(0)
+
+    fun lastSibling() = sibling(-1)
+
+    open fun nextSibling() = offset(1)
+
+    open fun previousSibling() = offset(-1)
 
     open fun childCount() = childCount
 
     fun hasChildren() = childCount > 0
 
-    fun children(): UiObjectCollection = List(childCount) { child(it) }.let { UiObjectCollection.of(it) }
+    fun firstChild() = child(0)
+
+    fun lastChild() = child(childCount - 1)
+
+    fun children() = List(childCount) { child(it) }.let { UiObjectCollection.of(it) }
+
+    fun siblings() = List(siblingCount()) { sibling(it) }.let { UiObjectCollection.of(it) }
 
     fun indexInParent() = indexInParent
 
