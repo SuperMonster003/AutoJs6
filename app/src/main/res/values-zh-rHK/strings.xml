@@ -524,8 +524,8 @@
     <string name="text_project_location">項目位置</string>
     <string name="text_project_media_access">投影媒體權限</string>
     <string name="text_project_media_access_description">被授予 \"投影媒體權限\" 後, 錄製屏幕的安全提示窗口將不再彈出.</string>
-    <string name="text_project_save_error">項目保存失敗</string>
-    <string name="text_project_save_succeeded">項目已保存</string>
+    <string name="text_failed_to_save_remote_project_to_local_storage">無法保存遠程項目至本地</string>
+    <string name="text_remote_project_saved_to_local_storage_successfully">項目已保存</string>
     <string name="text_prompt">提示</string>
     <string name="text_quit">放棄</string>
     <string name="text_record_finished">錄製完成</string>
@@ -585,7 +585,7 @@
     <string name="text_save_to">保存到</string>
     <string name="text_script_record">錄製腳本</string>
     <string name="text_script_running">腳本運行</string>
-    <string name="text_script_save_succeeded">保存成功 (需刷新目錄)</string>
+    <string name="text_remote_file_saved_to_local_storage_successfully">遠程項目已保存至本地</string>
     <string name="text_search">搜索</string>
     <string name="text_select">選擇</string>
     <string name="text_select_by_exists">判斷控件存在 (exists)</string>

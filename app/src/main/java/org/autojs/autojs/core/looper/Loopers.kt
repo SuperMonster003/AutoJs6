@@ -88,7 +88,7 @@ class Loopers(runtime: ScriptRuntime) : IdleHandler {
         if (mTimers.hasPendingCallbacks()) {
             return false
         }
-        if (waitWhenIdle.get() || !waitIds.get().isEmpty()) {
+        if (waitWhenIdle.get() == true || waitIds.get()?.isNotEmpty() == true) {
             return false
         }
         if ((Context.getCurrentContext() as AutoJsContext).hasPendingContinuation()) {
@@ -104,11 +104,13 @@ class Loopers(runtime: ScriptRuntime) : IdleHandler {
     }
 
     private fun initServantThread() {
-        val lock = this@Loopers as Object
         ThreadCompat {
             Looper.prepare()
             mServantLooper = Looper.myLooper()
-            synchronized(lock) { lock.notifyAll() }
+            @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+            synchronized(this@Loopers as Object) {
+                notifyAll()
+            }
             Looper.loop()
         }.start()
     }
@@ -117,10 +119,10 @@ class Loopers(runtime: ScriptRuntime) : IdleHandler {
         get() {
             if (mServantLooper == null) {
                 initServantThread()
-                val lock = this@Loopers as Object
-                synchronized(lock) {
+                @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+                synchronized(this@Loopers as Object) {
                     try {
-                        lock.wait()
+                        wait()
                     } catch (e: InterruptedException) {
                         throw ScriptInterruptedException(e)
                     }
@@ -134,16 +136,16 @@ class Loopers(runtime: ScriptRuntime) : IdleHandler {
     }
 
     fun waitWhenIdle(): Int {
-        val id = maxWaitId.get()
+        val id = maxWaitId.get()!!
         Log.d(LOG_TAG, "waitWhenIdle: $id")
         maxWaitId.set(id + 1)
-        waitIds.get().add(id)
+        waitIds.get()!!.add(id)
         return id
     }
 
     fun doNotWaitWhenIdle(waitId: Int) {
         Log.d(LOG_TAG, "doNotWaitWhenIdle: $waitId")
-        waitIds.get().remove(waitId)
+        waitIds.get()!!.remove(waitId)
     }
 
     fun waitWhenIdle(b: Boolean) {

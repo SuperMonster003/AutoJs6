@@ -83,6 +83,7 @@
     <string name="entry_root_record_out_file_type_binary">Бинарный тип (нередактируемый)</string>
     <string name="entry_root_record_out_file_type_js">Тип JavaScript (редактируемый)</string>
     <string name="error_a_runtime_has_been_set">Установлено время выполнения</string>
+    <string name="error_abandoned_method">Метод %s был отменен и не должен использоваться</string>
     <string name="error_app_not_installed">Приложение не установлено: \"%s\"</string>
     <string name="error_both_bitmap_and_mat_are_null">И bitmap, и mat являются нулевыми</string>
     <string name="error_cannot_be_null">%s не может быть null</string>
@@ -94,11 +95,13 @@
     <string name="error_change_password_error_length">Используйте больше символов для пароля</string>
     <string name="error_change_password_error_match">Эти пароли не совпадают</string>
     <string name="error_check_for_update">Не удалось проверить наличие обновлений</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">Двоеточие должно следовать за действительным IP-адресом</string>
     <string name="error_compass_cannot_be_null">Компас не может быть нулевым</string>
     <string name="error_connect_to_remote">Не удается подключиться к удаленному серверу: %s</string>
     <string name="error_continuation_resume_called_without_suspend">Метод resume() должен вызываться после suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Метод suspend() должен быть вызван только один раз</string>
     <string name="error_corresponding_github_release_may_not_published">Соответствующий релиз на GitHub может быть еще не опубликован</string>
+    <string name="error_dot_decimal_notation_num_over_255">Точечно-десятичное число больше 255</string>
     <string name="error_download_interrupted">Загрузка прервана</string>
     <string name="error_email_taken">Электронная почта занята</string>
     <string name="error_empty_broadcast_selection">Должна быть выбрана хотя бы одна трансляция</string>
@@ -118,9 +121,11 @@
     <string name="error_image_has_been_recycled">Изображение было переработано</string>
     <string name="error_invalid_compass">Неверный компас: %s</string>
     <string name="error_invalid_github_repo">Неверный репозиторий GitHub: %s</string>
+    <string name="error_invalid_ip_address">Неверный IP-адрес</string>
     <string name="error_invalid_login_credentials">Неверные учетные данные для входа в систему</string>
     <string name="error_invalid_rest_compass">Неверный остаток компаса: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Неверный элемент карты селектора: { %s: %s (%s) }</string>
+    <string name="error_ip_address_should_not_be_empty">IP-адрес не может быть пустым</string>
     <string name="error_max_listeners_exceeded">Превышено максимальное количество слушателей: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 может не иметь root-доступа для запуска файла \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() вызвана с нулевым аргументом: %s</string>
@@ -139,13 +144,17 @@
     <string name="error_parse_github_release_assets">Не удалось разобрать активы релиза GitHub</string>
     <string name="error_parse_version_info">Не удалось разобрать информацию о версии</string>
     <string name="error_pattern_syntax">Неверный синтаксис шаблона</string>
+    <string name="error_port_num_over_65535">Номер порта более 65535</string>
     <string name="error_put_value_into_json">Не удается поместить значение %s в JSON</string>
     <string name="error_regex_find_prev">Невозможно найти предыдущее значение с помощью regex</string>
+    <string name="error_repeated_colon_symbol">Повторяющийся символ двоеточия</string>
+    <string name="error_repeated_dot_symbol">Повторяющийся символ точки</string>
     <string name="error_script_is_on_exiting">Скрипт завершается</string>
     <string name="error_selector_method_without_calling">Метод селектора должен быть вызван, а не передан в качестве параметра: %s</string>
     <string name="error_selector_result_type_with_compass">Невозможно использовать компас, когда тип результата - селектор</string>
     <string name="error_set_both_icon_res_and_icon">Невозможно установить как iconRes, так и icon</string>
     <string name="error_thread_is_not_alive">Нить не жива</string>
+    <string name="error_unacceptable_character">Недопустимый символ</string>
     <string name="error_unknown">Неизвестная ошибка</string>
     <string name="error_unknown_algorithm_selector_param">Неизвестный параметр селектора алгоритма: %s</string>
     <string name="error_unknown_color_name">Неизвестное имя цвета: %s</string>
@@ -277,19 +286,21 @@
     <string name="text_click_too_frequently">Частые операции</string>
     <string name="text_client_mode">Режим клиента</string>
     <string name="text_close">Закрыть</string>
+    <string name="text_close_floating_button">Закрыть плавающую кнопку</string>
     <string name="text_code">Код</string>
     <string name="text_code_beautify">Улучшить код</string>
     <string name="text_command_already_copied_to_clip">Команда скопирована в буфер обмена</string>
+    <string name="text_comment">Комментарий</string>
     <string name="text_compatibility">Совместимость</string>
     <string name="text_compatibility_with_classes_for_ver_4_x">Совместимость с классами Java для версии 4.x</string>
     <string name="text_config">Конфигурация</string>
     <string name="text_confirm_to_delete">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_remove">Вы уверены, что хотите удалить?</string>
     <string name="text_connect_to_pc">Подключитесь к ПК</string>
+    <string name="text_connection_cannot_be_established">Соединение не может быть установлено</string>
     <string name="text_console">Консоль</string>
     <string name="text_continue">Продолжить</string>
     <string name="text_copy">Скопировать</string>
-    <string name="text_export">Экспорт</string>
     <string name="text_copy_all">Скопировать все</string>
     <string name="text_copy_all_files_to_new_directory">Скопировать все файлы в новый каталог</string>
     <string name="text_copy_command">Копировать cmd</string>
@@ -297,6 +308,7 @@
     <string name="text_copy_line">Копировать строку</string>
     <string name="text_copy_to_clip">Копировать в буфер обмена</string>
     <string name="text_copy_value">Копировать значение</string>
+    <string name="text_current_version">Текущая версия</string>
     <string name="text_daily_task">Ежедневная задача</string>
     <string name="text_date">Дата</string>
     <string name="text_day1">Пн</string>
@@ -363,7 +375,7 @@
     <string name="text_execution_finished" formatted="false">[%s] завершилось через %s секунд.\n</string>
     <string name="text_exit">Выход</string>
     <string name="text_exit_directly">Выйти</string>
-    <string name="text_close_floating_button">Закрыть плавающую кнопку</string>
+    <string name="text_export">Экспорт</string>
     <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
     <string name="text_extensibility">Расширяемость</string>
     <string name="text_failed">Не удалось</string>
@@ -374,6 +386,7 @@
     <string name="text_failed_to_download">Не удалось загрузить</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">Не удалось включить службу доступности с доступом root</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">Не удалось включить службу доступности с безопасными настройками</string>
+    <string name="text_failed_to_format">Не удалось отформатировать</string>
     <string name="text_failed_to_generate">Не удалось сгенерировать код</string>
     <string name="text_failed_to_grant_access">Не удалось предоставить доступ</string>
     <string name="text_failed_to_grant_draw_overlays_permission">Не удалось предоставить разрешение на отображение поверх других приложений</string>
@@ -381,6 +394,7 @@
     <string name="text_failed_to_login">Не удалось войти в систему</string>
     <string name="text_failed_to_register">Не удалось зарегистрироваться</string>
     <string name="text_failed_to_report">Не удалось отправить</string>
+    <string name="text_failed_to_save_remote_project_to_local_storage">Не удалось сохранить удаленный проект в локальное хранилище</string>
     <string name="text_failed_to_write_file">Не удалось записать файл</string>
     <string name="text_file">Файл</string>
     <string name="text_file_exists">Файл уже существует</string>
@@ -396,6 +410,8 @@
     <string name="text_force_stop">Принудительная остановка</string>
     <string name="text_foreground_service">Служба переднего плана</string>
     <string name="text_foreground_service_description">Службы переднего плана выполняют операции, заметные для пользователя.\nПередние службы отображают уведомление в строке состояния, чтобы пользователи были в курсе, что ваше приложение выполняет задачу на переднем плане и потребляет системные ресурсы.\nУведомление не может быть отменено, пока служба не будет остановлена или удалена с переднего плана.\nУведомление можно установить на низкий приоритет и даже отключить, долго нажимая на него.</string>
+    <string name="text_formatting_completed">Форматирование завершено</string>
+    <string name="text_function">Функция</string>
     <string name="text_fx_keyboard">Fx клавиатура</string>
     <string name="text_generate">Сгенерировать</string>
     <string name="text_generate_code">Сгенерировать код</string>
@@ -450,10 +466,13 @@
     <string name="text_loop_delay">Задержка цикла (сек)</string>
     <string name="text_loop_interval">Интервал между циклами (сек)</string>
     <string name="text_loop_times">Время выполнения цикла</string>
+    <string name="text_lower_than">Меньше, чем</string>
     <string name="text_main_file_name">Имя файла основного скрипта</string>
     <string name="text_manage">Управление</string>
     <string name="text_manage_a11y_service">Управление службой доступности</string>
     <string name="text_manage_ignored_updates">Управление игнорируемыми обновлениями</string>
+    <string name="text_min_version">Минимальная версия</string>
+    <string name="text_min_version_of_vscode_vsc_ext">Минимальная версия расширения VSCode</string>
     <string name="text_mobile_qq_not_installed">\"Мобильный QQ\" не установлен</string>
     <string name="text_more">Больше</string>
     <string name="text_more_details">Подробнее</string>
@@ -478,7 +497,6 @@
     <string name="text_not_granted">Не предоставляется</string>
     <string name="text_not_showing_main_activity">Не показывает основную деятельность</string>
     <string name="text_notification">Уведомление</string>
-    <string name="text_post_notifications_permission">почтовые уведомления</string>
     <string name="text_notification_access_permission">Доступ к уведомлениям</string>
     <string name="text_notification_service_disabled">Служба уведомлений не работает</string>
     <string name="text_null">Null</string>
@@ -514,6 +532,7 @@
     <string name="text_please_input_name">Имя ввода</string>
     <string name="text_pointer_location">Расположение указателя (с корнем)</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Переключение \"Расположение указателя\" не удалось.\nТребуется корневой доступ.</string>
+    <string name="text_post_notifications_permission">почтовые уведомления</string>
     <string name="text_pre_execute_script">Предварительное выполнение сценария</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Подготовка...</string>
     <string name="text_press_again_to_dismiss_dialog">Нажмите еще раз, чтобы закрыть диалог</string>
@@ -524,8 +543,6 @@
     <string name="text_project_location">Расположение проекта</string>
     <string name="text_project_media_access">Доступ к носителям проекта</string>
     <string name="text_project_media_access_description">При наличии доступа к медиафайлам проекта предупреждение о безопасности при записи экрана не выдается.</string>
-    <string name="text_project_save_error">Не удалось сохранить проект</string>
-    <string name="text_project_save_succeeded">Проект сохранен</string>
     <string name="text_prompt">Запрос</string>
     <string name="text_quit">Выйти</string>
     <string name="text_record_finished">Запись завершена</string>
@@ -542,11 +559,14 @@
     <string name="text_registering">Регистрация</string>
     <string name="text_release_notes">Примечания к выпуску</string>
     <string name="text_remote">удаленный</string>
+    <string name="text_remote_file_saved_to_local_storage_successfully">Удаленный файл успешно сохранен в локальном хранилище</string>
+    <string name="text_remote_project_saved_to_local_storage_successfully">Удаленный проект успешно сохранен в локальном хранилище</string>
     <string name="text_remove_all_breakpoints">Удалить все точки останова</string>
     <string name="text_rename">Переименовать</string>
     <string name="text_replace">Заменить</string>
     <string name="text_replace_all">Заменить все</string>
     <string name="text_replace_simplified">Замен</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">URL репозитория расширения VSCode</string>
     <string name="text_report_succeed">Отправить успешно</string>
     <string name="text_requires_android_os_version" formatted="false">Требуется версия Android OS %s (API %s), но текущая версия %s (API %s)</string>
     <string name="text_reset_password">Сброс пароля</string>
@@ -585,7 +605,6 @@
     <string name="text_save_to">Сохранить в</string>
     <string name="text_script_record">Запись сценария</string>
     <string name="text_script_running">Выполнение сценария</string>
-    <string name="text_script_save_succeeded">Сценарий сохранен успешно (требуется обновление)</string>
     <string name="text_search">Поиск</string>
     <string name="text_select">Выберите</string>
     <string name="text_select_by_exists">Если клип существует (существует)</string>
@@ -651,6 +670,7 @@
     <string name="text_version_info">Информация о версии</string>
     <string name="text_version_name">Название версии</string>
     <string name="text_view_docs">Просмотр документов</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">Версия расширения VSCode не соответствует требованиям</string>
     <string name="text_weekly_task">Недельное задание</string>
     <string name="text_weekly_task_should_check_day_of_week">Должен быть выбран хотя бы один день</string>
     <string name="text_working_dir_path">Путь к рабочему каталогу</string>
@@ -658,26 +678,6 @@
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="theme_color_default">По умолчанию</string>
-    <string name="error_abandoned_method">Метод %s был отменен и не должен использоваться</string>
-    <string name="error_invalid_ip_address">Неверный IP-адрес</string>
-    <string name="error_ip_address_should_not_be_empty">IP-адрес не может быть пустым</string>
-    <string name="error_unacceptable_character">Недопустимый символ</string>
-    <string name="error_port_num_over_65535">Номер порта более 65535</string>
-    <string name="error_dot_decimal_notation_num_over_255">Точечно-десятичное число больше 255</string>
-    <string name="error_colon_must_follow_a_valid_ip_address">Двоеточие должно следовать за действительным IP-адресом</string>
-    <string name="error_repeated_dot_symbol">Повторяющийся символ точки</string>
-    <string name="error_repeated_colon_symbol">Повторяющийся символ двоеточия</string>
-    <string name="text_vsc_ext_version_not_meet_requirement">Версия расширения VSCode не соответствует требованиям</string>
-    <string name="text_min_version">Минимальная версия</string>
-    <string name="text_current_version">Текущая версия</string>
-    <string name="text_lower_than">Меньше, чем</string>
-    <string name="text_repo_url_of_vscode_vsc_ext">URL репозитория расширения VSCode</string>
-    <string name="text_connection_cannot_be_established">Соединение не может быть установлено</string>
-    <string name="text_min_version_of_vscode_vsc_ext">Минимальная версия расширения VSCode</string>
-    <string name="text_function">Функция</string>
-    <string name="text_formatting_completed">Форматирование завершено</string>
-    <string name="text_failed_to_format">Не удалось отформатировать</string>
-    <string name="text_comment">Комментарий</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Всего: %d элемент</item>

@@ -135,7 +135,7 @@ dependencies /* Unclassified */ {
 dependencies /* Test */ {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
 }
 
 dependencies /* Annotations */ {

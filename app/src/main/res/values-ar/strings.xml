@@ -83,6 +83,7 @@
     <string name="entry_root_record_out_file_type_binary">النوع الثنائي (غير قابل للتطبيق)</string>
     <string name="entry_root_record_out_file_type_js">نوع JavaScript (قابل للتحرير)</string>
     <string name="error_a_runtime_has_been_set">تم تعيين وقت التشغيل</string>
+    <string name="error_abandoned_method">تم التخلي عن الأسلوب %s ويجب عدم استخدامه</string>
     <string name="error_app_not_installed">التطبيق غير مثبت: \"%s\"</string>
     <string name="error_both_bitmap_and_mat_are_null">كلا النقطات والحصيرة فارغة</string>
     <string name="error_cannot_be_null">%s لا يمكن أن يكون فارغا</string>
@@ -94,11 +95,13 @@
     <string name="error_change_password_error_length">استخدم المزيد من الأحرف لكلمة المرور</string>
     <string name="error_change_password_error_match">لا تتطابق كلمات المرور هذه</string>
     <string name="error_check_for_update">فشل في التحقق من التحديثات</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">يجب أن يتبع القولون عنوان IP صالحًا</string>
     <string name="error_compass_cannot_be_null">لا يمكن أن تكون البوصلة لاغية</string>
     <string name="error_connect_to_remote">لا يمكن الاتصال بالخادم البعيد: %s</string>
     <string name="error_continuation_resume_called_without_suspend">يجب استدعاء الطريقة السيرة الذاتية() بعد تعليق()</string>
     <string name="error_continuation_suspend_called_more_than_once">يجب استدعاء طريقة تعليق() مرة واحدة فقط</string>
     <string name="error_corresponding_github_release_may_not_published">قد لم يتم نشر إصدار GitHub المقابل بعد</string>
+    <string name="error_dot_decimal_notation_num_over_255">رقم عشري أكثر من 255</string>
     <string name="error_download_interrupted">تنزيل المقاطعة</string>
     <string name="error_email_taken">يتم أخذ البريد الإلكتروني</string>
     <string name="error_empty_broadcast_selection">يجب اختيار بث واحد على الأقل</string>
@@ -118,9 +121,11 @@
     <string name="error_image_has_been_recycled">تم إعادة تدوير الصورة</string>
     <string name="error_invalid_compass">بوصلة غير صالحة: %s</string>
     <string name="error_invalid_github_repo">مستودع جيثب غير صالح: %s</string>
+    <string name="error_invalid_ip_address">عنوان إب غير صالح</string>
     <string name="error_invalid_login_credentials">اعتماد تسجيل الدخول غير صالح</string>
     <string name="error_invalid_rest_compass">بوصلة راحة غير صالحة: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">عنصر خريطة محدد غير صالح: {%s: %s (%s)}</string>
+    <string name="error_ip_address_should_not_be_empty">لا يمكن أن يكون عنوان IP فارغًا</string>
     <string name="error_max_listeners_exceeded">تم تجاوز مستمعي أقصى: %s</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">قد لا يكون لدى AutoJs6 ملف الجذر لتشغيل ملف \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() دعا مع الوسيطة الفارغة: %s</string>
@@ -139,13 +144,17 @@
     <string name="error_parse_github_release_assets">فشل في تحليل أصول الإفراج عن جيثب</string>
     <string name="error_parse_version_info">فشل في تحليل معلومات الإصدار</string>
     <string name="error_pattern_syntax">بناء جملة نمط غير صالح</string>
+    <string name="error_port_num_over_65535">رقم المنفذ أكثر من 65535</string>
     <string name="error_put_value_into_json">لا يمكن وضع القيمة %s في JSON</string>
     <string name="error_regex_find_prev">لا يمكن العثور على السابق مع Regex</string>
+    <string name="error_repeated_colon_symbol">رمز القولون المتكرر</string>
+    <string name="error_repeated_dot_symbol">تكرار رمز النقطة</string>
     <string name="error_script_is_on_exiting">السيناريو عند الخروج</string>
     <string name="error_selector_method_without_calling">يجب أن تسمى طريقة المحدد بدلاً من تمريرها كمعلمة: %s</string>
     <string name="error_selector_result_type_with_compass">لا يمكن استخدام بوصلة عندما يكون نوع النتيجة محددًا</string>
     <string name="error_set_both_icon_res_and_icon">لا يمكن تعيين كل من الأيقونات والأيقونة</string>
     <string name="error_thread_is_not_alive">الموضوع ليس على قيد الحياة</string>
+    <string name="error_unacceptable_character">الطابع غير المقبول</string>
     <string name="error_unknown">خطأ غير معروف</string>
     <string name="error_unknown_algorithm_selector_param">محدد خوارزمية غير معروف بارام: %s</string>
     <string name="error_unknown_color_name">اسم لون غير معروف: %s</string>
@@ -277,19 +286,21 @@
     <string name="text_click_too_frequently">التشغيل المتكرر</string>
     <string name="text_client_mode">وضع العميل</string>
     <string name="text_close">قريب</string>
+    <string name="text_close_floating_button">إغلاق الزر العائم</string>
     <string name="text_code">شفرة</string>
     <string name="text_code_beautify">رمز تجميل</string>
     <string name="text_command_already_copied_to_clip">تم نسخ الأمر إلى الحافظة</string>
+    <string name="text_comment">تعليق</string>
     <string name="text_compatibility">التوافق</string>
     <string name="text_compatibility_with_classes_for_ver_4_x">التوافق مع فئات Java للإصدار 4.x</string>
     <string name="text_config">تكوين</string>
     <string name="text_confirm_to_delete">هل انت متأكد من الحذف؟</string>
     <string name="text_confirm_to_remove">هل أنت متأكد من إزالته؟</string>
     <string name="text_connect_to_pc">الاتصال بالكمبيوتر</string>
+    <string name="text_connection_cannot_be_established">لا يمكن إنشاء الاتصال</string>
     <string name="text_console">وحدة التحكم</string>
     <string name="text_continue">يكمل</string>
     <string name="text_copy">ينسخ</string>
-    <string name="text_export">يصدّر</string>
     <string name="text_copy_all">نسخ جميع</string>
     <string name="text_copy_all_files_to_new_directory">انسخ جميع الملفات إلى دليل جديد</string>
     <string name="text_copy_command">نسخ CMD</string>
@@ -297,6 +308,7 @@
     <string name="text_copy_line">خط النسخ</string>
     <string name="text_copy_to_clip">نسخ إلى الحافظة</string>
     <string name="text_copy_value">نسخ القيمة</string>
+    <string name="text_current_version">النسخة الحالية</string>
     <string name="text_daily_task">مهام يومية</string>
     <string name="text_date">تاريخ</string>
     <string name="text_day1">الاثنين</string>
@@ -363,7 +375,7 @@
     <string name="text_execution_finished" formatted="false">[%s] انتهى في %s.\n</string>
     <string name="text_exit">مخرج</string>
     <string name="text_exit_directly">مخرج</string>
-    <string name="text_close_floating_button">إغلاق الزر العائم</string>
+    <string name="text_export">يصدّر</string>
     <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
     <string name="text_extensibility">التمدد</string>
     <string name="text_failed">باءت بالفشل</string>
@@ -374,6 +386,7 @@
     <string name="text_failed_to_download">فشل في التحميل</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">فشل في تمكين خدمة الوصول مع الوصول إلى الجذر</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">فشل في تمكين خدمة إمكانية الوصول مع إعدادات آمنة</string>
+    <string name="text_failed_to_format">فشل التنسيق</string>
     <string name="text_failed_to_generate">فشل إنشاء رمز</string>
     <string name="text_failed_to_grant_access">فشل في منح الوصول</string>
     <string name="text_failed_to_grant_draw_overlays_permission">فشل في منح الشاشة على إذن التطبيقات الأخرى</string>
@@ -381,6 +394,7 @@
     <string name="text_failed_to_login">فشل في تسجيل الدخول</string>
     <string name="text_failed_to_register">فشل في تسجيل</string>
     <string name="text_failed_to_report">فشل في تقديم</string>
+    <string name="text_failed_to_save_remote_project_to_local_storage">فشل حفظ المشروع البعيد في التخزين المحلي</string>
     <string name="text_failed_to_write_file">فشل في كتابة الملف</string>
     <string name="text_file">ملف</string>
     <string name="text_file_exists">ملف موجود بالفعل</string>
@@ -396,6 +410,8 @@
     <string name="text_force_stop">توقف إجباري</string>
     <string name="text_foreground_service">خدمة المقدمة</string>
     <string name="text_foreground_service_description">تقوم الخدمات الأمامية بإجراء عمليات ملحوظة للمستخدم.\nتُظهر الخدمات المقدمة إخطار شريط الحالة ، بحيث يدرك المستخدمون بنشاط أن تطبيقك يقوم بمهمة في المقدمة ويستهلك موارد النظام.\nلا يمكن رفض الإشعار ما لم يتم إيقاف الخدمة أو إزالتها من المقدمة.\nقد يتم تحديد الإخطار أولوية منخفضة ، حتى يتم إيقاف تشغيله ، عن طريق الإخطار الطويل.</string>
+    <string name="text_formatting_completed">اكتمل التنسيق</string>
+    <string name="text_function">وظيفة</string>
     <string name="text_fx_keyboard">لوحة مفاتيح Fx</string>
     <string name="text_generate">يولد</string>
     <string name="text_generate_code">إنشاء التعليمات البرمجية</string>
@@ -450,10 +466,13 @@
     <string name="text_loop_delay">تأخير حلقة (ثانية)</string>
     <string name="text_loop_interval">فاصل الحلقة (ثانية)</string>
     <string name="text_loop_times">أوقات حلقة</string>
+    <string name="text_lower_than">أقل من</string>
     <string name="text_main_file_name">اسم ملف البرنامج النصي الرئيسي</string>
     <string name="text_manage">يدير</string>
     <string name="text_manage_a11y_service">إدارة خدمة إمكانية الوصول</string>
     <string name="text_manage_ignored_updates">إدارة التحديثات التي تم تجاهلها</string>
+    <string name="text_min_version">الإصدار الأدنى</string>
+    <string name="text_min_version_of_vscode_vsc_ext">أدنى إصدار من امتداد VSCode</string>
     <string name="text_mobile_qq_not_installed">لم يتم تثبيت \"Mobile QQ\"</string>
     <string name="text_more">أكثر</string>
     <string name="text_more_details">تفاصيل</string>
@@ -478,7 +497,6 @@
     <string name="text_not_granted">لم تمنح</string>
     <string name="text_not_showing_main_activity">لا تظهر النشاط الرئيسي</string>
     <string name="text_notification">تنبيه</string>
-    <string name="text_post_notifications_permission">نشر الإخطارات</string>
     <string name="text_notification_access_permission">الوصول إلى الإخطار</string>
     <string name="text_notification_service_disabled">خدمة الإخطار لا تعمل</string>
     <string name="text_null">لا شيء</string>
@@ -514,6 +532,7 @@
     <string name="text_please_input_name">اسم الإدخال</string>
     <string name="text_pointer_location">موقع المؤشر (مع الجذر)</string>
     <string name="text_pointer_location_toggle_failed_with_hint">فشل تبديل \"موقع المؤشر\".\nالوصول إلى الجذر مطلوب.</string>
+    <string name="text_post_notifications_permission">نشر الإخطارات</string>
     <string name="text_pre_execute_script">البرنامج النصي مسبقا</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">خطة...</string>
     <string name="text_press_again_to_dismiss_dialog">اضغط مرة أخرى لرفض الحوار</string>
@@ -523,9 +542,7 @@
     <string name="text_project">مشروع</string>
     <string name="text_project_location">موقع المشروع</string>
     <string name="text_project_media_access">وصول وسائل الإعلام المشروع</string>
-    <string name="text_project_media_access_description">مع الوصول إلى وسائل الإعلام ، لن يطالب التحذير الأمني ​​لتسجيل الشاشة.</string>
-    <string name="text_project_save_error">فشل في حفظ المشروع</string>
-    <string name="text_project_save_succeeded">تم حفظ المشروع</string>
+    <string name="text_project_media_access_description">مع الوصول إلى وسائط المشروع ، لن يطلب منك التحذير الأمني لتسجيل الشاشة.</string>
     <string name="text_prompt">مستعجل</string>
     <string name="text_quit">يترك</string>
     <string name="text_record_finished">انتهى التسجيل</string>
@@ -542,11 +559,14 @@
     <string name="text_registering">التسجيل</string>
     <string name="text_release_notes">ملاحظات الإصدار</string>
     <string name="text_remote">التحكم عن بعد</string>
+    <string name="text_remote_file_saved_to_local_storage_successfully">تم حفظ الملف البعيد في وحدة التخزين المحلية بنجاح</string>
+    <string name="text_remote_project_saved_to_local_storage_successfully">تم حفظ المشروع البعيد في وحدة التخزين المحلية بنجاح</string>
     <string name="text_remove_all_breakpoints">إزالة جميع نقاط التوقف</string>
     <string name="text_rename">إعادة تسمية</string>
     <string name="text_replace">يحل محل</string>
     <string name="text_replace_all">استبدل كل شيء</string>
     <string name="text_replace_simplified">يستبدل</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">عنوان URL لمستودع امتداد VSCode</string>
     <string name="text_report_succeed">إرسال نجح</string>
     <string name="text_requires_android_os_version" formatted="false">يتطلب إصدار Android OS %s (API %s) ولكن الحالي هو %s (API %s)</string>
     <string name="text_reset_password">إعادة تعيين كلمة المرور</string>
@@ -585,7 +605,6 @@
     <string name="text_save_to">حفظ في</string>
     <string name="text_script_record">تسجيل السيناريو</string>
     <string name="text_script_running">البرنامج النصي</string>
-    <string name="text_script_save_succeeded">نجح النصي المحفوظ (هناك حاجة إلى تحديث)</string>
     <string name="text_search">يبحث</string>
     <string name="text_select">يختار</string>
     <string name="text_select_by_exists">في حالة وجود مقطع (موجود)</string>
@@ -651,6 +670,7 @@
     <string name="text_version_info">معلومات الإصدار</string>
     <string name="text_version_name">اسم الإصدار</string>
     <string name="text_view_docs">عرض المستندات</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">إصدار امتداد VSCode لا يفي بالمتطلبات</string>
     <string name="text_weekly_task">مهمة أسبوعية</string>
     <string name="text_weekly_task_should_check_day_of_week">يجب اختيار يوم واحد على الأقل</string>
     <string name="text_working_dir_path">مسار دليل العمل</string>
@@ -658,26 +678,6 @@
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="theme_color_default">تقصير</string>
-    <string name="error_abandoned_method">تم التخلي عن الأسلوب %s ويجب عدم استخدامه</string>
-    <string name="error_invalid_ip_address">عنوان إب غير صالح</string>
-    <string name="error_ip_address_should_not_be_empty">لا يمكن أن يكون عنوان IP فارغًا</string>
-    <string name="error_unacceptable_character">الطابع غير المقبول</string>
-    <string name="error_port_num_over_65535">رقم المنفذ أكثر من 65535</string>
-    <string name="error_dot_decimal_notation_num_over_255">رقم عشري أكثر من 255</string>
-    <string name="error_colon_must_follow_a_valid_ip_address">يجب أن يتبع القولون عنوان IP صالحًا</string>
-    <string name="error_repeated_dot_symbol">تكرار رمز النقطة</string>
-    <string name="error_repeated_colon_symbol">رمز القولون المتكرر</string>
-    <string name="text_vsc_ext_version_not_meet_requirement">إصدار امتداد VSCode لا يفي بالمتطلبات</string>
-    <string name="text_min_version">الإصدار الأدنى</string>
-    <string name="text_current_version">النسخة الحالية</string>
-    <string name="text_lower_than">أقل من</string>
-    <string name="text_repo_url_of_vscode_vsc_ext">عنوان URL لمستودع امتداد VSCode</string>
-    <string name="text_connection_cannot_be_established">لا يمكن إنشاء الاتصال</string>
-    <string name="text_min_version_of_vscode_vsc_ext">أدنى إصدار من امتداد VSCode</string>
-    <string name="text_function">وظيفة</string>
-    <string name="text_formatting_completed">اكتمل التنسيق</string>
-    <string name="text_failed_to_format">فشل التنسيق</string>
-    <string name="text_comment">تعليق</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">المجموع: عنصر واحد</item>
