@@ -83,6 +83,7 @@
     <string name="entry_root_record_out_file_type_binary">バイナリ形式 (編集不可)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript タイプ (編集可能)</string>
     <string name="error_a_runtime_has_been_set">ランタイムが設定されている</string>
+    <string name="error_abandoned_method">メソッド %s は放棄されたので、使用しないでください</string>
     <string name="error_app_not_installed">\"%s\" アプリがインストールされていません</string>
     <string name="error_both_bitmap_and_mat_are_null">ビットマップとマットの両方が null です</string>
     <string name="error_cannot_be_null">%s は null にできません</string>
@@ -94,11 +95,13 @@
     <string name="error_change_password_error_length">パスワードにもっと多くの文字を使用する</string>
     <string name="error_change_password_error_match">これらのパスワードは一致しませんでした</string>
     <string name="error_check_for_update">更新のチェックに失敗しました</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">有効なIPアドレスの後にコロンが続くこと</string>
     <string name="error_compass_cannot_be_null">コンパスは null にできません</string>
     <string name="error_connect_to_remote">リモートサーバーに接続できません. %s</string>
     <string name="error_continuation_resume_called_without_suspend">resume() メソッドは suspend() の後に呼び出す必要があります</string>
     <string name="error_continuation_suspend_called_more_than_once">suspend() メソッドは一度だけコールされるべきです</string>
     <string name="error_corresponding_github_release_may_not_published">対応する GitHub のリリースがまだ公開されていない可能性があります</string>
+    <string name="error_dot_decimal_notation_num_over_255">255 を超えるドット10進数</string>
     <string name="error_download_interrupted">ダウンロードが中断される</string>
     <string name="error_email_taken">メールが取られている</string>
     <string name="error_empty_broadcast_selection">少なくとも一つのブロードキャストが選択されていなければならない</string>
@@ -118,9 +121,11 @@
     <string name="error_image_has_been_recycled">画像はリサイクルされました</string>
     <string name="error_invalid_compass">コンパスが無効です: %s</string>
     <string name="error_invalid_github_repo">無効な GitHub リポジトリ: %s</string>
+    <string name="error_invalid_ip_address">無効なIPアドレス</string>
     <string name="error_invalid_login_credentials">無効なログイン認証情報</string>
     <string name="error_invalid_rest_compass">無効な残りコンパスです: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">無効なセレクタ・マップ要素です. { %s: %s (%s) } です</string>
+    <string name="error_ip_address_should_not_be_empty">IP アドレスは空であってはならない</string>
     <string name="error_max_listeners_exceeded">リスナーの最大数を超えています: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 は \"auto\" ファイルを実行するためのルート・アクセス権を持っていない可能性があります</string>
     <string name="error_method_called_with_null_argument" formatted="false">null 引数で %s() が呼び出されました: %s</string>
@@ -139,13 +144,17 @@
     <string name="error_parse_github_release_assets">GitHub リリース・アセットの解析に失敗しました</string>
     <string name="error_parse_version_info">バージョン情報の解析に失敗しました</string>
     <string name="error_pattern_syntax">無効なパターン構文</string>
+    <string name="error_port_num_over_65535">65535 を超えるポート番号</string>
     <string name="error_put_value_into_json">\"値 %s を JSON に入れることができません\" というメッセージが表示されます</string>
     <string name="error_regex_find_prev">正規表現で前を見つけることができません</string>
+    <string name="error_repeated_colon_symbol">繰り返されるコロン記号</string>
+    <string name="error_repeated_dot_symbol">ドット記号の繰り返し</string>
     <string name="error_script_is_on_exiting">スクリプトが終了してしまう</string>
     <string name="error_selector_method_without_calling">セレクタ・メソッドはパラメータとして渡されるのではなく、呼び出される必要があります: %s</string>
     <string name="error_selector_result_type_with_compass">結果タイプがセレクタの場合、コンパスを使用できません</string>
     <string name="error_set_both_icon_res_and_icon">iconRes とアイコンの両方を設定できません</string>
     <string name="error_thread_is_not_alive">スレッドが生きていない</string>
+    <string name="error_unacceptable_character">使用できない文字</string>
     <string name="error_unknown">不明なエラー</string>
     <string name="error_unknown_algorithm_selector_param">不明なアルゴリズム・セレクタ・パラメータ: %s</string>
     <string name="error_unknown_color_name">不明な色名: %s</string>
@@ -277,19 +286,21 @@
     <string name="text_click_too_frequently">頻繁に行う操作</string>
     <string name="text_client_mode">クライアントモード</string>
     <string name="text_close">閉じる</string>
+    <string name="text_close_floating_button">フローティングボタンを閉じる</string>
     <string name="text_code">コード</string>
     <string name="text_code_beautify">コードの美化</string>
     <string name="text_command_already_copied_to_clip">クリップボードにコピーされたコマンド</string>
+    <string name="text_comment">コメント</string>
     <string name="text_compatibility">互換性</string>
     <string name="text_compatibility_with_classes_for_ver_4_x">バージョン 4.x の Java クラスとの互換性</string>
     <string name="text_config">設定</string>
     <string name="text_confirm_to_delete">本当に削除しますか？</string>
     <string name="text_confirm_to_remove">本当に削除しますか？</string>
     <string name="text_connect_to_pc">PCに接続する</string>
+    <string name="text_connection_cannot_be_established">接続が確立できない</string>
     <string name="text_console">コンソール</string>
     <string name="text_continue">続行</string>
     <string name="text_copy">コピー</string>
-    <string name="text_export">輸出</string>
     <string name="text_copy_all">すべてコピー</string>
     <string name="text_copy_all_files_to_new_directory">すべてのファイルを新しいディレクトリにコピーします</string>
     <string name="text_copy_command">cmdをコピー</string>
@@ -297,6 +308,7 @@
     <string name="text_copy_line">行をコピー</string>
     <string name="text_copy_to_clip">クリップボードにコピーする</string>
     <string name="text_copy_value">値をコピーする</string>
+    <string name="text_current_version">現在のバージョン</string>
     <string name="text_daily_task">デイリータスク</string>
     <string name="text_date">日付</string>
     <string name="text_day1">月</string>
@@ -363,7 +375,7 @@
     <string name="text_execution_finished" formatted="false">[%s] は %s 秒で終了しました</string>
     <string name="text_exit">終了</string>
     <string name="text_exit_directly">終了</string>
-    <string name="text_close_floating_button">フローティングボタンを閉じる</string>
+    <string name="text_export">輸出</string>
     <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
     <string name="text_extensibility">拡張性</string>
     <string name="text_failed">失敗</string>
@@ -374,6 +386,7 @@
     <string name="text_failed_to_download">ダウンロードの失敗</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">ルートアクセスによるアクセシビリティ・サービスの有効化に失敗しました</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">セキュアな設定によるアクセシビリティ・サービスの有効化の失敗</string>
+    <string name="text_failed_to_format">フォーマット失敗</string>
     <string name="text_failed_to_generate">コード生成の失敗</string>
     <string name="text_failed_to_grant_access">アクセス権の付与に失敗しました</string>
     <string name="text_failed_to_grant_draw_overlays_permission">他のアプリの上に表示する権限の付与に失敗しました</string>
@@ -381,6 +394,7 @@
     <string name="text_failed_to_login">ログインに失敗しました</string>
     <string name="text_failed_to_register">登録の失敗</string>
     <string name="text_failed_to_report">投稿の失敗</string>
+    <string name="text_failed_to_save_remote_project_to_local_storage">リモートプロジェクトをローカルストレージに保存できませんでした</string>
     <string name="text_failed_to_write_file">ファイルの書き込みに失敗しました</string>
     <string name="text_file">ファイル</string>
     <string name="text_file_exists">ファイルは既に存在しています</string>
@@ -396,6 +410,8 @@
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">フォアグラウンドサービス</string>
     <string name="text_foreground_service_description">フォアグラウンド・サービスは、ユーザーにとって目に付く操作を実行します.\nフォアグラウンド・サービスはステータス・バーに通知を表示し、アプリがフォアグラウンドでタスクを実行し、システム・リソースを消費していることをユーザーが積極的に認識できるようにします.\nこの通知は、サービスが停止されるか、フォアグラウンドから削除されない限り、解除されません.\n通知を長押しすることで、通知の優先度を低く設定したり、通知をオフにしたりすることができます</string>
+    <string name="text_formatting_completed">フォーマット完了</string>
+    <string name="text_function">関数</string>
     <string name="text_fx_keyboard">Fx キーボード</string>
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成されるコード</string>
@@ -450,10 +466,13 @@
     <string name="text_loop_delay">ループ遅延時間 (秒)</string>
     <string name="text_loop_interval">ループ間隔 (秒)</string>
     <string name="text_loop_times">ループ回数</string>
+    <string name="text_lower_than">より低い</string>
     <string name="text_main_file_name">メインスクリプトファイル名</string>
     <string name="text_manage">管理画面</string>
     <string name="text_manage_a11y_service">アクセシビリティサービスを管理する</string>
     <string name="text_manage_ignored_updates">無視されたアップデートの管理</string>
+    <string name="text_min_version">最小バージョン</string>
+    <string name="text_min_version_of_vscode_vsc_ext">VSCode 拡張機能の最小バージョン</string>
     <string name="text_mobile_qq_not_installed">「モバイルQQがインストールされていない</string>
     <string name="text_more">詳細</string>
     <string name="text_more_details">詳細</string>
@@ -478,7 +497,6 @@
     <string name="text_not_granted">許可されない</string>
     <string name="text_not_showing_main_activity">メインのアクティビティが表示されない</string>
     <string name="text_notification">通知</string>
-    <string name="text_post_notifications_permission">ゆうびんけいほう</string>
     <string name="text_notification_access_permission">通知へのアクセス</string>
     <string name="text_notification_service_disabled">通知サービスが機能していない</string>
     <string name="text_null">無効</string>
@@ -514,6 +532,7 @@
     <string name="text_please_input_name">入力名</string>
     <string name="text_pointer_location">ポインターの位置 (root 権限)</string>
     <string name="text_pointer_location_toggle_failed_with_hint">トグル「ポインターの位置」に失敗しました.\nroot 権限が必要です</string>
+    <string name="text_post_notifications_permission">ゆうびんけいほう</string>
     <string name="text_pre_execute_script">スクリプトの事前実行</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">準備中...</string>
     <string name="text_press_again_to_dismiss_dialog">ダイアログを閉じるにはもう一度押してください</string>
@@ -524,8 +543,6 @@
     <string name="text_project_location">プロジェクトの場所</string>
     <string name="text_project_media_access">プロジェクト・メディア・アクセス</string>
     <string name="text_project_media_access_description">プロジェクトのメディアアクセス権を使用すると、画面録画のセキュリティ警告が表示されなくなります</string>
-    <string name="text_project_save_error">プロジェクトの保存に失敗しました</string>
-    <string name="text_project_save_succeeded">プロジェクトの保存</string>
     <string name="text_prompt">プロンプト</string>
     <string name="text_quit">終了</string>
     <string name="text_record_finished">記録終了</string>
@@ -542,11 +559,14 @@
     <string name="text_registering">登録中</string>
     <string name="text_release_notes">リリースノート</string>
     <string name="text_remote">リモート</string>
+    <string name="text_remote_file_saved_to_local_storage_successfully">リモート・ファイルがローカル・ストレージに正常に保存された</string>
+    <string name="text_remote_project_saved_to_local_storage_successfully">リモートプロジェクトがローカルストレージに正常に保存された</string>
     <string name="text_remove_all_breakpoints">すべてのブレークポイントを削除する</string>
     <string name="text_rename">名前の変更</string>
     <string name="text_replace">置換</string>
     <string name="text_replace_all">すべてを置き換える</string>
     <string name="text_replace_simplified">置換</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">VSCode 拡張機能のリポジトリURL</string>
     <string name="text_report_succeed">送信に成功しました</string>
     <string name="text_requires_android_os_version" formatted="false">Android OS バージョン %s (API %s) が必要ですが、現在のバージョンは %s (API %s)です</string>
     <string name="text_reset_password">パスワードのリセット</string>
@@ -585,7 +605,6 @@
     <string name="text_save_to">保存先</string>
     <string name="text_script_record">スクリプトの記録</string>
     <string name="text_script_running">スクリプトの実行</string>
-    <string name="text_script_save_succeeded">スクリプトの保存に成功 (リフレッシュが必要です)</string>
     <string name="text_search">検索</string>
     <string name="text_select">選択</string>
     <string name="text_select_by_exists">クリップが存在する場合 (exists)</string>
@@ -651,6 +670,7 @@
     <string name="text_version_info">バージョン情報</string>
     <string name="text_version_name">バージョン名</string>
     <string name="text_view_docs">ドキュメントを見る</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">VSCode 拡張機能のバージョンが要件を満たしていない</string>
     <string name="text_weekly_task">週次タスク</string>
     <string name="text_weekly_task_should_check_day_of_week">最低1日選択する必要があります</string>
     <string name="text_working_dir_path">作業ディレクトリのパス</string>
@@ -658,26 +678,6 @@
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが、書き込むことはできないシステム環境設定を含む、安全なシステム設定です.\nこれは、ユーザーがシステムアプリのUIを通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると、通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="theme_color_default">デフォルト</string>
-    <string name="error_abandoned_method">メソッド %s は放棄されたので、使用しないでください</string>
-    <string name="error_invalid_ip_address">無効なIPアドレス</string>
-    <string name="error_ip_address_should_not_be_empty">IP アドレスは空であってはならない</string>
-    <string name="error_unacceptable_character">使用できない文字</string>
-    <string name="error_port_num_over_65535">65535 を超えるポート番号</string>
-    <string name="error_dot_decimal_notation_num_over_255">255 を超えるドット10進数</string>
-    <string name="error_colon_must_follow_a_valid_ip_address">有効なIPアドレスの後にコロンが続くこと</string>
-    <string name="error_repeated_dot_symbol">ドット記号の繰り返し</string>
-    <string name="error_repeated_colon_symbol">繰り返されるコロン記号</string>
-    <string name="text_vsc_ext_version_not_meet_requirement">VSCode 拡張機能のバージョンが要件を満たしていない</string>
-    <string name="text_min_version">最小バージョン</string>
-    <string name="text_current_version">現在のバージョン</string>
-    <string name="text_lower_than">より低い</string>
-    <string name="text_repo_url_of_vscode_vsc_ext">VSCode 拡張機能のリポジトリURL</string>
-    <string name="text_connection_cannot_be_established">接続が確立できない</string>
-    <string name="text_min_version_of_vscode_vsc_ext">VSCode 拡張機能の最小バージョン</string>
-    <string name="text_function">関数</string>
-    <string name="text_formatting_completed">フォーマット完了</string>
-    <string name="text_failed_to_format">フォーマット失敗</string>
-    <string name="text_comment">コメント</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">合計: %d 件</item>

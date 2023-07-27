@@ -27,6 +27,7 @@ class Timer @JvmOverloads constructor(runtime: ScriptRuntime, maxCallbackMillisF
     private val mHandlerCallbacks = SparseArray<Runnable?>()
     private var mCallbackMaxId = 0
     private val mRuntime: ScriptRuntime = runtime
+    @Suppress("DEPRECATION")
     private val mHandler = looper?.let { Handler(it) } ?: Handler()
     private var mMaxCallbackUptimeMillis: Long = 0
     private val mMaxCallbackMillisForAllThread: VolatileBox<Long> = maxCallbackMillisForAllThread

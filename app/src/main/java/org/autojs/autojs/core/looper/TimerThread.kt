@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
 //  ! Sorry but my current capabilities are not sufficient
 //  ! to fully understand everything from above pull request(s),
 //  ! so most of the code will remain as is. :)
+@Suppress("unused")
 open class TimerThread(
     private val scriptRuntime: ScriptRuntime,
     private val maxCallbackUptimeMillisForAllThreads: VolatileBox<Long>,
@@ -43,6 +44,7 @@ open class TimerThread(
         }
         (scriptRuntime.engines.myEngine() as? RhinoJavaScriptEngine)?.enterContext()
         notifyRunning()
+        @Suppress("DEPRECATION")
         Looper.myLooper()?.let {
             Handler(it).post(target)
         } ?: Handler().post(target)

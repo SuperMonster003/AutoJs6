@@ -81,6 +81,7 @@
     <string name="entry_root_record_out_file_type_binary">Binary type (non-editable)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript type (editable)</string>
     <string name="error_a_runtime_has_been_set">A runtime has been set</string>
+    <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
     <string name="error_app_not_installed">App is not installed: \"%s\"</string>
     <string name="error_both_bitmap_and_mat_are_null">Both bitmap and mat are null</string>
     <string name="error_cannot_be_null">%s can\'t be null</string>
@@ -92,11 +93,13 @@
     <string name="error_change_password_error_length">Use more characters for the password</string>
     <string name="error_change_password_error_match">Those passwords didn\'t match</string>
     <string name="error_check_for_update">Failed to check for updates</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
     <string name="error_compass_cannot_be_null">Compass can\'t be null</string>
     <string name="error_connect_to_remote">Can\'t connect to the remote server: %s</string>
     <string name="error_continuation_resume_called_without_suspend">Method resume() should be called after suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Method suspend() should be only called once</string>
     <string name="error_corresponding_github_release_may_not_published">Corresponding GitHub release may have not been published yet</string>
+    <string name="error_dot_decimal_notation_num_over_255">Dot-decimal number over 255</string>
     <string name="error_download_interrupted">Download interrupted</string>
     <string name="error_email_taken">The e-mail is taken</string>
     <string name="error_empty_broadcast_selection">At least one broadcast must be selected</string>
@@ -116,9 +119,11 @@
     <string name="error_image_has_been_recycled">Image has been recycled</string>
     <string name="error_invalid_compass">Invalid compass: %s</string>
     <string name="error_invalid_github_repo">Invalid GitHub repository: %s</string>
+    <string name="error_invalid_ip_address">Invalid IP address</string>
     <string name="error_invalid_login_credentials">Invalid login credentials</string>
     <string name="error_invalid_rest_compass">Invalid rest compass: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Invalid selector map element: { %s: %s (%s) }</string>
+    <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
     <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 may not have root access to run \"auto\" file</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
@@ -137,13 +142,17 @@
     <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
     <string name="error_parse_version_info">Failed to parse version information</string>
     <string name="error_pattern_syntax">Invalid pattern syntax</string>
+    <string name="error_port_num_over_65535">Port number over 65535</string>
     <string name="error_put_value_into_json">Can\'t put value %s into JSON</string>
     <string name="error_regex_find_prev">Can\'t find previous with regex</string>
+    <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
+    <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
     <string name="error_script_is_on_exiting">Script is on exiting</string>
     <string name="error_selector_method_without_calling">Selector method should be called rather than passed as a parameter: %s</string>
     <string name="error_selector_result_type_with_compass">Can\'t use a compass when result type is selector</string>
     <string name="error_set_both_icon_res_and_icon">Can\'t set both iconRes and icon</string>
     <string name="error_thread_is_not_alive">Thread is not alive</string>
+    <string name="error_unacceptable_character">Unacceptable character</string>
     <string name="error_unknown">Unknown error</string>
     <string name="error_unknown_algorithm_selector_param">Unknown algorithm selector param: %s</string>
     <string name="error_unknown_color_name">Unknown color name: %s</string>
@@ -275,19 +284,21 @@
     <string name="text_click_too_frequently">Frequent operation</string>
     <string name="text_client_mode">Client mode</string>
     <string name="text_close">Close</string>
+    <string name="text_close_floating_button">Close floating button</string>
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautify code</string>
     <string name="text_command_already_copied_to_clip">Command copied to clipboard</string>
+    <string name="text_comment">Comment</string>
     <string name="text_compatibility">Compatibility</string>
     <string name="text_compatibility_with_classes_for_ver_4_x">Compatibility with Java classes for version 4.x</string>
     <string name="text_config">Config</string>
     <string name="text_confirm_to_delete">Are you sure to delete?</string>
     <string name="text_confirm_to_remove">Are you sure to remove?</string>
     <string name="text_connect_to_pc">Connect to PC</string>
+    <string name="text_connection_cannot_be_established">Connection can\'t be established</string>
     <string name="text_console">Console</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copy</string>
-    <string name="text_export">Export</string>
     <string name="text_copy_all">Copy all</string>
     <string name="text_copy_all_files_to_new_directory">Copy all files to new directory</string>
     <string name="text_copy_command">Copy cmd</string>
@@ -295,6 +306,7 @@
     <string name="text_copy_line">Copy line</string>
     <string name="text_copy_to_clip">Copy to clipboard</string>
     <string name="text_copy_value">Copy value</string>
+    <string name="text_current_version">Current version</string>
     <string name="text_daily_task">Daily task</string>
     <string name="text_date">Date</string>
     <string name="text_day1">Mon</string>
@@ -361,7 +373,7 @@
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
     <string name="text_exit">Exit</string>
     <string name="text_exit_directly">Exit</string>
-    <string name="text_close_floating_button">Close floating button</string>
+    <string name="text_export">Export</string>
     <string name="text_extending_js_build_in_objects">Extending JavaScript build-in objects</string>
     <string name="text_extensibility">Extensibility</string>
     <string name="text_failed">Failed</string>
@@ -372,6 +384,7 @@
     <string name="text_failed_to_download">Failed to download</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">Failed to enable accessibility service with root access</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">Failed to enable accessibility service with secure settings</string>
+    <string name="text_failed_to_format">Failed to format</string>
     <string name="text_failed_to_generate">Failed to generate code</string>
     <string name="text_failed_to_grant_access">Failed to grant access</string>
     <string name="text_failed_to_grant_draw_overlays_permission">Failed to grant display over other apps permission</string>
@@ -379,6 +392,7 @@
     <string name="text_failed_to_login">Failed to login</string>
     <string name="text_failed_to_register">Failed to register</string>
     <string name="text_failed_to_report">Failed to submit</string>
+    <string name="text_failed_to_save_remote_project_to_local_storage">Failed to save remote project to local storage</string>
     <string name="text_failed_to_write_file">Failed to write file</string>
     <string name="text_file">File</string>
     <string name="text_file_exists">File already exists</string>
@@ -394,6 +408,8 @@
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Foreground service</string>
     <string name="text_foreground_service_description">Foreground services perform operations that are noticeable to the user.\nForeground services show a status bar notification, so that users are actively aware that your app is performing a task in the foreground and is consuming system resources.\nThe notification cannot be dismissed unless the service is either stopped or removed from the foreground.\nNotification may be set low priority, even be turned off, by long-pressing notification.</string>
+    <string name="text_formatting_completed">Formatting completed</string>
+    <string name="text_function">Function</string>
     <string name="text_fx_keyboard">Fx keyboard</string>
     <string name="text_generate">Generate</string>
     <string name="text_generate_code">Generate code</string>
@@ -448,10 +464,13 @@
     <string name="text_loop_delay">Loop delay (sec)</string>
     <string name="text_loop_interval">Loop interval (sec)</string>
     <string name="text_loop_times">Loop times</string>
+    <string name="text_lower_than">Lower than</string>
     <string name="text_main_file_name">Main script file name</string>
     <string name="text_manage">Manage</string>
     <string name="text_manage_a11y_service">Manage accessibility service</string>
     <string name="text_manage_ignored_updates">Manage ignored updates</string>
+    <string name="text_min_version">Minimum version</string>
+    <string name="text_min_version_of_vscode_vsc_ext">Minimum version of VSCode extension</string>
     <string name="text_mobile_qq_not_installed">\"Mobile QQ\" not installed</string>
     <string name="text_more">More</string>
     <string name="text_more_details">Details</string>
@@ -476,7 +495,6 @@
     <string name="text_not_granted">Not granted</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
     <string name="text_notification">Notification</string>
-    <string name="text_post_notifications_permission">Post notifications</string>
     <string name="text_notification_access_permission">Notification access</string>
     <string name="text_notification_service_disabled">Notification service is not working</string>
     <string name="text_null">Null</string>
@@ -512,6 +530,7 @@
     <string name="text_please_input_name">Input name</string>
     <string name="text_pointer_location">Pointer location (with root)</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nRoot access is required.</string>
+    <string name="text_post_notifications_permission">Post notifications</string>
     <string name="text_pre_execute_script">Pre-execute script</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Preparing...</string>
     <string name="text_press_again_to_dismiss_dialog">Press again to dismiss the dialog</string>
@@ -522,8 +541,6 @@
     <string name="text_project_location">Project location</string>
     <string name="text_project_media_access">Project media access</string>
     <string name="text_project_media_access_description">With project media access, security warning for screen recording will not prompt.</string>
-    <string name="text_project_save_error">Failed to save project</string>
-    <string name="text_project_save_succeeded">Project saved</string>
     <string name="text_prompt">Prompt</string>
     <string name="text_quit">Quit</string>
     <string name="text_record_finished">Recording finished</string>
@@ -540,11 +557,14 @@
     <string name="text_registering">Registering</string>
     <string name="text_release_notes">Release notes</string>
     <string name="text_remote">remote</string>
+    <string name="text_remote_file_saved_to_local_storage_successfully">Remote file saved to local storage successfully</string>
+    <string name="text_remote_project_saved_to_local_storage_successfully">Remote project saved to local storage successfully</string>
     <string name="text_remove_all_breakpoints">Remove all breakpoints</string>
     <string name="text_rename">Rename</string>
     <string name="text_replace">Replace</string>
     <string name="text_replace_all">Replace all</string>
     <string name="text_replace_simplified">Replace</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">Repository URL of VSCode extension</string>
     <string name="text_report_succeed">Submit succeeded</string>
     <string name="text_requires_android_os_version" formatted="false">Requires Android OS version %s (API %s) but current is %s (API %s)</string>
     <string name="text_reset_password">Reset password</string>
@@ -583,7 +603,6 @@
     <string name="text_save_to">Save to</string>
     <string name="text_script_record">Script recording</string>
     <string name="text_script_running">Script running</string>
-    <string name="text_script_save_succeeded">Script saved succeeded (refresh is needed)</string>
     <string name="text_search">Search</string>
     <string name="text_select">Select</string>
     <string name="text_select_by_exists">If clip exists (exists)</string>
@@ -649,6 +668,7 @@
     <string name="text_version_info">Version info</string>
     <string name="text_version_name">Version name</string>
     <string name="text_view_docs">View documents</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
     <string name="text_working_dir_path">Working directory path</string>
@@ -656,26 +676,6 @@
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="theme_color_default">Default</string>
-    <string name="error_abandoned_method">Method %s has been abandoned and should not be used</string>
-    <string name="error_invalid_ip_address">Invalid IP address</string>
-    <string name="error_ip_address_should_not_be_empty">IP address can not be empty</string>
-    <string name="error_unacceptable_character">Unacceptable character</string>
-    <string name="error_port_num_over_65535">Port number over 65535</string>
-    <string name="error_dot_decimal_notation_num_over_255">Dot-decimal number over 255</string>
-    <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
-    <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
-    <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
-    <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
-    <string name="text_min_version">Minimum version</string>
-    <string name="text_current_version">Current version</string>
-    <string name="text_lower_than">Lower than</string>
-    <string name="text_repo_url_of_vscode_vsc_ext">Repository URL of VSCode extension</string>
-    <string name="text_connection_cannot_be_established">Connection can\'t be established</string>
-    <string name="text_min_version_of_vscode_vsc_ext">Minimum version of VSCode extension</string>
-    <string name="text_function">Function</string>
-    <string name="text_formatting_completed">Formatting completed</string>
-    <string name="text_failed_to_format">Failed to format</string>
-    <string name="text_comment">Comment</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>

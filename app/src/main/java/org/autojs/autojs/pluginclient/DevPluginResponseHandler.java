@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -26,11 +27,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -76,7 +75,7 @@ public class DevPluginResponseHandler implements Handler {
                         .handler("save", data -> {
                             String script = data.get("script").getAsString();
                             String name = getName(data);
-                            saveScript(name, script);
+                            saveFile(name, script);
                             return true;
                         })
                         .handler("stopAll", data -> {
@@ -151,45 +150,56 @@ public class DevPluginResponseHandler implements Handler {
         return element.getAsString();
     }
 
-    private void saveScript(String name, String script) {
+    private void saveFile(String name, String content) {
         if (TextUtils.isEmpty(name)) {
-            name = "untitled";
+            name = getUntitledTitle();
         }
-        name = PFiles.getNameWithoutExtension(name);
-        if (!name.endsWith(".js")) {
-            name = name + ".js";
-        }
+        name = PFiles.getName(name);
+
+        // @Comment by SuperMonster003 on Jun 1, 2022.
+        //  ! Keep the original extension name of source file.
+        // name = PFiles.getNameWithoutExtension(name);
+        // if (!name.endsWith(".js")) {
+        //     name = name + ".js";
+        // }
+
         File file = new File(WorkingDirectoryUtils.getPath(), name);
         PFiles.ensureDir(file.getPath());
-        PFiles.write(file, script);
-        ViewUtils.showToast(mContext, R.string.text_script_save_succeeded, true);
+        PFiles.write(file, content);
+        ViewUtils.showToast(mContext, R.string.text_remote_file_saved_to_local_storage_successfully, true);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     private void saveProject(String name, String dir) {
         if (TextUtils.isEmpty(name)) {
-            name = "untitled";
+            name = getUntitledTitle();
         }
-        name = PFiles.getNameWithoutExtension(name);
+        name = PFiles.getName(name);
 
         File toDir = new File(WorkingDirectoryUtils.getPath(), name);
-        Callable<String> stringCallable = () -> {
-            copyDir(new File(dir), toDir);
-            return toDir.getPath();
-        };
-
-        Consumer<String> stringConsumer = dest -> ViewUtils
-                .showToast(mContext, mContext.getString(R.string.text_project_save_succeeded) + "\n" + dest);
-        Consumer<Throwable> throwableConsumer = err -> ViewUtils
-                .showToast(mContext, mContext.getString(R.string.text_project_save_error) + "\n" + err.getMessage());
 
         Observable
-                .fromCallable(stringCallable)
+                .fromCallable(() -> {
+                    copyDir(new File(dir), toDir);
+                    return toDir.getPath();
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(stringConsumer, throwableConsumer);
+                .subscribe(
+                        dest -> ViewUtils.showToast(mContext, mContext.getString(R.string.text_remote_project_saved_to_local_storage_successfully), true),
+                        err -> {
+                            var msg = mContext.getString(R.string.text_failed_to_save_remote_project_to_local_storage);
+                            var e = err.getMessage();
+                            if (e != null) msg += "\n" + e;
 
+                            new MaterialDialog.Builder(mContext)
+                                    .title(R.string.text_failed)
+                                    .content(msg)
+                                    .positiveText(R.string.dialog_button_confirm)
+                                    .show();
+                        }
+                );
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -207,6 +217,10 @@ public class DevPluginResponseHandler implements Handler {
                 PFiles.write(new FileInputStream(file), fos, true);
             }
         }
+    }
+
+    private String getUntitledTitle() {
+        return "untitled" + "-" + System.currentTimeMillis();
     }
 
 }

@@ -531,10 +531,12 @@ class CodeEditor : HVScrollView {
 
             @Suppress("RegExpSimplifiable")
             replaceSelectedLines(Regex("^(\\s{$insetPosition})(\\s*\\S+)")) { matchResult ->
-                "$prefix\u0020"
-                    .also { selectionEnd += it.length }
-                    .also { hasEverMatched = true }
-                    .let { "${matchResult.groupValues[1]}$it${matchResult.groupValues[2]}" }
+                "$prefix\u0020".let {
+                    selectionEnd += it.length
+                    hasEverMatched = true
+                    val (_, former, latter) = matchResult.groupValues
+                    "$former$it$latter"
+                }
             }
 
             @Suppress("ControlFlowWithEmptyBody")
@@ -555,8 +557,9 @@ class CodeEditor : HVScrollView {
             var selectionEnd = codeEditText.selectionEnd
 
             replaceSelectedLines(Regex("(\\s*)($prefix\\s?)(.*)")) { matchResult ->
-                selectionEnd -= matchResult.groupValues[2].length
-                "${matchResult.groupValues[1]}${matchResult.groupValues[3]}"
+                val (_, former, feature, latter) = matchResult.groupValues
+                selectionEnd -= feature.length
+                "$former$latter"
             }
 
             codeEditText.setSelection(selectionEnd)

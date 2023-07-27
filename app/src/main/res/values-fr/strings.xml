@@ -83,6 +83,7 @@
     <string name="entry_root_record_out_file_type_binary">Type binaire (non éditable)</string>
     <string name="entry_root_record_out_file_type_js">Type JavaScript (modifiable)</string>
     <string name="error_a_runtime_has_been_set">Un runtime a été défini</string>
+    <string name="error_abandoned_method">La méthode %s a été abandonnée et ne doit pas être utilisée</string>
     <string name="error_app_not_installed">L\'application n\'est pas installée: \"%s\"</string>
     <string name="error_both_bitmap_and_mat_are_null">Le bitmap et le mat sont tous deux nuls</string>
     <string name="error_cannot_be_null">%s can\'t be null</string>
@@ -94,11 +95,13 @@
     <string name="error_change_password_error_length">Utiliser plus de caractères pour le mot de passe</string>.
     <string name="error_change_password_error_match">Ces mots de passe ne correspondent pas</string>
     <string name="error_check_for_update">Fail to check for updates</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">Les deux points doivent suivre une adresse IP valide</string>
     <string name="error_compass_cannot_be_null">Compass ne peut pas être null</string>
     <string name="error_connect_to_remote">Impossible de se connecter au serveur distant: %s</string>
     <string name="error_continuation_resume_called_without_suspend">La méthode resume() doit être appelée après suspend()</string>.
     <string name="error_continuation_suspend_called_more_than_once">La méthode suspend() ne devrait être appelée qu\'une seule fois</string>.
     <string name="error_corresponding_github_release_may_not_published">La version GitHub correspondante n\'a peut-être pas encore été publiée</string>.
+    <string name="error_dot_decimal_notation_num_over_255">Nombre de points décimaux supérieur à 255</string>
     <string name="error_download_interrupted">Téléchargement interrompu</string>
     <string name="error_email_taken">L\'e-mail est pris</string>
     <string name="error_empty_broadcast_selection">Il faut sélectionner au moins une diffusion</string>.
@@ -118,9 +121,11 @@
     <string name="error_image_has_been_recycled">L\'image a été recyclée</string>
     <string name="error_invalid_compass">Compas non valide: %s</string>
     <string name="error_invalid_github_repo">Invalide le dépôt GitHub: %s</string>
+    <string name="error_invalid_ip_address">Adresse IP invalide</string>
     <string name="error_invalid_login_credentials">Crédentiels de connexion invalides</string>
     <string name="error_invalid_rest_compass">Invalid rest compass: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">Elément de carte de sélecteur non valide: { %s: %s (%s) }</string>
+    <string name="error_ip_address_should_not_be_empty">L\'adresse IP ne peut pas être vide</string>
     <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 peut ne pas avoir l\'accès root pour exécuter le fichier \"auto\"</string>.
     <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
@@ -139,13 +144,17 @@
     <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
     <string name="error_parse_version_info">Fail to parse version information</string>
     <string name="error_pattern_syntax">Syntaxe de motif invalide</string>
+    <string name="error_port_num_over_65535">Numéro de port supérieur à 65535</string>
     <string name="error_put_value_into_json">Can\'t put value %s into JSON</string>
     <string name="error_regex_find_prev">Can\'t find previous with regex</string>
+    <string name="error_repeated_colon_symbol">Symbole deux-points répété</string>
+    <string name="error_repeated_dot_symbol">Symbole point répété</string>
     <string name="error_script_is_on_exiting">Le script est en train de sortir</string>
     <string name="error_selector_method_without_calling">La méthode du sélecteur doit être appelée plutôt que passée en paramètre: %s</string>.
     <string name="error_selector_result_type_with_compass">Can\'t use a compass when result type is selector</string>
     <string name="error_set_both_icon_res_and_icon">Can\'t set both iconRes and icon</string>
     <string name="error_thread_is_not_alive">Thread n\'est pas vivant</string>
+    <string name="error_unacceptable_character">Caractère inacceptable</string>
     <string name="error_unknown">Erreur inconnue</string>
     <string name="error_unknown_algorithm_selector_param">Param inconnu du sélecteur d\'algorithme: %s</string>
     <string name="error_unknown_color_name">Nom de couleur inconnu: %s</string>
@@ -277,19 +286,21 @@
     <string name="text_click_too_frequently">Une opération fréquente</string>
     <string name="text_client_mode">Mode client</string>
     <string name="text_close">Fermeture</string>
+    <string name="text_close_floating_button">Fermer le bouton flottant</string>
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautifier le code</string>
     <string name="text_command_already_copied_to_clip">Commande copiée dans le presse-papiers</string>
+    <string name="text_comment">Commentaire</string>
     <string name="text_compatibility">Compatibilité</string>
     <string name="text_compatibility_with_classes_for_ver_4_x">Compatibilité avec les classes Java pour la version 4.x</string>
     <string name="text_config">Configuration</string>
     <string name="text_confirm_to_delete">Vous êtes sûr de vouloir supprimer?</string>
     <string name="text_confirm_to_remove">Etes-vous sûr de supprimer?</string>
     <string name="text_connect_to_pc">Connexion au PC</string>
+    <string name="text_connection_cannot_be_established">La connexion ne peut pas être établie</string>
     <string name="text_console">Console</string>
     <string name="text_continue">Continue</string>
     <string name="text_copy">Copie</string>
-    <string name="text_export">Export</string>
     <string name="text_copy_all">Copier tout</string>
     <string name="text_copy_all_files_to_new_directory">Copier tous les fichiers dans un nouveau répertoire</string>
     <string name="text_copy_command">Copie de cmd</string>
@@ -297,6 +308,7 @@
     <string name="text_copy_line">Copie de la ligne</string>
     <string name="text_copy_to_clip">Copie vers le presse-papiers</string>
     <string name="text_copy_value">Copie de la valeur</string>
+    <string name="text_current_version">Version actuelle</string>
     <string name="text_daily_task">Tâche quotidienne</string>
     <string name="text_date">Date</string>
     <string name="text_day1">Mon</string>
@@ -363,7 +375,7 @@
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
     <string name="text_exit">Sortir</string>
     <string name="text_exit_directly">Exit</string>
-    <string name="text_close_floating_button">Fermer le bouton flottant</string>
+    <string name="text_export">Export</string>
     <string name="text_extending_js_build_in_objects">Extension des objets intégrés de JavaScript</string>
     <string name="text_extensibility">Extensibilité</string>
     <string name="text_failed">Failed</string>
@@ -374,6 +386,7 @@
     <string name="text_failed_to_download">Fail to download</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">Failed to enable accessibility service with root access</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">Failed to enable accessibility service with secure settings</string>
+    <string name="text_failed_to_format">Échec du formatage</string>
     <string name="text_failed_to_generate">Fail to generate code</string>
     <string name="text_failed_to_grant_access">Failed to grant access</string>
     <string name="text_failed_to_grant_draw_overlays_permission">Fail to grant display over other apps permission</string>
@@ -381,6 +394,7 @@
     <string name="text_failed_to_login">Fail to login</string>
     <string name="text_failed_to_register">Failed to register</string>
     <string name="text_failed_to_report">Failed to submit</string>
+    <string name="text_failed_to_save_remote_project_to_local_storage">Échec de l\'enregistrement du projet distant dans le stockage local</string>
     <string name="text_failed_to_write_file">Fail to write file</string>
     <string name="text_file">Fichier</string>
     <string name="text_file_exists">Fichier déjà existant</string>
@@ -396,6 +410,8 @@
     <string name="text_force_stop">Force stop</string>
     <string name="text_foreground_service">Service d\'avant-plan</string>
     <string name="text_foreground_service_description">Les services d\'avant-plan effectuent des opérations qui sont perceptibles par l\'utilisateur\nLes services d\'avant-plan affichent une notification dans la barre d\'état, de sorte que les utilisateurs sont activement conscients que votre application effectue une tâche en avant-plan et consomme des ressources système.\nLa notification ne peut pas être rejetée à moins que le service ne soit arrêté ou supprimé de l\'avant-plan.\nLa notification peut avoir une faible priorité, voire être désactivée, en appuyant longuement sur la notification.</string>
+    <string name="text_formatting_completed">Formatage terminé</string>
+    <string name="text_function">Fonction</string>
     <string name="text_fx_keyboard">Fx clavier</string>
     <string name="text_generate">Générer</string>
     <string name="text_generate_code">Générer un code</string>
@@ -450,10 +466,13 @@
     <string name="text_loop_delay">Délai de boucle (sec)</string>
     <string name="text_loop_interval">Intervalle de boucle (sec)</string>
     <string name="text_loop_times">Temps de boucle</string>
+    <string name="text_lower_than">Inférieure à</string>
     <string name="text_main_file_name">Nom du fichier du script principal</string>
     <string name="text_manage">Gestion</string>
     <string name="text_manage_a11y_service">Gestion du service d\'accessibilité</string>
     <string name="text_manage_ignored_updates">Gérer les mises à jour ignorées</string>
+    <string name="text_min_version">Version minimale</string>
+    <string name="text_min_version_of_vscode_vsc_ext">Version minimale de l\'extension VSCode</string>
     <string name="text_mobile_qq_not_installed">\"Mobile QQ\" non installé</string>
     <string name="text_more">Plus</string>
     <string name="text_more_details">Détails</string>
@@ -478,7 +497,6 @@
     <string name="text_not_granted">Non accordée</string>
     <string name="text_not_showing_main_activity">Not showing main activity</string>
     <string name="text_notification">Notification</string>
-    <string name="text_post_notifications_permission">Notifications postales</string>
     <string name="text_notification_access_permission">Accès à la notification</string>
     <string name="text_notification_service_disabled">Le service de notification ne fonctionne pas</string>
     <string name="text_null">Null</string>
@@ -514,6 +532,7 @@
     <string name="text_please_input_name">Nom de l\'entrée</string>
     <string name="text_pointer_location">L\'emplacement du pointeur (avec la racine)</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nL\'accès à la racine est nécessaire.</string>
+    <string name="text_post_notifications_permission">Notifications postales</string>
     <string name="text_pre_execute_script">Pré-exécution du script</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Préparation...</string>
     <string name="text_press_again_to_dismiss_dialog">Appuyez à nouveau sur la touche pour rejeter la boîte de dialogue</string>.
@@ -524,8 +543,6 @@
     <string name="text_project_location">Localisation du projet</string>
     <string name="text_project_media_access">Accès aux médias du projet</string>
     <string name="text_project_media_access_description">Avec l\'accès aux médias du projet, l\'avertissement de sécurité pour l\'enregistrement d\'écran ne sera pas demandé.</string>
-    <string name="text_project_save_error">Fail to save project</string>
-    <string name="text_project_save_succeeded">Projet enregistré</string>
     <string name="text_prompt">Prompt</string>
     <string name="text_quit">Quit</string>
     <string name="text_record_finished">Enregistrement terminé</string>
@@ -542,11 +559,14 @@
     <string name="text_registering">Register</string>
     <string name="text_release_notes">Release notes</string>
     <string name="text_remote">à distance</string>
+    <string name="text_remote_file_saved_to_local_storage_successfully">Fichier distant enregistré avec succès dans la mémoire locale</string>
+    <string name="text_remote_project_saved_to_local_storage_successfully">Projet distant sauvegardé avec succès dans le stockage local</string>
     <string name="text_remove_all_breakpoints">Supprimer tous les points d\'arrêt</string>
     <string name="text_rename">Renommer</string>
     <string name="text_replace">Remplacer</string>
     <string name="text_replace_all">Remplacer tout</string>
     <string name="text_replace_simplified">Rempl</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">URL du dépôt de l\'extension VSCode</string>
     <string name="text_report_succeed">Submission réussie</string>
     <string name="text_requires_android_os_version" formatted="false">Requiert Android OS version %s (API %s) mais la version actuelle est %s (API %s)</string>
     <string name="text_reset_password">Réinitialiser le mot de passe</string>
@@ -585,7 +605,6 @@
     <string name="text_save_to">Save to</string>
     <string name="text_script_record">Enregistrement de scripts</string>
     <string name="text_script_running">Script running</string>
-    <string name="text_script_save_succeeded">Script enregistré réussi (un rafraîchissement est nécessaire)</string>
     <string name="text_search">Recherche</string>
     <string name="text_select">Select</string>
     <string name="text_select_by_exists">Si le clip existe (exists)</string>
@@ -651,6 +670,7 @@
     <string name="text_version_info">Informations de la version</string>
     <string name="text_version_name">Nom de la version</string>
     <string name="text_view_docs">Voir les documents</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">La version de l\'extension VSCode ne répond pas aux exigences</string>
     <string name="text_weekly_task">Tâche hebdomadaire</string>
     <string name="text_weekly_task_should_check_day_of_week">Au moins un jour doit être sélectionné</string>
     <string name="text_working_dir_path">Chemin du répertoire de travail</string>.
@@ -658,26 +678,6 @@
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="theme_color_default">Default</string>
-    <string name="error_abandoned_method">La méthode %s a été abandonnée et ne doit pas être utilisée</string>
-    <string name="error_invalid_ip_address">Adresse IP invalide</string>
-    <string name="error_ip_address_should_not_be_empty">L\'adresse IP ne peut pas être vide</string>
-    <string name="error_unacceptable_character">Caractère inacceptable</string>
-    <string name="error_port_num_over_65535">Numéro de port supérieur à 65535</string>
-    <string name="error_dot_decimal_notation_num_over_255">Nombre de points décimaux supérieur à 255</string>
-    <string name="error_colon_must_follow_a_valid_ip_address">Les deux points doivent suivre une adresse IP valide</string>
-    <string name="error_repeated_dot_symbol">Symbole point répété</string>
-    <string name="error_repeated_colon_symbol">Symbole deux-points répété</string>
-    <string name="text_vsc_ext_version_not_meet_requirement">La version de l\'extension VSCode ne répond pas aux exigences</string>
-    <string name="text_min_version">Version minimale</string>
-    <string name="text_current_version">Version actuelle</string>
-    <string name="text_lower_than">Inférieure à</string>
-    <string name="text_repo_url_of_vscode_vsc_ext">URL du dépôt de l\'extension VSCode</string>
-    <string name="text_connection_cannot_be_established">La connexion ne peut pas être établie</string>
-    <string name="text_min_version_of_vscode_vsc_ext">Version minimale de l\'extension VSCode</string>
-    <string name="text_function">Fonction</string>
-    <string name="text_formatting_completed">Formatage terminé</string>
-    <string name="text_failed_to_format">Échec du formatage</string>
-    <string name="text_comment">Commentaire</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d article</item>
