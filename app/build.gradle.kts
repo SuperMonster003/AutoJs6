@@ -109,6 +109,9 @@ dependencies /* Unclassified */ {
     // OpenCV
     implementation(project(":libs:org.opencv-4.5.5"))
 
+    // PaddleOCR
+    implementation(project(":libs:paddleocr"))
+
     // Android Job
     implementation(project(":libs:android-job-simplified-1.4.3"))
 
