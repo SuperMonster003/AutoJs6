@@ -40,6 +40,7 @@ import org.autojs.autojs.runtime.api.Floaty;
 import org.autojs.autojs.runtime.api.Images;
 import org.autojs.autojs.runtime.api.Media;
 import org.autojs.autojs.runtime.api.MlKitOCR;
+import org.autojs.autojs.runtime.api.PaddleOCR;
 import org.autojs.autojs.runtime.api.Plugins;
 import org.autojs.autojs.runtime.api.ProcessShell;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
@@ -243,6 +244,9 @@ public class ScriptRuntime {
     @ScriptVariable
     public final MlKitOCR mlKitOCR;
 
+    @ScriptVariable
+    public final PaddleOCR paddleOCR;
+
     private static WeakReference<Context> applicationContext;
     private final Map<String, Object> mProperties = new ConcurrentHashMap<>();
     private AbstractShell mRootShell;
@@ -278,6 +282,7 @@ public class ScriptRuntime {
         plugins = new Plugins(context, this);
 
         mlKitOCR = new MlKitOCR();
+        paddleOCR = new PaddleOCR();
     }
 
     public void init() {
@@ -554,6 +559,7 @@ public class ScriptRuntime {
         ignoresException(this::recycleShell);
         ignoresException(images::releaseScreenCapturer);
         ignoresException(mlKitOCR::release);
+        ignoresException(paddleOCR::release);
         ignoresException(sensors::unregisterAll);
         ignoresException(timers::recycle);
         ignoresException(ui::recycle);
