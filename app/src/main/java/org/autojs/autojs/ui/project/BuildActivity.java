@@ -34,7 +34,9 @@ import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityBuildBinding;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -68,6 +70,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private MaterialDialog mProgressDialog;
     private String mSource;
     private boolean mIsDefaultIcon = true;
+    private boolean mIsApkTemplateInAssets = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -96,7 +99,21 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (mSource != null) {
             setupWithSourceFile(new ScriptFile(mSource));
         }
-        checkApkBuilderPlugin();
+        mIsApkTemplateInAssets = checkApkTemplateInAssets();
+        if (!mIsApkTemplateInAssets) {
+            checkApkBuilderPlugin();
+        }
+    }
+
+    private boolean checkApkTemplateInAssets() {
+        try {
+            if (Arrays.asList(getAssets().list("")).contains("template.apk")) {
+                return true;
+            }
+        } catch (IOException e) {
+            Log.e(LOG_TAG, e.getMessage());
+        }
+        return false;
     }
 
     private void checkApkBuilderPlugin() {
@@ -182,7 +199,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     void buildApk() {
-        if (!ApkBuilderPluginHelper.isPluginAvailable(this)) {
+        if (!mIsApkTemplateInAssets && !ApkBuilderPluginHelper.isPluginAvailable(this)) {
             ViewUtils.showToast(this, R.string.text_apk_builder_plugin_unavailable);
             return;
         }
@@ -260,7 +277,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private ApkBuilder callApkBuilder(File tmpDir, File outApk, ApkBuilder.AppConfig appConfig) throws Exception {
-        InputStream templateApk = ApkBuilderPluginHelper.openTemplateApk(BuildActivity.this);
+        InputStream templateApk = mIsApkTemplateInAssets ? getAssets().open("template.apk") : ApkBuilderPluginHelper.openTemplateApk(BuildActivity.this);
         return new ApkBuilder(templateApk, outApk, tmpDir.getPath())
                 .setProgressCallback(BuildActivity.this)
                 .prepare()
