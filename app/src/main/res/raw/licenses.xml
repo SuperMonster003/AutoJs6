@@ -101,4 +101,10 @@
         <url>http://www.lingala.net/zip4j/</url>
         <license>Apache Software License 2.0</license>
     </notice>
+    <notice>
+        <name>paddle</name>
+        <copyright>Copyright (c) 2016 PaddlePaddle Authors. All Rights Reserved</copyright>
+        <url>https://github.com/paddlepaddle/paddle</url>
+        <license>Apache Software License 2.0</license>
+    </notice>
 </notices>

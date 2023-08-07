@@ -485,7 +485,7 @@ Object.assign(this, {
 
                 /* ! ocr < images */
                 /* ! ocr < files */
-                [ 'ocr' ],
+                [ 'ocr', 'paddle_ocr' ],
 
                 /* Safe to put last regardless of the order, no guarantee ;). */
                 [ 'floaty', 'storages', 'device', 'recorder', 'toast' ],
