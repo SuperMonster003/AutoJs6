@@ -1,0 +1,4 @@
+/build
+.cxx/
+cache/
+OpenCV/

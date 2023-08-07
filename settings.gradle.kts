@@ -10,6 +10,7 @@ include(
     ":libs:jackpal.androidterm.emulatorview-1.0.42",
     ":libs:jackpal.androidterm.libtermexec-1.0",
     ":libs:org.opencv-4.5.5",
+    ":libs:paddleocr",
 
     ":libs:android-spackle-9.0.0",
     ":libs:android-assertion-9.0.0",

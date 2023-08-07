@@ -1,0 +1,86 @@
+plugins {
+    id 'com.android.library'
+}
+import java.security.MessageDigest
+
+android {
+    namespace = "paddleocr"
+    ndkVersion '21.1.6352462'
+    compileSdk 33
+    defaultConfig {
+        minSdkVersion 24
+        targetSdkVersion 31
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11 -frtti -fexceptions -Wno-format"
+                arguments '-DANDROID_PLATFORM=android-23', '-DANDROID_STL=c++_shared' ,"-DANDROID_ARM_NEON=TRUE"
+            }
+        }
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a"
+            ldLibs "jnigraphics"
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.10.2"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(path: ':libs:org.opencv-4.5.5')
+}
+
+/**
+ * 下载opencv4.5.5源码包 默认为4.2.0 和 AutoJS中的版本不匹配会产生冲突 这里进行修改
+ */
+def zipArchives = [
+        [
+                'src' : 'https://github.com/opencv/opencv/releases/download/4.5.5/opencv-4.5.5-android-sdk.zip',
+                'dest': 'OpenCV'
+        ]
+]
+
+/**
+ * 首次导入最好手动运行一下这个task下载依赖的包
+ */
+tasks.register('downloadAndExtractArchives', DefaultTask) {
+    doFirst {
+        println "Downloading and extracting archives including libs and models"
+    }
+    doLast {
+        // Prepare cache folder for archives
+        String cachePath = "cache"
+        if (!file("${cachePath}").exists()) {
+            mkdir "${cachePath}"
+        }
+        zipArchives.eachWithIndex { archive, index ->
+            MessageDigest messageDigest = MessageDigest.getInstance('MD5')
+            messageDigest.update(archive.src.bytes)
+            String cacheName = new BigInteger(1, messageDigest.digest()).toString(32)
+            // Download the target archive if not exists
+            boolean copyFiles = !file("${archive.dest}").exists()
+            if (!file("${cachePath}/${cacheName}.zip").exists()) {
+                ant.get(src: archive.src, dest: file("${cachePath}/${cacheName}.zip"))
+                copyFiles = true; // force to copy files from the latest archive files
+            }
+            // Extract the target archive if its dest path does not exists
+            if (copyFiles) {
+                copy {
+                    from zipTree("${cachePath}/${cacheName}.zip")
+                    into "${archive.dest}"
+                }
+            }
+        }
+    }
+}
+preBuild.dependsOn downloadAndExtractArchives
