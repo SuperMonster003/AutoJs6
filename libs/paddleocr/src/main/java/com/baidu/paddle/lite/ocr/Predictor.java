@@ -8,13 +8,15 @@ import android.util.Base64;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * @author PaddleOCR
@@ -33,7 +35,7 @@ public class Predictor {
     protected OCRPredictorNative paddlePredictor = null;
     protected float inferenceTime = 0;
     // Only for object detection
-    protected Vector<String> wordLabels = new Vector<>();
+    protected List<String> wordLabels = new ArrayList<>();
     protected int detLongSize = 960;
     public float scoreThreshold = 0.1f;
     protected Bitmap inputImage = null;
@@ -70,7 +72,14 @@ public class Predictor {
      */
     private final String defaultModelPathSlim = "models/ocr_v3_for_cpu(slim)";
 
+    /**
+     * 初始化时校验模型是否加载正确
+     */
     private int retryTime = 1;
+    /**
+     * 初始化尝试次数
+     */
+    private int initRetryTime = 1;
 
     public Predictor() {
     }
@@ -92,13 +101,18 @@ public class Predictor {
     }
 
     public boolean init(Context appCtx, String modelPath, String labelPath) {
+        Log.d(TAG, "init whit model: " + modelPath + " label: " + labelPath);
         isLoaded = loadModel(appCtx, modelPath, cpuThreadNum, cpuPowerMode);
         if (!isLoaded) {
             return false;
         }
         isLoaded = loadLabel(appCtx, labelPath);
         if (!checkModelLoadedSuccess()) {
-            init(appCtx, modelPath, labelPath);
+            if (initRetryTime++ < 3) {
+                return init(appCtx, modelPath, labelPath);
+            } else {
+                return false;
+            }
         }
         return isLoaded;
     }
@@ -164,7 +178,7 @@ public class Predictor {
             // otherwise copy model to cache from assets
             realPath = appCtx.getCacheDir() + "/" + modelPath;
             // region add by TonyJiangWJ
-            String key = "PADDLE_MODEL_LOADED";
+            String key = "PADDLE_MODEL_LOADED" + md5(modelPath);
             // 进行了模型更新 需要强制覆盖旧模型
             boolean loaded = PreferenceManager.getDefaultSharedPreferences(appCtx).getBoolean(key, false);
             if (loaded) {
@@ -195,6 +209,18 @@ public class Predictor {
         return true;
     }
 
+    public static String md5(String text) {
+        MessageDigest md;
+        byte[] bytesOfMessage = text.getBytes();
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        byte[] thedigest = md.digest(bytesOfMessage);
+        return Base64.encodeToString(thedigest, Base64.DEFAULT);
+    }
+
     public void releaseModel() {
         if (paddlePredictor != null) {
             paddlePredictor.destroy();
@@ -210,21 +236,27 @@ public class Predictor {
         wordLabels.add("black");
         // Load word labels from file
         try {
-            InputStream assetsInputStream = appCtx.getAssets().open(labelPath);
-            int available = assetsInputStream.available();
+            InputStream labelInputStream = null;
+            if (labelPath.startsWith("/")) {
+                labelInputStream = new FileInputStream(labelPath);
+            } else {
+                labelInputStream = appCtx.getAssets().open(labelPath);
+            }
+            int available = labelInputStream.available();
             byte[] lines = new byte[available];
-            if (assetsInputStream.read(lines) <= 0) {
+            if (labelInputStream.read(lines) <= 0) {
                 Log.e(TAG, "读取label失败");
                 return false;
             }
-            assetsInputStream.close();
+            labelInputStream.close();
             String words = new String(lines);
-            String[] contents = words.split("\n");
+            // Windows下换行为\r\n 进行兼容
+            String[] contents = words.split("(\r)?\n");
             wordLabels.addAll(Arrays.asList(contents));
             wordLabels.add(" ");
             Log.i(TAG, "Word label size: " + wordLabels.size());
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, e.getMessage(), e);
             return false;
         }
         return true;
@@ -323,7 +355,7 @@ public class Predictor {
             StringBuilder word = new StringBuilder();
             for (int index : r.getWordIndex()) {
                 if (index >= 0 && index < wordLabels.size()) {
-                    word.append(wordLabels.get(index).replace("\r", ""));
+                    word.append(wordLabels.get(index));
                 } else {
                     Log.e(TAG, "Word index is not in label list:" + index);
                     word.append(" ");
