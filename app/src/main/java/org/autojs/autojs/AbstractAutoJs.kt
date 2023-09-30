@@ -20,6 +20,7 @@ import org.autojs.autojs.engine.RootAutomatorEngine
 import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.engine.ScriptEngineServiceBuilder
+import org.autojs.autojs.inrt.autojs.XJavaScriptEngine
 import org.autojs.autojs.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.rhino.InterruptibleAndroidContextFactory
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -58,9 +59,17 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     val infoProvider = ActivityInfoProvider(context)
     val scriptEngineManager = ScriptEngineManager(context)
     val scriptEngineService: ScriptEngineService = run {
-        scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
-            LoopBasedJavaScriptEngine(context).also { engine ->
-                engine.runtime = createRuntime().also { runtime = it }
+        if (org.autojs.autojs6.BuildConfig.isInrt) {
+            scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
+                XJavaScriptEngine(context).also { engine ->
+                    engine.runtime = createRuntime().also { runtime = it }
+                }
+            }
+        } else {
+            scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
+                LoopBasedJavaScriptEngine(context).also { engine ->
+                    engine.runtime = createRuntime().also { runtime = it }
+                }
             }
         }
         initContextFactory()
@@ -84,7 +93,14 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     }
 
     private fun initContextFactory() {
-        ContextFactory.initGlobal(InterruptibleAndroidContextFactory(File(context.cacheDir, "classes")))
+        ContextFactory.initGlobal(
+            InterruptibleAndroidContextFactory(
+                File(
+                    context.cacheDir,
+                    "classes"
+                )
+            )
+        )
     }
 
     protected open fun createRuntime(): ScriptRuntime = ScriptRuntime.Builder()
