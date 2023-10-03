@@ -44,6 +44,7 @@ import java.io.File
  * Created by Stardust on 2017/11/29.
  * Modified by SuperMonster003 as of Jun 10, 2022.
  * Transformed by SuperMonster003 on Oct 10, 2022.
+ * Modified by LZX284 (https://github.com/LZX284) as of Sep 30, 2023.
  */
 abstract class AbstractAutoJs protected constructor(protected val application: Application) {
 
@@ -93,14 +94,7 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     }
 
     private fun initContextFactory() {
-        ContextFactory.initGlobal(
-            InterruptibleAndroidContextFactory(
-                File(
-                    context.cacheDir,
-                    "classes"
-                )
-            )
-        )
+        ContextFactory.initGlobal(InterruptibleAndroidContextFactory(File(context.cacheDir, "classes")))
     }
 
     protected open fun createRuntime(): ScriptRuntime = ScriptRuntime.Builder()
