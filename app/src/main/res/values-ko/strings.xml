@@ -40,6 +40,7 @@
     <string name="description_stable_mode">안정 모드는 레이아웃 경계를 얻을 때 더 안정적이지만 일부 결과는 무시할 수 있습니다.\n접근성 서비스의 재시작이 필요합니다.</string>
     <string name="description_theme_color_preference">테마 색상은 다음을 포함하되 이에 국한되지 않는 위젯에 적용됩니다.\n상태 표시 줄\n앱바\n파일 아이콘\n작업 항목 아이콘\n팹\n설정 카테고리 제목\n스위치 버튼\n\n참고: AutoJs6 버전 6.2.0 현재 기본 색상, 기본 어두운 색상 및 강조 색상 사이에는 아직 차이가 없습니다.</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">취소</string>
     <string name="dialog_button_cancel_download">취소</string>
     <string name="dialog_button_confirm">확인</string>
@@ -132,7 +133,7 @@
     <string name="error_no_accessibility_permission">접근성 서비스가 비활성화되고 스크립트가 중지되었습니다</string>
     <string name="error_no_accessibility_permission_to_capture">접근성 서비스는 활성화되지 않습니다</string>
     <string name="error_no_accessibility_service">접근성 서비스가 없습니다</string>
-    <string name="error_no_draw_overlays_permission">\"다른 앱 위에 표시\"권한이 없습니다</string>
+    <string name="error_no_display_over_other_apps_permission">\"다른 앱 위에 표시\"권한이 없습니다</string>
     <string name="error_no_post_notifications_permission">\"게시물 알림\" 권한 없음</string>
     <string name="error_no_read_phone_state_permission">\"전화 상태 읽기\"권한이 없습니다</string>
     <string name="error_no_screen_capture_permission">화면 캡처 허가가 없습니다</string>
@@ -325,7 +326,7 @@
     <string name="text_debug_step_over">한 걸음 더</string>
     <string name="text_delete">삭제</string>
     <string name="text_delete_line">라인 삭제</string>
-    <string name="text_detail">세부</string>
+    <string name="text_details">세부</string>
     <string name="text_developer_details_under_development">개발자 세부 사항이 개발 중입니다</string>
     <string name="text_developer_options">개발자 옵션</string>
     <string name="text_device_brand">기기 브랜드</string>
@@ -678,6 +679,19 @@
     <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="theme_color_default">기본</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">총: %d 항목</item>

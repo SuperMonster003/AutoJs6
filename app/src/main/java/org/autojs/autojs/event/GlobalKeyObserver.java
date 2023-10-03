@@ -27,23 +27,18 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
     private boolean mVolumeDownFromShell, mVolumeDownFromAccessibility;
     private boolean mVolumeUpFromShell, mVolumeUpFromAccessibility;
 
-    GlobalKeyObserver() {
+    public GlobalKeyObserver() {
         AccessibilityService.Companion.getStickOnKeyObserver()
                 .addListener(this);
         ShellKeyObserver observer = new ShellKeyObserver();
         observer.setKeyListener(this);
-        InputEventObserver.getGlobal(GlobalAppContext.get()).addListener(observer);
+        InputEventObserver.initObserver(GlobalAppContext.get()).addListener(observer);
     }
 
-    public static GlobalKeyObserver getSingleton() {
+    public static void initIfNeeded() {
         if (sSingleton == null) {
             sSingleton = new GlobalKeyObserver();
         }
-        return sSingleton;
-    }
-
-    public static void init() {
-        if (Pref.isUseVolumeControlRunningEnabled()) getSingleton();
     }
 
     public void onVolumeUp() {

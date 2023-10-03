@@ -4,17 +4,15 @@ import android.content.Context
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
-import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder
 import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.ui.codegeneration.CodeGenerateDialog
+import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.NodeInfoView
 import org.autojs.autojs.ui.widget.BubblePopupMenu
-import org.autojs.autojs.util.ClipboardUtils
-import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 abstract class LayoutFloatyWindow(private val rootNode: NodeInfo?, private val context: Context, private val isServiceRelied: Boolean) : FullScreenFloatyWindow() {

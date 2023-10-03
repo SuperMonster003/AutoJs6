@@ -116,9 +116,15 @@
     <style name="Material3DarkTheme" parent="@style/Theme.Material3.Dark" />
 
     <style name="TextAppearanceEditorTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">@dimen/editor_title_text_size</item>
         <item name="android:maxLines">2</item>
         <item name="android:ellipsize">middle</item>
+    </style>
+
+    <style name="TextAppearanceMainTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">@dimen/main_title_text_size</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
     </style>
 
     <style name="OverflowIconDarkTheme" parent="@style/Widget.AppCompat.ActionButton.Overflow" >

@@ -11,7 +11,6 @@ import android.view.WindowManager;
 /**
  * Created by Stardust on 2017/3/10.
  */
-
 public class FloatingWindowPermissionUtil {
 
     public static void goToFloatingWindowPermissionSettingIfNeeded(Context context) {

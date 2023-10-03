@@ -13,7 +13,6 @@ import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 /**
  * Created by Stardust on 2017/4/18.
  */
-
 public class ResizeGesture extends GestureDetector.SimpleOnGestureListener {
 
     public static ResizeGesture enableResize(View resizer, @Nullable View resizableView, WindowBridge windowBridge) {

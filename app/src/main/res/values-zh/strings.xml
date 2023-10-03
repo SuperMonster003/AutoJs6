@@ -36,6 +36,7 @@
     <string name="description_stable_mode">稳定模式省略布局细节, 脚本分析布局时更稳定, 但可能影响获取的控件总量.\n需重启无障碍服务.</string>
     <string name="description_theme_color_preference">主题色的应用范围包括但不限于以下部件:\n系统通知栏\n应用栏 (AppBar)\n文件图标\n任务项图标\n浮动操作按钮 (Fab)\n设置页面类别标题\n按钮开关\n\n注: 截至 6.2.0 版本, AutoJs6 主题色暂未对 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 强调色 (Accent Color) ] 作出区分.</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消下载</string>
     <string name="dialog_button_confirm">确定</string>
@@ -128,7 +129,7 @@
     <string name="error_no_accessibility_permission">无障碍服务未启用</string>
     <string name="error_no_accessibility_permission_to_capture">无障碍服务未启用</string>
     <string name="error_no_accessibility_service">没有无障碍服务</string>
-    <string name="error_no_draw_overlays_permission">缺少 \"显示在其他应用上层\" 权限</string>
+    <string name="error_no_display_over_other_apps_permission">缺少 \"显示在其他应用上层\" 权限</string>
     <string name="error_no_post_notifications_permission">缺少 \"发布通知\" 权限</string>
     <string name="error_no_read_phone_state_permission">缺少 \"读取手机状态\" 权限</string>
     <string name="error_no_screen_capture_permission">缺少屏幕捕获权限</string>
@@ -321,7 +322,7 @@
     <string name="text_debug_step_over">单步</string>
     <string name="text_delete">删除</string>
     <string name="text_delete_line">删除行</string>
-    <string name="text_detail">详情</string>
+    <string name="text_details">详情</string>
     <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"开发者详情\" 正在开发中...</string>
     <string name="text_developer_options">开发者选项</string>
     <string name="text_device_brand">设备品牌</string>
@@ -390,7 +391,7 @@
     <string name="text_failed_to_login">登录失败</string>
     <string name="text_failed_to_register">注册失败</string>
     <string name="text_failed_to_report">提交失败</string>
-    <string name="text_failed_to_save_remote_project_to_local_storage">远程项目已保存至本地</string>
+    <string name="text_failed_to_save_remote_project_to_local_storage">无法保存远程项目至本地</string>
     <string name="text_failed_to_write_file">文件写入失败</string>
     <string name="text_file">文件</string>
     <string name="text_file_exists">文件已存在</string>
@@ -556,7 +557,7 @@
     <string name="text_release_notes">更新日志</string>
     <string name="text_remote">远程</string>
     <string name="text_remote_file_saved_to_local_storage_successfully">远程文件已保存至本地</string>
-    <string name="text_remote_project_saved_to_local_storage_successfully">无法保存远程项目至本地</string>
+    <string name="text_remote_project_saved_to_local_storage_successfully">远程项目已保存至本地</string>
     <string name="text_remove_all_breakpoints">删除所有断点</string>
     <string name="text_rename">重命名</string>
     <string name="text_replace">替换</string>
@@ -674,6 +675,19 @@
     <string name="text_write_secure_settings_description">安全设置包含应用程序可读但不可写入的设置选项, 这些选项只能由 UI 或系统级别应用修改.\n被授予 \"修改安全设置权限\" 后, 普通应用可直接修改上述安全设置 (例如无障碍服务).</string>
     <string name="text_write_system_settings">修改系统设置</string>
     <string name="theme_color_default">默认</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共计: %d 项</item>

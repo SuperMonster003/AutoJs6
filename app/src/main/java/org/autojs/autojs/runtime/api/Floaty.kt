@@ -18,6 +18,7 @@ import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.util.ViewUtils.setViewMeasure
 import org.autojs.autojs6.R
+import java.lang.Exception
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
@@ -72,6 +73,13 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
 
     @ScriptInterface
     fun requestPermission() = mDisplayOverOtherAppsPerm.request()
+
+    @ScriptInterface
+    fun ensurePermission() {
+        if (!hasPermission()) {
+            throw Exception(mContext.getString(R.string.error_no_display_over_other_apps_permission))
+        }
+    }
 
     @Synchronized
     fun closeAll() {

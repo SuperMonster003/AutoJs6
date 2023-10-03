@@ -23,6 +23,7 @@ let Crypto = org.autojs.autojs.core.crypto.Crypto;
 let Image = org.autojs.autojs.core.image.ImageWrapper;
 let ColorTable = org.autojs.autojs.core.image.ColorTable;
 let Canvas = org.autojs.autojs.core.graphics.ScriptCanvas;
+let EventEmitter = org.autojs.autojs.core.eventloop.EventEmitter;
 let UiObject = org.autojs.autojs.core.automator.UiObject;
 let UiObjectCollection = org.autojs.autojs.core.automator.UiObjectCollection;
 let ImageWrapper = org.autojs.autojs.core.image.ImageWrapper;
@@ -33,6 +34,7 @@ let OkHttpClient = Packages.okhttp3.OkHttpClient;
 let ScriptInterruptedException = org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 let ReentrantLock = java.util.concurrent.locks.ReentrantLock;
 let ScreenMetrics = org.autojs.autojs.runtime.api.ScreenMetrics;
+let ScriptRuntime = org.autojs.autojs.runtime.ScriptRuntime;
 let StandardCharsets = java.nio.charset.StandardCharsets;
 let WebView = android.webkit.WebView;
 let WebViewClient = android.webkit.WebViewClient;
@@ -93,13 +95,6 @@ let JsWebView = org.autojs.autojs.core.ui.widget.JsWebView;
 /* Global assignment. */
 
 Object.assign(this, {
-    io: Packages.io,
-    okio: Packages.okio,
-    de: Packages.de,
-    ezy: Packages.ezy,
-    kotlin: Packages.kotlin,
-    okhttp3: Packages.okhttp3,
-    androidx: Packages.androidx,
     isNullish(o) {
         // nullish coalescing operator: ??
         return o === null || o === undefined;
@@ -358,15 +353,29 @@ Object.assign(this, {
                         __importClass__(typeof clazz === 'string' ? Packages[clazz] : clazz);
                     });
                 },
-                // 重定向 importPackage 使其支持字符串参数.
-                /**
-                 * @global
-                 */
-                importPackage() {
-                    Array.from(arguments).forEach(pkg => {
-                        __importPackage__(typeof pkg === 'string' ? Packages[pkg] : pkg);
-                    });
-                },
+                // FIXME by SuperMonster003 on Jul 27, 2023.
+                //  ! This makes importPackage() behave abnormally
+                //  ! when calling it in a JavaScript module,
+                //  ! even with "with" scope binding expression.
+                //  !
+                // // 重定向 importPackage 使其支持字符串参数.
+                // /**
+                //  * @global
+                //  */
+                // importPackage() {
+                //     let args = Array.from(arguments);
+                //     let expression =
+                //         'args.forEach((pkg) => {' + '\n' +
+                //         '    __importPackage__(typeof pkg === \'string\' ? Packages[pkg] : pkg);' + '\n' +
+                //         '});';
+                //     // @ScopeBinding
+                //     // noinspection WithStatementJS
+                //     with (context) {
+                //         return (/* @IIFE */ function () {
+                //             return eval(expression);
+                //         })();
+                //     }
+                // },
                 /**
                  * @global
                  */
@@ -485,7 +494,7 @@ Object.assign(this, {
 
                 /* ! ocr < images */
                 /* ! ocr < files */
-                [ 'ocr', 'paddle_ocr' ],
+                [ 'ocr' ],
 
                 /* Safe to put last regardless of the order, no guarantee ;). */
                 [ 'floaty', 'storages', 'device', 'recorder', 'toast' ],
@@ -498,7 +507,7 @@ Object.assign(this, {
         bindPrologue() {
             // 重定向 require 以支持相对路径和 npm 模块.
             global.Module = require('jvm-npm');
-            global.require = id => Module.require(id);
+            global.require = Module.require;
 
             global.i18n.loadAll();
             global.i18n.setLocale('default');

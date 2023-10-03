@@ -1,5 +1,7 @@
 package org.autojs.autojs.runtime.api;
 
+import static android.content.Context.WINDOW_SERVICE;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -7,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -17,6 +20,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.view.Display;
+import android.view.Surface;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -25,6 +29,8 @@ import androidx.annotation.Nullable;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.util.DeviceUtils;
+import org.autojs.autojs.util.RomUtils;
+import org.autojs.autojs.util.RomUtils.Brand;
 import org.autojs.autojs6.R;
 
 import java.net.NetworkInterface;
@@ -36,6 +42,7 @@ import ezy.assist.compat.SettingsCompat;
 
 /**
  * Created by Stardust on 2017/12/2.
+ * Modified by SuperMonster003 as of Jan 1, 2022.
  */
 public class Device {
 
@@ -87,6 +94,10 @@ public class Device {
 
     public static String imei;
 
+    public final Manufacturers manufacturers;
+    public final RomUtils roms;
+    public final Brand brands;
+
     private final Context mContext;
     private final Vibrator mVibrator;
     private PowerManager.WakeLock mWakeLock;
@@ -95,6 +106,9 @@ public class Device {
     public Device(Context context) {
         mContext = context;
         mVibrator = context.getSystemService(Vibrator.class);
+        manufacturers = new Manufacturers();
+        roms = RomUtils.INSTANCE;
+        brands = Brand.INSTANCE;
         imei = DeviceUtils.getIMEI(context);
         serial = DeviceUtils.getSerial();
     }
@@ -237,7 +251,7 @@ public class Device {
     }
 
     public boolean isScreenOn() {
-        return ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getState() == Display.STATE_ON;
+        return getDefaultDisplay().getState() == Display.STATE_ON;
     }
 
     public void wakeUpIfNeeded() {
@@ -303,6 +317,30 @@ public class Device {
         mVibrator.cancel();
     }
 
+    public int getOrientation() {
+        if (isScreenLandscape()) {
+            return Configuration.ORIENTATION_LANDSCAPE;
+        }
+        if (isScreenPortrait()) {
+            return Configuration.ORIENTATION_PORTRAIT;
+        }
+        return Configuration.ORIENTATION_UNDEFINED;
+    }
+
+    public int getRotation() {
+        return getDefaultDisplay().getRotation();
+    }
+
+    public boolean isScreenPortrait() {
+        int rotation = getRotation();
+        return rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180;
+    }
+
+    public boolean isScreenLandscape() {
+        int rotation = getRotation();
+        return rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270;
+    }
+
     private void checkWriteSettingsPermission() {
         if (SettingsCompat.canWriteSettings(mContext)) {
             return;
@@ -311,10 +349,14 @@ public class Device {
         throw new SecurityException(mContext.getString(R.string.error_no_write_settings_permission));
     }
 
-    private void checkReadPhoneStatePermission() {
-        if (mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+    public void ensureReadPhoneStatePermission() {
+        if (!hasReadPhoneStatePermission()) {
             throw new SecurityException(mContext.getString(R.string.error_no_read_phone_state_permission));
         }
+    }
+
+    public boolean hasReadPhoneStatePermission() {
+        return mContext.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
     }
 
     // just to avoid warning of null pointer to make android studio happy..
@@ -410,6 +452,142 @@ public class Device {
                 ", securityPatch='" + securityPatch + '\'' +
                 ", serial='" + serial + '\'' +
                 '}';
+    }
+
+    private Display getDefaultDisplay() {
+        return ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+    }
+
+    public boolean isManufacturer(String manufacturer) {
+        return manufacturers.is(manufacturer);
+    }
+
+    public class Manufacturers {
+
+        private boolean is(String manufacturer) {
+            return manufacturer.equalsIgnoreCase(Build.MANUFACTURER);
+        }
+
+        /**
+         * HTC.
+         */
+        public boolean isHtc() {
+            return is("htc");
+        }
+
+        /**
+         * LG.
+         */
+        public boolean isLG() {
+            return is("lg");
+        }
+
+        /**
+         * 一加.
+         */
+        public boolean isOnePlus() {
+            return is("oneplus");
+        }
+
+        /**
+         * 三星.
+         */
+        public boolean isSamsung() {
+            return is("samsung");
+        }
+
+        /**
+         * 中兴.
+         */
+        public boolean isZte() {
+            return is("zte");
+        }
+
+        /**
+         * 乐视.
+         */
+        public boolean isLetv() {
+            return is("letv");
+        }
+
+        /**
+         * 华为.
+         */
+        public boolean isHuawei() {
+            return is("huawei") || isNova() || isHonor();
+        }
+
+        /**
+         * Huawei (华为) Nova.
+         */
+        public boolean isNova() {
+            return is("nova");
+        }
+
+        /**
+         * Huawei (华为) 荣耀.
+         */
+        public boolean isHonor() {
+            return is("honor");
+        }
+
+        /**
+         * 小米.
+         */
+        public boolean isXiaomi() {
+            return is("xiaomi") || brands.isRedmi() || brands.isMiMix();
+        }
+
+        /**
+         * 欧珀.
+         */
+        public boolean isOppo() {
+            return is("oppo");
+        }
+
+        /**
+         * 索尼.
+         */
+        public boolean isSony() {
+            return is("sony") || brands.isXperia();
+        }
+
+        /**
+         * 维沃.
+         */
+        public boolean isVivo() {
+            return is("vivo");
+        }
+
+        /**
+         * 联想.
+         */
+        public boolean isLenovo() {
+            return is("lenovo");
+        }
+
+        /**
+         * 酷派.
+         * 宇龙计算机通信科技 (深圳) 有限公司.
+         */
+        public boolean isCoolpad() {
+            return is("yulong");
+        }
+
+        /**
+         * 锤子.
+         */
+        public boolean isSmartisan() {
+            return is("smartisan");
+        }
+
+        /**
+         * 魅族.
+         */
+        public boolean isMeizu() {
+            return is("meizu");
+        }
+
     }
 
 }

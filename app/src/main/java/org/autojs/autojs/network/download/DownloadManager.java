@@ -157,9 +157,9 @@ public class DownloadManager {
                 .onNeutral((dialog, which) -> new MaterialDialog.Builder(context)
                         .title(R.string.text_prompt)
                         .content(R.string.text_download_interruption_warning)
-                        .negativeText(R.string.text_back)
+                        .negativeText(R.string.dialog_button_back)
                         .negativeColorRes(R.color.dialog_button_hint)
-                        .positiveText(R.string.text_continue)
+                        .positiveText(R.string.dialog_button_continue)
                         .positiveColorRes(R.color.dialog_button_caution)
                         .onPositive((d2, which2) -> {
                             dialog.getActionButton(DialogAction.POSITIVE).performClick();

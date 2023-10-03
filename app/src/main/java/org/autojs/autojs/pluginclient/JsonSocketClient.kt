@@ -1,6 +1,7 @@
 package org.autojs.autojs.pluginclient
 
 import android.app.Activity
+import android.content.Context
 import android.text.util.Linkify
 import android.util.Log
 import androidx.annotation.MainThread
@@ -24,7 +25,7 @@ import java.net.SocketTimeoutException
 import java.util.concurrent.Executors
 
 
-class JsonSocketClient(service: DevPluginService?, host: String?, port: Int) : JsonSocket(service) {
+class JsonSocketClient(service: DevPluginService?, private val ctx: Context, host: String?, port: Int) : JsonSocket(service) {
 
     private val jsonSocketExecutor = Executors.newSingleThreadExecutor()
 
@@ -83,6 +84,8 @@ class JsonSocketClient(service: DevPluginService?, host: String?, port: Int) : J
         }, HANDSHAKE_TIMEOUT.toLong())
     }
 
+    override fun getContext() = ctx
+
     private fun onHello(message: JsonObject) {
         var currentVersion: String? = null
         val requiredVersion = BuildConfig.VSCODE_EXT_REQUIRED_VERSION
@@ -127,7 +130,7 @@ class JsonSocketClient(service: DevPluginService?, host: String?, port: Int) : J
                 MaterialDialog.Builder(activity)
                     .title(activity.getString(R.string.text_connection_cannot_be_established))
                     .content(msg)
-                    .positiveText(R.string.dialog_button_back)
+                    .positiveText(R.string.dialog_button_dismiss)
                     .build()
                     .also {
                         it.contentView?.apply {

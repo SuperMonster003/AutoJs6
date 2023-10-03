@@ -5,7 +5,7 @@
 let { util } = global;
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Automator}
  */
@@ -136,8 +136,8 @@ module.exports = function (scriptRuntime, scope) {
                 gestureAsync(duration, points) {
                     return rtAutomator.gestureAsync.apply(rtAutomator, [ 0 ].concat(Array.from(arguments)));
                 },
-                swipe(x1, y1, x2, y2, delay) {
-                    return rtAutomator.swipe(x1, y1, x2, y2, delay);
+                swipe(x1, y1, x2, y2, duration) {
+                    return rtAutomator.swipe(x1, y1, x2, y2, duration);
                 },
                 isServiceRunning() {
                     return rtAutomator.isServiceRunning();

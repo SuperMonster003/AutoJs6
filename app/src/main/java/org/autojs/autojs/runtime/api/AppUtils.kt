@@ -219,8 +219,10 @@ class AppUtils {
         enum class BroadcastShortForm(val shortName: String) {
 
             INSPECT_LAYOUT_BOUNDS("inspect_layout_bounds"),
+            LAYOUT_BOUNDS("layout_bounds"),
             BOUNDS("bounds"),
             INSPECT_LAYOUT_HIERARCHY("inspect_layout_hierarchy"),
+            LAYOUT_HIERARCHY("layout_hierarchy"),
             HIERARCHY("hierarchy"),
             ;
 

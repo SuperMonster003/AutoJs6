@@ -35,6 +35,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:tabGravity="fill"
+                    app:tabMaxWidth="0dp"
                     app:tabIndicatorColor="@color/tab_indicator"
                     app:tabMode="fixed"
                     app:tabSelectedTextColor="@color/tab_selected_text"

@@ -22,7 +22,7 @@
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Util}
  */
@@ -38,7 +38,7 @@ module.exports = function (scriptRuntime, scope) {
              * @implements Internal.Util
              */
             const Util = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Util.prototype = {

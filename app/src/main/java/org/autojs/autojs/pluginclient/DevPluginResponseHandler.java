@@ -206,7 +206,7 @@ public class DevPluginResponseHandler implements Handler {
     private void copyDir(File fromDir, File toDir) throws FileNotFoundException {
         toDir.mkdirs();
         File[] files = fromDir.listFiles();
-        if (files == null || files.length == 0) {
+        if (files == null) {
             return;
         }
         for (File file : files) {

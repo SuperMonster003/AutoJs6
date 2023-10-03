@@ -38,6 +38,7 @@
     <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
     <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFab\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Cancel</string>
     <string name="dialog_button_confirm">OK</string>
@@ -130,7 +131,7 @@
     <string name="error_no_accessibility_permission">Accessibility service is disabled and the script has stopped</string>
     <string name="error_no_accessibility_permission_to_capture">Accessibility service is not activated</string>
     <string name="error_no_accessibility_service">No accessibility service</string>
-    <string name="error_no_draw_overlays_permission">No \"display over other apps\" permission</string>
+    <string name="error_no_display_over_other_apps_permission">No \"display over other apps\" permission</string>
     <string name="error_no_post_notifications_permission">No \"post notifications\" permission</string>
     <string name="error_no_read_phone_state_permission">No \"read phone state\" permission</string>
     <string name="error_no_screen_capture_permission">No screen capture permission</string>
@@ -323,7 +324,7 @@
     <string name="text_debug_step_over">Step over</string>
     <string name="text_delete">Delete</string>
     <string name="text_delete_line">Delete line</string>
-    <string name="text_detail">Details</string>
+    <string name="text_details">Details</string>
     <string name="text_developer_details_under_development">Developer details is under development</string>
     <string name="text_developer_options">Developer options</string>
     <string name="text_device_brand">Device brand</string>
@@ -676,6 +677,19 @@
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="theme_color_default">Default</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>

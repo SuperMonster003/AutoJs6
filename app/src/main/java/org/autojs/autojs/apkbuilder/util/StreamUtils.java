@@ -1,6 +1,5 @@
 package org.autojs.autojs.apkbuilder.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,9 +8,7 @@ import java.io.OutputStream;
 /**
  * Created by Stardust on 2017/10/23.
  */
-
 public class StreamUtils {
-
 
     public static void write(InputStream inputStream, OutputStream out) throws IOException {
         byte[] buffer = new byte[4096];
@@ -30,4 +27,5 @@ public class StreamUtils {
         }
         return outputStream.toByteArray();
     }
+
 }

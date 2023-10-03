@@ -5,7 +5,7 @@
 let { util } = global;
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Colors}
  */
@@ -63,10 +63,10 @@ module.exports = function (scriptRuntime, scope) {
             Color.prototype = {
                 constructor: Color,
                 toString() {
-                    return this.digest();
+                    return this.summary();
                 },
-                digest() {
-                    return colors.digest.apply(colors, [ this.color ].concat(Array.from(arguments)));
+                summary() {
+                    return colors.summary.apply(colors, [ this.color ].concat(Array.from(arguments)));
                 },
                 toHex() {
                     return colors.toHex.apply(colors, [ this.color ].concat(Array.from(arguments)));
@@ -250,7 +250,7 @@ module.exports = function (scriptRuntime, scope) {
              * @extends Internal.Colors
              */
             const Colors = function () {
-                // Empty class body.
+                /* Empty body. */
             };
 
             Colors.prototype = {
@@ -666,7 +666,7 @@ module.exports = function (scriptRuntime, scope) {
                     let args = [ _.Color ].concat(Array.from(arguments));
                     return new (Function.prototype.bind.apply(_.Color, args));
                 },
-                digest(color) {
+                summary(color) {
                     let [ r, g, b, a ] = this.toRgba(color);
                     let niceA = _.toDoubleComponent(a).toFixed(2).replace(/0$/, '');
                     return `hex(${this.toHex(color)}), rgba(${r},${g},${b}/${niceA}), int(${this.toInt(color)})`;

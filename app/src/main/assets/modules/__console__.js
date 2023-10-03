@@ -4,7 +4,7 @@
 let { files, util, s13n } = global;
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Console}
  */
@@ -27,7 +27,7 @@ module.exports = function (scriptRuntime, scope) {
              * @extends Internal.Console
              */
             const Console = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Console.prototype = {

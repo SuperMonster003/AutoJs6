@@ -1,7 +1,7 @@
 // noinspection NpmUsedModulesInstalled
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Threads}
  */
@@ -18,7 +18,7 @@ module.exports = function (scriptRuntime, scope) {
              * @implements Internal.Threads
              */
             const Threads = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Threads.prototype = {
@@ -73,7 +73,7 @@ module.exports = function (scriptRuntime, scope) {
              * @implements Internal.Threads.PromiseExtension
              */
             const PromiseExtension = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Object.assign(PromiseExtension.prototype, {

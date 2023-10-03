@@ -40,6 +40,7 @@
     <string name="description_stable_mode">穩定模式省略佈局細節, 腳本分析佈局時更穩定, 但可能影響獲取的控件總量.\n需重啓無障礙服務.</string>
     <string name="description_theme_color_preference">主題色的應用範圍包括但不限於以下部件:\n系統通知欄\n應用欄 (AppBar)\n文件圖標\n任務項圖標\n浮動操作按鈕 (Fab)\n設置頁面類別標題\n按鈕開關\n\n注: 截至 6.2.0 版本, AutoJs6 主題色暫未對 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 強調色 (Accent Color) ] 作出區分.</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消下載</string>
     <string name="dialog_button_confirm">確定</string>
@@ -83,6 +84,7 @@
     <string name="entry_root_record_out_file_type_binary">二進制文件 (不可編輯)</string>
     <string name="entry_root_record_out_file_type_js">JavaScript 文件 (可編輯)</string>
     <string name="error_a_runtime_has_been_set">運行時已存在</string>
+    <string name="error_abandoned_method">方法 %s 已被廢棄, 應避免使用</string>
     <string name="error_app_not_installed">應用未安裝: \"%s\"</string>
     <string name="error_both_bitmap_and_mat_are_null">Bitmap 與 Mat 不能同時為 null</string>
     <string name="error_cannot_be_null">%s 不能為 null</string>
@@ -94,11 +96,13 @@
     <string name="error_change_password_error_length">密碼長度不足</string>
     <string name="error_change_password_error_match">密碼不一致</string>
     <string name="error_check_for_update">檢查更新失敗</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">冒號需跟隨有效的 IP 地址</string>
     <string name="error_compass_cannot_be_null">羅盤參數不能為 null</string>
     <string name="error_connect_to_remote">連接失敗: %s</string>
     <string name="error_continuation_resume_called_without_suspend">方法 resume() 調用前需先調用 suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">方法 suspend() 只能調用一次</string>
     <string name="error_corresponding_github_release_may_not_published">對應的 GitHub 發行版可能還未發佈</string>
+    <string name="error_dot_decimal_notation_num_over_255">點分十進制數超過 255</string>
     <string name="error_download_interrupted">下載中斷</string>
     <string name="error_email_taken">郵箱已被佔用</string>
     <string name="error_empty_broadcast_selection">需至少選擇一個廣播事件</string>
@@ -118,16 +122,18 @@
     <string name="error_image_has_been_recycled">圖像資源已被回收</string>
     <string name="error_invalid_compass">無效的羅盤參數: %s</string>
     <string name="error_invalid_github_repo">無效的 GitHub 倉庫: %s</string>
+    <string name="error_invalid_ip_address">無效的 IP 地址</string>
     <string name="error_invalid_login_credentials">無效的登錄憑證</string>
     <string name="error_invalid_rest_compass">無效的剩餘羅盤參數: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">不合法的選擇器集合元素: { %s: %s (%s) }</string>
+    <string name="error_ip_address_should_not_be_empty">IP 地址不可為空</string>
     <string name="error_max_listeners_exceeded">超出最大監聽器數量限制: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 可能因缺少 Root 權限而無法運行 \"auto\" 文件</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() 傳入的 %s 參數為空</string>
     <string name="error_no_accessibility_permission">無障礙服務未啓用</string>
     <string name="error_no_accessibility_permission_to_capture">無障礙服務未啓用</string>
     <string name="error_no_accessibility_service">沒有無障礙服務</string>
-    <string name="error_no_draw_overlays_permission">缺少 \"顯示在其他應用上層\" 權限</string>
+    <string name="error_no_display_over_other_apps_permission">缺少 \"顯示在其他應用上層\" 權限</string>
     <string name="error_no_post_notifications_permission">缺少 \"發佈通知\" 權限</string>
     <string name="error_no_read_phone_state_permission">缺少 \"讀取手機狀態\" 權限</string>
     <string name="error_no_screen_capture_permission">缺少屏幕捕獲權限</string>
@@ -139,13 +145,17 @@
     <string name="error_parse_github_release_assets">解析 GitHub 發行版資源信息失敗</string>
     <string name="error_parse_version_info">無法解析版本信息</string>
     <string name="error_pattern_syntax">正則表達式句法錯誤</string>
+    <string name="error_port_num_over_65535">端口號超過 65535</string>
     <string name="error_put_value_into_json">無法將值 %s 存入 JSON</string>
     <string name="error_regex_find_prev">正則表達式不支持向前查找</string>
+    <string name="error_repeated_colon_symbol">重複的分號符號</string>
+    <string name="error_repeated_dot_symbol">重複的句點符號</string>
     <string name="error_script_is_on_exiting">腳本正在退出中</string>
     <string name="error_selector_method_without_calling">選擇器方法需調用而不可作為參數直接傳入: %s</string>
     <string name="error_selector_result_type_with_compass">結果類型為 selector 時, 無法同時使用羅盤參數</string>
     <string name="error_set_both_icon_res_and_icon">不支持同時設置 iconRes 與 icon</string>
     <string name="error_thread_is_not_alive">線程處於非活動狀態</string>
+    <string name="error_unacceptable_character">不接受的字符</string>
     <string name="error_unknown">未知錯誤</string>
     <string name="error_unknown_algorithm_selector_param">未知的 algorithm 選擇器參數: %s</string>
     <string name="error_unknown_color_name">未知顏色名稱: %s</string>
@@ -277,19 +287,21 @@
     <string name="text_click_too_frequently">操作頻率過快</string>
     <string name="text_client_mode">客户端模式</string>
     <string name="text_close">關閉</string>
+    <string name="text_close_floating_button">關閉浮動按鈕</string>
     <string name="text_code">代碼</string>
     <string name="text_code_beautify">格式化代碼</string>
     <string name="text_command_already_copied_to_clip">指令已複製到剪貼板</string>
+    <string name="text_comment">註釋</string>
     <string name="text_compatibility">兼容性</string>
     <string name="text_compatibility_with_classes_for_ver_4_x">Java 類名 4.x 版本兼容</string>
     <string name="text_config">配置</string>
     <string name="text_confirm_to_delete">是否確定刪除</string>
     <string name="text_confirm_to_remove">確定移除嗎?</string>
     <string name="text_connect_to_pc">連接到計算機</string>
+    <string name="text_connection_cannot_be_established">無法建立連接</string>
     <string name="text_console">控制枱</string>
     <string name="text_continue">繼續</string>
     <string name="text_copy">複製</string>
-    <string name="text_export">導出</string>
     <string name="text_copy_all">複製全部</string>
     <string name="text_copy_all_files_to_new_directory">複製原目錄文件到新目錄</string>
     <string name="text_copy_command">複製指令</string>
@@ -297,6 +309,7 @@
     <string name="text_copy_line">複製行</string>
     <string name="text_copy_to_clip">複製到剪貼板</string>
     <string name="text_copy_value">複製值</string>
+    <string name="text_current_version">當前版本</string>
     <string name="text_daily_task">每日任務</string>
     <string name="text_date">日期</string>
     <string name="text_day1">一</string>
@@ -313,7 +326,7 @@
     <string name="text_debug_step_over">單步</string>
     <string name="text_delete">刪除</string>
     <string name="text_delete_line">刪除行</string>
-    <string name="text_detail">詳情</string>
+    <string name="text_details">詳情</string>
     <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"開發者詳情\" 正在開發中...</string>
     <string name="text_developer_options">開發者選項</string>
     <string name="text_device_brand">設備品牌</string>
@@ -363,7 +376,7 @@
     <string name="text_execution_finished" formatted="false">[%s] 運行結束 (用時 %s 秒)\n</string>
     <string name="text_exit">退出</string>
     <string name="text_exit_directly">直接退出</string>
-    <string name="text_close_floating_button">關閉浮動按鈕</string>
+    <string name="text_export">導出</string>
     <string name="text_extending_js_build_in_objects">JavaScript 內置對象擴展</string>
     <string name="text_extensibility">擴展性</string>
     <string name="text_failed">失敗</string>
@@ -374,6 +387,7 @@
     <string name="text_failed_to_download">下載失敗</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">使用 root 權限啓用無障礙服務失敗</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">使用修改安全設置權限啓用無障礙服務失敗</string>
+    <string name="text_failed_to_format">格式化失敗</string>
     <string name="text_failed_to_generate">生成失敗</string>
     <string name="text_failed_to_grant_access">授權失敗</string>
     <string name="text_failed_to_grant_draw_overlays_permission">顯示在其他應用上層權限授予失敗</string>
@@ -381,6 +395,7 @@
     <string name="text_failed_to_login">登錄失敗</string>
     <string name="text_failed_to_register">註冊失敗</string>
     <string name="text_failed_to_report">提交失敗</string>
+    <string name="text_failed_to_save_remote_project_to_local_storage">無法保存遠程項目至本地</string>
     <string name="text_failed_to_write_file">文件寫入失敗</string>
     <string name="text_file">文件</string>
     <string name="text_file_exists">文件已存在</string>
@@ -396,6 +411,8 @@
     <string name="text_force_stop">強制停止</string>
     <string name="text_foreground_service">前台服務</string>
     <string name="text_foreground_service_description">前台服務執行一些用户能注意到的操作.\n前台服務必須顯示通知, 確保用户知道應用正在執行的任務.\n前台服務通知無法移除, 除非服務停止運行.\n可通過長按通知將通知優先級降低 (部分系統支持關閉前台服務通知), 以減少通知對用户的影響.</string>
+    <string name="text_formatting_completed">格式化已完成</string>
+    <string name="text_function">函數</string>
     <string name="text_fx_keyboard">多功能鍵盤</string>
     <string name="text_generate">生成</string>
     <string name="text_generate_code">生成代碼</string>
@@ -450,10 +467,13 @@
     <string name="text_loop_delay">延遲執行 (秒)</string>
     <string name="text_loop_interval">循環間隔 (秒)</string>
     <string name="text_loop_times">循環次數</string>
+    <string name="text_lower_than">低於</string>
     <string name="text_main_file_name">主腳本文件名</string>
     <string name="text_manage">管理</string>
     <string name="text_manage_a11y_service">管理無障礙服務</string>
     <string name="text_manage_ignored_updates">管理已忽略更新</string>
+    <string name="text_min_version">最低版本</string>
+    <string name="text_min_version_of_vscode_vsc_ext">VSCode 插件最低版本</string>
     <string name="text_mobile_qq_not_installed">未安裝 \"手機QQ\"</string>
     <string name="text_more">更多</string>
     <string name="text_more_details">瞭解詳情</string>
@@ -478,7 +498,6 @@
     <string name="text_not_granted">未授予</string>
     <string name="text_not_showing_main_activity">不顯示主界面</string>
     <string name="text_notification">通知</string>
-    <string name="text_post_notifications_permission">發佈通知權限</string>
     <string name="text_notification_access_permission">通知讀取權限</string>
     <string name="text_notification_service_disabled">通知服務未運行</string>
     <string name="text_null">無</string>
@@ -514,6 +533,7 @@
     <string name="text_please_input_name">請輸入名稱</string>
     <string name="text_pointer_location">指針位置 (root)</string>
     <string name="text_pointer_location_toggle_failed_with_hint">切換 \"指針位置\" 顯示狀態失敗\n可能缺少 root 權限</string>
+    <string name="text_post_notifications_permission">發佈通知權限</string>
     <string name="text_pre_execute_script">預執行腳本</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">準備中...</string>
     <string name="text_press_again_to_dismiss_dialog">再按一次關閉對話框</string>
@@ -524,8 +544,6 @@
     <string name="text_project_location">項目位置</string>
     <string name="text_project_media_access">投影媒體權限</string>
     <string name="text_project_media_access_description">被授予 \"投影媒體權限\" 後, 錄製屏幕的安全提示窗口將不再彈出.</string>
-    <string name="text_failed_to_save_remote_project_to_local_storage">無法保存遠程項目至本地</string>
-    <string name="text_remote_project_saved_to_local_storage_successfully">項目已保存</string>
     <string name="text_prompt">提示</string>
     <string name="text_quit">放棄</string>
     <string name="text_record_finished">錄製完成</string>
@@ -542,11 +560,14 @@
     <string name="text_registering">註冊中</string>
     <string name="text_release_notes">更新日誌</string>
     <string name="text_remote">遠程</string>
+    <string name="text_remote_file_saved_to_local_storage_successfully">遠程文件已保存至本地</string>
+    <string name="text_remote_project_saved_to_local_storage_successfully">遠程項目已保存至本地</string>
     <string name="text_remove_all_breakpoints">刪除所有斷點</string>
     <string name="text_rename">重命名</string>
     <string name="text_replace">替換</string>
     <string name="text_replace_all">全部替換</string>
     <string name="text_replace_simplified">替換</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">VSCode 插件項目地址</string>
     <string name="text_report_succeed">提交成功</string>
     <string name="text_requires_android_os_version" formatted="false">要求最低安卓系統版本 %s (API %s), 當前為 %s (API %s)</string>
     <string name="text_reset_password">重置密碼</string>
@@ -585,7 +606,6 @@
     <string name="text_save_to">保存到</string>
     <string name="text_script_record">錄製腳本</string>
     <string name="text_script_running">腳本運行</string>
-    <string name="text_remote_file_saved_to_local_storage_successfully">遠程項目已保存至本地</string>
     <string name="text_search">搜索</string>
     <string name="text_select">選擇</string>
     <string name="text_select_by_exists">判斷控件存在 (exists)</string>
@@ -651,6 +671,7 @@
     <string name="text_version_info">版本信息</string>
     <string name="text_version_name">版本名稱</string>
     <string name="text_view_docs">查看文檔</string>
+    <string name="text_vsc_ext_version_not_meet_requirement">VSCode 插件版本不符合要求</string>
     <string name="text_weekly_task">每週任務</string>
     <string name="text_weekly_task_should_check_day_of_week">需至少選擇一天</string>
     <string name="text_working_dir_path">工作路徑</string>
@@ -658,26 +679,19 @@
     <string name="text_write_secure_settings_description">安全設置包含應用程序可讀但不可寫入的設置選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設置權限\" 後, 普通應用可直接修改上述安全設置 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設置</string>
     <string name="theme_color_default">默認</string>
-    <string name="error_abandoned_method">方法 %s 已被廢棄, 應避免使用</string>
-    <string name="error_invalid_ip_address">無效的 IP 地址</string>
-    <string name="error_ip_address_should_not_be_empty">IP 地址不可為空</string>
-    <string name="error_unacceptable_character">不接受的字符</string>
-    <string name="error_port_num_over_65535">端口號超過 65535</string>
-    <string name="error_dot_decimal_notation_num_over_255">點分十進制數超過 255</string>
-    <string name="error_colon_must_follow_a_valid_ip_address">冒號需跟隨有效的 IP 地址</string>
-    <string name="error_repeated_dot_symbol">重複的句點符號</string>
-    <string name="error_repeated_colon_symbol">重複的分號符號</string>
-    <string name="text_vsc_ext_version_not_meet_requirement">VSCode 插件版本不符合要求</string>
-    <string name="text_min_version">最低版本</string>
-    <string name="text_current_version">當前版本</string>
-    <string name="text_lower_than">低於</string>
-    <string name="text_repo_url_of_vscode_vsc_ext">VSCode 插件項目地址</string>
-    <string name="text_connection_cannot_be_established">無法建立連接</string>
-    <string name="text_min_version_of_vscode_vsc_ext">VSCode 插件最低版本</string>
-    <string name="text_function">函數</string>
-    <string name="text_formatting_completed">格式化已完成</string>
-    <string name="text_failed_to_format">格式化失敗</string>
-    <string name="text_comment">註釋</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

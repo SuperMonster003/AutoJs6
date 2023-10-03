@@ -40,6 +40,7 @@
     <string name="description_stable_mode">Стабильный режим повышает стабильность при получении границ макета, но некоторые результаты могут быть проигнорированы.\nТребуется перезапуск службы доступности.</string>
     <string name="description_theme_color_preference">Цвет темы применяется к виджетам, включая следующие, но не ограничиваясь ими:\nСтрока состояния\nПанель приложений\nЗначок файла\nЗначок элемента задачи\nFab\nЗаголовок каталога настроек\nКнопка переключения\n\nПримечание: Начиная с версии AutoJs6 6.2.0, пока не существует различий между основным цветом, основным темным цветом и цветом акцента.</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">Отменить</string>
     <string name="dialog_button_cancel_download">Отменить</string>
     <string name="dialog_button_confirm">OK</string>
@@ -132,7 +133,7 @@
     <string name="error_no_accessibility_permission">Служба доступности отключена, и сценарий остановлен</string>
     <string name="error_no_accessibility_permission_to_capture">Служба доступности не активирована</string>
     <string name="error_no_accessibility_service">Нет службы доступности</string>
-    <string name="error_no_draw_overlays_permission">Нет разрешения \"отображать поверх других приложений\"</string>
+    <string name="error_no_display_over_other_apps_permission">Нет разрешения \"отображать поверх других приложений\"</string>
     <string name="error_no_post_notifications_permission">Нет разрешения на \"уведомления о сообщениях\"</string>
     <string name="error_no_read_phone_state_permission">Нет разрешения \"читать состояние телефона\"</string>
     <string name="error_no_screen_capture_permission">Нет разрешения на захват экрана</string>
@@ -325,7 +326,7 @@
     <string name="text_debug_step_over">Шаг за</string>
     <string name="text_delete">Удалить</string>
     <string name="text_delete_line">Удалить строку</string>
-    <string name="text_detail">Детали</string>
+    <string name="text_details">Детали</string>
     <string name="text_developer_details_under_development">Детали разработчика находятся в стадии разработки</string>
     <string name="text_developer_options">Параметры разработчика</string>
     <string name="text_device_brand">Бренд устройства</string>
@@ -678,6 +679,19 @@
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="theme_color_default">По умолчанию</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Всего: %d элемент</item>

@@ -20,11 +20,17 @@
           ! Target API >= 30: WRT + [ MSV<29> ] + LGC  + MAN
      -->
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+            android:name="android.permission.READ_EXTERNAL_STORAGE"
+            android:maxSdkVersion="32" />
 
     <uses-permission
             android:name="android.permission.WRITE_EXTERNAL_STORAGE"
             android:maxSdkVersion="29" />
+
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
     <uses-permission
             android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
@@ -38,10 +44,6 @@
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
 
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
-
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
-    <uses-permission android:name="android.permission.READ_SMS" />
 
     <uses-permission
             android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
@@ -72,6 +74,8 @@
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+
     <uses-permission
             android:name="android.permission.DUMP"
             tools:ignore="ProtectedPermissions" />
@@ -92,9 +96,6 @@
             android:name="android.permission.WRITE_SECURE_SETTINGS"
             tools:ignore="ProtectedPermissions" />
 
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:ignore="QueryAllPackagesPermission" />
-
     <!-- 非 AutoJs6 运行必需, 不会主动申请, 脚本可自行申请 -->
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -102,6 +103,15 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!--  Dangerous permission witch should be treated carefully.  -->
+
+    <!-- <uses-permission android:name="android.permission.READ_CONTACTS" />-->
+    <!-- <uses-permission android:name="android.permission.WRITE_CONTACTS" />-->
+
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <application
             android:name="org.autojs.autojs.App"
@@ -138,6 +148,7 @@
 
         <activity
                 android:name="org.autojs.autojs.ui.main.MainActivity"
+                android:exported="true"
                 android:launchMode="singleTask"
                 android:theme="@style/AppTheme.FullScreen" />
 
@@ -553,6 +564,14 @@
                 android:enabled="true"
                 android:foregroundServiceType="mediaProjection" />
 
+        <!-- This provider is required by Shizuku, remove this if your app only supports Sui -->
+        <provider
+                android:name="rikka.shizuku.ShizukuProvider"
+                android:authorities="org.autojs.autojs6.shizuku"
+                android:enabled="true"
+                android:exported="true"
+                android:multiprocess="false"
+                android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
     </application>
 
 </manifest>

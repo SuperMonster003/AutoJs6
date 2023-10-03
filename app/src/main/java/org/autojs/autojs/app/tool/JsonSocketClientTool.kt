@@ -55,7 +55,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         val host = Pref.getServerAddress()
         if (isAutoConnect) {
             devPlugin
-                .connectToRemoteServer(host, mClientModeItem, true)
+                .connectToRemoteServer(context, host, mClientModeItem, true)
                 .subscribe(Observers.emptyConsumer(), Observers.emptyConsumer())
             return
         }
@@ -96,14 +96,14 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                                 .show()
                         }
                     }
-                    .negativeText(R.string.dialog_button_back)
+                    .negativeText(R.string.dialog_button_cancel)
                     .negativeColorRes(R.color.dialog_button_default)
                     .onNegative { dHistories, _ -> dHistories.dismiss() }
                     .autoDismiss(false)
                     .show()
                     .also { DialogUtils.toggleContentViewByItems(it) }
             }
-            .negativeText(R.string.text_back)
+            .negativeText(R.string.text_cancel)
             .onNegative { dialog, _ -> dialog.dismiss() }
             .autoDismiss(false)
             .dismissListener(onConnectionDialogDismissed)
@@ -120,15 +120,15 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                 dialog.inputEditText!!.filters += InputFilter { source, start, end, dest, dstart, dend ->
                     if (end > start) {
                         val fullText = dest.substring(0, dstart) +
-                                       source.subSequence(start, end) +
-                                       dest.substring(dend)
+                                source.subSequence(start, end) +
+                                dest.substring(dend)
                         if (dstart > 0) {
                             val prevNearest = dest[dstart - 1]
-                            if (Regex(rexDot).matches(prevNearest.toString()) && Regex(rexDot).matches(source)) {
+                            if (Regex(REGEX_DOT).matches(prevNearest.toString()) && Regex(REGEX_DOT).matches(source)) {
                                 showSnack(dialog, R.string.error_repeated_dot_symbol)
                                 return@InputFilter ""
                             }
-                            if (Regex(rexColon).matches(prevNearest.toString()) && Regex(rexColon).matches(source)) {
+                            if (Regex(REGEX_COLON).matches(prevNearest.toString()) && Regex(REGEX_COLON).matches(source)) {
                                 showSnack(dialog, R.string.error_repeated_colon_symbol)
                                 return@InputFilter ""
                             }
@@ -141,8 +141,8 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                             showSnack(dialog, R.string.error_invalid_ip_address)
                             return@InputFilter ""
                         }
-                        if (!fullText.contains(Regex(rexColon))) {
-                            fullText.split(Regex(rexDot)).dropLastWhile { it.isEmpty() }.forEach { s ->
+                        if (!fullText.contains(Regex(REGEX_COLON))) {
+                            fullText.split(Regex(REGEX_DOT)).dropLastWhile { it.isEmpty() }.forEach { s ->
                                 if (s.toIntOrNull()?.let { it <= 255 } != true) {
                                     showSnack(dialog, R.string.error_dot_decimal_notation_num_over_255)
                                     return@InputFilter ""
@@ -150,14 +150,14 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                             }
                         } else {
                             if (!fullText.matches(rexFullIpWithColon)) {
-                                if (!dest.substring(0, dstart).contains(Regex(rexColon)) && dend == dest.length) {
+                                if (!dest.substring(0, dstart).contains(Regex(REGEX_COLON)) && dend == dest.length) {
                                     showSnack(dialog, R.string.error_colon_must_follow_a_valid_ip_address)
                                 } else {
                                     showSnack(dialog, R.string.error_invalid_ip_address)
                                 }
                                 return@InputFilter ""
                             }
-                            fullText.split(Regex("$rexDot|$rexColon")).dropLastWhile { it.isEmpty() }.forEachIndexed { index, s ->
+                            fullText.split(Regex("$REGEX_DOT|$REGEX_COLON")).dropLastWhile { it.isEmpty() }.forEachIndexed { index, s ->
                                 if (index < 4 && s.toIntOrNull()?.let { it <= 255 } != true) {
                                     showSnack(dialog, R.string.error_dot_decimal_notation_num_over_255)
                                     return@InputFilter ""
@@ -170,8 +170,8 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                         }
                     }
                     return@InputFilter source
-                        .replace(Regex("$rexDot+"), ".")
-                        .replace(Regex("$rexColon+"), ":")
+                        .replace(Regex("$REGEX_DOT+"), ".")
+                        .replace(Regex("$REGEX_COLON+"), ":")
                 }
             }
     }
@@ -193,22 +193,22 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         }
         dialog.dismiss()
         devPlugin
-            .connectToRemoteServer(input, mClientModeItem)
+            .connectToRemoteServer(context, input, mClientModeItem)
             .subscribe({ Pref.setServerAddress(input) }, onConnectionException)
     }
 
     companion object {
 
-        const val rexDot = "[,.，。\\u0020]"
-        const val rexColon = "[:：]"
+        const val REGEX_DOT = "[,.，。\\u0020]"
+        const val REGEX_COLON = "[:：]"
 
-        private const val rexIpDec = "\\d{1,3}"
-        private const val rexPort = "\\d{1,5}"
+        private const val REGEX_IP_DEC = "\\d{1,3}"
+        private const val REGEX_PORT = "\\d{1,5}"
 
-        val rexPartialIp = Regex("^$rexIpDec($rexDot($rexIpDec($rexDot($rexIpDec($rexDot($rexIpDec)?)?)?)?)?)?")
-        val rexFullIpWithColon = Regex("\\d+$rexDot\\d+$rexDot\\d+$rexDot\\d+$rexColon\\d*")
-        val rexValidIp = Regex("$rexIpDec$rexDot$rexIpDec$rexDot$rexIpDec$rexDot$rexIpDec($rexColon$rexPort)?")
-        val rexAcceptable = Regex("($rexDot|$rexColon|\\d)+")
+        val rexPartialIp = Regex("^$REGEX_IP_DEC($REGEX_DOT($REGEX_IP_DEC($REGEX_DOT($REGEX_IP_DEC($REGEX_DOT($REGEX_IP_DEC)?)?)?)?)?)?")
+        val rexFullIpWithColon = Regex("\\d+$REGEX_DOT\\d+$REGEX_DOT\\d+$REGEX_DOT\\d+$REGEX_COLON\\d*")
+        val rexValidIp = Regex("$REGEX_IP_DEC$REGEX_DOT$REGEX_IP_DEC$REGEX_DOT$REGEX_IP_DEC$REGEX_DOT$REGEX_IP_DEC($REGEX_COLON$REGEX_PORT)?")
+        val rexAcceptable = Regex("($REGEX_DOT|$REGEX_COLON|\\d)+")
 
     }
 

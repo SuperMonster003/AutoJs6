@@ -5,7 +5,7 @@
 let { files } = global;
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.UI}
  */
@@ -54,7 +54,7 @@ module.exports = function (scriptRuntime, scope) {
              * @extends Internal.UI
              */
             const UI = function () {
-                // Empty class body.
+                /* Empty body. */
             };
 
             UI.prototype = {
@@ -67,7 +67,7 @@ module.exports = function (scriptRuntime, scope) {
                     let Widget = function () {
                         this.__attrs__ = {};
                         return Object.assign(function () {
-                            // Empty interface body.
+                            /* Empty body. */
                         }, Widget.prototype);
                     };
 

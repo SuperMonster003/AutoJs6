@@ -61,6 +61,10 @@ class UiObjectCollection private constructor(private val nodes: List<UiObject?>)
         return success
     }
 
+    override fun toString(): String {
+        return "${UiObjectCollection::class.java.name}@${hashCode()}"
+    }
+
     companion object {
 
         val EMPTY = of(emptyList())

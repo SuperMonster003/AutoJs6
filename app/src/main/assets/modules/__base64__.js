@@ -1,5 +1,5 @@
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Base64}
  */
@@ -11,7 +11,7 @@ module.exports = function (scriptRuntime, scope) {
              * @implements Internal.Base64
              */
             const Base64Ctor = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Base64Ctor.prototype = {

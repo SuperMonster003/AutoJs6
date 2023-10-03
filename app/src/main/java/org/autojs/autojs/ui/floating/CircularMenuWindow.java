@@ -1,32 +1,32 @@
 package org.autojs.autojs.ui.floating;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.view.Gravity;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
 
-import androidx.preference.PreferenceManager;
-
+import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
 import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
-
-import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.ui.floating.gesture.BounceDragGesture;
+import org.jetbrains.annotations.NotNull;
 
 public class CircularMenuWindow extends FloatyWindow {
 
-    private static final String KEY_POSITION_X = CircularMenuWindow.class.getName() + ".position.x";
-    private static final String KEY_POSITION_Y = CircularMenuWindow.class.getName() + ".position.y";
+    private static final String KEY_POSITION_X_PERCENT = CircularMenuWindow.class.getName() + ".position.x_percent";
+    private static final String KEY_POSITION_Y_PERCENT = CircularMenuWindow.class.getName() + ".position.y_percent";
+    private static final String KEY_LAST_ORIENTATION = "key_$_last_orientation";
 
     protected CircularMenuFloaty mFloaty;
     protected CircularActionMenu mCircularActionMenu;
     protected CircularActionView mCircularActionView;
     protected BounceDragGesture mDragGesture;
-    protected OrientationAwareWindowBridge mActionViewWindowBridge;
+    protected WindowBridge.DefaultImpl mActionViewWindowBridge;
     protected WindowBridge mMenuWindowBridge;
     protected WindowManager.LayoutParams mActionViewWindowLayoutParams;
     protected WindowManager.LayoutParams mMenuWindowLayoutParams;
@@ -34,12 +34,11 @@ public class CircularMenuWindow extends FloatyWindow {
     protected float mKeepToSideHiddenWidthRadio;
     protected float mActiveAlpha = 1.0F;
     protected float mInactiveAlpha = 0.4F;
-    private final Context mContext;
-    private OrientationEventListener mOrientationEventListener;
 
-    public CircularMenuWindow(Context context, CircularMenuFloaty floaty) {
+    // private OrientationEventListener mOrientationEventListener;
+
+    public CircularMenuWindow(CircularMenuFloaty floaty) {
         mFloaty = floaty;
-        mContext = context;
     }
 
     @Override
@@ -51,17 +50,21 @@ public class CircularMenuWindow extends FloatyWindow {
         initGestures();
         setListeners();
         setInitialState();
-        mOrientationEventListener = new OrientationEventListener(mContext) {
-            @Override
-            public void onOrientationChanged(int orientation) {
-                if (mActionViewWindowBridge.isOrientationChanged(mContext.getResources().getConfiguration().orientation)) {
-                    keepToSide();
-                }
-            }
-        };
-        if (mOrientationEventListener.canDetectOrientation()) {
-            mOrientationEventListener.enable();
-        }
+
+        // @Comment by SuperMonster003 on Aug 2, 2023.
+        //  ! Seems useless.
+        //  !
+        // mOrientationEventListener = new OrientationEventListener(mContext) {
+        //     @Override
+        //     public void onOrientationChanged(int orientation) {
+        //         if (mActionViewWindowBridge.isOrientationChanged(mContext.getResources().getConfiguration().orientation)) {
+        //             keepToSide();
+        //         }
+        //     }
+        // };
+        // if (mOrientationEventListener.canDetectOrientation()) {
+        //     mOrientationEventListener.enable();
+        // }
     }
 
     @Override
@@ -79,9 +82,9 @@ public class CircularMenuWindow extends FloatyWindow {
     }
 
     private void setInitialState() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        int y = preferences.getInt(KEY_POSITION_Y, ScreenMetrics.getDeviceScreenHeight() / 2);
-        mActionViewWindowBridge.updatePosition(mActionViewWindowBridge.getX(), y);
+        int x = (int) (ScreenMetrics.getDeviceScreenWidth() * Pref.getFloat(KEY_POSITION_X_PERCENT, 0f));
+        int y = (int) (ScreenMetrics.getDeviceScreenHeight() * Pref.getFloat(KEY_POSITION_Y_PERCENT, 1 - 0.618f));
+        mActionViewWindowBridge.updatePosition(x, y);
         keepToSide();
     }
 
@@ -93,7 +96,7 @@ public class CircularMenuWindow extends FloatyWindow {
     }
 
     private void initWindowBridge() {
-        mActionViewWindowBridge = new OrientationAwareWindowBridge(mActionViewWindowLayoutParams, getWindowManager(), mCircularActionView, mContext);
+        mActionViewWindowBridge = new WindowBridge.DefaultImpl(mActionViewWindowLayoutParams, getWindowManager(), mCircularActionView);
         mMenuWindowBridge = new WindowBridge.DefaultImpl(mMenuWindowLayoutParams, getWindowManager(), mCircularActionMenu);
     }
 
@@ -213,14 +216,24 @@ public class CircularMenuWindow extends FloatyWindow {
         close();
     }
 
+    public void savePosition() {
+        int x = mActionViewWindowBridge.getX();
+        Pref.putFloatSync(KEY_POSITION_X_PERCENT, x / (float) ScreenMetrics.getDeviceScreenWidth());
+        int y = mActionViewWindowBridge.getY();
+        Pref.putFloatSync(KEY_POSITION_Y_PERCENT, y / (float) ScreenMetrics.getDeviceScreenHeight());
+    }
+
+    public void savePosition(@NotNull Configuration configuration) {
+        int orientation = configuration.orientation;
+        if (Pref.getInt(KEY_LAST_ORIENTATION, ORIENTATION_PORTRAIT) != orientation) {
+            Pref.putIntSync(KEY_LAST_ORIENTATION, orientation);
+            savePosition();
+        }
+    }
+
     public void close() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        preferences.edit()
-                .putInt(KEY_POSITION_X, mActionViewWindowBridge.getX())
-                .putInt(KEY_POSITION_Y, mActionViewWindowBridge.getY())
-                .apply();
         try {
-            mOrientationEventListener.disable();
+            // mOrientationEventListener.disable();
             FloatyService.removeWindow(this);
             FloatyWindowManger.clearCircularMenu();
             if (mCircularActionMenu.isAttachedToWindow()) {

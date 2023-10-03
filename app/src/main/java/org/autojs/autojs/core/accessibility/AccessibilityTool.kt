@@ -97,6 +97,8 @@ class AccessibilityTool(val context: Context) {
         private fun enableWithRoot(timeout: Long? = null): Boolean = when (timeout != null) {
             true -> enableWithRoot() && AccessibilityService.waitForEnabled(timeout.toLong())
             else -> try {
+                disableWithRoot()
+
                 val services = getEnabledWithRoot(true)
 
                 val cmdServices = "settings put secure enabled_accessibility_services $services"
@@ -116,8 +118,12 @@ class AccessibilityTool(val context: Context) {
         private fun enableWithSecure(timeout: Long? = null): Boolean = when (timeout != null) {
             true -> enableWithSecure() && AccessibilityService.waitForEnabled(timeout)
             else -> try {
-                Secure.putString(context.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES, getEnabledWithSecure(true))
+                disableWithSecure()
+
+                val enabledWithSecure = getEnabledWithSecure(true)
+                Secure.putString(context.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES, enabledWithSecure)
                 Secure.putInt(context.contentResolver, Secure.ACCESSIBILITY_ENABLED, 1)
+
                 isEnabled()
             } catch (e: Exception) {
                 false

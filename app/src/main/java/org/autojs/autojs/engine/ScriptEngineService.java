@@ -179,11 +179,12 @@ public class ScriptEngineService {
         return mScriptEngineManager.stopAll();
     }
 
-    public void stopAllAndToast() {
+    public int stopAllAndToast() {
         int n = stopAll();
         if (n > 0) {
             mUiHandler.toast(mContext.getResources().getQuantityString(R.plurals.text_already_stop_n_scripts, n, n));
         }
+        return n;
     }
 
     public Set<ScriptEngine> getEngines() {

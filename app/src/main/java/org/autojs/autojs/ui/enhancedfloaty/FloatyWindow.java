@@ -11,7 +11,6 @@ import org.opencv.core.Size;
 /**
  * Created by Stardust on 2017/5/1.
  */
-
 public abstract class FloatyWindow {
     private WindowManager mWindowManager;
     private FloatyService mFloatyService;

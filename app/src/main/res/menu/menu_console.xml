@@ -10,6 +10,12 @@
         app:showAsAction="never"/>
 
     <item
+            android:id="@+id/action_send"
+            android:icon="@drawable/ic_send_black_48dp"
+            android:title="@string/text_send"
+            app:showAsAction="never"/>
+
+    <item
             android:id="@+id/action_export"
             android:icon="@drawable/ic_export_black_48dp"
             android:title="@string/text_export"

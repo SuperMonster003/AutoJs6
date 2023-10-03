@@ -27,7 +27,6 @@ import org.autojs.autojs6.databinding.ActivityAboutItemsBinding
  * Created by Stardust on 2017/2/2.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
-
 open class AboutActivity : BaseActivity() {
 
     private lateinit var activityBinding: ActivityAboutBinding
@@ -121,13 +120,13 @@ open class AboutActivity : BaseActivity() {
         MaterialDialog.Builder(this)
             .title(R.string.text_app_and_device_info)
             .content(DeviceUtils.getDeviceSummaryWithSimpleAppInfo(this))
-            .negativeText(R.string.text_back)
-            .neutralText(R.string.text_copy)
+            .neutralText(R.string.dialog_button_copy)
             .onNeutral { d, _ ->
                 ClipboardUtils.setClip(this, d.contentView?.text)
                 ViewUtils.showToast(this, R.string.text_already_copied_to_clip)
             }
             .neutralColorRes(R.color.dialog_button_hint)
+            .negativeText(R.string.dialog_button_dismiss)
             .build()
             .apply { window?.setBackgroundDrawableResource(R.color.about_app_dev_info_dialog_background) }
             .show()
@@ -149,7 +148,7 @@ open class AboutActivity : BaseActivity() {
         LicenseResolver.registerLicense(MozillaPublicLicense20.instance)
         LicensesDialog.Builder(this)
             .setTitle(R.string.text_licenses)
-            .setCloseText(R.string.dialog_button_back)
+            .setCloseText(R.string.dialog_button_dismiss)
             .setNotices(R.raw.licenses)
             .setIncludeOwnLicense(true)
             .setEnableDarkMode(true)
@@ -168,8 +167,8 @@ open class AboutActivity : BaseActivity() {
         NotAskAgainDialog.Builder(this, key)
             .title(R.string.text_prompt)
             .content(R.string.content_github_feedback)
-            .negativeText(R.string.text_back)
-            .positiveText(R.string.text_continue)
+            .negativeText(R.string.dialog_button_cancel)
+            .positiveText(R.string.dialog_button_continue)
             .onNegative { d, _ -> d.dismiss() }
             .onPositive { _, _ -> launchGithubIssuesPage() }
             .cancelable(false)

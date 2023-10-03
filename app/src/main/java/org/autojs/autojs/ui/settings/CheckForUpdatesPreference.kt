@@ -35,6 +35,6 @@ class CheckForUpdatesPreference : MaterialPreference, OnSharedPreferenceChangeLi
         super.onClick()
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = notifyChanged()
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) = notifyChanged()
 
 }

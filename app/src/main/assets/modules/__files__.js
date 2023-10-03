@@ -1,5 +1,5 @@
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Files}
  */
@@ -12,7 +12,7 @@ module.exports = function (scriptRuntime, scope) {
              * @extends Internal.Files
              */
             const Files = function () {
-                // Empty class body.
+                /* Empty body. */
             };
 
             Files.prototype = {

@@ -130,7 +130,7 @@ public class ColorFinder {
     @Deprecated
     @ScriptInterface
     @SuppressWarnings("deprecation")
-    @CodeAuthor(name = "LYS", homepage = "https://github.com/LYS86")
+    @CodeAuthor(name = "LYS86", homepage = "https://github.com/LYS86")
     public Point[] findAllMultiColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
         Point[] firstPoints = findAllPointsForColor(image, firstColor, threshold, rect);
         List<Point> resultPoints = new ArrayList<>();

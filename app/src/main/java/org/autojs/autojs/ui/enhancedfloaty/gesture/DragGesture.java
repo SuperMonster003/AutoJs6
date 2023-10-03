@@ -10,7 +10,6 @@ import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 /**
  * Created by Stardust on 2017/4/18.
  */
-
 public class DragGesture extends GestureDetector.SimpleOnGestureListener {
 
     protected WindowBridge mWindowBridge;

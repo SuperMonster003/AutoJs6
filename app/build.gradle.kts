@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage", "SpellCheckingInspection")
+@file:Suppress("SpellCheckingInspection")
 
 import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
@@ -15,8 +15,9 @@ val versions = Versions("$rootDir/version.properties")
 
 plugins {
     id("com.android.application")
-    kotlin("android")
-    kotlin("kapt")
+    id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.kapt") /* kotlin("kapt") */
+    id("org.jetbrains.kotlin.android") /* kotlin("android") */
 }
 
 dependencies /* Unclassified */ {
@@ -38,7 +39,7 @@ dependencies /* Unclassified */ {
     implementation("de.psdev.licensesdialog:licensesdialog:2.2.0")
 
     // Commons Lang
-    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("org.apache.commons:commons-lang3:3.13.0")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -47,14 +48,14 @@ dependencies /* Unclassified */ {
     implementation("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
 
     // Glide
-    implementation("com.github.bumptech.glide:glide:4.15.1")
-    kapt("com.github.bumptech.glide:compiler:4.15.1")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    ksp("com.github.bumptech.glide:ksp:4.16.0")
 
     // Joda Time
     implementation("joda-time:joda-time:2.12.5")
 
     // Flurry
-    implementation("com.flurry.android:analytics:14.3.0")
+    implementation("com.flurry.android:analytics:14.4.0")
 
     // Bugly
     implementation(project(":libs:com.tencent.bugly.crashreport-4.0.4"))
@@ -63,7 +64,7 @@ dependencies /* Unclassified */ {
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
 
     // Webkit
-    implementation("androidx.webkit:webkit:1.7.0")
+    implementation("androidx.webkit:webkit:1.8.0")
 
     // Gson
     implementation("com.google.code.gson:gson:2.10.1")
@@ -76,8 +77,7 @@ dependencies /* Unclassified */ {
     implementation("log4j:log4j:1.2.17")
 
     // Preference
-    implementation("androidx.preference:preference:1.2.0")
-    implementation("androidx.preference:preference-ktx:1.2.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
 
     // RootShell
     implementation("com.github.Stericson:RootShell:1.6")
@@ -130,6 +130,11 @@ dependencies /* Unclassified */ {
     implementation(files("$rootDir/libs/javamail-android/activation.jar"))
     implementation(files("$rootDir/libs/javamail-android/additionnal.jar"))
     implementation(files("$rootDir/libs/javamail-android/mail.jar"))
+
+    // Shizuku
+    implementation("dev.rikka.shizuku:api:13.1.5")
+    implementation("dev.rikka.shizuku:provider:13.1.5")
+    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:4.3@aar")
 }
 
 dependencies /* Test */ {
@@ -140,9 +145,11 @@ dependencies /* Test */ {
 
 dependencies /* Annotations */ {
     // Android Annotations
-    kapt("org.androidannotations:androidannotations:4.8.0")
     implementation("org.androidannotations:androidannotations-api:4.8.0")
-    implementation("androidx.annotation:annotation:1.6.0")
+    implementation("androidx.annotation:annotation:1.7.0")
+    // FIXME by SuperMonster003 on Aug 17, 2023.
+    //  ! Failed to migrate it from kapt to KSP.
+    kapt("org.androidannotations:androidannotations:4.8.0")
 
     // JCIP Annotations
     implementation("net.jcip:jcip-annotations:1.0")
@@ -250,7 +257,7 @@ dependencies /* Auto.js Extensions */ {
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
     // @Legacy com.jrummyapps:colorpicker:2.1.7
     implementation("com.jaredrummler:colorpicker:1.1.0")
-    implementation("androidx.recyclerview:recyclerview:1.3.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.1")
     implementation("com.github.ozodrukh:CircularReveal:2.0.1")
 }
 
@@ -349,6 +356,10 @@ android {
 
     buildFeatures {
         viewBinding = true
+
+        // @Hint by SuperMonster003 on Aug 14, 2023.
+        //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
+        buildConfig = true
     }
 
     defaultConfig {
@@ -466,22 +477,68 @@ class Versions(filePath: String) {
     val appVersionCode = properties["VERSION_BUILD"].let { it as String }.toInt()
     val vscodeExtRequiredVersion = properties["VSCODE_EXT_REQUIRED_VERSION"] as String
 
+    private val javaVersionMinSupported = properties["JAVA_VERSION_MIN_SUPPORTED"]
+        .let { it as String }.toInt()
+        .also {
+            if (!JavaVersion.current().isCompatibleWith(JavaVersion.toVersion(it))) {
+                throw GradleException("Current Gradle JDK version ${JavaVersion.current()} does not meet the minimum requirement which $it is needed.")
+            }
+        }
+    private val javaVersionMinSuggested = properties["JAVA_VERSION_MIN_SUGGESTED"]
+        .let { it as String }.toInt()
+        .also {
+            if (!JavaVersion.current().isCompatibleWith(JavaVersion.toVersion(it))) {
+                logger.error("It is recommended to upgrade current Gradle JDK version ${JavaVersion.current()} to $it or higher.")
+            }
+        }
     private val javaVersionRaw = properties["JAVA_VERSION"] as String
+    private var javaVersionInfoSuffix = ""
+    private val javaVersionCeilMap = mapOf(
+        "as" to mapOf(
+            /* Empty so far. */
+        ),
+        "idea" to mapOf(
+            "2023.2" to javaVersionMinSuggested, /* Aug 17, 2023. */
+            "2023.1" to javaVersionMinSuggested, /* Aug 17, 2023. */
+            "2022.3" to javaVersionMinSuggested, /* Aug 17, 2023. */
+        ),
+    )
 
     val javaVersion: JavaVersion by lazy {
-        val minSupportedVersion = 17
         var versionInt = javaVersionRaw.toInt()
-        while (versionInt > minSupportedVersion) {
+
+        while (versionInt > javaVersionMinSupported) {
+            @Suppress("EnumValuesSoftDeprecate")
             if (JvmTarget.values().any { it.name.contains(Regex("_$versionInt$")) }) {
                 break
             }
             versionInt -= 1
         }
+
+        if (!JavaVersion.toVersion("$versionInt").isCompatibleWith(JavaVersion.toVersion(javaVersionRaw))) {
+            javaVersionInfoSuffix += " [fallback]"
+        }
+
+        val platformVersion = gradle.extra["platformVersion"] as String
+        val platformType = gradle.extra["platformType"] as String
+
+        javaVersionCeilMap[platformType]!![platformVersion]?.let { ceil: Int ->
+            if (versionInt > ceil) {
+                versionInt = ceil
+                javaVersionInfoSuffix += " [coerced]"
+            }
+        }
+
+        if (!JavaVersion.current().isCompatibleWith(JavaVersion.toVersion(versionInt))) {
+            versionInt = JavaVersion.current().majorVersion.toInt()
+            javaVersionInfoSuffix += " [consistent]"
+        }
+
         JavaVersion.toVersion(versionInt.toString())
     }
 
     private var isBuildNumberAutoIncremented = false
-    private val minBuildTimeGap = Utils.hours2Millis(0.5)
+    private val minBuildTimeGap = Utils.hours2Millis(0.75)
     private val assembleTargets = mapOf("app" to listOf("debug", "release"))
 
     private val isBuildGapEnough
@@ -506,12 +563,28 @@ class Versions(filePath: String) {
         properties.store(file.writer(), null)
     }
 
-    fun showInfo() = arrayOf(
-        "Version name: $appVersionName",
-        "Version code: $appVersionCode${" [auto-incremented]".takeIf { isBuildNumberAutoIncremented } ?: ""}",
-        "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]",
-        "Java version: $javaVersion${" [fallback]".takeUnless { javaVersion.isCompatibleWith(JavaVersion.toVersion(javaVersionRaw)) } ?: ""}",
-    ).forEach { println(it) }
+    fun showInfo() {
+        val title = "Version information for AutoJs6 app library"
+
+        val infoVerName = "Version name: $appVersionName"
+        val infoVerCode = "Version code: $appVersionCode${" [auto-incremented]".takeIf { isBuildNumberAutoIncremented } ?: ""}"
+        val infoVerSdk = "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]"
+        val infoVerJava = "Java version: $javaVersion$javaVersionInfoSuffix"
+
+        val maxLength = arrayOf(title, infoVerName, infoVerCode, infoVerSdk, infoVerJava).maxOf { it.length }
+
+        arrayOf(
+            "=".repeat(maxLength),
+            title,
+            "-".repeat(maxLength),
+            infoVerName,
+            infoVerCode,
+            infoVerSdk,
+            infoVerJava,
+            "=".repeat(maxLength),
+            "",
+        ).forEach { println(it) }
+    }
 
     fun handleIfNeeded(project: Project) = assembleTargets.forEach {
         val targetName = it.key

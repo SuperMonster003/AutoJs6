@@ -40,6 +40,7 @@
     <string name="description_stable_mode">يجعل الوضع المستقر أكثر استقرارًا عند الحصول على حدود تخطيط ، ولكن قد يتم تجاهل بعض النتائج.\nإعادة تشغيل خدمة الوصول المطلوبة.</string>
     <string name="description_theme_color_preference">يتم تطبيق لون النسق على عناصر واجهة المستخدم بما في ذلك على سبيل المثال لا الحصر العناصر التالية:\nشريط الحالة\nAppbar\nرمز الملف\nرمز عنصر المهمة\nفاب\nعنوان فئة الإعدادات\nزر التغيير\n\nملاحظة: اعتبارًا من الإصدار 6.2.0 من AutoJs6 ، لم يكن هناك فرق بين اللون الأساسي واللون الأساسي الداكن ولون التمييز حتى الآن.</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">يلغي</string>
     <string name="dialog_button_cancel_download">يلغي</string>
     <string name="dialog_button_confirm">نعم</string>
@@ -132,7 +133,7 @@
     <string name="error_no_accessibility_permission">يتم تعطيل خدمة إمكانية الوصول وتوقف البرنامج النصي</string>
     <string name="error_no_accessibility_permission_to_capture">لم يتم تنشيط خدمة إمكانية الوصول</string>
     <string name="error_no_accessibility_service">لا توجد خدمة إمكانية الوصول</string>
-    <string name="error_no_draw_overlays_permission">لا يوجد إذن \"عرض عبر التطبيقات الأخرى\"</string>
+    <string name="error_no_display_over_other_apps_permission">لا يوجد إذن \"عرض عبر التطبيقات الأخرى\"</string>
     <string name="error_no_post_notifications_permission">لا يوجد إذن \"نشر الإخطارات\"</string>
     <string name="error_no_read_phone_state_permission">لا يوجد إذن \"اقرأ حالة الهاتف\"</string>
     <string name="error_no_screen_capture_permission">لا يوجد إذن التقاط الشاشة</string>
@@ -325,7 +326,7 @@
     <string name="text_debug_step_over">خطوة أكثر</string>
     <string name="text_delete">حذف</string>
     <string name="text_delete_line">حذف الخط</string>
-    <string name="text_detail">تفاصيل</string>
+    <string name="text_details">تفاصيل</string>
     <string name="text_developer_details_under_development">تفاصيل المطور قيد التطوير</string>
     <string name="text_developer_options">خيارات للمطور</string>
     <string name="text_device_brand">العلامة التجارية للجهاز</string>
@@ -678,6 +679,19 @@
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="theme_color_default">تقصير</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">المجموع: عنصر واحد</item>

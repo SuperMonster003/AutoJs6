@@ -6,7 +6,6 @@ import android.widget.ImageView;
 /**
  * Created by Stardust on 2017/4/30.
  */
-
 public interface ResizableFloaty {
 
     View inflateView(FloatyService floatyService, ResizableFloatyWindow service);

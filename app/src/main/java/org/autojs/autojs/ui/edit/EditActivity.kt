@@ -162,7 +162,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         MaterialDialog.Builder(this)
             .title(R.string.text_prompt)
             .content(R.string.edit_exit_without_save_warn)
-            .neutralText(R.string.text_back)
+            .neutralText(R.string.dialog_button_back)
             .negativeText(R.string.text_exit_directly)
             .negativeColorRes(R.color.dialog_button_caution)
             .positiveText(R.string.text_save_and_exit)
