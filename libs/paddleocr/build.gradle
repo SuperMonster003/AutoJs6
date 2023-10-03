@@ -35,13 +35,15 @@ android {
     ndkVersion versionNdk
     compileSdk 33
     defaultConfig {
-        minSdkVersion 24
-        targetSdkVersion 31
+        /* minSdk 默认为 23，这里修改为与 AutoJs6 最低 SDK 版本一致的 24. */
+        minSdk 24
+        targetSdk 33
 
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11 -frtti -fexceptions -Wno-format"
-                arguments "-DANDROID_PLATFORM=android-23", "-DANDROID_STL=c++_shared", "-DANDROID_ARM_NEON=TRUE"
+                /* '-DANDROID_PLATFORM' 默认为 'android-23', 这里修改为与 AutoJs6 最低 SDK 版本一致的 24. */
+                arguments '-DANDROID_PLATFORM=android-24', '-DANDROID_STL=c++_shared', "-DANDROID_ARM_NEON=TRUE"
             }
         }
         ndk {
