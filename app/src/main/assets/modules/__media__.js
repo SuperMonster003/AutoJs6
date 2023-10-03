@@ -1,5 +1,5 @@
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Media}
  */
@@ -10,7 +10,7 @@ module.exports = function (scriptRuntime, scope) {
              * @extends Internal.Media
              */
             const Media = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Media.prototype = {

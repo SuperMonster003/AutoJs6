@@ -7,7 +7,6 @@ import java.util.Stack;
 /**
  * Created by Stardust on 2017/3/11.
  */
-
 public class ViewStack {
 
     public interface CurrentViewSetter {

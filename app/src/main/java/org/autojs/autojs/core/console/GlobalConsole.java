@@ -26,7 +26,7 @@ import java.util.Locale;
  */
 @SuppressLint("ConstantLocale")
 public class GlobalConsole extends ConsoleImpl {
-    private static final String TAG = "GlobalConsole";
+    private static final String TAG = GlobalConsole.class.getSimpleName();
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
     private static final Logger LOGGER = Logger.getLogger(GlobalConsole.class);
 
@@ -45,7 +45,7 @@ public class GlobalConsole extends ConsoleImpl {
         return log;
     }
 
-    private Priority toLog4jLevel(int level) {
+    protected Priority toLog4jLevel(int level) {
         switch (level) {
             case VERBOSE, DEBUG -> {
                 return Level.DEBUG;
@@ -66,7 +66,7 @@ public class GlobalConsole extends ConsoleImpl {
         }
     }
 
-    private String getLevelChar(int level) {
+    protected String getLevelChar(int level) {
         return switch (level) {
             case VERBOSE -> "V";
             case DEBUG -> "D";

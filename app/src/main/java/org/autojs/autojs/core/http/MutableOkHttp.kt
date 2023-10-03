@@ -3,7 +3,6 @@ package org.autojs.autojs.core.http
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
-import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -14,31 +13,28 @@ class MutableOkHttp : OkHttpClient() {
 
     private var mOkHttpClient: OkHttpClient
     private val maxRetries = 3
-    private var mTimeout = (30 * 1000).toLong()
+    private var mTimeout = 30 * 1000L
     private val mRetryInterceptor = Interceptor { chain: Interceptor.Chain ->
         val request = chain.request()
         var response: Response? = null
         var tryCount = 0
         do {
-            var succeed: Boolean
+            var isSuccessful: Boolean
             try {
                 response?.close()
-                chain.proceed(request).apply {
-                    response = this
-                    succeed = isSuccessful
-                }
-            } catch (e: SocketTimeoutException) {
-                succeed = false
+                response = chain.proceed(request).also { isSuccessful = it.isSuccessful }
+            } catch (e: Exception) {
+                isSuccessful = false
                 if (tryCount >= maxRetries) {
                     throw e
                 }
             }
-            if (succeed || tryCount >= maxRetries) {
+            if (isSuccessful || tryCount >= maxRetries) {
                 break
             }
             tryCount++
         } while (true)
-        response!!
+        response ?: throw Exception("Failed to make a request")
     }
 
     init {

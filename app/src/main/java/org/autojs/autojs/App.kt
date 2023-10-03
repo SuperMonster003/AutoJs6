@@ -1,12 +1,15 @@
 package org.autojs.autojs
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -31,10 +34,13 @@ import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
 import org.autojs.autojs.tool.CrashHandler
 import org.autojs.autojs.ui.error.ErrorReportActivity
+import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 import java.lang.ref.WeakReference
+import java.lang.reflect.Method
 
 
 /**
@@ -61,7 +67,7 @@ class App : MultiDexApplication() {
         setUpDebugEnvironment()
 
         AutoJs.initInstance(this)
-        GlobalKeyObserver.init()
+        GlobalKeyObserver.initIfNeeded()
         setupDrawableImageLoader()
         TimedTaskScheduler.init(this)
         initDynamicBroadcastReceivers()
@@ -73,7 +79,21 @@ class App : MultiDexApplication() {
     }
 
     override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(localeAppDelegate.attachBaseContext(base))
+        // @Caution by SuperMonster003 on Aug 2, 2023.
+        //  ! This will cause AutoJs6 not being aware of
+        //  ! configuration changes (like orientation and so forth).
+        // super.attachBaseContext(localeAppDelegate.attachBaseContext(base))
+
+        super.attachBaseContext(base)
+
+        // @Dubious by SuperMonster003 on Aug 2, 2023.
+        //  ! Locale helper may be not work as expected ?
+        localeAppDelegate.attachBaseContext(base)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            HiddenApiBypass.addHiddenApiExemptions("L");
+        }
+        Log.d("Shizuku", "${App::class.java.getSimpleName()} attachBaseContext | Process=${getProcessNameCompat()}")
     }
 
     private fun setUpStaticsTool() {
@@ -216,10 +236,11 @@ class App : MultiDexApplication() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         localeAppDelegate.onConfigurationChanged(this)
         ViewUtils.onConfigurationChanged(newConfig)
+        FloatyWindowManger.getCircularMenu()?.savePosition(newConfig)
         super.onConfigurationChanged(newConfig)
     }
 
-    override fun getApplicationContext() = LocaleHelper.onAttach(super.getApplicationContext())
+   override fun getApplicationContext() = LocaleHelper.onAttach(super.getApplicationContext())
 
     companion object {
 
@@ -229,6 +250,19 @@ class App : MultiDexApplication() {
 
         val app: App
             get() = instance.get()!!
+
+        fun getProcessNameCompat(): String {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) Application.getProcessName() else {
+                try {
+                    @SuppressLint("PrivateApi") val activityThread = Class.forName("android.app.ActivityThread")
+                    @SuppressLint("DiscouragedPrivateApi") val method: Method = activityThread.getDeclaredMethod("currentProcessName")
+                    method.invoke(null) as String
+                } catch (e: ClassNotFoundException) {
+                    e.printStackTrace()
+                    "Unknown process name"
+                }
+            }
+        }
 
     }
 

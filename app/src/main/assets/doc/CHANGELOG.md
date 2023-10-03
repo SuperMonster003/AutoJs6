@@ -6,9 +6,42 @@
 
 # v6.3.4
 
-###### 2023/07/25
+###### 2023/10/03
 
+* `新增` ocr 模块支持 Paddle Lite 引擎 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_ 
+* `新增` WebSocket 模块 (参阅 项目文档 > [颜色类](https://docs.autojs6.com/#/webSocketType))
+* `新增` device.rotation / device.orientation 等方法
+* `新增` 内部 Java 类支持 class 静态属性访问
 * `修复` VSCode 插件保存文件到本地时文件扩展名信息丢失的问题
+* `修复` 使用协程特性运行项目产生未捕获异常致使应用崩溃的问题
+* `修复` 重启或退出应用时浮动按钮无法记录其位置状态信息的问题
+* `修复` 设备屏幕方向改变时无法获取更新后的设备配置信息的问题
+* `修复` 屏幕旋转至横向时 Toolbar 标题字体过小的问题
+* `修复` 屏幕旋转至横向时应用主页的页签排版过于拥挤的问题
+* `修复` 屏幕旋转至横向时浮动按钮可能溢出屏幕的问题 _[`issue #90`](http://issues.autojs6.com/90)_
+* `修复` 屏幕多次旋转时无法恢复浮动按钮的坐标及屏幕侧边方向的问题
+* `修复` 消息浮动框在多个脚本同时运行时可能存在被遮蔽的问题 _[`issue #67`](http://issues.autojs6.com/67)_
+* `修复` 使用广播分析布局时点击布局无法弹出菜单且导致应用崩溃的问题
+* `修复` 第二次及以后创建的 WebSocket 实例均无法正常触发监听器的问题
+* `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
+* `修复` 撤销 importPackage 的全局重定向方法以避免某些作用域下的包导入异常 _[`issue #88`](http://issues.autojs6.com/88)_
+* `修复` 日志活动页面使用复制或导出功能时可能导致应用崩溃的问题
+* `优化` 日志活动页面导出功能重命名为发送功能并重新实现符合实际意义的导出功能
+* `优化` 日志活动页面发送功能支持条目数量过大时自动截取并作出提示
+* `优化` ocr 模块同时兼容 Google MLKit 及 Paddle Lite 引擎 (参阅 项目文档 > [光学字符识别](https://docs.autojs6.com/#/ocr?id=p-mode))
+* `优化` 提升无障碍服务自动启动的成功概率
+* `优化` 构建工具自适应 Java 发行版本以尽量避免 "无效的发行版本" 问题
+* `优化` 部分 Kotlin 注解处理由 kapt 迁移至 KSP
+* `优化` 附加 Rikka Shizuku 版本 13.1.5
+* `优化` 升级 Gradle Compile 版本 33 -> 34
+* `优化` 升级 Gradle 版本 8.3-rc-1 -> 8.4-rc-3
+* `优化` 升级 Apache Commons Lang3 版本 3.12.0 -> 3.13.0
+* `优化` 升级 Glide 版本 4.15.1 -> 4.16.0
+* `优化` 升级 Android Analytics 版本 14.3.0 -> 14.4.0
+* `优化` 升级 Androidx WebKit 版本 1.7.0 -> 1.8.0
+* `优化` 升级 Androidx Preference 版本 1.2.0 -> 1.2.1
+* `优化` 升级 Androidx Annotation 版本 1.6.0 -> 1.7.0
+* `优化` 升级 Androidx Recyclerview 版本 1.3.0 -> 1.3.1
 
 # v6.3.3
 
@@ -62,7 +95,7 @@
 * `优化` 服务端模式开启后保持常开状态 (除非手动关闭或应用进程结束) _[`issue #64`](http://issues.autojs6.com/64#issuecomment-1596990158)_
 * `优化` 实现 AutoJs6 与 VSCode 插件的双向版本检测并提示异常检测结果 _[`issue #89`](http://issues.autojs6.com/89)_
 * `优化` 增加短信数据读取权限 (android.permission.READ_SMS) (默认关闭)
-* `优化` findMultiColors 方法内部实现 (by [LYS](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
+* `优化` findMultiColors 方法内部实现 (by [LYS86](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
 * `优化` runtime.loadDex/loadJar/load 支持按目录级别加载或同时加载多个文件
 * `优化` 升级 Leakcanary 版本 2.11 -> 2.12
 * `优化` 升级 Android Analytics 版本 14.2.0 -> 14.3.0
@@ -166,7 +199,7 @@
 * `优化` 升级 Zip4j 版本 2.11.2 -> 2.11.5
 * `优化` 升级 Junit 版本 5.9.2 -> 5.9.3
 * `优化` 升级 Androidx Annotation 版本 1.5.0 -> 1.6.0
-* `优化` 升级 Jackson Databind 版本 2.14.1 -> 2.14.2
+* `优化` 升级 Jackson DataBind 版本 2.14.1 -> 2.14.2
 * `优化` 升级 Desugar JDK Libs 版本 2.0.0 -> 2.0.3
 
 # v6.2.0

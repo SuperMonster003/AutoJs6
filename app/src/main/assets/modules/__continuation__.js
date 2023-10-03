@@ -3,7 +3,7 @@
 let { engines, global: _global } = global;
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Continuation}
  */
@@ -41,7 +41,13 @@ module.exports = function (scriptRuntime, scope) {
                      */
                     let result = this.cont.suspend();
                     if (result.error !== null) {
-                        throw result.error;
+                        // throw result.error;
+                        if (typeof result.error.message === 'string') {
+                            ScriptRuntime.popException(result.error.message);
+                        } else {
+                            ScriptRuntime.popException(String(result.error));
+                        }
+                        return result.error;
                     }
                     return result.result;
                 },
@@ -64,7 +70,7 @@ module.exports = function (scriptRuntime, scope) {
              */
             const Continuation = function () {
                 return Object.assign(function () {
-                    // Empty interface body.
+                    /* Empty body. */
                 }, Continuation.prototype);
             };
 
@@ -97,7 +103,7 @@ module.exports = function (scriptRuntime, scope) {
              * @implements Internal.Continuation.PromiseExtension
              */
             const PromiseExtension = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Object.assign(PromiseExtension.prototype, {

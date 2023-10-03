@@ -1,7 +1,9 @@
 package org.autojs.autojs.core.inputevent;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
+
 import android.text.TextUtils;
 
 import org.autojs.autojs6.R;
@@ -67,7 +69,6 @@ public class InputEventObserver {
         void onInputEvent(@NonNull InputEvent e);
     }
 
-    private static InputEventObserver sGlobal;
     private final CopyOnWriteArrayList<InputEventListener> mInputEventListeners = new CopyOnWriteArrayList<>();
     private final Context mContext;
     private Shell mShell;
@@ -76,18 +77,10 @@ public class InputEventObserver {
         mContext = context;
     }
 
-    public static InputEventObserver getGlobal(Context context) {
-        if (sGlobal == null) {
-            initGlobal(context);
-        }
-        return sGlobal;
-    }
-
-    private static void initGlobal(Context context) {
-        if (sGlobal != null)
-            return;
-        sGlobal = new InputEventObserver(context);
-        sGlobal.observe();
+    public static InputEventObserver initObserver(Context context) {
+        var inputEventObserver = new InputEventObserver(context);
+        inputEventObserver.observe();
+        return inputEventObserver;
     }
 
     public void observe() {

@@ -18,7 +18,6 @@ import pxb.android.tinysign.TinySign;
 /**
  * Created by Stardust on 2017/10/23.
  */
-
 public class ApkPackager {
 
     private InputStream mApkInputStream;

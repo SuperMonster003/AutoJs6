@@ -46,7 +46,7 @@ class DisplayOverOtherAppsPermission(override val context: Context) : Permission
         }
         val r = Runnable {
             toggle()
-            ViewUtils.showToast(context, R.string.error_no_draw_overlays_permission)
+            ViewUtils.showToast(context, R.string.error_no_display_over_other_apps_permission)
         }
         if (Looper.myLooper() != Looper.getMainLooper()) {
             Handler(Looper.getMainLooper()).post(r)

@@ -22,6 +22,7 @@ import org.autojs.autojs.core.image.Colors;
 import org.autojs.autojs.core.image.ImageWrapper;
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester;
 import org.autojs.autojs.core.looper.Loopers;
+import org.autojs.autojs.core.web.WebSocket;
 import org.autojs.autojs.engine.ScriptEngineService;
 import org.autojs.autojs.lang.ThreadCompat;
 import org.autojs.autojs.pio.PFiles;
@@ -39,11 +40,12 @@ import org.autojs.autojs.runtime.api.Files;
 import org.autojs.autojs.runtime.api.Floaty;
 import org.autojs.autojs.runtime.api.Images;
 import org.autojs.autojs.runtime.api.Media;
-import org.autojs.autojs.runtime.api.MlKitOCR;
-import org.autojs.autojs.runtime.api.PaddleOCR;
+import org.autojs.autojs.runtime.api.OcrMLKit;
+import org.autojs.autojs.runtime.api.OcrPaddle;
 import org.autojs.autojs.runtime.api.Plugins;
 import org.autojs.autojs.runtime.api.ProcessShell;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
+import org.autojs.autojs.runtime.api.ScriptToast;
 import org.autojs.autojs.runtime.api.Sensors;
 import org.autojs.autojs.runtime.api.Threads;
 import org.autojs.autojs.runtime.api.Timers;
@@ -242,10 +244,13 @@ public class ScriptRuntime {
     private final Images images;
 
     @ScriptVariable
-    public final MlKitOCR mlKitOCR;
+    public final ScriptToast toast;
 
     @ScriptVariable
-    public final PaddleOCR paddleOCR;
+    public final OcrMLKit ocrMLKit;
+
+    @ScriptVariable
+    public final OcrPaddle ocrPaddle;
 
     private static WeakReference<Context> applicationContext;
     private final Map<String, Object> mProperties = new ConcurrentHashMap<>();
@@ -281,8 +286,9 @@ public class ScriptRuntime {
         media = new Media(context, this);
         plugins = new Plugins(context, this);
 
-        mlKitOCR = new MlKitOCR();
-        paddleOCR = new PaddleOCR();
+        ocrMLKit = new OcrMLKit();
+        ocrPaddle = new OcrPaddle();
+        toast = new ScriptToast(context, this);
     }
 
     public void init() {
@@ -325,10 +331,6 @@ public class ScriptRuntime {
 
     public AccessibilityBridge getAccessibilityBridge() {
         return accessibilityBridge;
-    }
-
-    public void toast(final String text) {
-        uiHandler.toast(text);
     }
 
     public void sleep(long millis) {
@@ -536,6 +538,8 @@ public class ScriptRuntime {
             }
         });
 
+        ignoresException(() -> WebSocket.onExit("Triggered by " + ScriptRuntime.class.getSimpleName()));
+
         // @Hint by 抠脚本人 on Jul 10, 2023.
         //  ! 清空无障碍事件.
         ignoresException(AccessibilityService::clearAccessibilityEventCallback);
@@ -558,8 +562,8 @@ public class ScriptRuntime {
         ignoresException(loopers::recycle);
         ignoresException(this::recycleShell);
         ignoresException(images::releaseScreenCapturer);
-        ignoresException(mlKitOCR::release);
-        ignoresException(paddleOCR::release);
+        ignoresException(ocrMLKit::release);
+        ignoresException(ocrPaddle::release);
         ignoresException(sensors::unregisterAll);
         ignoresException(timers::recycle);
         ignoresException(ui::recycle);

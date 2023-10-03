@@ -1,7 +1,7 @@
 // noinspection JSUnusedLocalSymbols,UnnecessaryLocalVariableJS
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Notice}
  */
@@ -47,7 +47,7 @@ module.exports = function (scriptRuntime, scope) {
          * @implements {Notice.Config}
          */
         const Config = function () {
-            // Empty interface body.
+            /* Empty body. */
         };
 
         Config.prototype = {
@@ -86,7 +86,7 @@ module.exports = function (scriptRuntime, scope) {
          * @implements {Notice.Channel}
          */
         const Channel = function () {
-            // Empty interface body.
+            /* Empty body. */
         };
 
         Channel.prototype = {

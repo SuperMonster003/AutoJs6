@@ -25,21 +25,21 @@
 
 ### 简介
 
-* Android 平台支持 [无障碍服务](https://developer.android.com/guide/topics/ui/accessibility/service?hl=zh-cn) 的 JavaScript 自动化工具
-* 需要 Android [API](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels) [24](https://developer.android.com/reference/android/os/Build.VERSION_CODES#N) ([7.0](https://zh.wikipedia.org/wiki/Android_Nougat)) [[N](https://developer.android.com/reference/android/os/Build.VERSION_CODES#N)] 及以上操作系统
-* 克隆 (clone) 自 [hyb1996/Auto.js](https://github.com/hyb1996/Auto.js)
-
 ******
 
-### 指南
+[Auto.js](https://github.com/hyb1996/Auto.js) 是一款 Android 平台支持 [无障碍服务](https://developer.android.com/guide/topics/ui/accessibility/service?hl=zh-cn) 的 JavaScript 自动化工具软件.
 
-******
+Auto.js 由 [hyb1996](https://github.com/hyb1996) 于 Jan 27, 2017 初次发布, 于 Mar 13, 2020 停止维护, 最终版本名称为 `4.1.1 alpha2`.
 
-* [应用文档](https://docs.autojs6.com)
-* [使用手册 (待编写)](https://docs.autojs6.com/#/manual)
-* [疑难解答](https://docs.autojs6.com/#/qa)
-* [项目编译构建](#项目编译构建)
-* [脚本开发辅助](#脚本开发辅助)
+AutoJs6 在 Auto.js 最终项目的基础上, 于 Dec 1, 2021 进行二次开发, 继续保持开源免费.
+
+基于 Auto.js 二次开发的开源项目 (以开发时间排序, 仅部分列举):
+
+|                         项目名称                          |          应用名称          |                          开发者                          |     开发时间     |
+|:-----------------------------------------------------:|:----------------------:|:-----------------------------------------------------:|:------------:|
+|   [Auto.js](https://github.com/TonyJiangWJ/Auto.js)   |       Auto.js M        |     [TonyJiangWJ](https://github.com/TonyJiangWJ)     | Nov 21, 2019 |
+|      [AutoX](https://github.com/kkevsekk1/AutoX)      | Autox.js / Autox.js v6 |       [kkevsekk1](https://github.com/kkevsekk1)       | Jul 24, 2020 |
+| [AutoJs6](https://github.com/SuperMonster003/AutoJs6) |        AutoJs6         | [SuperMonster003](https://github.com/SuperMonster003) | Dec 1, 2021  |
 
 ******
 
@@ -62,6 +62,27 @@
 
 ******
 
+### 环境
+
+******
+
+- Android 操作系统
+- [API](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels) [24](https://developer.android.com/reference/android/os/Build.VERSION_CODES#N) ([7.0](https://zh.wikipedia.org/wiki/Android_Nougat)) [[N](https://developer.android.com/reference/android/os/Build.VERSION_CODES#N)] 及以上
+
+******
+
+### 指南
+
+******
+
+* [应用文档](https://docs.autojs6.com)
+* [使用手册 (待编写)](https://docs.autojs6.com/#/manual)
+* [疑难解答](https://docs.autojs6.com/#/qa)
+* [项目编译构建](#项目编译构建)
+* [脚本开发辅助](#脚本开发辅助)
+
+******
+
 ### 主要变更
 
 ******
@@ -74,33 +95,33 @@
 
 * [Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升级至 [v1.7.15-SNAPSHOT](http://rhino.autojs6.com/blob/dbe3f43ba5eb01e7f76139208f36c383dcd1c488/gradle.properties#L3)
 
-  * 支持 [Object.values()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
+    * 支持 [Object.values()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
 
-     ```javascript
-     Object.values({name: 'Max', age: 4}); // ['max', 4]
-     ```
+       ```javascript
+       Object.values({name: 'Max', age: 4}); // ['max', 4]
+       ```
 
-  * 支持 [Array.prototype.includes()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
+    * 支持 [Array.prototype.includes()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
 
-     ```javascript
-     [10, 20, NaN].includes(20); // true
-     ```
+       ```javascript
+       [10, 20, NaN].includes(20); // true
+       ```
 
-  * 支持 [BigInt](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/BigInt)
+    * 支持 [BigInt](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/BigInt)
 
-     ```javascript
-     typeof 567n === 'bigint'; // true
-     ```
+       ```javascript
+       typeof 567n === 'bigint'; // true
+       ```
 
-  * 支持 [模板字符串](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Template_literals)
+    * 支持 [模板字符串](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Template_literals)
 
-     ```javascript
-     `Lucky number: ${(Math.random() * 100).toFixed(0)}`
-     ```
+       ```javascript
+       `Lucky number: ${(Math.random() * 100).toFixed(0)}`
+       ```
 
-  * 查看 Rhino 引擎 [更多新特性](http://project.autojs6.com/blob/master/app/src/main/assets/doc/RHINO.md)
+    * 查看 Rhino 引擎 [更多新特性](http://project.autojs6.com/blob/master/app/src/main/assets/doc/RHINO.md)
 
-  * 查看 Rhino 引擎 [兼容性列表](https://mozilla.github.io/rhino/compat/engines.html)
+    * 查看 Rhino 引擎 [兼容性列表](https://mozilla.github.io/rhino/compat/engines.html)
 
 ******
 
@@ -109,6 +130,35 @@
 ******
 
 [comment]: <> "Version history only shows last 3 versions"
+
+# v6.3.4
+
+###### 2023/10/03
+
+* `新增` ocr 模块支持 Paddle Lite 引擎 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_
+* `新增` WebSocket 模块 (参阅 项目文档 > [颜色类](https://docs.autojs6.com/#/webSocketType))
+* `新增` device.rotation / device.orientation 等方法
+* `新增` 内部 Java 类支持 class 静态属性访问
+* `修复` VSCode 插件保存文件到本地时文件扩展名信息丢失的问题
+* `修复` 使用协程特性运行项目产生未捕获异常致使应用崩溃的问题
+* `修复` 重启或退出应用时浮动按钮无法记录其位置状态信息的问题
+* `修复` 设备屏幕方向改变时无法获取更新后的设备配置信息的问题
+* `修复` 屏幕旋转至横向时 Toolbar 标题字体过小的问题
+* `修复` 屏幕旋转至横向时应用主页的页签排版过于拥挤的问题
+* `修复` 屏幕旋转至横向时浮动按钮可能溢出屏幕的问题 _[`issue #90`](http://issues.autojs6.com/90)_
+* `修复` 屏幕多次旋转时无法恢复浮动按钮的坐标及屏幕侧边方向的问题
+* `修复` 消息浮动框在多个脚本同时运行时可能存在被遮蔽的问题 _[`issue #67`](http://issues.autojs6.com/67)_
+* `修复` 使用广播分析布局时点击布局无法弹出菜单且导致应用崩溃的问题
+* `修复` 第二次及以后创建的 WebSocket 实例均无法正常触发监听器的问题
+* `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
+* `修复` 撤销 importPackage 的全局重定向方法以避免某些作用域下的包导入异常 _[`issue #88`](http://issues.autojs6.com/88)_
+* `修复` 日志活动页面使用复制或导出功能时可能导致应用崩溃的问题
+* `优化` 日志活动页面导出功能重命名为发送功能并重新实现符合实际意义的导出功能
+* `优化` 日志活动页面发送功能支持条目数量过大时自动截取并作出提示
+* `优化` ocr 模块同时兼容 Google MLKit 及 Paddle Lite 引擎 (参阅 项目文档 > [光学字符识别](https://docs.autojs6.com/#/ocr?id=p-mode))
+* `优化` 提升无障碍服务自动启动的成功概率
+* `优化` 构建工具自适应 Java 发行版本以尽量避免 "无效的发行版本" 问题
+* `优化` 部分 Kotlin 注解处理由 kapt 迁移至 KSP
 
 # v6.3.3
 
@@ -161,41 +211,9 @@
 * `优化` 服务端模式开启后保持常开状态 (除非手动关闭或应用进程结束) _[`issue #64`](http://issues.autojs6.com/64#issuecomment-1596990158)_
 * `优化` 实现 AutoJs6 与 VSCode 插件的双向版本检测并提示异常检测结果 _[`issue #89`](http://issues.autojs6.com/89)_
 * `优化` 增加短信数据读取权限 (android.permission.READ_SMS) (默认关闭)
-* `优化` findMultiColors 方法内部实现 (by [LYS](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
+* `优化` findMultiColors 方法内部实现 (by [LYS86](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
 * `优化` runtime.loadDex/loadJar/load 支持按目录级别加载或同时加载多个文件
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v632)_
-
-# v6.3.1
-
-###### 2023/05/26
-
-* `新增` 发布通知权限及主页抽屉开关 _[`issue #55`](http://issues.autojs6.com/55)_
-* `新增` UI 模式支持简单的 Android 布局解析 (参阅 示例代码 > 布局 > 简单安卓布局)
-* `新增` UI 模式增加 console / imagebutton / ratingbar / switch / textclock / togglebutton 等控件
-* `新增` UI 模式控件的颜色色值支持 [OmniColor](https://docs.autojs6.com/#/omniTypes?id=omnicolor) 类型 (如 color="orange")
-* `新增` UI 模式的控件完全支持 attr 方法设置控件属性 (如 ui.text.attr('color', 'blue'))
-* `新增` UI 模式控件支持布尔类型属性值的缺省形式 (如 clickable="true" 可简写为 clickable 或 isClickable)
-* `新增` button 控件支持 isColored 及 isBorderless 布尔类型属性
-* `新增` console.resetGlobalLogConfig 方法用于重置全局日志配置
-* `新增` web.newWebSocket 方法用于创建 Web Socket 实例 (参阅 项目文档 > [万维网](https://docs.autojs6.com/#/web?id=m-newwebsocket))
-* `修复` 文件管理器的文件夹排序异常
-* `修复` floaty 模块构建的浮动窗口无法调节样式及位置的问题 _[`issue #60`](http://issues.autojs6.com/60)_
-* `修复` floaty 模块构建的浮动窗口与系统状态栏重叠的问题
-* `修复` http.postMultipart 方法功能异常 _[`issue #56`](http://issues.autojs6.com/56)_
-* `修复` Android 7.x 无法运行任何脚本的问题 _[`issue #61`](http://issues.autojs6.com/61)_
-* `修复` sign.property 文件不存在时无法构建项目的问题
-* `修复` 高版本系统 AutoJs6 置于后台时可能因无前台通知权限而崩溃的问题 (API >= 33)
-* `修复` 调用 console.show 方法后日志窗口点击 FAB 按钮无法清空日志的问题
-* `修复` 脚本编辑器调试时出现的 prototype 空指针异常
-* `修复` 脚本编辑器运行脚本时在缓存文件夹运行临时脚本而非先保存再在原始位置运行以避免可能的脚本内容丢失问题
-* `修复` 调整布局层次分析的层级色条宽度避免层级过多时控件名称无法显示的问题 _[`issue #46`](http://issues.autojs6.com/46)_
-* `优化` 布局分析浮动窗口增加退出按钮以关闭窗口 _[`issue #63`](http://issues.autojs6.com/63)_
-* `优化` 脚本绝对路径使用简称形式以缩减文本长度并增加可读性
-* `优化` 将 Error 替换为 Exception 避免出现异常时 AutoJs6 应用崩溃
-* `优化` 视图 (View) 绑定方式由 ButterKnife 迁移至 View Binding _[`issue #48`](http://issues.autojs6.com/48)_
-* `优化` 服务端模式非正常关闭时将于 AutoJs6 启动时自动开启 _[`issue #64`](http://issues.autojs6.com/64)_
-* `优化` 客户端模式非正常关闭时将于 AutoJs6 启动时按最近一次的历史地址自动连接
-* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v631)_
 
 ##### 更多版本历史可参阅
 
@@ -207,27 +225,18 @@
 
 ******
 
-建议始终使用 Android Studio 进行 AutoJs6 调试或开发.
+如需对 AutoJs6 开源项目进行调试或开发, 可使用 Android Studio 或 [IntelliJ IDEA](https://www.jetbrains.com/idea/) ([Jetbrains](https://www.jetbrains.com/) 公司产品).
 
-如需使用 [IntelliJ IDEA](https://www.jetbrains.com/idea/) ([Jetbrains](https://www.jetbrains.com/) 公司产品), 需留意以下注意事项:
-
-- IntelliJ IDEA 版本建议不低于 `2022.3.3 (Ultimate Edition)`
-- IntelliJ IDEA 的 Gradle JVM 版本不低于 `19`
-- 回退 Gradle 构建工具版本至 IDEA 支持的版本
-  - 如 `classpath("com.android.tools.build:gradle:7.4.0")`
-  - 具体版本可根据 IDEA 的错误提示获知
-- 回退 Kotlin 脚本 (KTS) 语法
-  - 如 ` com.android.build.api.dsl.CommonExtension#options` 需回退为 `packagingOptions`
-- ... ...
+本小节以 Android Studio 为例介绍 AutoJs6 开源项目的编译构建方法, IntelliJ IDEA 与之类似.
 
 #### Android Studio 准备
 
-下载 `Android Studio Flamingo | 2022.2.1 Patch 2` 版本 (按需选择其一):
+下载 `Android Studio Giraffe | 2022.3.1 Patch 2` 版本 (按需选择其一):
 
-- [android-studio-2022.2.1.20-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2022.2.1.20/android-studio-2022.2.1.20-windows.exe) (1.0 GB)
-- [android-studio-2022.2.1.20-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.2.1.20/android-studio-2022.2.1.20-windows.zip) (1.0 GB)
+- [android-studio-2022.3.1.20-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2022.3.1.20/android-studio-2022.3.1.20-windows.exe) (1.1 GB)
+- [android-studio-2022.3.1.20-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.3.1.20/android-studio-2022.3.1.20-windows.zip) (1.1 GB)
 
-> 注: 上述版本发布时间为 2023 年 5 月 24 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive) 页面.
+> 注: 上述版本发布时间为 2023 年 9 月 28 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -252,11 +261,11 @@ Android SDK (安卓软件开发工具包)
 
 #### JDK 准备
 
-AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `19`.
+AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`.
+
+> 注: 如果计算机系统已安装 JDK 且版本不低于 17, 则可跳过此小节内容.
 
 JDK 可使用 IDE 直接下载, 或访问 [Oracle 网站](https://www.oracle.com/java/technologies/downloads/) 下载.
-
-> 注: 如果计算机系统已安装 JDK 且版本不低于 19, 则可跳过此小节内容.
 
 在 Android Studio 软件中使用快捷键 `CTRL + ALT + S` 打开设置页面:
 
@@ -268,12 +277,9 @@ Gradle
 
 `Gradle JDK` 处可选择或添加不同版本的 JDK.
 
-- 列表中存在合适版本的 JDK
-  - 直接选择即可
-- 选择 `Download JDK (下载 JDK)` 下载新的 JDK
-  - 选择一个版本不低于 19 的 JDK, 点击 `Download (下载)` 按钮并等待下载完成
-- 选择 `Add JDK (添加 JDK)` 添加已存在的本地 JDK
-  - 如计算机系统已存在合适版本的 JDK, 可定位其目录并完成 JDK 添加
+如果列表中已存在合适版本的 JDK (>= `17`), 则直接选择即可.  
+否则可以选择 `Download JDK (下载 JDK)` 下载合适的 JDK, 点击 `Download (下载)` 按钮并等待下载完成.  
+也可以选择 `Add JDK (添加 JDK)` 添加已存在的本地 JDK, 定位其目录并完成 JDK 添加.
 
 #### AutoJs6 资源克隆
 
@@ -295,14 +301,14 @@ Gradle
 打包项目并生成可安装到安卓设备的 APK 文件:
 
 - 调试版 (Debug Version)
-  - `Build (构建)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
-  - 生成带默认签名的调试版安装包
-  - 路径示例: `"D:\AutoJs6\app\build\outputs\apk\debug\"`
+    - `Build (构建)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
+    - 生成带默认签名的调试版安装包
+    - 路径示例: `"D:\AutoJs6\app\build\outputs\apk\debug\"`
 - 发布版 (Release Version)
-  - `Build (构建)` -> `Generate Signed Bundle / APK`
-  - 选择 `APK` 选项
-  - 准备好签名文件 (新建或选取), 生成已签名的发布版安装包
-  - 路径示例: `"D:\AutoJs6\app\release\"`
+    - `Build (构建)` -> `Generate Signed Bundle / APK`
+    - 选择 `APK` 选项
+    - 准备好签名文件 (新建或选取), 生成已签名的发布版安装包
+    - 路径示例: `"D:\AutoJs6\app\release\"`
 
 > 参阅: [Android Docs](https://developer.android.com/studio/run?hl=zh-cn)
 
@@ -328,31 +334,34 @@ Gradle
 
 - [AutoJs6-Documentation](http://docs-project.autojs6.com) - AutoJs6 应用文档
 
+现有的脚本开发项目可作为参考, 激发个人脚本项目的创作灵感:
+
+- [Ant-Forest](https://github.com/TonyJiangWJ/Ant-Forest) - 蚂蚁森林能量自动收取脚本 by [TonyJiangWJ](https://github.com/TonyJiangWJ)
+- [Ant-Forest](https://github.com/SuperMonster003/Ant-Forest) - 蚂蚁森林能量自动收取脚本 by [SuperMonster003](https://github.com/SuperMonster003)
+- [autojs](https://github.com/e1399579/autojs) - Auto.js 实用脚本 by  [e1399579](https://github.com/e1399579)
+- [autojsDemo](https://github.com/snailuncle/autojsDemo) - Auto.js 演示示例 by  [snailuncle](https://github.com/snailuncle)
+
 ******
 
-### 相关项目
+### 贡献参与
 
 ******
 
-[AutoX (Autox.js)](https://github.com/kkevsekk1/AutoX) by [kkevsekk1](https://github.com/kkevsekk1)
+感谢每一位参与 AutoJs6 项目开发的贡献人员. 
 
-- 安卓平台 JavaScript 自动化工具 (Auto.js 二次开发项目)
+|                         贡献人员                          |                                       提交数                                       |     最近提交     |
+|:-----------------------------------------------------:|:-------------------------------------------------------------------------------:|:------------:|
+|     [TonyJiangWJ](https://github.com/TonyJiangWJ)     |   [3](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)    | Aug 29, 2023 |
+| [SuperMonster003](https://github.com/SuperMonster003) | [33](https://github.com/SuperMonster003/AutoJs6/commits?author=SuperMonster003) | Jul 21, 2023 |
+|       [LZX284](https://github.com/LZX284) (Ai)        |      [4](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)      | Jul 20, 2023 |
+| [little-alei](https://github.com/little-alei) (抠脚本人)  |   [12](https://github.com/SuperMonster003/AutoJs6/commits?author=little-alei)   | Jul 12, 2023 |
+|          [aiselp](https://github.com/aiselp)          | [6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp) | Jun 14, 2023 |
+|        [LYS86](https://github.com/LYS86) (LYS)        |      [2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)       | Jun 3, 2023  |
 
-[AutoJs6-Documentation](http://docs-project.autojs6.com) by [SuperMonster003](https://github.com/SuperMonster003)
-
-- AutoJs6 应用文档
-
-[AutoJs6-VSCode-Extension](http://vscext-project.autojs6.com) by [SuperMonster003](https://github.com/SuperMonster003)
-
-- AutoJs6 调试器 (VSCode 平台插件)
-
-[AutoJs6-TypeScript-Declarations](http://dts-project.autojs6.com) by [SuperMonster003](https://github.com/SuperMonster003)
-
-- AutoJs6 声明文件 (代码智能补全)
-
-[Ant-Forest](https://github.com/SuperMonster003/Ant-Forest) by [SuperMonster003](https://github.com/SuperMonster003)
-
-- 蚂蚁森林能量自动收取脚本 (AutoJs6 示例脚本项目)
+> 数据统计区间: Dec 1, 2021 - Oct 3, 2023.  
+> 数据条目按 "最近提交" 列排序 (降序).  
+> 新发起的暂未处理的 Pull Request, 将在合并处理后加入数据统计.  
+> 部分贡献人员在 [GitHub Contributors](https://github.com/SuperMonster003/AutoJs6/graphs/contributors) 未能正常出现, 其提交记录为空, 仍可通过 [Pull Request](https://github.com/SuperMonster003/AutoJs6/pulls) 查看贡献记录.
 
 [//]: # (
     # --------------------------------------------------------------#

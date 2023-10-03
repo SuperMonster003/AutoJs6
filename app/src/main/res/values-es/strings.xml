@@ -40,6 +40,7 @@
     <string name="description_stable_mode">El modo estable hace que sea más estable al obtener los límites de diseño, pero algunos resultados pueden ser ignorados.\nEs necesario reiniciar el servicio de accesibilidad.</string>
     <string name="description_theme_color_preference">El color del tema se aplica a los widgets, incluidos, entre otros, los siguientes\nBarra de estado\nBarra de aplicaciones\nIcono de archivo\nIcono de elemento de tarea\nFab\nTítulo de la categoría de ajustes\nBotón de cambio\n\nNota: A partir de la versión 6.2.0 de AutoJs6, todavía no hay diferencia entre el color primario, el color primario oscuro y el color de acento.</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">Cancelar</string>
     <string name="dialog_button_cancel_download">Cancelar</string>
     <string name="dialog_button_confirm">OK</string>
@@ -132,7 +133,7 @@
     <string name="error_no_accessibility_permission">El servicio de accesibilidad está desactivado y el script se ha detenido</string>
     <string name="error_no_accessibility_permission_to_capture">El servicio de accesibilidad no está activado</string>
     <string name="error_no_accessibility_service">No hay servicio de accesibilidad</string>
-    <string name="error_no_draw_overlays_permission">No hay permiso de \"mostrar sobre otras aplicaciones\".</string>
+    <string name="error_no_display_over_other_apps_permission">No hay permiso de \"mostrar sobre otras aplicaciones\".</string>
     <string name="error_no_post_notifications_permission">Sin permiso para \"enviar notificaciones\"</string>
     <string name="error_no_read_phone_state_permission">No hay permiso de \"lectura del estado del teléfono\".</string>
     <string name="error_no_screen_capture_permission">No hay permiso de captura de pantalla</string>
@@ -325,7 +326,7 @@
     <string name="text_debug_step_over">Pasar por encima</string>
     <string name="text_delete">Borrar</string>
     <string name="text_delete_line">Borrar línea</string>
-    <string name="text_detail">Detalles</string>
+    <string name="text_details">Detalles</string>
     <string name="text_developer_details_under_development">Los detalles del desarrollador están en desarrollo</string>
     <string name="text_developer_options">Opciones del desarrollador</string>
     <string name="text_device_brand">Marca del dispositivo</string>
@@ -678,6 +679,19 @@
     <string name="text_write_secure_settings_description">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
     <string name="theme_color_default">Por defecto</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d artículo</item>

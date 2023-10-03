@@ -40,6 +40,7 @@
     <string name="description_stable_mode">安定モードにするとレイアウト境界を取得する際に安定しますが、一部の結果が無視されることがあります.\nアクセシビリティサービスの再起動が必要です</string>
     <string name="description_theme_color_preference">テーマカラーは、以下のウィジェットに適用されますが、これに限定されるものではありません.\nステータスバー\nアプリバー\nファイルアイコン\nタスクアイテムアイコン\nファブ\n設定カテゴリのタイトル\nスイッチボタン\n\n注: AutoJs6 バージョン 6.2.0 では、原色、原色暗色、アクセントカラーの区別はまだありません</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消</string>
     <string name="dialog_button_confirm">OK</string>
@@ -132,7 +133,7 @@
     <string name="error_no_accessibility_permission">アクセシビリティサービスが無効で、スクリプトが停止しています</string>
     <string name="error_no_accessibility_permission_to_capture">アクセシビリティサービスが有効になっていない</string>
     <string name="error_no_accessibility_service">アクセシビリティ・サービスがありません</string>
-    <string name="error_no_draw_overlays_permission">他のアプリの上に表示する」権限がない</string>
+    <string name="error_no_display_over_other_apps_permission">他のアプリの上に表示する」権限がない</string>
     <string name="error_no_post_notifications_permission">\"投稿通知\" 許可なし</string>
     <string name="error_no_read_phone_state_permission">電話の状態を読む」権限がない</string>
     <string name="error_no_screen_capture_permission">画面キャプチャ許可がありません</string>
@@ -325,7 +326,7 @@
     <string name="text_debug_step_over">ステップオーバー</string>
     <string name="text_delete">削除</string>
     <string name="text_delete_line">行削除</string>
-    <string name="text_detail">詳細</string>
+    <string name="text_details">詳細</string>
     <string name="text_developer_details_under_development">デベロッパーの詳細については、現在開発中です</string>
     <string name="text_developer_options">デベロッパーオプション</string>
     <string name="text_device_brand">デバイスブランド</string>
@@ -678,6 +679,19 @@
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが、書き込むことはできないシステム環境設定を含む、安全なシステム設定です.\nこれは、ユーザーがシステムアプリのUIを通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると、通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="theme_color_default">デフォルト</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">合計: %d 件</item>

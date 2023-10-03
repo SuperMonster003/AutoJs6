@@ -1,5 +1,7 @@
+// noinspection UnnecessaryLocalVariableJS
+
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Floaty}
  */
@@ -12,7 +14,7 @@ module.exports = function (scriptRuntime, scope) {
              * @implements Internal.Floaty
              */
             const Floaty = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Floaty.prototype = {
@@ -28,6 +30,7 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 hasPermission: () => rtFloaty.hasPermission(),
                 requestPermission: () => rtFloaty.requestPermission(),
+                ensurePermission: () => rtFloaty.ensurePermission(),
             };
 
             return Floaty;

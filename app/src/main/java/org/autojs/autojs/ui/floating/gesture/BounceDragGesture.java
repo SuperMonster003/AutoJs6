@@ -8,6 +8,7 @@ import android.view.animation.BounceInterpolator;
 import androidx.annotation.NonNull;
 
 import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
+import org.autojs.autojs6.R;
 
 /**
  * Created by Stardust on 2017/9/26.
@@ -37,11 +38,19 @@ public class BounceDragGesture extends DragGesture {
 
     @Override
     public void keepToEdge() {
-        int y = Math.min(mWindowBridge.getScreenHeight() - mView.getHeight() - MIN_DY_TO_SCREEN_BOTTOM, Math.max(MIN_DY_TO_SCREEN_TOP, mWindowBridge.getY()));
+        int side = mView.getContext().getResources().getDimensionPixelSize(R.dimen.side_circular_menu_icon);
+        int screenHeight = mWindowBridge.getScreenHeight();
+        int screenWidth = mWindowBridge.getScreenWidth();
+        int hiddenWidth = (int) (getKeepToSideHiddenWidthRadio() * (float) side);
+
         int x = mWindowBridge.getX();
-        int hiddenWidth = (int) (getKeepToSideHiddenWidthRadio() * (float) mView.getWidth());
-        if (x > mWindowBridge.getScreenWidth() / 2) {
-            bounce(x, mWindowBridge.getScreenWidth() - mView.getWidth() + hiddenWidth, y);
+        int y = Math.min(
+                screenHeight - side - MIN_DY_TO_SCREEN_BOTTOM,
+                Math.max(MIN_DY_TO_SCREEN_TOP, mWindowBridge.getY())
+        );
+
+        if (x > screenWidth / 2) {
+            bounce(x, screenWidth - side + hiddenWidth, y);
         } else {
             bounce(x, -hiddenWidth, y);
         }

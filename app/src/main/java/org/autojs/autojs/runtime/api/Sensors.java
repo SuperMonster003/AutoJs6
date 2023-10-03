@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.looper.Loopers;
-import org.autojs.autojs.pref.Language;
 import org.autojs.autojs.runtime.ScriptBridges;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.tool.MapBuilder;
@@ -22,8 +21,10 @@ import java.util.Set;
 
 /**
  * Created by Stardust on 2018/2/5.
+ * Modified by SuperMonster003 as of Dec 5, 2021.
+ * Modified by aiselp as of Jun 10, 2023.
  */
-public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
+public class Sensors extends EventEmitter {
 
     public class SensorEventEmitter extends EventEmitter implements SensorEventListener {
 
@@ -83,6 +84,13 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
     private final ScriptBridges mScriptBridges;
     private final SensorEventEmitter mNoOpSensorEventEmitter;
     private final ScriptRuntime mScriptRuntime;
+    private final Loopers.AsyncTask mAsyncTask = new Loopers.AsyncTask("Sensors") {
+        @Override
+        public boolean onFinish(@NonNull Loopers loopers) {
+            return !mSensorEventEmitters.isEmpty();
+        }
+    };
+
 
     public Sensors(Context context, ScriptRuntime runtime) {
         super(runtime.bridges);
@@ -90,7 +98,7 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
         mScriptBridges = runtime.bridges;
         mNoOpSensorEventEmitter = new SensorEventEmitter(runtime.bridges);
         mScriptRuntime = runtime;
-        runtime.loopers.addLooperQuitHandler(this);
+        runtime.loopers.addAsyncTask(mAsyncTask);
     }
 
     public SensorEventEmitter register(String sensorName) {
@@ -122,13 +130,8 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
         return emitter;
     }
 
-    @Override
-    public boolean shouldQuit() {
-        return mSensorEventEmitters.isEmpty();
-    }
-
     public Sensor getSensor(String sensorName) {
-        sensorName = sensorName.toUpperCase(Language.getPrefLanguage().getLocale());
+        sensorName = sensorName.toUpperCase();
         Integer type = SENSORS.get(sensorName);
         type = type == null ? getSensorTypeByReflect(sensorName) : type;
         return type == null ? null : mSensorManager.getDefaultSensor(type);
@@ -159,6 +162,6 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
             }
             mSensorEventEmitters.clear();
         }
-        mScriptRuntime.loopers.removeLooperQuitHandler(this);
+        mScriptRuntime.loopers.removeAsyncTask(mAsyncTask);
     }
 }

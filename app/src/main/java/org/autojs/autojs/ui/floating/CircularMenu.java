@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.floating;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.text.TextUtils;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -43,6 +44,7 @@ import org.autojs.autojs6.databinding.CircularActionMenuBinding;
 import org.greenrobot.eventbus.EventBus;
 import org.jdeferred.Deferred;
 import org.jdeferred.impl.DeferredObject;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.MessageFormat;
 
@@ -166,9 +168,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         });
         binding.stopAllScripts.setOnClickListener(v -> {
             mWindow.collapse();
-            if (AutoJs.getInstance().getScriptEngineManager().getEngines().size() > 0) {
-                AutoJs.getInstance().getScriptEngineService().stopAllAndToast();
-            } else {
+            if (AutoJs.getInstance().getScriptEngineService().stopAllAndToast() <= 0) {
                 ViewUtils.showToast(mContext, R.string.text_no_scripts_to_stop_running);
             }
         });
@@ -225,7 +225,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
     }
 
     private void initFloaty() {
-        mWindow = new CircularMenuWindow(mContext, new CircularMenuFloaty() {
+        mWindow = new CircularMenuWindow(new CircularMenuFloaty() {
             @Override
             public CircularActionView inflateActionView(FloatyService service, CircularMenuWindow window) {
                 CircularActionView actionView = (CircularActionView) View.inflate(service, R.layout.circular_action_view, null);
@@ -283,8 +283,18 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
     }
 
     public void closeAndSaveState() {
+        boolean state = FloatyWindowManger.isCircularMenuShowing();
+        Pref.putBooleanSync(R.string.key_floating_menu_shown, state);
+        savePosition();
         close();
-        Pref.putBoolean(R.string.key_floating_menu_shown, false);
+    }
+
+    public void savePosition() {
+        mWindow.savePosition();
+    }
+
+    public void savePosition(@NotNull Configuration newConfig) {
+        mWindow.savePosition(newConfig);
     }
 
     private AccessibilityTool getAccessibilityTool() {

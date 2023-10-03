@@ -103,7 +103,7 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
                         ViewUtils.showToast(context, resultRes)
                     }
                 }
-                .negativeText(R.string.text_back)
+                .negativeText(R.string.dialog_button_cancel)
                 .onNegative { dialog, _ -> dialog.dismiss() }
                 .positiveText(R.string.text_copy_command)
                 .onPositive { dialog, _ ->

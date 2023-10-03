@@ -7,8 +7,6 @@ let { autojs, console, device, pickup, ui, s13n, Numberx } = global;
 /* Here, importClass() is not recommended for intelligent code completion in IDE like WebStorm. */
 /* The same is true of destructuring assignment syntax (like `let {Uri} = android.net`). */
 
-let ScriptRuntime = org.autojs.autojs.runtime.ScriptRuntime;
-
 /**
  * @param {org.autojs.autojs.runtime.ScriptRuntime} runtime
  * @param {org.mozilla.javascript.Scriptable | global} scope

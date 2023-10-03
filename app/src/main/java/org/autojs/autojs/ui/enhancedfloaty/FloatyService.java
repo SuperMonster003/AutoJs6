@@ -15,7 +15,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Created by Stardust on 2017/5/1.
  */
-
 public class FloatyService extends Service {
 
     private static final CopyOnWriteArraySet<FloatyWindow> windows = new CopyOnWriteArraySet<>();

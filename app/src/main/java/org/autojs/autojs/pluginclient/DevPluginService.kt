@@ -88,10 +88,10 @@ class DevPluginService(val context: Context) {
     }
 
     @AnyThread
-    fun connectToRemoteServer(host: String, clientModeItem: DrawerMenuDisposableItem?) = connectToRemoteServer(host, clientModeItem, false)
+    fun connectToRemoteServer(context: Context, host: String, clientModeItem: DrawerMenuDisposableItem?) = connectToRemoteServer(context, host, clientModeItem, false)
 
     @AnyThread
-    fun connectToRemoteServer(host: String, clientModeItem: DrawerMenuDisposableItem?, ignoreExceptions: Boolean): Observable<JsonSocketClient> {
+    fun connectToRemoteServer(context: Context, host: String, clientModeItem: DrawerMenuDisposableItem?, ignoreExceptions: Boolean): Observable<JsonSocketClient> {
         try {
             var port = Port.PC_SERVER
             var ip = host
@@ -101,7 +101,7 @@ class DevPluginService(val context: Context) {
                 ip = host.substring(0, i)
             }
             return Observable
-                .just(JsonSocketClient(this, ip, port))
+                .just(JsonSocketClient(this, context, ip, port))
                 .observeOn(Schedulers.newThread())
                 .doOnNext { jsonSocketClient ->
                     try {
@@ -179,9 +179,10 @@ class DevPluginService(val context: Context) {
             }
     }
 
-    @AnyThread // FIXME by SuperMonster003 as of Dec 29, 2021.
+    // FIXME by SuperMonster003 as of Dec 29, 2021.
     //  ! Would print double (may be even more times) the amount of
     //  ! messages on VSCode when multi connection were established.
+    @AnyThread
     fun print(log: String?) {
         jsonSocketClient?.writeLog(log)
         jsonSocketServer?.writeLog(log)

@@ -23,11 +23,14 @@
     <dimen name="snackbar_padding_horizontal">12dp</dimen>
     <dimen name="snackbar_padding_vertical">14dp</dimen>
     <dimen name="snackbar_text_size">14sp</dimen>
+    <dimen name="editor_title_text_size">18sp</dimen>
+    <dimen name="main_title_text_size">20sp</dimen>
     <dimen name="textSize_item_property">14sp</dimen>
     <dimen name="first_char_view_stroke_width">2dp</dimen>
     <dimen name="expanded_view_initial_width">280dp</dimen>
     <dimen name="expanded_view_initial_height">518dp</dimen>
     <dimen name="toolbar_content_inset_start_with_navigation">64dp</dimen>
+    <dimen name="dimen_25dp">25dp</dimen>
     <integer name="snackbar_text_max_lines">2</integer>
     <integer name="layout_node_info_view_decoration_line">2</integer>
 
@@ -40,5 +43,6 @@
     <!-- Dimensions for the translations of the default dialog animation. -->
     <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
     <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
+    <dimen name="side_circular_menu_icon">42dp</dimen>
 
 </resources>

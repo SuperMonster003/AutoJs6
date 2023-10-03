@@ -40,6 +40,7 @@
     <string name="description_stable_mode">Le mode stable le rend plus stable lors de l\'obtention des limites de mise en page, mais certains résultats peuvent être ignorés.\nA11y service\'s restart required.</string>
     <string name="description_theme_color_preference">La couleur du thème est appliquée aux widgets, y compris, mais sans s\'y limiter, aux widgets suivants :\nBarre d\'état\nBarre d\'applications\nIcône de fichier\nIcône d\'élément de tâche\nFab\nTitre de la catégorie Paramètres\nBouton de commutation\n\nRemarque: Depuis la version 6.2.0 d\'AutoJs6, il n\'y a pas encore de différence entre la couleur primaire, la couleur primaire foncée et la couleur d\'accentuation.</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Annulation</string>
     <string name="dialog_button_confirm">OK</string>
@@ -132,7 +133,7 @@
     <string name="error_no_accessibility_permission">Le service d\'accessibilité est désactivé et le script s\'est arrêté</string>.
     <string name="error_no_accessibility_permission_to_capture">Le service d\'accessibilité n\'est pas activé</string>.
     <string name="error_no_accessibility_service">No accessibility service</string>
-    <string name="error_no_draw_overlays_permission">Aucune permission \"display over other apps\"</string>
+    <string name="error_no_display_over_other_apps_permission">Aucune permission \"display over other apps\"</string>
     <string name="error_no_post_notifications_permission">Pas d\'autorisation pour les \"notifications d\'envoi\"</string>
     <string name="error_no_read_phone_state_permission">Aucune autorisation de \"lire l\'état du téléphone\"</string>
     <string name="error_no_screen_capture_permission">Aucune autorisation de capture d\'écran</string>
@@ -325,7 +326,7 @@
     <string name="text_debug_step_over">Step over</string>
     <string name="text_delete">Suppression</string>
     <string name="text_delete_line">Supprimer la ligne</string>
-    <string name="text_detail">Détails</string>
+    <string name="text_details">Détails</string>
     <string name="text_developer_details_under_development">Les détails du développeur sont en cours de développement</string>
     <string name="text_developer_options">Les options du développeur</string>
     <string name="text_device_brand">Marque de l\'appareil</string>
@@ -678,6 +679,19 @@
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="theme_color_default">Default</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d article</item>

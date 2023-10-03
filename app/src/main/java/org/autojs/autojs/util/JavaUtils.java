@@ -11,8 +11,8 @@ import java.lang.reflect.Field;
 public class JavaUtils {
 
     @NonNull
-    public static Class<?> getClass(@NonNull Class<?> Clazz) {
-        return Clazz;
+    public static Class<?> getClass(@NonNull Class<?> clazz) {
+        return clazz;
     }
 
     @NonNull

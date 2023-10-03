@@ -1,15 +1,18 @@
 package org.autojs.autojs.runtime.api
 
 import android.app.Activity
-import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.content.res.Resources
 import android.graphics.Point
 import android.util.DisplayMetrics
-import android.view.Display
-import android.view.Surface
+import android.view.Surface.ROTATION_0
+import android.view.WindowManager
 
 /**
  * Created by Stardust on 2017/4/26.
  */
+@Suppress("unused")
 class ScreenMetrics(private var designWidth: Int, private var designHeight: Int) {
 
     constructor() : this(0, 0)
@@ -21,79 +24,111 @@ class ScreenMetrics(private var designWidth: Int, private var designHeight: Int)
 
     @JvmOverloads
     fun scaleX(x: Int, width: Int = designWidth) = when {
-        width == 0 || activity == null -> x
+        width == 0 || !isInitialized -> x
         else -> x * deviceScreenWidth / width
     }
 
     @JvmOverloads
     fun scaleY(y: Int, height: Int = designHeight) = when {
-        height == 0 || activity == null -> y
+        height == 0 || !isInitialized -> y
         else -> y * deviceScreenHeight / height
     }
 
     @JvmOverloads
     fun rescaleX(x: Int, width: Int = designWidth) = when {
-        width == 0 || activity == null -> x
+        width == 0 || !isInitialized -> x
         else -> x * width / deviceScreenWidth
     }
 
     @JvmOverloads
     fun rescaleY(y: Int, height: Int = designHeight) = when {
-        height == 0 || activity == null -> y
+        height == 0 || !isInitialized -> y
         else -> y * height / deviceScreenHeight
     }
 
     companion object {
 
-        private val metrics: DisplayMetrics = DisplayMetrics()
+        private var mWindowManager: WindowManager? = null
+        private var mResources: Resources? = null
 
-        private var activity: Activity? = null
+        private var isInitialized = false
 
         @Suppress("DEPRECATION")
-        private val defaultDisplay: Display?
-            get() = activity?.windowManager?.defaultDisplay
-
         @JvmStatic
         val rotation: Int
-            get() = defaultDisplay?.rotation ?: 0
+            get() = mWindowManager?.defaultDisplay?.rotation ?: ROTATION_0
 
         @JvmStatic
+        val orientation: Int
+            get() = mResources?.configuration?.orientation ?: ORIENTATION_PORTRAIT
+
+        @JvmStatic
+        val isScreenPortrait: Boolean
+            get() = orientation == ORIENTATION_PORTRAIT
+
+        @JvmStatic
+        val isScreenLandscape: Boolean
+            get() = orientation == ORIENTATION_LANDSCAPE
+
+        @JvmStatic
+        @Suppress("DEPRECATION")
         val deviceScreenWidth: Int
-            get() = toOriAwarePoint(metrics.widthPixels, metrics.heightPixels).x
+            get() {
+                mResources?.displayMetrics?.widthPixels?.takeIf { it > 0 }?.let { return it }
 
-        @JvmStatic
-        val deviceScreenHeight: Int
-            get() = toOriAwarePoint(metrics.widthPixels, metrics.heightPixels).y
+                val metricsLegacy = DisplayMetrics()
+                val display = mWindowManager?.defaultDisplay?.apply { getRealMetrics(metricsLegacy) }
+                metricsLegacy.widthPixels.takeIf { it > 0 }?.let { return it }
 
-        @JvmStatic
-        val deviceScreenDensity: Int
-            get() = metrics.densityDpi
+                display?.width?.takeIf { it > 0 }?.let { return it }
 
-        @JvmStatic
-        fun initIfNeeded(activity: Activity) {
-            this.activity ?: let {
-                this.activity = activity
-                @Suppress("DEPRECATION")
-                defaultDisplay?.getRealMetrics(this.metrics)
+                return 0
             }
+
+        @JvmStatic
+        @Suppress("DEPRECATION")
+        val deviceScreenHeight: Int
+            get() {
+                mResources?.displayMetrics?.heightPixels?.takeIf { it > 0 }?.let { return it }
+
+                val metricsLegacy = DisplayMetrics()
+                val display = mWindowManager?.defaultDisplay?.apply { getRealMetrics(metricsLegacy) }
+                metricsLegacy.heightPixels.takeIf { it > 0 }?.let { return it }
+
+                display?.height?.takeIf { it > 0 }?.let { return it }
+
+                return 0
+            }
+
+        @JvmStatic
+        @Suppress("DEPRECATION")
+        val deviceScreenDensity: Int
+            get() {
+                val metricsLegacy = DisplayMetrics()
+                mWindowManager?.defaultDisplay?.apply { getRealMetrics(metricsLegacy) }
+                return metricsLegacy.densityDpi
+            }
+
+        @JvmStatic
+        fun init(activity: Activity) {
+            mWindowManager = activity.windowManager
+            mResources = activity.resources
+            isInitialized = true
         }
 
-        @JvmStatic
-        fun isScreenLandscape() = listOf(Surface.ROTATION_90, Surface.ROTATION_270).contains(rotation)
-
         private fun toOriAwarePoint(a: Int, b: Int) = arrayOf(minOf(a, b), maxOf(a, b))
-            .apply { if (isScreenLandscape()) reverse() }
+            .apply { if (isScreenLandscape) reverse() }
             .let { Point(it[0], it[1]) }
 
         @JvmStatic
         fun getOrientationAwareScreenWidth(orientation: Int) = when (orientation) {
-            Configuration.ORIENTATION_LANDSCAPE -> deviceScreenHeight
+            ORIENTATION_LANDSCAPE -> deviceScreenHeight
             else -> deviceScreenWidth
         }
 
         @JvmStatic
         fun getOrientationAwareScreenHeight(orientation: Int) = when (orientation) {
-            Configuration.ORIENTATION_LANDSCAPE -> deviceScreenWidth
+            ORIENTATION_LANDSCAPE -> deviceScreenWidth
             else -> deviceScreenHeight
         }
 

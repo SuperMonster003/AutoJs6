@@ -164,6 +164,7 @@ public class Predictor {
         return true;
     }
 
+    /** @noinspection deprecation*/
     protected boolean loadModel(Context appCtx, String modelPath, int cpuThreadNum, String cpuPowerMode) {
         // Release model if exists
         releaseModel();

@@ -68,8 +68,8 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
             NotAskAgainDialog.Builder(mContext, key)
                 .title(title)
                 .content(it)
-                .negativeText(R.string.text_back)
-                .positiveText(R.string.text_continue)
+                .negativeText(R.string.dialog_button_cancel)
+                .positiveText(R.string.dialog_button_continue)
                 .onPositive { _, _ -> toggle(aimState) }
                 .dismissListener { sync() }
                 .show()

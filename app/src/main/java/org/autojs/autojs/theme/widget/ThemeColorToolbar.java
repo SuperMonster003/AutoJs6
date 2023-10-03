@@ -34,8 +34,8 @@ public class ThemeColorToolbar extends Toolbar implements ThemeColorMutable {
 
     private void init() {
         ThemeColorManager.add(this);
-
         setContentInsetStartWithNavigation(getContext().getResources().getDimensionPixelSize(R.dimen.toolbar_content_inset_start_with_navigation));
+        setTitleTextAppearance(getContext(), R.style.TextAppearanceMainTitle);
     }
 
     @Override

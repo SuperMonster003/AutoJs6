@@ -40,6 +40,7 @@
     <string name="description_stable_mode">穩定模式省略佈局細節, 指令碼分析佈局時更穩定, 但可能影響獲取的控制元件總量.\n需重啟無障礙服務.</string>
     <string name="description_theme_color_preference">主題色的應用範圍包括但不限於以下部件:\n系統通知欄\n應用欄 (AppBar)\n檔案圖示\n任務項圖示\n浮動操作按鈕 (Fab)\n設定頁面類別標題\n按鈕開關\n\n注: 截至 6.2.0 版本, AutoJs6 主題色暫未對 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 強調色 (Accent Color) ] 作出區分.</string>
     <string name="dialog_button_back">@string/text_back</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消下載</string>
     <string name="dialog_button_confirm">確定</string>
@@ -132,7 +133,7 @@
     <string name="error_no_accessibility_permission">無障礙服務未啟用</string>
     <string name="error_no_accessibility_permission_to_capture">無障礙服務未啟用</string>
     <string name="error_no_accessibility_service">沒有無障礙服務</string>
-    <string name="error_no_draw_overlays_permission">缺少 \"顯示在其他應用上層\" 許可權</string>
+    <string name="error_no_display_over_other_apps_permission">缺少 \"顯示在其他應用上層\" 許可權</string>
     <string name="error_no_post_notifications_permission">缺少 \"釋出通知\" 許可權</string>
     <string name="error_no_read_phone_state_permission">缺少 \"讀取手機狀態\" 許可權</string>
     <string name="error_no_screen_capture_permission">缺少螢幕捕獲許可權</string>
@@ -325,7 +326,7 @@
     <string name="text_debug_step_over">單步</string>
     <string name="text_delete">刪除</string>
     <string name="text_delete_line">刪除行</string>
-    <string name="text_detail">詳情</string>
+    <string name="text_details">詳情</string>
     <string name="text_developer_details_under_development" tools:ignore="TypographyEllipsis">\"開發者詳情\" 正在開發中...</string>
     <string name="text_developer_options">開發者選項</string>
     <string name="text_device_brand">裝置品牌</string>
@@ -678,6 +679,19 @@
     <string name="text_write_secure_settings_description">安全設定包含應用程式可讀但不可寫入的設定選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設定許可權\" 後, 普通應用可直接修改上述安全設定 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設定</string>
     <string name="theme_color_default">預設</string>
+    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
+    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
+    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
+    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
+    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
+    <string name="text_failed_to_copy">复制失败</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
+    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
+    <string name="dialog_button_dismiss">关闭</string>
+    <string name="dialog_button_view_file">查看文件</string>
+    <string name="text_exported">已导出</string>
+    <string name="text_some_items_exported">已导出 %d 个条目</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

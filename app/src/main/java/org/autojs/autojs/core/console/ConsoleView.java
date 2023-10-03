@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow;
+import org.autojs.autojs.ui.log.LogActivity;
 import org.autojs.autojs.util.DisplayUtils;
 import org.autojs.autojs6.R;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +41,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     private final static int sRefreshInterval = 100;
     private final Map<Integer, Integer> mColors = new MapBuilder<Integer, Integer>().build();
     private ConsoleImpl mConsole;
+    private LogActivity mLogActivity;
     private RecyclerView mLogListRecyclerView;
     private EditText mEditText;
     private ResizableExpandableFloatyWindow mWindow;
@@ -238,6 +240,16 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     public void setConsole(ConsoleImpl console) {
         mConsole = console;
         mConsole.setConsoleView(this);
+    }
+
+    public void setLogActivity(LogActivity activity) {
+        mLogActivity = activity;
+    }
+
+    public void export(String fileName) {
+        if (mLogActivity != null) {
+            mLogActivity.export(fileName);
+        }
     }
 
     @Override

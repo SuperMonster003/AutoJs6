@@ -5,7 +5,7 @@
 let { http } = global;
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Web}
  */
@@ -20,7 +20,7 @@ module.exports = function (scriptRuntime, scope) {
              * @implements Internal.Web
              */
             const Web = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Web.prototype = {
@@ -43,7 +43,7 @@ module.exports = function (scriptRuntime, scope) {
                     return new InjectableWebClient(Context.getCurrentContext(), scope);
                 },
                 newWebSocket(url) {
-                    return new org.autojs.autojs.core.web.WebSocket(http.__okhttp__, url);
+                    return new scope.WebSocket(url);
                 },
             };
 
@@ -55,6 +55,33 @@ module.exports = function (scriptRuntime, scope) {
              */
             let methods = [ 'newInjectableWebView', 'newInjectableWebClient', 'newWebSocket' ];
             __asGlobal__(web, methods, scope);
+
+            const WebSocket = function () {
+                if (!(this instanceof WebSocket)) {
+                    throw TypeError('WebSocket must be called as constructor');
+                }
+                if (arguments[0] instanceof MutableOkHttp) {
+                    this.client = arguments[0];
+                    this.url = arguments[1];
+                } else {
+                    this.client = http.__okhttp__;
+                    this.url = arguments[0];
+                }
+                if (typeof this.url !== 'string') {
+                    throw TypeError(`Invalid url (value: ${this.url}, species: ${species(this.url)}) for WebSocket`);
+                }
+                return new org.autojs.autojs.core.web.WebSocket(this.client, this.url);
+            };
+
+            /* Append all primitive static fields. */
+            Object.keys(org.autojs.autojs.core.web.WebSocket).forEach((key) => {
+                let value = org.autojs.autojs.core.web.WebSocket[key]
+                if (isPrimitive(value)) {
+                    WebSocket[key] = value;
+                }
+            });
+
+            scope.WebSocket = WebSocket;
         },
     };
 

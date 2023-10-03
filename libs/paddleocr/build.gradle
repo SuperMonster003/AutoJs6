@@ -1,11 +1,38 @@
-plugins {
-    id 'com.android.library'
-}
 import java.security.MessageDigest
+
+/**
+ * PaddleOCR (https://github.com/PaddlePaddle/PaddleOCR) build script (Groovy).
+ *
+ * Created by TonyJiangWJ (https://github.com/TonyJiangWJ) on Aug 7, 2023.
+ * Modified by TonyJiangWJ (https://github.com/TonyJiangWJ) as of Aug 11, 2023.
+ * Modified by SuperMonster003 as of Sep 4, 2023.
+ */
+
+plugins {
+    id "com.android.library"
+}
+
+def versions = new Versions("$rootDir/version.properties")
+
+def versionOpencv = versions.opencv
+def versionNdk = versions.ndk
+def versionCmake = versions.cmake
+
+def zipArchives = [
+        // @Hint by TonyJiangWJ on Aug 7, 2023.
+        //   ! 下载 OpenCV 源码包 (默认为 4.2.0).
+        //   ! 和 Auto.js 中的版本 (如 4.5.5) 不匹配会产生冲突, 可按需修改.
+        [
+                "src" : "https://github.com/opencv/opencv/releases/download" +
+                        "/${versionOpencv}/opencv-${versionOpencv}-android-sdk.zip",
+                "dest": "OpenCV",
+        ],
+]
 
 android {
     namespace = "com.baidu.paddleocr"
-    ndkVersion '21.1.6352462'
+
+    ndkVersion versionNdk
     compileSdk 33
     defaultConfig {
         minSdkVersion 24
@@ -14,7 +41,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11 -frtti -fexceptions -Wno-format"
-                arguments '-DANDROID_PLATFORM=android-23', '-DANDROID_STL=c++_shared' ,"-DANDROID_ARM_NEON=TRUE"
+                arguments "-DANDROID_PLATFORM=android-23", "-DANDROID_STL=c++_shared", "-DANDROID_ARM_NEON=TRUE"
             }
         }
         ndk {
@@ -30,30 +57,23 @@ android {
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
-            version "3.10.2"
+            version versionCmake
         }
     }
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(path: ':libs:org.opencv-4.5.5')
+    implementation fileTree(include: ["*.jar"], dir: "libs")
+    implementation project(path: ":libs:org.opencv-${versionOpencv}")
 }
 
-/**
- * 下载opencv4.5.5源码包 默认为4.2.0 和 AutoJS中的版本不匹配会产生冲突 这里进行修改
- */
-def zipArchives = [
-        [
-                'src' : 'https://github.com/opencv/opencv/releases/download/4.5.5/opencv-4.5.5-android-sdk.zip',
-                'dest': 'OpenCV'
-        ]
-]
+ext {
+    versions.showInfo()
+}
 
-/**
- * 首次导入最好手动运行一下这个task下载依赖的包
- */
-tasks.register('downloadAndExtractArchives', DefaultTask) {
+// @Hint by TonyJiangWJ on Aug 7, 2023.
+//   ! 首次导入最好手动运行一下这个 task 下载依赖的包.
+tasks.register("downloadAndExtractArchives", DefaultTask) {
     doFirst {
         println "Downloading and extracting archives including libs and models"
     }
@@ -63,15 +83,16 @@ tasks.register('downloadAndExtractArchives', DefaultTask) {
         if (!file("${cachePath}").exists()) {
             mkdir "${cachePath}"
         }
-        zipArchives.eachWithIndex { archive, index ->
-            MessageDigest messageDigest = MessageDigest.getInstance('MD5')
+        zipArchives.each { archive ->
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5")
             messageDigest.update(archive.src.bytes)
             String cacheName = new BigInteger(1, messageDigest.digest()).toString(32)
             // Download the target archive if not exists
             boolean copyFiles = !file("${archive.dest}").exists()
             if (!file("${cachePath}/${cacheName}.zip").exists()) {
                 ant.get(src: archive.src, dest: file("${cachePath}/${cacheName}.zip"))
-                copyFiles = true; // force to copy files from the latest archive files
+                // force to copy files from the latest archive files
+                copyFiles = true
             }
             // Extract the target archive if its dest path does not exists
             if (copyFiles) {
@@ -83,4 +104,52 @@ tasks.register('downloadAndExtractArchives', DefaultTask) {
         }
     }
 }
+
 preBuild.dependsOn downloadAndExtractArchives
+
+class Versions {
+
+    String opencv
+    String ndk
+    String cmake
+
+    Versions(String filePath) {
+        File file = new File(filePath)
+        if (!file.canRead()) {
+            throw FileNotFoundException("Can't read file '$filePath'")
+        }
+        Properties properties = new Properties()
+        properties.load(new FileInputStream(file))
+        opencv = properties["OPENCV_VERSION"] as String
+        ndk = properties["NDK_VERSION"] as String
+        cmake = properties["CMAKE_VERSION"] as String
+    }
+
+    void showInfo() {
+        def title = "Version information for paddleocr library"
+
+        def infoOpencv = "OpenCV version: $opencv"
+        def infoNdk = "NDK version: $ndk"
+        def infoCmake = "CMake version: $cmake"
+
+        def maxLength = maxOf([title, infoOpencv, infoNdk, infoCmake].collect { it.length() })
+
+        [
+                "=".repeat(maxLength),
+                title,
+                "-".repeat(maxLength),
+                infoOpencv,
+                infoNdk,
+                infoCmake,
+                "=".repeat(maxLength),
+                "",
+        ].each { println(it) }
+    }
+
+    private static int maxOf(List<Integer> integers) {
+        int max = 0
+        integers.each { max = Math.max(max, it) }
+        return max
+    }
+
+}

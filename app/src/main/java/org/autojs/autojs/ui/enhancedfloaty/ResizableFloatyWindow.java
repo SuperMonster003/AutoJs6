@@ -17,7 +17,6 @@ import org.autojs.autojs6.R;
 /**
  * Created by Stardust on 2017/4/30.
  */
-
 public class ResizableFloatyWindow extends FloatyWindow {
 
     private View mView;

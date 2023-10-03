@@ -44,8 +44,8 @@ public abstract class AbstractShell {
         this(false);
     }
 
-    public AbstractShell(boolean root) {
-        this(null, root);
+    public AbstractShell(boolean isExecWithRoot) {
+        this(null, isExecWithRoot);
     }
 
     public AbstractShell(Context context, boolean isExecWithRoot) {
@@ -67,9 +67,9 @@ public abstract class AbstractShell {
     public abstract void exit();
 
     public void SetTouchDevice(int touchDevice) {
-        if (mTouchDevice > 0)
-            return;
-        mTouchDevice = touchDevice;
+        if (mTouchDevice <= 0) {
+            mTouchDevice = touchDevice;
+        }
     }
 
     public void SendEvent(int type, int code, int value) {

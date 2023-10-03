@@ -5,7 +5,6 @@ import java.util.Map;
 /**
  * Created by Stardust on 2017/10/23.
  */
-
 public class DumpEditor extends DumpAdapter {
 
     private Map<String, String> mValueModifications;

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.widget.EditText;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.looper.Loopers;
 import org.autojs.autojs.core.looper.Timer;
@@ -13,6 +12,8 @@ import org.autojs.autojs.tool.UiHandler;
 
 /**
  * Created by Stardust on 2018/4/17.
+ * Modified by SuperMonster003 as of Mar 20, 2022.
+ * Modified by aiselp as of Jun 10, 2023.
  */
 public class JsDialogBuilder extends MaterialDialog.Builder {
 
@@ -21,7 +22,7 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
     private final Timer mTimer;
     private final Loopers mLoopers;
     private JsDialog mDialog;
-    private volatile int mWaitId = -1;
+    private volatile Loopers.AsyncTask task;
 
     public JsDialogBuilder(Context context, ScriptRuntime runtime) {
         super(context);
@@ -55,14 +56,14 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
             }
         });
         dismissListener(dialog -> {
-            mTimer.postDelayed(() -> mLoopers.doNotWaitWhenIdle(mWaitId), 0);
+            mTimer.postDelayed(() -> mLoopers.removeAsyncTask(task), 0);
             emit("dismiss", dialog);
         });
         cancelListener(dialog -> emit("cancel", dialog));
     }
 
     public void onShowCalled() {
-        mTimer.postDelayed(() -> mWaitId = mLoopers.waitWhenIdle(), 0);
+        mTimer.postDelayed(() -> task = mLoopers.createAndAddAsyncTask("js-dialog"), 0);
     }
 
     public JsDialog getDialog() {

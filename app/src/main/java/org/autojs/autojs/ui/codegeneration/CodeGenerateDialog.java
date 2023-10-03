@@ -91,7 +91,7 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
             DialogUtils.showDialog(builder
                     .title(R.string.text_generated_code)
                     .content(code)
-                    .negativeText(R.string.dialog_button_back)
+                    .negativeText(R.string.dialog_button_cancel)
                     .positiveText(R.string.dialog_button_copy)
                     .onPositive(((dialog, which) -> {
                         ClipboardUtils.setClip(mServiceContext, code);
@@ -102,7 +102,7 @@ public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
             DialogUtils.showDialog(builder
                     .title(R.string.text_prompt)
                     .content(R.string.text_failed_to_generate)
-                    .positiveText(R.string.dialog_button_back)
+                    .positiveText(R.string.dialog_button_dismiss)
                     .build());
         }
     }

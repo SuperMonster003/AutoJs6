@@ -102,14 +102,14 @@ object DialogUtils {
                                 MaterialDialog.Builder(context)
                                     .title(context.getString(R.string.dialog_button_more))
                                     .content(contentMore)
-                                    .positiveText(R.string.dialog_button_back)
+                                    .positiveText(R.string.dialog_button_dismiss)
                                     .build()
                                     .also { preference.longClickPromptMoreDialogHandler(it) }
                                     .show()
                             }
                         }
                     }
-                    .positiveText(R.string.dialog_button_back)
+                    .positiveText(R.string.dialog_button_dismiss)
                     .onPositive { dialog, _ -> dialog.dismiss() }
                     .autoDismiss(false)
                     .build()

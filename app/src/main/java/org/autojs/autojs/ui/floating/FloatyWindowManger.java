@@ -8,7 +8,6 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.autojs.autojs.core.console.GlobalConsole;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
 
@@ -28,6 +27,7 @@ public class FloatyWindowManger {
 
     private static DisplayOverOtherAppsPermission sDisplayOverOtherAppsPerm;
     private static boolean sCircularMenuShown;
+
     public static boolean addWindow(Context context, FloatyWindow window) {
         context.startService(new Intent(context, FloatyService.class));
         getDisplayOverOtherAppsPerm(context).requestIfNeeded();
@@ -78,7 +78,7 @@ public class FloatyWindowManger {
             context.startService(new Intent(context, FloatyService.class));
             setCircularMenuContext(context);
         } else {
-            ViewUtils.showToast(context, R.string.error_no_draw_overlays_permission);
+            ViewUtils.showToast(context, R.string.error_no_display_over_other_apps_permission);
             getDisplayOverOtherAppsPerm(context).config();
         }
         sCircularMenuShown = true;
@@ -94,24 +94,23 @@ public class FloatyWindowManger {
 
     public static void hideCircularMenuIfNeeded() {
         if (isCircularMenuShowing()) {
-            hideCircularMenu(false);
+            hideCircularMenu();
         }
     }
 
     public static void hideCircularMenu(boolean isSaveState) {
-        sCircularMenuShown = false;
-        if (sCircularMenu == null) {
-            return;
-        }
-        CircularMenu menu = sCircularMenu.get();
-        if (menu != null) {
-            if (isSaveState) {
-                menu.closeAndSaveState();
-            } else {
-                menu.close();
+        if (sCircularMenu != null) {
+            CircularMenu menu = sCircularMenu.get();
+            if (menu != null) {
+                if (isSaveState) {
+                    menu.closeAndSaveState();
+                } else {
+                    menu.close();
+                }
             }
         }
         clearCircularMenu();
+        sCircularMenuShown = false;
     }
 
     public static void clearCircularMenu() {

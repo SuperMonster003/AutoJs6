@@ -7,8 +7,8 @@
 
     <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/icon"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
+            android:layout_width="@dimen/side_circular_menu_icon"
+            android:layout_height="@dimen/side_circular_menu_icon"
             android:background="@drawable/circle_white"
             android:padding="@dimen/padding_circular_menu_normal"
             android:src="@drawable/autojs6_material"

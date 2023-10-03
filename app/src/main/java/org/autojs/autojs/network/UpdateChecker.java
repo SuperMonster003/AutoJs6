@@ -316,7 +316,7 @@ public class UpdateChecker {
         neutralButton.setOnClickListener(v -> new MaterialDialog.Builder(context)
                 .title(R.string.text_prompt)
                 .content(R.string.prompt_add_ignored_version)
-                .negativeText(R.string.dialog_button_back)
+                .negativeText(R.string.dialog_button_cancel)
                 .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_warn)
                 .onPositive((dPrompt, which) -> {
@@ -525,7 +525,7 @@ public class UpdateChecker {
                     this
                             .title(title)
                             .content(content)
-                            .positiveText(R.string.text_back)
+                            .positiveText(R.string.dialog_button_dismiss)
                             .cancelable(false);
                 }
 
@@ -540,7 +540,7 @@ public class UpdateChecker {
                             .content(R.string.text_getting_release_notes)
                             .neutralText(R.string.dialog_button_ignore_current_update)
                             .neutralColor(context.getColor(R.color.dialog_button_warn))
-                            .negativeText(R.string.dialog_button_back)
+                            .negativeText(R.string.dialog_button_cancel)
                             .negativeColor(context.getColor(R.color.dialog_button_default))
                             .positiveText(R.string.dialog_button_update_now)
                             .positiveColor(context.getColor(R.color.dialog_button_unavailable))

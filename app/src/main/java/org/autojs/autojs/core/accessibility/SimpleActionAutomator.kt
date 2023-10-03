@@ -171,7 +171,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     fun longClick(x: Int, y: Int) = globalActionAutomatorForGesture.longClick(x, y)
 
     @ScriptInterface
-    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, delay: Int) = globalActionAutomatorForGesture.swipe(x1, y1, x2, y2, delay.toLong())
+    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, duration: Int) = globalActionAutomatorForGesture.swipe(x1, y1, x2, y2, duration.toLong())
 
     @ScriptInterface
     fun paste(target: ActionTarget) = performAction(target.createAction(AccessibilityNodeInfo.ACTION_PASTE))

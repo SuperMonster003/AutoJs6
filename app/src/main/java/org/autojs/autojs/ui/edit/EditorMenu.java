@@ -232,7 +232,7 @@ public class EditorMenu {
                 // .onNeutral((dialog, which) -> {
                 //     // Hint dialog.
                 // })
-                .negativeText(R.string.dialog_button_back)
+                .negativeText(R.string.dialog_button_cancel)
                 .onNegative((dialog, which) -> dialog.dismiss())
                 .positiveText(R.string.dialog_button_confirm)
                 .onPositive((dialog, which) -> dialog.dismiss())

@@ -50,7 +50,6 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
         private set
 
     val context: Context = application.applicationContext
-
     val appUtils by lazy { createAppUtils(context) }
     val globalConsole by lazy { createGlobalConsole() }
 
@@ -108,7 +107,7 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
         application.registerActivityLifecycleCallbacks(object : SimpleActivityLifecycleCallbacks() {
 
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-                ScreenMetrics.initIfNeeded(activity)
+                ScreenMetrics.init(activity)
                 appUtils.setCurrentActivity(activity)
                 registerOnSharedPreferenceChangeListener(SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                     if (key == StringUtils.key(R.string.key_keep_screen_on_when_in_foreground)) {

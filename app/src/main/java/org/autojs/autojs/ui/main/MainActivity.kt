@@ -1,8 +1,7 @@
 package org.autojs.autojs.ui.main
 
-import android.Manifest.permission
+import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -20,6 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import org.autojs.autojs.App
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder.StoredFragmentPagerAdapter
@@ -62,6 +62,7 @@ import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityMainBinding
 import org.greenrobot.eventbus.EventBus
+import rikka.shizuku.Shizuku
 
 /**
  * Modified by SuperMonster003 as of Dec 1, 2021.
@@ -86,10 +87,49 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     val requestMultiplePermissionsLauncher = registerForActivityResult(RequestMultiplePermissions()) {
         it.forEach { (key: String, isGranted: Boolean) ->
             Log.d(TAG, "$key: $isGranted")
-            if (key == "android.permission.POST_NOTIFICATIONS") {
+            if (key == Manifest.permission.POST_NOTIFICATIONS) {
                 Pref.putBoolean(R.string.key_post_notification_permission_requested, true)
             }
         }
+    }
+
+    private val shizukuBinderReceivedListener = {
+        // if (Shizuku.isPreV11()) {
+        //     binding.text1.setText("Shizuku pre-v11 is not supported")
+        // } else {
+        //     binding.text1.setText("Binder received")
+        // }
+    }
+    private val shizukuBinderDeadListener = {
+        // binding.text1.setText("Binder dead")
+    }
+    private val shizukuRequestPermissionResultListener: (requestCode: Int, grantResult: Int) -> Unit = { /* requestCode: */ _: Int, /* grantResult */ _: Int ->
+        // if (grantResult == PackageManager.PERMISSION_GRANTED) {
+        //     switch (requestCode) {
+        //         case REQUEST_CODE_BUTTON1: {
+        //             getUsers();
+        //             break;
+        //         }
+        //         case REQUEST_CODE_BUTTON4: {
+        //             getSystemProperty();
+        //             break;
+        //         }
+        //         case REQUEST_CODE_BUTTON7: {
+        //             bindUserService();
+        //             break;
+        //         }
+        //         case REQUEST_CODE_BUTTON8: {
+        //             unbindUserService();
+        //             break;
+        //         }
+        //         case REQUEST_CODE_BUTTON9: {
+        //             peekUserService();
+        //             break;
+        //         }
+        //     }
+        // } else {
+        //     binding.text1.setText("User denied permission");
+        // }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,6 +162,11 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         setUpTabViewPager()
         registerBackPressHandlers()
         addViewBackground(binding.appBar)
+
+        Log.d("Shizuku", "${App::class.java.simpleName} onCreate | Process=${App.getProcessNameCompat()}")
+        Shizuku.addBinderReceivedListenerSticky(this.shizukuBinderReceivedListener)
+        Shizuku.addBinderDeadListener(shizukuBinderDeadListener)
+        Shizuku.addRequestPermissionResultListener(shizukuRequestPermissionResultListener)
     }
 
     override fun onPostResume() {
@@ -206,16 +251,15 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     fun rebirth(view: View) {
-        val context = view.context as Activity
-        context.finish()
+        val context = view.context as MainActivity
         context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
             context.startActivity(Intent.makeRestartActivityTask(it.component))
         }
-        Process.killProcess(Process.myPid())
+        context.exitCompletely()
     }
 
     fun exitCompletely() {
-        FloatyWindowManger.hideCircularMenu(!isFinishing)
+        FloatyWindowManger.hideCircularMenuAndSaveState()
         ForegroundServiceUtils.stopServiceIfNeeded(this, MainActivityForegroundService::class.java)
         stopService(Intent(this, FloatyService::class.java))
         AutoJs.instance.scriptEngineService.stopAll()
@@ -240,7 +284,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     private fun getGrantResult(permissions: Array<String>, grantResults: IntArray): Int {
-        val i = listOf(*permissions).indexOf(permission.READ_EXTERNAL_STORAGE)
+        val i = listOf(*permissions).indexOf(Manifest.permission.READ_EXTERNAL_STORAGE)
         return if (i < 0) 2 else grantResults[i]
     }
 
@@ -255,7 +299,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             }
         }
         if (!mBackPressObserver.onBackPressed(this)) {
-            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }
@@ -341,6 +384,10 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
+
+        Shizuku.removeBinderReceivedListener(this.shizukuBinderReceivedListener)
+        Shizuku.removeBinderDeadListener(shizukuBinderDeadListener)
+        Shizuku.removeRequestPermissionResultListener(shizukuRequestPermissionResultListener)
     }
 
     override fun onResume() {

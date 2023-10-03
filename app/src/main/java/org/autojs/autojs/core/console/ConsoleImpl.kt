@@ -1,30 +1,40 @@
 package org.autojs.autojs.core.console
 
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.CountDownTimer
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.ColorInt
+import com.afollestad.materialdialogs.DialogAction
+import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
+import org.autojs.autojs.pref.Language
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractConsole
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
+import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow
 import org.autojs.autojs.ui.enhancedfloaty.gesture.DragGesture
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs.util.ViewUtils.setViewMeasure
 import org.autojs.autojs6.R
+import org.joda.time.format.DateTimeFormat
 import org.opencv.core.Point
 import org.opencv.core.Size
+import java.io.IOException
 import java.lang.ref.WeakReference
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
+import kotlin.math.pow
+
 
 /**
  * Created by Stardust on 2017/5/2.
@@ -36,6 +46,8 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     var configurator = Configurator()
 
     private val mDefaultSafeDelay: Long = 360
+    private val mSafeSizeToSend: Int = 2.0.pow(16).toInt()
+    private val mSafeSizeToCopy: Int = 2.0.pow(19).toInt()
 
     private var mLogListeners = ArrayList<WeakReference<LogListener?>>()
     private var mConsoleView: WeakReference<ConsoleView?>? = null
@@ -43,7 +55,9 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     @get:Synchronized
     private var mCountDownTimer: CountDownTimer? = null
 
-    private val context = uiHandler.context
+    private val context: Context
+        get() = mConsoleView?.get()?.context ?: uiHandler.context
+
     private val mLockWindowShow = Object()
     private val mLockWindowCreated = Object()
     private val mLockConsoleView = Object()
@@ -51,7 +65,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     private val mFloatyWindow: ResizableExpandableFloatyWindow
     private val mConsoleFloaty: ConsoleFloaty
     private val mInput: BlockingQueue<String> = ArrayBlockingQueue(1)
-    private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(context)
+    private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(uiHandler.context)
 
     val logEntries = ArrayList<LogEntry>()
 
@@ -60,7 +74,9 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         private set
 
     private val logEntriesJoint
-        get() = logEntries.joinToString("\n") { it.content }
+        get() = synchronized(logEntries) {
+            logEntries.joinToString("\n") { it.content }
+        }
 
     // val size: Size
     //     get() = configurator.size ?: Size()
@@ -123,24 +139,172 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         mLogListeners.forEach { it.get()?.onLogClear() }
     }
 
-    fun copyAll() {
+    fun copyAll() = copyAll(logEntriesJoint)
+
+    private fun copyAll(text: String, cutOutEntriesSize: Int = -1) {
+        if (text.isEmpty()) {
+            ViewUtils.showToast(context, R.string.text_no_log_entries_to_copy)
+            return
+        }
         try {
-            ClipboardUtils.setClip(context, logEntriesJoint)
-            ViewUtils.showToast(context, R.string.text_already_copied_to_clip)
-        } catch (_: Exception) {
-            ViewUtils.showToast(context, R.string.text_failed)
+            ClipboardUtils.setClip(context, text)
+            if (cutOutEntriesSize >= 0) {
+                ViewUtils.showToast(
+                    context, context.getString(
+                        R.string.text_already_copied_to_clip_but_only_latest_few_items,
+                        cutOutEntriesSize
+                    ), true
+                )
+            } else {
+                ViewUtils.showToast(context, R.string.text_already_copied_to_clip)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (text.length < mSafeSizeToCopy || cutOutEntriesSize >= 0) {
+                ViewUtils.showToast(context, R.string.text_failed_to_copy)
+                return
+            }
+            try {
+                val cutOutEntries = cutOutEntries(mSafeSizeToCopy)
+                copyAll(cutOutEntries.joinToString("\n") { it.content }, cutOutEntries.size)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ViewUtils.showToast(context, R.string.text_failed_to_copy)
+            }
         }
     }
 
     fun export() {
-        val sendIntent: Intent = Intent().apply {
+        @Suppress("SpellCheckingInspection")
+        mConsoleView?.get()?.export("autojs6-log-${DateTimeFormat.forPattern("yyyyMMdd-HHmmss").print(System.currentTimeMillis())}.txt")
+    }
+
+    fun export(uri: Uri?) {
+        val message = logEntriesJoint
+        if (message.isEmpty()) {
+            ViewUtils.showToast(context, R.string.text_no_log_entries_to_export)
+            return
+        }
+        try {
+            context.contentResolver.openOutputStream(uri ?: return)?.use {
+                it.write(message.toByteArray())
+                it.flush()
+            }
+            ViewUtils.showToast(
+                context,
+                context.getString(R.string.text_some_items_exported, logEntries.size),
+                true,
+            )
+        } catch (e: IOException) {
+            e.printStackTrace()
+            MaterialDialog.Builder(context)
+                .title(R.string.text_prompt)
+                .content(R.string.text_failed_to_export_log_entries)
+                .cancelable(false)
+                .autoDismiss(false)
+                .neutralText(R.string.text_details)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .onNeutral { dialog, _ ->
+                    dialog.setActionButton(DialogAction.NEUTRAL, null)
+                    dialog.setActionButton(DialogAction.POSITIVE, R.string.dialog_button_dismiss)
+                    dialog.contentView?.text = e.stackTraceToString()
+                    dialog.titleView?.text = context.getString(R.string.text_details)
+                }
+                .positiveText(R.string.dialog_button_dismiss)
+                .onPositive { dialog, _ -> dialog.dismiss() }
+                .show()
+        }
+    }
+
+    fun send() {
+        val message = logEntriesJoint
+        if (message.isEmpty()) {
+            ViewUtils.showToast(context, R.string.text_no_log_entries_to_send)
+            return
+        }
+        try {
+            send(message)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (message.length < mSafeSizeToSend) {
+                throw Exception(e)
+            }
+
+            try {
+                val cutOutEntries = cutOutEntries(mSafeSizeToSend)
+
+                val msgReason = context.getString(R.string.text_num_of_log_entries_exceeds_limit_for_sending, logEntries.size)
+                val msgAction = context.getString(R.string.text_only_latest_few_items_will_be_sent, cutOutEntries.size)
+
+                NotAskAgainDialog.Builder(
+                    context,
+                    key(R.string.key_dialog_num_of_log_entries_exceeds_limit_for_sending),
+                ).apply {
+                    title(R.string.text_prompt)
+                    content("$msgReason, $msgAction.")
+                    cancelable(false)
+                    negativeText(R.string.dialog_button_quit)
+                    positiveText(R.string.dialog_button_continue)
+                    positiveColorRes(R.color.dialog_button_attraction)
+                    onPositive { _, _ -> send(cutOutEntries) }
+                    if (show() == null) {
+                        ViewUtils.showToast(context, msgAction.replaceFirstChar {
+                            if (it.isLowerCase()) it.titlecase(Language.getPrefLanguage().locale)
+                            else it.toString()
+                        }, true)
+                        send(cutOutEntries)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.text_failed_to_send_log_entries)
+                    .cancelable(false)
+                    .autoDismiss(false)
+                    .neutralText(R.string.text_details)
+                    .neutralColorRes(R.color.dialog_button_hint)
+                    .onNeutral { dialog, _ ->
+                        dialog.setActionButton(DialogAction.NEUTRAL, null)
+                        dialog.setActionButton(DialogAction.POSITIVE, R.string.text_close)
+                        dialog.contentView?.text = e.stackTraceToString()
+                        dialog.titleView?.text = context.getString(R.string.text_details)
+                    }
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .onPositive { dialog, _ -> dialog.dismiss() }
+                    .show()
+            }
+        }
+    }
+
+    private fun send(entries: MutableList<LogEntry>) {
+        send(entries.joinToString("\n") { it.content })
+    }
+
+    private fun send(message: String) {
+        val sendIntent = Intent().apply {
             action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, logEntriesJoint)
+            putExtra(Intent.EXTRA_TEXT, message)
             type = "text/plain"
         }
-        context.startActivity(Intent.createChooser(sendIntent, null).apply {
+        uiHandler.context.startActivity(Intent.createChooser(sendIntent, null).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         })
+    }
+
+    private fun cutOutEntries(maxLength: Int): MutableList<LogEntry> {
+        var accLength = 0
+        val chosenEntries = mutableListOf<LogEntry>()
+        synchronized(logEntries) {
+            for (entry in logEntries.reversed()) {
+                if (accLength >= maxLength) {
+                    break
+                }
+                accLength += entry.content.length
+                chosenEntries.add(0, entry)
+            }
+        }
+        return chosenEntries
     }
 
     override fun show() = show(false)
@@ -153,7 +317,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         synchronized(mLockWindowShow) {
             if (!mDisplayOverOtherAppsPerm.has()) {
                 mDisplayOverOtherAppsPerm.config()
-                uiHandler.toast(R.string.error_no_draw_overlays_permission)
+                uiHandler.toast(R.string.error_no_display_over_other_apps_permission)
                 return
             }
             if (isReset) reset()
@@ -168,7 +332,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
                     // SecurityException: https://github.com/hyb1996-guest/AutoJsIssueReport/issues/4781
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    uiHandler.toast(R.string.error_no_draw_overlays_permission)
+                    uiHandler.toast(R.string.error_no_display_over_other_apps_permission)
                 }
             }
             synchronized(mLockWindowCreated) {
@@ -214,7 +378,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     private fun startFloatyService() {
-        context.startService(Intent(context, FloatyService::class.java))
+        uiHandler.context.startService(Intent(uiHandler.context, FloatyService::class.java))
     }
 
     @ScriptInterface
@@ -234,7 +398,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         configurator.setSize(w, h)
         if (isShowing) {
             mConsoleFloaty.expandedView?.let {
-                setViewMeasure(it, w.toInt(), h.toInt())
+                ViewUtils.setViewMeasure(it, w.toInt(), h.toInt())
             }
         }
     }

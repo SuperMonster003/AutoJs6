@@ -3,7 +3,7 @@
 let { plugins, Arrayx, Numberx } = global;
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Mathx}
  */
@@ -14,7 +14,7 @@ module.exports = (scriptRuntime, scope) => {
              * @implements Internal.Mathx
              */
             const MathxCtor = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             MathxCtor.prototype = {

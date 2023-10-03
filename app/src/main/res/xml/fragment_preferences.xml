@@ -233,7 +233,7 @@
                 app:title="@string/text_about_app_tips"
                 app:summary="@string/summary_about_app_tips"
                 app:dialogContent="@string/content_about_app_tips"
-                app:positiveText="@string/dialog_button_back"
+                app:positiveText="@string/dialog_button_cancel"
                 app:longClickPrompt="@string/description_about_app_tips_preference" />
 
         <org.autojs.autojs.ui.settings.AboutAppAndDeveloperPreference

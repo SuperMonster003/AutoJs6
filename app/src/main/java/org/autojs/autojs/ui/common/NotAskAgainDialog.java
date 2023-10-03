@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -36,6 +37,7 @@ public class NotAskAgainDialog extends MaterialDialog {
             checkBoxPrompt(context.getString(R.string.text_do_not_show_again), false, (buttonView, isChecked) -> setRemindState(!isChecked));
         }
 
+        @Nullable
         public MaterialDialog show() {
             return mRemind ? super.show() : null;
         }

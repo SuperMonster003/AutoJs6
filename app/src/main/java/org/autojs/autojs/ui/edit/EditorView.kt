@@ -8,6 +8,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
@@ -167,9 +168,14 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED), Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED))
+        }
         (context as? HostActivity)?.backPressedObserver?.registerHandler(mFunctionsKeyboardHelper)
     }
 
@@ -595,7 +601,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     private fun showErrorMessage(msg: String) {
         Snackbar.make(this@EditorView, context.getString(R.string.text_error) + ": " + msg, Snackbar.LENGTH_LONG)
-            .setAction(R.string.text_detail) { LogActivity.launch(context) }
+            .setAction(R.string.text_details) { LogActivity.launch(context) }
             .show()
     }
 

@@ -17,7 +17,6 @@ import org.autojs.autojs6.R;
 /**
  * Created by Stardust on 2017/4/18.
  */
-
 public class ResizableExpandableFloatyWindow extends FloatyWindow {
 
     private static final int INITIAL_WINDOW_PARAM_FLAG = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;

@@ -57,12 +57,12 @@ class AutoJs private constructor(private val appContext: Application) : Abstract
                     when {
                         action.equals(LayoutBoundsFloatyWindow::class.java.name, true) -> {
                             capture(object : LayoutInspectFloatyWindow {
-                                override fun create(nodeInfo: NodeInfo?) = LayoutBoundsFloatyWindow(nodeInfo, context)
+                                override fun create(nodeInfo: NodeInfo?) = LayoutBoundsFloatyWindow(nodeInfo, context, true)
                             })
                         }
                         action.equals(LayoutHierarchyFloatyWindow::class.java.name, true) -> {
                             capture(object : LayoutInspectFloatyWindow {
-                                override fun create(nodeInfo: NodeInfo?) = LayoutHierarchyFloatyWindow(nodeInfo, context)
+                                override fun create(nodeInfo: NodeInfo?) = LayoutHierarchyFloatyWindow(nodeInfo, context, true)
                             })
                         }
                     }
@@ -167,9 +167,11 @@ class AutoJs private constructor(private val appContext: Application) : Abstract
         /* Broadcasts. */
 
         putProperty(BroadcastShortForm.INSPECT_LAYOUT_BOUNDS.fullName, LayoutBoundsFloatyWindow::class.java.name)
+        putProperty(BroadcastShortForm.LAYOUT_BOUNDS.fullName, LayoutBoundsFloatyWindow::class.java.name)
         putProperty(BroadcastShortForm.BOUNDS.fullName, LayoutBoundsFloatyWindow::class.java.name)
 
         putProperty(BroadcastShortForm.INSPECT_LAYOUT_HIERARCHY.fullName, LayoutHierarchyFloatyWindow::class.java.name)
+        putProperty(BroadcastShortForm.LAYOUT_HIERARCHY.fullName, LayoutHierarchyFloatyWindow::class.java.name)
         putProperty(BroadcastShortForm.HIERARCHY.fullName, LayoutHierarchyFloatyWindow::class.java.name)
     }
 
@@ -181,6 +183,7 @@ class AutoJs private constructor(private val appContext: Application) : Abstract
             private set
 
         @Synchronized
+        @JvmStatic
         fun initInstance(application: Application) {
             if (!isInitialized) {
                 instance = AutoJs(application)

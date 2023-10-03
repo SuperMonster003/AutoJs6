@@ -5,7 +5,7 @@
 let { util } = global;
 
 /**
- * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
+ * @param {ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Autojs}
  */
@@ -24,7 +24,7 @@ module.exports = function (scriptRuntime, scope) {
              * @implements Internal.Autojs
              */
             const Autojs = function () {
-                // Empty interface body.
+                /* Empty body. */
             };
 
             Autojs.prototype = {
@@ -54,6 +54,18 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 R: global.R,
                 name: context.getString(R.strings.app_name),
+                get rotation() {
+                    return ScreenMetrics.getRotation();
+                },
+                get orientation() {
+                    return ScreenMetrics.getOrientation();
+                },
+                isScreenPortrait() {
+                    return ScreenMetrics.isScreenPortrait();
+                },
+                isScreenLandscape() {
+                    return ScreenMetrics.isScreenLandscape();
+                },
                 isRootAvailable() {
                     return RootUtils.isRootAvailable();
                 },

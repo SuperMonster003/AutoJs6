@@ -37,9 +37,6 @@ object Pref {
         if (key == key(R.string.key_guard_mode)) {
             AccessibilityConfig.refreshUnintendedGuardState()
         }
-        if (key == key(R.string.key_use_volume_control_record) || key == key(R.string.key_use_volume_control_running) && isUseVolumeControlRunningEnabled) {
-            GlobalKeyObserver.init()
-        }
     }
 
     init {
@@ -250,7 +247,13 @@ object Pref {
     fun putBoolean(@KeyRes keyRes: Int, value: Boolean) = putBoolean(key(keyRes), value)
 
     @JvmStatic
+    fun putBooleanSync(@KeyRes keyRes: Int, value: Boolean) = putBooleanSync(key(keyRes), value)
+
+    @JvmStatic
     fun putBoolean(key: String?, value: Boolean) = sPref.edit().putBoolean(key, value).apply()
+
+    @JvmStatic
+    fun putBooleanSync(key: String?, value: Boolean) = sPref.edit().putBoolean(key, value).commit()
 
     @JvmStatic
     fun getBoolean(@KeyRes keyRes: Int, defValue: Boolean) = getBoolean(key(keyRes), defValue)
@@ -265,10 +268,22 @@ object Pref {
     fun putInt(key: String?, value: Int) = sPref.edit().putInt(key, value).apply()
 
     @JvmStatic
+    fun putIntSync(key: String?, value: Int) = sPref.edit().putInt(key, value).commit()
+
+    @JvmStatic
+    fun putFloat(key: String?, value: Float) = sPref.edit().putFloat(key, value).apply()
+
+    @JvmStatic
+    fun putFloatSync(key: String?, value: Float) = sPref.edit().putFloat(key, value).commit()
+
+    @JvmStatic
     fun getInt(@KeyRes keyRes: Int, defValue: Int): Int = getInt(key(keyRes), defValue)
 
     @JvmStatic
     fun getInt(key: String?, defValue: Int): Int = sPref.getInt(key, defValue)
+
+    @JvmStatic
+    fun getFloat(key: String?, defValue: Float): Float = sPref.getFloat(key, defValue)
 
     @JvmStatic
     fun putLong(@KeyRes keyRes: Int, value: Long) = sPref.edit().putLong(key(keyRes), value).apply()
