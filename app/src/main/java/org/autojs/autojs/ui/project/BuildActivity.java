@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -61,6 +62,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private static final String LOG_TAG = "BuildActivity";
     private static final Pattern REGEX_PACKAGE_NAME = Pattern.compile("^([A-Za-z][A-Za-z\\d_]*\\.)+([A-Za-z][A-Za-z\\d_]*)$");
     EditText mSourcePath;
+    EditText mTemplatePath;
+    View mTemplatePathContainer;
     View mSourcePathContainer;
     EditText mOutputPath;
     EditText mAppName;
@@ -85,6 +88,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
         mSourcePath = binding.sourcePath;
         mSourcePathContainer = binding.sourcePathContainer;
+        mTemplatePathContainer = binding.templatePathContainer;
+        mTemplatePath=binding.templatePath;
         mOutputPath = binding.outputPath;
         mAppName = binding.appName;
         mPackageName = binding.packageName;
@@ -96,6 +101,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         binding.fab.setOnClickListener(v -> buildApk());
         binding.selectSource.setOnClickListener(v -> selectSourceFilePath());
         binding.selectOutput.setOnClickListener(v -> selectOutputDirPath());
+        binding.selectTemplate.setOnClickListener(
+                v -> selectTemplateFilePath()
+        );
         mIcon.setOnClickListener(v -> selectIcon());
 
         setToolbarAsBack(R.string.text_build_apk);
@@ -173,6 +181,21 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+    }
+
+    void selectTemplateFilePath() {
+        new FileChooserDialogBuilder(this)
+                .title(R.string.text_template_apk_path)
+                .dir(Environment.getExternalStorageDirectory().getPath(), Environment.getExternalStorageDirectory().getPath())
+                .singleChoice(this::setTemplate)
+                .show();
+
+    }
+
+    private void setTemplate(File file) {
+        if (file.getName().toLowerCase().startsWith("inrt") && file.getName().toLowerCase().endsWith(".apk") && file.isFile()) {
+            mTemplatePath.setText(file.getPath());
+        }
     }
 
     void selectSourceFilePath() {
