@@ -907,7 +907,7 @@
     <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
     <string name="text_pin_shortcut_not_unsupported">Pinning shortcuts to launcher is not supported</string>
-    <string name="text_template_apk_path">模板apk路径</string>
+    <string name="text_template_apk_path">template apk path</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>
