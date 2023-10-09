@@ -698,6 +698,7 @@
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中執行特定操作, 使用者可以在啟動器中顯示這些快捷方式, 並快速開始某些任務或啟動某個活動, 如閲讀 AutoJs6 應用文件, 啟動 AutoJs6 設定頁面等.</string>
     <string name="summary_text_launcher_shortcuts">新增快捷方式到啟動器</string>
     <string name="text_pin_shortcut_not_unsupported">將快捷方式固定到啟動器不被支援</string>
+    <string name="text_template_apk_path">模板APK路徑</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

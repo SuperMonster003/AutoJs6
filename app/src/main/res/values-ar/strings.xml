@@ -698,6 +698,7 @@
     <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
     <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
     <string name="text_pin_shortcut_not_unsupported">تثبيت الاختصارات على المشغل غير مدعوم</string>
+    <string name="text_template_apk_path">قالب مسار APK</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">المجموع: عنصر واحد</item>

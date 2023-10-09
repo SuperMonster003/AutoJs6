@@ -699,6 +699,7 @@
     <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
     <string name="summary_text_launcher_shortcuts">런처에 바로 가기 추가</string>
     <string name="text_pin_shortcut_not_unsupported">런처에 바로가기를 고정하는 것은 지원되지 않습니다</string>
+    <string name="text_template_apk_path">템플릿 APK 경로</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">총: %d 개 항목</item>

@@ -698,6 +698,7 @@
     <string name="description_launcher_shortcuts">Ярлыки позволяют выполнять определенные действия в AutoJs6. Пользователи могут отображать эти ярлыки в поддерживаемой программе запуска и быстро запускать некоторые задачи или действия, например, читать документацию по приложению AutoJs6, запускать страницу настроек AutoJs6 и т.д.</string>
     <string name="summary_text_launcher_shortcuts">Добавление ярлыков в пусковую установку</string>
     <string name="text_pin_shortcut_not_unsupported">Закрепление ярлыков в пусковой установке не поддерживается</string>
+    <string name="text_template_apk_path">Шаблон APK-путь</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Всего: %d элемент</item>

@@ -698,6 +698,7 @@
     <string name="description_launcher_shortcuts">ショートカットは、AutoJs6 で特定のアクションを実行することができます。ユーザーは、サポートされているランチャーにこれらのショートカットを表示し、AutoJs6アプリケーションのドキュメントを読んだり、AutoJs6の設定ページを起動したりするなど、いくつかのタスクを素早く開始したり、アクティビティを起動したりすることができます</string>
     <string name="summary_text_launcher_shortcuts">ランチャーへのショートカットの追加</string>
     <string name="text_pin_shortcut_not_unsupported">ショートカットをランチャーにピン留めすることはサポートされていません</string>
+    <string name="text_template_apk_path">テンプレートAPKパス</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">合計: %d 件</item>

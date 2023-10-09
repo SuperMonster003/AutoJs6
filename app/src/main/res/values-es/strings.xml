@@ -698,6 +698,7 @@
     <string name="description_launcher_shortcuts">Los accesos directos pueden realizar acciones específicas en AutoJs6. Los usuarios pueden mostrar estos accesos directos en un lanzador compatible e iniciar rápidamente algunas tareas o iniciar una actividad, como leer la documentación de la aplicación AutoJs6, iniciar la página de configuración de AutoJs6, etc.</string>
     <string name="summary_text_launcher_shortcuts">Añadir accesos directos al lanzador</string>
     <string name="text_pin_shortcut_not_unsupported">No es posible anclar accesos directos al lanzador.</string>
+    <string name="text_template_apk_path">Ruta de acceso de APK de plantilla</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d artículo</item>
