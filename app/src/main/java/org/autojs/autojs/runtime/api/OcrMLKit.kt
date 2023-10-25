@@ -69,6 +69,7 @@ class OcrMLKit {
     }
 
     fun recognizeText(image: ImageWrapper?): Array<String> {
+        image?.takeUnless { image.isRecycled } ?: return emptyArray()
         initIfNeeded()
         val words = detect(image).sorted()
         val output = mutableListOf<String>()

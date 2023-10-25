@@ -24,7 +24,7 @@ public class ProjectConfig {
 
     public static final String CONFIG_FILE_NAME = "project.json";
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson sGson = new GsonBuilder().setPrettyPrinting().create();
 
     @SerializedName("name")
     private String mName;
@@ -64,7 +64,7 @@ public class ProjectConfig {
         if (json == null) {
             return null;
         }
-        ProjectConfig config = GSON.fromJson(json, ProjectConfig.class);
+        ProjectConfig config = sGson.fromJson(json, ProjectConfig.class);
         if (!isValid(config)) {
             return null;
         }
@@ -209,7 +209,7 @@ public class ProjectConfig {
     }
 
     public String toJson() {
-        return GSON.toJson(this);
+        return sGson.toJson(this);
     }
 
     public String getIcon() {

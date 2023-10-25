@@ -8,7 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 
-import org.autojs.autojs.AutoJs
+import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.console.ConsoleView

@@ -26,7 +26,6 @@
     <string name="description_change_working_dir_preference">Измените путь к директории, содержащей скрипты</string>
     <string name="description_check_for_updates_preference">AutoJs6 получает и загружает обновления с GitHub.\n\nПримечание: обновление пока не обеспечивает многоязыковую поддержку.</string>
     <string name="description_compatibility_with_classes_for_ver_4_x">Обеспечивает определенную совместимость имен классов Java для версий 4.x путем переименования имен классов.\nПри включении этой опции при каждом запуске скрипта будет происходить задержка запуска (от десятков до сотен миллисекунд).\nРекомендуется всегда держать эту опцию выключенной, если в ней нет особой необходимости.</string>
-    <string name="description_documentation_launcher_icon_preference">Значок запуска документации облегчает доступ к документам и может переключаться как отдельное приложение.</string>
     <string name="description_documentation_source_preference">Локальная документация: Использование встроенных файлов AutoJs6 в качестве источников документации, подключение к сети не требуется. Содержание меняется по мере обновления AutoJs6.\nОнлайн-документы: Использование страниц GitHub в качестве источников документации, требуется подключение к сети. Содержимое всегда обновляется.\n\nПримечание: Чтобы максимально улучшить качество чтения онлайн-документов, рекомендуется использовать широкоформатное устройство отображения, например настольный монитор.\nПримечание: Начиная с версии 6.2.0, документация находится на предварительной стадии разработки, и большая часть содержимого еще не была написана или обновлена.</string>
     <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P] и ниже: версия >= 105</string>
     <string name="description_extending_js_build_in_objects">Расширение встроенных объектов JavaScript может повысить гибкость кода и обеспечить более богатую функциональность, но может привести к конфликтам и даже поломкам.\nВсе сценарии имеют встроенные расширения, включенные по умолчанию, когда опция включена.\nВстроенные расширения часто небезопасны, и их не рекомендуется использовать, пока принципы и риски встроенных расширений не будут четко поняты.\nКогда опция выключена, встроенные расширения все еще можно включить через глобальный объект plugins, как описано в документации проекта.</string>
@@ -59,12 +58,11 @@
     <string name="dialog_button_system_settings_simplified">Система</string>
     <string name="dialog_button_update_now">Обновить</string>
     <string name="dialog_button_use_default">Использовать по умолчанию</string>
-    <string name="docs_app_name">AutoJs6 документы</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 документы</string>
+    <string name="text_app_shortcut_docs_short_label">документы</string>
     <string name="edit_and_run_handle_intent_error">Невозможно обработать файл</string>
     <string name="edit_exit_without_save_warn">Содержимое не было сохранено, вы уверены в выходе?</string>
     <string name="entry_app_language_auto">Следовать за системой</string>
-    <string name="entry_documentation_launcher_icon_hide">Скрыть значок из пусковой установки</string>
-    <string name="entry_documentation_launcher_icon_show">Показать значок в пусковой установке</string>
     <string name="entry_documentation_source_local">Локальные документы</string>
     <string name="entry_documentation_source_online">Онлайн-документы</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">размер текста</string>
@@ -345,7 +343,6 @@
     <string name="text_do_not_ask_again_for_this_version">Не показывать снова эту версию</string>
     <string name="text_do_not_show_again">Не показывать снова</string>
     <string name="text_documentation">Документы</string>
-    <string name="text_documentation_launcher_icon">Значок пусковой установки документации</string>
     <string name="text_documentation_source">Источник документации</string>
     <string name="text_done">Готово</string>
     <string name="text_download">Скачать</string>
@@ -460,6 +457,8 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Проверка макета...</string>
     <string name="text_licenses">Лицензии на открытые источники</string>
     <string name="text_log">Журнал</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 Журнал</string>
+    <string name="text_app_shortcut_log_short_label">Журнал</string>
     <string name="text_logging_in">Вход в систему</string>
     <string name="text_login">Вход</string>
     <string name="text_login_succeed">Вход выполнен успешно</string>
@@ -623,6 +622,8 @@
     <string name="text_set_as_working_dir">Как рабочий каталог</string>
     <string name="text_set_breakpoint">Установить точку останова</string>
     <string name="text_settings">Настройки</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 Настройки</string>
+    <string name="text_app_shortcut_settings_short_label">Настройки</string>
     <string name="text_should_not_be_empty">Текст не может быть пустым</string>
     <string name="text_show_layout_bounds">Вид в границах макета</string>
     <string name="text_show_layout_hierarchy">Вид в иерархии макета</string>
@@ -679,19 +680,24 @@
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="theme_color_default">По умолчанию</string>
-    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
-    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
-    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
-    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
-    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
-    <string name="text_failed_to_copy">复制失败</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
-    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
-    <string name="dialog_button_dismiss">关闭</string>
-    <string name="dialog_button_view_file">查看文件</string>
-    <string name="text_exported">已导出</string>
-    <string name="text_some_items_exported">已导出 %d 个条目</string>
+    <string name="text_only_latest_few_items_will_be_sent">Будут отправлены только последние %d элементов</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">Количество записей журнала %d превышает лимит для отправки</string>
+    <string name="text_failed_to_send_log_entries">Не удалось отправить записи журнала</string>
+    <string name="text_no_log_entries_to_send">Нет записей журнала для отправки</string>
+    <string name="text_no_log_entries_to_export">Нет записей журнала для экспорта</string>
+    <string name="text_no_log_entries_to_copy">Нет записей журнала для копирования</string>
+    <string name="text_failed_to_copy">Не удалось скопировать</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">Уже скопировано в буфер обмена (только последние %d элементов)</string>
+    <string name="text_failed_to_export_log_entries">Не удалось экспортировать записи журнала</string>
+    <string name="dialog_button_dismiss">Удалить</string>
+    <string name="dialog_button_view_file">Просмотр файла</string>
+    <string name="text_exported">Экспортировано</string>
+    <string name="text_some_items_exported">Экспортировано %d элементов</string>
+    <string name="text_app_shortcut_disabled">Этот ярлык отключен</string>
+    <string name="text_launcher_shortcuts">Ярлыки лаунчера</string>
+    <string name="description_launcher_shortcuts">Ярлыки позволяют выполнять определенные действия в AutoJs6. Пользователи могут отображать эти ярлыки в поддерживаемой программе запуска и быстро запускать некоторые задачи или действия, например, читать документацию по приложению AutoJs6, запускать страницу настроек AutoJs6 и т.д.</string>
+    <string name="summary_text_launcher_shortcuts">Добавление ярлыков в пусковую установку</string>
+    <string name="text_pin_shortcut_not_unsupported">Закрепление ярлыков в пусковой установке не поддерживается</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Всего: %d элемент</item>

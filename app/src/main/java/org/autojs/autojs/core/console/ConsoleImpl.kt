@@ -332,6 +332,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
                     // SecurityException: https://github.com/hyb1996-guest/AutoJsIssueReport/issues/4781
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    ScriptRuntime.popException(e.message)
                     uiHandler.toast(R.string.error_no_display_over_other_apps_permission)
                 }
             }

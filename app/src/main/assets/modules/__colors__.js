@@ -638,7 +638,7 @@ module.exports = function (scriptRuntime, scope) {
                     if (alphaMatters === true) {
                         return this.toInt(colorA) === this.toInt(colorB);
                     }
-                    throw TypeError(`Invalid argument isStrict (value: ${alphaMatters}, type: ${species(alphaMatters)}) for colors.isEqual`);
+                    throw TypeError(`Invalid argument isStrict (value: ${alphaMatters}, species: ${species(alphaMatters)}) for colors.isEqual`);
                 },
                 /**
                  * Get a ColorStateList containing a single color or more.

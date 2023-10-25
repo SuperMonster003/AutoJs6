@@ -26,7 +26,6 @@
     <string name="description_change_working_dir_preference">قم بتغيير مسار الدليل الذي يحتوي على البرامج النصية</string>
     <string name="description_check_for_updates_preference">يحصل AutoJs6 على التحديثات وتنزيلها من GitHub.\n\nملاحظة: لا يوفر التحديث دعمًا متعدد اللغات حتى الآن.</string>
     <string name="description_compatibility_with_classes_for_ver_4_x">يوفر درجة توافق اسم فئة Java لإصدارات 4.x من خلال إعادة تعيين اسم الفئة.\nعند تشغيل هذا الخيار ، سيكون هناك درجة متفاوتة من تأخير بدء التشغيل (عشرات إلى مئات المللي ثانية) في كل مرة يبدأ فيها البرنامج النصي.\nيوصى بإيقاف تشغيل الخيار في جميع الأوقات إذا لم يكن مطلوبًا على وجه التحديد.</string>
-    <string name="description_documentation_launcher_icon_preference">تسهل أيقونة مشغل الوثائق الوصول إلى المستندات ويمكن تبديلها مثل تطبيق مستقل.</string>
     <string name="description_documentation_source_preference">المستندات المحلية: باستخدام ملفات AutoJs6 المضمنة كمصادر توثيق ، لا يلزم الاتصال بالشبكة. يتغير المحتوى مع تحديث AutoJs6.\nالمستندات عبر الإنترنت: استخدام صفحات GitHub كمصادر توثيق تتطلب اتصالاً بالشبكة. المحتوى دائما محدث.\n\nملاحظة: لزيادة تجربة قراءة المستندات عبر الإنترنت إلى الحد الأقصى ، يوصى باستخدام جهاز عرض بشاشة عريضة مثل شاشة سطح المكتب.\nملاحظة: اعتبارًا من الإصدار 6.2.0 ، لا تزال الوثائق في المراحل الأولية من التطوير ، ومعظم المحتوى لم تتم كتابته أو تحديثه بعد.</string>
     <string name="description_documentation_source_preference_more">يجب استيفاء الشروط التالية لدعم النسق الداكن على صفحات المستند:\n1. تم تمكين الوضع الليلي AutoJs6\n2.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P] وما دون: الإصدار> = 105</string>
     <string name="description_extending_js_build_in_objects">يمكن أن يؤدي توسيع كائنات JavaScript المضمنة إلى زيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً ، ولكن يمكن أن يتسبب في حدوث تعارضات وحتى حدوث تعطل.\nتحتوي جميع البرامج النصية على امتدادات مضمنة يتم تمكينها افتراضيًا عند تشغيل الخيار.\nغالبًا ما تكون الامتدادات المضمنة غير آمنة ، ولا يوصى بها ما لم يتم فهم مبادئ ومخاطر الإضافات المضمنة بوضوح.\nعند إيقاف تشغيل الخيار ، لا يزال من الممكن تمكين الامتدادات المضمنة من خلال الكائن العام للمكونات الإضافية ، كما هو موضح في وثائق المشروع.</string>
@@ -59,12 +58,11 @@
     <string name="dialog_button_system_settings_simplified">النظام</string>
     <string name="dialog_button_update_now">تحديث</string>
     <string name="dialog_button_use_default">استخدم الافتراضي</string>
-    <string name="docs_app_name">AutoJs6 توثيق</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 توثيق</string>
+    <string name="text_app_shortcut_docs_short_label">توثيق</string>
     <string name="edit_and_run_handle_intent_error">لا يمكن معالجة الملف</string>
     <string name="edit_exit_without_save_warn">لم يتم حفظ المحتوى ، هل أنت متأكد من الخروج؟</string>
     <string name="entry_app_language_auto">اتبع النظام</string>
-    <string name="entry_documentation_launcher_icon_hide">إخفاء الرمز من المشغل</string>
-    <string name="entry_documentation_launcher_icon_show">إظهار الرمز في المشغل</string>
     <string name="entry_documentation_source_local">مستندات محلية</string>
     <string name="entry_documentation_source_online">مستندات عبر الإنترنت</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">تغيير حجم النص</string>
@@ -345,7 +343,6 @@
     <string name="text_do_not_ask_again_for_this_version">لا تسأل مرة أخرى عن هذا الإصدار</string>
     <string name="text_do_not_show_again">لا تظهر مرة أخرى</string>
     <string name="text_documentation">وثائق</string>
-    <string name="text_documentation_launcher_icon">رمز مشغل الوثائق</string>
     <string name="text_documentation_source">مصدر الوثائق</string>
     <string name="text_done">فعله</string>
     <string name="text_download">تحميل</string>
@@ -460,6 +457,8 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">فحص التصميم ...</string>
     <string name="text_licenses">تراخيص المصادر المفتوحة</string>
     <string name="text_log">سجل</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 سجل</string>
+    <string name="text_app_shortcut_log_short_label">سجل</string>
     <string name="text_logging_in">تسجيل الدخول</string>
     <string name="text_login">تسجيل الدخول</string>
     <string name="text_login_succeed">نجح تسجيل الدخول</string>
@@ -623,6 +622,8 @@
     <string name="text_set_as_working_dir">تعيين كدليل العمل</string>
     <string name="text_set_breakpoint">ضبط نقطة توقف</string>
     <string name="text_settings">إعدادات</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 إعدادات</string>
+    <string name="text_app_shortcut_settings_short_label">إعدادات</string>
     <string name="text_should_not_be_empty">النص لا يمكن أن يكون فارغًا</string>
     <string name="text_show_layout_bounds">عرض في حدود التصميم</string>
     <string name="text_show_layout_hierarchy">عرض في التسلسل الهرمي للتخطيط</string>
@@ -679,19 +680,24 @@
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="theme_color_default">تقصير</string>
-    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
-    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
-    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
-    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
-    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
-    <string name="text_failed_to_copy">复制失败</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
-    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
-    <string name="dialog_button_dismiss">关闭</string>
-    <string name="dialog_button_view_file">查看文件</string>
-    <string name="text_exported">已导出</string>
-    <string name="text_some_items_exported">已导出 %d 个条目</string>
+    <string name="text_only_latest_few_items_will_be_sent">سيتم إرسال أحدث %d من العناصر فقط</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">عدد إدخالات السجل %d يتجاوز حد الإرسال</string>
+    <string name="text_failed_to_send_log_entries">فشل في إرسال إدخالات السجل</string>
+    <string name="text_no_log_entries_to_send">لا توجد إدخالات سجل لإرسالها</string>
+    <string name="text_no_log_entries_to_export">لا توجد إدخالات سجل للتصدير</string>
+    <string name="text_no_log_entries_to_copy">لا توجد إدخالات سجل لنسخها</string>
+    <string name="text_failed_to_copy">فشل النسخ</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">تم النسخ بالفعل إلى الحافظة (فقط أحدث %d عنصر)</string>
+    <string name="text_failed_to_export_log_entries">فشل تصدير إدخالات السجل</string>
+    <string name="dialog_button_dismiss">رفض</string>
+    <string name="dialog_button_view_file">استعراض الملف</string>
+    <string name="text_exported">تصدير</string>
+    <string name="text_some_items_exported">تم تصدير %d من العناصر</string>
+    <string name="text_app_shortcut_disabled">تم تعطيل هذا الاختصار</string>
+    <string name="text_launcher_shortcuts">اختصارات المشغل</string>
+    <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
+    <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
+    <string name="text_pin_shortcut_not_unsupported">تثبيت الاختصارات على المشغل غير مدعوم</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">المجموع: عنصر واحد</item>

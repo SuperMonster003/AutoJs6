@@ -19,11 +19,12 @@ import java.io.InputStream;
 public class ApkBuilderPluginHelper {
 
     private static final String PLUGIN_PACKAGE_NAME = "org.autojs.apkbuilderplugin";
-    private static final String TEMPLATE_APK_PATH = "template.apk";
     private static final boolean DEBUG_APK_PLUGIN = false;
 
+    public static final String TEMPLATE_APK_PATH = "template.apk";
+
     public static boolean isPluginAvailable(Context context) {
-//        return DeveloperUtils.checkSignature(context, PLUGIN_PACKAGE_NAME);
+        // return DeveloperUtils.checkSignature(context, PLUGIN_PACKAGE_NAME);
         try {
             context.getPackageManager().getPackageInfo(PLUGIN_PACKAGE_NAME, 0);
         } catch (PackageManager.NameNotFoundException e) {
@@ -55,5 +56,3 @@ public class ApkBuilderPluginHelper {
         }
     }
 }
-
-

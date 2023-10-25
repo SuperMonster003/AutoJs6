@@ -74,7 +74,9 @@
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
+    <uses-permission
+            android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
+            tools:ignore="SystemPermissionTypo"/>
 
     <uses-permission
             android:name="android.permission.DUMP"
@@ -113,19 +115,22 @@
 
     <uses-permission android:name="android.permission.READ_SMS"/>
 
+    <!-- Property "largeHeap" is not recommended to set to true. -->
+    <!-- https://stackoverflow.com/questions/27396892/what-are-advantages-of-setting-largeheap-to-true -->
     <application
             android:name="org.autojs.autojs.App"
             android:allowBackup="false"
-            android:extractNativeLibs="true"
             android:hardwareAccelerated="true"
-            android:icon="@drawable/autojs6_material"
+            android:icon="${icon}"
             android:label="${appName}"
-            android:largeHeap="true"
+            android:largeHeap="false"
             android:requestLegacyExternalStorage="true"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
+            android:localeConfig="@xml/locales_config"
             android:usesCleartextTraffic="true"
-            tools:ignore="DataExtractionRules">
+            tools:ignore="DataExtractionRules"
+            tools:targetApi="tiramisu">
 
         <meta-data
                 android:name="CHANNEL"
@@ -141,8 +146,14 @@
             <intent-filter>
 
                 <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="${intentCategory}"/>
                 <category android:name="${intentCategory}"/>
             </intent-filter>
+
+            <meta-data
+                    android:name="android.app.shortcuts"
+                    android:resource="@xml/app_shortcuts"/>
         </activity>
 
         <activity
@@ -165,6 +176,16 @@
             </intent-filter>
         </activity>
 
+        <provider
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="${authorities}"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/provider_paths"/>
+        </provider>
+
         <activity
                 android:name="org.autojs.autojs.ui.edit.EditActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -179,6 +200,7 @@
 
         <activity
                 android:name="org.autojs.autojs.ui.settings.PreferencesActivity"
+                android:exported="true"
                 android:theme="@style/AppTheme.Settings"/>
 
         <activity
@@ -197,13 +219,14 @@
 
         <activity android:name="org.autojs.autojs.ui.project.ProjectConfigActivity"/>
 
-        <activity android:name="org.autojs.autojs.ui.log.LogActivity"/>
+        <activity
+                android:name="org.autojs.autojs.ui.log.LogActivity"
+                android:exported="true"/>
 
         <activity
                 android:name="org.autojs.autojs.ui.doc.DocumentationActivity"
                 android:exported="true"
-                android:icon="@drawable/ic_docs_app"
-                android:label="@string/docs_app_name"
+                android:label="@string/text_app_shortcut_docs_long_label"
                 android:taskAffinity="org.autojs.autojs.ui.doc.DocumentationActivity"
                 android:theme="@style/AppTheme.FullScreen">
 
@@ -562,14 +585,25 @@
                 android:multiprocess="false"
                 android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"/>
 
+        <service
+                android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+                android:enabled="false"
+                android:exported="false">
+            <meta-data
+                    android:name="autoStoreLocales"
+                    android:value="true" />
+        </service>
+
         <activity
                 android:name="org.autojs.autojs.inrt.SplashActivity"
                 android:exported="true"
                 android:theme="@style/AppTheme.Splash">
             <intent-filter tools:ignore="ExtraText">
+
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="${intentCategoryInrt}"/>
+
             </intent-filter>
         </activity>
         <activity android:name="org.autojs.autojs.inrt.LogActivity"/>
@@ -577,15 +611,12 @@
         <activity android:name="org.autojs.autojs.inrt.SettingsActivity"/>
 
         <provider
-                android:name="androidx.core.content.FileProvider"
-                android:authorities="${authorities}"
-                android:exported="false"
-                android:grantUriPermissions="true">
-            <meta-data
-                    android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/provider_paths"/>
-        </provider>
-
+                android:name="rikka.shizuku.ShizukuProvider"
+                android:authorities="org.autojs.autojs6.shizuku"
+                android:enabled="true"
+                android:exported="true"
+                android:multiprocess="false"
+                android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"/>
     </application>
 
 </manifest>

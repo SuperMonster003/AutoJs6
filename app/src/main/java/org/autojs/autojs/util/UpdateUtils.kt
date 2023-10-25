@@ -174,7 +174,8 @@ object UpdateUtils {
     }
 
     @JvmStatic
-    fun autoCheckForUpdatesIfNeededWithSnackbar(activity: AppCompatActivity, snackbarViewIdRes: Int) {
+    @JvmOverloads
+    fun autoCheckForUpdatesIfNeededWithSnackbar(activity: AppCompatActivity, snackbarViewIdRes: Int = android.R.id.content) {
         if (isAutoCheckForUpdatesEnabled) {
             val checker = IntervalChecker()
             if (checker.isBeyondNoNewer && checker.isBeyondPostponed && checker.isBeyondAutoChecked) {

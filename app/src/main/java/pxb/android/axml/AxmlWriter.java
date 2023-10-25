@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2009-2013 Panxiaobo
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -95,20 +95,18 @@ public class AxmlWriter extends AxmlVisitor {
         for (NodeImpl first : firsts) {
             size += first.prepare(this);
         }
-        {
-            int a = 0;
-            for (Map.Entry<String, Ns> e : nses.entrySet()) {
-                Ns ns = e.getValue();
-                if (ns == null) {
-                    ns = new Ns(null, new StringItem(e.getKey()), 0);
-                    e.setValue(ns);
-                }
-                if (ns.prefix == null) {
-                    ns.prefix = new StringItem(String.format(Language.getPrefLanguage().getLocale(), "axml_auto_%02d", a++));
-                }
-                ns.prefix = update(ns.prefix);
-                ns.uri = update(ns.uri);
+        int a = 0;
+        for (Map.Entry<String, Ns> e : nses.entrySet()) {
+            Ns ns = e.getValue();
+            if (ns == null) {
+                ns = new Ns(null, new StringItem(e.getKey()), 0);
+                e.setValue(ns);
             }
+            if (ns.prefix == null) {
+                ns.prefix = new StringItem(String.format(Language.getPrefLanguage().getLocale(), "axml_auto_%02d", a++));
+            }
+            ns.prefix = update(ns.prefix);
+            ns.uri = update(ns.uri);
         }
 
         size += nses.size() * 24 * 2;

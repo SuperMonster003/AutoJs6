@@ -47,12 +47,16 @@ let ColorUtils = org.autojs.autojs.util.ColorUtils;
 let TextUtils = org.autojs.autojs.util.TextUtils;
 let ProxyObject = org.autojs.autojs.rhino.ProxyObject;
 let ProxyJavaObject = org.autojs.autojs.rhino.ProxyJavaObject;
+let JavaScriptSource = org.autojs.autojs.script.JavaScriptSource;
 let NotificationManager = android.app.NotificationManager;
 let NotificationCompat = Packages.androidx.core.app.NotificationCompat;
 let SecurityException = java.lang.SecurityException;
+let FileProvider = androidx.core.content.FileProvider;
+let AppUtils = org.autojs.autojs.runtime.api.AppUtils;
 let Locale = java.util.Locale;
 let URI = java.net.URI;
 let File = java.io.File;
+let Uri = android.net.Uri;
 
 /* Global View classes. */
 
@@ -492,13 +496,16 @@ Object.assign(this, {
                 /* ! Numberx < Mathx */
                 [ 'plugins', 'Arrayx', 'Numberx', 'Mathx' ],
 
-                /* ! ocr < images */
-                /* ! ocr < files */
-                [ 'ocr' ],
+                /* ! images < ocr */
+                /* ! images < barcode */
+                /* ! images < qrcode */
+                /* ! barcode < qrcode */
+                /* ! files < ocr */
+                [ 'ocr', 'barcode', 'qrcode' ],
 
                 /* Safe to put last regardless of the order, no guarantee ;). */
                 [ 'floaty', 'storages', 'device', 'recorder', 'toast' ],
-                [ 'media', 'sensors', 'events', 'base64', 'notice' ],
+                [ 'media', 'sensors', 'events', 'base64', 'notice', 'shizuku' ],
 
                 /* Last but not the least */
                 [ 'globals' ],

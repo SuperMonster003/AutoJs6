@@ -71,7 +71,7 @@ module.exports = function (scriptRuntime, scope) {
         setEngineExecArgv() {
             engines.myEngine().setExecArgv(/* @IIFE */ ((e) => {
                 let execArgv = {};
-                let iterator = e.getTag(ExecutionConfig.CREATOR.getTag()).arguments.entrySet().iterator();
+                let iterator = e.getTag(ExecutionConfig.tag).arguments.entrySet().iterator();
                 while (iterator.hasNext()) {
                     let entry = iterator.next();
                     execArgv[entry.getKey()] = entry.getValue();

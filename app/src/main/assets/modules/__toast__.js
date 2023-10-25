@@ -1,86 +1,113 @@
-// noinspection UnnecessaryLocalVariableJS,JSUnusedLocalSymbols
+// noinspection JSUnusedLocalSymbols,UnnecessaryLocalVariableJS
 
 /**
- * @param {ScriptRuntime} scriptRuntime
+ * @param {org.autojs.autojs.runtime.ScriptRuntime} scriptRuntime
  * @param {org.mozilla.javascript.Scriptable | global} scope
  * @return {Internal.Toast}
  */
 module.exports = function (scriptRuntime, scope) {
-    let rtToast = scriptRuntime.toast;
+
+    const ScriptToast = org.autojs.autojs.runtime.api.ScriptToast;
+
     let _ = {
+        uiHandler: runtime.getUiHandler(),
         ToastCtor: (/* @IIFE */ () => {
             /**
              * @implements Internal.Toast
              */
-            const Ctor = function () {
+            const ToastCtor = function () {
+                // @Caution by SuperMonster003 on Oct 11, 2022.
+                //  ! android.widget.Toast.makeText() doesn't work well on Android API Level 28 (Android 9) [P].
+                //  ! There hasn't been a solution for this so far.
+                //  ! Tested devices:
+                //  ! 1. SONY XPERIA XZ1 Compact (G8441)
+                //  ! 2. Android Studio AVD (Android 9.0 x86)
                 /** @global */
-                const instance = function (msg, isLong, isForcible) {
+                const toast = function (msg, isLong, isForcible) {
                     let $ = {
                         badge: {
                             long: /^l(ong)?$/i,
                             short: /^s(hort)?$/i,
                             forcible: /^f(orcible)?$/i,
                         },
+                        toast() {
+                            this.init(arguments);
+                            this.show();
+                        },
                         init() {
                             this.message = isNullish(msg) ? '' : String(msg);
-                            this.isForcible = this.parseIsForcible(isForcible);
                             this.isLong = this.parseIsLong(isLong);
+                            this.isForcible = this.parseIsForcible(isForcible);
                         },
-                        parseIsLong(isLong) {
-                            if (typeof isLong === 'boolean') {
-                                return isLong;
+                        parseIsLong(o) {
+                            let def = typeof this.isLong === 'boolean' ? this.isLong : false;
+                            if (typeof o === 'boolean') {
+                                return o;
                             }
-                            if (typeof isLong === 'number') {
-                                return Boolean(isLong);
+                            if (typeof o === 'number') {
+                                return Boolean(o);
                             }
-                            if (typeof isLong === 'string') {
-                                if (this.badge.long.test(isLong)) {
+                            if (typeof o === 'string') {
+                                if (this.badge.long.test(o)) {
                                     return true;
                                 }
-                                if (this.badge.short.test(isLong)) {
+                                if (this.badge.short.test(o)) {
                                     return false;
                                 }
-                                if (this.badge.forcible.test(isLong)) {
+                                if (this.badge.forcible.test(o)) {
                                     this.isForcible = true;
-                                    return false;
+                                    return def;
                                 }
-                                throw Error(`Invalid param: {name: isLong, value: ${isLong}, type: ${species(isLong)}.`);
+                                throw Error(`Invalid param: {name: isLong, value: ${o}, type: ${species(o)}.`);
                             }
-                            return false;
+                            return def;
                         },
-                        parseIsForcible(isForcible) {
-                            if (typeof isForcible === 'boolean') {
-                                return isForcible;
+                        parseIsForcible(o) {
+                            let def = typeof this.isForcible === 'boolean' ? this.isForcible : false;
+                            if (typeof o === 'boolean') {
+                                return o;
                             }
-                            if (typeof isForcible === 'number') {
-                                return Boolean(isForcible);
+                            if (typeof o === 'number') {
+                                return Boolean(o);
                             }
-                            if (typeof isForcible === 'string') {
-                                if (this.badge.forcible.test(isForcible)) {
+                            if (typeof o === 'string') {
+                                if (this.badge.forcible.test(o)) {
                                     return true;
                                 }
-                                throw Error(`Invalid param: {name: isForcible, value: ${isForcible}, type: ${species(isForcible)}.`);
+                                if (this.badge.long.test(o)) {
+                                    this.isLong = true;
+                                    return def;
+                                }
+                                if (this.badge.short.test(o)) {
+                                    this.isLong = false;
+                                    return def;
+                                }
+                                throw Error(`Invalid param: {name: isForcible, value: ${o}, type: ${species(o)}.`);
                             }
-                            return false;
+                            return def;
                         },
-                        makeToast() {
-                            rtToast.makeToast(this.message, this.isLong, this.isForcible);
+                        show() {
+                            if ($.isForcible) {
+                                ToastCtor.prototype.dismissAll();
+                            }
+                            scriptRuntime.uiHandler.toast($.message, $.isLong);
                         },
                     };
 
-                    $.init();
-                    $.makeToast();
+                    $.toast();
                 };
 
-                return Object.assign(instance, Ctor.prototype);
+                return Object.assign(toast, ToastCtor.prototype);
             };
 
-            Ctor.prototype = {
-                constructor: Ctor,
-                dismissAll: () => rtToast.dismissAll(),
+            ToastCtor.prototype = {
+                constructor: ToastCtor,
+                dismissAll() {
+                    runtime.uiHandler.dismissAllToasts();
+                },
             };
 
-            return Ctor;
+            return ToastCtor;
         })(),
     };
 

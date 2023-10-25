@@ -184,11 +184,9 @@ class AppUtils {
 
     companion object {
 
-        @JvmStatic
-        val activityShortFormPrefix = "class."
+        const val activityShortFormPrefix = "class."
 
-        @JvmStatic
-        val broadcastShortFormPrefix = "broadcast."
+        const val broadcastShortFormPrefix = "broadcast."
 
         enum class ActivityShortForm(val shortName: String) {
 
@@ -237,23 +235,12 @@ class AppUtils {
         @JvmStatic
         fun isActivityShortForm(s: String) = ActivityShortForm.values().any { it.shortName.contentEquals(s) }
 
-        @JvmStatic
-        fun showLauncherIcon(context: Context, cls: Class<*>) {
-            context.packageManager.setComponentEnabledSetting(ComponentName(context, cls), COMPONENT_ENABLED_STATE_ENABLED, DONT_KILL_APP)
-        }
-
-        @JvmStatic
-        fun hideLauncherIcon(context: Context, cls: Class<*>) {
-            context.packageManager.setComponentEnabledSetting(ComponentName(context, cls), COMPONENT_ENABLED_STATE_DISABLED, DONT_KILL_APP)
-        }
-
         fun getInstalledApplications(context: Context): List<ApplicationInfo> = context.packageManager.let {
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
                     it.getInstalledApplications(ApplicationInfoFlags.of(GET_META_DATA.toLong()))
                 }
                 else -> {
-                    @Suppress("DEPRECATION")
                     it.getInstalledApplications(GET_META_DATA)
                 }
             }

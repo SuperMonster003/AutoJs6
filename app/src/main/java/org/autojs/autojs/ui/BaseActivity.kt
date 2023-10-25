@@ -3,15 +3,13 @@
 package org.autojs.autojs.ui
 
 import android.content.Context
-import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import com.zeugmasolutions.localehelper.LocaleHelper
-import com.zeugmasolutions.localehelper.LocaleHelperActivityDelegate
-import com.zeugmasolutions.localehelper.LocaleHelperActivityDelegateImpl
+import org.autojs.autojs.pref.Language
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.ViewUtils
 
 /**
@@ -19,8 +17,6 @@ import org.autojs.autojs.util.ViewUtils
  * Modified by SuperMonster003 as of Feb 18, 2022.
  */
 abstract class BaseActivity : AppCompatActivity() {
-
-    private val localeDelegate: LocaleHelperActivityDelegate = LocaleHelperActivityDelegateImpl()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,15 +34,16 @@ abstract class BaseActivity : AppCompatActivity() {
         }
 
         ViewUtils.makeBarsAdaptToNightMode(this)
-        localeDelegate.onCreate(this)
+
+        setLocaleForAutoLanguageIfNeeded(this)
     }
 
-    override fun getDelegate(): AppCompatDelegate {
-        return localeDelegate.getAppCompatDelegate(super.getDelegate())
-    }
-
-    override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(localeDelegate.attachBaseContext(newBase))
+    private fun setLocaleForAutoLanguageIfNeeded(context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (Language.getPrefLanguage().isAuto()) {
+                LocaleUtils.setFollowSystem(context)
+            }
+        }
     }
 
     override fun onStart() {
@@ -58,20 +55,8 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        localeDelegate.onResumed(this)
+        LocaleUtils.syncPrefWithCurrentStateIfNeeded(this)
     }
-
-    override fun onPause() {
-        super.onPause()
-        localeDelegate.onPaused()
-    }
-
-    override fun createConfigurationContext(overrideConfiguration: Configuration): Context {
-        val context = super.createConfigurationContext(overrideConfiguration)
-        return LocaleHelper.onAttach(context)
-    }
-
-    override fun getApplicationContext() = localeDelegate.getApplicationContext(super.getApplicationContext())
 
     fun setToolbarAsBack(titleRes: Int) = ViewUtils.setToolbarAsBack(this, titleRes)
 

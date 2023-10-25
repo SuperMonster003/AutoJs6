@@ -20,7 +20,7 @@ import org.autojs.autojs.engine.RootAutomatorEngine
 import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.engine.ScriptEngineServiceBuilder
-import org.autojs.autojs.inrt.autojs.XJavaScriptEngine
+import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
 import org.autojs.autojs.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.rhino.InterruptibleAndroidContextFactory
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -35,6 +35,7 @@ import org.autojs.autojs.util.ResourceMonitor
 import org.autojs.autojs.util.ResourceMonitor.UnclosedResourceException
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.WrappedException
@@ -51,6 +52,12 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     lateinit var runtime: ScriptRuntime
         private set
 
+    private val scriptEngine
+        get() = when (BuildConfig.isInrt) {
+            true -> LoopBasedJavaScriptEngineWithDecryption(context)
+            else -> LoopBasedJavaScriptEngine(context)
+        }
+
     val context: Context = application.applicationContext
     val appUtils by lazy { createAppUtils(context) }
     val globalConsole by lazy { createGlobalConsole() }
@@ -58,19 +65,11 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     val layoutInspector = LayoutInspector(context)
     val uiHandler = UiHandler(context)
     val infoProvider = ActivityInfoProvider(context)
-    val scriptEngineManager = ScriptEngineManager(context)
     val scriptEngineService: ScriptEngineService = run {
-        if (org.autojs.autojs6.BuildConfig.isInrt) {
-            scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
-                XJavaScriptEngine(context).also { engine ->
-                    engine.runtime = createRuntime().also { runtime = it }
-                }
-            }
-        } else {
-            scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
-                LoopBasedJavaScriptEngine(context).also { engine ->
-                    engine.runtime = createRuntime().also { runtime = it }
-                }
+        val scriptEngineManager = ScriptEngineManager(context)
+        scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
+            scriptEngine.also { engine ->
+                engine.runtime = createRuntime().also { runtime = it }
             }
         }
         initContextFactory()

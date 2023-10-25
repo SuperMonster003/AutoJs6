@@ -22,7 +22,6 @@
     <string name="description_change_working_dir_preference">更改包含脚本的文件夹路径</string>
     <string name="description_check_for_updates_preference">AutoJs6 从 GitHub 获取并下载更新.\n\n注: 版本更新内容暂未提供多语言支持.</string>
     <string name="description_compatibility_with_classes_for_ver_4_x">通过类名重映射, 提供一定程度上的 4.x 版本 Java 类名兼容.\n开启选项后, 每次启动脚本将出现不同程度的启动延迟 (几十到几百毫秒不等).\n如无特别需求, 建议始终保持选项关闭.</string>
-    <string name="description_documentation_launcher_icon_preference">文档启动器图标便于直接访问文档, 并可像独立应用程序一样进行切换.</string>
     <string name="description_documentation_source_preference">本地文档: AutoJs6 内置文件作为文档来源, 无需网络连接, 随 AutoJs6 应用更新而发生内容变动.\n在线文档: 使用 GitHub 网页作为文档来源, 需网络连接, 可随时保持文档内容为最新.\n\n注: 为最大化在线文档的阅读体验, 建议使用桌面显示器等宽屏显示设备阅读.\n注: 截至 6.2.0 版本, 文档尚处于初步编写阶段, 大部分内容尚未完成编写或更新.</string>
     <string name="description_documentation_source_preference_more">文档页面的深色主题支持需要满足以下条件:\n1. AutoJs6 开启夜间模式\n2. WebView (或 Google Chrome 等浏览器) 版本要求:\n- API 级别 29 (安卓 10) [Q] 及以上: 版本不低于 76\n- API 级别 28 (安卓 9) [P] 及以下: 版本不低于 105</string>
     <string name="description_extending_js_build_in_objects">扩展 JavaScript 内置对象可以增加代码灵活性并实现更丰富的功能, 但可能造成冲突甚至破坏.\n选项开启后所有脚本均默认启用内置扩展.\n内置扩展往往是不安全的, 除非明确了解内置扩展的原理及风险, 否则不建议启用.\n选项关闭后, 仍然可以通过 plugins 全局对象启用内置扩展, 详见项目文档.</string>
@@ -55,12 +54,11 @@
     <string name="dialog_button_system_settings_simplified">@string/dialog_button_system_settings</string>
     <string name="dialog_button_update_now">立即更新</string>
     <string name="dialog_button_use_default">使用默认值</string>
-    <string name="docs_app_name">AutoJs6 文档</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 文档</string>
+    <string name="text_app_shortcut_docs_short_label">文档</string>
     <string name="edit_and_run_handle_intent_error">无法处理文件</string>
     <string name="edit_exit_without_save_warn">内容尚未保存, 确定要退出吗</string>
     <string name="entry_app_language_auto">跟随系统</string>
-    <string name="entry_documentation_launcher_icon_hide">隐藏启动器图标</string>
-    <string name="entry_documentation_launcher_icon_show">显示启动器图标</string>
     <string name="entry_documentation_source_local">本地文档</string>
     <string name="entry_documentation_source_online">在线文档</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">更改字体大小</string>
@@ -341,7 +339,6 @@
     <string name="text_do_not_ask_again_for_this_version">此版本不再提示</string>
     <string name="text_do_not_show_again">不再提示</string>
     <string name="text_documentation">文档</string>
-    <string name="text_documentation_launcher_icon">文档启动器图标</string>
     <string name="text_documentation_source">文档源</string>
     <string name="text_done">完成</string>
     <string name="text_download">下载</string>
@@ -456,6 +453,8 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">布局分析中...</string>
     <string name="text_licenses">开源许可信息</string>
     <string name="text_log">日志</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 日志</string>
+    <string name="text_app_shortcut_log_short_label">日志</string>
     <string name="text_logging_in">登录中</string>
     <string name="text_login">登录</string>
     <string name="text_login_succeed">登录成功</string>
@@ -619,6 +618,8 @@
     <string name="text_set_as_working_dir">用作工作路径</string>
     <string name="text_set_breakpoint">设置断点</string>
     <string name="text_settings">设置</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 设置</string>
+    <string name="text_app_shortcut_settings_short_label">设置</string>
     <string name="text_should_not_be_empty">文本不能为空</string>
     <string name="text_show_layout_bounds">在布局范围中查看</string>
     <string name="text_show_layout_hierarchy">在布局层次中查看</string>
@@ -688,6 +689,11 @@
     <string name="dialog_button_view_file">查看文件</string>
     <string name="text_exported">已导出</string>
     <string name="text_some_items_exported">已导出 %d 个条目</string>
+    <string name="text_app_shortcut_disabled">此快捷方式已禁用</string>
+    <string name="text_launcher_shortcuts">启动器快捷方式</string>
+    <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中执行特定操作, 用户可以在启动器中显示这些快捷方式, 并快速开始某些任务或启动某个活动, 如阅读 AutoJs6 应用文档, 启动 AutoJs6 设置页面等.</string>
+    <string name="summary_text_launcher_shortcuts">添加快捷方式到启动器</string>
+    <string name="text_pin_shortcut_not_unsupported">将快捷方式固定到启动器不被支持</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共计: %d 项</item>

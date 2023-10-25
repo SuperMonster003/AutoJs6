@@ -106,7 +106,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     private void createShortcutByShortcutManager() {
         Icon icon;
         if (mIsDefaultIcon) {
-            icon = Icon.createWithResource(this, R.drawable.ic_file_type_js);
+            icon = Icon.createWithResource(this, R.drawable.ic_file_type_js_dark_green);
         } else {
             Bitmap bitmap = BitmapUtils.drawableToBitmap(mIcon.getDrawable());
             icon = Icon.createWithBitmap(bitmap);
@@ -124,7 +124,6 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         }
 
     }
-
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint({"CheckResult", "MissingSuperCall"})

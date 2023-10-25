@@ -8,7 +8,7 @@ import android.os.Looper
 import android.text.TextUtils
 import org.autojs.autojs.inrt.LogActivity
 import org.autojs.autojs.inrt.Pref
-import org.autojs.autojs.AutoJs
+import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution

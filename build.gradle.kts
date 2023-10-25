@@ -23,7 +23,7 @@ allprojects {
 
 tasks {
     register<Delete>("clean").configure {
-        // delete(rootProject.buildDir)
+        // @Legacy delete(rootProject.buildDir)
         delete(rootProject.layout.buildDirectory)
     }
 }

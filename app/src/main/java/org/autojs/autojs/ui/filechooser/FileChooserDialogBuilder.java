@@ -85,7 +85,7 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
     }
 
     public FileChooserDialogBuilder justScriptFile() {
-        mFileFilter = Scripts.getFILE_FILTER();
+        mFileFilter = Scripts.FILE_FILTER;
         return this;
     }
 

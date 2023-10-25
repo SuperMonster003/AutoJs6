@@ -40,7 +40,7 @@ module.exports = function (scriptRuntime, scope) {
                 enumerable: true, /* Emphasis. */
             };
 
-            const instanceFunc = function (img, options) {
+            const instanceFunc = function __(img, options) {
                 if (typeof arguments[0] === 'string') {
                     let img = images.read(/* path = */ arguments[0]);
                     if (img === null) {
@@ -87,7 +87,7 @@ module.exports = function (scriptRuntime, scope) {
 
                         // @Signature
                         // recognizeText(imgPath: string, options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
-                        // recognizeText(imgPath: string, region: Images.Options.Region): string[];
+                        // recognizeText(imgPath: string, region: OmniRegion): string[];
 
                         let img = images.read(/* path = */ arguments[0]);
                         if (img === null) {
@@ -95,12 +95,25 @@ module.exports = function (scriptRuntime, scope) {
                         }
                         // @Overload
                         // recognizeText(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
-                        // recognizeText(img: ImageWrapper, region: Images.Options.Region): string[];
+                        // recognizeText(img: ImageWrapper, region: OmniRegion): string[];
                         return this.recognizeText(img.oneShot(), arguments[1]);
                     }
+
+                    if (!(arguments[0] instanceof ImageWrapper)) {
+
+                        // @Signature
+                        // recognizeText(options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
+                        // recognizeText(region: OmniRegion): string[];
+
+                        // @Overload
+                        // recognizeText(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
+                        // recognizeText(img: ImageWrapper, region: OmniRegion): string[];
+                        return this.recognizeText.apply(this, [ images.captureScreen() ].concat(Array.from(arguments)));
+                    }
+
                     if (_.shouldTakenAsRegion(arguments[1])) {
 
-                        // @Signature recognizeText(img: ImageWrapper, region: Images.Options.Region): string[];
+                        // @Signature recognizeText(img: ImageWrapper, region: OmniRegion): string[];
 
                         // @Overload recognizeText(img: ImageWrapper, options: DetectOptionsMLKit | DetectOptionsPaddle): string[];
                         return this.recognizeText(img, { region: arguments[1] });
@@ -144,7 +157,7 @@ module.exports = function (scriptRuntime, scope) {
 
                         // @Signature
                         // detect(imgPath: string, options?: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
-                        // detect(imgPath: string, region: Images.Options.Region): org.autojs.autojs.runtime.api.OcrResult[];
+                        // detect(imgPath: string, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
 
                         let img = images.read(/* path = */ arguments[0]);
                         if (img === null) {
@@ -152,12 +165,25 @@ module.exports = function (scriptRuntime, scope) {
                         }
                         // @Overload
                         // detect(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
-                        // detect(img: ImageWrapper, region: Images.Options.Region): org.autojs.autojs.runtime.api.OcrResult[];
+                        // detect(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
                         return this.detect(img.oneShot(), arguments[1]);
                     }
+
+                    if (!(arguments[0] instanceof ImageWrapper)) {
+
+                        // @Signature
+                        // detect(options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
+                        // detect(region: OmniRegion): string[];
+
+                        // @Overload
+                        // detect(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
+                        // detect(img: ImageWrapper, region: OmniRegion): string[];
+                        return this.detect.apply(this, [ images.captureScreen() ].concat(Array.from(arguments)));
+                    }
+
                     if (_.shouldTakenAsRegion(arguments[1])) {
 
-                        // @Signature detect(img: ImageWrapper, region: Images.Options.Region): org.autojs.autojs.runtime.api.OcrResult[];
+                        // @Signature detect(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
 
                         // @Overload detect(img: ImageWrapper, options: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
                         return this.detect(img, { region: arguments[1] });

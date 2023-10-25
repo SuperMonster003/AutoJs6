@@ -12,7 +12,7 @@ import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
-import org.autojs.autojs.AutoJs
+import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
 import org.autojs.autojs6.R
 

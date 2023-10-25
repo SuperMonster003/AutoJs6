@@ -18,7 +18,6 @@ import java.util.List;
 @RequiresApi(api = Build.VERSION_CODES.N_MR1)
 public class ShortcutManager {
 
-
     private static ShortcutManager sInstance;
     private final Context mContext;
     private final android.content.pm.ShortcutManager mShortcutManager;

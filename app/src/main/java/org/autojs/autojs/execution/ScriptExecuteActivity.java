@@ -144,6 +144,7 @@ public class ScriptExecuteActivity extends AppCompatActivity {
             mScriptEngine.destroy();
         }
         mScriptExecution = null;
+        mRuntime.loopers.waitWhenIdle(false);
     }
 
     @Override
@@ -243,7 +244,7 @@ public class ScriptExecuteActivity extends AppCompatActivity {
                 mScriptEngine.forceStop();
             }
             mScriptEngine = mScriptEngineManager.createEngineOfSourceOrThrow(getSource(), getId());
-            mScriptEngine.setTag(ExecutionConfig.getTag(), getConfig());
+            mScriptEngine.setTag(ExecutionConfig.tag, getConfig());
             return mScriptEngine;
         }
 

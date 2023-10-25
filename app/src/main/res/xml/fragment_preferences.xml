@@ -59,14 +59,12 @@
                 app:longClickPrompt="@string/description_documentation_source_preference"
                 app:longClickPromptMore="@string/description_documentation_source_preference_more" />
 
-        <org.autojs.autojs.ui.settings.DocumentationLauncherIconPreference
+        <org.autojs.autojs.ui.settings.LauncherShortcutsPreference
                 app:layout="@layout/preference_custom"
-                app:key="@string/key_documentation_launcher_icon"
-                app:title="@string/text_documentation_launcher_icon"
-                app:itemKeys="@array/keys_documentation_launcher_icon"
-                app:itemValues="@array/values_documentation_launcher_icon"
-                app:itemDefaultKey="@string/key_documentation_launcher_icon_show"
-                app:longClickPrompt="@string/description_documentation_launcher_icon_preference" />
+                app:key="@string/key_launcher_shortcuts"
+                app:title="@string/text_launcher_shortcuts"
+                app:summary="@string/summary_text_launcher_shortcuts"
+                app:longClickPrompt="@string/description_launcher_shortcuts" />
 
         <org.autojs.autojs.ui.settings.WorkingDirectoryPreference
                 app:layout="@layout/preference_custom"
@@ -133,11 +131,11 @@
                 app:summary="@string/summary_use_volume_key_to_stop_running_scripts" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+                app:layout="@layout/preference_custom"
                 app:key="@string/key_guard_mode"
                 app:defaultValue="@bool/pref_guard_mode"
                 app:title="@string/text_guard_mode"
-                app:summary="@string/summary_guard_mode"
-                app:layout="@layout/preference_custom" />
+                app:summary="@string/summary_guard_mode" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

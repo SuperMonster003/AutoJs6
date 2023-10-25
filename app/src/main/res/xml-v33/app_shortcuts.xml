@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @OtherXmlVersions [ v25 ] -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+            android:shortcutId="settings"
+            android:enabled="true"
+            android:icon="@drawable/ic_app_shortcut_settings_green"
+            android:shortcutShortLabel="@string/text_app_shortcut_settings_short_label"
+            android:shortcutLongLabel="@string/text_app_shortcut_settings_long_label"
+            android:shortcutDisabledMessage="@string/text_app_shortcut_disabled">
+        <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="org.autojs.autojs6"
+                android:targetClass="org.autojs.autojs.ui.settings.PreferencesActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+            android:shortcutId="docs"
+            android:enabled="true"
+            android:icon="@drawable/ic_app_shortcut_docs_green"
+            android:shortcutShortLabel="@string/text_app_shortcut_docs_short_label"
+            android:shortcutLongLabel="@string/text_app_shortcut_docs_long_label"
+            android:shortcutDisabledMessage="@string/text_app_shortcut_disabled">
+        <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="org.autojs.autojs6"
+                android:targetClass="org.autojs.autojs.ui.doc.DocumentationActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+            android:shortcutId="log"
+            android:enabled="true"
+            android:icon="@drawable/ic_app_shortcut_log_green"
+            android:shortcutShortLabel="@string/text_app_shortcut_log_short_label"
+            android:shortcutLongLabel="@string/text_app_shortcut_log_long_label"
+            android:shortcutDisabledMessage="@string/text_app_shortcut_disabled">
+        <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="org.autojs.autojs6"
+                android:targetClass="org.autojs.autojs.ui.log.LogActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

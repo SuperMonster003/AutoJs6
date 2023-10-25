@@ -14,7 +14,7 @@ import java.util.Vector
  */
 object ThemeColorManager {
 
-    @JvmStatic
+    @JvmField
     var defaultThemeColor = ThemeColor(ColorUtils.fromResources(R.color.theme_color_default))
 
     @JvmStatic

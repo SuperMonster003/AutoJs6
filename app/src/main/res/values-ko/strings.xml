@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- Translator: [ QTranslate (https://quest-app.appspot.com) ] -->
+<!-- Translator: [ DeepL (https://www.deepl.com/translator) ] -->
 <!-- Proofreader: [ SuperMonster003 ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
@@ -26,7 +27,6 @@
     <string name="description_change_working_dir_preference">스크립트가 포함 된 디렉토리의 경로를 변경하십시오</string>
     <string name="description_check_for_updates_preference">AutoJs6 은 GitHub 에서 업데이트를 가져오고 다운로드합니다.\n\n참고: 업데이트는 아직 다국어 지원을 제공하지 않습니다.</string>
     <string name="description_compatibility_with_classes_for_ver_4_x">클래스 이름 재매핑을 통해 4.x 버전에 대해 어느 정도의 Java 클래스 이름 호환성을 제공합니다.\n이 옵션을 켜면 스크립트가 시작될 때마다 다양한 정도의 시작 지연 (수십에서 수백 밀리초) 이 발생합니다.\n특별히 필요하지 않은 경우 옵션을 항상 해제하는 것이 좋습니다.</string>
-    <string name="description_documentation_launcher_icon_preference">문서 시작 관리자 아이콘을 사용하면 문서에 더 쉽게 액세스할 수 있으며 독립 실행형 응용 프로그램처럼 전환할 수 있습니다.</string>
     <string name="description_documentation_source_preference">로컬 문서: AutoJs6 내장 파일을 문서 소스로 사용, 네트워크 연결이 필요하지 않습니다. 내용은 AutoJs6 이 업데이트됨에 따라 변경됩니다.\n온라인 문서: GitHub 페이지를 문서 소스로 사용, 네트워크 연결 필요. 콘텐츠는 항상 최신 상태입니다.\n\n참고: 온라인 문서의 읽기 환경을 최대화하려면 데스크탑 모니터와 같은 와이드 스크린 디스플레이 장치를 사용하는 것이 좋습니다.\n참고: 버전 6.2.0 현재 문서는 아직 개발 초기 단계이며 대부분의 콘텐츠가 아직 작성되거나 업데이트되지 않았습니다.</string>
     <string name="description_documentation_source_preference_more">문서 페이지에서 어두운 테마를 지원하려면 다음 조건이 충족되어야 합니다.\n1. AutoJs6 에는 야간 모드가 활성화되어 있습니다.\n2. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P] 이하: 버전 >= 105</string>
     <string name="description_extending_js_build_in_objects">JavaScript 내장 개체를 확장하면 코드 유연성이 향상되고 더 풍부한 기능을 사용할 수 있지만 충돌이 발생하고 파손될 수도 있습니다.\n옵션이 켜져 있을 때 모든 스크립트에는 기본적으로 활성화된 내장 확장이 있습니다.\n기본 제공 확장은 종종 안전하지 않으며 기본 제공 확장의 원칙과 위험을 명확하게 이해하지 않는 한 권장되지 않습니다.\n옵션이 꺼져 있어도 프로젝트 문서에 설명된 대로 플러그인 전역 개체를 통해 내장 확장을 계속 활성화할 수 있습니다.</string>
@@ -59,12 +59,11 @@
     <string name="dialog_button_system_settings_simplified">시스템</string>
     <string name="dialog_button_update_now">업데이트</string>
     <string name="dialog_button_use_default">기본값을 사용하십시오</string>
-    <string name="docs_app_name">AutoJs6 문서</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 문서</string>
+    <string name="text_app_shortcut_docs_short_label">문서</string>
     <string name="edit_and_run_handle_intent_error">파일을 처리 할 수 없습니다</string>
     <string name="edit_exit_without_save_warn">콘텐츠가 저장되지 않았습니다. 나가시겠습니까?</string>
     <string name="entry_app_language_auto">시스템을 따르십시오</string>
-    <string name="entry_documentation_launcher_icon_hide">런처에서 아이콘 숨기기</string>
-    <string name="entry_documentation_launcher_icon_show">런처에 아이콘 표시</string>
     <string name="entry_documentation_source_local">현지 문서</string>
     <string name="entry_documentation_source_online">온라인 문서</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">텍스트 크기 변경</string>
@@ -345,7 +344,6 @@
     <string name="text_do_not_ask_again_for_this_version">이 버전을 다시 요청하지 마십시오</string>
     <string name="text_do_not_show_again">다시 보여주지 마세요</string>
     <string name="text_documentation">서류</string>
-    <string name="text_documentation_launcher_icon">설명서 실행기 아이콘</string>
     <string name="text_documentation_source">문서 소스</string>
     <string name="text_done">완료</string>
     <string name="text_download">다운로드</string>
@@ -460,6 +458,8 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">레이아웃 검사 ...</string>
     <string name="text_licenses">오픈 소스 라이센스</string>
     <string name="text_log">통나무</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 통나무</string>
+    <string name="text_app_shortcut_log_short_label">통나무</string>
     <string name="text_logging_in">로그인</string>
     <string name="text_login">로그인</string>
     <string name="text_login_succeed">로그인이 성공했습니다</string>
@@ -623,6 +623,8 @@
     <string name="text_set_as_working_dir">작업 디렉토리로</string>
     <string name="text_set_breakpoint">중단 점을 설정하십시오</string>
     <string name="text_settings">설정</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 설정</string>
+    <string name="text_app_shortcut_settings_short_label">설정</string>
     <string name="text_should_not_be_empty">텍스트는 비어질 수 없다</string>
     <string name="text_show_layout_bounds">레이아웃 경계보기</string>
     <string name="text_show_layout_hierarchy">레이아웃 계층 구조보기</string>
@@ -679,27 +681,30 @@
     <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="theme_color_default">기본</string>
-    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
-    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
-    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
-    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
-    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
-    <string name="text_failed_to_copy">复制失败</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
-    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
-    <string name="dialog_button_dismiss">关闭</string>
-    <string name="dialog_button_view_file">查看文件</string>
-    <string name="text_exported">已导出</string>
-    <string name="text_some_items_exported">已导出 %d 个条目</string>
+    <string name="text_only_latest_few_items_will_be_sent">최신 %d 항목만 전송됩니다</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">로그 항목 수 %d개가 전송 제한을 초과했습니다</string>
+    <string name="text_failed_to_send_log_entries">로그 항목을 보내지 못했습니다</string>
+    <string name="text_no_log_entries_to_send">보낼 로그 항목이 없습니다</string>
+    <string name="text_no_log_entries_to_export">내보낼 로그 항목이 없습니다</string>
+    <string name="text_no_log_entries_to_copy">복사할 로그 항목이 없습니다</string>
+    <string name="text_failed_to_copy">복사하지 못했습니다</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">클립보드에 이미 복사되었습니다(최신 %d 항목만)</string>
+    <string name="text_failed_to_export_log_entries">로그 항목을 내보내지 못했습니다</string>
+    <string name="dialog_button_dismiss">Dismiss</string>
+    <string name="dialog_button_view_file">파일 보기</string>
+    <string name="text_exported">내보낸</string>
+    <string name="text_some_items_exported">내보낸 %d 항목</string>
+    <string name="text_app_shortcut_disabled">이 바로 가기가 비활성화되었습니다</string>
+    <string name="text_launcher_shortcuts">런처 바로 가기</string>
+    <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
+    <string name="summary_text_launcher_shortcuts">런처에 바로 가기 추가</string>
+    <string name="text_pin_shortcut_not_unsupported">런처에 바로가기를 고정하는 것은 지원되지 않습니다</string>
 
     <plurals name="text_items_total_sum">
-        <item quantity="one">총: %d 항목</item>
         <item quantity="other">총: %d 개 항목</item>
     </plurals>
 
     <plurals name="text_already_stop_n_scripts">
-        <item quantity="one">%d 스크립트가 중지되었습니다</item>
         <item quantity="other">%d 개의 스크립트가 중지되었습니다</item>
     </plurals>
 

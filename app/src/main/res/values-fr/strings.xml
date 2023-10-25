@@ -26,7 +26,6 @@
     <string name="description_change_working_dir_preference">Changer le chemin du répertoire contenant les scripts</string>.
     <string name="description_check_for_updates_preference">AutoJs6 obtient et télécharge les mises à jour depuis GitHub.\n\nNote: La mise à jour ne fournit pas encore de support multilingue.</string>
     <string name="description_compatibility_with_classes_for_ver_4_x">Assure un certain degré de compatibilité des noms de classe Java pour les versions 4.x grâce au remappage des noms de classe.\nSi cette option est activée, il y aura un délai de démarrage plus ou moins long (de quelques dizaines à quelques centaines de millisecondes) à chaque fois que le script sera lancé.\nIl est recommandé de laisser l\'option désactivée à tout moment si elle n\'est pas spécifiquement requise.</string>
-    <string name="description_documentation_launcher_icon_preference">Une icône de lancement de la documentation facilite l\'accès aux documents et peut être commutée comme une application autonome.</string>
     <string name="description_documentation_source_preference">Documentation locale: Utilisation des fichiers intégrés d\'AutoJs6 comme sources de documentation, aucune connexion réseau n\'est nécessaire. Le contenu change au fur et à mesure que AutoJs6 est mis à jour.\nDocumentation en ligne: Utilisation des pages GitHub comme sources de documentation, nécessitant une connexion réseau. Le contenu est toujours à jour.\n\nRemarque: pour optimiser l\'expérience de lecture des documents en ligne, il est recommandé d\'utiliser un dispositif d\'affichage grand écran tel qu\'un moniteur de bureau.\nRemarque: à partir de la version 6.2.0, la documentation est encore dans les phases préliminaires de développement, et la plupart du contenu n\'a pas encore été écrit ou mis à jour.</string>
     <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur: version >= 76\n- Android API Niveau 28 (Android 9) [P] et inférieur: version >= 105</string>
     <string name="description_extending_js_build_in_objects">L\'extension des objets JavaScript intégrés peut augmenter la flexibilité du code et permettre des fonctionnalités plus riches, mais elle peut provoquer des conflits et même des pannes.\nTous les scripts ont des extensions intégrées activées par défaut lorsque l\'option est activée.\nLes extensions intégrées sont souvent peu sûres et ne sont pas recommandées, sauf si les principes et les risques des extensions intégrées sont clairement compris.\nLorsque l\'option est désactivée, les extensions intégrées peuvent toujours être activées via l\'objet global plugins, comme décrit dans la documentation du projet.</string>
@@ -59,12 +58,11 @@
     <string name="dialog_button_system_settings_simplified">Système</string>
     <string name="dialog_button_update_now">Mise à jour</string>
     <string name="dialog_button_use_default">Par défaut</string>
-    <string name="docs_app_name">AutoJs6 Docs</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 Docs</string>
+    <string name="text_app_shortcut_docs_short_label">Docs</string>
     <string name="edit_and_run_handle_intent_error">Can\'t process file</string>
     <string name="edit_exit_without_save_warn">Le contenu n\'a pas été enregistré, êtes-vous sûr de vouloir quitter?</string>
     <string name="entry_app_language_auto">Suivre le système</string>
-    <string name="entry_documentation_launcher_icon_hide">Masquer l\'icône du lanceur</string>
-    <string name="entry_documentation_launcher_icon_show">Afficher l\'icône dans le lanceur</string>
     <string name="entry_documentation_source_local">Documents locaux</string>
     <string name="entry_documentation_source_online">Documents en ligne</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">Taille du texte</string>
@@ -345,7 +343,6 @@
     <string name="text_do_not_ask_again_for_this_version">Ne pas redemander cette version</string>
     <string name="text_do_not_show_again">Ne pas montrer à nouveau</string>
     <string name="text_documentation">Documents</string>
-    <string name="text_documentation_launcher_icon">Icône du lanceur de documentation</string>
     <string name="text_documentation_source">Source de la documentation</string>
     <string name="text_done">Done</string>
     <string name="text_download">Téléchargement</string>
@@ -460,6 +457,8 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecter la mise en page...</string>
     <string name="text_licenses">Licences Open Sources</string>
     <string name="text_log">Journal</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 Journal</string>
+    <string name="text_app_shortcut_log_short_label">Journal</string>
     <string name="text_logging_in">Logging in</string>
     <string name="text_login">Login</string>
     <string name="text_login_succeed">Login réussi</string>
@@ -623,6 +622,8 @@
     <string name="text_set_as_working_dir">Comme répertoire de travail</string>
     <string name="text_set_breakpoint">Définir un point d\'arrêt</string>
     <string name="text_settings">Réglages</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 Réglages</string>
+    <string name="text_app_shortcut_settings_short_label">Réglages</string>
     <string name="text_should_not_be_empty">Le texte ne peut pas être vide</string>
     <string name="text_show_layout_bounds">Afficher les bords de la disposition</string>
     <string name="text_show_layout_hierarchy">Afficher la hiérarchie de la disposition</string>
@@ -679,27 +680,34 @@
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="theme_color_default">Default</string>
-    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
-    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
-    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
-    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
-    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
-    <string name="text_failed_to_copy">复制失败</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
-    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
-    <string name="dialog_button_dismiss">关闭</string>
-    <string name="dialog_button_view_file">查看文件</string>
-    <string name="text_exported">已导出</string>
-    <string name="text_some_items_exported">已导出 %d 个条目</string>
+    <string name="text_only_latest_few_items_will_be_sent">Seuls les derniers %d éléments seront envoyés</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">Le nombre d\'entrées de journal %d dépasse la limite d\'envoi</string>
+    <string name="text_failed_to_send_log_entries">Échec de l\'envoi des entrées de journal</string>
+    <string name="text_no_log_entries_to_send">Aucune entrée de journal à envoyer</string>
+    <string name="text_no_log_entries_to_export">Aucune entrée de journal à exporter</string>
+    <string name="text_no_log_entries_to_copy">Aucune entrée de journal à copier</string>
+    <string name="text_failed_to_copy">Échec de la copie</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">Déjà copié dans le presse-papiers (seulement les derniers %d éléments)</string>
+    <string name="text_failed_to_export_log_entries">Échec de l\'exportation des entrées de journal</string>
+    <string name="dialog_button_dismiss">Quitter</string>
+    <string name="dialog_button_view_file">Voir le fichier</string>
+    <string name="text_exported">Exporté</string>
+    <string name="text_some_items_exported">%d items exported</string>
+    <string name="text_app_shortcut_disabled">Ce raccourci est désactivé</string>
+    <string name="text_launcher_shortcuts">Raccourcis du lanceur</string>
+    <string name="description_launcher_shortcuts">Les raccourcis permettent d\'effectuer des actions spécifiques dans AutoJs6. Les utilisateurs peuvent afficher ces raccourcis dans un lanceur pris en charge et démarrer rapidement certaines tâches ou lancer une activité, comme la lecture de la documentation de l\'application AutoJs6, le lancement de la page de configuration d\'AutoJs6, etc.</string>
+    <string name="summary_text_launcher_shortcuts">Ajouter des raccourcis au lanceur</string>
+    <string name="text_pin_shortcut_not_unsupported">L\'épinglage de raccourcis dans le lanceur n\'est pas pris en charge</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d article</item>
+        <item quantity="many">Total: %d articles</item>
         <item quantity="other">Total: %d articles</item>
     </plurals>
 
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d script arrêté</item>
+        <item quantity="many">%d scripts arrêtés</item>
         <item quantity="other">%d scripts arrêtés</item>
     </plurals>
 

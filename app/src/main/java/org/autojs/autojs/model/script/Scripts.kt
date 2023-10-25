@@ -36,7 +36,7 @@ object Scripts {
     const val EXTRA_EXCEPTION_LINE_NUMBER = "lineNumber"
     const val EXTRA_EXCEPTION_COLUMN_NUMBER = "columnNumber"
 
-    @JvmStatic
+    @JvmField
     val FILE_FILTER = FileFilter { file ->
         file.isDirectory ||
         file.name.endsWith(FileUtils.TYPE.JAVASCRIPT.extension) ||

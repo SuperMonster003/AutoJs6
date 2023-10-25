@@ -141,7 +141,7 @@ class WorkingDirectoryPreference : MaterialPreference {
                         transfer(mPrefFullPath, inputPath)
                     }
                     WorkingDirectoryUtils.path = inputPath
-                    MainActivity.setShouldRecreateMainActivity(true)
+                    MainActivity.shouldRecreateMainActivity = true
                 }
                 dialog.dismiss()
                 onFinish()

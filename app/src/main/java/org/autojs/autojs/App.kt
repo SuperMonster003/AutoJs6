@@ -20,8 +20,6 @@ import com.bumptech.glide.request.transition.Transition
 import com.flurry.android.FlurryAgent
 import com.tencent.bugly.Bugly
 import com.tencent.bugly.crashreport.CrashReport
-import com.zeugmasolutions.localehelper.LocaleHelper
-import com.zeugmasolutions.localehelper.LocaleHelperApplicationDelegate
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.ui.inflater.ImageLoader
@@ -38,10 +36,8 @@ import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
-import org.lsposed.hiddenapibypass.HiddenApiBypass
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
-
 
 /**
  * Created by Stardust on 2017/1/27.
@@ -54,8 +50,6 @@ class App : MultiDexApplication() {
 
     lateinit var devPluginService: DevPluginService
         private set
-
-    private val localeAppDelegate = LocaleHelperApplicationDelegate()
 
     override fun onCreate() {
         super.onCreate()
@@ -79,21 +73,8 @@ class App : MultiDexApplication() {
     }
 
     override fun attachBaseContext(base: Context) {
-        // @Caution by SuperMonster003 on Aug 2, 2023.
-        //  ! This will cause AutoJs6 not being aware of
-        //  ! configuration changes (like orientation and so forth).
-        // super.attachBaseContext(localeAppDelegate.attachBaseContext(base))
-
         super.attachBaseContext(base)
-
-        // @Dubious by SuperMonster003 on Aug 2, 2023.
-        //  ! Locale helper may be not work as expected ?
-        localeAppDelegate.attachBaseContext(base)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            HiddenApiBypass.addHiddenApiExemptions("L");
-        }
-        Log.d("Shizuku", "${App::class.java.getSimpleName()} attachBaseContext | Process=${getProcessNameCompat()}")
+        Log.d("Shizuku", "${App::class.java.simpleName} attachBaseContext | Process=${getProcessNameCompat()}")
     }
 
     private fun setUpStaticsTool() {
@@ -129,6 +110,7 @@ class App : MultiDexApplication() {
                         else -> ViewUtils.MODE.DAY
                     }
                 }
+
                 else -> ViewUtils.MODE.NULL
             }
         )
@@ -234,13 +216,10 @@ class App : MultiDexApplication() {
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        localeAppDelegate.onConfigurationChanged(this)
         ViewUtils.onConfigurationChanged(newConfig)
         FloatyWindowManger.getCircularMenu()?.savePosition(newConfig)
         super.onConfigurationChanged(newConfig)
     }
-
-   override fun getApplicationContext() = LocaleHelper.onAttach(super.getApplicationContext())
 
     companion object {
 
