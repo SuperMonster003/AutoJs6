@@ -147,11 +147,11 @@ assert(util.getClass(java.lang.String) === java.lang.String, 'util.getClass()');
 assert(util.getClassName(java.lang.String) === 'java.lang.String', 'util.getClassName()');
 assert(isFunc(new (function () {
     let C = function () {
-        // Empty constructor
+        /* Empty body. */
     };
     util.extend(C, (function () {
         let P = function () {
-            // Empty constructor
+            /* Empty body. */
         };
         P.prototype.getName = () => context.packageName;
         return P;

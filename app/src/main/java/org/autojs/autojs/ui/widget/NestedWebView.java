@@ -23,15 +23,16 @@ import android.webkit.WebView;
 
 import androidx.core.view.NestedScrollingChild;
 import androidx.core.view.NestedScrollingChildHelper;
-import androidx.core.view.ViewCompat;
 
 import org.autojs.autojs.ui.pager.ViewPager;
 
 public class NestedWebView extends WebView implements NestedScrollingChild {
-    private int mLastY;
-    private final int[] mScrollOffset = new int[2];
-    private final int[] mScrollConsumed = new int[2];
-    private int mNestedOffsetY;
+
+    // private int mLastY;
+    // private final int[] mScrollOffset = new int[2];
+    // private final int[] mScrollConsumed = new int[2];
+    // private int mNestedOffsetY;
+
     private final NestedScrollingChildHelper mChildHelper;
 
     public NestedWebView(Context context) {

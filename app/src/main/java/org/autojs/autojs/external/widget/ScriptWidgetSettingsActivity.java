@@ -15,6 +15,7 @@ import org.autojs.autojs.model.explorer.ExplorerFileProvider;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.explorer.ExplorerView;
+import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityScriptWidgetSettingsBinding;
 
@@ -42,9 +43,10 @@ public class ScriptWidgetSettingsActivity extends BaseActivity {
 
 
     private void initScriptListRecyclerView() {
-        mExplorer = new Explorer(new ExplorerFileProvider(Scripts.getFILE_FILTER()), 0);
+        mExplorer = new Explorer(new ExplorerFileProvider(Scripts.FILE_FILTER), 0);
         ExplorerView explorerView = binding.scriptList;
-        explorerView.setExplorer(mExplorer, ExplorerDirPage.createRoot(Environment.getExternalStorageDirectory()));
+        String workingDirPath = WorkingDirectoryUtils.getPath();
+        explorerView.setExplorer(mExplorer, ExplorerDirPage.createRoot(workingDirPath));
         explorerView.setOnItemClickListener((view, file) -> {
             mSelectedScriptFilePath = file.getPath();
             finish();

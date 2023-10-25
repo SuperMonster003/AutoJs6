@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- @OtherXmlVersions [ v30 ] -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
         android:accessibilityEventTypes="typeAllMask"
         android:accessibilityFeedbackType="feedbackAllMask"
@@ -7,6 +8,5 @@
         android:canRequestEnhancedWebAccessibility="true"
         android:canRequestFilterKeyEvents="true"
         android:canRetrieveWindowContent="true"
-        android:canTakeScreenshot="true"
         android:description="@string/text_a11y_service_description"
         android:notificationTimeout="0" />

@@ -75,7 +75,7 @@ class ManageAllFilesPermission(override val context: Context) : PermissionItemHe
             .onNegative { dialog, _ -> dialog.dismiss() }
             .onPositive { dialog, _ ->
                 request()
-                MainActivity.setShouldRecreateMainActivity(true)
+                MainActivity.shouldRecreateMainActivity = true
                 dialog.dismiss()
             }
             .cancelable(false)

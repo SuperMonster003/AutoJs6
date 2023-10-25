@@ -1,5 +1,6 @@
 package org.autojs.autojs
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -30,8 +31,10 @@ import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
+import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import java.util.concurrent.Executors
+import org.autojs.autojs.inrt.autojs.AutoJs as AutoJsInrt
 
 /**
  * Created by Stardust on 2017/4/2.
@@ -179,6 +182,7 @@ open class AutoJs(private val appContext: Application) : AbstractAutoJs(appConte
     companion object {
         private var isInitialized = false
 
+        @SuppressLint("StaticFieldLeak")
         @JvmStatic
         lateinit var instance: AutoJs
             private set
@@ -187,7 +191,10 @@ open class AutoJs(private val appContext: Application) : AbstractAutoJs(appConte
         @JvmStatic
         fun initInstance(application: Application) {
             if (!isInitialized) {
-                instance = AutoJs(application)
+                instance = when (BuildConfig.isInrt) {
+                    true -> AutoJsInrt(application)
+                    else -> AutoJs(application)
+                }
                 isInitialized = true
             }
         }

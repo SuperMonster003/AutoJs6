@@ -26,7 +26,6 @@
     <string name="description_change_working_dir_preference">スクリプトを含むディレクトリのパスを変更する</string>
     <string name="description_check_for_updates_preference">AutoJs6 は、GitHub からアップデートを取得し、ダウンロードします.\n\n注: このアップデートでは、まだ多言語サポートは提供されていません</string>
     <string name="description_compatibility_with_classes_for_ver_4_x">クラス名のリマッピングにより、4.x バージョンの Java クラス名の互換性をある程度確保します.\nこのオプションをオンにすると、スクリプトを起動するたびにさまざまな程度 (数十から数百ミリ秒) の起動遅延が発生するようになる.\n特に必要でない場合は、このオプションを常にオフにしておくことをお勧めします</string>
-    <string name="description_documentation_launcher_icon_preference">ドキュメントランチャーアイコンは、ドキュメントへのアクセスを容易にし、スタンドアロンアプリケーションのように切り替えることができます</string>
     <string name="description_documentation_source_preference">ローカルドキュメント AutoJs6 に組み込まれたファイルをドキュメントソースとして使用するため、ネットワーク接続は必要ありません. AutoJs6 が更新されると内容も変わります.\nオンライン・ドキュメント. GitHub のページをドキュメントソースとして使用し、ネットワーク接続が必要です. コンテンツは常に最新の状態に保たれます.\n\n注: オンラインドキュメントを最大限に活用するために、デスクトップモニターなどのワイドスクリーンディスプレイを使用することをお勧めします.\n注意: バージョン 6.2.0 時点では、ドキュメントはまだ開発の初期段階にあり、ほとんどのコンテンツはまだ執筆・更新されていません</string>
     <string name="description_documentation_source_preference_more">ドキュメントページでダークテーマをサポートするには、以下の条件を満たす必要があります.\n1. AutoJs6 でナイトモードが有効になっている\n2. Android System WebView (または Google Chrome などのブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P] 以下: バージョン >= 105</string>
     <string name="description_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張すると、コードの柔軟性が増し、より豊かな機能を実現できますが、衝突や破損を引き起こす可能性もあります.\nこのオプションをオンにすると、すべてのスクリプトはデフォルトで組み込みの拡張機能を有効にします.\n組み込みの拡張機能は安全でないことが多いので、組み込みの拡張機能の原理とリスクが明確に理解されていない限り、推奨されません.\nこのオプションをオフにした場合でも、プロジェクトのドキュメントで説明されているように、plugins グローバルオブジェクトを使用して組み込み拡張機能を有効にすることができます</string>
@@ -59,12 +58,11 @@
     <string name="dialog_button_system_settings_simplified">システム</string>
     <string name="dialog_button_update_now">更新</string>
     <string name="dialog_button_use_default">デフォルトを使用</string>
-    <string name="docs_app_name">AutoJs6 文書</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 文書</string>
+    <string name="text_app_shortcut_docs_short_label">文書</string>
     <string name="edit_and_run_handle_intent_error">ファイルを処理できません</string>
     <string name="edit_exit_without_save_warn">内容が保存されていませんので、本当に終了しますか？</string>
     <string name="entry_app_language_auto">システムに従ってください</string>
-    <string name="entry_documentation_launcher_icon_hide">ランチャーからアイコンを隠す</string>
-    <string name="entry_documentation_launcher_icon_show">ランチャーにアイコンを表示する</string>
     <string name="entry_documentation_source_local">ローカルドキュメント</string>
     <string name="entry_documentation_source_online">オンラインドキュメント</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">文字サイズ</string>
@@ -345,7 +343,6 @@
     <string name="text_do_not_ask_again_for_this_version">このバージョンでは再表示を要求しない</string>
     <string name="text_do_not_show_again">再表示禁止</string>
     <string name="text_documentation">ドキュメント</string>
-    <string name="text_documentation_launcher_icon">ドキュメントのランチャーアイコン</string>
     <string name="text_documentation_source">ドキュメントのソース</string>
     <string name="text_done">完了</string>
     <string name="text_download">ダウンロード</string>
@@ -460,6 +457,8 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">レイアウトの検査中...</string>
     <string name="text_licenses">オープンソースライセンス</string>
     <string name="text_log">ログ</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 ログ</string>
+    <string name="text_app_shortcut_log_short_label">ログ</string>
     <string name="text_logging_in">ログイン</string>
     <string name="text_login">ログイン</string>
     <string name="text_login_succeed">ログインに成功しました</string>
@@ -623,6 +622,8 @@
     <string name="text_set_as_working_dir">作業ディレクトリに設定する</string>
     <string name="text_set_breakpoint">ブレークポイントの設定</string>
     <string name="text_settings">設定</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 設定</string>
+    <string name="text_app_shortcut_settings_short_label">設定</string>
     <string name="text_should_not_be_empty">「テキストを空にすることはできません</string>
     <string name="text_show_layout_bounds">レイアウト境界内のビュー</string>
     <string name="text_show_layout_hierarchy">レイアウト階層内の表示</string>
@@ -679,19 +680,24 @@
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが、書き込むことはできないシステム環境設定を含む、安全なシステム設定です.\nこれは、ユーザーがシステムアプリのUIを通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると、通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="theme_color_default">デフォルト</string>
-    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
-    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
-    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
-    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
-    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
-    <string name="text_failed_to_copy">复制失败</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
-    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
-    <string name="dialog_button_dismiss">关闭</string>
-    <string name="dialog_button_view_file">查看文件</string>
-    <string name="text_exported">已导出</string>
-    <string name="text_some_items_exported">已导出 %d 个条目</string>
+    <string name="text_only_latest_few_items_will_be_sent">最新の %d 個の項目のみが送信されます</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">ログ・エントリ数 %d が送信制限を超えました</string>
+    <string name="text_failed_to_send_log_entries">ログ・エントリの送信に失敗しました</string>
+    <string name="text_no_log_entries_to_send">送信するログ・エントリがありません</string>
+    <string name="text_no_log_entries_to_export">エクスポートするログ・エントリがありません</string>
+    <string name="text_no_log_entries_to_copy">コピーするログ・エントリがありません</string>
+    <string name="text_failed_to_copy">コピーに失敗しました</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">既にクリップボードにコピーされました (最新の %d アイテムのみ)</string>
+    <string name="text_failed_to_export_log_entries">ログ・エントリのエクスポートに失敗しました</string>
+    <string name="dialog_button_dismiss">削除</string>
+    <string name="dialog_button_view_file">ファイルの表示</string>
+    <string name="text_exported">エクスポートされました</string>
+    <string name="text_some_items_exported">エクスポートされた項目 %d</string>
+    <string name="text_app_shortcut_disabled">このショートカットは無効です</string>
+    <string name="text_launcher_shortcuts">ランチャーショートカット</string>
+    <string name="description_launcher_shortcuts">ショートカットは、AutoJs6 で特定のアクションを実行することができます。ユーザーは、サポートされているランチャーにこれらのショートカットを表示し、AutoJs6アプリケーションのドキュメントを読んだり、AutoJs6の設定ページを起動したりするなど、いくつかのタスクを素早く開始したり、アクティビティを起動したりすることができます</string>
+    <string name="summary_text_launcher_shortcuts">ランチャーへのショートカットの追加</string>
+    <string name="text_pin_shortcut_not_unsupported">ショートカットをランチャーにピン留めすることはサポートされていません</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">合計: %d 件</item>

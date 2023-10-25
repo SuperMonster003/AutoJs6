@@ -89,6 +89,10 @@ import java.io.File
 // FIXME by SuperMonster003 on May 13, 2023.
 //  ! Failed many times to migrate this view with annotation to view binding.
 //  ! And this is the last view with annotation in the whole project so far.
+// FIXME by SuperMonster003 on Oct 18, 2023.
+//  ! Gradle property "android.nonFinalResIds"
+//  ! can't be enabled (by default since Android Gradle Plugin version 8.0),
+//  ! as final resource ID used in current class.
 open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, ToolbarFragment.OnMenuItemClickListener {
 
     @JvmField

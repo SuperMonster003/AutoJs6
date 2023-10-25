@@ -4,26 +4,33 @@
 
 ******
 
-# v6.3.4
+# v6.4.0
 
-###### 2023/10/03
+###### 2023/10/25
 
 * `新增` ocr 模块支持 Paddle Lite 引擎 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_ 
-* `新增` WebSocket 模块 (参阅 项目文档 > [颜色类](https://docs.autojs6.com/#/webSocketType))
+* `新增` 打包功能支持内置插件与外部插件两种打包方式 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
+* `新增` WebSocket 模块 (参阅 项目文档 > [WebSocket](https://docs.autojs6.com/#/webSocketType))
+* `新增` barcode / qrcode 模块 (参阅 项目文档 > [条码](https://docs.autojs6.com/#/barcode) / [二维码](https://docs.autojs6.com/#/qrcode))
+* `新增` shizuku 模块 (参阅 项目文档 > [Shizuku](https://docs.autojs6.com/#/shizuku))
 * `新增` device.rotation / device.orientation 等方法
 * `新增` 内部 Java 类支持 class 静态属性访问
+* `新增` 支持在安卓系统设置页面选择并切换应用语言 (安卓 13 及以上)
+* `新增` 支持设置页面添加或长按应用图标激活 [应用快捷方式](https://developer.android.com/guide/topics/ui/shortcuts?hl=zh-cn) , 可启动文档和设置等页面
+* `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
+* `修复` 打包应用无法使用 AutoJs6 新增 API 的问题 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
 * `修复` VSCode 插件保存文件到本地时文件扩展名信息丢失的问题
 * `修复` 使用协程特性运行项目产生未捕获异常致使应用崩溃的问题
 * `修复` 重启或退出应用时浮动按钮无法记录其位置状态信息的问题
-* `修复` 设备屏幕方向改变时无法获取更新后的设备配置信息的问题
+* `修复` 设备屏幕方向改变时无法获取更新后的设备配置信息的问题 _[`issue #153`](http://issues.autojs6.com/153)_
 * `修复` 屏幕旋转至横向时 Toolbar 标题字体过小的问题
 * `修复` 屏幕旋转至横向时应用主页的页签排版过于拥挤的问题
 * `修复` 屏幕旋转至横向时浮动按钮可能溢出屏幕的问题 _[`issue #90`](http://issues.autojs6.com/90)_
 * `修复` 屏幕多次旋转时无法恢复浮动按钮的坐标及屏幕侧边方向的问题
+* `修复` 部分设备消息浮动框可能出现遗漏显示或重复显示的问题
 * `修复` 消息浮动框在多个脚本同时运行时可能存在被遮蔽的问题 _[`issue #67`](http://issues.autojs6.com/67)_
 * `修复` 使用广播分析布局时点击布局无法弹出菜单且导致应用崩溃的问题
 * `修复` 第二次及以后创建的 WebSocket 实例均无法正常触发监听器的问题
-* `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
 * `修复` 撤销 importPackage 的全局重定向方法以避免某些作用域下的包导入异常 _[`issue #88`](http://issues.autojs6.com/88)_
 * `修复` 日志活动页面使用复制或导出功能时可能导致应用崩溃的问题
 * `优化` 日志活动页面导出功能重命名为发送功能并重新实现符合实际意义的导出功能
@@ -31,17 +38,26 @@
 * `优化` ocr 模块同时兼容 Google MLKit 及 Paddle Lite 引擎 (参阅 项目文档 > [光学字符识别](https://docs.autojs6.com/#/ocr?id=p-mode))
 * `优化` 提升无障碍服务自动启动的成功概率
 * `优化` 构建工具自适应 Java 发行版本以尽量避免 "无效的发行版本" 问题
+* `优化` 构建工具优化 IDE 及相关插件的版本退级逻辑并增加版本预测能力
 * `优化` 部分 Kotlin 注解处理由 kapt 迁移至 KSP
-* `优化` 附加 Rikka Shizuku 版本 13.1.5
-* `优化` 升级 Gradle Compile 版本 33 -> 34
-* `优化` 升级 Gradle 版本 8.3-rc-1 -> 8.4-rc-3
-* `优化` 升级 Apache Commons Lang3 版本 3.12.0 -> 3.13.0
-* `优化` 升级 Glide 版本 4.15.1 -> 4.16.0
-* `优化` 升级 Android Analytics 版本 14.3.0 -> 14.4.0
-* `优化` 升级 Androidx WebKit 版本 1.7.0 -> 1.8.0
-* `优化` 升级 Androidx Preference 版本 1.2.0 -> 1.2.1
-* `优化` 升级 Androidx Annotation 版本 1.6.0 -> 1.7.0
-* `优化` 升级 Androidx Recyclerview 版本 1.3.0 -> 1.3.1
+* `依赖` 附加 Rikka Shizuku 版本 13.1.5
+* `依赖` 附加 MLKit Barcode Scanning 版本 17.2.0
+* `依赖` 升级 OpenCV 版本 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
+* `依赖` 升级 Gradle Compile 版本 33 -> 34
+* `依赖` 升级 Gradle 版本 8.3-rc-1 -> 8.4-rc-3
+* `依赖` 升级 Apache Commons Lang3 版本 3.12.0 -> 3.13.0
+* `依赖` 升级 Glide 版本 4.15.1 -> 4.16.0
+* `依赖` 升级 Android Analytics 版本 14.3.0 -> 14.4.0
+* `依赖` 升级 Androidx AppCompat 版本 1.4.2 -> 1.6.0-alpha05
+* `依赖` 升级 Androidx WebKit 版本 1.7.0 -> 1.8.0
+* `依赖` 升级 Androidx Preference 版本 1.2.0 -> 1.2.1
+* `依赖` 升级 Androidx Annotation 版本 1.6.0 -> 1.7.0
+* `依赖` 升级 Androidx Recyclerview 版本 1.3.0 -> 1.3.2
+* `依赖` 升级 Android Material 版本 1.9.0 -> 1.10.0
+* `依赖` 升级 Androidx AppCompat 版本 1.4.2 -> 1.6.1
+* `依赖` 升级 Commons IO 版本 2.8.0 -> 2.14.0
+* `依赖` 升级 Jackson DataBind 版本 2.13.3 -> 2.14.3
+* `依赖` 移除 Zeugma Solutions LocaleHelper 版本 1.5.1
 
 # v6.3.3
 
@@ -63,7 +79,7 @@
 * `优化` 在 _[`pr #98`](http://pr.autojs6.com/98)_ 基础上添加代码注释菜单项
 * `优化` 适配 VSCode 插件 1.0.6
 * `优化` UiObject#parent 方法增加级数参数支持 (参阅 项目文档 > [控件节点](https://docs.autojs6.com/#/uiObjectType))
-* `优化` 升级 Gradle 版本 8.2 -> 8.3-rc-1
+* `依赖` 升级 Gradle 版本 8.2 -> 8.3-rc-1
 
 # v6.3.2
 
@@ -97,9 +113,9 @@
 * `优化` 增加短信数据读取权限 (android.permission.READ_SMS) (默认关闭)
 * `优化` findMultiColors 方法内部实现 (by [LYS86](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
 * `优化` runtime.loadDex/loadJar/load 支持按目录级别加载或同时加载多个文件
-* `优化` 升级 Leakcanary 版本 2.11 -> 2.12
-* `优化` 升级 Android Analytics 版本 14.2.0 -> 14.3.0
-* `优化` 升级 Gradle 版本 8.2-milestone-1 -> 8.2
+* `依赖` 升级 Leakcanary 版本 2.11 -> 2.12
+* `依赖` 升级 Android Analytics 版本 14.2.0 -> 14.3.0
+* `依赖` 升级 Gradle 版本 8.2-milestone-1 -> 8.2
 
 # v6.3.1
 
@@ -131,11 +147,11 @@
 * `优化` 视图 (View) 绑定方式由 ButterKnife 迁移至 View Binding _[`issue #48`](http://issues.autojs6.com/48)_
 * `优化` 服务端模式非正常关闭时将于 AutoJs6 启动时自动开启 _[`issue #64`](http://issues.autojs6.com/64)_
 * `优化` 客户端模式非正常关闭时将于 AutoJs6 启动时按最近一次的历史地址自动连接
-* `优化` 升级 Leakcanary 版本 2.10 -> 2.11
-* `优化` 升级 Android Material 版本 1.8.0 -> 1.9.0
-* `优化` 升级 Androidx WebKit 版本 1.6.1 -> 1.7.0
-* `优化` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11
-* `优化` 升级 MLKit Text Recognition Chinese 版本 16.0.0-beta6 -> 16.0.0
+* `依赖` 升级 Leakcanary 版本 2.10 -> 2.11
+* `依赖` 升级 Android Material 版本 1.8.0 -> 1.9.0
+* `依赖` 升级 Androidx WebKit 版本 1.6.1 -> 1.7.0
+* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11
+* `依赖` 升级 MLKit Text Recognition Chinese 版本 16.0.0-beta6 -> 16.0.0
 
 # v6.3.0
 
@@ -184,23 +200,23 @@
 * `优化` http 模块相关方法支持超时参数 (timeout)
 * `优化` Gradle 构建脚本支持 JDK 版本主动降级 (fallback)
 * `优化` Gradle 构建脚本支持根据平台类型及版本自动选择合适的构建工具版本 (程度有限)
-* `优化` 本地化 Auto.js APK Builder 版本 1.0.3
-* `优化` 本地化 MultiLevelListView 版本 1.1
-* `优化` 本地化 Settings Compat 版本 1.1.5
-* `优化` 本地化 Enhanced Floaty 版本 0.31
-* `优化` 附加 MLKit Text Recognition Chinese 版本 16.0.0-beta6
-* `优化` 升级 Gradle 版本 8.0-rc-1 -> 8.2-milestone-1
-* `优化` 升级 Android Material 版本 1.7.0 -> 1.8.0
-* `优化` 升级 Glide 版本 4.14.2 -> 4.15.1
-* `优化` 升级 Joda Time 版本 2.12.2 -> 2.12.5
-* `优化` 升级 Android Analytics 版本 14.0.0 -> 14.2.0
-* `优化` 升级 Androidx WebKit 版本 1.5.0 -> 1.6.1
-* `优化` 升级 Androidx Recyclerview 版本 1.2.1 -> 1.3.0
-* `优化` 升级 Zip4j 版本 2.11.2 -> 2.11.5
-* `优化` 升级 Junit 版本 5.9.2 -> 5.9.3
-* `优化` 升级 Androidx Annotation 版本 1.5.0 -> 1.6.0
-* `优化` 升级 Jackson DataBind 版本 2.14.1 -> 2.14.2
-* `优化` 升级 Desugar JDK Libs 版本 2.0.0 -> 2.0.3
+* `依赖` 本地化 Auto.js APK Builder 版本 1.0.3
+* `依赖` 本地化 MultiLevelListView 版本 1.1
+* `依赖` 本地化 Settings Compat 版本 1.1.5
+* `依赖` 本地化 Enhanced Floaty 版本 0.31
+* `依赖` 附加 MLKit Text Recognition Chinese 版本 16.0.0-beta6
+* `依赖` 升级 Gradle 版本 8.0-rc-1 -> 8.2-milestone-1
+* `依赖` 升级 Android Material 版本 1.7.0 -> 1.8.0
+* `依赖` 升级 Glide 版本 4.14.2 -> 4.15.1
+* `依赖` 升级 Joda Time 版本 2.12.2 -> 2.12.5
+* `依赖` 升级 Android Analytics 版本 14.0.0 -> 14.2.0
+* `依赖` 升级 Androidx WebKit 版本 1.5.0 -> 1.6.1
+* `依赖` 升级 Androidx Recyclerview 版本 1.2.1 -> 1.3.0
+* `依赖` 升级 Zip4j 版本 2.11.2 -> 2.11.5
+* `依赖` 升级 Junit 版本 5.9.2 -> 5.9.3
+* `依赖` 升级 Androidx Annotation 版本 1.5.0 -> 1.6.0
+* `依赖` 升级 Jackson DataBind 版本 2.14.1 -> 2.14.2
+* `依赖` 升级 Desugar JDK Libs 版本 2.0.0 -> 2.0.3
 
 # v6.2.0
 
@@ -300,32 +316,32 @@
 * `优化` 提升 console.show 显示的日志浮动窗口文字亮度以增强内容辨识度
 * `优化` ImageWrapper#saveTo 支持相对路径保存图像文件
 * `优化` 重新设计 colors 全局对象并增加 HSV / HSL 等色彩模式支持 (参阅 项目文档 > [颜色](https://docs.autojs6.com/#/color))
-* `优化` 升级 Gradle Compile 版本 32 -> 33
-* `优化` 本地化 Android Job 版本 1.4.3
-* `优化` 本地化 Android Plugin Client SDK For Locale 版本 9.0.0
-* `优化` 本地化 GitHub API 版本 1.306
-* `优化` 附加 JCIP Annotations 版本 1.0
-* `优化` 附加 Androidx WebKit 版本 1.5.0
-* `优化` 附加 Commons IO 版本 2.8.0
-* `优化` 附加 Desugar JDK Libs 版本 2.0.0
-* `优化` 附加 Jackson DataBind 版本 2.13.3
-* `优化` 附加 Jaredrummler Android Device Names 版本 2.1.0
-* `优化` 附加 Jaredrummler Animated SVG View 版本 1.0.6
-* `优化` 替换 Jrummyapps ColorPicker 版本 2.1.7 为 Jaredrummler ColorPicker 版本 1.1.0
-* `优化` 升级 Gradle 版本 7.5-rc-1 -> 8.0-rc-1
-* `优化` 升级 Gradle 构建工具版本 7.4.0-alpha02 -> 8.0.0-alpha09
-* `优化` 升级 Kotlin Gradle 插件版本 1.6.10 -> 1.8.0-RC2
-* `优化` 升级 Android Material 版本 1.6.0 -> 1.7.0
-* `优化` 升级 Androidx Annotation 版本 1.3.0 -> 1.5.0
-* `优化` 升级 Androidx AppCompat 版本 1.4.1 -> 1.4.2
-* `优化` 升级 Android Analytics 版本 13.3.0 -> 14.0.0
-* `优化` 升级 Gson 版本 2.9.0 -> 2.10
-* `优化` 升级 Joda Time 版本 2.10.14 -> 2.12.1
-* `优化` 升级 Kotlinx Coroutines 版本 1.6.1-native-mt -> 1.6.1
-* `优化` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.7 -> 5.0.0-alpha.9
-* `优化` 升级 Zip4j 版本 2.10.0 -> 2.11.2
-* `优化` 升级 Glide 版本 4.13.2 -> 4.14.2
-* `优化` 升级 Junit 版本 5.9.0 -> 5.9.1
+* `依赖` 升级 Gradle Compile 版本 32 -> 33
+* `依赖` 本地化 Android Job 版本 1.4.3
+* `依赖` 本地化 Android Plugin Client SDK For Locale 版本 9.0.0
+* `依赖` 本地化 GitHub API 版本 1.306
+* `依赖` 附加 JCIP Annotations 版本 1.0
+* `依赖` 附加 Androidx WebKit 版本 1.5.0
+* `依赖` 附加 Commons IO 版本 2.8.0
+* `依赖` 附加 Desugar JDK Libs 版本 2.0.0
+* `依赖` 附加 Jackson DataBind 版本 2.13.3
+* `依赖` 附加 Jaredrummler Android Device Names 版本 2.1.0
+* `依赖` 附加 Jaredrummler Animated SVG View 版本 1.0.6
+* `依赖` 替换 Jrummyapps ColorPicker 版本 2.1.7 为 Jaredrummler ColorPicker 版本 1.1.0
+* `依赖` 升级 Gradle 版本 7.5-rc-1 -> 8.0-rc-1
+* `依赖` 升级 Gradle 构建工具版本 7.4.0-alpha02 -> 8.0.0-alpha09
+* `依赖` 升级 Kotlin Gradle 插件版本 1.6.10 -> 1.8.0-RC2
+* `依赖` 升级 Android Material 版本 1.6.0 -> 1.7.0
+* `依赖` 升级 Androidx Annotation 版本 1.3.0 -> 1.5.0
+* `依赖` 升级 Androidx AppCompat 版本 1.4.1 -> 1.4.2
+* `依赖` 升级 Android Analytics 版本 13.3.0 -> 14.0.0
+* `依赖` 升级 Gson 版本 2.9.0 -> 2.10
+* `依赖` 升级 Joda Time 版本 2.10.14 -> 2.12.1
+* `依赖` 升级 Kotlinx Coroutines 版本 1.6.1-native-mt -> 1.6.1
+* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.7 -> 5.0.0-alpha.9
+* `依赖` 升级 Zip4j 版本 2.10.0 -> 2.11.2
+* `依赖` 升级 Glide 版本 4.13.2 -> 4.14.2
+* `依赖` 升级 Junit 版本 5.9.0 -> 5.9.1
 
 # v6.1.1
 
@@ -338,8 +354,8 @@
 * `修复` 编辑器页面选项菜单中 "粘贴" 功能缺失的问题
 * `优化` 部分异常消息字符串资源化 (en / zh)
 * `优化` 调整内容未保存对话框的按钮布局并增加颜色区分
-* `优化` 附加 github-api 版本 1.306
-* `优化` 替换 retrofit2-rxjava2-adapter 版本 1.0.0 为 adapter-rxjava2 版本 2.9.0
+* `依赖` 附加 github-api 版本 1.306
+* `依赖` 替换 retrofit2-rxjava2-adapter 版本 1.0.0 为 adapter-rxjava2 版本 2.9.0
 
 # v6.1.0
 
@@ -385,22 +401,22 @@
 * `优化` 外部存储读写权限适配高版本安卓系统 (API >= 30)
 * `优化` 控制台字体采用 Material Color 增强普通及夜间主题下的字体可读性
 * `优化` 保存 ImageWrapper 所有实例弱引用并在脚本结束时自动回收 (实验性)
-* `优化` 附加 CircleImageView 版本 3.1.0
-* `优化` 升级 Android Analytics 版本 13.1.0 -> 13.3.0
-* `优化` 升级 Gradle 构建工具版本 7.3.0-alpha06 -> 7.4.0-alpha02
-* `优化` 升级 Android Job 版本 1.4.2 -> 1.4.3
-* `优化` 升级 Android Material 版本 1.5.0 -> 1.6.0
-* `优化` 升级 CrashReport 版本 2.6.6 -> 4.0.4
-* `优化` 升级 Glide 版本 4.13.1 -> 4.13.2
-* `优化` 升级 Joda Time 版本 2.10.13 -> 2.10.14
-* `优化` 升级 Kotlin Gradle 插件版本 1.6.10 -> 1.6.21
-* `优化` 升级 Kotlinx Coroutines 版本 1.6.0 -> 1.6.1-native-mt
-* `优化` 升级 Leakcanary 版本 2.8.1 -> 2.9.1
-* `优化` 升级 Okhttp3 版本 5.0.0-alpha.6 -> 5.0.0-alpha.7
-* `优化` 升级 Rhino 引擎版本 1.7.14 -> 1.7.15-snapshot
-* `优化` 升级 Zip4j 版本 2.9.1 -> 2.10.0
-* `优化` 移除 Groovy JSON 版本 3.0.8
-* `优化` 移除 Kotlin Stdlib JDK7 版本 1.6.21
+* `依赖` 附加 CircleImageView 版本 3.1.0
+* `依赖` 升级 Android Analytics 版本 13.1.0 -> 13.3.0
+* `依赖` 升级 Gradle 构建工具版本 7.3.0-alpha06 -> 7.4.0-alpha02
+* `依赖` 升级 Android Job 版本 1.4.2 -> 1.4.3
+* `依赖` 升级 Android Material 版本 1.5.0 -> 1.6.0
+* `依赖` 升级 CrashReport 版本 2.6.6 -> 4.0.4
+* `依赖` 升级 Glide 版本 4.13.1 -> 4.13.2
+* `依赖` 升级 Joda Time 版本 2.10.13 -> 2.10.14
+* `依赖` 升级 Kotlin Gradle 插件版本 1.6.10 -> 1.6.21
+* `依赖` 升级 Kotlinx Coroutines 版本 1.6.0 -> 1.6.1-native-mt
+* `依赖` 升级 Leakcanary 版本 2.8.1 -> 2.9.1
+* `依赖` 升级 Okhttp3 版本 5.0.0-alpha.6 -> 5.0.0-alpha.7
+* `依赖` 升级 Rhino 引擎版本 1.7.14 -> 1.7.15-snapshot
+* `依赖` 升级 Zip4j 版本 2.9.1 -> 2.10.0
+* `依赖` 移除 Groovy JSON 版本 3.0.8
+* `依赖` 移除 Kotlin Stdlib JDK7 版本 1.6.21
 
 # v6.0.3
 
@@ -423,17 +439,17 @@
 * `优化` 浮动按钮初始化时同时应用透明度设置 (无需点击后再应用透明度)
 * `优化` 重置文件内容时增加是否为示例代码文件的检测并增加结果提示
 * `优化` 转移打包插件下载地址 GitHub -> JsDelivr
-* `优化` 附加 Zeugma Solutions LocaleHelper 版本 1.5.1
-* `优化` 降级 Android Material 版本 1.6.0-alpha02 -> 1.5.0
-* `优化` 升级 Kotlinx Coroutines 版本 1.6.0-native-mt -> 1.6.0
-* `优化` 升级 OpenCV 版本 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
-* `优化` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6
-* `优化` 升级 Gradle 构建工具版本 7.2.0-beta01 -> 7.3.0-alpha06
-* `优化` 升级 Auto.js-ApkBuilder 版本 1.0.1 -> 1.0.3
-* `优化` 升级 Glide Compiler 版本 4.12.0 -> 4.13.1
-* `优化` 升级 Gradle 发行版本 7.4-rc-2 -> 7.4.1
-* `优化` 升级 Gradle Compile 版本 31 -> 32
-* `优化` 升级 Gson 版本 2.8.9 -> 2.9.0
+* `依赖` 附加 Zeugma Solutions LocaleHelper 版本 1.5.1
+* `依赖` 降级 Android Material 版本 1.6.0-alpha02 -> 1.5.0
+* `依赖` 升级 Kotlinx Coroutines 版本 1.6.0-native-mt -> 1.6.0
+* `依赖` 升级 OpenCV 版本 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
+* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6
+* `依赖` 升级 Gradle 构建工具版本 7.2.0-beta01 -> 7.3.0-alpha06
+* `依赖` 升级 Auto.js-ApkBuilder 版本 1.0.1 -> 1.0.3
+* `依赖` 升级 Glide Compiler 版本 4.12.0 -> 4.13.1
+* `依赖` 升级 Gradle 发行版本 7.4-rc-2 -> 7.4.1
+* `依赖` 升级 Gradle Compile 版本 31 -> 32
+* `依赖` 升级 Gson 版本 2.8.9 -> 2.9.0
 
 # v6.0.2
 
@@ -446,14 +462,14 @@
 * `修复` 客户端模式及服务端模式开关状态不能正常刷新的问题
 * `修复` Android 7.x 解析 UI 模式 text 元素异常 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`issue #4`](http://issues.autojs6.com/4)_ _[`issue #9`](http://issues.autojs6.com/9)_
 * `优化` 忽略 sleep() 的 ScriptInterruptedException 异常
-* `优化` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
-* `优化` 升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1
-* `优化` 升级 Androidx Preference 版本 1.1.1 -> 1.2.0
-* `优化` 升级 Rhino 引擎版本 1.7.14-snapshot -> 1.7.14
-* `优化` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
-* `优化` 升级 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
-* `优化` 升级 Gradle 构建工具版本 7.2.0-alpha06 -> 7.2.0-beta01
-* `优化` 升级 Gradle 发行版本 7.3.3 -> 7.4-rc-2
+* `依赖` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
+* `依赖` 升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1
+* `依赖` 升级 Androidx Preference 版本 1.1.1 -> 1.2.0
+* `依赖` 升级 Rhino 引擎版本 1.7.14-snapshot -> 1.7.14
+* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
+* `依赖` 升级 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
+* `依赖` 升级 Gradle 构建工具版本 7.2.0-alpha06 -> 7.2.0-beta01
+* `依赖` 升级 Gradle 发行版本 7.3.3 -> 7.4-rc-2
 
 # v6.0.1
 
@@ -467,11 +483,11 @@
 * `优化` 扩展 global.sleep 支持 随机范围/负数兼容
 * `优化` 扩展 global.toast 支持 时长控制/强制覆盖控制/dismiss
 * `优化` 包名对象全局化 (okhttp3/androidx/de)
-* `优化` 升级 Android Material 版本 1.5.0-beta01 -> 1.6.0-alpha01
-* `优化` 升级 Gradle 构建工具版本 7.2.0-alpha04 -> 7.2.0-alpha06
-* `优化` 升级 Kotlinx Coroutines 版本 1.5.2-native-mt -> 1.6.0-native-mt
-* `优化` 升级 Kotlin Gradle 插件版本 1.6.0 -> 1.6.10
-* `优化` 升级 Gradle 发行版本 7.3 -> 7.3.3
+* `依赖` 升级 Android Material 版本 1.5.0-beta01 -> 1.6.0-alpha01
+* `依赖` 升级 Gradle 构建工具版本 7.2.0-alpha04 -> 7.2.0-alpha06
+* `依赖` 升级 Kotlinx Coroutines 版本 1.5.2-native-mt -> 1.6.0-native-mt
+* `依赖` 升级 Kotlin Gradle 插件版本 1.6.0 -> 1.6.10
+* `依赖` 升级 Gradle 发行版本 7.3 -> 7.3.3
 
 # v6.0.0
 
@@ -499,39 +515,39 @@
 * `优化` ResourceMonitor 使用 ReentrantLock 增强安全性 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
 * `优化` 使用 Maven Central 等仓库替换 JCenter 仓库
 * `优化` 抽离并移除重复的本地库文件
-* `优化` 本地化 CrashReport 版本 2.6.6
-* `优化` 本地化 MutableTheme 版本 1.0.0
-* `优化` 附加 Androidx Preference 版本 1.1.1
-* `优化` 附加 SwipeRefreshLayout 版本 1.1.0
-* `优化` 升级 Android Analytics 版本 7.0.0 -> 13.1.0
-* `优化` 升级 Android Annotations 版本 4.5.2 -> 4.8.0
-* `优化` 升级 Gradle 构建工具版本 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
-* `优化` 升级 Android Job 版本 1.2.6 -> 1.4.2
-* `优化` 升级 Android Material 版本 1.1.0-alpha01 -> 1.5.0-beta01
-* `优化` 升级 Androidx MultiDex 版本 2.0.0 -> 2.0.1
-* `优化` 升级 Apache Commons Lang3 版本 3.6 -> 3.12.0
-* `优化` 升级 Appcompat 版本 1.0.2 -> 1.4.0
-* `优化` 升级 ButterKnife Gradle 插件版本 9.0.0-rc2 -> 10.2.1 -> 10.2.3
-* `优化` 升级 ColorPicker 版本 2.1.5 -> 2.1.7
-* `优化` 升级 Espresso Core 版本 3.1.1-alpha01 -> 3.5.0-alpha03
-* `优化` 升级 Eventbus 版本 3.0.0 -> 3.2.0
-* `优化` 升级 Glide Compiler 版本 4.8.0 -> 4.12.0 -> 4.12.0
-* `优化` 升级 Gradle Build Tool 版本 29.0.2 -> 30.0.2
-* `优化` 升级 Gradle Compile 版本 28 -> 30 -> 31
-* `优化` 升级 Gradle 发行版本 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
-* `优化` 升级 Groovy-Json 插件版本 3.0.7 -> 3.0.8
-* `优化` 升级 Gson 版本 2.8.2 -> 2.8.9
-* `优化` 升级 JavaVersion 版本 1.8 -> 11 -> 16
-* `优化` 升级 Joda Time 版本 2.9.9 -> 2.10.13
-* `优化` 升级 Junit 版本 4.12 -> 4.13.2
-* `优化` 升级 Kotlin Gradle 插件版本 1.3.10 -> 1.4.10 -> 1.6.0
-* `优化` 升级 Kotlinx Coroutines 版本 1.0.1 -> 1.5.2-native-mt
-* `优化` 升级 Leakcanary 版本 1.6.1 -> 2.7
-* `优化` 升级 LicensesDialog 版本 1.8.1 -> 2.2.0
-* `优化` 升级 Material Dialogs 版本 0.9.2.3 -> 0.9.6.0
-* `优化` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.2 -> 5.0.0-alpha.3
-* `优化` 升级 Reactivex RxJava2 RxAndroid 版本 2.0.1 -> 2.1.1
-* `优化` 升级 Reactivex RxJava2 版本 2.1.2 -> 2.2.21
-* `优化` 升级 Retrofit2 Converter Gson 版本 2.3.0 -> 2.9.0
-* `优化` 升级 Retrofit2 Retrofit 版本 2.3.0 -> 2.9.0
-* `优化` 升级 Zip4j 版本 1.3.2 -> 2.9.1
+* `依赖` 本地化 CrashReport 版本 2.6.6
+* `依赖` 本地化 MutableTheme 版本 1.0.0
+* `依赖` 附加 Androidx Preference 版本 1.1.1
+* `依赖` 附加 SwipeRefreshLayout 版本 1.1.0
+* `依赖` 升级 Android Analytics 版本 7.0.0 -> 13.1.0
+* `依赖` 升级 Android Annotations 版本 4.5.2 -> 4.8.0
+* `依赖` 升级 Gradle 构建工具版本 3.2.1 -> 4.1.0 -> 7.0.3 -> 7.2.0-alpha04
+* `依赖` 升级 Android Job 版本 1.2.6 -> 1.4.2
+* `依赖` 升级 Android Material 版本 1.1.0-alpha01 -> 1.5.0-beta01
+* `依赖` 升级 Androidx MultiDex 版本 2.0.0 -> 2.0.1
+* `依赖` 升级 Apache Commons Lang3 版本 3.6 -> 3.12.0
+* `依赖` 升级 Appcompat 版本 1.0.2 -> 1.4.0
+* `依赖` 升级 ButterKnife Gradle 插件版本 9.0.0-rc2 -> 10.2.1 -> 10.2.3
+* `依赖` 升级 ColorPicker 版本 2.1.5 -> 2.1.7
+* `依赖` 升级 Espresso Core 版本 3.1.1-alpha01 -> 3.5.0-alpha03
+* `依赖` 升级 Eventbus 版本 3.0.0 -> 3.2.0
+* `依赖` 升级 Glide Compiler 版本 4.8.0 -> 4.12.0 -> 4.12.0
+* `依赖` 升级 Gradle Build Tool 版本 29.0.2 -> 30.0.2
+* `依赖` 升级 Gradle Compile 版本 28 -> 30 -> 31
+* `依赖` 升级 Gradle 发行版本 4.10.2 -> 6.5 -> 7.0.2 -> 7.3
+* `依赖` 升级 Groovy-Json 插件版本 3.0.7 -> 3.0.8
+* `依赖` 升级 Gson 版本 2.8.2 -> 2.8.9
+* `依赖` 升级 JavaVersion 版本 1.8 -> 11 -> 16
+* `依赖` 升级 Joda Time 版本 2.9.9 -> 2.10.13
+* `依赖` 升级 Junit 版本 4.12 -> 4.13.2
+* `依赖` 升级 Kotlin Gradle 插件版本 1.3.10 -> 1.4.10 -> 1.6.0
+* `依赖` 升级 Kotlinx Coroutines 版本 1.0.1 -> 1.5.2-native-mt
+* `依赖` 升级 Leakcanary 版本 1.6.1 -> 2.7
+* `依赖` 升级 LicensesDialog 版本 1.8.1 -> 2.2.0
+* `依赖` 升级 Material Dialogs 版本 0.9.2.3 -> 0.9.6.0
+* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.2 -> 5.0.0-alpha.3
+* `依赖` 升级 Reactivex RxJava2 RxAndroid 版本 2.0.1 -> 2.1.1
+* `依赖` 升级 Reactivex RxJava2 版本 2.1.2 -> 2.2.21
+* `依赖` 升级 Retrofit2 Converter Gson 版本 2.3.0 -> 2.9.0
+* `依赖` 升级 Retrofit2 Retrofit 版本 2.3.0 -> 2.9.0
+* `依赖` 升级 Zip4j 版本 1.3.2 -> 2.9.1

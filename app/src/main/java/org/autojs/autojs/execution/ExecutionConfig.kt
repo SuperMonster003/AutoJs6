@@ -86,8 +86,10 @@ data class ExecutionConfig(
 
     companion object CREATOR : Parcelable.Creator<ExecutionConfig> {
 
+        const val tag = "execution.config"
+
         @JvmStatic
-        val tag = "execution.config"
+        fun getTag() = tag
 
         @JvmStatic
         val default: ExecutionConfig

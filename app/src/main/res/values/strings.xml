@@ -60,7 +60,6 @@
     <string name="description_change_working_dir_preference">Change the path of the directory containing scripts</string>
     <string name="description_check_for_updates_preference">AutoJs6 gets and downloads updates from GitHub.\n\nNote: The update does not provide multilingual support yet.</string>
     <string name="description_compatibility_with_classes_for_ver_4_x">Provides a degree of Java class name compatibility for 4.x versions through class name remapping.\nWith this option turned on, there will be a varying degree of startup delay (tens to hundreds of milliseconds) each time the script is started.\nIt is recommended to keep the option off at all times if not specifically required.</string>
-    <string name="description_documentation_launcher_icon_preference">description_documentation_launcher_icon_preference</string>
     <string name="description_documentation_source_preference">Local docs: Using AutoJs6 build-in files as documentation sources, no network connection required. The content changes as AutoJs6 is updated.\nOnline docs: Using GitHub pages as documentation sources, requiring network connection. The content is always up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
     <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
     <string name="description_extending_js_build_in_objects">Extending JavaScript built-in objects can increase code flexibility and enable richer functionality, but can cause conflicts and even breakage.\nAll scripts have built-in extensions enabled by default when the option is turned on.\nBuilt-in extensions are often insecure, and are not recommended unless the principles and risks of built-in extensions are clearly understood.\nWhen the option is turned off, built-in extensions can still be enabled through the plugins global object, as described in the project documentation.</string>
@@ -95,7 +94,8 @@
     <string name="dialog_button_system_settings_simplified">System</string>
     <string name="dialog_button_update_now">Update</string>
     <string name="dialog_button_use_default">Use default</string>
-    <string name="docs_app_name">AutoJs6 Docs</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 Docs</string>
+    <string name="text_app_shortcut_docs_short_label">Docs</string>
     <string name="edit_and_run_handle_intent_error">Can\'t process file</string>
     <string name="edit_exit_without_save_warn">The content has not been saved, are you sure to exit?</string>
     <string name="email" translatable="false">hybbbb1996@gmail.com</string>
@@ -107,11 +107,9 @@
     <string name="entry_app_language_ja" translatable="false">日本語</string>
     <string name="entry_app_language_ko" translatable="false">한국어</string>
     <string name="entry_app_language_ru" translatable="false">Русский</string>
-    <string name="entry_app_language_zh" translatable="false">简体中文</string>
-    <string name="entry_app_language_zh_hk" translatable="false">繁體中文 (香港)</string>
-    <string name="entry_app_language_zh_tw" translatable="false">繁體中文 (台灣)</string>
-    <string name="entry_documentation_launcher_icon_hide">Hide icon from launcher</string>
-    <string name="entry_documentation_launcher_icon_show">Show icon in launcher</string>
+    <string name="entry_app_language_zh_hans" translatable="false">简体中文</string>
+    <string name="entry_app_language_zh_hant_hk" translatable="false">繁體中文 (香港)</string>
+    <string name="entry_app_language_zh_hant_tw" translatable="false">繁體中文 (台灣)</string>
     <string name="entry_documentation_source_local">Local docs</string>
     <string name="entry_documentation_source_online">Online docs</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">Change text size</string>
@@ -217,7 +215,7 @@
     <string name="foreground_notification_title">AutoJs6 foreground service</string>
     <string name="format_build_succeeded" formatted="true">Build succeeded.\nFile path: %s</string>
     <string name="format_debug_bar_title">Debug [ %s ]</string>
-    <string name="format_default_package_name" formatted="true" translatable="false">com.example.script%d</string>
+    <string name="format_default_package_name" formatted="true" translatable="false">org.autojs.autojs6.%s</string>
     <string name="format_dialog_progress_number_format_kilo_bytes" translatable="false">%.1fKB/%.1fKB</string>
     <string name="format_dialog_progress_number_format_mega_bytes" translatable="false">%.2fMB/%.2fMB</string>
     <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
@@ -238,12 +236,13 @@
     <string name="key_app_language_ja" translatable="false">key_$_app_language_ja</string>
     <string name="key_app_language_ko" translatable="false">key_$_app_language_ko</string>
     <string name="key_app_language_ru" translatable="false">key_$_app_language_ru</string>
-    <string name="key_app_language_zh" translatable="false">key_$_app_language_zh</string>
-    <string name="key_app_language_zh_hk" translatable="false">key_$_app_language_zh_hk</string>
-    <string name="key_app_language_zh_tw" translatable="false">key_$_app_language_zh_tw</string>
+    <string name="key_app_language_zh_hans" translatable="false">key_$_app_language_zh</string>
+    <string name="key_app_language_zh_hant_hk" translatable="false">key_$_app_language_zh_hk</string>
+    <string name="key_app_language_zh_hant_tw" translatable="false">key_$_app_language_zh_tw</string>
     <string name="key_auto_check_for_updates" translatable="false">key_$_auto_check_for_updates</string>
     <string name="key_auto_night_mode_enabled" translatable="false">key_$_auto_night_mode_enabled</string>
     <string name="key_change_working_dir" translatable="false">key_$_change_working_dir</string>
+    <string name="key_launcher_shortcuts" translatable="false">key_$_launcher_shortcuts</string>
     <string name="key_check_for_updates" translatable="false">key_$_check_for_updates</string>
     <string name="key_client_socket_normally_closed" translatable="false">key_$_client_socket_normally_closed</string>
     <string name="key_compatibility_with_classes_for_ver_4_x" translatable="false">key_$_compatibility_with_classes_for_ver_4_x</string>
@@ -252,9 +251,6 @@
     <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
     <string name="key_dialog_log_entries_exported" translatable="false">key_$_dialog_log_entries_exported</string>
     <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
-    <string name="key_documentation_launcher_icon" translatable="false">key_$_documentation_launcher_icon</string>
-    <string name="key_documentation_launcher_icon_hide" translatable="false">key_$_documentation_launcher_icon_hide</string>
-    <string name="key_documentation_launcher_icon_show" translatable="false">key_$_documentation_launcher_icon_show</string>
     <string name="key_documentation_source" translatable="false">key_$_documentation_source</string>
     <string name="key_documentation_source_local" translatable="false">key_$_documentation_source_local</string>
     <string name="key_documentation_source_online" translatable="false">key_$_documentation_source_online</string>
@@ -531,7 +527,6 @@
     <string name="text_do_not_ask_again_for_this_version">Don’t ask again for this version</string>
     <string name="text_do_not_show_again">Don\'t show again</string>
     <string name="text_documentation">Documents</string>
-    <string name="text_documentation_launcher_icon">Documentation launcher icon</string>
     <string name="text_documentation_source">Documentation source</string>
     <string name="text_done">Done</string>
     <string name="text_download">Download</string>
@@ -648,6 +643,8 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
     <string name="text_licenses">Open Sources Licenses</string>
     <string name="text_log">Log</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 Log</string>
+    <string name="text_app_shortcut_log_short_label">Log</string>
     <string name="text_logging_in">Logging in</string>
     <string name="text_login">Login</string>
     <string name="text_login_succeed">Login succeeded</string>
@@ -818,6 +815,8 @@
     <string name="text_set_as_working_dir">Set as working dir</string>
     <string name="text_set_breakpoint">Set a breakpoint</string>
     <string name="text_settings">Settings</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 Settings</string>
+    <string name="text_app_shortcut_settings_short_label">Settings</string>
     <string name="text_share_app" translatable="false">AutoJs6:\n&url_github_autojs6;</string>
     <string name="text_should_never_happen" translatable="false">Should never happen</string>
     <string name="text_should_not_be_empty">Text can\'t be empty</string>
@@ -887,19 +886,27 @@
     <string name="value_app_language_english" translatable="false">EN</string>
     <string name="value_app_language_follow_system" translatable="false">Auto</string>
     <string name="value_app_language_simplified_chinese" translatable="false">ZH_CN</string>
-    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
-    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
-    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
-    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
-    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
-    <string name="text_failed_to_copy">复制失败</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
-    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
-    <string name="dialog_button_dismiss">关闭</string>
-    <string name="dialog_button_view_file">查看文件</string>
-    <string name="text_exported">已导出</string>
-    <string name="text_some_items_exported">已导出 %d 个条目</string>
+    <string name="text_only_latest_few_items_will_be_sent">Only latest %d items will be sent</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">Number of log entries %d exceeds the limit for sending</string>
+    <string name="text_failed_to_send_log_entries">Failed to send log entries</string>
+    <string name="text_no_log_entries_to_send">No log entries to send</string>
+    <string name="text_no_log_entries_to_export">No log entries to export</string>
+    <string name="text_no_log_entries_to_copy">No log entries to copy</string>
+    <string name="text_failed_to_copy">Failed to copy</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">Already copied to clipboard (only latest %d items)</string>
+    <string name="text_failed_to_export_log_entries">Failed to export log entries</string>
+    <string name="dialog_button_dismiss">Dismiss</string>
+    <string name="dialog_button_view_file">View File</string>
+    <string name="text_exported">Exported</string>
+    <string name="text_some_items_exported">%d items exported</string>
+    <string name="text_app_shortcut_disabled">This shortcut is disabled</string>
+    <string name="id_launcher_shortcut_settings" translatable="false">shortcut_$_settings</string>
+    <string name="id_launcher_shortcut_docs" translatable="false">shortcut_$_docs</string>
+    <string name="id_launcher_shortcut_log" translatable="false">shortcut_$_log</string>
+    <string name="text_launcher_shortcuts">Launcher shortcuts</string>
+    <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
+    <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
+    <string name="text_pin_shortcut_not_unsupported">Pinning shortcuts to launcher is not supported</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>

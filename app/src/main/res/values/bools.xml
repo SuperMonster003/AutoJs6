@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <bool name="leak_canary_add_dynamic_shortcut">false</bool>
+    <bool name="leak_canary_add_launcher_icon">false</bool>
     <bool name="pref_compatibility_with_classes_for_ver_4_x">false</bool>
     <bool name="pref_extending_js_build_in_objects">false</bool>
     <bool name="pref_use_volume_control_running">true</bool>

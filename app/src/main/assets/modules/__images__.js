@@ -49,6 +49,9 @@ module.exports = function (scriptRuntime, scope) {
             Images.prototype = {
                 constructor: Images,
                 captureScreen(path) {
+                    if (rtImages.getScreenCapturer() === null) {
+                        this.requestScreenCapture();
+                    }
                     return path === undefined
                         ? rtImages.captureScreen()
                         : rtImages.captureScreen(path);

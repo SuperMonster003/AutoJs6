@@ -21,7 +21,8 @@ def versionCmake = versions.cmake
 def zipArchives = [
         // @Hint by TonyJiangWJ on Aug 7, 2023.
         //   ! 下载 OpenCV 源码包 (默认为 4.2.0).
-        //   ! 和 Auto.js 中的版本 (如 4.5.5) 不匹配会产生冲突, 可按需修改.
+        //   ! 和 Auto.js 中的版本 (如 4.8.0) 不匹配会产生冲突,
+        //   ! 可按需修改 version.properties 中对应内容.
         [
                 "src" : "https://github.com/opencv/opencv/releases/download" +
                         "/${versionOpencv}/opencv-${versionOpencv}-android-sdk.zip",
@@ -33,11 +34,11 @@ android {
     namespace = "com.baidu.paddleocr"
 
     ndkVersion versionNdk
-    compileSdk 33
+    compileSdk 34
     defaultConfig {
         /* minSdk 默认为 23，这里修改为与 AutoJs6 最低 SDK 版本一致的 24. */
         minSdk 24
-        targetSdk 33
+        targetSdk 34
 
         externalNativeBuild {
             cmake {
@@ -76,9 +77,6 @@ ext {
 // @Hint by TonyJiangWJ on Aug 7, 2023.
 //   ! 首次导入最好手动运行一下这个 task 下载依赖的包.
 tasks.register("downloadAndExtractArchives", DefaultTask) {
-    doFirst {
-        println "Downloading and extracting archives including libs and models"
-    }
     doLast {
         // Prepare cache folder for archives
         String cachePath = "cache"
@@ -89,18 +87,74 @@ tasks.register("downloadAndExtractArchives", DefaultTask) {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5")
             messageDigest.update(archive.src.bytes)
             String cacheName = new BigInteger(1, messageDigest.digest()).toString(32)
-            // Download the target archive if not exists
-            boolean copyFiles = !file("${archive.dest}").exists()
-            if (!file("${cachePath}/${cacheName}.zip").exists()) {
-                ant.get(src: archive.src, dest: file("${cachePath}/${cacheName}.zip"))
-                // force to copy files from the latest archive files
-                copyFiles = true
+
+            def cacheSrc = archive.src
+            def cacheDest = file("${cachePath}/${cacheName}.zip")
+            def libDest = archive.dest
+            def versionNameFileName = "opencv-${versionOpencv}.version"
+            def versionNameFile = file(new File(libDest, versionNameFileName))
+
+            boolean copyFiles = false
+
+            if (cacheDest.exists()) {
+                println("No need to download files as the cached archive exists")
+                if (versionNameFile.exists()) {
+                    println("No need to extract cached archive as the version name file exists")
+                } else {
+                    println("Cached archive needs to be extracted as the version name file doesn't exist")
+                    copyFiles = true
+                }
+            } else {
+                if (versionNameFile.exists()) {
+                    println("No need to download files as the version name file exists")
+                } else {
+                    def title = "Downloading and extracting the archive file including libs and models..."
+                    def srcInfo = "Source: ${cacheSrc}"
+                    def destInfo = "Destination: ${cacheDest}"
+                    def hintInfo = [
+                            "If the download gets stuck and won't finish,",
+                            "try downloading the source file with tools like IDM (Internet Download Manager),",
+                            "then renaming it into the destination path above.",
+                    ]
+
+                    def maxLength = [
+                            [title, srcInfo, destInfo].max { it.length() },
+                            hintInfo.max { it.length() },
+                    ].max { it.length() }.length()
+
+                    def infoList = [
+                            "=".repeat(maxLength),
+                            title,
+                            "-".repeat(maxLength),
+                            srcInfo,
+                            destInfo,
+                            "-".repeat(maxLength),
+                            hintInfo.join("\n"),
+                            "=".repeat(maxLength),
+                            "",
+                    ]
+                    infoList.forEach { println(it) }
+
+                    ant.get(src: cacheSrc, dest: cacheDest)
+
+                    // Force to copy files from the latest archive files
+                    copyFiles = true
+                }
             }
             // Extract the target archive if its dest path does not exists
             if (copyFiles) {
+                if (file(libDest).exists()) {
+                    println("Delete old files in \"${file(libDest)}\"")
+                    delete(libDest)
+                }
                 copy {
                     from zipTree("${cachePath}/${cacheName}.zip")
-                    into "${archive.dest}"
+                    into libDest
+                }
+                println("All libs and models extracted into \"${file(libDest)}\"")
+                if (!versionNameFile.exists()) {
+                    versionNameFile.createNewFile()
+                    println("Version name file \"${versionNameFileName}\" created")
                 }
             }
         }

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:gravity="center_vertical"
+        android:layout_gravity="center"
+        android:paddingVertical="16dp"
+        android:orientation="vertical">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+        <LinearLayout
+                android:id="@+id/launcher_shortcut_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true">
+
+            <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_gravity="center"
+                    android:layout_marginVertical="2dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:src="@mipmap/ic_app_shortcut_settings_adaptive" />
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:layout_gravity="center|bottom"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/day_night"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:text="@string/text_app_shortcut_settings_short_label" />
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/launcher_shortcut_docs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true">
+
+            <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_gravity="center"
+                    android:layout_marginVertical="2dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:src="@mipmap/ic_app_shortcut_docs_adaptive" />
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:layout_gravity="center|bottom"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/day_night"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:text="@string/text_app_shortcut_docs_short_label" />
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/launcher_shortcut_log"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true">
+
+            <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_gravity="center"
+                    android:layout_marginVertical="2dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:src="@mipmap/ic_app_shortcut_log_adaptive" />
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:layout_gravity="center|bottom"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/day_night"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:text="@string/text_app_shortcut_log_short_label" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

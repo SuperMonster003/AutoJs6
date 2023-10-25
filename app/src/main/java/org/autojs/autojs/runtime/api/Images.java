@@ -18,6 +18,7 @@ import android.view.Gravity;
 
 import androidx.annotation.NonNull;
 
+import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.annotation.ScriptVariable;
 import org.autojs.autojs.concurrent.VolatileDispose;
 import org.autojs.autojs.core.image.ColorFinder;
@@ -371,6 +372,7 @@ public class Images {
         return new Mat(mat, roi);
     }
 
+    @ScriptInterface
     public void initOpenCvIfNeeded() {
         if (mOpenCvInitialized || OpenCVHelper.isInitialized()) {
             return;
@@ -388,12 +390,15 @@ public class Images {
             });
             result.blockedGet();
         }
-
     }
 
     private void initSuccessfully() {
         mOpenCvInitialized = true;
         Log.i(TAG, "opencv: initialized");
+    }
+
+    public ScreenCapturer getScreenCapturer() {
+        return mScreenCapturer;
     }
 
 }

@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
 
-import org.autojs.autojs.core.permission.Permissions;
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.annotation.ScriptVariable;
@@ -22,6 +21,7 @@ import org.autojs.autojs.core.image.Colors;
 import org.autojs.autojs.core.image.ImageWrapper;
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester;
 import org.autojs.autojs.core.looper.Loopers;
+import org.autojs.autojs.core.permission.Permissions;
 import org.autojs.autojs.core.web.WebSocket;
 import org.autojs.autojs.engine.ScriptEngineService;
 import org.autojs.autojs.lang.ThreadCompat;
@@ -32,6 +32,7 @@ import org.autojs.autojs.rhino.TopLevelScope;
 import org.autojs.autojs.rhino.continuation.Continuation;
 import org.autojs.autojs.runtime.api.AbstractShell;
 import org.autojs.autojs.runtime.api.AppUtils;
+import org.autojs.autojs.runtime.api.Barcode;
 import org.autojs.autojs.runtime.api.Device;
 import org.autojs.autojs.runtime.api.Dialogs;
 import org.autojs.autojs.runtime.api.Engines;
@@ -50,6 +51,7 @@ import org.autojs.autojs.runtime.api.Sensors;
 import org.autojs.autojs.runtime.api.Threads;
 import org.autojs.autojs.runtime.api.Timers;
 import org.autojs.autojs.runtime.api.UI;
+import org.autojs.autojs.runtime.api.WrappedShizuku;
 import org.autojs.autojs.runtime.exception.ScriptEnvironmentException;
 import org.autojs.autojs.runtime.exception.ScriptException;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
@@ -84,6 +86,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ScriptRuntime {
 
     private static final String TAG = "ScriptRuntime";
+
+    public boolean isExiting;
 
     public static void popException(String message) {
         try {
@@ -244,10 +248,13 @@ public class ScriptRuntime {
     private final Images images;
 
     @ScriptVariable
-    public final ScriptToast toast;
+    public final OcrMLKit ocrMLKit;
 
     @ScriptVariable
-    public final OcrMLKit ocrMLKit;
+    public final Barcode barcode;
+
+    @ScriptVariable
+    public final WrappedShizuku shizuku;
 
     @ScriptVariable
     public final OcrPaddle ocrPaddle;
@@ -288,7 +295,8 @@ public class ScriptRuntime {
 
         ocrMLKit = new OcrMLKit();
         ocrPaddle = new OcrPaddle();
-        toast = new ScriptToast(context, this);
+        barcode = new Barcode();
+        shizuku = WrappedShizuku.INSTANCE;
     }
 
     public void init() {
@@ -531,6 +539,7 @@ public class ScriptRuntime {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void onExit() {
         Log.d(TAG, "on exit");
+        this.isExiting = true;
 
         ignoresException(() -> {
             if (console.getConfigurator().isExitOnClose()) {
@@ -555,6 +564,7 @@ public class ScriptRuntime {
         ignoresException(floaty::closeAll);
 
         ignoresException(() -> events.emit("exit"), "exception on exit: %s");
+        ignoresException(() -> ScriptToast.clear(this));
 
         ignoresException(threads::shutDownAll);
         ignoresException(events::recycle);

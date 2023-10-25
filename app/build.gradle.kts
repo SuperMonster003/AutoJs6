@@ -2,16 +2,29 @@
 
 import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
+import java.util.Properties
+import java.util.TimeZone
 import java.util.zip.CRC32
+import kotlin.text.RegexOption.IGNORE_CASE
 
 val applicationId = "org.autojs.autojs6"
 val sign = Sign("$rootDir/sign.properties")
 val versions = Versions("$rootDir/version.properties")
+
+val dimention = "channel"
+val flavorNameApp = "app"
+val flavorNameInrt = "inrt"
+val buildTypeDebug = "debug"
+val buildTypeRelease = "release"
+val buildActionAssemble = "assemble"
+val templateName = "template"
 
 plugins {
     id("com.android.application")
@@ -27,7 +40,7 @@ dependencies /* Unclassified */ {
     // Android supports
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.multidex:multidex:2.0.1")
-    implementation("com.google.android.material:material:1.9.0")
+    implementation("com.google.android.material:material:1.10.0")
 
     // SwipeRefreshLayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
@@ -103,11 +116,8 @@ dependencies /* Unclassified */ {
     // Dex
     implementation(files("$rootDir/libs/com.android.dx-1.7.0.jar"))
 
-    // LocaleHelper
-    implementation(project(":libs:com.zeugmasolutions.localehelper-1.5.1"))
-
     // OpenCV
-    implementation(project(":libs:org.opencv-4.5.5"))
+    implementation(project(":libs:org.opencv-4.8.0"))
 
     // PaddleOCR
     implementation(project(":libs:paddleocr"))
@@ -132,9 +142,13 @@ dependencies /* Unclassified */ {
     implementation(files("$rootDir/libs/javamail-android/mail.jar"))
 
     // Shizuku
-    implementation("dev.rikka.shizuku:api:13.1.5")
-    implementation("dev.rikka.shizuku:provider:13.1.5")
-    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:4.3@aar")
+    implementation(project(":libs:dev.rikka.shizuku-shared-13.1.5"))
+    implementation(project(":libs:dev.rikka.shizuku-aidl-13.1.5"))
+    implementation(project(":libs:dev.rikka.shizuku-api-13.1.5"))
+    implementation(project(":libs:dev.rikka.shizuku-provider-13.1.5"))
+
+    // ARSCLib
+    implementation("io.github.reandroid:ARSCLib:1.2.4")
 }
 
 dependencies /* Test */ {
@@ -159,12 +173,22 @@ dependencies /* Annotations */ {
 }
 
 dependencies /* AppCompat */ {
-    implementation("androidx.appcompat:appcompat") {
-        version {
-            strictly("1.4.2")
-            because("version 1.5.0 duplicates some classes")
-        }
-    }
+    // @Obsoleted by SuperMonster003 on Oct 5, 2023.
+    //  ! Comment with related code will be removed since Jan 5, 2024.
+    //
+    // @Hint by SuperMonster003 on Oct 5, 2023.
+    //  ! It look like that bugs below in version 1.5.x has gone away since 1.6.x.
+    // implementation("androidx.appcompat:appcompat") {
+    //     version {
+    //         strictly("1.4.2")
+    //         because("version 1.5.0 duplicates some classes")
+    //     }
+    // }
+    //
+    // @Hint by SuperMonster003 on Oct 5, 2023.
+    //  ! To check the releases for Appcompat library,
+    //  ! visit https://developer.android.com/jetpack/androidx/releases/appcompat
+    implementation("androidx.appcompat:appcompat:1.6.1")
 
     // AppCompat for legacy views (such as JsTextViewLegacy)
     implementation(project(":libs:androidx.appcompat-1.0.2")) {
@@ -213,18 +237,13 @@ dependencies /* View */ {
 dependencies /* GitHub API */ {
     implementation(files("$rootDir/libs/github-api-1.306.jar"))
 
-    implementation("commons-io:commons-io") {
-        version {
-            strictly("2.8.0")
-            because("Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IOUtils'")
-        }
-    }
+    implementation("commons-io:commons-io:2.14.0")
 
     implementation("com.fasterxml.jackson.core:jackson-databind") {
         because("compatibility for Android API Level < 26 (Android 8.0) [O]")
-        version {
-            strictly("2.13.3")
-            because("Exception on 2.14.x: 'No virtual method getParameterCount()I in class Ljava/lang/reflect/Method'")
+        version /* as of Oct 12, 2023 */ {
+            strictly("2.14.3")
+            because("Exception on 2.15.x: 'IllegalArgumentException: Unsupported class file major version 63'")
         }
     }
 
@@ -234,7 +253,11 @@ dependencies /* GitHub API */ {
 }
 
 dependencies /* MLKit */ {
+    // OCR
     implementation("com.google.mlkit:text-recognition-chinese:16.0.0")
+
+    // Barcode
+    implementation("com.google.mlkit:barcode-scanning:17.2.0")
 }
 
 dependencies /* Auto.js Extensions */ {
@@ -257,7 +280,7 @@ dependencies /* Auto.js Extensions */ {
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
     // @Legacy com.jrummyapps:colorpicker:2.1.7
     implementation("com.jaredrummler:colorpicker:1.1.0")
-    implementation("androidx.recyclerview:recyclerview:1.3.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("com.github.ozodrukh:CircularReveal:2.0.1")
 }
 
@@ -280,6 +303,7 @@ dependencies /* Reserved for auto append by IDE */ {
 }
 
 android {
+
     namespace = applicationId
     compileSdk = versions.sdkVersionCompile
 
@@ -288,45 +312,95 @@ android {
         minSdk = versions.sdkVersionMin
         targetSdk = versions.sdkVersionTarget
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("boolean", "isInrt", "false")
+        multiDexEnabled = true
+        buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
     }
 
-    flavorDimensions.add("channel")
+    flavorDimensions.add(dimention)
+
     productFlavors {
-        create("app") {
-            dimension = "channel"
+
+        create(flavorNameApp) {
+            dimension = dimention
             versionCode = versions.appVersionCode
             versionName = versions.appVersionName
-            buildConfigField("String", "CHANNEL", "\"app\"")
-            buildConfigField("boolean", "isInrt", "false")
+            buildConfigField("String", "CHANNEL", "\"$flavorNameApp\"")
+            buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
             manifestPlaceholders.putAll(
                 mapOf(
-                    "CHANNEL" to "app",
+                    "CHANNEL" to flavorNameApp,
                     "appName" to "@string/app_name",
                     "intentCategory" to "android.intent.category.LAUNCHER",
                     "intentCategoryInrt" to "android.intent.category.DEFAULT",
-                    "authorities" to "org.autojs.autojs6.fileprovider"
+                    "authorities" to "org.autojs.autojs6.fileprovider",
+                    "icon" to "@drawable/autojs6_material",
                 )
             )
         }
 
-        create("inrt") {
-            dimension = "channel"
-            applicationIdSuffix = ".inrt"
+        create(flavorNameInrt) {
+            dimension = dimention
+            applicationIdSuffix = ".$flavorNameInrt"
+            minSdk = versions.sdkVersionMin
+            targetSdk = versions.sdkVersionTargetInrt
+            compileSdk = versions.sdkVersionCompile
             versionCode = versions.appVersionCode
             versionName = versions.appVersionName
-            buildConfigField("String", "CHANNEL", "\"inrt\"")
-            buildConfigField("boolean", "isInrt", "true")
+            buildConfigField("String", "CHANNEL", "\"$flavorNameInrt\"")
+            buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "true")
             manifestPlaceholders.putAll(
                 mapOf(
-                    "CHANNEL" to "inrt",
-                    "appName" to "AutoJs6.inrt",
+                    "CHANNEL" to flavorNameInrt,
+                    "appName" to "AutoJs6.$flavorNameInrt",
                     "intentCategory" to "android.intent.category.DEFAULT",
                     "intentCategoryInrt" to "android.intent.category.LAUNCHER",
-                    "authorities" to "org.autojs.autojs6.inrt.fileprovider"
+                    "authorities" to "org.autojs.autojs6.$flavorNameInrt.fileprovider",
+                    "icon" to "@mipmap/ic_launcher",
                 )
             )
+
+            gradle.taskGraph.whenReady(object : Action<TaskExecutionGraph> {
+                override fun execute(taskGraph: TaskExecutionGraph) {
+                    val task = project.getTasksByName("${buildTypeRelease}InrtRelease", true).firstOrNull() ?: return
+                    task.doLast {
+                        copy {
+                            val src = "build/outputs/apk/$flavorNameInrt/$buildTypeRelease"
+                            val dst = "src/main/assets"
+                            val ext = Utils.FILE_EXTENSION_APK
+
+                            if (!file(src).isDirectory) {
+                                return@copy
+                            }
+
+                            from(src); into(dst)
+
+                            val verName = versionName?.replace(Regex("\\s"), "-")?.lowercase()
+                            val srcFileName = "$flavorNameInrt-v$verName-universal.$ext" /* e.g. inrt-v6.4.0-beta-universal.apk */
+                            val dstFileName = "$templateName.$ext"
+                            val isOverridden = file(File(dst, dstFileName)).exists()
+                            include(srcFileName)
+                            rename(srcFileName, dstFileName)
+                            println("Source: ${file(File(src, srcFileName))}")
+                            println("Destination: ${file(File(dst, dstFileName))}${if (isOverridden) " [overridden]" else ""}")
+                        }
+                    }
+                }
+            })
         }
+
+        androidResources {
+            if (gradle.startParameter.taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble")) }) {
+                ignoreAssetsPatterns.add(".idea")
+            }
+            if (gradle.startParameter.taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }) {
+                // @Hint by SuperMonster003 on Oct 16, 2023.
+                //  ! Nothing needs to be added into assets for flavor "inrt",
+                //  ! as assets will be copied from flavor "app"
+                //  ! while building an apk on org.autojs.autojs.ui.project.BuildActivity.
+                ignoreAssetsPatterns.add("!*") /* Ignore everything. */
+            }
+        }
+
     }
 
     compileOptions {
@@ -337,8 +411,8 @@ android {
 
     // Utils.Version(ANDROID_GRADLE_PLUGIN_VERSION) < Utils.Version("8.0")
 
-    @Suppress("DEPRECATION")
-    packagingOptions {
+    // @Legacy packagingOptions { ... }
+    packaging {
         arrayOf(
             "META-INF/DEPENDENCIES",
             "META-INF/LICENSE",
@@ -350,7 +424,12 @@ android {
             "META-INF/notice.*",
             "META-INF/ASL2.0",
             "META-INF/*.kotlin_module",
+            "lib/x86/libc++_shared.so",
+            "lib/x86_64/libc++_shared.so",
+            "lib/armeabi-v7a/libc++_shared.so",
+            "lib/arm64-v8a/libc++_shared.so",
         ).let { resources.pickFirsts.addAll(it) }
+
         jniLibs {
             useLegacyPackaging = true
         }
@@ -366,8 +445,8 @@ android {
     }
 
     signingConfigs {
-        takeIf { sign.isValid }?.let {
-            create("release") {
+        if (sign.isValid) {
+            create(buildTypeRelease) {
                 storeFile = sign.properties["storeFile"]?.let { file(it as String) }
                 keyPassword = sign.properties["keyPassword"] as String
                 keyAlias = sign.properties["keyAlias"] as String
@@ -382,23 +461,23 @@ android {
             "proguard-rules.pro",
         )
         val niceSigningConfig = takeIf { sign.isValid }?.let {
-            signingConfigs.getByName("release")
+            signingConfigs.getByName(buildTypeRelease)
         }
-        getByName("release") {
+        getByName(buildTypeRelease) {
             isMinifyEnabled = false
             proguardFiles(*proguardFiles)
             niceSigningConfig?.let { signingConfig = it }
         }
-        getByName("debug") {
-            isMinifyEnabled = getByName("release").isMinifyEnabled
+        getByName(buildTypeDebug) {
+            isMinifyEnabled = getByName(buildTypeRelease).isMinifyEnabled
             proguardFiles(*proguardFiles)
             niceSigningConfig?.let { signingConfig = it }
         }
     }
 
     buildFeatures {
+        aidl = true
         viewBinding = true
-
         // @Hint by SuperMonster003 on Aug 14, 2023.
         //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
         buildConfig = true
@@ -459,6 +538,7 @@ android {
             isUniversalApk = true
         }
     }
+
 }
 
 tasks {
@@ -477,24 +557,30 @@ tasks {
     }
 
     register<Copy>("appendDigestToReleasedFiles") {
-        val src = "release"
-        val dst = "${src}s"
-        val ext = Utils.FILE_EXTENSION_APK
+        listOf(flavorNameApp, flavorNameInrt).forEach { flavorName ->
+            val src = "$flavorName/$buildTypeRelease"
+            val dst = "${src}s"
+            val ext = Utils.FILE_EXTENSION_APK
 
-        from(src); into(dst); include("*.$ext")
-
-        rename { name ->
-            Utils.digestCRC32(file("${src}/$name")).let { digest ->
-                name.replace("^(.+?)(\\.$ext)\$".toRegex(), "\$1-$digest\$2")
+            if (!file(src).isDirectory) {
+                return@forEach
             }
-        }
 
-        doLast { println("Destination: ${file(dst)}") }
+            from(src); into(dst); include("*.$ext")
+
+            rename { name ->
+                Utils.digestCRC32(file("${src}/$name")).let { digest ->
+                    name.replace("^(.+?)(\\.$ext)\$".toRegex(), "\$1-$digest\$2")
+                }
+            }
+
+            doLast { println("Destination: ${file(dst)}") }
+        }
     }
 }
 
 extra {
-    versions.handleIfNeeded(project)
+    versions.handleIfNeeded(project, flavorNameApp, listOf(buildTypeDebug, buildTypeRelease))
 }
 
 class Sign(filePath: String) {
@@ -523,6 +609,7 @@ class Versions(filePath: String) {
 
     val sdkVersionMin = properties["MIN_SDK_VERSION"].let { it as String }.toInt()
     val sdkVersionTarget = properties["TARGET_SDK_VERSION"].let { it as String }.toInt()
+    val sdkVersionTargetInrt = properties["TARGET_SDK_VERSION_INRT"].let { it as String }.toInt()
     val sdkVersionCompile = properties["COMPILE_SDK_VERSION"].let { it as String }.toInt()
     val appVersionName = properties["VERSION_NAME"] as String
     val appVersionCode = properties["VERSION_BUILD"].let { it as String }.toInt()
@@ -559,7 +646,6 @@ class Versions(filePath: String) {
         var versionInt = javaVersionRaw.toInt()
 
         while (versionInt > javaVersionMinSupported) {
-            @Suppress("EnumValuesSoftDeprecate")
             if (JvmTarget.values().any { it.name.contains(Regex("_$versionInt$")) }) {
                 break
             }
@@ -590,15 +676,14 @@ class Versions(filePath: String) {
 
     private var isBuildNumberAutoIncremented = false
     private val minBuildTimeGap = Utils.hours2Millis(0.75)
-    private val assembleTargets = mapOf("app" to listOf("debug", "release"))
 
     private val isBuildGapEnough
         get() = properties["BUILD_TIME"]?.let {
             Date().time - (it as String).toLong() > minBuildTimeGap
         } ?: false
 
-    private fun appendToTask(project: Project, buildType: String) {
-        project.tasks.getByName(Utils.getAssembleTaskName(buildType)).doLast {
+    private fun appendToTask(project: Project, flavorName: String, buildType: String) {
+        project.tasks.getByName(Utils.getAssembleTaskName(flavorName, buildType)).doLast {
             updateProperties()
             println()
             showInfo()
@@ -618,7 +703,7 @@ class Versions(filePath: String) {
         val title = "Version information for AutoJs6 app library"
 
         val infoVerName = "Version name: $appVersionName"
-        val infoVerCode = "Version code: $appVersionCode${" [auto-incremented]".takeIf { isBuildNumberAutoIncremented } ?: ""}"
+        val infoVerCode = "Version code: ${if (isBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
         val infoVerSdk = "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]"
         val infoVerJava = "Java version: $javaVersion$javaVersionInfoSuffix"
 
@@ -637,21 +722,17 @@ class Versions(filePath: String) {
         ).forEach { println(it) }
     }
 
-    fun handleIfNeeded(project: Project) = assembleTargets.forEach {
-        val targetName = it.key
-        val targetBuildType = it.value
-        if (targetName == project.name) {
-            project.gradle.taskGraph.whenReady(object : Action<TaskExecutionGraph> {
-                override fun execute(taskGraph: TaskExecutionGraph) {
-                    for (buildType in targetBuildType) {
-                        if (taskGraph.hasTask(Utils.getAssembleFullTaskName(targetName, buildType))) {
-                            return appendToTask(project, buildType)
-                        }
+    fun handleIfNeeded(project: Project, flavorName: String, targetBuildType: List<String>) {
+        project.gradle.taskGraph.whenReady(object : Action<TaskExecutionGraph> {
+            override fun execute(taskGraph: TaskExecutionGraph) {
+                for (buildType in targetBuildType) {
+                    if (taskGraph.hasTask(Utils.getAssembleFullTaskName(project.name, flavorName, buildType))) {
+                        return appendToTask(project, flavorName, buildType)
                     }
-                    return showInfo()
                 }
-            })
-        }
+                return showInfo()
+            }
+        })
     }
 
 }
@@ -676,9 +757,9 @@ object Utils {
         return "$autojs-v$version-$architecture.$extension".lowercase(Locale.getDefault())
     }
 
-    fun getAssembleTaskName(buildType: String) = "assemble${capitalize(buildType)}"
+    fun getAssembleTaskName(flavorName: String, buildType: String) = "assemble${capitalize(flavorName)}${capitalize(buildType)}"
 
-    fun getAssembleFullTaskName(name: String, buildType: String) = ":$name:${getAssembleTaskName(buildType)}"
+    fun getAssembleFullTaskName(projectName: String, flavorName: String, buildType: String) = ":$projectName:${getAssembleTaskName(flavorName, buildType)}"
 
     fun digestCRC32(file: File): String {
         val fis = FileInputStream(file)

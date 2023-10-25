@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.preference.PreferenceManager
 import org.autojs.autojs.core.inputevent.InputDevices
 import org.autojs.autojs.pio.PFiles
+import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -50,7 +51,7 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
             "exit",
         )
         try {
-            Runtime.getRuntime().exec("su").also {
+            Runtime.getRuntime().exec(AbstractShell.COMMAND_SU).also {
                 mProcess = it
                 executeCommands(it, commands)
                 mPid = readPid(it)

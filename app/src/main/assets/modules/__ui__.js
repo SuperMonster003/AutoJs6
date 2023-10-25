@@ -317,7 +317,7 @@ module.exports = function (scriptRuntime, scope) {
                     })();
             },
             afterApplyAttribute(context, inflater, view, ns, attrName, value, parent) {
-                // Empty method body
+                /* Empty body. */
             },
             afterApplyAttributes(context, view, inflater, attrs, parent) {
                 context.remove('widget');
@@ -326,13 +326,13 @@ module.exports = function (scriptRuntime, scope) {
                 return false;
             },
             afterInflateChildren(context, inflater, node, parent) {
-                // Empty method body
+                /* Empty body. */
             },
             beforeApplyPendingAttributesOfChildren(context, inflater, view) {
                 return false;
             },
             afterApplyPendingAttributesOfChildren(context, inflater, view) {
-                // Empty method body
+                /* Empty body. */
             },
             afterInflateView(context, view, node, parent, attachToParent) {
                 let { widget } = view;

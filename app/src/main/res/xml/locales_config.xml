@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="zh" /> <!-- Chinese (prefer Simplified, China) -->
+    <locale android:name="zh-Hant-HK" /> <!-- Chinese (Traditional, Hong Kong) -->
+    <locale android:name="zh-Hant-TW" /> <!-- Chinese (Traditional, Taiwan) -->
+    <locale android:name="en" /> <!-- English (prefer United States) -->
+    <locale android:name="fr" /> <!-- French (prefer France) -->
+    <locale android:name="es" /> <!-- Spanish (prefer Spain) -->
+    <locale android:name="ja" /> <!-- Japanese (prefer Japan) -->
+    <locale android:name="ko" /> <!-- Korean (prefer South Korea) -->
+    <locale android:name="ru" /> <!-- Russian (prefer Russia) -->
+    <locale android:name="ar" /> <!-- Arabic (prefer Egypt) -->
+</locale-config>

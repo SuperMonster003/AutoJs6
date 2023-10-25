@@ -3,7 +3,7 @@ package org.autojs.autojs.external.foreground
 import android.app.Service
 import android.content.Intent
 import org.autojs.autojs.tool.ForegroundServiceCreator
-import org.autojs.autojs.ui.main.MainActivity.Companion.getIntent
+import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.ForegroundServiceUtils
 import org.autojs.autojs6.R
 
@@ -23,7 +23,7 @@ class MainActivityForegroundService : Service() {
         ForegroundServiceUtils.startForeground(
             ForegroundServiceCreator.Builder(this)
                 .setClassName(sClassName)
-                .setIntent(getIntent(this))
+                .setIntent(MainActivity.getIntent(this))
                 .setNotificationId(NOTIFICATION_ID)
                 .setServiceName(R.string.foreground_notification_channel_name)
                 .setServiceDescription(R.string.foreground_notification_channel_name)

@@ -89,7 +89,7 @@ enum class App(private val appNameResId: Int, val packageName: String, alias: St
     }
 
     @ScriptInterface
-    fun getAppNameZh() = getAppName(Language.ZH)
+    fun getAppNameZh() = getAppName(Language.ZH_HANS)
 
     @ScriptInterface
     fun getAppNameEn() = getAppName(Language.EN)

@@ -5,6 +5,10 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
+
 import org.autojs.autojs.engine.RootAutomatorEngine;
 
 /**
@@ -13,26 +17,42 @@ import org.autojs.autojs.engine.RootAutomatorEngine;
 public abstract class AbstractShell {
 
     public static class Result {
+
+        private static final Gson sGson = new GsonBuilder().setPrettyPrinting().create();
+
+        @SerializedName("code")
         public int code = -1;
-        public String error;
-        public String result;
+
+        @SerializedName("result")
+        public String result = "";
+
+        @SerializedName("error")
+        public String error = "";
 
         @NonNull
         @Override
         public String toString() {
             return "ShellResult{" +
                     "code=" + code +
-                    ", error='" + error + '\'' +
-                    ", result='" + result + '\'' +
+                    ", error=\"" + error + '"' +
+                    ", result=\"" + result + '"' +
                     '}';
         }
+
+        public String toJson() {
+            return sGson.toJson(this);
+        }
+
+        public static Result fromJson(String json) {
+            return sGson.fromJson(json, Result.class);
+        }
+
     }
 
-    protected static final String COMMAND_SU = "su";
-    protected static final String COMMAND_SH = "sh";
-    protected static final String COMMAND_EXIT = "exit\n";
-    protected static final String COMMAND_LINE_END = "\n";
-
+    public static final String COMMAND_SU = "su";
+    public static final String COMMAND_SH = "sh";
+    public static final String COMMAND_LINE_END = "\n";
+    public static final String COMMAND_EXIT = "exit" + COMMAND_LINE_END;
 
     private int mTouchDevice = -1;
     private ScreenMetrics mScreenMetrics;
@@ -90,7 +110,6 @@ public abstract class AbstractShell {
     public void SetScreenMetrics(ScreenMetrics screenMetrics) {
         mScreenMetrics = screenMetrics;
     }
-
 
     public void Touch(int x, int y) {
         TouchX(x);

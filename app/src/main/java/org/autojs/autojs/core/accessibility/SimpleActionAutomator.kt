@@ -34,18 +34,19 @@ import android.accessibilityservice.AccessibilityService as AndroidAccessibility
  */
 class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge, private val scriptRuntime: ScriptRuntime) {
 
-    private val globalActionAutomatorRaw by lazy {
-        GlobalActionAutomator(Handler(scriptRuntime.loopers.servantLooper)) {
+    private val globalActionAutomatorRaw
+        get() = GlobalActionAutomator(Handler(scriptRuntime.loopers.servantLooper)) {
             ensureService()
             accessibilityBridge.service!!
         }
+
+    private val globalActionAutomator by lazy {
+        globalActionAutomatorRaw
     }
 
-    private val globalActionAutomator
-        get() = globalActionAutomatorRaw
-
-    private val globalActionAutomatorForGesture
-        get() = globalActionAutomatorRaw.apply { setScreenMetrics(mScreenMetrics) }
+    private val globalActionAutomatorForGesture by lazy {
+        globalActionAutomatorRaw.apply { setScreenMetrics(mScreenMetrics) }
+    }
 
     private val isRunningPackageSelf
         get() = DeveloperUtils.isSelfPackage(accessibilityBridge.infoProvider.latestPackage)

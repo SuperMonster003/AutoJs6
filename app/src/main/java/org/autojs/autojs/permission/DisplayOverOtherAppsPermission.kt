@@ -34,7 +34,8 @@ class DisplayOverOtherAppsPermission(override val context: Context) : Permission
     fun config() {
         try {
             SettingsCompat.manageDrawOverlays(context)
-        } catch (ex: Exception) {
+        } catch (e: Exception) {
+            e.printStackTrace()
             FloatingWindowPermissionUtil.goToAppDetailSettings(context, context.packageName)
         }
     }

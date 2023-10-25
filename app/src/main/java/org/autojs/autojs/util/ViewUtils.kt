@@ -16,6 +16,7 @@ import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.View
 import android.view.Window
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -288,6 +289,24 @@ object ViewUtils {
     fun setKeepScreenOnWhenInForegroundFromLastEnabledState() {
         Pref.putString(R.string.key_keep_screen_on_when_in_foreground, keepScreenOnWhenInForegroundFromLastEnabledState)
         isKeepScreenOnWhenInForegroundEnabled = true
+    }
+
+    fun registerOnSharedPreferenceChangeListener(activity: Activity) {
+        Pref.registerOnSharedPreferenceChangeListener { _, key ->
+            if (key == key(R.string.key_keep_screen_on_when_in_foreground)) {
+                configKeepScreenOnWhenInForeground(activity)
+            }
+        }
+    }
+
+    fun configKeepScreenOnWhenInForeground(activity: Activity) {
+        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.let { flags ->
+            if (isKeepScreenOnWhenInForegroundEnabled) {
+                activity.window.addFlags(flags)
+            } else {
+                activity.window.clearFlags(flags)
+            }
+        }
     }
 
     class AutoNightMode {

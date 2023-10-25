@@ -15,12 +15,16 @@ module.exports = function (scriptRuntime, scope) {
              * @implements Internal.OcrPaddle
              */
             const OcrPaddleCtor = function () {
-                return Object.assign(function () {
+                const instanceFunc = function __() {
                     let argArray = Array.from(arguments);
+                    if (arguments.length === 0 || !(arguments[0] instanceof ImageWrapper)) {
+                        return __.apply(this, [ images.captureScreen() ].concat(argArray));
+                    }
                     /** @type {Internal.Ocr.ModeName} */
                     argArray[ocr['_forcibleModeArgIndex']] = ocr['_modeName']['paddle'];
                     return ocr.recognizeText.apply(ocr, argArray);
-                }, OcrPaddleCtor.prototype);
+                };
+                return Object.assign(instanceFunc, OcrPaddleCtor.prototype);
             };
 
             OcrPaddleCtor.prototype = {

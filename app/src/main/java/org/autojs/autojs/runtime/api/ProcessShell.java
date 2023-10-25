@@ -55,8 +55,8 @@ public class ProcessShell extends AbstractShell {
     public void exec(String command) {
         try {
             mCommandOutputStream.writeBytes(command);
-            if (!command.endsWith(AbstractShell.COMMAND_LINE_END)) {
-                mCommandOutputStream.writeBytes(AbstractShell.COMMAND_LINE_END);
+            if (!command.endsWith(COMMAND_LINE_END)) {
+                mCommandOutputStream.writeBytes(COMMAND_LINE_END);
             }
             mCommandOutputStream.flush();
         } catch (IOException e) {
@@ -92,7 +92,7 @@ public class ProcessShell extends AbstractShell {
 
     @Override
     public void exitAndWaitFor() {
-        exec(AbstractShell.COMMAND_EXIT);
+        exec(COMMAND_EXIT);
         waitFor();
         exit();
     }
@@ -118,7 +118,7 @@ public class ProcessShell extends AbstractShell {
         try {
             String line;
             while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
+                sb.append(line).append(COMMAND_LINE_END);
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -151,7 +151,7 @@ public class ProcessShell extends AbstractShell {
     }
 
     public static Result exec(String command, boolean isRoot) {
-        String[] commands = command.split("\n");
+        String[] commands = command.split(COMMAND_LINE_END);
         return exec(commands, isRoot);
     }
 
@@ -162,7 +162,7 @@ public class ProcessShell extends AbstractShell {
             for (String command : commands) {
                 shell.exec(command);
             }
-            shell.exec(AbstractShell.COMMAND_EXIT);
+            shell.exec(COMMAND_EXIT);
             Result result = new Result();
             result.code = shell.waitFor();
             shell.readAll();
@@ -178,22 +178,35 @@ public class ProcessShell extends AbstractShell {
     }
 
     public static Result execCommand(String[] commands, boolean isRoot) {
+        try {
+            Process process = isRoot ? getRootProcess() : getShellProcess();
+            return execCommand(commands, process);
+        } catch (Exception e) {
+            Result result = new Result();
+            String message = e.getMessage();
+            result.code = 1;
+            result.result = "";
+            result.error = message != null ? message : "";
+            return result;
+        }
+    }
+
+    public static Result execCommand(String[] commands, Process process) {
         Result commandResult = new Result();
-        if (commands == null || commands.length == 0)
+        if (commands == null || commands.length == 0) {
             throw new IllegalArgumentException(str(R.string.error_empty_shell_command));
-        Process process = null;
+        }
         DataOutputStream os = null;
         try {
-            process = Runtime.getRuntime().exec(isRoot ? AbstractShell.COMMAND_SU : AbstractShell.COMMAND_SH);
             os = new DataOutputStream(process.getOutputStream());
             for (String command : commands) {
                 if (command != null) {
                     os.write(command.getBytes());
-                    os.writeBytes(AbstractShell.COMMAND_LINE_END);
+                    os.writeBytes(COMMAND_LINE_END);
                     os.flush();
                 }
             }
-            os.writeBytes(AbstractShell.COMMAND_EXIT);
+            os.writeBytes(COMMAND_EXIT);
             os.flush();
             Log.d(TAG, "pid = " + ProcessUtils.getProcessPid(process));
             commandResult.code = process.waitFor();
@@ -232,18 +245,26 @@ public class ProcessShell extends AbstractShell {
         return commandResult;
     }
 
+    public static Process getShellProcess() throws IOException {
+        return Runtime.getRuntime().exec(COMMAND_SH);
+    }
+
+    public static Process getRootProcess() throws IOException {
+        return Runtime.getRuntime().exec(COMMAND_SU);
+    }
+
     private static String readAll(InputStream inputStream) throws IOException {
         String line;
         StringBuilder builder = new StringBuilder();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         while ((line = reader.readLine()) != null) {
-            builder.append(line).append('\n');
+            builder.append(line).append(COMMAND_LINE_END);
         }
         return builder.toString();
     }
 
     public static Result execCommand(String command, boolean withRoot) {
-        String[] commands = command.split("\n");
+        String[] commands = command.split(COMMAND_LINE_END);
         return execCommand(commands, withRoot);
     }
 

@@ -12,14 +12,12 @@ import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import org.autojs.autojs.App
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder.StoredFragmentPagerAdapter
@@ -36,11 +34,9 @@ import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.ManageAllFilesPermission
 import org.autojs.autojs.permission.PostNotificationPermission
 import org.autojs.autojs.pref.Pref
-import org.autojs.autojs.runtime.api.AppUtils.Companion.hideLauncherIcon
-import org.autojs.autojs.runtime.api.AppUtils.Companion.showLauncherIcon
+import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.theme.ThemeColorManager.addViewBackground
 import org.autojs.autojs.ui.BaseActivity
-import org.autojs.autojs.ui.doc.DocumentationActivity
 import org.autojs.autojs.ui.doc.DocumentationFragment
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.explorer.ExplorerView
@@ -55,14 +51,12 @@ import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.widget.DrawerAutoClose
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.util.ForegroundServiceUtils
-import org.autojs.autojs.util.StringUtils
-import org.autojs.autojs.util.UpdateUtils.autoCheckForUpdatesIfNeededWithSnackbar
+import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityMainBinding
 import org.greenrobot.eventbus.EventBus
-import rikka.shizuku.Shizuku
 
 /**
  * Modified by SuperMonster003 as of Dec 1, 2021.
@@ -93,45 +87,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         }
     }
 
-    private val shizukuBinderReceivedListener = {
-        // if (Shizuku.isPreV11()) {
-        //     binding.text1.setText("Shizuku pre-v11 is not supported")
-        // } else {
-        //     binding.text1.setText("Binder received")
-        // }
-    }
-    private val shizukuBinderDeadListener = {
-        // binding.text1.setText("Binder dead")
-    }
-    private val shizukuRequestPermissionResultListener: (requestCode: Int, grantResult: Int) -> Unit = { /* requestCode: */ _: Int, /* grantResult */ _: Int ->
-        // if (grantResult == PackageManager.PERMISSION_GRANTED) {
-        //     switch (requestCode) {
-        //         case REQUEST_CODE_BUTTON1: {
-        //             getUsers();
-        //             break;
-        //         }
-        //         case REQUEST_CODE_BUTTON4: {
-        //             getSystemProperty();
-        //             break;
-        //         }
-        //         case REQUEST_CODE_BUTTON7: {
-        //             bindUserService();
-        //             break;
-        //         }
-        //         case REQUEST_CODE_BUTTON8: {
-        //             unbindUserService();
-        //             break;
-        //         }
-        //         case REQUEST_CODE_BUTTON9: {
-        //             peekUserService();
-        //             break;
-        //         }
-        //     }
-        // } else {
-        //     binding.text1.setText("User denied permission");
-        // }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -150,34 +105,30 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
         @Suppress("DEPRECATION")
         ViewUtils.appendSystemUiVisibility(this, View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
+        ViewUtils.registerOnSharedPreferenceChangeListener(this)
 
-        Pref.registerOnSharedPreferenceChangeListener { _, key ->
-            if (key == StringUtils.key(R.string.key_keep_screen_on_when_in_foreground)) {
-                configKeepScreenOnWhenInForeground()
-            }
-        }
-
+        WrappedShizuku.onCreate()
         ExplorerView.clearViewStates()
         setUpToolbar()
         setUpTabViewPager()
         registerBackPressHandlers()
         addViewBackground(binding.appBar)
-
-        Log.d("Shizuku", "${App::class.java.simpleName} onCreate | Process=${App.getProcessNameCompat()}")
-        Shizuku.addBinderReceivedListenerSticky(this.shizukuBinderReceivedListener)
-        Shizuku.addBinderDeadListener(shizukuBinderDeadListener)
-        Shizuku.addRequestPermissionResultListener(shizukuRequestPermissionResultListener)
     }
 
     override fun onPostResume() {
         recreateIfNeeded()
-        autoCheckForUpdatesIfNeededWithSnackbar(this, android.R.id.content)
+        UpdateUtils.autoCheckForUpdatesIfNeededWithSnackbar(this)
         super.onPostResume()
     }
 
+    override fun onStart() {
+        super.onStart()
+        WrappedShizuku.checkShizukuPermission()
+    }
+
     private fun recreateIfNeeded() {
-        if (sShouldRecreateMainActivity) {
-            setShouldRecreateMainActivity(false)
+        if (shouldRecreateMainActivity) {
+            shouldRecreateMainActivity = false
             recreate()
             Explorers.workspace().refreshAll()
         }
@@ -290,7 +241,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     override fun getOnActivityResultDelegateMediator() = mActivityResultMediator
 
-    @Suppress("OVERRIDE_DEPRECATION")
+    @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
     override fun onBackPressed() {
         val fragment = mPagerAdapter.getStoredFragment(mViewPager.currentItem)
         if (fragment is BackPressedHandler) {
@@ -384,52 +335,22 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
-
-        Shizuku.removeBinderReceivedListener(this.shizukuBinderReceivedListener)
-        Shizuku.removeBinderDeadListener(shizukuBinderDeadListener)
-        Shizuku.removeRequestPermissionResultListener(shizukuRequestPermissionResultListener)
+        WrappedShizuku.onDestroy()
     }
 
     override fun onResume() {
         super.onResume()
-        configKeepScreenOnWhenInForeground()
-        configDocumentationLauncherIcon()
-    }
-
-    private fun configKeepScreenOnWhenInForeground() {
-        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.let { flags ->
-            if (ViewUtils.isKeepScreenOnWhenInForegroundEnabled) {
-                window.addFlags(flags)
-            } else {
-                window.clearFlags(flags)
-            }
-        }
-    }
-
-    private fun configDocumentationLauncherIcon() {
-        DocumentationActivity::class.java.let { clazz ->
-            if (Pref.isDocumentationLauncherIconShouldShow) {
-                showLauncherIcon(this, clazz)
-            } else {
-                hideLauncherIcon(this, clazz)
-            }
-        }
+        ViewUtils.configKeepScreenOnWhenInForeground(this)
     }
 
     companion object {
 
         private val TAG = MainActivity::class.java.simpleName
 
-        private var sShouldRecreateMainActivity = false
-
-        fun setShouldRecreateMainActivity(b: Boolean) {
-            sShouldRecreateMainActivity = b
-        }
+        var shouldRecreateMainActivity = false
 
         @JvmStatic
-        fun launch(context: Context) {
-            context.startActivity(getIntent(context).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-        }
+        fun launch(context: Context) = context.startActivity(getIntent(context).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
         @JvmStatic
         fun getIntent(context: Context?) = Intent(context, MainActivity::class.java)

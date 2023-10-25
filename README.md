@@ -131,26 +131,33 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 Dec 1, 2021 进行二次开发
 
 [comment]: <> "Version history only shows last 3 versions"
 
-# v6.3.4
+# v6.4.0
 
-###### 2023/10/03
+###### 2023/10/25
 
 * `新增` ocr 模块支持 Paddle Lite 引擎 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_
-* `新增` WebSocket 模块 (参阅 项目文档 > [颜色类](https://docs.autojs6.com/#/webSocketType))
+* `新增` 打包功能支持内置插件与外部插件两种打包方式 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
+* `新增` WebSocket 模块 (参阅 项目文档 > [WebSocket](https://docs.autojs6.com/#/webSocketType))
+* `新增` barcode / qrcode 模块 (参阅 项目文档 > [条码](https://docs.autojs6.com/#/barcode) / [二维码](https://docs.autojs6.com/#/qrcode))
+* `新增` shizuku 模块 (参阅 项目文档 > [Shizuku](https://docs.autojs6.com/#/shizuku))
 * `新增` device.rotation / device.orientation 等方法
 * `新增` 内部 Java 类支持 class 静态属性访问
+* `新增` 支持在安卓系统设置页面选择并切换应用语言 (安卓 13 及以上)
+* `新增` 支持设置页面添加或长按应用图标激活 [应用快捷方式](https://developer.android.com/guide/topics/ui/shortcuts?hl=zh-cn) , 可启动文档和设置等页面
+* `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
+* `修复` 打包应用无法使用 AutoJs6 新增 API 的问题 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
 * `修复` VSCode 插件保存文件到本地时文件扩展名信息丢失的问题
 * `修复` 使用协程特性运行项目产生未捕获异常致使应用崩溃的问题
 * `修复` 重启或退出应用时浮动按钮无法记录其位置状态信息的问题
-* `修复` 设备屏幕方向改变时无法获取更新后的设备配置信息的问题
+* `修复` 设备屏幕方向改变时无法获取更新后的设备配置信息的问题 _[`issue #153`](http://issues.autojs6.com/153)_
 * `修复` 屏幕旋转至横向时 Toolbar 标题字体过小的问题
 * `修复` 屏幕旋转至横向时应用主页的页签排版过于拥挤的问题
 * `修复` 屏幕旋转至横向时浮动按钮可能溢出屏幕的问题 _[`issue #90`](http://issues.autojs6.com/90)_
 * `修复` 屏幕多次旋转时无法恢复浮动按钮的坐标及屏幕侧边方向的问题
+* `修复` 部分设备消息浮动框可能出现遗漏显示或重复显示的问题
 * `修复` 消息浮动框在多个脚本同时运行时可能存在被遮蔽的问题 _[`issue #67`](http://issues.autojs6.com/67)_
 * `修复` 使用广播分析布局时点击布局无法弹出菜单且导致应用崩溃的问题
 * `修复` 第二次及以后创建的 WebSocket 实例均无法正常触发监听器的问题
-* `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
 * `修复` 撤销 importPackage 的全局重定向方法以避免某些作用域下的包导入异常 _[`issue #88`](http://issues.autojs6.com/88)_
 * `修复` 日志活动页面使用复制或导出功能时可能导致应用崩溃的问题
 * `优化` 日志活动页面导出功能重命名为发送功能并重新实现符合实际意义的导出功能
@@ -158,6 +165,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 Dec 1, 2021 进行二次开发
 * `优化` ocr 模块同时兼容 Google MLKit 及 Paddle Lite 引擎 (参阅 项目文档 > [光学字符识别](https://docs.autojs6.com/#/ocr?id=p-mode))
 * `优化` 提升无障碍服务自动启动的成功概率
 * `优化` 构建工具自适应 Java 发行版本以尽量避免 "无效的发行版本" 问题
+* `优化` 构建工具优化 IDE 及相关插件的版本退级逻辑并增加版本预测能力
 * `优化` 部分 Kotlin 注解处理由 kapt 迁移至 KSP
 
 # v6.3.3

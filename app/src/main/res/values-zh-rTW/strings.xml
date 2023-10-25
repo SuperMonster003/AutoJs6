@@ -26,7 +26,6 @@
     <string name="description_change_working_dir_preference">更改包含指令碼的資料夾路徑</string>
     <string name="description_check_for_updates_preference">AutoJs6 從 GitHub 獲取並下載更新.\n\n注: 版本更新內容暫未提供多語言支援.</string>
     <string name="description_compatibility_with_classes_for_ver_4_x">透過類名重對映, 提供一定程度上的 4.x 版本 Java 類名相容.\n開啟選項後, 每次啟動指令碼將出現不同程度的啟動延遲 (幾十到幾百毫秒不等).\n如無特別需求, 建議始終保持選項關閉.</string>
-    <string name="description_documentation_launcher_icon_preference">文件啟動器圖示便於直接訪問文件, 並可像獨立應用程式一樣進行切換.</string>
     <string name="description_documentation_source_preference">本地文件: AutoJs6 內建檔案作為文件來源, 無需網路連線, 隨 AutoJs6 應用更新而發生內容變動.\n線上文件: 使用 GitHub 網頁作為文件來源, 需網路連線, 可隨時保持文件內容為最新.\n\n注: 為最大化線上文件的閱讀體驗, 建議使用桌面顯示器等寬屏顯示裝置閱讀.\n注: 截至 6.2.0 版本, 文件尚處於初步編寫階段, 大部分內容尚未完成編寫或更新.</string>
     <string name="description_documentation_source_preference_more">文件頁面的深色主題支援需要滿足以下條件:\n1. AutoJs6 開啟夜間模式\n2. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P] 及以下: 版本不低於 105</string>
     <string name="description_extending_js_build_in_objects">擴充套件 JavaScript 內建物件可以增加程式碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啟後所有指令碼均預設啟用內建擴充套件.\n內建擴充套件往往是不安全的, 除非明確瞭解內建擴充套件的原理及風險, 否則不建議啟用.\n選項關閉後, 仍然可以透過 plugins 全域性物件啟用內建擴充套件, 詳見專案文件.</string>
@@ -59,12 +58,11 @@
     <string name="dialog_button_system_settings_simplified">@string/dialog_button_system_settings</string>
     <string name="dialog_button_update_now">立即更新</string>
     <string name="dialog_button_use_default">使用預設值</string>
-    <string name="docs_app_name">AutoJs6 文件</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 文件</string>
+    <string name="text_app_shortcut_docs_short_label">文件</string>
     <string name="edit_and_run_handle_intent_error">無法處理檔案</string>
     <string name="edit_exit_without_save_warn">內容尚未儲存, 確定要退出嗎</string>
     <string name="entry_app_language_auto">跟隨系統</string>
-    <string name="entry_documentation_launcher_icon_hide">隱藏啟動器圖示</string>
-    <string name="entry_documentation_launcher_icon_show">顯示啟動器圖示</string>
     <string name="entry_documentation_source_local">本地文件</string>
     <string name="entry_documentation_source_online">線上文件</string>
     <string name="entry_editor_pinch_to_zoom_change_text_size">更改字型大小</string>
@@ -345,7 +343,6 @@
     <string name="text_do_not_ask_again_for_this_version">此版本不再提示</string>
     <string name="text_do_not_show_again">不再提示</string>
     <string name="text_documentation">文件</string>
-    <string name="text_documentation_launcher_icon">文件啟動器圖示</string>
     <string name="text_documentation_source">文件源</string>
     <string name="text_done">完成</string>
     <string name="text_download">下載</string>
@@ -460,6 +457,8 @@
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">佈局分析中...</string>
     <string name="text_licenses">開源許可資訊</string>
     <string name="text_log">日誌</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 日誌</string>
+    <string name="text_app_shortcut_log_short_label">日誌</string>
     <string name="text_logging_in">登入中</string>
     <string name="text_login">登入</string>
     <string name="text_login_succeed">登入成功</string>
@@ -623,6 +622,8 @@
     <string name="text_set_as_working_dir">用作工作路徑</string>
     <string name="text_set_breakpoint">設定斷點</string>
     <string name="text_settings">設定</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 設定</string>
+    <string name="text_app_shortcut_settings_short_label">設定</string>
     <string name="text_should_not_be_empty">文字不能為空</string>
     <string name="text_show_layout_bounds">在佈局範圍中檢視</string>
     <string name="text_show_layout_hierarchy">在佈局層次中檢視</string>
@@ -679,19 +680,24 @@
     <string name="text_write_secure_settings_description">安全設定包含應用程式可讀但不可寫入的設定選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設定許可權\" 後, 普通應用可直接修改上述安全設定 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設定</string>
     <string name="theme_color_default">預設</string>
-    <string name="text_only_latest_few_items_will_be_sent">仅最新的 %d 个条目将被发送</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">当前日志总条目数 %d 超出可发送限制</string>
-    <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
-    <string name="text_no_log_entries_to_send">无可发送的日志条目</string>
-    <string name="text_no_log_entries_to_export">无可导出的日志条目</string>
-    <string name="text_no_log_entries_to_copy">无可复制的日志条目</string>
-    <string name="text_failed_to_copy">复制失败</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">已复制到剪贴板 (仅最新的 %d 个条目)</string>
-    <string name="text_failed_to_export_log_entries">日志条目导出失败</string>
-    <string name="dialog_button_dismiss">关闭</string>
-    <string name="dialog_button_view_file">查看文件</string>
-    <string name="text_exported">已导出</string>
-    <string name="text_some_items_exported">已导出 %d 个条目</string>
+    <string name="text_only_latest_few_items_will_be_sent">僅最新的 %d 個條目將被髮送</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">當前日誌總條目數 %d 超出可傳送限制</string>
+    <string name="text_failed_to_send_log_entries">日誌條目傳送失敗</string>
+    <string name="text_no_log_entries_to_send">無可傳送的日誌條目</string>
+    <string name="text_no_log_entries_to_export">無可導出的日誌條目</string>
+    <string name="text_no_log_entries_to_copy">無可複製的日誌條目</string>
+    <string name="text_failed_to_copy">複製失敗</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">已複製到剪貼簿 (僅最新的 %d 個條目)</string>
+    <string name="text_failed_to_export_log_entries">日誌條目匯出失敗</string>
+    <string name="dialog_button_dismiss">關閉</string>
+    <string name="dialog_button_view_file">檢視檔案</string>
+    <string name="text_exported">已匯出</string>
+    <string name="text_some_items_exported">已匯出 %d 個條目</string>
+    <string name="text_app_shortcut_disabled">此快捷方式已禁用</string>
+    <string name="text_launcher_shortcuts">啟動器快捷方式</string>
+    <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中執行特定操作, 使用者可以在啟動器中顯示這些快捷方式, 並快速開始某些任務或啟動某個活動, 如閲讀 AutoJs6 應用文件, 啟動 AutoJs6 設定頁面等.</string>
+    <string name="summary_text_launcher_shortcuts">新增快捷方式到啟動器</string>
+    <string name="text_pin_shortcut_not_unsupported">將快捷方式固定到啟動器不被支援</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

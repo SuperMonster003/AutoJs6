@@ -1,49 +1,59 @@
 package org.autojs.autojs.util
 
-import android.app.Activity
+import android.app.LocaleManager
+import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
-import com.zeugmasolutions.localehelper.LocaleHelper
-import com.zeugmasolutions.localehelper.LocaleHelperActivityDelegate
-import com.zeugmasolutions.localehelper.LocaleHelperActivityDelegateImpl
+import android.os.Build
+import android.os.LocaleList
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.pref.Language
 import org.autojs.autojs6.R
 import java.util.Locale
 
 object LocaleUtils {
 
-    private val localeDelegate: LocaleHelperActivityDelegate = LocaleHelperActivityDelegateImpl()
-    private val localeHelper = LocaleHelper
-
-    private val globalAppContext = GlobalAppContext.get()
-
     @JvmStatic
-    fun setLocale(activity: Activity, locale: Locale?) {
-        locale?.let { localeDelegate.setLocale(activity, it) }
-        ?: throw IllegalArgumentException(globalAppContext.getString(R.string.error_cannot_be_null, "Locale"))
-    }
-
-    @JvmStatic
-    fun setFollowSystem(activity: Activity) {
-        val systemLocale = localeHelper.systemLocale
-        val currentLocale = localeHelper.getLocale(activity)
-        localeDelegate.apply {
-            if (currentLocale !== systemLocale) {
-                setLocale(activity, systemLocale)
-            }
-            clearLocaleSelection(activity)
+    fun setLocale(context: Context, locale: Locale?) {
+        locale ?: throw IllegalArgumentException(context.getString(R.string.error_cannot_be_null, "Locale"))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList(locale)
+        } else {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(locale))
         }
     }
 
     @JvmStatic
-    fun getSystemLocale() = localeHelper.getLocale(globalAppContext)
+    fun setFollowSystem(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList.getEmptyLocaleList()
+        } else {
+            setLocale(context, getSystemLocale())
+        }
+    }
+
+    @JvmStatic
+    fun getSystemLocale(): Locale = Resources.getSystem().configuration.locales[0] ?: Locale.getDefault()
 
     @JvmStatic
     fun getResources(desiredLocale: Locale?): Resources {
-        return globalAppContext.let { context ->
+        return GlobalAppContext.get().let { context ->
             context.resources.configuration.let { Configuration(it) }.run {
-                setLocale(desiredLocale ?: localeHelper.systemLocale)
+                setLocale(desiredLocale ?: getSystemLocale())
                 context.createConfigurationContext(this).resources
+            }
+        }
+    }
+
+    fun syncPrefWithCurrentStateIfNeeded(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val appLocales = context.getSystemService(LocaleManager::class.java).applicationLocales
+            if (appLocales.isEmpty) {
+                Language.setPrefLanguageAuto()
+            } else {
+                Language.setPrefLanguage(appLocales[appLocales.size() - 1])
             }
         }
     }

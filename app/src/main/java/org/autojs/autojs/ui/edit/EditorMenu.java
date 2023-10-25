@@ -183,6 +183,8 @@ public class EditorMenu {
                     dialog.dismiss();
                 })
                 .onNegative((ignored, which) -> {
+                    // TODO by SuperMonster003 on Oct 20, 2023.
+                    //  ! Check by execution mode in class org.autojs.autojs.script.JavaScriptSource .
                     if (mEditor.getText().startsWith(JavaScriptSource.EXECUTION_MODE_UI_PREFIX)) {
                         mEditor.insert(1, item.getImportText() + ";\n");
                     } else {

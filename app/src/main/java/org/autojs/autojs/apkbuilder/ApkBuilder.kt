@@ -1,7 +1,10 @@
 package org.autojs.autojs.apkbuilder
 
+import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
+import com.reandroid.arsc.chunk.TableBlock
 import org.autojs.autojs.apkbuilder.util.StreamUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
@@ -30,8 +33,13 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
     private var mInitVector: String? = null
     private var mKey: String? = null
 
+    private val mAssetManager: AssetManager by lazy { GlobalAppContext.get().assets }
+
     private val mManifestFile
         get() = File(mWorkspacePath, "AndroidManifest.xml")
+
+    private val mResourcesArscFile
+        get() = File(mWorkspacePath, "resources.arsc")
 
     private lateinit var mAppConfig: AppConfig
 
@@ -43,9 +51,10 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
 
     @Throws(IOException::class)
     fun prepare() = also {
-        mProgressCallback?.run { GlobalAppContext.post { onPrepare(this@ApkBuilder) } }
+        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onPrepare(this) } }
         File(mWorkspacePath).mkdirs()
         mApkPackager.unzip()
+        copyAssetsRecursively("", File(mWorkspacePath, "assets"))
     }
 
     @Throws(IOException::class)
@@ -147,13 +156,24 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
 
     @Throws(IOException::class)
     fun build() = also {
-        mProgressCallback?.run { GlobalAppContext.post { onBuild(this@ApkBuilder) } }
-        mAppConfig.icon?.run {
+        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onBuild(this) } }
+        mAppConfig.icon?.let { callable ->
             try {
-                call()?.compress(
-                    Bitmap.CompressFormat.PNG, 100,
-                    FileOutputStream(File(mWorkspacePath, "res/mipmap/ic_launcher.png"))
-                )
+                val tableBlock = TableBlock.load(mResourcesArscFile)
+                val packageName = "${GlobalAppContext.get().packageName}.inrt"
+                val packageBlock = tableBlock.getOrCreatePackage(0x7f, packageName).also {
+                    tableBlock.currentPackage = it
+                }
+                val appIcon = packageBlock.getOrCreate("", ICON_RES_DIR, ICON_NAME)
+                val appIconPath = appIcon.resValue.decodeValue()
+                Log.d(TAG, "Icon path: $appIconPath")
+                val file = File(mWorkspacePath, appIconPath).also {
+                    if (!it.exists()) {
+                        File(it.parent!!).mkdirs()
+                        it.createNewFile()
+                    }
+                }
+                callable.call()?.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(file))
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
@@ -162,16 +182,36 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
         mArscPackageName?.let { buildArsc() }
     }
 
+    private fun copyAssetsRecursively(assetPath: String, targetFile: File) {
+        if (targetFile.isFile && targetFile.exists()) return
+        val list = mAssetManager.list(assetPath) ?: return
+        if (list.isEmpty()) /* asset is file */ {
+            mAssetManager.open(assetPath).use { input ->
+                FileOutputStream(targetFile.absolutePath).use { output ->
+                    input.copyTo(output)
+                    output.flush()
+                }
+            }
+        } else /* asset is folder */ {
+            targetFile.delete()
+            targetFile.mkdir()
+            list.forEach {
+                val sourcePath = if (assetPath.isEmpty()) it else "$assetPath/$it"
+                copyAssetsRecursively(sourcePath, File(targetFile, it))
+            }
+        }
+    }
+
     @Throws(Exception::class)
     fun sign() = also {
-        mProgressCallback?.run { GlobalAppContext.post { onSign(this@ApkBuilder) } }
+        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onSign(this) } }
         val fos = FileOutputStream(mOutApkFile)
         TinySign.sign(File(mWorkspacePath), fos)
         fos.close()
     }
 
     fun cleanWorkspace() = also {
-        mProgressCallback?.run { GlobalAppContext.post { onClean(this@ApkBuilder) } }
+        mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onClean(this) } }
         delete(File(mWorkspacePath))
     }
 
@@ -256,6 +296,15 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
                 }
             }
         }
+    }
+
+    companion object {
+
+        private val TAG = ApkBuilder::class.java.simpleName
+
+        const val ICON_NAME = "ic_launcher"
+        const val ICON_RES_DIR = "mipmap"
+
     }
 
 }

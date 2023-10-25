@@ -10,11 +10,7 @@ let { autojs, shell, files, util } = global;
  * @return {Internal.App}
  */
 module.exports = function (scriptRuntime, scope) {
-    const File = java.io.File;
-    const Uri = android.net.Uri;
     const JavaInteger = java.lang.Integer;
-    const FileProvider = androidx.core.content.FileProvider;
-    const AppUtils = org.autojs.autojs.runtime.api.AppUtils;
 
     /**
      * @type {org.autojs.autojs.runtime.api.AppUtils}

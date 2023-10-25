@@ -95,13 +95,6 @@ object Pref {
             resources.getBoolean(R.bool.pref_auto_check_for_updates),
         )
 
-    @JvmStatic
-    val isDocumentationLauncherIconShouldShow: Boolean
-        get() {
-            val shouldShow = key(R.string.key_documentation_launcher_icon_show)
-            return getString(R.string.key_documentation_launcher_icon, shouldShow) == shouldShow
-        }
-
     private val lastUpdatesCheckedTimestamp: Long
         get() = getTimestamp(R.string.key_last_updates_checked)
 

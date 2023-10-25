@@ -40,7 +40,8 @@ public class SdkVersionUtils {
             /* api: 30 */ "11",
             /* api: 31 */ "12",
             /* api: 32 */ "12.1",
-            /* api: 33 */ "13"
+            /* api: 33 */ "13",
+            /* api: 34 */ "14"
     };
 
     public static String sdkIntToString(int i) {

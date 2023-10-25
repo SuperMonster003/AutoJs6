@@ -22,7 +22,6 @@ public class ManifestEditor {
     private String mPackageName;
     private byte[] mManifestData;
 
-
     public ManifestEditor(InputStream manifestInputStream) {
         mManifestInputStream = manifestInputStream;
     }
@@ -54,7 +53,7 @@ public class ManifestEditor {
         mManifestData = writer.toByteArray();
         return this;
     }
-    
+
     private static byte[] readFully(InputStream is) throws IOException {
         byte[] bytes = new byte[is.available()];
         is.read(bytes);
@@ -89,7 +88,6 @@ public class ManifestEditor {
             return;
         }
     }
-
 
     private class MutableAxmlWriter extends AxmlWriter {
         private class MutableNodeImpl extends AxmlWriter.NodeImpl {

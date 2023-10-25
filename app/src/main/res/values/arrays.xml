@@ -20,21 +20,11 @@
         <item>@string/entry_documentation_source_online</item>
     </string-array>
 
-    <string-array name="keys_documentation_launcher_icon">
-        <item>@string/key_documentation_launcher_icon_show</item>
-        <item>@string/key_documentation_launcher_icon_hide</item>
-    </string-array>
-
-    <string-array name="values_documentation_launcher_icon">
-        <item>@string/entry_documentation_launcher_icon_show</item>
-        <item>@string/entry_documentation_launcher_icon_hide</item>
-    </string-array>
-
     <string-array name="keys_app_language">
         <item>@string/key_app_language_auto</item>
-        <item>@string/key_app_language_zh</item>
-        <item>@string/key_app_language_zh_hk</item>
-        <item>@string/key_app_language_zh_tw</item>
+        <item>@string/key_app_language_zh_hans</item>
+        <item>@string/key_app_language_zh_hant_hk</item>
+        <item>@string/key_app_language_zh_hant_tw</item>
         <item>@string/key_app_language_en</item>
         <item>@string/key_app_language_fr</item>
         <item>@string/key_app_language_es</item>
@@ -46,9 +36,9 @@
 
     <string-array name="values_app_language">
         <item>@string/entry_app_language_auto</item>
-        <item>@string/entry_app_language_zh</item>
-        <item>@string/entry_app_language_zh_hk</item>
-        <item>@string/entry_app_language_zh_tw</item>
+        <item>@string/entry_app_language_zh_hans</item>
+        <item>@string/entry_app_language_zh_hant_hk</item>
+        <item>@string/entry_app_language_zh_hant_tw</item>
         <item>@string/entry_app_language_en</item>
         <item>@string/entry_app_language_fr</item>
         <item>@string/entry_app_language_es</item>

@@ -2,7 +2,9 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
         android:configure="org.autojs.autojs.external.widget.ScriptWidgetSettingsActivity"
         android:initialLayout="@layout/widget_script_shortcut"
-        android:minHeight="40dp"
-        android:minWidth="40dp"
+        android:minHeight="24dp"
+        android:minWidth="24dp"
+        android:minResizeWidth="24dp"
+        android:minResizeHeight="24dp"
         android:previewImage="@drawable/ic_node_js_black"
-        android:resizeMode="none" />
+        android:resizeMode="horizontal|vertical" />

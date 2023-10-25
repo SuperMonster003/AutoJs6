@@ -25,11 +25,13 @@ class Loopers(val runtime: ScriptRuntime) {
 
     @Volatile
     private var mServantLooper: Looper? = null
+
     @Suppress("DEPRECATION")
     private var mMainLooperQuitHandler: LooperQuitHandler? = null
-    private var waitWhenIdle: Boolean
-    private val allTasks = ConcurrentLinkedQueue<AsyncTask>()
 
+    private var mWaitWhenIdle: Boolean
+
+    private val allTasks = ConcurrentLinkedQueue<AsyncTask>()
     private val lock = ReentrantLock()
     private val condition = lock.newCondition()
 
@@ -55,7 +57,7 @@ class Loopers(val runtime: ScriptRuntime) {
         prepare()
         myLooper = Looper.myLooper()!!
         timer = Timer(runtime, myLooper)
-        waitWhenIdle = myLooper == Looper.getMainLooper()
+        mWaitWhenIdle = myLooper == Looper.getMainLooper()
     }
 
     @Deprecated("Deprecated in Java", ReplaceWith("AsyncTask"))
@@ -111,10 +113,9 @@ class Loopers(val runtime: ScriptRuntime) {
             return when {
                 Thread.currentThread().isInterrupted -> true
                 timer.hasPendingCallbacks() -> false
-                // 检查是否有运行中的线程
-                checkTask() -> false
-                waitWhenIdle -> false
-                (Context.getCurrentContext() as AutoJsContext).hasPendingContinuation() -> false
+                checkTask() /* 检查是否有运行中的线程. */ -> false
+                (Context.getCurrentContext() as? AutoJsContext)?.hasPendingContinuation() == true -> false
+                mWaitWhenIdle -> false
                 else -> true
             }
         }
@@ -133,7 +134,7 @@ class Loopers(val runtime: ScriptRuntime) {
 
     @Deprecated("Deprecated in Java", ReplaceWith("AsyncTask"))
     fun waitWhenIdle(b: Boolean) {
-        waitWhenIdle = b
+        mWaitWhenIdle = b
     }
 
     fun recycle() {
@@ -160,7 +161,7 @@ class Loopers(val runtime: ScriptRuntime) {
         Looper.myQueue().addIdleHandler(MessageQueue.IdleHandler {
             if (this == runtime.loopers) {
                 Log.d(LOG_TAG, "main looper queueIdle")
-                if (shouldQuitLooper() && mMainLooperQuitHandler?.shouldQuit() == true) {
+                if (shouldQuitLooper() && mMainLooperQuitHandler?.shouldQuit() != false) {
                     Log.d(LOG_TAG, "main looper quit")
                     Looper.myLooper()?.quitSafely()
                 }
