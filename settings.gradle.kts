@@ -91,6 +91,14 @@ pluginManagement {
                 fallbackIdentifier to "1.8.21", /* May 3, 2023. */
             ),
         ),
+        "unknown" to mapOf(
+            "android" to mapOf(
+                fallbackIdentifier to "8.1.2", /* Oct 30, 2023. */
+            ),
+            "kotlin" to mapOf(
+                fallbackIdentifier to "1.8.21", /* May 3, 2023. */
+            ),
+        )
     )
 
     val kspPluginVersionMap = mapOf(
@@ -156,7 +164,7 @@ pluginManagement {
     val fallbackSuffix = " [$fallbackIdentifier]"
 
     /* Nullable. */
-    val platform = System.getProperty("idea.paths.selector") ?: System.getProperty("idea.platform.prefix")
+    val platform = System.getProperty("idea.paths.selector") ?: System.getProperty("idea.platform.prefix") ?: unknownIdentifier
 
     val isPlatformAS = platform?.startsWith(platformIdentifierForAS) == true
             || System.getProperty("idea.vendor.name").equals(vendorNameForAS, true)
@@ -166,7 +174,7 @@ pluginManagement {
     val platformType = when {
         isPlatformAS -> "as"
         isPlatformIdea -> "idea"
-        else -> throw Exception("$unknownIdentifier1Up platform: $platform")
+        else -> unknownIdentifier
     }
 
     val previewIdentifier = when {
@@ -175,12 +183,12 @@ pluginManagement {
         else -> ""
     }
 
-    val previewIdentifier1Up = uppercaseFirstChar(previewIdentifier)
+    val previewIdentifier1Up = previewIdentifier ?: uppercaseFirstChar(previewIdentifier)
 
     val platformVersion = (System.getProperty("idea.version") ?: when {
         isPlatformAS -> platform?.substring(platformIdentifierForAS.length)
         isPlatformIdea -> platform?.substring(platformIdentifierForIdea.length)
-        else -> null
+        else -> unknownIdentifier
     } ?: throw Exception("$unknownIdentifier1Up platform version"))
         .let { rawVersion ->
             platform?.let { rawVersion }
