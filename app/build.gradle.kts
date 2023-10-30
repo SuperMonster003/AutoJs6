@@ -657,6 +657,9 @@ class Versions(filePath: String) {
             "2023.1" to javaVersionMinSuggested, /* Aug 17, 2023. */
             "2022.3" to javaVersionMinSuggested, /* Aug 17, 2023. */
         ),
+        "unknown" to mapOf(
+            /* Empty for unknown. */
+        )
     )
 
     val javaVersion: JavaVersion by lazy {
