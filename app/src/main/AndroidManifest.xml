@@ -53,6 +53,9 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
+
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -147,6 +150,7 @@
 
                 <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.intent.action.MAIN"/>
+                <category android:name="${intentCategory}"/>
                 <category android:name="${intentCategory}"/>
                 <category android:name="${intentCategory}"/>
             </intent-filter>
@@ -591,7 +595,7 @@
                 android:exported="false">
             <meta-data
                     android:name="autoStoreLocales"
-                    android:value="true" />
+                    android:value="true"/>
         </service>
 
         <activity
@@ -606,7 +610,10 @@
 
             </intent-filter>
         </activity>
-        <activity android:name="org.autojs.autojs.inrt.LogActivity"/>
+
+        <activity
+                android:name="org.autojs.autojs.inrt.LogActivity"
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity android:name="org.autojs.autojs.inrt.SettingsActivity"/>
 

@@ -193,7 +193,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         if (!mEditorView.isTextChanged) {
             return
         }
-        val text = mEditorView.editor!!.text
+        val text = mEditorView.editor.text
         if (text.length < 256 * 1024) {
             outState.putString("text", text)
         } else {
@@ -228,7 +228,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
                 .observeOn(Schedulers.io())
                 .map { PFiles.read(it) }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ mEditorView.editor!!.text = it }, Throwable::printStackTrace)
+                .subscribe({ mEditorView.editor.text = it }, Throwable::printStackTrace)
         }
     }
 

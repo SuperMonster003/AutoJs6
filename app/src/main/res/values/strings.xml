@@ -907,7 +907,18 @@
     <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
     <string name="text_pin_shortcut_not_unsupported">Pinning shortcuts to launcher is not supported</string>
-    <string name="text_template_apk_path">template apk path</string>
+    <string name="text_template_apk_path">Template APK path</string>
+    <string name="path_android_asset_template" translatable="false">file:///android_asset/template.apk</string>
+    <string name="text_shizuku_access_description">Shizuku makes it possible to uses system API with ADB privileges</string>
+    <string name="text_shizuku_access">Shizuku access</string>
+    <string name="text_grant_autojs6_access_in_shizuku_app">Grant AutoJs6 access in Shizuku app</string>
+    <string name="text_revoke_autojs6_access_in_shizuku_app">Revoke AutoJs6 access in Shizuku app</string>
+    <string name="text_shizuku_service_may_need_to_be_run_first">Shizuku service may need to be run first</string>
+    <string name="error_shizuku_is_not_installed">Shizuku is not installed</string>
+    <string name="error_shizuku_version_is_not_supported">Shizuku version is not supported</string>
+    <string name="error_failed_to_revoke_shizuku_access">Failed to revoke Shizuku access</string>
+    <string name="error_failed_to_grant_shizuku_access">Failed to grant Shizuku access</string>
+    <string name="error_unable_to_use_shizuku_service">Unable to use Shizuku service</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>

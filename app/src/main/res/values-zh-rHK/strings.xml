@@ -698,7 +698,17 @@
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中執行特定操作, 用户可以在啓動器中顯示這些快捷方式, 並快速開始某些任務或啓動某個活動, 如閲讀 AutoJs6 應用文檔, 啓動 AutoJs6 設置頁面等.</string>
     <string name="summary_text_launcher_shortcuts">添加快捷方式到啓動器</string>
     <string name="text_pin_shortcut_not_unsupported">將快捷方式固定到啓動器不被支持</string>
-    <string name="text_template_apk_path">模板APK路徑</string>
+    <string name="text_template_apk_path">模板 APK 路徑</string>
+    <string name="text_shizuku_access_description">通過 Shizuku 可以獲得 ADB 特權並使用系統 API</string>
+    <string name="text_shizuku_access">Shizuku 權限</string>
+    <string name="text_grant_autojs6_access_in_shizuku_app">在 Shizuku 應用中授予 AutoJs6 權限</string>
+    <string name="text_revoke_autojs6_access_in_shizuku_app">在 Shizuku 應用中撤銷 AutoJs6 權限</string>
+    <string name="text_shizuku_service_may_need_to_be_run_first">可能需要先運行 Shizuku 服務</string>
+    <string name="error_shizuku_is_not_installed">Shizuku 未安裝</string>
+    <string name="error_shizuku_version_is_not_supported">Shizuku 版本不支持</string>
+    <string name="error_failed_to_revoke_shizuku_access">Shizuku 權限撤銷失敗</string>
+    <string name="error_failed_to_grant_shizuku_access">Shizuku 權限授予失敗</string>
+    <string name="error_unable_to_use_shizuku_service">無法使用 Shizuku 服務</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

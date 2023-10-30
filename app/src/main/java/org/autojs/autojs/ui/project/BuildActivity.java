@@ -77,7 +77,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private MaterialDialog mProgressDialog;
     private String mSource;
     private boolean mIsDefaultIcon = true;
-    private boolean mIsApkTemplateInAssets = false;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -102,9 +101,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         binding.fab.setOnClickListener(v -> buildApk());
         binding.selectSource.setOnClickListener(v -> selectSourceFilePath());
         binding.selectOutput.setOnClickListener(v -> selectOutputDirPath());
-        binding.selectTemplate.setOnClickListener(
-                v -> selectTemplateFilePath()
-        );
+        binding.selectTemplate.setOnClickListener(v -> selectTemplateFilePath());
         mIcon.setOnClickListener(v -> selectIcon());
 
         setToolbarAsBack(R.string.text_build_apk);
@@ -112,9 +109,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (mSource != null) {
             setupWithSourceFile(new ScriptFile(mSource));
         }
-        mIsApkTemplateInAssets = checkApkTemplateInAssets();
-        if (mIsApkTemplateInAssets) {
-            mTemplatePath.setText("file:///android_asset/template.apk");
+        if (checkApkTemplateInAssets()) {
+            mTemplatePath.setText(R.string.path_android_asset_template);
         }
     }
 
@@ -319,7 +315,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private ApkBuilder callApkBuilder(File tmpDir, File outApk, ApkBuilder.AppConfig appConfig) throws Exception {
-        InputStream templateApk = mTemplatePath.getText() != null ? (mTemplatePath.getText().toString().equals("file:///android_asset/template.apk") ? getAssets().open("template.apk") : new java.io.FileInputStream(mTemplatePath.getText().toString())) : ApkBuilderPluginHelper.openTemplateApk(BuildActivity.this);
+        InputStream templateApk = mTemplatePath.getText() != null
+                ? mTemplatePath.getText().toString().equals(getString(R.string.path_android_asset_template))
+                ? getAssets().open(TEMPLATE_APK_PATH)
+                : new java.io.FileInputStream(mTemplatePath.getText().toString())
+                : ApkBuilderPluginHelper.openTemplateApk(BuildActivity.this);
         return new ApkBuilder(templateApk, outApk, tmpDir.getPath())
                 .setProgressCallback(BuildActivity.this)
                 .prepare()

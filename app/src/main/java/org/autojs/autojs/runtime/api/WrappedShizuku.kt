@@ -1,15 +1,19 @@
 package org.autojs.autojs.runtime.api
 
 import android.content.ComponentName
+import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.IBinder
 import android.util.Log
 import org.autojs.autojs.App
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.shizuku.IUserService
 import org.autojs.autojs.core.shizuku.UserService
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import rikka.shizuku.Shizuku
 import org.autojs.autojs.runtime.api.AbstractShell.Result as ShellResult
 
@@ -22,6 +26,9 @@ object WrappedShizuku {
     var service: IUserService? = null
 
     private val TAG: String = WrappedShizuku::class.java.simpleName
+
+    private val context
+        get() = GlobalAppContext.get()
 
     private val mRequestCode = "shizuku-request-code".hashCode()
 
@@ -36,7 +43,7 @@ object WrappedShizuku {
         }
 
         override fun onServiceDisconnected(componentName: ComponentName) {
-            // ... ...
+            Log.d(TAG, "onServiceDisconnected: ${componentName.className}")
         }
     }
 
@@ -46,16 +53,16 @@ object WrappedShizuku {
         .debuggable(BuildConfig.DEBUG)
         .version(BuildConfig.VERSION_CODE)
 
-    private val mBinderReceivedListener = {
-        // if (Shizuku.isPreV11()) {
-        //     binding.text1.setText("Shizuku pre-v11 is not supported")
-        // } else {
-        //     binding.text1.setText("Binder received")
-        // }
+    private val mBinderReceivedListener = Shizuku.OnBinderReceivedListener {
+        if (Shizuku.isPreV11()) {
+            Log.d(TAG, "Shizuku pre-v11 is not supported")
+        } else {
+            Log.d(TAG, "Binder received")
+        }
     }
 
-    private val mBinderDeadListener = {
-        // binding.text1.setText("Binder dead")
+    private val mBinderDeadListener = Shizuku.OnBinderDeadListener {
+        Log.d(TAG, "Binder dead")
     }
 
     private val mRequestPermissionResultListener: (requestCode: Int, grantResult: Int) -> Unit = { requestCode: Int, grantResult: Int ->
@@ -71,45 +78,57 @@ object WrappedShizuku {
         Shizuku.addRequestPermissionResultListener(mRequestPermissionResultListener)
     }
 
+    internal fun bindUserServiceIfNeeded() {
+        if (hasPermission()) {
+            bindUserService()
+        }
+    }
+
     private fun bindUserService() {
-        val res = StringBuilder()
         try {
-            if (Shizuku.getVersion() < 10) {
-                res.append("requires Shizuku API 10")
-            } else {
+            if (!Shizuku.isPreV11()) {
                 Shizuku.bindUserService(mUserServiceArgs, mUserServiceConnection)
             }
-        } catch (tr: Throwable) {
-            tr.printStackTrace()
-            res.append(tr)
+        } catch (e: Throwable) {
+            e.printStackTrace()
         }
-        // binding.text3.setText(res.toString().trim { it <= ' ' })
     }
 
     private fun unbindUserService() {
-        val res = StringBuilder()
         try {
-            if (Shizuku.getVersion() < 10) {
-                res.append("requires Shizuku API 10")
-            } else {
+            if (!Shizuku.isPreV11()) {
                 Shizuku.unbindUserService(mUserServiceArgs, mUserServiceConnection, true)
             }
-        } catch (tr: Throwable) {
-            tr.printStackTrace()
-            res.append(tr)
+        } catch (_: Throwable) {
+            // Ignored.
         }
-        // binding.text3.setText(res.toString().trim { it <= ' ' })
     }
 
-    internal fun checkShizukuPermission() = try {
-        when {
-            Shizuku.isPreV11() -> false
-            Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED -> true.also { bindUserService() }
-            Shizuku.shouldShowRequestPermissionRationale() -> false
-            else -> false.also { Shizuku.requestPermission(mRequestCode) }
-        }
+    @ScriptInterface
+    fun isInstalled() = getLaunchIntent() != null
+
+    @ScriptInterface
+    fun hasPermission() = try {
+        Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
     } catch (e: Throwable) {
         false.also { e.printStackTrace() }
+    }
+
+    @ScriptInterface
+    fun requestPermission() = Shizuku.requestPermission(mRequestCode)
+
+    @ScriptInterface
+    @JvmOverloads
+    fun config(isRequest: Boolean? = null): Intent? {
+        return getLaunchIntent()?.also {
+            context.startActivity(it)
+            val message = when (isRequest) {
+                true -> "${context.getString(R.string.text_grant_autojs6_access_in_shizuku_app)} (${context.getString(R.string.text_shizuku_service_may_need_to_be_run_first)})"
+                false -> context.getString(R.string.text_revoke_autojs6_access_in_shizuku_app)
+                else -> null
+            }
+            ViewUtils.showToast(context, message, true)
+        }
     }
 
     @ScriptInterface
@@ -117,7 +136,7 @@ object WrappedShizuku {
         ensureService()
         return try {
             ShellResult.fromJson(service!!.execCommand(cmd))
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             ShellResult().apply {
                 code = 1
                 error = e.message ?: ""
@@ -133,7 +152,7 @@ object WrappedShizuku {
 
     @ScriptInterface
     fun ensureService() {
-        service ?: throw IllegalStateException("Shizuku service is not available")
+        service ?: throw IllegalStateException(context.getString(R.string.error_unable_to_use_shizuku_service))
     }
 
     internal fun onDestroy() {
@@ -141,6 +160,12 @@ object WrappedShizuku {
         Shizuku.removeBinderReceivedListener(mBinderReceivedListener)
         Shizuku.removeBinderDeadListener(mBinderDeadListener)
         Shizuku.removeRequestPermissionResultListener(mRequestPermissionResultListener)
+    }
+
+    private fun getLaunchIntent(): Intent? {
+        return context.packageManager.getLaunchIntentForPackage(org.autojs.autojs.util.App.SHIZUKU.packageName)?.apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
     }
 
 }

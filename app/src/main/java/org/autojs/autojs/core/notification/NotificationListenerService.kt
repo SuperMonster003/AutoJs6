@@ -45,6 +45,7 @@ class NotificationListenerService : android.service.notification.NotificationLis
     }
 
     companion object {
+        @JvmStatic
         var instance: NotificationListenerService? = null
             private set
     }

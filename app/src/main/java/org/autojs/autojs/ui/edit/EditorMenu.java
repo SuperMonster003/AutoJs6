@@ -197,7 +197,7 @@ public class EditorMenu {
     }
 
     private void startBuildApkActivity() {
-        Uri uri = mEditorView.getUri();
+        Uri uri = mEditorView.uri;
         if (uri != null) {
             BuildActivity.launch(mContext, uri.getPath());
         }
@@ -217,12 +217,10 @@ public class EditorMenu {
                 .title(R.string.text_pinch_to_zoom)
                 .items(R.array.values_editor_pinch_to_zoom_strategy)
                 .itemsCallbackSingleChoice(defSelectedIndex, (dialog, itemView, which, text) -> {
-                    if (mEditorView.editor != null) {
-                        String newKey = itemKeys.get(which);
-                        if (!Objects.equals(newKey, itemKey)) {
-                            Pref.putString(key, newKey);
-                            mEditorView.editor.notifyPinchToZoomStrategyChanged(newKey);
-                        }
+                    String newKey = itemKeys.get(which);
+                    if (!Objects.equals(newKey, itemKey)) {
+                        Pref.putString(key, newKey);
+                        mEditorView.editor.notifyPinchToZoomStrategyChanged(newKey);
                     }
                     return true;
                 })

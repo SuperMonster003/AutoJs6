@@ -59,7 +59,7 @@ class CodeEditor : HVScrollView {
 
     val codeEditText: CodeEditText = binding.codeEditText.also {
         it.addTextChangedListener(AutoIndent(it))
-        lastTextSize = getEditorTextSize(pxToSp(it.context, it.textSize).toInt())
+        lastTextSize = getEditorTextSize(pxToSp(it.textSize).toInt())
     }
 
     val lineCount

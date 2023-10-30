@@ -697,8 +697,18 @@
     <string name="text_launcher_shortcuts">Atajos del lanzador</string>
     <string name="description_launcher_shortcuts">Los accesos directos pueden realizar acciones específicas en AutoJs6. Los usuarios pueden mostrar estos accesos directos en un lanzador compatible e iniciar rápidamente algunas tareas o iniciar una actividad, como leer la documentación de la aplicación AutoJs6, iniciar la página de configuración de AutoJs6, etc.</string>
     <string name="summary_text_launcher_shortcuts">Añadir accesos directos al lanzador</string>
-    <string name="text_pin_shortcut_not_unsupported">No es posible anclar accesos directos al lanzador.</string>
+    <string name="text_pin_shortcut_not_unsupported">No es posible anclar accesos directos al lanzador</string>
     <string name="text_template_apk_path">Ruta de acceso de APK de plantilla</string>
+    <string name="text_shizuku_access_description">Shizuku te permite obtener privilegios ADB y acceso a las APIs del sistema</string>
+    <string name="text_shizuku_access">Permisos de Shizuku</string>
+    <string name="text_grant_autojs6_access_in_shizuku_app">Conceder privilegios AutoJs6 en una aplicación Shizuku</string>
+    <string name="text_revoke_autojs6_access_in_shizuku_app">Revocar privilegios de AutoJs6 en una aplicación Shizuku</string>
+    <string name="text_shizuku_service_may_need_to_be_run_first">Puede que necesite ejecutar primero el servicio Shizuku</string>
+    <string name="error_shizuku_is_not_installed">Shizuku no está instalado</string>
+    <string name="error_shizuku_version_is_not_supported">No se admite la versión de Shizuku</string>
+    <string name="error_failed_to_revoke_shizuku_access">Fallo en la revocación de permisos Shizuku</string>
+    <string name="error_failed_to_grant_shizuku_access">Fallo en la concesión de permisos Shizuku</string>
+    <string name="error_unable_to_use_shizuku_service">No se puede utilizar el servicio Shizuku</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d artículo</item>

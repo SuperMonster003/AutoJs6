@@ -6,19 +6,20 @@
 
 # v6.4.0
 
-###### 2023/10/25
+###### 2023/10/30
 
 * `新增` ocr 模块支持 Paddle Lite 引擎 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_ 
 * `新增` 打包功能支持内置插件与外部插件两种打包方式 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
 * `新增` WebSocket 模块 (参阅 项目文档 > [WebSocket](https://docs.autojs6.com/#/webSocketType))
 * `新增` barcode / qrcode 模块 (参阅 项目文档 > [条码](https://docs.autojs6.com/#/barcode) / [二维码](https://docs.autojs6.com/#/qrcode))
-* `新增` shizuku 模块 (参阅 项目文档 > [Shizuku](https://docs.autojs6.com/#/shizuku))
+* `新增` shizuku 模块 (参阅 项目文档 > [Shizuku](https://docs.autojs6.com/#/shizuku)) 及主页抽屉权限开关
 * `新增` device.rotation / device.orientation 等方法
 * `新增` 内部 Java 类支持 class 静态属性访问
 * `新增` 支持在安卓系统设置页面选择并切换应用语言 (安卓 13 及以上)
 * `新增` 支持设置页面添加或长按应用图标激活 [应用快捷方式](https://developer.android.com/guide/topics/ui/shortcuts?hl=zh-cn) , 可启动文档和设置等页面
 * `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
 * `修复` 打包应用无法使用 AutoJs6 新增 API 的问题 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
+* `修复` 打包应用在系统夜间模式下的样式异常
 * `修复` VSCode 插件保存文件到本地时文件扩展名信息丢失的问题
 * `修复` 使用协程特性运行项目产生未捕获异常致使应用崩溃的问题
 * `修复` 重启或退出应用时浮动按钮无法记录其位置状态信息的问题
@@ -37,9 +38,11 @@
 * `优化` 日志活动页面发送功能支持条目数量过大时自动截取并作出提示
 * `优化` ocr 模块同时兼容 Google MLKit 及 Paddle Lite 引擎 (参阅 项目文档 > [光学字符识别](https://docs.autojs6.com/#/ocr?id=p-mode))
 * `优化` 提升无障碍服务自动启动的成功概率
+* `优化` Kotlin 注解处理由 kapt 迁移至 KSP
+* `优化` 构建工具支持 IntelliJ Idea EAP 版本
 * `优化` 构建工具自适应 Java 发行版本以尽量避免 "无效的发行版本" 问题
 * `优化` 构建工具优化 IDE 及相关插件的版本退级逻辑并增加版本预测能力
-* `优化` 部分 Kotlin 注解处理由 kapt 迁移至 KSP
+* `优化` 适配 VSCode 插件 1.0.7
 * `依赖` 附加 Rikka Shizuku 版本 13.1.5
 * `依赖` 附加 MLKit Barcode Scanning 版本 17.2.0
 * `依赖` 升级 OpenCV 版本 4.5.5 -> 4.8.0 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
@@ -48,7 +51,6 @@
 * `依赖` 升级 Apache Commons Lang3 版本 3.12.0 -> 3.13.0
 * `依赖` 升级 Glide 版本 4.15.1 -> 4.16.0
 * `依赖` 升级 Android Analytics 版本 14.3.0 -> 14.4.0
-* `依赖` 升级 Androidx AppCompat 版本 1.4.2 -> 1.6.0-alpha05
 * `依赖` 升级 Androidx WebKit 版本 1.7.0 -> 1.8.0
 * `依赖` 升级 Androidx Preference 版本 1.2.0 -> 1.2.1
 * `依赖` 升级 Androidx Annotation 版本 1.6.0 -> 1.7.0

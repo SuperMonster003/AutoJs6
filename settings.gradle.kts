@@ -1,8 +1,5 @@
 @file:Suppress("SpellCheckingInspection")
 
-import org.gradle.kotlin.dsl.support.uppercaseFirstChar
-
-
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 include(
@@ -28,17 +25,7 @@ include(
 
 pluginManagement {
 
-    val platformIdentifierForAS = "AndroidStudio"
-    val platformIdentifierForIdea = "IntelliJIdea"
-
-    val unknownIdentifier = "unknown"
-    val unknownIdentifier1Up = unknownIdentifier[0].uppercase() + unknownIdentifier.substring(1)
-    val previewIdentifier = "preview"
-    val previewIdentifier1Up = previewIdentifier[0].uppercase() + previewIdentifier.substring(1)
-    val predictedIdentifier = "predicted"
-    val predictedSuffix = " [$predictedIdentifier]"
     val fallbackIdentifier = "fallback"
-    val fallbackSuffix = " [$fallbackIdentifier]"
 
     // @Hint by SuperMonster003 on May 3, 2023.
     //  ! To download archives of Android Studio,
@@ -66,7 +53,7 @@ pluginManagement {
                 "2022.1" to "E", /* May 3, 2023. */
             ),
             "android" to mapOf(
-                "Preview2023.2" to "8.3.0-alpha10", /* Oct 24, 2023. */
+                "Preview2023.2" to "8.3.0-alpha11", /* Oct 27, 2023. */
                 "2023.1" to "8.2.0-rc01", /* Oct 18, 2023. */
                 "Preview2023.1" to "8.2.0-beta06", /* Oct 11, 2023. */
                 "2022.3" to "8.1.2", /* Sep 29, 2023. */
@@ -90,13 +77,15 @@ pluginManagement {
         ),
         "idea" to mapOf(
             "android" to mapOf(
+                "Eap2023.3" to "8.1.2", /* Oct 25, 2023. */
                 "2023.2" to "8.1.2", /* Oct 18, 2023. */
                 "2023.1" to "7.4.2", /* May 26, 2023. */
                 "2022.3" to "7.4.0-beta02", /* Mar 25, 2023. */
                 fallbackIdentifier to "7.4.0", /* May 3, 2023. */
             ),
             "kotlin" to mapOf(
-                "2023.2" to "1.9.20-RC", /* Oct 18, 2023. */
+                "Eap2023.3" to "1.9.20-RC2", /* Oct 25, 2023. */
+                "2023.2" to "1.9.20-RC2", /* Oct 18, 2023. */
                 "2023.1" to "1.8.21", /* Apr 25, 2023. */
                 "2022.3" to "1.8.21", /* Apr 25, 2023. */
                 fallbackIdentifier to "1.8.21", /* May 3, 2023. */
@@ -105,7 +94,7 @@ pluginManagement {
     )
 
     val kspPluginVersionMap = mapOf(
-        // "1.9.20-RC2" to "1.0.13", /* Oct 25, 2023. */
+        "1.9.20-RC2" to "1.0.13", /* Oct 26, 2023. */
         "1.9.20-RC" to "1.0.13", /* Oct 12, 2023. */
         "1.9.20-Beta2" to "1.0.13", /* Sep 29, 2023. */
         "1.9.20-Beta" to "1.0.13", /* Sep 12, 2023. */
@@ -119,40 +108,60 @@ pluginManagement {
         fallbackIdentifier to "1.8.0-1.0.9", /* Aug 16, 2023. */
     )
 
-    val platformNicknameForAS = mapOf(
-        "Z" to "Zebra", /* Predicted on Oct 18, 2023. */
-        "Y" to "Yeti", /* Predicted on Oct 18, 2023. */
-        "X" to "Xiphias", /* Predicted on Oct 18, 2023. */
-        "W" to "Walrus", /* Predicted on Oct 18, 2023. */
-        "V" to "Vicuna", /* Predicted on Oct 18, 2023. */
-        "U" to "Unicorn", /* Predicted on Oct 18, 2023. */
-        "T" to "Tiger", /* Predicted on Oct 18, 2023. */
-        "S" to "Snail", /* Predicted on Oct 18, 2023. */
-        "R" to "Rhino", /* Predicted on Oct 18, 2023. */
-        "Q" to "Quail", /* Predicted on Oct 18, 2023. */
-        "P" to "Penguin", /* Predicted on Oct 18, 2023. */
-        "O" to "Ostrich", /* Predicted on Oct 18, 2023. */
-        "N" to "Newt", /* Predicted on Oct 18, 2023. */
-        "M" to "Monkey", /* Predicted on Oct 18, 2023. */
-        "L" to "Lion", /* Predicted on Oct 18, 2023. */
-        "K" to "Koala", /* Predicted on Oct 18, 2023. */
-        "J" to "Jaguar", /* Predicted on Oct 18, 2023. */
-        "I" to "Iguana", /* Aug 25, 2023. */
-        "H" to "Hedgehog", /* Apr 25, 2023. */
-        "G" to "Giraffe", /* Jan 17, 2023. */
-        "F" to "Flamingo", /* Sep 20, 2022. */
-        "E" to "Electric Eel", /* May 11, 2022. */
-        "D" to "Dolphin", /* Jan 31, 2022. */
-        "C" to "Chipmunk", /* Oct 13, 2021. */
-        "B" to "Bumblebee", /* May 18, 2021. */
-        "A" to "Arctic Fox", /* Jan 26, 2021. */
+    val platformCodenameForAS = mapOf(
+        "I" to "Iguana", /* Born on Aug 25, 2023. */
+        "H" to "Hedgehog", /* Born on Apr 25, 2023. */
+        "G" to "Giraffe", /* Born on Jan 17, 2023. */
+        "F" to "Flamingo", /* Born on Sep 20, 2022. */
+        "E" to "Electric Eel", /* Born on May 11, 2022. */
+        "D" to "Dolphin", /* Born on Jan 31, 2022. */
+        "C" to "Chipmunk", /* Born on Oct 13, 2021. */
+        "B" to "Bumblebee", /* Born on May 18, 2021. */
+        "A" to "Arctic Fox", /* Born on Jan 26, 2021. */
+
+        /* Codenames below were predicted on Oct 18, 2023. */
+
+        "J" to "Jaguar",
+        "K" to "Koala",
+        "L" to "Lion",
+        "M" to "Monkey",
+        "N" to "Newt",
+        "O" to "Ostrich",
+        "P" to "Penguin",
+        "Q" to "Quail",
+        "R" to "Rhino",
+        "S" to "Snail",
+        "T" to "Tiger",
+        "U" to "Unicorn",
+        "V" to "Vicuna",
+        "W" to "Walrus",
+        "X" to "Xiphias",
+        "Y" to "Yeti",
+        "Z" to "Zebra",
     )
 
-    /* Null safety. */
-    val platform = System.getProperty("idea.paths.selector") ?: platformIdentifierForAS
+    val platformIdentifierForAS = "AndroidStudio"
+    val vendorNameForAS = "Google"
+    val platformIdentifierForIdea = "IntelliJIdea"
+    val vendorNameForIdea = "Jetbrains"
 
-    val isPlatformAS = platform.startsWith(platformIdentifierForAS)
-    val isPlatformIdea = platform.startsWith(platformIdentifierForIdea)
+    fun uppercaseFirstChar(s: String) = s[0].uppercase() + s.substring(1)
+
+    val unknownIdentifier = "unknown"
+    val unknownIdentifier1Up = uppercaseFirstChar(unknownIdentifier)
+    val predictedIdentifier = "predicted"
+    val unfocusedIdentifier = "unfocused"
+    val unfocusedSuffix = " [$unfocusedIdentifier]"
+    val predictedSuffix = " [$predictedIdentifier]"
+    val fallbackSuffix = " [$fallbackIdentifier]"
+
+    /* Nullable. */
+    val platform = System.getProperty("idea.paths.selector") ?: System.getProperty("idea.platform.prefix")
+
+    val isPlatformAS = platform?.startsWith(platformIdentifierForAS) == true
+            || System.getProperty("idea.vendor.name").equals(vendorNameForAS, true)
+    val isPlatformIdea = platform?.startsWith(platformIdentifierForIdea) == true
+            || System.getProperty("idea.vendor.name").equals(vendorNameForIdea, true)
 
     val platformType = when {
         isPlatformAS -> "as"
@@ -160,11 +169,28 @@ pluginManagement {
         else -> throw Exception("$unknownIdentifier1Up platform: $platform")
     }
 
-    val platformVersion = when {
-        isPlatformAS -> platform.substring(platformIdentifierForAS.length)
-        isPlatformIdea -> platform.substring(platformIdentifierForIdea.length)
-        else -> "$unknownIdentifier1Up platform version" /* Should never happen. */
+    val previewIdentifier = when {
+        isPlatformAS -> "preview"
+        isPlatformIdea -> "eap"
+        else -> ""
     }
+
+    val previewIdentifier1Up = uppercaseFirstChar(previewIdentifier)
+
+    val platformVersion = (System.getProperty("idea.version") ?: when {
+        isPlatformAS -> platform?.substring(platformIdentifierForAS.length)
+        isPlatformIdea -> platform?.substring(platformIdentifierForIdea.length)
+        else -> null
+    } ?: throw Exception("$unknownIdentifier1Up platform version"))
+        .let { rawVersion ->
+            platform?.let { rawVersion }
+                ?: when (rawVersion.contains(previewIdentifier, true)) {
+                    true -> rawVersion
+                    else -> "$previewIdentifier1Up$rawVersion"
+                }
+        }
+
+    val platformVersionUnfocused = platformVersion.replace(Regex("(.+)(\\.\\d+)(\\.\\d+$)"), "$1$2")
 
     val abbrMap = gradlePluginVersionMap[platformType]!!["abbr"] ?: mapOf()
     val androidMap = gradlePluginVersionMap[platformType]!!["android"]!!
@@ -193,11 +219,11 @@ pluginManagement {
             when {
                 isPlatformAS -> {
                     var isPredicted = false
-                    val platformNickAbbr = abbrMap[platformVersion] ?: abbrMap["$previewIdentifier1Up$platformVersion"]?.also {
+                    val platformCodenameAbbr = abbrMap[platformVersion] ?: abbrMap["$previewIdentifier1Up$platformVersion"]?.also {
                         isPredicted = true
                     }
-                    val platformNick = platformNickAbbr?.let { abbr ->
-                        platformNicknameForAS[abbr]?.let {
+                    val platformCodeName = platformCodenameAbbr?.let { abbr ->
+                        platformCodenameForAS[abbr]?.let {
                             when (isPredicted) {
                                 true -> " [ $it ($predictedIdentifier) ]"
                                 else -> " $it"
@@ -209,33 +235,49 @@ pluginManagement {
                     val previewSuffix = if (isPreview) " ($previewIdentifier)" else ""
                     val niceVersion = if (isPreview) platformVersion.substring(previewIdentifier1Up.length) else platformVersion
 
-                    "Android Studio$platformNick$previewSuffix | $niceVersion"
+                    "Android Studio$platformCodeName$previewSuffix${if (niceVersion.isNotEmpty()) " | $niceVersion" else ""}"
                 }
-                isPlatformIdea -> "IntelliJ IDEA $platformVersion"
+                isPlatformIdea -> {
+                    val isEap = platformVersion.contains(previewIdentifier1Up, true)
+                    val isPredicted = platform == null
+                    val suffix = when (isEap) {
+                        true -> when (isPredicted) {
+                            true -> " [ ${previewIdentifier.uppercase()} ($predictedIdentifier) ]"
+                            else -> " ${previewIdentifier.uppercase()}"
+                        }
+                        else -> when (isPredicted) {
+                            true -> " ($predictedIdentifier)"
+                            else -> ""
+                        }
+                    }
+                    val niceVersion = if (isEap) platformVersion.substring(previewIdentifier1Up.length) else platformVersion
+
+                    "IntelliJ IDEA$suffix${if (niceVersion.isNotEmpty()) " | $niceVersion" else ""}"
+                }
                 else -> unknownIdentifier1Up
             }.let { infoList += "Platform: $it" }
         }
 
         dependencies /* Android/Kotlin Gradle Plugin. */  {
             arrayOf(
-                arrayOf(
-                    /* classpath = */ "com.android.tools.build:gradle",
-                    /* version = */ androidMap[platformVersion],
-                    /* versionPredicted = */ androidMap["$previewIdentifier1Up$platformVersion"],
-                    /* versionFallback = */ androidMap[fallbackIdentifier],
-                ),
-                arrayOf(
-                    /* classpath = */ "org.jetbrains.kotlin:kotlin-gradle-plugin",
-                    /* version = */ kotlinMap[platformVersion],
-                    /* versionPredicted = */ kotlinMap["$previewIdentifier1Up$platformVersion"],
-                    /* versionFallback = */ kotlinMap[fallbackIdentifier],
-                ),
+                arrayOf("com.android.tools.build:gradle", androidMap),
+                arrayOf("org.jetbrains.kotlin:kotlin-gradle-plugin", kotlinMap),
             ).forEach {
-                val (classpath, version, versionPredicted, versionFallback) = it
+                val (classpath, map) = it
+
+                map as? Map<*, *> ?: throw Exception("Invalid map for classpath")
+
+                val version = map[platformVersion] as? String
+                val versionUnfocused = map[platformVersionUnfocused] as? String
+                val versionPredicted = (map["$previewIdentifier1Up$platformVersion"]
+                    ?: map["$previewIdentifier1Up$platformVersionUnfocused"]) as? String
+                val versionFallback = map[fallbackIdentifier] as? String
 
                 var suffix = ""
                 val classpathNotation = "$classpath:" + (
-                        version ?: versionPredicted?.also {
+                        version ?: versionUnfocused?.also {
+                            suffix += unfocusedSuffix
+                        } ?: versionPredicted?.also {
                             suffix += predictedSuffix
                         } ?: versionFallback?.also {
                             suffix += fallbackSuffix
@@ -249,25 +291,27 @@ pluginManagement {
     }
 
     plugins {
-        arrayOf(
-            arrayOf(
-                /* id = */ "com.google.devtools.ksp",
-                /* kspVersionKey = */ kotlinMap[platformVersion],
-                /* kspVersionPredictedKey = */ kotlinMap["$previewIdentifier1Up$platformVersion"],
-                /* kspVersionFallbackKey = */ kotlinMap[fallbackIdentifier],
-                /* isApply = */ false,
-            ),
-        ).forEach { data ->
-            val id = data[0] as String
-            val kspVersionKey = data[1] as String?
-            val kspVersionPredictedKey = data[2] as String?
-            val kspVersionFallbackKey = data[3] as String
-            val isApply = data[4] as Boolean
+
+        arrayOf("com.google.devtools.ksp", kotlinMap, false).let { data ->
+            var (id, map, isApply) = data
+
+            id as? String ?: throw Exception("Invalid id for plugin")
+            map as? Map<*, *> ?: throw Exception("Invalid map for plugin")
+            isApply = isApply as? Boolean ?: false
+
+            val kspVersionKey = map[platformVersion] as String?
+            val kspVersionUnfocusedKey = map[platformVersionUnfocused] as String?
+            val kspVersionPredictedKey = (map["$previewIdentifier1Up$platformVersion"]
+                ?: map["$previewIdentifier1Up$platformVersionUnfocused"]) as String?
+            val kspVersionFallbackKey = map[fallbackIdentifier] as String
 
             var suffix = ""
 
             val pluginVersion = kspPluginVersionMap[kspVersionKey]?.let {
                 "$kspVersionKey-$it"
+            } ?: kspPluginVersionMap[kspVersionUnfocusedKey]?.let {
+                suffix += unfocusedSuffix
+                "$kspVersionUnfocusedKey-$it"
             } ?: kspPluginVersionMap[kspVersionPredictedKey]?.let {
                 suffix += predictedSuffix
                 "$kspVersionPredictedKey-$it"
@@ -277,7 +321,7 @@ pluginManagement {
             } ?: throw Exception("$unknownIdentifier1Up version for plugin $id")
 
             infoList += "Plugin: \"$id:$pluginVersion\"$suffix"
-            id(id) version pluginVersion apply isApply
+            id(id) version pluginVersion apply isApply as Boolean
         }
     }
 

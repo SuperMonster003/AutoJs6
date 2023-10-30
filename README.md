@@ -29,17 +29,17 @@
 
 [Auto.js](https://github.com/hyb1996/Auto.js) 是一款 Android 平台支持 [无障碍服务](https://developer.android.com/guide/topics/ui/accessibility/service?hl=zh-cn) 的 JavaScript 自动化工具软件.
 
-Auto.js 由 [hyb1996](https://github.com/hyb1996) 于 Jan 27, 2017 初次发布, 于 Mar 13, 2020 停止维护, 最终版本名称为 `4.1.1 alpha2`.
+Auto.js 由 [hyb1996](https://github.com/hyb1996) 于 `2017/01/27` 初次发布, 于 `2020/03/13` 停止维护, 最终版本名称为 `4.1.1 alpha2`.
 
-AutoJs6 在 Auto.js 最终项目的基础上, 于 Dec 1, 2021 进行二次开发, 继续保持开源免费.
+AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开发, 继续保持开源免费.
 
 基于 Auto.js 二次开发的开源项目 (以开发时间排序, 仅部分列举):
 
 |                         项目名称                          |          应用名称          |                          开发者                          |     开发时间     |
 |:-----------------------------------------------------:|:----------------------:|:-----------------------------------------------------:|:------------:|
-|   [Auto.js](https://github.com/TonyJiangWJ/Auto.js)   |       Auto.js M        |     [TonyJiangWJ](https://github.com/TonyJiangWJ)     | Nov 21, 2019 |
-|      [AutoX](https://github.com/kkevsekk1/AutoX)      | Autox.js / Autox.js v6 |       [kkevsekk1](https://github.com/kkevsekk1)       | Jul 24, 2020 |
-| [AutoJs6](https://github.com/SuperMonster003/AutoJs6) |        AutoJs6         | [SuperMonster003](https://github.com/SuperMonster003) | Dec 1, 2021  |
+|   [Auto.js](https://github.com/TonyJiangWJ/Auto.js)   |       Auto.js M        |     [TonyJiangWJ](https://github.com/TonyJiangWJ)     | `2019/11/21` |
+|      [AutoX](https://github.com/kkevsekk1/AutoX)      | Autox.js / Autox.js v6 |       [kkevsekk1](https://github.com/kkevsekk1)       | `2020/07/24` |
+| [AutoJs6](https://github.com/SuperMonster003/AutoJs6) |        AutoJs6         | [SuperMonster003](https://github.com/SuperMonster003) | `2021/12/01` |
 
 ******
 
@@ -133,19 +133,20 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 Dec 1, 2021 进行二次开发
 
 # v6.4.0
 
-###### 2023/10/25
+###### 2023/10/30
 
 * `新增` ocr 模块支持 Paddle Lite 引擎 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_
 * `新增` 打包功能支持内置插件与外部插件两种打包方式 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
 * `新增` WebSocket 模块 (参阅 项目文档 > [WebSocket](https://docs.autojs6.com/#/webSocketType))
 * `新增` barcode / qrcode 模块 (参阅 项目文档 > [条码](https://docs.autojs6.com/#/barcode) / [二维码](https://docs.autojs6.com/#/qrcode))
-* `新增` shizuku 模块 (参阅 项目文档 > [Shizuku](https://docs.autojs6.com/#/shizuku))
+* `新增` shizuku 模块 (参阅 项目文档 > [Shizuku](https://docs.autojs6.com/#/shizuku)) 及主页抽屉权限开关
 * `新增` device.rotation / device.orientation 等方法
 * `新增` 内部 Java 类支持 class 静态属性访问
 * `新增` 支持在安卓系统设置页面选择并切换应用语言 (安卓 13 及以上)
 * `新增` 支持设置页面添加或长按应用图标激活 [应用快捷方式](https://developer.android.com/guide/topics/ui/shortcuts?hl=zh-cn) , 可启动文档和设置等页面
 * `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
 * `修复` 打包应用无法使用 AutoJs6 新增 API 的问题 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
+* `修复` 打包应用在系统夜间模式下的样式异常
 * `修复` VSCode 插件保存文件到本地时文件扩展名信息丢失的问题
 * `修复` 使用协程特性运行项目产生未捕获异常致使应用崩溃的问题
 * `修复` 重启或退出应用时浮动按钮无法记录其位置状态信息的问题
@@ -164,9 +165,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 Dec 1, 2021 进行二次开发
 * `优化` 日志活动页面发送功能支持条目数量过大时自动截取并作出提示
 * `优化` ocr 模块同时兼容 Google MLKit 及 Paddle Lite 引擎 (参阅 项目文档 > [光学字符识别](https://docs.autojs6.com/#/ocr?id=p-mode))
 * `优化` 提升无障碍服务自动启动的成功概率
+* `优化` Kotlin 注解处理由 kapt 迁移至 KSP
+* `优化` 构建工具支持 IntelliJ Idea EAP 版本
 * `优化` 构建工具自适应 Java 发行版本以尽量避免 "无效的发行版本" 问题
 * `优化` 构建工具优化 IDE 及相关插件的版本退级逻辑并增加版本预测能力
-* `优化` 部分 Kotlin 注解处理由 kapt 迁移至 KSP
+* `优化` 适配 VSCode 插件 1.0.7
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v640)_
 
 # v6.3.3
 
@@ -239,12 +243,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 Dec 1, 2021 进行二次开发
 
 #### Android Studio 准备
 
-下载 `Android Studio Giraffe | 2022.3.1 Patch 2` 版本 (按需选择其一):
+下载 `Android Studio Hedgehog | 2023.1.1 RC 1` 版本 (按需选择其一):
 
-- [android-studio-2022.3.1.20-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2022.3.1.20/android-studio-2022.3.1.20-windows.exe) (1.1 GB)
-- [android-studio-2022.3.1.20-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.3.1.20/android-studio-2022.3.1.20-windows.zip) (1.1 GB)
+- [android-studio-2023.1.1.23-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2023.1.1.23/android-studio-2023.1.1.23-windows.exe) (1.1 GB)
+- [android-studio-2023.1.1.23-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.1.1.23/android-studio-2023.1.1.23-windows.zip) (1.1 GB)
 
-> 注: 上述版本发布时间为 2023 年 9 月 28 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2023 年 10 月 17 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -267,11 +271,32 @@ Android SDK (安卓软件开发工具包)
 待相关资源下载并安装完毕, 点击 `Finish (完成)` 按钮.  
 上述 `Android SDK Location (安卓软件开发工具包位置)` 处将自动完成路径填写, SDK 准备工作随即完成.
 
+#### Android SDK Tools 准备
+
+AutoJs6 需要使用部分 SDK 工具 (如 NDK 及 CMake).
+
+> 注: 如果计算机系统已安装 AutoJs6 全部所需的 Android SDK Tools, 则可跳过此小节内容.
+
+在 Android Studio 软件中使用快捷键 `CTRL + ALT + S` 打开设置页面:
+
+```text
+Appearance & Behavior (外观与表现) -> 
+System Settings (系统设置) -> 
+Android SDK (安卓软件开发工具包) -> 
+SDK Tools (SDK 工具) (位于右侧窗口)
+```
+
+勾选 `Show Package Details (显示包详情)`, 依次点击 NDK 及 CMake, 确保相应版本的工具已勾选 (截至 2023 年 10 月 30 日, NDK 所需版本为 `21.1.6352462`, CMake 所需版本为 `3.10.2`).
+
+SDK 工具的版本信息位于 AutoJs6 项目根目录的 `version.properties` 文件中.
+
 #### JDK 准备
 
-AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`.
+AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-> 注: 如果计算机系统已安装 JDK 且版本不低于 17, 则可跳过此小节内容.
+需额外留意, 截至 2023 年 10 月 30 日, AutoJs6 暂不支持 JDK 最新版本 `21`.
+
+> 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
 JDK 可使用 IDE 直接下载, 或访问 [Oracle 网站](https://www.oracle.com/java/technologies/downloads/) 下载.
 
@@ -348,6 +373,7 @@ Gradle
 - [Ant-Forest](https://github.com/SuperMonster003/Ant-Forest) - 蚂蚁森林能量自动收取脚本 by [SuperMonster003](https://github.com/SuperMonster003)
 - [autojs](https://github.com/e1399579/autojs) - Auto.js 实用脚本 by  [e1399579](https://github.com/e1399579)
 - [autojsDemo](https://github.com/snailuncle/autojsDemo) - Auto.js 演示示例 by  [snailuncle](https://github.com/snailuncle)
+- [autojs 相关仓库](https://github.com/topics/autojs) - GitHub 与 autojs 话题相关的全部仓库
 
 ******
 
@@ -355,21 +381,23 @@ Gradle
 
 ******
 
-感谢每一位参与 AutoJs6 项目开发的贡献人员. 
+感谢每一位参与 AutoJs6 项目开发的贡献人员.
 
 |                         贡献人员                          |                                       提交数                                       |     最近提交     |
 |:-----------------------------------------------------:|:-------------------------------------------------------------------------------:|:------------:|
-|     [TonyJiangWJ](https://github.com/TonyJiangWJ)     |   [3](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)    | Aug 29, 2023 |
-| [SuperMonster003](https://github.com/SuperMonster003) | [33](https://github.com/SuperMonster003/AutoJs6/commits?author=SuperMonster003) | Jul 21, 2023 |
-|       [LZX284](https://github.com/LZX284) (Ai)        |      [4](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)      | Jul 20, 2023 |
-| [little-alei](https://github.com/little-alei) (抠脚本人)  |   [12](https://github.com/SuperMonster003/AutoJs6/commits?author=little-alei)   | Jul 12, 2023 |
-|          [aiselp](https://github.com/aiselp)          | [6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp) | Jun 14, 2023 |
-|        [LYS86](https://github.com/LYS86) (LYS)        |      [2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)       | Jun 3, 2023  |
+|       [LZX284](https://github.com/LZX284) (Ai)        |     [13](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)      | `2023/10/09` |
+|     [TonyJiangWJ](https://github.com/TonyJiangWJ)     |   [3](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)    | `2023/08/29` |
+| [little-alei](https://github.com/little-alei) (抠脚本人)  |   [12](https://github.com/SuperMonster003/AutoJs6/commits?author=little-alei)   | `2023/07/12` |
+|          [aiselp](https://github.com/aiselp)          | [6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp) | `2023/06/14` |
+|        [LYS86](https://github.com/LYS86) (LYS)        |      [2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)       | `2023/06/03` |
 
-> 数据统计区间: Dec 1, 2021 - Oct 3, 2023.  
-> 数据条目按 "最近提交" 列排序 (降序).  
-> 新发起的暂未处理的 Pull Request, 将在合并处理后加入数据统计.  
-> 部分贡献人员在 [GitHub Contributors](https://github.com/SuperMonster003/AutoJs6/graphs/contributors) 未能正常出现, 其提交记录为空, 仍可通过 [Pull Request](https://github.com/SuperMonster003/AutoJs6/pulls) 查看贡献记录.
+数据更新于 `2023/10/25`.
+
+数据条目按 `最近提交` 降序排序.
+
+新发起的暂未处理的 Pull Request, 将在合并处理后加入数据统计.
+
+部分贡献人员在 [GitHub Contributors](https://github.com/SuperMonster003/AutoJs6/graphs/contributors) 未能正常出现, 其提交记录为空, 仍可通过 [Pull Request](https://github.com/SuperMonster003/AutoJs6/pulls) 查看贡献记录.
 
 [//]: # (
     # --------------------------------------------------------------#
@@ -377,7 +405,7 @@ Gradle
     # --------------------------------------------------------------#
     - CHANGELOG.md
         - Update entries for AutoJs6 by checking all changed files
-        - Update entries for Gradle plugins
+        - Update entries for Gradle plugins [ implementation ]
         - Update version name and released date
         - Append related GitHub issues to changelog entries
     - README.md
@@ -388,6 +416,9 @@ Gradle
         - Update android studio download links and version names
     - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
     - Update dependencies information for Android Gradle Plugin in the top-level build.gradle.kts
+    - Update dependencies TypeScript declarations.
     - Re-generate documentation by running the python script
+    - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
+    - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field
 )

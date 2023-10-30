@@ -698,7 +698,17 @@
     <string name="description_launcher_shortcuts">Les raccourcis permettent d\'effectuer des actions spécifiques dans AutoJs6. Les utilisateurs peuvent afficher ces raccourcis dans un lanceur pris en charge et démarrer rapidement certaines tâches ou lancer une activité, comme la lecture de la documentation de l\'application AutoJs6, le lancement de la page de configuration d\'AutoJs6, etc.</string>
     <string name="summary_text_launcher_shortcuts">Ajouter des raccourcis au lanceur</string>
     <string name="text_pin_shortcut_not_unsupported">L\'épinglage de raccourcis dans le lanceur n\'est pas pris en charge</string>
-    <string name="text_template_apk_path">Chemin d’accès APK du modèle</string>
+    <string name="text_template_apk_path">Chemin d\'accès APK du modèle</string>
+    <string name="text_shizuku_access_description">Shizuku vous permet d\'obtenir des privilèges ADB et d\'accéder aux API du système</string>
+    <string name="text_shizuku_access">Permissions de Shizuku</string>
+    <string name="text_grant_autojs6_access_in_shizuku_app">Accorder des privilèges AutoJs6 dans une application Shizuku</string>
+    <string name="text_revoke_autojs6_access_in_shizuku_app">Révoquer les privilèges AutoJs6 dans une application Shizuku</string>
+    <string name="text_shizuku_service_may_need_to_be_run_first">Il se peut que vous deviez d\'abord exécuter le service Shizuku</string>
+    <string name="error_shizuku_is_not_installed">Shizuku n\'est pas installé</string>
+    <string name="error_shizuku_version_is_not_supported">La version de Shizuku n\'est pas prise en charge</string>
+    <string name="error_failed_to_revoke_shizuku_access">La révocation des droits de Shizuku a échoué</string>
+    <string name="error_failed_to_grant_shizuku_access">Échec de l\'octroi de la permission de Shizuku</string>
+    <string name="error_unable_to_use_shizuku_service">Impossible d\'utiliser le service Shizuku</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d article</item>

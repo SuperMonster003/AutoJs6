@@ -29,7 +29,6 @@ val templateName = "template"
 plugins {
     id("com.android.application")
     id("com.google.devtools.ksp")
-    id("org.jetbrains.kotlin.kapt") /* kotlin("kapt") */
     id("org.jetbrains.kotlin.android") /* kotlin("android") */
 }
 
@@ -161,9 +160,7 @@ dependencies /* Annotations */ {
     // Android Annotations
     implementation("org.androidannotations:androidannotations-api:4.8.0")
     implementation("androidx.annotation:annotation:1.7.0")
-    // FIXME by SuperMonster003 on Aug 17, 2023.
-    //  ! Failed to migrate it from kapt to KSP.
-    kapt("org.androidannotations:androidannotations:4.8.0")
+    ksp("org.androidannotations:androidannotations:4.8.0")
 
     // JCIP Annotations
     implementation("net.jcip:jcip-annotations:1.0")
@@ -177,7 +174,7 @@ dependencies /* AppCompat */ {
     //  ! Comment with related code will be removed since Jan 5, 2024.
     //
     // @Hint by SuperMonster003 on Oct 5, 2023.
-    //  ! It look like that bugs below in version 1.5.x has gone away since 1.6.x.
+    //  ! It looks like that bugs below in version 1.5.x has gone away since 1.6.x.
     // implementation("androidx.appcompat:appcompat") {
     //     version {
     //         strictly("1.4.2")
@@ -361,29 +358,32 @@ android {
 
             gradle.taskGraph.whenReady(object : Action<TaskExecutionGraph> {
                 override fun execute(taskGraph: TaskExecutionGraph) {
-                    val task = project.getTasksByName("${buildTypeRelease}InrtRelease", true).firstOrNull() ?: return
-                    task.doLast {
-                        copy {
-                            val src = "build/outputs/apk/$flavorNameInrt/$buildTypeRelease"
-                            val dst = "src/main/assets"
-                            val ext = Utils.FILE_EXTENSION_APK
+                    val taskName = "$buildActionAssemble${flavorNameInrt.uppercaseFirstChar()}${buildTypeRelease.uppercaseFirstChar()}"
+                    project.getTasksByName(taskName, true)
+                        .firstOrNull()
+                        ?.doLast {
+                            copy {
+                                val src = "build/outputs/apk/$flavorNameInrt/$buildTypeRelease"
+                                val dst = "src/main/assets"
+                                val ext = Utils.FILE_EXTENSION_APK
 
-                            if (!file(src).isDirectory) {
-                                return@copy
+                                if (!file(src).isDirectory) {
+                                    return@copy
+                                }
+
+                                from(src); into(dst)
+
+                                val verName = versionName?.replace(Regex("\\s"), "-")?.lowercase()
+                                val srcFileName = "$flavorNameInrt-v$verName-universal.$ext" /* e.g. inrt-v6.4.0-beta-universal.apk */
+                                val dstFileName = "$templateName.$ext"
+                                val isOverridden = file(File(dst, dstFileName)).exists()
+                                include(srcFileName)
+                                rename(srcFileName, dstFileName)
+                                println("Source: ${file(File(src, srcFileName))}")
+                                println("Destination: ${file(File(dst, dstFileName))}${if (isOverridden) " [overridden]" else ""}")
                             }
-
-                            from(src); into(dst)
-
-                            val verName = versionName?.replace(Regex("\\s"), "-")?.lowercase()
-                            val srcFileName = "$flavorNameInrt-v$verName-universal.$ext" /* e.g. inrt-v6.4.0-beta-universal.apk */
-                            val dstFileName = "$templateName.$ext"
-                            val isOverridden = file(File(dst, dstFileName)).exists()
-                            include(srcFileName)
-                            rename(srcFileName, dstFileName)
-                            println("Source: ${file(File(src, srcFileName))}")
-                            println("Destination: ${file(File(dst, dstFileName))}${if (isOverridden) " [overridden]" else ""}")
                         }
-                    }
+                        ?: println("$taskName doesn't exist in project ${project.name}")
                 }
             })
         }
@@ -408,8 +408,6 @@ android {
         sourceCompatibility = versions.javaVersion
         targetCompatibility = versions.javaVersion
     }
-
-    // Utils.Version(ANDROID_GRADLE_PLUGIN_VERSION) < Utils.Version("8.0")
 
     // @Legacy packagingOptions { ... }
     packaging {
@@ -615,18 +613,37 @@ class Versions(filePath: String) {
     val appVersionCode = properties["VERSION_BUILD"].let { it as String }.toInt()
     val vscodeExtRequiredVersion = properties["VSCODE_EXT_REQUIRED_VERSION"] as String
 
-    private val javaVersionMinSupported = properties["JAVA_VERSION_MIN_SUPPORTED"]
+    private val currentVersionInt = JavaVersion.current().majorVersion.toInt()
+
+    private val javaVersionMinSupported: Int = properties["JAVA_VERSION_MIN_SUPPORTED"]
         .let { it as String }.toInt()
         .also {
-            if (!JavaVersion.current().isCompatibleWith(JavaVersion.toVersion(it))) {
-                throw GradleException("Current Gradle JDK version ${JavaVersion.current()} does not meet the minimum requirement which $it is needed.")
+            if (currentVersionInt < it) {
+                throw GradleException(
+                    "Current Gradle JDK version ${JavaVersion.current()} does not meet " +
+                            "the minimum requirement which $it is needed."
+                )
             }
         }
-    private val javaVersionMinSuggested = properties["JAVA_VERSION_MIN_SUGGESTED"]
+    private val javaVersionMinSuggested: Int = properties["JAVA_VERSION_MIN_SUGGESTED"]
         .let { it as String }.toInt()
         .also {
-            if (!JavaVersion.current().isCompatibleWith(JavaVersion.toVersion(it))) {
-                logger.error("It is recommended to upgrade current Gradle JDK version ${JavaVersion.current()} to $it or higher.")
+            if (currentVersionInt < it) {
+                logger.error(
+                    "It is recommended to upgrade current Gradle JDK version ${JavaVersion.current()} " +
+                            "to $it or higher (but lower than $javaVersionMinRadical)."
+                )
+            }
+        }
+    private val javaVersionMinRadical: Int = properties["JAVA_VERSION_MIN_RADICAL"]
+        .let { it as String }.toInt()
+        .also {
+            if (it in currentVersionInt downTo 1) {
+                logger.error(
+                    "It is recommended to downgrade current Gradle JDK version $currentVersionInt " +
+                            "to ${it - 1}${if (it - 1 > javaVersionMinSuggested) " or lower (but not lower than $javaVersionMinSuggested)" else ""}, " +
+                            "as Gradle may be not compatible with JDK $it${if (currentVersionInt > it) " (and above)" else ""} for now."
+                )
             }
         }
     private val javaVersionRaw = properties["JAVA_VERSION"] as String
@@ -643,16 +660,18 @@ class Versions(filePath: String) {
     )
 
     val javaVersion: JavaVersion by lazy {
-        var versionInt = javaVersionRaw.toInt()
+        var niceVersionInt = javaVersionRaw.toInt()
+        var isFallback = false
 
-        while (versionInt > javaVersionMinSupported) {
-            if (JvmTarget.values().any { it.name.contains(Regex("_$versionInt$")) }) {
+        while (niceVersionInt > javaVersionMinSupported) {
+            if (JvmTarget.values().any { it.name.contains(Regex("_$niceVersionInt$")) }) {
                 break
             }
-            versionInt -= 1
+            niceVersionInt -= 1
+            isFallback = true
         }
 
-        if (!JavaVersion.toVersion("$versionInt").isCompatibleWith(JavaVersion.toVersion(javaVersionRaw))) {
+        if (isFallback) {
             javaVersionInfoSuffix += " [fallback]"
         }
 
@@ -660,18 +679,18 @@ class Versions(filePath: String) {
         val platformType = gradle.extra["platformType"] as String
 
         javaVersionCeilMap[platformType]!![platformVersion]?.let { ceil: Int ->
-            if (versionInt > ceil) {
-                versionInt = ceil
+            if (niceVersionInt > ceil) {
+                niceVersionInt = ceil
                 javaVersionInfoSuffix += " [coerced]"
             }
         }
 
-        if (!JavaVersion.current().isCompatibleWith(JavaVersion.toVersion(versionInt))) {
-            versionInt = JavaVersion.current().majorVersion.toInt()
+        if (niceVersionInt > currentVersionInt) {
+            niceVersionInt = currentVersionInt
             javaVersionInfoSuffix += " [consistent]"
         }
 
-        JavaVersion.toVersion(versionInt.toString())
+        JavaVersion.toVersion(niceVersionInt)
     }
 
     private var isBuildNumberAutoIncremented = false
