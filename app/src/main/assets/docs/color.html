@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>颜色 (Color) | AutoJs6 文档 - 6.3.3</title>
+    <title>颜色 (Color) | AutoJs6 文档 - 6.4.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -42,6 +42,8 @@
 <li><a class="nav-color active" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
 <li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -54,6 +56,7 @@
 <li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
 <li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
 <li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
@@ -80,7 +83,9 @@
 <li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
 <li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
 <li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
 <li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
 <li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
 <li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
@@ -155,7 +160,7 @@
 
     <div id="column1" data-id="color" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.3</h1>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -170,6 +175,7 @@
             <ul>
 <li><span class="stability_undefined"><a href="#color_color">颜色 (Color)</a></span><ul>
 <li><span class="stability_undefined"><a href="#color">颜色表示</a></span></li>
+<li><span class="stability_undefined"><a href="#color_0">黑色与 0</a></span></li>
 <li><span class="stability_undefined"><a href="#color_m_toint">[m] toInt</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_toint_color">toInt(color)</a></span></li>
 </ul>
@@ -189,8 +195,8 @@
 <li><span class="stability_undefined"><a href="#color_build_red_green_blue_alpha">build(red, green, blue, alpha?)</a></span></li>
 </ul>
 </li>
-<li><span class="stability_undefined"><a href="#color_m_digest">[m] digest</a></span><ul>
-<li><span class="stability_undefined"><a href="#color_digest_color">digest(color)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_summary">[m] summary</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_summary_color">summary(color)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#color_m_parsecolor">[m] parseColor</a></span><ul>
@@ -544,6 +550,10 @@
 </ul>
 </li>
 </ul>
+<h2>黑色与 0<span><a class="mark" href="#color_0" id="color_0">#</a></span></h2>
+<p>需特别留意, 黑色的颜色字符串为 <code>#000000</code>, 它是完全颜色字符串 <code>#FF000000</code> 的简写形式, 其 ARGB 分量表示为 <code>argb(255, 0, 0, 0)</code>.</p>
+<p>因此黑色的颜色整数不是 <code>0</code>, 而是 <code>-16777216</code>.</p>
+<p>颜色整数 <code>0</code> 对应的是完全透明色, 即 <code>#00000000</code>, 其 ARGB 分量表示为 <code>argb(0, 0, 0, 0)</code>.</p>
 <hr>
 <p style="font: bold 2em sans-serif; color: #FF7043">colors</p>
 
@@ -743,8 +753,8 @@ colors.build().setHsla(0.25, 0.8, 0.64, 0.9).toHex(); // #E6A3ED5A
 colors.build(120, 60, 240, 0.85).toHex(); /* 同上. */
 colors.build().setRgba(120, 60, 240, 0.85).toHex(); /* 同上. */
 </code></pre>
-<h2>[m] digest<span><a class="mark" href="#color_m_digest" id="color_m_digest">#</a></span></h2>
-<h3>digest(color)<span><a class="mark" href="#color_digest_color" id="color_digest_color">#</a></span></h3>
+<h2>[m] summary<span><a class="mark" href="#color_m_summary" id="color_m_summary">#</a></span></h2>
+<h3>summary(color)<span><a class="mark" href="#color_summary_color" id="color_summary_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
 <li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
@@ -789,16 +799,16 @@ colors.build().setRgba(120, 60, 240, 0.85).toHex(); /* 同上. */
 </table>
 <p>示例:</p>
 <pre><code class="lang-js">// hex(#009688), rgba(0,150,136/1.0), int(-16738680)
-colors.digest(&#39;#009688&#39;);
+colors.summary(&#39;#009688&#39;);
 
 // hex(#BE009688), rgba(0,150,136/0.75), int(-1107257720)
-colors.digest(&#39;#BE009688&#39;);
+colors.summary(&#39;#BE009688&#39;);
 
 // hex(#FF0000), rgba(255,0,0/1.0), int(-65536)
-colors.digest(&#39;red&#39;);
+colors.summary(&#39;red&#39;);
 
 // hex(#6400008B), rgba(0,0,139/0.39), int(1677721739)
-colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
+colors.build(&#39;dark-blue&#39;).setAlpha(100).summary();
 </code></pre>
 <h2>[m] parseColor<span><a class="mark" href="#color_m_parsecolor" id="color_m_parsecolor">#</a></span></h2>
 <h3>parseColor(color)<span><a class="mark" href="#color_parsecolor_color" id="color_parsecolor_color">#</a></span></h3>
@@ -2037,84 +2047,165 @@ paint.setColor(android.graphics.Color.pack(
 <p><a href="colorTable.html#colortable_Material_颜色列表">Material 颜色列表</a> 对象.</p>
 <h2>[p] BLACK<span><a class="mark" href="#color_p_black" id="color_p_black">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16777216</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #000000">◑</span> 黑 (<code>#000000</code> <code>rgb(0,0,0</code>) 的颜色整数.</p>
 <h2>[p] BLUE<span><a class="mark" href="#color_p_blue" id="color_p_blue">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16776961</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #0000FF">◑</span> 蓝 (<code>#0000FF</code> <code>rgb(0,0,255</code>) 的颜色整数.</p>
 <h2>[p] CYAN<span><a class="mark" href="#color_p_cyan" id="color_p_cyan">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16711681</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #00FFFF">◑</span> 青 (<code>#00FFFF</code> <code>rgb(0,255,255</code>) 的颜色整数.</p>
 <h2>[p] AQUA<span><a class="mark" href="#color_p_aqua" id="color_p_aqua">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16711681</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #00FFFF">◑</span> 青 (<code>#00FFFF</code> <code>rgb(0,255,255</code>) 的颜色整数.</p>
 <h2>[p] DARK_GRAY<span><a class="mark" href="#color_p_dark_gray" id="color_p_dark_gray">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-12303292</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #444444">◑</span> 暗灰 (<code>#444444</code> <code>rgb(68,68,68</code>) 的颜色整数.</p>
 <h2>[p] DARK_GREY<span><a class="mark" href="#color_p_dark_grey" id="color_p_dark_grey">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-12303292</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #444444">◑</span> 暗灰 (<code>#444444</code> <code>rgb(68,68,68</code>) 的颜色整数.</p>
 <h2>[p] DKGRAY<span><a class="mark" href="#color_p_dkgray" id="color_p_dkgray">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-12303292</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #444444">◑</span> 暗灰 (<code>#444444</code> <code>rgb(68,68,68</code>) 的颜色整数.</p>
 <h2>[p] GRAY<span><a class="mark" href="#color_p_gray" id="color_p_gray">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-7829368</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #888888">◑</span> 灰 (<code>#888888</code> <code>rgb(136,136,136</code>) 的颜色整数.</p>
 <h2>[p] GREY<span><a class="mark" href="#color_p_grey" id="color_p_grey">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-7829368</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #888888">◑</span> 灰 (<code>#888888</code> <code>rgb(136,136,136</code>) 的颜色整数.</p>
 <h2>[p] GREEN<span><a class="mark" href="#color_p_green" id="color_p_green">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16711936</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #00FF00">◑</span> 绿 (<code>#00FF00</code> <code>rgb(0,255,0</code>) 的颜色整数.</p>
 <h2>[p] LIME<span><a class="mark" href="#color_p_lime" id="color_p_lime">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16711936</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #00FF00">◑</span> 绿 (<code>#00FF00</code> <code>rgb(0,255,0</code>) 的颜色整数.</p>
 <h2>[p] LIGHT_GRAY<span><a class="mark" href="#color_p_light_gray" id="color_p_light_gray">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-3355444</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #CCCCCC">◑</span> 亮灰 (<code>#CCCCCC</code> <code>rgb(204,204,204</code>) 的颜色整数.</p>
 <h2>[p] LIGHT_GREY<span><a class="mark" href="#color_p_light_grey" id="color_p_light_grey">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-3355444</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #CCCCCC">◑</span> 亮灰 (<code>#CCCCCC</code> <code>rgb(204,204,204</code>) 的颜色整数.</p>
 <h2>[p] LTGRAY<span><a class="mark" href="#color_p_ltgray" id="color_p_ltgray">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-3355444</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #CCCCCC">◑</span> 亮灰 (<code>#CCCCCC</code> <code>rgb(204,204,204</code>) 的颜色整数.</p>
 <h2>[p] MAGENTA<span><a class="mark" href="#color_p_magenta" id="color_p_magenta">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-65281</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FF00FF">◑</span> 品红 / 洋红 (<code>#FF00FF</code> <code>rgb(255,0,255</code>) 的颜色整数.</p>
 <h2>[p] FUCHSIA<span><a class="mark" href="#color_p_fuchsia" id="color_p_fuchsia">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-65281</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FF00FF">◑</span> 品红 / 洋红 (<code>#FF00FF</code> <code>rgb(255,0,255</code>) 的颜色整数.</p>
 <h2>[p] MAROON<span><a class="mark" href="#color_p_maroon" id="color_p_maroon">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-8388608</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #800000">◑</span> 栗 (<code>#800000</code> <code>rgb(128,0,0</code>) 的颜色整数.</p>
 <h2>[p] NAVY<span><a class="mark" href="#color_p_navy" id="color_p_navy">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16777088</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #000080">◑</span> 海军蓝 / 藏青 (<code>#000080</code> <code>rgb(0,0,128</code>) 的颜色整数.</p>
 <h2>[p] OLIVE<span><a class="mark" href="#color_p_olive" id="color_p_olive">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-8355840</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #808000">◑</span> 橄榄 (<code>#808000</code> <code>rgb(128,128,0</code>) 的颜色整数.</p>
 <h2>[p] PURPLE<span><a class="mark" href="#color_p_purple" id="color_p_purple">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-8388480</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #800080">◑</span> 紫 (<code>#800080</code> <code>rgb(128,0,128</code>) 的颜色整数.</p>
 <h2>[p] RED<span><a class="mark" href="#color_p_red" id="color_p_red">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-65536</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FF0000">◑</span> 红 (<code>#FF0000</code> <code>rgb(255,0,0</code>) 的颜色整数.</p>
 <h2>[p] SILVER<span><a class="mark" href="#color_p_silver" id="color_p_silver">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-4144960</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #C0C0C0">◑</span> 银 (<code>#C0C0C0</code> <code>rgb(192,192,192</code>) 的颜色整数.</p>
 <h2>[p] TEAL<span><a class="mark" href="#color_p_teal" id="color_p_teal">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16744320</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #008080">◑</span> 鸭绿 / 凫绿 (<code>#008080</code> <code>rgb(0,128,128</code>) 的颜色整数.</p>
 <h2>[p] WHITE<span><a class="mark" href="#color_p_white" id="color_p_white">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-1</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FFFFFF">◑</span> 白 (<code>#FFFFFF</code> <code>rgb(255,255,255</code>) 的颜色整数.</p>
 <h2>[p] YELLOW<span><a class="mark" href="#color_p_yellow" id="color_p_yellow">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-256</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FFFF00">◑</span> 黄 (<code>#FFFF00</code> <code>rgb(255,255,0)</code>) 的颜色整数.</p>
 <h2>[p] ORANGE<span><a class="mark" href="#color_p_orange" id="color_p_orange">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-23296</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FFA500">◑</span> 橙 (<code>#FFA500</code> <code>rgb(255,165,0)</code>) 的颜色整数.</p>
 <h2>[p] TRANSPARENT<span><a class="mark" href="#color_p_transparent" id="color_p_transparent">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>0</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p>全透明 (<code>#00000000</code> <code>argb(0, 0, 0, 0)</code>) 的颜色整数.</p>
 <hr>
 <h2>融合颜色<span><a class="mark" href="#color_1" id="color_1">#</a></span></h2>

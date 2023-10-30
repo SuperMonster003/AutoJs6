@@ -24,34 +24,34 @@ class ScreenMetrics(private var designWidth: Int, private var designHeight: Int)
 
     @JvmOverloads
     fun scaleX(x: Int, width: Int = designWidth) = when {
-        width == 0 || !isInitialized -> x
+        width == 0 || !mIsInitialized -> x
         else -> x * deviceScreenWidth / width
     }
 
     @JvmOverloads
     fun scaleY(y: Int, height: Int = designHeight) = when {
-        height == 0 || !isInitialized -> y
+        height == 0 || !mIsInitialized -> y
         else -> y * deviceScreenHeight / height
     }
 
     @JvmOverloads
     fun rescaleX(x: Int, width: Int = designWidth) = when {
-        width == 0 || !isInitialized -> x
+        width == 0 || !mIsInitialized -> x
         else -> x * width / deviceScreenWidth
     }
 
     @JvmOverloads
     fun rescaleY(y: Int, height: Int = designHeight) = when {
-        height == 0 || !isInitialized -> y
+        height == 0 || !mIsInitialized -> y
         else -> y * height / deviceScreenHeight
     }
 
     companion object {
 
-        private var mWindowManager: WindowManager? = null
-        private var mResources: Resources? = null
+        var resources: Resources? = null
 
-        private var isInitialized = false
+        private var mWindowManager: WindowManager? = null
+        private var mIsInitialized = false
 
         @Suppress("DEPRECATION")
         @JvmStatic
@@ -60,7 +60,7 @@ class ScreenMetrics(private var designWidth: Int, private var designHeight: Int)
 
         @JvmStatic
         val orientation: Int
-            get() = mResources?.configuration?.orientation ?: ORIENTATION_PORTRAIT
+            get() = resources?.configuration?.orientation ?: ORIENTATION_PORTRAIT
 
         @JvmStatic
         val isScreenPortrait: Boolean
@@ -74,7 +74,7 @@ class ScreenMetrics(private var designWidth: Int, private var designHeight: Int)
         @Suppress("DEPRECATION")
         val deviceScreenWidth: Int
             get() {
-                mResources?.displayMetrics?.widthPixels?.takeIf { it > 0 }?.let { return it }
+                resources?.displayMetrics?.widthPixels?.takeIf { it > 0 }?.let { return it }
 
                 val metricsLegacy = DisplayMetrics()
                 val display = mWindowManager?.defaultDisplay?.apply { getRealMetrics(metricsLegacy) }
@@ -89,7 +89,7 @@ class ScreenMetrics(private var designWidth: Int, private var designHeight: Int)
         @Suppress("DEPRECATION")
         val deviceScreenHeight: Int
             get() {
-                mResources?.displayMetrics?.heightPixels?.takeIf { it > 0 }?.let { return it }
+                resources?.displayMetrics?.heightPixels?.takeIf { it > 0 }?.let { return it }
 
                 val metricsLegacy = DisplayMetrics()
                 val display = mWindowManager?.defaultDisplay?.apply { getRealMetrics(metricsLegacy) }
@@ -111,9 +111,9 @@ class ScreenMetrics(private var designWidth: Int, private var designHeight: Int)
 
         @JvmStatic
         fun init(activity: Activity) {
+            resources = activity.resources
             mWindowManager = activity.windowManager
-            mResources = activity.resources
-            isInitialized = true
+            mIsInitialized = true
         }
 
         private fun toOriAwarePoint(a: Int, b: Int) = arrayOf(minOf(a, b), maxOf(a, b))

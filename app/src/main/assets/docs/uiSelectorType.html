@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>选择器 (UiSelector) | AutoJs6 文档 - 6.3.3</title>
+    <title>选择器 (UiSelector) | AutoJs6 文档 - 6.4.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -42,6 +42,8 @@
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
 <li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -54,6 +56,7 @@
 <li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
 <li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
 <li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
@@ -80,7 +83,9 @@
 <li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
 <li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
 <li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
 <li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
 <li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
 <li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
@@ -155,7 +160,7 @@
 
     <div id="column1" data-id="uiSelectorType" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.3</h1>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -923,25 +928,25 @@
 </li>
 </ul>
 </li>
-<li><span class="stability_undefined"><a href="#uiselectortype">筛选器类型</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiselectortype">选择器行为</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiselectortype_1">执行原理</a></span></li>
+<li><span class="stability_undefined"><a href="#uiselectortype_2">谨慎使用</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiselectortype_3">筛选器类型</a></span><ul>
 <li><span class="stability_undefined"><a href="#uiselectortype_xxxstartswith">xxxStartsWith</a></span></li>
 <li><span class="stability_undefined"><a href="#uiselectortype_xxxendswith">xxxEndsWith</a></span></li>
 <li><span class="stability_undefined"><a href="#uiselectortype_xxxcontains">xxxContains</a></span></li>
 <li><span class="stability_undefined"><a href="#uiselectortype_xxxmatches">xxxMatches</a></span><ul>
-<li><span class="stability_undefined"><a href="#uiselectortype_1">正则表达式类型</a></span></li>
-<li><span class="stability_undefined"><a href="#uiselectortype_2">字符串类型</a></span></li>
+<li><span class="stability_undefined"><a href="#uiselectortype_4">正则表达式类型</a></span></li>
+<li><span class="stability_undefined"><a href="#uiselectortype_5">字符串类型</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#uiselectortype_xxxmatch">xxxMatch</a></span><ul>
-<li><span class="stability_undefined"><a href="#uiselectortype_3">正则表达式类型</a></span></li>
-<li><span class="stability_undefined"><a href="#uiselectortype_4">字符串类型</a></span></li>
+<li><span class="stability_undefined"><a href="#uiselectortype_6">正则表达式类型</a></span></li>
+<li><span class="stability_undefined"><a href="#uiselectortype_7">字符串类型</a></span></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#uiselectortype_5">选择器行为</a></span><ul>
-<li><span class="stability_undefined"><a href="#uiselectortype_6">原理</a></span></li>
-<li><span class="stability_undefined"><a href="#uiselectortype_7">不推荐使用</a></span></li>
 </ul>
 </li>
 </ul>
@@ -5299,7 +5304,29 @@ pickup(w, text(&#39;abc&#39;), &#39;s&gt;1&#39;, &#39;bounds&#39;, (o) =&gt; {
     }
 }); /* 如果没有异常, pickup 结果为原本的拾取结果. */
 </code></pre>
-<h1>筛选器类型<span><a class="mark" href="#uiselectortype" id="uiselectortype">#</a></span></h1>
+<hr>
+<h1>选择器行为<span><a class="mark" href="#uiselectortype" id="uiselectortype">#</a></span></h1>
+<p>通常执行控件行为时, 按以下过程进行:</p>
+<pre><code class="lang-text">构建选择器 - 筛选 (查找) - 对结果 (控件或集合) 执行行为
+</code></pre>
+<p>而选择器行为的过程:</p>
+<pre><code class="lang-text">构建选择器 - 执行行为
+</code></pre>
+<h2>执行原理<span><a class="mark" href="#uiselectortype_1" id="uiselectortype_1">#</a></span></h2>
+<p>选择器行为隐含默认的筛选过程, 即 <a href="#uiselectortype_m_untilfind">untilFind</a>.</p>
+<p>例如 <code>text(&#39;abc&#39;).click()</code>, 相当于 <code>text(&#39;abc&#39;).untilFind().click()</code>.</p>
+<h2>谨慎使用<span><a class="mark" href="#uiselectortype_2" id="uiselectortype_2">#</a></span></h2>
+<p>与选择器行为相关的全局方法, 均不建议使用. 原因如下.</p>
+<ol>
+<li><p><strong>潜在的永久阻塞风险</strong></p>
+<p>因 <code>untilFind</code> 方法具有阻塞特性, 意味着此方法可能导致脚本 <strong>永久阻塞</strong>.<br>如上述示例, <code>text(&#39;abc&#39;)</code> 不存在时, 脚本将持续阻塞.</p>
+</li>
+<li><p><strong>全局行为缺少针对性</strong></p>
+<p>以 <code>paste()</code> 为例.<br>当使用全局方法 <code>paste()</code> 时, 相当于 <code>untilFind().paste()</code>, <code>untilFind()</code> 前无筛选条件, 因此 <code>untilFind()</code> 将得到窗口全部控件的集合.<br>这样的集合往往有几十甚至几百个控件, 再执行 <code>paste()</code> 时, 集合中的所有控件全部执行一次 <code>paste()</code>.<br>这样的操作往往是非预期且耗时的, 因此不建议使用 <code>paste()</code> 这样的全局方法, 推荐使用具体且尽量可控的筛选器筛选出特定的控件或集合, 再有针对性地执行 <code>paste()</code> 操作.</p>
+</li>
+</ol>
+<hr>
+<h1>筛选器类型<span><a class="mark" href="#uiselectortype_3" id="uiselectortype_3">#</a></span></h1>
 <h2>xxxStartsWith<span><a class="mark" href="#uiselectortype_xxxstartswith" id="uiselectortype_xxxstartswith">#</a></span></h2>
 <p>前缀匹配筛选器.</p>
 <p>筛选条件为 <a href="dataTypes.html#datatypes_string">字符串</a> 类型, 匹配对应控件属性串值的前缀.</p>
@@ -5327,7 +5354,7 @@ descContains(&#39;app&#39;); /* 不可匹配 w. */
 <h2>xxxMatches<span><a class="mark" href="#uiselectortype_xxxmatches" id="uiselectortype_xxxmatches">#</a></span></h2>
 <p>正则全匹配筛选器.</p>
 <p>筛选条件为 <a href="dataTypes.html#datatypes_string">字符串</a> 类型或 <a href="dataTypes.html#datatypes_regexp">正则表达式</a> 类型, 按正则表达式规则完全匹配控件属性串值.</p>
-<h3>正则表达式类型<span><a class="mark" href="#uiselectortype_1" id="uiselectortype_1">#</a></span></h3>
+<h3>正则表达式类型<span><a class="mark" href="#uiselectortype_4" id="uiselectortype_4">#</a></span></h3>
 <p>筛选条件为正则表达式类型时, 效果等同于 JavaScript 的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test">RegExp.prototype.test</a>, 但依照起止位置做完全匹配, 相当于自动添加匹配起始位置的 <code>^</code> 与匹配结束位置的 <code>$</code>.</p>
 <pre><code class="lang-js">w.desc(); // splendid
 /* 相当于 descMatch(/^s.*did$/) . */
@@ -5349,7 +5376,7 @@ descMatches(/(?:)/); /* 不可匹配 w. */
 /* 相当于 descMatch(/^spl\.?.+$/) . */
 descMatches(new RegExp(&#39;spl\\.?.+$')); /* 不可匹配 w. */
 </code></pre>
-<h3>字符串类型<span><a class="mark" href="#uiselectortype_2" id="uiselectortype_2">#</a></span></h3>
+<h3>字符串类型<span><a class="mark" href="#uiselectortype_5" id="uiselectortype_5">#</a></span></h3>
 <p>筛选条件为字符串类型时, 相当于 JavaScript 的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp">RegExp.prototype.constructor</a> 构造函数的 <code>pattern (模式)</code> 参数, 但依照起止位置做完全匹配, 相当于自动添加匹配起始位置的 <code>^</code> 与匹配结束位置的 <code>$</code>.</p>
 <p>如字符串 <code>&#39;abc&#39;</code> 按照正则表达式 <code>/^abc$/</code> 处理,<br>字符串 <code>&#39;\\d+&#39;</code> 按照正则表达式 <code>/^\d+$/</code> 处理.</p>
 <pre><code class="lang-js">w.desc(); // splendid
@@ -5387,7 +5414,7 @@ xxxMatches(/.*word.*/); /* 或 xxxMatches(&#39;.*word.*&#39;) . */
 <h2>xxxMatch<span><a class="mark" href="#uiselectortype_xxxmatch" id="uiselectortype_xxxmatch">#</a></span></h2>
 <p>正则匹配筛选器.</p>
 <p>筛选条件为 <a href="dataTypes.html#datatypes_string">字符串</a> 类型或 <a href="dataTypes.html#datatypes_regexp">正则表达式</a> 类型, 按正则表达式规则匹配控件属性串值.</p>
-<h3>正则表达式类型<span><a class="mark" href="#uiselectortype_3" id="uiselectortype_3">#</a></span></h3>
+<h3>正则表达式类型<span><a class="mark" href="#uiselectortype_6" id="uiselectortype_6">#</a></span></h3>
 <p>筛选条件为正则表达式类型时, 效果等同于 JavaScript 的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test">RegExp.prototype.test</a>.</p>
 <pre><code class="lang-js">w.desc(); // splendid
 descMatch(/s.*did/); /* 可匹配 w. */
@@ -5406,7 +5433,7 @@ descMatch(new RegExp(&#39;autojs6&#39;, &#39;i&#39;)); /* 可匹配 w. */
 <blockquote>
 <p>注: 截至 2022 年 12 月, 支持的修饰符仅包含 &#39;i&#39;.</p>
 </blockquote>
-<h3>字符串类型<span><a class="mark" href="#uiselectortype_4" id="uiselectortype_4">#</a></span></h3>
+<h3>字符串类型<span><a class="mark" href="#uiselectortype_7" id="uiselectortype_7">#</a></span></h3>
 <p>筛选条件为字符串类型时, 相当于 JavaScript 的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp">RegExp.prototype.constructor</a> 构造函数的 <code>pattern (模式)</code> 参数.</p>
 <p>如字符串 <code>&#39;abc&#39;</code> 按照正则表达式 <code>/abc/</code> 处理,<br>字符串 <code>&#39;\\d+&#39;</code> 按照正则表达式 <code>/\d+/</code> 处理.</p>
 <pre><code class="lang-js">w.desc(); // splendid
@@ -5425,26 +5452,7 @@ descMatch(&#39;.+&#39;); /* 可匹配 w, 与 descMatch(&#39;&#39;) 效果相同.
 /* 相当于 descMatch(/spl\.?.+$/) . */
 descMatch(&#39;spl\\.?.+$'); /* 可匹配 w. */
 </code></pre>
-<h1>选择器行为<span><a class="mark" href="#uiselectortype_5" id="uiselectortype_5">#</a></span></h1>
-<p>通常执行控件行为时, 按以下过程进行:</p>
-<pre><code class="lang-text">构建选择器 - 筛选 (查找) - 对结果 (控件或集合) 执行行为
-</code></pre>
-<p>而选择器行为的过程:</p>
-<pre><code class="lang-text">构建选择器 - 执行行为
-</code></pre>
-<h2>原理<span><a class="mark" href="#uiselectortype_6" id="uiselectortype_6">#</a></span></h2>
-<p>选择器行为隐含默认的筛选过程, 即 <a href="#uiselectortype_m_untilfind">untilFind</a>.</p>
-<p>例如 <code>text(&#39;abc&#39;).click()</code>, 相当于 <code>text(&#39;abc&#39;).untilFind().click()</code>.</p>
-<h2>不推荐使用<span><a class="mark" href="#uiselectortype_7" id="uiselectortype_7">#</a></span></h2>
-<div class="signature"><ol>
-<li><p><strong>潜在的永久阻塞风险</strong></p>
-<p>因 <code>untilFind</code> 方法具有阻塞特性, 意味着此方法可能导致脚本 <strong>永久阻塞</strong>.<br>如上述示例, <code>text(&#39;abc&#39;)</code> 不存在时, 脚本将持续阻塞.</p>
-</li>
-<li><p><strong>全局行为缺少针对性</strong></p>
-<p>以 <code>paste()</code> 为例.<br>当使用全局方法 <code>paste()</code> 时, 相当于 <code>untilFind().paste()</code>, <code>untilFind()</code> 前无筛选条件, 因此 <code>untilFind()</code> 将得到窗口全部控件的集合.<br>这样的集合往往有几十甚至几百个控件, 再执行 <code>paste()</code> 时, 集合中的所有控件全部执行一次 <code>paste()</code>.<br>这样的操作往往是非预期且耗时的, 因此不建议使用 <code>paste()</code> 这样的全局方法, 推荐使用具体且尽量可控的筛选器筛选出特定的控件或集合, 再有针对性地执行 <code>paste()</code> 操作.</p>
-</li>
-</ol>
-</div>
+
         </div>
     </div>
 </div>

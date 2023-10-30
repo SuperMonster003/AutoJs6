@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>综述 (Overview) | AutoJs6 文档 - 6.3.3</title>
+    <title>综述 (Overview) | AutoJs6 文档 - 6.4.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -42,6 +42,8 @@
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
 <li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -54,6 +56,7 @@
 <li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
 <li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
 <li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
@@ -80,7 +83,9 @@
 <li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
 <li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
 <li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
 <li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
 <li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
 <li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
@@ -155,7 +160,7 @@
 
     <div id="column1" data-id="all" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.3</h1>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -687,10 +692,7 @@
 <li><span class="stability_undefined"><a href="#autojs_p_versionname">[p] versionName</a></span></li>
 <li><span class="stability_undefined"><a href="#autojs_p_versioncode">[p] versionCode</a></span></li>
 <li><span class="stability_undefined"><a href="#autojs_p_versiondate">[p] versionDate</a></span></li>
-<li><span class="stability_undefined"><a href="#autojs_p_themecolor">[p] themeColor</a></span><ul>
-<li><span class="stability_undefined"><a href="#autojs_themecolor">themeColor</a></span></li>
-</ul>
-</li>
+<li><span class="stability_undefined"><a href="#autojs_p_themecolor">[p] themeColor</a></span></li>
 <li><span class="stability_undefined"><a href="#autojs_p_version">[p+] version</a></span><ul>
 <li><span class="stability_undefined"><a href="#autojs_p_name">[p] name</a></span></li>
 <li><span class="stability_undefined"><a href="#autojs_p_code">[p] code</a></span></li>
@@ -747,6 +749,7 @@
 </li>
 <li><span class="stability_undefined"><a href="#color_color">颜色 (Color)</a></span><ul>
 <li><span class="stability_undefined"><a href="#color">颜色表示</a></span></li>
+<li><span class="stability_undefined"><a href="#color_0">黑色与 0</a></span></li>
 <li><span class="stability_undefined"><a href="#color_m_toint">[m] toInt</a></span><ul>
 <li><span class="stability_undefined"><a href="#color_toint_color">toInt(color)</a></span></li>
 </ul>
@@ -766,8 +769,8 @@
 <li><span class="stability_undefined"><a href="#color_build_red_green_blue_alpha">build(red, green, blue, alpha?)</a></span></li>
 </ul>
 </li>
-<li><span class="stability_undefined"><a href="#color_m_digest">[m] digest</a></span><ul>
-<li><span class="stability_undefined"><a href="#color_digest_color">digest(color)</a></span></li>
+<li><span class="stability_undefined"><a href="#color_m_summary">[m] summary</a></span><ul>
+<li><span class="stability_undefined"><a href="#color_summary_color">summary(color)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#color_m_parsecolor">[m] parseColor</a></span><ul>
@@ -1099,13 +1102,18 @@
 </li>
 <li><span class="stability_undefined"><a href="#ocr_ocr">光学字符识别 (OCR)</a></span><ul>
 <li><span class="stability_undefined"><a href="#ocr_ocr_1">[@] ocr</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_ocr_options">ocr(options?)</a></span></li>
+<li><span class="stability_undefined"><a href="#ocr_ocr_region">ocr(region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_ocr_img_options">ocr(img, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_ocr_img_region">ocr(img, region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_ocr_imgpath_options">ocr(imgPath, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_ocr_imgpath_region">ocr(imgPath, region)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#ocr_p_mode">[p] mode</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_m_recognizetext">[m] recognizeText</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_recognizetext_options">recognizeText(options?)</a></span></li>
+<li><span class="stability_undefined"><a href="#ocr_recognizetext_region">recognizeText(region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_recognizetext_img_options">recognizeText(img, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_recognizetext_img_region">recognizeText(img, region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_recognizetext_imgpath_options">recognizeText(imgPath, options?)</a></span></li>
@@ -1113,14 +1121,27 @@
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#ocr_m_detect">[m] detect</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_detect_options">detect(options?)</a></span></li>
+<li><span class="stability_undefined"><a href="#ocr_detect_region">detect(region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_detect_img_options">detect(img, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_detect_img_region">detect(img, region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_detect_imgpath_options">detect(imgPath, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_detect_imgpath_region">detect(imgPath, region)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#ocr_m_tap">[m] tap</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_tap_mode">tap(mode)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#ocr_m_summary">[m] summary</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_summary">summary()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#ocr">工作模式与代码形式</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#barcode_barcode">条码 (Barcode)</a></span></li>
+<li><span class="stability_undefined"><a href="#qrcode_qr_code">二维码 (QR Code)</a></span></li>
 <li><span class="stability_undefined"><a href="#keys_keys">按键 (Keys)</a></span><ul>
 <li><span class="stability_undefined"><a href="#keys_back">back()</a></span></li>
 <li><span class="stability_undefined"><a href="#keys_home">home()</a></span></li>
@@ -2048,7 +2069,9 @@
 </li>
 <li><span class="stability_undefined"><a href="#http_http">HTTP</a></span><ul>
 <li><span class="stability_undefined"><a href="#http_m_get">[m] get</a></span><ul>
-<li><span class="stability_undefined"><a href="#http_get_url_options_callback">get(url, options?, callback?)</a></span></li>
+<li><span class="stability_undefined"><a href="#http_get_url">get(url)</a></span></li>
+<li><span class="stability_undefined"><a href="#http_get_url_options">get(url, options)</a></span></li>
+<li><span class="stability_undefined"><a href="#http_get_url_options_callback">get(url, options, callback)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#http_m_post">[m] post</a></span><ul>
@@ -2181,7 +2204,7 @@
 <li>点击左下方抽屉按钮 - 展开侧边栏并点击条目 - 阅读相关章节</li>
 </ul>
 </li>
-<li>AutoJs6 阅读<ul>
+<li>AutoJs6 应用内阅读<ul>
 <li>点击首页 &quot;文档&quot; 标签 - 点击条目 - 阅读相关章节</li>
 <li>点击首页右上方 &quot;搜索&quot; 图标 - 在当前页面检索内容</li>
 <li>文档页面左上方的导航链接可实现页面跳转:<ul>
@@ -2194,6 +2217,13 @@
 <li>长按 &quot;文档&quot; 标签 - 跳转至章节索引页面</li>
 </ul>
 </li>
+</ul>
+</li>
+<li>启动器快速启动阅读<ul>
+<li>AutoJs6 设置页面 - 启动器快捷方式 - 点击 &quot;文档&quot; 图标</li>
+<li>将 &quot;文档&quot; 快捷方式添加到启动器 (俗称 &quot;桌面&quot;)</li>
+<li>在启动器点击 &quot;文档&quot; 图标即可阅读文档</li>
+<li>部分高版本安卓系统支持长按 AutoJs6 应用图标直接激活快捷方式或拖放添加到启动器</li>
 </ul>
 </li>
 </ul>
@@ -2536,7 +2566,11 @@ console.log(UiObject.bounds()); /* 访问的是类 UiObject 的静态方法 boun
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">T</a></span> }</li>
 <li><ins><strong>template</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">T</a></span> }</li>
 </ul>
-</div><p>returns 后的 &quot;{}&quot; 内包含返回值类型.<br>上述示例表示 colors.rgb 方法调用后将返回 <a href="dataTypes.html#datatypes_number">number</a> 类型数据.</p>
+</div><p>template 标签指示了一个模板参数 <code>T</code>, 这个参数可以代表任意一个类型, 如 <code>string</code>.</p>
+<p>示例 <code>foo.bar(a, b)</code> 中, 返回值与参数 <code>a</code> 的类型均为 <code>T</code>, 因此两者的类型相同.</p>
+<p>例如当参数 <code>a</code> 传入 <code>string</code> 类型时, 返回值也为 <code>string</code> 类型:</p>
+<pre><code class="lang-js">typeof foo.bar(&#39;hello&#39;, 3); // string
+</code></pre>
 <blockquote>
 <p>参阅: <a href="dataTypes.html#datatypes_generic">泛型</a></p>
 </blockquote>
@@ -2605,9 +2639,9 @@ console.log(UiObject.bounds()); /* 访问的是类 UiObject 的静态方法 boun
 <p>对于存在阅读障碍的文档内容, 可尝试暂时略过, 继续阅读后续内容.<br>当完整阅读一个章节或小节后, 可能对之前略过内容的进一步理解有所帮助.<br>也可提交反馈至 GitHub 项目页面, 开发者可能会根据提交的反馈适当调整文档内容.</p>
 <h2>图像<span><a class="mark" href="#qa_4" id="qa_4">#</a></span></h2>
 <h3>OCR 特性<span><a class="mark" href="#qa_ocr" id="qa_ocr">#</a></span></h3>
-<p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 实现的.</p>
+<p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 及 <a href="https://www.paddlepaddle.org.cn/">Baidu PaddlePaddle</a> 的 <a href="https://github.com/PaddlePaddle/Paddle-Lite">Paddle Lite</a> 实现的.</p>
 <blockquote>
-<p>注: AutoJs6 的 <a href="http://project.autojs6.com/blob/master/app/src/main/java/org/autojs/autojs/runtime/api/MlKitOCR.kt">OCR 实现源码</a> 参考自 <a href="https://github.com/TonyJiangWJ">TonyJiangWJ</a> 的 <a href="https://github.com/TonyJiangWJ/Auto.js">开源项目</a>.</p>
+<p>注:<br>AutoJs6 基于 MLKit 引擎的 <a href="http://project.autojs6.com/blob/master/app/src/main/java/org/autojs/autojs/runtime/api/OcrMLKit.kt">OCR 实现源码</a> 参考自 <a href="https://github.com/TonyJiangWJ">TonyJiangWJ</a> 的 <a href="https://github.com/TonyJiangWJ/Auto.js">Auto.js</a> 项目.<br>AutoJs6 基于 Paddle Lite 引擎的 <a href="http://project.autojs6.com/blob/master/app/src/main/java/org/autojs/autojs/runtime/api/OcrPaddle.kt">OCR 实现源码</a> 源自 <a href="https://github.com/TonyJiangWJ">TonyJiangWJ</a> 的 <a href="http://pr.autojs6.com/120">GitHub PR</a>.</p>
 </blockquote>
 <blockquote>
 <p>参阅: <a href="ocr.html">光学字符识别 (OCR)</a> 模块</p>
@@ -2753,8 +2787,8 @@ console.log(UiObject.bounds()); /* 访问的是类 UiObject 的静态方法 boun
 <p>当升级 AutoJs6 后, 某个或某些 <code>API</code> 出现异常时, 可查询应用文档并定位到相关章节, 根据文档的提示排查并解决上述问题.</p>
 <p>如问题仍未解决, 可在项目的 GitHub 议题页面提交 <a href="#all_反馈">反馈</a>.</p>
 <h2>打包应用<span><a class="mark" href="#qa_12" id="qa_12">#</a></span></h2>
-<p>AutoJs6 使用 Auto.js 最终免费版打包插件, 因此打包应用与 AutoJs6 主应用有较大的功能和界面差异.</p>
-<p>AutoJs6 暂时不考虑对打包应用做进一步开发, 甚至可能永久搁置.</p>
+<p>AutoJs6 打包功能尚不完善, 打包应用与 AutoJs6 主应用可能有较大的功能和界面差异.</p>
+<p>AutoJs6 开发者暂不考虑参与打包功能相关的开发工作, 目前以 <a href="https://github.com/LZX284">LZX284</a> 为主要贡献者进行打包功能的开发及维护, 后续将继续由其他开发者贡献相关代码. </p>
 <h3>图片等资源共同打包及多脚本打包<span><a class="mark" href="#qa_13" id="qa_13">#</a></span></h3>
 <p>上述需求需使用 &quot;项目&quot; 功能.</p>
 <p>点击 AutoJs6 主页面 &quot;+&quot; 图标, 选择项目, 填写信息后可新建一个项目.<br>项目支持存放多个 [ 脚本 / 模块 / 资源文件 ].<br>项目工具栏的 APK 打包图标, 点击可打包一个项目.</p>
@@ -4281,13 +4315,13 @@ species.isRegExp(/test$/); // true
 <h2>[p] WIDTH<span><a class="mark" href="#global_p_width" id="global_p_width">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Getter</code></strong></p>
 <ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+<li><strong>&lt;get&gt;</strong> <a href="dataTypes.html#datatypes_number">number</a></li>
 </ul>
 <p><a href="device.html#device_p_width">device.width</a> 的别名属性.</p>
 <h2>[p] HEIGHT<span><a class="mark" href="#global_p_height" id="global_p_height">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Getter</code></strong></p>
 <ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+<li><strong>&lt;get&gt;</strong> <a href="dataTypes.html#datatypes_number">number</a></li>
 </ul>
 <p><a href="device.html#device_p_height">device.height</a> 的别名属性.</p>
 <h2>[p+] R<span><a class="mark" href="#global_p_r" id="global_p_r">#</a></span></h2>
@@ -4951,10 +4985,9 @@ console.log(autojs.version.code); /* 同上. */
 console.log(autojs.version.date); /* 同上. */
 </code></pre>
 <h2>[p] themeColor<span><a class="mark" href="#autojs_p_themecolor" id="autojs_p_themecolor">#</a></span></h2>
-<h3>themeColor<span><a class="mark" href="#autojs_themecolor" id="autojs_themecolor">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong> <strong><code>Getter</code></strong></p>
 <ul>
-<li>{ <span class="type"><a href="dataTypes.html#datatypes_themecolor">ThemeColor</a></span> }</li>
+<li><strong>&lt;get&gt;</strong> <a href="dataTypes.html#datatypes_themecolor">ThemeColor</a></li>
 </ul>
 <p>获取 AutoJs6 的主题颜色实例.</p>
 <pre><code class="lang-js">autojs.themeColor.getColorPrimary(); /* 获取 AutoJs6 主题色的主色色值. */
@@ -5407,6 +5440,10 @@ context.startActivity(i);
 </ul>
 </li>
 </ul>
+<h2>黑色与 0<span><a class="mark" href="#color_0" id="color_0">#</a></span></h2>
+<p>需特别留意, 黑色的颜色字符串为 <code>#000000</code>, 它是完全颜色字符串 <code>#FF000000</code> 的简写形式, 其 ARGB 分量表示为 <code>argb(255, 0, 0, 0)</code>.</p>
+<p>因此黑色的颜色整数不是 <code>0</code>, 而是 <code>-16777216</code>.</p>
+<p>颜色整数 <code>0</code> 对应的是完全透明色, 即 <code>#00000000</code>, 其 ARGB 分量表示为 <code>argb(0, 0, 0, 0)</code>.</p>
 <hr>
 <p style="font: bold 2em sans-serif; color: #FF7043">colors</p>
 
@@ -5606,8 +5643,8 @@ colors.build().setHsla(0.25, 0.8, 0.64, 0.9).toHex(); // #E6A3ED5A
 colors.build(120, 60, 240, 0.85).toHex(); /* 同上. */
 colors.build().setRgba(120, 60, 240, 0.85).toHex(); /* 同上. */
 </code></pre>
-<h2>[m] digest<span><a class="mark" href="#color_m_digest" id="color_m_digest">#</a></span></h2>
-<h3>digest(color)<span><a class="mark" href="#color_digest_color" id="color_digest_color">#</a></span></h3>
+<h2>[m] summary<span><a class="mark" href="#color_m_summary" id="color_m_summary">#</a></span></h2>
+<h3>summary(color)<span><a class="mark" href="#color_summary_color" id="color_summary_color">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
 <li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniColor</a></span> } - 颜色参数</li>
@@ -5652,16 +5689,16 @@ colors.build().setRgba(120, 60, 240, 0.85).toHex(); /* 同上. */
 </table>
 <p>示例:</p>
 <pre><code class="lang-js">// hex(#009688), rgba(0,150,136/1.0), int(-16738680)
-colors.digest(&#39;#009688&#39;);
+colors.summary(&#39;#009688&#39;);
 
 // hex(#BE009688), rgba(0,150,136/0.75), int(-1107257720)
-colors.digest(&#39;#BE009688&#39;);
+colors.summary(&#39;#BE009688&#39;);
 
 // hex(#FF0000), rgba(255,0,0/1.0), int(-65536)
-colors.digest(&#39;red&#39;);
+colors.summary(&#39;red&#39;);
 
 // hex(#6400008B), rgba(0,0,139/0.39), int(1677721739)
-colors.build(&#39;dark-blue&#39;).setAlpha(100).digest();
+colors.build(&#39;dark-blue&#39;).setAlpha(100).summary();
 </code></pre>
 <h2>[m] parseColor<span><a class="mark" href="#color_m_parsecolor" id="color_m_parsecolor">#</a></span></h2>
 <h3>parseColor(color)<span><a class="mark" href="#color_parsecolor_color" id="color_parsecolor_color">#</a></span></h3>
@@ -6900,84 +6937,165 @@ paint.setColor(android.graphics.Color.pack(
 <p><a href="colorTable.html#colortable_Material_颜色列表">Material 颜色列表</a> 对象.</p>
 <h2>[p] BLACK<span><a class="mark" href="#color_p_black" id="color_p_black">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16777216</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #000000">◑</span> 黑 (<code>#000000</code> <code>rgb(0,0,0</code>) 的颜色整数.</p>
 <h2>[p] BLUE<span><a class="mark" href="#color_p_blue" id="color_p_blue">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16776961</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #0000FF">◑</span> 蓝 (<code>#0000FF</code> <code>rgb(0,0,255</code>) 的颜色整数.</p>
 <h2>[p] CYAN<span><a class="mark" href="#color_p_cyan" id="color_p_cyan">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16711681</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #00FFFF">◑</span> 青 (<code>#00FFFF</code> <code>rgb(0,255,255</code>) 的颜色整数.</p>
 <h2>[p] AQUA<span><a class="mark" href="#color_p_aqua" id="color_p_aqua">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16711681</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #00FFFF">◑</span> 青 (<code>#00FFFF</code> <code>rgb(0,255,255</code>) 的颜色整数.</p>
 <h2>[p] DARK_GRAY<span><a class="mark" href="#color_p_dark_gray" id="color_p_dark_gray">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-12303292</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #444444">◑</span> 暗灰 (<code>#444444</code> <code>rgb(68,68,68</code>) 的颜色整数.</p>
 <h2>[p] DARK_GREY<span><a class="mark" href="#color_p_dark_grey" id="color_p_dark_grey">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-12303292</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #444444">◑</span> 暗灰 (<code>#444444</code> <code>rgb(68,68,68</code>) 的颜色整数.</p>
 <h2>[p] DKGRAY<span><a class="mark" href="#color_p_dkgray" id="color_p_dkgray">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-12303292</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #444444">◑</span> 暗灰 (<code>#444444</code> <code>rgb(68,68,68</code>) 的颜色整数.</p>
 <h2>[p] GRAY<span><a class="mark" href="#color_p_gray" id="color_p_gray">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-7829368</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #888888">◑</span> 灰 (<code>#888888</code> <code>rgb(136,136,136</code>) 的颜色整数.</p>
 <h2>[p] GREY<span><a class="mark" href="#color_p_grey" id="color_p_grey">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-7829368</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #888888">◑</span> 灰 (<code>#888888</code> <code>rgb(136,136,136</code>) 的颜色整数.</p>
 <h2>[p] GREEN<span><a class="mark" href="#color_p_green" id="color_p_green">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16711936</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #00FF00">◑</span> 绿 (<code>#00FF00</code> <code>rgb(0,255,0</code>) 的颜色整数.</p>
 <h2>[p] LIME<span><a class="mark" href="#color_p_lime" id="color_p_lime">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16711936</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #00FF00">◑</span> 绿 (<code>#00FF00</code> <code>rgb(0,255,0</code>) 的颜色整数.</p>
 <h2>[p] LIGHT_GRAY<span><a class="mark" href="#color_p_light_gray" id="color_p_light_gray">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-3355444</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #CCCCCC">◑</span> 亮灰 (<code>#CCCCCC</code> <code>rgb(204,204,204</code>) 的颜色整数.</p>
 <h2>[p] LIGHT_GREY<span><a class="mark" href="#color_p_light_grey" id="color_p_light_grey">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-3355444</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #CCCCCC">◑</span> 亮灰 (<code>#CCCCCC</code> <code>rgb(204,204,204</code>) 的颜色整数.</p>
 <h2>[p] LTGRAY<span><a class="mark" href="#color_p_ltgray" id="color_p_ltgray">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-3355444</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #CCCCCC">◑</span> 亮灰 (<code>#CCCCCC</code> <code>rgb(204,204,204</code>) 的颜色整数.</p>
 <h2>[p] MAGENTA<span><a class="mark" href="#color_p_magenta" id="color_p_magenta">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-65281</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FF00FF">◑</span> 品红 / 洋红 (<code>#FF00FF</code> <code>rgb(255,0,255</code>) 的颜色整数.</p>
 <h2>[p] FUCHSIA<span><a class="mark" href="#color_p_fuchsia" id="color_p_fuchsia">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-65281</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FF00FF">◑</span> 品红 / 洋红 (<code>#FF00FF</code> <code>rgb(255,0,255</code>) 的颜色整数.</p>
 <h2>[p] MAROON<span><a class="mark" href="#color_p_maroon" id="color_p_maroon">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-8388608</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #800000">◑</span> 栗 (<code>#800000</code> <code>rgb(128,0,0</code>) 的颜色整数.</p>
 <h2>[p] NAVY<span><a class="mark" href="#color_p_navy" id="color_p_navy">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16777088</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #000080">◑</span> 海军蓝 / 藏青 (<code>#000080</code> <code>rgb(0,0,128</code>) 的颜色整数.</p>
 <h2>[p] OLIVE<span><a class="mark" href="#color_p_olive" id="color_p_olive">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-8355840</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #808000">◑</span> 橄榄 (<code>#808000</code> <code>rgb(128,128,0</code>) 的颜色整数.</p>
 <h2>[p] PURPLE<span><a class="mark" href="#color_p_purple" id="color_p_purple">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-8388480</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #800080">◑</span> 紫 (<code>#800080</code> <code>rgb(128,0,128</code>) 的颜色整数.</p>
 <h2>[p] RED<span><a class="mark" href="#color_p_red" id="color_p_red">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-65536</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FF0000">◑</span> 红 (<code>#FF0000</code> <code>rgb(255,0,0</code>) 的颜色整数.</p>
 <h2>[p] SILVER<span><a class="mark" href="#color_p_silver" id="color_p_silver">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-4144960</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #C0C0C0">◑</span> 银 (<code>#C0C0C0</code> <code>rgb(192,192,192</code>) 的颜色整数.</p>
 <h2>[p] TEAL<span><a class="mark" href="#color_p_teal" id="color_p_teal">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-16744320</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #008080">◑</span> 鸭绿 / 凫绿 (<code>#008080</code> <code>rgb(0,128,128</code>) 的颜色整数.</p>
 <h2>[p] WHITE<span><a class="mark" href="#color_p_white" id="color_p_white">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-1</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FFFFFF">◑</span> 白 (<code>#FFFFFF</code> <code>rgb(255,255,255</code>) 的颜色整数.</p>
 <h2>[p] YELLOW<span><a class="mark" href="#color_p_yellow" id="color_p_yellow">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-256</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FFFF00">◑</span> 黄 (<code>#FFFF00</code> <code>rgb(255,255,0)</code>) 的颜色整数.</p>
 <h2>[p] ORANGE<span><a class="mark" href="#color_p_orange" id="color_p_orange">#</a></span></h2>
 <p><strong><code>6.2.0</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>-23296</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p><span style="color: #FFA500">◑</span> 橙 (<code>#FFA500</code> <code>rgb(255,165,0)</code>) 的颜色整数.</p>
 <h2>[p] TRANSPARENT<span><a class="mark" href="#color_p_transparent" id="color_p_transparent">#</a></span></h2>
 <p><strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>0</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
 <p>全透明 (<code>#00000000</code> <code>argb(0, 0, 0, 0)</code>) 的颜色整数.</p>
 <hr>
 <h2>融合颜色<span><a class="mark" href="#color_1" id="color_1">#</a></span></h2>
@@ -7646,7 +7764,7 @@ log(result.sortBy(&quot;top-right&quot;));
 <!-- [start-include:ocr.md] -->
 <h1>光学字符识别 (OCR)<span><a class="mark" href="#ocr_ocr" id="ocr_ocr">#</a></span></h1>
 <p>ocr 模块用于识别图像中的文本.</p>
-<p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 实现的.</p>
+<p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 及 <a href="https://www.paddlepaddle.org.cn/">Baidu PaddlePaddle</a> 的 <a href="https://github.com/PaddlePaddle/Paddle-Lite">Paddle Lite</a> 实现的.</p>
 <hr>
 <p style="font: bold 2em sans-serif; color: #FF7043">ocr</p>
 
@@ -7657,10 +7775,38 @@ log(result.sortBy(&quot;top-right&quot;));
 typeof ocr.detect; // &quot;function&quot;
 typeof ocr.recognizeText; // &quot;function&quot;
 </code></pre>
-<h3>ocr(img, options?)<span><a class="mark" href="#ocr_ocr_img_options" id="ocr_ocr_img_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [1-2]/6</code></strong></p>
+<h3>ocr(options?)<span><a class="mark" href="#ocr_ocr_options" id="ocr_ocr_options">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload [1-2]/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图中包含的所有文本, 返回文本数组.</p>
+<p><code>ocr()</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr(img);
+</code></pre>
+<p>同时也是 <a href="#all_m_recognizetext">ocr.recognizeText(options?)</a> 的别名方法.</p>
+<h3>ocr(region)<span><a class="mark" href="#ocr_ocr_region" id="ocr_ocr_region">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload 3/9</code></strong></p>
+<ul>
+<li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图指定区域内包含的所有文本, 返回文本数组.</p>
+<p><code>ocr(region)</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr(img, region);
+</code></pre>
+<p>同时也是 <a href="#all__ocr">ocr({ <span class="type">region: region</span> })</a> 的便捷方法,</p>
+<p>以及 <a href="#all_m_recognizetext">ocr.recognizeText(region)</a> 的别名方法.</p>
+<p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
+<h3>ocr(img, options?)<span><a class="mark" href="#ocr_ocr_img_options" id="ocr_ocr_img_options">#</a></span></h3>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/9</code></strong></p>
+<ul>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -7676,12 +7822,12 @@ let img = images.captureScreen();
 let results = ocr(img);
 
 /* 结果过滤, 筛选出文本中可部分匹配 &quot;app&quot; 的结果, 如 &quot;apple&quot;, &quot;disappear&quot; 等. */
-results.filter(text =&gt; text.includes(&#39;app&#39;)); 
+results.filter(text =&gt; text.includes(&#39;app&#39;));
 </code></pre>
 <h3>ocr(img, region)<span><a class="mark" href="#ocr_ocr_img_region" id="ocr_ocr_img_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 3/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -7702,7 +7848,7 @@ results.filter(text =&gt; text.includes(&#39;app&#39;));
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
 <h3>ocr(imgPath, options?)<span><a class="mark" href="#ocr_ocr_imgpath_options" id="ocr_ocr_imgpath_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [7-8]/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
@@ -7714,7 +7860,7 @@ results.filter(text =&gt; text.includes(&#39;app&#39;));
 <pre><code class="lang-js">ocr(&#39;./picture.jpg&#39;); /* 获取本地图像文件中的所有文本. */
 </code></pre>
 <h3>ocr(imgPath, region)<span><a class="mark" href="#ocr_ocr_imgpath_region" id="ocr_ocr_imgpath_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 9/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
@@ -7728,11 +7874,59 @@ results.filter(text =&gt; text.includes(&#39;app&#39;));
 ocr(&#39;./picture.jpg&#39;, [ 0, 0, 100, 150 ]);
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
-<h2>[m] recognizeText<span><a class="mark" href="#ocr_m_recognizetext" id="ocr_m_recognizetext">#</a></span></h2>
-<h3>recognizeText(img, options?)<span><a class="mark" href="#ocr_recognizetext_img_options" id="ocr_recognizetext_img_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [1-2]/6</code></strong></p>
+<h2>[p] mode<span><a class="mark" href="#ocr_p_mode" id="ocr_p_mode">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>Getter/Setter</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>[ &lt;get&gt; = <code>&#39;mlkit&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_ocrModeName">OcrModeName</a></span> }</li>
+<li><strong>&lt;set&gt;</strong> { <span class="type"><a href="dataTypes.html#datatypes_ocrModeName">OcrModeName</a></span> }</li>
+</ul>
+<p>获取或设置 OCR 的工作模式名称.</p>
+<pre><code class="lang-js">/* AutoJs6 OCR 默认采用 MLKit 工作模式. */
+console.log(ocr.mode); // &quot;mlkit&quot;
+
+ocr.mode = &#39;paddle&#39;; /* 切换到 Paddle 工作模式. */
+console.log(ocr.mode); // &quot;paddle&quot;
+
+ocr.mode = &#39;mlkit&#39;; /* 再次切换到 MLKit 工作模式. */
+console.log(ocr.mode); // &quot;mlkit&quot;
+</code></pre>
+<p>当使用不同的工作模式名称时, <code>ocr</code> 全局方法及其相关方法 (如 <a href="#all_m_detect">ocr.detect</a>) 将使用不同的引擎, 进而可能获得不同的识别速度和结果.</p>
+<h2>[m] recognizeText<span><a class="mark" href="#ocr_m_recognizetext" id="ocr_m_recognizetext">#</a></span></h2>
+<p>用于识别图像中的全部文本.</p>
+<p><code>recognizeText</code> 方法与工作模式有关, 例如当工作模式为 <code>paddle</code> 时, <code>ocr.recognizeText(...)</code> 与 <code>ocr.paddle.recognizeText(...)</code> 等价.</p>
+<p><code>ocr.recognizeText(...)</code> 相关方法均可简写为 <code>ocr(...)</code>.</p>
+<h3>recognizeText(options?)<span><a class="mark" href="#ocr_recognizetext_options" id="ocr_recognizetext_options">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload [1-2]/9</code></strong></p>
+<ul>
+<li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图中包含的所有文本, 返回文本数组.</p>
+<p><code>ocr.recognizeText()</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr.recognizeText(img);
+</code></pre>
+<p><code>ocr.recognizeText(options?)</code> 与 <code>ocr(options?)</code> 等价.</p>
+<h3>recognizeText(region)<span><a class="mark" href="#ocr_recognizetext_region" id="ocr_recognizetext_region">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload 3/9</code></strong></p>
+<ul>
+<li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图指定区域内包含的所有文本, 返回文本数组.</p>
+<p><code>ocr.recognizeText(region)</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr.recognizeText(img, region);
+</code></pre>
+<p><a href="#all_m_recognizeText">ocr.recognizeText({ <span class="type">region: region</span> })</a> 的便捷方法.</p>
+<p><code>ocr.recognizeText(region)</code> 与 <code>ocr(region)</code> 等价.</p>
+<p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
+<h3>recognizeText(img, options?)<span><a class="mark" href="#ocr_recognizetext_img_options" id="ocr_recognizetext_img_options">#</a></span></h3>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/9</code></strong></p>
+<ul>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -7743,9 +7937,9 @@ let img = images.captureScreen(); /* 截屏并获取包装图像对象. */
 ocr.recognizeText(img).filter(text =&gt; text.includes(&#39;app&#39;)); /* 过滤结果. */
 </code></pre>
 <h3>recognizeText(img, region)<span><a class="mark" href="#ocr_recognizetext_img_region" id="ocr_recognizetext_img_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 3/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -7758,7 +7952,7 @@ ocr.recognizeText(img, [ 0, 0, 100, 150 ]).filter(text =&gt; text.includes(&#39;
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
 <h3>recognizeText(imgPath, options?)<span><a class="mark" href="#ocr_recognizetext_imgpath_options" id="ocr_recognizetext_imgpath_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [7-8]/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
@@ -7770,7 +7964,7 @@ ocr.recognizeText(img, [ 0, 0, 100, 150 ]).filter(text =&gt; text.includes(&#39;
 <pre><code class="lang-js">ocr.recognizeText(&#39;./picture.jpg&#39;); /* 获取本地图像文件中的所有文本. */
 </code></pre>
 <h3>recognizeText(imgPath, region)<span><a class="mark" href="#ocr_recognizetext_imgpath_region" id="ocr_recognizetext_imgpath_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 9/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
@@ -7785,10 +7979,39 @@ ocr.recognizeText(&#39;./picture.jpg&#39;, [ 0, 0, 100, 150 ]);
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
 <h2>[m] detect<span><a class="mark" href="#ocr_m_detect" id="ocr_m_detect">#</a></span></h2>
-<h3>detect(img, options?)<span><a class="mark" href="#ocr_detect_img_options" id="ocr_detect_img_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [1-2]/6</code></strong></p>
+<p>用于识别图像中的全部文本.</p>
+<p><code>detect</code> 方法与工作模式有关, 例如当工作模式为 <code>paddle</code> 时, <code>ocr.detect(...)</code> 与 <code>ocr.paddle.detect(...)</code> 等价.</p>
+<p>与 <a href="#all_m_recognizetext">recognizeText</a> 不同, <code>detect</code> 返回的结果包含更多信息, 包括 [ 文本标签, 置信度, 位置矩形 ] 等, <code>recognizeText</code> 精简了 <code>detect</code> 返回的结果, 仅包含文本标签数据.</p>
+<h3>detect(options?)<span><a class="mark" href="#ocr_detect_options" id="ocr_detect_options">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload [1-2]/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_ocrresult">OcrResult</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图中包含的所有文本, 返回 <a href="dataTypes.html#datatypes_ocrresult">OcrResult</a> 数组.</p>
+<p><code>ocr.detect()</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr.detect(img);
+</code></pre>
+<h3>detect(region)<span><a class="mark" href="#ocr_detect_region" id="ocr_detect_region">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload 3/9</code></strong></p>
+<ul>
+<li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_ocrresult">OcrResult</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图指定区域内包含的所有文本, 返回 <a href="dataTypes.html#datatypes_ocrresult">OcrResult</a> 数组.</p>
+<p><code>ocr.detect(region)</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr.detect(img, region);
+</code></pre>
+<p>同时也是 <a href="#all_m_detect">ocr.detect({ <span class="type">region: region</span> })</a> 的便捷方法.</p>
+<p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
+<h3>detect(img, options?)<span><a class="mark" href="#ocr_detect_img_options" id="ocr_detect_img_options">#</a></span></h3>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/9</code></strong></p>
+<ul>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_ocrresult">OcrResult</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -7806,9 +8029,9 @@ let result = ocr.detect(img);
 result.filter(o =&gt; o.confidence &gt;= 0.8);
 </code></pre>
 <h3>detect(img, region)<span><a class="mark" href="#ocr_detect_img_region" id="ocr_detect_img_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 3/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_ocrresult">OcrResult</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -7828,7 +8051,7 @@ result.filter(o =&gt; o.confidence &gt;= 0.8);
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
 <h3>detect(imgPath, options?)<span><a class="mark" href="#ocr_detect_imgpath_options" id="ocr_detect_imgpath_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [7-8]/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
@@ -7840,7 +8063,7 @@ result.filter(o =&gt; o.confidence &gt;= 0.8);
 result.filter(o =&gt; o.confidence &gt;= 0.8); /* 筛选置信度高于 0.8 的结果. */
 </code></pre>
 <h3>detect(imgPath, region)<span><a class="mark" href="#ocr_detect_imgpath_region" id="ocr_detect_imgpath_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 9/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
@@ -7855,8 +8078,132 @@ let result = ocr.detect(&#39;./picture.jpg&#39;, [ 0, 0, 100, 150 ]);
 /* 筛选置信度高于 0.8 的结果. */
 result.filter(o =&gt; o.confidence &gt;= 0.8);
 </code></pre>
-<p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.
+<p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
+<h2>[m] tap<span><a class="mark" href="#ocr_m_tap" id="ocr_m_tap">#</a></span></h2>
+<h3>tap(mode)<span><a class="mark" href="#ocr_tap_mode" id="ocr_tap_mode">#</a></span></h3>
+<p><strong><code>6.3.4</code></strong></p>
+<ul>
+<li><strong>mode</strong> { <span class="type"><a href="dataTypes.html#datatypes_ocrModeName">OcrModeName</a></span> } - OCR 工作模式</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>用于切换 OCR 工作模式, 相当于 <a href="#all_p_mode">ocr.mode</a> 的 setter 形式.</p>
+<pre><code class="lang-js">ocr.tap(&#39;paddle&#39;);
+ocr.mode = &#39;paddle&#39;; /* 同上. */
+</code></pre>
+<h2>[m] summary<span><a class="mark" href="#ocr_m_summary" id="ocr_m_summary">#</a></span></h2>
+<h3>summary()<span><a class="mark" href="#ocr_summary" id="ocr_summary">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong></p>
+<p>获取 AutoJs6 OCR 功能的摘要.</p>
+<p>摘要中表述了 OCR 功能当前使用的工作模式, 以及全部可用的工作模式.</p>
+<pre><code class="lang-js">/* e.g. [ OCR summary ]
+ * Current mode: mlkit
+ * Available modes: [ mlkit, paddle ]
+ */
+console.log(ocr.summary());
+</code></pre>
+<h2>工作模式与代码形式<span><a class="mark" href="#ocr" id="ocr">#</a></span></h2>
+<p>截止 2023 年 9 月, AutoJs6 的 ocr 支持两种工作模式, <code>mlkit</code> (默认) 及 <code>paddle</code>.</p>
+<p>工作模式的获取或设置可通过 <a href="#all_p_mode">ocr.mode</a> 实现.</p>
+<p>下面以 <code>mlkit</code> 为例, 总结 <code>mlkit</code> 工作模式可用的全部代码形式.</p>
+<ol>
+<li>ocr.mlkit.detect(...)</li>
+<li>ocr.mlkit.recognizeText(...)</li>
+<li>ocr.mlkit(...)</li>
+<li><a href="#all_m_detect">ocr.detect(...)</a></li>
+<li><a href="#all_m_recognizetext">ocr.recognizeText(...)</a></li>
+<li><a href="#all__ocr">ocr(...)</a></li>
+</ol>
+<p>上述 6 种代码形式均可实现使用 <code>mlkit</code> 引擎进行光学字符识别.</p>
+<p>其中, [ 3 ] 是 [ 2 ] 的简便写法, [ 6 ] 是 [ 5 ] 的简便写法.</p>
+<p>另外, [ 4, 5, 6 ] 三种形式的条件, 是 OCR 工作模式为 <code>mlkit</code>, 即 <code>ocr.mode</code> 返回 <code>mlkit</code>. 否则需要调用 <code>ocr.mode = &#39;mlkit&#39;</code> 切换工作模式.</p>
+<p>下面再以 <code>paddle</code> 为例, 总结 <code>paddle</code> 工作模式可用的全部代码形式.</p>
+<ol>
+<li>ocr.paddle.detect(...)</li>
+<li>ocr.paddle.recognizeText(...)</li>
+<li>ocr.paddle(...)</li>
+<li><a href="#all_m_detect">ocr.detect(...)</a></li>
+<li><a href="#all_m_recognizetext">ocr.recognizeText(...)</a></li>
+<li><a href="#all__ocr">ocr(...)</a></li>
+</ol>
+<p>同样, [ 4, 5, 6 ] 三种形式的条件, 是 OCR 工作模式为 <code>paddle</code>, 即 <code>ocr.mode</code> 返回 <code>paddle</code>. 否则需要调用 <code>ocr.mode = &#39;paddle&#39;</code> 切换工作模式.</p>
+<p>由此可见, <code>ocr(...)</code> 和 <code>ocr.detect(...)</code> 等方法是动态变化的, 其功能取决于工作模式. 这种形式的优点是写法简单, 但可读性相对较差, 可能难以辨识 OCR 的具体工作引擎. 如需兼顾可读性, 则可使用 <code>ocr.mlkit(...)</code> 和 <code>ocr.mlkit.detect(...)</code> 等形式.
 <!-- [end-include:ocr.md] --></p>
+<!-- [start-include:barcode.md] -->
+<h1>条码 (Barcode)<span><a class="mark" href="#barcode_barcode" id="barcode_barcode">#</a></span></h1>
+<hr>
+<p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 30, 2023.</p>
+
+<hr>
+<p>barcode 模块用于识别图像中的条码.</p>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">barcode</p>
+
+<hr>
+<pre><code class="lang-ts">interface Barcode {
+
+    (options?: DetectOptions): string | string[] | null;
+    (isAll: boolean): string | string[] | null;
+    (img: ImageWrapper | string, options?: DetectOptions): string | string[] | null;
+    (img: ImageWrapper | string, isAll: boolean): string | string[] | null;
+
+    detect(options?: DetectOptions): Barcode.Result | Barcode.Result[] | null;
+    detect(isAll: boolean): Barcode.Result | Barcode.Result[] | null;
+    detect(img: ImageWrapper | string, options?: DetectOptions): Barcode.Result | Barcode.Result[] | null;
+    detect(img: ImageWrapper | string, isAll: boolean): Barcode.Result | Barcode.Result[] | null;
+
+    detectAll(options?: DetectOptionsWithoutIsAll): Barcode.Result[];
+    detectAll(img: ImageWrapper | string, options?: DetectOptionsWithoutIsAll): Barcode.Result[];
+
+    recognizeText(options?: DetectOptions): string | string[] | null;
+    recognizeText(isAll: boolean): string | string[] | null;
+    recognizeText(img: ImageWrapper | string, options?: DetectOptions): string | string[] | null;
+    recognizeText(img: ImageWrapper | string, isAll: boolean): string | string[] | null;
+
+    recognizeTexts(options?: DetectOptionsWithoutIsAll): string[];
+    recognizeTexts(img: ImageWrapper | string, options?: DetectOptionsWithoutIsAll): string[];
+
+}
+</code></pre>
+<!-- [end-include:barcode.md] -->
+<!-- [start-include:qrcode.md] -->
+<h1>二维码 (QR Code)<span><a class="mark" href="#qrcode_qr_code" id="qrcode_qr_code">#</a></span></h1>
+<hr>
+<p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 30, 2023.</p>
+
+<hr>
+<p>qrcode 模块用于识别图像中的二维码.</p>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">qrcode</p>
+
+<hr>
+<pre><code class="lang-ts">interface QrCode {
+
+    (options?: DetectOptions): string | string[] | null;
+    (isAll: boolean): string | string[] | null;
+    (img: ImageWrapper | string, options?: DetectOptions): string | string[] | null;
+    (img: ImageWrapper | string, isAll: boolean): string | string[] | null;
+
+    detect(options?: DetectOptions): QrCode.Result | QrCode.Result[] | null;
+    detect(isAll: boolean): QrCode.Result | QrCode.Result[] | null;
+    detect(img: ImageWrapper | string, options?: DetectOptions): QrCode.Result | QrCode.Result[] | null;
+    detect(img: ImageWrapper | string, isAll: boolean): QrCode.Result | QrCode.Result[] | null;
+
+    detectAll(options?: DetectOptionsWithoutIsAll): QrCode.Result[];
+    detectAll(img: ImageWrapper | string, options?: DetectOptionsWithoutIsAll): QrCode.Result[];
+
+    recognizeText(options?: DetectOptions): string | string[] | null;
+    recognizeText(isAll: boolean): string | string[] | null;
+    recognizeText(img: ImageWrapper | string, options?: DetectOptions): string | string[] | null;
+    recognizeText(img: ImageWrapper | string, isAll: boolean): string | string[] | null;
+
+    recognizeTexts(options?: DetectOptionsWithoutIsAll): string[];
+    recognizeTexts(img: ImageWrapper | string, options?: DetectOptionsWithoutIsAll): string[];
+
+}
+</code></pre>
+<!-- [end-include:qrcode.md] -->
 <!-- [start-include:keys.md] -->
 <h1>按键 (Keys)<span><a class="mark" href="#keys_keys" id="keys_keys">#</a></span></h1>
 <hr>
@@ -13603,70 +13950,15 @@ webView.setWebViewClient(newInjectableWebClient());
 <h3>newWebSocket(url)<span><a class="mark" href="#web_newwebsocket_url" id="web_newwebsocket_url">#</a></span></h3>
 <p><strong><code>6.3.1</code></strong> <strong><code>Global</code></strong></p>
 <ul>
-<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="webSocketType.html">WebSocket</a></span> }</li>
 </ul>
-<p>新建并返回一个 <a href="webSocketType.html">WebSocket</a> 实例.</p>
-<pre><code class="lang-js">console.setExitOnClose(7e3).show();
-
-let ws = web.newWebSocket(&#39;wss://echo.websocket.events&#39;);
-
-ws
-    .on(&#39;open&#39;, (res, ws) =&gt; {
-        console.log(&#39;WebSocket 已连接&#39;);
-    })
-    .on(&#39;message&#39;, (message, ws) =&gt; {
-        console.log(&#39;接收到消息&#39;);
-        // if (message instanceof okio.ByteString) {
-        //     console.log(`消息类型: ByteString`);
-        // } else if (typeof message === &#39;string&#39;) {
-        //     console.log(`消息类型: String`);
-        // } else {
-        //     throw TypeError(&#39;Should never happen&#39;);
-        // }
-    })
-    .on(&#39;text&#39;, (text, ws) =&gt; {
-        console.info(&#39;接收到文本消息:&#39;);
-        console.info(`text: ${text}`);
-    })
-    .on(&#39;bytes&#39;, (bytes, ws) =&gt; {
-        console.info(&#39;接收到字节数组消息:&#39;);
-        console.info(`utf8: ${bytes.utf8()}`);
-        console.info(`base64: ${bytes.base64()}`);
-        console.info(`md5: ${bytes.md5()}`);
-        console.info(`hex: ${bytes.hex()}`);
-    })
-    .on(&#39;closing&#39;, (code, reason, ws) =&gt; {
-        console.log(&#39;WebSocket 关闭中&#39;);
-    })
-    .on(&#39;closed&#39;, (code, reason, ws) =&gt; {
-        console.log(&#39;WebSocket 已关闭&#39;);
-        console.log(`code: ${code}`);
-        if (reason) console.log(`reason: ${reason}`);
-    })
-    .on(&#39;failure&#39;, (err, res, ws) =&gt; {
-        console.error(&#39;WebSocket 连接失败&#39;);
-        console.error(err);
-    });
-
-/* 发送文本消息. */
-ws.send(&#39;Hello WebSocket&#39;);
-
-/* 发送字节数组消息. */
-ws.send(new okio.ByteString(new java.lang.String(&#39;Hello WebSocket&#39;).getBytes()));
-
-setTimeout(() =&gt; {
-    console.log(&#39;断开 WebSocket&#39;);
-
-    /* code 支持的范围 [1000,5000). */
-    /* 1000 表示成功操作或常规的 Socket 关闭操作. */
-    /* 参阅 https://github.com/Luka967/websocket-close-codes */
-    ws.close(1000, &#39;Closed by user&#39;);
-}, 8e3);
-
-setTimeout(() =&gt; console.log(&#39;Exit&#39;), 9e3);
-</code></pre>
-<!-- [end-include:web.md] -->
+<p>构建一个 <a href="webSocketType.html">WebSocket</a> 实例.</p>
+<p>相当于 <code>new WebSocket(url)</code>.</p>
+<blockquote>
+<p>参阅: <a href="webSocketType.html">WebSocket</a> 章节
+<!-- [end-include:web.md] --></p>
+</blockquote>
 <!-- [start-include:http.md] -->
 <h1>HTTP<span><a class="mark" href="#http_http" id="http_http">#</a></span></h1>
 <hr>
@@ -13683,13 +13975,40 @@ setTimeout(() =&gt; console.log(&#39;Exit&#39;), 9e3);
 
 <hr>
 <h2>[m] get<span><a class="mark" href="#http_m_get" id="http_m_get">#</a></span></h2>
-<h3>get(url, options?, callback?)<span><a class="mark" href="#http_get_url_options_callback" id="http_get_url_options_callback">#</a></span></h3>
-<div class="signature"><ul>
-<li><code>url</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 请求的URL地址, 需要以&quot;http://&quot;或&quot;https://&quot;开头. 如果url没有以&quot;http://&quot;开头, 则默认为&quot;http://&quot;.</li>
+<h3>get(url)<span><a class="mark" href="#http_get_url" id="http_get_url">#</a></span></h3>
+<p><strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址 (默认使用 HTTP 协议)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="httpResponseType.html">HttpResponse</a></span> } - 请求的响应实例</li>
+</ul>
+<pre><code class="lang-js">let response = http.get(&#39;www.github.com&#39;);
+if (response.statusCode === 200) {
+    console.log(&#39;请求成功&#39;);
+} else {
+    console.log(&#39;请求失败&#39;);
+}
+</code></pre>
+<h3>get(url, options)<span><a class="mark" href="#http_get_url_options" id="http_get_url_options">#</a></span></h3>
+<p><strong><code>Overload 2/3</code></strong></p>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址 (默认使用 HTTP 协议)</li>
+<li><strong>options</strong> { <span class="type"><a href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></span> } - 请求的构建选项</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="httpResponseType.html">HttpResponse</a></span> } - 请求的响应实例</li>
+</ul>
+<h3>get(url, options, callback)<span><a class="mark" href="#http_get_url_options_callback" id="http_get_url_options_callback">#</a></span></h3>
+<p><strong><code>Overload 3/3</code></strong> <strong><code>Async</code></strong></p>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址 (默认使用 HTTP 协议)</li>
+<li><strong>options</strong> { <span class="type"><a href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></span> } - 请求的构建选项</li>
+<li><strong>callback</strong> { <span class="type"><a href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></span> } - 请求的响应回调</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="httpResponseType.html">HttpResponse</a></span> } - 请求的响应实例</li>
+</ul>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址</li>
 <li><code>options</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="type">Object</a> } 请求选项. 参见[http.request()][].</li>
 <li><code>callback</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" class="type">Function</a> } 回调函数, 可选, 其参数是一个[Response][]对象. 如果不加回调函数, 则该请求将阻塞、同步地执行.</li>
 </ul>
-</div><p>对地址url进行一次HTTP GET 请求. 如果没有回调函数, 则在请求完成或失败时返回此次请求的响应(参见[Response][]).</p>
+<p>对地址url进行一次HTTP GET 请求. 如果没有回调函数, 则在请求完成或失败时返回此次请求的响应(参见[Response][]).</p>
 <p>最简单GET请求如下:</p>
 <pre><code>console.show();
 var r = http.get(&quot;www.baidu.com&quot;);

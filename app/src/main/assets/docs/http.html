@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>HTTP | AutoJs6 文档 - 6.3.3</title>
+    <title>HTTP | AutoJs6 文档 - 6.4.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -42,6 +42,8 @@
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
 <li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -54,6 +56,7 @@
 <li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
 <li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
 <li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
@@ -80,7 +83,9 @@
 <li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
 <li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
 <li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
 <li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
 <li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
 <li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
@@ -155,7 +160,7 @@
 
     <div id="column1" data-id="http" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.3</h1>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -170,7 +175,9 @@
             <ul>
 <li><span class="stability_undefined"><a href="#http_http">HTTP</a></span><ul>
 <li><span class="stability_undefined"><a href="#http_m_get">[m] get</a></span><ul>
-<li><span class="stability_undefined"><a href="#http_get_url_options_callback">get(url, options?, callback?)</a></span></li>
+<li><span class="stability_undefined"><a href="#http_get_url">get(url)</a></span></li>
+<li><span class="stability_undefined"><a href="#http_get_url_options">get(url, options)</a></span></li>
+<li><span class="stability_undefined"><a href="#http_get_url_options_callback">get(url, options, callback)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#http_m_post">[m] post</a></span><ul>
@@ -215,13 +222,40 @@
 
 <hr>
 <h2>[m] get<span><a class="mark" href="#http_m_get" id="http_m_get">#</a></span></h2>
-<h3>get(url, options?, callback?)<span><a class="mark" href="#http_get_url_options_callback" id="http_get_url_options_callback">#</a></span></h3>
-<div class="signature"><ul>
-<li><code>url</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 请求的URL地址, 需要以&quot;http://&quot;或&quot;https://&quot;开头. 如果url没有以&quot;http://&quot;开头, 则默认为&quot;http://&quot;.</li>
+<h3>get(url)<span><a class="mark" href="#http_get_url" id="http_get_url">#</a></span></h3>
+<p><strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址 (默认使用 HTTP 协议)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="httpResponseType.html">HttpResponse</a></span> } - 请求的响应实例</li>
+</ul>
+<pre><code class="lang-js">let response = http.get(&#39;www.github.com&#39;);
+if (response.statusCode === 200) {
+    console.log(&#39;请求成功&#39;);
+} else {
+    console.log(&#39;请求失败&#39;);
+}
+</code></pre>
+<h3>get(url, options)<span><a class="mark" href="#http_get_url_options" id="http_get_url_options">#</a></span></h3>
+<p><strong><code>Overload 2/3</code></strong></p>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址 (默认使用 HTTP 协议)</li>
+<li><strong>options</strong> { <span class="type"><a href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></span> } - 请求的构建选项</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="httpResponseType.html">HttpResponse</a></span> } - 请求的响应实例</li>
+</ul>
+<h3>get(url, options, callback)<span><a class="mark" href="#http_get_url_options_callback" id="http_get_url_options_callback">#</a></span></h3>
+<p><strong><code>Overload 3/3</code></strong> <strong><code>Async</code></strong></p>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址 (默认使用 HTTP 协议)</li>
+<li><strong>options</strong> { <span class="type"><a href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></span> } - 请求的构建选项</li>
+<li><strong>callback</strong> { <span class="type"><a href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></span> } - 请求的响应回调</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="httpResponseType.html">HttpResponse</a></span> } - 请求的响应实例</li>
+</ul>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址</li>
 <li><code>options</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" class="type">Object</a> } 请求选项. 参见[http.request()][].</li>
 <li><code>callback</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" class="type">Function</a> } 回调函数, 可选, 其参数是一个[Response][]对象. 如果不加回调函数, 则该请求将阻塞、同步地执行.</li>
 </ul>
-</div><p>对地址url进行一次HTTP GET 请求. 如果没有回调函数, 则在请求完成或失败时返回此次请求的响应(参见[Response][]).</p>
+<p>对地址url进行一次HTTP GET 请求. 如果没有回调函数, 则在请求完成或失败时返回此次请求的响应(参见[Response][]).</p>
 <p>最简单GET请求如下:</p>
 <pre><code>console.show();
 var r = http.get(&quot;www.baidu.com&quot;);

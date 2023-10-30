@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>数据类型 (Data Types) | AutoJs6 文档 - 6.3.3</title>
+    <title>数据类型 (Data Types) | AutoJs6 文档 - 6.4.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -42,6 +42,8 @@
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
 <li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -54,6 +56,7 @@
 <li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
 <li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
 <li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
@@ -80,7 +83,9 @@
 <li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
 <li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
 <li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
 <li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
 <li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
 <li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
@@ -155,7 +160,7 @@
 
     <div id="column1" data-id="dataTypes" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.3</h1>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -273,6 +278,7 @@
 <li><span class="stability_undefined"><a href="#datatypes_extendmodulesnames">ExtendModulesNames</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_activityshortform">ActivityShortForm</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_broadcastshortform">BroadcastShortForm</a></span></li>
+<li><span class="stability_undefined"><a href="#datatypes_ocrmodename">OcrModeName</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_ocrresult">OcrResult</a></span><ul>
 <li><span class="stability_undefined"><a href="#datatypes_p_label">[p] label</a></span></li>
 <li><span class="stability_undefined"><a href="#datatypes_p_confidence">[p] confidence</a></span></li>
@@ -1091,7 +1097,7 @@ autojs.setRootMode(true); /* 同上. */
 <p>在网页中经常使用的形如 <code>#FF4500</code> 的字符串表示一个颜色.</p>
 <p>在 AutoJs6 中, 有三种表示方式, 均使用十六进制代码表示:</p>
 <h3>#AARRGGBB<span><a class="mark" href="#datatypes_aarrggbb" id="datatypes_aarrggbb">#</a></span></h3>
-<p>使用四个分量表示颜色, 分量顺序固定为 <code>A (alpha)</code>, <code>R (red)</code>, <code>G (green)</code>, <code>B (blue)</code>. 每个分量使用 <code>0-255</code> 对应的十六进制数表示, 不足两位时需补零.</p>
+<p>使用四个分量表示颜色, 分量顺序固定为 <code>A (alpha)</code>, <code>R (red)</code>, <code>G (green)</code>, <code>B (blue)</code>. 每个分量使用 <code>[0..255]</code> 对应的十六进制数表示, 不足两位时需补零.</p>
 <p>例如一个颜色使用 <code>rgba(120, 14, 224, 255)</code> 表示, 将其转换为 <code>#AARRGGBB</code> 格式:</p>
 <pre><code class="lang-text">R: 120 -&gt; 0x78
 G: 14 -&gt; 0xE
@@ -1370,13 +1376,13 @@ let [ r, g, b ] = components;
 console.log(`R: ${r}, G: ${g}, B: ${b}`);
 </code></pre>
 <p>colors 全局对象的很多 &quot;to&quot; 开头的方法都可返回颜色分量数组, 如 <a href="color.html#color_m_torgb">toRgb</a>, <a href="color.html#color_m_tohsv">toHsv</a>, <a href="color.html#color_m_tohsl">toHsl</a>, <a href="color.html#color_m_torgba">toRgba</a>, <a href="color.html#color_m_toargb">toArgb</a> 等.</p>
-<p>需额外注意 <a href="color.html#color_m_torgba">toRgba</a> 和 <a href="color.html#color_m_toargb">toArgb</a> 结果中的 <code>A (alpha)</code> 分量, 默认范围为 <code>0-255</code>, 而其他方法则恒为 <code>0-1</code>:</p>
+<p>需额外注意 <a href="color.html#color_m_torgba">toRgba</a> 和 <a href="color.html#color_m_toargb">toArgb</a> 结果中的 <code>A (alpha)</code> 分量, 默认范围为 <code>[0..255]</code>, 而其他方法则恒为 <code>[0..1]</code>:</p>
 <pre><code class="lang-js">colors.toRgba(&#39;blue-grey&#39;)[3]; /* A 分量为 255. */
 colors.toArgb(&#39;blue-grey&#39;)[0]; /* A 分量为 255. */
 colors.toHsva(&#39;blue-grey&#39;)[3]; /* A 分量为 1. */
 colors.toHsla(&#39;blue-grey&#39;)[3]; /* A 分量为 1. */
 </code></pre>
-<p>如需使 <code>toRgba</code> 和 <code>toArgb</code> 结果中 <code>A (alpha)</code> 分量范围也为 <code>0-1</code>, 可使用 <code>maxAlpha</code> 参数:</p>
+<p>如需使 <code>toRgba</code> 和 <code>toArgb</code> 结果中 <code>A (alpha)</code> 分量范围也为 <code>[0..1]</code>, 可使用 <code>maxAlpha</code> 参数:</p>
 <pre><code class="lang-js">colors.toRgba(&#39;blue-grey&#39;, { maxAlpha: 1 })[3]; /* A 分量为 1. */
 </code></pre>
 <h2>ColorDetectionAlgorithm<span><a class="mark" href="#datatypes_colordetectionalgorithm" id="datatypes_colordetectionalgorithm">#</a></span></h2>
@@ -1605,6 +1611,13 @@ app.sendBroadcast(&#39;hierarchy&#39;); /* 同上. */
 <li>布局范围分析 - <code>inspect_layout_bounds</code> / <code>bounds</code></li>
 <li>布局层次分析 - <code>inspect_layout_hierarchy</code> / <code>hierarchy</code></li>
 </ul>
+<h2>OcrModeName<span><a class="mark" href="#datatypes_ocrmodename" id="datatypes_ocrmodename">#</a></span></h2>
+<p>AutoJs6 的 OCR 模式名称.</p>
+<p>当使用不同的模式名称时, <code>ocr</code> 全局方法及其相关方法 (如 <a href="ocr.html#ocr_m_detect">ocr.detect</a>) 将使用不同的引擎, 进而可能获得不同的识别速度和结果.</p>
+<ul>
+<li><code>mlkit</code> - 代表 MLKit 引擎</li>
+<li><code>paddle</code> - 代表 Paddle Lite 引擎</li>
+</ul>
 <h2>OcrResult<span><a class="mark" href="#datatypes_ocrresult" id="datatypes_ocrresult">#</a></span></h2>
 <p>OcrResult 是一个代表 OCR 识别结果的接口.</p>
 <hr>
@@ -1615,11 +1628,11 @@ app.sendBroadcast(&#39;hierarchy&#39;); /* 同上. */
 <div class="signature"><ul>
 <li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
 </ul>
-</div><p>OCR 识别结果的标签, 通常可用于最终的文字识别结果.</p>
+</div><p>OCR 识别结果的文本标签, 通常可用于最终的文字识别结果.</p>
 <pre><code class="lang-js">images.requestScreenCapture();
 let img = images.captureScreen();
 let results = ocr.detect(img);
-results.map(o =&gt; o.label); /* 将识别结果全部映射为标签 (文本). */
+results.map(o =&gt; o.label); /* 将识别结果全部映射为文本标签. */
 </code></pre>
 <h3>[p] confidence<span><a class="mark" href="#datatypes_p_confidence" id="datatypes_p_confidence">#</a></span></h3>
 <div class="signature"><ul>

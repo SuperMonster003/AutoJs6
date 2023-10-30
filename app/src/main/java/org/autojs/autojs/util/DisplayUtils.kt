@@ -1,36 +1,56 @@
 package org.autojs.autojs.util
 
-import android.content.Context
+import android.os.Build
+import android.util.DisplayMetrics
 import android.util.DisplayMetrics.DENSITY_DEFAULT
+import android.util.TypedValue
+import android.util.TypedValue.COMPLEX_UNIT_DIP
+import android.util.TypedValue.COMPLEX_UNIT_SP
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.round
 import kotlin.math.roundToInt
 
+@Suppress("unused")
 object DisplayUtils {
+
+    @JvmStatic
+    val displayMetrics: DisplayMetrics
+        get() = ScreenMetrics.resources?.displayMetrics ?: GlobalAppContext.get().resources.displayMetrics
+
     /**
      * This method converts dp unit to equivalent pixels, depending on device density.
      *
-     * @param ctx Context to get resources and device specific display metrics
      * @param dp A value in dp (density independent pixels) unit. Which we need to convert into pixels
      * @return A float value to represent px equivalent to dp depending on device density
      */
     @JvmStatic
-    fun dpToPx(ctx: Context, dp: Float) = dp * (ctx.resources.displayMetrics.densityDpi.toFloat() / DENSITY_DEFAULT)
+    fun dpToPx(dp: Float) = TypedValue.applyDimension(COMPLEX_UNIT_DIP, dp, displayMetrics)
 
     /**
      * This method converts device specific pixels to density independent pixels.
      *
-     * @param ctx Context to get resources and device specific display metrics
      * @param px A value in px (pixels) unit. Which we need to convert into db
      * @return A float value to represent dp equivalent to px value
      */
     @JvmStatic
-    fun pxToDp(ctx: Context, px: Float) = px / (ctx.resources.displayMetrics.densityDpi.toFloat() / DENSITY_DEFAULT)
+    fun pxToDp(px: Float): Float {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            return TypedValue.deriveDimension(COMPLEX_UNIT_DIP, px, displayMetrics)
+        }
+        return px / (displayMetrics.densityDpi.toFloat() / DENSITY_DEFAULT)
+    }
 
     @JvmStatic
-    fun pxToSp(ctx: Context, px: Float) = px / ctx.resources.displayMetrics.scaledDensity
+    fun pxToSp(px: Float): Float {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            return TypedValue.deriveDimension(COMPLEX_UNIT_SP, px, displayMetrics)
+        }
+        @Suppress("DEPRECATION")
+        return px / displayMetrics.scaledDensity
+    }
 
     @JvmOverloads
     @JvmStatic

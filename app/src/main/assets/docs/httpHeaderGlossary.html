@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>HTTP Header (HTTP 标头) | AutoJs6 文档 - 6.3.3</title>
+    <title>HTTP Header (HTTP 标头) | AutoJs6 文档 - 6.4.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -42,6 +42,8 @@
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
 <li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -54,6 +56,7 @@
 <li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
 <li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
 <li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
@@ -80,7 +83,9 @@
 <li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
 <li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
 <li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
 <li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
 <li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
 <li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
@@ -155,7 +160,7 @@
 
     <div id="column1" data-id="httpHeaderGlossary" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.3</h1>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -234,7 +239,7 @@ Cache-Control: max-age=0
 </tr>
 <tr>
 <td>Accept-Encoding</td>
-<td>能够接受的编码方式列表. 参见 <a href="https://zh.wikipedia.org/wiki/HTTP压缩">HTTP压缩</a>.</td>
+<td>能够接受的编码方式列表. 参见 <a href="https://zh.wikipedia.org/wiki/HTTP压缩">HTTP 压缩</a>.</td>
 <td><code>Accept-Encoding: gzip, deflate</code></td>
 <td>常设</td>
 </tr>
@@ -276,7 +281,7 @@ Cache-Control: max-age=0
 </tr>
 <tr>
 <td>Content-Length</td>
-<td>以八位字节数组 (8位的字节) 表示的请求体的长度.</td>
+<td>以八位字节数组 (8 位的字节) 表示的请求体的长度.</td>
 <td><code>Content-Length: 348</code></td>
 <td>常设</td>
 </tr>
@@ -312,7 +317,7 @@ Cache-Control: max-age=0
 </tr>
 <tr>
 <td>Host</td>
-<td>服务器的域名 (用于虚拟主机), 以及服务器所监听的 <a href="https://zh.wikipedia.org/wiki/传输控制协议">传输控制协议</a> 端口号. 如果所请求的端口是对应的服务的标准端口, 则端口号可被省略. 自超文件传输协议版本1.1 (HTTP/1.1) 开始为必需字段.</td>
+<td>服务器的域名 (用于虚拟主机), 以及服务器所监听的 <a href="https://zh.wikipedia.org/wiki/传输控制协议">传输控制协议</a> 端口号. 如果所请求的端口是对应的服务的标准端口, 则端口号可被省略. 自超文件传输协议版本 1.1 (HTTP/1.1) 开始为必需字段.</td>
 <td><code>Host: zh.wikipedia.org:80</code> <code>Host: zh.wikipedia.org</code></td>
 <td>常设</td>
 </tr>
@@ -324,13 +329,13 @@ Cache-Control: max-age=0
 </tr>
 <tr>
 <td>If-Modified-Since</td>
-<td>允许在对应的内容未被修改的情况下返回304未修改 (304 Not Modified).</td>
+<td>允许在对应的内容未被修改的情况下返回 304 未修改 (304 Not Modified).</td>
 <td><code>If-Modified-Since: Sat, 29 Oct 1994 19:43:31 GMT</code></td>
 <td>常设</td>
 </tr>
 <tr>
 <td>If-None-Match</td>
-<td>允许在对应的内容未被修改的情况下返回304未修改 (304 Not Modified), 参见超文本传输协议的 <a href="https://zh.wikipedia.org/wiki/HTTP_ETag">实体标记</a>.</td>
+<td>允许在对应的内容未被修改的情况下返回 304 未修改 (304 Not Modified), 参见超文本传输协议的 <a href="https://zh.wikipedia.org/wiki/HTTP_ETag">实体标记</a>.</td>
 <td><code>If-None-Match: &quot;737060cd8c284d8af7ad3082f209582d&quot;</code></td>
 <td>常设</td>
 </tr>
@@ -414,14 +419,14 @@ Cache-Control: max-age=0
 </tr>
 <tr>
 <td>X-Requested-With</td>
-<td>主要用于标识 Ajax 及可扩展标记语言 请求. 大部分的JavaScript框架会发送这个字段, 且将其值设置为 XMLHttpRequest.</td>
+<td>主要用于标识 Ajax 及可扩展标记语言 请求. 大部分的 JavaScript 框架会发送这个字段, 且将其值设置为 XMLHttpRequest.</td>
 <td><code>X-Requested-With: XMLHttpRequest</code></td>
 <td>非标准</td>
 </tr>
 <tr>
 <td><a href="https://zh.wikipedia.org/wiki/请勿追踪">DNT</a></td>
-<td>请求某个网页应用程序停止跟踪某个用户. 在火狐浏览器中, 相当于 X-Do-Not-Track 协议头字段 (自 Firefox/4.0 Beta 11 版开始支持). <a href="https://zh.wikipedia.org/wiki/Safari">Safari</a> 和 <a href="https://zh.wikipedia.org/wiki/Internet_Explorer">Internet Explorer</a> 9 也支持这个字段. 2011年3月7日, 草案提交IETF. 万维网协会的跟踪保护工作组就此制作一项规范.</td>
-<td><code>DNT: 1 (DNT启用)</code> <code>DNT: 0 (DNT被禁用)</code></td>
+<td>请求某个网页应用程序停止跟踪某个用户. 在火狐浏览器中, 相当于 X-Do-Not-Track 协议头字段 (自 Firefox/4.0 Beta 11 版开始支持). <a href="https://zh.wikipedia.org/wiki/Safari">Safari</a> 和 <a href="https://zh.wikipedia.org/wiki/Internet_Explorer">Internet Explorer</a> 9 也支持这个字段. 2011 年 3 月 7 日, 草案提交 IETF. 万维网协会的跟踪保护工作组就此制作一项规范.</td>
+<td><code>DNT: 1 (DNT 启用)</code> <code>DNT: 0 (DNT 被禁用)</code></td>
 <td>非标准</td>
 </tr>
 <tr>

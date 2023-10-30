@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>疑难解答 (Q & A) | AutoJs6 文档 - 6.3.3</title>
+    <title>疑难解答 (Q & A) | AutoJs6 文档 - 6.4.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -42,6 +42,8 @@
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
 <li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -54,6 +56,7 @@
 <li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
 <li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
 <li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
@@ -80,7 +83,9 @@
 <li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
 <li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
 <li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
 <li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
 <li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
 <li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
@@ -155,7 +160,7 @@
 
     <div id="column1" data-id="qa" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.3</h1>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -276,9 +281,9 @@
 <p>对于存在阅读障碍的文档内容, 可尝试暂时略过, 继续阅读后续内容.<br>当完整阅读一个章节或小节后, 可能对之前略过内容的进一步理解有所帮助.<br>也可提交反馈至 GitHub 项目页面, 开发者可能会根据提交的反馈适当调整文档内容.</p>
 <h2>图像<span><a class="mark" href="#qa_4" id="qa_4">#</a></span></h2>
 <h3>OCR 特性<span><a class="mark" href="#qa_ocr" id="qa_ocr">#</a></span></h3>
-<p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 实现的.</p>
+<p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 及 <a href="https://www.paddlepaddle.org.cn/">Baidu PaddlePaddle</a> 的 <a href="https://github.com/PaddlePaddle/Paddle-Lite">Paddle Lite</a> 实现的.</p>
 <blockquote>
-<p>注: AutoJs6 的 <a href="http://project.autojs6.com/blob/master/app/src/main/java/org/autojs/autojs/runtime/api/OcrMLKit.kt">OCR 实现源码</a> 参考自 <a href="https://github.com/TonyJiangWJ">TonyJiangWJ</a> 的 <a href="https://github.com/TonyJiangWJ/Auto.js">开源项目</a>.</p>
+<p>注:<br>AutoJs6 基于 MLKit 引擎的 <a href="http://project.autojs6.com/blob/master/app/src/main/java/org/autojs/autojs/runtime/api/OcrMLKit.kt">OCR 实现源码</a> 参考自 <a href="https://github.com/TonyJiangWJ">TonyJiangWJ</a> 的 <a href="https://github.com/TonyJiangWJ/Auto.js">Auto.js</a> 项目.<br>AutoJs6 基于 Paddle Lite 引擎的 <a href="http://project.autojs6.com/blob/master/app/src/main/java/org/autojs/autojs/runtime/api/OcrPaddle.kt">OCR 实现源码</a> 源自 <a href="https://github.com/TonyJiangWJ">TonyJiangWJ</a> 的 <a href="http://pr.autojs6.com/120">GitHub PR</a>.</p>
 </blockquote>
 <blockquote>
 <p>参阅: <a href="ocr.html">光学字符识别 (OCR)</a> 模块</p>
@@ -424,8 +429,8 @@
 <p>当升级 AutoJs6 后, 某个或某些 <code>API</code> 出现异常时, 可查询应用文档并定位到相关章节, 根据文档的提示排查并解决上述问题.</p>
 <p>如问题仍未解决, 可在项目的 GitHub 议题页面提交 <a href="#qa_反馈">反馈</a>.</p>
 <h2>打包应用<span><a class="mark" href="#qa_12" id="qa_12">#</a></span></h2>
-<p>AutoJs6 使用 Auto.js 最终免费版打包插件, 因此打包应用与 AutoJs6 主应用有较大的功能和界面差异.</p>
-<p>AutoJs6 暂时不考虑对打包应用做进一步开发, 甚至可能永久搁置.</p>
+<p>AutoJs6 打包功能尚不完善, 打包应用与 AutoJs6 主应用可能有较大的功能和界面差异.</p>
+<p>AutoJs6 开发者暂不考虑参与打包功能相关的开发工作, 目前以 <a href="https://github.com/LZX284">LZX284</a> 为主要贡献者进行打包功能的开发及维护, 后续将继续由其他开发者贡献相关代码. </p>
 <h3>图片等资源共同打包及多脚本打包<span><a class="mark" href="#qa_13" id="qa_13">#</a></span></h3>
 <p>上述需求需使用 &quot;项目&quot; 功能.</p>
 <p>点击 AutoJs6 主页面 &quot;+&quot; 图标, 选择项目, 填写信息后可新建一个项目.<br>项目支持存放多个 [ 脚本 / 模块 / 资源文件 ].<br>项目工具栏的 APK 打包图标, 点击可打包一个项目.</p>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>万维网 (Web) | AutoJs6 文档 - 6.3.3</title>
+    <title>万维网 (Web) | AutoJs6 文档 - 6.4.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -42,6 +42,8 @@
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
 <li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -54,6 +56,7 @@
 <li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
 <li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
 <li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
@@ -80,7 +83,9 @@
 <li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
 <li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
 <li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
 <li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
 <li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
 <li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
@@ -155,7 +160,7 @@
 
     <div id="column1" data-id="web" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.3</h1>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -299,69 +304,14 @@ webView.setWebViewClient(newInjectableWebClient());
 <h3>newWebSocket(url)<span><a class="mark" href="#web_newwebsocket_url" id="web_newwebsocket_url">#</a></span></h3>
 <p><strong><code>6.3.1</code></strong> <strong><code>Global</code></strong></p>
 <ul>
-<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="webSocketType.html">WebSocket</a></span> }</li>
 </ul>
-<p>新建并返回一个 <a href="webSocketType.html">WebSocket</a> 实例.</p>
-<pre><code class="lang-js">console.setExitOnClose(7e3).show();
-
-let ws = web.newWebSocket(&#39;wss://echo.websocket.events&#39;);
-
-ws
-    .on(&#39;open&#39;, (res, ws) =&gt; {
-        console.log(&#39;WebSocket 已连接&#39;);
-    })
-    .on(&#39;message&#39;, (message, ws) =&gt; {
-        console.log(&#39;接收到消息&#39;);
-        // if (message instanceof okio.ByteString) {
-        //     console.log(`消息类型: ByteString`);
-        // } else if (typeof message === &#39;string&#39;) {
-        //     console.log(`消息类型: String`);
-        // } else {
-        //     throw TypeError(&#39;Should never happen&#39;);
-        // }
-    })
-    .on(&#39;text&#39;, (text, ws) =&gt; {
-        console.info(&#39;接收到文本消息:&#39;);
-        console.info(`text: ${text}`);
-    })
-    .on(&#39;bytes&#39;, (bytes, ws) =&gt; {
-        console.info(&#39;接收到字节数组消息:&#39;);
-        console.info(`utf8: ${bytes.utf8()}`);
-        console.info(`base64: ${bytes.base64()}`);
-        console.info(`md5: ${bytes.md5()}`);
-        console.info(`hex: ${bytes.hex()}`);
-    })
-    .on(&#39;closing&#39;, (code, reason, ws) =&gt; {
-        console.log(&#39;WebSocket 关闭中&#39;);
-    })
-    .on(&#39;closed&#39;, (code, reason, ws) =&gt; {
-        console.log(&#39;WebSocket 已关闭&#39;);
-        console.log(`code: ${code}`);
-        if (reason) console.log(`reason: ${reason}`);
-    })
-    .on(&#39;failure&#39;, (err, res, ws) =&gt; {
-        console.error(&#39;WebSocket 连接失败&#39;);
-        console.error(err);
-    });
-
-/* 发送文本消息. */
-ws.send(&#39;Hello WebSocket&#39;);
-
-/* 发送字节数组消息. */
-ws.send(new okio.ByteString(new java.lang.String(&#39;Hello WebSocket&#39;).getBytes()));
-
-setTimeout(() =&gt; {
-    console.log(&#39;断开 WebSocket&#39;);
-
-    /* code 支持的范围 [1000,5000). */
-    /* 1000 表示成功操作或常规的 Socket 关闭操作. */
-    /* 参阅 https://github.com/Luka967/websocket-close-codes */
-    ws.close(1000, &#39;Closed by user&#39;);
-}, 8e3);
-
-setTimeout(() =&gt; console.log(&#39;Exit&#39;), 9e3);
-</code></pre>
+<p>构建一个 <a href="webSocketType.html">WebSocket</a> 实例.</p>
+<p>相当于 <code>new WebSocket(url)</code>.</p>
+<blockquote>
+<p>参阅: <a href="webSocketType.html">WebSocket</a> 章节</p>
+</blockquote>
 
         </div>
     </div>

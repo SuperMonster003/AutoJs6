@@ -16,8 +16,8 @@ import android.util.AttributeSet
 import android.util.Log
 import android.util.SparseBooleanArray
 import android.view.View
-import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentActivity
@@ -26,9 +26,6 @@ import com.google.android.material.snackbar.Snackbar
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.androidannotations.annotations.AfterViews
-import org.androidannotations.annotations.EViewGroup
-import org.androidannotations.annotations.ViewById
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
@@ -77,6 +74,7 @@ import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.EditorViewBinding
 import java.io.File
 
 /**
@@ -84,61 +82,48 @@ import java.io.File
  * Modified by SuperMonster003 as of May 1, 2023.
  * Transformed by SuperMonster003 on May 1, 2023.
  */
-@SuppressLint("NonConstantResourceId")
-@EViewGroup(R.layout.editor_view)
-// FIXME by SuperMonster003 on May 13, 2023.
-//  ! Failed many times to migrate this view with annotation to view binding.
-//  ! And this is the last view with annotation in the whole project so far.
-// FIXME by SuperMonster003 on Oct 18, 2023.
-//  ! Gradle property "android.nonFinalResIds"
-//  ! can't be enabled (by default since Android Gradle Plugin version 8.0),
-//  ! as final resource ID used in current class.
-open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, ToolbarFragment.OnMenuItemClickListener {
+@SuppressLint("CheckResult")
+class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFragment.OnMenuItemClickListener {
+
+    private var binding: EditorViewBinding = EditorViewBinding.bind(View.inflate(context, R.layout.editor_view, this))
 
     @JvmField
-    @ViewById(R.id.editor)
-    var editor: CodeEditor? = null
+    val editor: CodeEditor = binding.editor
 
     @JvmField
-    @ViewById(R.id.debug_bar)
-    var debugBar: DebugBar? = null
+    val debugBar: DebugBar = binding.debugBar
 
     @JvmField
-    @ViewById(R.id.code_completion_bar)
-    var mCodeCompletionBar: CodeCompletionBar? = null
-
-    @JvmField
-    @ViewById(R.id.input_method_enhance_bar)
-    var mInputMethodEnhanceBar: View? = null
-
-    @JvmField
-    @ViewById(R.id.symbol_bar)
-    var mSymbolBar: CodeCompletionBar? = null
-
-    @JvmField
-    @ViewById(R.id.functions)
-    var mShowFunctionsButton: ImageView? = null
-
-    @JvmField
-    @ViewById(R.id.functions_keyboard)
-    var mFunctionsKeyboard: FunctionsKeyboardView? = null
-
-    @JvmField
-    @ViewById(R.id.docs)
-    var mDocsWebView: EWebView? = null
-
-    @JvmField
-    @ViewById(R.id.drawer_layout)
-    var mDrawerLayout: DrawerLayout? = null
-
     var name: String? = null
-        private set
 
+    @JvmField
     var uri: Uri? = null
-        private set
 
     var scriptExecutionId = 0
         private set
+
+    val activity: FragmentActivity
+        get() {
+            var context = context
+            while (context !is Activity && context is ContextWrapper) {
+                context = context.baseContext
+            }
+            return context as FragmentActivity
+        }
+
+    val isTextChanged: Boolean
+        get() = editor.isTextChanged
+
+    private val scriptExecution: ScriptExecution?
+        get() = AutoJs.instance.scriptEngineService.getScriptExecution(scriptExecutionId)
+
+    private val mCodeCompletionBar: CodeCompletionBar = binding.codeCompletionBar
+    private val mInputMethodEnhanceBar: View = binding.inputMethodEnhanceBar
+    private val mSymbolBar: CodeCompletionBar = binding.symbolBar
+    private val mShowFunctionsButton: ImageView = binding.functions
+    private val mFunctionsKeyboard: FunctionsKeyboardView = binding.functionsKeyboard
+    private val mDocsWebView: EWebView = binding.docs
+    private val mDrawerLayout: DrawerLayout = binding.drawerLayout
 
     private var mReadOnly = false
     private var mAutoCompletion: AutoCompletion? = null
@@ -156,7 +141,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
                 val line = intent.getIntExtra(EXTRA_EXCEPTION_LINE_NUMBER, -1)
                 val col = intent.getIntExtra(EXTRA_EXCEPTION_COLUMN_NUMBER, 0)
                 if (line >= 1) {
-                    editor!!.jumpTo(line - 1, col)
+                    editor.jumpTo(line - 1, col)
                 }
                 msg?.let { showErrorMessage(it) }
             }
@@ -169,8 +154,25 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     private var mTmpSavedFileForRunning: File? = null
 
     constructor(context: Context) : super(context)
+
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    init {
+        setUpEditor()
+        setUpInputMethodEnhancedBar()
+        setUpFunctionsKeyboard()
+        setMenuItemStatus(R.id.save, false)
+        mDocsWebView.apply {
+            webView.settings.displayZoomControls = true
+            webView.loadUrl(getUrl("index.html"))
+        }
+        Themes.getCurrent(context)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { theme: Theme? -> setTheme(theme) }
+        initNormalToolbar()
+    }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onAttachedToWindow() {
@@ -203,14 +205,14 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
                     findViewById<View>(R.id.run).visibility = GONE
                 }
                 if (mReadOnly) {
-                    editor!!.setReadOnly(true)
+                    editor.setReadOnly(true)
                 }
             }
     }
 
     fun setRestoredText(text: String) {
         mRestoredText = text
-        editor!!.text = text
+        editor.text = text
     }
 
     private fun handleText(intent: Intent): Observable<String> {
@@ -241,11 +243,11 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     private fun setInitialText(text: String) {
         if (mRestoredText != null) {
-            editor!!.text = mRestoredText!!
+            editor.text = mRestoredText!!
             mRestoredText = null
             return
         }
-        editor!!.setInitialText(text)
+        editor.setInitialText(text)
     }
 
     private fun setMenuItemStatus(id: Int, enabled: Boolean) {
@@ -261,23 +263,6 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     fun getMenuItemStatus(id: Int, defValue: Boolean): Boolean {
         return mMenuItemStatus[id, defValue]
-    }
-
-    @SuppressLint("CheckResult")
-    @AfterViews
-    fun init() {
-        setUpEditor()
-        setUpInputMethodEnhancedBar()
-        setUpFunctionsKeyboard()
-        setMenuItemStatus(R.id.save, false)
-        mDocsWebView?.apply {
-            webView.settings.displayZoomControls = true
-            webView.loadUrl(getUrl("index.html"))
-        }
-        Themes.getCurrent(context)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { theme: Theme? -> setTheme(theme) }
-        initNormalToolbar()
     }
 
     private fun initNormalToolbar() {
@@ -298,7 +283,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             .setFunctionsView(mFunctionsKeyboard)
             .setFunctionsTrigger(mShowFunctionsButton)
 
-            .setEditView(editor!!.codeEditText)
+            .setEditView(editor.codeEditText)
             .build()
 
         // @ArchivedTodo by 抠脚本人 on Jul 10, 2023.
@@ -313,21 +298,21 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
         //  ! 此处的点击事件回调注册是为了使功能键盘智能提示的属性可以实现其接口对应的功能:
         //  ! 点击: 自动补全, 并根据情况添加括号或句点符号等.
         //  ! 长按: 以浮动窗口形式展示 [方法/属性/模块] 对应的文档内容 (如果存在的话).
-        mFunctionsKeyboard!!.setClickCallback(this)
+        mFunctionsKeyboard.setClickCallback(this)
 
-        mShowFunctionsButton!!.setOnLongClickListener {
-            true.also { editor!!.beautifyCode() }
+        mShowFunctionsButton.setOnLongClickListener {
+            true.also { editor.beautifyCode() }
         }
     }
 
     private fun setUpInputMethodEnhancedBar() {
-        mSymbolBar!!.let { bar ->
+        mSymbolBar.let { bar ->
             bar.setOnHintClickListener(this)
             bar.codeCompletions = Symbols.getSymbols()
         }
-        mCodeCompletionBar!!.let { bar ->
+        mCodeCompletionBar.let { bar ->
             bar.setOnHintClickListener(this)
-            AutoCompletion(context, editor!!.codeEditText).apply {
+            AutoCompletion(context, editor.codeEditText).apply {
                 setAutoCompleteCallback { bar.codeCompletions = it }
                 mAutoCompletion = this
             }
@@ -335,14 +320,14 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     }
 
     private fun setUpEditor() {
-        editor!!.let { editor ->
+        editor.let { editor ->
             editor.codeEditText.let { editText ->
                 editText.addTextChangedListener(SimpleTextWatcher { _ ->
                     setMenuItemStatus(R.id.save, editor.isTextChanged)
                     setMenuItemStatus(R.id.undo, editor.canUndo())
                     setMenuItemStatus(R.id.redo, editor.canRedo())
                 })
-                editText.textSize = getEditorTextSize(pxToSp(context, editText.textSize).toInt()).toFloat()
+                editText.textSize = getEditorTextSize(pxToSp(editText.textSize).toInt()).toFloat()
             }
             editor.addCursorChangeCallback(object : CodeEditor.CursorChangeCallback {
                 override fun onCursorChange(line: String, cursor: Int) {
@@ -360,22 +345,22 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     private fun setTheme(theme: Theme?) {
         theme?.let {
             mEditorTheme = it
-            editor!!.setTheme(it)
-            mInputMethodEnhanceBar!!.setBackgroundColor(it.imeBarBackgroundColor)
+            editor.setTheme(it)
+            mInputMethodEnhanceBar.setBackgroundColor(it.imeBarBackgroundColor)
             val textColor = it.imeBarForegroundColor
-            mCodeCompletionBar!!.setTextColor(textColor)
-            mSymbolBar!!.setTextColor(textColor)
-            mShowFunctionsButton!!.setColorFilter(textColor)
+            mCodeCompletionBar.setTextColor(textColor)
+            mSymbolBar.setTextColor(textColor)
+            mShowFunctionsButton.setColorFilter(textColor)
             invalidate()
         }
     }
 
     fun onBackPressed(): Boolean {
-        if (mDrawerLayout!!.isDrawerOpen(GravityCompat.START)) {
-            if (mDocsWebView!!.webView.canGoBack()) {
-                mDocsWebView!!.webView.goBack()
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            if (mDocsWebView.webView.canGoBack()) {
+                mDocsWebView.webView.goBack()
             } else {
-                mDrawerLayout!!.closeDrawer(GravityCompat.START)
+                mDrawerLayout.closeDrawer(GravityCompat.START)
             }
             return true
         }
@@ -423,20 +408,20 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
         return run(true, file, uri!!.path)
     }
 
-    private fun undo() = editor!!.undo()
+    private fun undo() = editor.undo()
 
-    private fun redo() = editor!!.redo()
+    private fun redo() = editor.redo()
 
     fun save(): Observable<String> {
         val path = uri!!.path
         val backPath = "$path.save"
         move(path!!, backPath)
-        return Observable.just(editor!!.text)
+        return Observable.just(editor.text)
             .observeOn(Schedulers.io())
             .doOnNext { s: String? -> write(context.contentResolver.openOutputStream(uri!!)!!, s!!) }
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
-                editor!!.markTextAsSaved()
+                editor.markTextAsSaved()
                 setMenuItemStatus(R.id.save, false)
             }
             .doOnNext {
@@ -451,13 +436,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     }
 
     private fun doWithCurrentEngine(callback: Callback<ScriptEngine<*>>) {
-        val execution = AutoJs.instance.scriptEngineService.getScriptExecution(scriptExecutionId)
-        if (execution != null) {
-            val engine = execution.engine
-            if (engine != null) {
-                callback.call(engine)
-            }
-        }
+        scriptExecution?.engine?.let { callback.call(it) }
     }
 
     @SuppressLint("CheckResult")
@@ -470,9 +449,9 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             }
     }
 
-    private fun findNext() = editor!!.findNext()
+    private fun findNext() = editor.findNext()
 
-    private fun findPrev() = editor!!.findPrev()
+    private fun findPrev() = editor.findPrev()
 
     private fun cancelSearch() = showNormalToolbar()
 
@@ -482,21 +461,9 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             .commitAllowingStateLoss()
     }
 
-    val activity: FragmentActivity
-        get() {
-            var context = context
-            while (context !is Activity && context is ContextWrapper) {
-                context = context.baseContext
-            }
-            return context as FragmentActivity
-        }
-
     fun replace() {
-        editor!!.replaceSelection()
+        editor.replaceSelection()
     }
-
-    val isTextChanged: Boolean
-        get() = editor!!.isTextChanged
 
     fun showConsole() {
         doWithCurrentEngine { engine: ScriptEngine<*> -> (engine as JavaScriptEngine).runtime.console.show() }
@@ -509,32 +476,32 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     }
 
     fun beautifyCode() {
-        editor!!.beautifyCode()
+        editor.beautifyCode()
     }
 
     @SuppressLint("CheckResult")
     fun selectEditorTheme() {
-        editor!!.setProgress(true)
+        editor.setProgress(true)
         Themes.getAllThemes(context)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { themes: List<Theme?> ->
-                editor!!.setProgress(false)
+                editor.setProgress(false)
                 selectEditorTheme(themes)
             }
     }
 
     fun selectTextSize() {
         TextSizeSettingDialogBuilder(context)
-            .initialValue(pxToSp(context, editor!!.codeEditText.textSize).toInt())
+            .initialValue(pxToSp(editor.codeEditText.textSize).toInt())
             .callback { value: Int -> setTextSize(value) }
             .show()
     }
 
     fun setTextSize(value: Int) {
         setEditorTextSize(value)
-        editor!!.codeEditText.textSize = value.toFloat()
-        editor!!.lastTextSize = value
+        editor.codeEditText.textSize = value.toFloat()
+        editor.lastTextSize = value
     }
 
     private fun selectEditorTheme(themes: List<Theme?>) {
@@ -557,7 +524,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     @Throws(CheckedPatternSyntaxException::class)
     fun find(keywords: String, usingRegex: Boolean) {
-        editor!!.find(keywords, usingRegex)
+        editor.find(keywords, usingRegex)
         showSearchToolbar(false)
     }
 
@@ -572,21 +539,21 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
 
     @Throws(CheckedPatternSyntaxException::class)
     fun replace(keywords: String, replacement: String, usingRegex: Boolean) {
-        editor!!.replace(keywords, replacement, usingRegex)
+        editor.replace(keywords, replacement, usingRegex)
         showSearchToolbar(true)
     }
 
     @Throws(CheckedPatternSyntaxException::class)
     fun replaceAll(keywords: String, replacement: String, usingRegex: Boolean) {
-        editor!!.replaceAll(keywords, replacement, usingRegex)
+        editor.replaceAll(keywords, replacement, usingRegex)
     }
 
     fun debug() {
         activity.supportFragmentManager.beginTransaction()
             .replace(R.id.toolbar_menu, DebugToolbarFragment())
             .commit()
-        debugBar!!.visibility = VISIBLE
-        mInputMethodEnhanceBar!!.visibility = GONE
+        debugBar.visibility = VISIBLE
+        mInputMethodEnhanceBar.visibility = GONE
         mDebugging = true
     }
 
@@ -597,9 +564,9 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             fragment.detachDebugger()
         }
         showNormalToolbar()
-        editor!!.setDebuggingLine(-1)
-        debugBar!!.visibility = GONE
-        mInputMethodEnhanceBar!!.visibility = VISIBLE
+        editor.setDebuggingLine(-1)
+        debugBar.visibility = GONE
+        mInputMethodEnhanceBar.visibility = VISIBLE
         mDebugging = false
     }
 
@@ -627,7 +594,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
         //     editor!!.commentLine()
         // } else editor!!.insert(completion.insertText)
 
-        editor!!.insert(completion.insertText)
+        editor.insert(completion.insertText)
     }
 
     override fun onHintLongClick(completions: CodeCompletions, pos: Int) {
@@ -653,7 +620,7 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
         completions[pos].let {
             when {
                 // @Inspired by 抠脚本人 (https://github.com/little-alei) on Jul 13, 2023.
-                it.insertText == "/" -> editor!!.commentHelper.handle()
+                it.insertText == "/" -> editor.commentHelper.handle()
                 it.url != null -> showManual(it.url, it.hint)
             }
         }
@@ -665,8 +632,8 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             .title(title)
             .url(absUrl)
             .pinToLeft {
-                mDocsWebView!!.webView.loadUrl(absUrl)
-                mDrawerLayout!!.openDrawer(GravityCompat.START)
+                mDocsWebView.webView.loadUrl(absUrl)
+                mDrawerLayout.openDrawer(GravityCompat.START)
             }
             .show()
     }
@@ -681,12 +648,12 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
             p = "$p()"
         }
         if (property.isGlobal) {
-            editor!!.insert(p)
+            editor.insert(p)
         } else {
-            editor!!.insert(m.name + "." + p)
+            editor.insert(m.name + "." + p)
         }
         if (!property.isVariable) {
-            editor!!.moveCursor(-1)
+            editor.moveCursor(-1)
         }
         mFunctionsKeyboardHelper!!.hideFunctionsLayout(true)
     }
@@ -699,15 +666,9 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
         }
     }
 
-    val scriptExecution: ScriptExecution?
-        get() = AutoJs.instance.scriptEngineService.getScriptExecution(scriptExecutionId)
-
-    override fun onSaveInstanceState(): Parcelable? {
-        val bundle = Bundle()
-        val superData = super.onSaveInstanceState()
-        bundle.putParcelable("super_data", superData)
-        bundle.putInt("script_execution_id", scriptExecutionId)
-        return bundle
+    override fun onSaveInstanceState() = Bundle().apply {
+        putParcelable("super_data", super.onSaveInstanceState())
+        putInt("script_execution_id", scriptExecutionId)
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
@@ -721,17 +682,17 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
     }
 
     fun destroy() {
-        editor!!.destroy()
+        editor.destroy()
         mAutoCompletion?.shutdown()
     }
 
     @SuppressLint("CheckResult")
     private fun saveToTmpFile(): Observable<File> {
         return Observable.fromCallable {
-            val tmp = TmpScriptFiles.create(context)
-            write(tmp, editor!!.text)
-            mTmpSavedFileForRunning = tmp
-            tmp
+            TmpScriptFiles.create(context).also {
+                write(it, editor.text)
+                mTmpSavedFileForRunning = it
+            }
         }.observeOn(Schedulers.io())
     }
 
@@ -748,4 +709,5 @@ open class EditorView : FrameLayout, OnHintClickListener, ClickCallback, Toolbar
         const val EXTRA_SAVE_ENABLED = "saveEnabled"
         const val EXTRA_RUN_ENABLED = "runEnabled"
     }
+
 }

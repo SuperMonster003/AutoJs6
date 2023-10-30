@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>光学字符识别 (OCR) | AutoJs6 文档 - 6.3.3</title>
+    <title>光学字符识别 (OCR) | AutoJs6 文档 - 6.4.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -42,6 +42,8 @@
 <li><a class="nav-color" href="color.html">Color - 颜色</a></li>
 <li><a class="nav-image" href="image.html">Image - 图像</a></li>
 <li><a class="nav-ocr active" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
 <li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
 <li><a class="nav-device" href="device.html">Device - 设备</a></li>
 <li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
@@ -54,6 +56,7 @@
 <li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
 <li><a class="nav-console" href="console.html">Console - 控制台</a></li>
 <li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
 <li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
 <li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
 <li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
@@ -80,7 +83,9 @@
 <li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
 <li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
 <li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
-<li><a class="nav-imageWrapper" href="imageWrapper.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
 <li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
 <li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
 <li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
@@ -155,7 +160,7 @@
 
     <div id="column1" data-id="ocr" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.3.3</h1>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -170,13 +175,18 @@
             <ul>
 <li><span class="stability_undefined"><a href="#ocr_ocr">光学字符识别 (OCR)</a></span><ul>
 <li><span class="stability_undefined"><a href="#ocr_ocr_1">[@] ocr</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_ocr_options">ocr(options?)</a></span></li>
+<li><span class="stability_undefined"><a href="#ocr_ocr_region">ocr(region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_ocr_img_options">ocr(img, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_ocr_img_region">ocr(img, region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_ocr_imgpath_options">ocr(imgPath, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_ocr_imgpath_region">ocr(imgPath, region)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#ocr_p_mode">[p] mode</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_m_recognizetext">[m] recognizeText</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_recognizetext_options">recognizeText(options?)</a></span></li>
+<li><span class="stability_undefined"><a href="#ocr_recognizetext_region">recognizeText(region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_recognizetext_img_options">recognizeText(img, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_recognizetext_img_region">recognizeText(img, region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_recognizetext_imgpath_options">recognizeText(imgPath, options?)</a></span></li>
@@ -184,12 +194,23 @@
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#ocr_m_detect">[m] detect</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_detect_options">detect(options?)</a></span></li>
+<li><span class="stability_undefined"><a href="#ocr_detect_region">detect(region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_detect_img_options">detect(img, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_detect_img_region">detect(img, region)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_detect_imgpath_options">detect(imgPath, options?)</a></span></li>
 <li><span class="stability_undefined"><a href="#ocr_detect_imgpath_region">detect(imgPath, region)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#ocr_m_tap">[m] tap</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_tap_mode">tap(mode)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#ocr_m_summary">[m] summary</a></span><ul>
+<li><span class="stability_undefined"><a href="#ocr_summary">summary()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#ocr">工作模式与代码形式</a></span></li>
 </ul>
 </li>
 </ul>
@@ -199,7 +220,7 @@
         <div id="apicontent">
             <h1>光学字符识别 (OCR)<span><a class="mark" href="#ocr_ocr" id="ocr_ocr">#</a></span></h1>
 <p>ocr 模块用于识别图像中的文本.</p>
-<p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 实现的.</p>
+<p>AutoJs6 的 OCR 特性是基于 <a href="https://developers.google.com/ml-kit?hl=zh-cn">Google ML Kit</a> 的 <a href="https://developers.google.com/ml-kit/vision/text-recognition/android?hl=zh-cn">文字识别 API</a> 及 <a href="https://www.paddlepaddle.org.cn/">Baidu PaddlePaddle</a> 的 <a href="https://github.com/PaddlePaddle/Paddle-Lite">Paddle Lite</a> 实现的.</p>
 <hr>
 <p style="font: bold 2em sans-serif; color: #FF7043">ocr</p>
 
@@ -210,10 +231,38 @@
 typeof ocr.detect; // &quot;function&quot;
 typeof ocr.recognizeText; // &quot;function&quot;
 </code></pre>
-<h3>ocr(img, options?)<span><a class="mark" href="#ocr_ocr_img_options" id="ocr_ocr_img_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [1-2]/6</code></strong></p>
+<h3>ocr(options?)<span><a class="mark" href="#ocr_ocr_options" id="ocr_ocr_options">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload [1-2]/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图中包含的所有文本, 返回文本数组.</p>
+<p><code>ocr()</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr(img);
+</code></pre>
+<p>同时也是 <a href="#ocr_m_recognizetext">ocr.recognizeText(options?)</a> 的别名方法.</p>
+<h3>ocr(region)<span><a class="mark" href="#ocr_ocr_region" id="ocr_ocr_region">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload 3/9</code></strong></p>
+<ul>
+<li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图指定区域内包含的所有文本, 返回文本数组.</p>
+<p><code>ocr(region)</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr(img, region);
+</code></pre>
+<p>同时也是 <a href="#ocr__ocr">ocr({ <span class="type">region: region</span> })</a> 的便捷方法,</p>
+<p>以及 <a href="#ocr_m_recognizetext">ocr.recognizeText(region)</a> 的别名方法.</p>
+<p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
+<h3>ocr(img, options?)<span><a class="mark" href="#ocr_ocr_img_options" id="ocr_ocr_img_options">#</a></span></h3>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/9</code></strong></p>
+<ul>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -229,12 +278,12 @@ let img = images.captureScreen();
 let results = ocr(img);
 
 /* 结果过滤, 筛选出文本中可部分匹配 &quot;app&quot; 的结果, 如 &quot;apple&quot;, &quot;disappear&quot; 等. */
-results.filter(text =&gt; text.includes(&#39;app&#39;)); 
+results.filter(text =&gt; text.includes(&#39;app&#39;));
 </code></pre>
 <h3>ocr(img, region)<span><a class="mark" href="#ocr_ocr_img_region" id="ocr_ocr_img_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 3/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -255,7 +304,7 @@ results.filter(text =&gt; text.includes(&#39;app&#39;));
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
 <h3>ocr(imgPath, options?)<span><a class="mark" href="#ocr_ocr_imgpath_options" id="ocr_ocr_imgpath_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [7-8]/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
@@ -267,7 +316,7 @@ results.filter(text =&gt; text.includes(&#39;app&#39;));
 <pre><code class="lang-js">ocr(&#39;./picture.jpg&#39;); /* 获取本地图像文件中的所有文本. */
 </code></pre>
 <h3>ocr(imgPath, region)<span><a class="mark" href="#ocr_ocr_imgpath_region" id="ocr_ocr_imgpath_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 9/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
@@ -281,11 +330,59 @@ results.filter(text =&gt; text.includes(&#39;app&#39;));
 ocr(&#39;./picture.jpg&#39;, [ 0, 0, 100, 150 ]);
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
-<h2>[m] recognizeText<span><a class="mark" href="#ocr_m_recognizetext" id="ocr_m_recognizetext">#</a></span></h2>
-<h3>recognizeText(img, options?)<span><a class="mark" href="#ocr_recognizetext_img_options" id="ocr_recognizetext_img_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [1-2]/6</code></strong></p>
+<h2>[p] mode<span><a class="mark" href="#ocr_p_mode" id="ocr_p_mode">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>Getter/Setter</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>[ &lt;get&gt; = <code>&#39;mlkit&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_ocrModeName">OcrModeName</a></span> }</li>
+<li><strong>&lt;set&gt;</strong> { <span class="type"><a href="dataTypes.html#datatypes_ocrModeName">OcrModeName</a></span> }</li>
+</ul>
+<p>获取或设置 OCR 的工作模式名称.</p>
+<pre><code class="lang-js">/* AutoJs6 OCR 默认采用 MLKit 工作模式. */
+console.log(ocr.mode); // &quot;mlkit&quot;
+
+ocr.mode = &#39;paddle&#39;; /* 切换到 Paddle 工作模式. */
+console.log(ocr.mode); // &quot;paddle&quot;
+
+ocr.mode = &#39;mlkit&#39;; /* 再次切换到 MLKit 工作模式. */
+console.log(ocr.mode); // &quot;mlkit&quot;
+</code></pre>
+<p>当使用不同的工作模式名称时, <code>ocr</code> 全局方法及其相关方法 (如 <a href="#ocr_m_detect">ocr.detect</a>) 将使用不同的引擎, 进而可能获得不同的识别速度和结果.</p>
+<h2>[m] recognizeText<span><a class="mark" href="#ocr_m_recognizetext" id="ocr_m_recognizetext">#</a></span></h2>
+<p>用于识别图像中的全部文本.</p>
+<p><code>recognizeText</code> 方法与工作模式有关, 例如当工作模式为 <code>paddle</code> 时, <code>ocr.recognizeText(...)</code> 与 <code>ocr.paddle.recognizeText(...)</code> 等价.</p>
+<p><code>ocr.recognizeText(...)</code> 相关方法均可简写为 <code>ocr(...)</code>.</p>
+<h3>recognizeText(options?)<span><a class="mark" href="#ocr_recognizetext_options" id="ocr_recognizetext_options">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload [1-2]/9</code></strong></p>
+<ul>
+<li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图中包含的所有文本, 返回文本数组.</p>
+<p><code>ocr.recognizeText()</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr.recognizeText(img);
+</code></pre>
+<p><code>ocr.recognizeText(options?)</code> 与 <code>ocr(options?)</code> 等价.</p>
+<h3>recognizeText(region)<span><a class="mark" href="#ocr_recognizetext_region" id="ocr_recognizetext_region">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload 3/9</code></strong></p>
+<ul>
+<li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图指定区域内包含的所有文本, 返回文本数组.</p>
+<p><code>ocr.recognizeText(region)</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr.recognizeText(img, region);
+</code></pre>
+<p><a href="#ocr_m_recognizeText">ocr.recognizeText({ <span class="type">region: region</span> })</a> 的便捷方法.</p>
+<p><code>ocr.recognizeText(region)</code> 与 <code>ocr(region)</code> 等价.</p>
+<p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
+<h3>recognizeText(img, options?)<span><a class="mark" href="#ocr_recognizetext_img_options" id="ocr_recognizetext_img_options">#</a></span></h3>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/9</code></strong></p>
+<ul>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -296,9 +393,9 @@ let img = images.captureScreen(); /* 截屏并获取包装图像对象. */
 ocr.recognizeText(img).filter(text =&gt; text.includes(&#39;app&#39;)); /* 过滤结果. */
 </code></pre>
 <h3>recognizeText(img, region)<span><a class="mark" href="#ocr_recognizetext_img_region" id="ocr_recognizetext_img_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 3/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -311,7 +408,7 @@ ocr.recognizeText(img, [ 0, 0, 100, 150 ]).filter(text =&gt; text.includes(&#39;
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
 <h3>recognizeText(imgPath, options?)<span><a class="mark" href="#ocr_recognizetext_imgpath_options" id="ocr_recognizetext_imgpath_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [7-8]/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
@@ -323,7 +420,7 @@ ocr.recognizeText(img, [ 0, 0, 100, 150 ]).filter(text =&gt; text.includes(&#39;
 <pre><code class="lang-js">ocr.recognizeText(&#39;./picture.jpg&#39;); /* 获取本地图像文件中的所有文本. */
 </code></pre>
 <h3>recognizeText(imgPath, region)<span><a class="mark" href="#ocr_recognizetext_imgpath_region" id="ocr_recognizetext_imgpath_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 9/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
@@ -338,10 +435,39 @@ ocr.recognizeText(&#39;./picture.jpg&#39;, [ 0, 0, 100, 150 ]);
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
 <h2>[m] detect<span><a class="mark" href="#ocr_m_detect" id="ocr_m_detect">#</a></span></h2>
-<h3>detect(img, options?)<span><a class="mark" href="#ocr_detect_img_options" id="ocr_detect_img_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [1-2]/6</code></strong></p>
+<p>用于识别图像中的全部文本.</p>
+<p><code>detect</code> 方法与工作模式有关, 例如当工作模式为 <code>paddle</code> 时, <code>ocr.detect(...)</code> 与 <code>ocr.paddle.detect(...)</code> 等价.</p>
+<p>与 <a href="#ocr_m_recognizetext">recognizeText</a> 不同, <code>detect</code> 返回的结果包含更多信息, 包括 [ 文本标签, 置信度, 位置矩形 ] 等, <code>recognizeText</code> 精简了 <code>detect</code> 返回的结果, 仅包含文本标签数据.</p>
+<h3>detect(options?)<span><a class="mark" href="#ocr_detect_options" id="ocr_detect_options">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload [1-2]/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_ocrresult">OcrResult</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图中包含的所有文本, 返回 <a href="dataTypes.html#datatypes_ocrresult">OcrResult</a> 数组.</p>
+<p><code>ocr.detect()</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr.detect(img);
+</code></pre>
+<h3>detect(region)<span><a class="mark" href="#ocr_detect_region" id="ocr_detect_region">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong> <strong><code>Overload 3/9</code></strong></p>
+<ul>
+<li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_ocrresult">OcrResult</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>识别当前屏幕截图指定区域内包含的所有文本, 返回 <a href="dataTypes.html#datatypes_ocrresult">OcrResult</a> 数组.</p>
+<p><code>ocr.detect(region)</code> 相当于以下代码的整合:</p>
+<pre><code class="lang-js">images.requestScreenCapture();
+let img = images.captureScreen();
+ocr.detect(img, region);
+</code></pre>
+<p>同时也是 <a href="#ocr_m_detect">ocr.detect({ <span class="type">region: region</span> })</a> 的便捷方法.</p>
+<p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
+<h3>detect(img, options?)<span><a class="mark" href="#ocr_detect_img_options" id="ocr_detect_img_options">#</a></span></h3>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/9</code></strong></p>
+<ul>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_ocrresult">OcrResult</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -359,9 +485,9 @@ let result = ocr.detect(img);
 result.filter(o =&gt; o.confidence &gt;= 0.8);
 </code></pre>
 <h3>detect(img, region)<span><a class="mark" href="#ocr_detect_img_region" id="ocr_detect_img_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 3/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/9</code></strong></p>
 <ul>
-<li><strong>img</strong> { <span class="type"><a href="imageWrapper.html">ImageWrapper</a></span> } - 包装图像对象</li>
+<li><strong>img</strong> { <span class="type"><a href="imageWrapperType.html">ImageWrapper</a></span> } - 包装图像对象</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_ocrresult">OcrResult</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
 </ul>
@@ -381,7 +507,7 @@ result.filter(o =&gt; o.confidence &gt;= 0.8);
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
 <h3>detect(imgPath, options?)<span><a class="mark" href="#ocr_detect_imgpath_options" id="ocr_detect_imgpath_options">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload [4-5]/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload [7-8]/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>[ options ]</strong> { <span class="type"><a href="ocrOptionsType.html">OcrOptions</a></span> } - OCR 识别选项</li>
@@ -393,7 +519,7 @@ result.filter(o =&gt; o.confidence &gt;= 0.8);
 result.filter(o =&gt; o.confidence &gt;= 0.8); /* 筛选置信度高于 0.8 的结果. */
 </code></pre>
 <h3>detect(imgPath, region)<span><a class="mark" href="#ocr_detect_imgpath_region" id="ocr_detect_imgpath_region">#</a></span></h3>
-<p><strong><code>6.3.0</code></strong> <strong><code>Overload 6/6</code></strong></p>
+<p><strong><code>6.3.0</code></strong> <strong><code>Overload 9/9</code></strong></p>
 <ul>
 <li><strong>imgPath</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 图像路径</li>
 <li><strong>region</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omniregion">OmniRegion</a></span> } - OCR 识别区域</li>
@@ -409,6 +535,54 @@ let result = ocr.detect(&#39;./picture.jpg&#39;, [ 0, 0, 100, 150 ]);
 result.filter(o =&gt; o.confidence &gt;= 0.8);
 </code></pre>
 <p>关于 OCR 区域参数 <code>region</code> 的更多用法, 参阅 <a href="ocrOptionsType.html#ocroptionstype_p_region">OcrOptions#region</a> 小节.</p>
+<h2>[m] tap<span><a class="mark" href="#ocr_m_tap" id="ocr_m_tap">#</a></span></h2>
+<h3>tap(mode)<span><a class="mark" href="#ocr_tap_mode" id="ocr_tap_mode">#</a></span></h3>
+<p><strong><code>6.3.4</code></strong></p>
+<ul>
+<li><strong>mode</strong> { <span class="type"><a href="dataTypes.html#datatypes_ocrModeName">OcrModeName</a></span> } - OCR 工作模式</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>用于切换 OCR 工作模式, 相当于 <a href="#ocr_p_mode">ocr.mode</a> 的 setter 形式.</p>
+<pre><code class="lang-js">ocr.tap(&#39;paddle&#39;);
+ocr.mode = &#39;paddle&#39;; /* 同上. */
+</code></pre>
+<h2>[m] summary<span><a class="mark" href="#ocr_m_summary" id="ocr_m_summary">#</a></span></h2>
+<h3>summary()<span><a class="mark" href="#ocr_summary" id="ocr_summary">#</a></span></h3>
+<p><strong><code>6.4.0</code></strong></p>
+<p>获取 AutoJs6 OCR 功能的摘要.</p>
+<p>摘要中表述了 OCR 功能当前使用的工作模式, 以及全部可用的工作模式.</p>
+<pre><code class="lang-js">/* e.g. [ OCR summary ]
+ * Current mode: mlkit
+ * Available modes: [ mlkit, paddle ]
+ */
+console.log(ocr.summary());
+</code></pre>
+<h2>工作模式与代码形式<span><a class="mark" href="#ocr" id="ocr">#</a></span></h2>
+<p>截止 2023 年 9 月, AutoJs6 的 ocr 支持两种工作模式, <code>mlkit</code> (默认) 及 <code>paddle</code>.</p>
+<p>工作模式的获取或设置可通过 <a href="#ocr_p_mode">ocr.mode</a> 实现.</p>
+<p>下面以 <code>mlkit</code> 为例, 总结 <code>mlkit</code> 工作模式可用的全部代码形式.</p>
+<ol>
+<li>ocr.mlkit.detect(...)</li>
+<li>ocr.mlkit.recognizeText(...)</li>
+<li>ocr.mlkit(...)</li>
+<li><a href="#ocr_m_detect">ocr.detect(...)</a></li>
+<li><a href="#ocr_m_recognizetext">ocr.recognizeText(...)</a></li>
+<li><a href="#ocr__ocr">ocr(...)</a></li>
+</ol>
+<p>上述 6 种代码形式均可实现使用 <code>mlkit</code> 引擎进行光学字符识别.</p>
+<p>其中, [ 3 ] 是 [ 2 ] 的简便写法, [ 6 ] 是 [ 5 ] 的简便写法.</p>
+<p>另外, [ 4, 5, 6 ] 三种形式的条件, 是 OCR 工作模式为 <code>mlkit</code>, 即 <code>ocr.mode</code> 返回 <code>mlkit</code>. 否则需要调用 <code>ocr.mode = &#39;mlkit&#39;</code> 切换工作模式.</p>
+<p>下面再以 <code>paddle</code> 为例, 总结 <code>paddle</code> 工作模式可用的全部代码形式.</p>
+<ol>
+<li>ocr.paddle.detect(...)</li>
+<li>ocr.paddle.recognizeText(...)</li>
+<li>ocr.paddle(...)</li>
+<li><a href="#ocr_m_detect">ocr.detect(...)</a></li>
+<li><a href="#ocr_m_recognizetext">ocr.recognizeText(...)</a></li>
+<li><a href="#ocr__ocr">ocr(...)</a></li>
+</ol>
+<p>同样, [ 4, 5, 6 ] 三种形式的条件, 是 OCR 工作模式为 <code>paddle</code>, 即 <code>ocr.mode</code> 返回 <code>paddle</code>. 否则需要调用 <code>ocr.mode = &#39;paddle&#39;</code> 切换工作模式.</p>
+<p>由此可见, <code>ocr(...)</code> 和 <code>ocr.detect(...)</code> 等方法是动态变化的, 其功能取决于工作模式. 这种形式的优点是写法简单, 但可读性相对较差, 可能难以辨识 OCR 的具体工作引擎. 如需兼顾可读性, 则可使用 <code>ocr.mlkit(...)</code> 和 <code>ocr.mlkit.detect(...)</code> 等形式.</p>
 
         </div>
     </div>

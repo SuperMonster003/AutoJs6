@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>WebSocket | AutoJs6 文档 - 6.4.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/webSocketType.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-webSocketType">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType active" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpencvPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpencvRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpencvSize</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="webSocketType" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.4.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#websockettype_websocket">WebSocket</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_c_websocket">[C] WebSocket</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_c_url">[c] (url)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#websockettype_m_send">[m] send</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_send_text">send(text)</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_send_bytes">send(bytes)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#websockettype_m_close">[m] close</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_close_code_reason">close(code?, reason?)</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_close_reason">close(reason)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#websockettype_m_exitonclose">[m] exitOnClose</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_exitonclose">exitOnClose()</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_exitonclose_timeout">exitOnClose(timeout)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#websockettype_m_cancel">[m] cancel</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_cancel">cancel()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#websockettype_m_queuesize">[m] queueSize</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_queuesize">queueSize()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#websockettype_m_on">[m] on</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_on_eventname_callback">on(eventName, callback)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#websockettype_m_rebuild">[m] rebuild</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_rebuild_maxrebuildtimes">rebuild(maxRebuildTimes?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#websockettype_m_request">[m] request</a></span><ul>
+<li><span class="stability_undefined"><a href="#websockettype_request">request()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#websockettype_p_event_open">[p] EVENT_OPEN</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_event_message">[p] EVENT_MESSAGE</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_event_text">[p] EVENT_TEXT</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_event_bytes">[p] EVENT_BYTES</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_event_closing">[p] EVENT_CLOSING</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_event_closed">[p] EVENT_CLOSED</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_event_failure">[p] EVENT_FAILURE</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_event_max_rebuilds">[p] EVENT_MAX_REBUILDS</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_close_normal">[p] CODE_CLOSE_NORMAL</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_close_going_away">[p] CODE_CLOSE_GOING_AWAY</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_close_protocol_error">[p] CODE_CLOSE_PROTOCOL_ERROR</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_close_unsupported">[p] CODE_CLOSE_UNSUPPORTED</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_closed_no_status">[p] CODE_CLOSED_NO_STATUS</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_close_abnormal">[p] CODE_CLOSE_ABNORMAL</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_unsupported_payload">[p] CODE_UNSUPPORTED_PAYLOAD</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_policy_violation">[p] CODE_POLICY_VIOLATION</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_close_too_large">[p] CODE_CLOSE_TOO_LARGE</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_mandatory_extension">[p] CODE_MANDATORY_EXTENSION</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_server_error">[p] CODE_SERVER_ERROR</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_service_restart">[p] CODE_SERVICE_RESTART</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_try_again_later">[p] CODE_TRY_AGAIN_LATER</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_bad_gateway">[p] CODE_BAD_GATEWAY</a></span></li>
+<li><span class="stability_undefined"><a href="#websockettype_p_code_tls_handshake_fail">[p] CODE_TLS_HANDSHAKE_FAIL</a></span></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>WebSocket<span><a class="mark" href="#websockettype_websocket" id="websockettype_websocket">#</a></span></h1>
+<hr>
+<p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 30, 2023.</p>
+
+<hr>
+<p>WebSocket 类主要用于构建一个 <a href="https://square.github.io/okhttp/4.x/okhttp/okhttp3/-web-socket/">OkHttp3 WebSocket</a> 接口实现类的实例, 以便完成基于 <a href="https://zh.wikipedia.org/wiki/WebSocket">WebSocket 协议</a> 的网络请求.</p>
+<blockquote>
+<p>注: WebSocket 不同于 Socket.<br>WebSocket 是应用层的网络传输协议. 而 Socket 并非协议, 是位于应用层和传输控制层之间的一组接口, 是对 TCP/IP 协议的封装.</p>
+</blockquote>
+<p>一个流程相对完备的 WebSocket 示例:</p>
+<pre><code class="lang-js">console.setExitOnClose(7e3).show();
+
+let ws = new WebSocket(&#39;wss://echo.websocket.events&#39;);
+
+ws
+    .on(WebSocket.EVENT_OPEN, (res, ws) =&gt; {
+        console.log(&#39;WebSocket 已连接&#39;);
+    })
+    .on(WebSocket.EVENT_MESSAGE, (message, ws) =&gt; {
+        console.log(&#39;接收到消息&#39;);
+        // if (message instanceof okio.ByteString) {
+        //     console.log(`消息类型: ByteString`);
+        // } else if (typeof message === &#39;string&#39;) {
+        //     console.log(`消息类型: String`);
+        // } else {
+        //     throw TypeError(&#39;Should never happen&#39;);
+        // }
+    })
+    .on(WebSocket.EVENT_TEXT, (text, ws) =&gt; {
+        console.info(&#39;接收到文本消息:&#39;);
+        console.info(`text: ${text}`);
+    })
+    .on(WebSocket.EVENT_BYTES, (bytes, ws) =&gt; {
+        console.info(&#39;接收到字节数组消息:&#39;);
+        console.info(`utf8: ${bytes.utf8()}`);
+        console.info(`base64: ${bytes.base64()}`);
+        console.info(`md5: ${bytes.md5()}`);
+        console.info(`hex: ${bytes.hex()}`);
+    })
+    .on(WebSocket.EVENT_CLOSING, (code, reason, ws) =&gt; {
+        console.log(&#39;WebSocket 关闭中&#39;);
+    })
+    .on(WebSocket.EVENT_CLOSED, (code, reason, ws) =&gt; {
+        console.log(&#39;WebSocket 已关闭&#39;);
+        console.log(`code: ${code}`);
+        if (reason) console.log(`reason: ${reason}`);
+    })
+    .on(WebSocket.EVENT_FAILURE, (err, res, ws) =&gt; {
+        console.error(&#39;WebSocket 连接失败&#39;);
+        console.error(err);
+    });
+
+/* 发送文本消息. */
+ws.send(&#39;Hello WebSocket&#39;);
+
+/* 发送字节数组消息. */
+ws.send(new okio.ByteString(new java.lang.String(&#39;Hello WebSocket&#39;).getBytes()));
+
+setTimeout(() =&gt; {
+    console.log(&#39;断开 WebSocket&#39;);
+    ws.close(&#39;由用户断开连接&#39;);
+}, 8e3);
+</code></pre>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">WebSocket</p>
+
+<hr>
+<h2>[C] WebSocket<span><a class="mark" href="#websockettype_c_websocket" id="websockettype_c_websocket">#</a></span></h2>
+<div class="signature"><ul>
+<li><ins><strong>extends</strong></ins> { <span class="type"><a href="eventEmitterType.html">EventEmitter</a></span> }</li>
+</ul>
+</div><p>WebSocket 类继承自 <a href="eventEmitterType.html">EventEmitter</a> 类.</p>
+<p>因此 WebSocket 实例拥有继承而来的 <a href="eventEmitterType.html#eventemittertype_m_on">on</a>, <a href="eventEmitterType.html#eventemittertype_m_once">once</a>, <a href="eventEmitterType.html#eventemittertype_m_emit">emit</a>, <a href="eventEmitterType.html#eventemittertype_m_eventnames">eventNames</a>, <a href="eventEmitterType.html#eventemittertype_m_addlistener">addListener</a>, <a href="eventEmitterType.html#eventemittertype_m_removelistener">removeListener</a> 等方法, 详情参阅 <a href="eventEmitterType.html">事件发射器 (EventEmitter)</a> 章节.</p>
+<blockquote>
+<p>注:<br>特别地, on 和 once 方法在子类进行了 <code>覆写 (override)</code>, 其返回值类型被具体化为 WebSocket, 以便于链式调用.<br>为节约篇幅, 本章节仅列举了 on 方法的相关文档, once 方法与 on 的用法相同.</p>
+</blockquote>
+<h3>[c] (url)<span><a class="mark" href="#websockettype_c_url" id="websockettype_c_url">#</a></span></h3>
+<p><strong><code>6.3.4</code></strong> <strong><code>Global</code></strong></p>
+<ul>
+<li><strong>url</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 请求的 URL 地址</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="webSocketType.html">WebSocket</a></span> }</li>
+</ul>
+<p>构建一个 <a href="webSocketType.html">WebSocket</a> 实例.</p>
+<blockquote>
+<p>注: 构建实例时, 已经隐含客户端建立连接的过程.</p>
+</blockquote>
+<p>以下示例建立一个 WebSocket 连接, 并在 5 秒钟后主动断开连接.</p>
+<pre><code class="lang-js">let ws = new WebSocket(&#39;wss://echo.websocket.events&#39;);
+setTimeout(() =&gt; {
+    console.log(&#39;断开 WebSocket&#39;);
+    ws.close(WebSocket.CODE_CLOSE_NORMAL, &#39;Closed by user&#39;);
+}, 5e3);
+</code></pre>
+<h2>[m] send<span><a class="mark" href="#websockettype_m_send" id="websockettype_m_send">#</a></span></h2>
+<h3>send(text)<span><a class="mark" href="#websockettype_send_text" id="websockettype_send_text">#</a></span></h3>
+<p><strong><code>Overload 1/2</code></strong></p>
+<p>Attempts to enqueue text to be UTF-8 encoded and sent as a the data of a text (type 0x1) message.
+This method returns true if the message was enqueued. Messages that would overflow the outgoing message buffer will be rejected and trigger a graceful shutdown of this web socket. This method returns false in that case, and in any other case where this web socket is closing, closed, or canceled.
+This method returns immediately.</p>
+<pre><code class="lang-js">let ws = new WebSocket(&#39;wss://echo.websocket.events&#39;);
+ws.send(&#39;Hello WebSocket&#39;);
+ws.exitOnClose();
+</code></pre>
+<h3>send(bytes)<span><a class="mark" href="#websockettype_send_bytes" id="websockettype_send_bytes">#</a></span></h3>
+<p><strong><code>Overload 2/2</code></strong></p>
+<p>Attempts to enqueue bytes to be sent as a the data of a binary (type 0x2) message.
+This method returns true if the message was enqueued. Messages that would overflow the outgoing message buffer (16 MiB) will be rejected and trigger a graceful shutdown of this web socket. This method returns false in that case, and in any other case where this web socket is closing, closed, or canceled.
+This method returns immediately.</p>
+<pre><code class="lang-js">let ws = new WebSocket(&#39;wss://echo.websocket.events&#39;);
+ws.send(new okio.ByteString(new java.lang.String(&#39;Hello WebSocket&#39;).getBytes()));
+ws.exitOnClose();
+</code></pre>
+<h2>[m] close<span><a class="mark" href="#websockettype_m_close" id="websockettype_m_close">#</a></span></h2>
+<h3>close(code?, reason?)<span><a class="mark" href="#websockettype_close_code_reason" id="websockettype_close_code_reason">#</a></span></h3>
+<p><strong><code>Overload [1-3]/4</code></strong></p>
+<ul>
+<li><strong>[ code = <code>WebSocket.CODE_CLOSE_NORMAL [1000]</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 状态码</li>
+<li><strong>[ reason = <code>null</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 连接关闭原因</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 优雅关闭是否已经启动</li>
+</ul>
+<p>尝试启动 WebSocket 优雅关闭, 此时已排队的报文将在 WebSocket 断开前被传送.</p>
+<blockquote>
+<p>注: 相对应地, <a href="#websockettype_m_cancel">cancel</a> 则会立即释放资源, 而丢弃所有排队的报文.</p>
+</blockquote>
+<p>如果调用 <code>close</code> 时启动了优雅关闭, 返回 true.<br>如果调用 <code>close</code> 时, 优雅关闭已经启动, 或 WebSocket 已关闭或取消, 返回 false.</p>
+<p>参数 <code>code</code> 可选, 代表状态码, 通过状态码可以获取或判断连接关闭的原因. 其范围为 <code>[1000..5000)</code>.</p>
+<p>参数 <code>reason</code> 可选, 代表关闭原因, 方便用户直接通过阅读字符串获取连接关闭的原因.</p>
+<p>以下调用方式均被支持 (其中 <code>ws</code> 代表一个 WebSocket 实例):</p>
+<pre><code class="lang-js">ws.close(); /* 默认状态码, 无具体关闭原因. */
+ws.close(WebSocket.CODE_CLOSE_NORMAL); /* 指定状态码, 无具体关闭原因. */
+ws.close(WebSocket.CODE_CLOSE_NORMAL, &#39;用户正常关闭&#39;); /* 指定状态码, 指定具体关闭原因. */
+</code></pre>
+<h3>close(reason)<span><a class="mark" href="#websockettype_close_reason" id="websockettype_close_reason">#</a></span></h3>
+<p><strong><code>Overload 4/4</code></strong></p>
+<ul>
+<li><strong>reason</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 连接关闭原因</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 优雅关闭是否已经启动</li>
+</ul>
+<p>相当于 <code>close(WebSocket.CODE_CLOSE_NORMAL, reason)</code>.</p>
+<h2>[m] exitOnClose<span><a class="mark" href="#websockettype_m_exitonclose" id="websockettype_m_exitonclose">#</a></span></h2>
+<h3>exitOnClose()<span><a class="mark" href="#websockettype_exitonclose" id="websockettype_exitonclose">#</a></span></h3>
+<p><strong><code>Overload 1/2</code></strong></p>
+<p>... ...</p>
+<h3>exitOnClose(timeout)<span><a class="mark" href="#websockettype_exitonclose_timeout" id="websockettype_exitonclose_timeout">#</a></span></h3>
+<p><strong><code>Overload 2/2</code></strong></p>
+<p>... ...</p>
+<h2>[m] cancel<span><a class="mark" href="#websockettype_m_cancel" id="websockettype_m_cancel">#</a></span></h2>
+<h3>cancel()<span><a class="mark" href="#websockettype_cancel" id="websockettype_cancel">#</a></span></h3>
+<div class="signature"><ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+</div><p>立即强制释放该 WebSocket 所占用的资源, 并丢弃所有排队的报文.</p>
+<blockquote>
+<p>注: 相对应地, <a href="#websockettype_m_close">close</a> 则会在释放资源之前将排队的报文完成传送.</p>
+</blockquote>
+<h2>[m] queueSize<span><a class="mark" href="#websockettype_m_queuesize" id="websockettype_m_queuesize">#</a></span></h2>
+<h3>queueSize()<span><a class="mark" href="#websockettype_queuesize" id="websockettype_queuesize">#</a></span></h3>
+<div class="signature"><ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+</div><p>Returns the size in bytes of all messages enqueued to be transmitted to the server. This doesn&#39;t include framing overhead. If compression is enabled, uncompressed messages size is used to calculate this value. It also doesn&#39;t include any bytes buffered by the operating system or network intermediaries. This method returns 0 if no messages are waiting in the queue. If may return a nonzero value after the web socket has been canceled; this indicates that enqueued messages were not transmitted.</p>
+<h2>[m] on<span><a class="mark" href="#websockettype_m_on" id="websockettype_m_on">#</a></span></h2>
+<h3>on(eventName, callback)<span><a class="mark" href="#websockettype_on_eventname_callback" id="websockettype_on_eventname_callback">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>eventName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 最大连接重建次数</li>
+<li><strong>callback</strong> { <span class="type"><a href="dataTypes.html#datatypes_function">(</a>args: <a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_any">any</a><a href="documentation.html#documentation_可变参数">[]</a><a href="dataTypes.html#datatypes_function">)</a> <a href="dataTypes.html#datatypes_function">=&gt;</a> <a href="dataTypes.html#datatypes_any">any</a></span> } - 事件监听回调参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="webSocketType.html">WebSocket</a></span> }</li>
+</ul>
+</div><p>注册一个 WebSocket 相关的事件监听器, 当事件名称与 <code>eventName</code> 参数一致时, 触发执行回调函数 <code>callback</code>.</p>
+<p>... ...</p>
+<p>不同事件名称, 其对应监听回调函数的参数也不同 (给出具体对应的在 [p] 文档内).</p>
+<p>... ...</p>
+<h2>[m] rebuild<span><a class="mark" href="#websockettype_m_rebuild" id="websockettype_m_rebuild">#</a></span></h2>
+<h3>rebuild(maxRebuildTimes?)<span><a class="mark" href="#websockettype_rebuild_maxrebuildtimes" id="websockettype_rebuild_maxrebuildtimes">#</a></span></h3>
+<p><strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>maxRebuildTimes</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 最大连接重建次数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>... ...</p>
+<h2>[m] request<span><a class="mark" href="#websockettype_m_request" id="websockettype_m_request">#</a></span></h2>
+<h3>request()<span><a class="mark" href="#websockettype_request" id="websockettype_request">#</a></span></h3>
+<div class="signature"><ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="okhttp3RequestType.html">Okhttp3Request</a></span> }</li>
+</ul>
+</div><p>Returns the original request that initiated this web socket.</p>
+<h2>[p] EVENT_OPEN<span><a class="mark" href="#websockettype_p_event_open" id="websockettype_p_event_open">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>open</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>WebSocket 事件名称常量.</p>
+<ul>
+<li>事件触发: 远程对等端接受网络套接字, 并且可以开始信息传输.</li>
+<li>事件监听: <a href="#websockettype_m_on">WebSocket#on</a></li>
+</ul>
+<pre><code class="lang-js">let ws = new WebSocket(&#39;wss://echo.websocket.events&#39;);
+ws.on(WebSocket.EVENT_OPEN, (res, ws) =&gt; console.log(&#39;WebSocket 已连接&#39;));
+ws.exitOnClose();
+</code></pre>
+<h2>[p] EVENT_MESSAGE<span><a class="mark" href="#websockettype_p_event_message" id="websockettype_p_event_message">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>message</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>WebSocket 事件名称常量, 用于 xxx 事件.</p>
+<p>Invoked when a text (type 0x1) message has been received.</p>
+<h2>[p] EVENT_TEXT<span><a class="mark" href="#websockettype_p_event_text" id="websockettype_p_event_text">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>text</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>WebSocket 事件名称常量, 用于 xxx 事件.</p>
+<p>Invoked when a text (type 0x1) message has been received.</p>
+<h2>[p] EVENT_BYTES<span><a class="mark" href="#websockettype_p_event_bytes" id="websockettype_p_event_bytes">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>bytes</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>WebSocket 事件名称常量, 用于 xxx 事件.</p>
+<p>Invoked when a text (type 0x1) message has been received.</p>
+<h2>[p] EVENT_CLOSING<span><a class="mark" href="#websockettype_p_event_closing" id="websockettype_p_event_closing">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>closing</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>WebSocket 事件名称常量, 用于 xxx 事件.</p>
+<p>Invoked when the remote peer has indicated that no more incoming messages will be transmitted.</p>
+<h2>[p] EVENT_CLOSED<span><a class="mark" href="#websockettype_p_event_closed" id="websockettype_p_event_closed">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>closed</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>WebSocket 事件名称常量, 用于 xxx 事件.</p>
+<p>Invoked when both peers have indicated that no more messages will be transmitted and the connection has been successfully released. No further calls to this listener will be made.</p>
+<h2>[p] EVENT_FAILURE<span><a class="mark" href="#websockettype_p_event_failure" id="websockettype_p_event_failure">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>failure</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>WebSocket 事件名称常量, 用于 xxx 事件.</p>
+<p>Invoked when a web socket has been closed due to an error reading from or writing to the network. Both outgoing and incoming messages may have been lost. No further calls to this listener will be made.</p>
+<h2>[p] EVENT_MAX_REBUILDS<span><a class="mark" href="#websockettype_p_event_max_rebuilds" id="websockettype_p_event_max_rebuilds">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>max_rebuilds</code> ] { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>WebSocket 事件名称常量, 用于 xxx 事件.</p>
+<h2>[p] CODE_CLOSE_NORMAL<span><a class="mark" href="#websockettype_p_code_close_normal" id="websockettype_p_code_close_normal">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1000</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示成功操作或常规的 Socket 关闭操作.</p>
+<h2>[p] CODE_CLOSE_GOING_AWAY<span><a class="mark" href="#websockettype_p_code_close_going_away" id="websockettype_p_code_close_going_away">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1001</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示终端正在处于移除状态, 服务端或客户端即将不可用.</p>
+<h2>[p] CODE_CLOSE_PROTOCOL_ERROR<span><a class="mark" href="#websockettype_p_code_close_protocol_error" id="websockettype_p_code_close_protocol_error">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1002</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示终端因协议错误或无效帧而即将终止连接.</p>
+<h2>[p] CODE_CLOSE_UNSUPPORTED<span><a class="mark" href="#websockettype_p_code_close_unsupported" id="websockettype_p_code_close_unsupported">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1003</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示终端因帧数据类型不支持而即将终止连接.</p>
+<h2>[p] CODE_CLOSED_NO_STATUS<span><a class="mark" href="#websockettype_p_code_closed_no_status" id="websockettype_p_code_closed_no_status">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1005</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示不包含错误原因, 仅代表已经关闭的状态.</p>
+<h2>[p] CODE_CLOSE_ABNORMAL<span><a class="mark" href="#websockettype_p_code_close_abnormal" id="websockettype_p_code_close_abnormal">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1006</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示异常关闭 (如浏览器关闭).</p>
+<h2>[p] CODE_UNSUPPORTED_PAYLOAD<span><a class="mark" href="#websockettype_p_code_unsupported_payload" id="websockettype_p_code_unsupported_payload">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1007</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示终端接收到不一致的报文 (如异常格式的 UTF-8).</p>
+<h2>[p] CODE_POLICY_VIOLATION<span><a class="mark" href="#websockettype_p_code_policy_violation" id="websockettype_p_code_policy_violation">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1008</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示终端因收到了违反其策略的报文而即将终止连接.</p>
+<h2>[p] CODE_CLOSE_TOO_LARGE<span><a class="mark" href="#websockettype_p_code_close_too_large" id="websockettype_p_code_close_too_large">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1009</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示终端因无法处理长度过大的报文而即将终止连接.</p>
+<h2>[p] CODE_MANDATORY_EXTENSION<span><a class="mark" href="#websockettype_p_code_mandatory_extension" id="websockettype_p_code_mandatory_extension">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1010</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示终端因期望与服务端进行扩展协商而即将终止连接.</p>
+<h2>[p] CODE_SERVER_ERROR<span><a class="mark" href="#websockettype_p_code_server_error" id="websockettype_p_code_server_error">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1011</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示服务端因发生内部错误而即将终止连接.</p>
+<h2>[p] CODE_SERVICE_RESTART<span><a class="mark" href="#websockettype_p_code_service_restart" id="websockettype_p_code_service_restart">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1012</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示服务端正在重启过程中.</p>
+<h2>[p] CODE_TRY_AGAIN_LATER<span><a class="mark" href="#websockettype_p_code_try_again_later" id="websockettype_p_code_try_again_later">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1013</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示服务端临时拒绝了终端请求.</p>
+<h2>[p] CODE_BAD_GATEWAY<span><a class="mark" href="#websockettype_p_code_bad_gateway" id="websockettype_p_code_bad_gateway">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1014</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示网关服务器接收到无效的请求.</p>
+<h2>[p] CODE_TLS_HANDSHAKE_FAIL<span><a class="mark" href="#websockettype_p_code_tls_handshake_fail" id="websockettype_p_code_tls_handshake_fail">#</a></span></h2>
+<p><strong><code>6.3.4</code></strong> <strong><code>CONSTANT</code></strong></p>
+<ul>
+<li>[ <code>1015</code> ] { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>WebSocket 状态码, 表示 TLS 握手失败 (如服务端证书未通过验证等).</p>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

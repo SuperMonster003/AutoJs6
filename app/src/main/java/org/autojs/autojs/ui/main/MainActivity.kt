@@ -123,7 +123,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     override fun onStart() {
         super.onStart()
-        WrappedShizuku.checkShizukuPermission()
+        WrappedShizuku.bindUserServiceIfNeeded()
     }
 
     private fun recreateIfNeeded() {

@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@android:color/white"
-              android:fitsSystemWindows="true"
-              android:orientation="vertical">
-
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            android:fitsSystemWindows="true">
+
+        <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:titleTextColor="@color/md_black_1000"
+                app:subtitleTextColor="@color/md_black_1000"
+                android:theme="@style/ToolBarStyleInrt"
+                android:background="@color/md_blue_grey_50"
+                app:contentInsetStartWithNavigation="0dp"
+                app:contentInsetEndWithActions="2dp"
+                app:titleTextAppearance="@style/TextAppearanceEditorTitle"
+                app:popupTheme="@style/OverflowMenuInrt" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
-        android:id="@+id/fragment_setting"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/white"/>
+            android:id="@+id/fragment_setting"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 </LinearLayout>

@@ -34,10 +34,8 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun main() {
-        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_PHONE_STATE)
+        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
-
 
     private fun runScript() {
         Thread {

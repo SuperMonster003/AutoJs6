@@ -20,12 +20,12 @@ import android.view.OrientationEventListener;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.autojs.autojs.lang.ThreadCompat;
 import org.autojs.autojs.runtime.ScriptRuntime;
+import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.runtime.exception.ScriptException;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.util.ForegroundServiceUtils;
-import org.autojs.autojs.lang.ThreadCompat;
-import org.autojs.autojs.runtime.api.ScreenMetrics;
 
 import java.util.ArrayList;
 import java.util.Collections;

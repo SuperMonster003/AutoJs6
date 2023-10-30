@@ -1,3 +1,5 @@
+// noinspection JSUnusedLocalSymbols
+
 /* Overwritten protection. */
 
 let { util } = global;

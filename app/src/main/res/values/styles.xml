@@ -28,6 +28,10 @@
         <item name="popupTheme">@style/PopupMenuTheme</item>
     </style>
 
+    <style name="ToolBarStyleInrt" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="colorControlNormal">@color/md_black_1000</item>
+    </style>
+
     <style name="EditorTheme" parent="AppTheme">
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">@color/colorAccent</item>
@@ -135,6 +139,12 @@
         <item name="android:windowDisablePreview">true</item>
         <item name="overlapAnchor">false</item>
         <item name="android:dropDownVerticalOffset">5.0dp</item>
+    </style>
+
+    <style name="OverflowMenuInrt" parent="OverflowMenu">
+        <item name="android:textColor">@color/md_black_1000</item>
+        <item name="android:popupBackground">@color/md_blue_grey_100</item>
+        <item name="android:itemBackground">@color/md_blue_grey_100</item>
     </style>
 
 </resources>

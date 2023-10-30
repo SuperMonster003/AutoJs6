@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.main.drawer
 
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +17,7 @@ import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.permission.MediaProjectionPermission
 import org.autojs.autojs.permission.PostNotificationPermission
+import org.autojs.autojs.permission.ShizukuPermission
 import org.autojs.autojs.permission.UsageStatsPermission
 import org.autojs.autojs.permission.WriteSecureSettingsPermission
 import org.autojs.autojs.permission.WriteSystemSettingsPermission
@@ -55,7 +55,6 @@ open class DrawerFragment : Fragment() {
     private lateinit var mDrawerMenu: RecyclerView
     private lateinit var mContext: Context
     private lateinit var mActivity: MainActivity
-    // private lateinit var mReceiver: BatteryChangedReceiver
 
     private lateinit var mAccessibilityServiceItem: DrawerMenuToggleableItem
     private lateinit var mForegroundServiceItem: DrawerMenuToggleableItem
@@ -70,29 +69,21 @@ open class DrawerFragment : Fragment() {
     private lateinit var mWriteSystemSettingsItem: DrawerMenuToggleableItem
     private lateinit var mWriteSecuritySettingsItem: DrawerMenuToggleableItem
     private lateinit var mProjectMediaAccessItem: DrawerMenuToggleableItem
+    private lateinit var mShizukuAccessItem: DrawerMenuToggleableItem
     private lateinit var mNightModeItem: DrawerMenuToggleableItem
     private lateinit var mAutoNightModeItem: DrawerMenuToggleableItem
     private lateinit var mKeepScreenOnWhenInForegroundItem: DrawerMenuToggleableItem
     private lateinit var mThemeColorItem: DrawerMenuShortcutItem
     private lateinit var mAboutAppAndDevItem: DrawerMenuShortcutItem
 
-    private val actionBatteryChangedIntentFilter = IntentFilter().apply {
-        addAction("android.intent.action.ACTION_BATTERY_CHANGED")
-        addAction("android.intent.action.ACTION_POWER_CONNECTED")
-        addAction("android.intent.action.ACTION_POWER_DISCONNECTED")
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         EventBus.getDefault().register(this)
-        // mReceiver = BatteryChangedReceiver()
 
         mContext = requireContext()
 
-        mActivity = (requireActivity() as MainActivity).apply {
-            // registerReceiver(mReceiver, actionBatteryChangedIntentFilter)
-        }
+        mActivity = (requireActivity() as MainActivity)
 
         mAccessibilityServiceItem = DrawerMenuToggleableItem(
             AccessibilityService(mContext),
@@ -222,6 +213,13 @@ open class DrawerFragment : Fragment() {
             R.drawable.ic_cast_connected_black_48dp,
             R.string.text_project_media_access,
             R.string.text_project_media_access_description,
+        )
+
+        mShizukuAccessItem = DrawerMenuToggleableItem(
+            ShizukuPermission(mContext),
+            R.drawable.ic_app_shizuku_representative,
+            R.string.text_shizuku_access,
+            R.string.text_shizuku_access_description,
         )
 
         mAutoNightModeItem = DrawerMenuToggleableItem(
@@ -397,6 +395,7 @@ open class DrawerFragment : Fragment() {
             mWriteSystemSettingsItem,
             mWriteSecuritySettingsItem,
             mProjectMediaAccessItem,
+            mShizukuAccessItem,
             DrawerMenuGroup(R.string.text_appearance),
             mAutoNightModeItem,
             mNightModeItem,
@@ -432,6 +431,7 @@ open class DrawerFragment : Fragment() {
         mWriteSystemSettingsItem,
         mWriteSecuritySettingsItem,
         mProjectMediaAccessItem,
+        mShizukuAccessItem,
         mKeepScreenOnWhenInForegroundItem,
     ).forEach { it.sync() }
 
@@ -446,8 +446,6 @@ open class DrawerFragment : Fragment() {
 
     companion object {
 
-        private val TAG = DrawerFragment::class.java.simpleName
-
         lateinit var drawerMenuAdapter: DrawerMenuAdapter
             private set
 
@@ -457,28 +455,5 @@ open class DrawerFragment : Fragment() {
         }
 
     }
-
-    // class BatteryChangedReceiver : BroadcastReceiver() {
-    //
-    //     override fun onReceive(context: Context, intent: Intent) {
-    //         val action = intent.action ?: return
-    //         when {
-    //             action.matches(Regex("android.intent.action.ACTION_(POWER_CONNECTED|BATTERY_CHANGED)", RegexOption.IGNORE_CASE)) -> {
-    //                 Log.d(TAG, "Received broadcast: $action")
-    //
-    //                 // FIXME by SuperMonster003 on Jun 7, 2023.
-    //                 //  ! Code below doesn't work.
-    //
-    //                 // if (DeviceUtils.isPowerSourceUSB(context)) {
-    //                 //     Log.d(TAG, "Current power source is USB")
-    //                 //     drawerMenuAdapter.drawerMenuItems.find { it.title == R.string.text_server_mode }
-    //                 //         ?.takeUnless { it.isChecked }
-    //                 //         ?.let { it.subtitle = "true" }
-    //                 // }
-    //             }
-    //         }
-    //     }
-    //
-    // }
 
 }

@@ -31,7 +31,6 @@ public class EventEmitter {
         }
     }
 
-
     private class Listeners {
         private final CopyOnWriteArrayList<ListenerWrapper> mListenerWrappers = new CopyOnWriteArrayList<>();
 
@@ -134,8 +133,9 @@ public class EventEmitter {
 
     public boolean emit(String eventName, Object... args) {
         Listeners listeners = mListenersMap.get(eventName);
-        if (listeners == null || listeners.empty())
+        if (listeners == null || listeners.empty()) {
             return false;
+        }
         listeners.emit(args);
         return true;
     }
@@ -146,8 +146,9 @@ public class EventEmitter {
 
     public int listenerCount(String eventName) {
         Listeners listeners = mListenersMap.get(eventName);
-        if (listeners == null)
+        if (listeners == null) {
             return 0;
+        }
         return listeners.count();
     }
 
@@ -177,8 +178,9 @@ public class EventEmitter {
 
     public EventEmitter removeListener(String eventName, Object listener) {
         Listeners listeners = mListenersMap.get(eventName);
-        if (listeners != null)
+        if (listeners != null) {
             listeners.remove(listener);
+        }
         return this;
     }
 
@@ -194,6 +196,5 @@ public class EventEmitter {
     public static int defaultMaxListeners() {
         return defaultMaxListeners;
     }
-
 
 }

@@ -48,7 +48,7 @@ public class TaskerScriptEditActivity extends BaseActivity {
                     ViewUtils.showToast(TaskerScriptEditActivity.this, ex.getMessage(), true);
                     finish();
                 });
-        setToolbarAsBack(mEditorView.getName());
+        setToolbarAsBack(mEditorView.name);
     }
 
     public static void edit(Activity activity, String title, String summary, String content) {
@@ -61,9 +61,7 @@ public class TaskerScriptEditActivity extends BaseActivity {
     @Override
     public void finish() {
         CodeEditor editor = mEditorView.editor;
-        if (editor != null) {
-            setResult(RESULT_OK, new Intent().putExtra(EXTRA_CONTENT, editor.getText()));
-        }
+        setResult(RESULT_OK, new Intent().putExtra(EXTRA_CONTENT, editor.getText()));
         TaskerScriptEditActivity.super.finish();
     }
 

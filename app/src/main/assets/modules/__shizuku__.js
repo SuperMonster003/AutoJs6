@@ -19,17 +19,11 @@ module.exports = function (scriptRuntime, scope) {
                 const shizuku = function (cmd) {
                     return rtShizuku.execCommand(cmd);
                 };
-                return Object.assign(shizuku, ShizukuCtor.prototype);
+                return Object.assign(Object.setPrototypeOf(shizuku, rtShizuku), ShizukuCtor.prototype);
             };
 
             ShizukuCtor.prototype = {
                 constructor: ShizukuCtor,
-                ensureService() {
-                    rtShizuku.ensureService();
-                },
-                execCommand() {
-                    return rtShizuku.execCommand.apply(rtShizuku, arguments);
-                },
             };
 
             return ShizukuCtor;
