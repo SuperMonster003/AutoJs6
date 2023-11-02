@@ -281,7 +281,22 @@ module.exports = function (scriptRuntime, scope) {
                 return result;
             },
             getBody() {
+                let resBody = res.body();
+                let resBodyString;
+                let resBodyBytes;
                 return Object.setPrototypeOf({
+                    string() {
+                        if (typeof resBodyString !== 'undefined') {
+                            return resBodyString;
+                        }
+                        return resBodyString = resBody.string();
+                    },
+                    bytes() {
+                        if (typeof resBodyBytes !== 'undefined') {
+                            return resBodyBytes;
+                        }
+                        return resBodyBytes = resBody.bytes();
+                    },
                     json() {
                         /* "java.lang.IllegalStateException: closed" may happen. */
                         let str = this.string();
@@ -291,7 +306,10 @@ module.exports = function (scriptRuntime, scope) {
                             throw Error('Failed to parse JSON. Body string may be not in JSON format');
                         }
                     },
-                }, res.body());
+                    get contentType() {
+                        return resBody.contentType();
+                    },
+                }, resBody);
             },
         }.getResponse()),
         /**

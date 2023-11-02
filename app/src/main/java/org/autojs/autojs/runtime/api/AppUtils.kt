@@ -1,7 +1,6 @@
 package org.autojs.autojs.runtime.api
 
 import android.app.Activity
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -85,7 +84,6 @@ class AppUtils {
         null
     }
 
-    @Suppress("DEPRECATION")
     private fun getApplicationInfoCompat(packageManager: PackageManager, packageName: String, flags: Int) = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
             packageManager.getApplicationInfo(packageName, ApplicationInfoFlags.of(flags.toLong()))
@@ -115,7 +113,6 @@ class AppUtils {
         false
     }
 
-    @Suppress("DEPRECATION")
     private fun getPackageInfoCompat(packageManager: PackageManager, packageName: String, flags: Int) = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
             packageManager.getPackageInfo(packageName, PackageInfoFlags.of(flags.toLong()))
@@ -230,10 +227,10 @@ class AppUtils {
         }
 
         @JvmStatic
-        fun isBroadcastShortForm(s: String) = BroadcastShortForm.values().any { it.shortName.contentEquals(s) }
+        fun isBroadcastShortForm(s: String) = BroadcastShortForm.entries.any { it.shortName.contentEquals(s) }
 
         @JvmStatic
-        fun isActivityShortForm(s: String) = ActivityShortForm.values().any { it.shortName.contentEquals(s) }
+        fun isActivityShortForm(s: String) = ActivityShortForm.entries.any { it.shortName.contentEquals(s) }
 
         fun getInstalledApplications(context: Context): List<ApplicationInfo> = context.packageManager.let {
             when {

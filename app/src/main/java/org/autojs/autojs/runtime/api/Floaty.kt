@@ -7,7 +7,6 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.core.floaty.BaseResizableFloatyWindow
 import org.autojs.autojs.core.floaty.RawWindow
 import org.autojs.autojs.core.floaty.RawWindow.RawFloaty
@@ -16,10 +15,11 @@ import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
+import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.util.ViewUtils.setViewMeasure
 import org.autojs.autojs6.R
-import java.lang.Exception
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.concurrent.Volatile
 
 /**
  * Created by Stardust on 2017/12/5.
@@ -97,62 +97,65 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
 
     inner class JsRawWindow(floaty: RawFloaty) : JsWindow {
 
-        private var mWindow = RawWindow(floaty, mUiHandler.context)
+        private var mWindow: RawWindow? = null
         private var mExitOnClose = false
 
         init {
+            mWindow = RawWindow(floaty, mUiHandler.context)
             mUiHandler.context.startService(Intent(mUiHandler.context, FloatyService::class.java))
-            runWithWindow { FloatyService.addWindow(mWindow) }
+
+            val r = Runnable { FloatyService.addWindow(mWindow) }
+
+            /* 如果是 UI 线程则直接创建, 否则放入 UI 线程. */
+            if (isUiThread()) r.run() else mUiHandler.post(r)
         }
 
         fun findView(id: String?): View? {
-            return JsViewHelper.findViewByStringId(mWindow.contentView, id)
+            return mWindow?.let { JsViewHelper.findViewByStringId(it.contentView, id) }
         }
 
         val x: Int
-            get() = mWindow.windowBridge.x
+            get() = mWindow?.windowBridge?.x ?: -1
         val y: Int
-            get() = mWindow.windowBridge.y
+            get() = mWindow?.windowBridge?.y ?: -1
         val width: Int
-            get() = mWindow.windowView.width
+            get() = mWindow?.windowView?.width ?: 0
         val height: Int
-            get() = mWindow.windowView.height
+            get() = mWindow?.windowView?.height ?: 0
 
         fun setSize(w: Int, h: Int) = runWithWindow {
-            mWindow.windowBridge.updateMeasure(w, h)
-            setViewMeasure(mWindow.windowView, w, h)
+            mWindow!!.windowBridge.updateMeasure(w, h)
+            setViewMeasure(mWindow!!.windowView, w, h)
         }
 
         fun setTouchable(touchable: Boolean) = runWithWindow {
-            mWindow.setTouchable(touchable)
+            mWindow!!.setTouchable(touchable)
         }
 
         private fun runWithWindow(r: Runnable) {
-            if (isUiThread()) {
-                r.run()
-            } else {
-                mUiHandler.post(r)
-            }
+            mWindow ?: return
+            mUiHandler.post(r)
         }
 
         fun setPosition(x: Int, y: Int) = runWithWindow {
-            mWindow.windowBridge.updatePosition(x, y)
+            mWindow!!.windowBridge.updatePosition(x, y)
         }
 
         fun exitOnClose() {
             mExitOnClose = true
         }
 
-        fun requestFocus() = mWindow.requestWindowFocus()
+        fun requestFocus() = mWindow?.requestWindowFocus()
 
-        fun disableFocus() = mWindow.disableWindowFocus()
+        fun disableFocus() = mWindow?.disableWindowFocus()
 
         fun close() = close(true)
 
         override fun close(removeFromWindows: Boolean) {
             if (!removeFromWindows || removeWindow(this)) {
                 runWithWindow {
-                    mWindow.close()
+                    mWindow!!.close()
+                    mWindow = null
                     if (mExitOnClose) {
                         mRuntime.exit()
                     }
@@ -163,71 +166,76 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
 
     inner class JsResizableWindow(supplier: BaseResizableFloatyWindow.ViewSupplier) : JsWindow {
 
-        private lateinit var mView: View
+        private var mView: View? = null
 
         @Volatile
-        private var mWindow = BaseResizableFloatyWindow(mUiHandler.context, object : BaseResizableFloatyWindow.ViewSupplier {
-            override fun inflate(context: Context?, parent: ViewGroup?): View {
-                return supplier.inflate(context, parent).also { mView = it }
-            }
-        })
+        private var mWindow: BaseResizableFloatyWindow? = null
+
         private var mExitOnClose = false
 
         init {
+            mWindow = BaseResizableFloatyWindow(mContext, object : BaseResizableFloatyWindow.ViewSupplier {
+                override fun inflate(context: Context?, parent: ViewGroup?): View {
+                    return supplier.inflate(context, parent).also { mView = it }
+                }
+            })
             mUiHandler.context.startService(Intent(mUiHandler.context, FloatyService::class.java))
-            runWithWindow { FloatyService.addWindow(mWindow) }
-            mWindow.setOnCloseButtonClickListener { _ -> close() }
+
+            val r = Runnable { FloatyService.addWindow(mWindow!!) }
+
+            /* 如果是 UI 线程则直接创建, 否则放入 UI 线程. */
+            if (Looper.myLooper() == Looper.getMainLooper()) r.run() else mUiHandler.post(r)
+
+            mWindow!!.setOnCloseButtonClickListener { _ -> close() }
             // setSize(mWindow.getWindowBridge().getScreenWidth() / 2, mWindow.getWindowBridge().getScreenHeight() / 2);
         }
 
-        fun findView(id: String?) = JsViewHelper.findViewByStringId(mView, id)
+        fun findView(id: String?) = mView?.let { JsViewHelper.findViewByStringId(it, id) }
 
         val x: Int
-            get() = mWindow.windowBridge.x
+            get() = mWindow?.windowBridge?.x ?: -1
         val y: Int
-            get() = mWindow.windowBridge.y
+            get() = mWindow?.windowBridge?.y ?: -1
         val width: Int
-            get() = mWindow.rootView.width
+            get() = mWindow?.rootView?.width ?: 0
         val height: Int
-            get() = mWindow.rootView.height
+            get() = mWindow?.rootView?.height ?: 0
 
         fun setSize(w: Int, h: Int) = runWithWindow {
-            mWindow.windowBridge.updateMeasure(w, h)
-            setViewMeasure(mWindow.rootView, w, h)
+            mWindow!!.windowBridge.updateMeasure(w, h)
+            setViewMeasure(mWindow!!.rootView, w, h)
         }
 
         private fun runWithWindow(r: Runnable) {
-            if (isUiThread()) {
-                r.run()
-            } else {
-                mUiHandler.post(r)
-            }
+            mWindow ?: return
+            mUiHandler.post(r)
         }
 
         fun setPosition(x: Int, y: Int) = runWithWindow {
-            mWindow.windowBridge.updatePosition(x, y)
+            mWindow!!.windowBridge.updatePosition(x, y)
         }
 
         var isAdjustEnabled: Boolean
-            get() = mWindow.isAdjustEnabled
+            get() = mWindow?.isAdjustEnabled ?: false
             set(enabled) {
-                runWithWindow { mWindow.isAdjustEnabled = enabled }
+                runWithWindow { mWindow!!.isAdjustEnabled = enabled }
             }
 
         fun exitOnClose() {
             mExitOnClose = true
         }
 
-        fun requestFocus() = mWindow.requestWindowFocus()
+        fun requestFocus() = mWindow?.requestWindowFocus()
 
-        fun disableFocus() = mWindow.disableWindowFocus()
+        fun disableFocus() = mWindow?.disableWindowFocus()
 
         fun close() = close(true)
 
         override fun close(removeFromWindows: Boolean) {
             if (!removeFromWindows || removeWindow(this)) {
                 runWithWindow {
-                    mWindow.close()
+                    mWindow!!.close()
+                    mWindow = null
                     if (mExitOnClose) {
                         mRuntime.exit()
                     }

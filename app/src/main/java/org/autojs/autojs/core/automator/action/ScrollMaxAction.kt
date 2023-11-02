@@ -24,6 +24,7 @@ class ScrollMaxAction(private val mScrollAction: Int) : SimpleAction() {
         return result
     }
 
+    @Suppress("DEPRECATION")
     private fun reset() {
         mMaxScrollableNode?.let {
             if(it != mRootNode){

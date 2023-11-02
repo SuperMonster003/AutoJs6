@@ -113,7 +113,7 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:jackpal.androidterm-1.0.70"))
 
     // Dex
-    implementation(files("$rootDir/libs/com.android.dx-1.7.0.jar"))
+    implementation(files("$rootDir/libs/com.android.dx-1.14.jar"))
 
     // OpenCV
     implementation(project(":libs:org.opencv-4.8.0"))
@@ -649,17 +649,11 @@ class Versions(filePath: String) {
     private val javaVersionRaw = properties["JAVA_VERSION"] as String
     private var javaVersionInfoSuffix = ""
     private val javaVersionCeilMap = mapOf(
-        "as" to mapOf(
-            /* Empty so far. */
-        ),
         "idea" to mapOf(
             "2023.2" to javaVersionMinSuggested, /* Aug 17, 2023. */
             "2023.1" to javaVersionMinSuggested, /* Aug 17, 2023. */
             "2022.3" to javaVersionMinSuggested, /* Aug 17, 2023. */
         ),
-        "unknown" to mapOf(
-            /* Empty for unknown. */
-        )
     )
 
     val javaVersion: JavaVersion by lazy {
@@ -681,7 +675,7 @@ class Versions(filePath: String) {
         val platformVersion = gradle.extra["platformVersion"] as String
         val platformType = gradle.extra["platformType"] as String
 
-        javaVersionCeilMap[platformType]!![platformVersion]?.let { ceil: Int ->
+        javaVersionCeilMap[platformType]?.get(platformVersion)?.let { ceil: Int ->
             if (niceVersionInt > ceil) {
                 niceVersionInt = ceil
                 javaVersionInfoSuffix += " [coerced]"

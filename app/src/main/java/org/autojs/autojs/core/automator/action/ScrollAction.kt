@@ -16,6 +16,7 @@ class ScrollAction(private val mAction: Int, private val mIndex: Int) : SimpleAc
         return result
     }
 
+    @Suppress("DEPRECATION")
     private fun recycle(list: List<UiObject>, root: UiObject) {
         for (nodeInfo in list) {
             if (nodeInfo !== root)
@@ -34,6 +35,7 @@ class ScrollAction(private val mAction: Int, private val mIndex: Int) : SimpleAc
         return list
     }
 
+    @Suppress("DEPRECATION")
     private fun findScrollableNodes(node: UiObject?, list: MutableList<UiObject>) {
         if (node == null) {
             return

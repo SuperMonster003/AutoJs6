@@ -214,6 +214,7 @@ class ProjectConfigActivity : BaseActivity() {
         return false
     }
 
+    @Deprecated("Deprecated in Java")
     @SuppressLint("CheckResult", "MissingSuperCall")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode != RESULT_OK) {

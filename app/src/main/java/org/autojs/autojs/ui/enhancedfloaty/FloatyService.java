@@ -19,11 +19,19 @@ public class FloatyService extends Service {
 
     private static final CopyOnWriteArraySet<FloatyWindow> windows = new CopyOnWriteArraySet<>();
 
+    private static FloatyService instance;
+
+    private WindowManager windowManager;
+
     public Size initialSize;
+
+    public FloatyService() {
+        /* Empty constructor. */
+    }
 
     public static void addWindow(FloatyWindow window) {
         if (windows.add(window) && instance != null) {
-            window.onCreate(instance, instance.mWindowManager);
+            window.onCreate(instance, instance.windowManager);
         }
     }
 
@@ -31,15 +39,12 @@ public class FloatyService extends Service {
         windows.remove(window);
     }
 
-    private static FloatyService instance;
-    private WindowManager mWindowManager;
-
     @Override
     public void onCreate() {
         super.onCreate();
-        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         for (FloatyWindow delegate : windows) {
-            delegate.onCreate(this, mWindowManager);
+            delegate.onCreate(this, windowManager);
         }
         instance = this;
     }

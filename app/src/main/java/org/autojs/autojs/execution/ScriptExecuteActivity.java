@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.eventloop.SimpleEvent;
+import org.autojs.autojs.core.looper.Loopers;
 import org.autojs.autojs.engine.JavaScriptEngine;
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine;
 import org.autojs.autojs.engine.ScriptEngine;
@@ -37,8 +38,6 @@ public class ScriptExecuteActivity extends AppCompatActivity {
     private ScriptSource mScriptSource;
     private ActivityScriptExecution mScriptExecution;
     private ScriptRuntime mRuntime;
-
-
     private EventEmitter mEventEmitter;
 
     public static ActivityScriptExecution execute(Context context, ScriptEngineManager manager, ScriptExecutionTask task) {
@@ -137,14 +136,22 @@ public class ScriptExecuteActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         Log.d(LOG_TAG, "onDestroy");
+
         if (mScriptEngine != null) {
             mScriptEngine.put("activity", null);
             mScriptEngine.setTag("activity", null);
             mScriptEngine.destroy();
         }
         mScriptExecution = null;
-        mRuntime.loopers.waitWhenIdle(false);
+
+        if (mRuntime != null) {
+            Loopers loopers = mRuntime.loopers;
+            if (loopers != null) {
+                loopers.waitWhenIdle(false);
+            }
+        }
     }
 
     @Override

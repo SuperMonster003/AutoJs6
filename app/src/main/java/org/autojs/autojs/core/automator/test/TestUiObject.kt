@@ -55,6 +55,7 @@ class TestUiObject @JvmOverloads constructor(private val mChildCount: Int = max(
         return random.nextBoolean()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun recycle() {
         if (mRecycled) {
             throw IllegalStateException()

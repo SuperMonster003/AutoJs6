@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.doc
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.webkit.WebView
 import org.autojs.autojs.ui.BaseActivity
@@ -28,6 +29,7 @@ class DocumentationActivity : BaseActivity() {
         }
     }
 
+    @SuppressLint("MissingSuperCall")
     @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         if (mWebView.canGoBack()) {

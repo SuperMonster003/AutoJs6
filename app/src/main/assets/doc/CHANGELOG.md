@@ -4,11 +4,31 @@
 
 ******
 
+# v6.4.1
+
+###### 2023/11/02
+
+* `修复` 构建工具无法自适应未知平台的问题 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #158`](http://pr.autojs6.com/158)_
+* `修复` 脚本退出时可能导致应用崩溃的问题 _[`issue #159`](http://issues.autojs6.com/159)_
+* `修复` http 模块获取响应对象的 body.contentType 返回值类型错误 _[`issue #142`](http://issues.autojs6.com/142)_
+* `修复` device.width 及 device.height 返回数据不正确的问题 _[`issue #160`](http://issues.autojs6.com/160)_
+* `修复` 代码编辑器长按删除时可能导致应用崩溃的问题 (试修) _[`issue #156`](http://issues.autojs6.com/156)_
+* `修复` 代码编辑器反向选择文本后进行常规操作可能导致应用崩溃的问题
+* `修复` 部分设备长按 AutoJs6 应用图标无法显示快捷方式菜单的问题
+* `修复` 部分设备打包项目时点击确认按钮无响应的问题
+* `修复` app.sendBroadcast 及 app.startActivity 无法使用简称参数的问题
+* `修复` floaty 模块 JsWindow#setPosition 等方法首次调用时的功能异常
+* `优化` 增加 Termux 相关权限以支持 Intent 调用 Termux 执行 ADB 命令 _[`issue #136`](http://issues.autojs6.com/136)_
+* `优化` http 模块获取的响应对象可重复使用 body.string() 及 body.bytes() 方法
+* `优化` 增加 GitHub Actions 自动打包支持 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #158`](http://pr.autojs6.com/158)_
+* `优化` 构建工具自适应 Temurin 平台
+* `依赖` 升级 Android dx 版本 1.11 -> 1.14
+
 # v6.4.0
 
 ###### 2023/10/30
 
-* `新增` ocr 模块支持 Paddle Lite 引擎 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_ 
+* `新增` ocr 模块支持 Paddle Lite 引擎 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_
 * `新增` 打包功能支持内置插件与外部插件两种打包方式 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
 * `新增` WebSocket 模块 (参阅 项目文档 > [WebSocket](https://docs.autojs6.com/#/webSocketType))
 * `新增` barcode / qrcode 模块 (参阅 项目文档 > [条码](https://docs.autojs6.com/#/barcode) / [二维码](https://docs.autojs6.com/#/qrcode))
@@ -18,7 +38,7 @@
 * `新增` 支持在安卓系统设置页面选择并切换应用语言 (安卓 13 及以上)
 * `新增` 支持设置页面添加或长按应用图标激活 [应用快捷方式](https://developer.android.com/guide/topics/ui/shortcuts?hl=zh-cn) , 可启动文档和设置等页面
 * `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
-* `修复` 打包应用无法使用 AutoJs6 新增 API 的问题 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
+* `修复` 打包应用无法使用 AutoJs6 新增 API 的问题 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_ _[`issue #149`](http://issues.autojs6.com/149)_
 * `修复` 打包应用在系统夜间模式下的样式异常
 * `修复` VSCode 插件保存文件到本地时文件扩展名信息丢失的问题
 * `修复` 使用协程特性运行项目产生未捕获异常致使应用崩溃的问题
