@@ -207,7 +207,7 @@ class CodeEditText : AppCompatEditText {
                 mMatchingBrackets[0], mMatchingBrackets[1] -> mTheme.getColorForToken(TokenMapping.TOKEN_MATCHED_BRACKET)
                 else -> highlightTokens.colors[previousColorPos]
             }
-            var i = visibleCharStart
+            var i = previousColorPos
             while (i < visibleCharEnd) {
                 val color = when (i) {
                     mUnmatchedBracket -> mTheme.getColorForToken(Token.ERROR)

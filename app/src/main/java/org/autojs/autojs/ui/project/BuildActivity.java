@@ -27,6 +27,7 @@ import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.pref.Language;
 import org.autojs.autojs.project.ProjectConfig;
+import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
@@ -77,6 +78,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private MaterialDialog mProgressDialog;
     private String mSource;
     private boolean mIsDefaultIcon = true;
+    private boolean mIsProjectLevelBuilding;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -214,6 +216,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (mProjectConfig == null) {
             return;
         }
+        mIsProjectLevelBuilding = true;
         mOutputPath.setText(new File(mSource, mProjectConfig.getBuildDir()).getPath());
         mAppConfig.setVisibility(View.GONE);
         mSourcePathContainer.setVisibility(View.GONE);
@@ -242,16 +245,19 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return;
         }
         if (!checkInputs()) {
+            ViewUtils.showToast(this, getString(R.string.error_input_fields_check_failed));
             return;
         }
         doBuildingApk();
     }
 
     private boolean checkInputs() {
+        if (mIsProjectLevelBuilding) {
+            return checkNotEmpty(mOutputPath);
+        }
         return checkNotEmpty(mSourcePath)
                 & checkNotEmpty(mOutputPath)
                 & checkNotEmpty(mAppName)
-                & checkNotEmpty(mSourcePath)
                 & checkNotEmpty(mVersionCode)
                 & checkNotEmpty(mVersionName)
                 & checkPackageNameValid(mPackageName);
@@ -269,7 +275,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return false;
         }
         return true;
-
     }
 
     private boolean checkNotEmpty(EditText editText) {
@@ -344,6 +349,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         }
         String message = getString(R.string.text_failed_to_build) + "\n" + error.getMessage();
         ViewUtils.showToast(this, message, true);
+        ScriptRuntime.popException(message);
         Log.e(LOG_TAG, "Failed to build", error);
     }
 
@@ -357,7 +363,6 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .negativeText(R.string.text_cancel)
                 .onPositive((dialog, which) -> IntentUtils.installApkOrToast(BuildActivity.this, outApk.getPath(), AppFileProvider.AUTHORITY))
                 .show();
-
     }
 
     @Override

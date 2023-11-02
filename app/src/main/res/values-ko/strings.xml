@@ -710,6 +710,7 @@
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 권한 해지에 실패했습니다</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
     <string name="error_unable_to_use_shizuku_service">Shizuku 서비스를 사용할 수 없음</string>
+    <string name="error_input_fields_check_failed">입력 필드 확인 실패</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">총: %d 개 항목</item>

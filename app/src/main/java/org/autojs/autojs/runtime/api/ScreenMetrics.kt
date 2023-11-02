@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.content.res.Resources
@@ -8,6 +9,7 @@ import android.graphics.Point
 import android.util.DisplayMetrics
 import android.view.Surface.ROTATION_0
 import android.view.WindowManager
+import org.autojs.autojs.app.GlobalAppContext
 
 /**
  * Created by Stardust on 2017/4/26.
@@ -50,13 +52,19 @@ class ScreenMetrics(private var designWidth: Int, private var designHeight: Int)
 
         var resources: Resources? = null
 
-        private var mWindowManager: WindowManager? = null
         private var mIsInitialized = false
+
+        private var mPrivateWindowManager: WindowManager? = null
+        private var windowManager: WindowManager
+            get() = mPrivateWindowManager ?: GlobalAppContext.get().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            set(value) {
+                mPrivateWindowManager = value
+            }
 
         @Suppress("DEPRECATION")
         @JvmStatic
         val rotation: Int
-            get() = mWindowManager?.defaultDisplay?.rotation ?: ROTATION_0
+            get() = windowManager.defaultDisplay?.rotation ?: ROTATION_0
 
         @JvmStatic
         val orientation: Int
@@ -74,30 +82,24 @@ class ScreenMetrics(private var designWidth: Int, private var designHeight: Int)
         @Suppress("DEPRECATION")
         val deviceScreenWidth: Int
             get() {
-                resources?.displayMetrics?.widthPixels?.takeIf { it > 0 }?.let { return it }
+                // resources?.displayMetrics?.widthPixels?.takeIf { it > 0 }?.let { return it }
 
                 val metricsLegacy = DisplayMetrics()
-                val display = mWindowManager?.defaultDisplay?.apply { getRealMetrics(metricsLegacy) }
-                metricsLegacy.widthPixels.takeIf { it > 0 }?.let { return it }
-
-                display?.width?.takeIf { it > 0 }?.let { return it }
-
-                return 0
+                return windowManager.defaultDisplay.apply { getRealMetrics(metricsLegacy) }.let { display ->
+                    maxOf(metricsLegacy.widthPixels, display.width, 0)
+                }
             }
 
         @JvmStatic
         @Suppress("DEPRECATION")
         val deviceScreenHeight: Int
             get() {
-                resources?.displayMetrics?.heightPixels?.takeIf { it > 0 }?.let { return it }
+                // resources?.displayMetrics?.heightPixels?.takeIf { it > 0 }?.let { return it }
 
                 val metricsLegacy = DisplayMetrics()
-                val display = mWindowManager?.defaultDisplay?.apply { getRealMetrics(metricsLegacy) }
-                metricsLegacy.heightPixels.takeIf { it > 0 }?.let { return it }
-
-                display?.height?.takeIf { it > 0 }?.let { return it }
-
-                return 0
+                return windowManager.defaultDisplay.apply { getRealMetrics(metricsLegacy) }.let { display ->
+                    maxOf(metricsLegacy.heightPixels, display.height, 0)
+                }
             }
 
         @JvmStatic
@@ -105,14 +107,14 @@ class ScreenMetrics(private var designWidth: Int, private var designHeight: Int)
         val deviceScreenDensity: Int
             get() {
                 val metricsLegacy = DisplayMetrics()
-                mWindowManager?.defaultDisplay?.apply { getRealMetrics(metricsLegacy) }
+                windowManager.defaultDisplay?.apply { getRealMetrics(metricsLegacy) }
                 return metricsLegacy.densityDpi
             }
 
         @JvmStatic
         fun init(activity: Activity) {
             resources = activity.resources
-            mWindowManager = activity.windowManager
+            windowManager = activity.windowManager
             mIsInitialized = true
         }
 

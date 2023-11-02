@@ -11,6 +11,7 @@ import kotlin.collections.ArrayList
  */
 object DFS : SearchAlgorithm {
 
+    @Suppress("DEPRECATION")
     override fun search(root: UiObject, filter: Filter, limit: Int): ArrayList<UiObject> {
         val result = ArrayList<UiObject>()
         val stack = LinkedList<UiObject>()

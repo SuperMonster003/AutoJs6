@@ -184,6 +184,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         return mMediator
     }
 
+    @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         mMediator.onActivityResult(requestCode, resultCode, data)

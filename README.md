@@ -131,6 +131,26 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 [comment]: <> "Version history only shows last 3 versions"
 
+# v6.4.1
+
+###### 2023/11/02
+
+* `修复` 构建工具无法自适应未知平台的问题 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #158`](http://pr.autojs6.com/158)_
+* `修复` 脚本退出时可能导致应用崩溃的问题 _[`issue #159`](http://issues.autojs6.com/159)_
+* `修复` http 模块获取响应对象的 body.contentType 返回值类型错误 _[`issue #142`](http://issues.autojs6.com/142)_
+* `修复` device.width 及 device.height 返回数据不正确的问题 _[`issue #160`](http://issues.autojs6.com/160)_
+* `修复` 代码编辑器长按删除时可能导致应用崩溃的问题 (试修) _[`issue #156`](http://issues.autojs6.com/156)_
+* `修复` 代码编辑器反向选择文本后进行常规操作可能导致应用崩溃的问题
+* `修复` 部分设备长按 AutoJs6 应用图标无法显示快捷方式菜单的问题
+* `修复` 部分设备打包项目时点击确认按钮无响应的问题
+* `修复` app.sendBroadcast 及 app.startActivity 无法使用简称参数的问题
+* `修复` floaty 模块 JsWindow#setPosition 等方法首次调用时的功能异常
+* `优化` 增加 Termux 相关权限以支持 Intent 调用 Termux 执行 ADB 命令 _[`issue #136`](http://issues.autojs6.com/136)_
+* `优化` http 模块获取的响应对象可重复使用 body.string() 及 body.bytes() 方法
+* `优化` 增加 GitHub Actions 自动打包支持 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #158`](http://pr.autojs6.com/158)_
+* `优化` 构建工具自适应 Temurin 平台
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v641)_
+
 # v6.4.0
 
 ###### 2023/10/30
@@ -193,40 +213,6 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 适配 VSCode 插件 1.0.6
 * `优化` UiObject#parent 方法增加级数参数支持 (参阅 项目文档 > [控件节点](https://docs.autojs6.com/#/uiObjectType))
 
-# v6.3.2
-
-###### 2023/07/06
-
-* `新增` crypto 模块 (参阅 项目文档 > [密文](https://docs.autojs6.com/#/crypto)) _[`issue #70`](http://issues.autojs6.com/70)_
-* `新增` UI 模式增加 textswitcher / viewswitcher / viewflipper / numberpicker / video / search 等控件
-* `新增` 日志活动页面增加复制及导出日志等功能 _[`issue #76`](http://issues.autojs6.com/76)_
-* `新增` 客户端模式增加 IP 地址历史记录功能
-* `修复` 客户端模式自动连接或服务端模式自动开启后可能无法显示 IP 地址信息的问题
-* `修复` 客户端模式及服务端模式连接后在切换语言或夜间模式时连接断开且无法再次连接的问题
-* `修复` 客户端模式输入目标地址时无法使用自定义端口的问题
-* `修复` 客户端模式输入目标地址时某些字符将导致 AutoJs6 崩溃的问题
-* `修复` VSCode 插件远程命令可能出现解析失败造成命令无法响应的问题 (试修)
-* `修复` Android 7.x 发现新版本时无法获取版本详情的问题
-* `修复` images.pixel 无法获取无障碍服务截图的像素色值的问题 _[`issue #73`](http://issues.autojs6.com/73)_
-* `修复` UI 模式 Android 原生控件 (大写字母开头) 无法使用预置控件属性的问题
-* `修复` runtime.loadDex/loadJar 加载多个文件时仅第一个文件生效的问题 _[`issue #88`](http://issues.autojs6.com/88)_
-* `修复` 部分设备安装应用后启动器仅显示文档图标的问题 (试修) _[`issue #85`](http://issues.autojs6.com/85)_
-* `优化` 适配 VSCode 插件 1.0.5
-* `优化` 支持 cheerio 模块 (Ref to [aiselp](https://github.com/aiselp/AutoX/commit/7176f5ad52d6904383024fb700bf19af75e22903)) _[`issue #65`](http://issues.autojs6.com/65)_
-* `优化` JsWebSocket 实例支持使用 rebuild 方法重新重建实例并建立连接 _[`issue #69`](http://issues.autojs6.com/69)_
-* `优化` base64 模块支持 number 数组及 Java 字节数组作为主要参数的编解码
-* `优化` 增加对 JavaMail for Android 的支持 _[`issue #71`](http://issues.autojs6.com/71)_
-* `优化` 获取版本更新信息时使用 Blob 数据类型以增强无代理网络环境适应性
-* `优化` 客户端模式连接过程中在主页抽屉副标题显示目标 IP 地址
-* `优化` 客户端模式输入目标地址时支持对不合法的输入进行提示
-* `优化` 客户端模式支持使用软键盘回车键建立连接
-* `优化` 服务端模式开启后保持常开状态 (除非手动关闭或应用进程结束) _[`issue #64`](http://issues.autojs6.com/64#issuecomment-1596990158)_
-* `优化` 实现 AutoJs6 与 VSCode 插件的双向版本检测并提示异常检测结果 _[`issue #89`](http://issues.autojs6.com/89)_
-* `优化` 增加短信数据读取权限 (android.permission.READ_SMS) (默认关闭)
-* `优化` findMultiColors 方法内部实现 (by [LYS86](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
-* `优化` runtime.loadDex/loadJar/load 支持按目录级别加载或同时加载多个文件
-* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v632)_
-
 ##### 更多版本历史可参阅
 
 * [CHANGELOG.md](http://changelog.autojs6.com)
@@ -243,12 +229,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Hedgehog | 2023.1.1 RC 1` 版本 (按需选择其一):
+下载 `Android Studio Hedgehog | 2023.1.1 RC 2` 版本 (按需选择其一):
 
-- [android-studio-2023.1.1.23-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2023.1.1.23/android-studio-2023.1.1.23-windows.exe) (1.1 GB)
-- [android-studio-2023.1.1.23-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.1.1.23/android-studio-2023.1.1.23-windows.zip) (1.1 GB)
+- [android-studio-2023.1.1.24-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2023.1.1.24/android-studio-2023.1.1.24-windows.exe) (1.1 GB)
+- [android-studio-2023.1.1.24-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.1.1.24/android-studio-2023.1.1.24-windows.zip) (1.1 GB)
 
-> 注: 上述版本发布时间为 2023 年 10 月 17 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2023 年 10 月 30 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -385,13 +371,13 @@ Gradle
 
 |                         贡献人员                          |                                       提交数                                       |     最近提交     |
 |:-----------------------------------------------------:|:-------------------------------------------------------------------------------:|:------------:|
+|     [TonyJiangWJ](https://github.com/TonyJiangWJ)     |   [4](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)    | `2023/10/31` |
 |       [LZX284](https://github.com/LZX284) (Ai)        |     [13](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)      | `2023/10/09` |
-|     [TonyJiangWJ](https://github.com/TonyJiangWJ)     |   [3](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)    | `2023/08/29` |
 | [little-alei](https://github.com/little-alei) (抠脚本人)  |   [12](https://github.com/SuperMonster003/AutoJs6/commits?author=little-alei)   | `2023/07/12` |
 |          [aiselp](https://github.com/aiselp)          | [6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp) | `2023/06/14` |
 |        [LYS86](https://github.com/LYS86) (LYS)        |      [2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)       | `2023/06/03` |
 
-数据更新于 `2023/10/25`.
+数据更新于 `2023/10/31`.
 
 数据条目按 `最近提交` 降序排序.
 
@@ -411,7 +397,7 @@ Gradle
     - README.md
         - Latest changelog was synchronized by which in CHANGELOG.md
         - Changelog entries are not more than three
-        - The summary of the latest changelog for committing to Git
+        - The summary of the latest changelog for committing to Git [ DO NOT commit or push ]
         - Update badges like [ android studio / rhino / ... ]
         - Update android studio download links and version names
     - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
@@ -421,4 +407,5 @@ Gradle
     - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field
+    - Commit and push to GitHub
 )

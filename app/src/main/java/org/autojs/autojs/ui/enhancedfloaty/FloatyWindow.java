@@ -39,7 +39,7 @@ public abstract class FloatyWindow {
         onViewCreated(getWindowView());
 
         //attach to window
-        attachToWindow(getWindowView(), getWindowManager());
+        attachToWindow(getWindowView(), manager);
     }
 
     protected void onViewCreated(View view) {

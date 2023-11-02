@@ -318,8 +318,13 @@ public class HVScrollView extends FrameLayout {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        // Let the focused view and/or our descendants get the key first
-        return super.dispatchKeyEvent(event) || executeKeyEvent(event);
+        try {
+            // Let the focused view and/or our descendants get the key first
+            return super.dispatchKeyEvent(event) || executeKeyEvent(event);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -395,15 +400,15 @@ public class HVScrollView extends FrameLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         /*
          * This method JUST determines whether we want to intercept the motion.
-		 * If we return true, onMotionEvent will be called and we do the actual
-		 * scrolling there.
-		 */
+         * If we return true, onMotionEvent will be called and we do the actual
+         * scrolling there.
+         */
 
-		/*
-		 * Shortcut the most recurring case: the user is in the dragging
-		 * state and he is moving his finger.  We want to intercept this
-		 * motion.
-		 */
+        /*
+         * Shortcut the most recurring case: the user is in the dragging
+         * state and he is moving his finger.  We want to intercept this
+         * motion.
+         */
         final int action = ev.getAction();
         if ((action == MotionEvent.ACTION_MOVE) && (mIsBeingDragged)) {
             return true;
@@ -471,10 +476,10 @@ public class HVScrollView extends FrameLayout {
             case MotionEvent.ACTION_POINTER_UP -> onSecondaryPointerUp(ev);
         }
 
-		/*
-		 * The only time we want to intercept motion events is if we are in the
-		 * drag mode.
-		 */
+        /*
+         * The only time we want to intercept motion events is if we are in the
+         * drag mode.
+         */
         return mIsBeingDragged;
     }
 
@@ -502,10 +507,10 @@ public class HVScrollView extends FrameLayout {
                     return false;
                 }
 
-			/*
-			 * If being flinged and user touches, stop the fling. isFinished
-			 * will be false if being flinged.
-			 */
+                /*
+                 * If being flinged and user touches, stop the fling. isFinished
+                 * will be false if being flinged.
+                 */
                 if (!mScroller.isFinished()) {
                     mScroller.abortAnimation();
                 }
@@ -612,13 +617,13 @@ public class HVScrollView extends FrameLayout {
         List<View> focusables = getFocusables(View.FOCUS_FORWARD);
         View focusCandidate = null;
 
-		/*
-		 * A fully contained focusable is one where its top is below the bound's
-		 * top, and its bottom is above the bound's bottom. A partially
-		 * contained focusable is one where some part of it is within the
-		 * bounds, but it also has some part that is not within bounds.  A fully contained
-		 * focusable is preferred to a partially contained focusable.
-		 */
+        /*
+         * A fully contained focusable is one where its top is below the bound's
+         * top, and its bottom is above the bound's bottom. A partially
+         * contained focusable is one where some part of it is within the
+         * bounds, but it also has some part that is not within bounds.  A fully contained
+         * focusable is preferred to a partially contained focusable.
+         */
         boolean foundFullyContainedFocusable = false;
 
         int count = focusables.size();
@@ -628,16 +633,16 @@ public class HVScrollView extends FrameLayout {
             int viewBottom = view.getBottom();
 
             if (top < viewBottom && viewTop < bottom) {
-				/*
-				 * the focusable is in the target area, it is a candidate for
-				 * focusing
-				 */
+                /*
+                 * the focusable is in the target area, it is a candidate for
+                 * focusing
+                 */
 
                 final boolean viewIsFullyContained = (top < viewTop) &&
                         (viewBottom < bottom);
 
                 if (focusCandidate == null) {
-					/* No candidate, take this one */
+                    /* No candidate, take this one */
                     focusCandidate = view;
                     foundFullyContainedFocusable = viewIsFullyContained;
                 } else {
@@ -648,23 +653,23 @@ public class HVScrollView extends FrameLayout {
 
                     if (foundFullyContainedFocusable) {
                         if (viewIsFullyContained && viewIsCloserToBoundary) {
-							/*
-							 * We're dealing with only fully contained views, so
-							 * it has to be closer to the boundary to beat our
-							 * candidate
-							 */
+                            /*
+                             * We're dealing with only fully contained views, so
+                             * it has to be closer to the boundary to beat our
+                             * candidate
+                             */
                             focusCandidate = view;
                         }
                     } else {
                         if (viewIsFullyContained) {
-							/* Any fully contained view beats a partially contained view */
+                            /* Any fully contained view beats a partially contained view */
                             focusCandidate = view;
                             foundFullyContainedFocusable = true;
                         } else if (viewIsCloserToBoundary) {
-							/*
-							 * Partially contained view beats another partially
-							 * contained view if it's closer
-							 */
+                            /*
+                             * Partially contained view beats another partially
+                             * contained view if it's closer
+                             */
                             focusCandidate = view;
                         }
                     }
@@ -680,13 +685,13 @@ public class HVScrollView extends FrameLayout {
         List<View> focusables = getFocusables(View.FOCUS_FORWARD);
         View focusCandidate = null;
 
-		/*
-		 * A fully contained focusable is one where its left is below the bound's
-		 * left, and its right is above the bound's right. A partially
-		 * contained focusable is one where some part of it is within the
-		 * bounds, but it also has some part that is not within bounds.  A fully contained
-		 * focusable is preferred to a partially contained focusable.
-		 */
+        /*
+         * A fully contained focusable is one where its left is below the bound's
+         * left, and its right is above the bound's right. A partially
+         * contained focusable is one where some part of it is within the
+         * bounds, but it also has some part that is not within bounds.  A fully contained
+         * focusable is preferred to a partially contained focusable.
+         */
         boolean foundFullyContainedFocusable = false;
 
         int count = focusables.size();
@@ -696,16 +701,16 @@ public class HVScrollView extends FrameLayout {
             int viewRight = view.getRight();
 
             if (left < viewRight && viewLeft < right) {
-				/*
-				 * the focusable is in the target area, it is a candidate for
-				 * focusing
-				 */
+                /*
+                 * the focusable is in the target area, it is a candidate for
+                 * focusing
+                 */
 
                 final boolean viewIsFullyContained = (left < viewLeft) &&
                         (viewRight < right);
 
                 if (focusCandidate == null) {
-					/* No candidate, take this one */
+                    /* No candidate, take this one */
                     focusCandidate = view;
                     foundFullyContainedFocusable = viewIsFullyContained;
                 } else {
@@ -715,23 +720,23 @@ public class HVScrollView extends FrameLayout {
 
                     if (foundFullyContainedFocusable) {
                         if (viewIsFullyContained && viewIsCloserToBoundary) {
-							/*
-							 * We're dealing with only fully contained views, so
-							 * it has to be closer to the boundary to beat our
-							 * candidate
-							 */
+                            /*
+                             * We're dealing with only fully contained views, so
+                             * it has to be closer to the boundary to beat our
+                             * candidate
+                             */
                             focusCandidate = view;
                         }
                     } else {
                         if (viewIsFullyContained) {
-							/* Any fully contained view beats a partially contained view */
+                            /* Any fully contained view beats a partially contained view */
                             focusCandidate = view;
                             foundFullyContainedFocusable = true;
                         } else if (viewIsCloserToBoundary) {
-							/*
-							 * Partially contained view beats another partially
-							 * contained view if it's closer
-							 */
+                            /*
+                             * Partially contained view beats another partially
+                             * contained view if it's closer
+                             */
                             focusCandidate = view;
                         }
                     }
@@ -1180,7 +1185,7 @@ public class HVScrollView extends FrameLayout {
     private void scrollToChild(View child) {
         child.getDrawingRect(mTempRect);
 
-		/* Offset from child's local coordinates to ScrollView coordinates */
+        /* Offset from child's local coordinates to ScrollView coordinates */
         offsetDescendantRectToMyCoords(child, mTempRect);
 
         int scrollDeltaV = computeScrollDeltaToGetChildRectOnScreenV(mTempRect);
@@ -1513,29 +1518,29 @@ public class HVScrollView extends FrameLayout {
 
     private int clamp(int n, int my, int child) {
         if (my >= child || n < 0) {
-			/* my >= child is this case:
-			 *                    |--------------- me ---------------|
-			 *     |------ child ------|
-			 * or
-			 *     |--------------- me ---------------|
-			 *            |------ child ------|
-			 * or
-			 *     |--------------- me ---------------|
-			 *                                  |------ child ------|
-			 *
-			 * n < 0 is this case:
-			 *     |------ me ------|
-			 *                    |-------- child --------|
-			 *     |-- mScrollX --|
-			 */
+            /* my >= child is this case:
+             *                    |--------------- me ---------------|
+             *     |------ child ------|
+             * or
+             *     |--------------- me ---------------|
+             *            |------ child ------|
+             * or
+             *     |--------------- me ---------------|
+             *                                  |------ child ------|
+             *
+             * n < 0 is this case:
+             *     |------ me ------|
+             *                    |-------- child --------|
+             *     |-- mScrollX --|
+             */
             return 0;
         }
         if ((my + n) > child) {
-			/* this case:
-			 *                    |------ me ------|
-			 *     |------ child ------|
-			 *     |-- mScrollX --|
-			 */
+            /* this case:
+             *                    |------ me ------|
+             *     |------ child ------|
+             *     |-- mScrollX --|
+             */
             return child - my;
         }
         return n;

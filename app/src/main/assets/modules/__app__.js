@@ -274,7 +274,7 @@ module.exports = function (scriptRuntime, scope) {
                         if (rexWebSiteWithoutProtocol.test(o)) {
                             return this.openUrl(`http://${o}`);
                         }
-                        let prop = runtime.getProperty(`${AppUtils.Companion.getActivityShortFormPrefix()}${o}`);
+                        let prop = runtime.getProperty(`${AppUtils.activityShortFormPrefix()}${o}`);
                         if (!prop) {
                             throw Error(`Activity short form ${o} not found`);
                         }
@@ -326,7 +326,7 @@ module.exports = function (scriptRuntime, scope) {
                 },
                 sendBroadcast(i) {
                     if (typeof i === 'string') {
-                        let property = runtime.getProperty(`${AppUtils.Companion.getBroadcastShortFormPrefix()}${i}`);
+                        let property = runtime.getProperty(`${AppUtils.broadcastShortFormPrefix}${i}`);
                         if (!property) {
                             throw Error(`Broadcast short form ${i} not found`);
                         }

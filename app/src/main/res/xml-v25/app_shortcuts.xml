@@ -1,8 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- @OtherXmlVersions [ v33 ] -->
+<?xml version="1.0" encoding="utf-8"?><!--
+
+    @OtherXmlVersions [ v33 ]
+
+    @Caution by SuperMonster003 on Nov 1, 2023.
+     ! Property "shortcutId" must be a static constant.
+
+ -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
-            android:shortcutId="@string/id_launcher_shortcut_settings"
+            android:shortcutId="id_launcher_shortcut_settings"
             android:enabled="true"
             android:icon="@mipmap/ic_app_shortcut_settings_adaptive"
             android:shortcutShortLabel="@string/text_app_shortcut_settings_short_label"
@@ -15,7 +21,7 @@
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
     <shortcut
-            android:shortcutId="@string/id_launcher_shortcut_docs"
+            android:shortcutId="id_launcher_shortcut_docs"
             android:enabled="true"
             android:icon="@mipmap/ic_app_shortcut_docs_adaptive"
             android:shortcutShortLabel="@string/text_app_shortcut_docs_short_label"
@@ -28,7 +34,7 @@
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
     <shortcut
-            android:shortcutId="@string/id_launcher_shortcut_log"
+            android:shortcutId="id_launcher_shortcut_log"
             android:enabled="true"
             android:icon="@mipmap/ic_app_shortcut_log_adaptive"
             android:shortcutShortLabel="@string/text_app_shortcut_log_short_label"

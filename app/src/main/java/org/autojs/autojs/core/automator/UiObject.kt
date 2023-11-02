@@ -415,6 +415,7 @@ open class UiObject(
             ?: super.findAccessibilityNodeInfosByViewId(viewId)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun recycle() {
         try {
             super.recycle()

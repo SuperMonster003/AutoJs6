@@ -109,6 +109,8 @@
 
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
+    <uses-permission android:name="com.termux.permission.RUN_COMMAND"  />
+
     <!--  Dangerous permission witch should be treated carefully.  -->
 
     <!-- <uses-permission android:name="android.permission.READ_CONTACTS" />-->
@@ -230,8 +232,6 @@
         <activity
                 android:name="org.autojs.autojs.ui.doc.DocumentationActivity"
                 android:exported="true"
-                android:label="@string/text_app_shortcut_docs_long_label"
-                android:taskAffinity="org.autojs.autojs.ui.doc.DocumentationActivity"
                 android:theme="@style/AppTheme.FullScreen">
 
             <intent-filter>

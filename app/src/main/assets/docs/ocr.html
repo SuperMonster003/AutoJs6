@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>光学字符识别 (OCR) | AutoJs6 文档 - 6.4.0</title>
+    <title>光学字符识别 (OCR) | AutoJs6 文档 - 6.4.1</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -160,7 +160,7 @@
 
     <div id="column1" data-id="ocr" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.4.0</h1>
+            <h1>AutoJs6 文档 - 6.4.1</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -347,6 +347,9 @@ ocr.mode = &#39;mlkit&#39;; /* 再次切换到 MLKit 工作模式. */
 console.log(ocr.mode); // &quot;mlkit&quot;
 </code></pre>
 <p>当使用不同的工作模式名称时, <code>ocr</code> 全局方法及其相关方法 (如 <a href="#ocr_m_detect">ocr.detect</a>) 将使用不同的引擎, 进而可能获得不同的识别速度和结果.</p>
+<blockquote>
+<p>注: 使用 Paddle 工作模式时, 建议开启 AutoJs6 的 &quot;忽略电池优化&quot; 开关, 并降低对 AutoJs6 节电及后台运行等方面的限制, 否则可能导致应用崩溃.</p>
+</blockquote>
 <h2>[m] recognizeText<span><a class="mark" href="#ocr_m_recognizetext" id="ocr_m_recognizetext">#</a></span></h2>
 <p>用于识别图像中的全部文本.</p>
 <p><code>recognizeText</code> 方法与工作模式有关, 例如当工作模式为 <code>paddle</code> 时, <code>ocr.recognizeText(...)</code> 与 <code>ocr.paddle.recognizeText(...)</code> 等价.</p>

@@ -7,6 +7,7 @@ import kotlin.collections.ArrayList
 
 object BFS : SearchAlgorithm {
 
+    @Suppress("DEPRECATION")
     override fun search(root: UiObject, filter: Filter, limit: Int): ArrayList<UiObject> {
         val result = ArrayList<UiObject>()
         val queue = ArrayDeque<UiObject>()

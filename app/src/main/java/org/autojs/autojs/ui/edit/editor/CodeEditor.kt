@@ -117,8 +117,10 @@ class CodeEditor : HVScrollView {
 
     private val selectionText: String
         get() {
-            val s = codeEditText.selectionStart
-            val e = codeEditText.selectionEnd
+            val sRaw = codeEditText.selectionStart
+            val eRaw = codeEditText.selectionEnd
+            val s = minOf(sRaw, eRaw)
+            val e = maxOf(sRaw, eRaw)
             return if (s == e) "" else codeEditText.text?.substring(s, e) ?: ""
         }
 
@@ -181,7 +183,7 @@ class CodeEditor : HVScrollView {
 
     fun copyLine() {
         val layout = codeEditText.layout
-        val line = LayoutHelper.getLineOfChar(layout, codeEditText.selectionStart)
+        val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
         if (line >= 0 && line < layout.lineCount) {
             val text = codeEditText.text
             var lineText: CharSequence? = null
@@ -195,8 +197,10 @@ class CodeEditor : HVScrollView {
 
     private fun getCoveredLinesText(): CharSequence {
         val layout = codeEditText.layout
-        val lineStart = LayoutHelper.getLineOfChar(layout, codeEditText.selectionStart)
-        val lineEnd = LayoutHelper.getLineOfChar(layout, codeEditText.selectionEnd)
+        val lineStartRaw = LayoutHelper.getLineOfChar(layout, codeEditText.selectionStart)
+        val lineEndRaw = LayoutHelper.getLineOfChar(layout, codeEditText.selectionEnd)
+        val lineStart = minOf(lineStartRaw, lineEndRaw)
+        val lineEnd = maxOf(lineStartRaw, lineEndRaw)
         if (lineStart >= 0 && lineStart < layout.lineCount) {
             if (lineEnd >= 0 && lineEnd < layout.lineCount) {
                 return text.subSequence(layout.getLineStart(lineStart), layout.getLineEnd(lineEnd))
@@ -208,8 +212,10 @@ class CodeEditor : HVScrollView {
     private fun replaceSelectedLines(feature: Regex, transform: (MatchResult) -> CharSequence) {
         val text = codeEditText.text ?: return
         val layout = codeEditText.layout
-        val lineStart = LayoutHelper.getLineOfChar(layout, codeEditText.selectionStart)
-        val lineEnd = LayoutHelper.getLineOfChar(layout, codeEditText.selectionEnd)
+        val lineStartRaw = LayoutHelper.getLineOfChar(layout, codeEditText.selectionStart)
+        val lineEndRaw = LayoutHelper.getLineOfChar(layout, codeEditText.selectionEnd)
+        val lineStart = minOf(lineStartRaw, lineEndRaw)
+        val lineEnd = maxOf(lineStartRaw, lineEndRaw)
         val newText = getCoveredLinesText().split("\n").joinToString("\n") { it.replace(feature, transform) }
         text.replace(layout.getLineStart(lineStart), layout.getLineEnd(lineEnd), newText)
     }
@@ -217,7 +223,7 @@ class CodeEditor : HVScrollView {
     fun deleteLine() {
         val text = codeEditText.text ?: return
         val layout = codeEditText.layout
-        val line = LayoutHelper.getLineOfChar(layout, codeEditText.selectionStart)
+        val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
         if (line >= 0 && line < layout.lineCount) {
             text.replace(layout.getLineStart(line), layout.getLineEnd(line), "")
         }
@@ -236,7 +242,7 @@ class CodeEditor : HVScrollView {
 
     fun jumpToLineStart() {
         val layout = codeEditText.layout
-        val line = LayoutHelper.getLineOfChar(layout, codeEditText.selectionStart)
+        val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
         if (line >= 0 && line < layout.lineCount) {
             codeEditText.setSelection(layout.getLineStart(line))
         }
@@ -244,7 +250,7 @@ class CodeEditor : HVScrollView {
 
     fun jumpToLineEnd() {
         val layout = codeEditText.layout
-        val line = LayoutHelper.getLineOfChar(layout, codeEditText.selectionStart)
+        val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
         if (line >= 0 && line < layout.lineCount) {
             codeEditText.setSelection(layout.getLineEnd(line) - 1)
         }
@@ -414,12 +420,16 @@ class CodeEditor : HVScrollView {
     }
 
     fun replaceSelection() {
-        codeEditText.text?.replace(codeEditText.selectionStart, codeEditText.selectionEnd, mReplacement)
+        val selectionStartRaw = codeEditText.selectionStart
+        val selectionEndRaw = codeEditText.selectionEnd
+        val selectionStart = minOf(selectionStartRaw, selectionEndRaw)
+        val selectionEnd = maxOf(selectionStartRaw, selectionEndRaw)
+        codeEditText.text?.replace(selectionStart, selectionEnd, mReplacement)
     }
 
     fun beautifyCode() {
         setProgress(true)
-        val pos = codeEditText.selectionStart
+        val pos = minOf(codeEditText.selectionStart, codeEditText.selectionEnd)
         mJsBeautifier.beautify(codeEditText.text.toString(), object : JsBeautifier.Callback {
             override fun onSuccess(beautifiedCode: String) {
                 codeEditText.setText(beautifiedCode)
@@ -439,7 +449,7 @@ class CodeEditor : HVScrollView {
     }
 
     fun insert(insertText: String?) {
-        val selection = codeEditText.selectionStart.coerceAtLeast(0)
+        val selection = minOf(codeEditText.selectionStart, codeEditText.selectionEnd).coerceAtLeast(0)
         codeEditText.text!!.insert(selection, insertText)
     }
 
@@ -449,7 +459,7 @@ class CodeEditor : HVScrollView {
     }
 
     fun moveCursor(dCh: Int) {
-        codeEditText.setSelection(codeEditText.selectionStart + dCh)
+        codeEditText.setSelection(minOf(codeEditText.selectionStart, codeEditText.selectionEnd) + dCh)
     }
 
     fun markTextAsSaved() {
@@ -472,7 +482,7 @@ class CodeEditor : HVScrollView {
 
     fun addOrRemoveBreakpointAtCurrentLine() {
         val layout = codeEditText.layout
-        val line = LayoutHelper.getLineOfChar(layout, codeEditText.selectionStart)
+        val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
         if (line >= 0 && line < layout.lineCount) {
             addOrRemoveBreakpoint(line)
         }

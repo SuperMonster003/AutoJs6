@@ -709,6 +709,7 @@
     <string name="error_failed_to_revoke_shizuku_access">Fallo en la revocación de permisos Shizuku</string>
     <string name="error_failed_to_grant_shizuku_access">Fallo en la concesión de permisos Shizuku</string>
     <string name="error_unable_to_use_shizuku_service">No se puede utilizar el servicio Shizuku</string>
+    <string name="error_input_fields_check_failed">Error en la comprobación del campo de entrada</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d artículo</item>

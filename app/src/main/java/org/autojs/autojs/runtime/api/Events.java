@@ -250,7 +250,9 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
             NotificationListenerService.getInstance().removeListener(this);
         }
         mListeningNotification = false;
-        mLoopers.waitWhenIdle(mListeningToast);
+        if (!mListeningToast) {
+            mLoopers.waitWhenIdle(false);
+        }
     }
 
     public void observeToast() {
@@ -266,11 +268,10 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
 
     public void removeToastObserver() {
         mAccessibilityBridge.getNotificationObserver().removeToastListener(this);
-        if (NotificationListenerService.getInstance() != null) {
-            NotificationListenerService.getInstance().removeListener(this);
-        }
         mListeningToast = false;
-        mLoopers.waitWhenIdle(mListeningNotification);
+        if (!mListeningNotification) {
+            mLoopers.waitWhenIdle(false);
+        }
     }
 
     public Events onNotification(Object listener) {
@@ -282,7 +283,6 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         on("toast", listener);
         return this;
     }
-
 
     public void recycle() {
         broadcast.unregister();

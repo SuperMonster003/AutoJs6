@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
@@ -11,6 +12,7 @@ import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.shizuku.IUserService
 import org.autojs.autojs.core.shizuku.UserService
+import org.autojs.autojs.util.App.*
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -27,10 +29,8 @@ object WrappedShizuku {
 
     private val TAG: String = WrappedShizuku::class.java.simpleName
 
-    private val context
-        get() = GlobalAppContext.get()
-
     private val mRequestCode = "shizuku-request-code".hashCode()
+    private var mHasBinder = false
 
     private val mUserServiceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName, binder: IBinder?) {
@@ -58,11 +58,13 @@ object WrappedShizuku {
             Log.d(TAG, "Shizuku pre-v11 is not supported")
         } else {
             Log.d(TAG, "Binder received")
+            mHasBinder = true
         }
     }
 
     private val mBinderDeadListener = Shizuku.OnBinderDeadListener {
         Log.d(TAG, "Binder dead")
+        mHasBinder = false
     }
 
     private val mRequestPermissionResultListener: (requestCode: Int, grantResult: Int) -> Unit = { requestCode: Int, grantResult: Int ->
@@ -115,11 +117,14 @@ object WrappedShizuku {
     }
 
     @ScriptInterface
+    fun isRunning() = mHasBinder
+
+    @ScriptInterface
     fun requestPermission() = Shizuku.requestPermission(mRequestCode)
 
     @ScriptInterface
     @JvmOverloads
-    fun config(isRequest: Boolean? = null): Intent? {
+    fun config(context: Context = GlobalAppContext.get(), isRequest: Boolean? = null): Intent? {
         return getLaunchIntent()?.also {
             context.startActivity(it)
             val message = when (isRequest) {
@@ -132,6 +137,9 @@ object WrappedShizuku {
     }
 
     @ScriptInterface
+    fun config(isRequest: Boolean) = config(GlobalAppContext.get(), isRequest)
+
+    @ScriptInterface
     fun execCommand(cmd: String): ShellResult {
         ensureService()
         return try {
@@ -139,7 +147,11 @@ object WrappedShizuku {
         } catch (e: Throwable) {
             ShellResult().apply {
                 code = 1
-                error = e.message ?: ""
+                error = e.message ?: when {
+                    !hasPermission() -> "No permission to access Shizuku"
+                    !isRunning() -> "Shizuku service may be not running"
+                    else -> ""
+                }
                 result = ""
             }.also { e.printStackTrace() }
         }
@@ -151,7 +163,8 @@ object WrappedShizuku {
     }
 
     @ScriptInterface
-    fun ensureService() {
+    @JvmOverloads
+    fun ensureService(context: Context = GlobalAppContext.get()) {
         service ?: throw IllegalStateException(context.getString(R.string.error_unable_to_use_shizuku_service))
     }
 
@@ -163,7 +176,7 @@ object WrappedShizuku {
     }
 
     private fun getLaunchIntent(): Intent? {
-        return context.packageManager.getLaunchIntentForPackage(org.autojs.autojs.util.App.SHIZUKU.packageName)?.apply {
+        return GlobalAppContext.get().packageManager.getLaunchIntentForPackage(SHIZUKU.packageName)?.apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
     }

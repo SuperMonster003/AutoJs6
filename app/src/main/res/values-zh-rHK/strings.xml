@@ -709,6 +709,7 @@
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 權限撤銷失敗</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 權限授予失敗</string>
     <string name="error_unable_to_use_shizuku_service">無法使用 Shizuku 服務</string>
+    <string name="error_input_fields_check_failed">輸入字段檢查未通過</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

@@ -311,7 +311,6 @@ class TimedTaskSettingActivity : BaseActivity() {
             Log.d(LOG_TAG, "result code = $requestCode")
             createOrUpdateTask()
         }
-        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
     }
 
