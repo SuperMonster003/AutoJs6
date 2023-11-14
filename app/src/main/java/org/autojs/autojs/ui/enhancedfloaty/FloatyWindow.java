@@ -78,7 +78,7 @@ public abstract class FloatyWindow {
         return mWindowLayoutParams;
     }
 
-    protected void setWindowLayoutParams(WindowManager.LayoutParams windowLayoutParams) {
+    public void setWindowLayoutParams(WindowManager.LayoutParams windowLayoutParams) {
         mWindowLayoutParams = windowLayoutParams;
     }
 

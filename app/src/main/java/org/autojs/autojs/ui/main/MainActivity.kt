@@ -23,7 +23,7 @@ import org.autojs.autojs.app.FragmentPagerAdapterBuilder
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder.StoredFragmentPagerAdapter
 import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
-import org.autojs.autojs.core.accessibility.AccessibilityService
+import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
 import org.autojs.autojs.event.BackPressedHandler
 import org.autojs.autojs.event.BackPressedHandler.DoublePressExit
@@ -77,6 +77,10 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private val mBackPressObserver = BackPressedHandler.Observer()
     private var mSearchViewItem: SearchViewItem? = null
     private var mDocsSearchItemExpanded = false
+
+    private val mA11yToolService by lazy {
+        AccessibilityTool(this).service
+    }
 
     val requestMultiplePermissionsLauncher = registerForActivityResult(RequestMultiplePermissions()) {
         it.forEach { (key: String, isGranted: Boolean) ->
@@ -214,7 +218,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         ForegroundServiceUtils.stopServiceIfNeeded(this, MainActivityForegroundService::class.java)
         stopService(Intent(this, FloatyService::class.java))
         AutoJs.instance.scriptEngineService.stopAll()
-        AccessibilityService.disable()
+        mA11yToolService.stop(false)
         Process.killProcess(Process.myPid())
     }
 

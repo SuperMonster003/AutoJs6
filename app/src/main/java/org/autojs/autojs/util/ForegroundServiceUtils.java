@@ -8,10 +8,12 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import org.autojs.autojs.tool.ForegroundServiceCreator;
@@ -34,18 +36,19 @@ public class ForegroundServiceUtils {
         }
     }
 
-    public static void startService(Context context, Class<?> className) {
+    public static boolean startService(Context context, Class<?> className) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(getService(context, className));
+            return context.startForegroundService(getService(context, className)) != null;
         } else {
-            context.startService(getService(context, className));
+            return context.startService(getService(context, className)) != null;
         }
     }
 
-    public static void stopServiceIfNeeded(Context context, Class<?> className) {
+    public static boolean stopServiceIfNeeded(Context context, Class<?> className) {
         if (isRunning(context, className)) {
-            context.stopService(getService(context, className));
+            return context.stopService(getService(context, className));
         }
+        return true;
     }
 
     public static boolean isRunning(Context context, Class<?> className) {
@@ -117,6 +120,24 @@ public class ForegroundServiceUtils {
                 creator.notificationContent);
 
         service.startForeground(creator.notificationId, notification);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static void startForeground(ForegroundServiceCreator creator, int foregroundServiceType) {
+        Service service = creator.service;
+
+        ForegroundServiceUtils.createNotificationChannelIfNeeded(service,
+                creator.className,
+                creator.serviceName,
+                creator.serviceDescription);
+
+        Notification notification = ForegroundServiceUtils.getNotification(service,
+                creator.intent,
+                creator.className,
+                creator.notificationTitle,
+                creator.notificationContent);
+
+        service.startForeground(creator.notificationId, notification, foregroundServiceType);
     }
 
 }

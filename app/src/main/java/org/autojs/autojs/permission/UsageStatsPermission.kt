@@ -9,9 +9,9 @@ class UsageStatsPermission(override val context: Context) : PermissionItemHelper
 
     override fun has() = isUsageStatsPermissionGranted(context)
 
-    override fun request() = config()
+    override fun request() = false.also { config() }
 
-    override fun revoke() = config()
+    override fun revoke() = false.also { config() }
 
     fun config() = IntentUtils.requestAppUsagePermission(context)
 

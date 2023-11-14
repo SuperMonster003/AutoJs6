@@ -35,7 +35,7 @@ import android.accessibilityservice.AccessibilityService as AndroidAccessibility
 class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge, private val scriptRuntime: ScriptRuntime) {
 
     private val globalActionAutomatorRaw
-        get() = GlobalActionAutomator(Handler(scriptRuntime.loopers.servantLooper)) {
+        get() = GlobalActionAutomator(scriptRuntime.uiHandler.applicationContext, Handler(scriptRuntime.loopers.servantLooper)) {
             ensureService()
             accessibilityBridge.service!!
         }
@@ -181,7 +181,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     fun isServiceRunning() = AccessibilityService.isRunning()
 
     @ScriptInterface
-    fun ensureService() = accessibilityBridge.ensureServiceEnabled()
+    fun ensureService() = accessibilityBridge.ensureServiceStarted()
 
     // @Created by 抠脚本人 on Jul 10, 2023.
     // TODO by 抠脚本人 on Jul 10, 2023.

@@ -26,6 +26,8 @@ public abstract class LayoutInspectTileService extends TileService implements La
 
     private boolean mCapturing = false;
 
+    AccessibilityTool.Service mA11yService = new AccessibilityTool(this).getService();
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -65,19 +67,17 @@ public abstract class LayoutInspectTileService extends TileService implements La
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
             }
         } catch (Exception e) {
-            // Ignored.
+            /* Ignored. */
             // FIXME by SuperMonster003 on Sep 4, 2022.
             //  ! Maybe GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE could be helpful ?
         }
 
-        if (AccessibilityService.isRunning()) {
+        if (mA11yService.isRunning()) {
             mCapturing = true;
             GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindow(), 1000);
         } else {
             ViewUtils.showToast(this, R.string.error_no_accessibility_permission_to_capture);
-            if (!getAccessibilityTool().getService().enableIfNeeded()) {
-                getAccessibilityTool().launchSettings();
-            }
+            mA11yService.start();
             updateTile();
         }
     }
@@ -88,11 +88,6 @@ public abstract class LayoutInspectTileService extends TileService implements La
         MaterialDialog dialog = new MaterialDialog.Builder(getApplicationContext()).build();
         showDialog(dialog);
         dialog.dismiss();
-    }
-
-    @NonNull
-    private AccessibilityTool getAccessibilityTool() {
-        return new AccessibilityTool(this);
     }
 
     protected void updateTile() {

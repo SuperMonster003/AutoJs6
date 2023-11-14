@@ -12,12 +12,12 @@ class ForegroundService(override val context: Context) : ServiceItemHelper {
     override val isRunning
         get() = ForegroundServiceUtils.isRunning(context, mClassName)
 
-    override fun start() {
-        ForegroundServiceUtils.startService(context, mClassName)
+    override fun start(): Boolean {
+        return ForegroundServiceUtils.startService(context, mClassName)
     }
 
-    override fun stop() {
-        ForegroundServiceUtils.stopServiceIfNeeded(context, mClassName)
+    override fun stop(): Boolean {
+        return ForegroundServiceUtils.stopServiceIfNeeded(context, mClassName)
     }
 
 }

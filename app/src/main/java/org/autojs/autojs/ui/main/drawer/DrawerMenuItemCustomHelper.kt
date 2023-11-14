@@ -7,10 +7,9 @@ abstract class DrawerMenuItemCustomHelper internal constructor(private val mCont
     override val context: Context
         get() = mContext
 
-    override fun active() {
-        if (!isActive) {
-            toggle()
-        }
+    override fun active(): Boolean {
+        if (isActive) return true
+        return toggle()
     }
 
 }

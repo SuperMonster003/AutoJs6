@@ -43,7 +43,7 @@ class Barcode {
                 try {
                     lock.wait(50)
                 } catch (_: InterruptedException) {
-                    // Ignored.
+                    /* Ignored. */
                 }
             }
         }

@@ -102,7 +102,7 @@ object WrappedShizuku {
                 Shizuku.unbindUserService(mUserServiceArgs, mUserServiceConnection, true)
             }
         } catch (_: Throwable) {
-            // Ignored.
+            /* Ignored. */
         }
     }
 

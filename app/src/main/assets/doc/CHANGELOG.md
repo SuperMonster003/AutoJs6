@@ -4,6 +4,27 @@
 
 ******
 
+# v6.4.2
+
+###### 2023/11/15
+
+* `新增` dialogs.build() 选项参数属性 inputSingleLine
+* `新增` console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_
+* `修复` ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
+* `修复` Android 7.x 发现新版本时无法获取版本详情的问题
+* `修复` Android 14 申请截图权限时导致应用崩溃的问题
+* `修复` 主页抽屉快速切换 "浮动按钮" 开关时可能导致应用崩溃的问题
+* `修复` 使用菜单关闭浮动按钮时重启应用后浮动按钮可能依然显示的问题
+* `修复` 安卓 13 及以上系统设置页面选择并切换 AutoJs6 语言后无法生效的问题
+* `修复` 构建工具初次构建时无法自动完成 OpenCV 资源部署的问题
+* `优化` 原生化 bridges 模块以提升脚本执行效率 (Ref to [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
+* `优化` 重构无障碍服务相关代码以增强无障碍服务的功能稳定性 (实验性) _[`issue #167`](http://issues.autojs6.com/167)_
+* `优化` UiObject 和 UiObjectCollection 的打印输出格式
+* `优化` 构建工具在构建环境 Gradle JDK 版本不满足要求时作出升级提示
+* `依赖` 升级 Gradle 版本 8.4 -> 8.5-rc-1 
+* `依赖` 降级 Commons IO 版本 2.14.0 -> 2.8.0
+* `依赖` 降级 Jackson DataBind 版本 2.14.3 -> 2.13.3
+
 # v6.4.1
 
 ###### 2023/11/02
@@ -22,6 +43,7 @@
 * `优化` http 模块获取的响应对象可重复使用 body.string() 及 body.bytes() 方法
 * `优化` 增加 GitHub Actions 自动打包支持 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #158`](http://pr.autojs6.com/158)_
 * `优化` 构建工具自适应 Temurin 平台
+* `依赖` 升级 Gradle 版本 8.4-rc-3 -> 8.4
 * `依赖` 升级 Android dx 版本 1.11 -> 1.14
 
 # v6.4.0

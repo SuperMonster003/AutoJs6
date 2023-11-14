@@ -8,6 +8,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
 import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 import android.view.accessibility.AccessibilityNodeInfo
+import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_START_TIMEOUT
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
 import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.event.EventDispatcher
@@ -22,15 +23,15 @@ import java.util.concurrent.locks.ReentrantLock
  * Created by Stardust on 2017/5/2.
  */
 open class AccessibilityService : android.accessibilityservice.AccessibilityService() {
+
     val onKeyObserver = OnKeyListener.Observer()
     val keyInterrupterObserver = KeyInterceptor.Observer()
     var fastRootInActiveWindow: AccessibilityNodeInfo? = null
     var bridge: AccessibilityBridge? = null
+
     private val eventBox = TreeMap<Int, AccessibilityEventCallback>()
 
     private val gestureEventDispatcher = EventDispatcher<GestureListener>()
-
-    private val eventExecutor by lazy { Executors.newSingleThreadExecutor() }
 
     private fun eventNameToType(event: String): Int {
         return try {
@@ -51,7 +52,8 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        if (instance != this) instance = this
+        instance = this
+        connected = true
         val type = event.eventType
         eventBox[type]?.onAccessibilityEvent(AccessibilityEventWrapper(event))
         if (containsAllEventTypes || eventTypes.contains(type)) {
@@ -61,17 +63,19 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             for ((_, delegate) in delegates) {
                 val types = delegate.eventTypes
                 if (types == null || types.contains(type)) {
-                    // long start = System.currentTimeMillis();
+                    // val start = System.currentTimeMillis()
                     if (delegate.onAccessibilityEvent(this@AccessibilityService, event)) {
                         break
                     }
-                    // Log.v(TAG, "millis: " + (System.currentTimeMillis() - start) + " delegate: " + entry.getValue().getClass().getName());
+                    // Log.v(TAG, "millis: " + (System.currentTimeMillis() - start) + " delegate: " + delegate::class.java.name)
                 }
             }
         }
     }
 
-    override fun onInterrupt() {}
+    override fun onInterrupt() {
+        Log.d(TAG, "onInterrupt")
+    }
 
     override fun onKeyEvent(event: KeyEvent): Boolean {
         eventExecutor.execute {
@@ -102,31 +106,38 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
     override fun onDestroy() {
         Log.v(TAG, "onDestroy: $instance")
-        instance = null
-        bridge = null
         eventExecutor.shutdownNow()
+        eventExecutor.awaitTermination(1000L, TimeUnit.MILLISECONDS)
         callback?.onDisconnected()
+        connected = false
         super.onDestroy()
     }
 
     override fun onServiceConnected() {
+
+        Log.d(TAG, "onServiceConnected")
+
         instance = this
-        serviceInfo = serviceInfo.apply {
-            AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.let {
-                flags = (if (Pref.isStableModeEnabled) flags and it.inv() else flags or it)
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE.let {
-                    flags = (if (Pref.isGestureObservingEnabled) flags or it else flags and it.inv())
-                }
-            }
-        }
-        callback?.onConnected()
+        connected = true
         super.onServiceConnected()
 
         LOCK.lock()
-        ENABLED.signalAll()
-        LOCK.unlock()
+        try {
+            ENABLED.signalAll()
+            serviceInfo = serviceInfo.also { info ->
+                AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS.let {
+                    info.flags = (if (Pref.isStableModeEnabled) info.flags and it.inv() else info.flags or it)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE.let {
+                        info.flags = (if (Pref.isGestureObservingEnabled) info.flags or it else info.flags and it.inv())
+                    }
+                }
+            }
+            callback?.onConnected()
+        } finally {
+            LOCK.unlock()
+        }
 
         // FIXME: 2017/2/12 有时在无障碍中开启服务后这里不会调用服务也不会运行，安卓的BUG???
     }
@@ -142,6 +153,9 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         private val LOCK = ReentrantLock()
         private val ENABLED = LOCK.newCondition()
         private var callback: AccessibilityServiceCallback? = null
+        private val eventExecutor = Executors.newSingleThreadExecutor()
+
+        private var connected = false
 
         var instance: AccessibilityService? = null
             private set
@@ -154,11 +168,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
         val stickOnKeyObserver = OnKeyListener.Observer()
 
-        @JvmStatic
-        fun isRunning() = instance != null
-
-        @JvmStatic
-        fun isNotRunning() = !isRunning()
+        fun isRunning() = connected && instance != null
 
         fun addDelegate(uniquePriority: Int, delegate: AccessibilityDelegate) {
             // @Hint by 抠脚本人 on Jul 10, 2023.
@@ -172,14 +182,18 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             }
         }
 
-        @JvmStatic
-        fun disable() = try {
-            true.also { instance?.disableSelf() }
+        fun stop() = try {
+            instance?.disableSelf()
+            eventExecutor.shutdownNow()
+            eventExecutor.awaitTermination(1000L, TimeUnit.MILLISECONDS)
+            callback?.onDisconnected()
+            connected = false
+            true
         } catch (e: Exception) {
             false
         }
 
-        fun waitForEnabled(timeout: Long): Boolean {
+        fun waitForStarted(timeout: Long = DEFAULT_A11Y_START_TIMEOUT): Boolean {
             if (isRunning()) {
                 return true
             }

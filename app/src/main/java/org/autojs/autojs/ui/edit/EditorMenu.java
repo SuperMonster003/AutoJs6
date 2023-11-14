@@ -310,7 +310,7 @@ public class EditorMenu {
                         int line = Math.max(Math.min(Integer.parseInt(input.toString()), lineCount), 1);
                         mEditor.jumpTo(line - 1, 0);
                     } catch (NumberFormatException ignored) {
-                        // Ignored.
+                        /* Ignored. */
                     }
                 })
                 .inputType(InputType.TYPE_CLASS_NUMBER)
@@ -377,7 +377,7 @@ public class EditorMenu {
             callable.run();
             return true;
         } catch (Exception ignore) {
-            // Ignored.
+            /* Ignored. */
         }
         return false;
     }

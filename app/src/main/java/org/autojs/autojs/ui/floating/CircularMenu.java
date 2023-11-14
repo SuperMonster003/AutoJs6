@@ -16,7 +16,6 @@ import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
 import org.autojs.autojs.app.CircularMenuOperationDialogBuilder;
 import org.autojs.autojs.app.DialogUtils;
-import org.autojs.autojs.core.accessibility.AccessibilityService;
 import org.autojs.autojs.core.accessibility.AccessibilityTool;
 import org.autojs.autojs.core.accessibility.LayoutInspector;
 import org.autojs.autojs.core.accessibility.NodeInfo;
@@ -53,24 +52,8 @@ import java.text.MessageFormat;
  */
 public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInspector.CaptureAvailableListener {
 
-    public static final class StateChangeEvent {
-
-        private final int currentState;
-        private final int previousState;
-
-        public StateChangeEvent(int currentState, int previousState) {
-            this.currentState = currentState;
-            this.previousState = previousState;
-        }
-
-        public int getCurrentState() {
-            return currentState;
-        }
-
-        public int getPreviousState() {
-            return previousState;
-        }
-
+    public record StateChangeEvent(int currentState, int previousState) {
+        /* Empty record body. */
     }
 
     public static final int STATE_CLOSED = -1;
@@ -88,6 +71,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
     private MaterialDialog mLayoutInspectDialog;
     private String mRunningPackage, mRunningActivity;
     private Deferred<NodeInfo, Void, Void> mCaptureDeferred;
+    private final AccessibilityTool.Service mA11yToolService;
 
     public CircularMenu(Context context) {
         // mContext = new ContextThemeWrapper(context, R.style.AppTheme);
@@ -97,6 +81,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         mRecorder = GlobalActionRecorder.getSingleton(context);
         mRecorder.addOnStateChangedListener(this);
         AutoJs.getInstance().getLayoutInspector().addCaptureAvailableListener(this);
+        mA11yToolService = new AccessibilityTool(mContext).getService();
     }
 
     private void setupWindowListeners() {
@@ -120,9 +105,9 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
             explorerView.setExplorer(Explorers.workspace(), ExplorerDirPage.createRoot(WorkingDirectoryUtils.getPath()));
             explorerView.setDirectorySpanSize(2);
             final MaterialDialog dialog = new AppLevelThemeDialogBuilder(mContext)
-                    .title(R.string.text_run_script)
+                    .title(mContext.getString(R.string.text_run_script))
                     .customView(explorerView, false)
-                    .positiveText(R.string.text_cancel)
+                    .positiveText(mContext.getString(R.string.text_cancel))
                     .cancelable(false)
                     .build();
             explorerView.setOnItemOperateListener(item -> dialog.dismiss());
@@ -138,9 +123,9 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
             mWindow.collapse();
             if (!RootUtils.isRootAvailable()) {
                 DialogUtils.showDialog(new AppLevelThemeDialogBuilder(mContext)
-                        .title(R.string.text_no_root_access)
-                        .content(R.string.no_root_access_for_record)
-                        .positiveText(R.string.dialog_button_quit)
+                        .title(mContext.getString(R.string.text_no_root_access))
+                        .content(mContext.getString(R.string.no_root_access_for_record))
+                        .positiveText(mContext.getString(R.string.dialog_button_quit))
                         .build());
             } else {
                 mRecorder.start();
@@ -153,15 +138,15 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         binding.layoutInspect.setOnLongClickListener(v -> {
             mWindow.collapse();
             mLayoutInspectDialog = new CircularMenuOperationDialogBuilder(mContext)
-                    .item(R.drawable.ic_circular_menu_bounds, R.string.text_inspect_layout_bounds, v1 -> {
+                    .item(R.drawable.ic_circular_menu_bounds, mContext.getString(R.string.text_inspect_layout_bounds), v1 -> {
                         mWindow.collapse();
                         inspectLayout(rootNode -> new LayoutBoundsFloatyWindow(rootNode, mContext));
                     })
-                    .item(R.drawable.ic_circular_menu_hierarchy, R.string.text_inspect_layout_hierarchy, v1 -> {
+                    .item(R.drawable.ic_circular_menu_hierarchy, mContext.getString(R.string.text_inspect_layout_hierarchy), v1 -> {
                         mWindow.collapse();
                         inspectLayout(rootNode -> new LayoutHierarchyFloatyWindow(rootNode, mContext));
                     })
-                    .title(R.string.text_inspect_layout)
+                    .title(mContext.getString(R.string.text_inspect_layout))
                     .build();
             DialogUtils.showDialog(mLayoutInspectDialog);
             return true;
@@ -169,7 +154,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         binding.stopAllScripts.setOnClickListener(v -> {
             mWindow.collapse();
             if (AutoJs.getInstance().getScriptEngineService().stopAllAndToast() <= 0) {
-                ViewUtils.showToast(mContext, R.string.text_no_scripts_to_stop_running);
+                ViewUtils.showToast(mContext, mContext.getString(R.string.text_no_scripts_to_stop_running));
             }
         });
         binding.actionMenuMore.setOnClickListener(v -> {
@@ -184,7 +169,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
             mRunningActivity = infoProvider.getLatestActivity();
 
             mSettingsDialog = new CircularMenuOperationDialogBuilder(mContext)
-                    .item(R.drawable.ic_accessibility_black_48dp, R.string.text_manage_a11y_service, v1 -> {
+                    .item(R.drawable.ic_accessibility_black_48dp, mContext.getString(R.string.text_manage_a11y_service), v1 -> {
                         dismissSettingsDialog();
                         getAccessibilityTool().getService().launchSettings();
                     })
@@ -202,18 +187,18 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
                             ViewUtils.showToast(mContext, getTextAlreadyCopied(R.string.text_latest_activity));
                         }
                     })
-                    .item(R.drawable.ic_home_black_48dp, R.string.text_open_main_activity, v1 -> {
+                    .item(R.drawable.ic_home_black_48dp, mContext.getString(R.string.text_open_main_activity), v1 -> {
                         dismissSettingsDialog();
                         MainActivity.launch(mContext);
                     })
-                    .item(R.drawable.ic_control_point_black_48dp, R.string.text_pointer_location, v1 -> {
+                    .item(R.drawable.ic_control_point_black_48dp, mContext.getString(R.string.text_pointer_location), v1 -> {
                         dismissSettingsDialog();
                         if (!RootUtils.togglePointerLocation()) {
-                            ViewUtils.showToast(mContext, R.string.text_pointer_location_toggle_failed_with_hint, true);
+                            ViewUtils.showToast(mContext, mContext.getString(R.string.text_pointer_location_toggle_failed_with_hint), true);
                         }
                     })
-                    .item(R.drawable.ic_close_white_48dp, R.string.text_close_floating_button, v1 -> closeAndSaveState())
-                    .title(R.string.text_more)
+                    .item(R.drawable.ic_close_white_48dp, mContext.getString(R.string.text_close_floating_button), v1 -> closeAndSaveState(false))
+                    .title(mContext.getString(R.string.text_more))
                     .build();
 
             DialogUtils.showDialog(mSettingsDialog);
@@ -272,9 +257,11 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
             mLayoutInspectDialog.dismiss();
             mLayoutInspectDialog = null;
         }
-        if (AccessibilityService.isNotRunning()) {
-            ViewUtils.showToast(mContext, R.string.error_no_accessibility_permission_to_capture);
-            getAccessibilityTool().launchSettings();
+        if (!mA11yToolService.isRunning()) {
+            if (!mA11yToolService.start(false)) {
+                ViewUtils.showToast(mContext, mContext.getString(R.string.error_no_accessibility_permission_to_capture));
+                getAccessibilityTool().launchSettings();
+            }
         } else {
             mCaptureDeferred.promise().then(capture -> {
                 mActionViewIcon.post(() -> FloatyService.addWindow(windowCreator.call(capture)));
@@ -282,8 +269,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
         }
     }
 
-    public void closeAndSaveState() {
-        boolean state = FloatyWindowManger.isCircularMenuShowing();
+    public void closeAndSaveState(boolean state) {
         Pref.putBooleanSync(R.string.key_floating_menu_shown, state);
         savePosition();
         close();

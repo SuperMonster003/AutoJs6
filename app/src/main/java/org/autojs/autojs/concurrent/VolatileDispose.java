@@ -9,11 +9,17 @@ public class VolatileDispose<T> {
 
     public T blockedGet() {
         synchronized (this) {
+            return blockedGet(0);
+        }
+    }
+
+    public T blockedGet(long timeout) {
+        synchronized (this) {
             if (mValue != null) {
                 return mValue;
             }
             try {
-                this.wait();
+                this.wait(timeout);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

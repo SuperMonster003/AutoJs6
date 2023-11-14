@@ -262,8 +262,6 @@
     <string name="text_auto_check_for_updates">Comprobación automática de actualizaciones</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Comprueba las actualizaciones automáticamente y muestra una barra de snacks en la página de inicio</string>
     <string name="text_auto_night_mode">Modo nocturno automático</string>
-    <string name="text_auto_operate_service">Servicio de accesibilidad</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">El servicio de accesibilidad está activado pero no funciona</string>
     <string name="text_back">Volver</string>
     <string name="text_broadcast_action">Acción</string>
     <string name="text_broadcast_task">Tarea de difusión</string>

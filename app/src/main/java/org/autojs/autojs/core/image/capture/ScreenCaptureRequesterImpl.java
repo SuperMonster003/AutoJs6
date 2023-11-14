@@ -25,7 +25,7 @@ public class ScreenCaptureRequesterImpl extends ScreenCaptureRequester.AbstractS
 
     @Override
     public void request() {
-        ForegroundServiceUtils.requestIfNeeded(mAutoJs.getContext(), ScreenCapturerForegroundService.class);
+        ForegroundServiceUtils.requestIfNeeded(mAutoJs.getApplicationContext(), ScreenCapturerForegroundService.class);
 
         Activity activity = mAutoJs.getAppUtils().getCurrentActivity();
 
@@ -35,7 +35,7 @@ public class ScreenCaptureRequesterImpl extends ScreenCaptureRequester.AbstractS
             requester.setOnActivityResultCallback(mCallback);
             requester.request();
         } else {
-            ScreenCaptureRequestActivity.request(mAutoJs.getContext(), mCallback);
+            ScreenCaptureRequestActivity.request(mAutoJs.getApplicationContext(), mCallback);
         }
     }
 }

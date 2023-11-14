@@ -14,24 +14,13 @@ plugins {
 
 def versions = new Versions("$rootDir/version.properties")
 
-def versionOpencv = versions.opencv
 def versionNdk = versions.ndk
 def versionCmake = versions.cmake
 
-def zipArchives = [
-        // @Hint by TonyJiangWJ on Aug 7, 2023.
-        //   ! 下载 OpenCV 源码包 (默认为 4.2.0).
-        //   ! 和 Auto.js 中的版本 (如 4.8.0) 不匹配会产生冲突,
-        //   ! 可按需修改 version.properties 中对应内容.
-        [
-                "src" : "https://github.com/opencv/opencv/releases/download" +
-                        "/${versionOpencv}/opencv-${versionOpencv}-android-sdk.zip",
-                "dest": "OpenCV",
-        ],
-]
+def deployer = new LibDeployer(versions.opencv)
 
 android {
-    namespace = "com.baidu.paddleocr"
+    namespace = "com.baidu.paddle.lite.ocr"
 
     ndkVersion versionNdk
     compileSdk 34
@@ -42,12 +31,33 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++11 -frtti -fexceptions -Wno-format"
-                /* '-DANDROID_PLATFORM' 默认为 'android-23', 这里修改为与 AutoJs6 最低 SDK 版本一致的 24. */
-                arguments '-DANDROID_PLATFORM=android-24', '-DANDROID_STL=c++_shared', "-DANDROID_ARM_NEON=TRUE"
+                cppFlags(([
+                        "-std": "c++11",
+                ].collect { "$it.key=$it.value" } + [
+                        "-f": ["rtti", "exceptions"],
+                        "-W": "no-format",
+                ].collect {
+                    it.value instanceof List
+                            ? it.value.collect { opt -> (it.key + opt) }.join("\u0020")
+                            : it.key + it.value
+                }).join("\u0020"))
+
+                arguments(*[
+                        // @Hint by LZX284 on Sep 30, 2023.
+                        //  ! "ANDROID_PLATFORM" 默认为 "android-23", 这里修改为与 AutoJs6 最低 SDK 版本一致的 24.
+                        ANDROID_PLATFORM: "android-24",
+                        ANDROID_STL     : "c++_shared",
+                        ANDROID_ARM_NEON: "TRUE",
+                ].collect {
+                    // @Hint by SuperMonster003 on Nov 12, 2023.
+                    //  ! Do not add a space (nbsp) after "-D".
+                    //  ! Reference: https://stackoverflow.com/questions/14887438/spacing-in-d-option-in-cmake
+                    "-D$it.key=$it.value"
+                })
             }
         }
         ndk {
+            // noinspection ChromeOsAbiSupport
             abiFilters "arm64-v8a", "armeabi-v7a"
             ldLibs "jnigraphics"
         }
@@ -67,103 +77,118 @@ android {
 
 dependencies {
     implementation fileTree(include: ["*.jar"], dir: "libs")
-    implementation project(path: ":libs:org.opencv-${versionOpencv}")
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation project(path: ":libs:org.opencv-${versions.opencv}")
+    implementation "androidx.core:core-ktx:1.12.0"
+    implementation "androidx.preference:preference-ktx:1.2.1"
 }
 
 ext {
     versions.showInfo()
+    deployer.deploy(project)
 }
 
-// @Hint by TonyJiangWJ on Aug 7, 2023.
-//   ! 首次导入最好手动运行一下这个 task 下载依赖的包.
-tasks.register("downloadAndExtractArchives", DefaultTask) {
-    doLast {
+class LibDeployer {
+
+    String version
+
+    LinkedHashMap<String, String> archive
+
+    LibDeployer(String version) {
+        this.version = version
+        // @Hint by TonyJiangWJ on Aug 7, 2023.
+        //   ! 下载 OpenCV 源码包 (默认为 4.2.0).
+        //   ! 和 Auto.js 中的版本 (如 4.8.0) 不匹配会产生冲突,
+        //   ! 可按需修改 version.properties 中对应内容.
+        this.archive = [
+                "src" : "https://github.com/opencv/opencv/releases/download" +
+                        "/$version/opencv-$version-android-sdk.zip",
+                "dest": "OpenCV",
+        ]
+    }
+
+    void deploy(Project project) {
         // Prepare cache folder for archives
         String cachePath = "cache"
-        if (!file("${cachePath}").exists()) {
-            mkdir "${cachePath}"
+        if (!project.file(cachePath).exists()) {
+            project.mkdir(cachePath)
         }
-        zipArchives.each { archive ->
-            MessageDigest messageDigest = MessageDigest.getInstance("MD5")
-            messageDigest.update(archive.src.bytes)
-            String cacheName = new BigInteger(1, messageDigest.digest()).toString(32)
+        def messageDigest = MessageDigest.getInstance("MD5")
+        messageDigest.update(archive.src.bytes)
+        String cacheName = new BigInteger(1, messageDigest.digest()).toString(32)
 
-            def cacheSrc = archive.src
-            def cacheDest = file("${cachePath}/${cacheName}.zip")
-            def libDest = archive.dest
-            def versionNameFileName = "opencv-${versionOpencv}.version"
-            def versionNameFile = file(new File(libDest, versionNameFileName))
+        def cacheSrc = archive.src
+        def cacheDest = project.file(new File(cachePath, "${cacheName}.zip"))
+        def libDest = archive.dest
+        def versionNameFileName = "opencv-${version}.version"
+        def versionNameFile = project.file(new File(libDest, versionNameFileName))
 
-            boolean copyFiles = false
+        boolean copyFiles = false
 
-            if (cacheDest.exists()) {
-                println("No need to download files as the cached archive exists")
-                if (versionNameFile.exists()) {
-                    println("No need to extract cached archive as the version name file exists")
-                } else {
-                    println("Cached archive needs to be extracted as the version name file doesn't exist")
-                    copyFiles = true
-                }
+        if (cacheDest.exists()) {
+            println("No need to download the OpenCV archive as the cache exists")
+            if (versionNameFile.exists()) {
+                println("No need to extract OpenCV cached archive as the version name file exists")
             } else {
-                if (versionNameFile.exists()) {
-                    println("No need to download files as the version name file exists")
-                } else {
-                    def title = "Downloading and extracting the archive file including libs and models..."
-                    def srcInfo = "Source: ${cacheSrc}"
-                    def destInfo = "Destination: ${cacheDest}"
-                    def hintInfo = [
-                            "If the download gets stuck and won't finish,",
-                            "try downloading the source file with tools like IDM (Internet Download Manager),",
-                            "then renaming it into the destination path above.",
-                    ]
-
-                    def maxLength = [
-                            [title, srcInfo, destInfo].max { it.length() },
-                            hintInfo.max { it.length() },
-                    ].max { it.length() }.length()
-
-                    def infoList = [
-                            "=".repeat(maxLength),
-                            title,
-                            "-".repeat(maxLength),
-                            srcInfo,
-                            destInfo,
-                            "-".repeat(maxLength),
-                            hintInfo.join("\n"),
-                            "=".repeat(maxLength),
-                            "",
-                    ]
-                    infoList.forEach { println(it) }
-
-                    ant.get(src: cacheSrc, dest: cacheDest)
-
-                    // Force to copy files from the latest archive files
-                    copyFiles = true
-                }
+                println("OpenCV cached archive needs to be extracted as the version name file doesn't exist")
+                copyFiles = true
             }
-            // Extract the target archive if its dest path does not exists
-            if (copyFiles) {
-                if (file(libDest).exists()) {
-                    println("Delete old files in \"${file(libDest)}\"")
-                    delete(libDest)
-                }
-                copy {
-                    from zipTree("${cachePath}/${cacheName}.zip")
-                    into libDest
-                }
-                println("All libs and models extracted into \"${file(libDest)}\"")
-                if (!versionNameFile.exists()) {
-                    versionNameFile.createNewFile()
-                    println("Version name file \"${versionNameFileName}\" created")
-                }
+            println("")
+        } else if (versionNameFile.exists()) {
+            println("No need to download files as the version name file exists")
+        } else {
+            def title = "Downloading the OpenCV archive file including libs and models..."
+            def srcInfo = "Source: ${cacheSrc}"
+            def destInfo = "Destination: ${cacheDest}"
+            def hintInfo = [
+                    "If the download gets stuck and won't finish,",
+                    "try downloading the source file with tools like IDM (Internet Download Manager),",
+                    "then renaming it into the destination path above.",
+            ]
+
+            def maxLength = [
+                    [title, srcInfo, destInfo].max { it.length() },
+                    hintInfo.max { it.length() },
+            ].max { it.length() }.length()
+
+            def infoList = [
+                    "=".repeat(maxLength),
+                    title,
+                    "-".repeat(maxLength),
+                    srcInfo,
+                    destInfo,
+                    "-".repeat(maxLength),
+                    hintInfo.join("\n"),
+                    "=".repeat(maxLength),
+                    "",
+            ]
+            infoList.forEach { println(it) }
+
+            project.ant.get(src: cacheSrc, dest: cacheDest)
+
+            // Force to copy files from the latest archive files
+            copyFiles = true
+        }
+
+        // Extract the target archive if its dest path does not exists
+        if (copyFiles) {
+            if (project.file(libDest).exists()) {
+                println("Delete old files in \"${project.file(libDest)}\"")
+                project.delete(libDest)
             }
+            project.copy {
+                from project.zipTree("${cachePath}${File.separator}${cacheName}.zip")
+                into libDest
+            }
+            println("All libs and models extracted into \"${project.file(libDest)}\"")
+            if (!versionNameFile.exists()) {
+                versionNameFile.createNewFile()
+                println("Version name file \"${versionNameFileName}\" created")
+            }
+            println()
         }
     }
-}
 
-preBuild.dependsOn downloadAndExtractArchives
+}
 
 class Versions {
 

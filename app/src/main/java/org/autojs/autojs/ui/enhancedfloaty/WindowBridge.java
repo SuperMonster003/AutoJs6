@@ -51,7 +51,16 @@ public interface WindowBridge {
         public void updatePosition(int x, int y) {
             mWindowLayoutParams.x = x;
             mWindowLayoutParams.y = y;
-            mWindowManager.updateViewLayout(mWindowView, mWindowLayoutParams);
+            try {
+                mWindowManager.updateViewLayout(mWindowView, mWindowLayoutParams);
+            } catch (Exception e) {
+                // @Hint by SuperMonster003 on Nov 9, 2023.
+                //  ! If the user repeatedly switches the switch "Floating button" rapidly, an exception may happen.
+                //  !
+                //  ! java.lang.IllegalArgumentException: View=org.autojs.autojs.ui.floating.CircularActionView
+                //  ! not attached to window manager.
+                e.printStackTrace();
+            }
         }
 
         @Override

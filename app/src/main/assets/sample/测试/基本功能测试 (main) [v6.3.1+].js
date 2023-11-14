@@ -13,9 +13,6 @@ const assert = (value, message) => {
     message && console.verbose(`${message} passed`);
 };
 
-const AtomicLong = java.util.concurrent.atomic.AtomicLong;
-const JavaScriptEngine = org.autojs.autojs.engine.JavaScriptEngine;
-
 // @Test Rhino basic
 
 assert(/^xml$/.test(typeof (<></>)), 'xml type');

@@ -15,7 +15,7 @@ module.exports = function (scriptRuntime, scope) {
     const Path = android.graphics.Path;
     const Rect = android.graphics.Rect;
     const GestureDescription = android.accessibilityservice.GestureDescription;
-    const AccessibilityBridge = org.autojs.autojs.core.accessibility.AccessibilityBridge;
+    const AccessibilityTool = org.autojs.autojs.core.accessibility.AccessibilityTool;
 
     /**
      * @type {org.autojs.autojs.core.accessibility.SimpleActionAutomator}
@@ -27,17 +27,25 @@ module.exports = function (scriptRuntime, scope) {
      */
     const a11yBridge = scriptRuntime.accessibilityBridge;
 
+    const a11yService = new AccessibilityTool(context).getService();
+
     let _ = {
         Auto: (/* @IIFE */ () => {
             /**
              * @implements Internal.Auto
              */
             const Auto = function () {
-                return Object.assign(function (mode) {
-                    if (typeof mode === 'string') {
-                        auto.setMode(mode);
+                return Object.assign(function __(mode, isForcibleRestart) {
+                    if (typeof arguments[0] === 'boolean') {
+                        a11yBridge.ensureServiceStarted(arguments[0]);
+                        return;
                     }
-                    a11yBridge.ensureServiceEnabled();
+                    if (typeof arguments[0] === 'string') {
+                        auto.setMode(arguments[0]);
+                    }
+                    if (typeof arguments[1] === 'boolean') {
+                        a11yBridge.ensureServiceStarted(arguments[1]);
+                    }
                 }, Auto.prototype);
             };
 
@@ -60,6 +68,15 @@ module.exports = function (scriptRuntime, scope) {
                 get windowRoots() {
                     return util.java.toJsArray(a11yBridge.windowRoots(), false)
                         .map(root => UiObject.createRoot(root));
+                },
+                start() {
+                    return a11yService.start();
+                },
+                stop() {
+                    return a11yService.stop();
+                },
+                isRunning() {
+                    return a11yService.isRunning();
                 },
                 stateListener(listener) {
                     return a11yBridge.setAccessibilityListener(listener);
@@ -146,7 +163,7 @@ module.exports = function (scriptRuntime, scope) {
                     rtAutomator.ensureService();
                 },
                 waitForService(timeout) {
-                    a11yBridge.waitForServiceEnabled(_.parseNumber(timeout, -1));
+                    a11yService.startAndWaitFor(_.parseNumber(timeout, -1));
                 },
                 click() {
                     if (arguments.length === 2) {

@@ -8,11 +8,6 @@ let { colors, threads, ui } = global;
  * @return {Internal.Dialogs}
  */
 module.exports = function (scriptRuntime, scope) {
-    const Looper = android.os.Looper;
-    const Linkify = android.text.util.Linkify;
-    const LayoutParams = android.view.WindowManager.LayoutParams;
-    const ColorDrawable = android.graphics.drawable.ColorDrawable;
-
     let _ = {
         Dialogs: (/* @IIFE */ () => {
             /**
@@ -298,11 +293,13 @@ module.exports = function (scriptRuntime, scope) {
                     throw Error(`Unknown linkify: ${props.linkify}`);
                 })();
                 let view = dialog.getContentView();
-                let text = view.getText().toString();
-                ui.run(() => {
-                    view.setAutoLinkMask(linkify);
-                    view.setText(text);
-                });
+                if (view !== null) {
+                    let text = view.getText().toString();
+                    ui.run(() => {
+                        view.setAutoLinkMask(linkify);
+                        view.setText(text);
+                    });
+                }
             }
 
             if (props.onBackKey !== undefined) {
@@ -372,6 +369,13 @@ module.exports = function (scriptRuntime, scope) {
                     let win = dialog.getWindow();
                     win.addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
                 });
+            }
+
+            if (typeof props.inputSingleLine === 'boolean') {
+                let inputEditText = dialog.getInputEditText();
+                if (inputEditText !== null) {
+                    inputEditText.setSingleLine(props.inputSingleLine);
+                }
             }
         },
         wrapNonNullString(str) {

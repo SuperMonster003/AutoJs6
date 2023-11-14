@@ -19,7 +19,7 @@ public abstract class JavaScriptEngine extends ScriptEngine.AbstractScriptEngine
     @Override
     public Object execute(JavaScriptSource scriptSource) {
         if ((scriptSource.getExecutionMode() & JavaScriptSource.EXECUTION_MODE_AUTO) != 0) {
-            getRuntime().ensureAccessibilityServiceEnabled();
+            getRuntime().accessibilityBridge.ensureServiceStarted();
         }
         return doExecution(scriptSource);
     }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>控件节点 (UiObject) | AutoJs6 文档 - 6.4.1</title>
+    <title>控件节点 (UiObject) | AutoJs6 文档 - 6.4.2</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -160,7 +160,7 @@
 
     <div id="column1" data-id="uiObjectType" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.4.1</h1>
+            <h1>AutoJs6 文档 - 6.4.2</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -346,6 +346,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#uiobjecttype_m_point">[m#] point</a></span><ul>
 <li><span class="stability_undefined"><a href="#uiobjecttype_point">point()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjecttype_m_center">[m#] center</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjecttype_center">center()</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#uiobjecttype_m_size">[m#] size</a></span><ul>
@@ -1296,6 +1300,7 @@ console.log(wC.boundsExactCenterY()); // e.g. -16.5
 </ul>
 <p>返回控件矩形的中心点 (<a href="opencvPointType.html">Point</a>).</p>
 <p>该中心点坐标由 <a href="#uiobjecttype_m_exactcenterx">exactCenterX</a> 和 <a href="#uiobjecttype_m_exactcentery">exactCenterY</a> 计算获得, 因此会保留精度.</p>
+<p>是 <a href="#uiobjecttype_m_center">center</a> 的别名方法.</p>
 <pre><code class="lang-js">let wA = pickup(/.+/);
 console.log(wA.bounds()); // e.g. Rect(0, 0 - 10, 12)
 console.log(wA.point()); // e.g. {5.0, 6.0}
@@ -1305,6 +1310,25 @@ let wB = pickup(/.+/);
 console.log(wB.bounds()); // e.g. Rect(0, 0 - 11, 13)
 console.log(wB.point()); // e.g. {5.5, 6.5}
 console.log(wB.point().y); // e.g. 6.5
+</code></pre>
+<h2>[m#] center<span><a class="mark" href="#uiobjecttype_m_center" id="uiobjecttype_m_center">#</a></span></h2>
+<h3>center()<span><a class="mark" href="#uiobjecttype_center" id="uiobjecttype_center">#</a></span></h3>
+<p><strong><code>6.4.2</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="opencvPointType.html">OpencvPoint</a></span> }</li>
+</ul>
+<p>返回控件矩形的中心点 (<a href="opencvPointType.html">Point</a>).</p>
+<p>该中心点坐标由 <a href="#uiobjecttype_m_exactcenterx">exactCenterX</a> 和 <a href="#uiobjecttype_m_exactcentery">exactCenterY</a> 计算获得, 因此会保留精度.</p>
+<p>是 <a href="#uiobjecttype_m_point">point</a> 的别名方法.</p>
+<pre><code class="lang-js">let wA = pickup(/.+/);
+console.log(wA.bounds()); // e.g. Rect(0, 0 - 10, 12)
+console.log(wA.center()); // e.g. {5.0, 6.0}
+console.log(wA.center().x); // e.g. 5
+
+let wB = pickup(/.+/);
+console.log(wB.bounds()); // e.g. Rect(0, 0 - 11, 13)
+console.log(wB.center()); // e.g. {5.5, 6.5}
+console.log(wB.center().y); // e.g. 6.5
 </code></pre>
 <h2>[m#] size<span><a class="mark" href="#uiobjecttype_m_size" id="uiobjecttype_m_size">#</a></span></h2>
 <h3>size()<span><a class="mark" href="#uiobjecttype_size" id="uiobjecttype_size">#</a></span></h3>

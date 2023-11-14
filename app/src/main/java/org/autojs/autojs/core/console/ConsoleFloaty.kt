@@ -183,7 +183,7 @@ class ConsoleFloaty(private val mConsole: ConsoleImpl) : AbstractResizableExpand
 
     internal fun setCloseButton(resId: Int) {
         mCloseButton?.apply {
-            post { setImageDrawable(ResourcesCompat.getDrawable(mConsole.uiHandler.context.resources, resId, null)) }
+            post { setImageDrawable(ResourcesCompat.getDrawable(mConsole.uiHandler.applicationContext.resources, resId, null)) }
         }
     }
 

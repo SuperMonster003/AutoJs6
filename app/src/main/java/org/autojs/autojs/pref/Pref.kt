@@ -10,7 +10,6 @@ import com.google.gson.Gson
 import org.autojs.autojs.App.Companion.app
 import org.autojs.autojs.annotation.KeyRes
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.RootUtils
@@ -182,13 +181,13 @@ object Pref {
         .apply()
 
     @JvmStatic
-    fun shouldEnableA11yServiceWithRoot() = getBoolean(
+    fun shouldStartA11yServiceWithRoot() = getBoolean(
         R.string.key_enable_a11y_service_with_root_access,
         resources.getBoolean(R.bool.pref_enable_a11y_service_with_root_access),
     )
 
     @JvmStatic
-    fun shouldEnableA11yServiceWithSecureSettings() = getBoolean(
+    fun shouldStartA11yServiceWithSecureSettings() = getBoolean(
         R.string.key_enable_a11y_service_with_secure_settings,
         resources.getBoolean(R.bool.pref_enable_a11y_service_with_secure_settings)
     )

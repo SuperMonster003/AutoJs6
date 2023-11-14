@@ -178,7 +178,7 @@ dependencies /* AppCompat */ {
     // implementation("androidx.appcompat:appcompat") {
     //     version {
     //         strictly("1.4.2")
-    //         because("version 1.5.0 duplicates some classes")
+    //         because("Version 1.5.0 duplicates some classes")
     //     }
     // }
     //
@@ -200,7 +200,7 @@ dependencies /* Material Dialogs */ {
     val configuration: (ExternalModuleDependency).() -> Unit = {
         version {
             prefer("0.9.6.0")
-            because("not ready to update to version 3.3.0 yet")
+            because("Not ready to update to version 3.3.0 yet")
         }
     }
     configuration.let {
@@ -234,18 +234,24 @@ dependencies /* View */ {
 dependencies /* GitHub API */ {
     implementation(files("$rootDir/libs/github-api-1.306.jar"))
 
-    implementation("commons-io:commons-io:2.14.0")
+    implementation("commons-io:commons-io") {
+        because("Compatibility for Android API Level < 26 (Android 8.0) [O]")
+        version {
+            strictly("2.8.0")
+            because("Exception on newer versions: 'NoClassDefFoundError: org.apache.commons.io.IOUtils'")
+        }
+    }
 
     implementation("com.fasterxml.jackson.core:jackson-databind") {
-        because("compatibility for Android API Level < 26 (Android 8.0) [O]")
-        version /* as of Oct 12, 2023 */ {
-            strictly("2.14.3")
-            because("Exception on 2.15.x: 'IllegalArgumentException: Unsupported class file major version 63'")
+        because("Compatibility for Android API Level < 26 (Android 8.0) [O]")
+        version {
+            strictly("2.13.3")
+            because("Exception on 2.14.x: 'No virtual method getParameterCount()I in class Ljava/lang/reflect/Method'")
         }
     }
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3") {
-        because("compatibility of java.time.* for Android API Level < 26 (Android 8.0) [O]")
+        because("Compatibility of java.time.* for Android API Level < 26 (Android 8.0) [O]")
     }
 }
 
@@ -488,22 +494,13 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 mapOf(
-                    "resourcePackageName" to (this@defaultConfig.applicationId
-                        ?: this@Build_gradle.applicationId),
+                    "resourcePackageName" to (this@defaultConfig.applicationId ?: this@Build_gradle.applicationId),
                     "androidManifestFile" to ("$projectDir/src/main/AndroidManifest.xml")
                 ).let { arguments(it) }
             }
         }
-        buildConfigField(
-            "String",
-            "VERSION_DATE",
-            "\"${Utils.getDateString("MMM d, yyyy", "GMT+08:00")}\""
-        )
-        buildConfigField(
-            "String",
-            "VSCODE_EXT_REQUIRED_VERSION",
-            "\"${versions.vscodeExtRequiredVersion}\""
-        )
+        buildConfigField("String", "VERSION_DATE", "\"${Utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
+        buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
     }
 
     applicationVariants.all {

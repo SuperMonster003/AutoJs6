@@ -24,7 +24,6 @@ import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
 import org.autojs.autojs.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.rhino.InterruptibleAndroidContextFactory
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.Shell
@@ -54,26 +53,26 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
 
     private val scriptEngine
         get() = when (BuildConfig.isInrt) {
-            true -> LoopBasedJavaScriptEngineWithDecryption(context)
-            else -> LoopBasedJavaScriptEngine(context)
+            true -> LoopBasedJavaScriptEngineWithDecryption(applicationContext)
+            else -> LoopBasedJavaScriptEngine(applicationContext)
         }
 
-    val context: Context = application.applicationContext
-    val appUtils by lazy { createAppUtils(context) }
+    val applicationContext: Context = application.applicationContext
+    val appUtils by lazy { createAppUtils(applicationContext) }
     val globalConsole by lazy { createGlobalConsole() }
 
-    val layoutInspector = LayoutInspector(context)
-    val uiHandler = UiHandler(context)
-    val infoProvider = ActivityInfoProvider(context)
+    val layoutInspector = LayoutInspector(applicationContext)
+    val uiHandler = UiHandler(applicationContext)
+    val infoProvider = ActivityInfoProvider(applicationContext)
     val scriptEngineService: ScriptEngineService = run {
-        val scriptEngineManager = ScriptEngineManager(context)
+        val scriptEngineManager = ScriptEngineManager(applicationContext)
         scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
             scriptEngine.also { engine ->
                 engine.runtime = createRuntime().also { runtime = it }
             }
         }
         initContextFactory()
-        scriptEngineManager.registerEngine(AutoFileSource.ENGINE) { RootAutomatorEngine(context) }
+        scriptEngineManager.registerEngine(AutoFileSource.ENGINE) { RootAutomatorEngine(applicationContext) }
         ScriptEngineServiceBuilder()
             .uiHandler(uiHandler)
             .globalConsole(globalConsole)
@@ -82,7 +81,7 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
             .also { ScriptEngineService.setInstance(it) }
     }
 
-    val notificationObserver = AccessibilityNotificationObserver(context)
+    val notificationObserver = AccessibilityNotificationObserver(applicationContext)
 
     private val accessibilityActionRecorder = AccessibilityActionRecorder()
 
@@ -93,7 +92,7 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     }
 
     private fun initContextFactory() {
-        ContextFactory.initGlobal(InterruptibleAndroidContextFactory(File(context.cacheDir, "classes")))
+        ContextFactory.initGlobal(InterruptibleAndroidContextFactory(File(applicationContext.cacheDir, "classes")))
     }
 
     protected open fun createRuntime(): ScriptRuntime = ScriptRuntime.Builder()
@@ -103,7 +102,7 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
         .setAccessibilityBridge(AccessibilityBridgeImpl(this))
         .setAppUtils(appUtils)
         .setEngineService(scriptEngineService)
-        .setShellSupplier { Shell(context, true) }
+        .setShellSupplier { Shell(applicationContext, true) }
         .build()
 
     private fun addAccessibilityServiceDelegates() {
@@ -155,14 +154,8 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
         }
     }
 
-    abstract fun ensureAccessibilityServiceEnabled()
-
-    abstract fun waitForAccessibilityServiceEnabled(timeout: Long)
-
     open fun createAppUtils(context: Context) = AppUtils(context)
 
     open fun createGlobalConsole() = GlobalConsole(uiHandler)
-
-    fun createAccessibilityConfig() = AccessibilityConfig()
 
 }

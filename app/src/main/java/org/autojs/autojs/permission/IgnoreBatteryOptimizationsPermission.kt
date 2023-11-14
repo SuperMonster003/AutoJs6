@@ -21,20 +21,24 @@ class IgnoreBatteryOptimizationsPermission(override val context: Context) : Perm
     }
 
     @SuppressLint("BatteryLife")
-    override fun request() {
-        tryStartActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + context.packageName)))
-    }
+    override fun request() = tryStartActivity(
+        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + context.packageName))
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    )
 
-    override fun revoke() {
-        tryStartActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-    }
+    override fun revoke() = tryStartActivity(
+        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    )
 
-    private fun tryStartActivity(i: Intent) {
-        try {
+    private fun tryStartActivity(i: Intent): Boolean {
+        return try {
             context.startActivity(i)
+            true
         } catch (e: ActivityNotFoundException) {
             e.printStackTrace()
             ViewUtils.showToast(context, R.string.text_failed)
+            false
         }
     }
 

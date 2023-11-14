@@ -1,6 +1,3 @@
-const ColorDrawable = android.graphics.drawable.ColorDrawable;
-const Snackbar = com.google.android.material.snackbar.Snackbar;
-
 let dialog = dialogs.build({
     title: 'Time',
     content: null,

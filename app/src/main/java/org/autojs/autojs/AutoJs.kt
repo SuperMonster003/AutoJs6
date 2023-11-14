@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Looper
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.accessibility.LayoutInspector.CaptureAvailableListener
 import org.autojs.autojs.core.accessibility.NodeInfo
@@ -19,8 +18,6 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
 import org.autojs.autojs.runtime.api.AppUtils.Companion.BroadcastShortForm
-import org.autojs.autojs.runtime.exception.ScriptException
-import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.ui.doc.DocumentationActivity
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow
@@ -32,7 +29,6 @@ import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs6.BuildConfig
-import org.autojs.autojs6.R
 import java.util.concurrent.Executors
 import org.autojs.autojs.inrt.autojs.AutoJs as AutoJsInrt
 
@@ -42,13 +38,13 @@ import org.autojs.autojs.inrt.autojs.AutoJs as AutoJsInrt
  * Transformed by SuperMonster003 on Oct 10, 2022.
  * Modified by LZX284 (https://github.com/LZX284) as of Sep 30, 2023.
  */
-open class AutoJs(private val appContext: Application) : AbstractAutoJs(appContext) {
+open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
 
     // @Thank to Zen2H
-    private val printExecutor = Executors.newSingleThreadExecutor()
+    private val mPrintExecutor = Executors.newSingleThreadExecutor()
 
-    private val accessibilityTool: AccessibilityTool
-        get() = AccessibilityTool(appContext)
+    private val mA11yTool = AccessibilityTool(appContext)
+    private val mA11yToolService = mA11yTool.service
 
     init {
         scriptEngineService.registerGlobalScriptExecutionListener(ScriptExecutionGlobalListener())
@@ -57,14 +53,15 @@ open class AutoJs(private val appContext: Application) : AbstractAutoJs(appConte
             override fun onReceive(context: Context, intent: Intent) {
                 try {
                     val action = intent.action ?: return
-                    ensureAccessibilityServiceEnabled()
                     when {
                         action.equals(LayoutBoundsFloatyWindow::class.java.name, true) -> {
+                            mA11yToolService.ensure()
                             capture(object : LayoutInspectFloatyWindow {
                                 override fun create(nodeInfo: NodeInfo?) = LayoutBoundsFloatyWindow(nodeInfo, context, true)
                             })
                         }
                         action.equals(LayoutHierarchyFloatyWindow::class.java.name, true) -> {
+                            mA11yToolService.ensure()
                             capture(object : LayoutInspectFloatyWindow {
                                 override fun create(nodeInfo: NodeInfo?) = LayoutHierarchyFloatyWindow(nodeInfo, context, true)
                             })
@@ -111,39 +108,10 @@ open class AutoJs(private val appContext: Application) : AbstractAutoJs(appConte
                     //  ! When running in "ui" thread (ui.run() or ui.post()),
                     //  ! android.os.NetworkOnMainThreadException may happen.
                     //  ! Further more, dunno if a thread executor is a good idea.
-                    printExecutor.submit { devPluginService.print(it) }
+                    mPrintExecutor.submit { devPluginService.print(it) }
                 }
             }
         }
-    }
-
-    override fun ensureAccessibilityServiceEnabled() {
-        if (AccessibilityService.isNotRunning()) {
-            tryEnableAccessibilityService()?.let {
-                accessibilityTool.launchSettings()
-                throw ScriptException(it)
-            }
-        }
-    }
-
-    override fun waitForAccessibilityServiceEnabled(timeout: Long) {
-        if (AccessibilityService.isNotRunning()) {
-            tryEnableAccessibilityService()?.let {
-                accessibilityTool.launchSettings()
-                if (!AccessibilityService.waitForEnabled(timeout)) {
-                    throw ScriptInterruptedException()
-                }
-            }
-        }
-    }
-
-    private fun tryEnableAccessibilityService(): String? {
-        if (accessibilityTool.service.isEnabled()) {
-            return context.getString(R.string.text_auto_operate_service_enabled_but_not_working)
-        }
-        return if (!accessibilityTool.service.enableIfNeededAndWaitFor(2000)) {
-            context.getString(R.string.error_no_accessibility_permission)
-        } else null
     }
 
     override fun createRuntime(): ScriptRuntime = super.createRuntime().apply {

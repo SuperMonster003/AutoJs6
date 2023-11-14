@@ -8,7 +8,7 @@ buildId: ${device.buildId}
 bootloader版本: ${device.bootloader}
 硬件名称: ${device.hardware}
 唯一标识码: ${device.fingerprint}
-IMEI: ${device.getIMEI('suppress_warnings')}
+IMEI: ${device.getIMEI()}
 AndroidId: ${device.getAndroidId()}
 MAC: ${device.getMacAddress()}
 API: ${device.sdkInt}

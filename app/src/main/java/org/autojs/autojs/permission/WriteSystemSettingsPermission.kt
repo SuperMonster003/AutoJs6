@@ -10,9 +10,9 @@ class WriteSystemSettingsPermission(override val context: Context) : PermissionI
 
     override fun has() = Settings.System.canWrite(context)
 
-    override fun request() = config()
+    override fun request() = false.also { config() }
 
-    override fun revoke() = config()
+    override fun revoke() = false.also { config() }
 
     fun config() = context.startActivity(
         Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)

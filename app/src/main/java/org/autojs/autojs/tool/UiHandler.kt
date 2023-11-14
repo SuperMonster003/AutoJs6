@@ -15,14 +15,14 @@ import org.autojs.autojs.runtime.api.ScriptToast
  * Created by Stardust on 2017/5/2.
  * Transformed by SuperMonster003 on Oct 25, 2023.
  */
-class UiHandler(val context: Context) : Handler(Looper.getMainLooper()) {
+class UiHandler(val applicationContext: Context) : Handler(Looper.getMainLooper()) {
 
     @ScriptInterface
     @JvmOverloads
     fun toast(message: String?, isLong: Boolean = false) {
         post {
             message?.let {
-                val rawToast = Toast.makeText(context, it, if (isLong) LENGTH_LONG else LENGTH_SHORT)
+                val rawToast = Toast.makeText(applicationContext, it, if (isLong) LENGTH_LONG else LENGTH_SHORT)
                 when (Looper.getMainLooper() == Looper.myLooper()) {
                     true -> addAndShow(rawToast)
                     else -> GlobalAppContext.post { addAndShow(rawToast) }
@@ -33,7 +33,7 @@ class UiHandler(val context: Context) : Handler(Looper.getMainLooper()) {
 
     @ScriptInterface
     @JvmOverloads
-    fun toast(resId: Int, isLong: Boolean = false) = toast(context.getString(resId), isLong)
+    fun toast(resId: Int, isLong: Boolean = false) = toast(applicationContext.getString(resId), isLong)
 
     @ScriptInterface
     fun dismissAllToasts() = ScriptToast.dismissAll(AutoJs.instance.runtime)

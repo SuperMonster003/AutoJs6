@@ -15,8 +15,6 @@ const assert = (value, message) => {
     console.verbose(`${message} passed`);
 };
 
-const JavaScriptEngine = org.autojs.autojs.engine.JavaScriptEngine;
-
 // @Test auto
 
 assert(noError(auto.waitFor, auto), 'auto.waitFor()');

@@ -137,12 +137,12 @@ public class Device {
     }
 
     public void setBrightness(int b) throws Settings.SettingNotFoundException {
-        checkWriteSettingsPermission();
+        ensureWriteSettingsPermission();
         Settings.System.putInt(mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, b);
     }
 
     public void setBrightnessMode(int b) throws Settings.SettingNotFoundException {
-        checkWriteSettingsPermission();
+        ensureWriteSettingsPermission();
         Settings.System.putInt(mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE, b);
     }
 
@@ -177,19 +177,19 @@ public class Device {
     }
 
     public void setMusicVolume(int i) {
-        checkWriteSettingsPermission();
+        ensureWriteSettingsPermission();
         ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
                 .setStreamVolume(AudioManager.STREAM_MUSIC, i, 0);
     }
 
     public void setAlarmVolume(int i) {
-        checkWriteSettingsPermission();
+        ensureWriteSettingsPermission();
         ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
                 .setStreamVolume(AudioManager.STREAM_ALARM, i, 0);
     }
 
     public void setNotificationVolume(int i) {
-        checkWriteSettingsPermission();
+        ensureWriteSettingsPermission();
         ((AudioManager) getSystemService(Context.AUDIO_SERVICE))
                 .setStreamVolume(AudioManager.STREAM_NOTIFICATION, i, 0);
     }
@@ -341,7 +341,7 @@ public class Device {
         return rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270;
     }
 
-    private void checkWriteSettingsPermission() {
+    private void ensureWriteSettingsPermission() {
         if (SettingsCompat.canWriteSettings(mContext)) {
             return;
         }

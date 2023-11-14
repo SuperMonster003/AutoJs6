@@ -262,8 +262,6 @@
     <string name="text_auto_check_for_updates">Автоматическая проверка обновлений</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Автоматическая проверка обновлений и отображение закуски на домашней странице</string>
     <string name="text_auto_night_mode">Автоматический ночной режим</string>
-    <string name="text_auto_operate_service">Служба доступности</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">Служба доступности включена, но не работает</string>
     <string name="text_back">Назад</string>
     <string name="text_broadcast_action">Действие</string>
     <string name="text_broadcast_task">Трансляция задачи</string>

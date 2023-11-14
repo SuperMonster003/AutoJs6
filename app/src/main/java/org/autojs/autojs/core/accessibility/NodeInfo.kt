@@ -25,81 +25,48 @@ class NodeInfo(private val resources: Resources?, private val node: UiObject, va
     @Suppress("DEPRECATION")
     val boundsInParent = Rect().also { node.getBoundsInParent(it) }
     val boundsInScreen = Rect().also { node.getBoundsInScreen(it) }
-    val bounds = boundsToString(boundsInScreen)
 
-    val children = ArrayList<NodeInfo>()
-    val fullId = node.fullId()
-    val id = node.simpleId()
-    val desc = node.desc()
-    val text = node.text()
-    val className = node.className()
     val packageName = node.packageName()
-    val depth = node.depth()
-    val drawingOrder = node.drawingOrder
-    val accessibilityFocused = node.isAccessibilityFocused
-    val checked = node.isChecked
-    val checkable = node.isCheckable
-    val clickable = node.isClickable
-    val contextClickable = node.isContextClickable
-    val dismissable = node.isDismissable
-    val enabled = node.isEnabled
-    val editable = node.isEditable
-    val focusable = node.isFocusable
-    val focused = node.focused()
-    val longClickable = node.isLongClickable
-    val selected = node.isSelected
-    val scrollable = node.isScrollable
-    val visibleToUser = node.visibleToUser()
-    val row = node.row()
-    val column = node.column()
-    val rowCount = node.rowCount()
-    val columnCount = node.columnCount()
-    val rowSpan = node.rowSpan()
-    val columnSpan = node.columnSpan()
-    val indexInParent = node.indexInParent()
-    val childCount = node.childCount()
-    val actionNames = node.actionNames()
-
+    val id = node.simpleId()
+    val fullId = node.fullId()
     @SuppressLint("DiscouragedApi")
     val idHex = takeIf { resources != null && packageName != null && fullId != null }?.let {
         "0x${Integer.toHexString(resources!!.getIdentifier(fullId, null, null))}"
     }
+    val desc = node.desc()
+    val text = node.text()
+    val bounds = boundsInScreen
+    val center = node.center()
+    val className = node.className()
+    val clickable = node.isClickable
+    val longClickable = node.isLongClickable
+    val scrollable = node.isScrollable
+    val indexInParent = node.indexInParent()
+    val childCount = node.childCount()
+    val depth = node.depth()
+    val checked = node.isChecked
+    val enabled = node.isEnabled
+    val editable = node.isEditable
+    val focusable = node.isFocusable
+    val checkable = node.isCheckable
+    val selected = node.isSelected
+    val dismissable = node.isDismissable
+    val visibleToUser = node.visibleToUser()
+    val contextClickable = node.isContextClickable
+    val focused = node.focused()
+    val accessibilityFocused = node.isAccessibilityFocused
+    val rowCount = node.rowCount()
+    val columnCount = node.columnCount()
+    val row = node.row()
+    val column = node.column()
+    val rowSpan = node.rowSpan()
+    val columnSpan = node.columnSpan()
+    val drawingOrder = node.drawingOrder
+    val actionNames = node.actionNames()
 
-    override fun toString() =
-        "$className" + "{" +
-        "childCount=${children.size}, " +
-        "boundsInScreen=$boundsInScreen, " +
-        "boundsInParent=$boundsInParent, " +
-        "id='$id', " +
-        "desc='$desc', " +
-        "packageName='$packageName', " +
-        "text='$text', " +
-        "depth=$depth, " +
-        "drawingOrder=$drawingOrder, " +
-        "accessibilityFocused=$accessibilityFocused, " +
-        "checked=$checked, " +
-        "clickable=$clickable, " +
-        "contextClickable=$contextClickable, " +
-        "dismissable=$dismissable, " +
-        "editable=$editable, " +
-        "enabled=$enabled, " +
-        "focusable=$focusable, " +
-        "longClickable=$longClickable, " +
-        "row=$row, " +
-        "column=$column, " +
-        "rowCount=$rowCount, " +
-        "columnCount=$columnCount, " +
-        "rowSpan=$rowSpan, " +
-        "columnSpan=$columnSpan, " +
-        "selected=$selected, " +
-        "scrollable=$scrollable, " +
-        "bounds='$bounds', " +
-        "checkable=$checkable, " +
-        "focused=$focused, " +
-        "visibleToUser=$visibleToUser, " +
-        "parent=${parent?.className}" +
-        "actions=${actionNames}" +
-        "}"
+    val children = ArrayList<NodeInfo>()
+
+    override fun toString() = "$className${node.summary()}"
 
     companion object {
 

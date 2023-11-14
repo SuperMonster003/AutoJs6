@@ -262,8 +262,6 @@
     <string name="text_auto_check_for_updates">更新の自動チェック</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自動的に更新をチェックし、ホームページにスナックバーを表示します</string>
     <string name="text_auto_night_mode">オートナイトモード</string>
-    <string name="text_auto_operate_service">アクセシビリティサービス</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">アクセシビリティサービスは有効ですが、動作していません</string>
     <string name="text_back">戻る</string>
     <string name="text_broadcast_action">動作</string>
     <string name="text_broadcast_task">タスクの実行</string>

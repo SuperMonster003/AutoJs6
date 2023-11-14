@@ -2,6 +2,8 @@ package org.autojs.autojs.external.foreground
 
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import org.autojs.autojs.tool.ForegroundServiceCreator
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.ForegroundServiceUtils
@@ -20,17 +22,21 @@ class MainActivityForegroundService : Service() {
     override fun onBind(intent: Intent) = null
 
     private fun startForeground() {
-        ForegroundServiceUtils.startForeground(
-            ForegroundServiceCreator.Builder(this)
-                .setClassName(sClassName)
-                .setIntent(MainActivity.getIntent(this))
-                .setNotificationId(NOTIFICATION_ID)
-                .setServiceName(R.string.foreground_notification_channel_name)
-                .setServiceDescription(R.string.foreground_notification_channel_name)
-                .setNotificationTitle(R.string.foreground_notification_title)
-                .setNotificationContent(R.string.foreground_notification_text)
-                .create()
-        )
+        val foregroundServiceCreator = ForegroundServiceCreator.Builder(this)
+            .setClassName(sClassName)
+            .setIntent(MainActivity.getIntent(this))
+            .setNotificationId(NOTIFICATION_ID)
+            .setServiceName(R.string.foreground_notification_channel_name)
+            .setServiceDescription(R.string.foreground_notification_channel_name)
+            .setNotificationTitle(R.string.foreground_notification_title)
+            .setNotificationContent(R.string.foreground_notification_text)
+            .create()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ForegroundServiceUtils.startForeground(foregroundServiceCreator, ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED)
+        } else {
+            ForegroundServiceUtils.startForeground(foregroundServiceCreator)
+        }
     }
 
     override fun onDestroy() {

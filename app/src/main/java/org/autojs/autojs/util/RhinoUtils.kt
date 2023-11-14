@@ -3,6 +3,7 @@ package org.autojs.autojs.util
 import org.autojs.autojs.AutoJs
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.tools.shell.Global
 import java.lang.reflect.InvocationTargetException
@@ -28,6 +29,6 @@ object RhinoUtils {
         cx.wrapFactory.wrap(cx, AutoJs.instance.runtime.topLevelScope, obj, obj?.let { it::class.java })
     }
 
-    fun toArray(obj: Iterable<*>): Any = AutoJs.instance.runtime.bridges.toArray(obj)
+    fun toArray(obj: Iterable<*>): NativeArray? = AutoJs.instance.runtime.bridges.toArray(obj)
 
 }

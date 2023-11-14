@@ -29,7 +29,7 @@
 
 [Auto.js](https://github.com/hyb1996/Auto.js) 是一款 Android 平台支持 [无障碍服务](https://developer.android.com/guide/topics/ui/accessibility/service?hl=zh-cn) 的 JavaScript 自动化工具软件.
 
-Auto.js 由 [hyb1996](https://github.com/hyb1996) 于 `2017/01/27` 初次发布, 于 `2020/03/13` 停止维护, 最终版本名称为 `4.1.1 alpha2`.
+Auto.js 由 [hyb1996](https://github.com/hyb1996) 于 `2017/01/27` 初次发布, 于 `2020/03/13` 停止维护, 最终版本名称为 `4.1.1 Alpha2`, 构建版本号为 `461`.
 
 AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开发, 继续保持开源免费.
 
@@ -131,6 +131,25 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 [comment]: <> "Version history only shows last 3 versions"
 
+# v6.4.2
+
+###### 2023/11/15
+
+* `新增` dialogs.build() 选项参数属性 inputSingleLine
+* `新增` console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_
+* `修复` ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
+* `修复` Android 7.x 发现新版本时无法获取版本详情的问题
+* `修复` Android 14 申请截图权限时导致应用崩溃的问题
+* `修复` 主页抽屉快速切换 "浮动按钮" 开关时可能导致应用崩溃的问题
+* `修复` 使用菜单关闭浮动按钮时重启应用后浮动按钮可能依然显示的问题
+* `修复` 安卓 13 及以上系统设置页面选择并切换 AutoJs6 语言后无法生效的问题
+* `修复` 构建工具初次构建时无法自动完成 OpenCV 资源部署的问题
+* `优化` 原生化 bridges 模块以提升脚本执行效率 (Ref to [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
+* `优化` 重构无障碍服务相关代码以增强无障碍服务的功能稳定性 (实验性) _[`issue #167`](http://issues.autojs6.com/167)_
+* `优化` UiObject 和 UiObjectCollection 的打印输出格式
+* `优化` 构建工具在构建环境 Gradle JDK 版本不满足要求时作出升级提示
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v642)_
+
 # v6.4.1
 
 ###### 2023/11/02
@@ -192,27 +211,6 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 适配 VSCode 插件 1.0.7
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v640)_
 
-# v6.3.3
-
-###### 2023/07/21
-
-* `新增` 代码编辑器的代码注释功能 (by [抠脚本人](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
-* `新增` auto.stateListener 用于无障碍服务连接状态监听 (by [抠脚本人](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
-* `新增` UiObject 类型添加 nextSibling / lastChild / offset 等方法 (参阅 项目文档 > [控件节点](https://docs.autojs6.com/#/uiObjectType))
-* `修复` VSCode 插件在脚本字符总长度超过四位十进制数时无法解析数据的问题 _[`issue #91`](http://issues.autojs6.com/91)_ _[`issue #93`](http://issues.autojs6.com/93)_ _[`issue #100`](http://issues.autojs6.com/100)_ _[`issue #109`](http://issues.autojs6.com/109)_
-* `修复` VSCode 插件无法正常保存文件的问题 _[`issue #92`](http://issues.autojs6.com/91)_ _[`issue #94`](http://issues.autojs6.com/93)_
-* `修复` 浮动按钮菜单项 "管理无障碍服务" 点击后可能未发生页面跳转的问题
-* `修复` runtime.requestPermissions 方法丢失的问题 _[`issue #104`](http://issues.autojs6.com/104)_
-* `修复` events.emitter 不支持 MainThreadProxy 参数的问题 _[`issue #103`](http://issues.autojs6.com/103)_
-* `修复` 在 _[`pr #78`](http://pr.autojs6.com/78)_ 中存在的代码编辑器无法格式化代码的问题
-* `修复` 使用 JavaAdapter 时导致 ClassLoader 调用栈溢出的问题 _[`issue #99`](http://issues.autojs6.com/99)_ _[`issue #110`](http://issues.autojs6.com/110)_
-* `优化` 调整模块作用域 (by [aiselp](https://github.com/aiselp)) _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
-* `优化` 移除发行版本应用启动时的签名校验 (by [LZX284](https://github.com/LZX284)) _[`pr #81`](http://pr.autojs6.com/81)_
-* `优化` 在 _[`pr #98`](http://pr.autojs6.com/98)_ 基础上的编辑器代码注释功能的行为, 样式及光标位置处理
-* `优化` 在 _[`pr #98`](http://pr.autojs6.com/98)_ 基础上添加代码注释菜单项
-* `优化` 适配 VSCode 插件 1.0.6
-* `优化` UiObject#parent 方法增加级数参数支持 (参阅 项目文档 > [控件节点](https://docs.autojs6.com/#/uiObjectType))
-
 ##### 更多版本历史可参阅
 
 * [CHANGELOG.md](http://changelog.autojs6.com)
@@ -229,12 +227,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Hedgehog | 2023.1.1 RC 2` 版本 (按需选择其一):
+下载 `Android Studio Hedgehog | 2023.1.1 RC 3` 版本 (按需选择其一):
 
-- [android-studio-2023.1.1.24-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2023.1.1.24/android-studio-2023.1.1.24-windows.exe) (1.1 GB)
-- [android-studio-2023.1.1.24-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.1.1.24/android-studio-2023.1.1.24-windows.zip) (1.1 GB)
+- [android-studio-2023.1.1.25-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2023.1.1.25/android-studio-2023.1.1.25-windows.exe) (1.1 GB)
+- [android-studio-2023.1.1.25-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.1.1.25/android-studio-2023.1.1.25-windows.zip) (1.1 GB)
 
-> 注: 上述版本发布时间为 2023 年 10 月 30 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2023 年 11 月 9 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -401,11 +399,12 @@ Gradle
         - Update badges like [ android studio / rhino / ... ]
         - Update android studio download links and version names
     - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
-    - Update dependencies information for Android Gradle Plugin in the top-level build.gradle.kts
-    - Update dependencies TypeScript declarations.
+    - Update dependencies TypeScript declarations if needed.
     - Re-generate documentation by running the python script
     - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field
+    - Run Gradle task "app:appendDigestToReleasedFiles"
     - Commit and push to GitHub
+    - Publish the latest release with signed APKs
 )

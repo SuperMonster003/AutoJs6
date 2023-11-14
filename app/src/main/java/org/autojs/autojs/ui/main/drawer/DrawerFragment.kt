@@ -89,6 +89,8 @@ open class DrawerFragment : Fragment() {
             AccessibilityService(mContext),
             R.drawable.ic_accessibility_black_48dp,
             R.string.text_a11y_service,
+            DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
+            R.string.key_a11y_service,
         )
 
         mForegroundServiceItem = DrawerMenuToggleableItem(
@@ -101,9 +103,9 @@ open class DrawerFragment : Fragment() {
 
         mFloatingWindowItem = DrawerMenuToggleableItem(
             object : FloatingButtonTool(mContext) {
-                override fun toggle(aimState: Boolean) {
+                override fun toggle(aimState: Boolean): Boolean = try {
                     // @BeforeSuper
-                    if (!aimState /* is closing */) {
+                    if (!aimState /* is to switch off */) {
                         FloatyWindowManger.getCircularMenu()?.let { circularMenu ->
                             if (circularMenu.isRecording) {
                                 circularMenu.stopRecord()
@@ -114,11 +116,14 @@ open class DrawerFragment : Fragment() {
                     super.toggle(aimState)
 
                     // @AfterSuper
-                    if (isActive) {
+                    if (aimState /* is to switch on */) {
                         if (!mAccessibilityServiceItem.isChecked) {
                             mAccessibilityServiceItem.syncDelay()
                         }
                     }
+                    true
+                } catch (_: Exception) {
+                    false
                 }
             },
             R.drawable.ic_robot_64,
@@ -224,7 +229,7 @@ open class DrawerFragment : Fragment() {
 
         mAutoNightModeItem = DrawerMenuToggleableItem(
             object : DrawerMenuItemCustomHelper(mContext) {
-                override fun toggle() {
+                override fun toggle(): Boolean = try {
                     val isTurningOn = !isActive
                     val isNightModeYes = isNightModeYes(resources.configuration)
                     val mode = when {
@@ -242,6 +247,9 @@ open class DrawerFragment : Fragment() {
                             else -> MODE.DAY.key
                         }.let { Pref.putString(R.string.key_night_mode, it) }
                     }
+                    true
+                } catch (_: Exception) {
+                    false
                 }
 
                 override val isActive
@@ -257,7 +265,7 @@ open class DrawerFragment : Fragment() {
 
         mNightModeItem = DrawerMenuToggleableItem(
             object : DrawerMenuItemCustomHelper(mContext) {
-                override fun toggle() {
+                override fun toggle(): Boolean = try {
                     if (!mAutoNightModeItem.isHidden) {
                         ViewUtils.isAutoNightModeEnabled = false
                     }
@@ -271,6 +279,9 @@ open class DrawerFragment : Fragment() {
                             Pref.putString(R.string.key_night_mode, MODE.DAY.key)
                         }
                     }
+                    true
+                } catch (_: Exception) {
+                    false
                 }
 
                 override val isActive
@@ -289,12 +300,15 @@ open class DrawerFragment : Fragment() {
                 override val isActive: Boolean
                     get() = ViewUtils.isKeepScreenOnWhenInForegroundEnabled
 
-                override fun toggle() {
+                override fun toggle(): Boolean = try {
                     when (/* isTurningOn */ !isActive) {
                         true -> ViewUtils.setKeepScreenOnWhenInForegroundFromLastEnabledState()
                         else -> ViewUtils.setKeepScreenOnWhenInForegroundDisabled()
                     }
                     refreshSubtitle()
+                    true
+                } catch (_: Exception) {
+                    false
                 }
 
                 override fun refreshSubtitle() {

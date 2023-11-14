@@ -2,12 +2,6 @@
 
 'ui';
 
-/* Here, importClass() is not recommended for intelligent code completion in IDE like WebStorm. */
-/* The same is true of destructuring assignment syntax (like `let {Uri} = android.net`). */
-
-const InputType = android.text.InputType;
-const TextWatcher = android.text.TextWatcher;
-
 let _ = {
     colors: {
         inputText: colors.rgba('#000000DE'),

@@ -285,7 +285,7 @@ public class ScriptRuntime {
         uiHandler = builder.getUiHandler();
 
         floaty = new Floaty(uiHandler, this);
-        Context context = uiHandler.getContext();
+        Context context = uiHandler.getApplicationContext();
 
         ui = new UI(context, this);
         images = new Images(context, this, builder.getScreenCaptureRequester());
@@ -306,9 +306,9 @@ public class ScriptRuntime {
         threads = new Threads(this);
         timers = new Timers(this);
         loopers = new Loopers(this);
-        events = new Events(uiHandler.getContext(), accessibilityBridge, this);
+        events = new Events(uiHandler.getApplicationContext(), accessibilityBridge, this);
         mThread = Thread.currentThread();
-        sensors = new Sensors(uiHandler.getContext(), this);
+        sensors = new Sensors(uiHandler.getApplicationContext(), this);
     }
 
     public TopLevelScope getTopLevelScope() {
@@ -351,23 +351,23 @@ public class ScriptRuntime {
 
     public void setClip(final String text) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            ClipboardUtils.setClip(uiHandler.getContext(), text);
+            ClipboardUtils.setClip(uiHandler.getApplicationContext(), text);
             return;
         }
         VolatileDispose<Object> dispose = new VolatileDispose<>();
         uiHandler.post(() -> {
-            ClipboardUtils.setClip(uiHandler.getContext(), text);
+            ClipboardUtils.setClip(uiHandler.getApplicationContext(), text);
             dispose.setAndNotify(text);
         });
-        dispose.blockedGet();
+        dispose.blockedGet(60_000);
     }
 
     public String getClip() {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            return ClipboardUtils.getClipOrEmpty(uiHandler.getContext()).toString();
+            return ClipboardUtils.getClipOrEmpty(uiHandler.getApplicationContext()).toString();
         }
         final VolatileDispose<String> clip = new VolatileDispose<>();
-        uiHandler.post(() -> clip.setAndNotify(ClipboardUtils.getClipOrEmpty(uiHandler.getContext()).toString()));
+        uiHandler.post(() -> clip.setAndNotify(ClipboardUtils.getClipOrEmpty(uiHandler.getApplicationContext()).toString()));
         return clip.blockedGetOrThrow(ScriptInterruptedException.class);
     }
 
@@ -532,10 +532,6 @@ public class ScriptRuntime {
         return mScreenMetrics;
     }
 
-    public void ensureAccessibilityServiceEnabled() {
-        accessibilityBridge.ensureServiceEnabled();
-    }
-
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void onExit() {
         Log.d(TAG, "on exit");
@@ -664,7 +660,7 @@ public class ScriptRuntime {
 
     @ScriptInterface
     public void requestPermissions(String[] permissions) {
-        Context context = uiHandler.getContext();
+        Context context = uiHandler.getApplicationContext();
         permissions = Permissions.getPermissionsNeedToRequest(context, permissions);
         if (permissions.length == 0)
             return;

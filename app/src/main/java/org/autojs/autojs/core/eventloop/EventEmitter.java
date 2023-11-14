@@ -54,7 +54,7 @@ public class EventEmitter {
                 if (mTimer != null) {
                     mTimer.setImmediate(listenerWrapper.listener, args);
                 } else {
-                    mBridges.callFunction(listenerWrapper.listener, EventEmitter.this, args);
+                    mBridges.call(listenerWrapper.listener, EventEmitter.this, args);
                 }
                 if (listenerWrapper.isOnce) {
                     mListenerWrappers.remove(listenerWrapper);

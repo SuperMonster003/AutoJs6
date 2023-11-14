@@ -10,6 +10,8 @@ import android.text.TextUtils
 import android.util.Log
 import org.autojs.autojs.pref.Pref
 import org.autojs.autojs.runtime.api.ProcessShell
+import org.autojs.autojs.runtime.exception.ScriptException
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.SettingsUtils
 import org.autojs.autojs.util.ViewUtils
@@ -37,52 +39,28 @@ class AccessibilityTool(val context: Context) {
         }
     }
 
-    inner class Service {
+    companion object {
 
-        fun enable() {
-            enableIfNeeded().also { if (!it) launchSettings() }
-        }
+        @JvmStatic
+        val DEFAULT_A11Y_START_TIMEOUT = 2000L
 
-        fun launchSettings() {
-            this@AccessibilityTool.launchSettings()
-        }
+    }
 
-        fun enableIfNeeded() = when {
-            enableWithRootIfNeeded() -> true
-            enableWithSecureIfNeeded() -> true
-            else -> false
-        }
+    open inner class Service {
 
-        fun enableIfNeededAndWaitFor(timeout: Long) = when {
-            enableWithRootIfNeeded(timeout) -> true
-            enableWithSecureIfNeeded(timeout) -> true
-            else -> false
-        }
+        fun isRunning() = AccessibilityService.isRunning()
 
-        fun disable(): Boolean {
-            if (AccessibilityService.disable() && !isEnabled()) {
-                return true.also { Log.d(tag, "Accessibility Service disabled successfully by \"disableSelf\"") }
-            }
-            if (isRootAccessible() && disableWithRoot()) {
-                return true.also { Log.d(tag, "Accessibility Service disabled successfully by \"root\"") }
-            }
-            if (isSecureAccessible() && disableWithSecure()) {
-                return true.also { Log.d(tag, "Accessibility Service disabled successfully by \"secure settings\"") }
-            }
-            return false.also { launchSettings() }
-        }
-
-        fun isEnabled(): Boolean {
-            val enabledServicesSetting = Secure.getString(
+        fun exists(): Boolean {
+            val services = Secure.getString(
                 context.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES
             ) ?: return false
             TextUtils.SimpleStringSplitter(':').also { colonSplitter ->
-                colonSplitter.setString(enabledServicesSetting)
+                colonSplitter.setString(services)
                 val expectedComponentName = ComponentName(context, AccessibilityService::class.java)
                 while (colonSplitter.hasNext()) {
                     val componentNameString = colonSplitter.next()
-                    val enabledService = ComponentName.unflattenFromString(componentNameString)
-                    if (enabledService != null && enabledService == expectedComponentName) {
+                    val componentName = ComponentName.unflattenFromString(componentNameString)
+                    if (componentName != null && componentName == expectedComponentName) {
                         return true
                     }
                 }
@@ -90,16 +68,76 @@ class AccessibilityTool(val context: Context) {
             }
         }
 
-        private fun isSecureAccessible() = Pref.shouldEnableA11yServiceWithSecureSettings() && SettingsUtils.SecureSettings.isGranted(context)
+        @JvmOverloads
+        fun start(withLaunchSettings: Boolean = true): Boolean {
+            if (startWithConvenientWaysIfPossible()) {
+                return true
+            }
+            return false.also { if (withLaunchSettings) launchSettings() }
+        }
 
-        private fun isRootAccessible() = Pref.shouldEnableA11yServiceWithRoot() && RootUtils.isRootAvailable()
+        @JvmOverloads
+        fun stop(withLaunchSettings: Boolean = true): Boolean {
+            var result = false
+            if (AccessibilityService.stop() && !exists()) {
+                result = true.also { Log.d(tag, "Accessibility Service disabled successfully by \"disableSelf\"") }
+            }
+            if (isRootAccessible() && stopWithRoot()) {
+                result = true.also { Log.d(tag, "Accessibility Service disabled successfully by \"root\"") }
+            }
+            if (isSecureAccessible() && stopWithSecure()) {
+                result = true.also { Log.d(tag, "Accessibility Service disabled successfully by \"secure settings\"") }
+            }
+            return result || false.also { if (withLaunchSettings) launchSettings() }
+        }
 
-        private fun enableWithRoot(timeout: Long? = null): Boolean = when (timeout != null) {
-            true -> enableWithRoot() && AccessibilityService.waitForEnabled(timeout.toLong())
+        @JvmOverloads
+        fun startAndWaitFor(timeout: Long = DEFAULT_A11Y_START_TIMEOUT) {
+            if (isRunning()) return
+            if (startWithConvenientWaysIfPossibleAndWaitFor(DEFAULT_A11Y_START_TIMEOUT)) return
+            launchSettings()
+            if (!AccessibilityService.waitForStarted(timeout)) {
+                throw ScriptInterruptedException()
+            }
+        }
+
+        private fun startWithConvenientWaysIfPossible() = when {
+            startWithRootIfPossible() -> true
+            startWithSecureIfPossible() -> true
+            else -> false
+        }
+
+        private fun startWithConvenientWaysIfPossibleAndWaitFor(timeout: Long = DEFAULT_A11Y_START_TIMEOUT) = when {
+            startWithRootIfPossible(timeout) -> true
+            startWithSecureIfPossible(timeout) -> true
+            else -> false
+        }
+
+        fun ensure() {
+            if (isRunning()) return
+            if (exists()) {
+                launchSettings()
+                throw ScriptException(context.getString(R.string.text_a11y_service_enabled_but_not_running))
+            }
+            if (!startWithConvenientWaysIfPossibleAndWaitFor()) {
+                throw ScriptException(context.getString(R.string.error_no_accessibility_permission))
+            }
+        }
+
+        fun launchSettings() {
+            this@AccessibilityTool.launchSettings()
+        }
+
+        private fun isSecureAccessible() = Pref.shouldStartA11yServiceWithSecureSettings() && SettingsUtils.SecureSettings.isGranted(context)
+
+        private fun isRootAccessible() = Pref.shouldStartA11yServiceWithRoot() && RootUtils.isRootAvailable()
+
+        private fun startWithRoot(timeout: Long? = null): Boolean = when (timeout != null) {
+            true -> startWithRoot() && AccessibilityService.waitForStarted(timeout.toLong())
             else -> try {
-                disableWithRoot()
+                stopWithRoot()
 
-                val services = getEnabledWithRoot(true)
+                val services = getStartedWithRoot(true)
 
                 val cmdServices = "settings put secure enabled_accessibility_services $services"
                 val resultServices = ProcessShell.execCommand(cmdServices, true)
@@ -113,27 +151,27 @@ class AccessibilityTool(val context: Context) {
             }
         }
 
-        private fun enableWithRootIfNeeded(timeout: Long? = null) = isRootAccessible() && enableWithRoot(timeout)
+        private fun startWithRootIfPossible(timeout: Long? = null) = isRootAccessible() && startWithRoot(timeout)
 
-        private fun enableWithSecure(timeout: Long? = null): Boolean = when (timeout != null) {
-            true -> enableWithSecure() && AccessibilityService.waitForEnabled(timeout)
+        private fun startWithSecure(timeout: Long? = null): Boolean = when (timeout != null) {
+            true -> startWithSecure() && AccessibilityService.waitForStarted(timeout)
             else -> try {
-                disableWithSecure()
+                stopWithSecure()
 
-                val enabledWithSecure = getEnabledWithSecure(true)
+                val enabledWithSecure = getStartedWithSecure(true)
                 Secure.putString(context.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES, enabledWithSecure)
                 Secure.putInt(context.contentResolver, Secure.ACCESSIBILITY_ENABLED, 1)
 
-                isEnabled()
+                exists()
             } catch (e: Exception) {
                 false
             }
         }
 
-        private fun enableWithSecureIfNeeded(timeout: Long? = null) = isSecureAccessible() && enableWithSecure(timeout)
+        private fun startWithSecureIfPossible(timeout: Long? = null) = isSecureAccessible() && startWithSecure(timeout)
 
-        private fun disableWithRoot() = try {
-            val services = getEnabledWithRoot(false)
+        private fun stopWithRoot() = try {
+            val services = getStartedWithRoot(false)
 
             val cmdServices = "settings put secure enabled_accessibility_services $services"
             val resultServices = ProcessShell.execCommand(cmdServices, true)
@@ -146,26 +184,26 @@ class AccessibilityTool(val context: Context) {
             false
         }
 
-        private fun disableWithSecure() = try {
-            Secure.putString(context.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES, getEnabledWithSecure(false))
+        private fun stopWithSecure() = try {
+            Secure.putString(context.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES, getStartedWithSecure(false))
             Secure.putInt(context.contentResolver, Secure.ACCESSIBILITY_ENABLED, 0)
-            !isEnabled()
+            !exists()
         } catch (e: Exception) {
             false
         }
 
-        private fun getEnabledWithRoot(withAutoJs: Boolean? = null): String = when (withAutoJs) {
-            true -> attachAutoJs(getEnabledWithRoot(false))
-            false -> detachAutoJs(getEnabledWithRoot())
+        private fun getStartedWithRoot(withAutoJs: Boolean? = null): String = when (withAutoJs) {
+            true -> attachAutoJs(getStartedWithRoot(false))
+            false -> detachAutoJs(getStartedWithRoot())
             else -> {
                 val cmd = "settings get secure enabled_accessibility_services"
                 ProcessShell.execCommand(cmd, true).result.takeUnless { it == "null" }?.replace("\n", "") ?: ""
             }
         }
 
-        private fun getEnabledWithSecure(withAutoJs: Boolean? = null): String = when (withAutoJs) {
-            true -> attachAutoJs(getEnabledWithSecure(false))
-            false -> detachAutoJs(getEnabledWithSecure())
+        private fun getStartedWithSecure(withAutoJs: Boolean? = null): String = when (withAutoJs) {
+            true -> attachAutoJs(getStartedWithSecure(false))
+            false -> detachAutoJs(getStartedWithSecure())
             else -> Secure.getString(context.contentResolver, Secure.ENABLED_ACCESSIBILITY_SERVICES)?.replace("\n", "") ?: ""
         }
 

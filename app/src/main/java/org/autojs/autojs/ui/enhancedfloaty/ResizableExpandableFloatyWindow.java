@@ -287,5 +287,14 @@ public class ResizableExpandableFloatyWindow extends FloatyWindow {
         updateWindowLayoutParams(windowLayoutParams);
     }
 
+    public void setTouchable(boolean touchable) {
+        WindowManager.LayoutParams windowLayoutParams = getWindowLayoutParams();
+        if (touchable) {
+            windowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        } else {
+            windowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        }
+        updateWindowLayoutParams(windowLayoutParams);
+    }
 }
 

@@ -388,7 +388,7 @@ public class Images {
                 initSuccessfully();
                 result.setAndNotify(true);
             });
-            result.blockedGet();
+            result.blockedGet(60_000);
         }
     }
 

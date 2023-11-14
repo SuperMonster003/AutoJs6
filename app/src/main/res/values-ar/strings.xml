@@ -262,8 +262,6 @@
     <string name="text_auto_check_for_updates">تحقق من التحديثات التلقائية</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">تحقق من وجود التحديثات تلقائيًا وعرض تناول وجبة خفيفة على الصفحة الرئيسية</string>
     <string name="text_auto_night_mode">وضع الليل التلقائي</string>
-    <string name="text_auto_operate_service">خدمة إمكانية الوصول</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">يتم تمكين خدمة إمكانية الوصول ولكن لا تعمل</string>
     <string name="text_back">خلف</string>
     <string name="text_broadcast_action">عمل</string>
     <string name="text_broadcast_task">مهمة البث</string>

@@ -15,9 +15,9 @@ class PostNotificationPermission(override val context: Context) : PermissionItem
 
     override fun has() = NotificationUtils.isEnabled()
 
-    override fun request() = config()
+    override fun request(): Boolean = false.also { config() }
 
-    override fun revoke() = config()
+    override fun revoke(): Boolean = false.also { config() }
 
     private fun config() = NotificationUtils.launchSettings()
 

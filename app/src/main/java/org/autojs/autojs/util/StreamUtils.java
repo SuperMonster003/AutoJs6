@@ -16,7 +16,7 @@ public class StreamUtils {
                 try {
                     c.close();
                 } catch (IOException ignored) {
-                    // Ignored.
+                    /* Ignored. */
                 }
             }
         }

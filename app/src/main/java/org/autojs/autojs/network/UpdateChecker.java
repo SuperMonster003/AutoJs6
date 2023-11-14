@@ -608,7 +608,7 @@ public class UpdateChecker {
                     }
                 }
             } catch (Exception ignore) {
-                // Ignored.
+                /* Ignored. */
             }
             return targetAsset;
         }

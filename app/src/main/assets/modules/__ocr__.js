@@ -116,7 +116,7 @@ module.exports = function (scriptRuntime, scope) {
                         // @Signature recognizeText(img: ImageWrapper, region: OmniRegion): string[];
 
                         // @Overload recognizeText(img: ImageWrapper, options: DetectOptionsMLKit | DetectOptionsPaddle): string[];
-                        return this.recognizeText(img, { region: arguments[1] });
+                        return this.recognizeText(arguments[0], { region: arguments[1] });
                     }
 
                     // @Signature recognizeText(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
@@ -186,7 +186,7 @@ module.exports = function (scriptRuntime, scope) {
                         // @Signature detect(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
 
                         // @Overload detect(img: ImageWrapper, options: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
-                        return this.detect(img, { region: arguments[1] });
+                        return this.detect(/* img */ arguments[0], { region: arguments[1] });
                     }
 
                     // @Signature detect(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];

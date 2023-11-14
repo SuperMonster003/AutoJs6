@@ -4,10 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.mozilla.javascript.BaseFunction
-import org.mozilla.javascript.Context
-import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.Undefined
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
@@ -18,12 +14,11 @@ import kotlin.random.Random
  */
 class Timer(runtime: ScriptRuntime, looper: Looper) {
 
-    private val myLooper: Looper = looper
+    private val myLooper = looper
     private val mHandlerCallbacks = ConcurrentHashMap<Int, Runnable?>()
-    private val mRuntime: ScriptRuntime = runtime
-    private val mHandler: Handler = Handler(looper)
-    private val isUiLoop: Boolean = looper == Looper.getMainLooper()
-    private val context: Context? by lazy { Context.getCurrentContext() }
+    private val mRuntime = runtime
+    private val mHandler = Handler(looper)
+    private val mIsUiLoop = looper == Looper.getMainLooper()
 
     constructor(runtime: ScriptRuntime) : this(runtime, Looper.myLooper()!!)
 
@@ -38,22 +33,13 @@ class Timer(runtime: ScriptRuntime, looper: Looper) {
         return id
     }
 
-    private fun callFunction(callback: Any, thiz: Any?, args: Any?) {
-        val func = callback as BaseFunction
-        val map: Array<Any> =
-            (args as? Array<*>)?.map { Context.javaToJS(it, callback.parentScope) }
-                ?.toTypedArray() ?: emptyArray()
+    @Suppress("SameParameterValue")
+    private fun callFunction(callback: Any, thisArg: Any?, args: Array<*>) {
         try {
-            func.call(
-                context ?: Context.enter(), func.parentScope,
-                thiz as? Scriptable ?: Undefined.SCRIPTABLE_UNDEFINED, map
-            )
+            mRuntime.bridges.call(callback, thisArg, args)
         } catch (e: Exception) {
-            if (isUiLoop) {
-                mRuntime.exit(e)
-            } else throw e
-        } finally {
-            context ?: Context.exit()
+            if (!mIsUiLoop) throw e
+            mRuntime.exit(e)
         }
     }
 
@@ -131,7 +117,6 @@ class Timer(runtime: ScriptRuntime, looper: Looper) {
 
     companion object {
 
-        private const val LOG_TAG = "Timer"
         private val EMPTY_RUNNABLE = Runnable {}
 
     }

@@ -266,6 +266,7 @@
     <string name="key_extending_js_build_in_objects" translatable="false">key_$_extending_js_build_in_objects</string>
     <string name="key_floating_menu_shown" translatable="false">key_$_floating_menu_shown</string>
     <string name="key_foreground_service" translatable="false">key_$_foreground_service</string>
+    <string name="key_a11y_service" translatable="false">key_$_a11y_service</string>
     <string name="key_gesture_observing" translatable="false">key_$_gesture_observing</string>
     <string name="key_guard_mode" translatable="false">key_$_guard_mode</string>
     <string name="key_hidden_files" translatable="false">key_$_hidden_files</string>
@@ -441,8 +442,6 @@
     <string name="text_auto_check_for_updates">Auto check for updates</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Check for updates automatically and show a snackbar on homepage</string>
     <string name="text_auto_night_mode">Auto night mode</string>
-    <string name="text_auto_operate_service">Accessibility service</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">Accessibility service is enabled but not working</string>
     <string name="text_back">Back</string>
     <string name="text_broadcast_action">Action</string>
     <string name="text_broadcast_action_prefix" translatable="false">android.intent.action.</string>

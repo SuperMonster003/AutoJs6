@@ -67,7 +67,7 @@ class App : MultiDexApplication() {
         initDynamicBroadcastReceivers()
 
         setUpDefaultNightMode()
-        AccessibilityTool(this).service.enableIfNeeded()
+        AccessibilityTool(this).service.start(false)
 
         devPluginService = DevPluginService(this)
     }

@@ -51,7 +51,7 @@ open class LayoutBoundsFloatyWindow @JvmOverloads constructor(
                         try {
                             menu.preMeasure()
                         } catch (e: Exception) {
-                            // Ignored.
+                            /* Ignored. */
                         }
                     }
                     menu.showAsDropDownAtLocation(view, bounds.height(), x, y)
