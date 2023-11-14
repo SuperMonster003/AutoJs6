@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.floating.layoutinspector
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -12,9 +13,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.NumberUtils.toElegantlyDoubleString
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import org.opencv.core.Point
 import java.lang.reflect.Field
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /**
  * Created by Stardust on 2017/3/10.
@@ -57,7 +62,13 @@ class NodeInfoView : RecyclerView {
                             else -> value.joinToString("\n")
                         }
                     }
-                    else -> value?.toString() ?: ""
+                    else -> {
+                        when (FIELDS[i].name) {
+                            "bounds" -> (value as? Rect)?.let { "[ ${it.left}, ${it.top}, ${it.right}, ${it.bottom} ]" } ?: value?.toString() ?: ""
+                            "center" -> (value as? Point)?.let { "[ ${toElegantlyDoubleString(it.x)}, ${toElegantlyDoubleString(it.y)} ]" } ?: value?.toString() ?: ""
+                            else -> value?.toString() ?: ""
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 throw RuntimeException(e)
@@ -133,6 +144,26 @@ class NodeInfoView : RecyclerView {
             "className" -> value = value.replace("^android\\.widget\\.".toRegex(), "")
             "actionNames" -> return "action(${value.split("\n").joinToString(", ") { "'$it'" }})"
             "bounds" -> return "$attr(${value.replace("[^\\d,]".toRegex(), "").replace(",", ", ")})"
+            "center" -> {
+                val (x, y) = value.split(Regex(",\\s*")).map {
+                    it.replace(Regex("[^\\d.]+"), "").toDouble()
+                }
+                var result = "centerX(%X%).centerY(%Y%)"
+
+                result = if (x == x.toLong().toDouble()) {
+                    result.replace("%X%", x.toLong().toString())
+                } else {
+                    result.replace("%X%", "${toElegantlyDoubleString(floor(x))}, ${toElegantlyDoubleString(ceil(x))}")
+                }
+
+                result = if (y == y.toLong().toDouble()) {
+                    result.replace("%Y%", y.toLong().toString())
+                } else {
+                    result.replace("%Y%", "${toElegantlyDoubleString(floor(y))}, ${toElegantlyDoubleString(ceil(y))}")
+                }
+
+                return result
+            }
         }
         return when (NodeInfo::class.java.getDeclaredField(attr).type) {
             java.lang.String::class.java -> "$attr('$value')"
@@ -146,16 +177,16 @@ class NodeInfoView : RecyclerView {
             // Common
             "packageName", "id", "fullId", "idHex",
             "desc", "text",
-            "bounds", "className",
+            "bounds", "center", "className",
             "clickable", "longClickable", "scrollable",
             "indexInParent", "childCount", "depth",
 
             // Regular
-            "checked", "enabled", "editable", "focusable",
+            "checked", "enabled", "editable", "focusable", "checkable",
             "selected", "dismissable", "visibleToUser",
 
             // Rare
-            "contextClickable", "accessibilityFocused",
+            "contextClickable", "focused", "accessibilityFocused",
             "rowCount", "columnCount", "row", "column", "rowSpan", "columnSpan",
             "drawingOrder",
 

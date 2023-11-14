@@ -55,17 +55,18 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     @get:Synchronized
     private var mCountDownTimer: CountDownTimer? = null
 
+    private var mFloatyWindow: ResizableExpandableFloatyWindow? = null
+
     private val context: Context
-        get() = mConsoleView?.get()?.context ?: uiHandler.context
+        get() = mConsoleView?.get()?.context ?: uiHandler.applicationContext
 
     private val mLockWindowShow = Object()
     private val mLockWindowCreated = Object()
     private val mLockConsoleView = Object()
     private val mIdCounter = AtomicInteger(0)
-    private val mFloatyWindow: ResizableExpandableFloatyWindow
     private val mConsoleFloaty: ConsoleFloaty
     private val mInput: BlockingQueue<String> = ArrayBlockingQueue(1)
-    private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(uiHandler.context)
+    private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(uiHandler.applicationContext)
 
     val logEntries = ArrayList<LogEntry>()
 
@@ -287,7 +288,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             putExtra(Intent.EXTRA_TEXT, message)
             type = "text/plain"
         }
-        uiHandler.context.startActivity(Intent.createChooser(sendIntent, null).apply {
+        uiHandler.applicationContext.startActivity(Intent.createChooser(sendIntent, null).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         })
     }
@@ -349,13 +350,14 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
                 configurator.contentTextColors?.let { setContentTextColor(it) }
                 configurator.contentBackgroundColor?.let { setContentBackgroundColor(it) }
                 configurator.contentBackgroundAlpha?.let { setContentBackgroundAlpha(it) }
+                setTouchable(configurator.isTouchable)
                 mLockWindowCreated.wait(mDefaultSafeDelay)
             }
         }
     }
 
     private fun setTitleBarGestureListener() {
-        mFloatyWindow.windowBridge?.let { windowBridge ->
+        mFloatyWindow?.windowBridge?.let { windowBridge ->
             mConsoleFloaty.titleBarView?.let { view ->
                 DragGesture(windowBridge, view).apply { pressedAlpha = 1.0f }
             }
@@ -379,16 +381,16 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     private fun startFloatyService() {
-        uiHandler.context.startService(Intent(uiHandler.context, FloatyService::class.java))
+        uiHandler.applicationContext.startService(Intent(uiHandler.applicationContext, FloatyService::class.java))
     }
 
     @ScriptInterface
     override fun hide() = runWithWindow {
         synchronized(mLockWindowShow) {
             try {
-                mFloatyWindow.close()
+                mFloatyWindow!!.close()
             } catch (ignored: IllegalArgumentException) {
-                // Ignored.
+                /* Ignored. */
             }
             isShowing = false
         }
@@ -405,10 +407,32 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     @ScriptInterface
+    override fun setTouchable(touchable: Boolean) = runWithWindow {
+        configurator.setTouchable(touchable)
+        if (isShowing) {
+            try {
+                mFloatyWindow!!.setTouchable(touchable)
+            } catch (e: Exception) {
+                // FIXME by SuperMonster003 on Nov 2, 2023.
+                //  ! java.lang.NullPointerException: Attempt to read from field
+                //  ! 'int android.view.WindowManager$LayoutParams.flags' on a null object reference in method
+                //  ! 'void org.autojs.autojs.ui.enhancedfloaty.ResizableExpandableFloatyWindow.setTouchable(boolean)'.
+                //  ! A more elegant way is needed.
+                uiHandler.postDelayed({
+                    mFloatyWindow!!.setTouchable(touchable)
+                }, 320)
+            }
+        }
+    }
+
+    @ScriptInterface
+    fun setTouchable() = setTouchable(true)
+
+    @ScriptInterface
     override fun setPosition(x: Double, y: Double) = runWithWindow {
         configurator.setPosition(x, y)
         if (isShowing) {
-            mFloatyWindow.windowBridge.updatePosition(x.toInt(), y.toInt())
+            mFloatyWindow!!.windowBridge.updatePosition(x.toInt(), y.toInt())
         }
     }
 
@@ -569,15 +593,16 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     }
 
     private fun runWithWindow(r: Runnable) {
-        if (isUiThread) r.run() else uiHandler.post(r)
+        mFloatyWindow ?: return
+        uiHandler.post(r)
     }
 
     private val isUiThread: Boolean
         get() = Looper.myLooper() == Looper.getMainLooper()
 
-    fun expand() = uiHandler.post { mFloatyWindow.expand() }
+    fun expand() = uiHandler.post { mFloatyWindow?.expand() }
 
-    fun collapse() = uiHandler.post { mFloatyWindow.collapse() }
+    fun collapse() = uiHandler.post { mFloatyWindow?.collapse() }
 
     @JvmOverloads
     fun hideDelayed(exitOnCloseTimeout: Long = configurator.exitOnCloseTimeout) {
@@ -630,6 +655,8 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         var titleIconsTint: Int? = null
             private set
         var isExitOnClose: Boolean = false
+            private set
+        var isTouchable: Boolean = true
             private set
         var exitOnCloseTimeout: Long = DEFAULT_EXIT_ON_CLOSE_TIMEOUT
             private set
@@ -712,6 +739,10 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
         @JvmOverloads
         fun setExitOnClose(exitOnClose: Boolean = true) = also {
             isExitOnClose = exitOnClose
+        }
+
+        fun setTouchable(touchable: Boolean = true) = also {
+            isTouchable = touchable
         }
 
         internal fun initExitOnClose() {

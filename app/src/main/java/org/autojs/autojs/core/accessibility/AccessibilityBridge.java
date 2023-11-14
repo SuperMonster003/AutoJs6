@@ -52,9 +52,11 @@ public abstract class AccessibilityBridge {
         AccessibilityService.Companion.setBridge(this);
     }
 
-    public abstract void ensureServiceEnabled();
+    public abstract void ensureServiceStarted(boolean isForcibleRestart);
 
-    public abstract void waitForServiceEnabled(long timeout);
+    public void ensureServiceStarted() {
+        ensureServiceStarted(false);
+    }
 
     public void post(Runnable r) {
         mUiHandler.post(r);

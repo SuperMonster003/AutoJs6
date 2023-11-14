@@ -260,8 +260,6 @@
     <string name="text_auto_check_for_updates">Auto check for updates</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Check for updates automatically and show a snackbar on homepage</string>
     <string name="text_auto_night_mode">Auto night mode</string>
-    <string name="text_auto_operate_service">Accessibility service</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">Accessibility service is enabled but not working</string>
     <string name="text_back">Back</string>
     <string name="text_broadcast_action">Action</string>
     <string name="text_broadcast_task">Broadcast task</string>

@@ -10,16 +10,8 @@ let { files } = global;
  * @return {Internal.UI}
  */
 module.exports = function (scriptRuntime, scope) {
-    const Looper = android.os.Looper;
-    const Runnable = java.lang.Runnable;
-    const ContextThemeWrapper = android.view.ContextThemeWrapper;
     const ViewExtras = org.autojs.autojs.core.ui.ViewExtras;
-    const JsListView = org.autojs.autojs.core.ui.widget.JsListView;
-    const JsGridView = org.autojs.autojs.core.ui.widget.JsGridView;
     const JsViewHelper = org.autojs.autojs.core.ui.JsViewHelper;
-    const ThemeColor = org.autojs.autojs.theme.ThemeColor;
-    const DynamicLayoutInflater = org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater;
-    const ColorDrawable = android.graphics.drawable.ColorDrawable;
 
     require('object-observe-lite.min').call(scope);
     require('array-observe.min').call(scope);

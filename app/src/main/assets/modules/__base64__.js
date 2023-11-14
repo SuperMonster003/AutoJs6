@@ -4,7 +4,6 @@
  * @return {Internal.Base64}
  */
 module.exports = function (scriptRuntime, scope) {
-    const Base64 = android.util.Base64;
     let _ = {
         Base64Ctor: (/* @IIFE */ () => {
             /**

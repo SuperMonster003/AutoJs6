@@ -258,8 +258,6 @@
     <string name="text_auto_check_for_updates">自动检查更新</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自动检查更新并在首页下方显示通知条</string>
     <string name="text_auto_night_mode">自动夜间模式</string>
-    <string name="text_auto_operate_service">无障碍服务</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">无障碍服务已启用但未正常运行</string>
     <string name="text_back">返回</string>
     <string name="text_broadcast_action">动作 (Action)</string>
     <string name="text_broadcast_task">广播触发任务</string>

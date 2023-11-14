@@ -44,7 +44,7 @@ public class ThreadUtils {
         try {
             future.get(timeout, TimeUnit.MILLISECONDS);
         } catch (ExecutionException | TimeoutException ignore) {
-            // Ignored.
+            /* Ignored. */
         }
         future.cancel(true);
         return result.get();

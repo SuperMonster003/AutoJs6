@@ -72,6 +72,9 @@ interface Console {
     fun setPosition(x: Double, y: Double)
 
     @ScriptInterface
+    fun setTouchable(touchable: Boolean)
+
+    @ScriptInterface
     fun rawInput(): String?
 
 }

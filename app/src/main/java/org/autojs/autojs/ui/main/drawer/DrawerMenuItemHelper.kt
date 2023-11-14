@@ -15,14 +15,15 @@ interface DrawerMenuItemHelper {
     val isInMainThread: Boolean
         get() = false
 
-    fun active()
+    fun active(): Boolean
 
-    fun toggle()
+    fun toggle(): Boolean
 
-    fun toggle(aimState: Boolean) {
-        if (aimState != isActive) {
-            toggle()
+    fun toggle(aimState: Boolean): Boolean {
+        if (aimState == isActive) {
+            return true
         }
+        return toggle()
     }
 
     fun refreshSubtitle() {

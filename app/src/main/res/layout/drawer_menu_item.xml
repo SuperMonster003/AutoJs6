@@ -47,7 +47,7 @@
                 android:gravity="center_vertical"
                 android:textColor="?drawer_item_text_color"
                 android:textSize="14sp"
-                tools:text="@string/text_auto_operate_service" />
+                tools:text="@string/text_a11y_service" />
 
         <TextView
                 android:id="@+id/subtitle"

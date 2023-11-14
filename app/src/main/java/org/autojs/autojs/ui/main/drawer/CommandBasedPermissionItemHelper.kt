@@ -13,16 +13,18 @@ import org.autojs.autojs6.R
 
 interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRootItem, IPermissionAdbItem {
 
-    override fun request() {
-        if (!RootUtils.isRootAvailable() || !requestWithRoot()) {
-            requestWithAdb()
+    override fun request(): Boolean {
+        if (RootUtils.isRootAvailable() && requestWithRoot()) {
+            return true
         }
+        return requestWithAdb()
     }
 
-    override fun revoke() {
-        if (!RootUtils.isRootAvailable() || !revokeWithRoot()) {
-            revokeWithAdb()
+    override fun revoke(): Boolean {
+        if (RootUtils.isRootAvailable() && revokeWithRoot()) {
+            return true
         }
+        return revokeWithAdb()
     }
 
     override fun requestWithAdb() = withAdb(ACTION.REQUEST)
@@ -53,7 +55,7 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
                 return true.also { ViewUtils.showToast(context, onSuccessMessageRes) }
             }
         } catch (ignore: Exception) {
-            // Ignored.
+            /* Ignored. */
         }
         return false.also { ViewUtils.showToast(context, onFailureMessageRes, true) }
     }

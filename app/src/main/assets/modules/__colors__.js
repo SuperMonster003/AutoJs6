@@ -15,10 +15,6 @@ module.exports = function (scriptRuntime, scope) {
      */
     const rtColors = scriptRuntime.colors;
 
-    const ColorStateList = android.content.res.ColorStateList;
-    const ColorDetector = org.autojs.autojs.core.image.ColorDetector;
-    const ThemeColor = org.autojs.autojs.theme.ThemeColor;
-
     let _ = {
         Color: (/* @IIFE */ () => {
             /**

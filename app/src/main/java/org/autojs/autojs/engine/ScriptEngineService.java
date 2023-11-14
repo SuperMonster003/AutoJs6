@@ -1,8 +1,10 @@
 package org.autojs.autojs.engine;
 
 import android.content.Context;
+import android.os.Build;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.execution.LoopedBasedJavaScriptExecution;
@@ -21,8 +23,6 @@ import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.ScriptSource;
 import org.autojs.autojs.tool.UiHandler;
 import org.autojs.autojs6.R;
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -35,60 +35,12 @@ import java.util.Set;
  */
 public class ScriptEngineService {
 
-    private static final String LOG_TAG = "ScriptEngineService";
-    private static final EventBus EVENT_BUS = new EventBus();
-    private static final ScriptExecutionListener GLOBAL_LISTENER = new SimpleScriptExecutionListener() {
-        @Override
-        public void onStart(ScriptExecution execution) {
-            ScriptSource scriptSource = execution.getSource();
-            if (execution.getEngine() instanceof JavaScriptEngine) {
-                ((JavaScriptEngine) execution.getEngine()).getRuntime().console.setTitle(scriptSource.getName());
-            }
-            EVENT_BUS.post(new ScriptExecutionEvent(ScriptExecutionEvent.ON_START, scriptSource.getElegantPath()));
-        }
-
-        @Override
-        public void onSuccess(ScriptExecution execution, Object result) {
-            onFinish(execution);
-        }
-
-        private void onFinish(ScriptExecution execution) {
-
-        }
-
-        @Override
-        public void onException(ScriptExecution execution, Throwable e) {
-            e.printStackTrace();
-            onFinish(execution);
-            String message = null;
-            if (!ScriptInterruptedException.causedByInterrupted(e)) {
-                message = e.getMessage();
-                if (execution.getEngine() instanceof JavaScriptEngine engine) {
-                    engine.getRuntime().console.error(e);
-                }
-            }
-            if (execution.getEngine() instanceof JavaScriptEngine engine) {
-                Throwable uncaughtException = engine.getUncaughtException();
-                if (uncaughtException != null) {
-                    message = uncaughtException.getMessage();
-                    engine.getRuntime().console.error(uncaughtException);
-                }
-            }
-            if (message != null) {
-                EVENT_BUS.post(new ScriptExecutionEvent(ScriptExecutionEvent.ON_EXCEPTION, message));
-            }
-        }
-
-    };
-
-
     private static ScriptEngineService sInstance;
-    private final Context mContext;
+    private final Context mApplicationContext;
     private final UiHandler mUiHandler;
     private final Console mGlobalConsole;
     private final ScriptEngineManager mScriptEngineManager;
     private final EngineLifecycleObserver mEngineLifecycleObserver = new EngineLifecycleObserver() {
-
         @Override
         public void onEngineRemove(ScriptEngine engine) {
             mScriptExecutions.remove(engine.getId());
@@ -100,18 +52,63 @@ public class ScriptEngineService {
 
     ScriptEngineService(ScriptEngineServiceBuilder builder) {
         mUiHandler = builder.mUiHandler;
-        mContext = mUiHandler.getContext();
+        mApplicationContext = mUiHandler.getApplicationContext();
         mScriptEngineManager = builder.mScriptEngineManager;
         mGlobalConsole = builder.mGlobalConsole;
         mScriptEngineManager.setEngineLifecycleCallback(mEngineLifecycleObserver);
-        mScriptExecutionObserver.registerScriptExecutionListener(GLOBAL_LISTENER);
-        EVENT_BUS.register(this);
-        mScriptEngineManager.putGlobal("context", mContext);
-        ScriptRuntime.setApplicationContext(mContext.getApplicationContext());
+        mScriptExecutionObserver.registerScriptExecutionListener(new SimpleScriptExecutionListener() {
+            @Override
+            public void onStart(ScriptExecution execution) {
+                ScriptSource scriptSource = execution.getSource();
+                if (execution.getEngine() instanceof JavaScriptEngine) {
+                    ((JavaScriptEngine) execution.getEngine()).getRuntime().console.setTitle(scriptSource.getName());
+                }
+                mGlobalConsole.verbose(MessageFormat.format("{0} [{1}].", getLanguageContext().getString(R.string.text_start_running), scriptSource.getElegantPath()));
+            }
+
+            @Override
+            public void onSuccess(ScriptExecution execution, Object result) {
+                onFinish(execution);
+            }
+
+            private void onFinish(ScriptExecution execution) {
+                /* Empty function body. */
+            }
+
+            @Override
+            public void onException(ScriptExecution execution, Throwable e) {
+                e.printStackTrace();
+                onFinish(execution);
+                String message = null;
+                if (!ScriptInterruptedException.causedByInterrupted(e)) {
+                    message = e.getMessage();
+                    if (execution.getEngine() instanceof JavaScriptEngine engine) {
+                        engine.getRuntime().console.error(e);
+                    }
+                }
+                if (execution.getEngine() instanceof JavaScriptEngine engine) {
+                    Throwable uncaughtException = engine.getUncaughtException();
+                    if (uncaughtException != null) {
+                        message = uncaughtException.getMessage();
+                        engine.getRuntime().console.error(uncaughtException);
+                    }
+                }
+                if (message != null) {
+                    mUiHandler.toast(getLanguageContext().getString(R.string.text_error) + ": " + message);
+                }
+            }
+
+        });
+        mScriptEngineManager.putGlobal("context", mApplicationContext);
+        ScriptRuntime.setApplicationContext(mApplicationContext.getApplicationContext());
     }
 
     public Console getGlobalConsole() {
         return mGlobalConsole;
+    }
+
+    public Context getLanguageContext() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? mApplicationContext : ContextCompat.getContextForLanguage(mApplicationContext);
     }
 
     public void registerEngineLifecycleCallback(ScriptEngineManager.EngineLifecycleCallback engineLifecycleCallback) {
@@ -146,7 +143,7 @@ public class ScriptEngineService {
         if (source instanceof JavaScriptSource) {
             int mode = ((JavaScriptSource) source).getExecutionMode();
             if ((mode & JavaScriptSource.EXECUTION_MODE_UI) != 0) {
-                return ScriptExecuteActivity.execute(mContext, mScriptEngineManager, task);
+                return ScriptExecuteActivity.execute(mApplicationContext, mScriptEngineManager, task);
             }
         }
         RunnableScriptExecution r;
@@ -167,14 +164,6 @@ public class ScriptEngineService {
         return execute(new ScriptExecutionTask(source, null, config));
     }
 
-    @Subscribe
-    public void onScriptExecution(ScriptExecutionEvent event) {
-        switch (event.getCode()) {
-            case ScriptExecutionEvent.ON_START -> mGlobalConsole.verbose(MessageFormat.format("{0} [{1}].", mContext.getString(R.string.text_start_running), event.getMessage()));
-            case ScriptExecutionEvent.ON_EXCEPTION -> mUiHandler.toast(mContext.getString(R.string.text_error) + ": " + event.getMessage());
-        }
-    }
-
     public int stopAll() {
         return mScriptEngineManager.stopAll();
     }
@@ -182,7 +171,7 @@ public class ScriptEngineService {
     public int stopAllAndToast() {
         int n = stopAll();
         if (n > 0) {
-            mUiHandler.toast(mContext.getResources().getQuantityString(R.plurals.text_already_stop_n_scripts, n, n));
+            mUiHandler.toast(mApplicationContext.getResources().getQuantityString(R.plurals.text_already_stop_n_scripts, n, n));
         }
         return n;
     }
@@ -214,7 +203,6 @@ public class ScriptEngineService {
         return sInstance;
     }
 
-
     private static class EngineLifecycleObserver implements ScriptEngineManager.EngineLifecycleCallback {
 
         private final Set<ScriptEngineManager.EngineLifecycleCallback> mEngineLifecycleCallbacks = new LinkedHashSet<>();
@@ -241,7 +229,6 @@ public class ScriptEngineService {
             synchronized (mEngineLifecycleCallbacks) {
                 mEngineLifecycleCallbacks.add(callback);
             }
-
         }
 
         void unregisterCallback(ScriptEngineManager.EngineLifecycleCallback callback) {
@@ -251,12 +238,7 @@ public class ScriptEngineService {
         }
     }
 
-
     private static class ScriptExecutionEvent {
-
-        static final int ON_START = 1001;
-        static final int ON_SUCCESS = 1002;
-        static final int ON_EXCEPTION = 1003;
 
         private final int mCode;
         private final String mMessage;
@@ -273,6 +255,7 @@ public class ScriptEngineService {
         public String getMessage() {
             return mMessage;
         }
+
     }
 
 }

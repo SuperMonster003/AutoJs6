@@ -86,7 +86,7 @@ public class BlockedMaterialDialog extends MaterialDialog {
             }
             mNotified = true;
             if (mCallback != null) {
-                mScriptBridges.callFunction(mCallback, null, new Object[]{r});
+                mScriptBridges.call(mCallback, null, new Object[]{r});
             }
             if (mResultBox != null) {
                 mResultBox.setAndNotify(r);
@@ -99,7 +99,7 @@ public class BlockedMaterialDialog extends MaterialDialog {
             }
             mNotified = true;
             if (mCallback != null) {
-                mScriptBridges.callFunction(mCallback, null, new int[]{r});
+                mScriptBridges.call(mCallback, null, new Integer[]{r});
             }
             if (mResultBox != null) {
                 mResultBox.setAndNotify(r);
@@ -112,7 +112,7 @@ public class BlockedMaterialDialog extends MaterialDialog {
             }
             mNotified = true;
             if (mCallback != null) {
-                mScriptBridges.callFunction(mCallback, null, new boolean[]{r});
+                mScriptBridges.call(mCallback, null, new Boolean[]{r});
             }
             if (mResultBox != null) {
                 mResultBox.setAndNotify(r);
@@ -127,9 +127,7 @@ public class BlockedMaterialDialog extends MaterialDialog {
 
         public Builder confirm() {
             dismissListener(dialog -> setAndNotify(false));
-            onAny((dialog, which) -> {
-                setAndNotify(which == DialogAction.POSITIVE);
-            });
+            onAny((dialog, which) -> setAndNotify(which == DialogAction.POSITIVE));
             return this;
         }
 

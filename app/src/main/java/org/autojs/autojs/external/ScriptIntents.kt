@@ -47,7 +47,7 @@ object ScriptIntents {
                     }
                 }
             } catch (e: JSONException) {
-                // Ignored.
+                /* Ignored. */
             }
         }
         ExecutionConfig().let { config ->

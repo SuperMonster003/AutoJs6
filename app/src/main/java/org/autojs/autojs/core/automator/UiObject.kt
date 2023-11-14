@@ -35,7 +35,7 @@ open class UiObject(
     info: Any?,
     private val allocator: AccessibilityNodeInfoAllocator?,
     private val depth: Int,
-    private val indexInParent: Int
+    private val indexInParent: Int,
 ) : AccessibilityNodeInfoCompat(info), UiObjectActions {
 
     private val bounds by lazy { AccessibilityNodeInfoHelper.getBoundsInScreen(this) }
@@ -176,6 +176,8 @@ open class UiObject(
     fun exactCenterY() = boundsExactCenterY()
 
     fun point() = Point(exactCenterX().toDouble(), exactCenterY().toDouble())
+
+    fun center() = point()
 
     fun size() = Size(width().toDouble(), height().toDouble())
 
@@ -403,7 +405,7 @@ open class UiObject(
     override fun getChild(index: Int): AccessibilityNodeInfoCompat =
         allocator?.getChild(this, index) ?: super.getChild(index)
 
-    override fun getParent(): AccessibilityNodeInfoCompat = allocator?.getParent(this) ?: super.getParent()
+    override fun getParent(): AccessibilityNodeInfoCompat? = allocator?.getParent(this) ?: super.getParent()
 
     override fun findAccessibilityNodeInfosByText(text: String): List<AccessibilityNodeInfoCompat> {
         return allocator?.findAccessibilityNodeInfosByText(this, text)
@@ -423,6 +425,57 @@ open class UiObject(
             e.printStackTrace()
         }
     }
+
+    fun summary() = listOf("{").asSequence().plus(
+        /* Common */ arrayOf(
+            "packageName='${packageName()}'",
+            "parent='${parent?.className}'",
+            "id='${id()}'",
+            "fullId='${fullId()}'",
+            "idHex='${idHex()}'",
+            "desc='${desc()}'",
+            "text='${text()}'",
+            "bounds='${bounds()}'",
+            "center='${center()}'",
+            "className='${className()}'",
+            "clickable=${clickable()}",
+            "longClickable=${longClickable()}",
+            "scrollable=${scrollable()}",
+            "indexInParent=${indexInParent()}",
+            "childCount=${childCount()}",
+            "depth=${depth()}"
+        ).joinToString("\n")
+    ).plus(
+        /* Regular */ arrayOf(
+            "checked=${checked()}",
+            "enabled=${enabled()}",
+            "editable=${editable()}",
+            "focusable=${focusable()}",
+            "checkable=${checkable()}",
+            "selected=${selected()}",
+            "dismissable=$isDismissable",
+            "visibleToUser=${visibleToUser()}"
+        ).joinToString("\n")
+    ).plus(
+        /* Rare */ arrayOf(
+            "contextClickable=$isContextClickable",
+            "focused=${focused()}",
+            "accessibilityFocused=${isAccessibilityFocused}",
+            "rowCount=${rowCount()}",
+            "columnCount=${columnCount()}",
+            "row=${row()}",
+            "column=${column()}",
+            "rowSpan=${rowSpan()}",
+            "columnSpan=${columnSpan()}",
+            "drawingOrder=$drawingOrder"
+        ).joinToString("\n")
+    ).plus(
+        /* Arrays */ arrayOf(
+            "actions=${actionNames()}"
+        ).joinToString("\n")
+    ).plus("}").joinToString("\n")
+
+    override fun toString() = "$className ${summary()}"
 
     companion object {
 
@@ -495,7 +548,7 @@ open class UiObject(
 
         private fun listAliases(
             @Suppress("SameParameterValue") symbol: String,
-            @Suppress("SameParameterValue") vararg others: String
+            @Suppress("SameParameterValue") vararg others: String,
         ): Array<String> {
             return arrayOf("$symbol{}", "{$symbol}").plus(others.map { listOf("$it{}", "{$it}") }.flatten())
         }
@@ -555,7 +608,7 @@ open class UiObject(
             private val compass: CharSequence? = COMPASS_PASS_ON,
             private val result: Result,
             val callback: BaseFunction? = null,
-            private val selector: UiSelector? = UiSelector()
+            private val selector: UiSelector? = UiSelector(),
         ) {
 
             fun detect(): Any? = when (val type = result.type.let { if (it is List<*>) it[0] else it }.toString()) {

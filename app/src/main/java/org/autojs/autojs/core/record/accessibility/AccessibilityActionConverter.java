@@ -5,12 +5,11 @@ import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper;
+import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.core.automator.UiObject;
 import org.autojs.autojs.core.automator.action.FilterAction;
 import org.autojs.autojs.tool.SparseArrayEntries;
-import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper;
-import org.autojs.autojs.core.accessibility.NodeInfo;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;

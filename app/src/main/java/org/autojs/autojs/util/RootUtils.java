@@ -134,7 +134,7 @@ public class RootUtils {
         try {
             ProcessShell.execCommand("settings put system pointer_location " + (isEnabled ? 1 : 0), true);
         } catch (Exception ignored) {
-            // Ignored.
+            /* Ignored. */
         }
     }
 

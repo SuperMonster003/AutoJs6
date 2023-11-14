@@ -5,17 +5,20 @@ interface ServiceItemHelper : DrawerMenuItemHelper {
     override val isActive: Boolean
         get() = isRunning
 
-    override fun active() = startIfNeeded()
+    override fun active(): Boolean {
+        if (isRunning) return true
+        return start()
+    }
 
     val isRunning: Boolean
 
-    fun start()
+    fun start(): Boolean
 
     fun startIfNeeded() {
         if (!isRunning) start()
     }
 
-    fun stop()
+    fun stop(): Boolean
 
     fun stopIfNeeded() {
         if (isRunning) stop()

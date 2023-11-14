@@ -3,7 +3,7 @@ package org.mozilla.javascript;
 import android.os.Looper;
 import android.util.Log;
 
-import org.autojs.autojs.engine.RhinoJavaScriptEngine;
+import org.autojs.autojs.rhino.AutoJsContext;
 import org.mozilla.javascript.jdk18.VMBridge_jdk18;
 
 import java.lang.reflect.Constructor;
@@ -29,7 +29,6 @@ public class VMBridge_custom extends VMBridge_jdk18 {
     protected Object newInterfaceProxy(Object proxyHelper, ContextFactory cf, InterfaceAdapter adapter, Object target, Scriptable topScope) {
         Context context = Context.getCurrentContext();
         InterfaceAdapterWrapper adapterWrapper = new InterfaceAdapterWrapper(adapter, context);
-        RhinoJavaScriptEngine engine = RhinoJavaScriptEngine.Companion.getEngineOfContext(context);
         // --- The following code is copied from super class --
         Constructor<?> c = (Constructor<?>) proxyHelper;
         InvocationHandler handler = (proxy, method, args) -> {
@@ -60,9 +59,11 @@ public class VMBridge_custom extends VMBridge_jdk18 {
                     return defaultValue(method.getReturnType());
                 } catch (Throwable e) {
                     e.printStackTrace();
-                    if (engine != null) {
+                    // @Reference to aiselp (https://github.com/aiselp) on Nov 7, 2023.
+                    //  ! https://github.com/kkevsekk1/AutoX/commit/9cfeb00280447ef2807bdc5e195095d5a83afb39#diff-18d5934044cd3d259e52c3b1053ecd57e653ae70d14a7c0f31700029e97da239
+                    if (context instanceof AutoJsContext) {
                         // notify the script thread to exit
-                        org.autojs.autojs.runtime.ScriptRuntime runtime = engine.getRuntime();
+                        org.autojs.autojs.runtime.ScriptRuntime runtime = ((AutoJsContext) context).getRhinoJavaScriptEngine().getRuntime();
                         Log.d(LOG_TAG, "runtime = " + runtime);
                         runtime.exit(e);
                     }

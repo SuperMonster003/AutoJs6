@@ -6,7 +6,6 @@
  * @return {Internal.Threads}
  */
 module.exports = function (scriptRuntime, scope) {
-    const Throwable = java.lang.Throwable;
     const Synchronizer = org.mozilla.javascript.Synchronizer;
     const TimerThread = org.autojs.autojs.core.looper.TimerThread;
 

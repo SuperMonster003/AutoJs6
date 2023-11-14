@@ -16,15 +16,8 @@ module.exports = function (scriptRuntime, scope) {
     const Scalar = org.opencv.core.Scalar;
     const Size = org.opencv.core.Size;
     const Core = org.opencv.core.Core;
-    const Imgproc = org.opencv.imgproc.Imgproc;
-    const Gravity = android.view.Gravity;
-    const Mat = org.autojs.autojs.core.opencv.Mat;
     const Images = org.autojs.autojs.runtime.api.Images;
-    const ColorDetector = org.autojs.autojs.core.image.ColorDetector;
     const ScreenCapturer = org.autojs.autojs.core.image.capture.ScreenCapturer;
-    const Bitmap = android.graphics.Bitmap;
-    const BitmapFactory = android.graphics.BitmapFactory;
-    const ByteArrayOutputStream = java.io.ByteArrayOutputStream;
 
     const RtImages = org.autojs.autojs.runtime.api.Images;
     /**
@@ -592,7 +585,7 @@ module.exports = function (scriptRuntime, scope) {
                         }
                         // noinspection UnnecessaryLocalVariableJS
                         /** @type Images.TemplateMatch[] */
-                        let results = scriptRuntime.bridges.getBridges().toArray(list);
+                        let results = scriptRuntime.bridges.toArray(list);
                         return results;
                     })(),
                     get points() {

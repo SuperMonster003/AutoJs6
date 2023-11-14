@@ -28,7 +28,7 @@ public class OcrPaddle {
                 new Thread(() -> {
                     result.setAndNotify(mPredictor.init(GlobalAppContext.get(), useSlim));
                 }).start();
-                return result.blockedGet();
+                return result.blockedGet(60_000);
             } else {
                 return mPredictor.init(GlobalAppContext.get(), useSlim);
             }

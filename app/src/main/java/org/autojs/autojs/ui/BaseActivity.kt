@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import org.autojs.autojs.pref.Language
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.LocaleUtils
@@ -35,13 +36,17 @@ abstract class BaseActivity : AppCompatActivity() {
 
         ViewUtils.makeBarsAdaptToNightMode(this)
 
-        setLocaleForAutoLanguageIfNeeded(this)
+        setApplicationLocale(this)
     }
 
-    private fun setLocaleForAutoLanguageIfNeeded(context: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            if (Language.getPrefLanguage().isAuto()) {
-                LocaleUtils.setFollowSystem(context)
+    private fun setApplicationLocale(context: Context) {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                LocaleUtils.setApplicationLocale(AppCompatDelegate.getApplicationLocales())
+            }
+            else -> when (Language.getPrefLanguage().isAuto()) {
+                true -> LocaleUtils.setFollowSystem(context)
+                else -> LocaleUtils.setApplicationLocale(Language.getPrefLanguageOrNull()?.locale)
             }
         }
     }

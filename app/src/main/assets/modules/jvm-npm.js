@@ -19,10 +19,8 @@
 /* jshint evil: true */
 
 ( /* @ModuleIIFE */ () => {
-    const File = java.io.File;
     const Scanner = java.util.Scanner;
     const System = java.lang.System;
-    const Thread = java.lang.Thread;
 
     let _ = {
         Module: (/* @IIFE */ () => {

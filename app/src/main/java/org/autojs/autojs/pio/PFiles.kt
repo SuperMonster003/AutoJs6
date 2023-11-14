@@ -509,7 +509,7 @@ object PFiles {
         try {
             closeable?.close()
         } catch (ignored: IOException) {
-            // Ignored.
+            /* Ignored. */
         }
     }
 }

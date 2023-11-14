@@ -25,12 +25,13 @@ public class FloatyWindowManger {
 
     private static WeakReference<CircularMenu> sCircularMenu;
 
-    private static DisplayOverOtherAppsPermission sDisplayOverOtherAppsPerm;
     private static boolean sCircularMenuShown;
 
     public static boolean addWindow(Context context, FloatyWindow window) {
+        DisplayOverOtherAppsPermission displayOverOtherAppsPermission = new DisplayOverOtherAppsPermission(context);
+
         context.startService(new Intent(context, FloatyService.class));
-        getDisplayOverOtherAppsPerm(context).requestIfNeeded();
+        displayOverOtherAppsPermission.requestIfNeeded();
         try {
             FloatyService.addWindow(window);
             return true;
@@ -66,20 +67,14 @@ public class FloatyWindowManger {
         return null;
     }
 
-    private static DisplayOverOtherAppsPermission getDisplayOverOtherAppsPerm(Context context) {
-        if (sDisplayOverOtherAppsPerm == null) {
-            sDisplayOverOtherAppsPerm = new DisplayOverOtherAppsPermission(context);
-        }
-        return sDisplayOverOtherAppsPerm;
-    }
-
     public static void showCircularMenu(@NonNull Context context) {
-        if (getDisplayOverOtherAppsPerm(context).has()) {
+        DisplayOverOtherAppsPermission displayOverOtherAppsPermission = new DisplayOverOtherAppsPermission(context);
+        if (displayOverOtherAppsPermission.has()) {
             context.startService(new Intent(context, FloatyService.class));
             setCircularMenuContext(context);
         } else {
             ViewUtils.showToast(context, R.string.error_no_display_over_other_apps_permission);
-            getDisplayOverOtherAppsPerm(context).config();
+            displayOverOtherAppsPermission.config();
         }
         sCircularMenuShown = true;
     }
@@ -103,7 +98,7 @@ public class FloatyWindowManger {
             CircularMenu menu = sCircularMenu.get();
             if (menu != null) {
                 if (isSaveState) {
-                    menu.closeAndSaveState();
+                    menu.closeAndSaveState(isCircularMenuShowing());
                 } else {
                     menu.close();
                 }

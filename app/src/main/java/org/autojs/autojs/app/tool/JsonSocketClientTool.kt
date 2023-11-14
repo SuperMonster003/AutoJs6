@@ -12,6 +12,7 @@ import org.autojs.autojs.ui.main.drawer.DrawerMenuDisposableItem
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import java.lang.Exception
 
 class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
 
@@ -28,8 +29,11 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
 
     override val isInMainThread = true
 
-    override fun connect() {
+    override fun connect(): Boolean {
         inputRemoteHost(isAutoConnect = !isNormallyClosed)
+        // @Hint by SuperMonster003 on Nov 9, 2023.
+        //  ! Function with a dialog always returns false.
+        return false
     }
 
     internal fun connectIfNotNormallyClosed() {
@@ -40,10 +44,16 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         mClientModeItem = clientModeItem
     }
 
-    override fun disconnect() {
+    override fun disconnect(): Boolean {
         mClientModeItem?.subtitle = null
-        devPlugin.disconnectJsonSocketClient()
+        val result = try {
+            devPlugin.jsonSocketClient?.switchOff()
+            true
+        } catch (_: Exception) {
+            false
+        }
         isNormallyClosed = true
+        return result
     }
 
     override fun dispose() {

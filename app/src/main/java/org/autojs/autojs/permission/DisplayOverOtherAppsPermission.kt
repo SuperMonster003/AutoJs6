@@ -19,17 +19,11 @@ import org.autojs.autojs6.R
  */
 class DisplayOverOtherAppsPermission(override val context: Context) : PermissionItemHelper, AbleToUrge {
 
-    override fun has(): Boolean {
-        return SettingsCompat.canDrawOverlays(context)
-    }
+    override fun has() = SettingsCompat.canDrawOverlays(context)
 
-    override fun request() {
-        config()
-    }
+    override fun request() = false.also { config() }
 
-    override fun revoke() {
-        config()
-    }
+    override fun revoke() = false.also { config() }
 
     fun config() {
         try {

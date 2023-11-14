@@ -92,7 +92,7 @@ public class Files {
 
     public String readAssets(String path, String encoding) {
         try {
-            return PFiles.read(mRuntime.getUiHandler().getContext().getAssets().open(path), encoding);
+            return PFiles.read(mRuntime.getUiHandler().getApplicationContext().getAssets().open(path), encoding);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

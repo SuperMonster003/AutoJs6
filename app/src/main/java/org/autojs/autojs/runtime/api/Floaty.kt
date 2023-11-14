@@ -28,7 +28,7 @@ import kotlin.concurrent.Volatile
  */
 class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRuntime) {
 
-    private val mContext = ContextThemeWrapper(mUiHandler.context, R.style.ScriptTheme)
+    private val mContext = ContextThemeWrapper(mUiHandler.applicationContext, R.style.ScriptTheme)
     private val mWindows = CopyOnWriteArraySet<JsWindow>()
     private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(mContext)
 
@@ -101,8 +101,8 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
         private var mExitOnClose = false
 
         init {
-            mWindow = RawWindow(floaty, mUiHandler.context)
-            mUiHandler.context.startService(Intent(mUiHandler.context, FloatyService::class.java))
+            mWindow = RawWindow(floaty, mUiHandler.applicationContext)
+            mUiHandler.applicationContext.startService(Intent(mUiHandler.applicationContext, FloatyService::class.java))
 
             val r = Runnable { FloatyService.addWindow(mWindow) }
 
@@ -179,7 +179,7 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
                     return supplier.inflate(context, parent).also { mView = it }
                 }
             })
-            mUiHandler.context.startService(Intent(mUiHandler.context, FloatyService::class.java))
+            mUiHandler.applicationContext.startService(Intent(mUiHandler.applicationContext, FloatyService::class.java))
 
             val r = Runnable { FloatyService.addWindow(mWindow!!) }
 

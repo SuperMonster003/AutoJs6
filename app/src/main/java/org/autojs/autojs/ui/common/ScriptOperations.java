@@ -139,7 +139,7 @@ public class ScriptOperations {
                 .input(getString(R.string.text_please_input_name), "", false, (d, input) ->
                         validateInput(d, d.isPromptCheckBoxChecked() ? ".js" : null))
                 .checkBoxPromptRes(R.string.text_js_file, true, (buttonView, isChecked) -> {
-                    // Ignored.
+                    /* Ignored. */
                 })
                 .onPositive((d, which) -> {
                     boolean createJs = d.isPromptCheckBoxChecked();

@@ -97,12 +97,12 @@ public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder impleme
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        // Ignored.
+        /* Ignored. */
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        // Ignored.
+        /* Ignored. */
     }
 
 }

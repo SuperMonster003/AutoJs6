@@ -119,7 +119,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         ensureHandler();
         mLoopers.waitWhenIdle(true);
         mListeningKey = true;
-        mAccessibilityBridge.ensureServiceEnabled();
+        mAccessibilityBridge.ensureServiceStarted();
         service.getOnKeyObserver().addListener(this);
     }
 
@@ -171,7 +171,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
     }
 
     private AccessibilityService getAccessibilityService() {
-        mScriptRuntime.ensureAccessibilityServiceEnabled();
+        mScriptRuntime.accessibilityBridge.ensureServiceStarted();
         AccessibilityService service = mAccessibilityBridge.getService();
         if (service == null) {
             throw new ScriptException(mContext.getString(R.string.error_no_accessibility_service));
@@ -259,7 +259,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         if (mListeningToast) {
             return;
         }
-        mAccessibilityBridge.ensureServiceEnabled();
+        mAccessibilityBridge.ensureServiceStarted();
         mListeningToast = true;
         ensureHandler();
         mLoopers.waitWhenIdle(true);

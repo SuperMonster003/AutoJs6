@@ -12,5 +12,6 @@
         android:canRequestFilterKeyEvents="true"
         android:canRetrieveWindowContent="true"
         android:canTakeScreenshot="true"
+        android:packageNames="@null"
         android:description="@string/text_a11y_service_description"
         android:notificationTimeout="0" />

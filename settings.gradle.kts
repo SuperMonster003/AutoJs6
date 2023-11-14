@@ -54,10 +54,10 @@ pluginManagement {
                 "2022.1" to "E", /* May 3, 2023. */
             ),
             "android" to mapOf(
-                "Preview2023.2" to "8.3.0-alpha11", /* Oct 27, 2023. */
-                "2023.1" to "8.2.0-rc02", /* Oct 31, 2023. */
+                "Preview2023.2" to "8.3.0-alpha13", /* Nov 13, 2023. */
+                "2023.1" to "8.2.0-rc03", /* Nov 11, 2023. */
                 "Preview2023.1" to "8.2.0-beta06", /* Oct 11, 2023. */
-                "2022.3" to "8.1.2", /* Sep 29, 2023. */
+                "2022.3" to "8.1.3", /* Nov 13, 2023. */
                 "Preview2022.3" to "8.1.0-beta05", /* Jun 14 2023. */
                 "2022.2" to "8.0.2", /* May 26, 2023. */
                 "Preview2022.2" to "8.0.0-beta05", /* Mar 25, 2023. */
@@ -78,15 +78,15 @@ pluginManagement {
         ),
         "idea" to mapOf(
             "android" to mapOf(
-                "Eap2023.3" to "8.1.2", /* Oct 25, 2023. */
-                "2023.2" to "8.1.2", /* Oct 18, 2023. */
+                "Eap2023.3" to "8.1.3", /* Nov 11, 2023. */
+                "2023.2" to "8.1.3", /* Nov 11, 2023. */
                 "2023.1" to "7.4.2", /* May 26, 2023. */
                 "2022.3" to "7.4.0-beta02", /* Mar 25, 2023. */
                 fallbackIdentifier to "7.4.0", /* May 3, 2023. */
             ),
             "kotlin" to mapOf(
-                "Eap2023.3" to "1.9.20-RC2", /* Oct 25, 2023. */
-                "2023.2" to "1.9.20-RC2", /* Oct 18, 2023. */
+                "Eap2023.3" to "1.9.20", /* Nov 11, 2023. */
+                "2023.2" to "1.9.20", /* Nov 9, 2023. */
                 "2023.1" to "1.8.21", /* Apr 25, 2023. */
                 "2022.3" to "1.8.21", /* Apr 25, 2023. */
                 fallbackIdentifier to "1.8.21", /* May 3, 2023. */
@@ -113,6 +113,7 @@ pluginManagement {
     )
 
     val kspPluginVersionMap = mapOf(
+        "1.9.20" to "1.0.14", /* Nov 9, 2023. */
         "1.9.20-RC2" to "1.0.13", /* Oct 26, 2023. */
         "1.9.20-RC" to "1.0.13", /* Oct 12, 2023. */
         "1.9.20-Beta2" to "1.0.13", /* Sep 29, 2023. */
@@ -166,6 +167,10 @@ pluginManagement {
     val platformIdentifierForTemurin = "Temurin"
     val vendorNameForTemurin = "Adoptium" /* More common as "Eclipse Adoptium". */
     val defaultVersion = "0"
+
+    val minRequiredJavaJdkVersion = java.util.Properties().apply {
+        load(java.io.FileInputStream("$rootDir/version.properties"))
+    }["JAVA_VERSION_MIN_SUPPORTED"].let { it as String }.toInt()
 
     fun uppercaseFirstChar(s: String) = when (s.isEmpty()) {
         true -> ""
@@ -312,6 +317,38 @@ pluginManagement {
     gradle.extra.apply {
         set("platformVersion", platformVersion)
         set("platformType", platformType)
+    }
+
+    extra /* Ensure minimal Gradle JDK version. */ {
+        if (JavaVersion.current().majorVersion.toInt() < minRequiredJavaJdkVersion) {
+            val title = "Current Gradle JDK version ${JavaVersion.current()} does not meet " +
+                    "the minimum requirement which $minRequiredJavaJdkVersion is needed"
+            val hints = when {
+                isPlatformAS -> arrayOf(
+                    "Settings path: File | Settings | Build, Execution, Deployment | Build Tools | Gradle",
+                    "Change \"Gradle JDK\" to $minRequiredJavaJdkVersion at the least",
+                )
+                isPlatformIdea -> arrayOf(
+                    "Settings path: File | Settings | Build, Execution, Deployment | Build Tools | Gradle",
+                    "Change \"Gradle JVM\" to $minRequiredJavaJdkVersion at the least",
+                )
+                else -> arrayOf(
+                    "Change \"Gradle JDK\" to $minRequiredJavaJdkVersion at the least",
+                )
+            }
+            val maxLength = infoList.plus(title).maxOf { it.length }
+
+            val message = arrayOf(
+                "\n",
+                "=".repeat(maxLength),
+                title,
+                "-".repeat(maxLength),
+                *hints,
+                "=".repeat(maxLength),
+                "",
+            ).joinToString("\n")
+            throw GradleException(message)
+        }
     }
 
     buildscript {

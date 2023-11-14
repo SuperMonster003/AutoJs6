@@ -263,8 +263,6 @@
     <string name="text_auto_check_for_updates">자동 확인 업데이트</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">자동으로 업데이트를 확인하고 홈페이지에 스낵바를 표시합니다.</string>
     <string name="text_auto_night_mode">자동 밤 모드</string>
-    <string name="text_auto_operate_service">접근성 서비스</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">접근성 서비스는 활성화되었지만 작동하지 않습니다</string>
     <string name="text_back">뒤</string>
     <string name="text_broadcast_action">동작</string>
     <string name="text_broadcast_task">방송 작업</string>

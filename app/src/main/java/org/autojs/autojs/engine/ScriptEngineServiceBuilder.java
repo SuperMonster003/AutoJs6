@@ -1,5 +1,7 @@
 package org.autojs.autojs.engine;
 
+import android.content.Context;
+
 import org.autojs.autojs.runtime.api.Console;
 import org.autojs.autojs.tool.UiHandler;
 

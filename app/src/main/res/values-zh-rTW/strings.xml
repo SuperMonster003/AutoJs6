@@ -262,8 +262,6 @@
     <string name="text_auto_check_for_updates">自動檢查更新</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自動檢查更新並在首頁下方顯示通知條</string>
     <string name="text_auto_night_mode">自動夜間模式</string>
-    <string name="text_auto_operate_service">無障礙服務</string>
-    <string name="text_auto_operate_service_enabled_but_not_working">無障礙服務已啟用但未正常執行</string>
     <string name="text_back">返回</string>
     <string name="text_broadcast_action">動作 (Action)</string>
     <string name="text_broadcast_task">廣播觸發任務</string>

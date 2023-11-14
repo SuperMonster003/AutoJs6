@@ -67,7 +67,7 @@ public class Dialogs {
     private Context getContext() {
         if (mThemeWrapper != null)
             return mThemeWrapper;
-        mThemeWrapper = new ContextThemeWrapper(mRuntime.uiHandler.getContext().getApplicationContext(), androidx.appcompat.R.style.Theme_AppCompat_Light);
+        mThemeWrapper = new ContextThemeWrapper(mRuntime.uiHandler.getApplicationContext().getApplicationContext(), androidx.appcompat.R.style.Theme_AppCompat_Light);
         return mThemeWrapper;
     }
 

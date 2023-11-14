@@ -7,7 +7,7 @@ import org.autojs.autojs.tool.Consumer
  * Created by Stardust on 2017/3/9.
  * Modified by SuperMonster003 as of Jul 1, 2022.
  */
-class UiObjectCollection private constructor(private val nodes: List<UiObject?>) : UiObjectActions {
+class UiObjectCollection private constructor(val nodes: List<UiObject?>) : UiObjectActions {
 
     operator fun get(i: Int): UiObject? = nodes[i]
 

@@ -8,6 +8,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.FloatRange
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.core.automator.ActionArgument
 import org.autojs.autojs.core.automator.UiObject
@@ -735,7 +736,7 @@ open class UiSelector : UiObjectActions {
     }
 
     protected fun find(max: Int): UiObjectCollection {
-        AutoJs.instance.ensureAccessibilityServiceEnabled()
+        a11yToolService.ensure()
         mAccessibilityBridge ?: return findImpl(max)
         if (isUiThread()) return findImpl(max)
         if (mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0) return findImpl(max)
@@ -760,6 +761,10 @@ open class UiSelector : UiObjectActions {
 
         internal const val ID_IDENTIFIER = ":id/"
 
+        private val a11yToolService by lazy {
+            AccessibilityTool(GlobalAppContext.get()).service
+        }
+
         @JvmStatic
         fun pickup(root: UiObject?, selector: Any?, compass: CharSequence?, resultType: Any?, callback: BaseFunction? = null): Any? {
             return Picker.Builder()
@@ -775,7 +780,7 @@ open class UiSelector : UiObjectActions {
         internal class Picker private constructor(val root: UiObject?, val selector: UiSelector?, val compass: CharSequence?, val resultType: Any?, val callback: BaseFunction? = null) {
 
             internal fun pick(): Any? {
-                AutoJs.instance.ensureAccessibilityServiceEnabled()
+                a11yToolService.ensure()
                 return Detector(compass, object : Result(resultType) {
 
                     override fun byOne() = selector?.run { root?.let { return@run findOneOf(it) } ?: findOnce() }

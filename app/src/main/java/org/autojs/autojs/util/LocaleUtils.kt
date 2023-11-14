@@ -21,8 +21,16 @@ object LocaleUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList(locale)
         } else {
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(locale))
+            setApplicationLocale(locale)
         }
+    }
+
+    fun setApplicationLocale(locale: Locale?) {
+        locale?.let { AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(it)) }
+    }
+
+    fun setApplicationLocale(localeList: LocaleListCompat) {
+        AppCompatDelegate.setApplicationLocales(localeList)
     }
 
     @JvmStatic

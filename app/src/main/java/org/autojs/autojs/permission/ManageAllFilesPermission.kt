@@ -30,28 +30,36 @@ class ManageAllFilesPermission(override val context: Context) : PermissionItemHe
         }
     }
 
-    override fun request() {
+    override fun request(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
+            return try {
                 Intent()
                     .setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
                     .setData(Uri.fromParts("package", context.packageName, null))
                     .let { context.startActivity(it) }
+                true
             } catch (e: Exception) {
-                Intent()
-                    .setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-                    .let { context.startActivity(it) }
+                try {
+                    Intent()
+                        .setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                        .let { context.startActivity(it) }
+                    true
+                } catch (e: Exception) {
+                    false
+                }
             }
         } else {
-            try {
+            return try {
                 ActivityCompat.requestPermissions((context as Activity), LEGACY_STORAGE_PERMISSIONS, Base.REQUEST_CODE)
+                true
             } catch (e: Exception) {
                 config()
+                false
             }
         }
     }
 
-    override fun revoke() = config()
+    override fun revoke(): Boolean = false.also { config() }
 
     private fun config() {
         IntentUtils.goToAppDetailSettings(context, context.packageName)

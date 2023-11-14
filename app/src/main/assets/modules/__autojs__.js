@@ -10,10 +10,6 @@ let { util } = global;
  * @return {Internal.Autojs}
  */
 module.exports = function (scriptRuntime, scope) {
-    const Manifest = android.Manifest;
-    const BuildConfig = org.autojs.autojs6.BuildConfig;
-    const PackageManager = android.content.pm.PackageManager;
-    const RootUtils = org.autojs.autojs.util.RootUtils;
     const RootMode = RootUtils.RootMode;
     const Settings = android.provider.Settings;
     const System = Settings.System;

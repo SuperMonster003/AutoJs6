@@ -4,21 +4,24 @@ import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityService.*
 import android.accessibilityservice.GestureDescription
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Path
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.ViewConfiguration
 
 import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.concurrent.VolatileDispose
 import org.autojs.autojs.runtime.api.ScreenMetrics
+import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on 2017/5/16.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
-class GlobalActionAutomator(private val mHandler: Handler?, private val serviceProvider: () -> AccessibilityService) {
+class GlobalActionAutomator(private val mContext: Context, private val mHandler: Handler?, private val serviceProvider: () -> AccessibilityService) {
 
     private val service: AccessibilityService
         get() = serviceProvider()
@@ -127,7 +130,7 @@ class GlobalActionAutomator(private val mHandler: Handler?, private val serviceP
 
     private fun gesturesWithHandler(handler: Handler, description: GestureDescription): Boolean {
         val result = VolatileDispose<Boolean>()
-        service.dispatchGesture(description, object : GestureResultCallback() {
+        val dispatchGesture: Boolean = service.dispatchGesture(description, object : GestureResultCallback() {
             override fun onCompleted(gestureDescription: GestureDescription) {
                 result.setAndNotify(true)
             }
@@ -136,7 +139,11 @@ class GlobalActionAutomator(private val mHandler: Handler?, private val serviceP
                 result.setAndNotify(false)
             }
         }, handler)
-        return result.blockedGet()
+        Log.d(TAG, "dispatchGesture: $dispatchGesture")
+        if (!dispatchGesture) {
+            throw RuntimeException(mContext.getString(R.string.text_a11y_service_enabled_but_not_running))
+        }
+        return result.blockedGet(128_000)
     }
 
     private fun gesturesWithoutHandler(description: GestureDescription): Boolean {
@@ -185,5 +192,11 @@ class GlobalActionAutomator(private val mHandler: Handler?, private val serviceP
     private fun scaleY(y: Int) = mScreenMetrics?.scaleX(y) ?: y
 
     fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, duration: Long) = gesture(0, duration, intArrayOf(x1, y1), intArrayOf(x2, y2))
+
+    companion object {
+
+        private val TAG: String? = GlobalActionAutomator::class.java.simpleName
+
+    }
 
 }

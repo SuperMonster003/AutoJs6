@@ -22,7 +22,7 @@ import java.lang.ref.WeakReference
  * Modified by SuperMonster003 as of May 16, 2023.
  * Transformed by SuperMonster003 on May 16, 2023.
  */
-class ImageWrapper constructor(bitmap: Bitmap?, mat: Mat?) : Recyclable {
+class ImageWrapper(bitmap: Bitmap?, mat: Mat?) : Recyclable {
 
     // @Hint by SuperMonster003
     //  ! It is ensured that bitmap and mat will not be null at the same time.

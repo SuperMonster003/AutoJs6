@@ -47,6 +47,7 @@ class ScrollMaxAction(private val mScrollAction: Int) : SimpleAction() {
             } else if (getAreaInScreen(maxScrollableNode) < getAreaInScreen(nodeInfo)) {
                 if (maxScrollableNode !== mRootNode) {
                     mRecycledMaxUiObjects.add(maxScrollableNode)
+                    @Suppress("DEPRECATION")
                     maxScrollableNode.recycle()
                 }
                 mMaxScrollableNode = nodeInfo
@@ -57,6 +58,7 @@ class ScrollMaxAction(private val mScrollAction: Int) : SimpleAction() {
             if (child != null) {
                 findMaxScrollableNodeInfo(child)
                 if (mMaxScrollableNode !== child && !mRecycledMaxUiObjects.contains(child)) {
+                    @Suppress("DEPRECATION")
                     child.recycle()
                 }
             }

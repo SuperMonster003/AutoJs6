@@ -27,10 +27,8 @@
  * @return {Internal.Util}
  */
 module.exports = function (scriptRuntime, scope) {
-    const Build = android.os.Build;
     const Arrays = java.util.Arrays;
     const HashMap = java.util.HashMap;
-    const JavaUtils = org.autojs.autojs.util.JavaUtils;
 
     let _ = {
         Util: (/* @IIFE */ () => {
@@ -1139,6 +1137,12 @@ module.exports = function (scriptRuntime, scope) {
                     ret = this.formatValue(ctx, ret, recurseTimes);
                 }
                 return ret;
+            }
+
+            if (!isNullish(value) && typeof value.getClass === 'function') {
+                if (value.getClass() === UiObjectCollection) {
+                    return value.toString();
+                }
             }
 
             if (isJavaClass(value)) {
