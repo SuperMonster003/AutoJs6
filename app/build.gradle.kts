@@ -409,6 +409,21 @@ android {
 
     }
 
+    sourceSets {
+        // @Hint by LZX284 on Nov 15, 2023.
+        //  ! The assets file is divided into three directories according to different flavors.
+        //  ! But the files are not actually moved to avoid conflicts with the latest modifications.
+        getByName("main"){
+            assets.srcDirs("src/main/assets")
+        }
+        getByName(flavorNameApp){
+            assets.srcDirs("src/main/assets_$flavorNameApp")
+        }
+        getByName(flavorNameInrt){
+            assets.srcDirs("src/main/assets_$flavorNameInrt")
+        }
+    }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = versions.javaVersion
