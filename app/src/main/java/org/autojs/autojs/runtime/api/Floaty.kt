@@ -19,7 +19,8 @@ import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.util.ViewUtils.setViewMeasure
 import org.autojs.autojs6.R
 import java.util.concurrent.CopyOnWriteArraySet
-import kotlin.concurrent.Volatile
+//import kotlin.concurrent.Volatile
+import kotlin.jvm.Volatile
 
 /**
  * Created by Stardust on 2017/12/5.

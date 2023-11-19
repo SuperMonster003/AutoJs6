@@ -55,6 +55,30 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
         File(mWorkspacePath).mkdirs()
         mApkPackager.unzip()
         copyAssetsRecursively("", File(mWorkspacePath, "assets"))
+        copyLibDir()
+    }
+
+    private fun copyLibDir() {
+        val srcLibDir = File(GlobalAppContext.get().packageManager.getApplicationInfo(GlobalAppContext.get().packageName,0).sourceDir).parent!!.plus("/lib")
+        val subDirs = File(srcLibDir).listFiles { file -> file.isDirectory }?.toList() ?: emptyList()
+        val abiMap = mapOf(
+                "x86_64" to "x86_64",
+                "x86" to "x86",
+                "arm64-v8a" to "arm64-v8a",
+                "armeabi-v7a" to "armeabi-v7a",
+                "arm64" to "arm64-v8a",
+                "arm" to "armeabi-v7a"
+        )
+        for ((key,value ) in abiMap){
+            subDirs.forEach {subDir->
+                when(subDir.name.lowercase()==key){
+                    true -> {
+                        File(srcLibDir, subDir.name).copyRecursively(File(mWorkspacePath,"lib/$value"),false)
+                    }
+                    else -> {}
+                }
+            }
+        }
     }
 
     @Throws(IOException::class)
@@ -185,11 +209,14 @@ open class ApkBuilder(apkInputStream: InputStream?, private val mOutApkFile: Fil
     private fun copyAssetsRecursively(assetPath: String, targetFile: File) {
         if (targetFile.isFile && targetFile.exists()) return
         val list = mAssetManager.list(assetPath) ?: return
+        val unneededFiles = listOf("template.apk")
         if (list.isEmpty()) /* asset is file */ {
-            mAssetManager.open(assetPath).use { input ->
-                FileOutputStream(targetFile.absolutePath).use { output ->
-                    input.copyTo(output)
-                    output.flush()
+            if (!unneededFiles.contains(targetFile.name.lowercase())){
+                mAssetManager.open(assetPath).use { input ->
+                    FileOutputStream(targetFile.absolutePath).use { output ->
+                        input.copyTo(output)
+                        output.flush()
+                    }
                 }
             }
         } else /* asset is folder */ {

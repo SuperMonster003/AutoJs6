@@ -227,10 +227,12 @@ class AppUtils {
         }
 
         @JvmStatic
-        fun isBroadcastShortForm(s: String) = BroadcastShortForm.entries.any { it.shortName.contentEquals(s) }
+//        fun isBroadcastShortForm(s: String) = BroadcastShortForm.entries.any { it.shortName.contentEquals(s) }
+        fun isBroadcastShortForm(s: String) = BroadcastShortForm.values().any { it.shortName.contentEquals(s) }
 
         @JvmStatic
-        fun isActivityShortForm(s: String) = ActivityShortForm.entries.any { it.shortName.contentEquals(s) }
+//        fun isActivityShortForm(s: String) = ActivityShortForm.entries.any { it.shortName.contentEquals(s) }
+        fun isActivityShortForm(s: String) = ActivityShortForm.values().any { it.shortName.contentEquals(s) }
 
         fun getInstalledApplications(context: Context): List<ApplicationInfo> = context.packageManager.let {
             when {

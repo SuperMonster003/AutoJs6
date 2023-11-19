@@ -30,7 +30,8 @@ class AppLanguagePreference : MaterialListPreference {
 
     override fun onChangeConfirmed(dialog: MaterialDialog) {
         super.onChangeConfirmed(dialog)
-        Language.entries.find {
+//        Language.entries.find {
+        Language.values().find {
             it.getEntryName(prefContext) == dialog.items?.get(dialog.selectedIndex)
         }?.let {
             GlobalAppContext.post {
