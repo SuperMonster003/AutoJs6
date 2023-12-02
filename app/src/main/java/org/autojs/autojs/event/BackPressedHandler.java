@@ -7,7 +7,7 @@ import org.autojs.autojs.util.ViewUtils;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Created by Stardust on 2017/2/3.
+ * Created by Stardust on Feb 3, 2017.
  */
 public interface BackPressedHandler {
 

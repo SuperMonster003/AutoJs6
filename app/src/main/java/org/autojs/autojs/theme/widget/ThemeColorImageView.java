@@ -12,7 +12,7 @@ import org.autojs.autojs.theme.ThemeColorMutable;
 import org.autojs.autojs.util.DrawableUtils;
 
 /**
- * Created by Stardust on 2017/2/12.
+ * Created by Stardust on Feb 12, 2017.
  */
 public class ThemeColorImageView extends AppCompatImageView implements ThemeColorMutable {
 

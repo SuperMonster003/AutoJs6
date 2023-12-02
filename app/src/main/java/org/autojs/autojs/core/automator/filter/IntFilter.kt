@@ -3,7 +3,7 @@ package org.autojs.autojs.core.automator.filter
 import org.autojs.autojs.core.automator.UiObject
 
 /**
- * Created by Stardust on 2017/11/5.
+ * Created by Stardust on Nov 5, 2017.
  * Modified by SuperMonster003 as of Nov 19, 2022.
  */
 class IntFilter(private val mIntProperty: IntProperty, private val mValue: Int) : Filter {

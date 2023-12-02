@@ -10,7 +10,7 @@ import org.autojs.autojs.script.ScriptSource;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/8/3.
+ * Created by Stardust on Aug 3, 2017.
  */
 public abstract class JavaScriptEngine extends ScriptEngine.AbstractScriptEngine<JavaScriptSource> {
     private ScriptRuntime mRuntime;

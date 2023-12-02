@@ -6,7 +6,7 @@ import androidx.appcompat.widget.Toolbar
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/12/8.
+ * Created by Stardust on Dec 8, 2017.
  * Modified by SuperMonster003 as of Oct 27, 2023.
  */
 class SettingsActivity : AppCompatActivity() {

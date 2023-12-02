@@ -1,7 +1,7 @@
 package org.autojs.autojs.theme.app;
 
 /**
- * Created by Stardust on 2016/8/15.
+ * Created by Stardust on Aug 15, 2016.
  */
 public class ThemeColorMaterialDialog  {
 

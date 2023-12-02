@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Stardust on 2017/4/1.
+ * Created by Stardust on Apr 1, 2017.
  */
 public class PReadableTextFile implements Closeable, PFileInterface {
 

@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReentrantLock
 
 /**
- * Created by Stardust on 2017/12/3.
+ * Created by Stardust on Dec 3, 2017.
  * Modified by aiselp as of Jun 10, 2023.
  * Modified by SuperMonster003 as of Aug 28, 2023.
  */

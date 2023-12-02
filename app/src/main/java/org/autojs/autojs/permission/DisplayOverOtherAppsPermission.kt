@@ -13,7 +13,7 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2018/1/30.
+ * Created by Stardust on Jan 30, 2018.
  * Modified by SuperMonster003 as of Apr 10, 2022.
  * Transformed by SuperMonster003 on Jun 21, 2022.
  */

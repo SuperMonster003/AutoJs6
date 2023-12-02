@@ -5,7 +5,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 
 /**
- * Created by Stardust on 2017/3/6.
+ * Created by Stardust on Mar 6, 2017.
  */
 object AccessibilityNodeInfoHelper {
 

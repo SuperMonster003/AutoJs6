@@ -11,7 +11,7 @@ import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.theme.ThemeColorMutable;
 
 /**
- * Created by Stardust on 2017/3/5.
+ * Created by Stardust on Mar 5, 2017.
  */
 public class ThemeColorMaterialDialogBuilder extends MaterialDialog.Builder implements ThemeColorMutable {
     public ThemeColorMaterialDialogBuilder(@NonNull Context context) {

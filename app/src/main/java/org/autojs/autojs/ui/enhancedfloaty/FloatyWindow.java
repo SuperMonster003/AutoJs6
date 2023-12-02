@@ -4,12 +4,13 @@ import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.Nullable;
 
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 
 /**
- * Created by Stardust on 2017/5/1.
+ * Created by Stardust on May 1, 2017.
  */
 public abstract class FloatyWindow {
     private WindowManager mWindowManager;
@@ -30,7 +31,6 @@ public abstract class FloatyWindow {
         onCreateWindow(service, manager);
     }
 
-
     protected void onCreateWindow(FloatyService service, WindowManager manager) {
         setWindowLayoutParams(onCreateWindowLayoutParams());
         setWindowView(onCreateView(service));
@@ -38,7 +38,7 @@ public abstract class FloatyWindow {
 
         onViewCreated(getWindowView());
 
-        //attach to window
+        // attach to window
         attachToWindow(getWindowView(), manager);
     }
 
@@ -46,7 +46,7 @@ public abstract class FloatyWindow {
 
     }
 
-    protected void attachToWindow(View view, WindowManager manager){
+    protected void attachToWindow(View view, WindowManager manager) {
         getWindowManager().addView(view, getWindowLayoutParams());
         onAttachToWindow(view, manager);
     }
@@ -59,7 +59,6 @@ public abstract class FloatyWindow {
 
     protected WindowBridge onCreateWindowBridge(WindowManager.LayoutParams params) {
         return new WindowBridge.DefaultImpl(params, getWindowManager(), getWindowView());
-
     }
 
     protected abstract WindowManager.LayoutParams onCreateWindowLayoutParams();
@@ -68,7 +67,6 @@ public abstract class FloatyWindow {
         setWindowLayoutParams(params);
         mWindowManager.updateViewLayout(getWindowView(), getWindowLayoutParams());
     }
-
 
     protected void setWindowManager(WindowManager windowManager) {
         mWindowManager = windowManager;
@@ -98,6 +96,7 @@ public abstract class FloatyWindow {
         return mWindowManager;
     }
 
+    @Nullable
     public WindowBridge getWindowBridge() {
         return mWindowBridge;
     }
@@ -109,7 +108,6 @@ public abstract class FloatyWindow {
     public void onServiceDestroy(FloatyService service) {
         close();
     }
-
 
     public void close() {
         try {

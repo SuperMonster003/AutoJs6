@@ -24,7 +24,7 @@ import org.autojs.autojs6.R;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Created by Stardust on 2017/9/25.
+ * Created by Stardust on Sep 25, 2017.
  */
 public class CircularActionMenu extends FrameLayout {
 
@@ -112,7 +112,8 @@ public class CircularActionMenu extends FrameLayout {
             View v = getItemAt(i);
             LayoutParams params = (LayoutParams) v.getLayoutParams();
             params.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
-            // FIXME: 2017/10/17 Not working
+            // FIXME by Stardust on Oct 17, 2017.
+            //  ! Not working.
             updateViewLayout(v, params);
         }
         requestLayout();
@@ -249,7 +250,8 @@ public class CircularActionMenu extends FrameLayout {
             View item = getItemAt(i);
             maxWidth = Math.max(item.getMeasuredWidth(), maxWidth);
             maxX = Math.max((int) (mItemExpandedPositionOffsets[i].x + item.getMeasuredWidth()), maxX);
-            // FIXME: 2017/9/26 这样算出来的高度略大
+            // FIXME by Stardust on Sep 26, 2017.
+            //  ! 这样算出来的高度略大.
             maxY = Math.max((int) (mItemExpandedPositionOffsets[i].y + item.getMeasuredHeight()), maxY);
             minY = Math.min((int) (mItemExpandedPositionOffsets[i].y - item.getMeasuredHeight()), minY);
         }

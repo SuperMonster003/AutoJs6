@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -19,7 +20,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -34,241 +34,285 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                <androidx.cardview.widget.CardView
+                <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_marginEnd="6dp"
-                        app:cardCornerRadius="2dp"
-                        app:cardElevation="1dp"
-                        app:cardUseCompatPadding="true">
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="24dp"
+                            android:text="@string/text_file"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                            android:textColor="?android:textColorSecondary" />
 
                     <LinearLayout
+                            android:id="@+id/source_path_container"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="24dp">
-
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="24dp"
-                                android:text="@string/text_file"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                                android:textColor="?android:textColorSecondary" />
-
-                        <LinearLayout
-                            android:id="@+id/template_path_container"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
                             android:orientation="horizontal">
 
-                            <com.google.android.material.textfield.TextInputLayout
+                        <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:hint="@string/text_template_apk_path">
+                                android:hint="@string/text_source_file_path">
 
-                                <androidx.appcompat.widget.AppCompatEditText
-                                    android:id="@+id/template_path"
+                            <androidx.appcompat.widget.AppCompatEditText
+                                    android:id="@+id/source_path"
+                                    android:inputType="textUri|textMultiLine"
+                                    android:maxLines="2"
+                                    android:lineSpacingMultiplier="1.1"
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    />
+                                    android:layout_height="wrap_content" />
 
-                            </com.google.android.material.textfield.TextInputLayout>
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                            <androidx.appcompat.widget.AppCompatButton
-                                android:id="@+id/select_template"
-                                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                                android:layout_width="60dp"
+                        <ImageView
+                                android:id="@+id/select_source"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:text="@string/text_select"/>
-                        </LinearLayout>
+                                android:paddingHorizontal="2dp"
+                                android:paddingBottom="6dp"
+                                android:src="@drawable/ic_folder"
+                                android:alpha="0.8"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_gravity="bottom|center" />
 
-                        <LinearLayout
-                                android:id="@+id/source_path_container"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:hint="@string/text_source_file_path">
-
-                                <androidx.appcompat.widget.AppCompatEditText
-                                        android:id="@+id/source_path"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content" />
-
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <androidx.appcompat.widget.AppCompatButton
-                                    android:id="@+id/select_source"
-                                    style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                                    android:layout_width="60dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="bottom"
-                                    android:text="@string/text_select" />
-                        </LinearLayout>
-
-
-                        <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:orientation="horizontal">
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:hint="@string/text_output_apk_path">
-
-                                <androidx.appcompat.widget.AppCompatEditText
-                                        android:id="@+id/output_path"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content" />
-
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <androidx.appcompat.widget.AppCompatButton
-                                    android:id="@+id/select_output"
-                                    style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                                    android:layout_width="60dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="bottom"
-                                    android:text="@string/text_select" />
-                        </LinearLayout>
                     </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                        android:id="@+id/app_config"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_marginEnd="6dp"
-                        app:cardCornerRadius="2dp"
-                        app:cardElevation="1dp"
-                        app:cardUseCompatPadding="true">
 
                     <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="24dp">
-
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="24dp"
-                                android:text="@string/text_config"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                                android:textColor="?android:textColorSecondary" />
+                            android:layout_marginTop="8dp"
+                            android:orientation="horizontal">
 
                         <com.google.android.material.textfield.TextInputLayout
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/text_app_name">
+                                android:layout_weight="1"
+                                android:hint="@string/text_output_apk_path">
 
                             <androidx.appcompat.widget.AppCompatEditText
-                                    android:id="@+id/app_name"
+                                    android:id="@+id/output_path"
+                                    android:inputType="textUri|textMultiLine"
+                                    android:maxLines="2"
+                                    android:lineSpacingMultiplier="1.1"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content" />
+
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputLayout
-                                android:layout_width="match_parent"
+                        <ImageView
+                                android:id="@+id/select_output"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:hint="@string/text_package_name">
-
-                            <androidx.appcompat.widget.AppCompatEditText
-                                    android:id="@+id/package_name"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_." />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:baselineAligned="false">
-
-                            <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical">
-
-                                <com.google.android.material.textfield.TextInputLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginTop="12dp"
-                                        android:hint="@string/text_version_name">
-
-                                    <androidx.appcompat.widget.AppCompatEditText
-                                            android:id="@+id/version_name"
-                                            android:layout_width="match_parent"
-                                            android:layout_height="wrap_content"
-
-                                            android:text="1.0.0" />
-                                </com.google.android.material.textfield.TextInputLayout>
-
-                                <com.google.android.material.textfield.TextInputLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginTop="12dp"
-                                        android:hint="@string/text_version_code">
-
-                                    <androidx.appcompat.widget.AppCompatEditText
-                                            android:id="@+id/version_code"
-                                            android:layout_width="match_parent"
-                                            android:layout_height="wrap_content"
-
-                                            android:inputType="number"
-                                            android:text="1" />
-                                </com.google.android.material.textfield.TextInputLayout>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="match_parent"
-                                    android:orientation="vertical">
-
-                                <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginTop="12dp"
-                                        android:layout_marginBottom="12dp"
-                                        android:text="@string/text_icon"
-                                        android:textColor="#9e9e9e"
-                                        android:textSize="12sp" />
-
-                                <ImageView
-                                        android:id="@+id/icon"
-                                        android:layout_width="64dp"
-                                        android:layout_height="64dp"
-                                        android:layout_gravity="center"
-                                        android:layout_marginStart="16dp"
-                                        android:layout_marginEnd="16dp"
-                                        android:background="@drawable/shortcut_create_dialog_icon_bg"
-                                        android:padding="12dp"
-                                        android:src="@drawable/ic_add_white_48dp" />
-                            </LinearLayout>
-
-                        </LinearLayout>
-
+                                android:paddingHorizontal="2dp"
+                                android:paddingBottom="6dp"
+                                android:src="@drawable/ic_folder"
+                                android:alpha="0.8"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:layout_gravity="bottom|center" />
 
                     </LinearLayout>
 
-                </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+                <LinearLayout
+                        android:id="@+id/app_config"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="16dp"
+                        android:paddingBottom="16dp">
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="24dp"
+                            android:text="@string/text_config"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                            android:textColor="?android:textColorSecondary" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/text_app_name">
+
+                        <androidx.appcompat.widget.AppCompatEditText
+                                android:id="@+id/app_name"
+                                android:inputType="text"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:hint="@string/text_package_name">
+
+                        <androidx.appcompat.widget.AppCompatEditText
+                                android:id="@+id/package_name"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text"
+                                android:imeOptions="actionNext"
+                                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_." />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:baselineAligned="false">
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:hint="@string/text_version_name">
+
+                                <androidx.appcompat.widget.AppCompatEditText
+                                        android:id="@+id/version_name"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="text"
+                                        android:text="1.0.0" />
+
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:hint="@string/text_version_code">
+
+                                <androidx.appcompat.widget.AppCompatEditText
+                                        android:id="@+id/version_code"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:inputType="number"
+                                        android:text="1" />
+
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom|center"
+                                android:orientation="vertical">
+
+                            <ImageView
+                                    android:id="@+id/app_icon"
+                                    android:layout_width="64dp"
+                                    android:layout_height="64dp"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/transparent"
+                                    android:padding="8dp"
+                                    android:clickable="true"
+                                    android:focusable="true"
+                                    android:src="@mipmap/ic_launcher" />
+
+                            <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:layout_marginBottom="8dp"
+                                    android:text="@string/text_icon"
+                                    android:textSize="12sp"
+                                    android:gravity="center" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="0dp"
+                        android:paddingBottom="16dp">
+
+                    <TextView
+                            android:id="@+id/text_abis"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="24dp"
+                            android:paddingHorizontal="16dp"
+                            android:text="@string/text_supported_abis_short"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                            android:textColor="?android:textColorSecondary" />
+
+                    <com.google.android.flexbox.FlexboxLayout
+                            android:id="@+id/flexbox_abis"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center|top"
+                            android:layout_marginBottom="4dp"
+                            app:showDivider="middle"
+                            app:dividerDrawable="@drawable/round_checkbox_with_text_divider"
+                            app:flexDirection="row"
+                            app:flexWrap="wrap"
+                            app:alignContent="center" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="0dp"
+                        android:paddingBottom="16dp">
+
+                    <TextView
+                            android:id="@+id/text_libs"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="24dp"
+                            android:paddingHorizontal="16dp"
+                            android:text="@string/text_supported_libraries_short"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                            android:textColor="?android:textColorSecondary" />
+
+                    <com.google.android.flexbox.FlexboxLayout
+                            android:id="@+id/flexbox_libraries"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center|top"
+                            android:layout_marginBottom="4dp"
+                            app:showDivider="middle"
+                            app:dividerDrawable="@drawable/round_checkbox_with_text_divider"
+                            app:flexDirection="row"
+                            app:flexWrap="wrap"
+                            app:alignContent="center" />
+
+                </LinearLayout>
+
+                <View
+                        android:layout_width="match_parent"
+                        android:layout_height="72dp"
+                        android:background="@android:color/transparent" />
+
             </LinearLayout>
+
         </ScrollView>
 
         <org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
@@ -277,10 +321,10 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
-                android:src="@drawable/ic_done_white_48dp"
+                android:src="@drawable/ic_packaging"
                 app:backgroundTint="?attr/colorPrimary"
                 android:tint="@color/toolbar_text" />
-    </FrameLayout>
 
+    </FrameLayout>
 
 </LinearLayout>

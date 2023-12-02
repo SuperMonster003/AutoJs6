@@ -10,12 +10,15 @@ let { util } = global;
  * @return {Internal.Automator}
  */
 module.exports = function (scriptRuntime, scope) {
+
     const ResultAdapter = require('result-adapter');
 
     const Path = android.graphics.Path;
     const Rect = android.graphics.Rect;
     const GestureDescription = android.accessibilityservice.GestureDescription;
     const AccessibilityTool = org.autojs.autojs.core.accessibility.AccessibilityTool;
+    const AccessibilityBridge = org.autojs.autojs.core.accessibility.AccessibilityBridge;
+    const UiObject = org.autojs.autojs.core.automator.UiObject;
 
     /**
      * @type {org.autojs.autojs.core.accessibility.SimpleActionAutomator}

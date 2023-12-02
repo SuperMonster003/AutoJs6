@@ -26,7 +26,7 @@ import java.util.zip.ZipFile;
 import kotlin.text.Regex;
 
 /**
- * Created by Stardust on 2017/4/5.
+ * Created by Stardust on Apr 5, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 public class DeveloperUtils {

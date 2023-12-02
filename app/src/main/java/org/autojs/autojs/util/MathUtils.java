@@ -1,7 +1,7 @@
 package org.autojs.autojs.util;
 
 /**
- * Created by Stardust on 2017/11/26.
+ * Created by Stardust on Nov 26, 2017.
  */
 public class MathUtils {
 

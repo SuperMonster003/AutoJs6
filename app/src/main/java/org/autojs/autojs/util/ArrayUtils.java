@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 /**
- * Created by Stardust on 2017/5/8.
+ * Created by Stardust on May 8, 2017.
  */
 public class ArrayUtils {
 

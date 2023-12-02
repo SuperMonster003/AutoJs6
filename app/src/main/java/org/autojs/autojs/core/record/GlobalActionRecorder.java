@@ -21,7 +21,7 @@ import org.autojs.autojs6.R;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Created by Stardust on 2017/8/6.
+ * Created by Stardust on Aug 6, 2017.
  */
 public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
 

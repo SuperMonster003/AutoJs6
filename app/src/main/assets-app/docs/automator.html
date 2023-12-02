@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>自动化 (Automator) | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/automator.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-automator">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator active" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="automator" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#automator_automator">自动化 (Automator)</a></span><ul>
+<li><span class="stability_undefined"><a href="#automator_simpleactionautomator">简易自动化 (SimpleActionAutomator)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_rootautomator">高权限自动化 (RootAutomator)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_automatorconfiguration">自动化配置 (AutomatorConfiguration)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_uiselector">选择器 (UiSelector)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_uiobject">控件节点 (UiObject)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_uiobjectcollection">控件集合 (UiObjectCollection)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_uiobjectactions">控件节点行为 (UiObjectActions)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#automator">基于坐标的触摸模拟</a></span><ul>
+<li><span class="stability_undefined"><a href="#automator_setscreenmetrics_width_height">setScreenMetrics(width, height)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#automator_7_0">安卓7.0以上的触摸和手势模拟</a></span><ul>
+<li><span class="stability_undefined"><a href="#automator_click_x_y">click(x, y)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_longclick_x_y">longClick(x, y)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_press_x_y_duration">press(x, y, duration)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_swipe_x1_y1_x2_y2_duration">swipe(x1, y1, x2, y2, duration)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_gesture_duration_x1_y1_x2_y2">gesture(duration, [x1, y1], [x2, y2], ...)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_gestures_delay1_duration1_x1_y1_x2_y2_delay2_duration2_x3_y3_x4_y4">gestures([delay1, duration1, [x1, y1], [x2, y2], ...], [delay2, duration2, [x3, y3], [x4, y4], ...], ...)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#automator_rootautomator_1">RootAutomator</a></span><ul>
+<li><span class="stability_undefined"><a href="#automator_rootautomator_tap_x_y_id">RootAutomator.tap(x, y[, id])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_rootautomator_swipe_x1_x2_y1_y2_duration_id">RootAutomator.swipe(x1, x2, y1, y2[, duration, id])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_rootautomator_press_x_y_duration_id">RootAutomator.press(x, y, duration[, id])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_rootautomator_longpress_x_y_id">RootAutomator.longPress(x, y[\, id])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_rootautomator_touchdown_x_y_id">RootAutomator.touchDown(x, y[, id])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_rootautomator_touchmove_x_y_id">RootAutomator.touchMove(x, y[, id])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_rootautomator_touchup_id">RootAutomator.touchUp([id])</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#automator_root">使用root权限点击和滑动的简单命令</a></span><ul>
+<li><span class="stability_undefined"><a href="#automator_tap_x_y">Tap(x, y)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_swipe_x1_y1_x2_y2_duration_1">Swipe(x1, y1, x2, y2, [duration])</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#automator_1">基于控件的操作</a></span><ul>
+<li><span class="stability_undefined"><a href="#automator_auto_mode">auto([mode])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_auto_waitfor">auto.waitFor()</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_auto_setmode_mode">auto.setMode(mode)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_auto_setflags_flags">auto.setFlags(flags)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_auto_service">auto.service</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_auto_windows">auto.windows</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_auto_root">auto.root</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_auto_rootinactivewindow">auto.rootInActiveWindow</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_auto_setwindowfilter_filter">auto.setWindowFilter(filter)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_auto_windowroots">auto.windowRoots</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#automator_simpleactionautomator_1">SimpleActionAutomator</a></span><ul>
+<li><span class="stability_undefined"><a href="#automator_click_text_i">click(text[, i])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_click_left_top_bottom_right">click(left, top, bottom, right)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_longclick_text_i">longClick(text[, i]))</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_scrollup_i">scrollUp([i])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_scrolldown_i">scrollDown([i])</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_settext_i_text">setText([i, ]text)</a></span></li>
+<li><span class="stability_undefined"><a href="#automator_input_i_text">input([i, ]text)</a></span></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>自动化 (Automator)<span><a class="mark" href="#automator_automator" id="automator_automator">#</a></span></h1>
+<hr>
+<p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 22, 2022.</p>
+
+<hr>
+<h2>简易自动化 (SimpleActionAutomator)<span><a class="mark" href="#automator_simpleactionautomator" id="automator_simpleactionautomator">#</a></span></h2>
+<p>待补充...</p>
+<h2>高权限自动化 (RootAutomator)<span><a class="mark" href="#automator_rootautomator" id="automator_rootautomator">#</a></span></h2>
+<p>待补充...</p>
+<h2>自动化配置 (AutomatorConfiguration)<span><a class="mark" href="#automator_automatorconfiguration" id="automator_automatorconfiguration">#</a></span></h2>
+<p>待补充...</p>
+<h2>选择器 (UiSelector)<span><a class="mark" href="#automator_uiselector" id="automator_uiselector">#</a></span></h2>
+<p>UiSelector (选择器), 亦可看作是 <a href="uiObjectType.html">控件节点</a> 的条件筛选器, 用于通过附加不同的条件, 筛选出一个或一组活动窗口中的 <code>控件节点</code>, 并做进一步处理, 如 [ 执行 <a href="uiObjectActionsType.html">控件行为</a> (点击, 长按, 设置文本等) / 判断位置 / 获取文本内容 / 获取控件特定状态 / 在 <a href="glossaries.html#glossaries_控件层级">控件层级</a> 中进行 <a href="uiObjectType.html#uiobjecttype_m_compass">罗盘</a> 导航 ] 等.</p>
+<p>详情参阅 <a href="uiSelectorType.html">选择器 (UiSelector)</a> 章节.</p>
+<h2>控件节点 (UiObject)<span><a class="mark" href="#automator_uiobject" id="automator_uiobject">#</a></span></h2>
+<p>UiObject 通常被称为 [ 控件 / 节点 / 控件节点 ], 可看做是一个通过安卓无障碍服务包装的 <a href="https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo">AccessibilityNodeInfo</a> 对象, 代表一个当前活动窗口中的节点, 通过此节点可收集控件信息或执行控件行为, 进而实现一系列自动化操作.</p>
+<p>详情参阅 <a href="uiObjectType.html">控件节点 (UiObject)</a> 章节.</p>
+<h2>控件集合 (UiObjectCollection)<span><a class="mark" href="#automator_uiobjectcollection" id="automator_uiobjectcollection">#</a></span></h2>
+<p>UiObjectCollection 代表 <a href="uiObjectType.html">控件节点 (UiObject)</a> 的对象集合.</p>
+<p>详情参阅 <a href="uiObjectCollectionType.html">控件集合 (UiObjectCollection)</a> 章节.</p>
+<h2>控件节点行为 (UiObjectActions)<span><a class="mark" href="#automator_uiobjectactions" id="automator_uiobjectactions">#</a></span></h2>
+<p>UiObjectActions 是一个 Java 接口, 代表 <a href="uiObjectType.html">控件节点 (UiObject)</a> 的行为集合.</p>
+<p>详情参阅 <a href="uiObjectActionsType.html">控件节点行为 (UiObjectActions)</a> 章节.</p>
+<hr>
+<h1>基于坐标的触摸模拟<span><a class="mark" href="#automator" id="automator">#</a></span></h1>
+<p>本章节介绍了一些使用坐标进行点击、滑动的函数. 这些函数有的需要安卓7.0以上, 有的需要root权限.</p>
+<p>要获取要点击的位置的坐标, 可以在开发者选项中开启&quot;指针位置&quot;.</p>
+<p>基于坐标的脚本通常会有分辨率的问题, 这时可以通过<code>setScreenMetrics()</code>函数来进行自动坐标放缩. 这个函数会影响本章节的所有点击、长按、滑动等函数. 通过设定脚本设计时的分辨率, 使得脚本在其他分辨率下自动放缩坐标.</p>
+<p>控件和坐标也可以相互结合. 一些控件是无法点击的(clickable为false), 无法通过<code>.click()</code>函数来点击, 这时如果安卓版本在7.0以上或者有root权限, 就可以通过以下方式来点击：</p>
+<pre><code>//获取这个控件
+var widget = id(&quot;xxx&quot;).findOne();
+//获取其中心位置并点击
+click(widget.bounds().centerX(), widget.bounds().centerY());
+//如果用root权限则用Tap
+</code></pre><h2>setScreenMetrics(width, height)<span><a class="mark" href="#automator_setscreenmetrics_width_height" id="automator_setscreenmetrics_width_height">#</a></span></h2>
+<div class="signature"><ul>
+<li>width { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 屏幕宽度, 单位像素</li>
+<li>height { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 屏幕高度, 单位像素</li>
+</ul>
+</div><p>设置脚本坐标点击所适合的屏幕宽高. 如果脚本运行时, 屏幕宽度不一致会自动放缩坐标.</p>
+<p>例如在1920*1080的设备中, 某个操作的代码为</p>
+<pre><code>setScreenMetrics(1080, 1920);
+click(800, 200);
+longClick(300, 500);
+</code></pre><p>那么在其他设备上AutoJs会自动放缩坐标以便脚本仍然有效. 例如在540 * 960的屏幕中<code>click(800, 200)</code>实际上会点击位置(400, 100).</p>
+<h1>安卓7.0以上的触摸和手势模拟<span><a class="mark" href="#automator_7_0" id="automator_7_0">#</a></span></h1>
+<p><strong>注意以下命令只有Android7.0及以上才有效</strong></p>
+<h2>click(x, y)<span><a class="mark" href="#automator_click_x_y" id="automator_click_x_y">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要点击的坐标的x值</li>
+<li><code>y</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要点击的坐标的y值</li>
+</ul>
+</div><p>模拟点击坐标(x, y), 并返回是否点击成功. 只有在点击执行完成后脚本才继续执行.</p>
+<p>一般而言, 只有点击过程(大约150毫秒)中被其他事件中断(例如用户自行点击)才会点击失败.</p>
+<p>使用该函数模拟连续点击时可能有点击速度过慢的问题, 这时可以用<code>press()</code>函数代替.</p>
+<h2>longClick(x, y)<span><a class="mark" href="#automator_longclick_x_y" id="automator_longclick_x_y">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要长按的坐标的x值</li>
+<li><code>y</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要长按的坐标的y值</li>
+</ul>
+</div><p>模拟长按坐标(x, y), 并返回是否成功. 只有在长按执行完成（大约600毫秒）时脚本才会继续执行.</p>
+<p>一般而言, 只有长按过程中被其他事件中断(例如用户自行点击)才会长按失败.</p>
+<h2>press(x, y, duration)<span><a class="mark" href="#automator_press_x_y_duration" id="automator_press_x_y_duration">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要按住的坐标的x值</li>
+<li><code>y</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要按住的坐标的y值</li>
+<li><code>duration</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 按住时长, 单位毫秒</li>
+</ul>
+</div><p>模拟按住坐标(x, y), 并返回是否成功. 只有按住操作执行完成时脚本才会继续执行.</p>
+<p>如果按住时间过短, 那么会被系统认为是点击；如果时长超过500毫秒, 则认为是长按.</p>
+<p>一般而言, 只有按住过程中被其他事件中断才会操作失败.</p>
+<p>一个连点器的例子如下：</p>
+<pre><code>//循环100次
+for(var i = 0; i &lt; 100; i++){
+  //点击位置(500, 1000), 每次用时1毫秒
+  press(500, 1000, 1);
+}
+</code></pre><h2>swipe(x1, y1, x2, y2, duration)<span><a class="mark" href="#automator_swipe_x1_y1_x2_y2_duration" id="automator_swipe_x1_y1_x2_y2_duration">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x1</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动的起始坐标的x值</li>
+<li><code>y1</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动的起始坐标的y值</li>
+<li><code>x2</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动的结束坐标的x值</li>
+<li><code>y2</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动的结束坐标的y值</li>
+<li><code>duration</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动时长, 单位毫秒</li>
+</ul>
+</div><p>模拟从坐标(x1, y1)滑动到坐标(x2, y2), 并返回是否成功. 只有滑动操作执行完成时脚本才会继续执行.</p>
+<p>一般而言, 只有滑动过程中被其他事件中断才会滑动失败.</p>
+<h2>gesture(duration, [x1, y1], [x2, y2], ...)<span><a class="mark" href="#automator_gesture_duration_x1_y1_x2_y2" id="automator_gesture_duration_x1_y1_x2_y2">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>duration</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 手势的时长</li>
+<li>[x, y] ... 手势滑动路径的一系列坐标</li>
+</ul>
+</div><p>模拟手势操作. 例如<code>gesture(1000, [0, 0], [500, 500], [500, 1000])</code>为模拟一个从(0, 0)到(500, 500)到(500, 100)的手势操作, 时长为2秒.</p>
+<h2>gestures([delay1, duration1, [x1, y1], [x2, y2], ...], [delay2, duration2, [x3, y3], [x4, y4], ...], ...)<span><a class="mark" href="#automator_gestures_delay1_duration1_x1_y1_x2_y2_delay2_duration2_x3_y3_x4_y4" id="automator_gestures_delay1_duration1_x1_y1_x2_y2_delay2_duration2_x3_y3_x4_y4">#</a></span></h2>
+<p>同时模拟多个手势. 每个手势的参数为[delay, duration, 坐标], delay为延迟多久(毫秒)才执行该手势；duration为手势执行时长；坐标为手势经过的点的坐标. 其中delay参数可以省略, 默认为0.</p>
+<p>例如手指捏合：</p>
+<pre><code>gestures([0, 500, [800, 300], [500, 1000]],
+         [0, 500, [300, 1500], [500, 1000]]);
+</code></pre><h1>RootAutomator<span><a class="mark" href="#automator_rootautomator_1" id="automator_rootautomator_1">#</a></span></h1>
+<p>RootAutomator是一个使用root权限来模拟触摸的对象, 用它可以完成触摸与多点触摸, 并且这些动作的执行没有延迟.</p>
+<p>一个脚本中最好只存在一个RootAutomator, 并且保证脚本结束退出他. 可以在exit事件中退出RootAutomator, 例如：</p>
+<pre><code>var ra = new RootAutomator();
+events.on(&#39;exit&#39;, function(){
+  ra.exit();
+});
+//执行一些点击操作
+...
+
+</code></pre><p><strong>注意以下命令需要root权限</strong></p>
+<h2>RootAutomator.tap(x, y[, id])<span><a class="mark" href="#automator_rootautomator_tap_x_y_id" id="automator_rootautomator_tap_x_y_id">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 横坐标</li>
+<li><code>y</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 纵坐标</li>
+<li><code>id</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 多点触摸id, 可选, 默认为1, 可以通过setDefaultId指定.</li>
+</ul>
+</div><p>点击位置(x, y). 其中id是一个整数值, 用于区分多点触摸, 不同的id表示不同的&quot;手指&quot;, 例如：</p>
+<pre><code>var ra = new RootAutomator();
+//让&quot;手指1&quot;点击位置(100, 100)
+ra.tap(100, 100, 1);
+//让&quot;手指2&quot;点击位置(200, 200);
+ra.tap(200, 200, 2);
+ra.exit();
+</code></pre><p>如果不需要多点触摸, 则不需要id这个参数.
+多点触摸通常用于手势或游戏操作, 例如模拟双指捏合、双指上滑等.</p>
+<p>某些情况下可能存在tap点击无反应的情况, 这时可以用<code>RootAutomator.press()</code>函数代替.</p>
+<h2>RootAutomator.swipe(x1, x2, y1, y2[, duration, id])<span><a class="mark" href="#automator_rootautomator_swipe_x1_x2_y1_y2_duration_id" id="automator_rootautomator_swipe_x1_x2_y1_y2_duration_id">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x1</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动起点横坐标</li>
+<li><code>y1</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动起点纵坐标</li>
+<li><code>x2</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动终点横坐标</li>
+<li><code>y2</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动终点纵坐标</li>
+<li><code>duration</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动时长, 单位毫秒, 默认值为300</li>
+<li><code>id</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 多点触摸id, 可选, 默认为1</li>
+</ul>
+</div><p>模拟一次从(x1, y1)到(x2, y2)的时间为duration毫秒的滑动.</p>
+<h2>RootAutomator.press(x, y, duration[, id])<span><a class="mark" href="#automator_rootautomator_press_x_y_duration_id" id="automator_rootautomator_press_x_y_duration_id">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 横坐标</li>
+<li><code>y</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 纵坐标</li>
+<li><code>duration</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 按下时长</li>
+<li><code>id</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 多点触摸id, 可选, 默认为1</li>
+</ul>
+</div><p>模拟按下位置(x, y), 时长为duration毫秒.</p>
+<h2>RootAutomator.longPress(x, y[\, id])<span><a class="mark" href="#automator_rootautomator_longpress_x_y_id" id="automator_rootautomator_longpress_x_y_id">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 横坐标</li>
+<li><code>y</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 纵坐标</li>
+<li><code>duration</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 按下时长</li>
+<li><code>id</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 多点触摸id, 可选, 默认为1</li>
+</ul>
+</div><p>模拟长按位置(x, y).</p>
+<p>以上为简单模拟触摸操作的函数. 如果要模拟一些复杂的手势, 需要更底层的函数.</p>
+<h2>RootAutomator.touchDown(x, y[, id])<span><a class="mark" href="#automator_rootautomator_touchdown_x_y_id" id="automator_rootautomator_touchdown_x_y_id">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 横坐标</li>
+<li><code>y</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 纵坐标</li>
+<li><code>id</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 多点触摸id, 可选, 默认为1</li>
+</ul>
+</div><p>模拟手指按下位置(x, y).</p>
+<h2>RootAutomator.touchMove(x, y[, id])<span><a class="mark" href="#automator_rootautomator_touchmove_x_y_id" id="automator_rootautomator_touchmove_x_y_id">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>x</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 横坐标</li>
+<li><code>y</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 纵坐标</li>
+<li><code>id</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 多点触摸id, 可选, 默认为1</li>
+</ul>
+</div><p>模拟移动手指到位置(x, y).</p>
+<h2>RootAutomator.touchUp([id])<span><a class="mark" href="#automator_rootautomator_touchup_id" id="automator_rootautomator_touchup_id">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>id</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 多点触摸id, 可选, 默认为1</li>
+</ul>
+</div><p>模拟手指弹起.</p>
+<h1>使用root权限点击和滑动的简单命令<span><a class="mark" href="#automator_root" id="automator_root">#</a></span></h1>
+<p>注意：本章节的函数在后续版本很可能有改动！请勿过分依赖本章节函数的副作用. 推荐使用<code>RootAutomator</code>代替本章节的触摸函数.</p>
+<p>以下函数均需要root权限, 可以实现任意位置的点击、滑动等.</p>
+<ul>
+<li>这些函数通常首字母大写以表示其特殊的权限.</li>
+<li>这些函数均不返回任何值.</li>
+<li>并且, 这些函数的执行是异步的、非阻塞的, 在不同机型上所用的时间不同. 脚本不会等待动作执行完成才继续执行. 因此最好在每个函数之后加上适当的sleep来达到期望的效果.</li>
+</ul>
+<p>例如:</p>
+<pre><code>Tap(100, 100);
+sleep(500);
+</code></pre><p>注意, 动作的执行可能无法被停止, 例如：</p>
+<pre><code>for(var i = 0; i &lt; 100; i++){
+  Tap(100, 100);
+}
+</code></pre><p>这段代码执行后可能会出现在任务管理中停止脚本后点击仍然继续的情况.
+因此, 强烈建议在每个动作后加上延时：</p>
+<pre><code>for(var i = 0; i &lt; 100; i++){
+  Tap(100, 100);
+  sleep(500);
+}
+</code></pre><h2>Tap(x, y)<span><a class="mark" href="#automator_tap_x_y" id="automator_tap_x_y">#</a></span></h2>
+<div class="signature"><ul>
+<li>x, y { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要点击的坐标.</li>
+</ul>
+</div><p>点击位置(x, y), 您可以通过&quot;开发者选项&quot;开启指针位置来确定点击坐标.</p>
+<h2>Swipe(x1, y1, x2, y2, [duration])<span><a class="mark" href="#automator_swipe_x1_y1_x2_y2_duration_1" id="automator_swipe_x1_y1_x2_y2_duration_1">#</a></span></h2>
+<div class="signature"><ul>
+<li>x1, y1 { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动起点的坐标</li>
+<li>x2, y2 { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动终点的坐标</li>
+<li>duration { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 滑动动作所用的时间</li>
+</ul>
+</div><p>滑动. 从(x1, y1)位置滑动到(x2, y2)位置.</p>
+<h1>基于控件的操作<span><a class="mark" href="#automator_1" id="automator_1">#</a></span></h1>
+<p>基于控件的操作指的是选择屏幕上的控件, 获取其信息或对其进行操作. 对于一般软件而言, 基于控件的操作对不同机型有很好的兼容性；但是对于游戏而言, 由于游戏界面并不是由控件构成, 无法采用本章节的方法, 也无法使用本章节的函数. 有关游戏脚本的编写, 请参考《基于坐标的操作》.</p>
+<p>基于控件的操作依赖于无障碍服务, 因此最好在脚本开头使用<code>auto()</code>函数来确保无障碍服务已经启用. 如果运行到某个需要权限的语句无障碍服务并没启动, 则会抛出异常并跳转到无障碍服务界面. 这样的用户体验并不好, 因为需要重新运行脚本, 后续会加入等待无障碍服务启动并让脚本继续运行的函数.</p>
+<p>您也可以在脚本开头使用<code>&quot;auto&quot;;</code>表示这个脚本需要无障碍服务, 但是不推荐这种做法, 因为这个标记必须在脚本的最开头(前面不能有注释或其他语句、空格等), 我们推荐使用<code>auto()</code>函数来确保无障碍服务已启用.</p>
+<h2>auto([mode])<span><a class="mark" href="#automator_auto_mode" id="automator_auto_mode">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>mode</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 模式</li>
+</ul>
+</div><p>检查无障碍服务是否已经启用, 如果没有启用则抛出异常并跳转到无障碍服务启用界面；同时设置无障碍模式为mode. mode的可选值为：</p>
+<ul>
+<li><code>fast</code> 快速模式. 该模式下会启用控件缓存, 从而选择器获取屏幕控件更快. 对于需要快速的控件操作的脚本可以使用该模式, 一般脚本则没有必要使用该函数.</li>
+<li><code>normal</code> 正常模式, 默认.</li>
+</ul>
+<p>如果不加mode参数, 则为正常模式.</p>
+<p>建议使用<code>auto.waitFor()</code>和<code>auto.setMode()</code>代替该函数, 因为<code>auto()</code>函数如果无障碍服务未启动会停止脚本；而<code>auto.waitFor()</code>则会在在无障碍服务启动后继续运行.</p>
+<p>示例：</p>
+<pre><code>auto(&quot;fast&quot;);
+</code></pre><p>示例2：</p>
+<pre><code>auto();
+</code></pre><h2>auto.waitFor()<span><a class="mark" href="#automator_auto_waitfor" id="automator_auto_waitfor">#</a></span></h2>
+<p>检查无障碍服务是否已经启用, 如果没有启用则跳转到无障碍服务启用界面, 并等待无障碍服务启动；当无障碍服务启动后脚本会继续运行.</p>
+<p>因为该函数是阻塞的, 因此除非是有协程特性, 否则不能在ui模式下运行该函数, 建议在ui模式下使用<code>auto()</code>函数.</p>
+<h2>auto.setMode(mode)<span><a class="mark" href="#automator_auto_setmode_mode" id="automator_auto_setmode_mode">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>mode</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 模式</li>
+</ul>
+</div><p>设置无障碍模式为mode. mode的可选值为：</p>
+<ul>
+<li><code>fast</code> 快速模式. 该模式下会启用控件缓存, 从而选择器获取屏幕控件更快. 对于需要快速的控件查看和操作的脚本可以使用该模式, 一般脚本则没有必要使用该函数.</li>
+<li><code>normal</code> 正常模式, 默认.</li>
+</ul>
+<h2>auto.setFlags(flags)<span><a class="mark" href="#automator_auto_setflags_flags" id="automator_auto_setflags_flags">#</a></span></h2>
+<p><strong>[v4.1.0新增]</strong></p>
+<ul>
+<li><code>flags</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } | { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="type">Array</a> } 一些标志, 来启用和禁用某些特性, 包括：<ul>
+<li><code>findOnUiThread</code> 使用该特性后, 选择器搜索时会在主进程进行. 该特性用于解决线程安全问题导致的次生问题, 不过目前貌似已知问题并不是线程安全问题.</li>
+<li><code>useUsageStats</code> 使用该特性后, 将会以&quot;使用情况统计&quot;服务的结果来检测当前正在运行的应用包名（需要授予&quot;查看使用情况统计&quot;权限). 如果觉得currentPackage()返回的结果不太准确, 可以尝试该特性.</li>
+<li><code>useShell</code> 使用该特性后, 将使用shell命令获取当前正在运行的应用的包名、活动名称, 但是需要root权限.</li>
+</ul>
+</li>
+</ul>
+<p>启用有关automator的一些特性. 例如：</p>
+<pre><code>auto.setFlags([&quot;findOnUiThread&quot;, &quot;useShell&quot;]);
+</code></pre><h2>auto.service<span><a class="mark" href="#automator_auto_service" id="automator_auto_service">#</a></span></h2>
+<p><strong>[v4.1.0新增]</strong></p>
+<ul>
+<li><a href="https://developer.android.com/reference/android/accessibilityservice/AccessibilityService/">AccessibilityService</a></li>
+</ul>
+<p>获取无障碍服务. 如果无障碍服务没有启动, 则返回<code>null</code>.</p>
+<p>参见<a href="https://developer.android.com/reference/android/accessibilityservice/AccessibilityService/">AccessibilityService</a>.</p>
+<h2>auto.windows<span><a class="mark" href="#automator_auto_windows" id="automator_auto_windows">#</a></span></h2>
+<p><strong>[v4.1.0新增]</strong></p>
+<ul>
+<li>{ <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="type">Array</a> }</li>
+</ul>
+<p>当前所有窗口(<a href="https://developer.android.com/reference/android/view/accessibility/AccessibilityWindowInfo/">AccessibilityWindowInfo</a>)的数组, 可能包括状态栏、输入法、当前应用窗口, 弹出窗口、悬浮窗、分屏应用窗口等. 可以分别获取每个窗口的布局信息.</p>
+<p>该函数需要Android 5.0以上才能运行.</p>
+<h2>auto.root<span><a class="mark" href="#automator_auto_root" id="automator_auto_root">#</a></span></h2>
+<p><strong>[v4.1.0新增]</strong></p>
+<ul>
+<li>{ <span class="type">UiObject</span> }</li>
+</ul>
+<p>当前窗口的布局根元素. 如果无障碍服务未启动或者WindowFilter均返回false, 则会返回<code>null</code>.</p>
+<p>如果不设置windowFilter, 则当前窗口即为活跃的窗口（获取到焦点、正在触摸的窗口）；如果设置了windowFilter, 则获取的是过滤的窗口中的第一个窗口.</p>
+<p>如果系统是Android5.0以下, 则始终返回当前活跃的窗口的布局根元素.</p>
+<h2>auto.rootInActiveWindow<span><a class="mark" href="#automator_auto_rootinactivewindow" id="automator_auto_rootinactivewindow">#</a></span></h2>
+<p><strong>[v4.1.0新增]</strong></p>
+<ul>
+<li>{ <span class="type">UiObject</span> }</li>
+</ul>
+<p>当前活跃的窗口（获取到焦点、正在触摸的窗口）的布局根元素. 如果无障碍服务未启动则为<code>null</code>.</p>
+<h2>auto.setWindowFilter(filter)<span><a class="mark" href="#automator_auto_setwindowfilter_filter" id="automator_auto_setwindowfilter_filter">#</a></span></h2>
+<p><strong>[v4.1.0新增]</strong></p>
+<ul>
+<li><code>filter</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" class="type">Function</a> } 参数为窗口(<a href="https://developer.android.com/reference/android/view/accessibility/AccessibilityWindowInfo/">AccessibilityWindowInfo</a>), 返回值为Boolean的函数.</li>
+</ul>
+<p>设置窗口过滤器. 这个过滤器可以决定哪些窗口是目标窗口, 并影响选择器的搜索. 例如, 如果想要选择器在所有窗口（包括状态栏、输入法等）中搜索, 只需要使用以下代码：</p>
+<pre><code>auto.setWindowFilter(function(window){
+    //不管是如何窗口, 都返回true, 表示在该窗口中搜索
+    return true;
+});
+</code></pre><p>又例如, 当前使用了分屏功能, 屏幕上有Auto.js和QQ两个应用, 但我们只想选择器对QQ界面进行搜索, 则：</p>
+<pre><code>auto.setWindowFilter(function(window){
+    // 对于应用窗口, 他的title属性就是应用的名称, 因此可以通过title属性来判断一个应用
+    return window.title == &quot;QQ&quot;;
+});
+</code></pre><p>选择器默认是在当前活跃的窗口中搜索, 不会搜索诸如悬浮窗、状态栏之类的, 使用WindowFilter则可以控制搜索的窗口.</p>
+<p>需要注意的是, 如果WindowFilter返回的结果均为false, 则选择器的搜索结果将为空.</p>
+<p>另外setWindowFilter函数也会影响<code>auto.windowRoots</code>的结果.</p>
+<p>该函数需要Android 5.0以上才有效.</p>
+<h2>auto.windowRoots<span><a class="mark" href="#automator_auto_windowroots" id="automator_auto_windowroots">#</a></span></h2>
+<p><strong>[v4.1.0新增]</strong></p>
+<ul>
+<li>{ <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" class="type">Array</a> }</li>
+</ul>
+<p>返回当前被WindowFilter过滤的窗口的布局根元素组成的数组.</p>
+<p>如果系统是Android5.0以下, 则始终返回当前活跃的窗口的布局根元素的数组.</p>
+<h1>SimpleActionAutomator<span><a class="mark" href="#automator_simpleactionautomator_1" id="automator_simpleactionautomator_1">#</a></span></h1>
+<p>SimpleActionAutomator提供了一些模拟简单操作的函数, 例如点击文字、模拟按键等. 这些函数可以直接作为全局函数使用.</p>
+<h2>click(text[, i])<span><a class="mark" href="#automator_click_text_i" id="automator_click_text_i">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>text</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 要点击的文本</li>
+<li><code>i</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 如果相同的文本在屏幕中出现多次, 则i表示要点击第几个文本, i从0开始计算</li>
+</ul>
+</div><p>返回是否点击成功. 当屏幕中并未包含该文本, 或者该文本所在区域不能点击时返回false, 否则返回true.</p>
+<p>该函数可以点击大部分包含文字的按钮. 例如微信主界面下方的&quot;微信&quot;, &quot;联系人&quot;, &quot;发现&quot;, &quot;我&quot;的按钮.<br>通常与while同时使用以便点击按钮直至成功. 例如:</p>
+<pre><code>while(!click(&quot;扫一扫&quot;));
+</code></pre><p>当不指定参数i时则会尝试点击屏幕上出现的所有文字text并返回是否全部点击成功.</p>
+<p>i是从0开始计算的, 也就是, <code>click(&quot;啦啦啦&quot;, 0)</code>表示点击屏幕上第一个&quot;啦啦啦&quot;, <code>click(&quot;啦啦啦&quot;, 1)</code>表示点击屏幕上第二个&quot;啦啦啦&quot;.</p>
+<blockquote>
+<p>文本所在区域指的是, 从文本处向其父视图寻找, 直至发现一个可点击的部件为止.</p>
+</blockquote>
+<h2>click(left, top, bottom, right)<span><a class="mark" href="#automator_click_left_top_bottom_right" id="automator_click_left_top_bottom_right">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>left</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要点击的长方形区域左边与屏幕左边的像素距离</li>
+<li><code>top</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要点击的长方形区域上边与屏幕上边的像素距离</li>
+<li><code>bottom</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要点击的长方形区域下边与屏幕下边的像素距离</li>
+<li><code>right</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要点击的长方形区域右边与屏幕右边的像素距离</li>
+</ul>
+</div><p><strong>注意, 该函数一般只用于录制的脚本中使用, 在自己写的代码中使用该函数一般不要使用该函数. </strong></p>
+<p>点击在指定区域的控件. 当屏幕中并未包含与该区域严格匹配的区域, 或者该区域不能点击时返回false, 否则返回true.</p>
+<p>有些按钮或者部件是图标而不是文字（例如发送朋友圈的照相机图标以及QQ下方的消息、联系人、动态图标）, 这时不能通过<code>click(text, i)</code>来点击, 可以通过描述图标所在的区域来点击. left, bottom, top, right描述的就是点击的区域.</p>
+<p>至于要定位点击的区域, 可以在悬浮窗使用布局分析工具查看控件的bounds属性.</p>
+<p>通过无障碍服务录制脚本会生成该语句.</p>
+<h2>longClick(text[, i]))<span><a class="mark" href="#automator_longclick_text_i" id="automator_longclick_text_i">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>text</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 要长按的文本</li>
+<li><code>i</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 如果相同的文本在屏幕中出现多次, 则i表示要长按第几个文本, i从0开始计算</li>
+</ul>
+</div><p>返回是否点击成功. 当屏幕中并未包含该文本, 或者该文本所在区域不能点击时返回false, 否则返回true.</p>
+<p>当不指定参数i时则会尝试点击屏幕上出现的所有文字text并返回是否全部长按成功.</p>
+<h2>scrollUp([i])<span><a class="mark" href="#automator_scrollup_i" id="automator_scrollup_i">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>i</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要滑动的控件序号</li>
+</ul>
+</div><p>找到第i+1个可滑动控件上滑或<strong>左滑</strong>. 返回是否操作成功. 屏幕上没有可滑动的控件时返回false.</p>
+<p>另外不加参数时<code>scrollUp()</code>会寻找面积最大的可滑动的控件上滑或左滑, 例如微信消息列表等.</p>
+<p>参数为一个整数i时会找到第i + 1个可滑动控件滑动. 例如<code>scrollUp(0)</code>为滑动第一个可滑动控件.</p>
+<h2>scrollDown([i])<span><a class="mark" href="#automator_scrolldown_i" id="automator_scrolldown_i">#</a></span></h2>
+<div class="signature"><ul>
+<li><code>i</code> { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 要滑动的控件序号</li>
+</ul>
+</div><p>找到第i+1个可滑动控件下滑或<strong>右滑</strong>. 返回是否操作成功. 屏幕上没有可滑动的控件时返回false.</p>
+<p>另外不加参数时<code>scrollUp()</code>会寻找面积最大的可滑动的控件下滑或右滑.</p>
+<p>参数为一个整数i时会找到第i + 1个可滑动控件滑动. 例如<code>scrollUp(0)</code>为滑动第一个可滑动控件.</p>
+<h2>setText([i, ]text)<span><a class="mark" href="#automator_settext_i_text" id="automator_settext_i_text">#</a></span></h2>
+<div class="signature"><ul>
+<li>i { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 表示要输入的为第i + 1个输入框</li>
+<li>text { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 要输入的文本</li>
+</ul>
+</div><p>返回是否输入成功. 当找不到对应的文本框时返回false.</p>
+<p>不加参数i则会把所有输入框的文本都置为text. 例如<code>setText(&quot;测试&quot;)</code>.</p>
+<p>这里的输入文本的意思是, 把输入框的文本置为text, 而不是在原来的文本上追加.</p>
+<h2>input([i, ]text)<span><a class="mark" href="#automator_input_i_text" id="automator_input_i_text">#</a></span></h2>
+<div class="signature"><ul>
+<li>i { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type" class="type">number</a> } 表示要输入的为第i + 1个输入框</li>
+<li>text { <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type" class="type">string</a> } 要输入的文本</li>
+</ul>
+</div><p>返回是否输入成功. 当找不到对应的文本框时返回false.</p>
+<p>不加参数i则会把所有输入框的文本追加内容text. 例如<code>input(&quot;测试&quot;)</code>.</p>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

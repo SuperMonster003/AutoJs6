@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Stardust on 2017/7/11.
+ * Created by Stardust on Jul 11, 2017.
  */
 public class IntentExtras implements Serializable {
 

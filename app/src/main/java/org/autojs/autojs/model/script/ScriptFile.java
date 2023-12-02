@@ -8,7 +8,7 @@ import org.autojs.autojs.script.ScriptSource;
 import java.io.File;
 
 /**
- * Created by Stardust on 2017/1/23.
+ * Created by Stardust on Jan 23, 2017.
  */
 public class ScriptFile extends PFile {
 

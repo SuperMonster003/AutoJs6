@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by Stardust on 2017/8/4.
+ * Created by Stardust on Aug 4, 2017.
  */
 public class InputEventObserver {
 

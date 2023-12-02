@@ -9,7 +9,7 @@ import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/1/20.
+ * Created by Stardust on Jan 20, 2017.
  */
 public class Shortcut {
 

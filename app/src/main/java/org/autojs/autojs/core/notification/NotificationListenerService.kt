@@ -5,7 +5,7 @@ import org.autojs.autojs.core.accessibility.NotificationListener
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Created by Stardust on 2017/10/30.
+ * Created by Stardust on Oct 30, 2017.
  */
 class NotificationListenerService : android.service.notification.NotificationListenerService() {
 

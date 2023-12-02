@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 /**
- * Created by Stardust on 2017/12/3.
+ * Created by Stardust on Dec 3, 2017.
  */
 public class LocalStorage {
 

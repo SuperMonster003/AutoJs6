@@ -6,7 +6,7 @@ import android.view.View;
 import java.io.Serializable;
 
 /**
- * Created by Stardust on 2017/4/18.
+ * Created by Stardust on Apr 18, 2017.
  * <p>
  * The interface and its implementations must be serializable.
  * Only in this way it can be set to intent extra and be used as service argument.

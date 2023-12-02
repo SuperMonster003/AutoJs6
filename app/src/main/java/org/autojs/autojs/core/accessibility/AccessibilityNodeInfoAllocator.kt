@@ -8,7 +8,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import java.util.*
 
 /**
- * Created by Stardust on 2017/3/22.
+ * Created by Stardust on Mar 22, 2017.
  * Modified by SuperMonster003 as of Jun 17, 2022.
  */
 open class AccessibilityNodeInfoAllocator {
@@ -110,7 +110,8 @@ open class AccessibilityNodeInfoAllocator {
         val global = AccessibilityNodeInfoAllocator()
 
         fun recycleList(root: AccessibilityNodeInfo, list: List<AccessibilityNodeInfo>) {
-            // FIXME: 2017/5/1 Issue #180
+            // FIXME by Stardust on May 1, 2017.
+            //  ! Issue #180.
             list.takeIf { SDK_INT < TIRAMISU }
                 ?.filter { it !== root }
                 ?.forEach {

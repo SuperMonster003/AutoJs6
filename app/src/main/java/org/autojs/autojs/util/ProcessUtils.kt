@@ -1,7 +1,7 @@
 package org.autojs.autojs.util
 
 /**
- * Created by Stardust on 2017/8/3.
+ * Created by Stardust on Aug 3, 2017.
  */
 object ProcessUtils {
 

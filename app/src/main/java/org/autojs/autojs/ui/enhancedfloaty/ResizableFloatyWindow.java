@@ -15,7 +15,8 @@ import org.autojs.autojs.ui.enhancedfloaty.util.WindowTypeCompat;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/4/30.
+ * Created by Stardust on Apr 30, 2017.
+ * Modified by SuperMonster003 as of Apr 29, 2023.
  */
 public class ResizableFloatyWindow extends FloatyWindow {
 

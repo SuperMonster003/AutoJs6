@@ -10,14 +10,22 @@ let { files, util, ui, threads } = global;
  * @return {Internal.Images}
  */
 module.exports = function (scriptRuntime, scope) {
+
     const ResultAdapter = require('result-adapter');
 
     const Point = org.opencv.core.Point;
     const Scalar = org.opencv.core.Scalar;
     const Size = org.opencv.core.Size;
     const Core = org.opencv.core.Core;
+    const Imgproc = org.opencv.imgproc.Imgproc;
+    const Gravity = android.view.Gravity;
+    const Mat = org.autojs.autojs.core.opencv.Mat;
     const Images = org.autojs.autojs.runtime.api.Images;
+    const ColorDetector = org.autojs.autojs.core.image.ColorDetector;
     const ScreenCapturer = org.autojs.autojs.core.image.capture.ScreenCapturer;
+    const Bitmap = android.graphics.Bitmap;
+    const BitmapFactory = android.graphics.BitmapFactory;
+    const ByteArrayOutputStream = java.io.ByteArrayOutputStream;
 
     const RtImages = org.autojs.autojs.runtime.api.Images;
     /**

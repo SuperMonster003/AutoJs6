@@ -7,7 +7,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 
 /**
- * Created by Stardust on 2017/4/22.
+ * Created by Stardust on Apr 22, 2017.
  */
 object BitmapUtils {
 

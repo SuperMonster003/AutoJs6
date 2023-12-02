@@ -6,7 +6,7 @@ import org.autojs.autojs.script.ScriptSource;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Stardust on 2017/4/3.
+ * Created by Stardust on Apr 3, 2017.
  */
 public interface ScriptExecution {
 

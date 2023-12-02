@@ -10,6 +10,10 @@ let { util } = global;
  * @return {Internal.Device}
  */
 module.exports = function (scriptRuntime, scope) {
+
+    const NetworkUtils = org.autojs.autojs.util.NetworkUtils;
+    const DeviceUtils = org.autojs.autojs.util.DeviceUtils;
+
     const rtDevice = scriptRuntime.device;
 
     let _ = {

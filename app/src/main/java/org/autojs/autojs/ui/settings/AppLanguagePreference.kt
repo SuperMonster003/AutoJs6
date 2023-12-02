@@ -12,12 +12,16 @@ import org.autojs.autojs.util.LocaleUtils
 
 class AppLanguagePreference : MaterialListPreference {
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
+    @Suppress("unused")
     constructor(context: Context) : super(context)
 
     override fun onNeutral() {
@@ -30,7 +34,7 @@ class AppLanguagePreference : MaterialListPreference {
 
     override fun onChangeConfirmed(dialog: MaterialDialog) {
         super.onChangeConfirmed(dialog)
-        Language.entries.find {
+        (@Suppress("EnumValuesSoftDeprecate") Language.values()).find {
             it.getEntryName(prefContext) == dialog.items?.get(dialog.selectedIndex)
         }?.let {
             GlobalAppContext.post {

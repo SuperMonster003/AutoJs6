@@ -10,6 +10,17 @@ let { ui } = global;
  * @return {Internal.Http}
  */
 module.exports = function (scriptRuntime, scope) {
+
+    const PFile = org.autojs.autojs.pio.PFile;
+    const Request = okhttp3.Request;
+    const RequestBody = okhttp3.RequestBody;
+    const MultipartBody = okhttp3.MultipartBody;
+    const MediaType = okhttp3.MediaType;
+    const FormBody = okhttp3.FormBody;
+    const Callback = okhttp3.Callback;
+    const MimeTypeMap = android.webkit.MimeTypeMap;
+    const MutableOkHttp = org.autojs.autojs.core.http.MutableOkHttp;
+
     let _ = {
         Http: (/* @IIFE */ () => {
             /**

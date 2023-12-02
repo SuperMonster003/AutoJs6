@@ -11,7 +11,7 @@ import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.tool.UiHandler;
 
 /**
- * Created by Stardust on 2018/4/17.
+ * Created by Stardust on Apr 17, 2018.
  * Modified by SuperMonster003 as of Mar 20, 2022.
  * Modified by aiselp as of Jun 10, 2023.
  */

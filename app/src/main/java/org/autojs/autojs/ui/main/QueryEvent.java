@@ -1,7 +1,7 @@
 package org.autojs.autojs.ui.main;
 
 /**
- * Created by Stardust on 2017/10/25.
+ * Created by Stardust on Oct 25, 2017.
  */
 public class QueryEvent {
 

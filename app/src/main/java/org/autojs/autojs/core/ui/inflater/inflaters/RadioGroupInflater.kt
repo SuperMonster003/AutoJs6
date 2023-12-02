@@ -6,7 +6,7 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Ids
 
 /**
- * Created by Stardust on 2017/11/29.
+ * Created by Stardust on Nov 29, 2017.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
 open class RadioGroupInflater<V : RadioGroup>(resourceParser: ResourceParser) : LinearLayoutInflater<V>(resourceParser) {

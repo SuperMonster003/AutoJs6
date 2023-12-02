@@ -11,7 +11,7 @@ import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.theme.ThemeColorMutable;
 
 /**
- * Created by Stardust on 2016/8/16.
+ * Created by Stardust on Aug 16, 2016.
  */
 public class ThemeColorFloatingActionButton extends FloatingActionButton implements ThemeColorMutable {
     public ThemeColorFloatingActionButton(Context context) {

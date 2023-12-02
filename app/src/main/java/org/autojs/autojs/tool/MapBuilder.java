@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Stardust on 2017/1/26.
+ * Created by Stardust on Jan 26, 2017.
  */
 public class MapBuilder<K, V> {
 

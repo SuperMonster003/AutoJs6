@@ -30,14 +30,22 @@ module.exports = function (scriptRuntime, scope) {
             OcrMLKitCtor.prototype = {
                 constructor: OcrMLKitCtor,
                 recognizeTextMethodCreator(options) {
+                    ApkBuilder.Libs.ensure(ocr['_modeName']['mlkit'], ApkBuilder.Libs.MLKIT_GOOGLE_OCR);
                     return function (img) {
                         return Array.from(rtOcrMLKit.recognizeText(img));
                     };
                 },
+                recognizeText() {
+                    /* Stub. */
+                },
                 detectMethodCreator(options) {
+                    ApkBuilder.Libs.ensure(ocr['_modeName']['mlkit'], ApkBuilder.Libs.MLKIT_GOOGLE_OCR);
                     return function (img) {
                         return Array.from(rtOcrMLKit.detect(img).toArray());
                     };
+                },
+                detect() {
+                    /* Stub. */
                 },
             };
 

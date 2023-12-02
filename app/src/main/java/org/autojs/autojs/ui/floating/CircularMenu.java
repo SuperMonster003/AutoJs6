@@ -48,7 +48,7 @@ import org.jetbrains.annotations.NotNull;
 import java.text.MessageFormat;
 
 /**
- * Created by Stardust on 2017/10/18.
+ * Created by Stardust on Oct 18, 2017.
  */
 public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInspector.CaptureAvailableListener {
 

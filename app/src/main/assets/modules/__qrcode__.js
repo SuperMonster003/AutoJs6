@@ -61,10 +61,14 @@ module.exports = function (scriptRuntime, scope) {
                         if (img === null) {
                             throw TypeError(`Invalid image of path "${arguments[0]}" for qrcode.detectAll(img, options?)`);
                         }
+
+                        let argArray = Array.from(arguments);
+                        argArray.splice(0, 1, img.oneShot());
+
                         // @Overload
                         // detectAll(img: ImageWrapper): QrCode.Result[];
                         // detectAll(img: ImageWrapper, options: DetectOptionsWithoutIsAll): QrCode.Result[];
-                        return this.detectAll(img.oneShot(), arguments[1]);
+                        return this.detectAll.apply(this, argArray);
                     }
 
                     if (!(arguments[0] instanceof ImageWrapper)) {

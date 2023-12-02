@@ -36,22 +36,16 @@ import java.util.Map;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
- * Created by Stardust on 2017/12/9.
+ * Created by Stardust on Dec 9, 2017.
+ * Modified by SuperMonster003 as of May 26, 2022.
  */
 public class FunctionsKeyboardView extends FrameLayout {
-
-    public interface ClickCallback {
-        void onModuleLongClick(Module module);
-
-        void onPropertyClick(Module m, Property property);
-
-        void onPropertyLongClick(Module m, Property property);
-    }
 
     private static final int SPAN_COUNT = 4;
 
     private RecyclerView mModulesView;
     private RecyclerView mPropertiesView;
+    private Drawable mGridDividerView;
 
     private List<Module> mModules;
     private final Map<Module, List<Integer>> mSpanSizes = new HashMap<>();
@@ -80,54 +74,70 @@ public class FunctionsKeyboardView extends FrameLayout {
         init();
     }
 
+    public interface ClickCallback {
+        void onModuleLongClick(Module module);
+
+        void onPropertyClick(Module m, Property property);
+
+        void onPropertyLongClick(Module m, Property property);
+    }
+
     public void setClickCallback(ClickCallback clickCallback) {
         mClickCallback = clickCallback;
     }
 
     private void init() {
-        FunctionsKeyboardViewBinding binding = FunctionsKeyboardViewBinding.inflate(LayoutInflater.from(getContext()));
+        FunctionsKeyboardViewBinding binding = FunctionsKeyboardViewBinding.inflate(LayoutInflater.from(getContext()), this, true);
 
-        mModulesView = binding.moduleList;
-        mPropertiesView = binding.properties;
-
-        initModulesView();
-        initPropertiesView();
+        initModulesView(binding);
+        initPropertiesView(binding);
     }
 
-    private void initPropertiesView() {
+    private void initPropertiesView(FunctionsKeyboardViewBinding binding) {
+        mPropertiesView = binding.properties;
         WrapContentGridLayoutManger manager = new WrapContentGridLayoutManger(getContext(), SPAN_COUNT);
         manager.setDebugInfo("FunctionsKeyboardView");
         mPropertiesView.setLayoutManager(manager);
         mPropertiesView.setAdapter(new PropertiesAdapter());
         manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-
             @Override
             public int getSpanSize(int position) {
                 return mSpanSizes.get(mSelectedModule).get(position);
             }
         });
-        Drawable divider = ContextCompat.getDrawable(getContext(), R.drawable.divider_functions_view);
-        GridDividerDecoration dividerItemDecoration = new GridDividerDecoration(getContext(), divider);
+        mGridDividerView = ContextCompat.getDrawable(getContext(), R.drawable.divider_functions_view);
+        GridDividerDecoration dividerItemDecoration = new GridDividerDecoration(getContext(), mGridDividerView);
         mPropertiesView.addItemDecoration(dividerItemDecoration);
     }
 
     private void initSpanSizes(Module module) {
-        if (mSpanSizes.containsKey(module))
+        if (mSpanSizes.containsKey(module)) {
             return;
-        if (getMeasuredWidth() == 0)
+        }
+        if (getMeasuredWidth() == 0) {
             throw new IllegalStateException();
+        }
         List<Integer> spanSizes = new ArrayList<>();
-        //初始化spanSizes列表
+        // 初始化 spanSizes 列表.
         for (Property property : mSelectedModule.getProperties()) {
             int width = Math.max(getTextWidth(property.getKey()), getTextWidth(property.getSummary()));
-            int spanSize = (int) Math.ceil(width / ((double) getMeasuredWidth() / 4));
+            if (mGridDividerView != null) {
+                // @Hint by SuperMonster003 on Nov 30, 2023.
+                //  ! Increase the width as much as possible to prevent multi-line module names in TextView.
+                //  ! Like:
+                //  ! [ stopAllAndToas ]
+                //  ! [        t       ]
+                width += mGridDividerView.getIntrinsicWidth() * 2;
+            }
+            int spanSize = (int) Math.ceil(width / ((double) getMeasuredWidth() / SPAN_COUNT));
             spanSizes.add(Math.min(spanSize, 2));
         }
-        //遍历这个列表，调整spanSize。例如以下这种情况时:
+        // 遍历这个列表, 调整 spanSize.
+        // 例如以下这种情况:
         // [] [] []
         // [   ] [] []
         // [] [] [] []
-        //把第一行的第三个元素的spanSize设置为2
+        // 把第一行的第三个元素的 spanSize 设置为 2.
         int column = 0;
         for (int i = 0; i < spanSizes.size(); i++) {
             int spanSize = spanSizes.get(i);
@@ -137,7 +147,7 @@ public class FunctionsKeyboardView extends FrameLayout {
             } else {
                 column += spanSize;
             }
-            if (column == 4) {
+            if (column == SPAN_COUNT) {
                 column = 0;
             }
         }
@@ -145,8 +155,9 @@ public class FunctionsKeyboardView extends FrameLayout {
     }
 
     private String getDisplayText(Property property) {
-        if (TextUtils.isEmpty(property.getSummary()))
+        if (TextUtils.isEmpty(property.getSummary())) {
             return property.getKey();
+        }
         return property.getKey() + "\n" + property.getSummary();
     }
 
@@ -160,7 +171,8 @@ public class FunctionsKeyboardView extends FrameLayout {
         return r.width();
     }
 
-    private void initModulesView() {
+    private void initModulesView(FunctionsKeyboardViewBinding binding) {
+        mModulesView = binding.moduleList;
         mModulesView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
         mModulesView.setAdapter(new ModulesAdapter());
     }
@@ -185,8 +197,9 @@ public class FunctionsKeyboardView extends FrameLayout {
             mSelectedModuleView.setSelected(false);
         }
         mSelectedModuleView = moduleView;
-        if (mSelectedModuleView != null)
+        if (mSelectedModuleView != null) {
             mSelectedModuleView.setSelected(true);
+        }
         initSpanSizes(mSelectedModule);
         mPropertiesView.getAdapter().notifyDataSetChanged();
     }
@@ -194,8 +207,9 @@ public class FunctionsKeyboardView extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if (mModules == null)
+        if (mModules == null) {
             loadModules();
+        }
     }
 
     private class ModuleViewHolder extends RecyclerView.ViewHolder {
@@ -208,8 +222,9 @@ public class FunctionsKeyboardView extends FrameLayout {
             super(itemView);
             mTextView = (TextView) itemView;
             mTextView.setOnClickListener(v -> {
-                if (mModule == null)
+                if (mModule == null) {
                     return;
+                }
                 setSelectedModule(mModule, mTextView);
             });
             mTextView.setOnLongClickListener(v -> {
@@ -278,6 +293,7 @@ public class FunctionsKeyboardView extends FrameLayout {
         public int getItemCount() {
             return mModules == null ? 0 : mModules.size();
         }
+
     }
 
     private class PropertiesAdapter extends RecyclerView.Adapter<PropertyViewHolder> {
@@ -298,6 +314,7 @@ public class FunctionsKeyboardView extends FrameLayout {
         public int getItemCount() {
             return mSelectedModule == null ? 0 : mSelectedModule.getProperties().size();
         }
+
     }
 
 }

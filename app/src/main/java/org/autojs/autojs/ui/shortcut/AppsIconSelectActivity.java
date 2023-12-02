@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
 import org.autojs.autojs.ui.BaseActivity;
-import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityAppsIconSelectBinding;
 
@@ -37,7 +34,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * Created by Stardust on 2017/10/25.
+ * Created by Stardust on Oct 25, 2017.
  */
 public class AppsIconSelectActivity extends BaseActivity {
 
@@ -114,21 +111,16 @@ public class AppsIconSelectActivity extends BaseActivity {
         }
     }
 
-    public static Observable<Bitmap> getBitmapFromIntent(Context context, Intent data) {
+    public static Observable<Drawable> getDrawableFromIntent(Context context, Intent data) {
         String packageName = data.getStringExtra(EXTRA_PACKAGE_NAME);
         if (packageName != null) {
-            return Observable.fromCallable(() -> {
-                Drawable drawable = context.getPackageManager().getApplicationIcon(packageName);
-                return BitmapUtils.drawableToBitmap(drawable);
-            });
+            return Observable.fromCallable(() -> context.getPackageManager().getApplicationIcon(packageName));
         }
         Uri uri = data.getData();
         if (uri == null) {
             return Observable.error(new IllegalArgumentException("invalid intent"));
         }
-        return Observable.fromCallable(() ->
-                BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uri))
-        );
+        return Observable.fromCallable(() -> Drawable.createFromStream(context.getContentResolver().openInputStream(uri), null));
     }
 
     private class AppItem {

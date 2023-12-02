@@ -7,7 +7,7 @@ import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.w3c.dom.Node
 
 /**
- * Created by Stardust on 2017/11/3.
+ * Created by Stardust on Nov 3, 2017.
  */
 interface ViewInflater<V : View> {
 

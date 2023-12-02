@@ -41,7 +41,7 @@ import org.mozilla.javascript.WrappedException
 import java.io.File
 
 /**
- * Created by Stardust on 2017/11/29.
+ * Created by Stardust on Nov 29, 2017.
  * Modified by SuperMonster003 as of Jun 10, 2022.
  * Transformed by SuperMonster003 on Oct 10, 2022.
  * Modified by LZX284 (https://github.com/LZX284) as of Sep 30, 2023.

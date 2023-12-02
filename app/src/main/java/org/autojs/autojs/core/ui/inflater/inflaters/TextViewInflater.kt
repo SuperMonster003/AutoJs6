@@ -14,7 +14,7 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
 
 /**
- * Created by Stardust on 2017/11/3.
+ * Created by Stardust on Nov 3, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  * Transformed by SuperMonster003 on Apr 12, 2023.
  */
@@ -114,7 +114,8 @@ open class TextViewInflater<V : TextView>(resourceParser: ResourceParser) : Base
             .map("none", 0)
             .map("normal", 1)
 
-        // TODO: 2017/11/4 IME FLAG
+        // TODO by Stardust on Nov 4, 2017.
+        //  ! IME FLAG.
         val IME_OPTIONS: ValueMapper<Int> = ValueMapper<Int>("imeOptions")
             .map("actionDone", EditorInfo.IME_ACTION_DONE)
             .map("actionGo", EditorInfo.IME_ACTION_DONE)

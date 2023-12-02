@@ -12,7 +12,7 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 
 /**
- * Created by Stardust on 2017/7/21.
+ * Created by Stardust on Jul 21, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  * Transformed by SuperMonster003 on Nov 7, 2023.
  *

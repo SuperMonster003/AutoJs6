@@ -19,7 +19,7 @@ import java.io.InputStreamReader
 import java.util.regex.Pattern
 
 /**
- * Created by Stardust on 2017/8/1.
+ * Created by Stardust on Aug 1, 2017.
  * Modified by SuperMonster003 as of Sep 10, 2022.
  */
 class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Context, deviceNameOrPath: String? = InputDevices.getTouchDeviceName()) : ScriptEngine.AbstractScriptEngine<AutoFileSource?>() {

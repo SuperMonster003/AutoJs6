@@ -46,7 +46,7 @@ public class TinySign {
                 if (f.isFile()) {
                     doFile(prefix + f.getName(), f, zos, dos, m);
                 } else {
-                    doDir(prefix + f.getName() + "/", f, zos, dos, m);
+                    doDir(prefix + f.getName() + File.separator, f, zos, dos, m);
                 }
             }
         }
@@ -168,7 +168,7 @@ public class TinySign {
                     if (f.isFile()) {
                         doFile(f.getName(), f, zos, dos, m);
                     } else {
-                        doDir(f.getName() + "/", f, zos, dos, m);
+                        doDir(f.getName() + File.separator, f, zos, dos, m);
                     }
                 }
             }

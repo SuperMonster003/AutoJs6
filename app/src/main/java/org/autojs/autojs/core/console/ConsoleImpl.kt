@@ -35,9 +35,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.pow
 
-
 /**
- * Created by Stardust on 2017/5/2.
+ * Created by Stardust on May 2, 2017.
  * Modified by SuperMonster003 as of Apr 12, 2023.
  * Transformed by SuperMonster003 on Apr 12, 2023.
  */
@@ -432,7 +431,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     override fun setPosition(x: Double, y: Double) = runWithWindow {
         configurator.setPosition(x, y)
         if (isShowing) {
-            mFloatyWindow!!.windowBridge.updatePosition(x.toInt(), y.toInt())
+            mFloatyWindow!!.windowBridge?.updatePosition(x.toInt(), y.toInt())
         }
     }
 

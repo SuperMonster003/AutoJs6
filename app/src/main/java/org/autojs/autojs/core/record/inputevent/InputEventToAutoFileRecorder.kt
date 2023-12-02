@@ -16,7 +16,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 /**
- * Created by Stardust on 2017/8/2.
+ * Created by Stardust on Aug 2, 2017.
  */
 class InputEventToAutoFileRecorder(context: Context) : InputEventRecorder() {
     private var mLastEventTime = 0.0

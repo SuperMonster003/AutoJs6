@@ -12,7 +12,7 @@ import android.view.WindowManager
 import org.autojs.autojs.app.GlobalAppContext
 
 /**
- * Created by Stardust on 2017/4/26.
+ * Created by Stardust on Apr 26, 2017.
  */
 @Suppress("unused")
 class ScreenMetrics(private var designWidth: Int, private var designHeight: Int) {

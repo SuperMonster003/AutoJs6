@@ -1,7 +1,7 @@
 package org.autojs.autojs.concurrent;
 
 /**
- * Created by Stardust on 2017/12/27.
+ * Created by Stardust on Dec 27, 2017.
  */
 public class Value<T> {
 

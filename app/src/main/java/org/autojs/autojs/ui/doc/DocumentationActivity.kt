@@ -8,7 +8,7 @@ import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs6.databinding.ActivityDocumentationBinding
 
 /**
- * Created by Stardust on 2017/10/24.
+ * Created by Stardust on Oct 24, 2017.
  */
 class DocumentationActivity : BaseActivity() {
 

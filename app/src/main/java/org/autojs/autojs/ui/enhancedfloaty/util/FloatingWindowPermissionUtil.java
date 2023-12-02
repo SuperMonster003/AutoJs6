@@ -9,7 +9,7 @@ import android.provider.Settings;
 import android.view.WindowManager;
 
 /**
- * Created by Stardust on 2017/3/10.
+ * Created by Stardust on Mar 10, 2017.
  */
 public class FloatingWindowPermissionUtil {
 

@@ -1,0 +1,2156 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>全局对象 (Global) | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/global.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-global">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global active" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="global" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#global_global">全局对象 (Global)</a></span><ul>
+<li><span class="stability_undefined"><a href="#global">覆写保护</a></span></li>
+<li><span class="stability_undefined"><a href="#global_global_1">[@] global</a></span></li>
+<li><span class="stability_undefined"><a href="#global_m_sleep">[m] sleep</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_sleep_millis">sleep(millis)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_sleep_millismin_millismax">sleep(millisMin, millisMax)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_sleep_millis_bounds">sleep(millis, bounds)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_toast">[m+] toast</a></span></li>
+<li><span class="stability_undefined"><a href="#global_m_toastlog">[m] toastLog</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_toastlog_text">toastLog(text)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_toastlog_text_islong">toastLog(text, isLong)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_toastlog_text_islong_isforcible">toastLog(text, isLong, isForcible)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_toastlog_text_isforcible">toastLog(text, isForcible)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_notice">[m+] notice</a></span></li>
+<li><span class="stability_undefined"><a href="#global_m_random">[m] random</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_random">random()</a></span></li>
+<li><span class="stability_undefined"><a href="#global_random_min_max">random(min, max)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_wait">[m] wait</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_wait_condition">wait(condition)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_wait_condition_limit">wait(condition, limit)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_wait_condition_limit_interval">wait(condition, limit, interval)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_wait_condition_callback">wait(condition, callback)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_wait_condition_limit_callback">wait(condition, limit, callback)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_wait_condition_limit_interval_callback">wait(condition, limit, interval, callback)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_waitforactivity">[m] waitForActivity</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_waitforactivity_activityname">waitForActivity(activityName)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforactivity_activityname_limit">waitForActivity(activityName, limit)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforactivity_activityname_limit_interval">waitForActivity(activityName, limit, interval)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforactivity_activityname_callback">waitForActivity(activityName, callback)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforactivity_activityname_limit_callback">waitForActivity(activityName, limit, callback)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforactivity_activityname_limit_interval_callback">waitForActivity(activityName, limit, interval, callback)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_waitforpackage">[m] waitForPackage</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_waitforpackage_packagename">waitForPackage(packageName)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforpackage_packagename_limit">waitForPackage(packageName, limit)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforpackage_packagename_limit_interval">waitForPackage(packageName, limit, interval)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforpackage_packagename_callback">waitForPackage(packageName, callback)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforpackage_packagename_limit_callback">waitForPackage(packageName, limit, callback)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_waitforpackage_packagename_limit_interval_callback">waitForPackage(packageName, limit, interval, callback)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_exit">[m] exit</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_exit">exit()</a></span></li>
+<li><span class="stability_undefined"><a href="#global_exit_e">exit(e)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_stop">[m] stop</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_stop">stop()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isstopped">[m] isStopped</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isstopped">isStopped()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isshuttingdown">[m] isShuttingDown</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isshuttingdown">isShuttingDown()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isrunning">[m] isRunning</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isrunning">isRunning()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_notstopped">[m] notStopped</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_notstopped">notStopped()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_requiresapi">[m] requiresApi</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_requiresapi_api">requiresApi(api)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_requiresautojsversion">[m] requiresAutojsVersion</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_requiresautojsversion_versionname">requiresAutojsVersion(versionName)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_requiresautojsversion_versioncode">requiresAutojsVersion(versionCode)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_importpackage">[m] importPackage</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_importpackage_pkg">importPackage(...pkg)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_importclass">[m] importClass</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_importclass_cls">importClass(...cls)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_currentpackage">[m] currentPackage</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_currentpackage">currentPackage()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_currentactivity">[m] currentActivity</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_currentactivity">currentActivity()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_setclip">[m] setClip</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_setclip_text">setClip(text)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_getclip">[m] getClip</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_getclip">getClip()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_selector">[m] selector</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_selector">selector()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_pickup">[m] pickup</a></span></li>
+<li><span class="stability_undefined"><a href="#global_m_detect">[m] detect</a></span></li>
+<li><span class="stability_undefined"><a href="#global_m_existsall">[m] existsAll</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_existsall_selectors">existsAll(...selectors)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_existsone">[m] existsOne</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_existsone_selectors">existsOne(...selectors)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_cx">[m] cX</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_cx">cX()</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cx_x_base">cX(x, base)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cx_x_isratio">cX(x, isRatio)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cx_x">cX(x)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_cy">[m] cY</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_cy">cY()</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cy_y_base">cY(y, base)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cy_y_isratio">cY(y, isRatio)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cy_y">cY(y)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_cyx">[m] cYx</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_cyx_coordinatey_basex">cYx(coordinateY, baseX)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cyx_percenty_ratio">cYx(percentY, ratio)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cyx_y_isratio">cYx(y, isRatio)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cyx_y">cYx(y)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_cxy">[m] cXy</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_cxy_coordinatex_basey">cXy(coordinateX, baseY)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cxy_percentx_ratio">cXy(percentX, ratio)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cxy_x_isratio">cXy(x, isRatio)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_cxy_x">cXy(x)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_species">[m+] species</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_species_o">species(o)</a></span></li>
+<li><span class="stability_undefined"><a href="#global_m_isarray">[m] isArray</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isarray_o">isArray(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isarraybuffer">[m] isArrayBuffer</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isarraybuffer_o">isArrayBuffer(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isbigint">[m] isBigInt</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isbigint_o">isBigInt(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isboolean">[m] isBoolean</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isboolean_o">isBoolean(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_iscontinuation">[m] isContinuation</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_iscontinuation_o">isContinuation(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isdataview">[m] isDataView</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isdataview_o">isDataView(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isdate">[m] isDate</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isdate_o">isDate(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_iserror">[m] isError</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_iserror_o">isError(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isfloat32array">[m] isFloat32Array</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isfloat32array_o">isFloat32Array(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isfloat64array">[m] isFloat64Array</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isfloat64array_o">isFloat64Array(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isfunction">[m] isFunction</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isfunction_o">isFunction(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_ishtmldocument">[m] isHTMLDocument</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_ishtmldocument_o">isHTMLDocument(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isint16array">[m] isInt16Array</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isint16array_o">isInt16Array(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isint32array">[m] isInt32Array</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isint32array_o">isInt32Array(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isint8array">[m] isInt8Array</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isint8array_o">isInt8Array(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isjavaobject">[m] isJavaObject</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isjavaobject_o">isJavaObject(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isjavapackage">[m] isJavaPackage</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isjavapackage_o">isJavaPackage(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_ismap">[m] isMap</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_ismap_o">isMap(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isnamespace">[m] isNamespace</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isnamespace_o">isNamespace(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isnull">[m] isNull</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isnull_o">isNull(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isnumber">[m] isNumber</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isnumber_o">isNumber(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isobject">[m] isObject</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isobject_o">isObject(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isqname">[m] isQName</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isqname_o">isQName(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isregexp">[m] isRegExp</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isregexp_o">isRegExp(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isset">[m] isSet</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isset_o">isSet(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isstring">[m] isString</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isstring_o">isString(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isuint16array">[m] isUint16Array</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isuint16array_o">isUint16Array(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isuint32array">[m] isUint32Array</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isuint32array_o">isUint32Array(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isuint8array">[m] isUint8Array</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isuint8array_o">isUint8Array(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isuint8clampedarray">[m] isUint8ClampedArray</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isuint8clampedarray_o">isUint8ClampedArray(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isundefined">[m] isUndefined</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isundefined_o">isUndefined(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isweakmap">[m] isWeakMap</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isweakmap_o">isWeakMap(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isweakset">[m] isWeakSet</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isweakset_o">isWeakSet(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_iswindow">[m] isWindow</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_iswindow_o">isWindow(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isxml">[m] isXML</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isxml_o">isXML(o)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_m_isxmllist">[m] isXMLList</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_isxmllist_o">isXMLList(o)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#global_p_width">[p] WIDTH</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_height">[p] HEIGHT</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_r">[p+] R</a></span><ul>
+<li><span class="stability_undefined"><a href="#global_p_anim">[p+] anim</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_array">[p+] array</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_bool">[p+] bool</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_color">[p+] color</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_dimen">[p+] dimen</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_drawable">[p+] drawable</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_id">[p+] id</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_integer">[p+] integer</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_layout">[p+] layout</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_menu">[p+] menu</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_plurals">[p+] plurals</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_string">[p+] string</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_strings">[p+] strings</a></span></li>
+<li><span class="stability_undefined"><a href="#global_p_style">[p+] style</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>全局对象 (Global)<span><a class="mark" href="#global_global" id="global_global">#</a></span></h1>
+<p>在 JavaScript 中, <a href="https://stackoverflow.com/questions/9108925/how-is-almost-everything-in-javascript-an-object/">几乎一切都是对象</a>.<br>此处的全局 &quot;对象&quot; 包括 [ 变量 / 方法 / 构造器 ] 等.<br>全局对象随处可用, 包括 ECMA 标准内置对象 (如 [ Number / RegExp / String ] 等).</p>
+<p>AutoJs6 的内置模块均支持全局使用, 如 <code>app</code>, <code>images</code>, <code>device</code> 等.</p>
+<p>为便于使用, 一些 AutoJs6 模块中的方法也被全局化,<br>如 <code>images.captureScreen()</code>, <code>dialogs.alert()</code>, <code>app.launch()</code> 等.<br>全局化方法均以 <code>Global</code> 标签标注.</p>
+<p>脚本文件可直接运行使用, 也可作为模块被导入使用 (<code>require</code> 方法).<br>当作为模块使用时, <code>exports</code> 和 <code>module</code> 可作为全局对象使用.<br>另在 UI 模式下也有一些专属全局对象, 如 <code>activity</code>.</p>
+<h2>覆写保护<span><a class="mark" href="#global" id="global">#</a></span></h2>
+<p>AutoJs6 对部分全局对象及内置模块增加了覆写保护.<br>以下全局声明或赋值将导致异常或非预期结果:</p>
+<pre><code class="lang-js">/* 以全局对象 selector 为例. */
+
+/* 声明无效. */
+let selector = 1; /* 异常: 变量 selector 重复声明. */
+const selector = 1; /* 同上. */
+var selector = 1; /* 同上. */
+
+/* 覆写无效 (非严格模式). */
+selector = 1;
+typeof selector; // &quot;function&quot; - 静默失败, 覆写未生效.
+
+/* 覆写无效 (严格模式). */
+&quot;use strict&quot;;
+selector = 1; /* 异常: 无法修改只读属性: selector. */
+</code></pre>
+<p>局部作用域不受上述情况影响:</p>
+<pre><code class="lang-js">(function () {
+    let selector = 1;
+    return typeof selector;
+})(); // &quot;number&quot;
+</code></pre>
+<p>截至目前 (2022/10) 受覆写保护的对象有:</p>
+<pre><code class="lang-text">selector
+continuation
+</code></pre>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">global</p>
+
+<hr>
+<h2>[@] global<span><a class="mark" href="#global_global_1" id="global_global_1">#</a></span></h2>
+<p>global 为 AutoJs6 的默认顶级作用域对象, 可作为全局对象使用:</p>
+<pre><code class="lang-js">typeof global; // &quot;object&quot;
+typeof global.sleep; // &quot;function&quot;
+</code></pre>
+<p>另, 访问顶级作用域对象也可通过以下代码:</p>
+<pre><code class="lang-js">runtime.topLevelScope;
+</code></pre>
+<p><code>runtime.topLevelScope</code> 本身有 <code>global</code> 属性, 因此全局对象 <code>global</code> 也一样拥有:</p>
+<pre><code class="lang-js">typeof runtime.topLevelScope.global; // &quot;object&quot;
+
+global.global === global; // true
+global.global.global.global === global; // true
+</code></pre>
+<p>global 对象可以增加属性, 也可以覆写甚至删除属性 (部分被保护):</p>
+<pre><code class="lang-js">global.hello = &quot;hello&quot;;
+delete global.hello;
+</code></pre>
+<p>global 对象本身是可被覆写的:</p>
+<pre><code class="lang-js">typeof global; // &quot;object&quot;
+global = 3;
+typeof global; // &quot;number&quot;
+</code></pre>
+<p>如果 global 对象被意外重写 (虽然概率很低),<br>可通过 <code>runtime.topLevelScope</code> 访问或还原:</p>
+<pre><code class="lang-js">global = 3; /* 覆写 global 对象. */
+typeof global; // &quot;number&quot;
+typeof global.sleep; // &quot;undefined&quot;
+typeof runtime.topLevelScope.sleep; // &quot;function&quot;
+
+global = runtime.topLevelScope; /* 还原 global 对象. */
+typeof global; // &quot;object&quot;
+typeof global.sleep; // &quot;function&quot;
+</code></pre>
+<h2>[m] sleep<span><a class="mark" href="#global_m_sleep" id="global_m_sleep">#</a></span></h2>
+<h3>sleep(millis)<span><a class="mark" href="#global_sleep_millis" id="global_sleep_millis">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 1/3</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>millis</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 休眠时间 (毫秒)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>使当前线程休眠一段时间.</p>
+<pre><code class="lang-js">/* 休眠 9 秒钟. */
+sleep(9000);
+/* 休眠 9 秒钟 (使用科学计数法). */
+sleep(9e3);
+</code></pre>
+<h3>sleep(millisMin, millisMax)<span><a class="mark" href="#global_sleep_millismin_millismax" id="global_sleep_millismin_millismax">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/3</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>millisMin</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 休眠时间下限 (毫秒)</li>
+<li><strong>millisMax</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 休眠时间上限 (毫秒)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>使当前线程休眠一段时间, 该时间随机落在 millisMin 和 millisMax 之间.</p>
+<pre><code class="lang-js">/* 随机休眠 3 - 5 秒钟. */
+sleep(3e3, 5e3);
+</code></pre>
+<h3>sleep(millis, bounds)<span><a class="mark" href="#global_sleep_millis_bounds" id="global_sleep_millis_bounds">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 3/3</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>millis</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 休眠时间 (毫秒)</li>
+<li><strong>bounds</strong> { <span class="type"><a href="dataTypes.html#datatypes_NumberString">NumberString</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 浮动值</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>使当前线程休眠一段时间, 该时间随机落在 millis ± bounds 之间.<br>bounds 参数为 <a href="dataTypes.html#datatypes_NumberString">数字字符串</a> 类型 (如 &quot;12&quot;), 或在字符串开头附加 &quot;±&quot; 明确参数含义 (如 &quot;±12&quot;).</p>
+<pre><code class="lang-js">/* 随机休眠 3 - 5 秒钟 (即 4 ± 1 秒钟). */
+sleep(4e3, &quot;1e3&quot;);
+sleep(4e3, &quot;±1e3&quot;); /* 同上. */
+</code></pre>
+<h2>[m+] toast<span><a class="mark" href="#global_m_toast" id="global_m_toast">#</a></span></h2>
+<p>toast 模块的全局化对象, 参阅 <a href="toast.html">消息浮动框 (Toast)</a> 模块章节.</p>
+<h2>[m] toastLog<span><a class="mark" href="#global_m_toastlog" id="global_m_toastlog">#</a></span></h2>
+<p>显示消息浮动框并在控制台打印消息.<br>相当于以下代码组合:</p>
+<pre><code class="lang-js">toast(text, ...args);
+console.log(text);
+</code></pre>
+<p>因此, 方法重载与 <a href="#global_m_toast">toast</a> 完全一致.</p>
+<blockquote>
+<p>注: 虽然 toast 方法异步, 但 console.log 方法同步, 因此 toastLog 方法也为同步.</p>
+</blockquote>
+<h3>toastLog(text)<span><a class="mark" href="#global_toastlog_text" id="global_toastlog_text">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 1/4</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅: <a href="toast.html#toast_toasttext">toast(text)</a></p>
+</blockquote>
+<h3>toastLog(text, isLong)<span><a class="mark" href="#global_toastlog_text_islong" id="global_toastlog_text_islong">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 2/4</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容
+<strong>isLong = false</strong> { <code>&#39;long&#39;</code> | <code>&#39;l&#39;</code> | <code>&#39;short&#39;</code> | <code>&#39;s&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否以较长时间显示</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅: <a href="toast.html#toast_toasttext_islong">toast(text, isLong)</a></p>
+</blockquote>
+<h3>toastLog(text, isLong, isForcible)<span><a class="mark" href="#global_toastlog_text_islong_isforcible" id="global_toastlog_text_islong_isforcible">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 3/4</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容
+<strong>isLong = false</strong> { <code>&#39;long&#39;</code> | <code>&#39;l&#39;</code> | <code>&#39;short&#39;</code> | <code>&#39;s&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否以较长时间显示
+<strong>isForcible = false</strong> { <code>&#39;forcible&#39;</code> | <code>&#39;f&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否强制覆盖显示</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅: <a href="toast.html#toast_toasttext_islong_isforcible">toast(text, isLong, isForcible)</a></p>
+</blockquote>
+<h3>toastLog(text, isForcible)<span><a class="mark" href="#global_toastlog_text_isforcible" id="global_toastlog_text_isforcible">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 4/4</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 消息内容</li>
+<li><strong>isForcible</strong> { <code>&#39;forcible&#39;</code> | <code>&#39;f&#39;</code> } - 强制覆盖显示 (字符标识)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅: <a href="toast.html#toast_toasttext_isforcible">toast(text, isForcible)</a></p>
+</blockquote>
+<h2>[m+] notice<span><a class="mark" href="#global_m_notice" id="global_m_notice">#</a></span></h2>
+<p>notice 模块的全局化对象, 参阅 <a href="notice.html">消息通知 (Notice)</a> 模块章节.</p>
+<h2>[m] random<span><a class="mark" href="#global_m_random" id="global_m_random">#</a></span></h2>
+<h3>random()<span><a class="mark" href="#global_random" id="global_random">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 1/2</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>与 Math.random() 相同, 返回落在 [0, 1) 区间的随机数字.</p>
+<h3>random(min, max)<span><a class="mark" href="#global_random_min_max" id="global_random_min_max">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 2/2</code></strong></p>
+<ul>
+<li><strong>min</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 随机数下限</li>
+<li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 随机数上限</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回落在 [min, max] 区间的随机数字.</p>
+<blockquote>
+<p>注: random(min, max) 右边界闭合, 而 random() 右边界开放.</p>
+</blockquote>
+<h2>[m] wait<span><a class="mark" href="#global_m_wait" id="global_m_wait">#</a></span></h2>
+<h3>wait(condition)<span><a class="mark" href="#global_wait_condition" id="global_wait_condition">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 1/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>condition</strong> { <span class="type"><a href="dataTypes.html#datatypes_function">(() =&gt; any)</a></span> | <span class="type"><a href="dataTypes.html#datatypes_pickupselector">PickupSelector</a></span> } - 结束等待条件</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>阻塞等待, 直到条件满足.<br>默认等待时间为 10 秒, 条件检查间隔为 200 毫秒.<br>若超时, 放弃等待, 并返回特定的条件超时结果 (如 false).<br>若超时之前条件得以满足, 结束等待, 并返回特定的条件满足结果 (如 true).</p>
+<blockquote>
+<p>注: 不同于 while 和 for 等循环语句的 &quot;条件&quot;,<br>该方法的条件是结束等待条件, 只要不满足条件, 就一直等待.<br>而循环语句的条件, 是只要满足条件, 就一直循环.</p>
+</blockquote>
+<p>等待条件支持函数及选择器.</p>
+<p>函数示例, 等待设备屏幕关闭:</p>
+<pre><code class="lang-js">wait(function () {
+    return device.isScreenOff();
+});
+
+/* 使用箭头函数. */
+wait(() =&gt; device.isScreenOff());
+
+/* 使用 bind. */
+wait(device.isScreenOff.bind(device));
+
+/* 对结果分支处理. */
+if (wait(() =&gt; device.isScreenOff())) {
+    console.log(&quot;等待屏幕关闭成功&quot;);
+} else {
+    console.log(&quot;等待屏幕关闭超时&quot;);
+}
+</code></pre>
+<p>选择器示例, 等待文本为 &quot;立即开始&quot; 的控件出现:</p>
+<pre><code class="lang-js">/* 以下三种方式为 Pickup 选择器的不同格式, 效果相同. */
+wait(&#39;立即开始&#39;);
+wait(content(&#39;立即开始&#39;)); /* 同上. */
+wait({ content: &#39;立即开始&#39; }); /* 同上. */
+
+/* 函数方式. */
+wait(() =&gt; content(&#39;立即开始&#39;).exists());
+wait(() =&gt; pickup(&#39;立即开始&#39;, &#39;?&#39;)); /* 同上. */
+
+/* wait 返回结果的简单应用. */
+wait(&#39;立即开始&#39;) &amp;&amp; toast(&#39;OK&#39;);
+wait(&#39;立即开始&#39;) ? toast(&#39;√&#39;) : toast(&#39;×&#39;);
+</code></pre>
+<p>等待条件的满足与否, 与函数返回值有关.<br>例如当函数返回 true 时, 等待条件即满足.</p>
+<p>下面列出不满足条件的几种返回值:<br>[ <a href="dataTypes.html#datatypes_boolean">false</a> / <a href="dataTypes.html#datatypes_null">null</a> / <a href="dataTypes.html#datatypes_undefined">undefined</a> / <a href="https://developer.mozilla.org/zh-CN/docs/Glossary/NaN/">NaN</a> ]<br>除此之外的返回值均视为满足条件 (包括空字符串和数字 0 等).</p>
+<p>一种常见的错误用例, 即函数条件缺少返回值:</p>
+<pre><code class="lang-js">wait(() =&gt; {
+    if (device.isScreenOff()) {
+        console.log(&quot;屏幕已成功关闭&quot;);
+    }
+});
+</code></pre>
+<p>上述示例中, 等待条件永远无法满足, 因函数一直返回 undefined.</p>
+<p>添加合适的返回值即可修正:</p>
+<pre><code class="lang-js">wait(() =&gt; {
+    if (device.isScreenOff()) {
+        console.log(&quot;屏幕已成功关闭&quot;);
+        return true;
+    }
+});
+</code></pre>
+<blockquote>
+<p>参阅: <a href="uiSelectorType.html#uiselectortype_m_pickup">pickup</a></p>
+</blockquote>
+<h3>wait(condition, limit)<span><a class="mark" href="#global_wait_condition_limit" id="global_wait_condition_limit">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>condition</strong> { <span class="type"><a href="dataTypes.html#datatypes_function">(() =&gt; any)</a></span> | <span class="type"><a href="uiSelectorType.html#uiselectortype_m_pickup">PickupSelector</a></span> } - 结束等待条件</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p><a href="#global_waitcondition">wait(condition)</a> 增加条件检测限制.<br>达到限制后, 表示等待超时, 并放弃等待.<br>限制分为 &quot;次数限制&quot; (limit &lt; 100) 和 &quot;时间限制&quot; (limit &gt;= 100).</p>
+<pre><code class="lang-js">/* 等待屏幕关闭, 最多检测屏幕状态 20 次. */
+wait(() =&gt; device.isScreenOff(), 20); /* limit &lt; 100, 视为次数限制. */
+/* 等待屏幕关闭, 最多检测屏幕状态 5 秒钟. */
+wait(() =&gt; device.isScreenOff(), 5e3); /* limit &gt;= 100, 视为时间限制. */
+</code></pre>
+<h3>wait(condition, limit, interval)<span><a class="mark" href="#global_wait_condition_limit_interval" id="global_wait_condition_limit_interval">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 3/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>condition</strong> { <span class="type"><a href="dataTypes.html#datatypes_function">(() =&gt; any)</a></span> | <span class="type"><a href="uiSelectorType.html#uiselectortype_m_pickup">PickupSelector</a></span> } - 结束等待条件</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><strong>interval</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测间隔</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p><a href="#global_waitcondition_limit">wait(condition, limit)</a> 增加条件检测间隔.<br>只要条件不满足, wait() 方法会持续检测, 直到条件满足或达到检测限制.<br>interval 参数用于设置条件检测之间的间歇时长, 默认为 200 毫秒.</p>
+<pre><code class="lang-text">检查条件 (不满足) - 间歇 - 检查条件 (不满足) - 间歇 - 检查条件...
+</code></pre>
+<pre><code class="lang-js">/* 等待屏幕关闭, 最多检测屏幕状态 20 次, 每次检查间歇 3 秒钟. */
+wait(() =&gt; device.isScreenOff(), 20, 3e3);
+/* 等待屏幕关闭, 最多检测屏幕状态 20 次, 并采用不间断检测 (无间歇). */
+wait(() =&gt; device.isScreenOff(), 20, 0);
+</code></pre>
+<blockquote>
+<p>注: 在最后一次条件检查之后, 将不再发生间歇.<br>包括条件满足或达到检测限制.</p>
+<p>例如在第三次检查时, 条件满足:<br>检查 (×) - 间歇 - 检查 (×) - 间歇 - 检查 (√) - 立即结束 wait()</p>
+</blockquote>
+<h3>wait(condition, callback)<span><a class="mark" href="#global_wait_condition_callback" id="global_wait_condition_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 4/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>condition</strong> { <span class="type"><a href="dataTypes.html#datatypes_function">(() =&gt; T)</a></span> | <span class="type"><a href="uiSelectorType.html#uiselectortype_m_pickup">PickupSelector</a></span> } - 结束等待条件</li>
+<li><strong>callback</strong> {{<ul>
+<li>then(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+<li>else(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+</li>
+<li>}} - 等待结束回调对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">R</a> extends <a href="dataTypes.html#datatypes_void">void</a> ? <a href="dataTypes.html#datatypes_boolean">boolean</a> : <a href="dataTypes.html#datatypes_generic">R</a></span> }</li>
+<li><ins><strong>template</strong></ins> <a href="dataTypes.html#datatypes_generic">T</a>, <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+<p><a href="#global_waitcondition">wait(condition)</a> 增加回调对象.</p>
+<p>回调对象集合了两个方法, then 与 else 分别对应等待成功与等待失败的情况:</p>
+<pre><code class="lang-js">wait(() =&gt; device.isScreenOff(), {
+    then: () =&gt; console.log(&quot;等待屏幕关闭成功&quot;),
+    else: () =&gt; console.log(&quot;等待屏幕关闭超时&quot;),
+});
+</code></pre>
+<p>两种方法都将最后一次检查结果作为实参, 可在方法体内直接使用:</p>
+<pre><code class="lang-js">/* 等待一个落在 99.99 到 100 区间的随机数. */
+wait(() =&gt; {
+    let num = Math.random() * 100;
+    return num &gt; 99.99 &amp;&amp; num;
+}, {
+    then(o) {
+        console.log(`获取随机数成功, 数字是: ${o}`);
+    },
+    else() {
+        console.log(&quot;获取 99.99 到 100 的随机数超时&quot;);
+    },
+});
+</code></pre>
+<blockquote>
+<p>注: else 回调方法的参数只能是 [ <a href="dataTypes.html#datatypes_boolean">false</a> / <a href="dataTypes.html#datatypes_null">null</a> / <a href="dataTypes.html#datatypes_undefined">undefined</a> / <a href="https://developer.mozilla.org/zh-CN/docs/Glossary/NaN/">NaN</a> ],<br>因此 else 的参数几乎不会用到.</p>
+</blockquote>
+<p>需特别注意, 回调方法的返回值具有穿透性.<br>在回调方法内使用 return 语句, 将直接影响 wait() 的返回值 (undefined 除外).</p>
+<p>上述示例中, then 和 else 回调都没有返回值, 因此 wait() 返回值是 boolean 类型, 表示等待条件是否满足.<br>下述示例在回调函数中增加了返回值 (非 undefined), 则 wait() 也将返回这个值.</p>
+<pre><code class="lang-js">let result = wait(() =&gt; {
+    let num = Math.random() * 100;
+    return num &gt; 99.99 &amp;&amp; num;
+}, {
+    then(o) {
+        console.log(`获取随机数成功`);
+        return o;
+    },
+    else() {
+        console.log(&quot;获取 99.99 到 100 的随机数超时&quot;);
+        return NaN;
+    },
+});
+result; /* 一个数字 (如 99.99732126036437) 或 NaN. */
+</code></pre>
+<p>上述示例如果等待条件满足, 则返回 then 的返回值 (number 类型),<br>等待条件超时, 则返回 else 的返回值 (NaN, 也为 number 类型).</p>
+<p>如果去掉 else 的返回语句, 则等待条件超时后, wait() 将返回 false (boolean 类型).</p>
+<p>如需对 wait() 的返回值做进一步处理, 则建议两个回调方法的返回值类型一致:</p>
+<pre><code class="lang-js">wait(() =&gt; {
+    let num = Math.random() * 100;
+    return num &gt; 99.99 &amp;&amp; num;
+}, {
+    then(o) {
+        return [ o - 1, o, o + 1 ];
+    },
+    else() {
+        /* 即使等待条件超时, 也可调用 forEach 方法. */
+        return [];
+    },
+}).forEach(x =&gt; console.log(x));
+</code></pre>
+<h3>wait(condition, limit, callback)<span><a class="mark" href="#global_wait_condition_limit_callback" id="global_wait_condition_limit_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 5/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>condition</strong> { <span class="type"><a href="dataTypes.html#datatypes_function">(() =&gt; T)</a></span> | <span class="type"><a href="uiSelectorType.html#uiselectortype_m_pickup">PickupSelector</a></span> } - 结束等待条件</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><strong>callback</strong> {{<ul>
+<li>then(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+<li>else(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+</li>
+<li>}} - 等待结束回调对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">R</a> extends <a href="dataTypes.html#datatypes_void">void</a> ? <a href="dataTypes.html#datatypes_boolean">boolean</a> : <a href="dataTypes.html#datatypes_generic">R</a></span> }</li>
+<li><ins><strong>template</strong></ins> <a href="dataTypes.html#datatypes_generic">T</a>, <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+<p><a href="#global_waitcondition_callback">wait(condition, callback)</a> 增加条件检测限制.</p>
+<blockquote>
+<p>参阅: <a href="#global_waitcondition_limit">wait(condition, limit)</a></p>
+</blockquote>
+<h3>wait(condition, limit, interval, callback)<span><a class="mark" href="#global_wait_condition_limit_interval_callback" id="global_wait_condition_limit_interval_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 6/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>condition</strong> { <span class="type"><a href="dataTypes.html#datatypes_function">(() =&gt; T)</a></span> | <span class="type"><a href="uiSelectorType.html#uiselectortype_m_pickup">PickupSelector</a></span> } - 结束等待条件</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><strong>interval</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测间隔</li>
+<li><strong>callback</strong> {{<ul>
+<li>then(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+<li>else(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+</li>
+<li>}} - 等待结束回调对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">R</a> extends <a href="dataTypes.html#datatypes_void">void</a> ? <a href="dataTypes.html#datatypes_boolean">boolean</a> : <a href="dataTypes.html#datatypes_generic">R</a></span> }</li>
+<li><ins><strong>template</strong></ins> <a href="dataTypes.html#datatypes_generic">T</a>, <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+<p><a href="#global_waitcondition_callback">wait(condition, limit, callback)</a> 增加条件检测间隔.</p>
+<blockquote>
+<p>参阅: <a href="#global_waitcondition_limit_interval">wait(condition, limit, interval)</a></p>
+</blockquote>
+<h2>[m] waitForActivity<span><a class="mark" href="#global_m_waitforactivity" id="global_m_waitforactivity">#</a></span></h2>
+<p>等待指定名称的 Activity 出现 (前置).<br>此方法相当于 <code>wait(() =&gt; currentActivity() === activityName, ...args)</code>,<br>因此其所有重载方法的结构与 wait 一致.<br>为节约篇幅, 将仅列出方法签名等重要信息.</p>
+<h3>waitForActivity(activityName)<span><a class="mark" href="#global_waitforactivity_activityname" id="global_waitforactivity_activityname">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 1/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>activityName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标活动名称</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅:<a href="#global_waitcondition">wait(condition)</a></p>
+</blockquote>
+<h3>waitForActivity(activityName, limit)<span><a class="mark" href="#global_waitforactivity_activityname_limit" id="global_waitforactivity_activityname_limit">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>activityName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标活动名称</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅:<a href="#global_waitcondition_limit">wait(condition, limit)</a></p>
+</blockquote>
+<h3>waitForActivity(activityName, limit, interval)<span><a class="mark" href="#global_waitforactivity_activityname_limit_interval" id="global_waitforactivity_activityname_limit_interval">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 3/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>activityName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标活动名称</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><strong>interval</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测间隔</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅:<a href="#global_waitcondition_limit_interval">wait(condition, limit, interval)</a></p>
+</blockquote>
+<h3>waitForActivity(activityName, callback)<span><a class="mark" href="#global_waitforactivity_activityname_callback" id="global_waitforactivity_activityname_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 4/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>activityName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标活动名称</li>
+<li><strong>callback</strong> {{<ul>
+<li>then(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+<li>else(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+</li>
+<li>}} - 等待结束回调对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">R</a> extends <a href="dataTypes.html#datatypes_void">void</a> ? <a href="dataTypes.html#datatypes_boolean">boolean</a> : <a href="dataTypes.html#datatypes_generic">R</a></span> }</li>
+<li><ins><strong>template</strong></ins> <a href="dataTypes.html#datatypes_generic">T</a>, <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+<blockquote>
+<p>参阅: <a href="#global_waitcondition_callback">wait(condition, callback)</a></p>
+</blockquote>
+<h3>waitForActivity(activityName, limit, callback)<span><a class="mark" href="#global_waitforactivity_activityname_limit_callback" id="global_waitforactivity_activityname_limit_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 5/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>activityName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标活动名称</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><strong>callback</strong> {{<ul>
+<li>then(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+<li>else(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+</li>
+<li>}} - 等待结束回调对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">R</a> extends <a href="dataTypes.html#datatypes_void">void</a> ? <a href="dataTypes.html#datatypes_boolean">boolean</a> : <a href="dataTypes.html#datatypes_generic">R</a></span> }</li>
+<li><ins><strong>template</strong></ins> <a href="dataTypes.html#datatypes_generic">T</a>, <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+<blockquote>
+<p>参阅: <a href="#global_waitcondition_limit_callback">wait(condition, limit, callback)</a></p>
+</blockquote>
+<h3>waitForActivity(activityName, limit, interval, callback)<span><a class="mark" href="#global_waitforactivity_activityname_limit_interval_callback" id="global_waitforactivity_activityname_limit_interval_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 6/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>activityName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标活动名称</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><strong>interval</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测间隔</li>
+<li><strong>callback</strong> {{<ul>
+<li>then(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+<li>else(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+</li>
+<li>}} - 等待结束回调对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">R</a> extends <a href="dataTypes.html#datatypes_void">void</a> ? <a href="dataTypes.html#datatypes_boolean">boolean</a> : <a href="dataTypes.html#datatypes_generic">R</a></span> }</li>
+<li><ins><strong>template</strong></ins> <a href="dataTypes.html#datatypes_generic">T</a>, <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+<blockquote>
+<p>参阅: <a href="#global_waitcondition_limit_interval_callback">wait(condition, limit, interval, callback)</a></p>
+</blockquote>
+<h2>[m] waitForPackage<span><a class="mark" href="#global_m_waitforpackage" id="global_m_waitforpackage">#</a></span></h2>
+<p>等待指定包名的应用出现 (前置).<br>此方法相当于 <code>wait(() =&gt; currentPackage() === packageName, ...args)</code>,<br>因此其所有重载方法的结构与 wait 一致.<br>为节约篇幅, 将仅列出方法签名等重要信息.</p>
+<h3>waitForPackage(packageName)<span><a class="mark" href="#global_waitforpackage_packagename" id="global_waitforpackage_packagename">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 1/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>packageName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标应用包名</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅:<a href="#global_waitcondition">wait(condition)</a></p>
+</blockquote>
+<h3>waitForPackage(packageName, limit)<span><a class="mark" href="#global_waitforpackage_packagename_limit" id="global_waitforpackage_packagename_limit">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>packageName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标应用包名</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅:<a href="#global_waitcondition_limit">wait(condition, limit)</a></p>
+</blockquote>
+<h3>waitForPackage(packageName, limit, interval)<span><a class="mark" href="#global_waitforpackage_packagename_limit_interval" id="global_waitforpackage_packagename_limit_interval">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 3/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>packageName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标应用包名</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><strong>interval</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测间隔</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<blockquote>
+<p>参阅:<a href="#global_waitcondition_limit_interval">wait(condition, limit, interval)</a></p>
+</blockquote>
+<h3>waitForPackage(packageName, callback)<span><a class="mark" href="#global_waitforpackage_packagename_callback" id="global_waitforpackage_packagename_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 4/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>packageName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标应用包名</li>
+<li><strong>callback</strong> {{<ul>
+<li>then(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+<li>else(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+</li>
+<li>}} - 等待结束回调对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">R</a> extends <a href="dataTypes.html#datatypes_void">void</a> ? <a href="dataTypes.html#datatypes_boolean">boolean</a> : <a href="dataTypes.html#datatypes_generic">R</a></span> }</li>
+<li><ins><strong>template</strong></ins> <a href="dataTypes.html#datatypes_generic">T</a>, <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+<blockquote>
+<p>参阅: <a href="#global_waitcondition_callback">wait(condition, callback)</a></p>
+</blockquote>
+<h3>waitForPackage(packageName, limit, callback)<span><a class="mark" href="#global_waitforpackage_packagename_limit_callback" id="global_waitforpackage_packagename_limit_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 5/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>packageName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标应用包名</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><strong>callback</strong> {{<ul>
+<li>then(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+<li>else(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+</li>
+<li>}} - 等待结束回调对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">R</a> extends <a href="dataTypes.html#datatypes_void">void</a> ? <a href="dataTypes.html#datatypes_boolean">boolean</a> : <a href="dataTypes.html#datatypes_generic">R</a></span> }</li>
+<li><ins><strong>template</strong></ins> <a href="dataTypes.html#datatypes_generic">T</a>, <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+<blockquote>
+<p>参阅: <a href="#global_waitcondition_limit_callback">wait(condition, limit, callback)</a></p>
+</blockquote>
+<h3>waitForPackage(packageName, limit, interval, callback)<span><a class="mark" href="#global_waitforpackage_packagename_limit_interval_callback" id="global_waitforpackage_packagename_limit_interval_callback">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 6/6</code></strong> <strong><code>A11Y?</code></strong> <strong><code>Non-UI</code></strong></p>
+<ul>
+<li><strong>packageName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 目标应用包名</li>
+<li><strong>limit</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测限制</li>
+<li><strong>interval</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 等待条件检测间隔</li>
+<li><strong>callback</strong> {{<ul>
+<li>then(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+<li>else(result?: <a href="dataTypes.html#datatypes_generic">T</a>)?: <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+</li>
+<li>}} - 等待结束回调对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_generic">R</a> extends <a href="dataTypes.html#datatypes_void">void</a> ? <a href="dataTypes.html#datatypes_boolean">boolean</a> : <a href="dataTypes.html#datatypes_generic">R</a></span> }</li>
+<li><ins><strong>template</strong></ins> <a href="dataTypes.html#datatypes_generic">T</a>, <a href="dataTypes.html#datatypes_generic">R</a></li>
+</ul>
+<blockquote>
+<p>参阅: <a href="#global_waitcondition_limit_interval_callback">wait(condition, limit, interval, callback)</a></p>
+</blockquote>
+<h2>[m] exit<span><a class="mark" href="#global_m_exit" id="global_m_exit">#</a></span></h2>
+<p>停止脚本运行.</p>
+<h3>exit()<span><a class="mark" href="#global_exit" id="global_exit">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 1/2</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>通过抛出 <code>ScriptInterruptedException</code> 异常实现脚本停止.<br>因此用 <code>try</code> 包裹 <code>exit()</code> 语句将会使脚本继续运行片刻:</p>
+<pre><code class="lang-js">try {
+    log(&#39;exit now&#39;);
+    exit();
+    log(&quot;after&quot;); /* 控制台不会打印 &quot;after&quot;. */
+} catch (e) {
+    e.javaException instanceof ScriptInterruptedException; // true
+}
+while (true) log(&quot;hello&quot;); /* 控制台将打印一定数量的 &quot;hello&quot;. */
+</code></pre>
+<p>如果编写的脚本对 &quot;是否停止&quot; 的状态十分敏感,<br>即要求 exit() 之后的代码一定不被执行,<br>则可通过附加状态判断实现上述需求:</p>
+<pre><code class="lang-js">if (!isStopped()) {
+    // 其他代码...
+}
+</code></pre>
+<p>因此上述示例如果加上状态判断, &quot;hello&quot; 将不会被打印:</p>
+<pre><code class="lang-js">try {
+    log(&#39;exit now&#39;);
+    exit();
+} catch (_) {
+    // Ignored.
+}
+if (!isStopped()) {
+    while (true) {
+        /* 控制台不会打印 &quot;hello&quot;. */
+        log(&quot;hello&quot;);
+    }
+}
+</code></pre>
+<p>除了 <a href="#global_isstopped">isStopped</a>, 还可通过 <code>threads</code> 或 <code>engines</code> 模块获取停止状态:</p>
+<pre><code class="lang-js">/* threads. */
+if (!threads.currentThread().isInterrupted()) {
+    // 其他代码...
+}
+
+/* engines. */
+if (!engines.myEngine().isStopped()) {
+    // 其他代码...
+}
+</code></pre>
+<h3>exit(e)<span><a class="mark" href="#global_exit_e" id="global_exit_e">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 2/2</code></strong></p>
+<ul>
+<li><strong>e</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnithrowable">OmniThrowable</a></span> } - 异常参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>停止脚本运行并抛出异常参数指定的异常.</p>
+<pre><code class="lang-js">let arg = &#39;hello&#39;;
+try {
+    if (typeof arg !== &quot;number&quot;) {
+        throw Error(&#39;arg 参数非 number 类型&#39;);
+    }
+} catch (e) {
+    exit(e);
+}
+</code></pre>
+<p><a href="omniTypes.html#omnitypes_omnithrowable">OmniThrowable</a> 支持字符串参数, 可将字符串参数作为异常消息传入 <code>exit</code> 方法中:</p>
+<pre><code class="lang-js">let buttonText = &#39;点此开始&#39;;
+if (!pickup(buttonText)) {
+    exit(`&quot;${buttonText}&quot; 按钮不存在.`);
+}
+</code></pre>
+<h2>[m] stop<span><a class="mark" href="#global_m_stop" id="global_m_stop">#</a></span></h2>
+<h3>stop()<span><a class="mark" href="#global_stop" id="global_stop">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</p>
+<p>停止脚本运行.</p>
+<p><a href="#global_exit">exit()</a> 的别名方法.</p>
+<blockquote>
+<p>注: stop 方法不存在 <a href="#global_exite">exit(e)</a> 对应的重载方法.</p>
+</blockquote>
+<h2>[m] isStopped<span><a class="mark" href="#global_m_isstopped" id="global_m_isstopped">#</a></span></h2>
+<h3>isStopped()<span><a class="mark" href="#global_isstopped" id="global_isstopped">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>DEPRECATED</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>检测脚本主线程是否已中断.</p>
+<p>即 <code>runtime.isInterrupted()</code>.</p>
+<h2>[m] isShuttingDown<span><a class="mark" href="#global_m_isshuttingdown" id="global_m_isshuttingdown">#</a></span></h2>
+<h3>isShuttingDown()<span><a class="mark" href="#global_isshuttingdown" id="global_isshuttingdown">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>DEPRECATED</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>检测脚本主线程是否已中断.</p>
+<p>因方法名称易造成歧义及混淆, 因此被弃用, 建议使用 <a href="#global_m_isstopped">isStopped()</a> 或 <code>runtime.isInterrupted()</code> 替代.</p>
+<h2>[m] isRunning<span><a class="mark" href="#global_m_isrunning" id="global_m_isrunning">#</a></span></h2>
+<h3>isRunning()<span><a class="mark" href="#global_isrunning" id="global_isrunning">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</p>
+<p>检测脚本主线程是否未被中断.</p>
+<p>即 <code>!runtime.isInterrupted()</code>.</p>
+<h2>[m] notStopped<span><a class="mark" href="#global_m_notstopped" id="global_m_notstopped">#</a></span></h2>
+<h3>notStopped()<span><a class="mark" href="#global_notstopped" id="global_notstopped">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>DEPRECATED</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>检测脚本主线程是否未被中断.</p>
+<p>因方法名称易造成歧义及混淆, 因此被弃用, 建议使用 <a href="#global_m_isrunning">isRunning()</a> 或 <code>!runtime.isInterrupted()</code> 替代.</p>
+<h2>[m] requiresApi<span><a class="mark" href="#global_m_requiresapi" id="global_m_requiresapi">#</a></span></h2>
+<h3>requiresApi(api)<span><a class="mark" href="#global_requiresapi_api" id="global_requiresapi_api">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <strong>api</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 安卓 API 级别</p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>脚本运行的最低 API 级别要求.</p>
+<p>例如要求脚本运行不低于 <a href="apiLevel.html">Android API 30 (11) [R]</a>:</p>
+<pre><code class="lang-js">requiresApi(30);
+requiresApi(util.versionCodes.R.apiLevel); /* 同上. */
+requiresApi(android.os.Build.VERSION_CODES.R); /* 同上. */
+</code></pre>
+<p>若 API 级别不符合要求, 脚本抛出异常并停止继续执行.</p>
+<blockquote>
+<p>参阅:</p>
+<ul>
+<li><a href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a href="util.html#util_versioncodes">util.versionCodes</a></li>
+</ul>
+</blockquote>
+<h2>[m] requiresAutojsVersion<span><a class="mark" href="#global_m_requiresautojsversion" id="global_m_requiresautojsversion">#</a></span></h2>
+<h3>requiresAutojsVersion(versionName)<span><a class="mark" href="#global_requiresautojsversion_versionname" id="global_requiresautojsversion_versionname">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 1/2</code></strong></p>
+<ul>
+<li><strong>versionName</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - AutoJs6 版本名称</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>脚本运行的最低 AutoJs6 版本要求 (版本名称).</p>
+<pre><code class="lang-js">requiresAutojsVersion(&quot;6.2.0&quot;);
+</code></pre>
+<p>可通过 <code>autojs.versionName</code> 查看 AutoJs6 版本名称.</p>
+<blockquote>
+<p>参阅: <a href="autojs.html#autojs_versionname">autojs.versionName</a></p>
+</blockquote>
+<h3>requiresAutojsVersion(versionCode)<span><a class="mark" href="#global_requiresautojsversion_versioncode" id="global_requiresautojsversion_versioncode">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>Overload 2/2</code></strong></p>
+<ul>
+<li><strong>versionCode</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - AutoJs6 版本号</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>脚本运行的最低 AutoJs6 版本要求 (版本号).</p>
+<pre><code class="lang-js">requiresAutojsVersion(1024);
+</code></pre>
+<p>可通过 <code>autojs.versionCode</code> 查看 AutoJs6 版本号.</p>
+<blockquote>
+<p>参阅: <a href="autojs.html#autojs_versioncode">autojs.versionCode</a></p>
+</blockquote>
+<h2>[m] importPackage<span><a class="mark" href="#global_m_importpackage" id="global_m_importpackage">#</a></span></h2>
+<h3>importPackage(...pkg)<span><a class="mark" href="#global_importpackage_pkg" id="global_importpackage_pkg">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <strong>pkg</strong> { <span class="type">...( <a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_object">object</a> )</span> } - 需导入的 Java 包</p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<pre><code class="lang-js">/* 导入一个 Java 包. */
+
+importPackage(java.lang);
+importPackage(&#39;java.lang&#39;); /* 同上. */
+
+/* 导入多个 Java 包. */
+
+importPackage(java.io);
+importPackage(java.lang);
+importPackage(java.util);
+
+importPackage(java.io, java.lang, java.util); /* 同上. */
+</code></pre>
+<blockquote>
+<p>参阅: <a href="scriptingJava.html#scriptingjava_访问_Java_包和类">访问 Java 包和类</a></p>
+</blockquote>
+<h2>[m] importClass<span><a class="mark" href="#global_m_importclass" id="global_m_importclass">#</a></span></h2>
+<h3>importClass(...cls)<span><a class="mark" href="#global_importclass_cls" id="global_importclass_cls">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <strong>cls</strong> { <span class="type">...( <a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_object">object</a> )</span> } - 需导入的 Java 类</p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<pre><code class="lang-js">/* 导入一个 Java 类. */
+
+importClass(java.lang.Integer);
+importClass(&#39;java.lang.Integer&#39;); /* 同上. */
+
+/* 导入多个 Java 类. */
+
+importClass(java.io.File);
+importClass(java.lang.Integer);
+importClass(java.util.HashMap);
+
+importClass(
+    java.io.File,
+    java.lang.Integer,
+    java.util.HashMap,
+); /* 同上. */
+</code></pre>
+<blockquote>
+<p>参阅: <a href="scriptingJava.html#scriptingjava_访问_Java_包和类">访问 Java 包和类</a></p>
+</blockquote>
+<h2>[m] currentPackage<span><a class="mark" href="#global_m_currentpackage" id="global_m_currentpackage">#</a></span></h2>
+<h3>currentPackage()<span><a class="mark" href="#global_currentpackage" id="global_currentpackage">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取最近一次监测到的应用包名, 并视为当前正在运行的应用包名.</p>
+<h2>[m] currentActivity<span><a class="mark" href="#global_m_currentactivity" id="global_m_currentactivity">#</a></span></h2>
+<h3>currentActivity()<span><a class="mark" href="#global_currentactivity" id="global_currentactivity">#</a></span></h3>
+<p><strong><code>Global</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取最近一次监测到的活动名称, 并视为当前正在运行的活动名称.</p>
+<h2>[m] setClip<span><a class="mark" href="#global_m_setclip" id="global_m_setclip">#</a></span></h2>
+<h3>setClip(text)<span><a class="mark" href="#global_setclip_text" id="global_setclip_text">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 剪贴板内容</p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>设置系统剪贴板内容.</p>
+<blockquote>
+<p>参阅: <a href="#global_m_getclip">getClip</a></p>
+</blockquote>
+<h2>[m] getClip<span><a class="mark" href="#global_m_getclip" id="global_m_getclip">#</a></span></h2>
+<h3>getClip()<span><a class="mark" href="#global_getclip" id="global_getclip">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 系统剪贴板内容</p>
+<p>需额外留意, 自 <a href="apiLevel.html">Android API 29 (10) [Q]</a> 起, 剪贴板数据的访问将受到限制:</p>
+<p>为更好地保护用户隐私权, 除默认输入法及当前获取焦点的前置应用外, 均无法访问剪贴板数据.</p>
+<pre><code class="lang-js">setClip(&quot;test&quot;);
+
+/* 安卓 10 以下: 打印 &quot;test&quot;. */
+/* 安卓 10 及以上: 若 AutoJs6 前置, 打印 &quot;test&quot;, 否则打印空字符串. */
+console.log(getClip());
+</code></pre>
+<blockquote>
+<p>参阅: <a href="#global_m_setclip">setClip</a></p>
+</blockquote>
+<blockquote>
+<p>参阅: <a href="https://developer.android.com/about/versions/10/privacy/changes#clipboard-data">Android Docs</a></p>
+</blockquote>
+<h2>[m] selector<span><a class="mark" href="#global_m_selector" id="global_m_selector">#</a></span></h2>
+<h3>selector()<span><a class="mark" href="#global_selector" id="global_selector">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <ins><strong>returns</strong></ins> { <span class="type"><a href="uiSelectorType.html">UiSelector</a></span> }</p>
+<p>构建一个 &quot;空&quot; <a href="uiSelectorType.html">选择器</a>.</p>
+<h2>[m] pickup<span><a class="mark" href="#global_m_pickup" id="global_m_pickup">#</a></span></h2>
+<p>拾取选择器, 简称拾取器, 是高度封装的混合形式选择器, 用于在筛选控件及处理结果过程中实现快捷操作.<br>支持 [ 选择器多形式混合 / 控件罗盘 / 结果筛选 / 参化调用 ] 等.</p>
+<p>参阅 <a href="uiSelectorType.html#uiselectortype_m_pickup">UiSelector.pickup</a>.</p>
+<h2>[m] detect<span><a class="mark" href="#global_m_detect" id="global_m_detect">#</a></span></h2>
+<p>控件探测.</p>
+<p>探测相当于对控件进行一系列组合操作 (罗盘定位, 结果筛选, 参化调用, 回调处理).</p>
+<p>参阅 <a href="uiObjectType.html#uiobjecttype_m_detect">UiObject#detect</a>.</p>
+<h2>[m] existsAll<span><a class="mark" href="#global_m_existsall" id="global_m_existsall">#</a></span></h2>
+<h3>existsAll(...selectors)<span><a class="mark" href="#global_existsall_selectors" id="global_existsall_selectors">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <strong>selectors</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_pickupselector">PickupSelector</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 混合选择器参数</p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 选择器全部满足 &quot;存在&quot; 条件</li>
+</ul>
+<p>提供的选择器参数全部满足 &quot;存在&quot; 条件, 即 <code>selector.exists() === true</code>.</p>
+<p>例如要求当前活动窗口中同时存在以下三个选择器对应的控件:</p>
+<ol>
+<li>contentMatch(/^开始.*/)</li>
+<li>descMatch(/descriptions?/)</li>
+<li>content(&#39;点击继续&#39;)</li>
+</ol>
+<pre><code class="lang-js">console.log(existsAll(contentMatch(/^开始.*/), descMatch(/descriptions?/), content(&#39;点击继续&#39;))); /* e.g. true */
+</code></pre>
+<p>因混合选择器参数支持对 content 系列选择器的简化, 因此上述示例也可改写为以下形式:</p>
+<pre><code class="lang-js">console.log(existsAll(/^开始.*/, descMatch(/descriptions?/), &#39;点击继续&#39;)); /* e.g. true */
+</code></pre>
+<p>此方法对应的传统的逻辑判断形式:</p>
+<pre><code class="lang-js">console.log(contentMatch(/^开始.*/).exists()
+    &amp;&amp; descMatch(/descriptions?/).exists()
+    &amp;&amp; content(&#39;点击继续&#39;).exists()); /* e.g. true */
+</code></pre>
+<h2>[m] existsOne<span><a class="mark" href="#global_m_existsone" id="global_m_existsone">#</a></span></h2>
+<h3>existsOne(...selectors)<span><a class="mark" href="#global_existsone_selectors" id="global_existsone_selectors">#</a></span></h3>
+<p><strong><code>Global</code></strong> - <strong>selectors</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_pickupselector">PickupSelector</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 混合选择器参数</p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 选择器任一满足 &quot;存在&quot; 条件</li>
+</ul>
+<p>提供的选择器参数任一满足 &quot;存在&quot; 条件, 即 <code>selector.exists() === true</code>.</p>
+<p>例如要求当前活动窗口中存在任意一个以下选择器对应的控件:</p>
+<ol>
+<li>contentMatch(/^开始.*/)</li>
+<li>descMatch(/descriptions?/)</li>
+<li>content(&#39;点击继续&#39;)</li>
+</ol>
+<pre><code class="lang-js">console.log(existsOne(contentMatch(/^开始.*/), descMatch(/descriptions?/), content(&#39;点击继续&#39;))); /* e.g. true */
+</code></pre>
+<p>因混合选择器参数支持对 content 系列选择器的简化, 因此上述示例也可改写为以下形式:</p>
+<pre><code class="lang-js">console.log(existsOne(/^开始.*/, descMatch(/descriptions?/), &#39;点击继续&#39;)); /* e.g. true */
+</code></pre>
+<p>此方法对应的传统的逻辑判断形式:</p>
+<pre><code class="lang-js">console.log(contentMatch(/^开始.*/).exists()
+    || descMatch(/descriptions?/).exists()
+    || content(&#39;点击继续&#39;).exists()); /* e.g. true */
+</code></pre>
+<h2>[m] cX<span><a class="mark" href="#global_m_cx" id="global_m_cx">#</a></span></h2>
+<p>横坐标标度.</p>
+<h3>cX()<span><a class="mark" href="#global_cx" id="global_cx">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 1/5</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>无参时, 返回当前设备宽度.</p>
+<pre><code class="lang-js">console.log(cX() === device.width); // true
+</code></pre>
+<h3>cX(x, base)<span><a class="mark" href="#global_cx_x_base" id="global_cx_x_base">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/4</code></strong></p>
+<ul>
+<li><strong>x</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值</li>
+<li><strong>[ base = 720 ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 坐标值基数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>由基数换算后得到的横坐标值.</p>
+<p>例如在一个设备宽度为 <code>1096</code> 的设备上的 <code>100</code> 像素, 在其他不同宽度的设备上将转换为不同的值:</p>
+<pre><code class="lang-js">/* 在宽度为 1096 像素的设备上. */
+cX(100, 1096); // 100
+
+/* 在宽度为 1080 像素的设备上. */
+cX(100, 1096); // 99
+
+/* 在宽度为 720 像素的设备上. */
+cX(100, 1096); // 66
+
+/* 在宽度为 540 像素的设备上. */
+cX(100, 1096); // 49
+</code></pre>
+<p>上述示例的 <code>1096</code> 为基数, 默认基数为 <code>720</code>, 如需设置默认基数, 可使用以下方法:</p>
+<pre><code class="lang-js">cX(100); /* 相当于 cX(100, 720) . */
+setScaleBaseX(1096);
+cX(100); /* 相当于 cX(100, 1096) . */
+</code></pre>
+<p>默认基数只能修改最多一次.</p>
+<h3>cX(x, isRatio)<span><a class="mark" href="#global_cx_x_isratio" id="global_cx_x_isratio">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 3/4</code></strong></p>
+<ul>
+<li><strong>x</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值或屏幕宽度百分比</li>
+<li><strong>[ isRatio = &#39;auto&#39; ]</strong> { <code>&#39;auto&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否将 <code>x</code> 参数强制作为百分比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p><code>isRatio</code> 参数默认为 <code>auto</code>, 即由 <code>x</code> 参数的范围自动决定 <code>x</code> 是否视为百分比,<br>即当参数 <code>x</code> 满足 <code>-1 &lt; x &lt; 1</code> 时, <code>x</code> 将视为屏幕宽度百分比, 否则将视为绝对坐标值.</p>
+<p><code>isRatio</code> 参数为 <code>true</code> 时, <code>x</code> 参数将强制视为百分比, 如 <code>cX(2, true)</code> 意味着两倍屏幕宽度, <code>2</code> 的意义不再是像素值.</p>
+<p><code>isRatio</code> 参数为 <code>false</code> 时, <code>x</code> 参数将强制视为绝对坐标值, 如 <code>cX(0.5, false)</code> 意味着 <code>0.5</code> 像素值, 其意义不再是百分比.</p>
+<h3>cX(x)<span><a class="mark" href="#global_cx_x" id="global_cx_x">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 4/4</code></strong></p>
+<ul>
+<li><strong>x</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值或屏幕宽度百分比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>当参数 <code>x</code> 满足 <code>-1 &lt; x &lt; 1</code> 时, 相当于 <code>cX(x, /* isRatio = */ true)</code>, 即 <code>x</code> 将视为屏幕宽度百分比.</p>
+<p>当参数 <code>x</code> 满足 <code>x &lt;= -1 | x &gt;= 1</code> 时, 相当于 <code>cX(x, /* base = */ 720)</code>, 即 <code>x</code> 将视为绝对坐标值, 另 <code>base</code> 参数可能由 <code>setScaleBaseX</code> 等方法修改, <code>720</code> 为其默认值.</p>
+<h2>[m] cY<span><a class="mark" href="#global_m_cy" id="global_m_cy">#</a></span></h2>
+<p>横坐标标度.</p>
+<h3>cY()<span><a class="mark" href="#global_cy" id="global_cy">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 1/5</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>无参时, 返回当前设备高度.</p>
+<pre><code class="lang-js">console.log(cY() === device.width); // true
+</code></pre>
+<h3>cY(y, base)<span><a class="mark" href="#global_cy_y_base" id="global_cy_y_base">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/4</code></strong></p>
+<ul>
+<li><strong>y</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值</li>
+<li><strong>[ base = 1280 ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 坐标值基数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>由基数换算后得到的纵坐标值.</p>
+<p>例如在一个设备高度为 <code>2560</code> 的设备上的 <code>100</code> 像素, 在其他不同高度的设备上将转换为不同的值:</p>
+<pre><code class="lang-js">/* 在高度为 2560 像素的设备上. */
+cY(100, 2560); // 100
+
+/* 在高度为 1920 像素的设备上. */
+cY(100, 2560); // 75
+
+/* 在高度为 1280 像素的设备上. */
+cY(100, 2560); // 50
+
+/* 在高度为 960 像素的设备上. */
+cY(100, 2560); // 38
+</code></pre>
+<p>上述示例的 <code>2560</code> 为基数, 默认基数为 <code>1280</code>, 如需设置默认基数, 可使用以下方法:</p>
+<pre><code class="lang-js">cY(100); /* 相当于 cY(100, 1280) . */
+setScaleBaseY(2560);
+cY(100); /* 相当于 cY(100, 2560) . */
+</code></pre>
+<p>默认基数只能修改最多一次.</p>
+<h3>cY(y, isRatio)<span><a class="mark" href="#global_cy_y_isratio" id="global_cy_y_isratio">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 3/4</code></strong></p>
+<ul>
+<li><strong>y</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值或屏幕高度百分比</li>
+<li><strong>[ isRatio = &#39;auto&#39; ]</strong> { <code>&#39;auto&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否将 <code>y</code> 参数强制作为百分比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p><code>isRatio</code> 参数默认为 <code>auto</code>, 即由 <code>y</code> 参数的范围自动决定 <code>y</code> 是否视为百分比,<br>即当参数 <code>y</code> 满足 <code>-1 &lt; y &lt; 1</code> 时, <code>y</code> 将视为屏幕高度百分比, 否则将视为绝对坐标值.</p>
+<p><code>isRatio</code> 参数为 <code>true</code> 时, <code>y</code> 参数将强制视为百分比, 如 <code>cY(2, true)</code> 意味着两倍屏幕高度, <code>2</code> 的意义不再是像素值.</p>
+<p><code>isRatio</code> 参数为 <code>false</code> 时, <code>y</code> 参数将强制视为绝对坐标值, 如 <code>cY(0.5, false)</code> 意味着 <code>0.5</code> 像素值, 其意义不再是百分比.</p>
+<h3>cY(y)<span><a class="mark" href="#global_cy_y" id="global_cy_y">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 4/4</code></strong></p>
+<ul>
+<li><strong>y</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值或屏幕高度百分比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>当参数 <code>y</code> 满足 <code>-1 &lt; y &lt; 1</code> 时, 相当于 <code>cY(y, /* isRatio = */ true)</code>, 即 <code>y</code> 将视为屏幕高度百分比.</p>
+<p>当参数 <code>y</code> 满足 <code>y &lt;= -1 | y &gt;= 1</code> 时, 相当于 <code>cY(y, /* base = */ 1280)</code>, 即 <code>y</code> 将视为绝对坐标值, 另 <code>base</code> 参数可能由 <code>setScaleBaseY</code> 等方法修改, <code>1280</code> 为其默认值.</p>
+<h2>[m] cYx<span><a class="mark" href="#global_m_cyx" id="global_m_cyx">#</a></span></h2>
+<p>以横坐标度量的纵坐标标度.</p>
+<p>与设备高度无关, 与设备宽度相关的坐标标度.</p>
+<p>如 <code>cYx(0.5, &#39;9:16&#39;)</code> 对于以下 5 个设备 (以分辨率区分) 得到的结果是完全一致的:</p>
+<pre><code class="lang-text">1. 1080 × 1920
+4. 1080 × 2160
+5. 1080 × 2340
+3. 1080 × 2520
+2. 1080 × 2560
+</code></pre>
+<p>因为所有设备宽度相同, <code>cYx</code> 的结果是高度无关的.</p>
+<p>计算结果:</p>
+<pre><code class="lang-js">1080 * 0.5 * 16 / 9; // 960
+</code></pre>
+<p>设想如下场景, 某个应用页面是可以向下滚动窗口显示更多内容的, 在屏幕上半部分有一个按钮 <code>BTN</code>, 距离屏幕上边缘 <code>H</code> 距离, 另一台设备与当前设备屏幕宽度相同, 但高度更大, 相当于屏幕纵向变长, 此时按钮 <code>BTN</code> 距离屏幕上边缘依然是 <code>H</code> 距离, 仅仅是屏幕下方显示了更多内容.<br>因此可使用 <code>cYx</code> 标度表示按钮 <code>BTN</code> 的位置, 如 <code>cYx(0.2, 1080 / 1920)</code> 或 <code>cYx(0.2, 9 / 16)</code> 或 <code>cYx(0.2, &#39;9:16&#39;)</code>.</p>
+<p>上述示例的 <code>0.2</code> 是一个相对值, 是相对于当前设备屏幕高度的, 因此第 2 个参数对应设备宽高比例值.<br>如果使用绝对坐标值 (<code>Y</code> 坐标值), 如 <code>384</code>, 则第 2 个参数对应的是设备屏幕宽度值:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">第 1 个参数</th>
+<th style="text-align:center">第 2 个参数</th>
+<th style="text-align:center">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Y 坐标百分比</td>
+<td style="text-align:center">设备宽高比</td>
+<td style="text-align:center">cYx(0.2, &#39;9:16&#39;)</td>
+</tr>
+<tr>
+<td style="text-align:center">Y 坐标值</td>
+<td style="text-align:center">设备宽度值</td>
+<td style="text-align:center">cYx(384, 1096)</td>
+</tr>
+</tbody>
+</table>
+<h3>cYx(coordinateY, baseX)<span><a class="mark" href="#global_cyx_coordinatey_basex" id="global_cyx_coordinatey_basex">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload [1(A)]/3</code></strong></p>
+<ul>
+<li><strong>coordinateY</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 纵坐标值</li>
+<li><strong>[ baseX = 720 ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 横坐标基数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>由横坐标基数换算后得到的纵坐标值.</p>
+<p>例如在一个设备宽度为 <code>1096</code> 设备上的 <code>512</code> 像素高度, 在其他不同宽度的设备上将转换为不同的值:</p>
+<pre><code class="lang-js">/* 在宽度为 1096 像素的设备上. */
+cYx(512, 1096); // 512
+
+/* 在宽度为 1080 像素的设备上. */
+cYx(512, 1096); // 505
+
+/* 在宽度为 720 像素的设备上. */
+cYx(512, 1096); // 336
+
+/* 在宽度为 540 像素的设备上. */
+cYx(512, 1096); // 252
+</code></pre>
+<p>上述示例的 <code>1096</code> 为基数, 默认基数为 <code>720</code>, 如需设置默认基数, 可使用以下方法:</p>
+<pre><code class="lang-js">cYx(512); /* 相当于 cYx(512, 720) . */
+setScaleBaseX(1096);
+cYx(512); /* 相当于 cYx(512, 1096) . */
+</code></pre>
+<p>默认基数只能修改最多一次.</p>
+<h3>cYx(percentY, ratio)<span><a class="mark" href="#global_cyx_percenty_ratio" id="global_cyx_percenty_ratio">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload [1(B)]/3</code></strong></p>
+<ul>
+<li><strong>percentY</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 纵坐标百分比</li>
+<li><strong>[ ratio = &#39;9:16&#39; ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 设备宽高比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>由设备宽高比换算后得到的新纵坐标值.</p>
+<p>例如在一个设备宽度与高度分别为 <code>1096</code> 和 <code>2560</code> 的设备上的 <code>512</code> 像素高度, 即 <code>0.2</code> 倍的屏幕高度, 在其他不同宽度的设备上将转换为不同的值:</p>
+<pre><code class="lang-js">/* 在宽度为 1096 像素的设备上. */
+cYx(0.2, 1096 / 2560); // 512
+
+/* 在宽度为 1080 像素的设备上. */
+cYx(0.2, 1096 / 2560); // 505
+
+/* 在宽度为 720 像素的设备上. */
+cYx(0.2, 1096 / 2560); // 336
+
+/* 在宽度为 540 像素的设备上. */
+cYx(0.2, 1096 / 2560); // 252
+</code></pre>
+<p>上述示例的 <code>1096 / 2560</code> 为基数, 默认基数为 <code>720 / 1280</code>, 如需设置默认基数, 可使用以下方法:</p>
+<pre><code class="lang-js">cYx(0.2); /* 相当于 cYx(0.2, 720 / 1280) . */
+setScaleBases(1096, 2560);
+cYx(0.2); /* 相当于 cYx(0.2, 1096 / 2560) . */
+</code></pre>
+<p>默认基数只能修改最多一次.</p>
+<h3>cYx(y, isRatio)<span><a class="mark" href="#global_cyx_y_isratio" id="global_cyx_y_isratio">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/3</code></strong></p>
+<ul>
+<li><strong>y</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值或屏幕高度百分比</li>
+<li><strong>[ isRatio = &#39;auto&#39; ]</strong> { <code>&#39;auto&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否将 <code>y</code> 参数强制作为百分比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p><code>isRatio</code> 参数默认为 <code>auto</code>, 即由 <code>y</code> 参数的范围自动决定 <code>y</code> 是否视为百分比,<br>即当参数 <code>y</code> 满足 <code>-1 &lt; y &lt; 1</code> 时, <code>y</code> 将视为屏幕高度百分比, 否则将视为绝对坐标值.</p>
+<p><code>isRatio</code> 参数为 <code>true</code> 时, <code>y</code> 参数将强制视为百分比, 如 <code>cYx(2, true)</code> 意味着两倍屏幕高度, <code>2</code> 的意义不再是像素值.</p>
+<p><code>isRatio</code> 参数为 <code>false</code> 时, <code>y</code> 参数将强制视为绝对坐标值, 如 <code>cYx(0.5, false)</code> 意味着 <code>0.5</code> 像素值, 其意义不再是百分比.</p>
+<h3>cYx(y)<span><a class="mark" href="#global_cyx_y" id="global_cyx_y">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 3/3</code></strong></p>
+<ul>
+<li><strong>y</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值或屏幕高度百分比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>当参数 <code>y</code> 满足 <code>-1 &lt; y &lt; 1</code> 时, 相当于 <code>cY(y, /* isRatio = */ true)</code>, 即 <code>y</code> 将视为屏幕高度百分比.</p>
+<p>当参数 <code>y</code> 满足 <code>y &lt;= -1 | y &gt;= 1</code> 时, 相当于 <code>cY(y, /* base = */ 720)</code>, 即 <code>y</code> 将视为绝对坐标值, 另 <code>base</code> 参数可能由 <code>setScaleBaseX</code> 等方法修改, <code>720</code> 为其默认值.</p>
+<pre><code class="lang-js">cYx(0.3); /* 相当于 cYx(0.3, &#39;9:16&#39;) . */
+cYx(384); /* 相当于 cYx(384, 720) . */
+</code></pre>
+<h2>[m] cXy<span><a class="mark" href="#global_m_cxy" id="global_m_cxy">#</a></span></h2>
+<p>以纵坐标度量的横坐标标度.</p>
+<p>与设备宽度无关, 与设备高度相关的坐标标度.</p>
+<p>如 <code>cXy(0.5, &#39;9:16&#39;)</code> 对于以下 5 个设备 (以分辨率区分) 得到的结果是完全一致的:</p>
+<pre><code class="lang-text">1. 1080 × 1920
+4. 1096 × 1920
+5. 720 × 1920
+3. 540 × 1920
+2. 960 × 1920
+</code></pre>
+<p>因为所有设备高度相同, <code>cXy</code> 的结果是宽度无关的.</p>
+<p>计算结果:</p>
+<pre><code class="lang-js">1920 * 0.5 * 9 / 16; // 540
+</code></pre>
+<p>设想如下场景, 某个应用页面是可以向右滚动窗口显示更多内容的, 在屏幕左半部分有一个按钮 <code>BTN</code>, 距离屏幕左边缘 <code>W</code> 距离, 另一台设备与当前设备屏幕高度相同, 但宽度更大, 相当于屏幕横向变长, 此时按钮 <code>BTN</code> 距离屏幕左边缘依然是 <code>W</code> 距离, 仅仅是屏幕右方显示了更多内容.<br>因此可使用 <code>cXy</code> 标度表示按钮 <code>BTN</code> 的位置, 如 <code>cXy(0.2, 1080 / 1920)</code> 或 <code>cXy(0.2, 9 / 16)</code> 或 <code>cXy(0.2, &#39;9:16&#39;)</code>.</p>
+<p>上述示例的 <code>0.2</code> 是一个相对值, 是相对于当前设备屏幕宽度的, 因此第 2 个参数对应设备宽高比例值.<br>如果使用绝对坐标值 (<code>X</code> 坐标值), 如 <code>384</code>, 则第 2 个参数对应的是设备屏幕高度值:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">第 1 个参数</th>
+<th style="text-align:center">第 2 个参数</th>
+<th style="text-align:center">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">X 坐标百分比</td>
+<td style="text-align:center">设备宽高比</td>
+<td style="text-align:center">cXy(0.2, &#39;9:16&#39;)</td>
+</tr>
+<tr>
+<td style="text-align:center">X 坐标值</td>
+<td style="text-align:center">设备高度值</td>
+<td style="text-align:center">cXy(384, 2560)</td>
+</tr>
+</tbody>
+</table>
+<h3>cXy(coordinateX, baseY)<span><a class="mark" href="#global_cxy_coordinatex_basey" id="global_cxy_coordinatex_basey">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload [1(A)]/3</code></strong></p>
+<ul>
+<li><strong>coordinateX</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 横坐标值</li>
+<li><strong>[ baseY = 1280 ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 纵坐标基数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>由纵坐标基数换算后得到的横坐标值.</p>
+<p>例如在一个设备高度为 <code>2560</code> 设备上的 <code>512</code> 像素宽度, 在其他不同高度的设备上将转换为不同的值:</p>
+<pre><code class="lang-js">/* 在高度为 2560 像素的设备上. */
+cXy(512, 2560); // 512
+
+/* 在高度为 1920 像素的设备上. */
+cXy(512, 2560); // 384
+
+/* 在高度为 1280 像素的设备上. */
+cXy(512, 2560); // 256
+
+/* 在高度为 960 像素的设备上. */
+cXy(512, 2560); // 192
+</code></pre>
+<p>上述示例的 <code>2560</code> 为基数, 默认基数为 <code>1280</code>, 如需设置默认基数, 可使用以下方法:</p>
+<pre><code class="lang-js">cXy(512); /* 相当于 cXy(512, 1280) . */
+setScaleBaseY(2560);
+cXy(512); /* 相当于 cXy(512, 2560) . */
+</code></pre>
+<p>默认基数只能修改最多一次.</p>
+<h3>cXy(percentX, ratio)<span><a class="mark" href="#global_cxy_percentx_ratio" id="global_cxy_percentx_ratio">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload [1(B)]/3</code></strong></p>
+<ul>
+<li><strong>percentX</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 横坐标百分比</li>
+<li><strong>[ ratio = &#39;9:16&#39; ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 设备宽高比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>由设备宽高比换算后得到的新横坐标值.</p>
+<p>例如在一个设备高度与宽度分别为 <code>1096</code> 和 <code>2560</code> 的设备上的 <code>548</code> 像素宽度, 即 <code>0.5</code> 倍的屏幕宽度, 在其他不同高度的设备上将转换为不同的值:</p>
+<pre><code class="lang-js">/* 在高度为 2560 像素的设备上. */
+cXy(0.5, 1096 / 2560); // 548
+
+/* 在高度为 1920 像素的设备上. */
+cXy(0.5, 1096 / 2560); // 411
+
+/* 在高度为 1280 像素的设备上. */
+cXy(0.5, 1096 / 2560); // 274
+
+/* 在高度为 960 像素的设备上. */
+cXy(0.5, 1096 / 2560); // 206
+</code></pre>
+<p>上述示例的 <code>1096 / 2560</code> 为基数, 默认基数为 <code>720 / 1280</code>, 如需设置默认基数, 可使用以下方法:</p>
+<pre><code class="lang-js">cXy(0.5); /* 相当于 cXy(0.5, 720 / 1280) . */
+setScaleBases(1096, 2560);
+cXy(0.5); /* 相当于 cXy(0.5, 1096 / 2560) . */
+</code></pre>
+<p>默认基数只能修改最多一次.</p>
+<h3>cXy(x, isRatio)<span><a class="mark" href="#global_cxy_x_isratio" id="global_cxy_x_isratio">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/3</code></strong></p>
+<ul>
+<li><strong>x</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值或屏幕宽度百分比</li>
+<li><strong>[ isRatio = &#39;auto&#39; ]</strong> { <code>&#39;auto&#39;</code> | <a href="dataTypes.html#datatypes_boolean">boolean</a> } - 是否将 <code>x</code> 参数强制作为百分比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p><code>isRatio</code> 参数默认为 <code>auto</code>, 即由 <code>x</code> 参数的范围自动决定 <code>x</code> 是否视为百分比,<br>即当参数 <code>x</code> 满足 <code>-1 &lt; x &lt; 1</code> 时, <code>x</code> 将视为屏幕宽度百分比, 否则将视为绝对坐标值.</p>
+<p><code>isRatio</code> 参数为 <code>true</code> 时, <code>x</code> 参数将强制视为百分比, 如 <code>cXy(2, true)</code> 意味着两倍屏幕宽度, <code>2</code> 的意义不再是像素值.</p>
+<p><code>isRatio</code> 参数为 <code>false</code> 时, <code>x</code> 参数将强制视为绝对坐标值, 如 <code>cXy(0.5, false)</code> 意味着 <code>0.5</code> 像素值, 其意义不再是百分比.</p>
+<h3>cXy(x)<span><a class="mark" href="#global_cxy_x" id="global_cxy_x">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 3/3</code></strong></p>
+<ul>
+<li><strong>x</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 绝对坐标值或屏幕宽度百分比</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>当参数 <code>x</code> 满足 <code>-1 &lt; x &lt; 1</code> 时, 相当于 <code>cY(x, /* isRatio = */ true)</code>, 即 <code>x</code> 将视为屏幕宽度百分比.</p>
+<p>当参数 <code>x</code> 满足 <code>x &lt;= -1 | x &gt;= 1</code> 时, 相当于 <code>cY(x, /* base = */ 720)</code>, 即 <code>x</code> 将视为绝对坐标值, 另 <code>base</code> 参数可能由 <code>setScaleBaseX</code> 等方法修改, <code>720</code> 为其默认值.</p>
+<pre><code class="lang-js">cXy(0.3); /* 相当于 cXy(0.3, &#39;9:16&#39;) . */
+cXy(384); /* 相当于 cXy(384, 720) . */
+</code></pre>
+<h2>[m+] species<span><a class="mark" href="#global_m_species" id="global_m_species">#</a></span></h2>
+<h3>species(o)<span><a class="mark" href="#global_species_o" id="global_species_o">#</a></span></h3>
+<p><strong><code>Global</code></strong></p>
+<ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>查看任意对象的 &quot;种类&quot;, 如 <code>Object</code>, <code>Array</code>, <code>Number</code>, <code>String</code>, <code>RegExp</code> 等.</p>
+<p>内部实现代码摘要:</p>
+<pre><code class="lang-js">Object.prototype.toString.call(o).slice(&#39;[Object\x20&#39;.length, &#39;]&#39;.length * -1);
+</code></pre>
+<p>示例:</p>
+<pre><code class="lang-js">species(&#39;xyz&#39;); // String
+species(20); // Number
+species(20n); // BigInt
+species(true); // Boolean
+species(undefined); // Undefined
+species(null); // Null
+species(() =&gt; null); // Function
+species({ a: &#39;Apple&#39; }); // Object
+species([ 5, 10, 15 ]); // Array
+species(/^\d{8,11}$/); // RegExp
+species(new Date()); // Date
+species(new TypeError()); // Error
+species(new Map()); // Map
+species(new Set()); // Set
+species(&lt;text/&gt;); // XML
+species(org.autojs.autojs6); // JavaPackage
+species(org.autojs.autojs6.R); // JavaClass
+</code></pre>
+<p>如需判断某个对象是否为特定的 &quot;种类&quot;, 可使用形如 <code>species.isXxx</code> 的扩展方法:</p>
+<pre><code class="lang-js">species.isObject(23); // false
+species.isNumber(23); // true
+species.isRegExp(/test$/); // true
+</code></pre>
+<h3>[m] isArray<span><a class="mark" href="#global_m_isarray" id="global_m_isarray">#</a></span></h3>
+<h4>isArray(o)<span><a class="mark" href="#global_isarray_o" id="global_isarray_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Array</code>.</p>
+<h3>[m] isArrayBuffer<span><a class="mark" href="#global_m_isarraybuffer" id="global_m_isarraybuffer">#</a></span></h3>
+<h4>isArrayBuffer(o)<span><a class="mark" href="#global_isarraybuffer_o" id="global_isarraybuffer_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>ArrayBuffer</code>.</p>
+<h3>[m] isBigInt<span><a class="mark" href="#global_m_isbigint" id="global_m_isbigint">#</a></span></h3>
+<h4>isBigInt(o)<span><a class="mark" href="#global_isbigint_o" id="global_isbigint_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>BigInt</code>.</p>
+<h3>[m] isBoolean<span><a class="mark" href="#global_m_isboolean" id="global_m_isboolean">#</a></span></h3>
+<h4>isBoolean(o)<span><a class="mark" href="#global_isboolean_o" id="global_isboolean_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Boolean</code>.</p>
+<h3>[m] isContinuation<span><a class="mark" href="#global_m_iscontinuation" id="global_m_iscontinuation">#</a></span></h3>
+<h4>isContinuation(o)<span><a class="mark" href="#global_iscontinuation_o" id="global_iscontinuation_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Continuation</code>.</p>
+<h3>[m] isDataView<span><a class="mark" href="#global_m_isdataview" id="global_m_isdataview">#</a></span></h3>
+<h4>isDataView(o)<span><a class="mark" href="#global_isdataview_o" id="global_isdataview_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>DataView</code>.</p>
+<h3>[m] isDate<span><a class="mark" href="#global_m_isdate" id="global_m_isdate">#</a></span></h3>
+<h4>isDate(o)<span><a class="mark" href="#global_isdate_o" id="global_isdate_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Date</code>.</p>
+<h3>[m] isError<span><a class="mark" href="#global_m_iserror" id="global_m_iserror">#</a></span></h3>
+<h4>isError(o)<span><a class="mark" href="#global_iserror_o" id="global_iserror_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Error</code>.</p>
+<h3>[m] isFloat32Array<span><a class="mark" href="#global_m_isfloat32array" id="global_m_isfloat32array">#</a></span></h3>
+<h4>isFloat32Array(o)<span><a class="mark" href="#global_isfloat32array_o" id="global_isfloat32array_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Float32Array</code>.</p>
+<h3>[m] isFloat64Array<span><a class="mark" href="#global_m_isfloat64array" id="global_m_isfloat64array">#</a></span></h3>
+<h4>isFloat64Array(o)<span><a class="mark" href="#global_isfloat64array_o" id="global_isfloat64array_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Float64Array</code>.</p>
+<h3>[m] isFunction<span><a class="mark" href="#global_m_isfunction" id="global_m_isfunction">#</a></span></h3>
+<h4>isFunction(o)<span><a class="mark" href="#global_isfunction_o" id="global_isfunction_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Function</code>.</p>
+<h3>[m] isHTMLDocument<span><a class="mark" href="#global_m_ishtmldocument" id="global_m_ishtmldocument">#</a></span></h3>
+<h4>isHTMLDocument(o)<span><a class="mark" href="#global_ishtmldocument_o" id="global_ishtmldocument_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>HTMLDocument</code>.</p>
+<h3>[m] isInt16Array<span><a class="mark" href="#global_m_isint16array" id="global_m_isint16array">#</a></span></h3>
+<h4>isInt16Array(o)<span><a class="mark" href="#global_isint16array_o" id="global_isint16array_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Int16Array</code>.</p>
+<h3>[m] isInt32Array<span><a class="mark" href="#global_m_isint32array" id="global_m_isint32array">#</a></span></h3>
+<h4>isInt32Array(o)<span><a class="mark" href="#global_isint32array_o" id="global_isint32array_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Int32Array</code>.</p>
+<h3>[m] isInt8Array<span><a class="mark" href="#global_m_isint8array" id="global_m_isint8array">#</a></span></h3>
+<h4>isInt8Array(o)<span><a class="mark" href="#global_isint8array_o" id="global_isint8array_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Int8Array</code>.</p>
+<h3>[m] isJavaObject<span><a class="mark" href="#global_m_isjavaobject" id="global_m_isjavaobject">#</a></span></h3>
+<h4>isJavaObject(o)<span><a class="mark" href="#global_isjavaobject_o" id="global_isjavaobject_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>JavaObject</code>.</p>
+<h3>[m] isJavaPackage<span><a class="mark" href="#global_m_isjavapackage" id="global_m_isjavapackage">#</a></span></h3>
+<h4>isJavaPackage(o)<span><a class="mark" href="#global_isjavapackage_o" id="global_isjavapackage_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>JavaPackage</code>.</p>
+<h3>[m] isMap<span><a class="mark" href="#global_m_ismap" id="global_m_ismap">#</a></span></h3>
+<h4>isMap(o)<span><a class="mark" href="#global_ismap_o" id="global_ismap_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Map</code>.</p>
+<h3>[m] isNamespace<span><a class="mark" href="#global_m_isnamespace" id="global_m_isnamespace">#</a></span></h3>
+<h4>isNamespace(o)<span><a class="mark" href="#global_isnamespace_o" id="global_isnamespace_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Namespace</code>.</p>
+<h3>[m] isNull<span><a class="mark" href="#global_m_isnull" id="global_m_isnull">#</a></span></h3>
+<h4>isNull(o)<span><a class="mark" href="#global_isnull_o" id="global_isnull_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Null</code>.</p>
+<h3>[m] isNumber<span><a class="mark" href="#global_m_isnumber" id="global_m_isnumber">#</a></span></h3>
+<h4>isNumber(o)<span><a class="mark" href="#global_isnumber_o" id="global_isnumber_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Number</code>.</p>
+<h3>[m] isObject<span><a class="mark" href="#global_m_isobject" id="global_m_isobject">#</a></span></h3>
+<h4>isObject(o)<span><a class="mark" href="#global_isobject_o" id="global_isobject_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Object</code>.</p>
+<h3>[m] isQName<span><a class="mark" href="#global_m_isqname" id="global_m_isqname">#</a></span></h3>
+<h4>isQName(o)<span><a class="mark" href="#global_isqname_o" id="global_isqname_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>QName</code>.</p>
+<h3>[m] isRegExp<span><a class="mark" href="#global_m_isregexp" id="global_m_isregexp">#</a></span></h3>
+<h4>isRegExp(o)<span><a class="mark" href="#global_isregexp_o" id="global_isregexp_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>RegExp</code>.</p>
+<h3>[m] isSet<span><a class="mark" href="#global_m_isset" id="global_m_isset">#</a></span></h3>
+<h4>isSet(o)<span><a class="mark" href="#global_isset_o" id="global_isset_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Set</code>.</p>
+<h3>[m] isString<span><a class="mark" href="#global_m_isstring" id="global_m_isstring">#</a></span></h3>
+<h4>isString(o)<span><a class="mark" href="#global_isstring_o" id="global_isstring_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>String</code>.</p>
+<h3>[m] isUint16Array<span><a class="mark" href="#global_m_isuint16array" id="global_m_isuint16array">#</a></span></h3>
+<h4>isUint16Array(o)<span><a class="mark" href="#global_isuint16array_o" id="global_isuint16array_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Uint16Array</code>.</p>
+<h3>[m] isUint32Array<span><a class="mark" href="#global_m_isuint32array" id="global_m_isuint32array">#</a></span></h3>
+<h4>isUint32Array(o)<span><a class="mark" href="#global_isuint32array_o" id="global_isuint32array_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Uint32Array</code>.</p>
+<h3>[m] isUint8Array<span><a class="mark" href="#global_m_isuint8array" id="global_m_isuint8array">#</a></span></h3>
+<h4>isUint8Array(o)<span><a class="mark" href="#global_isuint8array_o" id="global_isuint8array_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Uint8Array</code>.</p>
+<h3>[m] isUint8ClampedArray<span><a class="mark" href="#global_m_isuint8clampedarray" id="global_m_isuint8clampedarray">#</a></span></h3>
+<h4>isUint8ClampedArray(o)<span><a class="mark" href="#global_isuint8clampedarray_o" id="global_isuint8clampedarray_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Uint8ClampedArray</code>.</p>
+<h3>[m] isUndefined<span><a class="mark" href="#global_m_isundefined" id="global_m_isundefined">#</a></span></h3>
+<h4>isUndefined(o)<span><a class="mark" href="#global_isundefined_o" id="global_isundefined_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Undefined</code>.</p>
+<h3>[m] isWeakMap<span><a class="mark" href="#global_m_isweakmap" id="global_m_isweakmap">#</a></span></h3>
+<h4>isWeakMap(o)<span><a class="mark" href="#global_isweakmap_o" id="global_isweakmap_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>WeakMap</code>.</p>
+<h3>[m] isWeakSet<span><a class="mark" href="#global_m_isweakset" id="global_m_isweakset">#</a></span></h3>
+<h4>isWeakSet(o)<span><a class="mark" href="#global_isweakset_o" id="global_isweakset_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>WeakSet</code>.</p>
+<h3>[m] isWindow<span><a class="mark" href="#global_m_iswindow" id="global_m_iswindow">#</a></span></h3>
+<h4>isWindow(o)<span><a class="mark" href="#global_iswindow_o" id="global_iswindow_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Window</code>.</p>
+<h3>[m] isXML<span><a class="mark" href="#global_m_isxml" id="global_m_isxml">#</a></span></h3>
+<h4>isXML(o)<span><a class="mark" href="#global_isxml_o" id="global_isxml_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>XML</code>.</p>
+<h3>[m] isXMLList<span><a class="mark" href="#global_m_isxmllist" id="global_m_isxmllist">#</a></span></h3>
+<h4>isXMLList(o)<span><a class="mark" href="#global_isxmllist_o" id="global_isxmllist_o">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+</div><p>判断对象的 &quot;种类&quot; 是否为 <code>XMLList</code>.</p>
+<h2>[p] WIDTH<span><a class="mark" href="#global_p_width" id="global_p_width">#</a></span></h2>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Getter</code></strong></p>
+<ul>
+<li><strong>&lt;get&gt;</strong> <a href="dataTypes.html#datatypes_number">number</a></li>
+</ul>
+<p><a href="device.html#device_p_width">device.width</a> 的别名属性.</p>
+<h2>[p] HEIGHT<span><a class="mark" href="#global_p_height" id="global_p_height">#</a></span></h2>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Getter</code></strong></p>
+<ul>
+<li><strong>&lt;get&gt;</strong> <a href="dataTypes.html#datatypes_number">number</a></li>
+</ul>
+<p><a href="device.html#device_p_height">device.height</a> 的别名属性.</p>
+<h2>[p+] R<span><a class="mark" href="#global_p_r" id="global_p_r">#</a></span></h2>
+<p>在代码中使用 R 类的子类中的静态整数可访问 <a href="glossaries.html#glossaries_应用资源">应用资源</a>, 详情参阅 <a href="glossaries.html#glossaries_资源_ID">资源 ID</a> 术语.</p>
+<h3>[p+] anim<span><a class="mark" href="#global_p_anim" id="global_p_anim">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>动画资源.</p>
+<p>定义了预先确定的动画.<br>补间动画保存在 <code>res/anim/</code> 中, 可通过 <code>R.anim</code> 属性访问.<br>帧动画保存在 <code>res/drawable/</code> 中, 可通过 <code>R.drawable</code> 属性访问.</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+
+ui.layout(&lt;vertical id=&quot;main&quot;&gt;
+    &lt;vertical width=&quot;100&quot; height=&quot;100&quot; bg=&quot;#00695C&quot;&gt;&lt;/vertical&gt;
+&lt;/vertical&gt;);
+
+const AnimationUtils = android.view.animation.AnimationUtils;
+
+const mContentContainer = ui.main;
+const mSlideDownAnimation = AnimationUtils.loadAnimation(context, R.anim.slide_down);
+mSlideDownAnimation.setDuration(2000);
+mContentContainer.startAnimation(mSlideDownAnimation);
+</code></pre>
+<h3>[p+] array<span><a class="mark" href="#global_p_array" id="global_p_array">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>静态资源.</p>
+<p>提供数组的 XML 资源.</p>
+<pre><code class="lang-js">dialogs.build({
+    title: R.string.text_pinch_to_zoom,
+    items: R.array.values_editor_pinch_to_zoom_strategy,
+    itemsSelectMode: &#39;single&#39;,
+    itemsSelectedIndex: defSelectedIndex,
+    positive: &#39;OK&#39;,
+}).on(&#39;single_choice&#39;, function (idx, item) {
+    toastLog(`${idx}: ${item}`);
+}).show();
+</code></pre>
+<h3>[p+] bool<span><a class="mark" href="#global_p_bool" id="global_p_bool">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>静态资源.</p>
+<p>包含布尔值的 XML 资源.</p>
+<pre><code class="lang-js">console.log(context.getResources().getBoolean(R.bool.pref_auto_check_for_updates));
+</code></pre>
+<h3>[p+] color<span><a class="mark" href="#global_p_color" id="global_p_color">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>静态资源.</p>
+<p>包含颜色值 (十六进制颜色) 的 XML 资源.</p>
+<pre><code class="lang-js">console.log(colors.toString(context.getColor(R.color.console_view_warn), 6)); // #1976D2
+</code></pre>
+<h3>[p+] dimen<span><a class="mark" href="#global_p_dimen" id="global_p_dimen">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>静态资源.</p>
+<p>包含尺寸值 (及度量单位) 的 XML 资源.</p>
+<pre><code class="lang-js">console.log(context.getResources().getDimensionPixelSize(R.dimen.textSize_item_property)); // e.g. 28
+</code></pre>
+<h3>[p+] drawable<span><a class="mark" href="#global_p_drawable" id="global_p_drawable">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>可绘制资源.</p>
+<p>使用位图或 XML 定义各种图形.<br>保存在 <code>res/drawable/</code> 中, 可通过 <code>R.drawable</code> 属性访问.</p>
+<pre><code class="lang-js">/* 绘制一个淡绿色的铃铛图标. */
+
+&#39;ui&#39;;
+
+ui.layout(&lt;vertical bg=&quot;#FFFFFF&quot;&gt;
+    &lt;img id=&quot;img&quot; tint=&quot;#9CCC65&quot;/&gt;
+&lt;/vertical&gt;);
+
+ui.img.setImageResource(R.drawable.ic_ali_notification);
+</code></pre>
+<h3>[p+] id<span><a class="mark" href="#global_p_id" id="global_p_id">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>静态资源.</p>
+<p>为应用资源和组件提供唯一标识符的 XML 资源.</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+
+ui.layout(&lt;vertical bg=&quot;#FFFFFF&quot;&gt;
+    &lt;text id=&quot;txt&quot; size=&quot;30&quot;/&gt;
+&lt;/vertical&gt;);
+
+let childCount = ui.txt.getRootView().findViewById(R.id.action_bar_root).getChildCount(); // e.g 2
+ui.txt.setText(`Child count is ${childCount}`);
+</code></pre>
+<h3>[p+] integer<span><a class="mark" href="#global_p_integer" id="global_p_integer">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>静态资源.</p>
+<p>包含整数值的 XML 资源.</p>
+<pre><code class="lang-js">console.log(context.getResources().getInteger(R.integer.layout_node_info_view_decoration_line)); // 2
+</code></pre>
+<h3>[p+] layout<span><a class="mark" href="#global_p_layout" id="global_p_layout">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>布局资源.</p>
+<p>定义应用界面的布局.<br>保存在 <code>res/layout/</code> 中, 可通过 <code>R.layout</code> 属性访问.</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+
+activity.setContentView(R.layout.activity_log);
+</code></pre>
+<h3>[p+] menu<span><a class="mark" href="#global_p_menu" id="global_p_menu">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>菜单资源.</p>
+<p>定义应用菜单的内容.<br>保存在 <code>res/menu/</code> 中, 可通过 <code>R.menu</code> 属性访问.</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+
+ui.layout(&lt;vertical bg=&quot;#FFFFFF&quot;&gt;
+    &lt;text id=&quot;txt&quot; size=&quot;30&quot;/&gt;
+&lt;/vertical&gt;);
+
+const PopupMenu = android.widget.PopupMenu;
+
+let childCount = ui.txt.getRootView().findViewById(R.id.action_bar_root).getChildCount(); // e.g 2
+ui.txt.setText(`Child count is ${childCount}`);
+
+let popupMenu = new PopupMenu(context, ui.txt);
+popupMenu.inflate(R.menu.menu_script_options);
+popupMenu.show();
+</code></pre>
+<h3>[p+] plurals<span><a class="mark" href="#global_p_plurals" id="global_p_plurals">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>静态资源.</p>
+<p>定义资源复数形式.</p>
+<pre><code class="lang-js">console.log(context.getResources().getQuantityString(
+    R.plurals.text_already_stop_n_scripts,
+    new java.lang.Integer(1),
+    new java.lang.Integer(1))); // e.g. 1 script stopped
+console.log(context.getResources().getQuantityString(
+    R.plurals.text_already_stop_n_scripts,
+    new java.lang.Integer(3),
+    new java.lang.Integer(3))); // e.g. 3 scripts stopped
+</code></pre>
+<h3>[p+] string<span><a class="mark" href="#global_p_string" id="global_p_string">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>字符串资源.</p>
+<p>定义字符串.<br>保存在 <code>res/values/</code> 中, 可通过 <code>R.string</code> 属性访问.</p>
+<pre><code class="lang-js">console.log(context.getString(R.string.app_name)); // AutoJs6
+</code></pre>
+<h3>[p+] strings<span><a class="mark" href="#global_p_strings" id="global_p_strings">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>字符串资源.</p>
+<p>同 <a href="#global_p_string">R.string</a>.<br>因 <code>TypeScript Declarations (TS 声明文件)</code> 中, <code>string</code> 为保留关键字, 不能作为类名使用, 为了使 <code>IDE</code> 实现智能补全, 特提供 <code>R.strings</code> 别名类.</p>
+<pre><code class="lang-js">console.log(context.getString(R.strings.app_name)); // AutoJs6
+console.log(context.getString(R.string.app_name)); /* 同上, 但 IDE 无法智能补全. */
+</code></pre>
+<h3>[p+] style<span><a class="mark" href="#global_p_style" id="global_p_style">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong></p>
+<p>样式资源.</p>
+<p>定义界面元素的外观和格式.<br>保存在 <code>res/values/</code> 中, 可通过 <code>R.style</code> 属性访问.</p>
+<pre><code class="lang-js">&#39;ui&#39;;
+
+const MaterialDialog = com.afollestad.materialdialogs.MaterialDialog;
+const ContextThemeWrapper = android.view.ContextThemeWrapper;
+
+new MaterialDialog.Builder(new ContextThemeWrapper(activity, R.style.Material3DarkTheme))
+    .title(&#39;Hello&#39;)
+    .content(&#39;This is a test for showing a dialog with material 3 dark theme.&#39;)
+    .positiveText(&#39;OK&#39;)
+    .onPositive(() =&gt; ui.finish())
+    .cancelable(false)
+    .build()
+    .show();
+</code></pre>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

@@ -17,7 +17,7 @@ import org.autojs.autojs.util.ArrayUtils;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/5/8.
+ * Created by Stardust on May 8, 2017.
  */
 public class Dialogs {
 

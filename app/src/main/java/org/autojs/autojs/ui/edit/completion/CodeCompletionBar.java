@@ -17,7 +17,7 @@ import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/2/17.
+ * Created by Stardust on Feb 17, 2017.
  */
 public class CodeCompletionBar extends RecyclerView {
 

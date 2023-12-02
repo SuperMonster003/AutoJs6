@@ -4,7 +4,7 @@ import android.util.Log
 import org.autojs.autojs.runtime.exception.ScriptException
 
 /**
- * Created by Stardust on 2017/5/1.
+ * Created by Stardust on May 1, 2017.
  */
 abstract class AbstractConsole : Console {
 

@@ -10,7 +10,7 @@ import org.autojs.autojs.util.EventUtils
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/3/12.
+ * Created by Stardust on Mar 12, 2017.
  * Modified by SuperMonster003 as of Aug 31, 2022.
  */
 open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(private val rootNode: NodeInfo?, private val context: Context, isServiceRelied: Boolean = false) : LayoutFloatyWindow(rootNode, context, isServiceRelied) {

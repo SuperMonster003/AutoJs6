@@ -20,9 +20,8 @@ import androidx.core.graphics.drawable.DrawableCompat;
 
 import org.autojs.autojs.theme.internal.ScrollingViewEdgeGlowColorHelper;
 
-
 /**
- * Created by Stardust on 2016/10/24.
+ * Created by Stardust on Oct 24, 2016.
  */
 public class ThemeColorHelper {
 

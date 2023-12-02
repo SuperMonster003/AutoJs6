@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by Stardust on 2017/3/7.
+ * Created by Stardust on Mar 7, 2017.
  */
 public abstract class InputEventRecorder extends Recorder.AbstractRecorder implements InputEventObserver.InputEventListener {
 

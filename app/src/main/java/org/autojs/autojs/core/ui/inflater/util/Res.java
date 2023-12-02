@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 /**
- * Created by Stardust on 2017/11/5.
+ * Created by Stardust on Nov 5, 2017.
  */
 public class Res {
     public static int parseStyle(View view, String value) {
@@ -12,7 +12,8 @@ public class Res {
     }
 
     public static int parseStyle(Context context, String value) {
-        // FIXME: 2017/11/5 Can or should it retrieve android.R.style or styleable?
+        // FIXME by Stardust on Nov 5, 2017.
+        //  ! Can or should it retrieve android.R.style or styleable?
         if (value.startsWith("@style/")) {
             value = value.substring(7);
         }

@@ -13,7 +13,7 @@ import org.autojs.autojs.util.MD5Utils;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/1/30.
+ * Created by Stardust on Jan 30, 2017.
  */
 public class NotAskAgainDialog extends MaterialDialog {
 

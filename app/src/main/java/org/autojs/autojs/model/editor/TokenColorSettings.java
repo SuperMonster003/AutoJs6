@@ -3,7 +3,7 @@ package org.autojs.autojs.model.editor;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by Stardust on 2018/2/21.
+ * Created by Stardust on Feb 21, 2018.
  */
 public class TokenColorSettings {
 

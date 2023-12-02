@@ -10,7 +10,7 @@ import static org.autojs.autojs.runtime.api.ScreenMetrics.getDeviceScreenHeight;
 import static org.autojs.autojs.runtime.api.ScreenMetrics.getDeviceScreenWidth;
 
 /**
- * Created by Stardust on 2017/8/1.
+ * Created by Stardust on Aug 1, 2017.
  */
 public class InputEventToRootAutomatorRecorder extends InputEventRecorder {
 

@@ -12,7 +12,7 @@ import org.autojs.autojs.script.StringScriptSource
 
 class LoopBasedJavaScriptEngineWithDecryption(context: Context) : LoopBasedJavaScriptEngine(context) {
 
-    override fun execute(source: ScriptSource, callback: ExecuteCallback?) {
+    override fun execute(source: ScriptSource?, callback: ExecuteCallback?) {
         if (source is JavaScriptFileSource) {
             try {
                 val file = source.file

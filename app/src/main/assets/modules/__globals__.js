@@ -12,6 +12,9 @@ let { autojs, console, device, pickup, ui, s13n, Numberx } = global;
  * @param {org.mozilla.javascript.Scriptable | global} scope
  */
 module.exports = function (runtime, scope) {
+
+    const ScreenMetrics = org.autojs.autojs.runtime.api.ScreenMetrics;
+
     let _ = {
         scale: {
             base: {

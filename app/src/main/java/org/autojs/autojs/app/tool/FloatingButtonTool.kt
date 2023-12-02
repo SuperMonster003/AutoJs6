@@ -2,7 +2,6 @@ package org.autojs.autojs.app.tool
 
 import android.app.Activity
 import android.content.Context
-import org.autojs.autojs.service.AccessibilityService
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.main.drawer.ShowableItemHelper
 
@@ -11,8 +10,6 @@ import org.autojs.autojs.ui.main.drawer.ShowableItemHelper
  */
 open class FloatingButtonTool(final override val context: Context) : ShowableItemHelper {
 
-    private val mAccessibilityService: AccessibilityService = AccessibilityService(context)
-
     override val isShowing
         get() = FloatyWindowManger.isCircularMenuShowing()
 
@@ -20,10 +17,14 @@ open class FloatingButtonTool(final override val context: Context) : ShowableIte
 
     override fun show(): Boolean {
         FloatyWindowManger.showCircularMenu(context)
-        return when (isShowing) {
-            true -> true.also { mAccessibilityService.startIfNeeded() }
-            else -> false
-        }
+        // @Comment by SuperMonster003 on Nov 16, 2023.
+        //  ! Seems pointless to force a11y service
+        //  ! to start along with showing floating button.
+        // return when (isShowing) {
+        //     true -> true.also { mAccessibilityService.startIfNeeded() }
+        //     else -> false
+        // }
+        return isShowing
     }
 
     override fun showIfNeeded() {

@@ -7,7 +7,7 @@ import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsImageView
 
 /**
- * Created by Stardust on 2017/11/30.
+ * Created by Stardust on Nov 30, 2017.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
 class JsImageViewInflater(resourceParser: ResourceParser) : RoundedImageViewInflater<JsImageView>(resourceParser) {

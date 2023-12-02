@@ -5,109 +5,6 @@
 //  ! declared globally in RhinoJavaScriptEngine.kt.
 let global = this;
 
-/* Global classes. */
-
-let Manifest = android.Manifest;
-let Notification = android.app.Notification;
-let NotificationManager = android.app.NotificationManager;
-let PendingIntent = android.app.PendingIntent;
-let Context = global.Context = android.content.Context;
-let Intent = global.Intent = android.content.Intent;
-let PackageManager = android.content.pm.PackageManager;
-let ColorStateList = android.content.res.ColorStateList;
-let Bitmap = android.graphics.Bitmap;
-let BitmapFactory = android.graphics.BitmapFactory;
-let Paint = android.graphics.Paint;
-let ColorDrawable = android.graphics.drawable.ColorDrawable;
-let Uri = android.net.Uri;
-let Build = android.os.Build;
-let Handler = android.os.Handler;
-let Looper = android.os.Looper;
-let InputType = android.text.InputType;
-let TextWatcher = android.text.TextWatcher;
-let Linkify = android.text.util.Linkify;
-let Base64 = android.util.Base64;
-let Log = android.util.Log;
-let ContextThemeWrapper = android.view.ContextThemeWrapper;
-let Gravity = android.view.Gravity;
-let KeyEvent = android.view.KeyEvent;
-let MotionEvent = android.view.MotionEvent;
-let LayoutParams = android.view.WindowManager.LayoutParams;
-let MimeTypeMap = android.webkit.MimeTypeMap;
-let WebChromeClient = android.webkit.WebChromeClient;
-let WebView = android.webkit.WebView;
-let WebViewClient = android.webkit.WebViewClient;
-let Toast = android.widget.Toast;
-let BigTextStyle = androidx.core.app.NotificationCompat.BigTextStyle;
-let NotificationCompat = androidx.core.app.NotificationCompat;
-let FileProvider = androidx.core.content.FileProvider;
-let Snackbar = com.google.android.material.snackbar.Snackbar;
-let LogConfigurator = de.mindpipe.android.logging.log4j.LogConfigurator;
-let Version = io.github.g00fy2.versioncompare.Version;
-let ByteArrayOutputStream = java.io.ByteArrayOutputStream;
-let File = java.io.File;
-let Runnable = java.lang.Runnable;
-let SecurityException = java.lang.SecurityException;
-let Thread = java.lang.Thread;
-let Throwable = java.lang.Throwable;
-let URI = java.net.URI;
-let StandardCharsets = java.nio.charset.StandardCharsets;
-let Locale = java.util.Locale;
-let AtomicLong = java.util.concurrent.atomic.AtomicLong;
-let ReentrantLock = java.util.concurrent.locks.ReentrantLock;
-let Callback = okhttp3.Callback;
-let FormBody = okhttp3.FormBody;
-let MediaType = okhttp3.MediaType;
-let MultipartBody = okhttp3.MultipartBody;
-let OkHttpClient = okhttp3.OkHttpClient;
-let Request = okhttp3.Request;
-let RequestBody = okhttp3.RequestBody;
-let Level = org.apache.log4j.Level;
-let LogManager = org.apache.log4j.LogManager;
-let GlobalAppContext = org.autojs.autojs.app.GlobalAppContext;
-let AccessibilityBridge = org.autojs.autojs.core.accessibility.AccessibilityBridge;
-let UiSelector = org.autojs.autojs.core.accessibility.UiSelector;
-let UiObject = org.autojs.autojs.core.automator.UiObject;
-let UiObjectCollection = org.autojs.autojs.core.automator.UiObjectCollection;
-let Crypto = org.autojs.autojs.core.crypto.Crypto;
-let EventEmitter = org.autojs.autojs.core.eventloop.EventEmitter;
-let Canvas = org.autojs.autojs.core.graphics.ScriptCanvas;
-let MutableOkHttp = org.autojs.autojs.core.http.MutableOkHttp;
-let ColorDetector = org.autojs.autojs.core.image.ColorDetector;
-let ColorTable = org.autojs.autojs.core.image.ColorTable;
-let Image = org.autojs.autojs.core.image.ImageWrapper;
-let ImageWrapper = org.autojs.autojs.core.image.ImageWrapper;
-let Mat = org.autojs.autojs.core.opencv.Mat;
-let DynamicLayoutInflater = org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater;
-let JavaScriptEngine = org.autojs.autojs.engine.JavaScriptEngine;
-let PFile = org.autojs.autojs.pio.PFile;
-let Pref = org.autojs.autojs.pref.Pref;
-let ProxyJavaObject = org.autojs.autojs.rhino.ProxyJavaObject;
-let ProxyObject = org.autojs.autojs.rhino.ProxyObject;
-let ScriptRuntime = org.autojs.autojs.runtime.ScriptRuntime;
-let AppUtils = org.autojs.autojs.runtime.api.AppUtils;
-let ScreenMetrics = org.autojs.autojs.runtime.api.ScreenMetrics;
-let Shell = org.autojs.autojs.runtime.api.Shell;
-let ScriptInterruptedException = org.autojs.autojs.runtime.exception.ScriptInterruptedException;
-let JavaScriptSource = org.autojs.autojs.script.JavaScriptSource;
-let ThemeColor = org.autojs.autojs.theme.ThemeColor;
-let App = org.autojs.autojs.util.App;
-let ArrayUtils = org.autojs.autojs.util.ArrayUtils;
-let ColorUtils = org.autojs.autojs.util.ColorUtils;
-let ConsoleUtils = org.autojs.autojs.util.ConsoleUtils;
-let DeviceUtils = org.autojs.autojs.util.DeviceUtils;
-let DisplayUtils = org.autojs.autojs.util.DisplayUtils;
-let JavaUtils = org.autojs.autojs.util.JavaUtils;
-let NetworkUtils = org.autojs.autojs.util.NetworkUtils;
-let NotificationUtils = org.autojs.autojs.util.NotificationUtils;
-let RootMode = org.autojs.autojs.util.RootUtils.RootMode;
-let RootUtils = org.autojs.autojs.util.RootUtils;
-let StringUtils = org.autojs.autojs.util.StringUtils;
-let TextUtils = org.autojs.autojs.util.TextUtils;
-let BuildConfig = org.autojs.autojs6.BuildConfig;
-let VolatileBox = org.autojs.concurrent.VolatileBox;
-let Imgproc = org.opencv.imgproc.Imgproc;
-
 /* Global View classes. */
 
 let JsAppBarLayout = org.autojs.autojs.core.ui.widget.JsAppBarLayout;
@@ -303,6 +200,9 @@ Object.assign(this, {
 
 ( /* @ModuleIIFE */ () => {
 
+    const ProxyObject = org.autojs.autojs.rhino.ProxyObject;
+    const Pref = org.autojs.autojs.pref.Pref;
+
     let _ = {
         Throwable: java.lang.Throwable,
         EvaluatorException: org.mozilla.javascript.EvaluatorException,
@@ -386,6 +286,7 @@ Object.assign(this, {
         },
         bind() {
             this.bindEpilogue();
+            this.bindClasses();
             this.bindModules();
             this.bindPrologue();
         },
@@ -489,6 +390,112 @@ Object.assign(this, {
                 },
             });
         },
+        bindClasses() {
+            Object.assign(global, {
+                Manifest: android.Manifest,
+                Notification: android.app.Notification,
+                NotificationManager: android.app.NotificationManager,
+                PendingIntent: android.app.PendingIntent,
+                Context: android.content.Context,
+                Intent: android.content.Intent,
+                PackageManager: android.content.pm.PackageManager,
+                ColorStateList: android.content.res.ColorStateList,
+                Bitmap: android.graphics.Bitmap,
+                BitmapFactory: android.graphics.BitmapFactory,
+                Paint: android.graphics.Paint,
+                ColorDrawable: android.graphics.drawable.ColorDrawable,
+                Uri: android.net.Uri,
+                Build: android.os.Build,
+                Handler: android.os.Handler,
+                Looper: android.os.Looper,
+                InputType: android.text.InputType,
+                TextWatcher: android.text.TextWatcher,
+                Linkify: android.text.util.Linkify,
+                Base64: android.util.Base64,
+                Log: android.util.Log,
+                ContextThemeWrapper: android.view.ContextThemeWrapper,
+                Gravity: android.view.Gravity,
+                KeyEvent: android.view.KeyEvent,
+                MotionEvent: android.view.MotionEvent,
+                LayoutParams: android.view.WindowManager.LayoutParams,
+                MimeTypeMap: android.webkit.MimeTypeMap,
+                WebChromeClient: android.webkit.WebChromeClient,
+                WebView: android.webkit.WebView,
+                WebViewClient: android.webkit.WebViewClient,
+                Toast: android.widget.Toast,
+                BigTextStyle: androidx.core.app.NotificationCompat.BigTextStyle,
+                NotificationCompat: androidx.core.app.NotificationCompat,
+                FileProvider: androidx.core.content.FileProvider,
+                Snackbar: com.google.android.material.snackbar.Snackbar,
+                LogConfigurator: de.mindpipe.android.logging.log4j.LogConfigurator,
+                Version: io.github.g00fy2.versioncompare.Version,
+                ByteArrayOutputStream: java.io.ByteArrayOutputStream,
+                File: java.io.File,
+                Runnable: java.lang.Runnable,
+                SecurityException: java.lang.SecurityException,
+                System: java.lang.System,
+                Thread: java.lang.Thread,
+                Throwable: java.lang.Throwable,
+                URI: java.net.URI,
+                StandardCharsets: java.nio.charset.StandardCharsets,
+                Locale: java.util.Locale,
+                AtomicLong: java.util.concurrent.atomic.AtomicLong,
+                ReentrantLock: java.util.concurrent.locks.ReentrantLock,
+                Callback: okhttp3.Callback,
+                FormBody: okhttp3.FormBody,
+                MediaType: okhttp3.MediaType,
+                MultipartBody: okhttp3.MultipartBody,
+                OkHttpClient: okhttp3.OkHttpClient,
+                Request: okhttp3.Request,
+                RequestBody: okhttp3.RequestBody,
+                Level: org.apache.log4j.Level,
+                LogManager: org.apache.log4j.LogManager,
+                GlobalAppContext: org.autojs.autojs.app.GlobalAppContext,
+                AccessibilityBridge: org.autojs.autojs.core.accessibility.AccessibilityBridge,
+                UiSelector: org.autojs.autojs.core.accessibility.UiSelector,
+                ApkBuilder: org.autojs.autojs.apkbuilder.ApkBuilder,
+                UiObject: org.autojs.autojs.core.automator.UiObject,
+                UiObjectCollection: org.autojs.autojs.core.automator.UiObjectCollection,
+                Crypto: org.autojs.autojs.core.crypto.Crypto,
+                EventEmitter: org.autojs.autojs.core.eventloop.EventEmitter,
+                Canvas: org.autojs.autojs.core.graphics.ScriptCanvas,
+                MutableOkHttp: org.autojs.autojs.core.http.MutableOkHttp,
+                ColorDetector: org.autojs.autojs.core.image.ColorDetector,
+                ColorTable: org.autojs.autojs.core.image.ColorTable,
+                Image: org.autojs.autojs.core.image.ImageWrapper,
+                ImageWrapper: org.autojs.autojs.core.image.ImageWrapper,
+                Mat: org.autojs.autojs.core.opencv.Mat,
+                DynamicLayoutInflater: org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater,
+                JavaScriptEngine: org.autojs.autojs.engine.JavaScriptEngine,
+                PFile: org.autojs.autojs.pio.PFile,
+                Pref: org.autojs.autojs.pref.Pref,
+                ProxyJavaObject: org.autojs.autojs.rhino.ProxyJavaObject,
+                ProxyObject: org.autojs.autojs.rhino.ProxyObject,
+                ScriptRuntime: org.autojs.autojs.runtime.ScriptRuntime,
+                AppUtils: org.autojs.autojs.runtime.api.AppUtils,
+                ScreenMetrics: org.autojs.autojs.runtime.api.ScreenMetrics,
+                Shell: org.autojs.autojs.runtime.api.Shell,
+                ScriptInterruptedException: org.autojs.autojs.runtime.exception.ScriptInterruptedException,
+                JavaScriptSource: org.autojs.autojs.script.JavaScriptSource,
+                ThemeColor: org.autojs.autojs.theme.ThemeColor,
+                App: org.autojs.autojs.util.App,
+                ArrayUtils: org.autojs.autojs.util.ArrayUtils,
+                ColorUtils: org.autojs.autojs.util.ColorUtils,
+                ConsoleUtils: org.autojs.autojs.util.ConsoleUtils,
+                DeviceUtils: org.autojs.autojs.util.DeviceUtils,
+                DisplayUtils: org.autojs.autojs.util.DisplayUtils,
+                JavaUtils: org.autojs.autojs.util.JavaUtils,
+                NetworkUtils: org.autojs.autojs.util.NetworkUtils,
+                NotificationUtils: org.autojs.autojs.util.NotificationUtils,
+                RootMode: org.autojs.autojs.util.RootUtils.RootMode,
+                RootUtils: org.autojs.autojs.util.RootUtils,
+                StringUtils: org.autojs.autojs.util.StringUtils,
+                TextUtils: org.autojs.autojs.util.TextUtils,
+                BuildConfig: org.autojs.autojs6.BuildConfig,
+                VolatileBox: org.autojs.concurrent.VolatileBox,
+                Imgproc: org.opencv.imgproc.Imgproc,
+            });
+        },
         bindModules() {
             // @OrderMatters by SuperMonster003 on May 2, 2022.
             _.bind([
@@ -550,8 +557,8 @@ Object.assign(this, {
                 [ 'ocr', 'barcode', 'qrcode' ],
 
                 /* Safe to put last regardless of the order, no guarantee ;). */
-                [ 'floaty', 'storages', 'device', 'recorder', 'toast' ],
-                [ 'media', 'sensors', 'events', 'base64', 'notice', 'shizuku' ],
+                [ 'floaty', 'storages', 'device', 'recorder', 'toast', 'media' ],
+                [ 'sensors', 'events', 'base64', 'notice', 'shizuku', 'opencc' ],
 
                 /* Last but not the least */
                 [ 'globals' ],

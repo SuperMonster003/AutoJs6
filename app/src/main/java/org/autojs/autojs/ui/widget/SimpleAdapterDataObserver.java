@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.widget;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**
- * Created by Stardust on 2017/3/14.
+ * Created by Stardust on Mar 14, 2017.
  */
 public class SimpleAdapterDataObserver extends RecyclerView.AdapterDataObserver {
 

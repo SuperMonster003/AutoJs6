@@ -40,7 +40,7 @@ import java.lang.ref.WeakReference
 import java.lang.reflect.Method
 
 /**
- * Created by Stardust on 2017/1/27.
+ * Created by Stardust on Jan 27, 2017.
  * Modified by SuperMonster003 as of Aug 23, 2022.
  */
 class App : MultiDexApplication() {

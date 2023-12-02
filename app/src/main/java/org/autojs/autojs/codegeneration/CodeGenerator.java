@@ -7,7 +7,7 @@ import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.core.automator.UiObject;
 
 /**
- * Created by Stardust on 2017/12/7.
+ * Created by Stardust on Dec 7, 2017.
  */
 public class CodeGenerator {
 

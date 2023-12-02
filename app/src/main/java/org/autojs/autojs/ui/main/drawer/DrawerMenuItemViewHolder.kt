@@ -10,7 +10,7 @@ import org.autojs.autojs6.databinding.DrawerMenuItemBinding
 import java.io.IOException
 
 /**
- * Created by Stardust on 2017/12/10.
+ * Created by Stardust on Dec 10, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  * Transformed by SuperMonster003 on May 13, 2023.
  */

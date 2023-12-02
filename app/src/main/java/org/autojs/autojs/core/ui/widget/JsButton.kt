@@ -9,7 +9,7 @@ import android.widget.Button
 import android.widget.CompoundButton
 
 /**
- * Created by Stardust on 2017/5/15.
+ * Created by Stardust on May 15, 2017.
  * Transformed by SuperMonster003 on May 18, 2023.
  */
 @SuppressLint("AppCompatCustomView")

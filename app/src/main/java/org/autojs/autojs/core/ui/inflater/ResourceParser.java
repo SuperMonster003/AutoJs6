@@ -3,7 +3,7 @@ package org.autojs.autojs.core.ui.inflater;
 import org.autojs.autojs.core.ui.inflater.util.Drawables;
 
 /**
- * Created by Stardust on 2018/1/24.
+ * Created by Stardust on Jan 24, 2018.
  */
 public class ResourceParser {
 

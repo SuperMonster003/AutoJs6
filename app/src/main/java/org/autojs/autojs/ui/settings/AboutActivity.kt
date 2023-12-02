@@ -24,7 +24,7 @@ import org.autojs.autojs6.databinding.ActivityAboutFunctionButtonsBinding
 import org.autojs.autojs6.databinding.ActivityAboutItemsBinding
 
 /**
- * Created by Stardust on 2017/2/2.
+ * Created by Stardust on Feb 2, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 open class AboutActivity : BaseActivity() {

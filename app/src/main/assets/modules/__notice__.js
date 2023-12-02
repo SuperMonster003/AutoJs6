@@ -7,7 +7,13 @@
  */
 module.exports = function (scriptRuntime, scope) {
 
+    const AppUtils = org.autojs.autojs.runtime.api.AppUtils;
+    const NotificationUtils = org.autojs.autojs.util.NotificationUtils;
+    const NotificationCompat = androidx.core.app.NotificationCompat;
     const Builder = androidx.core.app.NotificationCompat.Builder;
+    const BigTextStyle = androidx.core.app.NotificationCompat.BigTextStyle;
+    const Notification = android.app.Notification;
+    const NotificationManager = android.app.NotificationManager;
 
     // @Caution by SuperMonster003 on May 6, 2023.
     //  ! On device running with Android 7.x,

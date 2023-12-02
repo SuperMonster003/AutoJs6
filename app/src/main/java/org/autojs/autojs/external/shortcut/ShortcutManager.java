@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by Stardust on 2017/10/25.
+ * Created by Stardust on Oct 25, 2017.
  */
 @RequiresApi(api = Build.VERSION_CODES.N_MR1)
 public class ShortcutManager {

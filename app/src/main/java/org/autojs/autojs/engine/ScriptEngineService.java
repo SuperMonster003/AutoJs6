@@ -2,6 +2,7 @@ package org.autojs.autojs.engine;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -31,9 +32,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Created by Stardust on 2017/1/23.
+ * Created by Stardust on Jan 23, 2017.
  */
 public class ScriptEngineService {
+
+    private static final String TAG = ScriptEngineService.class.getSimpleName();
 
     private static ScriptEngineService sInstance;
     private final Context mApplicationContext;
@@ -59,6 +62,7 @@ public class ScriptEngineService {
         mScriptExecutionObserver.registerScriptExecutionListener(new SimpleScriptExecutionListener() {
             @Override
             public void onStart(ScriptExecution execution) {
+                Log.d(TAG, "onStart");
                 ScriptSource scriptSource = execution.getSource();
                 if (execution.getEngine() instanceof JavaScriptEngine) {
                     ((JavaScriptEngine) execution.getEngine()).getRuntime().console.setTitle(scriptSource.getName());
@@ -77,6 +81,7 @@ public class ScriptEngineService {
 
             @Override
             public void onException(ScriptExecution execution, Throwable e) {
+                Log.d(TAG, "onException");
                 e.printStackTrace();
                 onFinish(execution);
                 String message = null;
@@ -94,7 +99,10 @@ public class ScriptEngineService {
                     }
                 }
                 if (message != null) {
+                    Log.e(TAG, message);
                     mUiHandler.toast(getLanguageContext().getString(R.string.text_error) + ": " + message);
+                } else {
+                    Log.e(TAG, "No exception message");
                 }
             }
 
@@ -148,8 +156,10 @@ public class ScriptEngineService {
         }
         RunnableScriptExecution r;
         if (source instanceof JavaScriptSource) {
+            Log.d(TAG, "JavaScriptSource: true");
             r = new LoopedBasedJavaScriptExecution(mScriptEngineManager, task);
         } else {
+            Log.d(TAG, "JavaScriptSource: false");
             r = new RunnableScriptExecution(mScriptEngineManager, task);
         }
         new ThreadCompat(r).start();

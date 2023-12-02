@@ -10,7 +10,7 @@ import org.autojs.autojs.util.DisplayUtils.toFloorIntY
 import org.autojs.autojs.util.StringUtils.formatDouble
 
 /**
- * Created by Stardust on 2017/3/9.
+ * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of Nov 19, 2022.
  */
 class BoundsFilter(private val left: Double, private val top: Double, private val right: Double, private val bottom: Double, private val type: Int) : Filter {

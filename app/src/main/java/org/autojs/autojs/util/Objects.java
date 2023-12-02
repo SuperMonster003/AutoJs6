@@ -1,7 +1,7 @@
 package org.autojs.autojs.util;
 
 /**
- * Created by Stardust on 2017/12/31.
+ * Created by Stardust on Dec 31, 2017.
  */
 public class Objects {
 

@@ -201,9 +201,10 @@
     <string name="text_a11y_service_description">Requise par le fonctionnement automatique du script (clic, appui long, glissement, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Service d\'accessibilité activé mais non exécuté (réactivation ou redémarrage du périphérique)</string>.
     <string name="text_a11y_service_may_be_needed">Un service d\'accessibilité peut être nécessaire</string>
-    <string name="text_abis">ABIs</string>
-    <string name="text_abis_32bit">ABIs (32-bit)</string>
-    <string name="text_abis_64bit">ABIs (64-bit)</string>
+    <string name="text_supported_libraries_short">Bibliothèques</string>
+    <string name="text_supported_abis_short">ABIs</string>
+    <string name="text_supported_abis_short_32bit">ABIs (32-bit)</string>
+    <string name="text_supported_abis_short_64bit">ABIs (64-bit)</string>
     <string name="text_about">A propos</string>
     <string name="text_about_all_files_access">A propos de l\'accès à tous les fichiers</string>
     <string name="text_about_app_and_developer">A propos de l\'application et du développeur</string>
@@ -696,7 +697,6 @@
     <string name="description_launcher_shortcuts">Les raccourcis permettent d\'effectuer des actions spécifiques dans AutoJs6. Les utilisateurs peuvent afficher ces raccourcis dans un lanceur pris en charge et démarrer rapidement certaines tâches ou lancer une activité, comme la lecture de la documentation de l\'application AutoJs6, le lancement de la page de configuration d\'AutoJs6, etc.</string>
     <string name="summary_text_launcher_shortcuts">Ajouter des raccourcis au lanceur</string>
     <string name="text_pin_shortcut_not_unsupported">L\'épinglage de raccourcis dans le lanceur n\'est pas pris en charge</string>
-    <string name="text_template_apk_path">Chemin d\'accès APK du modèle</string>
     <string name="text_shizuku_access_description">Shizuku vous permet d\'obtenir des privilèges ADB et d\'accéder aux API du système</string>
     <string name="text_shizuku_access">Permissions de Shizuku</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Accorder des privilèges AutoJs6 dans une application Shizuku</string>
@@ -708,6 +708,17 @@
     <string name="error_failed_to_grant_shizuku_access">Échec de l\'octroi de la permission de Shizuku</string>
     <string name="error_unable_to_use_shizuku_service">Impossible d\'utiliser le service Shizuku</string>
     <string name="error_input_fields_check_failed">Échec de la vérification du champ de saisie</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">Au moins un ABI doit être sélectionné</string>
+    <string name="text_malfunctioning">Dysfonctionnement</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">Le module \"%s\" ne fonctionne pas en raison de l\'absence des fichiers de bibliothèque nécessaires</string>
+    <string name="text_unavailable">Indisponible</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">L\'ABI sélectionné \"%s\" ne peut pas être utilisé pour créer une application packagée, car la version actuelle d\'AutoJs6 n\'inclut pas l\'ABI ci-dessus.</string>
+    <string name="text_the_following_solutions_can_be_referred_to">Les solutions suivantes peuvent être utilisées</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">Téléchargez et installez la version d\'AutoJs6 qui inclut l\'ABI ci-dessus (le nom du fichier contient \"%s\")</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">Télécharger et installer la version d\'AutoJs6 qui inclut tous les ABI (le nom du fichier contient \"universal\")</string>
+    <string name="text_recommended">Recommandé</string>
+    <string name="text_download_link_for_autojs6">Lien de téléchargement pour AutoJs6</string>
+    <string name="text_unavailable_abi_for">L\'ABI \"%s\" n\'est pas disponible</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d article</item>

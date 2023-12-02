@@ -17,7 +17,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 
 /**
- * Created by Stardust on 2017/4/5.
+ * Created by Stardust on Apr 5, 2017.
  * Modified by SuperMonster003 as of Jul 5, 2023.
  * Transformed by SuperMonster003 on Jul 5, 2023.
  */
@@ -53,6 +53,12 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         if (!file.exists() || !file.canRead()) {
             throw FileNotFoundException(str(R.string.file_not_exist_or_readable, path))
         }
+
+        // @Hint by SuperMonster003 on Nov 30, 2023.
+        //  ! Try to avoid java.lang.SecurityException which looks like below (API Level 34+):
+        //  ! Writable dex file '/data/user/0/org.autojs.autojs6/cache/classes/xxx.jar' is not allowed.
+        file.setReadOnly()
+
         return DexClassLoader(path, cacheDir.path, null, parent).also {
             mDexClassLoaders[path] = it
         }

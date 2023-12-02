@@ -11,9 +11,8 @@ import org.opencv.android.OpenCVLoader;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-
 /**
- * Created by Stardust on 2018/4/2.
+ * Created by Stardust on Apr 2, 2018.
  */
 public class OpenCVHelper {
 

@@ -12,7 +12,7 @@ import com.google.gson.annotations.SerializedName;
 import org.autojs.autojs.engine.RootAutomatorEngine;
 
 /**
- * Created by Stardust on 2017/4/24.
+ * Created by Stardust on Apr 24, 2017.
  */
 public abstract class AbstractShell {
 

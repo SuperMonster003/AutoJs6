@@ -52,7 +52,7 @@ import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
 
 /**
- * Created by Stardust on 2017/11/28.
+ * Created by Stardust on Nov 28, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 class TimedTaskSettingActivity : BaseActivity() {

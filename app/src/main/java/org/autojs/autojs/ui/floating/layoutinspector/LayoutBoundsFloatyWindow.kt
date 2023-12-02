@@ -10,7 +10,7 @@ import org.autojs.autojs.util.EventUtils.isKeyBackAndActionUp
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/3/12.
+ * Created by Stardust on Mar 12, 2017.
  * Modified by SuperMonster003 as of Aug 31, 2022.
  */
 open class LayoutBoundsFloatyWindow @JvmOverloads constructor(

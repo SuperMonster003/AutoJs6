@@ -7,7 +7,7 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/12/8.
+ * Created by Stardust on Dec 8, 2017.
  */
 object Pref {
 

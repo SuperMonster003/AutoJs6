@@ -19,20 +19,13 @@
             android:id="@+id/reset"
             android:title="@string/text_reset_to_initial_content" />
     <item
-            android:id="@+id/more"
-            android:title="@string/text_more">
-        <menu>
-            <item
-                    android:id="@+id/send"
-                    android:title="@string/text_send" />
-            <item
-                    android:id="@+id/open_by_other_apps"
-                    android:title="@string/text_open_by_other_apps" />
-            <item
-                    android:id="@+id/run_repeatedly"
-                    android:title="@string/text_run_repeatedly" />
-        </menu>
-    </item>
-
+            android:id="@+id/send"
+            android:title="@string/text_send" />
+    <item
+            android:id="@+id/open_by_other_apps"
+            android:title="@string/text_open_by_other_apps" />
+    <item
+            android:id="@+id/run_repeatedly"
+            android:title="@string/text_run_repeatedly" />
 
 </menu>

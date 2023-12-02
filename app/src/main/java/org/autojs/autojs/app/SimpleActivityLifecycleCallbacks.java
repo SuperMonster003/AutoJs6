@@ -5,7 +5,7 @@ import android.app.Application;
 import android.os.Bundle;
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  */
 public class SimpleActivityLifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
 

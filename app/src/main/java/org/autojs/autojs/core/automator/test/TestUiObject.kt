@@ -7,7 +7,7 @@ import java.util.*
 import kotlin.math.max
 
 /**
- * Created by Stardust on 2017/5/5.
+ * Created by Stardust on May 5, 2017.
  */
 class TestUiObject @JvmOverloads constructor(private val mChildCount: Int = max(0, random.nextInt(6) - 2)) : UiObject(null) {
 

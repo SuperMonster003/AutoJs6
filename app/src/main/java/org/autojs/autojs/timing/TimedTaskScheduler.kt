@@ -12,7 +12,7 @@ import org.autojs.autojs.external.ScriptIntents.handleIntent
 import java.util.concurrent.TimeUnit
 
 /**
- * Created by Stardust on 2017/11/27.
+ * Created by Stardust on Nov 27, 2017.
  */
 object TimedTaskScheduler {
 

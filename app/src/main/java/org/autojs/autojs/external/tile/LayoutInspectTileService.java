@@ -13,7 +13,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.app.GlobalAppContext;
-import org.autojs.autojs.core.accessibility.AccessibilityService;
 import org.autojs.autojs.core.accessibility.AccessibilityTool;
 import org.autojs.autojs.core.accessibility.LayoutInspector;
 import org.autojs.autojs.core.accessibility.NodeInfo;
@@ -74,12 +73,21 @@ public abstract class LayoutInspectTileService extends TileService implements La
 
         if (mA11yService.isRunning()) {
             mCapturing = true;
-            GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindow(), 1000);
+            captureCurrentWindowDelayed();
         } else {
-            ViewUtils.showToast(this, R.string.error_no_accessibility_permission_to_capture);
-            mA11yService.start();
-            updateTile();
+            if (mA11yService.start(false)) {
+                mCapturing = true;
+                captureCurrentWindowDelayed();
+            } else {
+                ViewUtils.showToast(this, R.string.error_no_accessibility_permission_to_capture);
+                mA11yService.launchSettings();
+                updateTile();
+            }
         }
+    }
+
+    private static void captureCurrentWindowDelayed() {
+        GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindow(), 1000);
     }
 
     // @Hint by SuperMonster003 on Oct 8, 2022.

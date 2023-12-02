@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Created by Stardust on 2017/5/17.
+ * Created by Stardust on May 17, 2017.
  * Modified by SuperMonster003 as of May 19, 2022.
  */
 public class ScreenCapturer {

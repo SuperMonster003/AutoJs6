@@ -5,7 +5,7 @@ import org.autojs.autojs.core.automator.UiObject
 import java.util.ArrayList
 
 /**
- * Created by Stardust on 2017/2/12.
+ * Created by Stardust on Feb 12, 2017.
  */
 class ScrollAction(private val mAction: Int, private val mIndex: Int) : SimpleAction() {
 

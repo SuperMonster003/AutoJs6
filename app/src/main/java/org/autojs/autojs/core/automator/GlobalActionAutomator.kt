@@ -18,7 +18,7 @@ import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/5/16.
+ * Created by Stardust on May 16, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 class GlobalActionAutomator(private val mContext: Context, private val mHandler: Handler?, private val serviceProvider: () -> AccessibilityService) {

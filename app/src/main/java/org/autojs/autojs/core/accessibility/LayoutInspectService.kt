@@ -3,7 +3,7 @@ package org.autojs.autojs.core.accessibility
 import android.accessibilityservice.AccessibilityServiceInfo
 
 /**
- * Created by Stardust on 2017/7/13.
+ * Created by Stardust on Jul 13, 2017.
  */
 class LayoutInspectService : AccessibilityService() {
 

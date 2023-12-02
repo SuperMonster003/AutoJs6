@@ -5,7 +5,7 @@ import android.os.Looper;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by Stardust on 2017/12/27.
+ * Created by Stardust on Dec 27, 2017.
  */
 public class LooperHelper {
 

@@ -6,7 +6,7 @@ import android.widget.CompoundButton
 import androidx.appcompat.widget.SwitchCompat
 
 /**
- * Created by Stardust on 2017/9/18.
+ * Created by Stardust on Sep 18, 2017.
  * Transformed by SuperMonster003 on May 21, 2023.
  */
 open class JsSwitch : SwitchCompat {

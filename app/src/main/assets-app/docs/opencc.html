@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>OpenCC | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/opencc.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-opencc">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc active" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="opencc" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#opencc_opencc">OpenCC</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_opencc_1">[@] opencc</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_opencc_s_type">opencc(s, type)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_convert">[m] convert</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_convert_s_type">convert(s, type)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_s2t">[m] s2t</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_s2t_s">s2t(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_s2hk">[m] s2hk</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_s2hk_s">s2hk(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_s2tw">[m] s2tw</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_s2tw_s">s2tw(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_s2twi">[m] s2twi</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_s2twi_s">s2twi(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_s2jp">[m] s2jp</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_s2jp_s">s2jp(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_t2s">[m] t2s</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_t2s_s">t2s(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_t2hk">[m] t2hk</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_t2hk_s">t2hk(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_t2tw">[m] t2tw</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_t2tw_s">t2tw(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_t2twi">[m] t2twi</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_t2twi_s">t2twi(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_t2jp">[m] t2jp</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_t2jp_s">t2jp(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_hk2s">[m] hk2s</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_hk2s_s">hk2s(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_hk2t">[m] hk2t</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_hk2t_s">hk2t(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_hk2tw">[m] hk2tw</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_hk2tw_s">hk2tw(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_hk2twi">[m] hk2twi</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_hk2twi_s">hk2twi(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_hk2jp">[m] hk2jp</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_hk2jp_s">hk2jp(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_tw2s">[m] tw2s</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_tw2s_s">tw2s(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_tw2t">[m] tw2t</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_tw2t_s">tw2t(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_tw2hk">[m] tw2hk</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_tw2hk_s">tw2hk(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_tw2twi">[m] tw2twi</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_tw2twi_s">tw2twi(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_tw2jp">[m] tw2jp</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_tw2jp_s">tw2jp(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_twi2s">[m] twi2s</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_twi2s_s">twi2s(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_twi2t">[m] twi2t</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_twi2t_s">twi2t(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_twi2hk">[m] twi2hk</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_twi2hk_s">twi2hk(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_twi2tw">[m] twi2tw</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_twi2tw_s">twi2tw(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_twi2jp">[m] twi2jp</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_twi2jp_s">twi2jp(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_jp2s">[m] jp2s</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_jp2s_s">jp2s(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_jp2t">[m] jp2t</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_jp2t_s">jp2t(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_jp2hk">[m] jp2hk</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_jp2hk_s">jp2hk(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_jp2tw">[m] jp2tw</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_jp2tw_s">jp2tw(s)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#opencc_m_jp2twi">[m] jp2twi</a></span><ul>
+<li><span class="stability_undefined"><a href="#opencc_jp2twi_s">jp2twi(s)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>OpenCC<span><a class="mark" href="#opencc_opencc" id="opencc_opencc">#</a></span></h1>
+<p>OpenCC, 全称 &quot;Open Chinese Convert&quot;, 译为 &quot;开放中文转换&quot;.</p>
+<p>opencc 模块是一个中文简繁转换模块, 支持词汇级别的转换, 异体字转换和地区习惯用词转换 (中国大陆/台湾/香港/日本新字体).</p>
+<blockquote>
+<p>参阅:<br>OpenCC 官方网站: <a href="https://opencc.byvoid.com">https://opencc.byvoid.com</a><br>OpenCC 官方文档: <a href="https://byvoid.github.io/OpenCC">https://byvoid.github.io/OpenCC</a><br>OpenCC 开源项目: <a href="https://github.com/BYVoid/OpenCC">https://github.com/BYVoid/OpenCC</a><br>OpenCC (Android) 开源项目: <a href="https://github.com/qichuan/android-opencc">https://github.com/qichuan/android-opencc</a></p>
+</blockquote>
+<p>下表列举了一些简体中文的转换示例:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align:center"><span style="white-space:nowrap">程序员</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">文档</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">文件</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">文件夹</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">荞麦面</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">心里为之喜悦</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span style="white-space:nowrap">繁体</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">程序員</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文檔</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文件</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文件夾</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">蕎麥麪</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">心裏爲之喜悅</span></td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">香港繁体</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">程序員</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文檔</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文件</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文件夾</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">蕎麥麪</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">心裏為之喜悦</span></td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">台湾正体</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">程序員</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文檔</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文件</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文件夾</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">蕎麥麵</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">心裡為之喜悅</span></td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">台湾正体 (惯)</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">程式設計師</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">文件</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">檔案</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">資料夾</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">蕎麥麵</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">心裡為之喜悅</span></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注: 表中 &quot;惯&quot; 表示惯用词.</p>
+</blockquote>
+<p>转换方法对照表:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align:center"><span style="white-space:nowrap">简体</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">繁体</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">香港繁体</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">台湾正体</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">台湾正体 (惯)</span></th>
+<th style="text-align:center"><span style="white-space:nowrap">日本汉字</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span style="white-space:nowrap">简体</span></td>
+<td style="text-align:center">-</td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_s2t">s2t</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_s2hk">s2hk</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_s2tw">s2tw</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_s2twi">s2twi</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_s2jp">s2jp</a> &gt;</span></td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">繁体</span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_t2s">t2s</a></span></td>
+<td style="text-align:center">-</td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_t2hk">t2hk</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_t2tw">t2tw</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_t2twi">t2twi</a> &gt;</span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_t2jp">t2jp</a></span></td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">香港繁体</span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_hk2s">hk2s</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_hk2t">hk2t</a></span></td>
+<td style="text-align:center">-</td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_hk2tw">hk2tw</a> &gt;</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_hk2twi">hk2twi</a> &gt;</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_hk2jp">hk2jp</a> &gt;</span></td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">台湾正体</span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_tw2s">tw2s</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_tw2t">tw2t</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_tw2hk">tw2hk</a> &gt;</span></td>
+<td style="text-align:center">-</td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_tw2twi">tw2twi</a> &gt;</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_tw2jp">tw2jp</a> &gt;</span></td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">台湾正体 (惯)</span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_twi2s">twi2s</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_twi2t">twi2t</a> &gt;</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_twi2hk">twi2hk</a> &gt;</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_twi2tw">twi2tw</a> &gt;</span></td>
+<td style="text-align:center">-</td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt;&lt; <a href="#opencc_m_twi2jp">twi2jp</a> &gt;&gt;</span></td>
+</tr>
+<tr>
+<td><span style="white-space:nowrap">日本汉字</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_jp2s">jp2s</a> &gt;</span></td>
+<td style="text-align:center"><span style="white-space:nowrap"><a href="#opencc_m_jp2t">jp2t</a></span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_jp2hk">jp2hk</a> &gt;</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt; <a href="#opencc_m_jp2tw">jp2tw</a> &gt;</span></td>
+<td style="text-align:center"><span style="white-space:nowrap">&lt;&lt; <a href="#opencc_m_jp2twi">jp2twi</a> &gt;&gt;</span></td>
+<td style="text-align:center">-</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注:</p>
+<p>尖括号表示 AutoJs6 封装方法, 内部经 1 次转换.<br>双尖括号表示 AutoJs6 封装方法, 内部经 2 次转换.</p>
+<p>台湾正体存在惯用词.<br>在转换时, 如涉及到台湾正体, 方法名称将以 &quot;twi&quot; 体现惯用词转换.<br>如 twi2s 表示台湾正体转简体并应用惯用词转换.<br>再如 hk2twi 表示香港繁体转台湾正体并应用惯用词转换.</p>
+</blockquote>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">opencc</p>
+
+<hr>
+<h2>[@] opencc<span><a class="mark" href="#opencc_opencc_1" id="opencc_opencc_1">#</a></span></h2>
+<p>opencc 可作为全局对象使用:</p>
+<pre><code class="lang-js">typeof opencc; // &quot;function&quot;
+typeof opencc.convert; // &quot;function&quot;
+</code></pre>
+<h3>opencc(s, type)<span><a class="mark" href="#opencc_opencc_s_type" id="opencc_opencc_s_type">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><strong>type</strong> { <span class="type"><a href="openCCConversionType.html">OpenCCConversion</a></span> } - 转换类型</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>将字符串转换为目标类型.</p>
+<pre><code class="lang-js">/* 简体. */
+let s = &#39;鼠标里面的硅二极管坏了, 导致光标分辨率降低&#39;;
+
+/* 繁體 (臺灣正體標準) [惯用词]. */
+let t = &#39;滑鼠裡面的矽二極體壞了, 導致游標解析度降低&#39;;
+
+/* s 转换为 t. */
+console.log(opencc(s, &#39;S2TWI&#39;));
+
+/* t 转换为 s. */
+console.log(opencc(t, &#39;TWI2S&#39;));
+</code></pre>
+<p><code>opencc(s, type)</code> 与 <a href="#opencc_m_convert">opencc.convert(s, type)</a> 等价.</p>
+<h2>[m] convert<span><a class="mark" href="#opencc_m_convert" id="opencc_m_convert">#</a></span></h2>
+<h3>convert(s, type)<span><a class="mark" href="#opencc_convert_s_type" id="opencc_convert_s_type">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><strong>type</strong> { <span class="type"><a href="openCCConversionType.html">OpenCCConversion</a></span> } - 转换类型</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>将字符串转换为目标类型.</p>
+<p><code>opencc.convert(s, type)</code> 与 <a href="#opencc_openccs_type">opencc(s, type)</a> 等价.</p>
+<h2>[m] s2t<span><a class="mark" href="#opencc_m_s2t" id="opencc_m_s2t">#</a></span></h2>
+<h3>s2t(s)<span><a class="mark" href="#opencc_s2t_s" id="opencc_s2t_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从简体到繁体.</p>
+<p>相当于 <code>opencc(s, &#39;S2T&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心里为何充满喜悦&#39;;
+console.log(opencc.s2t(str)); // 心裏爲何充滿喜悅
+console.log(opencc(str, &#39;S2T&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: s2t 的逆转换方法为 <a href="#opencc_m_t2s">t2s</a>.</p>
+</blockquote>
+<h2>[m] s2hk<span><a class="mark" href="#opencc_m_s2hk" id="opencc_m_s2hk">#</a></span></h2>
+<h3>s2hk(s)<span><a class="mark" href="#opencc_s2hk_s" id="opencc_s2hk_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从简体到香港繁体 (香港小学学习字词表标准).</p>
+<p>相当于 <code>opencc(s, &#39;S2HK&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心里为何充满喜悦&#39;;
+console.log(opencc.s2hk(str)); // 心裏為何充滿喜悦
+console.log(opencc(str, &#39;S2HK&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: s2hk 的逆转换方法为 <a href="#opencc_m_hk2s">hk2s</a>.</p>
+</blockquote>
+<h2>[m] s2tw<span><a class="mark" href="#opencc_m_s2tw" id="opencc_m_s2tw">#</a></span></h2>
+<h3>s2tw(s)<span><a class="mark" href="#opencc_s2tw_s" id="opencc_s2tw_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从简体到台湾正体.</p>
+<p>相当于 <code>opencc(s, &#39;S2TW&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心里为何充满喜悦&#39;;
+console.log(opencc.s2tw(str)); // 心裡為何充滿喜悅
+console.log(opencc(str, &#39;S2TW&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: s2tw 的逆转换方法为 <a href="#opencc_m_tw2s">tw2s</a>.</p>
+</blockquote>
+<h2>[m] s2twi<span><a class="mark" href="#opencc_m_s2twi" id="opencc_m_s2twi">#</a></span></h2>
+<h3>s2twi(s)<span><a class="mark" href="#opencc_s2twi_s" id="opencc_s2twi_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从简体到繁体 (台湾正体标准) [惯用词].</p>
+<p>相当于 <code>opencc(s, &#39;S2TWI&#39;)</code>;</p>
+<pre><code class="lang-js">let strA = &#39;心里为何充满喜悦&#39;;
+console.log(opencc.s2twi(strA)); // 心裡為何充滿喜悅
+console.log(opencc(strA, &#39;S2TWI&#39;)); /* 同上. */
+
+let strB = &#39;使用鼠标完成文件重命名操作&#39;;
+console.log(opencc.s2twi(strB)); // 使用滑鼠完成檔案重新命名操作
+console.log(opencc(strB, &#39;S2TWI&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: s2twi 的逆转换方法为 <a href="#opencc_m_twi2s">twi2s</a>.</p>
+</blockquote>
+<h2>[m] s2jp<span><a class="mark" href="#opencc_m_s2jp" id="opencc_m_s2jp">#</a></span></h2>
+<h3>s2jp(s)<span><a class="mark" href="#opencc_s2jp_s" id="opencc_s2jp_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从简体到日本汉字.</p>
+<p>相当于 <code>opencc(s, &#39;S2JP&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;黑/废/泪/稻/亚&#39;;
+console.log(opencc.s2jp(str)); // 黒/廃/涙/稲/亜
+console.log(opencc(str, &#39;S2JP&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: s2jp 的逆转换方法为 <a href="#opencc_m_jp2s">jp2s</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">s2t -&gt; t2jp
+</code></pre>
+<h2>[m] t2s<span><a class="mark" href="#opencc_m_t2s" id="opencc_m_t2s">#</a></span></h2>
+<h3>t2s(s)<span><a class="mark" href="#opencc_t2s_s" id="opencc_t2s_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从繁体到简体.</p>
+<p>相当于 <code>opencc(s, &#39;T2S&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心裏爲何充滿喜悅&#39;;
+console.log(opencc.t2s(str)); // 心里为何充满喜悦
+console.log(opencc(str, &#39;T2S&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: t2s 的逆转换方法为 <a href="#opencc_m_s2t">s2t</a>.</p>
+</blockquote>
+<h2>[m] t2hk<span><a class="mark" href="#opencc_m_t2hk" id="opencc_m_t2hk">#</a></span></h2>
+<h3>t2hk(s)<span><a class="mark" href="#opencc_t2hk_s" id="opencc_t2hk_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从繁体到香港繁体 (香港小学学习字词表标准).</p>
+<p>相当于 <code>opencc(s, &#39;T2HK&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心裏爲何充滿喜悅&#39;;
+console.log(opencc.t2hk(str)); // 心裏為何充滿喜悦
+console.log(opencc(str, &#39;T2HK&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: t2hk 的逆转换方法为 <a href="#opencc_m_hk2t">hk2t</a>.</p>
+</blockquote>
+<h2>[m] t2tw<span><a class="mark" href="#opencc_m_t2tw" id="opencc_m_t2tw">#</a></span></h2>
+<h3>t2tw(s)<span><a class="mark" href="#opencc_t2tw_s" id="opencc_t2tw_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从繁体到台湾正体.</p>
+<p>相当于 <code>opencc(s, &#39;T2TW&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心裏爲何充滿喜悅&#39;;
+console.log(opencc.t2tw(str)); // 心裡為何充滿喜悅
+console.log(opencc(str, &#39;T2TW&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: t2tw 的逆转换方法为 <a href="#opencc_m_tw2t">tw2t</a>.</p>
+</blockquote>
+<h2>[m] t2twi<span><a class="mark" href="#opencc_m_t2twi" id="opencc_m_t2twi">#</a></span></h2>
+<h3>t2twi(s)<span><a class="mark" href="#opencc_t2twi_s" id="opencc_t2twi_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从繁体到台湾正体 [惯用词].</p>
+<p>相当于 <code>opencc(s, &#39;T2TWI&#39;)</code>.</p>
+<pre><code class="lang-js">let strA = &#39;心裏爲何充滿喜悅&#39;;
+console.log(opencc.t2twi(strA)); // 心裡為何充滿喜悅
+console.log(opencc(strA, &#39;T2TWI&#39;)); /* 同上. */
+
+let strB = &#39;使用鼠標完成文件重命名操作&#39;;
+console.log(opencc.t2twi(strB)); // 使用滑鼠完成檔案重新命名操作
+console.log(opencc(strB, &#39;T2TWI&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: t2twi 的逆转换方法为 <a href="#opencc_m_twi2t">twi2t</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">t2s -&gt; s2twi
+</code></pre>
+<h2>[m] t2jp<span><a class="mark" href="#opencc_m_t2jp" id="opencc_m_t2jp">#</a></span></h2>
+<h3>t2jp(s)<span><a class="mark" href="#opencc_t2jp_s" id="opencc_t2jp_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从繁体到日本汉字.</p>
+<p>相当于 <code>opencc(s, &#39;T2JP&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;黑/廢/淚/稻/亞&#39;;
+console.log(opencc.t2jp(str)); // 黒/廃/涙/稲/亜
+console.log(opencc(str, &#39;T2JP&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: t2jp 的逆转换方法为 <a href="#opencc_m_jp2t">jp2t</a>.</p>
+</blockquote>
+<h2>[m] hk2s<span><a class="mark" href="#opencc_m_hk2s" id="opencc_m_hk2s">#</a></span></h2>
+<h3>hk2s(s)<span><a class="mark" href="#opencc_hk2s_s" id="opencc_hk2s_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从香港繁体 (香港小学学习字词表标准) 到简体.</p>
+<p>相当于 <code>opencc(s, &#39;HK2S&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心裏為何充滿喜悦&#39;;
+console.log(opencc.hk2s(str)); // 心里为何充满喜悦
+console.log(opencc(str, &#39;HK2S&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: hk2s 的逆转换方法为 <a href="#opencc_m_s2hk">s2hk</a>.</p>
+</blockquote>
+<h2>[m] hk2t<span><a class="mark" href="#opencc_m_hk2t" id="opencc_m_hk2t">#</a></span></h2>
+<h3>hk2t(s)<span><a class="mark" href="#opencc_hk2t_s" id="opencc_hk2t_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从香港繁体 (香港小学学习字词表标准) 到繁体.</p>
+<p>相当于 <code>opencc(s, &#39;HK2T&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心裏為何充滿喜悦&#39;;
+console.log(opencc.hk2t(str)); // 心裏爲何充滿喜悅
+console.log(opencc(str, &#39;HK2T&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: hk2t 的逆转换方法为 <a href="#opencc_m_t2hk">t2hk</a>.</p>
+</blockquote>
+<h2>[m] hk2tw<span><a class="mark" href="#opencc_m_hk2tw" id="opencc_m_hk2tw">#</a></span></h2>
+<h3>hk2tw(s)<span><a class="mark" href="#opencc_hk2tw_s" id="opencc_hk2tw_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从香港繁体 (香港小学学习字词表标准) 到台湾正体.</p>
+<p>相当于 <code>opencc(s, &#39;HK2TW&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;心裏為何充滿喜悦&#39;;
+console.log(opencc.hk2tw(str)); // 心裡為何充滿喜悅
+console.log(opencc(str, &#39;HK2TW&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: hk2tw 的逆转换方法为 <a href="#opencc_m_tw2hk">tw2hk</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">hk2t -&gt; t2tw
+</code></pre>
+<h2>[m] hk2twi<span><a class="mark" href="#opencc_m_hk2twi" id="opencc_m_hk2twi">#</a></span></h2>
+<h3>hk2twi(s)<span><a class="mark" href="#opencc_hk2twi_s" id="opencc_hk2twi_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从香港繁体 (香港小学学习字词表标准) 到台湾正体 [惯用词].</p>
+<p>相当于 <code>opencc(s, &#39;HK2TWI&#39;)</code>.</p>
+<pre><code class="lang-js">let strA = &#39;心裏為何充滿喜悦&#39;;
+console.log(opencc.hk2twi(strA)); // 心裡為何充滿喜悅
+console.log(opencc(strA, &#39;HK2TWI&#39;)); /* 同上. */
+
+let strB = &#39;使用鼠標完成文件重命名操作&#39;;
+console.log(opencc.hk2twi(strB)); // 使用滑鼠完成檔案重新命名操作
+console.log(opencc(strB, &#39;HK2TWI&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: hk2twi 的逆转换方法为 <a href="#opencc_m_twi2hk">twi2hk</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">hk2s -&gt; s2twi
+</code></pre>
+<h2>[m] hk2jp<span><a class="mark" href="#opencc_m_hk2jp" id="opencc_m_hk2jp">#</a></span></h2>
+<h3>hk2jp(s)<span><a class="mark" href="#opencc_hk2jp_s" id="opencc_hk2jp_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从香港繁体 (香港小学学习字词表标准) 到日本汉字.</p>
+<p>相当于 <code>opencc(s, &#39;HK2JP&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;黑/廢/淚/稻/亞&#39;;
+console.log(opencc.hk2jp(str)); // 黒/廃/涙/稲/亜
+console.log(opencc(str, &#39;HK2JP&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: hk2jp 的逆转换方法为 <a href="#opencc_m_jp2hk">jp2hk</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">hk2t -&gt; t2jp
+</code></pre>
+<h2>[m] tw2s<span><a class="mark" href="#opencc_m_tw2s" id="opencc_m_tw2s">#</a></span></h2>
+<h3>tw2s(s)<span><a class="mark" href="#opencc_tw2s_s" id="opencc_tw2s_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从台湾正体到简体.</p>
+<p>相当于 <code>opencc(s, &#39;TW2S&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心裡為何充滿喜悅&#39;;
+console.log(opencc.tw2s(str)); // 心里为何充满喜悦
+console.log(opencc(str, &#39;TW2S&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: tw2s 的逆转换方法为 <a href="#opencc_m_s2tw">s2tw</a>.</p>
+</blockquote>
+<h2>[m] tw2t<span><a class="mark" href="#opencc_m_tw2t" id="opencc_m_tw2t">#</a></span></h2>
+<h3>tw2t(s)<span><a class="mark" href="#opencc_tw2t_s" id="opencc_tw2t_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从台湾正体到繁体.</p>
+<p>相当于 <code>opencc(s, &#39;TW2T&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;心裡為何充滿喜悅&#39;;
+console.log(opencc.tw2t(str)); // 心裏爲何充滿喜悅
+console.log(opencc(str, &#39;TW2T&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: tw2t 的逆转换方法为 <a href="#opencc_m_t2tw">t2tw</a>.</p>
+</blockquote>
+<h2>[m] tw2hk<span><a class="mark" href="#opencc_m_tw2hk" id="opencc_m_tw2hk">#</a></span></h2>
+<h3>tw2hk(s)<span><a class="mark" href="#opencc_tw2hk_s" id="opencc_tw2hk_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从台湾正体到香港繁体 (香港小学学习字词表标准).</p>
+<p>相当于 <code>opencc(s, &#39;TW2HK&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;心裡為何充滿喜悅&#39;;
+console.log(opencc.tw2hk(str)); // 心裏為何充滿喜悦
+console.log(opencc(str, &#39;TW2HK&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: tw2hk 的逆转换方法为 <a href="#opencc_m_hk2tw">hk2tw</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">tw2t -&gt; t2hk
+</code></pre>
+<h2>[m] tw2twi<span><a class="mark" href="#opencc_m_tw2twi" id="opencc_m_tw2twi">#</a></span></h2>
+<h3>tw2twi(s)<span><a class="mark" href="#opencc_tw2twi_s" id="opencc_tw2twi_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从台湾正体到台湾正体 [惯用词].</p>
+<p>相当于 <code>opencc(s, &#39;TW2TWI&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;使用鼠標完成文件重命名操作&#39;;
+console.log(opencc.tw2twi(str)); // 使用滑鼠完成檔案重新命名操作
+console.log(opencc(str, &#39;TW2TWI&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: tw2twi 的逆转换方法为 <a href="#opencc_m_twi2tw">twi2tw</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">tw2s -&gt; s2twi
+</code></pre>
+<h2>[m] tw2jp<span><a class="mark" href="#opencc_m_tw2jp" id="opencc_m_tw2jp">#</a></span></h2>
+<h3>tw2jp(s)<span><a class="mark" href="#opencc_tw2jp_s" id="opencc_tw2jp_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从台湾正体到日本汉字.</p>
+<p>相当于 <code>opencc(s, &#39;TW2JP&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;黑/廢/淚/稻/亞&#39;;
+console.log(opencc.tw2jp(str)); // 黒/廃/涙/稲/亜
+console.log(opencc(str, &#39;TW2JP&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: tw2jp 的逆转换方法为 <a href="#opencc_m_jp2tw">jp2tw</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">tw2t -&gt; t2jp
+</code></pre>
+<h2>[m] twi2s<span><a class="mark" href="#opencc_m_twi2s" id="opencc_m_twi2s">#</a></span></h2>
+<h3>twi2s(s)<span><a class="mark" href="#opencc_twi2s_s" id="opencc_twi2s_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从繁体 (台湾正体标准) [惯用词] 到简体.</p>
+<p>相当于 <code>opencc(s, &#39;TWI2S&#39;)</code>;</p>
+<pre><code class="lang-js">let strA = &#39;心裡為何充滿喜悅&#39;;
+console.log(opencc.twi2s(strA)); // 心里为何充满喜悦
+console.log(opencc(strA, &#39;TWI2S&#39;)); /* 同上. */
+
+let strB = &#39;使用滑鼠完成檔案重新命名操作&#39;;
+console.log(opencc.twi2s(strB)); // 使用鼠标完成文件重命名操作
+console.log(opencc(strB, &#39;TWI2S&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: twi2s 的逆转换方法为 <a href="#opencc_m_s2twi">s2twi</a>.</p>
+</blockquote>
+<h2>[m] twi2t<span><a class="mark" href="#opencc_m_twi2t" id="opencc_m_twi2t">#</a></span></h2>
+<h3>twi2t(s)<span><a class="mark" href="#opencc_twi2t_s" id="opencc_twi2t_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从台湾正体 [惯用词] 到繁体.</p>
+<p>相当于 <code>opencc(s, &#39;TWI2T&#39;)</code>.</p>
+<pre><code class="lang-js">let strA = &#39;心裡為何充滿喜悅&#39;;
+console.log(opencc.twi2t(strA)); // 心裏爲何充滿喜悅
+console.log(opencc(strA, &#39;TWI2T&#39;)); /* 同上. */
+
+let strB = &#39;使用滑鼠完成檔案重新命名操作&#39;;
+console.log(opencc.twi2t(strB)); // 使用鼠標完成文件重命名操作
+console.log(opencc(strB, &#39;TWI2T&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: twi2t 的逆转换方法为 <a href="#opencc_m_t2twi">t2twi</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">twi2s -&gt; s2t
+</code></pre>
+<h2>[m] twi2hk<span><a class="mark" href="#opencc_m_twi2hk" id="opencc_m_twi2hk">#</a></span></h2>
+<h3>twi2hk(s)<span><a class="mark" href="#opencc_twi2hk_s" id="opencc_twi2hk_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从台湾正体 [惯用词] 到香港繁体 (香港小学学习字词表标准).</p>
+<p>相当于 <code>opencc(s, &#39;TWI2HK&#39;)</code>.</p>
+<pre><code class="lang-js">let strA = &#39;心裡為何充滿喜悅&#39;;
+console.log(opencc.twi2hk(strA)); // 心裏為何充滿喜悦
+console.log(opencc(strA, &#39;TWI2HK&#39;)); /* 同上. */
+
+let strB = &#39;使用滑鼠完成檔案重新命名操作&#39;;
+console.log(opencc.twi2hk(strB)); // 使用鼠標完成文件重命名操作
+console.log(opencc(strB, &#39;TWI2HK&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: twi2hk 的逆转换方法为 <a href="#opencc_m_hk2twi">hk2twi</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">twi2s -&gt; s2hk
+</code></pre>
+<h2>[m] twi2tw<span><a class="mark" href="#opencc_m_twi2tw" id="opencc_m_twi2tw">#</a></span></h2>
+<h3>twi2tw(s)<span><a class="mark" href="#opencc_twi2tw_s" id="opencc_twi2tw_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从台湾正体 [惯用词] 到台湾正体.</p>
+<p>相当于 <code>opencc(s, &#39;TWI2TW&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;使用滑鼠完成檔案重新命名操作&#39;;
+console.log(opencc.twi2tw(str)); // 使用鼠標完成文件重命名操作
+console.log(opencc(str, &#39;TWI2TW&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: twi2tw 的逆转换方法为 <a href="#opencc_m_tw2twi">tw2twi</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">twi2s -&gt; s2tw
+</code></pre>
+<h2>[m] twi2jp<span><a class="mark" href="#opencc_m_twi2jp" id="opencc_m_twi2jp">#</a></span></h2>
+<h3>twi2jp(s)<span><a class="mark" href="#opencc_twi2jp_s" id="opencc_twi2jp_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从台湾正体 [惯用词] 到日本汉字.</p>
+<p>相当于 <code>opencc(s, &#39;TWI2JP&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;黑/廢/淚/稻/亞&#39;;
+console.log(opencc.twi2jp(str)); // 黒/廃/涙/稲/亜
+console.log(opencc(str, &#39;TWI2JP&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: twi2jp 的逆转换方法为 <a href="#opencc_m_jp2twi">jp2twi</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">twi2s -&gt; s2t -&gt; t2jp
+</code></pre>
+<h2>[m] jp2s<span><a class="mark" href="#opencc_m_jp2s" id="opencc_m_jp2s">#</a></span></h2>
+<h3>jp2s(s)<span><a class="mark" href="#opencc_jp2s_s" id="opencc_jp2s_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从日本汉字到简体.</p>
+<p>相当于 <code>opencc(s, &#39;JP2S&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;黒/廃/涙/稲/亜&#39;;
+console.log(opencc.jp2s(str)); // 黑/废/泪/稻/亚
+console.log(opencc(str, &#39;JP2S&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: jp2s 的逆转换方法为 <a href="#opencc_m_s2jp">s2jp</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">jp2t -&gt; t2s
+</code></pre>
+<h2>[m] jp2t<span><a class="mark" href="#opencc_m_jp2t" id="opencc_m_jp2t">#</a></span></h2>
+<h3>jp2t(s)<span><a class="mark" href="#opencc_jp2t_s" id="opencc_jp2t_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从日本汉字到繁体.</p>
+<p>相当于 <code>opencc(s, &#39;JP2T&#39;)</code>;</p>
+<pre><code class="lang-js">let str = &#39;黒/廃/涙/稲/亜&#39;;
+console.log(opencc.jp2t(str)); // 黑/廢/淚/稻/亞
+console.log(opencc(str, &#39;JP2T&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: jp2t 的逆转换方法为 <a href="#opencc_m_t2jp">2tjp</a>.</p>
+</blockquote>
+<h2>[m] jp2hk<span><a class="mark" href="#opencc_m_jp2hk" id="opencc_m_jp2hk">#</a></span></h2>
+<h3>jp2hk(s)<span><a class="mark" href="#opencc_jp2hk_s" id="opencc_jp2hk_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从日本汉字到香港繁体 (香港小学学习字词表标准).</p>
+<p>相当于 <code>opencc(s, &#39;JP2HK&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;黒/廃/涙/稲/亜&#39;;
+console.log(opencc.jp2hk(str)); // 黑/廢/淚/稻/亞
+console.log(opencc(str, &#39;JP2HK&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: jp2hk 的逆转换方法为 <a href="#opencc_m_hk2jp">hk2jp</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">jp2t -&gt; t2hk
+</code></pre>
+<h2>[m] jp2tw<span><a class="mark" href="#opencc_m_jp2tw" id="opencc_m_jp2tw">#</a></span></h2>
+<h3>jp2tw(s)<span><a class="mark" href="#opencc_jp2tw_s" id="opencc_jp2tw_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从日本汉字到台湾正体.</p>
+<p>相当于 <code>opencc(s, &#39;JP2TW&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;黒/廃/涙/稲/亜&#39;;
+console.log(opencc.jp2tw(str)); // 黑/廢/淚/稻/亞
+console.log(opencc(str, &#39;JP2TW&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: jp2tw 的逆转换方法为 <a href="#opencc_m_tw2jp">tw2jp</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">jp2t -&gt; t2tw
+</code></pre>
+<h2>[m] jp2twi<span><a class="mark" href="#opencc_m_jp2twi" id="opencc_m_jp2twi">#</a></span></h2>
+<h3>jp2twi(s)<span><a class="mark" href="#opencc_jp2twi_s" id="opencc_jp2twi_s">#</a></span></h3>
+<p><strong><code>6.5.0</code></strong></p>
+<ul>
+<li><strong>s</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 待转换字符串</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 转换结果</li>
+</ul>
+<p>字符串转换, 从日本汉字到台湾正体 [惯用词].</p>
+<p>相当于 <code>opencc(s, &#39;JP2TWI&#39;)</code>.</p>
+<pre><code class="lang-js">let str = &#39;黒/廃/涙/稲/亜&#39;;
+console.log(opencc.jp2twi(str)); // 黑/廢/淚/稻/亞
+console.log(opencc(str, &#39;JP2TWI&#39;)); /* 同上. */
+</code></pre>
+<blockquote>
+<p>注: jp2twi 的逆转换方法为 <a href="#opencc_m_twi2jp">twi2jp</a>.</p>
+</blockquote>
+<p>此方法为 AutoJs6 封装方法, 内部进行如下转换:</p>
+<pre><code class="lang-text">jp2t -&gt; t2s -&gt; s2twi
+</code></pre>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

@@ -1,7 +1,7 @@
 package org.autojs.autojs.core.inputevent;
 
 /**
- * Created by Stardust on 2017/8/5.
+ * Created by Stardust on Aug 5, 2017.
  * <p>
  * from linux/input-event-codes.h
  */

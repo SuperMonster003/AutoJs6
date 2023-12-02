@@ -18,7 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 /**
- * Created by Stardust on 2017/2/22.
+ * Created by Stardust on Feb 22, 2017.
  */
 public class RunIntentActivity extends Activity {
 

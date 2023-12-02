@@ -5,7 +5,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 /**
- * Created by Stardust on 2017/4/18.
+ * Created by Stardust on Apr 18, 2017.
  */
 public interface WindowBridge {
     int getX();

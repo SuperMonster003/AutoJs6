@@ -8,6 +8,12 @@ let { colors, threads, ui } = global;
  * @return {Internal.Dialogs}
  */
 module.exports = function (scriptRuntime, scope) {
+
+    const Looper = android.os.Looper;
+    const Linkify = android.text.util.Linkify;
+    const LayoutParams = android.view.WindowManager.LayoutParams;
+    const ColorDrawable = android.graphics.drawable.ColorDrawable;
+
     let _ = {
         Dialogs: (/* @IIFE */ () => {
             /**

@@ -11,7 +11,7 @@ import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/9/26.
+ * Created by Stardust on Sep 26, 2017.
  */
 public class BounceDragGesture extends DragGesture {
 

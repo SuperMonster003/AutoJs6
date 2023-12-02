@@ -7,7 +7,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 /**
- * Created by Stardust on 2017/3/9.
+ * Created by Stardust on Mar 9, 2017.
  */
 object DFS : SearchAlgorithm {
 

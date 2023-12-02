@@ -10,7 +10,7 @@ import org.mozilla.javascript.Context
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Created by Stardust on 2017/12/27.
+ * Created by Stardust on Dec 27, 2017.
  */
 open class TimerThread(private val mRuntime: ScriptRuntime, private val mTarget: Runnable) : ThreadCompat(mTarget) {
 

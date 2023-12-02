@@ -201,9 +201,10 @@
     <string name="text_a11y_service_description">指令碼自動操作 (點選/長按/滑動等) 所需</string>
     <string name="text_a11y_service_enabled_but_not_running">無障礙服務已啟用但未執行 (嘗試重新啟用或重啟裝置)</string>
     <string name="text_a11y_service_may_be_needed">可能需要啟用無障礙服務</string>
-    <string name="text_abis">支援 ABI</string>
-    <string name="text_abis_32bit">支援 ABI (32 位)</string>
-    <string name="text_abis_64bit">支援 ABI (64 位)</string>
+    <string name="text_supported_libraries_short">支援庫</string>
+    <string name="text_supported_abis_short">支援 ABI</string>
+    <string name="text_supported_abis_short_32bit">支援 ABI (32 位)</string>
+    <string name="text_supported_abis_short_64bit">支援 ABI (64 位)</string>
     <string name="text_about">關於</string>
     <string name="text_about_all_files_access">關於所有檔案訪問許可權</string>
     <string name="text_about_app_and_developer">關於應用與開發者</string>
@@ -696,7 +697,6 @@
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中執行特定操作, 使用者可以在啟動器中顯示這些快捷方式, 並快速開始某些任務或啟動某個活動, 如閲讀 AutoJs6 應用文件, 啟動 AutoJs6 設定頁面等.</string>
     <string name="summary_text_launcher_shortcuts">新增快捷方式到啟動器</string>
     <string name="text_pin_shortcut_not_unsupported">將快捷方式固定到啟動器不被支援</string>
-    <string name="text_template_apk_path">模板 APK 路徑</string>
     <string name="text_shizuku_access_description">透過 Shizuku 可以獲得 ADB 特權並使用系統 API</string>
     <string name="text_shizuku_access">Shizuku 許可權</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">在 Shizuku 應用中授予 AutoJs6 許可權</string>
@@ -708,6 +708,17 @@
     <string name="error_failed_to_grant_shizuku_access">Shizuku 許可權授予失敗</string>
     <string name="error_unable_to_use_shizuku_service">無法使用 Shizuku 服務</string>
     <string name="error_input_fields_check_failed">輸入欄位檢查未透過</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">需要至少選擇一個 ABI</string>
+    <string name="text_malfunctioning">功能故障</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">由於缺少必要的庫檔案, 模組 \"%s\" 無法正常載入</string>
+    <string name="text_unavailable">不可用</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">選擇的 ABI 架構 \"%s\" 無法用於建立打包應用, 因當前 AutoJs6 版本未包含上述 ABI 架構.</string>
+    <string name="text_the_following_solutions_can_be_referred_to">可參考以下解決方案</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">下載安裝包含上述 ABI 架構的 AutoJs6 版本 (檔名包含 \"%s\" 字樣)</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">下載安裝包含全部 ABI 架構的 AutoJs6 版本 (檔名包含 \"universal\" 字樣)</string>
+    <string name="text_recommended">推薦</string>
+    <string name="text_download_link_for_autojs6">AutoJs6 下載連結</string>
+    <string name="text_unavailable_abi_for">ABI \"%s\" 不可用</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">共計: %d 項</item>

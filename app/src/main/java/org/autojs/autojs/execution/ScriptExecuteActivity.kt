@@ -19,12 +19,14 @@ import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.execution.ScriptExecution.AbstractScriptExecution
+import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.ScriptSource
+import org.autojs.autojs6.BuildConfig
 import org.mozilla.javascript.ContinuationPending
 
 /**
- * Created by Stardust on 2017/2/5.
+ * Created by Stardust on Feb 5, 2017.
  */
 class ScriptExecuteActivity : AppCompatActivity() {
     private var mResult: Any? = null
@@ -36,7 +38,8 @@ class ScriptExecuteActivity : AppCompatActivity() {
     lateinit var eventEmitter: EventEmitter
         private set
 
-    // FIXME: 2018/3/16 如果Activity被回收则得不到改进
+    // FIXME by Stardust on Mar 16, 2018.
+    //  ! 如果 Activity 被回收则得不到改进.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val executionId = intent.getIntExtra(EXTRA_EXECUTION_ID, ScriptExecution.NO_ID)
@@ -71,22 +74,8 @@ class ScriptExecuteActivity : AppCompatActivity() {
     }
 
     private fun onException(e: Throwable) {
-        mExecutionListener!!.onException(mScriptExecution, e)
+        mExecutionListener?.onException(mScriptExecution, e)
         super.finish()
-    }
-
-    private fun doExecution() {
-        mScriptEngine.setTag(ScriptEngine.TAG_SOURCE, mScriptSource)
-        mExecutionListener!!.onStart(mScriptExecution)
-        (mScriptEngine as LoopBasedJavaScriptEngine?)!!.execute(mScriptSource, object : ExecuteCallback {
-            override fun onResult(r: Any) {
-                mResult = r
-            }
-
-            override fun onException(e: Exception) {
-                this@ScriptExecuteActivity.onException(e)
-            }
-        })
     }
 
     private fun prepare() {
@@ -97,16 +86,32 @@ class ScriptExecuteActivity : AppCompatActivity() {
         mScriptEngine.init()
     }
 
-    override fun finish() {
-        if (mExecutionListener == null) {
-            super.finish()
-            return
+    private fun doExecution() {
+        val executeCallback = object : ExecuteCallback {
+            override fun onResult(r: Any) {
+                mResult = r
+            }
+
+            override fun onException(e: Throwable) {
+                this@ScriptExecuteActivity.onException(e)
+            }
         }
-        val exception = mScriptEngine.uncaughtException
-        if (exception != null) {
-            onException(exception)
+
+        mScriptEngine.setTag(ScriptEngine.TAG_SOURCE, mScriptSource)
+        mExecutionListener!!.onStart(mScriptExecution)
+
+        if (BuildConfig.isInrt) {
+            (mScriptEngine as LoopBasedJavaScriptEngineWithDecryption?)!!.execute(mScriptSource, executeCallback)
         } else {
-            mExecutionListener!!.onSuccess(mScriptExecution, mResult)
+            (mScriptEngine as LoopBasedJavaScriptEngine?)!!.execute(mScriptSource, executeCallback)
+        }
+    }
+
+    override fun finish() {
+        if (::mScriptEngine.isInitialized) {
+            mScriptEngine.uncaughtException
+                ?.let { onException(it) }
+                ?: mExecutionListener?.onSuccess(mScriptExecution, mResult)
         }
         super.finish()
     }
@@ -115,9 +120,11 @@ class ScriptExecuteActivity : AppCompatActivity() {
         super.onDestroy()
         Log.d(LOG_TAG, "onDestroy")
 
-        mScriptEngine.put("activity", null)
-        mScriptEngine.setTag("activity", null)
-        mScriptEngine.destroy()
+        if (::mScriptEngine.isInitialized) {
+            mScriptEngine.put("activity", null)
+            mScriptEngine.setTag("activity", null)
+            mScriptEngine.destroy()
+        }
 
         @Suppress("DEPRECATION")
         mRuntime.loopers?.waitWhenIdle(false)

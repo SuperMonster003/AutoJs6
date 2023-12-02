@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 
 /**
- * Created by Stardust on 2017/2/12.
+ * Created by Stardust on Feb 12, 2017.
  */
 object DrawableUtils {
 

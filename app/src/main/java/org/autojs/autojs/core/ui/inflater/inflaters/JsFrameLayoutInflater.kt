@@ -10,7 +10,7 @@ import org.autojs.autojs.core.ui.inflater.util.Gravities
 import org.autojs.autojs.core.ui.widget.JsFrameLayout
 
 /**
- * Created by Stardust on 2017/11/29.
+ * Created by Stardust on Nov 29, 2017.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
 class JsFrameLayoutInflater(resourceParser: ResourceParser) : FrameLayoutInflater<JsFrameLayout>(resourceParser) {

@@ -22,7 +22,7 @@ import org.autojs.autojs6.databinding.FloatingConsoleExpandBinding
 import org.autojs.autojs6.databinding.FloatingWindowCollapseBinding
 
 /**
- * Created by Stardust on 2017/4/20.
+ * Created by Stardust on Apr 20, 2017.
  */
 class ConsoleFloaty(private val mConsole: ConsoleImpl) : AbstractResizableExpandableFloaty() {
 

@@ -3,7 +3,7 @@ package org.autojs.autojs.core.automator.action
 import org.autojs.autojs.core.automator.UiObject
 
 /**
- * Created by Stardust on 2017/1/27.
+ * Created by Stardust on Jan 27, 2017.
  */
 abstract class SearchTargetAction(val action: Int, filter: Filter) : FilterAction(filter) {
 

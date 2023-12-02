@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Created by Stardust on 2017/2/3.
+ * Created by Stardust on Feb 3, 2017.
  */
 public class StateObserver {
 

@@ -11,7 +11,7 @@ import org.autojs.autojs.ui.widget.BindableViewHolder;
 import java.util.List;
 
 /**
- * Created by Stardust on 2017/12/10.
+ * Created by Stardust on Dec 10, 2017.
  */
 public class DrawerMenuAdapter extends RecyclerView.Adapter<BindableViewHolder<DrawerMenuItem>> {
 

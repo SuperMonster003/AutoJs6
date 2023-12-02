@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Base64 | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/base64.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-base64">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64 active" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="base64" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#base64_base64">Base64</a></span><ul>
+<li><span class="stability_undefined"><a href="#base64">可逆性</a></span></li>
+<li><span class="stability_undefined"><a href="#base64_m_encode">[m] encode</a></span><ul>
+<li><span class="stability_undefined"><a href="#base64_encode_o_encoding">encode(o, encoding?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#base64_m_decode">[m] decode</a></span><ul>
+<li><span class="stability_undefined"><a href="#base64_decode_o_encoding">decode(o, encoding?)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>Base64<span><a class="mark" href="#base64_base64" id="base64_base64">#</a></span></h1>
+<p>Base64 是一种编码方式, 同时可作为一种数据的存储格式, 并非严格意义上的加密与解密.</p>
+<p>base64 模块主要用于对数据进行 Base64 编码及解码.</p>
+<blockquote>
+<p>注: 与 <a href="crypto.html">crypto</a> 模块不同, crypto 模块主要用于信息的加密与解密.</p>
+</blockquote>
+<blockquote>
+<p>参阅:<br><a href="https://en.wikipedia.org/wiki/Base64">Wikipedia (英)</a> / <a href="https://zh.wikipedia.org/wiki/Base64">Wikipedia (中)</a><br><a href="http://www.ruanyifeng.com/blog/2008/06/base64.html">Base64 笔记 (from 阮一峰的网络日志)</a><br><a href="https://juejin.cn/post/6887498543494660109">Base64 是加密算法吗 (from 稀土掘金)</a></p>
+</blockquote>
+<h2>可逆性<span><a class="mark" href="#base64" id="base64">#</a></span></h2>
+<p>Base64 是一种可逆的编码方式:</p>
+<pre><code class="lang-js">console.log(base64.decode(base64.encode(&#39;orange&#39;))); // orange
+console.log(base64.decode(base64.encode(&#39;简体中文&#39;))); // 简体中文
+</code></pre>
+<p>但需注意参数的字符编码方式 (默认为 <code>UTF-8</code>), 当存在超出编码表示范围的字符时, 可逆性将遭到破坏:</p>
+<pre><code class="lang-js">/* us-ascii 编码无法表示 &quot;出&quot; 和 &quot;口&quot;. */
+console.log(base64.decode(base64.encode(&#39;E2 出口&#39;, &#39;us-ascii&#39;), &#39;us-ascii&#39;)); // E2 ??
+</code></pre>
+<p>编解码使用了不同的编码方式, 也可能导致可逆性失效:</p>
+<pre><code class="lang-js">/* utf-16 与 utf-8 不一致. */
+console.log(base64.decode(base64.encode(&#39;简体中文&#39;, &#39;utf-16&#39;), &#39;utf-8&#39;)); // ��{�OSN-e�
+</code></pre>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">base64</p>
+
+<hr>
+<h2>[m] encode<span><a class="mark" href="#base64_m_encode" id="base64_m_encode">#</a></span></h2>
+<h3>encode(o, encoding?)<span><a class="mark" href="#base64_encode_o_encoding" id="base64_encode_o_encoding">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待编码数据</li>
+<li><strong>[ encoding = <code>&#39;UTF_8&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_standardcharset">StandardCharset</a></span> } - 字符编码</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+</div><p>对数据进行 Base64 编码.</p>
+<pre><code class="lang-js">/* 字符串. */
+
+console.log(base64.encode(&#39;hello&#39;, &#39;iso-8859-1&#39;)); // aGVsbG8=
+console.log(base64.encode(&#39;hello&#39;, &#39;us-ascii&#39;)); // aGVsbG8=
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-8&#39;)); // aGVsbG8=
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-16&#39;)); // /v8AaABlAGwAbABv
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-16be&#39;)); // AGgAZQBsAGwAbw==
+console.log(base64.encode(&#39;hello&#39;, &#39;utf-16le&#39;)); // aABlAGwAbABvAA==
+
+/* JavaScript 字节数组. */
+
+console.log(base64.encode([ 104, 101, 108, 108, 111 ], &#39;utf-8&#39;)); // aGVsbG8=
+
+/* Java 字节数组. */
+
+console.log(base64.encode(new java.lang.String(&#39;hello&#39;).getBytes(), &#39;utf-8&#39;)); // aGVsbG8=
+
+let jsArr = [ 104, 101, 108, 108, 111 ];
+let javaArr = util.java.array(&#39;byte&#39;, jsArr.length);
+jsArr.forEach((o, i) =&gt; javaArr[i] = o);
+console.log(base64.encode(javaArr, &#39;utf-8&#39;)); /* 效果同上. */
+</code></pre>
+<h2>[m] decode<span><a class="mark" href="#base64_m_decode" id="base64_m_decode">#</a></span></h2>
+<h3>decode(o, encoding?)<span><a class="mark" href="#base64_decode_o_encoding" id="base64_decode_o_encoding">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_jsbytearray">JsByteArray</a></span> | <span class="type"><a href="dataTypes.html#datatypes_bytearray">ByteArray</a></span> } - 待解码数据</li>
+<li><strong>[ encoding = <code>&#39;UTF_8&#39;</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_standardcharset">StandardCharset</a></span> } - 字符编码</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+</div><p>对数据进行 Base64 解码.</p>
+<pre><code class="lang-js">/* 字符串. */
+
+console.log(base64.decode(&#39;aGVsbG8=&#39;, &#39;iso-8859-1&#39;)); // hello
+console.log(base64.decode(&#39;aGVsbG8=&#39;, &#39;us-ascii&#39;)); // hello
+console.log(base64.decode(&#39;aGVsbG8=&#39;, &#39;utf-8&#39;)); // hello
+console.log(base64.decode(&#39;/v8AaABlAGwAbABv&#39;, &#39;utf-16&#39;)); // hello
+console.log(base64.decode(&#39;AGgAZQBsAGwAbw==&#39;, &#39;utf-16be&#39;)); // hello
+console.log(base64.decode(&#39;aABlAGwAbABvAA==&#39;, &#39;utf-16le&#39;)); // hello
+
+/* JavaScript 字节数组. */
+
+console.log(base64.decode([ 97, 71, 86, 115, 98, 71, 56, 61 ], &#39;utf-8&#39;)); // hello
+
+/* Java 字节数组. */
+
+console.log(base64.decode(new java.lang.String(&#39;aGVsbG8=&#39;).getBytes(), &#39;utf-8&#39;)); // hello
+
+let jsArr = [ 97, 71, 86, 115, 98, 71, 56, 61 ];
+let javaArr = util.java.array(&#39;byte&#39;, jsArr.length);
+jsArr.forEach((o, i) =&gt; javaArr[i] = o);
+console.log(base64.decode(javaArr, &#39;utf-8&#39;)); /* 效果同上. */
+</code></pre>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

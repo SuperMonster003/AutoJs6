@@ -22,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.concurrent.Volatile
 
 /**
- * Created by Stardust on 2017/12/5.
+ * Created by Stardust on Dec 5, 2017.
  * Modified by SuperMonster003 as of Mar 27, 2022.
  * Transformed by SuperMonster003 on Mar 27, 2022.
  */
@@ -124,7 +124,7 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
             get() = mWindow?.windowView?.height ?: 0
 
         fun setSize(w: Int, h: Int) = runWithWindow {
-            mWindow!!.windowBridge.updateMeasure(w, h)
+            mWindow!!.windowBridge?.updateMeasure(w, h)
             setViewMeasure(mWindow!!.windowView, w, h)
         }
 
@@ -138,7 +138,7 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
         }
 
         fun setPosition(x: Int, y: Int) = runWithWindow {
-            mWindow!!.windowBridge.updatePosition(x, y)
+            mWindow!!.windowBridge?.updatePosition(x, y)
         }
 
         fun exitOnClose() {
@@ -202,7 +202,7 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
             get() = mWindow?.rootView?.height ?: 0
 
         fun setSize(w: Int, h: Int) = runWithWindow {
-            mWindow!!.windowBridge.updateMeasure(w, h)
+            mWindow!!.windowBridge?.updateMeasure(w, h)
             setViewMeasure(mWindow!!.rootView, w, h)
         }
 
@@ -212,7 +212,7 @@ class Floaty(private val mUiHandler: UiHandler, private val mRuntime: ScriptRunt
         }
 
         fun setPosition(x: Int, y: Int) = runWithWindow {
-            mWindow!!.windowBridge.updatePosition(x, y)
+            mWindow!!.windowBridge?.updatePosition(x, y)
         }
 
         var isAdjustEnabled: Boolean

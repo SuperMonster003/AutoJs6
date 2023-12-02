@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 
 /**
- * Created by Stardust on 2017/5/15.
+ * Created by Stardust on May 15, 2017.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
 class JsTextView : AppCompatTextView {

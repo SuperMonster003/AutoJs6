@@ -18,9 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-
 /**
- * Created by Stardust on 2017/5/18.
+ * Created by Stardust on May 18, 2017.
  */
 @SuppressWarnings("unused")
 public class ColorFinder {

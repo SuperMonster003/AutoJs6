@@ -9,7 +9,7 @@ import android.view.View
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/3/10.
+ * Created by Stardust on Mar 10, 2017.
  * Modified by SuperMonster003 as of May 3, 2023.
  * Transformed by SuperMonster003 on May 3, 2023.
  */

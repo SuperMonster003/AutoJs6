@@ -20,7 +20,7 @@ import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityScriptWidgetSettingsBinding;
 
 /**
- * Created by Stardust on 2017/7/11.
+ * Created by Stardust on Jul 11, 2017.
  * Modified by SuperMonster003 as of May 8, 2023.
  */
 public class ScriptWidgetSettingsActivity extends BaseActivity {

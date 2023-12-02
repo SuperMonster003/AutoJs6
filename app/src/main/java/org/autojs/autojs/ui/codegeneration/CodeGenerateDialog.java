@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Stardust on 2017/11/6.
+ * Created by Stardust on Nov 6, 2017.
  */
 public class CodeGenerateDialog extends AppLevelThemeDialogBuilder {
     private final List<OptionGroup> mOptionGroups = new ListBuilder<OptionGroup>()

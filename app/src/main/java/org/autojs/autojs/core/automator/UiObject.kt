@@ -26,7 +26,7 @@ import org.opencv.core.Point
 import org.opencv.core.Size
 
 /**
- * Created by Stardust on 2017/3/9.
+ * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  */
 
@@ -62,7 +62,7 @@ open class UiObject(
             } ?: 0)
         }
     } catch (e: IllegalStateException) {
-        // FIXME: 2017/5/5
+        // FIXME by Stardust on May 5, 2017.
         null.also { e.printStackTrace() }
     }
 
@@ -75,7 +75,7 @@ open class UiObject(
         return try {
             super.getChild(i)?.run { UiObject(unwrap(), depth + 1, i) }
         } catch (e: IllegalStateException) {
-            // FIXME: 2017/5/5
+            // FIXME by Stardust on May 5, 2017.
             null.also { e.printStackTrace() }
         }
     }
@@ -391,14 +391,14 @@ open class UiObject(
             else -> super.performAction(action, bundle)
         }
     } catch (e: IllegalStateException) {
-        // FIXME: 2017/5/5
+        // FIXME by Stardust on May 5, 2017.
         false.also { e.printStackTrace() }
     }
 
     override fun performAction(action: Int): Boolean = try {
         super.performAction(action)
     } catch (e: IllegalStateException) {
-        // FIXME: 2017/5/5
+        // FIXME by Stardust on May 5, 2017.
         false.also { e.printStackTrace() }
     }
 

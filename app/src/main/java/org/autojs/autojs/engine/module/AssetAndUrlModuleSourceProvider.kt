@@ -24,7 +24,7 @@ import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 
 /**
- * Created by Stardust on 2017/5/9.
+ * Created by Stardust on May 9, 2017.
  * Transformed by SuperMonster003 on Jul 14, 2023.
  */
 // @Inspired by aiselp (https://github.com/aiselp) on Jul 14, 2023.

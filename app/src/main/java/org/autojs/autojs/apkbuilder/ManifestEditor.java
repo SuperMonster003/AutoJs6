@@ -10,7 +10,7 @@ import pxb.android.axml.AxmlWriter;
 import pxb.android.axml.NodeVisitor;
 
 /**
- * Created by Stardust on 2017/10/23.
+ * Created by Stardust on Oct 23, 2017.
  */
 public class ManifestEditor {
 

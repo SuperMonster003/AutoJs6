@@ -66,13 +66,23 @@ public class ExplorerFileItem implements ExplorerItem {
     }
 
     @Override
-    public boolean canDelete() {
-        return mFile.canWrite();
+    public boolean canRename() {
+        return !isInSampleDir(mFile) && mFile.canWrite();
     }
 
     @Override
-    public boolean canRename() {
-        return mFile.canWrite();
+    public boolean canDelete() {
+        return !isInSampleDir(mFile) && mFile.canWrite();
+    }
+
+    @Override
+    public boolean canBuildApk() {
+        return getType() == FileUtils.TYPE.JAVASCRIPT || mFile.canBuildApk();
+    }
+
+    @Override
+    public boolean canSetAsWorkingDir() {
+        return !isInSampleDir(mFile);
     }
 
     public ExplorerFileItem rename(String newName) {
@@ -85,7 +95,7 @@ public class ExplorerFileItem implements ExplorerItem {
         if (mFile.isDirectory()) {
             return FileUtils.TYPE.DIRECTORY;
         }
-        if (mFile.isProject()) {
+        if (getName().equals(FileUtils.TYPE.PROJECT.getTypeName())) {
             return FileUtils.TYPE.PROJECT;
         }
         String extension = mFile.getExtension();
@@ -120,6 +130,10 @@ public class ExplorerFileItem implements ExplorerItem {
     public boolean isExecutable() {
         FileUtils.TYPE type = getType();
         return type == FileUtils.TYPE.JAVASCRIPT || type == FileUtils.TYPE.AUTO;
+    }
+
+    private boolean isInSampleDir(PFile file) {
+        return Explorers.Providers.workspace().isInSampleDir(file);
     }
 
     @NonNull

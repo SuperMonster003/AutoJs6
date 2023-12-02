@@ -3,7 +3,7 @@ package org.autojs.autojs.pluginclient;
 import com.google.gson.JsonObject;
 
 /**
- * Created by Stardust on 2017/5/11.
+ * Created by Stardust on May 11, 2017.
  */
 public interface Handler {
 

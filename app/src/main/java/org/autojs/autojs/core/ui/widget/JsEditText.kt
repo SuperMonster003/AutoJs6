@@ -6,7 +6,7 @@ import android.util.AttributeSet
 import android.widget.EditText
 
 /**
- * Created by Stardust on 2017/5/15.
+ * Created by Stardust on May 15, 2017.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
 @SuppressLint("AppCompatCustomView")

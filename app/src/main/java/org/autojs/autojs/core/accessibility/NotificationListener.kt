@@ -3,7 +3,7 @@ package org.autojs.autojs.core.accessibility
 import org.autojs.autojs.core.notification.Notification
 
 /**
- * Created by Stardust on 2017/8/1.
+ * Created by Stardust on Aug 1, 2017.
  */
 interface NotificationListener {
 

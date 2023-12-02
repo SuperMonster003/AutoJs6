@@ -7,7 +7,7 @@ import org.autojs.autojs.core.looper.TimerThread;
 import org.autojs.autojs.runtime.ScriptRuntime;
 
 /**
- * Created by Stardust on 2017/7/21.
+ * Created by Stardust on Jul 21, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  * Modified by aiselp as of Jun 10, 2023.
  */

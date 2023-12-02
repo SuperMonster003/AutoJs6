@@ -1,7 +1,7 @@
 package org.autojs.autojs.theme;
 
 /**
- * Created by Stardust on 2016/10/24.
+ * Created by Stardust on Oct 24, 2016.
  */
 public interface ThemeColorMutableReference {
 

@@ -7,7 +7,7 @@ import org.autojs.autojs.core.automator.UiObject
 import java.util.*
 
 /**
- * Created by Stardust on 2017/1/27.
+ * Created by Stardust on Jan 27, 2017.
  */
 abstract class FilterAction(private val mFilter: Filter) : SimpleAction() {
 

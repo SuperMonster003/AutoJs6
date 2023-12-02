@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Stardust on 2017/10/19.
+ * Created by Stardust on Oct 19, 2017.
  */
 public class FileChooseListView extends ExplorerView {
 

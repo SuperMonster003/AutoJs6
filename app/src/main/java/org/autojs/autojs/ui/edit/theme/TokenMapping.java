@@ -9,10 +9,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by Stardust on 2018/2/21.
+ * Created by Stardust on Feb 21, 2018.
  */
 public class TokenMapping {
-
 
     public static final int TOKEN_MATCHED_BRACKET = Token.LAST_TOKEN + 1;
 
@@ -22,17 +21,21 @@ public class TokenMapping {
 
     public static List<Integer> getTokensForScope(String scope) {
         switch (scope) {
-            case "keyword":
+            case "keyword" -> {
                 return KEYWORD;
-            case "keyword.operator":
+            }
+            case "keyword.operator" -> {
                 return KEYWORD_OPERATOR;
-            case "keyword.control":
+            }
+            case "keyword.control" -> {
                 return KEYWORD_CONTROL;
-            default:
+            }
+            default -> {
                 int token = tokenNameToType(scope);
                 if (isValidToken(token)) {
                     return Collections.singletonList(token);
                 }
+            }
         }
         return Collections.emptyList();
     }
@@ -43,17 +46,21 @@ public class TokenMapping {
 
     public static int tokenNameToType(String name) {
         switch (name) {
-            case "this.self":
+            case "this.self" -> {
                 return Token.THIS;
-            case "keyword.operator.quantifier.regexp":
+            }
+            case "keyword.operator.quantifier.regexp" -> {
                 return Token.REGEXP;
-            case "variable":
+            }
+            case "variable" -> {
                 return Token.NAME;
-            case "constant.numeric":
+            }
+            case "constant.numeric" -> {
                 return Token.NUMBER;
-            case "bracket.matched":
+            }
+            case "bracket.matched" -> {
                 return TOKEN_MATCHED_BRACKET;
-
+            }
         }
         for (int token = Token.ERROR; token < Token.LAST_TOKEN; token++) {
             if (token == Token.STRICT_SETNAME || token == Token.SETCONSTVAR)

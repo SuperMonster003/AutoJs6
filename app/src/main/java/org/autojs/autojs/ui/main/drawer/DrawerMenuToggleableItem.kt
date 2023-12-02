@@ -47,7 +47,7 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
             } else {
                 setCheckedIfNeeded(aimState)
             }
-            mItemHelper.refreshSubtitle()
+            mItemHelper.refreshSubtitle(aimState)
         }
     }
 
@@ -64,14 +64,18 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
 
     fun getPrompt(aimState: Boolean): MaterialDialog? {
         return content?.let {
+            var isPositiveButtonPressed = false
             val key = "${DrawerMenuToggleableItem::class.simpleName}\$${mContext.getString(title)}"
             NotAskAgainDialog.Builder(mContext, key)
                 .title(title)
                 .content(it)
                 .negativeText(R.string.dialog_button_cancel)
                 .positiveText(R.string.dialog_button_continue)
-                .onPositive { _, _ -> toggle(aimState) }
-                .dismissListener { sync() }
+                .onPositive { _, _ ->
+                    isPositiveButtonPressed = true
+                    toggle(aimState)
+                }
+                .dismissListener { if (!isPositiveButtonPressed) sync() }
                 .show()
         }
     }
@@ -85,22 +89,24 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
         DrawerFragment.drawerMenuAdapter.notifyItemChanged(this)
     }
 
-    override fun toggle() = toggle { mItemHelper.toggle() }
-
-    override fun toggle(aimState: Boolean) = toggle { mItemHelper.toggle(aimState) }
-
     @SuppressLint("CheckResult")
-    private fun toggle(runnable: Runnable) {
+    override fun toggle(aimState: Boolean) {
         if (!isHidden) {
             when (mItemHelper.isInMainThread) {
-                true -> runnable.run()
+                true -> {
+                    val tryToggleResult = mItemHelper.toggle(aimState)
+                    syncDelay { if (tryToggleResult) mItemHelper.callback(aimState) }
+                }
                 else -> {
                     isProgress = true
                     Observable
-                        .fromCallable { runnable.run() }
+                        .fromCallable { mItemHelper.toggle(aimState) }
                         .subscribeOn(Schedulers.single())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe { isProgress = false; syncDelay() }
+                        .subscribe { tryToggleResult ->
+                            isProgress = false
+                            syncDelay { if (tryToggleResult) mItemHelper.callback(aimState) }
+                        }
                 }
             }
         }

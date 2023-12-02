@@ -6,7 +6,7 @@ import org.autojs.autojs.core.inputevent.InputEventObserver;
 import org.autojs.autojs.core.record.Recorder;
 
 /**
- * Created by Stardust on 2017/3/16.
+ * Created by Stardust on Mar 16, 2017.
  */
 public class TouchRecorder extends Recorder.AbstractRecorder {
 

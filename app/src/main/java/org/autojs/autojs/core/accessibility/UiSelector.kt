@@ -6,7 +6,6 @@ import android.os.Looper
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.FloatRange
-import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.concurrent.VolatileBox
@@ -58,7 +57,7 @@ import org.mozilla.javascript.regexp.NativeRegExp
 import java.math.BigInteger
 
 /**
- * Created by Stardust on 2017/3/9.
+ * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of Jun 11, 2022.
  */
 open class UiSelector : UiObjectActions {
@@ -750,12 +749,19 @@ open class UiSelector : UiObjectActions {
 
     private fun addFilter(filter: Filter) = also { selector.add(filter) }
 
-    private fun append(selector: UiSelector?) = also {
+    fun append(selector: UiSelector?) = also {
         selector?.let {
             this.selector.append(it)
             this.searchAlgorithm = it.searchAlgorithm
         }
     }
+
+    fun plus(selector: UiSelector?) = selector?.let { paramSel ->
+        UiSelector().also { newSel ->
+            newSel.selector.filters.addAll(this.selector.filters + paramSel.selector.filters)
+            newSel.searchAlgorithm = paramSel.searchAlgorithm
+        }
+    } ?: this
 
     companion object {
 
@@ -766,34 +772,45 @@ open class UiSelector : UiObjectActions {
         }
 
         @JvmStatic
-        fun pickup(root: UiObject?, selector: Any?, compass: CharSequence?, resultType: Any?, callback: BaseFunction? = null): Any? {
-            return Picker.Builder()
-                .setRoot(root)
-                .setCompass(compass)
-                .setResultType(resultType)
-                .setSelector(selector)
-                .setCallback(callback)
-                .build()
-                .pick()
-        }
+        fun pickup(
+            root: UiObject?,
+            selector: Any?,
+            compass: CharSequence?,
+            resultType: Any?,
+            callback: BaseFunction? = null,
+        ) = Picker.Builder()
+            .setRoot(root)
+            .setCompass(compass)
+            .setResultType(resultType)
+            .setSelector(selector)
+            .setCallback(callback)
+            .build()
+            .pick()
 
-        internal class Picker private constructor(val root: UiObject?, val selector: UiSelector?, val compass: CharSequence?, val resultType: Any?, val callback: BaseFunction? = null) {
+        internal class Picker private constructor(
+            val root: UiObject?,
+            val selector: UiSelector?,
+            val compass: CharSequence?,
+            val resultType: Any?,
+            val callback: BaseFunction? = null,
+        ) {
 
-            internal fun pick(): Any? {
-                a11yToolService.ensure()
-                return Detector(compass, object : Result(resultType) {
+            internal fun pick() = Detector(compass, object : Result(resultType) {
 
-                    override fun byOne() = selector?.run { root?.let { return@run findOneOf(it) } ?: findOnce() }
+                override fun byOne() = selector?.let { sel ->
+                    root?.let { return sel.findOneOf(it) } ?: sel.findOnce()
+                }
 
-                    override fun byAll() = selector?.run { root?.let { return@run findOf(it) } ?: find() } ?: EMPTY
+                override fun byAll() = selector?.let { sel ->
+                    root?.let { return sel.findOf(it) } ?: sel.find()
+                } ?: EMPTY
 
-                }, callback, selector).detect()
-            }
+            }, callback, selector).detect()
 
             internal class Builder {
 
                 private var mRoot: UiObject? = null
-                private var mSelector = UiSelector()
+                private var mSelector = UiSelector(AccessibilityService.bridge)
                 private var mCompass: CharSequence? = COMPASS_PASS_ON
                 private var mResultType: Any = RESULT_TYPE_WIDGET
                 private var mCallback: BaseFunction? = null

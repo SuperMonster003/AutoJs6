@@ -41,7 +41,7 @@ import java.util.List;
 import ezy.assist.compat.SettingsCompat;
 
 /**
- * Created by Stardust on 2017/12/2.
+ * Created by Stardust on Dec 2, 2017.
  * Modified by SuperMonster003 as of Jan 1, 2022.
  */
 public class Device {

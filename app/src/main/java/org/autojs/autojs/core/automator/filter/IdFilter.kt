@@ -4,7 +4,7 @@ import org.autojs.autojs.core.accessibility.UiSelector.Companion.ID_IDENTIFIER
 import org.autojs.autojs.core.automator.UiObject
 
 /**
- * Created by Stardust on 2017/3/9.
+ * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of Nov 19, 2022.
  */
 object IdFilter {

@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * Created by Stardust on 2017/1/20.
+ * Created by Stardust on Jan 20, 2017.
  * <p>
  * 来自网络~~
  */
@@ -228,6 +228,8 @@ public class ProcessShell extends AbstractShell {
             commandResult.code = index < 0 ? 1 : Integer.parseInt(message.substring(index + aimErrStr.length()).replaceAll("^(\\d+).+", "$1"));
             commandResult.result = "";
             commandResult.error = message != null ? message : "";
+
+            e.printStackTrace();
         } finally {
             try {
                 if (os != null) os.close();

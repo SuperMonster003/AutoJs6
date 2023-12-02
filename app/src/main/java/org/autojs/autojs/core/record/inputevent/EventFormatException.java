@@ -1,7 +1,7 @@
 package org.autojs.autojs.core.record.inputevent;
 
 /**
- * Created by Stardust on 2017/3/7.
+ * Created by Stardust on Mar 7, 2017.
  */
 public class EventFormatException extends RuntimeException {
 

@@ -12,7 +12,7 @@ import org.autojs.autojs.theme.ThemeColorMutable;
 import org.autojs.autojs.theme.internal.ScrollingViewEdgeGlowColorHelper;
 
 /**
- * Created by Stardust on 2016/8/14.
+ * Created by Stardust on Aug 14, 2016.
  */
 public class ThemeColorPreferenceFragment extends PreferenceFragmentCompat implements ThemeColorMutable {
 

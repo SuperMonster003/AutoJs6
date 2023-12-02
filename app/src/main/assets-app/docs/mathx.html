@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Mathx (Math 扩展) | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/mathx.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-mathx">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx active" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="mathx" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#mathx_mathx_math">Mathx (Math 扩展)</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx">启用内置扩展</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_m_randint">[m] randInt</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_randint_start_stop">randInt(start, stop)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_randint_stop">randInt(stop)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_randint_range">randInt(range?)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_randint_numbers">randInt(...numbers)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#mathx_m_sum">[m] sum</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_sum_numbers">sum(...numbers)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_sum_numbers_fraction">sum(numbers, fraction?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#mathx_m_avg">[m] avg</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_avg_numbers">avg(...numbers)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_avg_numbers_fraction">avg(numbers, fraction?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#mathx_m_median">[m] median</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_median_numbers">median(...numbers)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_median_numbers_fraction">median(numbers, fraction?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#mathx_m_var">[m] var</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_var_numbers">var(...numbers)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_var_numbers_fraction">var(numbers, fraction?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#mathx_m_std">[m] std</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_std_numbers">std(...numbers)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_std_numbers_fraction">std(numbers, fraction?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#mathx_m_cv">[m] cv</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_cv_numbers">cv(...numbers)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_cv_numbers_fraction">cv(numbers, fraction?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#mathx_m_max">[m] max</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_max_numbers">max(...numbers)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_max_numbers_fraction">max(numbers, fraction?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#mathx_m_min">[m] min</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_min_numbers">min(...numbers)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_min_numbers_fraction">min(numbers, fraction?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#mathx_m_dist">[m] dist</a></span><ul>
+<li><span class="stability_undefined"><a href="#mathx_dist_pointa_pointb_fraction">dist(pointA, pointB, fraction?)</a></span></li>
+<li><span class="stability_undefined"><a href="#mathx_dist_rect_fraction">dist(rect, fraction?)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>Mathx (Math 扩展)<span><a class="mark" href="#mathx_mathx_math" id="mathx_mathx_math">#</a></span></h1>
+<p>Mathx 用于扩展 JavaScript 标准内置对象 Math 的功能 (参阅 <a href="glossaries.html#glossaries_内置对象扩展">内置对象扩展</a>).</p>
+<p>Mathx 全局可用:</p>
+<pre><code class="lang-js">console.log(typeof Mathx); // &quot;object&quot;
+console.log(typeof Mathx.sum); // &quot;function&quot;
+</code></pre>
+<p>当启用内置扩展后, Mathx 将被应用在 Math 上:</p>
+<pre><code class="lang-js">console.log(typeof Math.sum); // &quot;function&quot;
+</code></pre>
+<h2>启用内置扩展<span><a class="mark" href="#mathx" id="mathx">#</a></span></h2>
+<p>内置扩展默认被禁用, 以下任一方式可启用内置扩展:</p>
+<ul>
+<li>在脚本中加入代码片段: <code>plugins.extendAll();</code> 或 <code>plugins.extend(&#39;Math&#39;);</code></li>
+<li>AutoJs6 应用设置 - 扩展性 - JavaScript 内置对象扩展 - [ 启用 ]</li>
+</ul>
+<p>当上述应用设置启用时, 所有脚本均默认启用内置扩展.<br>当上述应用设置禁用时, 只有加入上述代码片段的脚本才会启用内置扩展.<br>内置扩展往往是不安全的, 除非明确了解内置扩展的原理及风险, 否则不建议启用.</p>
+<blockquote>
+<p>注: 因 Mathx 所有属性及方法均为 &quot;针对对象的内置对象扩展&quot;, 在启用内置对象扩展时, 使用方法仅仅是 Mathx 与 Math 的差别, 故示例代码中将不再赘述相关示例, 但别名方法例外 (如 min 的别名 mini, max 的别名 maxi 等).</p>
+</blockquote>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">Mathx</p>
+
+<hr>
+<h2>[m] randInt<span><a class="mark" href="#mathx_m_randint" id="mathx_m_randint">#</a></span></h2>
+<p>randInt 用于返回一个指定范围内的随机整数.</p>
+<p>因 NaN 不属于整数范畴, 故 randInt 内部实现对范围数值中出现的 NaN 做了过滤处理, 进而使 NaN 失去了常见的传染性.</p>
+<pre><code class="lang-js">/* NaN 不属于整数范畴. */
+console.log(Number.isInteger(NaN)); // false
+
+/* NaN 出现在范围数值中时将失去其传染性. */
+console.log(Number.isNaN(Mathx.randInt(1, NaN))); // false
+</code></pre>
+<p>若范围数值中出现非整数数值, 将范围中极小值作 <code>Math.ceil()</code> 处理, 极大值作 <code>Math.floor()</code> 处理.</p>
+<pre><code class="lang-js">console.log(Mathx.randInt(1.8, 3.3)); /* 视为 randInt(2, 3). */
+console.log(Mathx.randInt(-9.7, -2.4)); /* 视为 randInt(-9, -3). */
+</code></pre>
+<h3>randInt(start, stop)<span><a class="mark" href="#mathx_randint_start_stop" id="mathx_randint_start_stop">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload 1/5</code></strong></p>
+<ul>
+<li><strong>start</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 范围起点 (含)</li>
+<li><strong>stop</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 范围止点 (含)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 范围内随机整数</li>
+</ul>
+<p>返回一个指定范围内的随机整数.</p>
+<pre><code class="lang-js">/* 10 - 20 的随机整数. */
+console.log(Mathx.randInt(10, 20)); // e.g. 13
+
+/* start 和 stop 可自动交换. */
+console.log(Mathx.randInt(20, 10)); /* 与 randInt(10, 20) 效果相同. */
+
+/* start 与 stop 相等时返回唯一值. */
+console.log(Mathx.randInt(15, 15)); // 15
+</code></pre>
+<h3>randInt(stop)<span><a class="mark" href="#mathx_randint_stop" id="mathx_randint_stop">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload 2/5</code></strong></p>
+<ul>
+<li><strong>stop</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 范围止点 (含)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 范围内随机整数</li>
+</ul>
+<p>返回一个指定范围内的随机整数, stop 参数作为止点, 0 作为起点.<br>相当于 <code>randInt(0, stop)</code>.<br>当 stop 为负数时, 起止点将自动交换.</p>
+<pre><code class="lang-js">/* 10 - 20 的随机整数. */
+console.log(Mathx.randInt(10, 20)); // e.g. 13
+
+/* start 和 stop 可自动交换. */
+console.log(Mathx.randInt(20, 10)); /* 与 randInt(10, 20) 效果相同. */
+
+/* start 与 stop 相等时返回唯一值. */
+console.log(Mathx.randInt(15, 15)); // 15
+</code></pre>
+<h3>randInt(range?)<span><a class="mark" href="#mathx_randint_range" id="mathx_randint_range">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload [3-4]/5</code></strong></p>
+<ul>
+<li><strong>[ range = [ <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER">MIN_SAFE_INTEGER</a>, <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER">MAX_SAFE_INTEGER</a> ] ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 范围数组 (含两边界)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 范围内随机整数</li>
+</ul>
+<p>返回一个指定范围内的随机整数.</p>
+<pre><code class="lang-js">/* 10 - 20 的随机整数. */
+console.log(Mathx.randInt([ 10, 20 ])); // e.g. 13
+
+/* 范围数组中的数字没有数量限制, 排序后将两个极值作为边界. */
+console.log(Mathx.randInt([ 20, 10, 13, 11, 15 ])); /* 与 randInt([ 10, 20 ]) 效果相同. */
+
+/* 范围数组中排序后极值相同时将直接返回此极值. */
+console.log(Mathx.randInt([ 15, 15, 15 ])); // 15
+
+/* 范围数组为空数组或省略参数时将返回任意 &quot;安全&quot; 整数. */
+console.log(Mathx.randInt([])); // e.g. -7217922776918875
+console.log(Mathx.randInt([ Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER ])); /* 效果同上. */
+console.log(Mathx.randInt()); /* 效果同上. */
+</code></pre>
+<h3>randInt(...numbers)<span><a class="mark" href="#mathx_randint_numbers" id="mathx_randint_numbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload 5/5</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_number">number</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 范围数组 (含两边界)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 范围内随机整数</li>
+</ul>
+<p>返回一个指定范围内的随机整数.</p>
+<pre><code class="lang-js">/* 10 - 20 的随机整数. */
+console.log(Mathx.randInt(10, 20)); // e.g. 13
+
+/* 可变参数没有数量限制, 排序后将两个极值作为边界. */
+console.log(Mathx.randInt(20, 10, 13, 11, 15)); /* 与 randInt(10, 20) 效果相同. */
+
+/* 可变参数排序后极值相同时将直接返回此极值. */
+console.log(Mathx.randInt(15, 15, 15)); // 15
+</code></pre>
+<h2>[m] sum<span><a class="mark" href="#mathx_m_sum" id="mathx_m_sum">#</a></span></h2>
+<p>求和.</p>
+<h3>sum(...numbers)<span><a class="mark" href="#mathx_sum_numbers" id="mathx_sum_numbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_number">number</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 待求和数字</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回所有数字的加和结果.</p>
+<pre><code class="lang-js">/* 整数求和. */
+console.log(Mathx.sum(1, 2, 3)); // 6
+console.log(Mathx.sum(9)); // 9
+
+/* 浮点数求和. */
+console.log(Mathx.sum(0.1, 0.1)); // 0.2
+console.log(Mathx.sum(0.1, 0.2, 0.3)); // 0.6000000000000001
+
+/* NaN 保持其传染性. */
+console.log(Mathx.sum(7, 8, 9, NaN)); // NaN
+
+/* 无参将返回 NaN. */
+console.log(Mathx.sum()); // NaN
+
+/* 元素将被 Number 化. */
+console.log(Mathx.sum(&#39;1&#39;, &#39;2&#39;, &#39;3&#39;)); // 6
+console.log(Mathx.sum({ valueOf: () =&gt; 11 }, { valueOf: () =&gt; 12 })); // 23
+
+/* 嵌套将被展平. */
+console.log(Mathx.sum(1, [ 2, [ 3, [ 4 ] ], 5 ])); // 15
+</code></pre>
+<h3>sum(numbers, fraction?)<span><a class="mark" href="#mathx_sum_numbers_fraction" id="mathx_sum_numbers_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload [2-3]/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 待求和数字数组</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回数组内数字的加和结果, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">console.log(Mathx.sum([ 1, 2, 3 ])); // 6
+console.log(Mathx.sum([ 1, 2, [ 3 ] ])); // 6
+console.log(Mathx.sum([ 0.1, 0.2, 0.309 ], 2)); // 0.61
+console.log(Mathx.sum([ 0.1, 0.2, 0.309 ], 10)); // 0.609
+console.log(Mathx.sum([ 0.1, 0.2, 0.309 ], 0)); // 1
+</code></pre>
+<h2>[m] avg<span><a class="mark" href="#mathx_m_avg" id="mathx_m_avg">#</a></span></h2>
+<p>算术平均数.</p>
+<h3>avg(...numbers)<span><a class="mark" href="#mathx_avg_numbers" id="mathx_avg_numbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_number">number</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 待求算术平均值的数字</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回所有数字的算术平均值.</p>
+<pre><code class="lang-js">/* 常规运算. */
+console.log(Mathx.avg(1, 2, 3)); // 2
+console.log(Mathx.avg(9)); // 9
+console.log(Mathx.avg(0.1, 0.1)); // 0.1
+console.log(Mathx.avg(0.1, 0.2, 0.3)); // 0.20000000000000004
+
+/* NaN 保持其传染性. */
+console.log(Mathx.avg(7, 8, 9, NaN)); // NaN
+
+/* 无参将返回 NaN. */
+console.log(Mathx.avg()); // NaN
+
+/* 元素将被 Number 化. */
+console.log(Mathx.avg(&#39;1&#39;, &#39;2&#39;, &#39;3&#39;)); // 2
+console.log(Mathx.avg({ valueOf: () =&gt; 11 }, { valueOf: () =&gt; 12 })); // 11.5
+
+/* 嵌套将被展平. */
+console.log(Mathx.avg(1, [ 2, [ 3, [ 4 ] ], 5 ])); // 3
+</code></pre>
+<h3>avg(numbers, fraction?)<span><a class="mark" href="#mathx_avg_numbers_fraction" id="mathx_avg_numbers_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload [2-3]/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 待求算术平均值数字数组</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回数组内数字的算术平均值, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">console.log(Mathx.avg([ 1, 2, 3 ])); // 2
+console.log(Mathx.avg([ 1, 2, [ 3 ] ])); // 2
+console.log(Mathx.avg([ 0.1, 0.2, 0.309 ], 2)); // 0.2
+console.log(Mathx.avg([ 0.1, 0.2, 0.309 ], 10)); // 0.203
+console.log(Mathx.avg([ 0.1, 0.2, 0.309 ], 0)); // 0
+</code></pre>
+<h2>[m] median<span><a class="mark" href="#mathx_m_median" id="mathx_m_median">#</a></span></h2>
+<p>中位数.</p>
+<h3>median(...numbers)<span><a class="mark" href="#mathx_median_numbers" id="mathx_median_numbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_number">number</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 待求中位数的数字</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回所有数字的中位数.</p>
+<pre><code class="lang-js">/* 常规运算. */
+console.log(Mathx.median(1, 2, 3)); // 2
+console.log(Mathx.median(9)); // 9
+console.log(Mathx.median(0.1, 0.1)); // 0.1
+console.log(Mathx.median(0.1, 0.2, 0.3)); // 0.2
+
+/* NaN 保持其传染性. */
+console.log(Mathx.median(7, 8, 9, NaN)); // NaN
+
+/* 无参将返回 NaN. */
+console.log(Mathx.median()); // NaN
+
+/* 元素将被 Number 化. */
+console.log(Mathx.median(&#39;1&#39;, &#39;2&#39;, &#39;3&#39;)); // 2
+console.log(Mathx.median({ valueOf: () =&gt; 11 }, { valueOf: () =&gt; 12 })); // 11.5
+
+/* 嵌套将被展平. */
+console.log(Mathx.median(1, [ 2, [ 3, [ 4 ] ], 5 ])); // 3
+</code></pre>
+<h3>median(numbers, fraction?)<span><a class="mark" href="#mathx_median_numbers_fraction" id="mathx_median_numbers_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload [2-3]/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 待求中位数数字数组</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回数组内数字的中位数, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">console.log(Mathx.median([ 1, 2, 3 ])); // 2
+console.log(Mathx.median([ 1, 2, [ 3 ] ])); // 2
+console.log(Mathx.median([ 0.1, 0.2, 0.309 ], 2)); // 0.2
+console.log(Mathx.median([ 0.1, 0.2, 0.309 ], 10)); // 0.203
+console.log(Mathx.median([ 0.1, 0.2, 0.309 ], 0)); // 0
+</code></pre>
+<h2>[m] var<span><a class="mark" href="#mathx_m_var" id="mathx_m_var">#</a></span></h2>
+<p>方差.</p>
+<h3>var(...numbers)<span><a class="mark" href="#mathx_var_numbers" id="mathx_var_numbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_number">number</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 待求方差的数字</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回所有数字的方差.</p>
+<pre><code class="lang-js">/* 常规运算. */
+console.log(Mathx.var(1, 2, 3)); // 0.6666666666666666
+console.log(Mathx.var(1, 2, 3, 4, 5)); // 2
+console.log(Mathx.var(9)); // 0
+console.log(Mathx.var(0.1, 0.1)); // 0
+console.log(Mathx.var(0.1, 0.2, 0.3)); // 0.006666666666666665
+
+/* NaN 保持其传染性. */
+console.log(Mathx.var(7, 8, 9, NaN)); // NaN
+
+/* 无参将返回 NaN. */
+console.log(Mathx.var()); // NaN
+
+/* 元素将被 Number 化. */
+console.log(Mathx.var(&#39;1&#39;, &#39;2&#39;, &#39;3&#39;)); // 0.6666666666666666
+console.log(Mathx.var({ valueOf: () =&gt; 11 }, { valueOf: () =&gt; 12 })); // 0.25
+
+/* 嵌套将被展平. */
+console.log(Mathx.var(1, [ 2, [ 3, [ 4 ] ], 5 ])); // 2
+</code></pre>
+<h3>var(numbers, fraction?)<span><a class="mark" href="#mathx_var_numbers_fraction" id="mathx_var_numbers_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload [2-3]/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 待求方差数字数组</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回数组内数字的方差, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">console.log(Mathx.var([ 1, 2, 3 ])); // 0.6666666666666666
+console.log(Mathx.var([ 1, 2, [ 3 ] ])); // 0.6666666666666666
+console.log(Mathx.var([ 0.1, 0.2, 0.309 ], 2)); // 0.01
+console.log(Mathx.var([ 0.1, 0.2, 0.309 ], 10)); // 0.0072846667
+console.log(Mathx.var([ 0.1, 0.2, 0.309 ], 0)); // 0
+</code></pre>
+<h2>[m] std<span><a class="mark" href="#mathx_m_std" id="mathx_m_std">#</a></span></h2>
+<p>标准差 (均方差).</p>
+<h3>std(...numbers)<span><a class="mark" href="#mathx_std_numbers" id="mathx_std_numbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_number">number</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 待求标准差的数字</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回所有数字的标准差.</p>
+<pre><code class="lang-js">/* 常规运算. */
+console.log(Mathx.std(1, 2, 3)); // 0.816496580927726
+console.log(Mathx.std(1, 2, 3, 4, 5)); // 1.4142135623730951
+console.log(Mathx.std(9)); // 0
+console.log(Mathx.std(0.1, 0.1)); // 0
+console.log(Mathx.std(0.1, 0.2, 0.3)); // 0.0816496580927726
+
+/* NaN 保持其传染性. */
+console.log(Mathx.std(7, 8, 9, NaN)); // NaN
+
+/* 无参将返回 NaN. */
+console.log(Mathx.std()); // NaN
+
+/* 元素将被 Number 化. */
+console.log(Mathx.std(&#39;1&#39;, &#39;2&#39;, &#39;3&#39;)); // 0.0816496580927726
+console.log(Mathx.std({ valueOf: () =&gt; 11 }, { valueOf: () =&gt; 12 })); // 0.5
+
+/* 嵌套将被展平. */
+console.log(Mathx.std(1, [ 2, [ 3, [ 4 ] ], 5 ])); // 1.4142135623730951
+</code></pre>
+<h3>std(numbers, fraction?)<span><a class="mark" href="#mathx_std_numbers_fraction" id="mathx_std_numbers_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload [2-3]/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 待求标准差数字数组</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回数组内数字的标准差, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">console.log(Mathx.std([ 1, 2, 3 ])); // 0.816496580927726
+console.log(Mathx.std([ 1, 2, [ 3 ] ])); // 0.816496580927726
+console.log(Mathx.std([ 0.1, 0.2, 0.309 ], 2)); // 0.09
+console.log(Mathx.std([ 0.1, 0.2, 0.309 ], 10)); // 0.0853502587
+console.log(Mathx.std([ 0.1, 0.2, 0.309 ], 0)); // 0
+</code></pre>
+<h2>[m] cv<span><a class="mark" href="#mathx_m_cv" id="mathx_m_cv">#</a></span></h2>
+<p>变异系数 (离散系数).</p>
+<h3>cv(...numbers)<span><a class="mark" href="#mathx_cv_numbers" id="mathx_cv_numbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_number">number</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 待求变异系数的数字</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回所有数字的变异系数.</p>
+<pre><code class="lang-js">/* 常规运算. */
+console.log(Mathx.cv(1, 2, 3)); // 0.5
+console.log(Mathx.cv(1, 2, 3, 4, 5)); // 0.5270462766947299
+console.log(Mathx.cv(9)); // NaN
+console.log(Mathx.cv(0.1, 0.1)); // 0
+console.log(Mathx.cv([ 0.1, 0.2, 0.3 ], 2)); // 0.5
+
+/* NaN 保持其传染性. */
+console.log(Mathx.cv(7, 8, 9, NaN)); // NaN
+
+/* 无参将返回 NaN. */
+console.log(Mathx.cv()); // NaN
+
+/* 元素将被 Number 化. */
+console.log(Mathx.cv(&#39;1&#39;, &#39;2&#39;, &#39;3&#39;)); // 0.5
+console.log(Mathx.cv({ valueOf: () =&gt; 11 }, { valueOf: () =&gt; 12 })); // 0.06148754619013457
+
+/* 嵌套将被展平. */
+console.log(Mathx.cv(1, [ 2, [ 3, [ 4 ] ], 5 ])); // 0.5270462766947299
+</code></pre>
+<h3>cv(numbers, fraction?)<span><a class="mark" href="#mathx_cv_numbers_fraction" id="mathx_cv_numbers_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload [2-3]/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 待求变异系数数字数组</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回数组内数字的变异系数, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">console.log(Mathx.cv([ 1, 2, 3 ])); // 0.5
+console.log(Mathx.cv([ 1, 2, [ 3 ] ])); // 0.5
+console.log(Mathx.cv([ 0.1, 0.2, 0.309 ], 2)); // 0.51
+console.log(Mathx.cv([ 0.1, 0.2, 0.309 ], 10)); // 0.5149373973
+console.log(Mathx.cv([ 0.1, 0.2, 0.309 ], 0)); // 1
+</code></pre>
+<h2>[m] max<span><a class="mark" href="#mathx_m_max" id="mathx_m_max">#</a></span></h2>
+<p>最大值.</p>
+<p>内置扩展别名: maxi.</p>
+<pre><code class="lang-js">console.log(Mathx.max([ 5, 23 ])); // 23
+
+/* 启用内置对象扩展后. */
+console.log(Math.maxi([ 5, 23 ])); // 23
+</code></pre>
+<p>需额外留意空数组作为参数及无参时的一些情况:</p>
+<pre><code class="lang-js">console.log(Math.max()); // -Infinity
+console.log(Mathx.max()); // -Infinity
+
+console.log(Math.max([])); // 0
+console.log(Mathx.max([])); // -Infinity
+</code></pre>
+<h3>max(...numbers)<span><a class="mark" href="#mathx_max_numbers" id="mathx_max_numbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>xAlias</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_number">number</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 待求最大值的数字</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回所有参数中的最大数字.</p>
+<pre><code class="lang-js">/* 常规运算. */
+console.log(Mathx.max(1, 2, 3)); // 3
+console.log(Mathx.max(9)); // 9
+console.log(Mathx.max(0.1, 0.1)); // 0.1
+
+/* NaN 保持其传染性. */
+console.log(Mathx.max(7, 8, 9, NaN)); // NaN
+
+/* 无参将返回与 Math.max() 相同的值. */
+console.log(Mathx.max()); // -Infinity
+
+/* 元素将被 Number 化. */
+console.log(Mathx.max(&#39;1&#39;, &#39;2&#39;, &#39;3&#39;)); // 3
+console.log(Mathx.max({ valueOf: () =&gt; 11 }, { valueOf: () =&gt; 12 })); // 12
+
+/* 嵌套将被展平. */
+console.log(Mathx.max(1, [ 2, [ 3, [ 4 ] ], 5 ])); // 5
+</code></pre>
+<h3>max(numbers, fraction?)<span><a class="mark" href="#mathx_max_numbers_fraction" id="mathx_max_numbers_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>xAlias</code></strong> <strong><code>Overload [2-3]/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 待求最大值的数字数组</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回数组内参数的最大数字, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">console.log(Mathx.max([ 1, 2, 3 ])); // 3
+console.log(Mathx.max([ 1, 2, [ 3 ] ])); // 3
+console.log(Mathx.max([ 0.1, 0.2, 0.309 ], 2)); // 0.31
+console.log(Mathx.max([ 0.1, 0.2, 0.309 ], 10)); // 0.309
+console.log(Mathx.max([ 0.1, 0.2, 0.309 ], 0)); // 0
+
+/* 相当于无参调用 Math.max(). */
+console.log(Mathx.max([])); // -Infinity
+</code></pre>
+<h2>[m] min<span><a class="mark" href="#mathx_m_min" id="mathx_m_min">#</a></span></h2>
+<p>最小值.</p>
+<p>内置扩展别名: mini.</p>
+<pre><code class="lang-js">console.log(Mathx.min([ 5, 23 ])); // 5
+
+/* 启用内置对象扩展后. */
+console.log(Math.mini([ 5, 23 ])); // 5
+</code></pre>
+<p>需额外留意空数组作为参数及无参时的一些情况:</p>
+<pre><code class="lang-js">console.log(Math.min()); // Infinity
+console.log(Mathx.min()); // Infinity
+
+console.log(Math.min([])); // 0
+console.log(Mathx.min([])); // Infinity
+</code></pre>
+<h3>min(...numbers)<span><a class="mark" href="#mathx_min_numbers" id="mathx_min_numbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>xAlias</code></strong> <strong><code>Overload 1/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="dataTypes.html#datatypes_number">number</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 待求最小值的数字</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回所有参数中的最小数字.</p>
+<pre><code class="lang-js">/* 常规运算. */
+console.log(Mathx.min(1, 2, 3)); // 1
+console.log(Mathx.min(9)); // 9
+console.log(Mathx.min(0.1, 0.1)); // 0.1
+
+/* NaN 保持其传染性. */
+console.log(Mathx.min(7, 8, 9, NaN)); // NaN
+
+/* 无参将返回与 Math.min() 相同的值. */
+console.log(Mathx.min()); // Infinity
+
+/* 元素将被 Number 化. */
+console.log(Mathx.min(&#39;1&#39;, &#39;2&#39;, &#39;3&#39;)); // 1
+console.log(Mathx.min({ valueOf: () =&gt; 11 }, { valueOf: () =&gt; 12 })); // 11
+
+/* 嵌套将被展平. */
+console.log(Mathx.min(1, [ 2, [ 3, [ 4 ] ], 5 ])); // 1
+</code></pre>
+<h3>min(numbers, fraction?)<span><a class="mark" href="#mathx_min_numbers_fraction" id="mathx_min_numbers_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>xAlias</code></strong> <strong><code>Overload [2-3]/3</code></strong></p>
+<ul>
+<li><strong>numbers</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> } - 待求最小值的数字数组</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回数组内参数的最小数字, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">console.log(Mathx.min([ 1, 2, 3 ])); // 1
+console.log(Mathx.min([ 1, 2, [ 3 ] ])); // 1
+console.log(Mathx.min([ 0.1, 0.2, 0.309 ], 2)); // 0.1
+console.log(Mathx.min([ 0.1, 0.2, 0.309 ], 10)); // 0.1
+console.log(Mathx.min([ 0.1, 0.2, 0.309 ], 0)); // 0
+
+/* 相当于无参调用 Math.min(). */
+console.log(Mathx.min([])); // Infinity
+</code></pre>
+<h2>[m] dist<span><a class="mark" href="#mathx_m_dist" id="mathx_m_dist">#</a></span></h2>
+<p>两点间距离.</p>
+<p>上述 &quot;距离&quot; 指的是 <a href="https://zh.wikipedia.org/wiki/%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E8%B7%9D%E7%A6%BB">欧几里得距离 (Euclidean distance)</a>, 亦称作欧氏距离.</p>
+<h3>dist(pointA, pointB, fraction?)<span><a class="mark" href="#mathx_dist_pointa_pointb_fraction" id="mathx_dist_pointa_pointb_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload [1-2]/4</code></strong></p>
+<ul>
+<li><strong>pointA</strong> { <span class="type"><a href="dataTypes.html#datatypes_tuple">[</a> <a href="dataTypes.html#datatypes_number">number</a>, <a href="dataTypes.html#datatypes_number">number</a> <a href="dataTypes.html#datatypes_tuple">]</a></span> | <span class="type"><a href="dataTypes.html#datatypes_object">{</a> x: <a href="dataTypes.html#datatypes_number">number</a>, y: <a href="dataTypes.html#datatypes_number">number</a> <a href="dataTypes.html#datatypes_object"></span> }</a> | <a href="opencvPointType.html">OpenCVPoint</a> | <a href="androidRectType.html">AndroidRect</a> }</li>
+<li><strong>pointB</strong> { <span class="type"><a href="dataTypes.html#datatypes_tuple">[</a> <a href="dataTypes.html#datatypes_number">number</a>, <a href="dataTypes.html#datatypes_number">number</a> <a href="dataTypes.html#datatypes_tuple">]</a></span> | <span class="type"><a href="dataTypes.html#datatypes_object">{</a> x: <a href="dataTypes.html#datatypes_number">number</a>, y: <a href="dataTypes.html#datatypes_number">number</a> <a href="dataTypes.html#datatypes_object"></span> }</a> | <a href="opencvPointType.html">OpenCVPoint</a> | <a href="androidRectType.html">AndroidRect</a> }</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回两点间距离, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">const Point = org.opencv.core.Point;
+const Rect = android.graphics.Rect;
+
+/* 无参返回 NaN. */
+console.log(Mathx.dist()); // NaN
+
+/* 以数组作点. */
+console.log(Mathx.dist([ 0, 0 ], [ 3, 4 ])); // 5
+
+/* 以包含 x 及 y 属性的对象作点. */
+console.log(Mathx.dist({ x: 0, y: 0 }, { x: 3, y: 4 })); // 5
+
+/* 以 Point 作点. */
+console.log(Mathx.dist(new Point(6, 7), new Point(12, 15))); // 10
+
+/* 以 Rect 作点, 此时其中心点作为参照点. */
+console.log(Mathx.dist(new Rect(0, 0, 10, 10), new Rect(10, 10, 20, 20))); // 14.142135623730951
+console.log(Mathx.dist(new Rect(0, 0, 10, 10), new Rect(10, 10, 20, 20), 3)); // 14.142
+
+/* 两点类型可以不一致. */
+console.log(Mathx.dist([ 0, 0 ], new Point(3, 4))); // 5
+console.log(Mathx.dist([ 0, 0 ], new Rect(0, 0, 6, 8))); // 5
+
+/* 点可以用浮点数表示. */
+console.log(Mathx.dist(new Point(0, 0), new Point(0.5, 0.5))); // 0.7071067811865476
+
+/* Rect 的中心点也可以为浮点数. */
+console.log(Mathx.dist(new Point(0, 0), new Rect(0, 0, 1, 1))); // 0.7071067811865476
+</code></pre>
+<h3>dist(rect, fraction?)<span><a class="mark" href="#mathx_dist_rect_fraction" id="mathx_dist_rect_fraction">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>xObject</code></strong> <strong><code>Overload [3-4]/4</code></strong></p>
+<ul>
+<li><strong>rect</strong> { <span class="type"><a href="androidRectType.html">AndroidRect</a></span> } - 矩形</li>
+<li><strong>[ fraction = undefined ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 小数点后的数字个数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>返回矩形的对角点间距, 并根据 fraction 参数进行可能的四舍五入.</p>
+<pre><code class="lang-js">/* 长 6 (12 - 6) 宽 8 (15 - 7) 的矩形, 对角线长度为 10. */
+console.log(Mathx.dist(new Rect(6, 7, 12, 15))); // 10
+
+/* 边长为 1 的正方形, 对角线长度为 √2 (根号 2). 结果保留 3 位小数. */
+console.log(Mathx.dist(new Rect(0, 0, 1, 1), 3)); // 1.414
+</code></pre>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

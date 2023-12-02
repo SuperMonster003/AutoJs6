@@ -7,11 +7,13 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
- * Created by Stardust on 2017/4/30.
+ * Created by Stardust on Apr 30, 2017.
  */
 public class ThreadCompat extends Thread {
 
-    // FIXME: 2017/12/29 是否需要用synchronizedMap?这里虽然线程不安全，但竞争很小
+    // FIXME by Stardust on Dec 29, 2017.
+    //  ! 是否需要用 synchronizedMap?
+    //  ! 这里虽然线程不安全, 但竞争很小.
     private static final Set<Thread> interruptedThreads = Collections.newSetFromMap(new WeakHashMap<>());
 
     public ThreadCompat() {

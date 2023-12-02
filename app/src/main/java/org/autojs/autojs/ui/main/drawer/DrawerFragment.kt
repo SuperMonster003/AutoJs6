@@ -13,6 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
+import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.permission.MediaProjectionPermission
@@ -76,6 +77,8 @@ open class DrawerFragment : Fragment() {
     private lateinit var mThemeColorItem: DrawerMenuShortcutItem
     private lateinit var mAboutAppAndDevItem: DrawerMenuShortcutItem
 
+    private lateinit var mA11yService: AccessibilityTool.Service
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,8 +88,30 @@ open class DrawerFragment : Fragment() {
 
         mActivity = (requireActivity() as MainActivity)
 
+        mA11yService = AccessibilityTool(mContext).service
+
         mAccessibilityServiceItem = DrawerMenuToggleableItem(
-            AccessibilityService(mContext),
+            object : AccessibilityService(mContext) {
+
+                override fun refreshSubtitle(aimState: Boolean) {
+                    val oldSubtitle = mAccessibilityServiceItem.subtitle
+                    if (aimState) {
+                        if (mA11yService.exists() && !mA11yService.isRunning()) {
+                            mAccessibilityServiceItem.subtitle = mContext.getString(R.string.text_malfunctioning)
+                        } else {
+                            mAccessibilityServiceItem.subtitle = null
+                        }
+                    } else {
+                        mAccessibilityServiceItem.subtitle = null
+                    }
+                    if (mAccessibilityServiceItem.subtitle != oldSubtitle) {
+                        /* To refresh subtitle view. */
+                        mAccessibilityServiceItem.isChecked = mAccessibilityServiceItem.isChecked
+                    }
+                    super.refreshSubtitle(aimState)
+                }
+
+            },
             R.drawable.ic_accessibility_black_48dp,
             R.string.text_a11y_service,
             DrawerMenuItem.DEFAULT_DIALOG_CONTENT,
@@ -116,11 +141,11 @@ open class DrawerFragment : Fragment() {
                     super.toggle(aimState)
 
                     // @AfterSuper
-                    if (aimState /* is to switch on */) {
-                        if (!mAccessibilityServiceItem.isChecked) {
-                            mAccessibilityServiceItem.syncDelay()
-                        }
-                    }
+                    // if (aimState /* is to switch on */) {
+                    //     if (!mAccessibilityServiceItem.isChecked) {
+                    //         mAccessibilityServiceItem.syncDelay()
+                    //     }
+                    // }
                     true
                 } catch (_: Exception) {
                     false
@@ -305,21 +330,26 @@ open class DrawerFragment : Fragment() {
                         true -> ViewUtils.setKeepScreenOnWhenInForegroundFromLastEnabledState()
                         else -> ViewUtils.setKeepScreenOnWhenInForegroundDisabled()
                     }
-                    refreshSubtitle()
+                    refreshSubtitle(!isActive)
                     true
                 } catch (_: Exception) {
                     false
                 }
 
-                override fun refreshSubtitle() {
+                override fun refreshSubtitle(aimState: Boolean) {
+                    val oldSubtitle = mKeepScreenOnWhenInForegroundItem.subtitle
                     val aimSubtitle = if (ViewUtils.isKeepScreenOnWhenInForegroundDisabled) null else {
                         val i = resources.getStringArray(R.array.keys_keep_screen_on_when_in_foreground).indexOf(Pref.keyKeepScreenOnWhenInForeground!!)
                         resources.getStringArray(R.array.values_keep_screen_on_when_in_foreground)[i]
                     }
                     if (mKeepScreenOnWhenInForegroundItem.subtitle != aimSubtitle) {
                         mKeepScreenOnWhenInForegroundItem.subtitle = aimSubtitle
-                        mKeepScreenOnWhenInForegroundItem.isChecked = mKeepScreenOnWhenInForegroundItem.isChecked
+                        if (mKeepScreenOnWhenInForegroundItem.subtitle != oldSubtitle) {
+                            /* To refresh subtitle view. */
+                            mKeepScreenOnWhenInForegroundItem.isChecked = mKeepScreenOnWhenInForegroundItem.isChecked
+                        }
                     }
+                    super.refreshSubtitle(aimState)
                 }
             },
             R.drawable.ic_lightbulb_outline_black_48dp,
@@ -344,7 +374,6 @@ open class DrawerFragment : Fragment() {
         mDrawerMenu = binding.drawerMenu
         initMenuItems()
         initMenuItemStates()
-        syncMenuItemStates()
         setupListeners()
     }
 
@@ -426,9 +455,8 @@ open class DrawerFragment : Fragment() {
     }
 
     private fun initMenuItemStates() = listOf(
-        mAccessibilityServiceItem,
-        mForegroundServiceItem,
         mFloatingWindowItem,
+        mForegroundServiceItem,
     ).forEach { it.selfActive() }
 
     private fun syncMenuItemStates() = listOf(

@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by Stardust on 2017/4/5.
+ * Created by Stardust on Apr 5, 2017.
  */
 public class RhinoAndroidHelper {
 

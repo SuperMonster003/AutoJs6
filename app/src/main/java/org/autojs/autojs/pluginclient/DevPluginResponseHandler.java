@@ -33,7 +33,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * Created by Stardust on 2017/5/11.
+ * Created by Stardust on May 11, 2017.
  */
 public class DevPluginResponseHandler implements Handler {
 

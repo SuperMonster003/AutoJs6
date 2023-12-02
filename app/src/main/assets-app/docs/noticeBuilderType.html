@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>NoticeBuilder | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/noticeBuilderType.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-noticeBuilderType">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType active" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="noticeBuilderType" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_noticebuilder">NoticeBuilder</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setautocancel">[m] setAutoCancel</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setautocancel_autocancel">setAutoCancel(autoCancel)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setchannelid">[m] setChannelId</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setchannelid_channelid">setChannelId(channelId)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setcolor">[m] setColor</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setcolor_argb">setColor(argb)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setcontenttitle">[m] setContentTitle</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setcontenttitle_title">setContentTitle(title)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setcontenttext">[m] setContentText</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setcontenttext_text">setContentText(text)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setongoing">[m] setOnGoing</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setongoing_ongoing">setOnGoing(ongoing)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setprogress">[m] setProgress</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setprogress_max_progress_indeterminate">setProgress(max, progress, indeterminate)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setsmallicon">[m] setSmallIcon</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setsmallicon_icon">setSmallIcon(icon)</a></span></li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setsmallicon_iconcompat">setSmallIcon(iconCompat)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setstyle">[m] setStyle</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setstyle_style">setStyle(style)</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_bigtextstyle">BigTextStyle</a></span></li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_messagingstyle">MessagingStyle</a></span></li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_bigpicturestyle">BigPictureStyle</a></span></li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_inboxstyle">InboxStyle</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_settimeoutafter">[m] setTimeoutAfter</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_settimeoutafter_duration">setTimeoutAfter(duration)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setuseschronometer">[m] setUsesChronometer</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setuseschronometer_b">setUsesChronometer(b)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setchronometercountdown">[m] setChronometerCountDown</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setchronometercountdown_countdown">setChronometerCountDown(countDown)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setwhen">[m] setWhen</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setwhen_when">setWhen(when)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#noticebuildertype_m_setshowwhen">[m] setShowWhen</a></span><ul>
+<li><span class="stability_undefined"><a href="#noticebuildertype_setshowwhen_show">setShowWhen(show)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>NoticeBuilder<span><a class="mark" href="#noticebuildertype_noticebuilder" id="noticebuildertype_noticebuilder">#</a></span></h1>
+<p><a href="https://developer.android.com/reference/android/app/Notification.Builder">androidx.core.app.NotificationCompat.Builder</a> 别名.</p>
+<p>NoticeBuilder 表示一个通知构建器.</p>
+<p>常见相关方法或属性:</p>
+<ul>
+<li><a href="notice.html#notice_m_getbuilder">notice.getBuilder</a></li>
+</ul>
+<blockquote>
+<p>注: 本章节仅列出部分属性或方法.</p>
+</blockquote>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">androidx.core.app.NotificationCompat.Builder</p>
+
+<hr>
+<h2>[m] setAutoCancel<span><a class="mark" href="#noticebuildertype_m_setautocancel" id="noticebuildertype_m_setautocancel">#</a></span></h2>
+<h3>setAutoCancel(autoCancel)<span><a class="mark" href="#noticebuildertype_setautocancel_autocancel" id="noticebuildertype_setautocancel_autocancel">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>autoCancel</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>配置用户点击通知后是否自动移除通知.</p>
+<h2>[m] setChannelId<span><a class="mark" href="#noticebuildertype_m_setchannelid" id="noticebuildertype_m_setchannelid">#</a></span></h2>
+<h3>setChannelId(channelId)<span><a class="mark" href="#noticebuildertype_setchannelid_channelid" id="noticebuildertype_setchannelid_channelid">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>channelId</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设定通知渠道 ID.</p>
+<h2>[m] setColor<span><a class="mark" href="#noticebuildertype_m_setcolor" id="noticebuildertype_m_setcolor">#</a></span></h2>
+<h3>setColor(argb)<span><a class="mark" href="#noticebuildertype_setcolor_argb" id="noticebuildertype_setcolor_argb">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>argb</strong> { <span class="type"><a href="dataTypes.html#datatypes_colorint">ColorInt</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设定通知的 <code>强调色 (Accent Color)</code>.</p>
+<p>此颜色将应用于通知 <code>标头图像 (Header Image)</code> 的着色, 而不会改变通知字体颜色或通知背景颜色等.</p>
+<pre><code class="lang-js">notice(notice.getBuilder()
+    .setContentText(&#39;hello&#39;)
+    .setColor(Color(&#39;dark-orange&#39;).toInt()));
+</code></pre>
+<h2>[m] setContentTitle<span><a class="mark" href="#noticebuildertype_m_setcontenttitle" id="noticebuildertype_m_setcontenttitle">#</a></span></h2>
+<h3>setContentTitle(title)<span><a class="mark" href="#noticebuildertype_setcontenttitle_title" id="noticebuildertype_setcontenttitle_title">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>title</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设定通知的文本标题.</p>
+<h2>[m] setContentText<span><a class="mark" href="#noticebuildertype_m_setcontenttext" id="noticebuildertype_m_setcontenttext">#</a></span></h2>
+<h3>setContentText(text)<span><a class="mark" href="#noticebuildertype_setcontenttext_text" id="noticebuildertype_setcontenttext_text">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设定通知的文本内容.</p>
+<h2>[m] setOnGoing<span><a class="mark" href="#noticebuildertype_m_setongoing" id="noticebuildertype_m_setongoing">#</a></span></h2>
+<h3>setOnGoing(ongoing)<span><a class="mark" href="#noticebuildertype_setongoing_ongoing" id="noticebuildertype_setongoing_ongoing">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>ongoing</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设定通知为 &quot;正在进行中&quot; 状态.</p>
+<p>正在进行中, 意味着通知关联着一个用户正在参与的后台任务, 如 [ 播放音乐 / 下载任务 / 文件同步操作 / 网络连接激活 ] 等.<br>这样的通知不能被用户消除 (如左右滑动), 只能通过 <a href="notice.html#notice_m_cancel">notice.cancel</a> 或 <a href="noticeBuilderType.html#noticebuildertype_m_setautocancel">NoticeBuilder#setAutoCancel</a> 等方式消除.</p>
+<h2>[m] setProgress<span><a class="mark" href="#noticebuildertype_m_setprogress" id="noticebuildertype_m_setprogress">#</a></span></h2>
+<h3>setProgress(max, progress, indeterminate)<span><a class="mark" href="#noticebuildertype_setprogress_max_progress_indeterminate" id="noticebuildertype_setprogress_max_progress_indeterminate">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>max</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 进度最大值</li>
+<li><strong>progress</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 当前进度值</li>
+<li><strong>indeterminate</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否为不确定进度条</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设定通知条目的进度值及样式 (以 ProgressBar 控件呈现).</p>
+<pre><code class="lang-js">let notificationId = 12;
+let progress = 0;
+let progressMax = 100;
+
+let builder = notice.getBuilder()
+    .setSilent(true)
+    .setContentTitle(&#39;正在下载应用&#39;);
+
+while (progress &lt; progressMax) {
+    builder
+        .setProgress(progressMax, progress, false)
+        .setContentText(`已完成 ${progress}%`);
+    notice(builder, { notificationId });
+    sleep(50);
+    progress += Mathx.randInt(1, 4);
+}
+builder
+    .setContentText(`已完成 ${progressMax}%`)
+    .setContentTitle(&#39;下载完成&#39;)
+notice(builder, { notificationId });
+</code></pre>
+<h2>[m] setSmallIcon<span><a class="mark" href="#noticebuildertype_m_setsmallicon" id="noticebuildertype_m_setsmallicon">#</a></span></h2>
+<h3>setSmallIcon(icon)<span><a class="mark" href="#noticebuildertype_setsmallicon_icon" id="noticebuildertype_setsmallicon_icon">#</a></span></h3>
+<p><strong><code>Overload 1/2</code></strong></p>
+<ul>
+<li><strong>icon</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - Drawable (可绘制) <a href="glossaries.html#glossaries_资源_ID">资源 ID</a></li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+<p>设定通知的小图标.</p>
+<p><code>icon</code> 参数需对应内置的 Drawable 资源, 使用 <a href="global.html#global_p_drawable">R.drawable</a> 可获取 AutoJs6 的 Drawable (可绘制) 资源 ID:</p>
+<pre><code class="lang-js">/* 设定通知的小图标为闹钟图标. */
+notice(notice.getBuilder()
+    .setSmallIcon(R.drawable.ic_access_alarm_black_48dp)
+    .setContentTitle(&#39;小图标测试&#39;)
+    .setContentText(&#39;闹钟图标&#39;));
+</code></pre>
+<h3>setSmallIcon(iconCompat)<span><a class="mark" href="#noticebuildertype_setsmallicon_iconcompat" id="noticebuildertype_setsmallicon_iconcompat">#</a></span></h3>
+<p><strong><code>Overload 2/2</code></strong></p>
+<ul>
+<li><strong>iconCompat</strong> { <span class="type"><a href="https://developer.android.com/reference/androidx/core/graphics/drawable/IconCompat">IconCompat</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+<p>设定通知的小图标.</p>
+<p><code>iconCompat</code> 参数为 <a href="https://developer.android.com/reference/androidx/core/graphics/drawable/IconCompat">IconCompat</a> 类型, 是对 <a href="https://developer.android.com/reference/android/graphics/drawable/Icon.html">Icon</a> 类型的浅层封装, 支持 <code>createFromIcon</code> / <code>createWithBitmap</code> / <code>createWithContentUri</code> 等静态方法直接创建 <code>IconCompat</code> 实例.</p>
+<pre><code class="lang-js">const IconCompat = androidx.core.graphics.drawable.IconCompat;
+let img = images.read(&#39;./test.png&#39;).oneShot();
+notice(notice.getBuilder()
+    .setSmallIcon(IconCompat.createWithBitmap(img.bitmap))
+    .setContentTitle(&#39;小图标测试&#39;)
+    .setContentText(&#39;从本地文件加载图标&#39;));
+img.shoot();
+</code></pre>
+<h2>[m] setStyle<span><a class="mark" href="#noticebuildertype_m_setstyle" id="noticebuildertype_m_setstyle">#</a></span></h2>
+<h3>setStyle(style)<span><a class="mark" href="#noticebuildertype_setstyle_style" id="noticebuildertype_setstyle_style">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>style</strong> { <span class="type"><a href="https://developer.android.com/reference/androidx/core/app/NotificationCompat.Style">NotificationCompat.Style</a></span> } - 通知样式类型对象</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设定通知的风格样式.</p>
+<p>部分常用样式模板类:</p>
+<ul>
+<li><a href="#noticebuildertype_bigpicturestyle">NotificationCompat.BigPictureStyle</a></li>
+<li><a href="#noticebuildertype_bigtextstyle">NotificationCompat.BigTextStyle</a></li>
+<li><a href="#noticebuildertype_inboxstyle">NotificationCompat.InboxStyle</a></li>
+<li><a href="#noticebuildertype_messagingstyle">NotificationCompat.MessagingStyle</a></li>
+<li>... ...</li>
+</ul>
+<h4>BigTextStyle<span><a class="mark" href="#noticebuildertype_bigtextstyle" id="noticebuildertype_bigtextstyle">#</a></span></h4>
+<p>大量文本内容通知样式.</p>
+<pre><code class="lang-js">let builder = notice.getBuilder();
+let text = Array(6).fill(&#39;This is a long text for test.&#39;).join(&#39;\n&#39;);
+let bigTextStyle = new NotificationCompat.BigTextStyle().bigText(text);
+notice(builder.setStyle(bigTextStyle));
+</code></pre>
+<p><a href="noticeOptionsType.html#noticeoptionstype_p_bigcontent">NoticeOptions#bigContent</a> 接口属性, 其内部实现就使用了 BigTextStyle 样式模板类.</p>
+<blockquote>
+<p>参阅: <a href="https://developer.android.com/reference/androidx/core/app/NotificationCompat.BigTextStyle">Android Docs</a></p>
+</blockquote>
+<h4>MessagingStyle<span><a class="mark" href="#noticebuildertype_messagingstyle" id="noticebuildertype_messagingstyle">#</a></span></h4>
+<p>对话通知样式.</p>
+<p>显示任意人数之间依序发送的消息, 类似即时通讯.</p>
+<pre><code class="lang-js">let getTimestamp = (/* @IIFE */ () =&gt; {
+    let ts = Date.now();
+    return () =&gt; ts += 1e3;
+})();
+let getPerson = function (name) {
+    return new androidx.core.app.Person.Builder().setName(name).build();
+};
+let person = {
+    maxwell: getPerson(&#39;Maxwell Adam&#39;),
+    john: getPerson(&#39;John Smith&#39;),
+    willilam: getPerson(&#39;William Wallace&#39;),
+};
+
+let notificationId = 16;
+let builder = notice.getBuilder();
+let messagingStyle = new NotificationCompat.MessagingStyle(&#39;some_people&#39;)
+    .setConversationTitle(&#39;活动安排&#39;)
+    .addMessage(&#39;周五上午集合吗?&#39;, getTimestamp(), person.maxwell)
+    .addMessage(&#39;应该是周六&#39;, getTimestamp(), person.john)
+    .addMessage(&#39;我查一下备忘录&#39;, getTimestamp(), person.john);
+
+notice(builder.setStyle(messagingStyle), { notificationId });
+
+void /* argsList */ [
+    [ &#39;没错, 是周六上午&#39;, getTimestamp(), person.willilam ],
+    [ &#39;好的多谢, 后天见&#39;, getTimestamp(), person.maxwell ],
+    [ &#39;不客气&#39;, getTimestamp(), person.willilam ],
+    [ &#39;后天见&#39;, getTimestamp(), person.willilam ],
+    [ &#39;OK&#39;, getTimestamp(), person.john ],
+    [ &#39;别忘了带上单反&#39;, getTimestamp(), person.john ],
+    [ &#39;没问题&#39;, getTimestamp(), person.willilam ],
+].forEach((args) =&gt; {
+    sleep(2e3, &#39;±500&#39;);
+    messagingStyle.addMessage.apply(messagingStyle, args);
+    builder
+        .setStyle(messagingStyle)
+        .setSilent(true);
+    notice(builder, { notificationId });
+});
+</code></pre>
+<blockquote>
+<p>参阅: <a href="https://developer.android.com/reference/androidx/core/app/NotificationCompat.MessagingStyle">Android Docs</a></p>
+</blockquote>
+<h4>BigPictureStyle<span><a class="mark" href="#noticebuildertype_bigpicturestyle" id="noticebuildertype_bigpicturestyle">#</a></span></h4>
+<p>大尺寸图片通知样式.</p>
+<pre><code class="lang-js">const FileProvider = androidx.core.content.FileProvider;
+const AppFileProvider = org.autojs.autojs.external.fileprovider.AppFileProvider;
+const MimeTypesUtils = org.autojs.autojs.util.MimeTypesUtils;
+
+let notificationId = 17;
+let builder = notice.getBuilder();
+let imagePath = files.path(&#39;./test.png&#39;);
+let albumArtImg = images.read(imagePath).oneShot();
+
+let bigPictureStyle = new NotificationCompat.BigPictureStyle()
+    .bigPicture(albumArtImg.bitmap)
+    .setBigContentTitle(&#39;Title&#39;)
+    .setSummaryText(&#39;This is a big picture for test&#39;)
+    .showBigPictureWhenCollapsed(true);
+
+let pendingIntent = (/* @IIFE */ () =&gt; {
+    let fileUri = FileProvider.getUriForFile(context, AppFileProvider.AUTHORITY, new File(imagePath));
+
+    let mimeType = MimeTypesUtils.fromFileOr(imagePath, &quot;*/*&quot;);
+
+    let intent = new Intent(Intent.ACTION_VIEW)
+        .setDataAndType(fileUri, mimeType)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+    return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+})();
+
+builder
+    .setContentText(&#39;A big picture&#39;)
+    .setStyle(bigPictureStyle)
+    .setContentIntent(pendingIntent)
+    .setAutoCancel(true);
+
+notice(builder, { notificationId });
+
+albumArtImg.shoot();
+</code></pre>
+<blockquote>
+<p>参阅: <a href="https://developer.android.com/reference/androidx/core/app/NotificationCompat.BigPictureStyle">Android Docs</a></p>
+</blockquote>
+<h4>InboxStyle<span><a class="mark" href="#noticebuildertype_inboxstyle" id="noticebuildertype_inboxstyle">#</a></span></h4>
+<p>收件箱通知样式.</p>
+<p>按行显示通知内容, 支持使用 <code>addMessage</code> 添加新的消息条目, 每个通知最多容纳 5-7 个 (取决于操作系统及屏幕分辨率), 超过此容量的条目将不会被显示.</p>
+<pre><code class="lang-js">let notificationId = 20;
+let style = new NotificationCompat.InboxStyle()
+    .addLine(&#39;消息片段 A&#39;)
+    .addLine(&#39;消息片段 B&#39;)
+    .addLine(&#39;消息片段 C&#39;);
+let builder = notice.getBuilder()
+    .setContentTitle(&#39;新消息&#39;)
+    .setContentText(&#39;新的收件箱消息&#39;)
+    .setStyle(style
+        .setBigContentTitle(&#39;收件箱消息&#39;)
+        .setSummaryText(&#39;消息数量 3&#39;));
+notice(builder, { notificationId });
+
+sleep(2e3);
+
+style.addLine(&#39;消息片段 D&#39;).setSummaryText(&#39;消息数量 4&#39;);
+notice(builder.setSilent(true), { notificationId });
+
+sleep(2e3);
+
+style.addLine(&#39;消息片段 E&#39;).setSummaryText(&#39;消息数量 5&#39;);
+notice(builder.setSilent(true), { notificationId });
+
+sleep(2e3);
+
+style.addLine(&#39;消息片段 F&#39;)
+    .addLine(&#39;消息片段 G&#39;)
+    .addLine(&#39;消息片段 H&#39;)
+    .setSummaryText(&#39;消息数量 5+&#39;);
+notice(builder.setSilent(true), { notificationId });
+</code></pre>
+<blockquote>
+<p>参阅: <a href="https://developer.android.com/reference/androidx/core/app/NotificationCompat.InboxStyle">Android Docs</a></p>
+</blockquote>
+<h2>[m] setTimeoutAfter<span><a class="mark" href="#noticebuildertype_m_settimeoutafter" id="noticebuildertype_m_settimeoutafter">#</a></span></h2>
+<h3>setTimeoutAfter(duration)<span><a class="mark" href="#noticebuildertype_settimeoutafter_duration" id="noticebuildertype_settimeoutafter_duration">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>duration</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 超时时间 (毫秒)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>指定通知自动消除的超时时间 (毫秒).</p>
+<pre><code class="lang-js">notice(notice.getBuilder()
+    .setContentTitle(&#39;通知测试&#39;)
+    .setContentText(&#39;通知于 3 秒后自动消除&#39;)
+    .setTimeoutAfter(3e3));
+</code></pre>
+<h2>[m] setUsesChronometer<span><a class="mark" href="#noticebuildertype_m_setuseschronometer" id="noticebuildertype_m_setuseschronometer">#</a></span></h2>
+<h3>setUsesChronometer(b)<span><a class="mark" href="#noticebuildertype_setuseschronometer_b" id="noticebuildertype_setuseschronometer_b">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>b</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否使用通知计时秒表</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设置是否使用通知计时秒表.</p>
+<p>参数 <code>b</code> 设为 <code>true</code> 时, 通知时间区域将显示为自动刷新的计时秒表, 每秒钟自动刷新时间.</p>
+<p>计时秒表通常用于表明通知的持续显示时间, 可应用于通话计时等场景:</p>
+<pre><code class="lang-js">notice(notice.getBuilder()
+    .setContentTitle(&#39;通知测试&#39;)
+    .setContentText(&#39;通知计时测试&#39;)
+    .setUsesChronometer(true));
+</code></pre>
+<blockquote>
+<p>注:<br>chronometer [krəˈnɒmɪtə(r)]<br>_n._ 精密记时表; 高度精确的钟表.</p>
+</blockquote>
+<h2>[m] setChronometerCountDown<span><a class="mark" href="#noticebuildertype_m_setchronometercountdown" id="noticebuildertype_m_setchronometercountdown">#</a></span></h2>
+<h3>setChronometerCountDown(countDown)<span><a class="mark" href="#noticebuildertype_setchronometercountdown_countdown" id="noticebuildertype_setchronometercountdown_countdown">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>countDown</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设置通知计时区域的时间为倒计时而非正计时.</p>
+<p><code>setChronometerCountDown</code> 仅在 <a href="#noticebuildertype_m_setuseschronometer">setUsesChronometer</a> 设置为 <code>true</code> 时才有效.</p>
+<pre><code class="lang-js">/* 在通知的计时区域显示 10 秒钟倒计时. */
+notice(notice.getBuilder()
+    .setUsesChronometer(true)
+    .setChronometerCountDown(true)
+    .setShowWhen(true)
+    .setWhen(Date.now() + 10e3)
+);
+</code></pre>
+<blockquote>
+<p>注:<br>chronometer [krəˈnɒmɪtə(r)]<br>_n._ 精密记时表; 高度精确的钟表.</p>
+</blockquote>
+<h2>[m] setWhen<span><a class="mark" href="#noticebuildertype_m_setwhen" id="noticebuildertype_m_setwhen">#</a></span></h2>
+<h3>setWhen(when)<span><a class="mark" href="#noticebuildertype_setwhen_when" id="noticebuildertype_setwhen_when">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>when</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 时间戳 (毫秒)</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>添加一个通知时间戳 (毫秒), 用以表示通知发生 (或即将发生) 的具体时间.</p>
+<p>使用 <code>setWhen</code> 时, 需要设置 <a href="#noticebuildertype_m_setshowwhen">setShowWhen</a> 为 <code>true</code>, 否则将无法显示时间消息. </p>
+<pre><code class="lang-js">notice(notice.getBuilder()
+    .setContentTitle(&#39;通知测试&#39;)
+    .setContentText(&#39;通知时间测试 (过去 5 分钟)&#39;)
+    .setWhen(Date.now() - 5 * 60e3)
+    .setShowWhen(true));
+
+notice(notice.getBuilder()
+    .setContentTitle(&#39;通知测试&#39;)
+    .setContentText(&#39;通知时间测试 (未来 2 分钟)&#39;)
+    .setWhen(Date.now() + 128e3)
+    .setShowWhen(true));
+</code></pre>
+<h2>[m] setShowWhen<span><a class="mark" href="#noticebuildertype_m_setshowwhen" id="noticebuildertype_m_setshowwhen">#</a></span></h2>
+<h3>setShowWhen(show)<span><a class="mark" href="#noticebuildertype_setshowwhen_show" id="noticebuildertype_setshowwhen_show">#</a></span></h3>
+<div class="signature"><ul>
+<li><strong>show</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否显示时间戳信息</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="noticeBuilderType.html">NoticeBuilder</a></span> }</li>
+</ul>
+</div><p>设置通知消息是否显示使用 <a href="#noticebuildertype_m_setwhen">setWhen</a> 设置的时间戳信息.</p>
+<p>当 <code>setShowWhen</code> 设置为 <code>false</code> 时, <a href="#noticebuildertype_m_setwhen">setWhen</a> 设置的时间戳信息将不再显示在通知消息中.</p>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatCheckBox
 
 /**
- * Created by Stardust on 2017/10/19.
+ * Created by Stardust on Oct 19, 2017.
  * Transformed by SuperMonster003 on May 21, 2023.
  */
 class JsCheckBox : AppCompatCheckBox {

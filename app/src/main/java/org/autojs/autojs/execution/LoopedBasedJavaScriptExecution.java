@@ -4,10 +4,12 @@ import org.autojs.autojs.core.looper.Loopers;
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine;
 import org.autojs.autojs.engine.ScriptEngine;
 import org.autojs.autojs.engine.ScriptEngineManager;
+import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption;
 import org.autojs.autojs.script.JavaScriptSource;
+import org.autojs.autojs6.BuildConfig;
 
 /**
- * Created by Stardust on 2017/10/27.
+ * Created by Stardust on Oct 27, 2017.
  */
 public class LoopedBasedJavaScriptExecution extends RunnableScriptExecution {
 
@@ -15,14 +17,16 @@ public class LoopedBasedJavaScriptExecution extends RunnableScriptExecution {
         super(manager, task);
     }
 
-
     protected Object doExecution(final ScriptEngine engine) {
         engine.setTag(ScriptEngine.TAG_SOURCE, getSource());
         getListener().onStart(this);
         long delay = getConfig().getDelay();
         sleep(delay);
-        final LoopBasedJavaScriptEngine javaScriptEngine = (LoopBasedJavaScriptEngine) engine;
         final long interval = getConfig().getInterval();
+
+        var javaScriptEngine = BuildConfig.isInrt
+                ? (LoopBasedJavaScriptEngineWithDecryption) engine
+                : (LoopBasedJavaScriptEngine) engine;
         javaScriptEngine.getRuntime().loopers.setMainLooperQuitHandler(new Loopers.LooperQuitHandler() {
             long times = getConfig().getLoopTimes() == 0 ? Integer.MAX_VALUE : getConfig().getLoopTimes();
 
@@ -39,6 +43,7 @@ public class LoopedBasedJavaScriptExecution extends RunnableScriptExecution {
             }
         });
         javaScriptEngine.execute(getSource());
+
         return null;
     }
 

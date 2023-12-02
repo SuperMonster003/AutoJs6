@@ -10,7 +10,7 @@ import org.autojs.autojs.runtime.api.Console;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/5/3.
+ * Created by Stardust on May 3, 2017.
  */
 public class ScriptExecutionGlobalListener implements ScriptExecutionListener {
     private static final String ENGINE_TAG_START_TIME = "org.autojs.autojs.autojs.Goodbye, World";

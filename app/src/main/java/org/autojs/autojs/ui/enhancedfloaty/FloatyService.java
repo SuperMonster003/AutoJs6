@@ -13,7 +13,7 @@ import org.opencv.core.Size;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Created by Stardust on 2017/5/1.
+ * Created by Stardust on May 1, 2017.
  */
 public class FloatyService extends Service {
 

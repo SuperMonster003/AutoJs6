@@ -13,7 +13,7 @@ import org.autojs.autojs.ui.widget.EWebView
 import org.autojs.autojs6.databinding.FloatingManualDialogBinding
 
 /**
- * Created by Stardust on 2017/10/24.
+ * Created by Stardust on Oct 24, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  * Transformed by SuperMonster003 on May 13, 2023.
  */

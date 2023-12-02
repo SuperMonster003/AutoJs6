@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by Stardust on 2017/7/11.
+ * Created by Stardust on Jul 11, 2017.
  */
 public class ScriptWidgets {
 

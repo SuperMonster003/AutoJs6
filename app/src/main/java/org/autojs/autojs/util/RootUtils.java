@@ -15,7 +15,7 @@ import org.autojs.autojs6.R;
 import java.text.MessageFormat;
 
 /**
- * Created by Stardust on 2018/1/26.
+ * Created by Stardust on Jan 26, 2018.
  * Modified by SuperMonster003 as of March 10, 2022.
  */
 public class RootUtils {

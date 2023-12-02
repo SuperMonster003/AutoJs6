@@ -23,7 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * Created by Stardust on 2018/2/3.
+ * Created by Stardust on Feb 3, 2018.
  */
 public class AutoCompletion {
 

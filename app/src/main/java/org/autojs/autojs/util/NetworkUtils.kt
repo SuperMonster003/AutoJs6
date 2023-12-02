@@ -19,7 +19,7 @@ import java.util.Collections
 import java.util.Locale
 
 /**
- * Created by Stardust on 2017/4/9.
+ * Created by Stardust on Apr 9, 2017.
  * Modified by SuperMonster003 as of Jun 3, 2022.
  */
 @Suppress("DEPRECATION", "unused")

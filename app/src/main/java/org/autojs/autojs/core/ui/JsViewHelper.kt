@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.util.Ids
 
 /**
- * Created by Stardust on 2017/5/14.
+ * Created by Stardust on May 14, 2017.
  * Transformed by 抠脚本人 (https://github.com/little-alei) on Jul 10, 2023.
  */
 object JsViewHelper {

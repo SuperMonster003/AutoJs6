@@ -18,7 +18,7 @@ import java.lang.ref.WeakReference
 import java.net.URI
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  * Modified by SuperMonster003 as of Jul 13, 2022.
  */
 class AppUtils {
@@ -60,6 +60,7 @@ class AppUtils {
     }
 
     @ScriptInterface
+    @Suppress("unused")
     fun sendLocalBroadcastSync(intent: Intent?) {
         intent?.let { LocalBroadcastManager.getInstance(mContext).sendBroadcastSync(it) }
     }
@@ -84,7 +85,7 @@ class AppUtils {
         null
     }
 
-    private fun getApplicationInfoCompat(packageManager: PackageManager, packageName: String, flags: Int) = when {
+    private fun getApplicationInfoCompat(packageManager: PackageManager, packageName: String, @Suppress("SameParameterValue") flags: Int) = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
             packageManager.getApplicationInfo(packageName, ApplicationInfoFlags.of(flags.toLong()))
         }
@@ -113,7 +114,7 @@ class AppUtils {
         false
     }
 
-    private fun getPackageInfoCompat(packageManager: PackageManager, packageName: String, flags: Int) = when {
+    private fun getPackageInfoCompat(packageManager: PackageManager, packageName: String, @Suppress("SameParameterValue") flags: Int) = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
             packageManager.getPackageInfo(packageName, PackageInfoFlags.of(flags.toLong()))
         }
@@ -122,6 +123,7 @@ class AppUtils {
 
     @ScriptInterface
     @Throws(Exception::class)
+    @Suppress("unused")
     fun ensureInstalled(packageName: String?) {
         try {
             getPackageInfoCompat(mPackageManager, packageName!!, 0)
@@ -141,6 +143,7 @@ class AppUtils {
     }
 
     @ScriptInterface
+    @Suppress("unused")
     fun isInstalledAndEnabled(packageName: String?) = try {
         getApplicationInfoCompat(mPackageManager, packageName!!, 0).enabled
     } catch (e: NameNotFoundException) {
@@ -227,10 +230,14 @@ class AppUtils {
         }
 
         @JvmStatic
-        fun isBroadcastShortForm(s: String) = BroadcastShortForm.entries.any { it.shortName.contentEquals(s) }
+        @ScriptInterface
+        @Suppress("unused")
+        fun isBroadcastShortForm(s: String) = (@Suppress("EnumValuesSoftDeprecate") BroadcastShortForm.values()).any { it.shortName.contentEquals(s) }
 
         @JvmStatic
-        fun isActivityShortForm(s: String) = ActivityShortForm.entries.any { it.shortName.contentEquals(s) }
+        @ScriptInterface
+        @Suppress("unused")
+        fun isActivityShortForm(s: String) = (@Suppress("EnumValuesSoftDeprecate") ActivityShortForm.values()).any { it.shortName.contentEquals(s) }
 
         fun getInstalledApplications(context: Context): List<ApplicationInfo> = context.packageManager.let {
             when {

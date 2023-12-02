@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by Stardust on 2018/2/21.
+ * Created by Stardust on Feb 21, 2018.
  */
 public class TokenColorDeserializer implements JsonDeserializer<TokenColor> {
 

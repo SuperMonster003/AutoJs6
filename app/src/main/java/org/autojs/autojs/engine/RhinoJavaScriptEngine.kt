@@ -28,7 +28,7 @@ import java.net.URI
 import java.util.Locale
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  */
 open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Context) : JavaScriptEngine() {

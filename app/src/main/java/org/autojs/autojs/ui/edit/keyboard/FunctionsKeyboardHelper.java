@@ -15,8 +15,8 @@ import android.widget.LinearLayout;
 import org.autojs.autojs.event.BackPressedHandler;
 
 /**
- * Created by Stardust on 2017/12/9.
- * https://github.com/dss886/Android-FunctionsInputDetector
+ * Created by Stardust on Dec 9, 2017.
+ * <a href="https://github.com/dss886/Android-FunctionsInputDetector">Android-FunctionsInputDetector</a>
  */
 public class FunctionsKeyboardHelper implements BackPressedHandler {
 

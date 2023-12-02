@@ -8,7 +8,7 @@ import android.view.View;
 import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 
 /**
- * Created by Stardust on 2017/4/18.
+ * Created by Stardust on Apr 18, 2017.
  */
 public class DragGesture extends GestureDetector.SimpleOnGestureListener {
 

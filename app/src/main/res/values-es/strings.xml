@@ -201,9 +201,10 @@
     <string name="text_a11y_service_description">Requerido por el funcionamiento automático del script (clic, pulsación larga, deslizamiento, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">El servicio de accesibilidad está habilitado pero no se está ejecutando (vuelva a habilitarlo o reinicie el dispositivo)</string>
     <string name="text_a11y_service_may_be_needed">El servicio de accesibilidad puede ser necesario</string>
-    <string name="text_abis">ABIs</string>
-    <string name="text_abis_32bit">ABIs (32 bits)</string>
-    <string name="text_abis_64bit">ABIs (64 bits)</string>
+    <string name="text_supported_libraries_short">Bibliotecas</string>
+    <string name="text_supported_abis_short">ABIs</string>
+    <string name="text_supported_abis_short_32bit">ABIs (32 bits)</string>
+    <string name="text_supported_abis_short_64bit">ABIs (64 bits)</string>
     <string name="text_about">Acerca de</string>
     <string name="text_about_all_files_access">Sobre el acceso a todos los archivos</string>
     <string name="text_about_app_and_developer">Sobre la aplicación y el desarrollador</string>
@@ -696,7 +697,6 @@
     <string name="description_launcher_shortcuts">Los accesos directos pueden realizar acciones específicas en AutoJs6. Los usuarios pueden mostrar estos accesos directos en un lanzador compatible e iniciar rápidamente algunas tareas o iniciar una actividad, como leer la documentación de la aplicación AutoJs6, iniciar la página de configuración de AutoJs6, etc.</string>
     <string name="summary_text_launcher_shortcuts">Añadir accesos directos al lanzador</string>
     <string name="text_pin_shortcut_not_unsupported">No es posible anclar accesos directos al lanzador</string>
-    <string name="text_template_apk_path">Ruta de acceso de APK de plantilla</string>
     <string name="text_shizuku_access_description">Shizuku te permite obtener privilegios ADB y acceso a las APIs del sistema</string>
     <string name="text_shizuku_access">Permisos de Shizuku</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Conceder privilegios AutoJs6 en una aplicación Shizuku</string>
@@ -708,6 +708,17 @@
     <string name="error_failed_to_grant_shizuku_access">Fallo en la concesión de permisos Shizuku</string>
     <string name="error_unable_to_use_shizuku_service">No se puede utilizar el servicio Shizuku</string>
     <string name="error_input_fields_check_failed">Error en la comprobación del campo de entrada</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">Es necesario seleccionar al menos un ABI</string>
+    <string name="text_malfunctioning">Mal funcionamiento</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">El módulo \"%s\" no funciona debido a la falta de archivos de biblioteca necesarios</string>
+    <string name="text_unavailable">No disponible</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">La ABI seleccionada \"%s\" no se puede utilizar para crear una aplicación empaquetada, porque la versión actual de AutoJs6 no incluye la ABI mencionada.</string>
+    <string name="text_the_following_solutions_can_be_referred_to">Puede recurrir a las siguientes soluciones</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">Descargue e instale la versión de AutoJs6 que incluye la ABI anterior (el nombre del archivo contiene \"%s\")</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">Descargar e instalar la versión de AutoJs6 que incluye todas las ABIs (el nombre del archivo contiene \"universal\")</string>
+    <string name="text_recommended">Recomendado</string>
+    <string name="text_download_link_for_autojs6">Enlace de descarga de AutoJs6</string>
+    <string name="text_unavailable_abi_for">ABI \"%s\" no está disponible</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d artículo</item>

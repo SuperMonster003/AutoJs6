@@ -10,7 +10,7 @@ import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.util.ViewUtils;
 
 /**
- * Created by Stardust on 2017/1/23.
+ * Created by Stardust on Jan 23, 2017.
  */
 public class ShortcutActivity extends Activity {
 

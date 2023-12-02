@@ -7,7 +7,7 @@ import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.tool.SimpleCache;
 
 /**
- * Created by Stardust on 2017/3/14.
+ * Created by Stardust on Mar 14, 2017.
  */
 public class AssetsCache {
 

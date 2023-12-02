@@ -15,7 +15,7 @@ import org.json.JSONObject
 import java.io.File
 
 /**
- * Created by Stardust on 2017/4/1.
+ * Created by Stardust on Apr 1, 2017.
  * Modified by SuperMonster003 as of Mar 25, 2023.
  * Transformed by SuperMonster003 on Mar 25, 2023.
  */

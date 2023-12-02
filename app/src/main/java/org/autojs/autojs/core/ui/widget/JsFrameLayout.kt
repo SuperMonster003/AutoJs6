@@ -8,7 +8,7 @@ import androidx.annotation.StyleRes
 import org.autojs.autojs.core.ui.JsViewHelper
 
 /**
- * Created by Stardust on 2017/5/14.
+ * Created by Stardust on May 14, 2017.
  * Transformed by SuperMonster003 on May 22, 2023.
  */
 class JsFrameLayout : FrameLayout {

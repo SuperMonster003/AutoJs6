@@ -12,7 +12,7 @@ import org.autojs.autojs.theme.ThemeColorMutable;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/3/5.
+ * Created by Stardust on Mar 5, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 public class ThemeColorToolbar extends Toolbar implements ThemeColorMutable {

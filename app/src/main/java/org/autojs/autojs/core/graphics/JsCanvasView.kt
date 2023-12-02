@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
- * Created by Stardust on 2018/3/16.
+ * Created by Stardust on Mar 16, 2018.
  */
 @SuppressLint("ViewConstructor")
 class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {

@@ -12,7 +12,7 @@ import androidx.core.view.MenuItemCompat;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/10/25.
+ * Created by Stardust on Oct 25, 2017.
  */
 public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, SearchView.OnQueryTextListener {
 

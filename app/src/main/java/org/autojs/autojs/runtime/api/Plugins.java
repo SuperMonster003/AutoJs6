@@ -37,7 +37,7 @@ public class Plugins {
     }
 
     private File getScriptCacheDir(String packageName) {
-        File dir = new File(mPluginCacheDir, packageName + "/");
+        File dir = new File(mPluginCacheDir, packageName + File.separator);
         dir.mkdirs();
         return dir;
     }

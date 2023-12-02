@@ -16,7 +16,7 @@ import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.DialogScriptLoopBinding;
 
 /**
- * Created by Stardust on 2017/7/8.
+ * Created by Stardust on Jul 8, 2017.
  */
 public class ScriptLoopDialog {
 

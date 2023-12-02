@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 /**
- * Created by Stardust on 2017/4/29.
+ * Created by Stardust on Apr 29, 2017.
  */
 public class PRandomAccessBinaryFile extends RandomAccessFile {
 

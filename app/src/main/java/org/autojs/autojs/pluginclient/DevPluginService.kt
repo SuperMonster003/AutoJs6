@@ -15,7 +15,7 @@ import java.io.IOException
 import java.net.ServerSocket
 
 /**
- * Created by Stardust on 2017/5/11.
+ * Created by Stardust on May 11, 2017.
  * Modified by SuperMonster003 as of Jan 1, 2022.
  * Transformed by SuperMonster003 on Jul 1, 2023.
  */

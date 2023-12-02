@@ -20,9 +20,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-
 /**
- * Created by Stardust on 2017/11/25.
+ * Created by Stardust on Nov 25, 2017.
  */
 public class TemplateMatching {
 

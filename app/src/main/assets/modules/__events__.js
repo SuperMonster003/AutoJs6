@@ -6,6 +6,9 @@
  * @return {Internal.Events}
  */
 module.exports = function (scriptRuntime, scope) {
+
+    const KeyEvent = android.view.KeyEvent;
+
     let _ = {
         Events: (/* @IIFE */ () => {
             /**

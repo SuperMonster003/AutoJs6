@@ -1,7 +1,7 @@
 package org.autojs.autojs.ui.edit.editor;
 
 /**
- * Created by Stardust on 2018/2/25.
+ * Created by Stardust on Feb 25, 2018.
  */
 public class BracketMatching {
 

@@ -6,6 +6,7 @@ import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.pref.Pref;
 import org.autojs.autojs.util.ViewUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
 /**
- * Created by Stardust on 2018/2/22.
+ * Created by Stardust on Feb 22, 2018.
  */
 public class Themes {
 
@@ -71,7 +72,7 @@ public class Themes {
         }
         try {
             return Observable.fromArray(context.getAssets().list(ASSETS_THEMES_PATH))
-                    .map(file -> context.getAssets().open(ASSETS_THEMES_PATH + "/" + file))
+                    .map(file -> context.getAssets().open(ASSETS_THEMES_PATH + File.separator + file))
                     .map(stream -> Theme.fromJson(new InputStreamReader(stream)))
                     .collectInto((List<Theme>) new ArrayList<Theme>(), List::add)
                     .toObservable();

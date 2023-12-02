@@ -20,10 +20,12 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent;
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.model.explorer.ExplorerPage;
+import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.pref.Pref;
 import org.autojs.autojs.project.ProjectConfig;
@@ -33,7 +35,6 @@ import org.autojs.autojs.ui.widget.BindableViewHolder;
 import org.autojs.autojs.util.EnvironmentUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
-import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
 import org.autojs.autojs6.R;
 import org.greenrobot.eventbus.Subscribe;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +51,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * Created by Stardust on 2017/8/21.
+ * Created by Stardust on Aug 21, 2017.
  * Modified by SuperMonster003 as of Apr 1, 2023.
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -313,7 +314,14 @@ public class ExplorerView extends ThemeColorSwipeRefreshLayout implements SwipeR
 
     public void goUp() {
         mPageStateHistories.push(currentPageState);
-        setCurrentPageState(new ExplorerPageState(createRoot(new File(getCurrentPage().getPath()).getParent())));
+        String currentPagePath = getCurrentPage().getPath();
+        String nextPagePath;
+        if (Explorers.Providers.workspace().isCurrentSampleDir(getCurrentDirectory())) {
+            nextPagePath = WorkingDirectoryUtils.getPath();
+        } else {
+            nextPagePath = new File(currentPagePath).getParent();
+        }
+        setCurrentPageState(new ExplorerPageState(createRoot(nextPagePath)));
         loadItemList();
     }
 

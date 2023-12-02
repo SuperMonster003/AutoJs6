@@ -5,7 +5,7 @@ import android.view.InflateException;
 import java.util.HashMap;
 
 /**
- * Created by Stardust on 2017/11/3.
+ * Created by Stardust on Nov 3, 2017.
  */
 public class ValueMapper<V> {
 

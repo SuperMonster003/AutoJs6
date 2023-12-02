@@ -78,7 +78,7 @@ import org.autojs.autojs6.databinding.EditorViewBinding
 import java.io.File
 
 /**
- * Created by Stardust on 2017/9/28.
+ * Created by Stardust on Sep 28, 2017.
  * Modified by SuperMonster003 as of May 1, 2023.
  * Transformed by SuperMonster003 on May 1, 2023.
  */
@@ -276,13 +276,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun setUpFunctionsKeyboard() {
         mFunctionsKeyboardHelper = FunctionsKeyboardHelper.with(context as Activity)
             .setContent(editor)
-
-            // @Hint by SuperMonster003 on Jul 20, 2023.
-            //  ! Note the order in which setFunctionsView and setFunctionsTrigger are called.
-            //  ! zh-CN: 需留意 setFunctionsView 与 setFunctionsTrigger 的先后顺序.
-            .setFunctionsView(mFunctionsKeyboard)
             .setFunctionsTrigger(mShowFunctionsButton)
-
+            .setFunctionsView(mFunctionsKeyboard)
             .setEditView(editor.codeEditText)
             .build()
 
@@ -393,10 +388,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         if (showMessage) {
             showSnack(this, R.string.text_start_running)
         }
-        // TODO: 2018/10/24
+        // TODO by Stardust on Oct 24, 2018.
         val execution = runWithBroadcastSender(
             file,
-            uri!!.path?.let { File(it).parent },
+            workingDirectory = uri!!.path?.let { File(it).parent },
             overriddenFullPath,
         ) ?: return null
         scriptExecutionId = execution.id
@@ -532,7 +527,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         activity.supportFragmentManager.beginTransaction()
             .replace(R.id.toolbar_menu, SearchToolbarFragment().apply {
                 setOnMenuItemClickListener(this@EditorView)
-                arguments?.putBoolean(SearchToolbarFragment.ARGUMENT_SHOW_REPLACE_ITEM, showReplaceItem)
+                arguments ?: let { arguments = Bundle() }
+                arguments!!.putBoolean(SearchToolbarFragment.ARGUMENT_SHOW_REPLACE_ITEM, showReplaceItem)
             })
             .commit()
     }

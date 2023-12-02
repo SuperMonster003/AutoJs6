@@ -10,11 +10,12 @@ import java.io.FilenameFilter;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
 /**
- * Created by Stardust on 2017/10/19.
+ * Created by Stardust on Oct 19, 2017.
  */
 public class PFile extends File {
 
@@ -163,8 +164,17 @@ public class PFile extends File {
         return renameTo(new File(to, getName()));
     }
 
-    public boolean isProject() {
-        return getName().equals(FileUtils.TYPE.PROJECT.getTypeName());
+    public boolean canBuildApk() {
+        if (isFile()) {
+            return getExtension().equals(FileUtils.TYPE.JAVASCRIPT.getExtension());
+        }
+        if (isDirectory()) {
+            PFile[] listedFiles = listFiles();
+            if (listedFiles != null) {
+                return Arrays.stream(listedFiles).anyMatch(pFile -> pFile.getName().equals(FileUtils.TYPE.PROJECT.getTypeName()));
+            }
+        }
+        return false;
     }
 
 }

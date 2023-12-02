@@ -5,7 +5,7 @@ import org.autojs.autojs.script.ScriptSource;
 import java.io.Serializable;
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  */
 public class ScriptExecutionTask implements Serializable {
 

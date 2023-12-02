@@ -3,11 +3,15 @@ package org.autojs.autojs.ui.project
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.KeyEvent
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
+import androidx.core.graphics.drawable.toBitmapOrNull
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.Glide
 import com.google.android.material.textfield.TextInputLayout
@@ -38,6 +42,7 @@ import java.util.regex.Pattern
 class ProjectConfigActivity : BaseActivity() {
 
     private lateinit var mProjectLocation: EditText
+    private lateinit var mProjectLocationWrapper: LinearLayout
     private lateinit var mAppName: EditText
     private lateinit var mPackageName: EditText
     private lateinit var mVersionName: EditText
@@ -58,13 +63,25 @@ class ProjectConfigActivity : BaseActivity() {
         setContentView(binding.root)
 
         mProjectLocation = binding.projectLocation
+        mProjectLocationWrapper = binding.projectLocationWrapper
         mAppName = binding.appName
+
         mPackageName = binding.packageName
+        mPackageName.setOnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                if (event.action == KeyEvent.ACTION_UP) {
+                    mVersionName.requestFocus()
+                }
+                return@setOnKeyListener true
+            }
+            false
+        }
+
         mVersionName = binding.versionName
         mVersionCode = binding.versionCode
         mMainFileName = binding.mainFileName
 
-        mIcon = binding.icon.apply {
+        mIcon = binding.appIcon.apply {
             setOnClickListener { selectIcon() }
         }
 
@@ -78,7 +95,9 @@ class ProjectConfigActivity : BaseActivity() {
                 finish()
                 return
             }
-            mParentDirectory = File(parentDirectory)
+            mParentDirectory = File(parentDirectory).also {
+                mProjectLocation.setText(it.path)
+            }
             mProjectConfig = ProjectConfig()
         } else {
             val dir = intent.getStringExtra(EXTRA_DIRECTORY)
@@ -107,11 +126,12 @@ class ProjectConfigActivity : BaseActivity() {
                 mPackageName.setText(config.packageName)
                 mVersionName.setText(config.versionName)
                 mMainFileName.setText(config.mainScriptFile)
-                mProjectLocation.visibility = View.GONE
+                mProjectLocationWrapper.visibility = View.GONE
                 val icon = config.icon
-                if (icon != null) {
+                val iconFile = File(mDirectory, icon)
+                if (icon != null && iconFile.exists()) {
                     Glide.with(this)
-                        .load(File(mDirectory, icon))
+                        .load(iconFile)
                         .into(mIcon)
                 }
             }
@@ -182,7 +202,7 @@ class ProjectConfigActivity : BaseActivity() {
             val location = mProjectLocation.text.toString()
             mDirectory = File(location)
         }
-        //mProjectConfig.getLaunchConfig().setHideLogs(true);
+        // mProjectConfig.getLaunchConfig().setHideLogs(true);
     }
 
     private fun checkInputs(): Boolean {
@@ -208,7 +228,8 @@ class ProjectConfigActivity : BaseActivity() {
 
     private fun checkNotEmpty(editText: EditText?): Boolean {
         if (!TextUtils.isEmpty(editText!!.text)) return true
-        // TODO: 2017/12/8 more beautiful ways?
+        // TODO by Stardust on Dec 8, 2017.
+        //   ! More beautiful ways?
         val hint = (editText.parent.parent as TextInputLayout).hint.toString()
         editText.error = hint + getString(R.string.text_should_not_be_empty)
         return false
@@ -220,12 +241,13 @@ class ProjectConfigActivity : BaseActivity() {
         if (resultCode != RESULT_OK) {
             return
         }
-        AppsIconSelectActivity.getBitmapFromIntent(applicationContext, data)
+        AppsIconSelectActivity.getDrawableFromIntent(applicationContext, data)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ bitmap: Bitmap? ->
-                mIcon.setImageBitmap(bitmap)
-                mIconBitmap = bitmap
+            .subscribe({ drawable: Drawable? ->
+                drawable ?: return@subscribe
+                mIcon.setImageDrawable(drawable)
+                mIconBitmap = drawable.toBitmapOrNull()
             }) { obj: Throwable -> obj.printStackTrace() }
     }
 

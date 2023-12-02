@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>HttpResponseHeaders | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/httpResponseHeadersType.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-httpResponseHeadersType">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType active" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="httpResponseHeadersType" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_httpresponseheaders">HttpResponseHeaders</a></span><ul>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_i_httpresponseheaders">[I] HttpResponseHeaders</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_cache_control">[p?] cache-control</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_content_type">[p?] content-type</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_content_encoding">[p?] content-encoding</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_date">[p?] date</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_server">[p?] server</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_transfer_encoding">[p?] transfer-encoding</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_expires">[p?] expires</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_last_modified">[p?] last-modified</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_connection">[p?] connection</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_etag">[p?] etag</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_refresh">[p?] refresh</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_access_control_allow_origin">[p?] access-control-allow-origin</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_access_control_allow_methods">[p?] access-control-allow-methods</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_access_control_allow_credentials">[p?] access-control-allow-credentials</a></span></li>
+<li><span class="stability_undefined"><a href="#httpresponseheaderstype_p_content_range">[p?] content-range</a></span></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>HttpResponseHeaders<span><a class="mark" href="#httpresponseheaderstype_httpresponseheaders" id="httpresponseheaderstype_httpresponseheaders">#</a></span></h1>
+<p>HttpResponseHeaders 是一个代表 <a href="httpHeaderGlossary.html#httpheaderglossary_响应标头">HTTP 响应头</a> 信息的接口.</p>
+<p>HTTP 标头字段是大小写 <strong>不敏感</strong> 的 (根据 <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>), 本章节采用 <strong>全部小写</strong> 的形式表示标头字段 (如 content-type).</p>
+<blockquote>
+<p>注: 本章节仅列出部分响应头字段信息, 更多信息可参阅 <a href="httpHeaderGlossary.html#httpheaderglossary_响应标头">HTTP 标头</a> 术语章节.</p>
+</blockquote>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">HttpResponseHeaders</p>
+
+<hr>
+<h2>[I] HttpResponseHeaders<span><a class="mark" href="#httpresponseheaderstype_i_httpresponseheaders" id="httpresponseheaderstype_i_httpresponseheaders">#</a></span></h2>
+<p>HttpResponseHeaders 接口类型的变量, 实际是将 <a href="https://square.github.io/okhttp/3.x/okhttp/index.html?okhttp3/Headers.html">okhttp3.Headers</a> 进行 JavaScript 对象化得到的.</p>
+<p>大致过程如下:</p>
+<pre><code class="lang-js">function getHeaders() {
+    let result = {};
+
+    /** @type {okhttp3.Headers} */
+    let headers = res.headers();
+
+    for (let i = 0; i &lt; headers.size(); i += 1) {
+        let name = headers.name(i).toLowerCase();
+        let value = headers.value(i);
+        if (!(name in result)) {
+            result[name] = value;
+            continue;
+        }
+
+        /* 同名的响应头字段, 将新旧数据共同存入数组中. */
+
+        let origin = result[name];
+        if (!Array.isArray(origin)) {
+            result[name] = [ origin ];
+        }
+        result[name].push(value);
+    }
+    return result;
+}
+</code></pre>
+<h2>[p?] cache-control<span><a class="mark" href="#httpresponseheaderstype_p_cache_control" id="httpresponseheaderstype_p_cache_control">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>标头字段 cache-control 被用于在 HTTP 请求和响应中, 通过指定指令来实现缓存机制.</p>
+<pre><code class="lang-text"># 语法
+cache-control: must-revalidate
+cache-control: no-cache
+cache-control: no-store
+cache-control: no-transform
+cache-control: public
+cache-control: private
+cache-control: proxy-revalidate
+cache-control: max-age=&lt;seconds&gt;
+cache-control: s-maxage=&lt;seconds&gt;
+... ...
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>must-revalidate</td>
+<td>一旦资源过期, 在成功向原始服务器验证之前, 缓存不能用该资源响应后续请求</td>
+</tr>
+<tr>
+<td>no-cache</td>
+<td>发布缓存副本前, 强制要求原始服务器进行验证缓存中的请求</td>
+</tr>
+<tr>
+<td>no-store</td>
+<td>不使用任何缓存</td>
+</tr>
+<tr>
+<td>no-transform</td>
+<td>不得对资源进行转换或转变</td>
+</tr>
+<tr>
+<td>public</td>
+<td>表明响应可以被任何对象 (客户端及代理服务器等) 缓存, 即使是通常不可缓存的内容</td>
+</tr>
+<tr>
+<td>private</td>
+<td>表明响应只能被单个用户缓存, 不能作为共享缓存</td>
+</tr>
+<tr>
+<td>proxy-revalidate</td>
+<td>与 must-revalidate 作用相同, 但它仅适用于共享缓存 (如代理), 并被私有缓存忽略</td>
+</tr>
+<tr>
+<td>max-age=&lt;seconds&gt;</td>
+<td>设置缓存存储最大周期, 单位为秒, 超过这个时间缓存被认为过期</td>
+</tr>
+<tr>
+<td>s-maxage=&lt;seconds&gt;</td>
+<td>覆盖 max-age 或 expires 头, 但仅适用于共享缓存, 私有缓存会忽略</td>
+</tr>
+<tr>
+<td>... ...</td>
+<td>... ...</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Cache-Control">MDN</a></p>
+</blockquote>
+<h2>[p?] content-type<span><a class="mark" href="#httpresponseheaderstype_p_content_type" id="httpresponseheaderstype_p_content_type">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>标头字段 Content-Type 告诉客户端实际返回内容的内容类型 (如 <a href="mimeTypeGlossary.html">MIME 类型</a>).</p>
+<pre><code class="lang-text"># 示例
+content-type: text/html; charset=utf-8
+content-type: multipart/form-data; boundary=something
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>media-type</td>
+<td>资源或数据的 <a href="mimeTypeGlossary.html">MIME 类型</a></td>
+</tr>
+<tr>
+<td>charset</td>
+<td>字符编码</td>
+</tr>
+<tr>
+<td>... ...</td>
+<td>... ...</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Type">MDN</a></p>
+</blockquote>
+<h2>[p?] content-encoding<span><a class="mark" href="#httpresponseheaderstype_p_content_encoding" id="httpresponseheaderstype_p_content_encoding">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>标头字段 content-encoding 列出了对当前实体消息 (消息荷载) 应用的编码类型以及编码顺序.</p>
+<p>它告知接收者需要以何种顺序解码该实体消息才能获得原始荷载格式.</p>
+<p>content-encoding 主要用于在不丢失原媒体类型内容的情况下压缩消息数据.</p>
+<p>注意原始媒体内容的类型通过 <a href="#httpresponseheaderstype_p_content_type">content-type</a> 首部给出, 而 content-encoding 应用于数据的表示或编码形式. 如果原始媒体以某种方式编码 (如 zip 文件), 则该信息不应该被包含在 content-encoding 首部内.</p>
+<pre><code class="lang-text"># 示例
+content-encoding: gzip
+content-encoding: compress
+content-encoding: deflate
+content-encoding: br
+content-encoding: deflate, gzip
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gzip</td>
+<td>采用 Lempel-Ziv Coding (LZ77) 压缩算法, 以及 32 位 CRC 校验的编码方式</td>
+</tr>
+<tr>
+<td>compress</td>
+<td>采用 Lempel-Ziv-Welch (LZW) 压缩算法</td>
+</tr>
+<tr>
+<td>deflate</td>
+<td>采用 zlib 结构 (RFC 1950) 和 deflate 压缩算法 (RFC 1951)</td>
+</tr>
+<tr>
+<td>br</td>
+<td>采用 Brotli 算法的编码方式</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Encoding">MDN</a></p>
+</blockquote>
+<h2>[p?] date<span><a class="mark" href="#httpresponseheaderstype_p_date" id="httpresponseheaderstype_p_date">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>date 是一个通用首部, 其中包含了报文创建的日期和时间.</p>
+<pre><code class="lang-text"># 语法
+date: &lt;day-name&gt;, &lt;day&gt; &lt;month&gt; &lt;year&gt; &lt;hour&gt;:&lt;minute&gt;:&lt;second&gt; GMT
+
+# 示例
+date: Wed, 21 Oct 2015 07:28:00 GMT
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;day-name&gt;</td>
+<td>&quot;Mon&quot;, &quot;Tue&quot;, &quot;Wed&quot;, &quot;Thu&quot;, &quot;Fri&quot;, &quot;Sat&quot;, &quot;Sun&quot; 之一 (区分大小写)</td>
+</tr>
+<tr>
+<td>&lt;day&gt;</td>
+<td>2 位数字表示天数, 例如 &quot;04&quot; 或 &quot;23&quot;</td>
+</tr>
+<tr>
+<td>&lt;month&gt;</td>
+<td>&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;, &quot;Apr&quot;, &quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot; 之一 (区分大小写)</td>
+</tr>
+<tr>
+<td>&lt;year&gt;</td>
+<td>4 位数字表示年份, 例如 &quot;1990&quot; 或 &quot;2016&quot;</td>
+</tr>
+<tr>
+<td>&lt;hour&gt;</td>
+<td>2 位数字表示小时数, 例如 &quot;09&quot; 或 &quot;23&quot;</td>
+</tr>
+<tr>
+<td>&lt;minute&gt;</td>
+<td>2 位数字表示分钟数, 例如 &quot;04&quot; 或 &quot;59&quot;</td>
+</tr>
+<tr>
+<td>&lt;second&gt;</td>
+<td>2 位数字表示秒数, 例如 &quot;04&quot; 或 &quot;59&quot;</td>
+</tr>
+<tr>
+<td>GMT</td>
+<td>格林尼治标准时间. 在 HTTP 协议中, 时间都是用格林尼治标准时间表示, 而非本地时间</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Date">MDN</a></p>
+</blockquote>
+<h2>[p?] server<span><a class="mark" href="#httpresponseheaderstype_p_server" id="httpresponseheaderstype_p_server">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>server 首部包含了处理请求的源头服务器所用到的软件相关信息.</p>
+<pre><code class="lang-text"># 语法
+server: &lt;product&gt;
+
+# 示例
+server: Apache/2.4.1 (Unix)
+server: nginx/1.16.1
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;product&gt;</td>
+<td>处理请求的软件或者产品的名称</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Server">MDN</a></p>
+</blockquote>
+<h2>[p?] transfer-encoding<span><a class="mark" href="#httpresponseheaderstype_p_transfer_encoding" id="httpresponseheaderstype_p_transfer_encoding">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>transfer-encoding 首部指明实体传递采用的编码形式.</p>
+<p>transfer-encoding 仅应用于两个节点之间的消息传递, 而非资源本身. 一个多节点连接的每一段都可应用不同的transfer-encoding 值. 如需将压缩后的数据应用于整个连接, 可使用端到端传输首部 content-encoding.</p>
+<pre><code class="lang-text"># 示例
+transfer-encoding: chunked
+transfer-encoding: compress
+transfer-encoding: deflate
+transfer-encoding: gzip
+transfer-encoding: identity
+transfer-encoding: gzip, chunked
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;chunked&gt;</td>
+<td>数据以一系列分块的形式进行发送</td>
+</tr>
+<tr>
+<td>&lt;compress&gt;</td>
+<td>采用 Lempel-Ziv-Welch (LZW) 压缩算法</td>
+</tr>
+<tr>
+<td>&lt;deflate&gt;</td>
+<td>采用 zlib 结构 (RFC 1950) 和 deflate 压缩算法 (RFC 1951)</td>
+</tr>
+<tr>
+<td>&lt;gzip&gt;</td>
+<td>采用 Lempel-Ziv coding (LZ77) 压缩算法, 以及 32 位 CRC 校验的编码方式</td>
+</tr>
+<tr>
+<td>&lt;identity&gt;</td>
+<td>用于指代自身 (如: 未经过压缩和修改). 除非特别指明, 这个标记始终可被接受</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Transfer-Encoding">MDN</a></p>
+</blockquote>
+<h2>[p?] expires<span><a class="mark" href="#httpresponseheaderstype_p_expires" id="httpresponseheaderstype_p_expires">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>expires 响应头包含日期及时间. 指在此时间之后, 响应过期.</p>
+<p>若 cache-control 响应头设置了 &quot;max-age&quot; 或 &quot;s-max-age&quot; 指令, 则 expires 头将被忽略.</p>
+<pre><code class="lang-text"># 语法
+expires: &lt;http-date&gt;
+
+# 示例
+expires: Wed, 21 Oct 2015 07:28:00 GMT
+</code></pre>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Expires">MDN</a></p>
+</blockquote>
+<h2>[p?] last-modified<span><a class="mark" href="#httpresponseheaderstype_p_last_modified" id="httpresponseheaderstype_p_last_modified">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>last-modified 首部包含源头服务器认定的资源做出修改的日期及时间.</p>
+<p>它通常被用作一个验证器来判断接收到的或者存储的资源是否彼此一致.</p>
+<p>由于精确度比 etag 低, 因此常作为备用, 含 if-modified-since 或 if-unmodified-since 首部的条件请求会使用这个字段.</p>
+<pre><code class="lang-text"># 语法
+last-modified: &lt;http-date&gt;
+
+# 示例
+last-modified: Wed, 21 Oct 2015 07:28:00 GMT
+</code></pre>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Last-Modified">MDN</a></p>
+</blockquote>
+<h2>[p?] connection<span><a class="mark" href="#httpresponseheaderstype_p_connection" id="httpresponseheaderstype_p_connection">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>connection 通用标头控制网络连接在当前会话完成后是否仍然保持打开状态.</p>
+<pre><code class="lang-text"># 示例
+connection: keep-alive
+connection: close
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>close</td>
+<td>表明客户端或服务器想要关闭该网络连接. 这是 HTTP/1.0 请求的默认值</td>
+</tr>
+<tr>
+<td>keep-alive</td>
+<td>表明客户端想要保持该网络连接打开. HTTP/1.1 的请求默认使用一个持久连接</td>
+</tr>
+<tr>
+<td>... ...</td>
+<td>... ...</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Connection">MDN</a></p>
+</blockquote>
+<h2>[p?] etag<span><a class="mark" href="#httpresponseheaderstype_p_etag" id="httpresponseheaderstype_p_etag">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>etag 响应头是资源特定版本的标识符.</p>
+<p>若给定 URL 中的资源更改, 则一定要生成新的 etag 值, 通过比较这些 etag 能快速确定此资源是否变化.</p>
+<pre><code class="lang-text"># 语法
+etag: W/&quot;&lt;etag_value&gt;&quot;
+etag: &quot;&lt;etag_value&gt;&quot;
+
+# 示例
+etag: &quot;737060cd8c284d8af7ad3082f209582d&quot;
+etag: &quot;33a64df551425fcc55e4d42a148795d9f25f89d4&quot;
+etag: W/&quot;0815&quot;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W/ (可选)</td>
+<td>表示使用弱验证器</td>
+</tr>
+<tr>
+<td>&lt;etag_value&gt;</td>
+<td>实体标签唯一地表示所请求的资源</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/ETag">MDN</a></p>
+</blockquote>
+<h2>[p?] refresh<span><a class="mark" href="#httpresponseheaderstype_p_refresh" id="httpresponseheaderstype_p_refresh">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>refresh 标头字段指示浏览器重新加载页面或重定向到另一个页面.</p>
+<pre><code class="lang-text"># 语法
+refresh: &lt;seconds&gt;
+refresh: &lt;seconds&gt;;url=&lt;url&gt;
+
+# 示例
+refresh: 3
+refresh: 3;url=https://www.mozilla.org
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;seconds&gt;</td>
+<td>重载或重定向页面前的等待时间, 单位为秒</td>
+</tr>
+<tr>
+<td>&lt;url&gt;</td>
+<td>重定向页面的 URL</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/meta#attr-http-equiv">MDN</a></p>
+</blockquote>
+<h2>[p?] access-control-allow-origin<span><a class="mark" href="#httpresponseheaderstype_p_access_control_allow_origin" id="httpresponseheaderstype_p_access_control_allow_origin">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>access-control-allow-origin 响应标头指定了该响应的资源是否被允许与给定的来源 (origin) 共享.</p>
+<pre><code class="lang-text"># 语法
+access-control-allow-origin: *
+access-control-allow-origin: &lt;origin&gt;
+access-control-allow-origin: null
+
+# 示例
+access-control-allow-origin: *
+access-control-allow-origin: https://developer.mozilla.org
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>*</td>
+<td>对于不包含凭据的请求, 服务器会以 &quot;*&quot; 作为通配符, 从而允许任意来源的请求代码都具有访问资源的权限</td>
+</tr>
+<tr>
+<td>&lt;origin&gt;</td>
+<td>指定一个来源 (仅能指定一个). 若服务器支持多个来源的客户端, 其必须以与指定客户端匹配的来源来响应请求</td>
+</tr>
+<tr>
+<td>null</td>
+<td>指定来源为 &quot;null&quot;, 不建议被使用</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Allow-Origin">MDN</a></p>
+</blockquote>
+<h2>[p?] access-control-allow-methods<span><a class="mark" href="#httpresponseheaderstype_p_access_control_allow_methods" id="httpresponseheaderstype_p_access_control_allow_methods">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>响应首部 access-control-allow-methods 在对 &quot;预检请求 (Preflight Request)&quot; 的应答中明确了客户端所要访问的资源允许使用的方法或方法列表.</p>
+<pre><code class="lang-text"># 语法
+access-control-allow-methods: &lt;method&gt;, &lt;method&gt;, ...
+
+# 示例
+access-control-allow-methods: POST, GET, OPTIONS
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;method&gt;</td>
+<td>用逗号隔开的允许使用的 <a href="httpRequestMethodsGlossary.html">HTTP 请求方法 (HTTP Request Methods)</a> 列表</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Allow-Methods">MDN</a></p>
+</blockquote>
+<h2>[p?] access-control-allow-credentials<span><a class="mark" href="#httpresponseheaderstype_p_access_control_allow_credentials" id="httpresponseheaderstype_p_access_control_allow_credentials">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>access-control-allow-credentials 响应头用于在请求要求包含 credentials (Request.credentials 的值为 include) 时, 告知浏览器是否可以将对请求的响应暴露给前端 JavaScript 代码.</p>
+<pre><code class="lang-text"># 语法
+access-control-allow-credentials: true
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>true</td>
+<td>这个头的唯一有效值 (区分大小写). 若不需要 credentials, 可直接忽视这个头, 而不必设置为 false</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials">MDN</a></p>
+</blockquote>
+<h2>[p?] content-range<span><a class="mark" href="#httpresponseheaderstype_p_content_range" id="httpresponseheaderstype_p_content_range">#</a></span></h2>
+<div class="signature"><ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_string">string</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+</div><p>content-range 表示一个数据片段在整个文件中的位置.</p>
+<pre><code class="lang-text"># 语法
+content-range: &lt;unit&gt; &lt;range-start&gt;-&lt;range-end&gt;/&lt;size&gt;
+content-range: &lt;unit&gt; &lt;range-start&gt;-&lt;range-end&gt;/*
+content-range: &lt;unit&gt; */&lt;size&gt;
+
+# 示例
+content-range: bytes 0-5/7877
+content-range: bytes 200-1000/67589
+content-range: bytes 1000-2000/*
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;unit&gt;</td>
+<td>数据区间所采用的单位, 通常是字节 (bytes)</td>
+</tr>
+<tr>
+<td>&lt;range-start&gt;</td>
+<td>一个整数, 表示在给定单位下, 区间的起始值</td>
+</tr>
+<tr>
+<td>&lt;range-end&gt;</td>
+<td>一个整数, 表示在给定单位下, 区间的结束值</td>
+</tr>
+<tr>
+<td>&lt;size&gt;</td>
+<td>整个文件的大小 (大小未知可用 &quot;*&quot; 表示)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>参阅: <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Content-Range">MDN</a></p>
+</blockquote>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

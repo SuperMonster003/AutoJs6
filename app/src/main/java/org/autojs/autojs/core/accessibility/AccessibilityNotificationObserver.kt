@@ -10,7 +10,7 @@ import java.util.ArrayList
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Created by Stardust on 2017/11/3.
+ * Created by Stardust on Nov 3, 2017.
  */
 class AccessibilityNotificationObserver(private val mContext: Context) : NotificationListener, AccessibilityDelegate {
 

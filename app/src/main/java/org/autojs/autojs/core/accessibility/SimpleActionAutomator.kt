@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import android.accessibilityservice.AccessibilityService as AndroidAccessibilityService
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  */
 class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge, private val scriptRuntime: ScriptRuntime) {
 

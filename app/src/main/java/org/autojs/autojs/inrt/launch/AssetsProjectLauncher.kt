@@ -21,7 +21,7 @@ import java.io.File
 import java.io.IOException
 
 /**
- * Created by Stardust on 2018/1/24.
+ * Created by Stardust on Jan 24, 2018.
  */
 open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private val mActivity: Context) {
     private val mProjectDir: String = File(mActivity.filesDir, "project/").path

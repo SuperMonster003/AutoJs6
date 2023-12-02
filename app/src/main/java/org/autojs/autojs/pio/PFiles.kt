@@ -22,7 +22,7 @@ import kotlin.math.ln
 import kotlin.math.pow
 
 /**
- * Created by Stardust on 2017/4/1.
+ * Created by Stardust on Apr 1, 2017.
  */
 object PFiles {
 
@@ -92,8 +92,7 @@ object PFiles {
 
     @JvmStatic
     fun ensureDir(path: String): Boolean {
-        var i = path.lastIndexOf("\\")
-        if (i < 0) i = path.lastIndexOf("/")
+        val i = path.lastIndexOf(separator)
         return if (i >= 0) {
             val folder = path.substring(0, i)
             val file = File(folder)

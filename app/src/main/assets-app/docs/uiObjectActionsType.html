@@ -1,0 +1,1704 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>控件节点行为 (UiObjectActions) | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/uiObjectActionsType.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-uiObjectActionsType">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType active" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="uiObjectActionsType" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_uiobjectactions">控件节点行为 (UiObjectActions)</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_performaction">[m!] performAction</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_performaction_action_arguments">performAction(action, ...arguments)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_click">[m=] click</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_click">click()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_longclick">[m=] longClick</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_longclick">longClick()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_accessibilityfocus">[m=] accessibilityFocus</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_accessibilityfocus">accessibilityFocus()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_clearaccessibilityfocus">[m=] clearAccessibilityFocus</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_clearaccessibilityfocus">clearAccessibilityFocus()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_focus">[m=] focus</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_focus">focus()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_clearfocus">[m=] clearFocus</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_clearfocus">clearFocus()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_dragstart">[m=] dragStart</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_dragstart">dragStart()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_dragdrop">[m=] dragDrop</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_dragdrop">dragDrop()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_dragcancel">[m=] dragCancel</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_dragcancel">dragCancel()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_imeenter">[m=] imeEnter</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_imeenter">imeEnter()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_movewindow">[m=] moveWindow</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_movewindow_x_y">moveWindow(x, y)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_nextatmovementgranularity">[m=] nextAtMovementGranularity</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_nextatmovementgranularity_granularity_isextendselection">nextAtMovementGranularity(granularity, isExtendSelection)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_nexthtmlelement">[m=] nextHtmlElement</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_nexthtmlelement_element">nextHtmlElement(element)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_pageleft">[m=] pageLeft</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_pageleft">pageLeft()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_pageup">[m=] pageUp</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_pageup">pageUp()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_pageright">[m=] pageRight</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_pageright">pageRight()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_pagedown">[m=] pageDown</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_pagedown">pageDown()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_pressandhold">[m=] pressAndHold</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_pressandhold">pressAndHold()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_previousatmovementgranularity">[m=] previousAtMovementGranularity</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_previousatmovementgranularity_granularity_isextendselection">previousAtMovementGranularity(granularity, isExtendSelection)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_previoushtmlelement">[m=] previousHtmlElement</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_previoushtmlelement_element">previousHtmlElement(element)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_showtextsuggestions">[m=] showTextSuggestions</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_showtextsuggestions">showTextSuggestions()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_showtooltip">[m=] showTooltip</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_showtooltip">showTooltip()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_hidetooltip">[m=] hideTooltip</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_hidetooltip">hideTooltip()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_show">[m=] show</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_show">show()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_dismiss">[m=] dismiss</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_dismiss">dismiss()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_copy">[m=] copy</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_copy">copy()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_cut">[m=] cut</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_cut">cut()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_paste">[m=] paste</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_paste">paste()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_select">[m=] select</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_select">select()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_expand">[m=] expand</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_expand">expand()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_collapse">[m=] collapse</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_collapse">collapse()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_scrollleft">[m=] scrollLeft</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_scrollleft">scrollLeft()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_scrollup">[m=] scrollUp</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_scrollup">scrollUp()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_scrollright">[m=] scrollRight</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_scrollright">scrollRight()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_scrolldown">[m=] scrollDown</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_scrolldown">scrollDown()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_scrollforward">[m=] scrollForward</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_scrollforward">scrollForward()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_scrollbackward">[m=] scrollBackward</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_scrollbackward">scrollBackward()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_scrollto">[m=] scrollTo</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_scrollto_row_column">scrollTo(row, column)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_contextclick">[m=] contextClick</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_contextclick">contextClick()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_settext">[m=] setText</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_settext_text">setText(text)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_setselection">[m=] setSelection</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_setselection_start_end">setSelection(start, end)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_clearselection">[m=] clearSelection</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_clearselection">clearSelection()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_m_setprogress">[m=] setProgress</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_setprogress_progress">setProgress(progress)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_i_actionargument">[I] ActionArgument</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_intactionargument">[C] IntActionArgument</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_name_value">[c] (name, value)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_booleanactionargument">[C] BooleanActionArgument</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_name_value_1">[c] (name, value)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_charsequenceactionargument">[C] CharSequenceActionArgument</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_name_value_2">[c] (name, value)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_stringactionargument">[C] StringActionArgument</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_name_value_3">[c] (name, value)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_floatactionargument">[C] FloatActionArgument</a></span><ul>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype_c_name_value_4">[c] (name, value)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#uiobjectactionstype">全局行为重定向</a></span></li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>控件节点行为 (UiObjectActions)<span><a class="mark" href="#uiobjectactionstype_uiobjectactions" id="uiobjectactionstype_uiobjectactions">#</a></span></h1>
+<p>UiObjectActions 是一个 Java 接口, 代表 <a href="uiObjectType.html">控件节点 (UiObject)</a> 的行为集合.</p>
+<p>该接口有一个抽象方法 <a href="#uiobjectactionstype_m_performaction">performAction</a> 是执行具体的控件节点行为的核心.<br>诸如 [ click / copy / paste ] 等方法均是对 performAction 的封装, 因此用户也可利用 performAction 实现自定义控件节点行为的封装.</p>
+<p>下表列出了部分行为 ID 名称, 及对应已实现封装的方法名称 (星号表示 AutoJs6 新增方法):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">行为 ID</th>
+<th style="text-align:left">封装方法名</th>
+<th>最低 API 等级</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ACTION_ACCESSIBILITY_FOCUS</td>
+<td style="text-align:left">accessibilityFocus</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_CLEAR_ACCESSIBILITY_FOCUS</td>
+<td style="text-align:left">clearAccessibilityFocus</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_CLEAR_FOCUS</td>
+<td style="text-align:left">clearFocus</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_CLEAR_SELECTION</td>
+<td style="text-align:left">clearSelection *</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_CLICK</td>
+<td style="text-align:left">click</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_COLLAPSE</td>
+<td style="text-align:left">collapse</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_CONTEXT_CLICK</td>
+<td style="text-align:left">contextClick</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_COPY</td>
+<td style="text-align:left">copy</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_CUT</td>
+<td style="text-align:left">cut</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_DISMISS</td>
+<td style="text-align:left">dismiss</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_DRAG_CANCEL</td>
+<td style="text-align:left">dragCancel *</td>
+<td>32 (12.1) [S_V2]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_DRAG_DROP</td>
+<td style="text-align:left">dragDrop *</td>
+<td>32 (12.1) [S_V2]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_DRAG_START</td>
+<td style="text-align:left">dragStart *</td>
+<td>32 (12.1) [S_V2]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_EXPAND</td>
+<td style="text-align:left">expand</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_FOCUS</td>
+<td style="text-align:left">focus</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_HIDE_TOOLTIP</td>
+<td style="text-align:left">hideTooltip *</td>
+<td>28 (9) [P]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_IME_ENTER</td>
+<td style="text-align:left">imeEnter *</td>
+<td>30 (11) [R]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_LONG_CLICK</td>
+<td style="text-align:left">longClick</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_MOVE_WINDOW</td>
+<td style="text-align:left">moveWindow *</td>
+<td>26 (8) [O]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_NEXT_AT_MOVEMENT_GRANULARITY</td>
+<td style="text-align:left">nextAtMovementGranularity *</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_NEXT_HTML_ELEMENT</td>
+<td style="text-align:left">nextHtmlElement *</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_PAGE_DOWN</td>
+<td style="text-align:left">pageDown *</td>
+<td>29 (10) [Q]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_PAGE_LEFT</td>
+<td style="text-align:left">pageLeft *</td>
+<td>29 (10) [Q]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_PAGE_RIGHT</td>
+<td style="text-align:left">pageRight *</td>
+<td>29 (10) [Q]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_PAGE_UP</td>
+<td style="text-align:left">pageUp *</td>
+<td>29 (10) [Q]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_PASTE</td>
+<td style="text-align:left">paste</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_PRESS_AND_HOLD</td>
+<td style="text-align:left">pressAndHold *</td>
+<td>30 (11) [R]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY</td>
+<td style="text-align:left">previousAtMovementGranularity *</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_PREVIOUS_HTML_ELEMENT</td>
+<td style="text-align:left">previousHtmlElement *</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SCROLL_BACKWARD</td>
+<td style="text-align:left">scrollBackward</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SCROLL_DOWN</td>
+<td style="text-align:left">scrollDown</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SCROLL_FORWARD</td>
+<td style="text-align:left">scrollForward</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SCROLL_LEFT</td>
+<td style="text-align:left">scrollLeft</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SCROLL_RIGHT</td>
+<td style="text-align:left">scrollRight</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SCROLL_TO_POSITION</td>
+<td style="text-align:left">scrollTo</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SCROLL_UP</td>
+<td style="text-align:left">scrollUp</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SELECT</td>
+<td style="text-align:left">select</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SET_PROGRESS</td>
+<td style="text-align:left">setProgress</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SET_SELECTION</td>
+<td style="text-align:left">setSelection</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SET_TEXT</td>
+<td style="text-align:left">setText</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SHOW_ON_SCREEN</td>
+<td style="text-align:left">show</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SHOW_TEXT_SUGGESTIONS</td>
+<td style="text-align:left">showTextSuggestions *</td>
+<td>33 (13) [TIRAMISU]</td>
+</tr>
+<tr>
+<td style="text-align:left">ACTION_SHOW_TOOLTIP</td>
+<td style="text-align:left">showTooltip *</td>
+<td>28 (9) [P]</td>
+</tr>
+</tbody>
+</table>
+<p>若当前设备不满足列表中最低 API 等级要求, 使用对应方法时不会抛出异常, 会静默返回 false:</p>
+<pre><code class="lang-js">/* 
+    例如 ACTION_IME_ENTER 要求设备运行条件不低于 Android API 30 (11) [R].
+    在 API &lt; 30 的设备上一定返回 false 且 IME ENTER 无效果 (但不会抛出异常).
+ */
+console.log(pickup({
+    focusable: true,
+    contentMatch: &#39;.+&#39;,
+}, &#39;imeEnter&#39;));
+</code></pre>
+<p>上表中所有已封装的控件行为对应的方法 <strong>名称</strong> 均已全局化, 有关全局化方法的使用方式及方法的绑定源信息, 可参阅 <a href="#uiobjectactionstype_全局行为重定向">全局行为重定向</a> 小节.</p>
+<blockquote>
+<p>参阅: <a href="https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo.AccessibilityAction">Android Docs</a></p>
+</blockquote>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">UiObjectActions</p>
+
+<hr>
+<h2>[m!] performAction<span><a class="mark" href="#uiobjectactionstype_m_performaction" id="uiobjectactionstype_m_performaction">#</a></span></h2>
+<p>用于执行指定的控件行为.<br>是一个无默认实现的抽象方法.</p>
+<h3>performAction(action, ...arguments)<span><a class="mark" href="#uiobjectactionstype_performaction_action_arguments" id="uiobjectactionstype_performaction_action_arguments">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>action</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 行为的唯一标志符 (Action ID)</li>
+<li><strong>arguments</strong> { <span class="type"><a href="documentation.html#documentation_可变参数">...</a><a href="#uiobjectactionstype_i_actionargument">ActionArgument</a><a href="documentation.html#documentation_可变参数">[]</a></span> } - 行为参数, 用于给行为传递参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>实现此方法的类有:</p>
+<ul>
+<li><a href="uiSelectorType.html">UiSelector</a></li>
+<li><a href="uiObjectType.html">UiObject</a></li>
+<li><a href="uiObjectCollectionType.html">UiObjectCollection</a></li>
+</ul>
+<p>源代码摘要:</p>
+<ul>
+<li>UiSelector</li>
+</ul>
+<pre><code class="lang-kotlin">/* Updated as of Nov 2, 2022. */
+
+override fun performAction(action: Int, vararg arguments: ActionArgument): Boolean {
+    return untilFind().performAction(action, *arguments)
+}
+</code></pre>
+<ul>
+<li>UiObject</li>
+</ul>
+<pre><code class="lang-kotlin">/* Updated as of Nov 2, 2022. */
+
+override fun performAction(action: Int, vararg arguments: ActionArgument): Boolean {
+    return performAction(action, Bundle().apply { arguments.forEach { it.putIn(this) } })
+}
+
+override fun performAction(action: Int, bundle: Bundle): Boolean = try {
+    when (bundle.isEmpty) {
+        true -&gt; super.performAction(action)
+        else -&gt; super.performAction(action, bundle)
+    }
+} catch (e: IllegalStateException) {
+    false
+}
+</code></pre>
+<ul>
+<li>UiObjectCollection</li>
+</ul>
+<pre><code class="lang-kotlin">/* Updated as of Nov 2, 2022. */
+
+override fun performAction(action: Int, vararg arguments: ActionArgument): Boolean {
+    var success = true
+    nodes.filterNotNull().forEach { node -&gt;
+        when (arguments.isEmpty()) {
+            true -&gt; node.performAction(action)
+            else -&gt; node.performAction(action, *arguments)
+        }.also { success = success and it }
+    }
+    return success
+}
+</code></pre>
+<p>由此可见, <a href="uiSelectorType.html">UiSelector</a> 与 <a href="uiObjectCollectionType.html">UiObjectCollection</a> 最终都调用了 <a href="uiObjectType.html">UiObject</a> 的 <code>performAction</code> 方法, 而 <code>UiObject</code> 的 <code>performAction</code> 则调用了 Android 系统的 <a href="https://developer.android.com/reference/androidx/core/view/accessibility/AccessibilityNodeInfoCompat#performAction(int,android.os.Bundle">AccessibilityNodeInfoCompat#performAction</a>) 方法</p>
+<p><code>UiObjectCollection</code> 相当于对控件集合中的每一个控件执行 <code>UiObject#performAction</code> 方法.<br><code>UiSelector</code> 相当于先执行 <a href="uiSelectorType.html#uiselectortype_m_untilfind">untilFind</a> 找到当前窗口中所有控件, 将其作为集合执行 <code>UiObjectCollection#performAction</code> 方法.</p>
+<p>因全局的 <code>untilFind()</code> 是 &quot;无条件&quot; 筛选, 会把窗口中所有控件 (往往会有几十甚至成百上千个控件) 全部加入集合中, 此时执行任何 <code>行为 (Action)</code>, 都相当于集合中所有控件执行一遍上述行为, 这样的操作往往是无意义的, 很可能造成非预期结果甚至不可控的操作, 因此不建议使用 <code>UiSelector</code> 提供的 <code>行为 (Action)</code> 方法.</p>
+<p>下面列举一个 <code>UiSelector</code> 提供的行为, 再次强调不建议使用:</p>
+<pre><code class="lang-js">/* ACTION_SET_TEXT 行为 */
+
+/* 对当前窗口中所有支持设置文本的控件, 将内容设置为 &quot;hello&quot;. */
+selector().setText(&quot;hello&quot;);
+
+/* UiSelector 几乎所有方法均已全局化, setText 位列其中. */
+setText(&quot;hello&quot;); /* 效果同上. */
+</code></pre>
+<p>如有上述示例的需求 (对控件设置文本内容), 而且是针对多个控件同时设置, 建议使用选择器定位指定的控件集合, 再统一执行 <code>行为 (Action)</code>:</p>
+<pre><code class="lang-js">/* 先筛选集合. */
+let nodes = pickup({
+    focusable: true,
+    textMatch: &quot;name&quot;,
+    boundInside: [ cX(0.2), cYx(0.04), cX(0.8), cY(0.92) ],
+}, &#39;[w]&#39;);
+
+/* 再执行行为. */
+nodes.forEach(w =&gt; w.setText(&quot;hello&quot;));
+</code></pre>
+<p>如需对控件执行自定义行为, 可通过 <code>UiObject#performAction</code> 实现:</p>
+<pre><code class="lang-js">/* 对控件执行 ACTION_IME_ENTER 行为. */
+
+let { AccessibilityActionCompat } = androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+
+let w = focusable().contentMatch(/name/).findOnce();
+w.performAction(AccessibilityActionCompat.ACTION_IME_ENTER.id);
+</code></pre>
+<p>有些 <code>行为 (Action)</code> 需要指定参数, 此时可借助 <a href="#uiobjectactionstype_i_actionargument">ActionArgument</a> 接口传入参数:</p>
+<pre><code class="lang-js">/* 对控件执行 ACTION_SET_TEXT 及 ACTION_SET_SELECTION 行为. */
+
+let { AccessibilityNodeInfoCompat } = androidx.core.view.accessibility
+let { AccessibilityActionCompat } = AccessibilityNodeInfoCompat;
+let { ActionArgument } = org.autojs.autojs.core.automator;
+
+let w = focusable().contentMatch(/name/).findOnce();
+
+/* ACTION_SET_TEXT 需要一个 ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE &quot;行为参数&quot;. */
+w.performAction(
+    AccessibilityActionCompat.ACTION_SET_TEXT.id,
+    ActionArgument.CharSequenceActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, &quot;hello&quot;),
+);
+
+/* ACTION_SET_SELECTION 需要两个 &quot;行为参数&quot;, */
+/* ACTION_ARGUMENT_SELECTION_START_INT 及 ACTION_ARGUMENT_SELECTION_END_INT. */
+w.performAction(
+    AccessibilityActionCompat.ACTION_SET_SELECTION.id,
+    ActionArgument.IntActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SELECTION_START_INT, 1),
+    ActionArgument.IntActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SELECTION_END_INT, 4),
+);
+</code></pre>
+<p><code>UiObject</code> 拥有另一个实例方法 <a href="uiObjectType.html#uiobjecttype_performactionaction_bundle">performAction(action, bundle)</a>, 因此上述示例也可改写为:</p>
+<pre><code class="lang-js">let arguments = new android.os.Bundle();
+arguments.putInt(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SELECTION_START_INT, 1);
+arguments.putInt(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SELECTION_END_INT, 4);
+w.performAction(AccessibilityActionCompat.ACTION_SET_SELECTION.id, arguments);
+</code></pre>
+<p>如需判断控件是否有某个或某些 <code>Action</code>, 可使用 <a href="uiObjectType.html#uiobjecttype_m_hasaction">UiObject#hasAction</a>:</p>
+<pre><code class="lang-js">console.log(w.hasAction(&quot;ACTION_CLICK&quot;));
+console.log(w.hasAction(&quot;CLICK&quot;)); /* 前缀 &quot;ACTION_&quot; 可省略. */
+
+/* 检查是否同时拥有多个 Action. */
+console.log(w.hasAction(&quot;CLICK&quot;, &quot;IME_ENTER&quot;, &quot;SCROLL_UP&quot;));
+</code></pre>
+<p>如需使用 <code>Action</code> 选择器筛选控件, 可使用 <a href="uiSelectorType.html#uiselectortype_m_action">UiSelector#action</a>:</p>
+<pre><code class="lang-js">console.log(action(&quot;ACTION_CLICK&quot;).findOnce());
+console.log(action(&quot;CLICK&quot;).findOnce()); /* 前缀 &quot;ACTION_&quot; 可省略. */
+
+/* 筛选多个 Action. */
+console.log(action(&quot;CLICK&quot;, &quot;IME_ENTER&quot;, &quot;SCROLL_UP&quot;).findOnce());
+</code></pre>
+<h2>[m=] click<span><a class="mark" href="#uiobjectactionstype_m_click" id="uiobjectactionstype_m_click">#</a></span></h2>
+<h3>click()<span><a class="mark" href="#uiobjectactionstype_click" id="uiobjectactionstype_click">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 点击 ] 行为.</p>
+<p>检查一个控件节点是否可点击:</p>
+<pre><code class="lang-js">console.log(w.clickable());
+console.log(w.isClickable()); /* 同上. */
+</code></pre>
+<p>以下情况可能导致 <code>w.click()</code> 返回 <code>false</code>:</p>
+<ul>
+<li>控件不可点击 (<code>w.clickable()</code> 为 <code>false</code>)</li>
+<li>页面无法响应点击事件</li>
+</ul>
+<p>有时会出现虽然 <code>w</code> 不可点击但 <code>w.parent()</code> 或 <code>w.parent().parent()</code> 等父级控件可点击的情况:</p>
+<pre><code class="lang-js">function tryClick(w) {
+    let max = 3;
+    let tmp = w;
+    while (max--) {
+        tmp = tmp.parent();
+        if (tmp.isClickable()) {
+            return tmp.click();
+        }
+    }
+    return false;
+}
+
+console.log(tryClick(w));
+
+/* 上述过程可使用 pickup 简化. */
+console.log(pickup(w, &#39;k3&#39;, &#39;click&#39;));
+</code></pre>
+<p>使用控件的 <code>click</code> 方法主要优缺点 (相较于坐标模拟点击):</p>
+<ul>
+<li>[优] 速度较快</li>
+<li>[优] 适用于位置不断变化的控件</li>
+<li>[优] 适用于不在窗口可视化范围内的控件</li>
+<li>[优] 适用于上层被其他控件覆盖或遮挡的控件</li>
+<li>[劣] 部分控件难以通过选择器精确定位</li>
+<li>[劣] 部分控件执行 <code>click</code> 行为后无响应</li>
+<li>[劣] 无法完全适应控件属性或层级关系改变的情况</li>
+</ul>
+<p>鉴于上述优劣项, 控件的 <code>click</code> 方法通常与 [ <a href="global.html#global_m_click">global.click</a> (<a href="automator.html#automator_m_click">automator.click</a>) / <a href="uiObjectType.html#uiobjecttype_m_clickbybounds">UiObject#clickByBounds</a> ] 等方法配合使用.</p>
+<h2>[m=] longClick<span><a class="mark" href="#uiobjectactionstype_m_longclick" id="uiobjectactionstype_m_longclick">#</a></span></h2>
+<h3>longClick()<span><a class="mark" href="#uiobjectactionstype_longclick" id="uiobjectactionstype_longclick">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 长按 ] 行为.</p>
+<p>检查一个控件节点是否可长按:</p>
+<pre><code class="lang-js">console.log(w.longClickable());
+console.log(w.isLongClickable()); /* 同上. */
+</code></pre>
+<p>以下情况可能导致 <code>w.longClick()</code> 返回 <code>false</code>:</p>
+<ul>
+<li>控件不可长按 (<code>w.longClickable()</code> 为 <code>false</code>)</li>
+<li>页面无法响应长按事件</li>
+</ul>
+<h2>[m=] accessibilityFocus<span><a class="mark" href="#uiobjectactionstype_m_accessibilityfocus" id="uiobjectactionstype_m_accessibilityfocus">#</a></span></h2>
+<h3>accessibilityFocus()<span><a class="mark" href="#uiobjectactionstype_accessibilityfocus" id="uiobjectactionstype_accessibilityfocus">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 获取无障碍焦点 ] 行为.</p>
+<p>只有在当前设备启用了无障碍软件 (如 <a href="https://support.google.com/accessibility/android/topic/10601570?hl=zh-Hans">TalkBack</a>) 才能正常使用 accessibilityFocus().</p>
+<p>以 TalkBack 为例, 启用后, 当前窗口中获取无障碍焦点的控件将被绿色方框标记其边界, 此时按下键盘回车键或无障碍设备 (如 <a href="https://en.wikipedia.org/wiki/D-pad">D-pad</a>) 的确定键 (取决于不同设备), 即可激活此控件.</p>
+<pre><code class="lang-js">/* 获得无障碍焦点. */
+console.log(pickup(idEndsWith(&#39;fab&#39;), &#39;accessibilityFocus&#39;)); /* boolean 类型结果. */
+
+/* 检查是否已获得无障碍焦点. */
+console.log(pickup(idEndsWith(&#39;fab&#39;), &#39;accessibilityFocused&#39;)); /* boolean 类型结果. */
+</code></pre>
+<p>如需清除焦点, 可使用 <a href="#uiobjectactionstype_m_clearaccessibilityfocus">clearAccessibilityFocus</a> 方法.</p>
+<h2>[m=] clearAccessibilityFocus<span><a class="mark" href="#uiobjectactionstype_m_clearaccessibilityfocus" id="uiobjectactionstype_m_clearaccessibilityfocus">#</a></span></h2>
+<h3>clearAccessibilityFocus()<span><a class="mark" href="#uiobjectactionstype_clearaccessibilityfocus" id="uiobjectactionstype_clearaccessibilityfocus">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 清除无障碍焦点 ] 行为.</p>
+<p>只有在当前设备启用了无障碍软件 (如 <a href="https://support.google.com/accessibility/android/topic/10601570?hl=zh-Hans">TalkBack</a>) 才能正常使用 clearAccessibilityFocus().</p>
+<pre><code class="lang-js">/* 清除无障碍焦点. */
+console.log(pickup(idEndsWith(&#39;fab&#39;), &#39;clearAccessibilityFocus&#39;)); /* boolean 类型结果. */
+</code></pre>
+<h2>[m=] focus<span><a class="mark" href="#uiobjectactionstype_m_focus" id="uiobjectactionstype_m_focus">#</a></span></h2>
+<h3>focus()<span><a class="mark" href="#uiobjectactionstype_focus" id="uiobjectactionstype_focus">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 获取焦点 ] 行为.</p>
+<p>在当前设备连接外置键盘等输入设备时, 按下 TAB 或 方向键可在控件之间 &quot;切换&quot;, 这些控件都是 focusable (可被聚焦) 的.</p>
+<pre><code class="lang-js">/* 查看控件是否可被聚焦. */
+console.log(w.focusable());
+console.log(w.isFocusable()); /* 同上. */
+</code></pre>
+<p>当控件被聚焦 (即获取焦点) 后, 可使用输入设备的 ENTER 或 OK 等表示确认的按键激活此控件.<br>如果此控件支持文本输入 (例如常见的 EditText 类型控件), 在被聚焦后, 将出现输入光标, 且可能会弹出软键盘用于用户输入内容.</p>
+<pre><code class="lang-js">/* 打印当前窗口支持聚焦的控件文本内容数组. */
+console.log(pickup({ focusable: true }, &#39;txt[]&#39;));
+
+/* 按文本内容筛选一个控件并使其获得焦点. */
+pickup([ { focusable: true }, /search/ ], &#39;focus&#39;);
+</code></pre>
+<p>如需清除焦点, 可使用 <a href="#uiobjectactionstype_m_clearfocus">clearFocus</a> 方法.</p>
+<h2>[m=] clearFocus<span><a class="mark" href="#uiobjectactionstype_m_clearfocus" id="uiobjectactionstype_m_clearfocus">#</a></span></h2>
+<h3>clearFocus()<span><a class="mark" href="#uiobjectactionstype_clearfocus" id="uiobjectactionstype_clearfocus">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 清除焦点 ] 行为.</p>
+<p>对一个可被聚焦的控件, 如果它没有获得焦点, 调用 clearFocus 方法时将返回 false.</p>
+<pre><code class="lang-js">/* w 可被聚焦, 但当前未获得焦点. */
+console.log(w.focusable()); // true
+console.log(w.isFocused()); // false
+
+/* isFocused 返回 false, 因此 clearFocus 也返回 false. */
+console.log(w.clearFocus()); // false
+</code></pre>
+<h2>[m=] dragStart<span><a class="mark" href="#uiobjectactionstype_m_dragstart" id="uiobjectactionstype_m_dragstart">#</a></span></h2>
+<h3>dragStart()<span><a class="mark" href="#uiobjectactionstype_dragstart" id="uiobjectactionstype_dragstart">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=32</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 拖放开始 ] 行为.</p>
+<p>此操作将初始化系统内部的拖放 (Drag &amp; Drop) 功能.<br>支持拖放的内容将在拖放行为开始前完成准备.</p>
+<h2>[m=] dragDrop<span><a class="mark" href="#uiobjectactionstype_m_dragdrop" id="uiobjectactionstype_m_dragdrop">#</a></span></h2>
+<h3>dragDrop()<span><a class="mark" href="#uiobjectactionstype_dragdrop" id="uiobjectactionstype_dragdrop">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=32</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 拖放放下 ] 行为.</p>
+<p>此操作针对于已开始 ACTION_DRAG_START 行为的拖放目标.</p>
+<h2>[m=] dragCancel<span><a class="mark" href="#uiobjectactionstype_m_dragcancel" id="uiobjectactionstype_m_dragcancel">#</a></span></h2>
+<h3>dragCancel()<span><a class="mark" href="#uiobjectactionstype_dragcancel" id="uiobjectactionstype_dragcancel">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=32</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 拖放取消 ] 行为.</p>
+<p>此操作针对于已开始 ACTION_DRAG_START 行为的拖放目标.</p>
+<h2>[m=] imeEnter<span><a class="mark" href="#uiobjectactionstype_m_imeenter" id="uiobjectactionstype_m_imeenter">#</a></span></h2>
+<h3>imeEnter()<span><a class="mark" href="#uiobjectactionstype_imeenter" id="uiobjectactionstype_imeenter">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=30</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 输入法 ENTER 键 ] 行为.</p>
+<p>此操作通常只对获得焦点且可编辑的控件有效.</p>
+<p>通常 imeEnter 用来模拟回车键在文本控件实现换行功能.<br>另外也可以模拟某些表示确认的操作, 如 [ 搜索 / 发送 / 下一步 / 立即前往 / 开始执行 ] 等.</p>
+<pre><code class="lang-js">/* 模拟回车键. */
+console.log(pickup({
+    className: &#39;EditText&#39;,
+    focused: true,
+}, &#39;imeEnter&#39;)); /* e.g. true */
+</code></pre>
+<h2>[m=] moveWindow<span><a class="mark" href="#uiobjectactionstype_m_movewindow" id="uiobjectactionstype_m_movewindow">#</a></span></h2>
+<h3>moveWindow(x, y)<span><a class="mark" href="#uiobjectactionstype_movewindow_x_y" id="uiobjectactionstype_movewindow_x_y">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=26</code></strong></p>
+<ul>
+<li><strong>x</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - X 坐标</li>
+<li><strong>y</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - Y 坐标</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 移动窗口到新位置 ] 行为.</p>
+<h2>[m=] nextAtMovementGranularity<span><a class="mark" href="#uiobjectactionstype_m_nextatmovementgranularity" id="uiobjectactionstype_m_nextatmovementgranularity">#</a></span></h2>
+<h3>nextAtMovementGranularity(granularity, isExtendSelection)<span><a class="mark" href="#uiobjectactionstype_nextatmovementgranularity_granularity_isextendselection" id="uiobjectactionstype_nextatmovementgranularity_granularity_isextendselection">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>granularity</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 粒度</li>
+<li><strong>isExtendSelection</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否扩展选则文本</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 按粒度移至下一位置 ] 行为.</p>
+<p>按指定粒度移动光标到下一个文本实体位置, 例如移动到下一个单词, 下一行, 下一个段落等.</p>
+<pre><code class="lang-js">const AccessibilityNodeInfo = android.view.accessibility.AccessibilityNodeInfo;
+
+let w = pickup([ /.+/, { className: &#39;EditText&#39; } ]);
+
+/* 按 WORD (单词) 粒度移动. */
+/* 除 WORD 外, 还支持 CHARACTER (字符), LINE (行), PARAGRAPH (段落), PAGE (页) 等粒度. */
+w.nextAtMovementGranularity(AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD, false);
+</code></pre>
+<h2>[m=] nextHtmlElement<span><a class="mark" href="#uiobjectactionstype_m_nexthtmlelement" id="uiobjectactionstype_m_nexthtmlelement">#</a></span></h2>
+<h3>nextHtmlElement(element)<span><a class="mark" href="#uiobjectactionstype_nexthtmlelement_element" id="uiobjectactionstype_nexthtmlelement_element">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>element</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 元素名称</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 按元素移至下一位置 ] 行为.</p>
+<p>按指定元素名称移动焦点至下一元素位置, 例如移动到下一个按钮, 下一个列表, 下一个输入框等.</p>
+<pre><code class="lang-js">console.log(w.nextHtmlElement(&quot;BUTTON&quot;));
+</code></pre>
+<h2>[m=] pageLeft<span><a class="mark" href="#uiobjectactionstype_m_pageleft" id="uiobjectactionstype_m_pageleft">#</a></span></h2>
+<h3>pageLeft()<span><a class="mark" href="#uiobjectactionstype_pageleft" id="uiobjectactionstype_pageleft">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗左移的翻页 ] 行为.</p>
+<p>此操作使视窗向左移动, 以便将可翻页控件左侧的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向右拖动视图.</p>
+<ul>
+<li>新可视化内容: 左.</li>
+<li>视窗移动方向: 左.</li>
+<li>视图移动方向: 右.</li>
+</ul>
+<h2>[m=] pageUp<span><a class="mark" href="#uiobjectactionstype_m_pageup" id="uiobjectactionstype_m_pageup">#</a></span></h2>
+<h3>pageUp()<span><a class="mark" href="#uiobjectactionstype_pageup" id="uiobjectactionstype_pageup">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗上移的翻页 ] 行为.</p>
+<p>此操作使视窗向上移动, 以便将可翻页控件上方的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向下拖动视图.</p>
+<ul>
+<li>新可视化内容: 上.</li>
+<li>视窗移动方向: 上.</li>
+<li>视图移动方向: 下.</li>
+</ul>
+<h2>[m=] pageRight<span><a class="mark" href="#uiobjectactionstype_m_pageright" id="uiobjectactionstype_m_pageright">#</a></span></h2>
+<h3>pageRight()<span><a class="mark" href="#uiobjectactionstype_pageright" id="uiobjectactionstype_pageright">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗右移的翻页 ] 行为.</p>
+<p>此操作使视窗向右移动, 以便将可翻页控件右侧的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向左拖动视图.</p>
+<ul>
+<li>新可视化内容: 右.</li>
+<li>视窗移动方向: 右.</li>
+<li>视图移动方向: 左.</li>
+</ul>
+<h2>[m=] pageDown<span><a class="mark" href="#uiobjectactionstype_m_pagedown" id="uiobjectactionstype_m_pagedown">#</a></span></h2>
+<h3>pageDown()<span><a class="mark" href="#uiobjectactionstype_pagedown" id="uiobjectactionstype_pagedown">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=29</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗下移的翻页 ] 行为.</p>
+<p>此操作使视窗向下移动, 以便将可翻页控件下方的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向上拖动视图.</p>
+<ul>
+<li>新可视化内容: 下.</li>
+<li>视窗移动方向: 下.</li>
+<li>视图移动方向: 上.</li>
+</ul>
+<h2>[m=] pressAndHold<span><a class="mark" href="#uiobjectactionstype_m_pressandhold" id="uiobjectactionstype_m_pressandhold">#</a></span></h2>
+<h3>pressAndHold()<span><a class="mark" href="#uiobjectactionstype_pressandhold" id="uiobjectactionstype_pressandhold">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=30</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 按住 ] 行为.</p>
+<p>按住即按下并保持, 与 ACTION_LONG_CLICK (长按) 不同.<br>如果控件的单一行为响应是为 &quot;长按&quot; 设计的, 则应该使用封装的 longClick 方法, 而非 pressAndHold 方法.<br>只有控件存在对 &quot;按住&quot; 行为的响应, 才会使 pressAndHold 有效.<br>通常控件不会同时存在上述两种行为的响应.</p>
+<h2>[m=] previousAtMovementGranularity<span><a class="mark" href="#uiobjectactionstype_m_previousatmovementgranularity" id="uiobjectactionstype_m_previousatmovementgranularity">#</a></span></h2>
+<h3>previousAtMovementGranularity(granularity, isExtendSelection)<span><a class="mark" href="#uiobjectactionstype_previousatmovementgranularity_granularity_isextendselection" id="uiobjectactionstype_previousatmovementgranularity_granularity_isextendselection">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>granularity</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 粒度</li>
+<li><strong>isExtendSelection</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否扩展选则文本</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 按粒度移至上一位置 ] 行为.</p>
+<p>按指定粒度移动光标到上一个文本实体位置, 例如移动到上一个单词, 上一行, 上一个段落等.</p>
+<pre><code class="lang-js">const AccessibilityNodeInfo = android.view.accessibility.AccessibilityNodeInfo;
+
+let w = pickup([ /.+/, { className: &#39;EditText&#39; } ]);
+
+/* 按 WORD (单词) 粒度移动. */
+/* 除 WORD 外, 还支持 CHARACTER (字符), LINE (行), PARAGRAPH (段落), PAGE (页) 等粒度. */
+w.previousAtMovementGranularity(AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD, false);
+</code></pre>
+<h2>[m=] previousHtmlElement<span><a class="mark" href="#uiobjectactionstype_m_previoushtmlelement" id="uiobjectactionstype_m_previoushtmlelement">#</a></span></h2>
+<h3>previousHtmlElement(element)<span><a class="mark" href="#uiobjectactionstype_previoushtmlelement_element" id="uiobjectactionstype_previoushtmlelement_element">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>element</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 元素名称</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 按元素移至上一位置 ] 行为.</p>
+<p>按指定元素名称移动焦点至上一元素位置, 例如移动到上一个按钮, 上一个列表, 上一个输入框等.</p>
+<pre><code class="lang-js">console.log(w.previousHtmlElement(&quot;BUTTON&quot;));
+</code></pre>
+<h2>[m=] showTextSuggestions<span><a class="mark" href="#uiobjectactionstype_m_showtextsuggestions" id="uiobjectactionstype_m_showtextsuggestions">#</a></span></h2>
+<h3>showTextSuggestions()<span><a class="mark" href="#uiobjectactionstype_showtextsuggestions" id="uiobjectactionstype_showtextsuggestions">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=33</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 显示文本建议 ] 行为.</p>
+<p>此操作将为一个可编辑文本的控件显示相关输入建议.</p>
+<h2>[m=] showTooltip<span><a class="mark" href="#uiobjectactionstype_m_showtooltip" id="uiobjectactionstype_m_showtooltip">#</a></span></h2>
+<h3>showTooltip()<span><a class="mark" href="#uiobjectactionstype_showtooltip" id="uiobjectactionstype_showtooltip">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=28</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 显示工具提示信息 ] 行为.</p>
+<p>此操作通常只对其视图未在显示工具提示信息的控件有效.</p>
+<h2>[m=] hideTooltip<span><a class="mark" href="#uiobjectactionstype_m_hidetooltip" id="uiobjectactionstype_m_hidetooltip">#</a></span></h2>
+<h3>hideTooltip()<span><a class="mark" href="#uiobjectactionstype_hidetooltip" id="uiobjectactionstype_hidetooltip">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong> <strong><code>API&gt;=28</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 隐藏工具提示信息 ] 行为.</p>
+<p>此操作通常只对其视图正在显示工具提示信息的控件有效.</p>
+<h2>[m=] show<span><a class="mark" href="#uiobjectactionstype_m_show" id="uiobjectactionstype_m_show">#</a></span></h2>
+<h3>show()<span><a class="mark" href="#uiobjectactionstype_show" id="uiobjectactionstype_show">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 显示在视窗内 ] 行为.</p>
+<p>此操作使控件的所有边界全部出现在视窗内部.<br>如有需要, 页面会发生滚动.</p>
+<pre><code class="lang-js">/* &quot;关于应用与开发者&quot; 按钮部分 (或全部) 位于视窗外部. */
+let w = pickup(&quot;关于应用与开发者&quot;);
+
+if (w !== null) {
+    /* 控件将随着页面滚动到视窗内部. */
+    w.show();
+}
+</code></pre>
+<blockquote>
+<p>参阅 <a href="https://developer.android.com/reference/android/view/View#requestRectangleOnScreen(android.graphics.Rect">View.requestRectangleOnScreen(Rect)</a>)</p>
+</blockquote>
+<h2>[m=] dismiss<span><a class="mark" href="#uiobjectactionstype_m_dismiss" id="uiobjectactionstype_m_dismiss">#</a></span></h2>
+<h3>dismiss()<span><a class="mark" href="#uiobjectactionstype_dismiss" id="uiobjectactionstype_dismiss">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 消隐 ] 行为.</p>
+<p>检查一个控件节点是否可消隐:</p>
+<pre><code class="lang-js">console.log(w.dismissable());
+console.log(w.isDismissable()); /* 同上. */
+</code></pre>
+<h2>[m=] copy<span><a class="mark" href="#uiobjectactionstype_m_copy" id="uiobjectactionstype_m_copy">#</a></span></h2>
+<h3>copy()<span><a class="mark" href="#uiobjectactionstype_copy" id="uiobjectactionstype_copy">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 复制文本 ] 行为.</p>
+<p>此操作将控件的已选中文本内容复制到剪贴板.</p>
+<h2>[m=] cut<span><a class="mark" href="#uiobjectactionstype_m_cut" id="uiobjectactionstype_m_cut">#</a></span></h2>
+<h3>cut()<span><a class="mark" href="#uiobjectactionstype_cut" id="uiobjectactionstype_cut">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 剪切文本 ] 行为.</p>
+<p>此操作将控件的已选中文本内容剪切并置于剪贴板.</p>
+<h2>[m=] paste<span><a class="mark" href="#uiobjectactionstype_m_paste" id="uiobjectactionstype_m_paste">#</a></span></h2>
+<h3>paste()<span><a class="mark" href="#uiobjectactionstype_paste" id="uiobjectactionstype_paste">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 粘贴文本 ] 行为.</p>
+<p>此操作将剪贴板的文本内容粘贴到控件的可编辑文本区域.</p>
+<p>需额外留意, 自 <a href="apiLevel.html">Android API 29 (10) [Q]</a> 起, 剪贴板数据的访问将受到限制.<br>详情参阅 <a href="global.html#global_m_getclip">getClip</a>.</p>
+<h2>[m=] select<span><a class="mark" href="#uiobjectactionstype_m_select" id="uiobjectactionstype_m_select">#</a></span></h2>
+<h3>select()<span><a class="mark" href="#uiobjectactionstype_select" id="uiobjectactionstype_select">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 选中 ] 行为.</p>
+<p>此操作将选中当前控件.</p>
+<p>检查一个控件节点是否已被选中:</p>
+<pre><code class="lang-js">console.log(w.selected());
+console.log(w.isSelected()); /* 同上. */
+</code></pre>
+<h2>[m=] expand<span><a class="mark" href="#uiobjectactionstype_m_expand" id="uiobjectactionstype_m_expand">#</a></span></h2>
+<h3>expand()<span><a class="mark" href="#uiobjectactionstype_expand" id="uiobjectactionstype_expand">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 展开 ] 行为.</p>
+<p>此操作用于展开可展开的控件.</p>
+<h2>[m=] collapse<span><a class="mark" href="#uiobjectactionstype_m_collapse" id="uiobjectactionstype_m_collapse">#</a></span></h2>
+<h3>collapse()<span><a class="mark" href="#uiobjectactionstype_collapse" id="uiobjectactionstype_collapse">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 折叠 ] 行为.</p>
+<p>此操作用于折叠 (或收起) 可展开的控件.</p>
+<h2>[m=] scrollLeft<span><a class="mark" href="#uiobjectactionstype_m_scrollleft" id="uiobjectactionstype_m_scrollleft">#</a></span></h2>
+<h3>scrollLeft()<span><a class="mark" href="#uiobjectactionstype_scrollleft" id="uiobjectactionstype_scrollleft">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗左移的滚动 ] 行为.</p>
+<p>此操作使视窗向左移动, 以便将可滚动控件左侧的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向右拖动视图.</p>
+<ul>
+<li>新可视化内容: 左.</li>
+<li>视窗移动方向: 左.</li>
+<li>视图移动方向: 右.</li>
+</ul>
+<h2>[m=] scrollUp<span><a class="mark" href="#uiobjectactionstype_m_scrollup" id="uiobjectactionstype_m_scrollup">#</a></span></h2>
+<h3>scrollUp()<span><a class="mark" href="#uiobjectactionstype_scrollup" id="uiobjectactionstype_scrollup">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗上移的滚动 ] 行为.</p>
+<p>此操作使视窗向上移动, 以便将可滚动控件上方的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向下拖动视图.</p>
+<ul>
+<li>新可视化内容: 上.</li>
+<li>视窗移动方向: 上.</li>
+<li>视图移动方向: 下.</li>
+</ul>
+<h2>[m=] scrollRight<span><a class="mark" href="#uiobjectactionstype_m_scrollright" id="uiobjectactionstype_m_scrollright">#</a></span></h2>
+<h3>scrollRight()<span><a class="mark" href="#uiobjectactionstype_scrollright" id="uiobjectactionstype_scrollright">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗右移的滚动 ] 行为.</p>
+<p>此操作使视窗向右移动, 以便将可滚动控件右侧的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向左拖动视图.</p>
+<ul>
+<li>新可视化内容: 右.</li>
+<li>视窗移动方向: 右.</li>
+<li>视图移动方向: 左.</li>
+</ul>
+<h2>[m=] scrollDown<span><a class="mark" href="#uiobjectactionstype_m_scrolldown" id="uiobjectactionstype_m_scrolldown">#</a></span></h2>
+<h3>scrollDown()<span><a class="mark" href="#uiobjectactionstype_scrolldown" id="uiobjectactionstype_scrolldown">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗下移的滚动 ] 行为.</p>
+<p>此操作使视窗向下移动, 以便将可滚动控件下方的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向上拖动视图.</p>
+<ul>
+<li>新可视化内容: 下.</li>
+<li>视窗移动方向: 下.</li>
+<li>视图移动方向: 上.</li>
+</ul>
+<h2>[m=] scrollForward<span><a class="mark" href="#uiobjectactionstype_m_scrollforward" id="uiobjectactionstype_m_scrollforward">#</a></span></h2>
+<h3>scrollForward()<span><a class="mark" href="#uiobjectactionstype_scrollforward" id="uiobjectactionstype_scrollforward">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗前移的滚动 ] 行为.</p>
+<p>此操作使视窗向前移动, 以便将可滚动控件前方的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向后拖动视图.</p>
+<ul>
+<li>新可视化内容: 前.</li>
+<li>视窗移动方向: 前.</li>
+<li>视图移动方向: 后.</li>
+</ul>
+<blockquote>
+<p>注: &quot;前&quot; 包括 &quot;左&quot; 或 &quot;上&quot;, &quot;后&quot; 包括 &quot;右&quot; 或 &quot;下&quot;.</p>
+</blockquote>
+<h2>[m=] scrollBackward<span><a class="mark" href="#uiobjectactionstype_m_scrollbackward" id="uiobjectactionstype_m_scrollbackward">#</a></span></h2>
+<h3>scrollBackward()<span><a class="mark" href="#uiobjectactionstype_scrollbackward" id="uiobjectactionstype_scrollbackward">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 使视窗后移的滚动 ] 行为.</p>
+<p>此操作使视窗向后移动, 以便将可滚动控件后方的更多内容 (如有) 展示在视窗内.<br>对于触屏设备, 此操作相当于按住屏幕并向前拖动视图.</p>
+<ul>
+<li>新可视化内容: 后.</li>
+<li>视窗移动方向: 后.</li>
+<li>视图移动方向: 前.</li>
+</ul>
+<blockquote>
+<p>注: &quot;前&quot; 包括 &quot;左&quot; 或 &quot;上&quot;, &quot;后&quot; 包括 &quot;右&quot; 或 &quot;下&quot;.</p>
+</blockquote>
+<h2>[m=] scrollTo<span><a class="mark" href="#uiobjectactionstype_m_scrollto" id="uiobjectactionstype_m_scrollto">#</a></span></h2>
+<h3>scrollTo(row, column)<span><a class="mark" href="#uiobjectactionstype_scrollto_row_column" id="uiobjectactionstype_scrollto_row_column">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>row</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 行序数</li>
+<li><strong>column</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 列序数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 将指定位置滚动至视窗内 ] 行为.</p>
+<p>此操作将集合中指定位置 (以 &quot;行&quot; 和 &quot;列&quot; 标记) 滚动至视窗内.</p>
+<pre><code class="lang-js">scrollable().find().some((w) =&gt; {
+    let info = w.getCollectionInfo();
+    if (info !== null) {
+        console.log(info.getRowCount()); /* e.g. 17 */
+        console.log(info.getColumnCount()); /* e.g. 2 */
+
+        let randRow = Mathx.randInt(info.getRowCount() - 1);
+        let randColumn = Mathx.randInt(info.getColumnCount() - 1);
+        console.log(`${randRow},${randColumn}`); /* e.g. 10,1 */
+
+        console.log(w.scrollTo(randRow, randColumn)); /* e.g. false */
+
+        return /* @some */ true;
+    }
+});
+</code></pre>
+<h2>[m=] contextClick<span><a class="mark" href="#uiobjectactionstype_m_contextclick" id="uiobjectactionstype_m_contextclick">#</a></span></h2>
+<h3>contextClick()<span><a class="mark" href="#uiobjectactionstype_contextclick" id="uiobjectactionstype_contextclick">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 上下文点击 ] 行为.</p>
+<p>此操作通常会弹出一个上下文菜单, 类似鼠标右键菜单.</p>
+<blockquote>
+<p>注: 在 Microsoft Windows 操作系统中, 单击鼠标右键 (或按下键盘的菜单键) 即类似控件的 Context Click (上下文点击) 行为, 弹出的右键菜单又称为 Context Menu (上下文菜单).</p>
+</blockquote>
+<h2>[m=] setText<span><a class="mark" href="#uiobjectactionstype_m_settext" id="uiobjectactionstype_m_settext">#</a></span></h2>
+<h3>setText(text)<span><a class="mark" href="#uiobjectactionstype_settext_text" id="uiobjectactionstype_settext_text">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>text</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 文本</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 设置文本 ] 行为.</p>
+<p>此操作将使用新文本替换原有文本, 并将光标置于文本末尾.</p>
+<pre><code class="lang-js">let w = pickup({ className: &#39;EditText&#39; });
+
+/* 设置文本为 &quot;hello&quot;. */
+w.setText(&quot;hello&quot;);
+
+/* 清空文本. */
+w.setText(&quot;&quot;);
+</code></pre>
+<h2>[m=] setSelection<span><a class="mark" href="#uiobjectactionstype_m_setselection" id="uiobjectactionstype_m_setselection">#</a></span></h2>
+<h3>setSelection(start, end)<span><a class="mark" href="#uiobjectactionstype_setselection_start_end" id="uiobjectactionstype_setselection_start_end">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>start</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 开始位置</li>
+<li><strong>end</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 结束位置</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 选择文本 ] 行为.</p>
+<p>此操作将按指定范围选中控件的文本内容.</p>
+<pre><code class="lang-js">let w = pickup({ className: &#39;EditText&#39; });
+
+/* 选中 2 - 3 的 1 个文本, 起始光标停留在 2 位置, 末尾光标停留在 3 位置. */
+w.setSelection(2, 3);
+
+/* 无任何效果, 光标不发生变化. */
+w.setSelection(2, 0);
+w.setSelection(2, -5);
+
+/* 抛出异常. */
+w.setSelection(NaN, 0);
+w.setSelection(Infinity, 0);
+
+/* 选中 0 个文本, 此时起始和末尾两个光标重合. */
+w.setSelection(2, 2);
+</code></pre>
+<h2>[m=] clearSelection<span><a class="mark" href="#uiobjectactionstype_m_clearselection" id="uiobjectactionstype_m_clearselection">#</a></span></h2>
+<h3>clearSelection()<span><a class="mark" href="#uiobjectactionstype_clearselection" id="uiobjectactionstype_clearselection">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>A11Y</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 取消选择文本 ] 行为.</p>
+<h2>[m=] setProgress<span><a class="mark" href="#uiobjectactionstype_m_setprogress" id="uiobjectactionstype_m_setprogress">#</a></span></h2>
+<h3>setProgress(progress)<span><a class="mark" href="#uiobjectactionstype_setprogress_progress" id="uiobjectactionstype_setprogress_progress">#</a></span></h3>
+<p><strong><code>A11Y</code></strong></p>
+<ul>
+<li><strong>progress</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 进度值</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否行为已执行且执行过程中无异常</li>
+</ul>
+<p>控件节点执行 [ 设置进度值 ] 行为.</p>
+<pre><code class="lang-js">pickup({ action: [&#39;SET_PROGRESS&#39;] }, &#39;[]&#39;).some((w) =&gt; {
+    const info = w.getRangeInfo();
+    if (info !== null) {
+        console.log(w.getMin(), w.getMax());
+        let randProgress = Mathx.randInt(w.getMin(), w.getMax());
+        console.log(randProgress);
+        console.log(w.setProgress(randProgress));
+    }
+});
+</code></pre>
+<h2>[I] ActionArgument<span><a class="mark" href="#uiobjectactionstype_i_actionargument" id="uiobjectactionstype_i_actionargument">#</a></span></h2>
+<p>控件的行为参数接口.<br>主要用于自定义控件行为的 <a href="#uiobjectactionstype_m_performaction">performAction</a> 抽象方法内.</p>
+<h3>[C] IntActionArgument<span><a class="mark" href="#uiobjectactionstype_c_intactionargument" id="uiobjectactionstype_c_intactionargument">#</a></span></h3>
+<p>ActionArgument 的具体类.<br>用于传递 Int 类型的行为参数.</p>
+<h4>[c] (name, value)<span><a class="mark" href="#uiobjectactionstype_c_name_value" id="uiobjectactionstype_c_name_value">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>name</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 行为名称</li>
+<li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 行为参数值</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#uiobjectactionstype_i_actionargument">ActionArgument</a></span> }</li>
+</ul>
+</div><p>构造一个 Int 类型的行为参数.</p>
+<pre><code class="lang-js">/* 模拟 scrollTo 封装方法. */
+function scrollTo(x, y) {
+    return w.performAction(
+        AccessibilityActionCompat.ACTION_SCROLL_TO_POSITION.id,
+        ActionArgument.IntActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_ROW_INT, x),
+        ActionArgument.IntActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_COLUMN_INT, y),
+    );
+}
+</code></pre>
+<h3>[C] BooleanActionArgument<span><a class="mark" href="#uiobjectactionstype_c_booleanactionargument" id="uiobjectactionstype_c_booleanactionargument">#</a></span></h3>
+<p>ActionArgument 的具体类.<br>用于传递 Boolean 类型的行为参数.</p>
+<h4>[c] (name, value)<span><a class="mark" href="#uiobjectactionstype_c_name_value_1" id="uiobjectactionstype_c_name_value_1">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>name</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 行为名称</li>
+<li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 行为参数值</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#uiobjectactionstype_i_actionargument">ActionArgument</a></span> }</li>
+</ul>
+</div><p>构造一个 Boolean 类型的行为参数.</p>
+<pre><code class="lang-js">/* 模拟 nextAtMovementGranularity 封装方法. */
+function nextAtMovementGranularity(granularity, isExtendSelection) {
+    return w.performAction(
+        AccessibilityActionCompat.ACTION_NEXT_AT_MOVEMENT_GRANULARITY.id,
+        ActionArgument.IntActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT, granularity),
+        ActionArgument.BooleanActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN, isExtendSelection),
+    );
+}
+</code></pre>
+<h3>[C] CharSequenceActionArgument<span><a class="mark" href="#uiobjectactionstype_c_charsequenceactionargument" id="uiobjectactionstype_c_charsequenceactionargument">#</a></span></h3>
+<p>ActionArgument 的具体类.<br>用于传递 CharSequence 类型的行为参数.</p>
+<h4>[c] (name, value)<span><a class="mark" href="#uiobjectactionstype_c_name_value_2" id="uiobjectactionstype_c_name_value_2">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>name</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 行为名称</li>
+<li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 行为参数值</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#uiobjectactionstype_i_actionargument">ActionArgument</a></span> }</li>
+</ul>
+</div><p>构造一个 CharSequence 类型的行为参数.</p>
+<pre><code class="lang-js">/* 模拟 setText 封装方法. */
+function setText(text) {
+    return w.performAction(
+        AccessibilityActionCompat.ACTION_SET_TEXT.id,
+        ActionArgument.IntActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text),
+    );
+}
+</code></pre>
+<h3>[C] StringActionArgument<span><a class="mark" href="#uiobjectactionstype_c_stringactionargument" id="uiobjectactionstype_c_stringactionargument">#</a></span></h3>
+<p>ActionArgument 的具体类.<br>用于传递 String 类型的行为参数.</p>
+<h4>[c] (name, value)<span><a class="mark" href="#uiobjectactionstype_c_name_value_3" id="uiobjectactionstype_c_name_value_3">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>name</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 行为名称</li>
+<li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 行为参数值</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#uiobjectactionstype_i_actionargument">ActionArgument</a></span> }</li>
+</ul>
+</div><p>构造一个 String 类型的行为参数.</p>
+<pre><code class="lang-js">/* 模拟 nextHtmlElement 封装方法. */
+function nextHtmlElement(element) {
+    return w.performAction(
+        AccessibilityActionCompat.ACTION_NEXT_HTML_ELEMENT.id,
+        ActionArgument.StringActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_HTML_ELEMENT_STRING, element),
+    );
+}
+</code></pre>
+<h3>[C] FloatActionArgument<span><a class="mark" href="#uiobjectactionstype_c_floatactionargument" id="uiobjectactionstype_c_floatactionargument">#</a></span></h3>
+<p>ActionArgument 的具体类.<br>用于传递 Float 类型的行为参数.</p>
+<h4>[c] (name, value)<span><a class="mark" href="#uiobjectactionstype_c_name_value_4" id="uiobjectactionstype_c_name_value_4">#</a></span></h4>
+<div class="signature"><ul>
+<li><strong>name</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 行为名称</li>
+<li><strong>value</strong> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 行为参数值</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#uiobjectactionstype_i_actionargument">ActionArgument</a></span> }</li>
+</ul>
+</div><p>构造一个 Float 类型的行为参数.</p>
+<pre><code class="lang-js">/* 模拟 setProgress 封装方法. */
+function nextHtmlElement(progress) {
+    return w.performAction(
+        AccessibilityActionCompat.ACTION_SET_PROGRESS.id,
+        ActionArgument.FloatActionArgument(AccessibilityNodeInfoCompat.ACTION_ARGUMENT_PROGRESS_VALUE, progress),
+    );
+}
+</code></pre>
+<h1>全局行为重定向<span><a class="mark" href="#uiobjectactionstype" id="uiobjectactionstype">#</a></span></h1>
+<p>本章节所有控件行为对应的方法 <strong>名称</strong> 均已全局化, 即支持 [ <code>click()</code> / <code>paste()</code> / <code>scrollDown()</code> / <code>show()</code> ] 等全局直接调用的方式来使用.<br>这些方法多数是 UiSelector 实例方法的直接绑定, 但有部分方法被 SimpleActionAutomator 覆盖.</p>
+<p>下表列出了控件行为方法对应的绑定源.<br>其中 AUTO 代表 SimpleActionAutomator, SEL 代表 UiSelector.</p>
+<table>
+<thead>
+<tr>
+<th>Global Actions</th>
+<th style="text-align:center">AUTO</th>
+<th style="text-align:center">SEL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>accessibilityFocus</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>clearAccessibilityFocus</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>clearFocus</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>clearSelection</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>click</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>collapse</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>contextClick</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>copy</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>cut</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>dismiss</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>dragCancel</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>dragDrop</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>dragStart</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>expand</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>focus</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>hideTooltip</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>imeEnter</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>longClick</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>moveWindow</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>nextAtMovementGranularity</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>nextHtmlElement</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>pageDown</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>pageLeft</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>pageRight</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>pageUp</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>paste</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>pressAndHold</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>previousAtMovementGranularity</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>previousHtmlElement</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>scrollBackward</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>scrollDown</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>scrollForward</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>scrollLeft</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>scrollRight</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>scrollTo</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>scrollUp</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>select</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>setProgress</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>setSelection</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>setText</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>show</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>showTextSuggestions</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td>showTooltip</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">√</td>
+</tr>
+</tbody>
+</table>
+<p>截至目前 (2022/11), 只有 [ click, longClick, scrollDown, scrollUp, setText ] 全局方法属于 SimpleActionAutomator.</p>
+<pre><code class="lang-js">copy(); /* 相当于 selector().copy(). */
+paste(); /* 相当于 selector().paste(). */
+clearFocus(); /* 相当于 selector().clearFocus(). */
+imeEnter(); /* 相当于 selector().imeEnter(). */
+
+click(1, 2); /* 相当于 automator.click(1, 2). */
+longClick(1, 2); /* 相当于 automator.longClick(1, 2). */
+setText(&quot;hello&quot;); /* 相当于 automator.setText(&quot;hello&quot;). */
+scrollUp(); /* 相当于 automator.scrollUp(). */
+scrollDown(); /* 相当于 automator.scrollDown(). */
+</code></pre>
+<p>通过 <a href="#uiobjectactionstype_m_performaction">performAction</a> 小节可知, UiSelector 的控件行为方法实际是对当前窗口中所有控件全部执行一次 Action, 因此几乎所有 UiSelector 的控件行为方法均不建议使用.</p>
+<p>全局方法 <a href="#uiobjectactionstype_m_paste">paste</a> 是使用率相对较高的控件行为, 且效果往往与预期相符.<br>有关全局方法 <code>paste</code> 的执行过程及原理分析可参阅 <a href="uiSelectorType.html#uiselectortype_m_paste">UiSelector#paste</a> 小节.</p>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

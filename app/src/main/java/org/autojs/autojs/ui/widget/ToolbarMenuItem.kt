@@ -12,7 +12,7 @@ import org.autojs.autojs.util.DrawableUtils
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/1/29.
+ * Created by Stardust on Jan 29, 2017.
  */
 class ToolbarMenuItem : LinearLayout {
 

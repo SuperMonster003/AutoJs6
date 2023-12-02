@@ -22,7 +22,7 @@ import org.autojs.autojs6.R;
 import io.reactivex.subjects.PublishSubject;
 
 /**
- * Created by Stardust on 2017/9/24.
+ * Created by Stardust on Sep 24, 2017.
  */
 public class FloatingActionMenu extends FrameLayout implements View.OnClickListener {
 

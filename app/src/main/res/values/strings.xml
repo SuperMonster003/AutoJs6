@@ -248,6 +248,7 @@
     <string name="key_compatibility_with_classes_for_ver_4_x" translatable="false">key_$_compatibility_with_classes_for_ver_4_x</string>
     <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
     <string name="key_dialog_num_of_log_entries_exceeds_limit_for_sending" translatable="false">key_$_num_of_log_entries_exceeds_limit_for_sending</string>
+    <string name="key_dialog_selected_abi_is_unavailable" translatable="false">key_$_dialog_selected_abi_is_unavailable</string>
     <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
     <string name="key_dialog_log_entries_exported" translatable="false">key_$_dialog_log_entries_exported</string>
     <string name="key_dialog_manage_all_files_permission" translatable="false">key_$_dialog_manage_all_files_permission</string>
@@ -346,9 +347,11 @@
     <string name="text_a11y_service_description">Required by the script automatic operation (click, long press, slide, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Accessibility service enabled but not running (Re-enable or reboot the device)</string>
     <string name="text_a11y_service_may_be_needed">Accessibility service may be needed</string>
-    <string name="text_abis">ABIs</string>
-    <string name="text_abis_32bit">ABIs (32-bit)</string>
-    <string name="text_abis_64bit">ABIs (64-bit)</string>
+    <string name="text_abis" translatable="false">ABIs</string>
+    <string name="text_supported_libraries_short">Libraries</string>
+    <string name="text_supported_abis_short">ABIs</string>
+    <string name="text_supported_abis_short_32bit">ABIs (32-bit)</string>
+    <string name="text_supported_abis_short_64bit">ABIs (64-bit)</string>
     <string name="text_about">About</string>
     <string name="text_about_all_files_access">About all files access</string>
     <string name="text_about_app_and_developer">About app and developer</string>
@@ -906,8 +909,6 @@
     <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
     <string name="text_pin_shortcut_not_unsupported">Pinning shortcuts to launcher is not supported</string>
-    <string name="text_template_apk_path">Template APK path</string>
-    <string name="path_android_asset_template" translatable="false">file:///android_asset/template.apk</string>
     <string name="text_shizuku_access_description">Shizuku makes it possible to uses system API with ADB privileges</string>
     <string name="text_shizuku_access">Shizuku access</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Grant AutoJs6 access in Shizuku app</string>
@@ -919,6 +920,18 @@
     <string name="error_failed_to_grant_shizuku_access">Failed to grant Shizuku access</string>
     <string name="error_unable_to_use_shizuku_service">Unable to use Shizuku service</string>
     <string name="error_input_fields_check_failed">Input fields check failed</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">At least one ABI needs to be selected</string>
+    <string name="text_malfunctioning">Malfunctioning</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">The \"%s\" module does not work due to the lack of necessary library files</string>
+    <string name="uri_autojs6_download_link" translatable="false">http://download.autojs6.com</string>
+    <string name="text_unavailable">Unavailable</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">The selected ABI \"%s\" cannot be used to create a packaged application, because the current version of AutoJs6 does not include the above ABI.</string>
+    <string name="text_the_following_solutions_can_be_referred_to">The following solutions can be referred to</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">Download and install the version of AutoJs6 that includes the above ABI (the file name contains \"%s\")</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">Download and install the version of AutoJs6 that includes all ABIs (the file name contains \"universal\")</string>
+    <string name="text_recommended">Recommended</string>
+    <string name="text_download_link_for_autojs6">Download link for AutoJs6</string>
+    <string name="text_unavailable_abi_for">ABI \"%s\" is unavailable</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Total: %d item</item>

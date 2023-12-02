@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**
- * Created by Stardust on 2017/4/6.
+ * Created by Stardust on Apr 6, 2017.
  */
 public class ItemTouchHelperSimpleCallback extends ItemTouchHelper.SimpleCallback {
 

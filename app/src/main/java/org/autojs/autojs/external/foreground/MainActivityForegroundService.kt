@@ -46,7 +46,7 @@ class MainActivityForegroundService : Service() {
 
     companion object {
 
-        private const val NOTIFICATION_ID = 1
+        private const val NOTIFICATION_ID = 0xBF
         private val sClassName = MainActivityForegroundService::class.java
 
     }

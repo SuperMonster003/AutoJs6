@@ -28,7 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 
 /**
- * Created by Stardust on 2017/5/14.
+ * Created by Stardust on May 14, 2017.
  * Modified by SuperMonster003 as of Feb 5, 2022.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
@@ -83,7 +83,7 @@ object XmlConverter {
                 .map(arrayOf("webview", "web"), JsWebView::class.java.name)
                 .map(
                     "text",
-                    // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on Mar 20, 2022
+                    // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on Mar 20, 2022.
                     when (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                         true -> JsTextViewLegacy::class.java.name
                         else -> JsTextView::class.java.name

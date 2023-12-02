@@ -8,7 +8,7 @@ import org.autojs.autojs.lang.ThreadCompat;
 import java.util.Map;
 
 /**
- * Created by Stardust on 2017/12/28.
+ * Created by Stardust on Dec 28, 2017.
  */
 public class MainThreadProxy {
 

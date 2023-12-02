@@ -11,7 +11,7 @@ import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.theme.ThemeColorMutable;
 
 /**
- * Created by Stardust on 2016/8/7.
+ * Created by Stardust on Aug 7, 2016.
  */
 public class ThemeColorSwitch extends SwitchCompat implements ThemeColorMutable {
     public ThemeColorSwitch(Context context) {

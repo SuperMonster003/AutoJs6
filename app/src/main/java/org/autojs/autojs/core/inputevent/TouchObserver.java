@@ -4,9 +4,8 @@ import androidx.annotation.NonNull;
 
 import static org.autojs.autojs.core.record.inputevent.InputEventRecorder.parseDeviceNumber;
 
-
 /**
- * Created by Stardust on 2017/7/20.
+ * Created by Stardust on Jul 20, 2017.
  */
 public class TouchObserver implements InputEventObserver.InputEventListener {
 
