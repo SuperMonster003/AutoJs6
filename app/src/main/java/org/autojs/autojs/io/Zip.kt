@@ -19,10 +19,10 @@ object Zip {
         var zis: ZipInputStream? = null
         try {
             zis = ZipInputStream(stream)
-            var entry: ZipEntry
+            var entry: ZipEntry?
             while (zis.nextEntry.also { entry = it } != null) {
-                val file = File(dir, entry.name)
-                if (entry.isDirectory) {
+                val file = File(dir, entry!!.name)
+                if (entry!!.isDirectory) {
                     file.mkdirs()
                 } else {
                     ensureDir(file.path)
