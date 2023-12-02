@@ -8,7 +8,7 @@ import android.media.projection.MediaProjectionManager;
 import org.autojs.autojs.app.OnActivityResultDelegate;
 
 /**
- * Created by Stardust on 2017/5/17.
+ * Created by Stardust on May 17, 2017.
  */
 public interface ScreenCaptureRequester {
 

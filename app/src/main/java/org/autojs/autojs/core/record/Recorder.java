@@ -3,7 +3,7 @@ package org.autojs.autojs.core.record;
 import java.util.Arrays;
 
 /**
- * Created by Stardust on 2017/3/16.
+ * Created by Stardust on Mar 16, 2017.
  */
 public interface Recorder {
 

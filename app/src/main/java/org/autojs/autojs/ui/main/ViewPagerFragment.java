@@ -11,7 +11,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import org.autojs.autojs.event.BackPressedHandler;
 
 /**
- * Created by Stardust on 2017/8/22.
+ * Created by Stardust on Aug 22, 2017.
  */
 public abstract class ViewPagerFragment extends Fragment implements BackPressedHandler {
 

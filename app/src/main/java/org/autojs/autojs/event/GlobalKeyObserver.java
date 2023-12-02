@@ -12,7 +12,7 @@ import org.autojs.autojs.core.inputevent.ShellKeyObserver;
 import org.autojs.autojs.pref.Pref;
 
 /**
- * Created by Stardust on 2017/8/14.
+ * Created by Stardust on Aug 14, 2017.
  */
 public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyListener {
 

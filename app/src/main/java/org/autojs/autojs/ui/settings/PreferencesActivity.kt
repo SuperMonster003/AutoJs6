@@ -9,7 +9,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityPreferencesBinding
 
 /**
- * Created by Stardust on 2017/2/2.
+ * Created by Stardust on Feb 2, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 open class PreferencesActivity : BaseActivity() {

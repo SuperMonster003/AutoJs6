@@ -55,9 +55,8 @@ import io.reactivex.internal.functions.ObjectHelper;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
-
 /**
- * Created by Stardust on 2017/7/31.
+ * Created by Stardust on Jul 31, 2017.
  */
 @SuppressLint("CheckResult")
 public class ScriptOperations {
@@ -97,7 +96,8 @@ public class ScriptOperations {
     }
 
     private String getCurrentDirectoryPath() {
-        return getCurrentDirectory().getPath() + "/";
+        String path = getCurrentDirectory().getPath();
+        return path.endsWith(File.separator) ? path : path + File.separator;
     }
 
     private ScriptFile getCurrentDirectory() {
@@ -227,7 +227,7 @@ public class ScriptOperations {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             showMessageWithoutThreadSwitch(resId);
         }
-        //switch to ui thread to show message
+        // switch to ui thread to show message
         GlobalAppContext.post(() -> showMessageWithoutThreadSwitch(resId));
     }
 

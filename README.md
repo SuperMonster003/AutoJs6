@@ -131,6 +131,45 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 [comment]: <> "Version history only shows last 3 versions"
 
+# v6.5.0
+
+###### 2023/12/02
+
+* `新增` opencc 模块 (参阅 项目文档 > [中文转换](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
+* `新增` UiSelector 增加 [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) 及 [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) 方法 _[`issue #115`](http://issues.autojs6.com/115)_
+* `新增` 打包应用页面增加 ABI 及库的筛选支持 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
+* `修复` 打包应用文件体积异常庞大的问题 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
+* `修复` 打包应用无法显示并打印部分异常消息的问题
+* `修复` 打包应用页面选择应用图标后可能显示空图标的问题
+* `修复` 打包应用包含 MLKit Google OCR 库时可能出现的上下文未初始化异常
+* `修复` ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u> 方法无效的问题
+* `修复` 部分文本 (如日志页面) 显示语言与应用设置语言可能不相符的问题
+* `修复` 部分语言在主页抽屉开关项可能出现文本溢出的问题
+* `修复` 部分设备无障碍服务开启后立即自动关闭且无任何提示消息的问题 _[`issue #181`](http://issues.autojs6.com/181)_
+* `修复` 部分设备无障碍服务开启后设备物理按键可能导致应用崩溃的问题 (试修) _[`issue #183`](http://issues.autojs6.com/183)_ _[`issue #186`](http://issues.autojs6.com/186#issuecomment-1817307790)_
+* `修复` 使用 auto(true) 重启无障碍服务后 pickup 功能异常的问题 (试修) _[`issue #184`](http://issues.autojs6.com/184)_
+* `修复` floaty 模块创建浮动窗口拖动时可能导致应用崩溃的问题 (试修)
+* `修复` app.startActivity 无法使用简称参数的问题 _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
+* `修复` importClass 导入的类名与全局变量冲突时代码抛出异常的问题 _[`issue #185`](http://issues.autojs6.com/185)_
+* `修复` Android 7.x 无法使用无障碍服务的问题
+* `修复` Android 14+ 可能无法正常使用 runtime.<u>loadJar/loadDex</u> 方法的问题 (试修)
+* `修复` 安卓系统快速设置面板中 "布局范围分析" 和 "布局层次分析" 不可用的问题 _[`issue #193`](http://issues.autojs6.com/193)_
+* `修复` 自动检查更新功能可能导致应用 [ANR](https://developer.android.com/topic/performance/vitals/anr) 的问题 (试修) _[`issue #186`](http://issues.autojs6.com/186)_
+* `修复` 文件管理器示例代码文件夹点击 "向上" 按钮后无法回到工作路径页面的问题 _[`issue #129`](http://issues.autojs6.com/129)_
+* `修复` 代码编辑器使用替换功能时替换按钮无法显示的问题
+* `修复` 代码编辑器长按删除时可能导致应用崩溃的问题 (试修)
+* `修复` 代码编辑器点击 fx 按钮无法显示模块函数快捷面板的问题
+* `修复` 代码编辑器模块函数快捷面板按钮函数名称可能溢出的问题
+* `优化` 代码编辑器模块函数快捷面板适配夜间模式
+* `优化` 打包应用启动页面适配夜间模式并调整应用图标布局
+* `优化` 打包应用页面支持使用软键盘 ENTER 键实现光标跳转
+* `优化` 打包应用页面支持点击 ABI 标题及库标题切换全选状态
+* `优化` 打包应用页面默认 ABI 智能选择并增加不可选择项的引导提示
+* `优化` 文件管理器根据文件及文件夹的类型及特征调整菜单项的显示情况
+* `优化` 文件管理器文件夹右键菜单增加打包应用选项
+* `优化` 无障碍服务启用但功能异常时在 AutoJs6 主页抽屉开关处将体现异常状态
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v650)_
+
 # v6.4.2
 
 ###### 2023/11/15
@@ -170,47 +209,6 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 构建工具自适应 Temurin 平台
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v641)_
 
-# v6.4.0
-
-###### 2023/10/30
-
-* `新增` ocr 模块支持 Paddle Lite 引擎 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #120`](http://pr.autojs6.com/120)_
-* `新增` 打包功能支持内置插件与外部插件两种打包方式 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
-* `新增` WebSocket 模块 (参阅 项目文档 > [WebSocket](https://docs.autojs6.com/#/webSocketType))
-* `新增` barcode / qrcode 模块 (参阅 项目文档 > [条码](https://docs.autojs6.com/#/barcode) / [二维码](https://docs.autojs6.com/#/qrcode))
-* `新增` shizuku 模块 (参阅 项目文档 > [Shizuku](https://docs.autojs6.com/#/shizuku)) 及主页抽屉权限开关
-* `新增` device.rotation / device.orientation 等方法
-* `新增` 内部 Java 类支持 class 静态属性访问
-* `新增` 支持在安卓系统设置页面选择并切换应用语言 (安卓 13 及以上)
-* `新增` 支持设置页面添加或长按应用图标激活 [应用快捷方式](https://developer.android.com/guide/topics/ui/shortcuts?hl=zh-cn) , 可启动文档和设置等页面
-* `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
-* `修复` 打包应用无法使用 AutoJs6 新增 API 的问题 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_
-* `修复` 打包应用在系统夜间模式下的样式异常
-* `修复` VSCode 插件保存文件到本地时文件扩展名信息丢失的问题
-* `修复` 使用协程特性运行项目产生未捕获异常致使应用崩溃的问题
-* `修复` 重启或退出应用时浮动按钮无法记录其位置状态信息的问题
-* `修复` 设备屏幕方向改变时无法获取更新后的设备配置信息的问题 _[`issue #153`](http://issues.autojs6.com/153)_
-* `修复` 屏幕旋转至横向时 Toolbar 标题字体过小的问题
-* `修复` 屏幕旋转至横向时应用主页的页签排版过于拥挤的问题
-* `修复` 屏幕旋转至横向时浮动按钮可能溢出屏幕的问题 _[`issue #90`](http://issues.autojs6.com/90)_
-* `修复` 屏幕多次旋转时无法恢复浮动按钮的坐标及屏幕侧边方向的问题
-* `修复` 部分设备消息浮动框可能出现遗漏显示或重复显示的问题
-* `修复` 消息浮动框在多个脚本同时运行时可能存在被遮蔽的问题 _[`issue #67`](http://issues.autojs6.com/67)_
-* `修复` 使用广播分析布局时点击布局无法弹出菜单且导致应用崩溃的问题
-* `修复` 第二次及以后创建的 WebSocket 实例均无法正常触发监听器的问题
-* `修复` 撤销 importPackage 的全局重定向方法以避免某些作用域下的包导入异常 _[`issue #88`](http://issues.autojs6.com/88)_
-* `修复` 日志活动页面使用复制或导出功能时可能导致应用崩溃的问题
-* `优化` 日志活动页面导出功能重命名为发送功能并重新实现符合实际意义的导出功能
-* `优化` 日志活动页面发送功能支持条目数量过大时自动截取并作出提示
-* `优化` ocr 模块同时兼容 Google MLKit 及 Paddle Lite 引擎 (参阅 项目文档 > [光学字符识别](https://docs.autojs6.com/#/ocr?id=p-mode))
-* `优化` 提升无障碍服务自动启动的成功概率
-* `优化` Kotlin 注解处理由 kapt 迁移至 KSP
-* `优化` 构建工具支持 IntelliJ Idea EAP 版本
-* `优化` 构建工具自适应 Java 发行版本以尽量避免 "无效的发行版本" 问题
-* `优化` 构建工具优化 IDE 及相关插件的版本退级逻辑并增加版本预测能力
-* `优化` 适配 VSCode 插件 1.0.7
-* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets/doc/CHANGELOG.md#v640)_
-
 ##### 更多版本历史可参阅
 
 * [CHANGELOG.md](http://changelog.autojs6.com)
@@ -227,12 +225,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Hedgehog | 2023.1.1 RC 3` 版本 (按需选择其一):
+下载 `Android Studio Hedgehog | 2023.1.1` 版本 (按需选择其一):
 
-- [android-studio-2023.1.1.25-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2023.1.1.25/android-studio-2023.1.1.25-windows.exe) (1.1 GB)
-- [android-studio-2023.1.1.25-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.1.1.25/android-studio-2023.1.1.25-windows.zip) (1.1 GB)
+- [android-studio-2023.1.1.26-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2023.1.1.26/android-studio-2023.1.1.26-windows.exe) (1.1 GB)
+- [android-studio-2023.1.1.26-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.1.1.26/android-studio-2023.1.1.26-windows.zip) (1.1 GB)
 
-> 注: 上述版本发布时间为 2023 年 11 月 9 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2023 年 11 月 30 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -369,13 +367,13 @@ Gradle
 
 |                         贡献人员                          |                                       提交数                                       |     最近提交     |
 |:-----------------------------------------------------:|:-------------------------------------------------------------------------------:|:------------:|
+|       [LZX284](https://github.com/LZX284) (Ai)        |     [17](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)      | `2023/11/19` |
 |     [TonyJiangWJ](https://github.com/TonyJiangWJ)     |   [4](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)    | `2023/10/31` |
-|       [LZX284](https://github.com/LZX284) (Ai)        |     [13](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)      | `2023/10/09` |
 | [little-alei](https://github.com/little-alei) (抠脚本人)  |   [12](https://github.com/SuperMonster003/AutoJs6/commits?author=little-alei)   | `2023/07/12` |
 |          [aiselp](https://github.com/aiselp)          | [6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp) | `2023/06/14` |
 |        [LYS86](https://github.com/LYS86) (LYS)        |      [2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)       | `2023/06/03` |
 
-数据更新于 `2023/10/31`.
+数据更新于 `2023/12/02`.
 
 数据条目按 `最近提交` 降序排序.
 
@@ -398,6 +396,7 @@ Gradle
         - The summary of the latest changelog for committing to Git [ DO NOT commit or push ]
         - Update badges like [ android studio / rhino / ... ]
         - Update android studio download links and version names
+        - Update contribution section
     - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
     - Update dependencies TypeScript declarations if needed.
     - Re-generate documentation by running the python script

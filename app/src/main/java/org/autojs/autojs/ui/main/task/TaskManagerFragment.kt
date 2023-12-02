@@ -14,7 +14,7 @@ import org.autojs.autojs.ui.widget.SimpleAdapterDataObserver
 import org.autojs.autojs6.databinding.FragmentTaskManagerBinding
 
 /**
- * Created by Stardust on 2017/3/24.
+ * Created by Stardust on Mar 24, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  * Transformed by SuperMonster003 on Mar 31, 2023.
  */

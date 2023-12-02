@@ -7,7 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 
 /**
- * Created by Stardust on 2017/3/10.
+ * Created by Stardust on Mar 10, 2017.
  */
 class LayoutInspector(private val mContext: Context) {
 

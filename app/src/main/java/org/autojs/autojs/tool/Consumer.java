@@ -3,7 +3,7 @@ package org.autojs.autojs.tool;
 import androidx.annotation.Keep;
 
 /**
- * Created by Stardust on 2017/3/10.
+ * Created by Stardust on Mar 10, 2017.
  */
 @Keep
 public interface Consumer<T> {

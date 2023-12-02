@@ -12,7 +12,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 /**
- * Created by Stardust on 2017/5/20.
+ * Created by Stardust on May 20, 2017.
  * Modified by SuperMonster003 as of Feb 15, 2023.
  */
 interface ColorDetector {

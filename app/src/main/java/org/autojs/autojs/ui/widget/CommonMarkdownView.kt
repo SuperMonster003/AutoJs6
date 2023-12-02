@@ -12,7 +12,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.util.TextUtils.renderMarkdown
 
 /**
- * Created by Stardust on 2017/3/5.
+ * Created by Stardust on Mar 5, 2017.
  * Transformed by SuperMonster003 on May 25, 2023.
  */
 class CommonMarkdownView : WebView {

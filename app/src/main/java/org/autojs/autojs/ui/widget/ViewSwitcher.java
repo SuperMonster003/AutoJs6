@@ -5,7 +5,7 @@ import android.util.AttributeSet;
 import android.view.View;
 
 /**
- * Created by Stardust on 2017/3/11.
+ * Created by Stardust on Mar 11, 2017.
  */
 public class ViewSwitcher extends android.widget.ViewSwitcher {
 

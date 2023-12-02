@@ -201,9 +201,10 @@
     <string name="text_a11y_service_description">Требуется для автоматической работы сценария (щелчок, длительное нажатие, скольжение и т.д.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Служба доступности включена, но не работает (Включите или перезагрузите устройство)</string>
     <string name="text_a11y_service_may_be_needed">Может потребоваться служба доступности</string>
-    <string name="text_abis">ABIs</string>
-    <string name="text_abis_32bit">ABIs (32-bit)</string>
-    <string name="text_abis_64bit">ABIs (64-bit)</string>
+    <string name="text_supported_libraries_short">Библиотеки</string>
+    <string name="text_supported_abis_short">ABIs</string>
+    <string name="text_supported_abis_short_32bit">ABIs (32-bit)</string>
+    <string name="text_supported_abis_short_64bit">ABIs (64-bit)</string>
     <string name="text_about">Об</string>
     <string name="text_about_all_files_access">О доступе ко всем файлам</string>
     <string name="text_about_app_and_developer">О приложении и разработчике</string>
@@ -696,7 +697,6 @@
     <string name="description_launcher_shortcuts">Ярлыки позволяют выполнять определенные действия в AutoJs6. Пользователи могут отображать эти ярлыки в поддерживаемой программе запуска и быстро запускать некоторые задачи или действия, например, читать документацию по приложению AutoJs6, запускать страницу настроек AutoJs6 и т.д.</string>
     <string name="summary_text_launcher_shortcuts">Добавление ярлыков в пусковую установку</string>
     <string name="text_pin_shortcut_not_unsupported">Закрепление ярлыков в пусковой установке не поддерживается</string>
-    <string name="text_template_apk_path">Шаблон APK путь</string>
     <string name="text_shizuku_access_description">Shizuku позволяет получить привилегии ADB и доступ к системным API.</string>
     <string name="text_shizuku_access">Разрешения Shizuku</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Предоставление привилегий AutoJs6 в приложении Shizuku</string>
@@ -708,6 +708,17 @@
     <string name="error_failed_to_grant_shizuku_access">Не удалось предоставить права на использование Shizuku</string>
     <string name="error_unable_to_use_shizuku_service">Невозможно использовать службу Shizuku</string>
     <string name="error_input_fields_check_failed">Не удалось выполнить проверку поля ввода</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">Необходимо выбрать хотя бы один ПВБ</string>
+    <string name="text_malfunctioning">Неисправность</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">Модуль \"%s\" не работает из-за отсутствия необходимых библиотечных файлов</string>
+    <string name="text_unavailable">Недоступно</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">Выбранный ABI \"%s\" не может быть использован для создания упакованного приложения, поскольку текущая версия AutoJs6 не включает указанный ABI.</string>
+    <string name="text_the_following_solutions_can_be_referred_to">Можно воспользоваться следующими решениями</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">Загрузите и установите версию AutoJs6, включающую вышеуказанный ABI (в имени файла содержится \"%s\")</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">Загрузить и установить версию AutoJs6, включающую все ABI (имя файла содержит \"universal\")</string>
+    <string name="text_recommended">Рекомендуемый</string>
+    <string name="text_download_link_for_autojs6">Ссылка на скачивание AutoJs6</string>
+    <string name="text_unavailable_abi_for">ABI \"%s\" недоступен</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">Всего: %d элемент</item>

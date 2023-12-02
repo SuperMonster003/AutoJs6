@@ -93,10 +93,14 @@ module.exports = function (scriptRuntime, scope) {
                         if (img === null) {
                             throw TypeError(`Invalid image of path "${arguments[0]}" for ocr.recognizeText(img, options?)`);
                         }
+
+                        let argArray = Array.from(arguments);
+                        argArray.splice(0, 1, img.oneShot());
+
                         // @Overload
                         // recognizeText(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
                         // recognizeText(img: ImageWrapper, region: OmniRegion): string[];
-                        return this.recognizeText(img.oneShot(), arguments[1]);
+                        return this.recognizeText.apply(this, argArray);
                     }
 
                     if (!(arguments[0] instanceof ImageWrapper)) {
@@ -115,8 +119,11 @@ module.exports = function (scriptRuntime, scope) {
 
                         // @Signature recognizeText(img: ImageWrapper, region: OmniRegion): string[];
 
+                        let argArray = Array.from(arguments);
+                        argArray.splice(1, 1, { region: arguments[1] });
+
                         // @Overload recognizeText(img: ImageWrapper, options: DetectOptionsMLKit | DetectOptionsPaddle): string[];
-                        return this.recognizeText(arguments[0], { region: arguments[1] });
+                        return this.recognizeText.apply(this, argArray);
                     }
 
                     // @Signature recognizeText(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): string[];
@@ -163,10 +170,14 @@ module.exports = function (scriptRuntime, scope) {
                         if (img === null) {
                             throw TypeError(`Invalid image of path "${arguments[0]}" for ocr.detect(img, options?)`);
                         }
+
+                        let argArray = Array.from(arguments);
+                        argArray.splice(0, 1, img.oneShot());
+
                         // @Overload
                         // detect(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
                         // detect(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
-                        return this.detect(img.oneShot(), arguments[1]);
+                        return this.detect.apply(this, argArray);
                     }
 
                     if (!(arguments[0] instanceof ImageWrapper)) {
@@ -185,8 +196,11 @@ module.exports = function (scriptRuntime, scope) {
 
                         // @Signature detect(img: ImageWrapper, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];
 
+                        let argArray = Array.from(arguments);
+                        argArray.splice(1, 1, { region: arguments[1] });
+
                         // @Overload detect(img: ImageWrapper, options: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
-                        return this.detect(/* img */ arguments[0], { region: arguments[1] });
+                        return this.detect.apply(this, argArray);
                     }
 
                     // @Signature detect(img: ImageWrapper, options?: DetectOptionsMLKit | DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];
@@ -200,7 +214,7 @@ module.exports = function (scriptRuntime, scope) {
                     /** type {Internal.Ocr.DetectMethod} */
                     let detectMethod;
 
-                    switch (_mode) {
+                    switch (arguments[OcrCtor.prototype._forcibleModeArgIndex] || _mode) {
                         case modeName.mlkit:
                             detectMethod = this.mlkit.detectMethodCreator(opt);
                             break;
@@ -233,6 +247,32 @@ module.exports = function (scriptRuntime, scope) {
                 toString() {
                     return this.summary();
                 },
+            };
+
+            /* Replace stubs. */
+
+            OcrCtor.prototype.mlkit.recognizeText = function () {
+                let argArray = Array.from(arguments);
+                argArray[OcrCtor.prototype._forcibleModeArgIndex] = modeName.mlkit;
+                return OcrCtor.prototype.recognizeText.apply(OcrCtor.prototype, argArray);
+            };
+
+            OcrCtor.prototype.mlkit.detect = function () {
+                let argArray = Array.from(arguments);
+                argArray[OcrCtor.prototype._forcibleModeArgIndex] = modeName.mlkit;
+                return OcrCtor.prototype.detect.apply(OcrCtor.prototype, argArray);
+            };
+
+            OcrCtor.prototype.paddle.recognizeText = function () {
+                let argArray = Array.from(arguments);
+                argArray[OcrCtor.prototype._forcibleModeArgIndex] = modeName.paddle;
+                return OcrCtor.prototype.recognizeText.apply(OcrCtor.prototype, argArray);
+            };
+
+            OcrCtor.prototype.paddle.detect = function () {
+                let argArray = Array.from(arguments);
+                argArray[OcrCtor.prototype._forcibleModeArgIndex] = modeName.paddle;
+                return OcrCtor.prototype.detect.apply(OcrCtor.prototype, argArray);
             };
 
             /* Set prototype descriptors. */

@@ -26,7 +26,8 @@ open class ImageViewAttributes(resourceParser: ResourceParser, view: View) : Vie
         registerAttr("scaleType") { view.scaleType = SCALE_TYPES[it] }
         registerAttr("src") { drawables.setupWithImage(view, it) }
         registerAttr("tint") {
-            // FIXME: 2018/10/13 setImageTineList not working
+            // FIXME by Stardust on Oct 13, 2018.
+            //  ! Method setImageTineList not working.
             val mode = ImageViewCompat.getImageTintMode(view)
             view.setColorFilter(ColorUtils.parse(view, it), mode ?: PorterDuff.Mode.SRC_ATOP)
         }

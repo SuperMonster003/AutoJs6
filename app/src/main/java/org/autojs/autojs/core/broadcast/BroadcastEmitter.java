@@ -5,7 +5,7 @@ import org.autojs.autojs.core.looper.Timer;
 import org.autojs.autojs.runtime.ScriptBridges;
 
 /**
- * Created by Stardust on 2018/4/1.
+ * Created by Stardust on Apr 1, 2018.
  */
 public class BroadcastEmitter extends EventEmitter {
 

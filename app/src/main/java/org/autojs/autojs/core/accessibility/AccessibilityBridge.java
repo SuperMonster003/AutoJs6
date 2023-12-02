@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.core.activity.ActivityInfoProvider;
 import org.autojs.autojs.permission.UsageStatsPermission;
 import org.autojs.autojs.runtime.accessibility.AccessibilityConfig;
@@ -17,9 +18,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  */
 public abstract class AccessibilityBridge {
 
@@ -152,6 +152,7 @@ public abstract class AccessibilityBridge {
         return mConfig;
     }
 
+    @ScriptInterface
     public void setAccessibilityListener(AccessibilityServiceCallback listener) {
         AccessibilityService.Companion.setCallback(listener);
     }

@@ -5,7 +5,7 @@ import android.graphics.Rect;
 import android.text.Layout;
 
 /**
- * Created by Stardust on 2018/2/13.
+ * Created by Stardust on Feb 13, 2018.
  */
 public class LayoutHelper {
 

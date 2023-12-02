@@ -5,7 +5,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 /**
- * Created by Stardust on 2017/4/19.
+ * Created by Stardust on Apr 19, 2017.
  */
 public interface ResizableExpandableFloaty {
 

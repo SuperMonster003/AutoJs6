@@ -9,7 +9,7 @@ import org.autojs.autojs.core.ui.inflater.util.ValueMapper
 import org.autojs.autojs.core.ui.widget.JsSpinner
 
 /**
- * Created by Stardust on 2017/11/29.
+ * Created by Stardust on Nov 29, 2017.
  * Transformed by SuperMonster003 on Apr 12, 2023.
  */
 class JsSpinnerInflater(resourceParser: ResourceParser) : AppCompatSpinnerInflater<JsSpinner>(resourceParser) {

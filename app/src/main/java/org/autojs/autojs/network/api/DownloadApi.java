@@ -7,7 +7,7 @@ import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 
 /**
- * Created by Stardust on 2017/12/6.
+ * Created by Stardust on Dec 6, 2017.
  */
 public interface DownloadApi {
 

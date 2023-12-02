@@ -17,7 +17,7 @@ import android.widget.TextView;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/2/4.
+ * Created by Stardust on Feb 4, 2017.
  */
 public class ExpandableRecyclerView extends ThemeColorRecyclerView {
 

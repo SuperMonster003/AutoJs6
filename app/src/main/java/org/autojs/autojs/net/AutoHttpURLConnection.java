@@ -9,7 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * Created by Stardust on 2017/4/10.
+ * Created by Stardust on Apr 10, 2017.
  */
 public class AutoHttpURLConnection extends HttpURLConnection implements AutoCloseable {
 

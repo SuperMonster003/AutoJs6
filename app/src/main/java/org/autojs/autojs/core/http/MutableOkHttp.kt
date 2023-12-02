@@ -6,7 +6,7 @@ import okhttp3.Response
 import java.util.concurrent.TimeUnit
 
 /**
- * Created by Stardust on 2018/4/11.
+ * Created by Stardust on Apr 11, 2018.
  * Modified by SuperMonster003 as of Sep 8, 2022.
  */
 class MutableOkHttp : OkHttpClient() {

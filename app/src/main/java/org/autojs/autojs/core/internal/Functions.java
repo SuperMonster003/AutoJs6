@@ -5,7 +5,7 @@ import static org.autojs.autojs.util.StringUtils.str;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/7/19.
+ * Created by Stardust on Jul 19, 2017.
  */
 public class Functions {
 

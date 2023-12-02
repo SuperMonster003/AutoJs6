@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import org.autojs.autojs.util.ViewUtils;
 
 /**
- * Created by Stardust on 2017/1/30.
+ * Created by Stardust on Jan 30, 2017.
  */
 public abstract class Fragment extends androidx.fragment.app.Fragment {
 

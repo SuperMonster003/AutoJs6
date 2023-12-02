@@ -2,15 +2,21 @@ package org.autojs.autojs.inrt.autojs
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
+import com.google.mlkit.common.MlKit
 import org.autojs.autojs.inrt.LogActivity
 import org.autojs.autojs.inrt.SettingsActivity
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.AutoJs as AutoJsApp
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  */
 class AutoJs(application: Application) : AutoJsApp(application) {
+
+    init {
+        initMLKit(application)
+    }
 
     override fun createAppUtils(context: Context) = AppUtils(context, context.packageName + ".fileprovider")
 
@@ -19,7 +25,17 @@ class AutoJs(application: Application) : AutoJsApp(application) {
         putProperty("class.console", LogActivity::class.java)
     }
 
+    private fun initMLKit(application: Application) {
+        // @Hint by SuperMonster003 on Nov 26, 2023.
+        //  ! To avoid the exception as below (only happened on packaged apps).
+        //  ! IllegalStateException: MlKitContext has not been initialized.
+        MlKit.initialize(application)
+        Log.d(TAG, "MLKit initialized")
+    }
+
     companion object {
+
+        private const val TAG = "AutoJsInrt"
 
         val instance
             get() = AutoJsApp.instance

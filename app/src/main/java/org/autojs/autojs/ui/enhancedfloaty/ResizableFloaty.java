@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 /**
- * Created by Stardust on 2017/4/30.
+ * Created by Stardust on Apr 30, 2017.
  */
 public interface ResizableFloaty {
 

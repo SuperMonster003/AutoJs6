@@ -23,7 +23,7 @@ import org.joda.time.format.DateTimeFormat
 import java.util.LinkedList
 
 /**
- * Created by Stardust on 2017/1/31.
+ * Created by Stardust on Jan 31, 2017.
  */
 object Pref {
 

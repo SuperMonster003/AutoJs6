@@ -10,7 +10,7 @@ import org.autojs.autojs.annotation.ScriptInterface
 import org.mozilla.javascript.Scriptable
 
 /**
- * Created by Stardust on 2017/4/1.
+ * Created by Stardust on Apr 1, 2017.
  * Modified by SuperMonster003 as of Jan 21, 2023.
  * Transformed by SuperMonster003 on Apr 18, 2023.
  */

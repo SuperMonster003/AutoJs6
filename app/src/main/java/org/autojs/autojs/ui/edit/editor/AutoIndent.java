@@ -4,7 +4,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 
 /**
- * Created by Stardust on 2018/2/25.
+ * Created by Stardust on Feb 25, 2018.
  */
 public class AutoIndent implements TextWatcher {
 

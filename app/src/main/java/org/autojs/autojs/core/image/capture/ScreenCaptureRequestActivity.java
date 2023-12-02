@@ -12,7 +12,7 @@ import org.autojs.autojs.app.OnActivityResultDelegate;
 import org.autojs.autojs.tool.IntentExtras;
 
 /**
- * Created by Stardust on 2017/5/22.
+ * Created by Stardust on May 22, 2017.
  */
 public class ScreenCaptureRequestActivity extends Activity {
 

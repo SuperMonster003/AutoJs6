@@ -12,9 +12,10 @@ import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.console.ConsoleView
+import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs6.R
 
-class LogActivity : AppCompatActivity() {
+class LogActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

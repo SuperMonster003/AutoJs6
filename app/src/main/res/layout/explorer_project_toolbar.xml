@@ -57,7 +57,7 @@
                 android:layout_height="40dp"
                 android:background="?selectableItemBackgroundBorderless"
                 android:paddingVertical="9dp"
-                android:src="@drawable/ic_build_apk"
+                android:src="@drawable/ic_packaging"
                 app:tint="@color/project_toolbar_button" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>

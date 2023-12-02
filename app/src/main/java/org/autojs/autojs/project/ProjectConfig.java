@@ -9,6 +9,7 @@ import com.google.gson.annotations.SerializedName;
 
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.pio.PFiles;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Stardust on 2018/1/24.
+ * Created by Stardust on Jan 24, 2018.
  */
 public class ProjectConfig {
 
@@ -58,7 +59,6 @@ public class ProjectConfig {
 
     @SerializedName("useFeatures")
     private List<String> mFeatures = new ArrayList<>();
-
 
     public static ProjectConfig fromJson(String json) {
         if (json == null) {

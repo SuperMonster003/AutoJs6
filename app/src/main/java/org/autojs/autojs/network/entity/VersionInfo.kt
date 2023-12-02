@@ -7,7 +7,7 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/9/20.
+ * Created by Stardust on Sep 20, 2017.
  * Modified by SuperMonster003 as of May 29, 2022.
  */
 class VersionInfo : ExtendedVersionInfo {

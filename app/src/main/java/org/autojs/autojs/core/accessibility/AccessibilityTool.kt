@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.provider.Settings.Secure
 import android.text.TextUtils
 import android.util.Log
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.pref.Pref
 import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.exception.ScriptException
@@ -18,13 +19,13 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/1/26.
+ * Created by Stardust on Jan 26, 2017.
  * Modified by SuperMonster003 as of Feb 15, 2022.
  */
 class AccessibilityTool(val context: Context) {
 
     private val tag: String = AccessibilityTool::class.java.simpleName
-    private val serviceName = "${context.packageName}/${AccessibilityService::class.java.name}"
+    private val serviceName = "${(GlobalAppContext.get()?: context).packageName}/${AccessibilityServiceUsher::class.java.name}"
 
     val service: Service = Service()
 
@@ -56,7 +57,7 @@ class AccessibilityTool(val context: Context) {
             ) ?: return false
             TextUtils.SimpleStringSplitter(':').also { colonSplitter ->
                 colonSplitter.setString(services)
-                val expectedComponentName = ComponentName(context, AccessibilityService::class.java)
+                val expectedComponentName = ComponentName(context, AccessibilityServiceUsher::class.java)
                 while (colonSplitter.hasNext()) {
                     val componentNameString = colonSplitter.next()
                     val componentName = ComponentName.unflattenFromString(componentNameString)

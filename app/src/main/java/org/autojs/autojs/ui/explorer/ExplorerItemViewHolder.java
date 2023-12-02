@@ -120,14 +120,21 @@ class ExplorerItemViewHolder extends BindableViewHolder<ExplorerItem> {
         popupMenu.inflate(R.menu.menu_script_options);
         Menu menu = popupMenu.getMenu();
         if (!mExplorerItem.isExecutable()) {
+            menu.removeItem(R.id.create_shortcut);
+            menu.removeItem(R.id.timed_task);
             menu.removeItem(R.id.run_repeatedly);
-            menu.removeItem(R.id.more);
         }
         if (!mExplorerItem.canDelete()) {
             menu.removeItem(R.id.delete);
         }
         if (!mExplorerItem.canRename()) {
             menu.removeItem(R.id.rename);
+        }
+        if (!mExplorerItem.canBuildApk()) {
+            menu.removeItem(R.id.action_build_apk);
+        }
+        if (!mExplorerItem.canSetAsWorkingDir()) {
+            menu.removeItem(R.id.action_set_as_working_dir);
         }
         String samplePath = new PFile(explorerView.getContext().getFilesDir(), SAMPLE_PATH).getPath();
         if (!(mExplorerItem.getPath().startsWith(samplePath))) {

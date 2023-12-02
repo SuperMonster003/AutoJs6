@@ -12,7 +12,7 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.runtime.api.ScriptToast
 
 /**
- * Created by Stardust on 2017/5/2.
+ * Created by Stardust on May 2, 2017.
  * Transformed by SuperMonster003 on Oct 25, 2023.
  */
 class UiHandler(val applicationContext: Context) : Handler(Looper.getMainLooper()) {

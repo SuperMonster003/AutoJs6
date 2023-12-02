@@ -10,7 +10,7 @@ import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 
 /**
- * Created by Stardust on 2017/10/21.
+ * Created by Stardust on Oct 21, 2017.
  */
 public class RxDialogs {
 

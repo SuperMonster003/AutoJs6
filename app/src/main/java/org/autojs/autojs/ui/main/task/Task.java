@@ -16,7 +16,7 @@ import org.autojs.autojs6.R;
 import org.joda.time.format.DateTimeFormat;
 
 /**
- * Created by Stardust on 2017/11/28.
+ * Created by Stardust on Nov 28, 2017.
  */
 public abstract class Task {
 

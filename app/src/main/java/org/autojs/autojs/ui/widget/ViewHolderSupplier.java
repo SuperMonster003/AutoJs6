@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import java.lang.reflect.Constructor;
 
 /**
- * Created by Stardust on 2017/4/8.
+ * Created by Stardust on Apr 8, 2017.
  */
 public interface ViewHolderSupplier<VH extends RecyclerView.ViewHolder> {
 

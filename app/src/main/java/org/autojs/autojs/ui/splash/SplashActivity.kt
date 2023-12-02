@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.splash
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -9,10 +10,11 @@ import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/7/7.
+ * Created by Stardust on Jul 7, 2017.
  * Modified by SuperMonster003 as of Apr 4, 2023.
  * Transformed by SuperMonster003 on Apr 4, 2023.
  */
+@SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity() {
 
     private var mAlreadyEnterNextActivity = false
@@ -54,7 +56,7 @@ class SplashActivity : BaseActivity() {
 
     companion object {
 
-        private const val INIT_TIMEOUT: Long = 700
+        const val INIT_TIMEOUT: Long = 1000
 
     }
 

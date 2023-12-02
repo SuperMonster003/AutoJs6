@@ -8,7 +8,7 @@ import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 
 /**
- * Created by Stardust on 2017/9/20.
+ * Created by Stardust on Sep 20, 2017.
  * Modified by SuperMonster003 as of Feb 28, 2022.
  */
 public interface UpdateCheckerApi {

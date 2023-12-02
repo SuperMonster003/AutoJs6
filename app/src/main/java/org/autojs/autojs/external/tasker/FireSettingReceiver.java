@@ -12,7 +12,7 @@ import org.autojs.autojs.external.open.RunIntentActivity;
 import org.json.JSONObject;
 
 /**
- * Created by Stardust on 2017/3/27.
+ * Created by Stardust on Mar 27, 2017.
  */
 public class FireSettingReceiver extends AbstractPluginSettingReceiver {
 

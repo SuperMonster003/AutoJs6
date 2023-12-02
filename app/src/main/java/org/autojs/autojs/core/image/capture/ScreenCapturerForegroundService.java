@@ -45,7 +45,7 @@ public class ScreenCapturerForegroundService extends Service {
         ForegroundServiceCreator foregroundServiceCreator = new ForegroundServiceCreator.Builder(this)
                 .setClassName(sClassName)
                 .setIntent(
-                        // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on Apr 10, 2022
+                        // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on Apr 10, 2022.
                         ScreenCaptureRequestActivity.getIntent(this)
                 )
                 .setNotificationId(NOTIFICATION_ID)
@@ -64,8 +64,8 @@ public class ScreenCapturerForegroundService extends Service {
 
     @Override
     public void onDestroy() {
+        stopForeground(STOP_FOREGROUND_REMOVE);
         super.onDestroy();
-        stopForeground(true);
     }
 
 }

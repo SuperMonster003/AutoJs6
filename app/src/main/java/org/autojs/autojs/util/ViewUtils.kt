@@ -30,7 +30,7 @@ import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/1/24.
+ * Created by Stardust on Jan 24, 2017.
  * Modified by SuperMonster003 as of Sep 11, 2022.
  */
 @Suppress("unused")
@@ -73,8 +73,9 @@ object ViewUtils {
         return view.findViewById(resId)
     }
 
-    // FIXME: 2018/1/23 not working in some devices
-    // https://github.com/hyb1996/Auto.js/issues/268
+    // FIXME by Stardust on Jan 23, 2018.
+    //  ! Not working in some devices.
+    //  ! https://github.com/hyb1996/Auto.js/issues/268
     fun getStatusBarHeightLegacy(context: Context): Int {
         return context.resources.getIdentifier("status_bar_height", "dimen", "android").let { resourceId ->
             when (resourceId > 0) {

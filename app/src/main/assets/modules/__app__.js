@@ -10,6 +10,7 @@ let { autojs, shell, files, util } = global;
  * @return {Internal.App}
  */
 module.exports = function (scriptRuntime, scope) {
+
     const JavaInteger = java.lang.Integer;
 
     /**
@@ -274,7 +275,7 @@ module.exports = function (scriptRuntime, scope) {
                         if (rexWebSiteWithoutProtocol.test(o)) {
                             return this.openUrl(`http://${o}`);
                         }
-                        let prop = runtime.getProperty(`${AppUtils.activityShortFormPrefix()}${o}`);
+                        let prop = runtime.getProperty(`${AppUtils.activityShortFormPrefix}${o}`);
                         if (!prop) {
                             throw Error(`Activity short form ${o} not found`);
                         }

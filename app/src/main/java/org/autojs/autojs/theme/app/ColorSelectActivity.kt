@@ -34,7 +34,7 @@ import org.autojs.autojs6.R
 import kotlin.math.hypot
 
 /**
- * Created by Stardust on 2017/3/5.
+ * Created by Stardust on Mar 5, 2017.
  * Modified by SuperMonster003 as of Sep 22, 2022.
  * Transformed by SuperMonster003 on Sep 22, 2022.
  */

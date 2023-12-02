@@ -5,7 +5,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 /**
- * Created by Stardust on 2017/5/13.
+ * Created by Stardust on May 13, 2017.
  */
 public class RhinoE4XTest {
 

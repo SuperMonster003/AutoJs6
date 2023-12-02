@@ -8,7 +8,7 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.UniqueTag
 
 /**
- * Created by Stardust on 2017/12/6.
+ * Created by Stardust on Dec 6, 2017.
  * Modified by SuperMonster003 as of Apr 12, 2023.
  */
 class ProxyJavaObject : NativeJavaObject {

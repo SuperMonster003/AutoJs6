@@ -201,9 +201,10 @@
     <string name="text_a11y_service_description">مطلوب من خلال العملية التلقائية البرنامج النصي (انقر فوق ، اضغط لفترة طويلة ، شريحة ، إلخ).</string>
     <string name="text_a11y_service_enabled_but_not_running">تم تمكين خدمة إمكانية الوصول ولكن لا تعمل (إعادة تمكين أو إعادة تشغيل الجهاز)</string>
     <string name="text_a11y_service_may_be_needed">قد تكون هناك حاجة إلى خدمة إمكانية الوصول</string>
-    <string name="text_abis">قيم ABIs</string>
-    <string name="text_abis_32bit">ABIs (32 بت)</string>
-    <string name="text_abis_64bit">ABIs (64 بت)</string>
+    <string name="text_supported_libraries_short">المكتبات</string>
+    <string name="text_supported_abis_short">قيم ABIs</string>
+    <string name="text_supported_abis_short_32bit">ABIs (32 بت)</string>
+    <string name="text_supported_abis_short_64bit">ABIs (64 بت)</string>
     <string name="text_about">حول</string>
     <string name="text_about_all_files_access">حول كل الملفات وصول</string>
     <string name="text_about_app_and_developer">حول التطبيق والمطور</string>
@@ -696,7 +697,6 @@
     <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
     <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
     <string name="text_pin_shortcut_not_unsupported">تثبيت الاختصارات على المشغل غير مدعوم</string>
-    <string name="text_template_apk_path">قالب مسار APK</string>
     <string name="text_shizuku_access_description">يتيح Shizuku استخدام واجهة برمجة تطبيقات النظام مع امتيازات ADB</string>
     <string name="text_shizuku_access">وصول Shizuku</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">منح الوصول إلى AutoJs6 في تطبيق Shizuku</string>
@@ -708,6 +708,17 @@
     <string name="error_failed_to_grant_shizuku_access">فشل منح Shizuku حق الوصول</string>
     <string name="error_unable_to_use_shizuku_service">غير قادر على استخدام خدمة Shizuku</string>
     <string name="error_input_fields_check_failed">فشل فحص حقول الإدخال</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">يجب تحديد ABI واحد على الأقل</string>
+    <string name="text_malfunctioning">خلل</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">الوحدة النمطية \"%s\" لا تعمل بسبب عدم توفر ملفات المكتبة الضرورية</string>
+    <string name="text_unavailable">غير متوفره</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">لا يمكن استخدام ABI المحدد \"%s\" لإنشاء تطبيق مجمع، لأن الإصدار الحالي من AutoJs6 لا يتضمن ABI أعلاه.</string>
+    <string name="text_the_following_solutions_can_be_referred_to">ويمكن الرجوع إلى الحلول التالية</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن ABI أعلاه (يحتوي اسم الملف على \"%s\")</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن كافة واجهات برمجة التطبيقات (يحتوي اسم الملف على \"universal\")</string>
+    <string name="text_recommended">مُستَحسَن</string>
+    <string name="text_download_link_for_autojs6">رابط تحميل AutoJs6</string>
+    <string name="text_unavailable_abi_for">واجهة برمجة التطبيقات \"%s\" غير متوفرة</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="one">المجموع: عنصر واحد</item>

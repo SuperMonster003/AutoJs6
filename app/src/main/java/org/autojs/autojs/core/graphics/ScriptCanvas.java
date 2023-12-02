@@ -18,7 +18,7 @@ import androidx.annotation.Nullable;
 import org.autojs.autojs.core.image.ImageWrapper;
 
 /**
- * Created by Stardust on 2018/3/22.
+ * Created by Stardust on Mar 22, 2018.
  */
 @SuppressWarnings("unused")
 public class ScriptCanvas {

@@ -2,9 +2,15 @@
 <resources>
 
     <color name="day_night">#DE212121</color>
+    <color name="day_night_full">#212121</color>
+    <color name="day_night_alpha_70">#B3212121</color>
     <color name="night_day">#DEFBFBFB</color>
+    <color name="night_day_full">#FBFBFB</color>
     <color name="window_background">#FFFFFF</color>
+    <color name="window_background_selected">#E5E5E5</color>
     <color name="text_color_primary">@color/day_night</color>
+    <color name="text_color_primary_full">@color/day_night_full</color>
+    <color name="text_color_primary_alpha_70">@color/day_night_alpha_70</color>
     <color name="text_color_secondly">#9DA0A2</color>
 
     <color name="colorAccent">#03A9F4</color>

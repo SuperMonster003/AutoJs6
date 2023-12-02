@@ -5,7 +5,7 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 
 /**
- * Created by Stardust on 2017/1/26.
+ * Created by Stardust on Jan 26, 2017.
  */
 public class SparseArrayEntries<E> {
 

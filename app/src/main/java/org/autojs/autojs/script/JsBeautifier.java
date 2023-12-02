@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Created by Stardust on 2017/4/12.
+ * Created by Stardust on Apr 12, 2017.
  */
 public class JsBeautifier {
 

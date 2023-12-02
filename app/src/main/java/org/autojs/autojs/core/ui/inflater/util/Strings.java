@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Created by Stardust on 2017/11/4.
+ * Created by Stardust on Nov 4, 2017.
  */
 public class Strings {
 

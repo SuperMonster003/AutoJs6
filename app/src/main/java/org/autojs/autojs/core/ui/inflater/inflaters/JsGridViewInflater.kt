@@ -7,7 +7,7 @@ import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsGridView
 
 /**
- * Created by Stardust on 2018/3/30.
+ * Created by Stardust on Mar 30, 2018.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
 class JsGridViewInflater<V : JsGridView>(resourceParser: ResourceParser) : JsListViewInflater<V>(resourceParser) {

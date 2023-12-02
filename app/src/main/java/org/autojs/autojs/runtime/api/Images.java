@@ -48,7 +48,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by Stardust on 2017/5/20.
+ * Created by Stardust on May 20, 2017.
  */
 @SuppressWarnings("unused")
 public class Images {

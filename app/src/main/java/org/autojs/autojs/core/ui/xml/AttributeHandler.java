@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Stardust on 2017/5/14.
+ * Created by Stardust on May 14, 2017.
  */
 public interface AttributeHandler {
 

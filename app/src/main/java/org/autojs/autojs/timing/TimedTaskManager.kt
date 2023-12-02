@@ -14,7 +14,7 @@ import org.autojs.autojs.timing.TimedTaskScheduler.scheduleTaskIfNeeded
 import org.autojs.autojs.util.Observers
 
 /**
- * Created by Stardust on 2017/11/27.
+ * Created by Stardust on Nov 27, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  * Transformed by SuperMonster003 on Apr 2, 2023.
  */

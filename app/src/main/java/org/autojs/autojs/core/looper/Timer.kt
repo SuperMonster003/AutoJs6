@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
 /**
- * Created by Stardust on 2017/12/27.
+ * Created by Stardust on Dec 27, 2017.
  * Modified by aiselp as of Jun 14, 2023.
  * Modified by SuperMonster003 as of Jul 12, 2023.
  */

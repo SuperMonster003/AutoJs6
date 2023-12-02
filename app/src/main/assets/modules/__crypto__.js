@@ -1,7 +1,8 @@
 // noinspection JSUnusedLocalSymbols
 
 module.exports = function (runtime, global) {
-    Crypto.KeyPair.prototype
+
+    const Crypto = org.autojs.autojs.core.crypto.Crypto;
 
     return {
         Key: Crypto.Key,

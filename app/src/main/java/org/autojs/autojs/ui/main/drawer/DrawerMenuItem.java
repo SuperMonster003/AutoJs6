@@ -5,7 +5,7 @@ import androidx.annotation.Nullable;
 import java.io.IOException;
 
 /**
- * Created by Stardust on 2017/8/25.
+ * Created by Stardust on Aug 25, 2017.
  */
 public class DrawerMenuItem {
 

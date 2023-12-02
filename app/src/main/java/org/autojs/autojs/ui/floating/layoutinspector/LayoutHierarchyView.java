@@ -28,7 +28,7 @@ import pl.openrnd.multilevellistview.NestType;
 import pl.openrnd.multilevellistview.OnItemClickListener;
 
 /**
- * Created by Stardust on 2017/3/10.
+ * Created by Stardust on Mar 10, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  */
 public class LayoutHierarchyView extends MultiLevelListView {

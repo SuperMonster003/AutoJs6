@@ -44,6 +44,9 @@ dependencies /* Unclassified */ {
     // SwipeRefreshLayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
+    // FlexboxLayout
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
+
     // Common Markdown
     implementation("com.github.atlassian:commonmark-java:commonmark-parent-0.9.0")
 
@@ -263,6 +266,11 @@ dependencies /* MLKit */ {
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
 }
 
+dependencies /* OpenCC */ {
+    // OpenCC
+    implementation("com.github.qichuan:android-opencc:1.2.0")
+}
+
 dependencies /* Auto.js Extensions */ {
     // Settings Compat
     // @Integrated by SuperMonster003 on Mar 30, 2023.
@@ -361,6 +369,24 @@ android {
                     "icon" to "@mipmap/ic_launcher",
                 )
             )
+            packagingOptions.apply {
+                // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) on Nov 16, 2023.
+                //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L91
+                jniLibs.excludes += "*"
+                resources.excludes.addAll(
+                    listOf(
+                        "com/**/*",
+                        "frameworks/**/*",
+                        "junit/**/*",
+                        "LICENSE-junit.txt",
+                        "spec.txt",
+                    )
+                )
+            }
+            // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) on Nov 16, 2023.
+            //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L93
+            // noinspection ChromeOsAbiSupport
+            ndk.abiFilters += ""
 
             gradle.taskGraph.whenReady(object : Action<TaskExecutionGraph> {
                 override fun execute(taskGraph: TaskExecutionGraph) {
@@ -370,7 +396,10 @@ android {
                         ?.doLast {
                             copy {
                                 val src = "build/outputs/apk/$flavorNameInrt/$buildTypeRelease"
-                                val dst = "src/main/assets"
+
+                                // @Reference to LZX284 (https://github.com/LZX284) on Nov 16, 2022.
+                                val dst = "src/main/assets-$flavorNameApp"
+
                                 val ext = Utils.FILE_EXTENSION_APK
 
                                 if (!file(src).isDirectory) {
@@ -380,7 +409,14 @@ android {
                                 from(src); into(dst)
 
                                 val verName = versionName?.replace(Regex("\\s"), "-")?.lowercase()
-                                val srcFileName = "$flavorNameInrt-v$verName-universal.$ext" /* e.g. inrt-v6.4.0-beta-universal.apk */
+
+                                /* e.g. inrt-v6.4.0-beta-universal.apk */
+                                val srcFileName = "$flavorNameInrt-v$verName-universal.$ext".also {
+                                    if (!file(File(src, it)).exists()) {
+                                        throw GradleException("Source file \"${file(File(src, it))}\" doesn't exist")
+                                    }
+                                }
+
                                 val dstFileName = "$templateName.$ext"
                                 val isOverridden = file(File(dst, dstFileName)).exists()
                                 include(srcFileName)
@@ -396,32 +432,37 @@ android {
 
         androidResources {
             if (gradle.startParameter.taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble")) }) {
-                ignoreAssetsPatterns.add(".idea")
+                ignoreAssetsPatterns.addAll(listOf(".idea", "declarations", "sample/declarations"))
             }
             if (gradle.startParameter.taskNames.any { it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE)) }) {
                 // @Hint by SuperMonster003 on Oct 16, 2023.
-                //  ! Nothing needs to be added into assets for flavor "inrt",
-                //  ! as assets will be copied from flavor "app"
+                //  ! Runtime assets will be copied from flavor "app"
                 //  ! while building an apk on org.autojs.autojs.ui.project.BuildActivity.
-                ignoreAssetsPatterns.add("!*") /* Ignore everything. */
+                ignoreAssetsPatterns.addAll(emptyList())
             }
         }
 
     }
 
     sourceSets {
+
         // @Hint by LZX284 on Nov 15, 2023.
         //  ! The assets file is divided into three directories according to different flavors.
         //  ! But the files are not actually moved to avoid conflicts with the latest modifications.
-        getByName("main"){
+        //  !
+        // @Hint by SuperMonster003 on Nov 16, 2023.
+        //  ! The assets division idea was accepted, and it wouldn't hurt to try. :)
+
+        getByName("main") {
             assets.srcDirs("src/main/assets")
         }
-        getByName(flavorNameApp){
-            assets.srcDirs("src/main/assets_$flavorNameApp")
+        getByName(flavorNameApp) {
+            assets.srcDirs("src/main/assets-$flavorNameApp")
         }
-        getByName(flavorNameInrt){
-            assets.srcDirs("src/main/assets_$flavorNameInrt")
+        getByName(flavorNameInrt) {
+            assets.srcDirs("src/main/assets-$flavorNameInrt")
         }
+
     }
 
     compileOptions {
@@ -447,6 +488,7 @@ android {
             "lib/x86_64/libc++_shared.so",
             "lib/armeabi-v7a/libc++_shared.so",
             "lib/arm64-v8a/libc++_shared.so",
+            "lib/armeabi/libc++_shared.so",
         ).let { resources.pickFirsts.addAll(it) }
 
         jniLibs {
@@ -524,7 +566,21 @@ android {
                 doLast {
                     mapOf(
                         "dir" to outputDir,
-                        "includes" to listOf("declarations/**", "sample/declarations/**"),
+                        "includes" to when (variantName.startsWith(flavorNameInrt)) {
+                            true -> listOf(
+                                "mlkit-google-ocr-models/**/*",
+                                "mlkit_barcode_models/**/*",
+                                "models/**/*",
+                                "openccdata/**/*",
+                                "project/**/*",
+                                "android-devices.db",
+                                "autojs.keystore",
+                            )
+                            else -> listOf(
+                                "declarations/**/*",
+                                "sample/declarations/**/*",
+                            )
+                        },
                     ).let { delete(fileTree(it)) }
                 }
             }
@@ -537,13 +593,15 @@ android {
         // Configures multiple APKs based on ABI.
         abi {
             // Enables building multiple APKs per ABI.
-            isEnable = true
+            isEnable = /* isNotAssembleInrt */ !gradle.startParameter.taskNames.any {
+                it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE))
+            }
             // By default, all ABIs are included, so use reset() and include to specify that we only
             // want APKs for x86 and x86_64.
             // Resets the list of ABIs that Gradle should create APKs for to none.
             reset()
             // Specifies a list of ABIs that Gradle should create APKs for.
-            include("x86", "armeabi-v7a", "arm64-v8a", "x86_64")
+            include("arm64-v8a", "x86_64", "armeabi-v7a", "x86", "armeabi")
             // Specifies that we do not want to also generate a universal APK that includes all ABIs.
             isUniversalApk = true
         }

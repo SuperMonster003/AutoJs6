@@ -3,7 +3,7 @@ package org.autojs.autojs.model.autocomplete;
 import java.util.Arrays;
 
 /**
- * Created by Stardust on 2017/9/28.
+ * Created by Stardust on Sep 28, 2017.
  * Modified by SuperMonster003 as of Aug 24, 2022.
  */
 public class Symbols {

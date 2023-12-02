@@ -8,7 +8,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 
 /**
- * Created by Stardust on 2017/11/29.
+ * Created by Stardust on Nov 29, 2017.
  */
 class JsWebView : WebView {
 

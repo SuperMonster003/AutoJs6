@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>AutoJs6 本体应用 | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/autojs.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-autojs">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs active" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="autojs" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#autojs_autojs6">AutoJs6 本体应用</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_m_getlanguage">[m] getLanguage</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_getlanguage">getLanguage()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_getlanguagetag">[m] getLanguageTag</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_getlanguagetag">getLanguageTag()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_isrootavailable">[m] isRootAvailable</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_isrootavailable">isRootAvailable()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_getrootmode">[m] getRootMode</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_getrootmode">getRootMode()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_setrootmode">[m] setRootMode</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_setrootmode_rootmode_iswriteintopreference">setRootMode(rootMode, isWriteIntoPreference?)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_canmodifysystemsettings">[m] canModifySystemSettings</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_canmodifysystemsettings">canModifySystemSettings()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_canwritesecuresettings">[m] canWriteSecureSettings</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_canwritesecuresettings">canWriteSecureSettings()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_candisplayoverotherapps">[m] canDisplayOverOtherApps</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_candisplayoverotherapps">canDisplayOverOtherApps()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_p_versionname">[p] versionName</a></span></li>
+<li><span class="stability_undefined"><a href="#autojs_p_versioncode">[p] versionCode</a></span></li>
+<li><span class="stability_undefined"><a href="#autojs_p_versiondate">[p] versionDate</a></span></li>
+<li><span class="stability_undefined"><a href="#autojs_p_themecolor">[p] themeColor</a></span></li>
+<li><span class="stability_undefined"><a href="#autojs_p_version">[p+] version</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_p_name">[p] name</a></span></li>
+<li><span class="stability_undefined"><a href="#autojs_p_code">[p] code</a></span></li>
+<li><span class="stability_undefined"><a href="#autojs_p_date">[p] date</a></span></li>
+<li><span class="stability_undefined"><a href="#autojs_m_isequal">[m] isEqual</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_isequal_otherversion">isEqual(otherVersion)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_ishigherthan">[m] isHigherThan</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_ishigherthan_otherversion">isHigherThan(otherVersion)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_islowerthan">[m] isLowerThan</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_islowerthan_otherversion">isLowerThan(otherVersion)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_m_isatleast">[m] isAtLeast</a></span><ul>
+<li><span class="stability_undefined"><a href="#autojs_isatleast_otherversion">isAtLeast(otherVersion)</a></span></li>
+<li><span class="stability_undefined"><a href="#autojs_isatleast_otherversion_ignoresuffix">isAtLeast(otherVersion, ignoreSuffix)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#autojs_p_r">[p+] R</a></span></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>AutoJs6 本体应用<span><a class="mark" href="#autojs_autojs6" id="autojs_autojs6">#</a></span></h1>
+<p>autojs 全局对象主要包含与 AutoJs6 应用本身相关的属性及方法, 如获取 AutoJs6 的 [ Root 状态 / 语言标签 / 权限状态 ] 等.</p>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">autojs</p>
+
+<hr>
+<h2>[m] getLanguage<span><a class="mark" href="#autojs_m_getlanguage" id="autojs_m_getlanguage">#</a></span></h2>
+<h3>getLanguage()<span><a class="mark" href="#autojs_getlanguage" id="autojs_getlanguage">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html">java.util.Locale</a></span> }</li>
+</ul>
+<p>获取 AutoJs6 <code>语言</code> 设置选项.</p>
+<p>此方法返回一个 java.util.Locale 对象, 如需返回其标签名, 如 <code>en-US</code>, <code>zh-CN</code> 等, 可使用 <code>autojs.getLanguage().toLanguageTag()</code> 或直接使用 <a href="#autojs_m_getlanguagetag">autojs.getLanguageTag()</a> 方法.</p>
+<pre><code class="lang-js">console.log(autojs.getLanguage().getDisplayName()); /* e.g. 日本語 */
+</code></pre>
+<h2>[m] getLanguageTag<span><a class="mark" href="#autojs_m_getlanguagetag" id="autojs_m_getlanguagetag">#</a></span></h2>
+<h3>getLanguageTag()<span><a class="mark" href="#autojs_getlanguagetag" id="autojs_getlanguagetag">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取 AutoJs6 语言设置选项.</p>
+<p>此方法返回 <a href="https://en.wikipedia.org/wiki/IETF_language_tag">IETF 语言标签</a>, 相当于 <code>autojs.getLanguage().toLanguageTag()</code>:</p>
+<pre><code class="lang-js">console.log(autojs.getLanguageTag()); /* e.g. en-US */
+</code></pre>
+<p>此方法可用于设定 i18n 对象的区域:</p>
+<pre><code class="lang-js">i18n.setLocale(autojs.getLanguageTag());
+</code></pre>
+<h2>[m] isRootAvailable<span><a class="mark" href="#autojs_m_isrootavailable" id="autojs_m_isrootavailable">#</a></span></h2>
+<h3>isRootAvailable()<span><a class="mark" href="#autojs_isrootavailable" id="autojs_isrootavailable">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>获取 AutoJs6 的 Root 权限有效性.</p>
+<pre><code class="lang-js">console.log(autojs.isRootAvailable()); // e.g. true
+</code></pre>
+<p>注意上述示例的检测结果取决于 AutoJs6 的 <code>强制 Root 权限检查</code> 设置.<br>此设置可通过 AutoJs6 应用设置修改, 或 <a href="#autojs_m_setrootmode">setRootMode</a> 方法携带 <code>isWriteIntoPreference</code> 参数实现修改.</p>
+<h2>[m] getRootMode<span><a class="mark" href="#autojs_m_getrootmode" id="autojs_m_getrootmode">#</a></span></h2>
+<h3>getRootMode()<span><a class="mark" href="#autojs_getrootmode" id="autojs_getrootmode">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_rootmode">RootMode</a></span> }</li>
+</ul>
+<p>获取 AutoJs6 的 Root 权限状态.</p>
+<pre><code class="lang-js"> /* 是否为 &#39;自动检测 Root 权限&#39; 状态. */
+console.log(autojs.getRootMode() === RootMode.AUTO_DETECT);
+/* 是否为 &#39;强制 Root 模式&#39; 状态. */
+console.log(autojs.getRootMode() === RootMode.FORCE_ROOT);
+/* 是否为 &#39;强制非 Root 模式&#39; 状态. */
+console.log(autojs.getRootMode() === RootMode.FORCE_NON_ROOT);
+</code></pre>
+<h2>[m] setRootMode<span><a class="mark" href="#autojs_m_setrootmode" id="autojs_m_setrootmode">#</a></span></h2>
+<h3>setRootMode(rootMode, isWriteIntoPreference?)<span><a class="mark" href="#autojs_setrootmode_rootmode_iswriteintopreference" id="autojs_setrootmode_rootmode_iswriteintopreference">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload [1-2]/2</code></strong></p>
+<ul>
+<li><strong>rootMode</strong> { <span class="type"><a href="dataTypes.html#datatypes_rootmode">RootMode</a></span> | <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> | <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> | <span class="type">&#39;auto&#39;</span> | <span class="type">&#39;root&#39;</span> | <span class="type">&#39;non-root&#39;</span> } - Root 模式参数</li>
+<li><strong>[ isWriteIntoPreference = <code>false</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否写入应用设置</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_void">void</a></span> }</li>
+</ul>
+<p>设置 AutoJs6 的 Root 模式.</p>
+<p>默认情况下, AutoJs6 将根据 <code>su</code> 二进制名称特征来判断是否具有 Root 权限.
+但有时设备可能使用了非常规 Root 方式或 Root 权限检测结果出现异常, 此时可设置 <code>强制 Root 模式</code> 或 <code>强制非 Root 模式</code> 来改变 AutoJs6 对 Root 权限的检测结果.</p>
+<p>以设置 &#39;强制 Root 模式&#39; 为例:</p>
+<pre><code class="lang-js">autojs.setRootMode(RootMode.FORCE_ROOT);
+autojs.setRootMode(&#39;root&#39;); /* 同上. */
+autojs.setRootMode(1); /* 同上. */
+autojs.setRootMode(true); /* 同上. */
+</code></pre>
+<p>上述示例设置的 Root 模式, 将影响 <a href="#autojs_m_isrootavailable">isRootAvailable</a> 的结果, 使其固定返回 <code>true</code>.<br>如果设置为 <code>RootMode.FORCE_NON_ROOT</code>, <a href="#autojs_m_isrootavailable">isRootAvailable</a> 将固定返回 <code>false</code>.<br>如果设置为 <code>RootMode.AUTO_DETECT</code>, <a href="#autojs_m_isrootavailable">isRootAvailable</a> 将根据 AutoJs6 是否具有 <code>su</code> 二进制名称特征决定其返回结果.  </p>
+<p>在没有特殊需求的情况下, 建议始终保持 Root 模式为 &#39;自动&#39; 模式.</p>
+<p>需额外留意, Root 模式修改仅对当前 <code>运行时 (Runtime)</code> 有效, 当脚本结束时, 已设置的 Root 模式将自动还原为 &#39;自动&#39; 模式, 即 <code>RootMode.AUTO_DETECT</code>.</p>
+<p>如需将保留修改的 Root 模式, 可使用 <code>isWriteIntoPreference</code> 参数, 修改将立即写入应用设置中:</p>
+<pre><code class="lang-js">autojs.setRootMode(RootMode.FORCE_ROOT, true);
+</code></pre>
+<p>上述示例代码的效果, 等效于在 AutoJs6 应用中进行如下设置:</p>
+<pre><code class="lang-text">[ AutoJs6 设置 ] - [ 强制 Root 权限检查 ] - [ 强制 Root 模式 ] # [ 选择 ]
+</code></pre>
+<h2>[m] canModifySystemSettings<span><a class="mark" href="#autojs_m_canmodifysystemsettings" id="autojs_m_canmodifysystemsettings">#</a></span></h2>
+<h3>canModifySystemSettings()<span><a class="mark" href="#autojs_canmodifysystemsettings" id="autojs_canmodifysystemsettings">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>获取 AutoJs6 的 <code>修改系统设置</code> 权限状态.</p>
+<pre><code class="lang-js">console.log(autojs.canModifySystemSettings()); // e.g. true
+</code></pre>
+<p>拥有 <code>修改系统设置</code> 后, AutoJs6 可以通过脚本修改部分系统设置, 如修改屏幕超时参数, 修改媒体音量值等.</p>
+<h2>[m] canWriteSecureSettings<span><a class="mark" href="#autojs_m_canwritesecuresettings" id="autojs_m_canwritesecuresettings">#</a></span></h2>
+<h3>canWriteSecureSettings()<span><a class="mark" href="#autojs_canwritesecuresettings" id="autojs_canwritesecuresettings">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>获取 AutoJs6 的 <code>修改安全设置</code> 权限状态.</p>
+<pre><code class="lang-js">console.log(autojs.canWriteSecureSettings()); // e.g. true
+</code></pre>
+<p>拥有 <code>修改安全设置</code> 后, AutoJs6 可以通过脚本修改部分安全设置, 如修改屏幕常亮类别参数, 修改无障碍服务列表内容等.</p>
+<h2>[m] canDisplayOverOtherApps<span><a class="mark" href="#autojs_m_candisplayoverotherapps" id="autojs_m_candisplayoverotherapps">#</a></span></h2>
+<h3>canDisplayOverOtherApps()<span><a class="mark" href="#autojs_candisplayoverotherapps" id="autojs_candisplayoverotherapps">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>获取 AutoJs6 的 <code>显示在其他应用上层</code> 权限状态.</p>
+<pre><code class="lang-js">console.log(autojs.canDisplayOverOtherApps()); // e.g. true
+</code></pre>
+<p>拥有 <code>显示在其他应用上层</code> 后, AutoJs6 可以使用悬浮窗工具, 并可通过脚本显示对话框或自定义浮动组件等.</p>
+<h2>[p] versionName<span><a class="mark" href="#autojs_p_versionname" id="autojs_p_versionname">#</a></span></h2>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取版本名称.</p>
+<pre><code class="lang-js">console.log(autojs.versionName); // e.g. 6.2.0-alpha9
+console.log(autojs.version.name); /* 同上. */
+</code></pre>
+<h2>[p] versionCode<span><a class="mark" href="#autojs_p_versioncode" id="autojs_p_versioncode">#</a></span></h2>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>获取版本号.</p>
+<pre><code class="lang-js">console.log(autojs.versionCode); // e.g. 1545
+console.log(autojs.version.code); /* 同上. */
+</code></pre>
+<h2>[p] versionDate<span><a class="mark" href="#autojs_p_versiondate" id="autojs_p_versiondate">#</a></span></h2>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取版本日期.</p>
+<pre><code class="lang-js">console.log(autojs.versionDate); // e.g. Dec 18, 2022
+console.log(autojs.version.date); /* 同上. */
+</code></pre>
+<h2>[p] themeColor<span><a class="mark" href="#autojs_p_themecolor" id="autojs_p_themecolor">#</a></span></h2>
+<p><strong><code>6.3.0</code></strong> <strong><code>Getter</code></strong></p>
+<ul>
+<li><strong>&lt;get&gt;</strong> <a href="dataTypes.html#datatypes_themecolor">ThemeColor</a></li>
+</ul>
+<p>获取 AutoJs6 的主题颜色实例.</p>
+<pre><code class="lang-js">autojs.themeColor.getColorPrimary(); /* 获取 AutoJs6 主题色的主色色值. */
+</code></pre>
+<h2>[p+] version<span><a class="mark" href="#autojs_p_version" id="autojs_p_version">#</a></span></h2>
+<h3>[p] name<span><a class="mark" href="#autojs_p_name" id="autojs_p_name">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取版本名称.</p>
+<pre><code class="lang-js">console.log(autojs.version.name); // e.g. 6.2.0-alpha9
+console.log(autojs.versionName); /* 同上. */
+</code></pre>
+<h3>[p] code<span><a class="mark" href="#autojs_p_code" id="autojs_p_code">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>获取版本号.</p>
+<pre><code class="lang-js">console.log(autojs.version.code); // e.g. 1545
+console.log(autojs.versionCode); /* 同上. */
+</code></pre>
+<h3>[p] date<span><a class="mark" href="#autojs_p_date" id="autojs_p_date">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li>{ <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取版本日期.</p>
+<pre><code class="lang-js">console.log(autojs.version.date); // e.g. Dec 18, 2022
+console.log(autojs.versionDate); /* 同上. */
+</code></pre>
+<h3>[m] isEqual<span><a class="mark" href="#autojs_m_isequal" id="autojs_m_isequal">#</a></span></h3>
+<h4>isEqual(otherVersion)<span><a class="mark" href="#autojs_isequal_otherversion" id="autojs_isequal_otherversion">#</a></span></h4>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="versionType.html#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 AutoJs6 版本是否与参数对应的版本号等同.</p>
+<pre><code class="lang-js">console.log(autojs.version.isEqual(&#39;6.2.0&#39;)); // e.g. true
+</code></pre>
+<h3>[m] isHigherThan<span><a class="mark" href="#autojs_m_ishigherthan" id="autojs_m_ishigherthan">#</a></span></h3>
+<h4>isHigherThan(otherVersion)<span><a class="mark" href="#autojs_ishigherthan_otherversion" id="autojs_ishigherthan_otherversion">#</a></span></h4>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="versionType.html#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 AutoJs6 版本是否高于待比较版本.</p>
+<pre><code class="lang-js">console.log(autojs.version.isHigherThan(&#39;6.1.3&#39;)); // e.g. true
+</code></pre>
+<h3>[m] isLowerThan<span><a class="mark" href="#autojs_m_islowerthan" id="autojs_m_islowerthan">#</a></span></h3>
+<h4>isLowerThan(otherVersion)<span><a class="mark" href="#autojs_islowerthan_otherversion" id="autojs_islowerthan_otherversion">#</a></span></h4>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="versionType.html#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 AutoJs6 版本是否低于待比较版本.</p>
+<pre><code class="lang-js">console.log(autojs.version.isLowerThan(&#39;6.2.0&#39;)); // e.g. true
+</code></pre>
+<h3>[m] isAtLeast<span><a class="mark" href="#autojs_m_isatleast" id="autojs_m_isatleast">#</a></span></h3>
+<h4>isAtLeast(otherVersion)<span><a class="mark" href="#autojs_isatleast_otherversion" id="autojs_isatleast_otherversion">#</a></span></h4>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="versionType.html#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 AutoJs6 版本是否不低于 (即大于等于) 参数对应的版本号.</p>
+<pre><code class="lang-js">console.log(autojs.version.isAtLeast(&#39;6.1.3&#39;)); // e.g. true
+</code></pre>
+<h4>isAtLeast(otherVersion, ignoreSuffix)<span><a class="mark" href="#autojs_isatleast_otherversion_ignoresuffix" id="autojs_isatleast_otherversion_ignoresuffix">#</a></span></h4>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="versionType.html#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><strong>[ ignoreSuffix = <code>false</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否忽略版本后缀</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>返回 AutoJs6 版本是否不低于 (即大于等于) 参数对应的版本号且根据 <code>ignoreSuffix</code> 参数决定是否忽略版本后缀.</p>
+<pre><code class="lang-js">console.log(autojs.version.name); // e.g. 6.2.0-alpha9
+console.log(autojs.version.isAtLeast(&#39;6.2.0&#39;)); // e.g. false
+console.log(autojs.version.isAtLeast(&#39;6.2.0&#39;, true)); // e.g. true
+</code></pre>
+<h2>[p+] R<span><a class="mark" href="#autojs_p_r" id="autojs_p_r">#</a></span></h2>
+<p>使用 R 类的子类中的静态整数可访问相应的应用资源, 如 <code>R.string</code> 访问字符串资源, <code>R.drawable</code> 访问可绘制资源等.</p>
+<p><a href="global.html#global_p_r">global.R</a> 的别名属性, 参阅 <a href="global.html#global_p_r">全局对象 (Global)</a> 章节.</p>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

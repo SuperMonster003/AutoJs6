@@ -10,7 +10,7 @@ import org.mozilla.javascript.Scriptable
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Created by Stardust on 2017/5/14.
+ * Created by Stardust on May 14, 2017.
  * Modified by SuperMonster003 as of Dec 5, 2021.
  * Transformed by SuperMonster003 on May 20, 2023.
  */

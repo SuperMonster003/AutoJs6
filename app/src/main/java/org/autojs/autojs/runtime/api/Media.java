@@ -12,7 +12,7 @@ import org.autojs.autojs.util.MimeTypesUtils;
 import java.io.IOException;
 
 /**
- * Created by Stardust on 2018/2/12.
+ * Created by Stardust on Feb 12, 2018.
  */
 public class Media implements MediaScannerConnection.MediaScannerConnectionClient {
 

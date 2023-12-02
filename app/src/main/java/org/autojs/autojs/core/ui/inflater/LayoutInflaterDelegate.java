@@ -10,7 +10,7 @@ import org.w3c.dom.Node;
 import java.util.HashMap;
 
 /**
- * Created by Stardust on 2018/3/29.
+ * Created by Stardust on Mar 29, 2018.
  */
 public interface LayoutInflaterDelegate {
 

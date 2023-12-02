@@ -10,10 +10,16 @@ let { util } = global;
  * @return {Internal.Colors}
  */
 module.exports = function (scriptRuntime, scope) {
+
     /**
      * @type {org.autojs.autojs.core.image.Colors}
      */
     const rtColors = scriptRuntime.colors;
+
+    const ColorStateList = android.content.res.ColorStateList;
+    const ColorDetector = org.autojs.autojs.core.image.ColorDetector;
+    const ThemeColor = org.autojs.autojs.theme.ThemeColor;
+    const ColorTable = org.autojs.autojs.core.image.ColorTable;
 
     let _ = {
         Color: (/* @IIFE */ () => {
@@ -845,7 +851,7 @@ module.exports = function (scriptRuntime, scope) {
         parseRelativePercentage(percentage) {
             let p = Numberx.parseAny(percentage);
             if (isNaN(p) || p < 0) {
-                throw TypeError(`Relative percentage must be in range 0..255, instead of ${percentage}`)
+                throw TypeError(`Relative percentage must be in range 0..255, instead of ${percentage}`);
             }
             return p;
         },

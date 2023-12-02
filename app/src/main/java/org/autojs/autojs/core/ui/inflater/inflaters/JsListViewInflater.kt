@@ -9,7 +9,7 @@ import org.autojs.autojs.core.ui.widget.JsListView
 import org.w3c.dom.Node
 
 /**
- * Created by Stardust on 2018/3/28.
+ * Created by Stardust on Mar 28, 2018.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
 open class JsListViewInflater<V : JsListView>(resourceParser: ResourceParser) : RecyclerViewInflater<V>(resourceParser) {

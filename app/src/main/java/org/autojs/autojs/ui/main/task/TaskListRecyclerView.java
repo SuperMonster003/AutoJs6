@@ -40,7 +40,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Created by Stardust on 2017/3/24.
+ * Created by Stardust on Mar 24, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  */
 public class TaskListRecyclerView extends ThemeColorRecyclerView {

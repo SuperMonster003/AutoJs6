@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 import org.autojs.autojs.pio.PFiles;
 
 /**
- * Created by Stardust on 2018/2/12.
+ * Created by Stardust on Feb 12, 2018.
  */
 public class MimeTypesUtils {
 

@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**
- * Created by Stardust on 2017/2/13.
+ * Created by Stardust on Feb 13, 2017.
  * <br>
  * <a href="http://stackoverflow.com/questions/31759171/recyclerview-and-java-lang-indexoutofboundsexception-inconsistency-detected-in">
  * Reference: stackoverflow</a>

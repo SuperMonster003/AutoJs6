@@ -6,7 +6,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.core.automator.UiObject
 
 /**
- * Created by Stardust on 2017/1/27.
+ * Created by Stardust on Jan 27, 2017.
  */
 object ActionFactory {
 

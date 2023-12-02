@@ -6,7 +6,7 @@ import org.autojs.autojs.runtime.api.Console;
 import org.autojs.autojs.tool.UiHandler;
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  */
 public class ScriptEngineServiceBuilder {
 

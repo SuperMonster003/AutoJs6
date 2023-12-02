@@ -6,7 +6,7 @@ import android.content.Intent;
 import androidx.annotation.Nullable;
 
 /**
- * Created by Stardust on 2017/5/15.
+ * Created by Stardust on May 15, 2017.
  */
 public class ScriptExecutionIntentService extends IntentService {
 

@@ -48,7 +48,7 @@ import org.mozilla.javascript.Token
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Created by Administrator on 2018/2/11.
+ * Created by Administrator on Feb 11, 2018.
  * Modified by SuperMonster003 as of May 1, 2023.
  */
 class CodeEditText : AppCompatEditText {
@@ -127,7 +127,9 @@ class CodeEditText : AppCompatEditText {
         // 调用 super.onDraw 绘制光标和选择高亮
         // 因为字体颜色被设置为透明
         // 因此 super.onDraw 绘制的字体不显示
-        // TODO: 2018/2/24 优化效率。不绘制透明字体。
+        // TODO by Stardust on Feb 24, 2018.
+        //  ! 优化效率.
+        //  ! 不绘制透明字体.
         super.onDraw(canvas)
         canvas.save()
         canvas.translate(0f, extendedPaddingTop.toFloat())
@@ -212,7 +214,7 @@ class CodeEditText : AppCompatEditText {
                 val color = when (i) {
                     mUnmatchedBracket -> mTheme.getColorForToken(Token.ERROR)
                     mMatchingBrackets[0], mMatchingBrackets[1] -> mTheme.getColorForToken(TokenMapping.TOKEN_MATCHED_BRACKET)
-                    else -> highlightTokens.colors[i]
+                    else -> highlightTokens.colors[i.coerceAtMost(highlightTokens.colors.size - 1)]
                 }
                 if (previousColor != color) {
                     paint.color = previousColor
@@ -224,13 +226,17 @@ class CodeEditText : AppCompatEditText {
                 i++
             }
             paint.color = previousColor
-            val offsetX = paint.measureText(text, lineStart, previousColorPos)
-            if (previousColorPos < 0 || visibleCharEnd > textLength || previousColorPos >= visibleCharEnd) {
-                Log.e(TAG, "IndexOutOfBounds: previousColorPos = $previousColorPos, visibleCharEnd = $visibleCharEnd, textLength = $textLength")
-                // postInvalidate();
-                return
-            }
             try {
+                if (previousColorPos < 0) {
+                    throw IndexOutOfBoundsException("Proactively throw a local exception as \"previousColorPos < 0\"")
+                }
+                if (visibleCharEnd > textLength) {
+                    throw IndexOutOfBoundsException("Proactively throw a local exception as \"visibleCharEnd > textLength\"")
+                }
+                if (previousColorPos >= visibleCharEnd) {
+                    throw IndexOutOfBoundsException("Proactively throw a local exception as \"previousColorPos >= visibleCharEnd\"")
+                }
+                val offsetX = paint.measureText(text, lineStart, previousColorPos)
                 canvas.drawText(text!!, previousColorPos, visibleCharEnd, paddingLeft + offsetX, lineBaseline.toFloat(), paint)
             } catch (ex: IndexOutOfBoundsException) {
                 Log.e(TAG, "IndexOutOfBounds: previousColorPos = $previousColorPos, visibleCharEnd = $visibleCharEnd, textLength = $textLength")

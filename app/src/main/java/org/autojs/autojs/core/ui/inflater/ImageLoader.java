@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 
 /**
- * Created by Stardust on 2017/11/3.
+ * Created by Stardust on Nov 3, 2017.
  */
 public interface ImageLoader {
 

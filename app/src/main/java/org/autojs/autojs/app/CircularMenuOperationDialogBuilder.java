@@ -17,7 +17,7 @@ import org.autojs.autojs6.databinding.OperationDialogItemBinding;
 import java.util.ArrayList;
 
 /**
- * Created by Stardust on 2017/6/26.
+ * Created by Stardust on Jun 26, 2017.
  */
 public class CircularMenuOperationDialogBuilder extends AppLevelThemeDialogBuilder {
 

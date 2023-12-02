@@ -59,7 +59,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by Stardust on 2017/9/20.
+ * Created by Stardust on Sep 20, 2017.
  * Modified by SuperMonster003 as of Feb 26, 2022.
  */
 public class UpdateChecker {
@@ -115,27 +115,29 @@ public class UpdateChecker {
                             return;
                         }
 
-                        VersionInfo versionInfo = getVersionInfo(responseBody);
+                        mGitHubExecutor.execute(() -> {
+                            VersionInfo versionInfo = getVersionInfo(responseBody);
 
-                        switch (mPromptMode) {
-                            case DIALOG -> {
-                                if (versionInfo == null) {
-                                    ViewUtils.showToast(mContext, R.string.error_parse_version_info);
-                                    return;
+                            switch (mPromptMode) {
+                                case DIALOG -> {
+                                    if (versionInfo == null) {
+                                        ViewUtils.showToast(mContext, R.string.error_parse_version_info);
+                                        return;
+                                    }
+                                    if (versionInfo.isNewer() && versionInfo.isNotIgnored()) {
+                                        mHandler.post(() -> showDialog(versionInfo));
+                                    } else {
+                                        ViewUtils.showToast(mContext, R.string.text_is_latest_version);
+                                        Pref.refreshLastNoNewerUpdatesTimestamp();
+                                    }
                                 }
-                                if (versionInfo.isNewer() && versionInfo.isNotIgnored()) {
-                                    showDialog(versionInfo);
-                                } else {
-                                    ViewUtils.showToast(mContext, R.string.text_is_latest_version);
-                                    Pref.refreshLastNoNewerUpdatesTimestamp();
+                                case SNACKBAR -> {
+                                    if (versionInfo != null && versionInfo.isNewer() && versionInfo.isNotIgnored()) {
+                                        mHandler.post(() -> showSnackBar(versionInfo));
+                                    }
                                 }
                             }
-                            case SNACKBAR -> {
-                                if (versionInfo != null && versionInfo.isNewer() && versionInfo.isNotIgnored()) {
-                                    showSnackBar(versionInfo);
-                                }
-                            }
-                        }
+                        });
                     }
 
                     @Override

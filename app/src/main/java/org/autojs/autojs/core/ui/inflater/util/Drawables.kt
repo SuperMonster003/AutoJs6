@@ -24,7 +24,7 @@ import java.util.concurrent.Executors
 import java.util.regex.Pattern
 
 /**
- * Created by Stardust on 2017/11/3.
+ * Created by Stardust on Nov 3, 2017.
  * Transformed by SuperMonster003 on Jun 5, 2023.
  */
 open class Drawables {

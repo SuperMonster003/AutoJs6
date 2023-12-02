@@ -8,7 +8,7 @@ import android.content.Intent;
 import org.autojs.autojs.external.ScriptIntents;
 
 /**
- * Created by Stardust on 2017/11/27.
+ * Created by Stardust on Nov 27, 2017.
  */
 public class TaskReceiver extends BroadcastReceiver {
 

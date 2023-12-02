@@ -8,7 +8,7 @@ import org.autojs.autojs.core.automator.UiObject
 import java.util.HashSet
 
 /**
- * Created by Stardust on 2017/1/27.
+ * Created by Stardust on Jan 27, 2017.
  */
 class ScrollMaxAction(private val mScrollAction: Int) : SimpleAction() {
     private var mMaxScrollableNode: UiObject? = null

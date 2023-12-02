@@ -36,7 +36,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
- * Created by Stardust on 2017/9/28.
+ * Created by Stardust on Sep 28, 2017.
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @SuppressLint("CheckResult")

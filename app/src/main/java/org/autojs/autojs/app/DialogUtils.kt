@@ -19,7 +19,7 @@ import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/8/4.
+ * Created by Stardust on Aug 4, 2017.
  * Modified by SuperMonster003 as of Sep 10, 2022.
  * Transformed by SuperMonster003 on Oct 19, 2022.
  */

@@ -5,7 +5,7 @@ import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.tool.SparseArrayEntries
 
 /**
- * Created by Stardust on 2017/1/27.
+ * Created by Stardust on Jan 27, 2017.
  */
 interface Able {
 

@@ -1,7 +1,7 @@
 package org.autojs.autojs.concurrent;
 
 /**
- * Created by Stardust on 2017/10/28.
+ * Created by Stardust on Oct 28, 2017.
  */
 public class VolatileDispose<T> {
 

@@ -1,7 +1,7 @@
 package org.autojs.autojs.tool;
 
 /**
- * Created by Stardust on 2017/7/7.
+ * Created by Stardust on Jul 7, 2017.
  */
 public interface Func1<T, R> {
 

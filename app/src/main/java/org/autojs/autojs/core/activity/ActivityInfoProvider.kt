@@ -16,7 +16,7 @@ import org.autojs.autojs.runtime.api.Shell
 import java.util.regex.Pattern
 
 /**
- * Created by Stardust on 2017/3/9.
+ * Created by Stardust on Mar 9, 2017.
  */
 class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate {
 

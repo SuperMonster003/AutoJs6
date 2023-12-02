@@ -5,7 +5,7 @@ import java.util.Arrays
 import java.util.Locale
 
 /**
- * Created by Stardust on 2017/3/31.
+ * Created by Stardust on Mar 31, 2017.
  */
 object FileUtils {
 
@@ -29,7 +29,7 @@ object FileUtils {
 
     enum class TYPE(val typeName: String, private val iconName: String? = null) {
 
-        DIRECTORY("/"),
+        DIRECTORY(File.separator),
         JAVASCRIPT("js"),
         AUTO("auto", "R"),
         JSON("json"),

@@ -3,7 +3,7 @@ package org.autojs.autojs.execution;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Created by Stardust on 2017/5/3.
+ * Created by Stardust on May 3, 2017.
  */
 public class ScriptExecutionObserver implements ScriptExecutionListener {
     private final CopyOnWriteArraySet<ScriptExecutionListener> mScriptExecutionListeners = new CopyOnWriteArraySet<>();

@@ -14,9 +14,8 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
-
 /**
- * Created by Stardust on 2017/2/14.
+ * Created by Stardust on Feb 14, 2017.
  */
 public class AccessibilityActionConverter {
 

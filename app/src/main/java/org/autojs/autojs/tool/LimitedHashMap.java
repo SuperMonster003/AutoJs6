@@ -3,7 +3,7 @@ package org.autojs.autojs.tool;
 import java.util.LinkedHashMap;
 
 /**
- * Created by Stardust on 2017/3/31.
+ * Created by Stardust on Mar 31, 2017.
  */
 public class LimitedHashMap<K, V> extends LinkedHashMap<K, V> {
 

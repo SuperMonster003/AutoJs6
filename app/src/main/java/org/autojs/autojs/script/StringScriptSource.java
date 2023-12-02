@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 import java.io.Reader;
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  */
 public class StringScriptSource extends JavaScriptSource {
 

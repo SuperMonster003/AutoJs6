@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  * <p>
  * A ScriptEngine is created by {@link ScriptEngineManager#createEngine(String, int)} ()}, and then can be
  * used to execute script with {@link ScriptEngine#execute(ScriptSource)} in the <strong>same</strong> thread.

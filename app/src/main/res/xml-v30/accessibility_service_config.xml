@@ -4,14 +4,14 @@
 
 -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-        android:accessibilityEventTypes="typeAllMask"
-        android:accessibilityFeedbackType="feedbackAllMask"
-        android:accessibilityFlags="flagIncludeNotImportantViews|flagReportViewIds|flagRetrieveInteractiveWindows|flagRequestEnhancedWebAccessibility|flagRequestFilterKeyEvents"
-        android:canPerformGestures="true"
-        android:canRequestEnhancedWebAccessibility="true"
-        android:canRequestFilterKeyEvents="true"
-        android:canRetrieveWindowContent="true"
-        android:canTakeScreenshot="true"
-        android:packageNames="@null"
-        android:description="@string/text_a11y_service_description"
-        android:notificationTimeout="0" />
+                       android:accessibilityEventTypes="typeAllMask"
+                       android:accessibilityFeedbackType="feedbackAllMask"
+                       android:accessibilityFlags="flagIncludeNotImportantViews|flagReportViewIds|flagRetrieveInteractiveWindows|flagRequestEnhancedWebAccessibility|flagRequestFilterKeyEvents"
+                       android:canPerformGestures="true"
+                       android:canRequestEnhancedWebAccessibility="true"
+                       android:canRequestFilterKeyEvents="true"
+                       android:canRetrieveWindowContent="true"
+                       android:canTakeScreenshot="true"
+                       android:packageNames="@null"
+                       android:description="@string/text_a11y_service_description"
+                       android:notificationTimeout="0" />

@@ -12,7 +12,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorMutable
 
 /**
- * Created by Stardust on 2016/8/8.
+ * Created by Stardust on Aug 8, 2016.
  * Transformed by SuperMonster003 on Sep 25, 2022.
  */
 class ThemeColorPreferenceCategory : PreferenceCategory, ThemeColorMutable {

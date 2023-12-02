@@ -47,7 +47,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 /**
- * Created by Stardust on 2017/10/20.
+ * Created by Stardust on Oct 20, 2017.
  */
 public class DownloadManager {
 
@@ -329,7 +329,8 @@ public class DownloadManager {
 
         private void onCancel() {
             recycle();
-            // TODO: 2017/12/6 notify?
+            // TODO by Stardust on Dec 6, 2017.
+            //  ! notify?
         }
 
         public void recycle() {

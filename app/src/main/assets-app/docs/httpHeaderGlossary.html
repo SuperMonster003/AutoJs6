@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>HTTP Header (HTTP 标头) | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/httpHeaderGlossary.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-httpHeaderGlossary">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary active" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="httpHeaderGlossary" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#httpheaderglossary_http_header_http">HTTP Header (HTTP 标头)</a></span><ul>
+<li><span class="stability_undefined"><a href="#httpheaderglossary">请求标头</a></span></li>
+<li><span class="stability_undefined"><a href="#httpheaderglossary_1">响应标头</a></span></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>HTTP Header (HTTP 标头)<span><a class="mark" href="#httpheaderglossary_http_header_http" id="httpheaderglossary_http_header_http">#</a></span></h1>
+<p>HTTP 标头 (HTTP Header) 也称 [ HTTP 头 / HTTP 头字段 / HTTP 头部字段 ] 等.</p>
+<p>它允许客户端和服务器通过 HTTP 请求 (Request) 或 HTTP 响应 (Response) 传递附加信息.</p>
+<p>一个 HTTP 标头由它的名称 (不区分大小写) 跟随一个冒号 (:) 及其具体的值.</p>
+<p>根据不同的消息上下文, 标头可以分为:</p>
+<ul>
+<li>请求标头 - 包含有关要获取的资源或客户端或请求资源的客户端的更多信息</li>
+<li>响应标头 - 包含有关响应的额外信息, 例如响应的位置或者提供响应的服务器</li>
+<li>表示标头 - 包含资源主体的信息, 例如主体的 MIME 类型或者应用的编码/压缩方案</li>
+<li>有效负荷标头 - 包含有关有效载荷数据表示的单独信息, 包括内容长度和用于传输的编码</li>
+</ul>
+<blockquote>
+<p>参阅: <a href="https://zh.wikipedia.org/wiki/HTTP%E5%A4%B4%E5%AD%97%E6%AE%B5">Wikipedia (中)</a> / <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers">MDN</a></p>
+</blockquote>
+<hr>
+<h2>请求标头<span><a class="mark" href="#httpheaderglossary" id="httpheaderglossary">#</a></span></h2>
+<p>请求标头 (Request Header) 包含有关要获取的资源或客户端或请求资源的客户端的更多信息.</p>
+<p>以下为 GET 请求后的一些请求标头样例:</p>
+<pre><code class="lang-text">GET /home.html HTTP/1.1
+Host: developer.mozilla.org
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://developer.mozilla.org/testpage.html
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+If-Modified-Since: Mon, 18 Jul 2016 02:36:04 GMT
+If-None-Match: &quot;c561c68d0ba92bbeb8b0fff2a9199f722e3a621a&quot;
+Cache-Control: max-age=0
+</code></pre>
+<p>常见请求标头字段:</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>说明</th>
+<th>示例</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Accept</td>
+<td>能够接受的回应内容类型 (Content-Types). 参见 <a href="https://zh.wikipedia.org/wiki/内容协商">内容协商</a>.</td>
+<td><code>Accept: text/plain</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Accept-Charset</td>
+<td>能够接受的字符集.</td>
+<td><code>Accept-Charset: utf-8</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Accept-Encoding</td>
+<td>能够接受的编码方式列表. 参见 <a href="https://zh.wikipedia.org/wiki/HTTP压缩">HTTP 压缩</a>.</td>
+<td><code>Accept-Encoding: gzip, deflate</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Accept-Language</td>
+<td>能够接受的回应内容的自然语言列表. 参见 <a href="https://zh.wikipedia.org/wiki/内容协商">内容协商</a>.</td>
+<td><code>Accept-Language: en-US</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Accept-Datetime</td>
+<td>能够接受的按照时间来表示的版本.</td>
+<td><code>Accept-Datetime: Thu, 31 May 2007 20:35:00 GMT</code></td>
+<td>临时</td>
+</tr>
+<tr>
+<td>Authorization</td>
+<td>用于超文本传输协议的认证的认证信息.</td>
+<td><code>Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Cache-Control</td>
+<td>用来指定在这次的请求/响应链中的所有缓存机制都必须遵守的指令.</td>
+<td><code>Cache-Control: no-cache</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Connection</td>
+<td>该浏览器想要优先使用的连接类型.</td>
+<td><code>Connection: keep-alive</code> <code>Connection: Upgrade</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Cookie</td>
+<td>之前由服务器通过 Set-Cookie 发送的一个超文本传输协议 <a href="https://zh.wikipedia.org/wiki/Cookie">Cookie</a>.</td>
+<td><code>Cookie: $Version=1; Skin=new;</code></td>
+<td>常设: 标准</td>
+</tr>
+<tr>
+<td>Content-Length</td>
+<td>以八位字节数组 (8 位的字节) 表示的请求体的长度.</td>
+<td><code>Content-Length: 348</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Content-MD5</td>
+<td>请求体的内容的二进制 MD5 散列值, 以 Base64 编码的结果.</td>
+<td><code>Content-MD5: Q2hlY2sgSW50ZWdyaXR5IQ==</code></td>
+<td>过时的</td>
+</tr>
+<tr>
+<td>Content-Type</td>
+<td>请求体的 <a href="https://zh.wikipedia.org/wiki/MIME">MIME</a>类型 (用于 POST 和 PUT 请求中).</td>
+<td><code>Content-Type: application/x-www-form-urlencoded</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>发送该消息的日期和时间 (按照 RFC 7231 中定义的 &quot;超文本传输协议日期&quot; 格式来发送).</td>
+<td><code>Date: Tue, 15 Nov 1994 08:12:31 GMT</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Expect</td>
+<td>表明客户端要求服务器做出特定的行为.</td>
+<td><code>Expect: 100-continue</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>From</td>
+<td>发起此请求的用户的邮件地址.</td>
+<td><code>From: user@example.com</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Host</td>
+<td>服务器的域名 (用于虚拟主机), 以及服务器所监听的 <a href="https://zh.wikipedia.org/wiki/传输控制协议">传输控制协议</a> 端口号. 如果所请求的端口是对应的服务的标准端口, 则端口号可被省略. 自超文件传输协议版本 1.1 (HTTP/1.1) 开始为必需字段.</td>
+<td><code>Host: zh.wikipedia.org:80</code> <code>Host: zh.wikipedia.org</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>If-Match</td>
+<td>仅当客户端提供的实体与服务器上对应的实体相匹配时, 才进行对应的操作. 主要作用时, 用作像 PUT 这样的方法中, 仅当从用户上次更新某个资源以来, 该资源未被修改的情况下, 才更新该资源.</td>
+<td><code>If-Match: &quot;737060cd8c284d8af7ad3082f209582d&quot;</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>If-Modified-Since</td>
+<td>允许在对应的内容未被修改的情况下返回 304 未修改 (304 Not Modified).</td>
+<td><code>If-Modified-Since: Sat, 29 Oct 1994 19:43:31 GMT</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>If-None-Match</td>
+<td>允许在对应的内容未被修改的情况下返回 304 未修改 (304 Not Modified), 参见超文本传输协议的 <a href="https://zh.wikipedia.org/wiki/HTTP_ETag">实体标记</a>.</td>
+<td><code>If-None-Match: &quot;737060cd8c284d8af7ad3082f209582d&quot;</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>If-Range</td>
+<td>如果该实体未被修改过, 则向我发送所缺少的那一个或多个部分; 否则发送整个新的实体.</td>
+<td><code>If-Range: &quot;737060cd8c284d8af7ad3082f209582d&quot;</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>If-Unmodified-Since</td>
+<td>仅当该实体自某个特定时间已来未被修改的情况下才发送回应.</td>
+<td><code>If-Unmodified-Since: Sat, 29 Oct 1994 19:43:31 GMT</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Max-Forwards</td>
+<td>限制该消息可被代理及网关转发的次数.</td>
+<td><code>Max-Forwards: 10</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Origin</td>
+<td>发起一个针对跨来源资源共享的请求 (要求服务器在回应中加入一个 &quot;访问控制-允许来源&quot; (&#39;Access-Control-Allow-Origin&#39;) 字段).</td>
+<td><code>Origin: http://www.example-social-network.com</code></td>
+<td>常设: 标准</td>
+</tr>
+<tr>
+<td>Pragma</td>
+<td>与具体的实现相关, 这些字段可能在请求/回应链中的任何时候产生多种效果.</td>
+<td><code>Pragma: no-cache</code></td>
+<td>常设但不常用</td>
+</tr>
+<tr>
+<td>Proxy-Authorization</td>
+<td>用来向代理进行认证的认证信息.</td>
+<td><code>Proxy-Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Range</td>
+<td>仅请求某个实体的一部分. 字节偏移以 0 开始. 参见 <a href="https://zh.wikipedia.org/w/index.php?title=字节服务&amp;action=edit&amp;redlink=1">字节服务</a>.</td>
+<td><code>Range: bytes=500-999</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Referer</td>
+<td>表示浏览器所访问的前一个页面, 正是那个页面上的某个链接将浏览器带到了当前所请求的这个页面.</td>
+<td><code>Referer: http://zh.wikipedia.org/wiki/Main_Page</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>TE</td>
+<td>浏览器预期接受的传输编码方式: 可使用回应协议头 Transfer-Encoding 字段中的值; 另外还可用 &quot;trailers&quot; (与 &quot;分块&quot; 传输方式相关) 这个值来表明浏览器希望在最后一个尺寸为 0 的块之后还接收到一些额外的字段.</td>
+<td><code>TE: trailers, deflate</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>User-Agent</td>
+<td>浏览器的 <a href="https://zh.wikipedia.org/wiki/用户代理">浏览器身份标识字符串</a></td>
+<td><code>User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Upgrade</td>
+<td>要求服务器升级到另一个协议.</td>
+<td><code>Upgrade: HTTP/2.0, SHTTP/1.3, IRC/6.9, RTA/x11</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Via</td>
+<td>向服务器告知, 这个请求是由哪些代理发出的.</td>
+<td><code>Via: 1.0 fred, 1.1 example.com (Apache/1.1)</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Warning</td>
+<td>一个一般性的警告, 告知在实体内容体中可能存在错误.</td>
+<td><code>Warning: 199 Miscellaneous warning</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>X-Requested-With</td>
+<td>主要用于标识 Ajax 及可扩展标记语言 请求. 大部分的 JavaScript 框架会发送这个字段, 且将其值设置为 XMLHttpRequest.</td>
+<td><code>X-Requested-With: XMLHttpRequest</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/请勿追踪">DNT</a></td>
+<td>请求某个网页应用程序停止跟踪某个用户. 在火狐浏览器中, 相当于 X-Do-Not-Track 协议头字段 (自 Firefox/4.0 Beta 11 版开始支持). <a href="https://zh.wikipedia.org/wiki/Safari">Safari</a> 和 <a href="https://zh.wikipedia.org/wiki/Internet_Explorer">Internet Explorer</a> 9 也支持这个字段. 2011 年 3 月 7 日, 草案提交 IETF. 万维网协会的跟踪保护工作组就此制作一项规范.</td>
+<td><code>DNT: 1 (DNT 启用)</code> <code>DNT: 0 (DNT 被禁用)</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/X-Forwarded-For">X-Forwarded-For</a></td>
+<td>一个事实标准, 用于标识某个通过超文本传输协议代理或负载均衡连接到某个网页服务器的客户端的原始互联网地址.</td>
+<td><code>X-Forwarded-For: client1, proxy1, proxy2</code> <code>X-Forwarded-For: 129.78.138.66, 129.78.64.103</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-Forwarded-Host</td>
+<td>一个事实标准, 用于识别客户端原本发出的 <code>Host</code> 请求头部.</td>
+<td><code>X-Forwarded-Host: zh.wikipedia.org:80</code> <code>X-Forwarded-Host: zh.wikipedia.org</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-Forwarded-Proto</td>
+<td>一个事实标准, 用于标识某个超文本传输协议请求最初所使用的协议.</td>
+<td><code>X-Forwarded-Proto: https</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>Front-End-Https</td>
+<td>被微软的服务器和负载均衡器所使用的非标准头部字段.</td>
+<td><code>Front-End-Https: on</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-Http-Method-Override</td>
+<td>请求某个网页应用程序使用该协议头字段中指定的方法 (一般是 PUT 或 DELETE) 来覆盖掉在请求中所指定的方法 (一般是 POST). 当某个浏览器或防火墙阻止直接发送 PUT 或 DELETE 方法时 (注意, 这可能是因为软件中的某个漏洞, 因而需要修复, 也可能是因为某个配置选项就是如此要求的, 因而不应当设法绕过), 可使用这种方式.</td>
+<td><code>X-HTTP-Method-Override: DELETE</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-ATT-DeviceId</td>
+<td>使服务器更容易解读 AT&amp;T 设备 User-Agent 字段中常见的设备型号, 固件信息.</td>
+<td><code>X-Att-Deviceid: GT-P7320/P7320XXLPG</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-Wap-Profile</td>
+<td>链接到互联网上的一个 XML 文件, 其完整仔细地描述了正在连接的设备. 右侧以为 AT&amp;T Samsung Galaxy S2 提供的 XML 文件为例.</td>
+<td><code>x-wap-profile: http://wap.samsungmobile.com/uaprof/SGH-I777.xml</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>Proxy-Connection</td>
+<td>该字段源于早期超文本传输协议版本实现中的错误. 与标准的连接 (Connection) 字段的功能完全相同.</td>
+<td><code>Proxy-Connection: keep-alive</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-Csrf-Token</td>
+<td>用于防止 <a href="https://zh.wikipedia.org/wiki/跨站请求伪造">跨站请求伪造</a>. 辅助用的头部有 <code>X-CSRFToken</code> 或 <code>X-XSRF-TOKEN</code>.</td>
+<td><code>X-Csrf-Token: i8XNjC4b8KVok4uw5RftR38Wgp2BFwql</code></td>
+<td>非标准</td>
+</tr>
+</tbody>
+</table>
+<h2>响应标头<span><a class="mark" href="#httpheaderglossary_1" id="httpheaderglossary_1">#</a></span></h2>
+<p>响应标头 (Response Header) 包含有关响应的额外信息, 例如响应的位置或者提供响应的服务器.</p>
+<p>以下为 GET 请求后的一些响应标头和表示标头样例:</p>
+<pre><code class="lang-text">200 OK
+Access-Control-Allow-Origin: *
+Connection: Keep-Alive
+Content-Encoding: gzip
+Content-Type: text/html; charset=utf-8
+Date: Mon, 18 Jul 2016 16:06:00 GMT
+Etag: &quot;c561c68d0ba92bbeb8b0f612a9199f722e3a621a&quot;
+Keep-Alive: timeout=5, max=997
+Last-Modified: Mon, 18 Jul 2016 02:36:04 GMT
+Server: Apache
+Set-Cookie: mykey=myvalue; expires=Mon, 17-Jul-2017 16:06:00 GMT; Max-Age=31449600; Path=/; secure
+Transfer-Encoding: chunked
+Vary: Cookie, Accept-Encoding
+X-Backend-Server: developer2.webapp.scl3.mozilla.com
+X-Cache-Info: not cacheable; meta data too large
+X-kuma-revision: 1085259
+x-frame-options: DENY
+</code></pre>
+<p>常见响应标头字段:</p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>说明</th>
+<th>示例</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access-Control-Allow-Origin</td>
+<td>指定哪些网站可参与到跨来源资源共享过程中.</td>
+<td><code>Access-Control-Allow-Origin: *</code></td>
+<td>临时</td>
+</tr>
+<tr>
+<td>Accept-Patch</td>
+<td>指定服务器支持的文件格式类型.</td>
+<td><code>Accept-Patch: text/example;charset=utf-8</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Accept-Ranges</td>
+<td>这个服务器支持哪些种类的部分内容范围.</td>
+<td><code>Accept-Ranges: bytes</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Age</td>
+<td>这个对象在代理缓存中存在的时间, 以秒为单位.</td>
+<td><code>Age: 12</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Allow</td>
+<td>对于特定资源有效的动作. 针对 HTTP/405 这一错误代码而使用.</td>
+<td><code>Allow: GET, HEAD</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/网页快照">Cache-Control</a></td>
+<td>向从服务器直到客户端在内的所有缓存机制告知, 它们是否可以缓存这个对象. 其单位为秒.</td>
+<td><code>Cache-Control: max-age=3600</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Connection</td>
+<td>针对该连接所预期的选项.</td>
+<td><code>Connection: close</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Content-Disposition</td>
+<td>一个可以让客户端下载文件并建议文件名的头部. 文件名需要用双引号包裹.</td>
+<td><code>Content-Disposition: attachment; filename=&quot;fname.ext&quot;</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Content-Encoding</td>
+<td>在数据上使用的编码类型. 参见超文本传输协议压缩.</td>
+<td><code>Content-Encoding: gzip</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Content-Language</td>
+<td>内容所使用的语言.</td>
+<td><code>Content-Language: da</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Content-Length</td>
+<td>回应消息体的长度, 以字节为单位.</td>
+<td><code>Content-Length: 348</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Content-Location</td>
+<td>所返回的数据的一个候选位置.</td>
+<td><code>Content-Location: /index.htm</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Content-MD5</td>
+<td>回应内容的二进制 MD5 散列, 以 Base64 方式编码.</td>
+<td><code>Content-MD5: Q2hlY2sgSW50ZWdyaXR5IQ==</code></td>
+<td>过时的</td>
+</tr>
+<tr>
+<td>Content-Range</td>
+<td>这条部分消息是属于某条完整消息的哪个部分.</td>
+<td><code>Content-Range: bytes 21010-47021/47022</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Content-Type</td>
+<td>当前内容的 <a href="https://zh.wikipedia.org/wiki/MIME">MIME</a> 类型.</td>
+<td><code>Content-Type: text/html; charset=utf-8</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>此条消息被发送时的日期和时间 (按照 RFC 7231 中定义的 &quot;超文本传输协议日期&quot; 格式来表示).</td>
+<td><code>Date: Tue, 15 Nov 1994 08:12:31 GMT</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/HTTP_ETag">ETag</a></td>
+<td>对于某个资源的某个特定版本的一个标识符, 通常是一个消息散列.</td>
+<td><code>ETag: &quot;737060cd8c284d8af7ad3082f209582d&quot;</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Expires</td>
+<td>指定一个日期/时间, 超过该时间则认为此回应已经过期.</td>
+<td><code>Expires: Thu, 01 Dec 1994 16:00:00 GMT</code></td>
+<td>常设: 标准</td>
+</tr>
+<tr>
+<td>Last-Modified</td>
+<td>所请求的对象的最后修改日期 (按照 RFC 7231 中定义的 &quot;超文本传输协议日期&quot; 格式来表示).</td>
+<td><code>Last-Modified: Tue, 15 Nov 1994 12:45:26 GMT</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Link</td>
+<td>用来表达与另一个资源之间的类型关系, 此处所说的类型关系是在 RFC 5988 中定义的.</td>
+<td><code>Link: &lt;/feed&gt;; rel=&quot;alternate&quot;</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/HTTP_Location">Location</a></td>
+<td>用来进行重定向, 或者在创建了某个新资源时使用.</td>
+<td><code>Location: http://www.w3.org/pub/WWW/People.html</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>P3P</td>
+<td>用于支持设置 <a href="https://zh.wikipedia.org/wiki/P3P">P3P</a> 策略, 标准格式为 &quot;<code>P3P:CP=&quot;your_compact_policy&quot;</code>&quot;.</td>
+<td><code>P3P: CP=&quot;This is not a P3P policy! `</code>See <a href="http://www.google.com/support/accounts/bin/answer.py?hl=en&amp;answer=151657">http://www.google.com/support/accounts/bin/answer.py?hl=en&amp;answer=151657</a> for more info.&quot;`</td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Pragma</td>
+<td>与具体的实现相关, 这些字段可能在请求/回应链中的任何时候产生多种效果.</td>
+<td><code>Pragma: no-cache</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Proxy-Authenticate</td>
+<td>要求在访问代理时提供身份认证信息.</td>
+<td><code>Proxy-Authenticate: Basic</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/HTTP公钥固定">Public-Key-Pins</a></td>
+<td>用于缓解 <a href="https://zh.wikipedia.org/wiki/中间人攻击">中间人攻击</a>, 声明网站认证使用的 <a href="https://zh.wikipedia.org/wiki/传输层安全协议">传输层安全协议</a> 证书的散列值.</td>
+<td><code>Public-Key-Pins: max-age=2592000; pin-sha256=&quot;E9CZ9INDbd+2eRQozYqqbQ2yXLVKB9+xcprMF+44U1g=&quot;;</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Refresh</td>
+<td>用于设定可定时的重定向跳转. 右边例子设定了 5 秒后跳转至 &quot;<code>http://www.w3.org/pub/WWW/People.html</code>&quot;.</td>
+<td><code>Refresh: 5; url=http://www.w3.org/pub/WWW/People.html</code></td>
+<td>专利并非标准, Netscape 实现的扩展, 但大部分浏览器也支持</td>
+</tr>
+<tr>
+<td>Retry-After</td>
+<td>如果某个实体临时不可用, 则, 此协议头用来告知客户端日后重试. 其值可以是一个特定的时间段 (以秒为单位) 或一个超文本传输协议日期.</td>
+<td>Example 1: <code>Retry-After: 120</code> Example 2: <code>Retry-After: Fri, 07 Nov 2014 23:59:59 GMT</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>服务器的名字.</td>
+<td><code>Server: Apache/2.4.1 (Unix)</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Set-Cookie</td>
+<td><a href="https://zh.wikipedia.org/wiki/Cookie">HTTP cookie</a>.</td>
+<td><code>Set-Cookie: UserID=JohnDoe; Max-Age=3600; Version=1</code></td>
+<td>常设: 标准</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>通用网关接口协议头字段, 用来说明当前这个超文本传输协议回应的状态. 普通的超文本传输协议回应, 会使用单独的 &quot;状态行&quot; (&quot;Status-Line&quot;) 作为替代, 这一点是在 RFC 7230 中定义的.</td>
+<td><code>Status: 200 OK</code></td>
+<td>-</td>
+</tr>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/HTTP严格传输安全">Strict-Transport-Security</a></td>
+<td>HTTP 严格传输安全这一头部告知客户端缓存这一强制 HTTPS 策略的时间, 以及这一策略是否适用于其子域名.</td>
+<td><code>Strict-Transport-Security: max-age=16070400; includeSubDomains</code></td>
+<td>常设: 标准</td>
+</tr>
+<tr>
+<td>Trailer</td>
+<td>这个头部数值指示了在这一系列头部信息由 <a href="https://zh.wikipedia.org/wiki/分块传输编码">分块传输编码</a> 编码.</td>
+<td><code>Trailer: Max-Forwards</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Transfer-Encoding</td>
+<td>用来将实体安全地传输给用户的编码形式. 当前定义的方法包括: chunked (分块), compress, deflate, gzip 和 identity.</td>
+<td><code>Transfer-Encoding: chunked</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Upgrade</td>
+<td>要求客户端升级到另一个协议.</td>
+<td><code>Upgrade: HTTP/2.0, SHTTP/1.3, IRC/6.9, RTA/x11</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Vary</td>
+<td>告知下游的代理服务器, 应当如何对未来的请求协议头进行匹配, 以决定是否可使用已缓存的回应内容而不是重新从原始服务器请求新的内容.</td>
+<td><code>Vary: *</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Via</td>
+<td>告知代理服务器的客户端, 当前回应是通过什么途径发送的.</td>
+<td><code>Via: 1.0 fred, 1.1 example.com (Apache/1.1)</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>Warning</td>
+<td>一般性的警告, 告知在实体内容体中可能存在错误.</td>
+<td><code>Warning: 199 Miscellaneous warning</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>WWW-Authenticate</td>
+<td>表明在请求获取这个实体时应当使用的认证模式.</td>
+<td><code>WWW-Authenticate: Basic</code></td>
+<td>常设</td>
+</tr>
+<tr>
+<td>X-Frame-Options</td>
+<td><a href="https://zh.wikipedia.org/wiki/点击劫持">点击劫持</a> 保护. <code>deny</code>: 该页面不允许在 frame 中展示, 即使是同域名内. <code>sameorigin</code>: 该页面允许同域名内在 frame 中展示. <code>allow-from *uri*</code>: 该页面允许在指定 uri 的 frame 中展示. <code>allowall</code>: 允许任意位置的 frame 显示, 非标准值.</td>
+<td><code>X-Frame-Options: deny</code></td>
+<td>过时的</td>
+</tr>
+<tr>
+<td>X-XSS-Protection</td>
+<td>跨站脚本攻击 (XSS) 过滤器</td>
+<td><code>X-XSS-Protection: 1; mode=block</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>Content-Security-Policy, <em>X-Content-Security-Policy</em>, <em>X-WebKit-CSP</em></td>
+<td><a href="https://zh.wikipedia.org/wiki/内容安全策略">内容安全策略</a> 定义.</td>
+<td><code>X-WebKit-CSP: default-src &#39;self&#39;</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-Content-Type-Options</td>
+<td>唯一允许的数值为 &quot;nosniff&quot;, 防止 <a href="https://zh.wikipedia.org/wiki/Internet_Explorer">Internet Explorer</a> 对文件进行 MIME 类型嗅探. 这也对 <a href="https://zh.wikipedia.org/wiki/Google_Chrome">Google Chrome</a> 下载扩展时适用.</td>
+<td><code>X-Content-Type-Options: nosniff</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-Powered-By</td>
+<td>表明用于支持当前网页应用程序的技术 (例如: PHP) (版本号细节通常放置在 X-Runtime 或 X-Version 中)</td>
+<td><code>X-Powered-By: PHP/5.4.0</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-UA-Compatible</td>
+<td>推荐指定的渲染引擎 (通常是向后兼容模式) 来显示内容. 也用于激活 Internet Explorer 中的 <a href="https://zh.wikipedia.org/wiki/Google_Chrome_Frame">Chrome Frame</a>.</td>
+<td><code>X-UA-Compatible: IE=EmulateIE7</code>  <code>X-UA-Compatible: IE=edge</code>  <code>X-UA-Compatible: Chrome=1</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-Content-Duration</td>
+<td>指出音视频的长度, 单位为秒. 只受 Gecko 内核浏览器支持.</td>
+<td><code>X-Content-Duration: 42.666</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>Feature-Policy</td>
+<td>管控特定应用程序接口.</td>
+<td><code>Feature-Policy: vibrate &#39;none&#39;; geolocation &#39;none&#39;</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>Permissions-Policy</td>
+<td>管控特定应用程序接口为 W3C 标准, 替代 Feature-Policy.</td>
+<td><code>Permissions-Policy: microphone=(),geolocation=(),camera=()</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>X-Permitted-Cross-Domain-Policies</td>
+<td>Flash 的跨网站攻击防御.</td>
+<td><code>X-Permitted-Cross-Domain-Policies: none</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>Referrer-Policy</td>
+<td>保护信息泄漏.</td>
+<td><code>Referrer-Policy: origin-when-cross-origin</code></td>
+<td>非标准</td>
+</tr>
+<tr>
+<td>Expect-CT</td>
+<td>防止欺骗 SSL, 单位为秒.</td>
+<td><code>Expect-CT: max-age=31536000, enforce</code></td>
+<td>非标准</td>
+</tr>
+</tbody>
+</table>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

@@ -7,7 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 /**
- * Created by Stardust on 2018/3/22.
+ * Created by Stardust on Mar 22, 2018.
  */
 public class GlobalAppContext {
 

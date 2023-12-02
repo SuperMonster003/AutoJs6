@@ -24,9 +24,8 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FloatyWindowBinding
 import org.autojs.autojs6.databinding.RawWindowBinding
 
-
 /**
- * Created by Stardust on 2017/12/5.
+ * Created by Stardust on Dec 5, 2017.
  * Modified by SuperMonster003 as of Jun 10, 2022.
  * Transformed by SuperMonster003 on Oct 10, 2022.
  */

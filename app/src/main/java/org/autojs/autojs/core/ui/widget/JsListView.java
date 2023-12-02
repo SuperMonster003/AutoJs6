@@ -20,7 +20,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Created by Stardust on 2018/3/28.
+ * Created by Stardust on Mar 28, 2018.
  */
 public class JsListView extends RecyclerView {
 

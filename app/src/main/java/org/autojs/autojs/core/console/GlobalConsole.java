@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Created by Stardust on 2017/10/22.
+ * Created by Stardust on Oct 22, 2017.
  */
 public class GlobalConsole extends ConsoleImpl {
     private static final String TAG = GlobalConsole.class.getSimpleName();

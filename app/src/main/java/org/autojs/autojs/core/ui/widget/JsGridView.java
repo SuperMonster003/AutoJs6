@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 /**
- * Created by Stardust on 2018/3/30.
+ * Created by Stardust on Mar 30, 2018.
  */
 public class JsGridView extends JsListView {
 

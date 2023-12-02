@@ -14,7 +14,7 @@ import java.util.Locale
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Created by Stardust on 2017/4/5.
+ * Created by Stardust on Apr 5, 2017.
  */
 open class AndroidContextFactory(private val cacheDirectory: File) : ContextFactory() {
     companion object {

@@ -11,7 +11,7 @@ import org.autojs.autojs.theme.ThemeColorMutable;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2018/1/23.
+ * Created by Stardust on Jan 23, 2018.
  */
 public class ThemeColorSwipeRefreshLayout extends SwipeRefreshLayout implements ThemeColorMutable {
 

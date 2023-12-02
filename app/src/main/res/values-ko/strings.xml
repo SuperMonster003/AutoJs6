@@ -202,9 +202,10 @@
     <string name="text_a11y_service_description">스크립트 자동 작동에 필요합니다 (클릭, 긴 프레스, 슬라이드 등).</string>
     <string name="text_a11y_service_enabled_but_not_running">접근성 서비스가 활성화되었지만 실행되지 않음 (장치를 다시 활성화 또는 재부팅)</string>
     <string name="text_a11y_service_may_be_needed">접근성 서비스가 필요할 수 있습니다</string>
-    <string name="text_abis">ABI</string>
-    <string name="text_abis_32bit">ABI (32 비트)</string>
-    <string name="text_abis_64bit">ABI (64 비트)</string>
+    <string name="text_supported_libraries_short">라이브러리</string>
+    <string name="text_supported_abis_short">ABI</string>
+    <string name="text_supported_abis_short_32bit">ABI (32 비트)</string>
+    <string name="text_supported_abis_short_64bit">ABI (64 비트)</string>
     <string name="text_about">에 대한</string>
     <string name="text_about_all_files_access">모든 파일 액세스에 대해</string>
     <string name="text_about_app_and_developer">앱과 개발자에 대해</string>
@@ -697,7 +698,6 @@
     <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
     <string name="summary_text_launcher_shortcuts">런처에 바로 가기 추가</string>
     <string name="text_pin_shortcut_not_unsupported">런처에 바로가기를 고정하는 것은 지원되지 않습니다</string>
-    <string name="text_template_apk_path">템플릿 APK 경로</string>
     <string name="text_shizuku_access_description">Shizuku 를 사용하면 ADB 권한과 시스템 API 에 대한 액세스 권한을 얻을 수 있습니다</string>
     <string name="text_shizuku_access">Shizuku 권한</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 부여하기</string>
@@ -709,6 +709,17 @@
     <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
     <string name="error_unable_to_use_shizuku_service">Shizuku 서비스를 사용할 수 없음</string>
     <string name="error_input_fields_check_failed">입력 필드 확인 실패</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">하나 이상의 ABI 를 선택해야 합니다.</string>
+    <string name="text_malfunctioning">오작동</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">필요한 라이브러리 파일이 부족하여 \"%s\" 모듈이 작동하지 않습니다</string>
+    <string name="text_unavailable">사용할 수 없음</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">현재 버전의 AutoJs6에 위의 ABI가 포함되어 있지 않으므로 선택한 ABI \"%s\" 를 사용하여 패키지 응용 프로그램을 만들 수 없습니다.</string>
+    <string name="text_the_following_solutions_can_be_referred_to">다음 해결 방법을 참조할 수 있습니다</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">위의 ABI가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"%s\" 포함)</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">모든 ABI가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"universal\" 포함)</string>
+    <string name="text_recommended">권장</string>
+    <string name="text_download_link_for_autojs6">AutoJs6 다운로드 링크</string>
+    <string name="text_unavailable_abi_for">ABI \"%s\" 를 사용할 수 없습니다</string>
 
     <plurals name="text_items_total_sum">
         <item quantity="other">총: %d 개 항목</item>

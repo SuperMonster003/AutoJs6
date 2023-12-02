@@ -33,7 +33,7 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Stardust on 2017/7/16.
+ * Created by Stardust on Jul 16, 2017.
  * Modified by SuperMonster003 as of May 12, 2022.
  */
 public class RootAutomator implements Shell.Callback {

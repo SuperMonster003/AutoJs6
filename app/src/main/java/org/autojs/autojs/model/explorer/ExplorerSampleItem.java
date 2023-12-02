@@ -26,4 +26,15 @@ public class ExplorerSampleItem extends ExplorerFileItem {
     public boolean canRename() {
         return false;
     }
+
+    @Override
+    public boolean canBuildApk() {
+        return getFile().canBuildApk();
+    }
+
+    @Override
+    public boolean canSetAsWorkingDir() {
+        return false;
+    }
+
 }

@@ -1,7 +1,7 @@
 package org.autojs.autojs.util;
 
 /**
- * Created by Stardust on 2017/4/3.
+ * Created by Stardust on Apr 3, 2017.
  * Modified by SuperMonster003 as of Feb 5, 2022.
  */
 public class SdkVersionUtils {

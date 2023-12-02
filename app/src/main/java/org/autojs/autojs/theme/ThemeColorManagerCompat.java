@@ -6,7 +6,7 @@ import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/3/12.
+ * Created by Stardust on Mar 12, 2017.
  */
 public class ThemeColorManagerCompat {
 

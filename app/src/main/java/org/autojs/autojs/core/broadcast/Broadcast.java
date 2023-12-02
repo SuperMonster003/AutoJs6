@@ -3,7 +3,7 @@ package org.autojs.autojs.core.broadcast;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Created by Stardust on 2018/4/1.
+ * Created by Stardust on Apr 1, 2018.
  */
 public class Broadcast {
 

@@ -9,7 +9,7 @@ import org.autojs.autojs.theme.ThemeColorManager.add
 import org.autojs.autojs.theme.ThemeColorMutable
 
 /**
- * Created by Stardust on 2017/5/10.
+ * Created by Stardust on May 10, 2017.
  * Transformed by SuperMonster003 on May 15, 2023.
  */
 class ThemeColorImageViewCompat : AppCompatImageView, ThemeColorMutable {

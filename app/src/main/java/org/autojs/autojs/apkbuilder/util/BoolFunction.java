@@ -1,9 +1,10 @@
 package org.autojs.autojs.apkbuilder.util;
 
 /**
- * Created by Stardust on 2017/10/23.
+ * Created by Stardust on Oct 23, 2017.
  */
 public interface BoolFunction<T> {
 
     boolean accept(T t);
+
 }

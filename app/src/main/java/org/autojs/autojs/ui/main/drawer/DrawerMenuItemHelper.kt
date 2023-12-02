@@ -26,7 +26,23 @@ interface DrawerMenuItemHelper {
         return toggle()
     }
 
-    fun refreshSubtitle() {
-        // Nothing to do by default.
+    fun refreshSubtitle(aimState: Boolean) {
+        /* Nothing to do by default. */
     }
+
+    fun callback(aimState: Boolean) {
+        when (aimState == isActive) {
+            true -> onToggleSuccess()
+            else -> onToggleFailure()
+        }
+    }
+
+    fun onToggleSuccess() {
+        /* Nothing to do by default. */
+    }
+
+    fun onToggleFailure() {
+        /* Nothing to do by default. */
+    }
+
 }

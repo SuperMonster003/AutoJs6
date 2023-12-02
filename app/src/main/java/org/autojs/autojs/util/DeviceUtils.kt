@@ -74,9 +74,9 @@ object DeviceUtils {
             ${context.getString(R.string.text_device_hardware_name)}: $hardware
             ${context.getString(R.string.text_device_hardware_serial_number)}: ${getSerial()}
             ${context.getString(R.string.text_device_imei)}: ${getIMEI(context)}
-            ${context.getString(R.string.text_abis)}: ${Arrays.toString(abis)}
-            ${context.getString(R.string.text_abis_32bit)}: ${Arrays.toString(abis32Bits)}
-            ${context.getString(R.string.text_abis_64bit)}: ${Arrays.toString(abis64Bits)}
+            ${context.getString(R.string.text_supported_abis_short)}: ${Arrays.toString(abis)}
+            ${context.getString(R.string.text_supported_abis_short_32bit)}: ${Arrays.toString(abis32Bits)}
+            ${context.getString(R.string.text_supported_abis_short_64bit)}: ${Arrays.toString(abis64Bits)}
             """.trimIndent()
 
         fun toStringWithSimpleAppInfo() = """

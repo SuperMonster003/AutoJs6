@@ -11,7 +11,7 @@ import org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/3/5.
+ * Created by Stardust on Mar 5, 2017.
  * Modified by SuperMonster003 as of Mar 30, 2023.
  * Transformed by SuperMonster003 on Mar 30, 2023.
  */

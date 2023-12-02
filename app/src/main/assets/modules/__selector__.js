@@ -32,8 +32,12 @@ module.exports = function (scriptRuntime, scope) {
             return Selector;
         })(),
         javaObjectInstance: new java.lang.Object(),
+        scopeAugmentMethodBlacklist: [
+            'plus', 'append',
+        ],
         isInJavaObject: key => key in _.javaObjectInstance,
         isInScope: key => key in scope,
+        isInScopeAugmentMethodBlacklist: key => _.scopeAugmentMethodBlacklist.includes(key),
         scopeAugment() {
             Object.assign(scope, {
                 pickup(root, selector, compass, resultType, callback) {
@@ -144,7 +148,7 @@ module.exports = function (scriptRuntime, scope) {
             });
 
             for (let method in scriptRuntime.selector()) {
-                if (_.isInJavaObject(method) || _.isInScope(method)) {
+                if (_.isInJavaObject(method) || _.isInScope(method) || _.isInScopeAugmentMethodBlacklist(method)) {
                     // @Caution by SuperMonster003 as of Oct 23, 2022.
                     //  ! The following methods have been assigned by 'automator' module,
                     //  ! which not belonging to UiSelector:

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Stardust on 2017/4/29.
+ * Created by Stardust on Apr 29, 2017.
  */
 public class AccessibilityConfig {
 

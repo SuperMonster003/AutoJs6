@@ -1,4 +1,7 @@
 ( /* @ModuleIIFE */ () => {
+
+    const Looper = android.os.Looper;
+
     let _ = {
         isUiThread() {
             return Looper.myLooper() === Looper.getMainLooper();

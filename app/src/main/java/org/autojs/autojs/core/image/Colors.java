@@ -7,7 +7,7 @@ import androidx.annotation.ColorInt;
 import org.autojs.autojs.util.ColorUtils;
 
 /**
- * Created by Stardust on 2017/12/31.
+ * Created by Stardust on Dec 31, 2017.
  */
 public class Colors {
 

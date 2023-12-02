@@ -42,10 +42,16 @@
         <attr name="itemValues" format="reference" />
         <attr name="itemDefaultKey" format="string" />
     </declare-styleable>
+
     <declare-styleable name="ToolbarMenuItem">
         <attr name="text" format="string|reference" />
         <attr name="icon" />
         <attr name="icon_color" format="color|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="RoundCheckboxWithText">
+        <attr name="text" />
+        <attr name="checked" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="PrefSwitch">

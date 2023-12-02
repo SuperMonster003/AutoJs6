@@ -14,7 +14,7 @@ import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.DialogTextSizeSettingBinding;
 
 /**
- * Created by Stardust on 2018/2/24.
+ * Created by Stardust on Feb 24, 2018.
  */
 public class TextSizeSettingDialogBuilder extends MaterialDialog.Builder implements SeekBar.OnSeekBarChangeListener {
 

@@ -3,7 +3,7 @@ package org.autojs.autojs.project;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by Stardust on 2018/1/25.
+ * Created by Stardust on Jan 25, 2018.
  */
 public class LaunchConfig {
 

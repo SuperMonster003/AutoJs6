@@ -115,6 +115,7 @@
                     android:text="@string/text_exit"
                     android:textSize="15sp" />
         </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

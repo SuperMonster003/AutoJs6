@@ -5,14 +5,17 @@ import android.os.Looper
 
 interface IToggleableItem {
 
-    fun toggle()
-
     fun toggle(aimState: Boolean)
 
     fun sync()
 
-    fun syncDelay() {
-        Handler(Looper.getMainLooper()).postDelayed({ sync() }, DrawerMenuItemViewHolder.CLICK_TIMEOUT)
+    fun sync(callback: Runnable) {
+        sync()
+        callback.run()
+    }
+
+    fun syncDelay(callback: Runnable) {
+        Handler(Looper.getMainLooper()).postDelayed({ sync(callback) }, DrawerMenuItemViewHolder.CLICK_TIMEOUT)
     }
 
 }

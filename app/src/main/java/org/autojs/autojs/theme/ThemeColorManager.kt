@@ -10,7 +10,7 @@ import java.util.LinkedList
 import java.util.Vector
 
 /**
- * Created by Stardust on 2016/5/10.
+ * Created by Stardust on May 10, 2016.
  */
 object ThemeColorManager {
 

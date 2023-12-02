@@ -15,7 +15,7 @@ import org.autojs.autojs6.R;
 import java.io.File;
 
 /**
- * Created by Stardust on 2017/4/1.
+ * Created by Stardust on Apr 1, 2017.
  */
 public class PathChecker {
     public static final int CHECK_RESULT_OK = 0;

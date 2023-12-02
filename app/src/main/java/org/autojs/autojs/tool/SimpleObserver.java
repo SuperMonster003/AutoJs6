@@ -5,7 +5,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 
 /**
- * Created by Stardust on 2017/8/20.
+ * Created by Stardust on Aug 20, 2017.
  */
 public class SimpleObserver<T> implements Observer<T> {
     @Override

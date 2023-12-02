@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.ViewGroup;
 
 /**
- * Created by Stardust on 2017/4/8.
+ * Created by Stardust on Apr 8, 2017.
  */
 public abstract class ViewHolderMutableAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 

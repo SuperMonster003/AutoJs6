@@ -9,9 +9,11 @@ import org.autojs.autojs.util.EnvironmentUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
- * Created by Stardust on 2018/1/23.
+ * Created by Stardust on Jan 23, 2018.
+ * Modified by SuperMonster003 as of May 26, 2022.
  */
 public class Files {
 
@@ -21,13 +23,14 @@ public class Files {
         mRuntime = runtime;
     }
 
-    // FIXME: 2018/10/16 is not correct in sub-directory?
+    // FIXME by Stardust on Oct 16, 2018.
+    //  ! Is not correct in sub-directory?
     public String path(String relativePath) {
         String cwd = cwd();
-        if (cwd == null || relativePath == null || relativePath.startsWith("/"))
+        if (cwd == null || relativePath == null || relativePath.startsWith(File.separator))
             return relativePath;
         File f = new File(cwd);
-        String[] paths = relativePath.split("/");
+        String[] paths = relativePath.split(Pattern.quote(File.separator));
         for (String path : paths) {
             if (path.equals("."))
                 continue;
@@ -38,7 +41,7 @@ public class Files {
             f = new File(f, path);
         }
         String path = f.getPath();
-        return relativePath.endsWith(File.separator) ? path + "/" : path;
+        return relativePath.endsWith(File.separator) ? path + File.separator : path;
     }
 
     public String cwd() {

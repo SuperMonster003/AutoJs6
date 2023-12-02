@@ -27,5 +27,5 @@ sync.ffs_db
 /local.properties
 /sign.properties
 
-**/assets/declarations
-**/assets/sample/declarations
+**/assets-app/declarations
+**/assets-app/sample/declarations

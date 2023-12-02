@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Created by Stardust on 2017/5/2.
+ * Created by Stardust on May 2, 2017.
  * <p>
  * TODO: 优化为无锁形式
  */

@@ -10,7 +10,7 @@ import kotlin.math.min
 import kotlin.math.pow
 
 /**
- * Created by Stardust on 2017/5/3.
+ * Created by Stardust on May 3, 2017.
  * Modified by SuperMonster003 as of Jul 6, 2022.
  */
 object StringUtils {

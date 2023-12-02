@@ -1,8 +1,7 @@
 package org.autojs.autojs.concurrent;
 
-
 /**
- * Created by Stardust on 2017/5/8.
+ * Created by Stardust on May 8, 2017.
  * Modified by SuperMonster003 as of Jun 11, 2022.
  */
 public class VolatileBox<T> {

@@ -9,6 +9,14 @@ let { files, util, s13n } = global;
  * @return {Internal.Console}
  */
 module.exports = function (scriptRuntime, scope) {
+
+    const Log = android.util.Log;
+    const Level = org.apache.log4j.Level;
+    const LogManager = org.apache.log4j.LogManager;
+    const LogConfigurator = de.mindpipe.android.logging.log4j.LogConfigurator;
+    const ProxyObject = org.autojs.autojs.rhino.ProxyObject;
+    const ConsoleUtils = org.autojs.autojs.util.ConsoleUtils;
+
     // noinspection JSValidateTypes
     /** @type {org.autojs.autojs.core.console.GlobalConsole} */
     const rtConsole = scriptRuntime.console;

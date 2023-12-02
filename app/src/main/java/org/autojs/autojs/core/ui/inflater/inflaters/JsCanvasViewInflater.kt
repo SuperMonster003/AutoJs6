@@ -7,7 +7,7 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 
 /**
- * Created by Stardust on 2018/3/16.
+ * Created by Stardust on Mar 16, 2018.
  */
 class JsCanvasViewInflater(resourceParser: ResourceParser) : TextureViewInflater<JsCanvasView>(resourceParser) {
 

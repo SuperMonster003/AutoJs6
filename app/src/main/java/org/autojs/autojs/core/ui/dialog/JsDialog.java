@@ -51,7 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Stardust on 2018/4/17.
+ * Created by Stardust on Apr 17, 2018.
  */
 public class JsDialog {
 

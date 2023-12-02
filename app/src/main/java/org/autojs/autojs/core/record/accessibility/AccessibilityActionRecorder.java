@@ -12,9 +12,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-
 /**
- * Created by Stardust on 2017/2/14.
+ * Created by Stardust on Feb 14, 2017.
  */
 public class AccessibilityActionRecorder extends Recorder.AbstractRecorder implements AccessibilityDelegate {
 

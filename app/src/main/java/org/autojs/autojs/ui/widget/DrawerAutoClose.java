@@ -7,7 +7,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import org.autojs.autojs.event.BackPressedHandler;
 
 /**
- * Created by Stardust on 2017/6/19.
+ * Created by Stardust on Jun 19, 2017.
  */
 public class DrawerAutoClose implements BackPressedHandler {
 

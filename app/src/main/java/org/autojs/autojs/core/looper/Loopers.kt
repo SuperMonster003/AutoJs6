@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 /**
- * Created by Stardust on 2017/7/29.
+ * Created by Stardust on Jul 29, 2017.
  * Modified by aiselp as of Jun 4, 2023.
  *  ! 调整内容:
  *  ! 使此类只负责单 loop 线程生命周期管理, 移除繁琐的调用链

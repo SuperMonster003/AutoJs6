@@ -18,7 +18,7 @@ import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 
 /**
- * Created by Stardust on 2017/11/25.
+ * Created by Stardust on Nov 25, 2017.
  * Modified by SuperMonster003 as of May 16, 2023.
  * Transformed by SuperMonster003 on May 16, 2023.
  */

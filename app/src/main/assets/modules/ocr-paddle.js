@@ -30,6 +30,7 @@ module.exports = function (scriptRuntime, scope) {
             OcrPaddleCtor.prototype = {
                 constructor: OcrPaddleCtor,
                 recognizeTextMethodCreator(options) {
+                    ApkBuilder.Libs.ensure(ocr['_modeName']['paddle'], ApkBuilder.Libs.PADDLE_LITE);
                     return function (img) {
                         const { cpuThreadNum, useSlim } = options;
 
@@ -43,7 +44,11 @@ module.exports = function (scriptRuntime, scope) {
                         ));
                     };
                 },
+                recognizeText() {
+                    /* Stub. */
+                },
                 detectMethodCreator(options) {
+                    ApkBuilder.Libs.ensure(ocr['_modeName']['paddle'], ApkBuilder.Libs.PADDLE_LITE);
                     return function (img) {
                         const { cpuThreadNum, useSlim } = options;
 
@@ -56,6 +61,9 @@ module.exports = function (scriptRuntime, scope) {
                             niceUseSlim,
                         ).toArray());
                     };
+                },
+                detect() {
+                    /* Stub. */
                 },
             };
 

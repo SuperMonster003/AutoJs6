@@ -101,6 +101,8 @@
             android:name="android.permission.WRITE_SECURE_SETTINGS"
             tools:ignore="ProtectedPermissions" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
     <!-- 非 AutoJs6 运行必需, 不会主动申请, 脚本可自行申请 -->
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -284,7 +286,7 @@
 
         <service
                 android:name="org.autojs.autojs.external.foreground.MainActivityForegroundService"
-                android:foregroundServiceType="systemExempted" />
+                android:foregroundServiceType="specialUse" />
 
         <service android:name="org.autojs.autojs.external.ScriptExecutionIntentService" />
 
@@ -299,7 +301,7 @@
 
             <meta-data
                     android:name="android.service.quicksettings.ACTIVE_TILE"
-                    android:value="true" />
+                    android:value="false" />
 
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
@@ -316,7 +318,7 @@
 
             <meta-data
                     android:name="android.service.quicksettings.ACTIVE_TILE"
-                    android:value="true" />
+                    android:value="false" />
 
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
@@ -573,9 +575,9 @@
                 android:theme="@style/ScriptTheme.Transparent" />
 
         <service
-                android:name="org.autojs.autojs.core.accessibility.AccessibilityService"
-                android:exported="true"
-                android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+                android:name="org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
+                android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+                android:exported="true">
 
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />

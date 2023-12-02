@@ -1,6 +1,7 @@
 package org.autojs.autojs.inrt
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_DENIED
 import android.graphics.Typeface
@@ -9,20 +10,20 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
+import org.autojs.autojs.ui.splash.SplashActivity.Companion.INIT_TIMEOUT
 import org.autojs.autojs6.R
+import kotlin.concurrent.thread
 
 /**
- * Created by Stardust on 2018/2/2.
+ * Created by Stardust on Feb 2, 2018.
  */
+@SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
 
-    override fun onCreate(@Nullable savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
         setContentView(R.layout.activity_splash_inrt)
         val slug = findViewById<TextView>(R.id.slug)
         slug.typeface = Typeface.createFromAsset(assets, "roboto_medium.ttf")
@@ -31,6 +32,7 @@ class SplashActivity : AppCompatActivity() {
         } else {
             Handler(Looper.myLooper()!!).postDelayed({ this@SplashActivity.main() }, INIT_TIMEOUT)
         }
+        super.onCreate(savedInstanceState)
     }
 
     private fun main() {
@@ -38,7 +40,7 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun runScript() {
-        Thread {
+        thread(true) {
             try {
                 GlobalProjectLauncher.launch(this)
             } catch (e: Exception) {
@@ -49,15 +51,15 @@ class SplashActivity : AppCompatActivity() {
                     AutoJs.instance.globalConsole.printAllStackTrace(e)
                 }
             }
-        }.start()
+        }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, @NonNull permissions: Array<String>, @NonNull grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         runScript()
     }
 
-    private fun checkPermission(vararg permissions: String) {
+    private fun checkPermission(@Suppress("SameParameterValue") vararg permissions: String) {
         val requestPermissions = getRequestPermissions(permissions)
         if (requestPermissions.isNotEmpty()) {
             requestPermissions(requestPermissions, PERMISSION_REQUEST_CODE)
@@ -66,21 +68,16 @@ class SplashActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun getRequestPermissions(permissions: Array<out String>): Array<String> {
-        val list = ArrayList<String>()
-        for (permission in permissions) {
-            if (checkSelfPermission(permission) == PERMISSION_DENIED) {
-                list.add(permission)
-            }
+    private fun getRequestPermissions(permissions: Array<out String>) = ArrayList<String>()
+        .let { list ->
+            permissions.filterTo(list) { checkSelfPermission(it) == PERMISSION_DENIED }
+            list.toTypedArray()
         }
-        return list.toTypedArray()
-    }
 
     companion object {
 
         private const val PERMISSION_REQUEST_CODE = 11186
-        private const val INIT_TIMEOUT: Long = 1000
+
     }
 
 }

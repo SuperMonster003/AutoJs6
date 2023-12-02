@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>版本工具类 (Version) | AutoJs6 文档 - 6.5.0</title>
+    <link rel="stylesheet" href="assets/fonts.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/sh.css">
+    <link rel="stylesheet" href="plugins/docsify-copy-code@2-styles.css">
+    <link rel="stylesheet" href="plugins/zoom-image-styles.css">
+    <link rel="canonical" href="https://nodejs.org/api/versionType.html">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="user-scalable=no">
+</head>
+<body class="alt apidoc" id="api-section-versionType">
+<div id="content" class="clearfix">
+    <div id="column2" class="interior">
+        <div id="intro" class="interior">
+            <a href="/" title="返回首页">
+                AutoJs6
+            </a>
+        </div>
+        <ul>
+<li><a class="nav-overview" href="overview.html">Overview - 综述</a></li>
+<li><a class="nav-documentation" href="documentation.html">About - 关于文档</a></li>
+<li><a class="nav-progress" href="progress.html">Progress - 文档部署进度</a></li>
+<li><a class="nav-changelog" href="changelog.html">Changelog - 文档更新日志</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-manual" href="manual.html">Manual - AutoJs6 使用手册</a></li>
+<li><a class="nav-qa" href="qa.html">Q &amp; A - 疑难解答</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-global" href="global.html">Global - 全局对象</a></li>
+<li><a class="nav-automator" href="automator.html">Automator - 自动化</a></li>
+<li><a class="nav-autojs" href="autojs.html">AutoJs6 - 本体应用</a></li>
+<li><a class="nav-app" href="app.html">App - 通用应用</a></li>
+<li><a class="nav-color" href="color.html">Color - 颜色</a></li>
+<li><a class="nav-image" href="image.html">Image - 图像</a></li>
+<li><a class="nav-ocr" href="ocr.html">OCR - 光学字符识别</a></li>
+<li><a class="nav-barcode" href="barcode.html">Barcode - 条码</a></li>
+<li><a class="nav-qrcode" href="qrcode.html">QR Code - 二维码</a></li>
+<li><a class="nav-keys" href="keys.html">Keys - 按键</a></li>
+<li><a class="nav-device" href="device.html">Device - 设备</a></li>
+<li><a class="nav-storages" href="storages.html">Storage - 储存</a></li>
+<li><a class="nav-files" href="files.html">File - 文件</a></li>
+<li><a class="nav-engines" href="engines.html">Engine - 引擎</a></li>
+<li><a class="nav-tasks" href="tasks.html">Task - 任务</a></li>
+<li><a class="nav-modules" href="modules.html">Module - 模块</a></li>
+<li><a class="nav-plugins" href="plugins.html">Plugins - 插件</a></li>
+<li><a class="nav-toast" href="toast.html">Toast - 消息浮动框</a></li>
+<li><a class="nav-notice" href="notice.html">Notice - 消息通知</a></li>
+<li><a class="nav-console" href="console.html">Console - 控制台</a></li>
+<li><a class="nav-shell" href="shell.html">Shell</a></li>
+<li><a class="nav-shizuku" href="shizuku.html">Shizuku</a></li>
+<li><a class="nav-media" href="media.html">Media - 多媒体</a></li>
+<li><a class="nav-sensors" href="sensors.html">Sensor - 传感器</a></li>
+<li><a class="nav-recorder" href="recorder.html">Recorder - 记录器</a></li>
+<li><a class="nav-timers" href="timers.html">Timer - 定时器</a></li>
+<li><a class="nav-threads" href="threads.html">Thread - 线程</a></li>
+<li><a class="nav-continuation" href="continuation.html">Continuation - 协程</a></li>
+<li><a class="nav-events" href="events.html">Event - 事件监听</a></li>
+<li><a class="nav-dialogs" href="dialogs.html">Dialog - 对话框</a></li>
+<li><a class="nav-floaty" href="floaty.html">Floaty - 悬浮窗</a></li>
+<li><a class="nav-canvas" href="canvas.html">Canvas - 画布</a></li>
+<li><a class="nav-ui" href="ui.html">UI - 用户界面</a></li>
+<li><a class="nav-web" href="web.html">Web - 万维网</a></li>
+<li><a class="nav-http" href="http.html">HTTP</a></li>
+<li><a class="nav-base64" href="base64.html">Base64</a></li>
+<li><a class="nav-crypto" href="crypto.html">Crypto - 密文</a></li>
+<li><a class="nav-opencc" href="opencc.html">OpenCC - 中文转换</a></li>
+<li><a class="nav-i18n" href="i18n.html">Internationalization - 国际化</a></li>
+<li><a class="nav-s13n" href="s13n.html">Standardization - 标准化</a></li>
+<li><a class="nav-e4x" href="e4x.html">E4X</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-uiSelectorType" href="uiSelectorType.html">UiSelector - 选择器</a></li>
+<li><a class="nav-uiObjectType" href="uiObjectType.html">UiObject - 控件节点</a></li>
+<li><a class="nav-uiObjectCollectionType" href="uiObjectCollectionType.html">UiObjectCollection - 控件集合</a></li>
+<li><a class="nav-uiObjectActionsType" href="uiObjectActionsType.html">UiObjectActions - 控件节点行为</a></li>
+<li><a class="nav-webSocketType" href="webSocketType.html">WebSocket</a></li>
+<li><a class="nav-eventEmitterType" href="eventEmitterType.html">EventEmitter - 事件发射器</a></li>
+<li><a class="nav-imageWrapperType" href="imageWrapperType.html">ImageWrapper - 包装图像类</a></li>
+<li><a class="nav-appType" href="appType.html">App - 应用枚举类</a></li>
+<li><a class="nav-colorType" href="colorType.html">Color - 颜色类</a></li>
+<li><a class="nav-versionType active" href="versionType.html">Version - 版本工具类</a></li>
+<li><a class="nav-polyfill" href="polyfill.html">Polyfill - 代码填泥</a></li>
+<li><a class="nav-arrayx" href="arrayx.html">Arrayx - Array 扩展</a></li>
+<li><a class="nav-numberx" href="numberx.html">Numberx - Number 扩展</a></li>
+<li><a class="nav-mathx" href="mathx.html">Mathx - Math 扩展</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-exceptions" href="exceptions.html">Exceptions - 异常</a></li>
+<li><a class="nav-intentType" href="intentType.html">Intent - 意图</a></li>
+<li><a class="nav-runtime" href="runtime.html">Runtime - 运行时</a></li>
+<li><a class="nav-context" href="context.html">Context - 上下文</a></li>
+<li><a class="nav-activity" href="activity.html">Activity - 活动</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-scriptingJava" href="scriptingJava.html">Scripting Java - 脚本化 Java</a></li>
+<li><a class="nav-apiLevel" href="apiLevel.html">Android API Level - 安卓 API 级别</a></li>
+<li><a class="nav-colorTable" href="colorTable.html">Color Table - 颜色列表</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-glossaries" href="glossaries.html">Glossaries - 术语</a></li>
+<li><a class="nav-httpHeaderGlossary" href="httpHeaderGlossary.html">HttpHeader - HTTP 标头</a></li>
+<li><a class="nav-httpRequestMethodsGlossary" href="httpRequestMethodsGlossary.html">HttpRequestMethods - HTTP 请求方法</a></li>
+<li><a class="nav-mimeTypeGlossary" href="mimeTypeGlossary.html">MimeType - MIME 类型</a></li>
+<li><a class="nav-notificationChannelGlossary" href="notificationChannelGlossary.html">NotificationChannel - 通知渠道</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-dataTypes" href="dataTypes.html">Data Types - 数据类型</a></li>
+<li><a class="nav-omniTypes" href="omniTypes.html">Omnipotent Types - 全能类型</a></li>
+<li><a class="nav-storageType" href="storageType.html">Storage - 存储类</a></li>
+<li><a class="nav-androidBundleType" href="androidBundleType.html">AndroidBundle</a></li>
+<li><a class="nav-androidRectType" href="androidRectType.html">AndroidRect</a></li>
+<li><a class="nav-cryptoCipherOptionsType" href="cryptoCipherOptionsType.html">CryptoCipherOptions</a></li>
+<li><a class="nav-cryptoKeyType" href="cryptoKeyType.html">CryptoKey</a></li>
+<li><a class="nav-cryptoKeyPairType" href="cryptoKeyPairType.html">CryptoKeyPair</a></li>
+<li><a class="nav-consoleBuildOptionsType" href="consoleBuildOptionsType.html">ConsoleBuildOptions</a></li>
+<li><a class="nav-httpRequestBuilderOptionsType" href="httpRequestBuilderOptionsType.html">HttpRequestBuilderOptions</a></li>
+<li><a class="nav-httpRequestHeadersType" href="httpRequestHeadersType.html">HttpRequestHeaders</a></li>
+<li><a class="nav-httpResponseBodyType" href="httpResponseBodyType.html">HttpResponseBody</a></li>
+<li><a class="nav-httpResponseHeadersType" href="httpResponseHeadersType.html">HttpResponseHeaders</a></li>
+<li><a class="nav-httpResponseType" href="httpResponseType.html">HttpResponse</a></li>
+<li><a class="nav-injectableWebClientType" href="injectableWebClientType.html">InjectableWebClient</a></li>
+<li><a class="nav-injectableWebViewType" href="injectableWebViewType.html">InjectableWebView</a></li>
+<li><a class="nav-noticeOptionsType" href="noticeOptionsType.html">NoticeOptions</a></li>
+<li><a class="nav-noticeChannelOptionsType" href="noticeChannelOptionsType.html">NoticeChannelOptions</a></li>
+<li><a class="nav-noticePresetConfigurationType" href="noticePresetConfigurationType.html">NoticePresetConfiguration</a></li>
+<li><a class="nav-noticeBuilderType" href="noticeBuilderType.html">NoticeBuilder</a></li>
+<li><a class="nav-okhttp3HttpUrlType" href="okhttp3HttpUrlType.html">Okhttp3HttpUrl</a></li>
+<li><a class="nav-ocrOptionsType" href="ocrOptionsType.html">OcrOptions</a></li>
+<li><a class="nav-okhttp3RequestType" href="okhttp3RequestType.html">Okhttp3Request</a></li>
+<li><a class="nav-opencvPointType" href="opencvPointType.html">OpenCVPoint</a></li>
+<li><a class="nav-opencvRectType" href="opencvRectType.html">OpenCVRect</a></li>
+<li><a class="nav-opencvSizeType" href="opencvSizeType.html">OpenCVSize</a></li>
+<li><a class="nav-openCCConversionType" href="openCCConversionType.html">OpenCCConversion</a></li>
+</ul>
+<div class="line"></div>
+
+<ul>
+<li><a class="nav-http-project-autojs6-com" href="http://project.autojs6.com">GitHub - 应用项目地址</a></li>
+<li><a class="nav-http-docs-project-autojs6-com" href="http://docs-project.autojs6.com">GitHub - 文档项目地址</a></li>
+</ul>
+
+    </div>
+
+    <div id="column1" data-id="versionType" class="interior">
+        <header>
+            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <div id="gtoc">
+                <p class="index">
+                    <a href="index.html" name="toc">索引</a> |
+                    <a href="all.html">查看全部</a>
+                </p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="toc">
+            <h2>目录</h2>
+            <ul>
+<li><span class="stability_undefined"><a href="#versiontype_version">版本工具类 (Version)</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_c_version">[C] Version</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_c_versionstring">[c] (versionString)</a></span></li>
+<li><span class="stability_undefined"><a href="#versiontype_c_versionstring_throwexceptions">[c] (versionString, throwExceptions)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_getmajor">[m#] getMajor</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_getmajor">getMajor()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_getminor">[m#] getMinor</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_getminor">getMinor()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_getpatch">[m#] getPatch</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_getpatch">getPatch()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_getsuffix">[m#] getSuffix</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_getsuffix">getSuffix()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_isequal">[m#] isEqual</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_isequal_otherversion">isEqual(otherVersion)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_ishigherthan">[m#] isHigherThan</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_ishigherthan_otherversion">isHigherThan(otherVersion)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_islowerthan">[m#] isLowerThan</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_islowerthan_otherversion">isLowerThan(otherVersion)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_isatleast">[m#] isAtLeast</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_isatleast_otherversion">isAtLeast(otherVersion)</a></span></li>
+<li><span class="stability_undefined"><a href="#versiontype_isatleast_otherversion_ignoresuffix">isAtLeast(otherVersion, ignoreSuffix)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_getsubversionnumbers">[m#] getSubversionNumbers</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_getsubversionnumbers">getSubversionNumbers()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_getoriginalstring">[m#] getOriginalString</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_getoriginalstring">getOriginalString()</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#versiontype_m_compareto">[m#] compareTo</a></span><ul>
+<li><span class="stability_undefined"><a href="#versiontype_compareto_otherversion">compareTo(otherVersion)</a></span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+
+        <div id="apicontent">
+            <h1>版本工具类 (Version)<span><a class="mark" href="#versiontype_version" id="versiontype_version">#</a></span></h1>
+<p>版本工具类用于版本信息提取 (主版本号 / 次版本号 / 补丁版本号) 及版本号比较.</p>
+<pre><code class="lang-js">/* 生成一个 Version 实例. */
+let ver = new Version(&#39;6.1.3&#39;);
+
+/* 获取主版本号. */
+console.log(ver.getMajor()); // 6
+
+/* 获取次版本号. */
+console.log(ver.getMinor()); // 1
+
+/* 获取补丁版本号. */
+console.log(ver.getPatch()); // 3
+
+/* 版本号比较. */
+console.log(ver.isHigherThan(&#39;6.1.2&#39;)); // true
+console.log(ver.isLowerThan(&#39;6.1.5&#39;)); // true
+console.log(ver.isEqual(&#39;6.1.3&#39;)); // true
+console.log(ver.isAtLeast(&#39;6.1.1&#39;)); // true
+</code></pre>
+<blockquote>
+<p>注: 此工具类源于 GitHub 开源项目 <a href="https://github.com/G00fY2/version-compare">G00fY2/version-compare</a>.</p>
+</blockquote>
+<hr>
+<p style="font: bold 2em sans-serif; color: #FF7043">Version</p>
+
+<hr>
+<h2>[C] Version<span><a class="mark" href="#versiontype_c_version" id="versiontype_c_version">#</a></span></h2>
+<h3>[c] (versionString)<span><a class="mark" href="#versiontype_c_versionstring" id="versiontype_c_versionstring">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 1/2</code></strong></p>
+<ul>
+<li><strong>versionString</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 版本号参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#versiontype_c_version">Version</a></span> }</li>
+</ul>
+<p>使用版本号参数生成一个 Version 实例.</p>
+<pre><code class="lang-js">let verA = new Version(&#39;3.0.2&#39;);
+let verB = new Version(&#39;5.2.3&#39;);
+</code></pre>
+<p>注意版本号参数的格式要求, 只能以数字开头, 不支持 <code>v5.2.3</code> 这样的以 <code>v</code> 开头的参数形式.</p>
+<p>版本号格式:</p>
+<pre><code class="lang-text">%主版本号%[.%次版本号%[.%补丁版本号%[.%版本后缀%]]]
+</code></pre>
+<p>补丁版本号和次版本号及版本后缀全部是可选的, 以下构造器均是合法的:</p>
+<pre><code class="lang-js">let verA = new Version(&#39;5&#39;); /* 相当于 &#39;5.0.0&#39; . */
+let verB = new Version(&#39;5.2&#39;); /* 相当于 &#39;5.2.0&#39; . */
+let verC = new Version(&#39;5.2.3&#39;);
+let verD = new Version(&#39;5.2.3-alpha11&#39;); /* alpha11 为后缀. */
+</code></pre>
+<p>特别地, 数字 (包含正整数及正小数) 也支持作为版本号参数使用, 它将被隐式转换为字符串类型:</p>
+<pre><code class="lang-js">let verA = new Version(5); /* 相当于 &#39;5.0.0&#39; . */
+let verB = new Version(5.2); /* 相当于 &#39;5.2.0&#39; . */
+</code></pre>
+<p>版本号结构样例:</p>
+<pre><code class="lang-text">Version 1.7.3-rc2.xyz
+            +-------+   +-------+   +-------+   +-------+
+  String    |   1   | . |   7   | . | 3-rc2 | . |  xyz  |
+            +-------+   +-------+   +-------+   +-------+
+                |           |         |  |          |
+  major  [1] &lt;--            |         |   ----      |
+  minor  [7] &lt;--------------          |       | ----
+  patch  [3] &lt;------------------------        ||
+         ...                            +------------+
+                                suffix  |  -rc2.xyz  |
+                                        +------------+
+-------------------------------------------------------------------------
+suffix compare logic                          ||
+                                         -----  -----
+                                        |            |
+                                    +-------+    +-------+
+              detected pre-release  |  rc2  |    | .xyz  |  ignored part
+                                    +-------+    +-------+
+                                       ||
+                                    ---  ---
+                                   |        |
+                                +----+    +---+
+                                | rc |    | 2 |  pre-release build
+                                +----+    +---+
+</code></pre>
+<p>支持的后缀:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">优先级</th>
+<th style="text-align:center">后缀</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">空或未知</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">rc</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">beta</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">alpha</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">pre + alpha</td>
+</tr>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:center">snapshot</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-js">console.log(new Version(&#39;5.2.3-beta&#39;).isHigherThan(&#39;5.2.3-snapshot&#39;)); // true
+</code></pre>
+<h3>[c] (versionString, throwExceptions)<span><a class="mark" href="#versiontype_c_versionstring_throwexceptions" id="versiontype_c_versionstring_throwexceptions">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/2</code></strong></p>
+<ul>
+<li><strong>versionString</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> } - 版本号参数</li>
+<li><strong>[ throwExceptions = <code>false</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否在版本号参数不合法时抛出异常</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="#versiontype_c_version">Version</a></span> }</li>
+</ul>
+<p>throwExceptions 参数用于控制是否在版本号参数不合法时抛出异常.</p>
+<p>不合法的情况:</p>
+<ol>
+<li>versionString 参数为 null</li>
+<li>versionString 参数为非数字开头的字符串</li>
+</ol>
+<pre><code class="lang-js">let verA = new Version(null, true); /* 抛出异常. */
+let verB = new Version(&#39;v5.2.3&#39;, true); /* 抛出异常. */
+let verC = new Version(&#39;5.2.3&#39;, true); /* 无异常. */
+
+let verD = new Version(null); /* 无异常. */
+let verE = new Version(&#39;v5.2.3&#39;); /* 无异常. */
+let verF = new Version(&#39;5.2.3&#39;); /* 无异常. */
+</code></pre>
+<h2>[m#] getMajor<span><a class="mark" href="#versiontype_m_getmajor" id="versiontype_m_getmajor">#</a></span></h2>
+<h3>getMajor()<span><a class="mark" href="#versiontype_getmajor" id="versiontype_getmajor">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取主版本号.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;5.2.3&#39;).getMajor()); // 5
+console.log(new Version(11).getMajor()); // 11
+</code></pre>
+<h2>[m#] getMinor<span><a class="mark" href="#versiontype_m_getminor" id="versiontype_m_getminor">#</a></span></h2>
+<h3>getMinor()<span><a class="mark" href="#versiontype_getminor" id="versiontype_getminor">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取次版本号.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;5.2.3&#39;).getMinor()); // 2
+console.log(new Version(11.9).getMinor()); // 9
+</code></pre>
+<h2>[m#] getPatch<span><a class="mark" href="#versiontype_m_getpatch" id="versiontype_m_getpatch">#</a></span></h2>
+<h3>getPatch()<span><a class="mark" href="#versiontype_getpatch" id="versiontype_getpatch">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取补丁版本号.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;5.2.3&#39;).getPatch()); // 3
+console.log(new Version(11.9).getPatch()); // 0
+</code></pre>
+<h2>[m#] getSuffix<span><a class="mark" href="#versiontype_m_getsuffix" id="versiontype_m_getsuffix">#</a></span></h2>
+<h3>getSuffix()<span><a class="mark" href="#versiontype_getsuffix" id="versiontype_getsuffix">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>获取版本号后缀.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;5.2.3&#39;).getSuffix()); /* &quot;&quot; (空字符串) */
+
+console.log(new Version(&#39;5.2.3-beta2&#39;).getSuffix()); // -beta2
+console.log(new Version(&#39;5.2.3_beta2&#39;).getSuffix()); // _beta2
+
+console.log(new Version(&#39;5.2.3 beta2&#39;).getSuffix()); /* beta2 */
+console.log(new Version(&#39;5.2.3beta2&#39;).getSuffix()); /* 同上 (不推荐). */
+console.log(new Version(&#39;5.2.3 beta 2&#39;).getSuffix()); /* 同上 (不推荐). */
+</code></pre>
+<p>即使在获取后缀时, 不同的符号会得到不同的结果, 但在比较版本大小时, 这些不同的符号不会影响比较结果:</p>
+<pre><code class="lang-js">let verA = new Version(&#39;5.2.3-alpha11&#39;);
+let verB = new Version(&#39;5.2.3 alpha11&#39;);
+
+/* 两者后缀不等同. */
+console.log(verA.getSuffix() === verB.getSuffix()); // false
+
+/* 两者版本比较结果相同. */
+console.log(verA.isEqual(verB)); // true
+</code></pre>
+<h2>[m#] isEqual<span><a class="mark" href="#versiontype_m_isequal" id="versiontype_m_isequal">#</a></span></h2>
+<h3>isEqual(otherVersion)<span><a class="mark" href="#versiontype_isequal_otherversion" id="versiontype_isequal_otherversion">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>比较版本号, 返回是否与参数对应的版本号等同.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;2.3&#39;).isEqual(&#39;2.3.0&#39;)); // true
+console.log(new Version(&#39;2.3&#39;).isEqual(new Version(&#39;2.3.0&#39;))); /* 同上. */
+</code></pre>
+<h2>[m#] isHigherThan<span><a class="mark" href="#versiontype_m_ishigherthan" id="versiontype_m_ishigherthan">#</a></span></h2>
+<h3>isHigherThan(otherVersion)<span><a class="mark" href="#versiontype_ishigherthan_otherversion" id="versiontype_ishigherthan_otherversion">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>比较版本号, 返回是否高于参数对应的版本号.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;2.3&#39;).isHigherThan(&#39;2.2&#39;)); // true
+console.log(new Version(&#39;2.3&#39;).isHigherThan(new Version(&#39;2.2&#39;))); /* 同上. */
+</code></pre>
+<h2>[m#] isLowerThan<span><a class="mark" href="#versiontype_m_islowerthan" id="versiontype_m_islowerthan">#</a></span></h2>
+<h3>isLowerThan(otherVersion)<span><a class="mark" href="#versiontype_islowerthan_otherversion" id="versiontype_islowerthan_otherversion">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>比较版本号, 返回是否低于参数对应的版本号.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;2.1&#39;).isLowerThan(&#39;2.2&#39;)); // true
+console.log(new Version(&#39;2.1&#39;).isLowerThan(new Version(&#39;2.2&#39;))); /* 同上. */
+</code></pre>
+<h2>[m#] isAtLeast<span><a class="mark" href="#versiontype_m_isatleast" id="versiontype_m_isatleast">#</a></span></h2>
+<h3>isAtLeast(otherVersion)<span><a class="mark" href="#versiontype_isatleast_otherversion" id="versiontype_isatleast_otherversion">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 1/2</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>比较版本号, 返回是否不低于 (即大于等于) 参数对应的版本号.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;2.3&#39;).isAtLeast(&#39;2.2&#39;)); // true
+console.log(new Version(&#39;2.3&#39;).isAtLeast(new Version(&#39;2.2&#39;))); /* 同上. */
+
+console.log(new Version(&#39;2.3&#39;).isAtLeast(&#39;2.3&#39;)); // true
+console.log(new Version(&#39;2.3&#39;).isAtLeast(new Version(&#39;2.3&#39;))); /* 同上. */
+</code></pre>
+<h3>isAtLeast(otherVersion, ignoreSuffix)<span><a class="mark" href="#versiontype_isatleast_otherversion_ignoresuffix" id="versiontype_isatleast_otherversion_ignoresuffix">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong> <strong><code>Overload 2/2</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> | <span class="type"><a href="#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><strong>[ ignoreSuffix = <code>false</code> ]</strong> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> } - 是否忽略版本后缀</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
+</ul>
+<p>比较版本号, 返回是否不低于 (即大于等于) 参数对应的版本号且根据 <code>ignoreSuffix</code> 参数决定是否忽略版本后缀.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;2.3-alpha2&#39;).isAtLeast(&#39;2.3&#39;)); // false
+console.log(new Version(&#39;2.3-alpha2&#39;).isAtLeast(&#39;2.3&#39;, true)); // true
+</code></pre>
+<h2>[m#] getSubversionNumbers<span><a class="mark" href="#versiontype_m_getsubversionnumbers" id="versiontype_m_getsubversionnumbers">#</a></span></h2>
+<h3>getSubversionNumbers()<span><a class="mark" href="#versiontype_getsubversionnumbers" id="versiontype_getsubversionnumbers">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a><a href="dataTypes.html#datatypes_array">[]</a></span> }</li>
+</ul>
+<p>返回版本号所有数字部分组成的数组.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;2.3.5&#39;).getSubversionNumbers()); // [2, 3, 5]
+
+/* 后缀将被忽略. */
+console.log(new Version(&#39;2.3.5-alpha9&#39;).getSubversionNumbers()); // [2, 3, 5]
+
+/* 
+ * 注意虽然 &#39;2&#39; 与 &#39;2.0.0&#39; 版本比较等同,
+ * 即 new Version(&#39;2&#39;).isEqual(&#39;2.0.0&#39;) 为 true,
+ * 但两者 getSubversionNumbers() 不同. 
+ */
+console.log(new Version(&#39;2.0.0&#39;).getSubversionNumbers()); // [2, 0, 0]
+console.log(new Version(&#39;2&#39;).getSubversionNumbers()); // [2]
+</code></pre>
+<h2>[m#] getOriginalString<span><a class="mark" href="#versiontype_m_getoriginalstring" id="versiontype_m_getoriginalstring">#</a></span></h2>
+<h3>getOriginalString()<span><a class="mark" href="#versiontype_getoriginalstring" id="versiontype_getoriginalstring">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> }</li>
+</ul>
+<p>返回版本号原始字符串.</p>
+<pre><code class="lang-js">console.log(new Version(&#39;2.3.5&#39;).getOriginalString()); // 2.3.5
+console.log(new Version(&#39;2.3&#39;).getOriginalString()); // 2.3
+console.log(new Version(&#39;2.3-alpha5&#39;).getOriginalString()); // 2.3-alpha5
+console.log(new Version(&#39;2.0.0&#39;).getOriginalString()); // 2.0.0
+console.log(new Version(2).getOriginalString()); /* 2 (字符串类型) */
+</code></pre>
+<h2>[m#] compareTo<span><a class="mark" href="#versiontype_m_compareto" id="versiontype_m_compareto">#</a></span></h2>
+<h3>compareTo(otherVersion)<span><a class="mark" href="#versiontype_compareto_otherversion" id="versiontype_compareto_otherversion">#</a></span></h3>
+<p><strong><code>6.2.0</code></strong></p>
+<ul>
+<li><strong>otherVersion</strong> { <span class="type"><a href="#versiontype_c_version">Version</a></span> } - 待比较版本参数</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_number">number</a></span> }</li>
+</ul>
+<p>比较两个版本并返回比较结果数字 [ 1 / -1 / 0 ].</p>
+<pre><code class="lang-js">let verA = new Version(&#39;2&#39;);
+let verB = new Version(&#39;2.0.3&#39;);
+let verC = new Version(&#39;2.0.5&#39;);
+
+console.log(verA.compareTo(verB)); /* -1, 表示低于待比较版本. */
+console.log(verA.compareTo(new Version(&#39;2.0.0&#39;))); /* 0, 表示与待比较版本等同. */
+console.log(verC.compareTo(verB)); /* 1, 表示高于待比较版本. */
+
+/* 需留意 otherVersion 参数类型只能为 Version 类型. */
+console.log(verA.compareTo(new Version(&#39;2.0.0&#39;))); // 0
+console.log(verA.compareTo(&#39;2.0.0&#39;)); /* 抛出异常. */
+</code></pre>
+<p>配合 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/sort">Array.prototype.sort</a> 可以方便地进行数组排序:</p>
+<pre><code class="lang-js">let verList = [
+    new Version(&#39;2.3.5&#39;),
+    new Version(&#39;2.3.5-alpha9&#39;),
+    new Version(&#39;2.3.5-beta2&#39;),
+    new Version(&#39;2.3.5-snapshot&#39;),
+    new Version(&#39;2.3.6&#39;),
+    new Version(&#39;2.3&#39;),
+];
+// [ 2.3, 2.3.5-snapshot, 2.3.5-alpha9, 2.3.5-beta2, 2.3.5, 2.3.6 ]
+console.log(verList.sort((a, b) =&gt; a.compareTo(b)));
+</code></pre>
+
+        </div>
+    </div>
+</div>
+
+<script src="assets/sh_javascript.js"></script>
+<script src="assets/sh_java.js"></script>
+<script src="assets/sh_main.js"></script>
+
+<script src="plugins/docsify-copy-code@2.js"></script>
+<script src="plugins/zoom-image.js"></script>
+
+<script>
+    highlight(void 0, void 0, 'pre');
+    highlight(void 0, void 0, 'tt');
+</script>
+
+<!-- __TRACKING__ -->
+
+</body>
+</html>

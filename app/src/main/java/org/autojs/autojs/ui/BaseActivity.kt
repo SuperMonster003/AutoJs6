@@ -14,7 +14,7 @@ import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.ViewUtils
 
 /**
- * Created by Stardust on 2017/1/23.
+ * Created by Stardust on Jan 23, 2017.
  * Modified by SuperMonster003 as of Feb 18, 2022.
  */
 abstract class BaseActivity : AppCompatActivity() {

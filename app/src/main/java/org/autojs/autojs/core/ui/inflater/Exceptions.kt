@@ -3,7 +3,7 @@ package org.autojs.autojs.core.ui.inflater
 import android.view.View
 
 /**
- * Created by Stardust on 2017/11/4.
+ * Created by Stardust on Nov 4, 2017.
  * Transformed by SuperMonster003 on May 21, 2023.
  */
 object Exceptions {

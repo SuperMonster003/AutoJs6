@@ -13,7 +13,7 @@ import org.autojs.autojs.theme.ThemeColorMutable;
 import java.lang.reflect.Field;
 
 /**
- * Created by Stardust on 2016/8/15.
+ * Created by Stardust on Aug 15, 2016.
  */
 public class ThemeColorNavigationView extends NavigationView implements ThemeColorMutable {
 

@@ -211,17 +211,17 @@ class Versions {
     void showInfo() {
         def title = "Version information for paddleocr library"
 
-        def infoOpencv = "OpenCV version: $opencv"
+        def infoOpenCV = "OpenCV version: $opencv"
         def infoNdk = "NDK version: $ndk"
         def infoCmake = "CMake version: $cmake"
 
-        def maxLength = maxOf([title, infoOpencv, infoNdk, infoCmake].collect { it.length() })
+        def maxLength = maxOf([title, infoOpenCV, infoNdk, infoCmake].collect { it.length() })
 
         [
                 "=".repeat(maxLength),
                 title,
                 "-".repeat(maxLength),
-                infoOpencv,
+                infoOpenCV,
                 infoNdk,
                 infoCmake,
                 "=".repeat(maxLength),

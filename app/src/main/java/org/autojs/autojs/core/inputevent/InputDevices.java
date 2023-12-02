@@ -4,9 +4,8 @@ import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.InputDevice;
 
-
 /**
- * Created by Stardust on 2017/8/1.
+ * Created by Stardust on Aug 1, 2017.
  */
 public class InputDevices {
 

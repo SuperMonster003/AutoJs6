@@ -5,7 +5,7 @@ import android.view.KeyEvent
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Created by Stardust on 2018/2/27.
+ * Created by Stardust on Feb 27, 2018.
  */
 interface KeyInterceptor {
 

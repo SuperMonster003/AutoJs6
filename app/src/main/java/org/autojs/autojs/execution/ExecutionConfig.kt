@@ -5,7 +5,7 @@ import android.os.Parcelable
 import org.autojs.autojs.project.ScriptConfig
 
 /**
- * Created by Stardust on 2017/2/1.
+ * Created by Stardust on Feb 1, 2017.
  */
 data class ExecutionConfig(
     var workingDirectory: String = "",

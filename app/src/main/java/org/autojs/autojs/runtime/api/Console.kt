@@ -3,7 +3,7 @@ package org.autojs.autojs.runtime.api
 import org.autojs.autojs.annotation.ScriptInterface
 
 /**
- * Created by Stardust on 2017/4/2.
+ * Created by Stardust on Apr 2, 2017.
  * Modified by SuperMonster003 as of Oct 19, 2022.
  */
 interface Console {

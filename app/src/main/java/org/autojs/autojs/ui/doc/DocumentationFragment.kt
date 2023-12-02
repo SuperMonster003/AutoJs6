@@ -23,7 +23,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
 /**
- * Created by Stardust on 2017/8/22.
+ * Created by Stardust on Aug 22, 2017.
  * Modified by SuperMonster003 as of Mar 26, 2022.
  * Transformed by SuperMonster003 on Mar 31, 2023.
  */

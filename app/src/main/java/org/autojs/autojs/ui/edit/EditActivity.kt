@@ -31,7 +31,7 @@ import java.io.File
 import java.io.IOException
 
 /**
- * Created by Stardust on 2017/1/29.
+ * Created by Stardust on Jan 29, 2017.
  * Modified by SuperMonster003 as of Jan 21, 2023.
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {

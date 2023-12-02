@@ -22,7 +22,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 
 /**
- * Created by Stardust on 2017/3/10.
+ * Created by Stardust on Mar 10, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 class NodeInfoView : RecyclerView {

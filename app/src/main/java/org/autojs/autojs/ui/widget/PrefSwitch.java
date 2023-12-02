@@ -14,7 +14,7 @@ import org.autojs.autojs.theme.ThemeColorMutable;
 import org.autojs.autojs6.R;
 
 /**
- * Created by Stardust on 2017/8/6.
+ * Created by Stardust on Aug 6, 2017.
  */
 public class PrefSwitch extends JsSwitch implements SharedPreferences.OnSharedPreferenceChangeListener, ThemeColorMutable {
 

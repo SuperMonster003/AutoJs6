@@ -22,7 +22,7 @@ import org.autojs.autojs6.databinding.ActivityTaskerScriptEditBinding;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
- * Created by Stardust on 2017/4/5.
+ * Created by Stardust on Apr 5, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  */
 public class TaskerScriptEditActivity extends BaseActivity {

@@ -181,7 +181,7 @@ public class Predictor {
         if (modelPath.charAt(0) != '/') {
             // Read model files from custom path if the first character of mode path is '/'
             // otherwise copy model to cache from assets
-            realPath = appCtx.getCacheDir() + "/" + modelPath;
+            realPath = appCtx.getCacheDir() + File.separator + modelPath;
             // region add by TonyJiangWJ
             String key = "PADDLE_MODEL_LOADED" + md5(modelPath);
             // 进行了模型更新 需要强制覆盖旧模型
@@ -210,7 +210,7 @@ public class Predictor {
         this.cpuThreadNum = cpuThreadNum;
         this.cpuPowerMode = cpuPowerMode;
         this.modelPath = realPath;
-        this.modelName = realPath.substring(realPath.lastIndexOf("/") + 1);
+        this.modelName = realPath.substring(realPath.lastIndexOf(File.separator) + 1);
         return true;
     }
 
@@ -242,7 +242,7 @@ public class Predictor {
         // Load word labels from file
         try {
             InputStream labelInputStream;
-            if (labelPath.startsWith("/")) {
+            if (labelPath.startsWith(File.separator)) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     labelInputStream = Files.newInputStream(Paths.get(labelPath));
                 } else {

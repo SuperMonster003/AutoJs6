@@ -14,7 +14,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.DialogFindOrReplaceBinding
 
 /**
- * Created by Stardust on 2017/9/28.
+ * Created by Stardust on Sep 28, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  * Transformed by SuperMonster003 on May 12, 2023.
  */

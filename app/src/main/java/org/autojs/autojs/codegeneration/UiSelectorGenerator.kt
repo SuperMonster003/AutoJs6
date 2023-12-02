@@ -5,7 +5,7 @@ import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.tool.Consumer
 
 /**
- * Created by Stardust on 2017/12/7.
+ * Created by Stardust on Dec 7, 2017.
  * Modified by SuperMonster003 as of Sep 2, 2022.
  */
 class UiSelectorGenerator(private val mRoot: UiObject, private val mTarget: UiObject) {

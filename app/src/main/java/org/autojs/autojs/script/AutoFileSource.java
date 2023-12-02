@@ -7,7 +7,7 @@ import org.autojs.autojs.pio.PFiles;
 import java.io.File;
 
 /**
- * Created by Stardust on 2017/8/2.
+ * Created by Stardust on Aug 2, 2017.
  */
 public class AutoFileSource extends ScriptSource {
 

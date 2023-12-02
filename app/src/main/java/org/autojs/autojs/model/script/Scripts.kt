@@ -25,7 +25,7 @@ import java.io.File
 import java.io.FileFilter
 
 /**
- * Created by Stardust on 2017/5/3.
+ * Created by Stardust on May 3, 2017.
  */
 object Scripts {
 

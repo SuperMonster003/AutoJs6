@@ -1,7 +1,7 @@
 package org.autojs.autojs.ui.main.drawer;
 
 /**
- * Created by Stardust on 2017/8/25.
+ * Created by Stardust on Aug 25, 2017.
  */
 public class DrawerMenuGroup extends DrawerMenuItem {
 

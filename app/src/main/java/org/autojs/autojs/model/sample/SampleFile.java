@@ -18,7 +18,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 
 /**
- * Created by Stardust on 2017/10/28.
+ * Created by Stardust on Oct 28, 2017.
  */
 public class SampleFile extends ScriptFile {
 

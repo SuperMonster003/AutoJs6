@@ -19,7 +19,7 @@ import org.autojs.autojs.theme.ThemeColorMutable
 import org.autojs.autojs6.R
 
 /**
- * Created by Stardust on 2017/3/5.
+ * Created by Stardust on Mar 5, 2017.
  */
 class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClickablePreferenceLike {
 

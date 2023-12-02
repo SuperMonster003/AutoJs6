@@ -17,7 +17,7 @@ import java.util.TooManyListenersException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Created by Stardust on 2017/7/19.
+ * Created by Stardust on Jul 19, 2017.
  */
 public class EventEmitter {
 

@@ -21,7 +21,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by Stardust on 2017/2/2.
+ * Created by Stardust on Feb 2, 2017.
  */
 public class ErrorReportActivity extends BaseActivity {
 

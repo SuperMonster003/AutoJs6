@@ -10,7 +10,7 @@ import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.core.automator.UiObject;
 
 /**
- * Created by Stardust on 2017/11/5.
+ * Created by Stardust on Nov 5, 2017.
  */
 public class ReadOnlyUiObject extends UiObject {
 

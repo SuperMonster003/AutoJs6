@@ -3,7 +3,7 @@ package pxb.android.axml;
 import java.util.Map;
 
 /**
- * Created by Stardust on 2017/10/23.
+ * Created by Stardust on Oct 23, 2017.
  */
 public class DumpEditor extends DumpAdapter {
 

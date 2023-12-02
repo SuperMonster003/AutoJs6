@@ -21,6 +21,14 @@ public interface ExplorerItem {
 
     boolean canRename();
 
+    default boolean canBuildApk() {
+        return true;
+    }
+
+    default boolean canSetAsWorkingDir() {
+        return true;
+    }
+
     @NonNull
     FileUtils.TYPE getType();
 

@@ -4,7 +4,7 @@ import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.tool.Consumer
 
 /**
- * Created by Stardust on 2017/3/9.
+ * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of Jul 1, 2022.
  */
 class UiObjectCollection private constructor(val nodes: List<UiObject?>) : UiObjectActions {

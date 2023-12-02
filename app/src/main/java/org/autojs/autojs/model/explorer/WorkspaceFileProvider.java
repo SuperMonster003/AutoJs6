@@ -45,7 +45,7 @@ public class WorkspaceFileProvider extends ExplorerFileProvider {
                             p.addChild(new ExplorerProjectPage(file, parent, projectConfig));
                             return;
                         }
-                        if (inSampleDir(file)) {
+                        if (isInSampleDir(file)) {
                             p.addChild(new ExplorerSamplePage(file, p));
                         } else {
                             p.addChild(new ExplorerDirPage(file, p));
@@ -61,13 +61,17 @@ public class WorkspaceFileProvider extends ExplorerFileProvider {
                 .subscribeOn(Schedulers.io());
     }
 
-    private boolean inSampleDir(PFile file) {
+    public boolean isInSampleDir(PFile file) {
         return file.getPath().startsWith(mSampleDir.getPath());
+    }
+
+    public boolean isCurrentSampleDir(PFile file) {
+        return file.getPath().equals(mSampleDir.getPath());
     }
 
     @Override
     protected Observable<PFile> listFiles(PFile directory) {
-        if (inSampleDir(directory)) {
+        if (isInSampleDir(directory)) {
             return listSamples(directory);
         }
         return super.listFiles(directory);
@@ -89,7 +93,7 @@ public class WorkspaceFileProvider extends ExplorerFileProvider {
                         return file;
                     }
                     try {
-                        InputStream stream = mAssetManager.open(pathOfAsset + "/" + child);
+                        InputStream stream = mAssetManager.open(pathOfAsset + File.separator + child);
                         PFiles.copyStream(stream, file.getPath());
                     } catch (FileNotFoundException e) {
                         file.mkdirs();

@@ -79,7 +79,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by Stardust on 2017/1/27.
+ * Created by Stardust on Jan 27, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2021.
  */
 @SuppressWarnings("unused")

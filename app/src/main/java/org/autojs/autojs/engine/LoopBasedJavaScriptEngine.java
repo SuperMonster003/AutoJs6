@@ -4,22 +4,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import org.autojs.autojs.core.looper.LooperHelper;
+import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.ScriptSource;
+import org.autojs.autojs6.BuildConfig;
 import org.mozilla.javascript.ContinuationPending;
 
 /**
- * Created by Stardust on 2017/7/28.
+ * Created by Stardust on Jul 28, 2017.
  */
 public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
 
-    public interface ExecuteCallback {
-        void onResult(Object r);
-
-        void onException(Exception e);
-    }
+    private final String TAG = LoopBasedJavaScriptEngine.class.getSimpleName();
 
     private Handler mHandler;
     private boolean mLooping = false;
@@ -28,31 +27,40 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
         super(context);
     }
 
+    public interface ExecuteCallback {
+        void onResult(Object r);
+
+        void onException(Throwable e);
+    }
+
     @Override
     public Object execute(final JavaScriptSource source) {
         execute(source, null);
         return null;
     }
 
-
     public void execute(final ScriptSource source, final ExecuteCallback callback) {
         Runnable r = () -> {
             try {
                 Object o = LoopBasedJavaScriptEngine.super.execute((JavaScriptSource) source);
-                if (callback != null)
+                if (callback != null) {
                     callback.onResult(o);
+                }
             } catch (ContinuationPending ignored) {
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                if (e.getMessage() != null) {
+                    Log.e(TAG, e.getMessage());
+                }
                 if (callback == null) {
                     throw e;
                 } else {
                     callback.onException(e);
                 }
             }
-
-
         };
+
         mHandler.post(r);
+
         if (!mLooping && Looper.myLooper() != Looper.getMainLooper()) {
             mLooping = true;
             while (true) {
@@ -62,6 +70,9 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
                     continue;
                 } catch (Throwable t) {
                     mLooping = false;
+                    if (BuildConfig.isInrt && t.getMessage() != null) {
+                        ScriptRuntime.popException(t.getMessage());
+                    }
                     throw t;
                 }
                 break;
@@ -100,6 +111,5 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
         mHandler = new Handler();
         super.init();
     }
-
 
 }

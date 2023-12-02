@@ -3,7 +3,7 @@ package org.autojs.autojs.network.download;
 import androidx.annotation.NonNull;
 
 /**
- * Created by Stardust on 2017/10/20.
+ * Created by Stardust on Oct 20, 2017.
  */
 public class DownloadFailedException extends Throwable {
     private final String mUrl;

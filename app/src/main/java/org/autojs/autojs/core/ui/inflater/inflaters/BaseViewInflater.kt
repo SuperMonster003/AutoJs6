@@ -7,7 +7,7 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 
 /**
- * Created by Stardust on 2017/11/3.
+ * Created by Stardust on Nov 3, 2017.
  * Modified by SuperMonster003 as of Dec 5, 2021.
  * Transformed by SuperMonster003 on Apr 12, 2023.
  */

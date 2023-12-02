@@ -4,18 +4,16 @@ import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiObject
 import java.util.*
 
-class Selector : Filter {
+open class Selector : Filter {
 
-    private val mFilters = LinkedList<Filter>()
+    val filters = LinkedList<Filter>()
 
-    override fun filter(node: UiObject) = mFilters.all { it.filter(node) }
+    override fun filter(node: UiObject) = filters.all { it.filter(node) }
 
-    private fun getFilter() = mFilters
+    fun add(filter: Filter) = filters.add(filter)
 
-    fun add(filter: Filter) = mFilters.add(filter)
+    fun append(uiSelector: UiSelector) = filters.addAll(uiSelector.selector.filters)
 
-    fun append(uiSelector: UiSelector) = mFilters.addAll(uiSelector.selector.getFilter())
-
-    override fun toString() = mFilters.joinToString(".").ifEmpty { Selector::class.java.toString() }
+    override fun toString() = filters.joinToString(".").ifEmpty { Selector::class.java.toString() }
 
 }

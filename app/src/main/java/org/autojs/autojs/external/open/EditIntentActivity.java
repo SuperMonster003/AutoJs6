@@ -18,7 +18,7 @@ import org.autojs.autojs6.R;
 import java.io.File;
 
 /**
- * Created by Stardust on 2017/2/2.
+ * Created by Stardust on Feb 2, 2017.
  */
 public class EditIntentActivity extends BaseActivity {
 

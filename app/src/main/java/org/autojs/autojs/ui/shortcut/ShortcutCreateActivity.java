@@ -36,7 +36,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * Created by Stardust on 2017/10/25.
+ * Created by Stardust on Oct 25, 2017.
  */
 public class ShortcutCreateActivity extends AppCompatActivity {
 

@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 
 /**
- * Created by Stardust on 2017/11/29.
+ * Created by Stardust on Nov 29, 2017.
  * Transformed by SuperMonster003 on Jun 8, 2023.
  */
 interface ViewCreator<V : View> {

@@ -7,6 +7,7 @@ import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow;
 
 public class LayoutHierarchyTile extends LayoutInspectTileService {
+
     @Override
     protected FullScreenFloatyWindow onCreateWindow(NodeInfo capture, Context context) {
         return new LayoutHierarchyFloatyWindow(capture, context, true) {

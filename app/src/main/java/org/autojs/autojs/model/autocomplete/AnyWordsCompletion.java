@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Stardust on 2018/2/26.
+ * Created by Stardust on Feb 26, 2018.
  */
 public class AnyWordsCompletion extends SimpleTextWatcher {
 
