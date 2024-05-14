@@ -4,7 +4,6 @@ import android.app.Activity;
 
 import org.autojs.autojs.AbstractAutoJs;
 import org.autojs.autojs.app.OnActivityResultDelegate;
-import org.autojs.autojs.util.ForegroundServiceUtils;
 
 public class ScreenCaptureRequesterImpl extends ScreenCaptureRequester.AbstractScreenCaptureRequester {
 
@@ -25,8 +24,6 @@ public class ScreenCaptureRequesterImpl extends ScreenCaptureRequester.AbstractS
 
     @Override
     public void request() {
-        ForegroundServiceUtils.requestIfNeeded(mAutoJs.getApplicationContext(), ScreenCapturerForegroundService.class);
-
         Activity activity = mAutoJs.getAppUtils().getCurrentActivity();
 
         if (activity instanceof OnActivityResultDelegate.DelegateHost) {

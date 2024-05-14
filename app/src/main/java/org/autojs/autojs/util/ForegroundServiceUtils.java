@@ -6,10 +6,12 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
+import android.content.ServiceConnection;
 import android.os.Build;
+import android.os.IBinder;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +35,23 @@ public class ForegroundServiceUtils {
     public static void request(Context context, Class<?> className) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startService(context, className);
+        }
+    }
+
+    public static void requestReadyIfNeeded(Context context, Class<?> className, Runnable runnable) {
+        if (isRunning(context, className)) {
+            runnable.run();
+        } else {
+            context.bindService(getService(context, className), new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    runnable.run();
+                }
+
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                }
+            }, Context.BIND_AUTO_CREATE);
         }
     }
 
