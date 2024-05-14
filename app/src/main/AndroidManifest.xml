@@ -132,7 +132,7 @@
             android:hardwareAccelerated="true"
             android:icon="${icon}"
             android:label="${appName}"
-            android:largeHeap="false"
+            android:largeHeap="true"
             android:requestLegacyExternalStorage="true"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
