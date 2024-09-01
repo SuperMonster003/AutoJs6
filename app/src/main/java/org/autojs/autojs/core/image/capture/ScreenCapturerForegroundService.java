@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 
@@ -38,7 +39,7 @@ public class ScreenCapturerForegroundService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new Binder();
     }
 
     private void startForeground() {
