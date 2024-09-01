@@ -33,7 +33,7 @@ class MainActivityForegroundService : Service() {
             .create()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ForegroundServiceUtils.startForeground(foregroundServiceCreator, ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED)
+            ForegroundServiceUtils.startForeground(foregroundServiceCreator, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         } else {
             ForegroundServiceUtils.startForeground(foregroundServiceCreator)
         }
