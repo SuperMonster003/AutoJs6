@@ -29,3 +29,6 @@ sync.ffs_db
 
 **/assets-app/declarations
 **/assets-app/sample/declarations
+
+# template apk
+!app/src/main/assets/template.apk
