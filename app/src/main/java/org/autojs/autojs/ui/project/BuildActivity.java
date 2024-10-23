@@ -423,7 +423,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private ApkBuilder.AppConfig createAppConfig() {
         if (mProjectConfig != null) {
-            return ApkBuilder.AppConfig.fromProjectConfig(mSource, mProjectConfig);
+            return ApkBuilder.AppConfig.fromProjectConfig(mSource, mProjectConfig)
+                    .setAbis(getSelectedAbis())
+                    .setLibs(getSelectedLibs());
         }
         String jsPath = mSourcePath.getText().toString();
         String versionName = mVersionName.getText().toString();
@@ -431,6 +433,18 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         String appName = mAppName.getText().toString();
         String packageName = mPackageName.getText().toString();
 
+        return new ApkBuilder.AppConfig()
+                .setAppName(appName)
+                .setSourcePath(jsPath)
+                .setPackageName(packageName)
+                .setVersionName(versionName)
+                .setVersionCode(versionCode)
+                .setAbis(getSelectedAbis())
+                .setLibs(getSelectedLibs())
+                .setIcon(mIsDefaultIcon ? null : () -> BitmapUtils.drawableToBitmap(mIcon.getDrawable()));
+    }
+
+    private ArrayList<String> getSelectedAbis() {
         ArrayList<String> abis = new ArrayList<>();
 
         for (int i = 0; i < mFlexboxAbis.getChildCount(); i += 1) {
@@ -445,6 +459,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             }
         }
 
+        return abis;
+    }
+
+    private ArrayList<String> getSelectedLibs() {
         ArrayList<String> libs = new ArrayList<>();
 
         for (int i = 0; i < mFlexboxLibs.getChildCount(); i += 1) {
@@ -459,15 +477,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             }
         }
 
-        return new ApkBuilder.AppConfig()
-                .setAppName(appName)
-                .setSourcePath(jsPath)
-                .setPackageName(packageName)
-                .setVersionName(versionName)
-                .setVersionCode(versionCode)
-                .setAbis(abis)
-                .setLibs(libs)
-                .setIcon(mIsDefaultIcon ? null : () -> BitmapUtils.drawableToBitmap(mIcon.getDrawable()));
+        return libs;
     }
 
     private ApkBuilder callApkBuilder(File tmpDir, File outApk, ApkBuilder.AppConfig appConfig) throws Exception {
