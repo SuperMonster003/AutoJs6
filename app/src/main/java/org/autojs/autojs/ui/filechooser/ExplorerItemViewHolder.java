@@ -34,8 +34,8 @@ class ExplorerItemViewHolder extends BindableViewHolder<Object> {
         if (!(item instanceof ExplorerItem explorerItem)) return;
         mExplorerItem = explorerItem;
         listFileBinding.name.setText(ExplorerViewHelper.getDisplayName(fileChooseListView.getContext(), explorerItem));
-        listFileBinding.item.setOnClickListener(_ -> listFileBinding.checkbox.toggle());
-        listFileBinding.checkbox.setOnCheckedChangeListener((_, _) -> {
+        listFileBinding.item.setOnClickListener(view -> listFileBinding.checkbox.toggle());
+        listFileBinding.checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (listFileBinding.checkbox.isChecked()) {
                 fileChooseListView.check(mExplorerItem.toScriptFile(), getAdapterPosition());
             } else {

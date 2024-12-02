@@ -43,7 +43,7 @@ public class ScriptWidgetSettingsActivity extends BaseActivity {
         ExplorerView explorerView = binding.scriptList;
         String workingDirPath = WorkingDirectoryUtils.getPath();
         explorerView.setExplorer(mExplorer, ExplorerDirPage.createRoot(workingDirPath));
-        explorerView.setOnItemClickListener((_, file) -> {
+        explorerView.setOnItemClickListener((view, file) -> {
             mSelectedScriptFilePath = file.getPath();
             finish();
         });

@@ -239,7 +239,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
                     .setFillTransparent();
             itemBinding.name.setText(task.getName());
             itemBinding.taskListFilePath.setText(task.getDesc());
-            itemBinding.stop.setOnClickListener(_ -> {
+            itemBinding.stop.setOnClickListener(view -> {
                 if (mTask != null) {
                     mTask.cancel();
                 }
@@ -267,7 +267,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
             super(itemView);
             title = itemView.findViewById(R.id.title);
             icon = itemView.findViewById(R.id.icon);
-            itemView.setOnClickListener(_ -> {
+            itemView.setOnClickListener(view -> {
                 if (isExpanded()) {
                     collapseView();
                 } else {
