@@ -108,7 +108,11 @@ class Utils {
         }
 
         LibDeployer setDestDir(String destDir) {
-            def destFile = project.file(destDir)
+            def destFile = destDir.matches("[/\\\\].+") ? project.file(destDir.substring(1)) : project.file(destDir)
+            println(destDir.matches("[/\\\\].+"))
+            println(project.file(destDir))
+            println(project.file(destDir.substring(1)))
+            println(destFile.absolutePath)
             destFile.mkdirs()
             this.destDir = destDir
             this.destFile = destFile
@@ -150,7 +154,6 @@ class Utils {
 
         void clean() {
             project.delete skipFile
-            println(skipFile)
             project.delete tempOutFile
             deleteDestAccordingToSrc()
             deleteCacheAccordingToMd5()
