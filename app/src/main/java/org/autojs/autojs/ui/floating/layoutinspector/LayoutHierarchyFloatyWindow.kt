@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.floating.layoutinspector
 import android.content.Context
 import android.view.KeyEvent
 import android.view.View
+import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.ui.floating.LayoutFloatyWindow
@@ -13,21 +14,29 @@ import org.autojs.autojs6.R
  * Created by Stardust on Mar 12, 2017.
  * Modified by SuperMonster003 as of Aug 31, 2022.
  */
-open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(private val rootNode: NodeInfo?, private val context: Context, isServiceRelied: Boolean = false) : LayoutFloatyWindow(rootNode, context, isServiceRelied) {
+open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
+    private val capture: Capture,
+    private val context: Context,
+    isServiceRelied: Boolean = false,
+) : LayoutFloatyWindow(capture, context, isServiceRelied) {
 
     private lateinit var mLayoutHierarchyView: LayoutHierarchyView
 
+    override val popMenuActions = linkedMapOf(
+        R.string.text_show_widget_information to ::showNodeInfo,
+        R.string.text_show_layout_bounds to ::showLayoutBounds,
+        R.string.text_generate_code to ::generateCode,
+        R.string.text_switch_window to ::switchWindow,
+        R.string.text_exit to ::close,
+    )
+
     override fun onCreateView(floatyService: FloatyService): View {
-        onCreate(floatyService, LinkedHashMap<Int, Runnable>().apply {
-            put(R.string.text_show_widget_information, Runnable { showNodeInfo() })
-            put(R.string.text_show_layout_bounds, Runnable { showLayoutBounds() })
-            put(R.string.text_generate_code, Runnable { generateCode() })
-            put(R.string.text_exit, Runnable { close() })
-        })
+        onCreate(floatyService)
 
         return object : LayoutHierarchyView(context) {
             override fun dispatchKeyEvent(e: KeyEvent) = when {
                 EventUtils.isKeyBackAndActionUp(e) -> true.also { close() }
+                EventUtils.isKeyVolumeDownAndActionDown(e) -> true.also { close() }
                 else -> super.dispatchKeyEvent(e)
             }
         }.also { mLayoutHierarchyView = it }
@@ -52,7 +61,7 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(private val roo
                     menu.showAsDropDownAtLocation(view, view.height, x, y)
                 }
             }
-            setRootNode(rootNode)
+            setRootNode(capture.root)
             getLayoutSelectedNode()?.let { setSelectedNode(it) }
         }
     }

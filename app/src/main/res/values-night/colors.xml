@@ -4,6 +4,8 @@
     <color name="day_night">#DEBFBFBF</color>
     <color name="day_night_full">#BFBFBF</color>
     <color name="day_night_alpha_70">#B3BFBFBF</color>
+    <color name="day_night_alpha_30">#4DBFBFBF</color>
+    <color name="day_night_alpha_20">#33BFBFBF</color>
     <color name="night_day">#DE252525</color>
     <color name="night_day_full">#252525</color>
     <color name="window_background">#212121</color>

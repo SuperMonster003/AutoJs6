@@ -43,41 +43,45 @@ public abstract class Database<M extends BaseModel> {
     }
 
     public Observable<Integer> delete(M model) {
-        return exec(() -> {
-            int delete = mWritableSQLiteDatabase.delete(mTable, "id = ?",
-                    new String[]{String.valueOf(model.getId())});
-            if (delete >= 1) {
-                mModelChange.onNext(new ModelChange<>(model, ModelChange.DELETE));
-            }
-            return delete;
-        });
+        return exec(() -> deleteSync(model));
+    }
+
+    public int deleteSync(M model) {
+        int delete = mWritableSQLiteDatabase.delete(mTable, "id = ?",
+                new String[]{String.valueOf(model.getId())});
+        if (delete >= 1) {
+            mModelChange.onNext(new ModelChange<>(model, ModelChange.DELETE));
+        }
+        return delete;
     }
 
     public Observable<Integer> update(M model) {
-        return exec(() -> {
-            ContentValues values = asContentValues(model);
-            values.put("id", model.getId());
-            int update = mWritableSQLiteDatabase.update(mTable, values, "id = ?", arg(model.getId()));
-            if (update >= 1) {
-                mModelChange.onNext(new ModelChange<>(model, ModelChange.UPDATE));
-            }
-            return update;
-        });
+        return exec(() -> updateSync(model));
     }
 
+    public int updateSync(M model) {
+        ContentValues values = asContentValues(model);
+        values.put("id", model.getId());
+        int update = mWritableSQLiteDatabase.update(mTable, values, "id = ?", arg(model.getId()));
+        if (update >= 1) {
+            mModelChange.onNext(new ModelChange<>(model, ModelChange.UPDATE));
+        }
+        return update;
+    }
 
     public Observable<Long> insert(M model) {
-        return exec(() -> {
-            ContentValues values = asContentValues(model);
-            long id = mWritableSQLiteDatabase.insertOrThrow(mTable, null, values);
-            if (id >= 0) {
-                model.setId(id);
-                mModelChange.onNext(new ModelChange<>(model, ModelChange.INSERT));
-            }
-            return id;
-        });
+        return exec(() -> insertSync(model));
     }
 
+    public long insertSync(M model) {
+        ContentValues values = asContentValues(model);
+        long id = mWritableSQLiteDatabase.insertOrThrow(mTable, null, values);
+        if (id >= 0) {
+            model.setId(id);
+            mModelChange.onNext(new ModelChange<>(model, ModelChange.INSERT));
+        }
+        return id;
+    }
 
     protected abstract M createModelFromCursor(Cursor cursor);
 
@@ -92,7 +96,6 @@ public abstract class Database<M extends BaseModel> {
         cursor.close();
         return model;
     }
-
 
     public Flowable<M> queryAllAsFlowable() {
         return execFlowable(() ->
@@ -121,7 +124,6 @@ public abstract class Database<M extends BaseModel> {
         return 0;
     }
 
-
     public Flowable<M> query(String sql, Object... args) {
         String[] strArgs = args(args);
         return execFlowable(() ->
@@ -145,7 +147,6 @@ public abstract class Database<M extends BaseModel> {
     private String[] arg(Object value) {
         return new String[]{String.valueOf(value)};
     }
-
 
     private static class CursorIterator implements Iterator<Cursor> {
 

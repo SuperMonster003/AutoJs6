@@ -2,13 +2,10 @@ package org.autojs.autojs.core.inputevent;
 
 import androidx.annotation.NonNull;
 
-import static org.autojs.autojs.core.record.inputevent.InputEventRecorder.parseDeviceNumber;
-
 /**
  * Created by Stardust on Jul 20, 2017.
  */
 public class TouchObserver implements InputEventObserver.InputEventListener {
-
 
     public interface OnTouchEventListener {
         void onTouch(int x, int y);
@@ -43,21 +40,20 @@ public class TouchObserver implements InputEventObserver.InputEventListener {
         }
     }
 
-
     @Override
     public void onInputEvent(@NonNull InputEventObserver.InputEvent event) {
-        int device = parseDeviceNumber(event.device);
+        // int device = InputEventRecorder.parseDeviceNumber(event.device);
         int type = (int) Long.parseLong(event.type, 16);
         int code = (int) Long.parseLong(event.code, 16);
         int value = (int) Long.parseLong(event.value, 16);
-        if (type != 3) {
+        if (type != InputEventCodes.EV_ABS) {
             return;
         }
-        if (code == 53) {
+        if (code == InputEventCodes.ABS_MT_POSITION_X) {
             onTouchX(value);
             return;
         }
-        if (code == 54) {
+        if (code == InputEventCodes.ABS_MT_POSITION_Y) {
             onTouchY(value);
             return;
         }
@@ -79,9 +75,9 @@ public class TouchObserver implements InputEventObserver.InputEventListener {
     private void onTouchY(int value) {
         if (mLastTouchX > 0) {
             onTouch(mLastTouchX, value);
-            return;
+        } else {
+            mLastTouchY = value;
         }
-        mLastTouchY = value;
     }
 
 }

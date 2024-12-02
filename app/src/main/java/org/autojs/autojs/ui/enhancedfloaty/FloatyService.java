@@ -7,7 +7,6 @@ import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 
-import org.jetbrains.annotations.NotNull;
 import org.opencv.core.Size;
 
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -19,7 +18,7 @@ public class FloatyService extends Service {
 
     private static final CopyOnWriteArraySet<FloatyWindow> windows = new CopyOnWriteArraySet<>();
 
-    private static FloatyService instance;
+    public static FloatyService instance;
 
     private WindowManager windowManager;
 
@@ -64,8 +63,10 @@ public class FloatyService extends Service {
         }
     }
 
-    public static void addInitialMeasure(@NotNull Size size) {
-        instance.initialSize = size;
+    public static void setInitialMeasure(@Nullable Size size) {
+        if (instance != null) {
+            instance.initialSize = size;
+        }
     }
 
 }

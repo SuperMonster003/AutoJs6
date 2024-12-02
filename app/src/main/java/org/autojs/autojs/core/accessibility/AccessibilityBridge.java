@@ -3,10 +3,8 @@ package org.autojs.autojs.core.accessibility;
 import android.content.Context;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.core.activity.ActivityInfoProvider;
 import org.autojs.autojs.permission.UsageStatsPermission;

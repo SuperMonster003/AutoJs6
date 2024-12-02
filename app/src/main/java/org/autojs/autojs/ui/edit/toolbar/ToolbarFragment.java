@@ -15,7 +15,6 @@ import java.util.List;
 
 public abstract class ToolbarFragment extends Fragment implements View.OnClickListener, View.OnLongClickListener {
 
-
     public interface OnMenuItemClickListener {
         void onToolbarMenuItemClick(int id);
     }
@@ -54,7 +53,6 @@ public abstract class ToolbarFragment extends Fragment implements View.OnClickLi
         return (EditorView) view;
     }
 
-
     private void updateMenuItemStatus(View rootView) {
         if (rootView == null) {
             return;
@@ -71,14 +69,12 @@ public abstract class ToolbarFragment extends Fragment implements View.OnClickLi
         }
     }
 
-
     @Override
     public void onClick(View view) {
         if (mOnMenuItemClickListener != null) {
             mOnMenuItemClickListener.onToolbarMenuItemClick(view.getId());
         }
     }
-
 
     @Override
     public boolean onLongClick(View v) {

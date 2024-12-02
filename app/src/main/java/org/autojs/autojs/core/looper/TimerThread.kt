@@ -1,55 +1,126 @@
 package org.autojs.autojs.core.looper
 
+import android.os.Handler
 import android.os.Looper
 import androidx.annotation.CallSuper
+import org.autojs.autojs.AutoJs
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.Console
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
-import java.util.concurrent.ConcurrentHashMap
+import java.lang.ref.WeakReference
+import java.util.*
 
 /**
  * Created by Stardust on Dec 27, 2017.
  */
-open class TimerThread(private val mRuntime: ScriptRuntime, private val mTarget: Runnable) : ThreadCompat(mTarget) {
+open class TimerThread(
+    scriptRuntime: ScriptRuntime,
+    private val target: Runnable,
+) : ThreadCompat(target), ILooperThread {
 
-    private var mTimer: Timer? = null
     private var mRunning = false
     private val mRunningLock = Object()
-    private val mAsyncTask = Loopers.AsyncTask("TimerThread")
+    private var mWeakRuntime = WeakReference(scriptRuntime)
+
+    @Volatile
+    private var mTimer: Timer? = null
+
+    @Volatile
+    private var mLooper: Looper? = null
+
+    override val looper: Looper? = mLooper
 
     var loopers: Loopers? = null
 
-    init {
-        mRuntime.loopers.addAsyncTask(mAsyncTask)
-    }
+    val timer: Timer
+        get() {
+            checkNotNull(mTimer) { "thread is not alive" }
+            return mTimer as Timer
+        }
 
     override fun run() {
-        loopers = Loopers(mRuntime)
-        mTimer = loopers!!.timer
-        sTimerMap[currentThread()] = mTimer!!
-        (mRuntime.engines.myEngine() as RhinoJavaScriptEngine).enterContext()
+        val scriptRuntime = mWeakRuntime.get() ?: return
+        scriptRuntime.loopers.prepare()
+        var timer: Timer
+        mTimer = scriptRuntime.timers.newTimer(scriptRuntime).also { timer = it }
+        sTimerMap[currentThread()] = WeakReference<Timer>(timer)
+        (scriptRuntime.engines.myEngine() as? RhinoJavaScriptEngine)?.enterContext()
         notifyRunning()
-        mTimer!!.post(mTarget)
+        Looper.myLooper().also { setLooper(it) }
+            ?.let { Handler(it).post(target) }
         try {
             Looper.loop()
-        } catch (e: Throwable) {
-            if (!ScriptInterruptedException.causedByInterrupted(e)) {
-                mRuntime.console.error(currentThread().toString() + ": ", e)
-            }
-        } finally {
-            // mRuntime.console.log("TimerThread exit");
             onExit()
             mTimer = null
-            Context.exit()
-            sTimerMap.remove(currentThread(), mTimer)
+        } catch (throwable: Throwable) {
+            try {
+                if (ScriptInterruptedException.causedByInterrupt(throwable)) {
+                    return
+                }
+                var console: Console? = null
+                val runtime = mWeakRuntime.get()
+                if (runtime != null) {
+                    console = runtime.console
+                }
+                if (console == null) {
+                    console = AutoJs.instance.globalConsole
+                }
+                console.error("${Thread.currentThread()}: $throwable")
+            } finally {
+                onExit()
+                mTimer = null
+                Context.exit()
+                sTimerMap.remove(currentThread())
+            }
+        }
+        runCatching { Context.exit() }
+            sTimerMap.remove(currentThread())
+        }
+
+    override fun interrupt() {
+        LooperHelper.quit(LooperThread.getLooperOrNull(this))
+        super.interrupt()
+    }
+
+    override fun toString() = "Thread[$name,$priority]"
+
+    @CallSuper
+    protected open fun onExit() {
+        val loopers = mWeakRuntime.get()?.loopers ?: return
+        loopers.notifyThreadExit(this)
+    }
+
+    @Throws(InterruptedException::class)
+    fun waitFor() {
+        synchronized(mRunningLock) {
+            if (!mRunning) {
+                mRunningLock.wait()
+            }
         }
     }
 
-    override fun interrupt() {
-        LooperHelper.quitForThread(this)
-        super.interrupt()
+    fun setTimeout(callback: BaseFunction): Double = setTimeout(callback, 1)
+
+    fun setTimeout(callback: BaseFunction, delay: Long, vararg args: Any): Double = timer.setTimeout(callback, delay, args.copyOf())
+
+    fun clearTimeout(id: Double) = timer.clearTimeout(id)
+
+    fun setInterval(callback: BaseFunction) = setInterval(callback, 1L)
+
+    fun setInterval(callback: BaseFunction, interval: Long, vararg args: Any) = timer.setInterval(callback, interval, args.copyOf())
+
+    fun clearInterval(id: Double) = timer.clearInterval(id)
+
+    fun setImmediate(callback: BaseFunction, vararg args: Any) = timer.setImmediate(callback, args.copyOf())
+
+    fun clearImmediate(id: Double) = timer.clearImmediate(id)
+
+    private fun setLooper(looper: Looper?) {
+        mLooper = looper
     }
 
     private fun notifyRunning() {
@@ -59,71 +130,12 @@ open class TimerThread(private val mRuntime: ScriptRuntime, private val mTarget:
         }
     }
 
-    @CallSuper
-    protected open fun onExit() {
-        mRuntime.loopers.removeAsyncTask(mAsyncTask)
-        mRuntime.loopers.notifyThreadExit(this)
-    }
-
-    fun setTimeout(callback: Any, delay: Long, vararg args: Any): Int {
-        return timer.setTimeout(callback, delay, *args)
-    }
-
-    fun setTimeout(callback: Any): Int {
-        return setTimeout(callback, 1)
-    }
-
-    val timer: Timer
-        get() {
-            checkNotNull(mTimer) { "thread is not alive" }
-            return mTimer as Timer
-        }
-
-    fun clearTimeout(id: Int): Boolean {
-        return timer.clearTimeout(id)
-    }
-
-    fun setInterval(listener: Any?, interval: Long, vararg args: Any): Int {
-        return timer.setInterval(listener!!, interval, *args)
-    }
-
-    fun setInterval(listener: Any?): Int {
-        return setInterval(listener, 1)
-    }
-
-    fun clearInterval(id: Int): Boolean {
-        return timer.clearInterval(id)
-    }
-
-    fun setImmediate(listener: Any, vararg args: Any): Int {
-        return timer.setImmediate(listener, *args)
-    }
-
-    fun clearImmediate(id: Int): Boolean {
-        return timer.clearImmediate(id)
-    }
-
-    @Throws(InterruptedException::class)
-    fun waitFor() {
-        synchronized(mRunningLock) {
-            if (mRunning) return
-            mRunningLock.wait()
-        }
-    }
-
-    override fun toString(): String {
-        return "Thread[$name,$priority]"
-    }
-
     companion object {
-        private val sTimerMap = ConcurrentHashMap<Thread, Timer?>()
+        private val sTimerMap = WeakHashMap<Thread, WeakReference<Timer>>()
 
         @JvmStatic
-        fun getTimerForThread(thread: Thread): Timer? {
-            return sTimerMap[thread]
-        }
+        fun getTimerForThread(thread: Thread) = sTimerMap[thread]?.get()
 
-        val timerForCurrentThread: Timer?
-            get() = getTimerForThread(currentThread())
     }
+
 }

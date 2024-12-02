@@ -6,6 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.core.content.FileProvider
+import org.autojs.autojs.external.fileprovider.AppFileProvider
+import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs6.R
 import java.io.File
 
@@ -38,14 +40,12 @@ object IntentUtils {
     @JvmOverloads
     fun sendMailTo(context: Context, sendTo: String, title: String? = null, content: String? = null) = try {
         true.also {
-            Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$sendTo"))
-                .apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    putExtra(Intent.EXTRA_CC, /* email */ arrayOf(sendTo))
-                    title?.let { putExtra(Intent.EXTRA_SUBJECT, it) }
-                    content?.let { putExtra(Intent.EXTRA_TEXT, it) }
-                }
-                .let { context.startActivity(Intent.createChooser(it, "")) }
+            Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$sendTo")).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra(Intent.EXTRA_CC, /* email */ arrayOf(sendTo))
+                title?.let { putExtra(Intent.EXTRA_SUBJECT, it) }
+                content?.let { putExtra(Intent.EXTRA_TEXT, it) }
+            }.let { context.startActivity(Intent.createChooser(it, "")) }
         }
     } catch (e: ActivityNotFoundException) {
         false.also { e.printStackTrace() }
@@ -81,55 +81,54 @@ object IntentUtils {
     @JvmOverloads
     fun goToAppDetailSettings(context: Context, packageName: String = context.packageName) = try {
         true.also {
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                .apply {
-                    addCategory(Intent.CATEGORY_DEFAULT)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    data = Uri.parse("package:$packageName")
-                }
-                .let { context.startActivity(it) }
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                addCategory(Intent.CATEGORY_DEFAULT)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                data = Uri.parse("package:$packageName")
+            }.let { context.startActivity(it) }
         }
     } catch (ignored: ActivityNotFoundException) {
         false
     }
 
-    @Throws(ActivityNotFoundException::class)
-    fun installApk(context: Context, path: String?, fileProviderAuthority: String?) {
-        Intent(Intent.ACTION_VIEW)
-            .apply {
-                setDataAndType(
-                    getUriOfFile(context, path, fileProviderAuthority),
-                    "application/vnd.android.package-archive",
-                )
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            }
-            .let { context.startActivity(it) }
-    }
-
     @JvmStatic
-    fun installApkOrToast(context: Context, path: String?, fileProviderAuthority: String?) = try {
-        installApk(context, path, fileProviderAuthority)
+    @JvmOverloads
+    fun installApk(context: Context, path: String, fileProviderAuthority: String? = AppFileProvider.AUTHORITY) = try {
+        Intent(Intent.ACTION_VIEW)
+            .setDataAndType(
+                getUriOfFile(context, path, fileProviderAuthority),
+                Mime.APPLICATION_VND_ANDROID_PACKAGE_ARCHIVE,
+            )
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            .let { context.startActivity(it) }
+        true
     } catch (e: ActivityNotFoundException) {
         e.printStackTrace()
         ViewUtils.showToast(context, R.string.text_activity_not_found_for_apk_installing)
+        false
     }
+
 
     @JvmStatic
-    fun viewFile(context: Context, path: String?, fileProviderAuthority: String?): Boolean {
-        return viewFile(context, path, MimeTypesUtils.fromFileOr(path, "*/*"), fileProviderAuthority)
-    }
-
-    fun getUriOfFile(context: Context, path: String?, fileProviderAuthority: String?): Uri {
+    @JvmOverloads
+    fun getUriOfFile(context: Context, path: String?, fileProviderAuthority: String? = AppFileProvider.AUTHORITY): Uri {
         return fileProviderAuthority?.let {
             FileProvider.getUriForFile(context, it, File(path ?: ""))
         } ?: Uri.parse("file://$path")
     }
 
-    fun viewFile(context: Context, uri: Uri, mimeType: String?, fileProviderAuthority: String?): Boolean {
+    @JvmStatic
+    fun viewFile(context: Context, path: String, fileProviderAuthority: String? = AppFileProvider.AUTHORITY): Boolean {
+        return viewFile(context, path, Mime.fromFileOr(path, Mime.WILDCARD), fileProviderAuthority)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun viewFile(context: Context, uri: Uri, mimeType: String?, fileProviderAuthority: String? = AppFileProvider.AUTHORITY): Boolean {
         if (uri.scheme == "file") {
-            return viewFile(context, uri.path, mimeType, fileProviderAuthority)
+            return uri.path?.let { viewFile(context, it, mimeType, fileProviderAuthority) } ?: false
         }
         return try {
             true.also {
@@ -145,7 +144,8 @@ object IntentUtils {
         }
     }
 
-    fun viewFile(context: Context, path: String?, mimeType: String?, fileProviderAuthority: String?) = try {
+    @JvmStatic
+    fun viewFile(context: Context, path: String, mimeType: String?, fileProviderAuthority: String? = AppFileProvider.AUTHORITY) = try {
         true.also {
             Intent(Intent.ACTION_VIEW)
                 .setDataAndType(getUriOfFile(context, path, fileProviderAuthority), mimeType)
@@ -158,12 +158,14 @@ object IntentUtils {
         false.also { e.printStackTrace() }
     }
 
-    fun editFile(context: Context, path: String?, fileProviderAuthority: String?) = try {
+    @JvmStatic
+    @JvmOverloads
+    fun editFile(context: Context, path: String, fileProviderAuthority: String? = AppFileProvider.AUTHORITY) = try {
         true.also {
             Intent(Intent.ACTION_EDIT)
                 .setDataAndType(
                     getUriOfFile(context, path, fileProviderAuthority),
-                    MimeTypesUtils.fromFileOr(path, "*/*"),
+                    Mime.fromFileOrWildcard(path),
                 )
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

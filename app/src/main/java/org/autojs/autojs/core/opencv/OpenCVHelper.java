@@ -34,7 +34,7 @@ public class OpenCVHelper {
         mat.release();
     }
 
-    public static void release(@Nullable Mat mat) {
+    public static void release(@Nullable org.opencv.core.Mat mat) {
         if (mat == null)
             return;
         mat.release();

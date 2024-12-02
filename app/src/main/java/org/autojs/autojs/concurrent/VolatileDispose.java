@@ -1,5 +1,7 @@
 package org.autojs.autojs.concurrent;
 
+import androidx.annotation.Nullable;
+
 /**
  * Created by Stardust on Oct 28, 2017.
  */
@@ -7,12 +9,22 @@ public class VolatileDispose<T> {
 
     private volatile T mValue;
 
+    @Nullable
     public T blockedGet() {
         synchronized (this) {
-            return blockedGet(0);
+            if (mValue != null) {
+                return mValue;
+            }
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
+        return mValue;
     }
 
+    @Nullable
     public T blockedGet(long timeout) {
         synchronized (this) {
             if (mValue != null) {

@@ -5,8 +5,9 @@ import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsViewPager
+import org.autojs.autojs.runtime.ScriptRuntime
 
-class JsViewPagerInflater(resourceParser: ResourceParser) : ViewPagerInflater<JsViewPager>(resourceParser) {
+class JsViewPagerInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : ViewPagerInflater<JsViewPager>(scriptRuntime, resourceParser) {
 
     override fun getCreator(): ViewCreator<in JsViewPager> = object : ViewCreator<JsViewPager> {
         override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsViewPager {

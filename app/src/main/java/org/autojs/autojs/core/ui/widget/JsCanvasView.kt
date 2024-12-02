@@ -9,11 +9,12 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.TextureView
 import android.view.View
-import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.graphics.ScriptCanvas
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.KotlinUtils.ifNull
+import org.mozilla.javascript.BaseFunction
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -24,14 +25,14 @@ import java.util.concurrent.Executors
 @SuppressLint("ViewConstructor")
 class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
 
+    private lateinit var mScriptRuntime: ScriptRuntime
+
     @Volatile
     private var mDrawing = true
-    private val mRuntime by lazy { AutoJs.instance.runtime }
-    private val mEventEmitter: EventEmitter by lazy { EventEmitter(mRuntime.bridges) }
+    private val mEventEmitter: EventEmitter by lazy { EventEmitter(mScriptRuntime.bridges) }
     private var mDrawingThreadPool: ExecutorService? = null
     @Volatile
     private var mTimePerDraw = (1000 / 30).toLong()
-
 
     val maxListeners: Int
         get() = mEventEmitter.maxListeners
@@ -43,6 +44,10 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
 
     init {
         surfaceTextureListener = this
+    }
+
+    fun initWithScriptRuntime(scriptRuntime: ScriptRuntime) {
+        mScriptRuntime = scriptRuntime
     }
 
     fun setMaxFps(maxFps: Int) {
@@ -74,7 +79,7 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
                         time = SystemClock.uptimeMillis()
                     }
                 } catch (e: Exception) {
-                    mRuntime.exit(e)
+                    mScriptRuntime.exit(e)
                     mDrawing = false
                 } finally {
                     if (canvas != null) {
@@ -104,15 +109,15 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
         super.onWindowVisibilityChanged(visibility)
     }
 
-    fun once(eventName: String, listener: Any): EventEmitter {
+    fun once(eventName: String, listener: BaseFunction): EventEmitter {
         return mEventEmitter.once(eventName, listener)
     }
 
-    fun on(eventName: String, listener: Any): EventEmitter {
+    fun on(eventName: String, listener: BaseFunction): EventEmitter {
         return mEventEmitter.on(eventName, listener)
     }
 
-    fun addListener(eventName: String, listener: Any): EventEmitter {
+    fun addListener(eventName: String, listener: BaseFunction): EventEmitter {
         return mEventEmitter.addListener(eventName, listener)
     }
 
@@ -132,11 +137,11 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
         return mEventEmitter.listeners(eventName)
     }
 
-    fun prependListener(eventName: String, listener: Any): EventEmitter {
+    fun prependListener(eventName: String, listener: BaseFunction): EventEmitter {
         return mEventEmitter.prependListener(eventName, listener)
     }
 
-    fun prependOnceListener(eventName: String, listener: Any): EventEmitter {
+    fun prependOnceListener(eventName: String, listener: BaseFunction): EventEmitter {
         return mEventEmitter.prependOnceListener(eventName, listener)
     }
 
@@ -148,7 +153,7 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
         return mEventEmitter.removeAllListeners(eventName)
     }
 
-    fun removeListener(eventName: String, listener: Any): EventEmitter {
+    fun removeListener(eventName: String, listener: BaseFunction): EventEmitter {
         return mEventEmitter.removeListener(eventName, listener)
     }
 
@@ -171,15 +176,15 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
     }
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
-
+        /* Empty body. */
     }
 
     companion object {
 
         private const val LOG_TAG = "ScriptCanvasView"
 
-        fun defaultMaxListeners(): Int {
-            return EventEmitter.defaultMaxListeners()
-        }
+        fun defaultMaxListeners(): Int = EventEmitter.defaultMaxListeners()
+
     }
+
 }

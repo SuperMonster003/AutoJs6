@@ -30,27 +30,26 @@ public class DynamicBroadcastReceivers {
     private final BaseBroadcastReceiver mPackageActionReceiver = new BaseBroadcastReceiver();
     private final Context mContext;
 
-
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     public DynamicBroadcastReceivers(Context context) {
         mContext = context;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                mContext.registerReceiver(mDefaultActionReceiver, createIntentFilter(StaticBroadcastReceiver.ACTIONS), Context.RECEIVER_NOT_EXPORTED);
+                mContext.registerReceiver(mDefaultActionReceiver, createIntentFilter(StaticBroadcastReceiver.ACTIONS), Context.RECEIVER_EXPORTED);
             } else {
                 mContext.registerReceiver(mDefaultActionReceiver, createIntentFilter(StaticBroadcastReceiver.ACTIONS));
             }
             IntentFilter filter = createIntentFilter(StaticBroadcastReceiver.PACKAGE_ACTIONS);
             filter.addDataScheme("package");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                mContext.registerReceiver(mPackageActionReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+                mContext.registerReceiver(mPackageActionReceiver, filter, Context.RECEIVER_EXPORTED);
             } else {
                 mContext.registerReceiver(mPackageActionReceiver, filter);
             }
         }
     }
 
-    public void register(IntentTask task) {
+    public void registerIntent(IntentTask task) {
         register(Collections.singletonList(task.getAction()), task.isLocal());
     }
 
@@ -140,7 +139,7 @@ public class DynamicBroadcastReceivers {
                 broadcastManager.registerReceiver(receiver, intentFilter);
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    mContext.registerReceiver(receiver, intentFilter, Context.RECEIVER_NOT_EXPORTED);
+                    mContext.registerReceiver(receiver, intentFilter, Context.RECEIVER_EXPORTED);
                 } else {
                     mContext.registerReceiver(receiver, intentFilter);
                 }

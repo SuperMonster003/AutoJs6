@@ -46,8 +46,8 @@ import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.pio.PFiles.move
 import org.autojs.autojs.pio.PFiles.read
 import org.autojs.autojs.pio.PFiles.write
-import org.autojs.autojs.pref.Pref.getEditorTextSize
-import org.autojs.autojs.pref.Pref.setEditorTextSize
+import org.autojs.autojs.core.pref.Pref.getEditorTextSize
+import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
@@ -178,7 +178,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED), Context.RECEIVER_NOT_EXPORTED)
+            context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED), Context.RECEIVER_EXPORTED)
         } else {
             context.registerReceiver(mOnRunFinishedReceiver, IntentFilter(ACTION_ON_EXECUTION_FINISHED))
         }
@@ -281,8 +281,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .setEditView(editor.codeEditText)
             .build()
 
-        // @ArchivedTodo by 抠脚本人 on Jul 10, 2023.
+        // @TodoDiary by 抠脚本人 on Jul 10, 2023.
         //  ! 不清楚作用, 暂时注释掉.
+        //  ! en-US (translated by SuperMonster003 on Jul 28, 2024):
+        //  ! Not sure of its function, commented it out temporarily.
         // @Hint by SuperMonster003 on Jul 12, 2023.
         //  ! The click event callback is registered here
         //  ! so that the properties name of the functional keyboard
@@ -567,7 +569,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     private fun showErrorMessage(msg: String) {
-        Snackbar.make(this@EditorView, context.getString(R.string.text_error) + ": " + msg, Snackbar.LENGTH_LONG)
+        Snackbar.make(this@EditorView, /* context.getString(R.string.text_error) + ": " + msg */ msg, Snackbar.LENGTH_LONG)
             .setAction(R.string.text_details) { LogActivity.launch(context) }
             .show()
     }
@@ -577,18 +579,20 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // @Overruled by SuperMonster003 on Jul 12, 2023.
         //  ! Author: 抠脚本人
-        //  ! Related PR:
-        //  ! http://pr.autojs6.com/98
+        //  ! Related PR: http://pr.autojs6.com/98
         //  ! Reason:
         //  ! In any case, only the simplest input functions should be realized
         //  ! when clicking on the keys of the function keyboard.
         //  ! zh-CN: 在任何情况下, 单击功能键盘的按键时, 均应实现且仅实现最简单的输入功能.
         //  !
-        // @ArchivedTodo by 抠脚本人 on Jul 11, 2023.
-        //  ! 增加行注释
-        // if (completion.insertText == "/") {
-        //     editor!!.commentLine()
-        // } else editor!!.insert(completion.insertText)
+        // @TodoDiary by 抠脚本人 on Jul 11, 2023.
+        //  ! 增加行注释.
+        //  ! en-US (translated by SuperMonster003 on Jul 28, 2024):
+        //  ! Add line comment.
+        //  !
+        //  # if (completion.insertText == "/") {
+        //  #     editor!!.commentLine()
+        //  # } else editor!!.insert(completion.insertText)
 
         editor.insert(completion.insertText)
     }
@@ -605,13 +609,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         //  ! multi-line comments are also commented with double slashes.
         //  ! zh-CN: 鉴于块注释与正则表达式的某些句法组合造成混淆, 多行注释也采用双斜杠注释方式.
         //  !
-        // val completion = completions[pos]
-        // @ArchivedTodo by 抠脚本人 on Jul 10, 2023.
-        //  ! 增加块注释
-        // if (completion.insertText == "/") {
-        //     editor!!.commentBlock()
-        //     return
-        // }
+        // @TodoDiary by 抠脚本人 on Jul 10, 2023.
+        //  ! 增加块注释.
+        //  ! en-US (translated by SuperMonster003 on Jul 28, 2024):
+        //  ! Add block comment.
+        //  !
+        //  # val completion = completions[pos]
+        //  # if (completion.insertText == "/") {
+        //  #     editor!!.commentBlock()
+        //  #     return
+        //  # }
 
         completions[pos].let {
             when {
@@ -680,6 +687,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     fun destroy() {
         editor.destroy()
         mAutoCompletion?.shutdown()
+        if (mDebugging) {
+            exitDebugging()
+            forceStop()
+        }
     }
 
     @SuppressLint("CheckResult")

@@ -18,7 +18,7 @@ public class ManifestEditor {
     private final InputStream mManifestInputStream;
     private int mVersionCode = -1;
     private String mVersionName;
-    private String mAppName;
+    private CharSequence mAppName;
     private String mPackageName;
     private byte[] mManifestData;
 
@@ -36,7 +36,7 @@ public class ManifestEditor {
         return this;
     }
 
-    public ManifestEditor setAppName(String appName) {
+    public ManifestEditor setAppName(CharSequence appName) {
         mAppName = appName;
         return this;
     }
@@ -59,7 +59,6 @@ public class ManifestEditor {
         is.read(bytes);
         return bytes;
     }
-
 
     public void writeTo(OutputStream manifestOutputStream) throws IOException {
         manifestOutputStream.write(mManifestData);
@@ -84,7 +83,7 @@ public class ManifestEditor {
             return;
         }
         if ("label".equals(attr.name.data) && mAppName != null && attr.value instanceof StringItem) {
-            ((StringItem) attr.value).data = mAppName;
+            ((StringItem) attr.value).data = mAppName.toString();
             return;
         }
     }

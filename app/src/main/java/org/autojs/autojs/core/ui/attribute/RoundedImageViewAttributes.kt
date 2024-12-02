@@ -8,14 +8,15 @@ import com.makeramen.roundedimageview.RoundedImageView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
-open class RoundedImageViewAttributes(resourceParser: ResourceParser, view: View) : ImageViewAttributes(resourceParser, view) {
+open class RoundedImageViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ImageViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as RoundedImageView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttrs(arrayOf("cornerRadius", "radius")) { view.cornerRadius = Dimensions.parseToPixel(it, view) }
         registerAttrs(arrayOf("cornerRadiusTopLeft", "radiusTopLeft")) { view.setCornerRadius(Dimensions.parseToPixel(it, view), view.getCornerRadius(Corner.TOP_RIGHT), view.getCornerRadius(Corner.BOTTOM_LEFT), view.getCornerRadius(Corner.BOTTOM_RIGHT)) }

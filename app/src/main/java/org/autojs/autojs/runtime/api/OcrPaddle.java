@@ -11,6 +11,7 @@ import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.concurrent.VolatileDispose;
 import org.autojs.autojs.core.image.ImageWrapper;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,16 +20,15 @@ import java.util.List;
  * @since 2023-08-06
  */
 public class OcrPaddle {
+
     private final Predictor mPredictor = new Predictor();
 
     public synchronized boolean init(boolean useSlim) {
         if (!mPredictor.isLoaded || useSlim != mPredictor.isUseSlim()) {
             if (Looper.getMainLooper() == Looper.myLooper()) {
                 VolatileDispose<Boolean> result = new VolatileDispose<>();
-                new Thread(() -> {
-                    result.setAndNotify(mPredictor.init(GlobalAppContext.get(), useSlim));
-                }).start();
-                return result.blockedGet(60_000);
+                new Thread(() -> result.setAndNotify(mPredictor.init(GlobalAppContext.get(), useSlim))).start();
+                return Boolean.TRUE.equals(result.blockedGet(60_000));
             } else {
                 return mPredictor.init(GlobalAppContext.get(), useSlim);
             }
@@ -64,23 +64,24 @@ public class OcrPaddle {
         return detect(image, 4, true);
     }
 
-    public String[] recognizeText(ImageWrapper image, int cpuThreadNum, boolean useSlim) {
+    public List<String> recognizeText(ImageWrapper image, int cpuThreadNum, boolean useSlim) {
         List<OcrResult> words_result = detect(image, cpuThreadNum, useSlim);
         Collections.sort(words_result);
-        String[] outputResult = new String[words_result.size()];
+        List<String> outputResult = Arrays.asList(new String[words_result.size()]);
         for (int i = 0; i < words_result.size(); i++) {
-            outputResult[i] = words_result.get(i).getLabel();
+            outputResult.set(i, words_result.get(i).getLabel());
             // show LOG in Logcat panel
-            Log.i("outputResult", outputResult[i]);
+            Log.i("outputResult", outputResult.get(i));
         }
         return outputResult;
     }
 
-    public String[] recognizeText(ImageWrapper image, int cpuThreadNum) {
+    public List<String> recognizeText(ImageWrapper image, int cpuThreadNum) {
         return recognizeText(image, cpuThreadNum, true);
     }
 
-    public String[] recognizeText(ImageWrapper image) {
+    public List<String> recognizeText(ImageWrapper image) {
         return recognizeText(image, 4, true);
     }
+
 }

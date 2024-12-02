@@ -9,30 +9,26 @@ import org.autojs.autojs6.R
 open class AccessibilityService(final override val context: Context) : ServiceItemHelper {
 
     private val mA11yTool = AccessibilityTool(context)
-    private val mA11yToolService = mA11yTool.service
 
     override val isRunning
-        get() = mA11yToolService.exists() || mA11yToolService.isRunning()
+        get() = mA11yTool.serviceExists() || mA11yTool.isServiceRunning()
 
     override fun active(): Boolean {
-        var result = true
-        result = mA11yToolService.stop(false) && result
-        result = mA11yToolService.start(false) && result
-        return result
+        return mA11yTool.restartService(true)
     }
 
     override fun start(): Boolean {
-        return mA11yToolService.start()
+        return mA11yTool.startService(true)
     }
 
     override fun startIfNeeded() {
         if (!isRunning) {
-            mA11yToolService.start()
+            mA11yTool.startService(true)
         }
     }
 
     override fun stop(): Boolean {
-        if (mA11yToolService.stop()) {
+        if (mA11yTool.stopService(true)) {
             return true
         }
         ViewUtils.showToast(context, R.string.text_failed_to_disable_a11y_service)
@@ -40,7 +36,7 @@ open class AccessibilityService(final override val context: Context) : ServiceIt
     }
 
     fun restart() {
-        if (mA11yToolService.stop()) {
+        if (mA11yTool.stopService(true)) {
             start()
         } else {
             ViewUtils.showToast(context, R.string.text_failed_to_disable_a11y_service)
@@ -48,7 +44,7 @@ open class AccessibilityService(final override val context: Context) : ServiceIt
     }
 
     override fun onToggleSuccess() {
-        if (mA11yToolService.exists() && !mA11yToolService.isRunning()) {
+        if (mA11yTool.serviceExists() && !mA11yTool.isServiceRunning()) {
             ViewUtils.showToast(context, R.string.text_a11y_service_enabled_but_not_running, true)
         }
         super.onToggleSuccess()

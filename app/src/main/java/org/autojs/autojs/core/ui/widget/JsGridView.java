@@ -2,11 +2,11 @@ package org.autojs.autojs.core.ui.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import org.autojs.autojs.AutoJs;
 
 /**
  * Created by Stardust on Mar 30, 2018.
@@ -37,7 +37,7 @@ public class JsGridView extends JsListView {
                 try {
                     super.onLayoutChildren(recycler, state);
                 } catch (IndexOutOfBoundsException e) {
-                    getScriptRuntime().console.error(e);
+                    AutoJs.getInstance().createGlobalConsole().error(e);
                 }
             }
         });

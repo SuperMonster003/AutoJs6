@@ -90,7 +90,6 @@ public class Theme {
         return new Theme(theme);
     }
 
-
     public static Theme fromJson(Reader reader) {
         EditorTheme theme = EditorTheme.fromJson(reader);
         if (theme == null)

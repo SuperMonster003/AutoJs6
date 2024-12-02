@@ -27,7 +27,6 @@ import android.util.Log;
 
 import java.lang.reflect.Method;
 
-
 public class SettingsCompat {
     private static final String TAG = "ezy-settings-compat";
 
@@ -76,7 +75,6 @@ public class SettingsCompat {
         return false;
     }
 
-
     private static boolean checkOp(Context context, int op) {
         AppOpsManager manager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         try {
@@ -98,7 +96,6 @@ public class SettingsCompat {
             return false;
         }
     }
-
 
     // 小米
     private static boolean manageDrawOverlaysForMiui(Context context) {

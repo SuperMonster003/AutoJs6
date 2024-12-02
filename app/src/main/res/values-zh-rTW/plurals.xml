@@ -1,0 +1,11 @@
+<resources>
+
+    <plurals name="text_items_total_sum">
+        <item quantity="other">共計: %d 項</item>
+    </plurals>
+
+    <plurals name="text_already_stop_n_scripts">
+        <item quantity="other">已停止執行 %d 個指令碼</item>
+    </plurals>
+
+</resources>

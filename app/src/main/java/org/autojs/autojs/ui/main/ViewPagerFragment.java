@@ -55,7 +55,6 @@ public abstract class ViewPagerFragment extends Fragment implements BackPressedH
         }
     }
 
-
     @CallSuper
     public void onPageHide() {
         mShown = false;

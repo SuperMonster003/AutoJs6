@@ -25,15 +25,19 @@ public class Files {
 
     // FIXME by Stardust on Oct 16, 2018.
     //  ! Is not correct in sub-directory?
+    //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
+    //  ! 子目录的处理不够准确吗?
     public String path(String relativePath) {
         String cwd = cwd();
-        if (cwd == null || relativePath == null || relativePath.startsWith(File.separator))
+        if (cwd == null || relativePath == null || relativePath.startsWith(File.separator)) {
             return relativePath;
+        }
         File f = new File(cwd);
         String[] paths = relativePath.split(Pattern.quote(File.separator));
         for (String path : paths) {
-            if (path.equals("."))
+            if (path.equals(".")) {
                 continue;
+            }
             if (path.equals("..")) {
                 f = f.getParentFile();
                 continue;
@@ -52,15 +56,15 @@ public class Files {
         return PFiles.open(path(path), mode, encoding, bufferSize);
     }
 
-    public Object open(String path, String mode, String encoding) {
+    public PFileInterface open(String path, String mode, String encoding) {
         return PFiles.open(path(path), mode, encoding);
     }
 
-    public Object open(String path, String mode) {
+    public PFileInterface open(String path, String mode) {
         return PFiles.open(path(path), mode);
     }
 
-    public Object open(String path) {
+    public PFileInterface open(String path) {
         return PFiles.open(path(path));
     }
 
@@ -87,7 +91,6 @@ public class Files {
     public String read(String path, String encoding) {
         return PFiles.read(path(path), encoding);
     }
-
 
     public String read(String path) {
         return PFiles.read(path(path));

@@ -5,11 +5,12 @@ import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsEditText
+import org.autojs.autojs.runtime.ScriptRuntime
 
 /**
  * Created by SuperMonster003 on May 19, 2023.
  */
-class JsEditTextInflater(resourceParser: ResourceParser) : EditTextInflater<JsEditText>(resourceParser) {
+class JsEditTextInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : EditTextInflater<JsEditText>(scriptRuntime, resourceParser) {
 
     private var mIsSelectAll = false
     private var mExtendsSelection: String? = null
@@ -53,7 +54,7 @@ class JsEditTextInflater(resourceParser: ResourceParser) : EditTextInflater<JsEd
                 view.setSelection(startIndex.toInt(), stopIndex.toInt())
                 return
             }
-            throw Exception("Can't resolve attribute { name: setSelection, value: $it } when inflating a EditText view")
+            throw Exception("Cannot resolve attribute { name: setSelection, value: $it } when inflating a EditText view")
         }
     }
 

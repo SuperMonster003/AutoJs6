@@ -4,6 +4,118 @@
 
 ******
 
+# v6.6.0
+
+###### 2024/12/02 - 内置模块重写, 谨慎升级
+
+* `提示` 内置模块使用 Kotlin 重新编写以提升脚本运行效率但可能需要多次迭代逐步完善
+* `提示` 内置 init.js 文件默认为空但支持开发者自行扩展内置模块或挂载外部模块
+* `新增` axios 模块 / cheerio 模块 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX))
+* `新增` sqlite 模块, 用于 SQLite 数据库简单操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [SQLite](https://docs.autojs6.com/#/sqlite))
+* `新增` mime 模块, 用于处理和解析 MIME 类型字符串 (参阅 项目文档 > [MIME](https://docs.autojs6.com/#/mime))
+* `新增` nanoid 模块, 可作为字符串 ID 生成器 (Ref to [ai/nanoid](https://github.com/ai/nanoid))
+* `新增` sysprops 模块, 用于获取运行时环境配置数据 (参阅 项目文档 > [系统属性](https://docs.autojs6.com/#/sysprops))
+* `新增` ocr 模块支持 [Rapid OCR](https://github.com/RapidAI/RapidOCR) 引擎
+* `新增` 布局分析支持切换窗口 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` auto.clearCache 方法, 支持清除控件缓存 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` threads.pool 方法, 支持线程池简单应用 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.matchTemplate 方法增加 useTransparentMask 选项参数, 支持透明找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.requestScreenCaptureAsync 方法, 用于 UI 模式异步方式申请截图权限 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.requestScreenCapture 方法增加 isAsync 选项参数, 支持异步方式获取屏幕截图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.on('screen_capture', callback) 等事件监听方法, 支持监听屏幕截图可用事件 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.stopScreenCapture 方法, 支持主动释放截图申请的相关资源 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
+* `新增` images.psnr/mse/ssim/mssim/hist/ncc 及 images.getSimilarity 方法, 用于获取图像相似性度量值
+* `新增` images.isGrayscale 方法, 用于判断图像是否为灰度图像
+* `新增` images.invert 方法, 用于反色图像转换
+* `新增` s13n.point/time 方法, 用于标准化点对象及时长对象 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))
+* `新增` console 模块 gravity (重力), touchThrough (穿透点击), backgroundTint (背景着色) 等相关方法 (参阅 项目文档 > [控制台](https://docs.autojs6.com/#/console))
+* `新增` Mathx.randomInt/Mathx.randomFloat 方法, 用于返回指定范围内的随机整数或随机浮点数
+* `新增` app.launchDual/startDualActivity 等方法, 用于处理双开应用 (需要 Shizuku 或 Root 权限) (实验性)
+* `新增` app.kill 方法, 用于强制停止应用 (需要 Shizuku 或 Root 权限)
+* `新增` floaty.getClip 方法, 用于借助浮动窗口聚焦间接获取剪切板内容
+* `修复` Fragment 子类 (如 [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 等) 中存在的 View Binding 内存泄漏
+* `修复` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 等类中存在的实例内存泄漏
+* `修复` Android 14+ 申请截图权限导致应用崩溃的问题 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `修复` Android 14+ 开启前台服务导致应用崩溃的问题
+* `修复` Android 14+ 代码编辑器运行按钮点击后无法正常亮起的问题
+* `修复` 项目打包后应用可能因缺少必要库文件无法正常运行的问题 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
+* `修复` 编辑项目时可能因指定图标资源不存在而导致应用崩溃的问题 _[`issue #203`](http://issues.autojs6.com/203)_
+* `修复` 截图权限申请时无法正常使用参数获取指定屏幕方向的截图资源
+* `修复` 部分设备无法正常添加脚本快捷方式的问题 (试修) _[`issue #221`](http://issues.autojs6.com/221)_
+* `修复` 调用 http 模块与发送请求相关的方法将出现累积性请求发送延迟的问题 _[`issue #192`](http://issues.autojs6.com/192)_
+* `修复` Shizuku 服务在 AutoJs6 进入主活动页面之前可能无法正常使用的问题 (试修) _[`issue #255`](http://issues.autojs6.com/255)_
+* `修复` random(min, max) 方法可能出现结果越界的问题
+* `修复` pickup 方法结果类型参数无法正常传入空数组的问题
+* `修复` UiObject#bounds() 得到的控件矩形可能被意外修改而破坏其不变性的问题
+* `修复` text/button/input 元素的文本内容包含半角双引号时无法正常解析的问题
+* `修复` text/textswitcher 元素的 autoLink 属性功能失效的问题
+* `修复` 不同脚本可能错误地共享同一个 ScriptRuntime 对象的问题
+* `修复` 全局变量 HEIGHT 及 WIDTH 丢失 Getter 动态属性的问题
+* `修复` 脚本启动时 RootShell 随即加载可能导致启动高延迟的问题
+* `修复` 控制台浮动窗口设置背景颜色导致矩形圆角样式丢失的问题
+* `修复` 无障碍服务自动启动可能出现的服务异常问题 (试修)
+* `修复` 主页文档页面左右滑动 WebView 控件时可能触发 ViewPager 切换的问题
+* `修复` 文件管理器无法识别包含大写字母文件扩展名的问题
+* `修复` 文件管理器首次进入项目目录时可能无法自动识别项目的问题
+* `修复` 文件管理器删除文件夹后页面无法自动刷新的问题
+* `修复` 文件管理器排序文件及文件夹时可能出现 ASCII 首字母名称置后的问题
+* `修复` 代码编辑器调试功能的 FAILED ASSERTION 异常
+* `修复` 代码编辑器调试过程中关闭编辑器后无法再次正常调试的问题
+* `修复` 代码编辑器跳转到行尾时可能遗漏末尾字符的问题
+* `修复` 主活动页面启动日志活动页面时可能出现闪屏的问题
+* `修复` 打包应用无法正常使用 opencc 模块的问题
+* `优化` 打包页面中 "不可用 ABI" 控件的点击提示体验
+* `优化` 支持使用 Shizuku 控制 "指针位置" 显示开关
+* `优化` 支持使用 Shizuku 控制 "投影媒体" 及 "修改安全设置" 权限开关
+* `优化` automator.gestureAsync/gesturesAsync 支持回调函数参数
+* `优化` tasks 模块使用同步方式进行数据库操作避免可能的数据访问不一致问题
+* `优化` 脚本执行模式支持管道符号分隔模式参数 (如 `"ui|auto";` 开头)
+* `优化` 脚本执行模式支持单引号及反引号且支持省略分号 (如 `'ui';` 或 `'ui'` 开头)
+* `优化` 脚本执行模式支持 axios, cheerio, dayjs 等模式参数快捷导入内置扩展模块 (如 `"axios";` 开头)
+* `优化` 脚本执行模式支持 x 或 jsox 模式参数快捷启用 JavaScript 内置对象扩展模块 (如 `"x";` 开头)
+* `优化` img 元素 src 及 path 属性支持本地相对路径 (如 `<img src="a.png"` />)
+* `优化` 代码编辑器导入 Java 类和包名时支持智能判断插入位置
+* `优化` images 模块支持直接使用路径作为图像参数
+* `优化` importPackage 支持字符串参数
+* `优化` 服务端模式 IP 地址支持剪切板导入智能识别且支持空格按键智能转换
+* `优化` 文件管理器新建文件时支持默认前缀选择并自动生成合适的数字后缀
+* `优化` 文件管理器运行项目时具体化异常消息提示 _[`issue #268`](http://issues.autojs6.com/268)_
+* `优化` 文件管理器支持更多类型并支持显示对应的图标符号 (支持 800 多种文件类型)
+* `优化` 文件管理器可编辑的文件类型 (jpg/doc/pdf...) 增加编辑按钮
+* `优化` 文件管理器 APK 文件支持查看基础信息, Manifest 信息及权限列表
+* `优化` 文件管理器音视频等媒体文件支持查看基础信息及 MediaInfo 信息
+* `优化` 打包单文件时支持自动填入合适的标准化名包并支持无效字符过滤提示
+* `优化` 打包单文件时支持根据已安装同包名应用自动设置图标并自增版本号及版本名称
+* `优化` 打包项目配置文件支持 abis/libs 选项指定默认包含的 ABI 架构及扩展库
+* `优化` 打包项目配置文件 abis/libs 选项无效或无可用时支持相关消息提示
+* `优化` LeakCanary 在正式发行版本中被排除以避免增加不必要性
+* `优化` 项目源代码所有英文注释增加简体中文翻译以增强注释可读性
+* `优化` README 及 CHANGELOG 支持多语言 (由脚本自动生成)
+* `优化` Gradle 构建脚本提升版本自适应能力
+* `依赖` 附加 MIME Util 版本 2.3.1
+* `依赖` 附加 Toaster 版本 12.6
+* `依赖` 附加 EasyWindow (for Toaster) 版本 10.3
+* `依赖` 升级 Gradle 版本 8.5 -> 8.11.1
+* `依赖` 升级 Rhino 版本 1.7.15-snapshot -> 1.7.16-snapshot
+* `依赖` 升级 Android Material Lang3 版本 1.10.0 -> 1.12.0
+* `依赖` 升级 Androidx Annotation 版本 1.7.0 -> 1.9.1
+* `依赖` 升级 Androidx AppCompat 版本 1.6.1 -> 1.7.0
+* `依赖` 升级 Androidx WebKit 版本 1.8.0 -> 1.12.1
+* `依赖` 升级 Apache Commons 版本 3.13.0 -> 3.16.0
+* `依赖` 升级 ARSCLib 版本 1.2.4 -> 1.3.1
+* `依赖` 升级 Gson 版本 2.10.1 -> 2.11.0
+* `依赖` 升级 Jackson DataBind 版本 2.13.3 -> 2.13.4.2
+* `依赖` 升级 Joda Time 版本 2.12.5 -> 2.12.7
+* `依赖` 升级 LeakCanary 版本 2.12 -> 2.14
+* `依赖` 升级 MLKit Barcode Scanning 版本 17.2.0 -> 17.3.0
+* `依赖` 升级 MLKit Text Recognition Chinese 版本 16.0.0 -> 16.0.1
+* `依赖` 升级 Retrofit2 Converter Gson 版本 2.9.0 -> 2.11.0
+* `依赖` 升级 Retrofit2 Retrofit 版本 2.9.0 -> 2.11.0
+* `依赖` 升级 Desugar JDK Libs 版本 2.0.3 -> 2.0.4
+* `依赖` 升级 Test Runner 版本 1.5.2 -> 1.6.2
+* `依赖` 升级 Junit Jupiter 版本 5.10.0 -> 5.10.3
+* `依赖` 降级 OkHttp3 版本 5.0.0-alpha.11 -> 4.12.0
+
 # v6.5.0
 
 ###### 2023/12/02
@@ -19,7 +131,7 @@
 * `修复` 部分文本 (如日志页面) 显示语言与应用设置语言可能不相符的问题
 * `修复` 部分语言在主页抽屉开关项可能出现文本溢出的问题
 * `修复` 部分设备无障碍服务开启后立即自动关闭且无任何提示消息的问题 _[`issue #181`](http://issues.autojs6.com/181)_
-* `修复` 部分设备无障碍服务开启后设备物理按键可能导致应用崩溃的问题 (试修) _[`issue #183`](http://issues.autojs6.com/183)_ _[`issue #186`](http://issues.autojs6.com/186#issuecomment-1817307790)_ 
+* `修复` 部分设备无障碍服务开启后设备物理按键可能导致应用崩溃的问题 (试修) _[`issue #183`](http://issues.autojs6.com/183)_ _[`issue #186`](http://issues.autojs6.com/186#issuecomment-1817307790)_
 * `修复` 使用 auto(true) 重启无障碍服务后 pickup 功能异常的问题 (试修) _[`issue #184`](http://issues.autojs6.com/184)_
 * `修复` floaty 模块创建浮动窗口拖动时可能导致应用崩溃的问题 (试修)
 * `修复` app.startActivity 无法使用简称参数的问题 _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
@@ -41,6 +153,8 @@
 * `优化` 文件管理器根据文件及文件夹的类型及特征调整菜单项的显示情况
 * `优化` 文件管理器文件夹右键菜单增加打包应用选项
 * `优化` 无障碍服务启用但功能异常时在 AutoJs6 主页抽屉开关处将体现异常状态
+* `优化` 控制台打印错误消息时附加详细的堆栈信息
+* `依赖` 附加 ARSCLib 版本 1.2.4
 * `依赖` 附加 Flexbox 版本 3.0.0
 * `依赖` 附加 Android OpenCC 版本 1.2.0
 * `依赖` 升级 Gradle 版本 8.5-rc-1 -> 8.5
@@ -53,16 +167,16 @@
 * `新增` console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_
 * `修复` ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
 * `修复` Android 7.x 发现新版本时无法获取版本详情的问题
-* `修复` Android 14 申请截图权限时导致应用崩溃的问题
+* `修复` Android 14+ 申请截图权限时导致应用崩溃的问题
 * `修复` 主页抽屉快速切换 "浮动按钮" 开关时可能导致应用崩溃的问题
 * `修复` 使用菜单关闭浮动按钮时重启应用后浮动按钮可能依然显示的问题
-* `修复` 安卓 13 及以上系统设置页面选择并切换 AutoJs6 语言后无法生效的问题
+* `修复` Android 13+ 设置页面选择并切换 AutoJs6 语言后无法生效的问题
 * `修复` 构建工具初次构建时无法自动完成 OpenCV 资源部署的问题
 * `优化` 原生化 bridges 模块以提升脚本执行效率 (Ref to [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
 * `优化` 重构无障碍服务相关代码以增强无障碍服务的功能稳定性 (实验性) _[`issue #167`](http://issues.autojs6.com/167)_
 * `优化` UiObject 和 UiObjectCollection 的打印输出格式
 * `优化` 构建工具在构建环境 Gradle JDK 版本不满足要求时作出升级提示
-* `依赖` 升级 Gradle 版本 8.4 -> 8.5-rc-1 
+* `依赖` 升级 Gradle 版本 8.4 -> 8.5-rc-1
 * `依赖` 降级 Commons IO 版本 2.14.0 -> 2.8.0
 * `依赖` 降级 Jackson DataBind 版本 2.14.3 -> 2.13.3
 
@@ -98,7 +212,7 @@
 * `新增` shizuku 模块 (参阅 项目文档 > [Shizuku](https://docs.autojs6.com/#/shizuku)) 及主页抽屉权限开关
 * `新增` device.rotation / device.orientation 等方法
 * `新增` 内部 Java 类支持 class 静态属性访问
-* `新增` 支持在安卓系统设置页面选择并切换应用语言 (安卓 13 及以上)
+* `新增` 支持在安卓系统设置页面选择并切换应用语言 (Android 13+)
 * `新增` 支持设置页面添加或长按应用图标激活 [应用快捷方式](https://developer.android.com/guide/topics/ui/shortcuts?hl=zh-cn) , 可启动文档和设置等页面
 * `修复` 重新合并部分 PR (by [aiselp](https://github.com/aiselp)) 以解决部分脚本无法正常结束运行的问题 _[`pr #75`](http://pr.autojs6.com/75)_ _[`pr #78`](http://pr.autojs6.com/78)_
 * `修复` 打包应用无法使用 AutoJs6 新增 API 的问题 (by [LZX284](https://github.com/LZX284)) _[`pr #151`](http://pr.autojs6.com/151)_ _[`issue #149`](http://issues.autojs6.com/149)_
@@ -148,8 +262,8 @@
 
 ###### 2023/07/21
 
-* `新增` 代码编辑器的代码注释功能 (by [抠脚本人](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
-* `新增` auto.stateListener 用于无障碍服务连接状态监听 (by [抠脚本人](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
+* `新增` 代码编辑器的代码注释功能 (by [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
+* `新增` auto.stateListener 用于无障碍服务连接状态监听 (by [little-alei](https://github.com/little-alei)) _[`pr #98`](http://pr.autojs6.com/98)_
 * `新增` UiObject 类型添加 nextSibling / lastChild / offset 等方法 (参阅 项目文档 > [控件节点](https://docs.autojs6.com/#/uiObjectType))
 * `修复` VSCode 插件在脚本字符总长度超过四位十进制数时无法解析数据的问题 _[`issue #91`](http://issues.autojs6.com/91)_ _[`issue #93`](http://issues.autojs6.com/93)_ _[`issue #100`](http://issues.autojs6.com/100)_ _[`issue #109`](http://issues.autojs6.com/109)_
 * `修复` VSCode 插件无法正常保存文件的问题 _[`issue #92`](http://issues.autojs6.com/91)_ _[`issue #94`](http://issues.autojs6.com/93)_
@@ -198,7 +312,7 @@
 * `优化` 增加短信数据读取权限 (android.permission.READ_SMS) (默认关闭)
 * `优化` findMultiColors 方法内部实现 (by [LYS86](https://github.com/LYS86)) _[`pr #72`](http://pr.autojs6.com/72)_
 * `优化` runtime.loadDex/loadJar/load 支持按目录级别加载或同时加载多个文件
-* `依赖` 升级 Leakcanary 版本 2.11 -> 2.12
+* `依赖` 升级 LeakCanary 版本 2.11 -> 2.12
 * `依赖` 升级 Android Analytics 版本 14.2.0 -> 14.3.0
 * `依赖` 升级 Gradle 版本 8.2-milestone-1 -> 8.2
 
@@ -223,8 +337,8 @@
 * `修复` sign.property 文件不存在时无法构建项目的问题
 * `修复` 高版本系统 AutoJs6 置于后台时可能因无前台通知权限而崩溃的问题 (API >= 33)
 * `修复` 调用 console.show 方法后日志窗口点击 FAB 按钮无法清空日志的问题
-* `修复` 脚本编辑器调试时出现的 prototype 空指针异常
-* `修复` 脚本编辑器运行脚本时在缓存文件夹运行临时脚本而非先保存再在原始位置运行以避免可能的脚本内容丢失问题
+* `修复` 代码编辑器调试时出现的 prototype 空指针异常
+* `修复` 代码编辑器运行脚本时在缓存文件夹运行临时脚本而非先保存再在原始位置运行以避免可能的脚本内容丢失问题
 * `修复` 调整布局层次分析的层级色条宽度避免层级过多时控件名称无法显示的问题 _[`issue #46`](http://issues.autojs6.com/46)_
 * `优化` 布局分析浮动窗口增加退出按钮以关闭窗口 _[`issue #63`](http://issues.autojs6.com/63)_
 * `优化` 脚本绝对路径使用简称形式以缩减文本长度并增加可读性
@@ -232,10 +346,10 @@
 * `优化` 视图 (View) 绑定方式由 ButterKnife 迁移至 View Binding _[`issue #48`](http://issues.autojs6.com/48)_
 * `优化` 服务端模式非正常关闭时将于 AutoJs6 启动时自动开启 _[`issue #64`](http://issues.autojs6.com/64)_
 * `优化` 客户端模式非正常关闭时将于 AutoJs6 启动时按最近一次的历史地址自动连接
-* `依赖` 升级 Leakcanary 版本 2.10 -> 2.11
+* `依赖` 升级 LeakCanary 版本 2.10 -> 2.11
 * `依赖` 升级 Android Material 版本 1.8.0 -> 1.9.0
 * `依赖` 升级 Androidx WebKit 版本 1.6.1 -> 1.7.0
-* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11
+* `依赖` 升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.9 -> 5.0.0-alpha.11
 * `依赖` 升级 MLKit Text Recognition Chinese 版本 16.0.0-beta6 -> 16.0.0
 
 # v6.3.0
@@ -298,7 +412,7 @@
 * `依赖` 升级 Androidx WebKit 版本 1.5.0 -> 1.6.1
 * `依赖` 升级 Androidx Recyclerview 版本 1.2.1 -> 1.3.0
 * `依赖` 升级 Zip4j 版本 2.11.2 -> 2.11.5
-* `依赖` 升级 Junit 版本 5.9.2 -> 5.9.3
+* `依赖` 升级 Junit Jupiter 版本 5.9.2 -> 5.9.3
 * `依赖` 升级 Androidx Annotation 版本 1.5.0 -> 1.6.0
 * `依赖` 升级 Jackson DataBind 版本 2.14.1 -> 2.14.2
 * `依赖` 升级 Desugar JDK Libs 版本 2.0.0 -> 2.0.3
@@ -331,7 +445,7 @@
 * `修复` JavaScript 模块名被覆盖声明时导致存在依赖关系的内部模块无法正常使用的问题 _[`issue #29`](http://issues.autojs6.com/29)_
 * `修复` 高版本安卓系统点击快速设置面板中相关图标后面板可能无法自动收起的问题 (试修) _[`issue #7`](http://issues.autojs6.com/7)_
 * `修复` 高版本安卓系统可能出现部分页面与通知栏区域重叠的问题
-* `修复` 安卓 10 及以上系统无法正常运行有关设置画笔颜色的示例代码的问题
+* `修复` Android 10+ 无法正常运行有关设置画笔颜色的示例代码的问题
 * `修复` 示例代码 "音乐管理器" 更正文件名为 "文件管理器" 并恢复正常功能
 * `修复` 文件管理器下拉刷新时可能出现定位漂移的问题
 * `修复` ui 模块作用域绑定错误导致部分基于 UI 的脚本无法访问组件属性的问题
@@ -354,7 +468,7 @@
 * `修复` 部分安卓系统脚本运行结束时日志中无法统计运行时长的问题
 * `修复` 使用浮动按钮菜单关闭按钮后重启应用时浮动按钮依然显示的问题
 * `修复` 布局层次分析时长按列表项可能导致弹出菜单溢出下方屏幕的问题
-* `修复` 安卓 7.x 系统在夜间模式关闭时导航栏按钮难以辨识的问题
+* `修复` Android 7.x 系统在夜间模式关闭时导航栏按钮难以辨识的问题
 * `修复` http.post 等方法可能出现的请求未关闭异常
 * `修复` colors.toString 方法在 Alpha 通道为 0 时其通道信息在结果中丢失的问题
 * `优化` 重定向 Auto.js 4.x 版本的公有类以实现尽可能的向下兼容 (程度有限)
@@ -363,10 +477,10 @@
 * `优化` Rhino 异常消息增加多语言支持
 * `优化` 主页抽屉权限开关仅在开启时弹出提示消息
 * `优化` 主页抽屉布局紧贴于状态栏下方避免顶部颜色条的低兼容性
-* `优化` 检查更新/下载更新/更新提示功能兼容安卓 7.x 系统
+* `优化` 检查更新/下载更新/更新提示功能兼容 Android 7.x 系统
 * `优化` 重新设计设置页面 (迁移至 AndroidX)
 * `优化` 设置页面支持长按设置选项获取详细信息
-* `优化` 夜间模式增加 "跟随系统" 设置选项 (安卓 9 及以上)
+* `优化` 夜间模式增加 "跟随系统" 设置选项 (Android 9+)
 * `优化` 应用启动画面适配夜间模式
 * `优化` 应用图标增加数字标识以提升多个开源版本共存用户的使用体验
 * `优化` 主题色增加更多 Material Design Color (材料设计颜色) 选项
@@ -423,17 +537,17 @@
 * `依赖` 升级 Gson 版本 2.9.0 -> 2.10
 * `依赖` 升级 Joda Time 版本 2.10.14 -> 2.12.1
 * `依赖` 升级 Kotlinx Coroutines 版本 1.6.1-native-mt -> 1.6.1
-* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.7 -> 5.0.0-alpha.9
+* `依赖` 升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.7 -> 5.0.0-alpha.9
 * `依赖` 升级 Zip4j 版本 2.10.0 -> 2.11.2
 * `依赖` 升级 Glide 版本 4.13.2 -> 4.14.2
-* `依赖` 升级 Junit 版本 5.9.0 -> 5.9.1
+* `依赖` 升级 Junit Jupiter 版本 5.9.0 -> 5.9.1
 
 # v6.1.1
 
 ###### 2022/05/31
 
-* `新增` 检查更新/下载更新/更新提示功能 (参阅 设置页面) (暂不支持安卓 7.x 系统)
-* `修复` 应用在安卓 10 系统无法读写外部存储的问题 _[`issue #17`](http://issues.autojs6.com/17)_
+* `新增` 检查更新/下载更新/更新提示功能 (参阅 设置页面) (暂不支持 Android 7.x 系统)
+* `修复` 应用在 Android 10 系统无法读写外部存储的问题 _[`issue #17`](http://issues.autojs6.com/17)_
 * `修复` 编辑器页面长按时可能导致应用崩溃的问题 _[`issue #18`](http://issues.autojs6.com/18)_
 * `修复` 编辑器页面长按菜单 "删除行" 和 "复制行" 功能无效的问题
 * `修复` 编辑器页面选项菜单中 "粘贴" 功能缺失的问题
@@ -444,7 +558,7 @@
 
 # v6.1.0
 
-###### 2022/05/26 - 包名变更 谨慎升级
+###### 2022/05/26 - 包名变更, 谨慎升级
 
 * `提示` 修改应用包名为 org.autojs.autojs6 避免与开源 Auto.js 应用包名冲突
 * `新增` 主页抽屉增加 "投影媒体权限" 开关 (Root / ADB 方式) (开关状态检测为实验性)
@@ -459,8 +573,8 @@
 * `新增` timers.setIntervalExt() 方法 (参阅 示例代码 > 定时器 > 条件周期执行)
 * `新增` colors.toInt() / rgba() 等方法 (参阅 示例代码 > 图像与颜色 > 基本颜色转换)
 * `新增` automator.isServiceRunning() / ensureService() 方法
-* `新增` automator.lockScreen() 等方法 (参阅 示例代码 > 无障碍服务 > 安卓 9 新增)
-* `新增` automator.headsethook() 等方法 (参阅 示例代码 > 无障碍服务 > 安卓 11 新增)
+* `新增` automator.lockScreen() 等方法 (参阅 示例代码 > 无障碍服务 > Android 9 新增)
+* `新增` automator.headsethook() 等方法 (参阅 示例代码 > 无障碍服务 > Android 11 新增)
 * `新增` automator.captureScreen() 方法 (参阅 示例代码 > 无障碍服务 > 获取屏幕截图)
 * `新增` dialogs.build() 选项参数属性 animation, linkify 等 (参阅 示例代码 > 对话框 > 个性化对话框)
 * `修复` dialogs.build() 选项参数属性 inputHint, itemsSelectedIndex 等功能异常
@@ -496,8 +610,8 @@
 * `依赖` 升级 Joda Time 版本 2.10.13 -> 2.10.14
 * `依赖` 升级 Kotlin Gradle 插件版本 1.6.10 -> 1.6.21
 * `依赖` 升级 Kotlinx Coroutines 版本 1.6.0 -> 1.6.1-native-mt
-* `依赖` 升级 Leakcanary 版本 2.8.1 -> 2.9.1
-* `依赖` 升级 Okhttp3 版本 5.0.0-alpha.6 -> 5.0.0-alpha.7
+* `依赖` 升级 LeakCanary 版本 2.8.1 -> 2.9.1
+* `依赖` 升级 OkHttp3 版本 5.0.0-alpha.6 -> 5.0.0-alpha.7
 * `依赖` 升级 Rhino 引擎版本 1.7.14 -> 1.7.15-snapshot
 * `依赖` 升级 Zip4j 版本 2.9.1 -> 2.10.0
 * `依赖` 移除 Groovy JSON 版本 3.0.8
@@ -528,7 +642,7 @@
 * `依赖` 降级 Android Material 版本 1.6.0-alpha02 -> 1.5.0
 * `依赖` 升级 Kotlinx Coroutines 版本 1.6.0-native-mt -> 1.6.0
 * `依赖` 升级 OpenCV 版本 3.4.3 -> 4.5.4 -> 4.5.5 (Ref to [TonyJiangWJ](https://github.com/TonyJiangWJ))
-* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6
+* `依赖` 升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.4 -> 5.0.0-alpha.6
 * `依赖` 升级 Gradle 构建工具版本 7.2.0-beta01 -> 7.3.0-alpha06
 * `依赖` 升级 Auto.js-ApkBuilder 版本 1.0.1 -> 1.0.3
 * `依赖` 升级 Glide Compiler 版本 4.12.0 -> 4.13.1
@@ -551,7 +665,7 @@
 * `依赖` 升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1
 * `依赖` 升级 Androidx Preference 版本 1.1.1 -> 1.2.0
 * `依赖` 升级 Rhino 引擎版本 1.7.14-snapshot -> 1.7.14
-* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
+* `依赖` 升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `依赖` 升级 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
 * `依赖` 升级 Gradle 构建工具版本 7.2.0-alpha06 -> 7.2.0-beta01
 * `依赖` 升级 Gradle 发行版本 7.3.3 -> 7.4-rc-2
@@ -627,10 +741,10 @@
 * `依赖` 升级 Junit 版本 4.12 -> 4.13.2
 * `依赖` 升级 Kotlin Gradle 插件版本 1.3.10 -> 1.4.10 -> 1.6.0
 * `依赖` 升级 Kotlinx Coroutines 版本 1.0.1 -> 1.5.2-native-mt
-* `依赖` 升级 Leakcanary 版本 1.6.1 -> 2.7
+* `依赖` 升级 LeakCanary 版本 1.6.1 -> 2.7
 * `依赖` 升级 LicensesDialog 版本 1.8.1 -> 2.2.0
 * `依赖` 升级 Material Dialogs 版本 0.9.2.3 -> 0.9.6.0
-* `依赖` 升级 Okhttp3 版本 3.10.0 -> 5.0.0-alpha.2 -> 5.0.0-alpha.3
+* `依赖` 升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.2 -> 5.0.0-alpha.3
 * `依赖` 升级 Reactivex RxJava2 RxAndroid 版本 2.0.1 -> 2.1.1
 * `依赖` 升级 Reactivex RxJava2 版本 2.1.2 -> 2.2.21
 * `依赖` 升级 Retrofit2 Converter Gson 版本 2.3.0 -> 2.9.0

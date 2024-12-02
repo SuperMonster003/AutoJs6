@@ -20,6 +20,7 @@ import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 
 /**
  * A URL-based script provider that can load modules against a set of base
@@ -122,7 +123,7 @@ public class UrlModuleSourceProvider extends ModuleSourceProviderBase {
     protected ModuleSource loadFromUri(URI uri, URI base, Object validator)
             throws IOException, URISyntaxException {
         // We expect modules to have a ".js" file name extension ...
-        URI fullUri = new URI(uri + ".js");
+        URI fullUri = new URI(uri + JAVASCRIPT.extensionWithDot);
         ModuleSource source = loadFromActualUri(fullUri, base, validator);
         // ... but for compatibility we support modules without extension,
         // or ids with explicit extension.
@@ -148,8 +149,8 @@ public class UrlModuleSourceProvider extends ModuleSourceProviderBase {
         try {
             urlConnection.connect();
             if (applicableValidator != null &&
-                    applicableValidator.updateValidator(urlConnection,
-                            request_time, urlConnectionExpiryCalculator)) {
+                applicableValidator.updateValidator(urlConnection,
+                        request_time, urlConnectionExpiryCalculator)) {
                 close(urlConnection);
                 return NOT_MODIFIED;
             }
@@ -207,8 +208,8 @@ public class UrlModuleSourceProvider extends ModuleSourceProviderBase {
      * @param urlConnection the connection
      * @param cause         the cause it failed to close.
      */
-    protected void onFailedClosingUrlConnection(URLConnection urlConnection,
-                                                IOException cause) {
+    protected void onFailedClosingUrlConnection(URLConnection urlConnection, IOException cause) {
+        /* Empty body. */
     }
 
     /**
@@ -226,7 +227,7 @@ public class UrlModuleSourceProvider extends ModuleSourceProviderBase {
     @Override
     protected boolean entityNeedsRevalidation(Object validator) {
         return !(validator instanceof URLValidator)
-                || ((URLValidator) validator).entityNeedsRevalidation();
+               || ((URLValidator) validator).entityNeedsRevalidation();
     }
 
     private static class URLValidator implements Serializable {
@@ -262,7 +263,7 @@ public class UrlModuleSourceProvider extends ModuleSourceProviderBase {
                 throws IOException {
             if (urlConnection instanceof HttpURLConnection) {
                 return ((HttpURLConnection) urlConnection).getResponseCode() ==
-                        HttpURLConnection.HTTP_NOT_MODIFIED;
+                       HttpURLConnection.HTTP_NOT_MODIFIED;
             }
             return lastModified != urlConnection.getLastModified();
         }
@@ -283,14 +284,14 @@ public class UrlModuleSourceProvider extends ModuleSourceProviderBase {
                 if (-1 != max_age) {
                     final long response_time = System.currentTimeMillis();
                     final long apparent_age = Math.max(0, response_time -
-                            urlConnection.getDate());
+                                                          urlConnection.getDate());
                     final long corrected_received_age = Math.max(apparent_age,
                             urlConnection.getHeaderFieldInt("Age", 0) * 1000L);
                     final long response_delay = response_time - request_time;
                     final long corrected_initial_age = corrected_received_age +
-                            response_delay;
+                                                       response_delay;
                     final long creation_time = response_time -
-                            corrected_initial_age;
+                                               corrected_initial_age;
                     return max_age * 1000L + creation_time;
                 }
             }

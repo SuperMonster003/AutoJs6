@@ -1,6 +1,5 @@
 package org.autojs.autojs.core.automator.action
 
-
 import org.autojs.autojs.core.automator.UiObject
 
 /**

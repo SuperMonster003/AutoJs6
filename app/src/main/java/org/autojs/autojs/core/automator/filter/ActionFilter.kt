@@ -1,8 +1,6 @@
 package org.autojs.autojs.core.automator.filter
 
 import org.autojs.autojs.core.automator.UiObject
-import org.autojs.autojs.pref.Language
-import org.autojs.autojs.util.App
 
 /**
  * Created by SuperMonster003 on Nov 19, 2022.

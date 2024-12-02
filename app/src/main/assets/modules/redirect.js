@@ -408,7 +408,6 @@ let map = {
         MimeTypes: org.autojs.autojs.util.MimeTypesUtils,
         Nath: org.autojs.autojs.util.MathUtils,
         Objects: org.autojs.autojs.util.Objects,
-        ResourceMonitor: org.autojs.autojs.util.ResourceMonitor,
         ScreenMetrics: org.autojs.autojs.runtime.api.ScreenMetrics,
         SdkVersionUtil: org.autojs.autojs.util.SdkVersionUtils,
         SparseArrayEntries: org.autojs.autojs.tool.SparseArrayEntries,
@@ -435,4 +434,4 @@ let map = {
     },
 };
 
-module.exports = { perform: () => Object.assign(com.stardust, map) };
+module.exports = Object.assign(com.stardust, map);

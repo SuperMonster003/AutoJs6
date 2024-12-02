@@ -25,7 +25,6 @@ public class ArrayUtils {
         return box;
     }
 
-
     @NonNull
     @Contract(pure = true)
     public static int[] unbox(@NonNull Integer[] array) {

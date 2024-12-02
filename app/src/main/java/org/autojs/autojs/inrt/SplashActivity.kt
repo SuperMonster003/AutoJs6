@@ -8,13 +8,13 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
 import org.autojs.autojs.ui.splash.SplashActivity.Companion.INIT_TIMEOUT
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivitySplashInrtBinding
 import kotlin.concurrent.thread
 
 /**
@@ -25,8 +25,8 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setContentView(R.layout.activity_splash_inrt)
-        val slug = findViewById<TextView>(R.id.slug)
-        slug.typeface = Typeface.createFromAsset(assets, "roboto_medium.ttf")
+        val binding = ActivitySplashInrtBinding.inflate(layoutInflater)
+        binding.slug.typeface = Typeface.createFromAsset(assets, "roboto_medium.ttf")
         if (!Pref.isFirstUsing) {
             main()
         } else {

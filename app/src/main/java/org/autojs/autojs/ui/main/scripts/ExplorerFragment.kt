@@ -9,9 +9,8 @@ import android.view.ViewGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.model.explorer.ExplorerItem
-import org.autojs.autojs.model.script.Scripts.edit
+import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.tool.SimpleObserver
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.explorer.ExplorerView
@@ -21,7 +20,7 @@ import org.autojs.autojs.ui.main.QueryEvent
 import org.autojs.autojs.ui.main.ViewPagerFragment
 import org.autojs.autojs.ui.main.ViewStatesManageable
 import org.autojs.autojs.ui.project.ProjectConfigActivity
-import org.autojs.autojs.util.IntentUtils.viewFile
+import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentExplorerBinding
 import org.greenrobot.eventbus.EventBus
@@ -34,7 +33,7 @@ import org.greenrobot.eventbus.Subscribe
  */
 open class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener, ViewStatesManageable {
 
-    private lateinit var binding: FragmentExplorerBinding
+    private var binding: FragmentExplorerBinding? = null
 
     private var mExplorerView: ExplorerView? = null
     private var mFloatingActionMenu: FloatingActionMenu? = null
@@ -50,17 +49,22 @@ open class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickL
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mExplorerView = binding.itemList.apply {
-            setOnItemClickListener { _, item: ExplorerItem ->
-                if (item.isEditable) {
-                    edit(requireActivity(), item.toScriptFile())
-                } else {
-                    viewFile(GlobalAppContext.get(), item.path, AppFileProvider.AUTHORITY)
+        mExplorerView = binding!!.itemList.apply {
+            setOnItemClickListener(object : ExplorerView.OnItemClickListener {
+                override fun onItemClick(view: View?, item: ExplorerItem) {
+                    when {
+                        item.isTextEditable -> Scripts.edit(requireActivity(), item.toScriptFile())
+                        item.isInstallable -> ApkInfoDialogManager.showApkInfoDialog(requireActivity(), item)
+                        item.isMediaMenu || item.isMediaPlayable -> MediaInfoDialogManager.showMediaInfoDialog(requireActivity(), item)
+                        else -> viewFile(item)
+                    }
                 }
-            }
+            })
         }
         restoreViewStates()
     }
+
+    private fun viewFile(item: ExplorerItem) = IntentUtils.viewFile(GlobalAppContext.get(), item.path)
 
     override fun onFabClick(fab: FloatingActionButton) {
         mFloatingActionMenu ?: let {
@@ -126,6 +130,13 @@ open class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickL
         super.onDestroy()
         ExplorerView.clearViewStates()
         EventBus.getDefault().unregister(this)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
+        mExplorerView = null
+        mFloatingActionMenu = null
     }
 
     override fun onDetach() {

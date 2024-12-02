@@ -30,7 +30,7 @@ public class ResBagValue extends ResValue implements GetResValues {
 	protected final ResReferenceValue mParent;
 
 	public ResBagValue(ResReferenceValue parent) {
-		this.mParent = parent;
+		mParent = parent;
 	}
 
 	public ResReferenceValue getParent() {

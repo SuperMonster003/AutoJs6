@@ -43,5 +43,4 @@ public abstract class Fragment extends androidx.fragment.app.Fragment {
     @Nullable
     public abstract View createView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState);
 
-
 }

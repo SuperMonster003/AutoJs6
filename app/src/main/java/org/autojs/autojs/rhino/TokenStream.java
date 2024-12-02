@@ -13,7 +13,6 @@ import org.mozilla.javascript.Token;
 import java.io.IOException;
 import java.io.Reader;
 
-
 public class TokenStream {
     public static final double NaN = Double
             .longBitsToDouble(0x7ff8000000000000L);
@@ -60,8 +59,7 @@ public class TokenStream {
                 } catch (NumberFormatException nfe) {
                     return NaN;
                 }
-            } else if (radix == 2 || radix == 4 || radix == 8 || radix == 16
-                    || radix == 32) {
+            } else if (radix == 2 || radix == 4 || radix == 8 || radix == 16 || radix == 32) {
                 /*
                  * The number may also be inaccurate for one of these bases.
                  * This happens if the addition in value*radix + digit causes a
@@ -907,43 +905,43 @@ public class TokenStream {
         return id & 0xff;
     }
 
-    final String getSourceString() {
+    public final String getSourceString() {
         return sourceString;
     }
 
-    final int getLineno() {
+    public final int getLineno() {
         return lineno;
     }
 
-    final String getString() {
+    public final String getString() {
         return string;
     }
 
-    final char getQuoteChar() {
+    public final char getQuoteChar() {
         return (char) quoteChar;
     }
 
-    final double getNumber() {
+    public final double getNumber() {
         return number;
     }
 
-    final boolean isNumberBinary() {
+    public final boolean isNumberBinary() {
         return isBinary;
     }
 
-    final boolean isNumberOldOctal() {
+    public final boolean isNumberOldOctal() {
         return isOldOctal;
     }
 
-    final boolean isNumberOctal() {
+    public final boolean isNumberOctal() {
         return isOctal;
     }
 
-    final boolean isNumberHex() {
+    public final boolean isNumberHex() {
         return isHex;
     }
 
-    final boolean eof() {
+    public final boolean eof() {
         return hitEOF;
     }
 
@@ -1037,10 +1035,7 @@ public class TokenStream {
                                 return Token.ERROR;
                             }
                         } else {
-                            if (c == EOF_CHAR
-                                    || c == BYTE_ORDER_MARK
-                                    || !Character
-                                    .isJavaIdentifierPart((char) c)) {
+                            if (c == EOF_CHAR || c == BYTE_ORDER_MARK || !Character.isJavaIdentifierPart((char) c)) {
                                 break;
                             }
                             addToString(c);
@@ -1593,6 +1588,7 @@ public class TokenStream {
         tokenEnd = start + stringBufferTop + 2; // include slashes
 
         if (isAlpha(peekChar())) {
+            /* Empty body. */
         }
 
         this.string = new String(stringBuffer, 0, reEnd);
@@ -1695,9 +1691,7 @@ public class TokenStream {
                                     case '[':
                                         c = getChar(); // Skip [
                                         addToString(c);
-                                        if (getChar() == 'C' && getChar() == 'D'
-                                                && getChar() == 'A' && getChar() == 'T'
-                                                && getChar() == 'A' && getChar() == '[') {
+                                        if (getChar() == 'C' && getChar() == 'D' && getChar() == 'A' && getChar() == 'T' && getChar() == 'A' && getChar() == '[') {
                                             addToString('C');
                                             addToString('D');
                                             addToString('A');
@@ -1721,7 +1715,7 @@ public class TokenStream {
                                 }
                             }
                             case '?' -> {
-                                c = getChar(); // Skip ?
+                                c = getChar(); // Skip?
                                 addToString(c);
                                 if (!readPI())
                                     return Token.ERROR;
@@ -2027,6 +2021,7 @@ public class TokenStream {
         // skip to end of line
         int c;
         while ((c = getChar()) != EOF_CHAR && c != '\n') {
+            /* Empty body. */
         }
         ungetChar(c);
         tokenEnd = cursor;

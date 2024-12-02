@@ -5,7 +5,7 @@ import static org.autojs.autojs.util.StringUtils.str;
 import android.annotation.SuppressLint;
 
 import org.autojs.autojs.AutoJs;
-import org.autojs.autojs.pref.Language;
+import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.runtime.api.Console;
 import org.autojs.autojs6.R;
 

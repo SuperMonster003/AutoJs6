@@ -19,7 +19,6 @@ import org.autojs.autojs6.R;
 
 import java.util.List;
 
-
 /**
  * Reference to ScrollView and HorizontalScrollView
  */
@@ -27,7 +26,6 @@ public class HVScrollView extends FrameLayout {
     static final int ANIMATED_SCROLL_GAP = 250;
 
     static final float MAX_SCROLL_FACTOR = 0.5f;
-
 
     private long mLastScroll;
 
@@ -181,7 +179,6 @@ public class HVScrollView extends FrameLayout {
     public int getMaxScrollAmountH() {
         return (int) (MAX_SCROLL_FACTOR * (getRight() - getLeft()));
     }
-
 
     private void initScrollView() {
         mScroller = new Scroller(getContext());
@@ -1348,13 +1345,12 @@ public class HVScrollView extends FrameLayout {
             if (!mIsLayoutDirty) {
                 scrollToChild(focused);
             } else {
-                // The child may not be laid out yet, we can't compute the scroll yet
+                // The child may not be laid out yet, we cannot compute the scroll yet
                 mChildToScrollTo = focused;
             }
         }
         super.requestChildFocus(child, focused);
     }
-
 
     /**
      * When looking for focus in children of a scroll view, need to be a little

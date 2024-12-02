@@ -51,10 +51,7 @@ public class UserService extends IUserService.Stub {
                     .execCommand(command.split("\n"), ProcessShell.getShellProcess())
                     .toJson();
         } catch (Exception e) {
-            AbstractShell.Result result = new AbstractShell.Result();
-            result.code = 1;
-            result.error = e.getMessage();
-            return result.toJson();
+            return new AbstractShell.Result(1, e).toJson();
         }
     }
 

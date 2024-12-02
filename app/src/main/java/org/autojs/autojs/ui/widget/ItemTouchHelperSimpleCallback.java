@@ -25,8 +25,8 @@ public class ItemTouchHelperSimpleCallback extends ItemTouchHelper.SimpleCallbac
 
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
-    }
+        /* Empty body. */
+}
 
     @Override
     public boolean isLongPressDragEnabled() {
@@ -37,4 +37,5 @@ public class ItemTouchHelperSimpleCallback extends ItemTouchHelper.SimpleCallbac
     public boolean isItemViewSwipeEnabled() {
         return mItemViewSwipeEnabled;
     }
+
 }

@@ -3,8 +3,9 @@ package org.autojs.autojs.core.ui.attribute
 import android.view.View
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.widget.JsProgressBar
+import org.autojs.autojs.runtime.ScriptRuntime
 
-class JsProgressBarAttributes(resourceParser: ResourceParser, view: View) : ProgressBarAttributes(resourceParser, view) {
+class JsProgressBarAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ProgressBarAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as JsProgressBar
 

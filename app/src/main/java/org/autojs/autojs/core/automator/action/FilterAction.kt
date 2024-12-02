@@ -2,9 +2,8 @@ package org.autojs.autojs.core.automator.action
 
 import android.graphics.Rect
 import org.autojs.autojs.core.accessibility.UiSelector
-import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.automator.UiObject
-import java.util.*
+import java.util.LinkedList
 
 /**
  * Created by Stardust on Jan 27, 2017.
@@ -20,7 +19,7 @@ abstract class FilterAction(private val mFilter: Filter) : SimpleAction() {
     class TextFilter(private var mText: String, private var mIndex: Int) : Filter {
 
         override fun filter(root: UiObject): List<UiObject> {
-            val list = UiSelector(AccessibilityService.bridge!!).textContains(mText).findAndReturnList(root)
+            val list = UiSelector().textContains(mText).findAndReturnList(root)
             return when (mIndex) {
                 -1 -> list
                 else -> when {
@@ -98,7 +97,7 @@ abstract class FilterAction(private val mFilter: Filter) : SimpleAction() {
 
     class IdFilter(private val mId: String) : Filter {
 
-        override fun filter(root: UiObject): List<UiObject> = UiSelector(AccessibilityService.bridge!!).id(mId).findAndReturnList(root)
+        override fun filter(root: UiObject): List<UiObject> = UiSelector().id(mId).findAndReturnList(root)
 
         override fun toString() = "IdFilter{mId='$mId'}"
 

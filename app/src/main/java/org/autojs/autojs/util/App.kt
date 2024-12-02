@@ -3,7 +3,7 @@ package org.autojs.autojs.util
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.pref.Language
+import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R

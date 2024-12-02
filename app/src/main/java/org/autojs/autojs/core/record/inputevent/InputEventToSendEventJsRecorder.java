@@ -1,11 +1,8 @@
 package org.autojs.autojs.core.record.inputevent;
 
 import androidx.annotation.NonNull;
-
 import org.autojs.autojs.core.inputevent.InputEventObserver;
-
-import static org.autojs.autojs.runtime.api.ScreenMetrics.getDeviceScreenHeight;
-import static org.autojs.autojs.runtime.api.ScreenMetrics.getDeviceScreenWidth;
+import org.autojs.autojs.runtime.api.ScreenMetrics;
 
 /**
  * Created by Stardust on May 3, 2017.
@@ -20,10 +17,10 @@ public class InputEventToSendEventJsRecorder extends InputEventRecorder {
 
     public InputEventToSendEventJsRecorder() {
         mCode.append("var sh = new Shell(true);\n")
-                .append("sh.SetScreenMetrics(").append(getDeviceScreenWidth()).append(", ")
-                .append(getDeviceScreenHeight()).append(");\n");
+                .append("sh.SetScreenMetrics(")
+                .append(ScreenMetrics.getDeviceScreenWidth()).append(", ")
+                .append(ScreenMetrics.getDeviceScreenHeight()).append(");\n");
     }
-
 
     @Override
     public void recordInputEvent(@NonNull InputEventObserver.InputEvent event) {
@@ -67,7 +64,6 @@ public class InputEventToSendEventJsRecorder extends InputEventRecorder {
             mLastTouchY = -1;
         }
     }
-
 
     private void onTouchX(int device, int value) {
         if (mTouchDevice == -1) {

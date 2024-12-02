@@ -17,7 +17,6 @@ public class EventDispatcher<Listener> {
         mListeners.add(l);
     }
 
-
     public boolean removeListener(Listener l) {
         return mListeners.remove(l);
     }

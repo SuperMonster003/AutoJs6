@@ -101,5 +101,4 @@ public class SlidingUpPanel extends FrameLayout {
             super.addView(child, index, params);
     }
 
-
 }

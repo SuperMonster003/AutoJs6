@@ -48,7 +48,6 @@ public class PFile extends File {
         return dateFormat.format(new Date(date));
     }
 
-
     private void init() {
         if (isDirectory()) {
             mSimplifiedName = getName();
@@ -57,7 +56,6 @@ public class PFile extends File {
         }
         mSimplifyPath = PFiles.getElegantPath(getPath());
     }
-
 
     @NonNull
     public PFile renameTo(String newName) {
@@ -166,12 +164,12 @@ public class PFile extends File {
 
     public boolean canBuildApk() {
         if (isFile()) {
-            return getExtension().equals(FileUtils.TYPE.JAVASCRIPT.getExtension());
+            return getExtension().equalsIgnoreCase(FileUtils.TYPE.JAVASCRIPT.extension);
         }
         if (isDirectory()) {
             PFile[] listedFiles = listFiles();
             if (listedFiles != null) {
-                return Arrays.stream(listedFiles).anyMatch(pFile -> pFile.getName().equals(FileUtils.TYPE.PROJECT.getTypeName()));
+                return Arrays.stream(listedFiles).anyMatch(pFile -> pFile.getName().equalsIgnoreCase(FileUtils.TYPE.PROJECT.getTypeName()));
             }
         }
         return false;

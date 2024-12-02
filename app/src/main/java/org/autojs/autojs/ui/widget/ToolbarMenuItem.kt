@@ -37,7 +37,7 @@ class ToolbarMenuItem : LinearLayout {
         mImageView = findViewById<ImageView?>(R.id.icon).apply {
             setImageResource(iconResId)
             if (iconColor != Color.TRANSPARENT) {
-                setImageDrawable(DrawableUtils.filterDrawableColor(drawable, iconColor))
+                setImageDrawable(DrawableUtils.setDrawableColorFilterSrcIn(drawable, iconColor))
             }
         }
 
@@ -62,7 +62,7 @@ class ToolbarMenuItem : LinearLayout {
     }
 
     private fun ensureDisabledDrawable() {
-        mDisabledDrawable = mDisabledDrawable ?: DrawableUtils.filterDrawableColor(mEnabledDrawable, mColorDisabled)
+        mDisabledDrawable = mDisabledDrawable ?: DrawableUtils.setDrawableColorFilterSrcIn(mEnabledDrawable, mColorDisabled)
     }
 
     private fun ensureEnabledDrawable() {

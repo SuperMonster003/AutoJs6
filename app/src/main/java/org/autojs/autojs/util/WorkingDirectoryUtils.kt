@@ -1,8 +1,8 @@
 package org.autojs.autojs.util
 
 import org.autojs.autojs.annotation.MinSize
-import org.autojs.autojs.pref.Language
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.util.EnvironmentUtils.externalStorageDirectory
 import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
 import org.autojs.autojs.util.StringUtils.key
@@ -18,7 +18,7 @@ object WorkingDirectoryUtils {
 
     @JvmStatic
     var path: String
-        get() = Pref.getString(R.string.key_working_directory, str(R.string.default_value_working_directory))!!.let {
+        get() = Pref.getString(R.string.key_working_directory, str(R.string.default_value_working_directory)).let {
             File(externalStorageDirectory, it).path
         }
         set(path) {
@@ -63,16 +63,18 @@ object WorkingDirectoryUtils {
         }
         // @Hint by SuperMonster003 on Oct 14, 2022.
         //  ! Get the newest last modified and non-empty directory from default paths.
-        //  ! If null, the first path of default paths will be used as a fallback.
-        getRecommendedDefaultPaths().let { paths ->
-            Pref.putString(dirKey, paths.map {
-                File(externalStorageDirectory, it)
-            }.filter {
-                it.listFiles()?.isNotEmpty() ?: false
-            }.maxByOrNull {
-                it.lastModified()
-            }?.path?.let { toRelativePath(it) } ?: paths.first())
-        }
+        //  ! If null, the first path of default paths will be used.
+        //  ! zh-CN:
+        //  ! 从默认路径中获取一个最新修改过的非空目录.
+        //  ! 如果为空, 则使用默认路径的第一个.
+        val newestNonEmptyDir = getRecommendedDefaultPaths()
+            .map { File(externalStorageDirectory, it) }
+            .filter { it.listFiles()?.isNotEmpty() ?: false }
+            .maxByOrNull { it.lastModified() }
+        val selectedDir = newestNonEmptyDir?.let {
+            toRelativePath(it.path)
+        } ?: getRecommendedDefaultPaths().firstOrNull()
+        selectedDir?.let { Pref.putString(dirKey, it) }
     }
 
     @JvmStatic

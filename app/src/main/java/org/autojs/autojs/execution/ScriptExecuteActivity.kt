@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
+import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.eventloop.SimpleEvent
 import org.autojs.autojs.engine.JavaScriptEngine
@@ -27,6 +28,7 @@ import org.mozilla.javascript.ContinuationPending
 
 /**
  * Created by Stardust on Feb 5, 2017.
+ * Modified by SuperMonster003 as of Nov 15, 2023.
  */
 class ScriptExecuteActivity : AppCompatActivity() {
     private var mResult: Any? = null
@@ -34,12 +36,16 @@ class ScriptExecuteActivity : AppCompatActivity() {
     private var mExecutionListener: ScriptExecutionListener? = null
     private var mScriptSource: ScriptSource? = null
     private lateinit var mScriptExecution: ActivityScriptExecution
-    private lateinit var mRuntime: ScriptRuntime
+    private var mRuntime: ScriptRuntime? = null
+
+    @ScriptInterface
     lateinit var eventEmitter: EventEmitter
         private set
 
     // FIXME by Stardust on Mar 16, 2018.
     //  ! 如果 Activity 被回收则得不到改进.
+    //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+    //  ! No improvements would be obtained if Activity was destroyed.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val executionId = intent.getIntExtra(EXTRA_EXECUTION_ID, ScriptExecution.NO_ID)
@@ -56,8 +62,9 @@ class ScriptExecuteActivity : AppCompatActivity() {
         mScriptSource = mScriptExecution.source
         mScriptEngine = mScriptExecution.createEngine(this)
         mExecutionListener = mScriptExecution.listener
-        mRuntime = (mScriptEngine as JavaScriptEngine?)!!.runtime
-        eventEmitter = EventEmitter(mRuntime.bridges)
+        mRuntime = (mScriptEngine as JavaScriptEngine?)!!.runtime.also { rt ->
+            eventEmitter = EventEmitter(rt.bridges)
+        }
         runScript()
         emit("create", savedInstanceState)
     }
@@ -81,14 +88,14 @@ class ScriptExecuteActivity : AppCompatActivity() {
     private fun prepare() {
         mScriptEngine.put("activity", this)
         mScriptEngine.setTag("activity", this)
-        mScriptEngine.setTag(ScriptEngine.TAG_ENV_PATH, mScriptExecution.config.path)
+        mScriptEngine.setTag(ScriptEngine.TAG_ENV_PATH, mScriptExecution.config.envPath)
         mScriptEngine.setTag(ScriptEngine.TAG_WORKING_DIRECTORY, mScriptExecution.config.workingDirectory)
         mScriptEngine.init()
     }
 
     private fun doExecution() {
         val executeCallback = object : ExecuteCallback {
-            override fun onResult(r: Any) {
+            override fun onResult(r: Any?) {
                 mResult = r
             }
 
@@ -101,9 +108,9 @@ class ScriptExecuteActivity : AppCompatActivity() {
         mExecutionListener!!.onStart(mScriptExecution)
 
         if (BuildConfig.isInrt) {
-            (mScriptEngine as LoopBasedJavaScriptEngineWithDecryption?)!!.execute(mScriptSource, executeCallback)
+            (mScriptEngine as LoopBasedJavaScriptEngineWithDecryption).execute(mScriptSource, executeCallback)
         } else {
-            (mScriptEngine as LoopBasedJavaScriptEngine?)!!.execute(mScriptSource, executeCallback)
+            (mScriptEngine as LoopBasedJavaScriptEngine).execute(mScriptSource, executeCallback)
         }
     }
 
@@ -126,8 +133,9 @@ class ScriptExecuteActivity : AppCompatActivity() {
             mScriptEngine.destroy()
         }
 
-        @Suppress("DEPRECATION")
-        mRuntime.loopers?.waitWhenIdle(false)
+        mRuntime?.run {
+            loopers.waitWhenIdle(false)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -141,7 +149,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
         val event = SimpleEvent()
         emit("back_pressed", event)
         if (!event.consumed) {
-            @Suppress("DEPRECATION")
+            @Suppress("DEPRECATION", "KotlinRedundantDiagnosticSuppress")
             super.onBackPressed()
         }
     }
@@ -154,10 +162,6 @@ class ScriptExecuteActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         emit("resume")
-    }
-
-    override fun onRestart() {
-        super.onRestart()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -177,6 +181,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
         return super.onGenericMotionEvent(event)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         emit("activity_result", requestCode, resultCode, data)
@@ -197,7 +202,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
         try {
             eventEmitter.emit(event, *args)
         } catch (e: Exception) {
-            mRuntime.exit(e)
+            mRuntime?.exit(e)
         }
     }
 
@@ -206,7 +211,9 @@ class ScriptExecuteActivity : AppCompatActivity() {
         task: ScriptExecutionTask?,
     ) : AbstractScriptExecution(task) {
         private var mScriptEngine: ScriptEngine<*>? = null
-        fun createEngine(@Suppress("UNUSED_PARAMETER") activity: Activity?): ScriptEngine<*> {
+
+        @Suppress("unused", "UNUSED_PARAMETER")
+        fun createEngine(activity: Activity?): ScriptEngine<*> {
             mScriptEngine?.forceStop()
             return mScriptEngineManager.createEngineOfSourceOrThrow(source, id)
                 .apply { setTag(ExecutionConfig.tag, config) }

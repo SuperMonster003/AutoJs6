@@ -5,7 +5,6 @@ package org.autojs.autojs.core.record.inputevent;
  */
 public class EventFormatException extends RuntimeException {
 
-
     public static EventFormatException forEventStr(String eventStr, NumberFormatException e) {
         return new EventFormatException(eventStr, e);
     }

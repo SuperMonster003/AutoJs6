@@ -21,7 +21,6 @@ public class ValueMapper<V> {
         return this;
     }
 
-
     public ValueMapper<V> mapDefault(String key, V value) {
         mHashMap.put(key, value);
         mHashMap.put("", value);

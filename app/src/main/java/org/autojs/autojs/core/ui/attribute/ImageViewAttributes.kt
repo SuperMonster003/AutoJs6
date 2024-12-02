@@ -7,14 +7,15 @@ import android.widget.ImageView.ScaleType
 import androidx.core.widget.ImageViewCompat
 import org.autojs.autojs.core.ui.BiMaps
 import org.autojs.autojs.core.ui.inflater.ResourceParser
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
-open class ImageViewAttributes(resourceParser: ResourceParser, view: View) : ViewAttributes(resourceParser, view) {
+open class ImageViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as ImageView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("adjustViewBounds") { view.adjustViewBounds = it.toBoolean() }
         registerIntPixelAttr("baseline") { view.baseline = it }
@@ -22,12 +23,14 @@ open class ImageViewAttributes(resourceParser: ResourceParser, view: View) : Vie
         registerAttr("cropToPadding") { view.cropToPadding = it.toBoolean() }
         registerIntPixelAttr("maxHeight") { view.maxHeight = it }
         registerIntPixelAttr("maxWidth") { view.maxWidth = it }
-        registerAttr("path") { drawables.setupWithImage(view, wrapAsPath(it)) }
+        registerAttr("path") { drawables.setupWithImage(view, scriptRuntime.getPath(it, ::wrapAsPath)) }
         registerAttr("scaleType") { view.scaleType = SCALE_TYPES[it] }
-        registerAttr("src") { drawables.setupWithImage(view, it) }
+        registerAttr("src") { drawables.setupWithImage(view, scriptRuntime.getPath(it)) }
         registerAttr("tint") {
             // FIXME by Stardust on Oct 13, 2018.
-            //  ! Method setImageTineList not working.
+            //  ! Method setImageTintList not working.
+            //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
+            //  ! 方法 setImageTintList 无效果.
             val mode = ImageViewCompat.getImageTintMode(view)
             view.setColorFilter(ColorUtils.parse(view, it), mode ?: PorterDuff.Mode.SRC_ATOP)
         }
@@ -40,9 +43,18 @@ open class ImageViewAttributes(resourceParser: ResourceParser, view: View) : Vie
         else -> "file://$value"
     }
 
+    @Suppress("HttpUrlsUsage")
     private fun wrapAsUrl(value: String) = when {
         value.startsWith("http://") || value.startsWith("https://") -> value
         else -> "http://$value"
+    }
+
+    private fun ScriptRuntime.getPath(s: String, def: String = s): String {
+        return if (this.files.exists(s)) this.files.path(s) else def
+    }
+
+    private fun ScriptRuntime.getPath(s: String, def: (String) -> String): String {
+        return if (this.files.exists(s)) this.files.path(s) else def(s)
     }
 
     companion object {

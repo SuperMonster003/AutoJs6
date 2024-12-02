@@ -17,7 +17,7 @@ package pxb.android;
 
 import androidx.annotation.NonNull;
 
-import org.autojs.autojs.pref.Language;
+import org.autojs.autojs.core.pref.Language;
 
 import java.util.Objects;
 

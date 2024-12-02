@@ -1,0 +1,15 @@
+<resources>
+
+    <plurals name="text_items_total_sum">
+        <item quantity="one">Total: %d artículo</item>
+        <item quantity="many">Total: %d artículos</item>
+        <item quantity="other">Total: %d artículos</item>
+    </plurals>
+
+    <plurals name="text_already_stop_n_scripts">
+        <item quantity="one">%d script detenido</item>
+        <item quantity="many">%d scripts detenidos</item>
+        <item quantity="other">%d scripts detenidos</item>
+    </plurals>
+
+</resources>

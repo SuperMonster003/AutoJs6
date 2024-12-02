@@ -70,7 +70,6 @@ public class CodeGenerator {
         return generateAction(selector);
     }
 
-
     protected String generateCode(UiSelectorGenerator generator, UiObject root, UiObject target, int maxParentLevel, int maxChildrenLevel, boolean withFind) {
         String selector;
         if (withFind) {

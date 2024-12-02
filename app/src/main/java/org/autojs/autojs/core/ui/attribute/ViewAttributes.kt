@@ -27,6 +27,7 @@ import org.autojs.autojs.core.ui.inflater.util.Gravities
 import org.autojs.autojs.core.ui.inflater.util.Ids
 import org.autojs.autojs.core.ui.inflater.util.Strings
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -34,7 +35,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
+open class ViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, open val view: View) {
 
     val drawables: Drawables = resourceParser.drawables
 
@@ -42,7 +43,7 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
     private var mViewAttributeDelegate: ViewAttributeDelegate? = null
 
     init {
-        this.onRegisterAttrs()
+        this.onRegisterAttrs(scriptRuntime)
     }
 
     interface Getter<T> {
@@ -119,7 +120,7 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
     }
 
     @CallSuper
-    protected open fun onRegisterAttrs() {
+    protected open fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
         registerAttr("id") { view.id = Ids.parse(it) }
         registerAttr("gravity", Gravities::parse, ::setGravity)
         registerAttrs(arrayOf("width", "w", "layout_width", "layoutWidth"), { parseDimension(it, true) }, ::setWidth)
@@ -556,8 +557,10 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
                     return@forEachIndexed
                 }
                 if (value.startsWith("@")) {
+
                     // @Hint by SuperMonster003 on May 22, 2023.
                     //  ! Conditions like "@color/xxx", "@dimen/xxx" and so forth.
+                    //  ! zh-CN: 类似 "@color/xxx", "@dimen/xxx" 等情形.
 
                     if (index + 1 < split.size) {
                         result.add("$it/${split[index + 1]}")
@@ -571,7 +574,6 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
         }
 
         @JvmStatic
-        @Suppress("SpellCheckingInspection")
         fun parseDayOfWeek(value: String) = when {
             value.matches(Regex("MON(DAY)?", RegexOption.IGNORE_CASE)) -> Calendar.MONDAY
             value.matches(Regex("TUE(SDAY)?", RegexOption.IGNORE_CASE)) -> Calendar.TUESDAY
@@ -586,9 +588,18 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
                 //  ! Take Tuesday as an example,
                 //  ! for Java, Calendar.TUESDAY is 3,
                 //  ! for JavaScript, Date#getDay() is 2.
+                //  ! zh-CN:
+                //  ! Calendar.XXX 与 JavaScript Date 不同.
+                //  ! 以 "周二" (Tuesday) 为例,
+                //  ! 对于 Java, Calendar.TUESDAY 是 3,
+                //  ! 对于 JavaScript, Date#getDay() 是 2.
 
-                // Compatibility for 0 is not necessary.
-                // (value.toInt() + 6).mod(7) + 1
+                // @Hint by SuperMonster003 on May 19, 2023.
+                //  ! Compatibility for 0 is not necessary.
+                //  # (value.toInt() + 6).mod(7) + 1
+                //  ! zh-CN:
+                //  ! 0 值兼容不再必要.
+                //  # (value.toInt() + 6).mod(7) + 1
 
                 value.toInt()
             }
@@ -651,10 +662,10 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
             .map("low", View.DRAWING_CACHE_QUALITY_LOW)
 
         val IMPORTANT_FOR_ACCESSIBILITY: ValueMapper<Int> = ValueMapper<Int>("importantForAccessibility")
-            .map("auto", 0) //View.IMPORTANT_FOR_ACCESSIBILITY_AUTO)
-            .map("no", 2) //View.IMPORTANT_FOR_ACCESSIBILITY_NO)
-            .map("noHideDescendants", 4) //View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS)
-            .map("yes", 1) //View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+            .map("auto", 0) // View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+            .map("no", 2) // View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            .map("noHideDescendants", 4) // View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+            .map("yes", 1) // View.IMPORTANT_FOR_ACCESSIBILITY_YES
 
         val LAYOUT_DIRECTIONS: ValueMapper<Int> = ValueMapper<Int>("layoutDirection")
             .map("inherit", 2)
@@ -669,13 +680,13 @@ open class ViewAttributes(resourceParser: ResourceParser, open val view: View) {
             .map("outsideOverlay", View.SCROLLBARS_OUTSIDE_OVERLAY)
 
         val SCROLL_INDICATORS: ValueMapper<Int> = ValueMapper<Int>("scrollIndicators")
-            .map("bottom", 2) //View.SCROLL_INDICATOR_BOTTOM)
-            .map("end", 20) //View.SCROLL_INDICATOR_END)
-            .map("left", 4) //View.SCROLL_INDICATOR_LEFT)
+            .map("bottom", 2) // View.SCROLL_INDICATOR_BOTTOM)
+            .map("end", 20) // View.SCROLL_INDICATOR_END)
+            .map("left", 4) // View.SCROLL_INDICATOR_LEFT)
             .map("none", 0)
-            .map("right", 8) //View.SCROLL_INDICATOR_RIGHT)
-            .map("start", 10) //View.SCROLL_INDICATOR_START)
-            .map("top", 1) //View.SCROLL_INDICATOR_TOP)
+            .map("right", 8) // View.SCROLL_INDICATOR_RIGHT)
+            .map("start", 10) // View.SCROLL_INDICATOR_START)
+            .map("top", 1) // View.SCROLL_INDICATOR_TOP)
 
         val VISIBILITY: ValueMapper<Int> = ValueMapper<Int>("visibility")
             .map("visible", View.VISIBLE)

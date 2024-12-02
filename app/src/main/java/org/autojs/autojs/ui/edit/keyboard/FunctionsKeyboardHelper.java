@@ -14,6 +14,8 @@ import android.widget.LinearLayout;
 
 import org.autojs.autojs.event.BackPressedHandler;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Created by Stardust on Dec 9, 2017.
  * <a href="https://github.com/dss886/Android-FunctionsInputDetector">Android-FunctionsInputDetector</a>
@@ -22,7 +24,7 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
 
     private static final String SHARE_PREFERENCE_NAME = "FunctionsKeyboardHelper";
     private static final String SHARE_PREFERENCE_SOFT_INPUT_HEIGHT = "soft_input_height";
-    private final Activity mActivity;
+    private final WeakReference<Activity> mActivityRef;
     private final InputMethodManager mInputManager;
     private final SharedPreferences mPreferences;
     private View mFunctionsLayout;
@@ -30,7 +32,7 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
     private View mContentView;
 
     private FunctionsKeyboardHelper(Activity activity) {
-        mActivity = activity;
+        mActivityRef = new WeakReference<>(activity);
         mInputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         mPreferences = activity.getSharedPreferences(SHARE_PREFERENCE_NAME, Context.MODE_PRIVATE);
     }
@@ -64,7 +66,6 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
         return this;
     }
 
-
     public FunctionsKeyboardHelper setFunctionsTrigger(View triggerButton) {
         triggerButton.setOnClickListener(v -> {
             if (mFunctionsLayout.isShown()) {
@@ -77,7 +78,7 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
                     showFunctionsLayout();
                     unlockContentHeightDelayed();
                 } else {
-                    showFunctionsLayout();//两者都没显示，直接显示表情布局
+                    showFunctionsLayout(); // 两者都没显示, 直接显示表情布局
                 }
             }
         });
@@ -90,8 +91,8 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
     }
 
     public FunctionsKeyboardHelper build() {
-        mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN |
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        mActivityRef.get().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN |
+                                                        WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         hideSoftInput();
         return this;
     }
@@ -106,7 +107,6 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
         mFunctionsLayout.setVisibility(View.VISIBLE);
     }
 
-
     public void hideFunctionsLayout(boolean showSoftInput) {
         if (mFunctionsLayout.isShown()) {
             mFunctionsLayout.setVisibility(View.GONE);
@@ -116,13 +116,11 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
         }
     }
 
-
     private void lockContentHeight() {
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mContentView.getLayoutParams();
         params.height = mContentView.getHeight();
         params.weight = 0.0F;
     }
-
 
     private void unlockContentHeightDelayed() {
         mEditView.postDelayed(() -> ((LinearLayout.LayoutParams) mContentView.getLayoutParams()).weight = 1.0F, 200L);
@@ -133,11 +131,9 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
         mEditView.post(() -> mInputManager.showSoftInput(mEditView, InputMethodManager.SHOW_FORCED));
     }
 
-
     private void hideSoftInput() {
         mInputManager.hideSoftInputFromWindow(mEditView.getWindowToken(), 0);
     }
-
 
     private boolean isSoftInputShown() {
         return getSupportSoftInputHeight() != 0;
@@ -145,8 +141,8 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
 
     private int getSupportSoftInputHeight() {
         Rect r = new Rect();
-        mActivity.getWindow().getDecorView().getWindowVisibleDisplayFrame(r);
-        int screenHeight = mActivity.getWindow().getDecorView().getRootView().getHeight();
+        mActivityRef.get().getWindow().getDecorView().getWindowVisibleDisplayFrame(r);
+        int screenHeight = mActivityRef.get().getWindow().getDecorView().getRootView().getHeight();
         int softInputHeight = screenHeight - r.bottom;
         // When SDK Level >= 20 (Android L), the softInputHeight will contain the height of softButtonsBar (if has)
         softInputHeight = softInputHeight - getSoftKeyButtonsHeight();
@@ -158,9 +154,9 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
 
     private int getSoftKeyButtonsHeight() {
         DisplayMetrics metrics = new DisplayMetrics();
-        mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        mActivityRef.get().getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int usableHeight = metrics.heightPixels;
-        mActivity.getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
+        mActivityRef.get().getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
         int realHeight = metrics.heightPixels;
         if (realHeight > usableHeight) {
             return realHeight - usableHeight;

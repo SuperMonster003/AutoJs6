@@ -43,5 +43,4 @@
                 android:tint="@color/toolbar_text" />
     </FrameLayout>
 
-
 </LinearLayout>

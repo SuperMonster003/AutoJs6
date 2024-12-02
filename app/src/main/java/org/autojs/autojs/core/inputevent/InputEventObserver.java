@@ -16,11 +16,31 @@ import java.util.regex.Pattern;
 
 /**
  * Created by Stardust on Aug 4, 2017.
+ * Modified by SuperMonster003 as of May 26, 2022.
  */
 public class InputEventObserver {
 
+    private static InputEventObserver sGlobal;
+
+    private final CopyOnWriteArrayList<InputEventListener> mInputEventListeners = new CopyOnWriteArrayList<>();
+    private final Context mContext;
+    private Shell mShell;
+
+    public InputEventObserver(Context context) {
+        mContext = context;
+    }
+
+    public static InputEventObserver getGlobal(Context context) {
+        if (sGlobal == null) {
+            InputEventObserver observer = new InputEventObserver(context);
+            sGlobal = observer;
+            observer.observe();
+        }
+        return sGlobal;
+    }
+
     public static class InputEvent {
-        static final Pattern PATTERN = Pattern.compile("^\\[([^]]*)]\\s+([^:]*):\\s+([^\\s]*)\\s+([^\\s]*)\\s+([^\\s]*)\\s*$");
+        static final Pattern PATTERN = Pattern.compile("^\\[([^]]*)]\\s+([^:]*):\\s+(\\S*)\\s+(\\S*)\\s+(\\S*)\\s*$");
 
         static InputEvent parse(String eventStr) {
             Matcher matcher = PATTERN.matcher(eventStr);
@@ -29,13 +49,13 @@ public class InputEventObserver {
             }
             double time;
             try {
-                time = Double.parseDouble(matcher.group(1));
+                String grouped = matcher.group(1);
+                time = Double.parseDouble(grouped);
             } catch (NumberFormatException e) {
                 throw new EventFormatException(eventStr, e);
             }
             return new InputEvent(time, matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
         }
-
 
         public double time;
         public String device;
@@ -50,7 +70,6 @@ public class InputEventObserver {
             this.code = code;
             this.value = value;
         }
-
 
         @NonNull
         @Override
@@ -69,25 +88,10 @@ public class InputEventObserver {
         void onInputEvent(@NonNull InputEvent e);
     }
 
-    private final CopyOnWriteArrayList<InputEventListener> mInputEventListeners = new CopyOnWriteArrayList<>();
-    private final Context mContext;
-    private Shell mShell;
-
-    public InputEventObserver(Context context) {
-        mContext = context;
-    }
-
-    public static InputEventObserver initObserver(Context context) {
-        var inputEventObserver = new InputEventObserver(context);
-        inputEventObserver.observe();
-        return inputEventObserver;
-    }
-
     public void observe() {
-        if (mShell != null)
-            throw new IllegalStateException(mContext
-                    .getString(R.string.error_function_called_more_than_once,
-                            "InputEventObserver.observe"));
+        if (mShell != null) {
+            throw new IllegalStateException(mContext.getString(R.string.error_function_called_more_than_once, "InputEventObserver.observe"));
+        }
         mShell = new Shell(mContext, true);
         mShell.setCallback(new Shell.SimpleCallback() {
             @Override
@@ -106,13 +110,13 @@ public class InputEventObserver {
     }
 
     public void onInputEvent(String eventStr) {
-        if (TextUtils.isEmpty(eventStr) || !eventStr.startsWith("["))
-            return;
-        try {
-            InputEvent event = InputEvent.parse(eventStr);
-            dispatchInputEvent(event);
-        } catch (Exception ignored) {
-
+        if (!TextUtils.isEmpty(eventStr) && eventStr.startsWith("[")) {
+            try {
+                InputEvent event = InputEvent.parse(eventStr);
+                dispatchInputEvent(event);
+            } catch (Exception ignored) {
+                /* Ignored. */
+            }
         }
     }
 
@@ -130,10 +134,8 @@ public class InputEventObserver {
         return mInputEventListeners.remove(listener);
     }
 
-
     public void recycle() {
         mShell.exit();
     }
-
 
 }

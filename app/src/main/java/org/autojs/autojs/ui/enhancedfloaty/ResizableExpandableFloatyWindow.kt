@@ -17,6 +17,7 @@ import org.autojs.autojs.ui.enhancedfloaty.gesture.ResizeGesture
 import org.autojs.autojs.ui.enhancedfloaty.util.WindowTypeCompat
 import org.autojs.autojs.ui.widget.ViewSwitcher
 import org.autojs.autojs6.R
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Created by Stardust on Apr 18, 2017.
@@ -34,6 +35,7 @@ class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandableFlo
 
     private var mResizer: View? = null
     private var mMoveCursor: View? = null
+    private var mViewAttachedTasks: CopyOnWriteArrayList<() -> Unit> = CopyOnWriteArrayList()
 
     private var mCollapsedViewX = 0
     private var mCollapsedViewY = 0
@@ -56,11 +58,21 @@ class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandableFlo
         return windowView
     }
 
+    fun clearOnViewAttachedTask() {
+        mViewAttachedTasks.clear()
+    }
+
+    fun addOnViewAttachedTask(task: () -> Unit) {
+        mViewAttachedTasks.add(task)
+    }
+
     override fun onAttachToWindow(view: View, manager: WindowManager) {
         super.onAttachToWindow(view, manager)
         initGesture()
         setKeyListener()
         setInitialState()
+        mViewAttachedTasks.forEach { it.invoke() }
+        clearOnViewAttachedTask()
     }
 
     private fun initGesture() {
@@ -88,7 +100,7 @@ class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandableFlo
     }
 
     private fun setKeyListener() {
-        windowView.setOnKeyListener { _, keyCode, event ->
+        windowView?.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
                 onBackPressed()
                 return@setOnKeyListener true
@@ -186,7 +198,7 @@ class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandableFlo
 
     fun requestWindowFocus() {
         updateWindowLayoutParams(windowLayoutParams.apply { flags = flags and FLAG_NOT_FOCUSABLE.inv() })
-        windowView.requestFocus()
+        windowView?.requestFocus()
     }
 
     private fun setWindowLayoutNoLimit() {

@@ -1,0 +1,650 @@
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+import java.util.zip.ZipFile
+import org.apache.commons.compress.archivers.sevenz.SevenZFile
+
+ext.Utils = Utils
+
+class Utils {
+
+    static LibDeployer newLibDeployer(Project project, String name, String downloadUrl) {
+        return new LibDeployer(project, name, downloadUrl)
+    }
+
+    static Formatted newFormatted(String title, Collection<String> contents = [], String subtitle = null) {
+        return new Formatted(title, contents, subtitle)
+    }
+
+    static Versions newVersions(Project project) {
+        return new Versions("$project.rootDir/version.properties")
+    }
+
+    private static String generateProgressBar(double progress, int length = 30) {
+        int filledLength = (int) (length * progress / 100.0)
+        String filled = '#' * filledLength
+        String empty = '-' * (length - filledLength)
+        filled + empty
+    }
+
+    private static String formatFileSize(long size) {
+        if (size < 1024) {
+            String.format("%d B", size)
+        } else if (size < (1024 * 1024)) {
+            String.format("%.2f KB", size / 1024.0)
+        } else if (size < (1024 * 1024 * 1024)) {
+            String.format("%.2f MB", size / (1024.0 * 1024))
+        } else {
+            String.format("%.2f GB", size / (1024.0 * 1024 * 1024))
+        }
+    }
+
+    private static ExtractedFile extractFileFromUrl(url, standardize = false) {
+        def fileNameWithExtension = url.tokenize("/").last()
+
+        String fileName
+        String extensionName
+
+        if (fileNameWithExtension.contains('.')) {
+            def lastIndexOfDot = fileNameWithExtension.lastIndexOf('.')
+            fileName = fileNameWithExtension.take(lastIndexOfDot)
+            extensionName = fileNameWithExtension.substring(lastIndexOfDot + 1)
+        } else {
+            fileName = fileNameWithExtension
+            extensionName = ""
+        }
+
+        if (standardize) {
+            fileName = fileName.toLowerCase().replaceAll(/\s+/, '').replaceAll(/[^a-z0-9.]/, '-')
+        }
+
+        return new ExtractedFile(fileName, extensionName)
+    }
+
+    private static class LibDeployer {
+
+        String name
+        String downloadUrl = null
+        Project project
+
+        String sourceDir = File.separator
+        String destDir = File.separator
+
+        File cacheFile
+        File cacheRootFile
+        String cacheFileName
+        String cacheFileExtensionName
+
+        private File privateSkipFile = null
+
+        File getSkipFile() {
+            if (privateSkipFile == null) {
+                privateSkipFile = project.file(new File(destDir, "${cacheFileName}.skip"))
+            }
+            privateSkipFile
+        }
+
+        private File privateTempOutFile = null
+
+        File getTempOutFile() {
+            if (privateTempOutFile == null) {
+                privateTempOutFile = project.file(new File(destDir, "temp-extracted"))
+            }
+            privateTempOutFile
+        }
+
+        LibDeployer(Project project, String name, String downloadUrl) {
+            this.project = project
+            this.name = name
+            this.downloadUrl = downloadUrl
+
+            def extractedFile = extractFileFromUrl(downloadUrl, true)
+
+            this.cacheRootFile = project.file("cache")
+            cacheRootFile.mkdirs()
+            this.cacheFileName = "${extractedFile.fileName}-[${generateShortMd5String(downloadUrl).toLowerCase()}]"
+            this.cacheFileExtensionName = extractedFile.extensionName
+            this.cacheFile = project.file(new File(cacheRootFile, "$cacheFileName.$cacheFileExtensionName"))
+        }
+
+        LibDeployer setSourceDir(String sourceDir) {
+            this.sourceDir = new File(sourceDir).path
+            return this
+        }
+
+        LibDeployer setDestDir(String destDir) {
+            this.destDir = new File(destDir).path
+            project.file(destDir).mkdirs()
+            return this
+        }
+
+        void deploy() {
+            if (tempOutFile.exists()) {
+                project.delete tempOutFile
+            }
+
+            def checkResult = checkCacheAndSkipFiles()
+            def (shouldDownload, shouldExtract) = [checkResult.shouldDownload, checkResult.shouldExtract]
+
+            if (shouldDownload) {
+                printDownloadInfo()
+                downloadWithRetry()
+                shouldExtract = true
+            }
+
+            if (shouldExtract) {
+                try {
+                    printExtractInfo()
+                    extractCacheFile()
+                    generateMd5File(cacheFile)
+                } catch (Exception e) {
+                    println("Cache file was deleted as there is an error during extraction")
+                    println("Cache file: ${cacheFile.absolutePath}")
+                    cacheFile.delete()
+                    println()
+                    throw e
+                }
+            }
+        }
+
+        void clean() {
+            project.delete skipFile
+            project.delete tempOutFile
+            deleteDestAccordingToSrc()
+            deleteCacheAccordingToMd5()
+        }
+
+        private LinkedHashMap<String, Boolean> checkCacheAndSkipFiles() {
+            def shouldDownload = true
+            def shouldExtract = true
+
+            if (skipFile.exists()) {
+                println("No need to download or extract \"$name\" archive file as the \"skip file\" exists")
+                shouldDownload = false
+                shouldExtract = false
+                println()
+            } else if (cacheFile.exists()) {
+                if (validateMd5File(cacheFile)) {
+                    println("No need to download \"$name\" archive file as the cache file exists and is valid")
+                    shouldDownload = false
+                    println("Cache file of \"$name\" needs to be extracted as the \"skip file\" doesn't exist")
+                } else {
+                    println("Cache file of \"$name\" was deleted as it is invalid")
+                    println("Cache file: $cacheFile")
+                    project.delete cacheFile
+                    def md5File = new File(cacheFile.parentFile, cacheFile.name + ".md5")
+                    if (md5File.exists()) {
+                        println("MD5 file of \"$name\" was deleted as it is unreliable")
+                        println("MD5 file: $md5File")
+                        project.delete md5File
+                    }
+                }
+                println()
+            }
+            return [shouldDownload: shouldDownload, shouldExtract: shouldExtract]
+        }
+
+        private static boolean validateMd5File(File cacheFile) {
+            def md5File = new File(cacheFile.parentFile, cacheFile.name + ".md5")
+            if (!md5File.exists()) {
+                return false
+            }
+            def expectedMd5 = md5File.text.trim().toUpperCase()
+            def actualMd5 = generateMd5String(cacheFile).toUpperCase()
+            return expectedMd5 == actualMd5
+        }
+
+        private static void generateMd5File(File file) {
+            def md5File = new File(file.parentFile, file.name + ".md5")
+
+            println("Generating MD5...")
+            def generatedMd5 = generateMd5String(file)
+            md5File.text = generatedMd5
+            println("MD5 generated: $generatedMd5")
+
+            println()
+        }
+
+        private static String generateMd5String(File file) {
+            try (FileInputStream fis = new FileInputStream(file)) {
+                FileChannel fileChannel = fis.getChannel()
+                MessageDigest md = MessageDigest.getInstance("MD5")
+                ByteBuffer buffer = ByteBuffer.allocate(4096)
+
+                while (fileChannel.read(buffer) > 0) {
+                    buffer.flip()
+                    md.update(buffer)
+                    buffer.clear()
+                }
+
+                return new BigInteger(1, md.digest()).toString(16).padLeft(32, '0')
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException("MD5 algorithm not found", e)
+            }
+        }
+
+        private static String generateShortMd5String(String s) {
+            MessageDigest md = MessageDigest.getInstance("MD5")
+            md.update(s.bytes)
+            return new BigInteger(1, md.digest()).toString(32)
+        }
+
+        private void printDownloadInfo() {
+            def title = "Download \"$name\" archive file for \"${project.ext["projectName"]}\" Gradle project"
+            def srcInfo = "Source: $downloadUrl"
+            def destInfo = "Destination: $cacheFile"
+            def hintInfo = [
+                    "If the download gets stuck and won't finish,",
+                    "try downloading the source file with tools like IDM (Internet Download Manager),",
+                    "then renaming it into the destination path above.",
+            ]
+
+            def maxLength = [
+                    [title, srcInfo, destInfo].max { it.length() },
+                    hintInfo.max { it.length() }
+            ].max { it.length() }.length()
+
+            def infoList = [
+                    "=".repeat(maxLength),
+                    title,
+                    "-".repeat(maxLength),
+                    srcInfo,
+                    destInfo,
+                    "-".repeat(maxLength),
+                    hintInfo.join("\n"),
+                    "=".repeat(maxLength),
+                    "",
+            ]
+            infoList.forEach { println(it) }
+        }
+
+        private void printExtractInfo() {
+            def title = "Extract the archive file for \"${project.ext["projectName"]}\" Gradle project"
+            def srcInfo = "Source: ${cacheFile.absolutePath}"
+            def destInfo = "Destination: ${project.file(destDir).absolutePath}"
+            def hintInfo = cacheFileExtensionName == "7z" ? [
+                    "Extracting \"7z\" archive file may take some time to complete.",
+            ] : []
+
+            def maxLength = [
+                    [title, srcInfo, destInfo].max { it.length() },
+                    hintInfo.max { it.length() }
+            ].max { it != null ? it.length() : 0 }.length()
+
+            def infoList = [
+                    "=".repeat(maxLength),
+                    title,
+                    "-".repeat(maxLength),
+                    srcInfo,
+                    destInfo,
+                    hintInfo.isEmpty() ? null : "-".repeat(maxLength),
+                    hintInfo.isEmpty() ? null : hintInfo.join("\n"),
+                    "=".repeat(maxLength),
+                    "",
+            ]
+            infoList.forEach { if (it != null) println(it) }
+        }
+
+        private void downloadWithRetry(int maxRetries = 3, int retryDelay = 2000) {
+            for (int attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    download()
+                    return
+                } catch (IOException e) {
+                    println("Attempt $attempt of $maxRetries failed: ${e.message}")
+                    if (attempt < maxRetries) {
+                        println("Retrying after ${retryDelay / 1000} seconds...")
+                        sleep(retryDelay)
+                    } else {
+                        throw new GradleException("Download failed after $maxRetries attempts", e)
+                    }
+                }
+            }
+        }
+
+        private void extractCacheFile() {
+            switch (cacheFileExtensionName) {
+                case 'zip':
+                    handleZip()
+                    break
+                case '7z':
+                    handleSevenZip()
+                    break
+                default:
+                    throw new GradleException("Unknown archive file type: $cacheFileExtensionName")
+            }
+            println("All files extracted into [ ${project.file(destDir)} ]")
+            if (!skipFile.exists()) {
+                skipFile.parentFile.mkdirs()
+                skipFile.createNewFile()
+                println("File \"${skipFile.name}\" created")
+            }
+            println()
+        }
+
+        private void deleteDestAccordingToSrc() {
+            // TODO by SuperMonster003 on Oct 22, 2024.
+            //  ! Use the cache file as a reference file.
+            //  ! If the cache file does not exist, attempt to re-download it.
+            //  ! According to the sourceDir, obtain a single-level file directory tree
+            //  ! from the compressed file, and delete the corresponding files
+            //  ! under the destDir directory based on this.
+            //  ! If the processed destDir is empty, delete it as well.
+            //  ! zh-CN:
+            //  ! 将缓存文件作为参考文件, 缓存文件不存在时, 尝试重新下载.
+            //  ! 根据 sourceDir, 从压缩文件中获取单一层级的文件目录树, 由此删除 destDir 目录下的对应文件.
+            //  ! 处理后的 destDir 若为空, 则一并删除.
+
+            /* Pending code... */
+
+            // @Caution by SuperMonster003 on Oct 22, 2024.
+            //  ! This operation is NOT safe.
+            //  ! zh-CN: 此操作存在安全隐患.
+            project.delete destDir
+
+            def tmp = project.file(destDir).parentFile
+            while (tmp != project.projectDir) {
+                if (tmp.listFiles().toList().isEmpty()) {
+                    println("Delete empty directory: $tmp.absolutePath")
+                    project.delete tmp
+                }
+                tmp = tmp.parentFile
+            }
+        }
+
+        private deleteCacheAccordingToMd5() {
+            cacheRootFile.eachFile { file ->
+                if (!file.name.endsWith('.md5')) {
+                    def md5File = new File(file.parentFile, file.name + ".md5")
+                    if (!md5File.exists() || !validateMd5File(file)) {
+                        project.delete(file)
+                        println("Delete cache file: ${file.absolutePath}")
+                        if (md5File.exists()) {
+                            project.delete(md5File)
+                            println("Delete MD5 file: ${md5File.absolutePath}")
+                        }
+                        println()
+                    }
+                }
+            }
+        }
+
+        private void download() {
+            final int MAX_RETRIES = 3
+            int attempt = 0
+            boolean success = false
+
+            while (attempt < MAX_RETRIES && !success) {
+                try {
+                    attempt++
+
+                    cacheFile.parentFile.mkdirs()
+
+                    def urlConn = new URI(downloadUrl).toURL().openConnection()
+                    urlConn.connectTimeout = 120_000
+                    urlConn.readTimeout = 90_000
+                    long fileSize = urlConn.contentLengthLong
+
+                    urlConn.getInputStream().withCloseable { inputStream ->
+                        cacheFile.withOutputStream { outputStream ->
+                            byte[] buffer = new byte[8192]
+                            long downloadedSize = 0
+                            int bytesRead
+
+                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                outputStream.write(buffer, 0, bytesRead)
+                                downloadedSize += bytesRead
+
+                                double progress = (downloadedSize * 100.0 / fileSize)
+                                String progressBar = generateProgressBar(progress)
+                                print String.format("\rDownloading... [ %s ] %.2f%%", progressBar, progress)
+                                System.out.flush()
+                            }
+                        }
+                    }
+
+                    String downloadPath = cacheFile.absolutePath
+                    String formattedFileSize = formatFileSize(fileSize)
+                    print String.format("\rDownload complete [ %s | %s ]\n", downloadPath, formattedFileSize)
+                    System.out.flush()
+                    println()
+
+                    success = true
+
+                } catch (SocketTimeoutException ignored) {
+                    println String.format("Attempt %d/%d failed: Connection timed out. Retrying...", attempt, MAX_RETRIES)
+                } catch (IOException e) {
+                    println String.format("Attempt %d/%d failed: %s. Retrying...", attempt, MAX_RETRIES, e.message)
+                }
+
+                if (!success && attempt >= MAX_RETRIES) {
+                    println "Download failed after $MAX_RETRIES attempts."
+                }
+            }
+        }
+
+        private void handleZip() {
+            def zipFileForTotalSize = new ZipFile(cacheFile)
+            def zipEntriesForTotalSize = zipFileForTotalSize.entries()
+            def entries = []
+            def totalExtractedSize = 0L
+
+            def sourceDirPath = new File(sourceDir).path
+            if (sourceDirPath.startsWith(File.separator)) sourceDirPath = sourceDirPath.substring(1)
+
+            while (zipEntriesForTotalSize.hasMoreElements()) {
+                def entry = zipEntriesForTotalSize.nextElement()
+                def entryName = new File(entry.name).path
+                if (entryName.startsWith(sourceDirPath)) {
+                    entries.add(entry)
+                    totalExtractedSize += entry.size
+                }
+            }
+
+            zipFileForTotalSize.close()
+
+            def zipFile = new ZipFile(cacheFile)
+            def zipEntries = zipFile.entries()
+
+            int totalEntries = entries.size()
+            int processedEntries = 0
+
+            while (zipEntries.hasMoreElements()) {
+                def entry = zipEntries.nextElement()
+                def entryName = new File(entry.name).path
+                if (entryName.startsWith(sourceDirPath)) {
+                    File outFile = project.file(new File(tempOutFile, entryName.substring(sourceDirPath.length())))
+                    if (entry.isDirectory()) {
+                        outFile.mkdirs()
+                    } else {
+                        outFile.parentFile.mkdirs()
+                        zipFile.getInputStream(entry).withCloseable { entryInputStream ->
+                            outFile.withOutputStream { outputStream ->
+                                byte[] buffer = new byte[8192]
+                                int bytesRead
+                                while ((bytesRead = entryInputStream.read(buffer)) != -1) {
+                                    outputStream.write(buffer, 0, bytesRead)
+                                }
+                            }
+                        }
+                    }
+
+                    double progress = (processedEntries * 100.0 / totalEntries)
+                    String progressBar = generateProgressBar(progress)
+                    print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
+                    System.out.flush()
+
+                    processedEntries++
+                }
+            }
+
+            String formattedTotalExtractedSize = formatFileSize(totalExtractedSize)
+            print String.format("\rExtraction complete [ %s | %s ]\n", project.file(destDir).absolutePath, formattedTotalExtractedSize)
+            System.out.flush()
+            println()
+
+            zipFile.close()
+
+            project.copy {
+                from tempOutFile
+                into destDir
+            }
+            project.delete tempOutFile
+        }
+
+        private void handleSevenZip() {
+            def sevenZFileForTotalSize = new SevenZFile.Builder().setFile(cacheFile).get()
+            def entry
+            def entries = []
+            def totalExtractedSize = 0L
+
+            def sourceDirPath = new File(sourceDir).path
+            if (sourceDirPath.startsWith(File.separator)) sourceDirPath = sourceDirPath.substring(1)
+
+            while ((entry = sevenZFileForTotalSize.getNextEntry()) != null) {
+                def entryName = new File(entry.name).path
+                if (entryName.startsWith(sourceDirPath)) {
+                    entries.add(entry)
+                    totalExtractedSize += entry.size
+                }
+            }
+
+            sevenZFileForTotalSize.close()
+
+            def sevenZFile = new SevenZFile.Builder().setFile(cacheFile).get()
+
+            int totalEntries = entries.size()
+            int processedEntries = 0
+
+            while ((entry = sevenZFile.getNextEntry()) != null) {
+                def entryName = new File(entry.name).path
+                if (entryName.startsWith(sourceDirPath)) {
+                    File outFile = project.file(new File(tempOutFile, entryName.substring(sourceDirPath.length())))
+                    if (entry.isDirectory()) {
+                        outFile.mkdirs()
+                    } else {
+                        outFile.parentFile.mkdirs()
+                        outFile.withOutputStream { outputStream ->
+                            sevenZFile.getInputStream(entry).withCloseable { entryInputStream ->
+                                byte[] buffer = new byte[8192]
+                                int bytesRead
+                                while ((bytesRead = entryInputStream.read(buffer)) != -1) {
+                                    outputStream.write(buffer, 0, bytesRead)
+                                }
+                            }
+                        }
+                    }
+
+                    double progress = (processedEntries * 100.0 / totalEntries)
+                    String progressBar = generateProgressBar(progress)
+                    print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
+                    System.out.flush()
+
+                    processedEntries++
+                }
+            }
+
+            String formattedUncompressedSize = formatFileSize(totalExtractedSize)
+            print String.format("\rExtraction complete [ %s | %s ]\n", project.file(destDir).absolutePath, formattedUncompressedSize)
+            System.out.flush()
+
+            sevenZFile.close()
+
+            project.copy {
+                from tempOutFile
+                into destDir
+            }
+            project.delete tempOutFile
+        }
+
+    }
+
+    private static class Versions {
+
+        private Properties properties
+
+        private static String PREFIX_PUBLIC = "PUBLIC"
+        private static String SUFFIX_VERSION = "VERSION"
+
+        Versions(String filePath) {
+            File file = new File(filePath)
+            if (!file.canRead()) {
+                throw FileNotFoundException("Cannot read file '$filePath'")
+            }
+            properties = new Properties()
+            properties.load(new FileInputStream(file))
+        }
+
+        String get(String propertyName) {
+            if (propertyName.contains("/")) {
+                return get(propertyName.split("/").toList())
+            }
+            var value = properties["${propertyName}_$SUFFIX_VERSION"] as String
+            return value == PREFIX_PUBLIC
+                    ? properties["${PREFIX_PUBLIC}_${propertyName}_$SUFFIX_VERSION"] as String
+                    : value
+        }
+
+        String get(List<String> propertyInfo) {
+            def (lib, body) = propertyInfo
+            var value = properties["${lib}_${body}_$SUFFIX_VERSION"] as String
+            return value == PREFIX_PUBLIC
+                    ? properties["${PREFIX_PUBLIC}_${body}_$SUFFIX_VERSION"] as String
+                    : value
+        }
+
+    }
+
+    private static class Formatted {
+
+        private String title
+        private Collection<String> contents
+        private String subtitle
+        private List<String> formattedOutput
+
+        Formatted(String title, Collection<String> contents = [], String subtitle = null) {
+            this.title = title
+            this.contents = contents
+            this.subtitle = subtitle
+
+            formattedOutput = {
+                def elements = []
+                if (subtitle != null) elements.add(subtitle)
+                elements.addAll(contents)
+                def maxLength = ([title, subtitle] + contents).findAll().collect { it.length() }.max()
+                def result = [
+                        '=' * maxLength,
+                        title,
+                        subtitle,
+                        contents.isEmpty() ? null : '-' * maxLength
+                ].findAll() + contents + ['=' * maxLength, '']
+                return result
+            }()
+        }
+
+        void print(boolean contentsMatters = false) {
+            formattedOutput.each {
+                if (!contentsMatters || !contents.isEmpty()) {
+                    println(it)
+                }
+            }
+        }
+
+        void throwException() {
+            throw new Exception(formattedOutput.join('\n'))
+        }
+
+    }
+
+    private static class ExtractedFile {
+        String fileName
+        String extensionName
+
+        ExtractedFile(String fileName, String extensionName) {
+            this.fileName = fileName
+            this.extensionName = extensionName
+        }
+    }
+
+}

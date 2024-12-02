@@ -1,0 +1,17 @@
+<resources>
+
+    <plurals name="text_items_total_sum">
+        <item quantity="one">Всего: %d элемент</item>
+        <item quantity="few">Всего: %d элемента</item>
+        <item quantity="many">Всего: %d элементов</item>
+        <item quantity="other">Всего: %d элементов</item>
+    </plurals>
+
+    <plurals name="text_already_stop_n_scripts">
+        <item quantity="one">%d скрипт остановлен</item>
+        <item quantity="few">%d скрипта остановлены</item>
+        <item quantity="many">%d скриптов остановлены</item>
+        <item quantity="other">%d скриптов остановлены</item>
+    </plurals>
+
+</resources>

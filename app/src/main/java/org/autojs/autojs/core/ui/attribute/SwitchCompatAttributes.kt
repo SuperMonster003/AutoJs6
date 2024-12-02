@@ -6,13 +6,14 @@ import androidx.appcompat.widget.SwitchCompat
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Strings
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class SwitchCompatAttributes(resourceParser: ResourceParser, view: View) : CompoundButtonAttributes(resourceParser, view) {
+open class SwitchCompatAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : CompoundButtonAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as SwitchCompat
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("showText") { view.showText = it.toBoolean() }
         registerAttr("textOff") { view.textOff = Strings.parse(view, it) }

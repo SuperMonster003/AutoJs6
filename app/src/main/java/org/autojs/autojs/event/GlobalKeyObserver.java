@@ -2,14 +2,11 @@ package org.autojs.autojs.event;
 
 import android.util.Log;
 import android.view.KeyEvent;
-
 import org.autojs.autojs.AutoJs;
-import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.accessibility.AccessibilityService;
 import org.autojs.autojs.core.accessibility.OnKeyListener;
-import org.autojs.autojs.core.inputevent.InputEventObserver;
 import org.autojs.autojs.core.inputevent.ShellKeyObserver;
-import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.core.pref.Pref;
 
 /**
  * Created by Stardust on Aug 14, 2017.
@@ -23,19 +20,32 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
     private static final EventDispatcher.Event<OnVolumeDownListener> VOLUME_DOWN_EVENT = OnVolumeDownListener::onVolumeDown;
     private static final String LOG_TAG = "GlobalKeyObserver";
     private static GlobalKeyObserver sSingleton;
-    private final EventDispatcher<OnVolumeDownListener> mVolumeDownEventDispatcher = new EventDispatcher<>();
+    private final EventDispatcher<OnVolumeDownListener> mVolumeDownEventDispatcher;
     private boolean mVolumeDownFromShell, mVolumeDownFromAccessibility;
     private boolean mVolumeUpFromShell, mVolumeUpFromAccessibility;
 
-    public GlobalKeyObserver() {
-        AccessibilityService.Companion.getStickOnKeyObserver()
-                .addListener(this);
-        ShellKeyObserver observer = new ShellKeyObserver();
-        observer.setKeyListener(this);
-        InputEventObserver.initObserver(GlobalAppContext.get()).addListener(observer);
+    private GlobalKeyObserver() {
+        mVolumeDownEventDispatcher = new EventDispatcher<>();
+        AccessibilityService.Companion.getStickOnKeyObserver().addListener(this);
+        // ShellKeyObserver observer = new ShellKeyObserver();
+        // observer.setKeyListener(this);
+        // InputEventObserver.getGlobal(GlobalAppContext.get()).addListener(observer);
     }
 
     public static void initIfNeeded() {
+        if (Pref.isUseVolumeControlRunningEnabled()) makeSureSingletonInitialized();
+    }
+
+    public static void init() {
+        makeSureSingletonInitialized();
+    }
+
+    public static GlobalKeyObserver getSingleton() {
+        makeSureSingletonInitialized();
+        return sSingleton;
+    }
+
+    private static void makeSureSingletonInitialized() {
         if (sSingleton == null) {
             sSingleton = new GlobalKeyObserver();
         }
@@ -63,7 +73,7 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
 
     @Override
     public void onKeyEvent(int keyCode, KeyEvent event) {
-        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+        if (event.getAction() != KeyEvent.ACTION_UP) {
             return;
         }
         if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
@@ -83,9 +93,13 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
         }
     }
 
-
     @Override
     public void onKeyDown(String keyName) {
+        /* Empty body. */
+    }
+
+    @Override
+    public void onKeyUp(String keyName) {
         if ("KEY_VOLUMEUP".equals(keyName)) {
             if (mVolumeUpFromAccessibility) {
                 mVolumeUpFromAccessibility = false;
@@ -103,8 +117,4 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
         }
     }
 
-    @Override
-    public void onKeyUp(String keyName) {
-
-    }
 }

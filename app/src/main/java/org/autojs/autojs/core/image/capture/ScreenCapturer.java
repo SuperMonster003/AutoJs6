@@ -1,271 +1,248 @@
 package org.autojs.autojs.core.image.capture;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-import android.view.OrientationEventListener;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import org.autojs.autojs.lang.ThreadCompat;
-import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
-import org.autojs.autojs.runtime.exception.ScriptException;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
-import org.autojs.autojs.util.ForegroundServiceUtils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.text.MessageFormat;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Stardust on May 17, 2017.
  * Modified by SuperMonster003 as of May 19, 2022.
  */
+// @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
 public class ScreenCapturer {
 
-    private static final String TAG = ScreenCapturer.class.getSimpleName();
+    private static final Pattern PATTERN_BUFFER_FORMAT_EXCEPTION = Pattern.compile("buffer format ([0-9a-zA-Z]+) doesn't match");
 
-    public static final int ORIENTATION_AUTO = Configuration.ORIENTATION_UNDEFINED;
-    public static final int ORIENTATION_LANDSCAPE = Configuration.ORIENTATION_LANDSCAPE;
-    public static final int ORIENTATION_PORTRAIT = Configuration.ORIENTATION_PORTRAIT;
+    public static final int ORIENTATION_AUTO = Configuration.ORIENTATION_UNDEFINED; // 0
+    public static final int ORIENTATION_LANDSCAPE = Configuration.ORIENTATION_LANDSCAPE; // 1
+    public static final int ORIENTATION_PORTRAIT = Configuration.ORIENTATION_PORTRAIT; // 2
+    public static final int ORIENTATION_NONE = -1;
 
-    // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on May 19, 2022.
-    //  ! Snippet:
-    //  ! private final ConcurrentHashMap<ScriptRuntime, Boolean> registeredRuntimes = new ConcurrentHashMap<>();
-    private static final List<ScriptRuntime> mScriptRuntimes = Collections.synchronizedList(new ArrayList<>());
-
-    private final MediaProjectionManager mProjectionManager;
+    private volatile Image mUnderUsingImage;
+    private final int mScreenDensity;
+    private final Handler mHandler;
+    private final Context mContext;
+    private final int mOrientation;
+    private final Object mImageAvailableLock = new Object();
+    private final Options mOptions;
     private ImageReader mImageReader;
     private MediaProjection mMediaProjection;
     private VirtualDisplay mVirtualDisplay;
-    private volatile Looper mImageAcquireLooper;
-    private volatile Image mUnderUsingImage;
-    private final AtomicReference<Image> mCachedImage = new AtomicReference<>();
-    private volatile Exception mException;
-    private final int mScreenDensity;
-    private final Handler mHandler;
-    private final Intent mData;
-    private final Context mContext;
-    private int mOrientation = -1;
+    private OnScreenCaptureAvailableListener mOnScreenCaptureAvailableListener;
     private int mDetectedOrientation;
-    private OrientationEventListener mOrientationEventListener;
-    private boolean mIsMediaProjectionStopped;
+    private int mPixelFormat = PixelFormat.RGBA_8888;
+    private volatile boolean mImageAvailable = false;
+    private boolean mShouldRefreshVirtualDisplayOnNextCapture = false;
 
-    @SuppressLint("StaticFieldLeak")
-    private static ScreenCapturer INSTANCE_CACHE;
-
-    private ScreenCapturer(Context context, Intent data, int orientation, int screenDensity, Handler handler) {
+    public ScreenCapturer(Context context, Intent data, Options options, Handler handler) {
         mContext = context;
-        mData = data;
-        mScreenDensity = screenDensity;
+        mOptions = options;
         mHandler = handler;
-        mProjectionManager = (MediaProjectionManager) context.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-
-        setMediaProjectionIfNeeded();
-        setOrientation(orientation);
-        observeOrientation();
+        mMediaProjection = ((MediaProjectionManager) mContext.getSystemService(Context.MEDIA_PROJECTION_SERVICE)).getMediaProjection(Activity.RESULT_OK, (Intent) data.clone());
+        mScreenDensity = options.density;
+        mOrientation = options.orientation;
+        refreshVirtualDisplay(mOrientation == ORIENTATION_AUTO ? mDetectedOrientation : mOrientation, true);
+        refreshDetectedOrientation();
+        EventBus.getDefault().register(this);
     }
 
-    public static ScreenCapturer getInstanceCache() {
-        return INSTANCE_CACHE;
+    private void refreshDetectedOrientation() {
+        mDetectedOrientation = mContext.getResources().getConfiguration().orientation;
     }
 
-    public static ScreenCapturer getInstance(Context context, Intent data, int orientation, int density, Handler handler, ScriptRuntime mScriptRuntime) {
-        if (INSTANCE_CACHE == null) {
-            INSTANCE_CACHE = new ScreenCapturer(context, data, orientation, density, handler);
-        }
-        addScriptRuntimeIfNeeded(mScriptRuntime);
-        return INSTANCE_CACHE;
-    }
-
-    public static boolean hasScriptRuntime(ScriptRuntime scriptRuntime) {
-        return mScriptRuntimes.contains(scriptRuntime);
-    }
-
-    private static void addScriptRuntimeIfNeeded(ScriptRuntime scriptRuntime) {
-        if (!hasScriptRuntime(scriptRuntime)) {
-            Log.d(TAG, "addScriptRuntimeIfNeeded: @" + Integer.toHexString(scriptRuntime.hashCode()));
-            mScriptRuntimes.add(scriptRuntime);
+    public record Options(int width, int height, int orientation, int density, boolean isAsync) {
+        @NonNull
+        @Override
+        public String toString() {
+            return MessageFormat.format(
+                    "Options'{'width={0}, height={1}, orientation={2}, density={3}, isAsync={4}'}'",
+                    width, height, orientation, density, isAsync);
         }
     }
 
-    private static void removeScriptRuntimeIfNeeded(ScriptRuntime scriptRuntime) {
-        while (hasScriptRuntime(scriptRuntime)) {
-            Log.d(TAG, "removeScriptRuntimeIfNeeded: @" + Integer.toHexString(scriptRuntime.hashCode()));
-            mScriptRuntimes.remove(scriptRuntime);
-        }
+    public interface OnScreenCaptureAvailableListener {
+        void onCaptureAvailable(Image image);
     }
 
-    private void setMediaProjectionIfNeeded() {
-        if (!isMediaProjectionValid()) {
-            mMediaProjection = getMediaProjection();
-        }
-    }
-
-    public boolean isMediaProjectionValid() {
-        return mMediaProjection != null && !mIsMediaProjectionStopped;
-    }
-
-    @NonNull
-    private synchronized MediaProjection getMediaProjection() {
-        ForegroundServiceUtils.request(mContext, ScreenCapturerForegroundService.class);
-        MediaProjection mediaProjection = mProjectionManager.getMediaProjection(Activity.RESULT_OK, (Intent) mData.clone());
-
-        mIsMediaProjectionStopped = false;
-
-        mediaProjection.registerCallback(new MediaProjection.Callback() {
-            @Override
-            public void onStop() {
-                Log.d(TAG, "Media projection stopped: @" + Integer.toHexString(mediaProjection.hashCode()));
-                mIsMediaProjectionStopped = true;
+    private Image acquireLatestImage() {
+        waitForImageAvailable();
+        try {
+            return mImageReader.acquireLatestImage();
+        } catch (UnsupportedOperationException ex) {
+            Integer pixelFormat = getPixelFormat(ex);
+            if (pixelFormat != null) {
+                setPixelFormat(pixelFormat);
+                waitForImageAvailable();
+                return mImageReader.acquireLatestImage();
             }
-        }, mHandler);
-
-        return mediaProjection;
-    }
-
-    private void observeOrientation() {
-        mOrientationEventListener = new OrientationEventListener(mContext) {
-            @Override
-            public void onOrientationChanged(int o) {
-                int orientation = mContext.getResources().getConfiguration().orientation;
-                if (mOrientation == ORIENTATION_AUTO && mDetectedOrientation != orientation) {
-                    mDetectedOrientation = orientation;
-                    try {
-                        refreshVirtualDisplay(orientation);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        mException = e;
-                    }
-                }
-            }
-        };
-        if (mOrientationEventListener.canDetectOrientation()) {
-            mOrientationEventListener.enable();
+            throw ex;
         }
-    }
-
-    public void setOrientation(int orientation) {
-        if (mOrientation != orientation) {
-            mOrientation = orientation;
-            mDetectedOrientation = mContext.getResources().getConfiguration().orientation;
-            refreshVirtualDisplay(mOrientation == ORIENTATION_AUTO ? mDetectedOrientation : mOrientation);
-        }
-    }
-
-    private void refreshVirtualDisplay(int orientation) {
-        if (mImageAcquireLooper != null) {
-            mImageAcquireLooper.quit();
-        }
-        if (mImageReader != null) {
-            mImageReader.close();
-        }
-        if (mVirtualDisplay != null) {
-            mVirtualDisplay.release();
-        }
-        int screenHeight = ScreenMetrics.getOrientationAwareScreenHeight(orientation);
-        int screenWidth = ScreenMetrics.getOrientationAwareScreenWidth(orientation);
-        initVirtualDisplay(screenWidth, screenHeight, mScreenDensity);
-        startAcquireImageLoop();
-    }
-
-    @SuppressLint("WrongConstant")
-    private void initVirtualDisplay(int width, int height, int screenDensity) {
-        mImageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 3);
-        int max = 3;
-        do {
-            try {
-                mVirtualDisplay = mMediaProjection.createVirtualDisplay(TAG,
-                        width, height, screenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                        mImageReader.getSurface(), null, null);
-                break;
-            } catch (SecurityException e) {
-                setMediaProjectionIfNeeded();
-            }
-        } while (--max > 0);
-    }
-
-    private void startAcquireImageLoop() {
-        if (mHandler != null) {
-            setImageListener(mHandler);
-            return;
-        }
-        new Thread(() -> {
-            Log.d(TAG, "AcquireImageLoop: start");
-            Looper.prepare();
-            mImageAcquireLooper = Looper.myLooper();
-            setImageListener(new Handler());
-            Looper.loop();
-            Log.d(TAG, "AcquireImageLoop: stop");
-        }).start();
-    }
-
-    private void setImageListener(Handler handler) {
-        mImageReader.setOnImageAvailableListener(reader -> {
-            try {
-                Image oldCacheImage = mCachedImage.getAndSet(null);
-                if (oldCacheImage != null) {
-                    oldCacheImage.close();
-                }
-                mCachedImage.set(reader.acquireLatestImage());
-            } catch (Exception e) {
-                mException = e;
-            }
-
-        }, handler);
     }
 
     @Nullable
-    public synchronized Image capture() {
-        Exception e = mException;
-        if (e != null) {
-            mException = null;
-            throw new ScriptException(e);
-        }
-
-        Thread thread = ThreadCompat.currentThread();
-        while (!thread.isInterrupted()) {
-            Image cachedImage = mCachedImage.getAndSet(null);
-            if (cachedImage != null) {
-                if (mUnderUsingImage != null) {
-                    mUnderUsingImage.close();
+    private Integer getPixelFormat(UnsupportedOperationException ex) {
+        String message = ex.getMessage();
+        if (message != null) {
+            Matcher matcher = PATTERN_BUFFER_FORMAT_EXCEPTION.matcher(message);
+            if (matcher.find()) {
+                final String group = matcher.group(1);
+                if (group != null && group.startsWith("0x")) {
+                    return Integer.parseInt(group.substring(2), 16);
                 }
-                mUnderUsingImage = cachedImage;
-                return cachedImage;
             }
         }
-        throw new ScriptInterruptedException();
+        return null;
     }
 
-    public int getScreenDensity() {
-        return mScreenDensity;
+    private void initVirtualDisplay(int width, int height, int screenDensity) {
+        refreshImageReader(width, height);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            mMediaProjection.registerCallback(new MediaProjection.Callback() {
+                /* Empty body. */
+            }, mHandler);
+        }
+
+        mVirtualDisplay = mMediaProjection.createVirtualDisplay(ScreenCapturer.class.getSimpleName(), width, height, screenDensity, 16, mImageReader.getSurface(), null, null);
+    }
+
+    private void refreshImageReader(int width, int height) {
+        if (mImageReader != null) {
+            mImageReader.close();
+        }
+        synchronized (mImageAvailableLock) {
+            mImageAvailable = false;
+        }
+        int maxImages = mOptions.isAsync ? 1 : 3;
+        mImageReader = ImageReader.newInstance(width, height, mPixelFormat, maxImages);
+        setImageListener(mHandler);
+    }
+
+    private void refreshVirtualDisplay(int orientation, boolean isInit) {
+        AtomicInteger width = new AtomicInteger();
+        AtomicInteger height = new AtomicInteger();
+        if (orientation == ORIENTATION_NONE) {
+            width.set(mOptions.width);
+            height.set(mOptions.height);
+        } else {
+            width.set(ScreenMetrics.getOrientationAwareScreenWidth(orientation));
+            height.set(ScreenMetrics.getOrientationAwareScreenHeight(orientation));
+        }
+        if (mVirtualDisplay == null) {
+            if (isInit) {
+                initVirtualDisplay(width.get(), height.get(), mScreenDensity);
+            }
+        } else {
+            refreshImageReader(width.get(), height.get());
+            mVirtualDisplay.setSurface(mImageReader.getSurface());
+            mVirtualDisplay.resize(width.get(), height.get(), mScreenDensity);
+        }
+    }
+
+    private void setImageListener(Handler handler) {
+        ImageReader.OnImageAvailableListener o = mOptions.isAsync
+                ? new OnImageAvailableListenerAsync(this)
+                : new OnImageAvailableListenerSync(this, mImageReader);
+        mImageReader.setOnImageAvailableListener(o, handler);
+    }
+
+    public void setImageListenerAsync(ImageReader imageReader) {
+        if (mOnScreenCaptureAvailableListener != null) {
+            Image acquireLatestImage = imageReader.acquireLatestImage();
+            mOnScreenCaptureAvailableListener.onCaptureAvailable(acquireLatestImage);
+            acquireLatestImage.close();
+        }
+    }
+
+    public void setImageListenerSync(ImageReader imageReader) {
+        imageReader.setOnImageAvailableListener(null, null);
+        if (!mImageAvailable && imageReader == mImageReader) {
+            synchronized (mImageAvailableLock) {
+                mImageAvailable = true;
+                mImageAvailableLock.notifyAll();
+            }
+        }
+    }
+
+    private void setPixelFormat(int pixelFormat) {
+        mPixelFormat = pixelFormat;
+        refreshImageReader(mImageReader.getWidth(), mImageReader.getHeight());
+        mVirtualDisplay.setSurface(mImageReader.getSurface());
+    }
+
+    private void waitForImageAvailable() {
+        if (!mImageAvailable) {
+            synchronized (mImageAvailableLock) {
+                if (!mImageAvailable) {
+                    try {
+                        mImageAvailableLock.wait();
+                    } catch (InterruptedException ex) {
+                        throw new ScriptInterruptedException();
+                    }
+                }
+            }
+        }
+    }
+
+    @Nullable
+    public Image capture() {
+        if (mOptions.isAsync) {
+            throw new IllegalStateException("capture() is not available in async mode");
+        }
+        if (mShouldRefreshVirtualDisplayOnNextCapture) {
+            mShouldRefreshVirtualDisplayOnNextCapture = false;
+            refreshVirtualDisplay(mDetectedOrientation, false);
+        }
+        Image acquireLatestImage = acquireLatestImage();
+        if (acquireLatestImage != null) {
+            if (mUnderUsingImage != null) {
+                mUnderUsingImage.close();
+            }
+            mUnderUsingImage = acquireLatestImage;
+        }
+        return mUnderUsingImage;
+    }
+
+    public Options getOptions() {
+        return mOptions;
+    }
+
+    @Subscribe
+    public void onConfigurationChanged(Configuration configuration) {
+        if (mOrientation == ORIENTATION_AUTO && mDetectedOrientation != configuration.orientation) {
+            refreshDetectedOrientation();
+            if (mOptions.isAsync) {
+                mHandler.post(() -> refreshVirtualDisplay(mDetectedOrientation, false));
+            } else {
+                mShouldRefreshVirtualDisplayOnNextCapture = true;
+            }
+        }
     }
 
     public void release() {
-        Log.d(TAG, "release");
-
-        INSTANCE_CACHE = null;
-
-        if (mImageAcquireLooper != null) {
-            mImageAcquireLooper.quit();
-        }
         if (mMediaProjection != null) {
             mMediaProjection.stop();
+            mMediaProjection = null;
         }
         if (mVirtualDisplay != null) {
             mVirtualDisplay.release();
@@ -276,20 +253,19 @@ public class ScreenCapturer {
         if (mUnderUsingImage != null) {
             mUnderUsingImage.close();
         }
-        Image cachedImage = mCachedImage.getAndSet(null);
-        if (cachedImage != null) {
-            cachedImage.close();
-        }
-        if (mOrientationEventListener != null) {
-            mOrientationEventListener.disable();
-        }
-        ScreenCapturerForegroundService.stop(mContext);
+        EventBus.getDefault().unregister(this);
     }
 
-    public void release(ScriptRuntime scriptRuntime) {
-        removeScriptRuntimeIfNeeded(scriptRuntime);
-        if (mScriptRuntimes.isEmpty()) {
+    public void setImageCaptureCallback(OnScreenCaptureAvailableListener onScreenCaptureAvailableListener) {
+        mOnScreenCaptureAvailableListener = onScreenCaptureAvailableListener;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
             release();
+        } finally {
+            super.finalize();
         }
     }
 

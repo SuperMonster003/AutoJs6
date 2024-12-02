@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>密文 (Crypto) | AutoJs6 文档 - 6.5.0</title>
+    <title>密文 (Crypto) | AutoJs6 文档 - 6.6.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -162,7 +162,7 @@
 
     <div id="column1" data-id="crypto" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <h1>AutoJs6 文档 - 6.6.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -461,10 +461,10 @@ console.log(dc); // hello
 console.log(dc === message); // true
 </code></pre>
 <p>但需额外注意, 某些算法生成的密钥对, 仅仅用作密钥交换, 密钥交换后将确定一个对称密钥, 最终使用一个对称密钥算法 (如 DES) 进行加解密. 因此密钥对不一定参与非对称加解密过程.</p>
-<p>上述情况典型的样例, 当属 Diffie-Hellman（迪菲-赫尔曼) 算法:</p>
+<p>上述情况典型的样例, 当属 Diffie-Hellman (迪菲-赫尔曼) 算法:</p>
 <pre><code class="lang-js">let message = &#39;hello&#39;;
 
-/* 生成 Diffie-Hellman（迪菲-赫尔曼) 密钥对. */
+/* 生成 Diffie-Hellman (迪菲-赫尔曼) 密钥对. */
 let keyPair = crypto.generateKeyPair(&#39;DiffieHellman&#39;);
 
 /* 借助 Diffie-Hellman 密钥对, 使用 DES 算法生成一个确定的密钥. */

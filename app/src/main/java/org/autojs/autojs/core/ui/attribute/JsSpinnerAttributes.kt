@@ -5,17 +5,18 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.inflaters.TextViewInflater
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.widget.JsSpinner
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
 /**
  * Created by SuperMonster003 on May 20, 2023.
  */
-class JsSpinnerAttributes(resourceParser: ResourceParser, view: View) : AppCompatSpinnerAttributes(resourceParser, view) {
+class JsSpinnerAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : AppCompatSpinnerAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as JsSpinner
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("entries", ::setAdapter)
         registerAttr("entryTextColor") { view.entryTextColor = ColorUtils.parse(view.context, it) }

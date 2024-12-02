@@ -1,6 +1,5 @@
 package org.autojs.autojs.ui.edit.editor;
 
-
 import android.text.Editable;
 import android.text.TextWatcher;
 

@@ -59,7 +59,6 @@ public class TouchRecorder extends Recorder.AbstractRecorder {
         return mInputEventRecorder.getCode();
     }
 
-
     @Override
     public String getPath() {
         return mInputEventRecorder.getPath();

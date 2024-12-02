@@ -36,7 +36,6 @@ public class AccessibilityActionRecorder extends Recorder.AbstractRecorder imple
 
     private boolean mShouldIgnoreFirstAction = false;
 
-
     private AccessibilityActionConverter mConverter;
     private long mRecordStartMillis;
 

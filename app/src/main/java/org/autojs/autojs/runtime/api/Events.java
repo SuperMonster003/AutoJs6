@@ -26,11 +26,12 @@ import org.autojs.autojs.core.looper.MainThreadProxy;
 import org.autojs.autojs.core.looper.Timer;
 import org.autojs.autojs.core.notification.Notification;
 import org.autojs.autojs.core.notification.NotificationListenerService;
-import org.autojs.autojs.pref.Language;
+import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.exception.ScriptException;
 import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs6.R;
+import org.mozilla.javascript.BaseFunction;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -111,10 +112,11 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
 
         // @Dubious by SuperMonster003 on Feb 11, 2022.
         //  ! Condition may be always false?
-
-        // if ((service.getServiceInfo().flags & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) == 0) {
-        //     throw new ScriptException(mContext.getString(R.string.text_should_enable_key_observing));
-        // }
+        //  ! zh-CN: 条件永假?
+        //  !
+        //  # if ((service.getServiceInfo().flags & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) == 0) {
+        //  #     throw new ScriptException(mContext.getString(R.string.text_should_enable_key_observing));
+        //  # }
 
         ensureHandler();
         mLoopers.waitWhenIdle(true);
@@ -135,7 +137,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         }
         ensureHandler();
         mLoopers.waitWhenIdle(true);
-        mTouchObserver = new TouchObserver(InputEventObserver.initObserver(mContext));
+        mTouchObserver = new TouchObserver(InputEventObserver.getGlobal(mContext));
         mTouchObserver.setOnTouchEventListener(this);
         mTouchObserver.observe();
     }
@@ -179,12 +181,12 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         return service;
     }
 
-    public Events onKeyDown(String keyName, Object listener) {
+    public Events onKeyDown(String keyName, BaseFunction listener) {
         on(PREFIX_KEY_DOWN + keyName, listener);
         return this;
     }
 
-    public Events onceKeyDown(String keyName, Object listener) {
+    public Events onceKeyDown(String keyName, BaseFunction listener) {
         once(PREFIX_KEY_DOWN + keyName, listener);
         return this;
     }
@@ -194,12 +196,12 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         return this;
     }
 
-    public Events onKeyUp(String keyName, Object listener) {
+    public Events onKeyUp(String keyName, BaseFunction listener) {
         on(PREFIX_KEY_UP + keyName, listener);
         return this;
     }
 
-    public Events onceKeyUp(String keyName, Object listener) {
+    public Events onceKeyUp(String keyName, BaseFunction listener) {
         once(PREFIX_KEY_UP + keyName, listener);
         return this;
     }
@@ -209,7 +211,7 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         return this;
     }
 
-    public Events onTouch(Object listener) {
+    public Events onTouch(BaseFunction listener) {
         on("touch", listener);
         return this;
     }
@@ -274,12 +276,12 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         }
     }
 
-    public Events onNotification(Object listener) {
+    public Events onNotification(BaseFunction listener) {
         on("notification", listener);
         return this;
     }
 
-    public Events onToast(Object listener) {
+    public Events onToast(BaseFunction listener) {
         on("toast", listener);
         return this;
     }

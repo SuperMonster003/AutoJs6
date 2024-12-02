@@ -92,8 +92,9 @@ public class Explorer {
     }
 
     public void refreshAll() {
-        if (mExplorerPageLruCache != null)
+        if (mExplorerPageLruCache != null) {
             mExplorerPageLruCache.evictAll();
+        }
         mEventBus.post(ExplorerChangeEvent.EVENT_ALL);
     }
 
@@ -106,21 +107,24 @@ public class Explorer {
         return mExplorerProvider.getExplorerPage(page)
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(g -> {
-                    if (mExplorerPageLruCache != null)
+                    if (mExplorerPageLruCache != null) {
                         mExplorerPageLruCache.put(g.getPath(), g);
+                    }
                     page.copyChildren(g);
                     return page;
                 });
     }
 
     private void clearCache(ExplorerPage item) {
-        if (mExplorerPageLruCache != null)
+        if (mExplorerPageLruCache != null) {
             mExplorerPageLruCache.remove(item.getPath());
+        }
     }
 
     public void registerChangeListener(Object subscriber) {
-        if (!mEventBus.isRegistered(subscriber))
+        if (!mEventBus.isRegistered(subscriber)) {
             mEventBus.register(subscriber);
+        }
     }
 
     public void unregisterChangeListener(Object subscriber) {

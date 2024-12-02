@@ -24,6 +24,10 @@ public class SimpleTextWatcher implements TextWatcher {
     private OnTextChangedListener mOnTextChangedListener;
     private AfterTextChangedListener mAfterTextChangedListener;
 
+    public SimpleTextWatcher() {
+        /* Empty body. */
+    }
+
     public SimpleTextWatcher(BeforeTextChangedListener beforeTextChangedListener, OnTextChangedListener onTextChangedListener, AfterTextChangedListener afterTextChangedListener) {
         mBeforeTextChangedListener = beforeTextChangedListener;
         mOnTextChangedListener = onTextChangedListener;
@@ -40,9 +44,6 @@ public class SimpleTextWatcher implements TextWatcher {
 
     public SimpleTextWatcher(OnTextChangedListener onTextChangedListener) {
         mOnTextChangedListener = onTextChangedListener;
-    }
-
-    public SimpleTextWatcher() {
     }
 
     @Override

@@ -6,11 +6,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Looper
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import org.autojs.autojs.core.accessibility.AccessibilityTool
+import org.autojs.autojs.core.accessibility.Capture
 import org.autojs.autojs.core.accessibility.LayoutInspector.CaptureAvailableListener
-import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.execution.ScriptExecutionGlobalListener
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -18,16 +18,11 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
 import org.autojs.autojs.runtime.api.AppUtils.Companion.BroadcastShortForm
-import org.autojs.autojs.ui.doc.DocumentationActivity
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
-import org.autojs.autojs.ui.log.LogActivity
-import org.autojs.autojs.ui.main.MainActivity
-import org.autojs.autojs.ui.project.BuildActivity
-import org.autojs.autojs.ui.settings.AboutActivity
-import org.autojs.autojs.ui.settings.PreferencesActivity
+import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs6.BuildConfig
 import java.util.concurrent.Executors
 import org.autojs.autojs.inrt.autojs.AutoJs as AutoJsInrt
@@ -44,7 +39,6 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
     private val mPrintExecutor = Executors.newSingleThreadExecutor()
 
     private val mA11yTool = AccessibilityTool(appContext)
-    private val mA11yToolService = mA11yTool.service
 
     init {
         scriptEngineService.registerGlobalScriptExecutionListener(ScriptExecutionGlobalListener())
@@ -55,20 +49,20 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
                     val action = intent.action ?: return
                     when {
                         action.equals(LayoutBoundsFloatyWindow::class.java.name, true) -> {
-                            mA11yToolService.ensure()
+                            mA11yTool.ensureService()
                             capture(object : LayoutInspectFloatyWindow {
-                                override fun create(nodeInfo: NodeInfo?) = LayoutBoundsFloatyWindow(nodeInfo, context, true)
+                                override fun create(capture: Capture) = LayoutBoundsFloatyWindow(capture, context, true)
                             })
                         }
                         action.equals(LayoutHierarchyFloatyWindow::class.java.name, true) -> {
-                            mA11yToolService.ensure()
+                            mA11yTool.ensureService()
                             capture(object : LayoutInspectFloatyWindow {
-                                override fun create(nodeInfo: NodeInfo?) = LayoutHierarchyFloatyWindow(nodeInfo, context, true)
+                                override fun create(capture: Capture) = LayoutHierarchyFloatyWindow(capture, context, true)
                             })
                         }
                     }
                 } catch (e: Exception) {
-                    if (Looper.myLooper() != Looper.getMainLooper()) {
+                    if (isBackgroundThread()) {
                         throw e
                     }
                 }
@@ -80,13 +74,13 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
     }
 
     private interface LayoutInspectFloatyWindow {
-        fun create(nodeInfo: NodeInfo?): FullScreenFloatyWindow?
+        fun create(capture: Capture): FullScreenFloatyWindow
     }
 
     private fun capture(window: LayoutInspectFloatyWindow) {
         val inspector = layoutInspector
         val listener: CaptureAvailableListener = object : CaptureAvailableListener {
-            override fun onCaptureAvailable(capture: NodeInfo?, context: Context) {
+            override fun onCaptureAvailable(capture: Capture, context: Context) {
                 inspector.removeCaptureAvailableListener(this)
                 uiHandler.post { FloatyWindowManger.addWindow(context, window.create(capture)) }
             }
@@ -107,7 +101,10 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
                     // FIXME by SuperMonster003 as of Feb 2, 2022.
                     //  ! When running in "ui" thread (ui.run() or ui.post()),
                     //  ! android.os.NetworkOnMainThreadException may happen.
-                    //  ! Further more, dunno if a thread executor is a good idea.
+                    //  ! Furthermore, dunno if a thread executor is a good idea.
+                    //  ! 当在 "ui" 线程执行时 (如 ui.run() 或 ui.post()),
+                    //  ! 可能会发生 android.os.NetworkOnMainThreadException 异常.
+                    //  ! 而且, 我不确定使用线程执行器是否是个好主意.
                     mPrintExecutor.submit { devPluginService.print(it) }
                 }
             }
@@ -118,37 +115,26 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
 
         /* Activities. */
 
-        putProperty(ActivityShortForm.SETTINGS.fullName, PreferencesActivity::class.java)
-        putProperty(ActivityShortForm.PREFERENCES.fullName, PreferencesActivity::class.java)
-        putProperty(ActivityShortForm.PREF.fullName, PreferencesActivity::class.java)
-
-        putProperty(ActivityShortForm.CONSOLE.fullName, LogActivity::class.java)
-        putProperty(ActivityShortForm.LOG.fullName, LogActivity::class.java)
-
-        putProperty(ActivityShortForm.HOMEPAGE.fullName, MainActivity::class.java)
-        putProperty(ActivityShortForm.HOME.fullName, MainActivity::class.java)
-
-        putProperty(ActivityShortForm.ABOUT.fullName, AboutActivity::class.java)
-
-        putProperty(ActivityShortForm.BUILD.fullName, BuildActivity::class.java)
-
-        putProperty(ActivityShortForm.DOCUMENTATION.fullName, DocumentationActivity::class.java)
-        putProperty(ActivityShortForm.DOC.fullName, DocumentationActivity::class.java)
-        putProperty(ActivityShortForm.DOCS.fullName, DocumentationActivity::class.java)
+        listOf(
+            ActivityShortForm.SETTINGS, ActivityShortForm.PREFERENCES, ActivityShortForm.PREF,
+            ActivityShortForm.DOCUMENTATION, ActivityShortForm.DOC, ActivityShortForm.DOCS,
+            ActivityShortForm.HOMEPAGE, ActivityShortForm.HOME,
+            ActivityShortForm.CONSOLE, ActivityShortForm.LOG,
+            ActivityShortForm.ABOUT,
+            ActivityShortForm.BUILD,
+        ).forEach { putProperty(it.fullName, it.classType) }
 
         /* Broadcasts. */
 
-        putProperty(BroadcastShortForm.INSPECT_LAYOUT_BOUNDS.fullName, LayoutBoundsFloatyWindow::class.java.name)
-        putProperty(BroadcastShortForm.LAYOUT_BOUNDS.fullName, LayoutBoundsFloatyWindow::class.java.name)
-        putProperty(BroadcastShortForm.BOUNDS.fullName, LayoutBoundsFloatyWindow::class.java.name)
-
-        putProperty(BroadcastShortForm.INSPECT_LAYOUT_HIERARCHY.fullName, LayoutHierarchyFloatyWindow::class.java.name)
-        putProperty(BroadcastShortForm.LAYOUT_HIERARCHY.fullName, LayoutHierarchyFloatyWindow::class.java.name)
-        putProperty(BroadcastShortForm.HIERARCHY.fullName, LayoutHierarchyFloatyWindow::class.java.name)
+        listOf(
+            BroadcastShortForm.INSPECT_LAYOUT_BOUNDS, BroadcastShortForm.LAYOUT_BOUNDS, BroadcastShortForm.BOUNDS,
+            BroadcastShortForm.INSPECT_LAYOUT_HIERARCHY, BroadcastShortForm.LAYOUT_HIERARCHY, BroadcastShortForm.HIERARCHY,
+        ).forEach { putProperty(it.fullName, it.className) }
     }
 
     companion object {
         private var isInitialized = false
+        private val TAG = AutoJs::class.java.simpleName
 
         @SuppressLint("StaticFieldLeak")
         @JvmStatic
@@ -158,6 +144,7 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
         @Synchronized
         @JvmStatic
         fun initInstance(application: Application) {
+            Log.d(TAG, "AutoJs isInitialized: $isInitialized")
             if (!isInitialized) {
                 instance = when (BuildConfig.isInrt) {
                     true -> AutoJsInrt(application)

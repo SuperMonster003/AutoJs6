@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_permissions"
+        android:title="@string/text_permissions_list"
+        android:icon="@drawable/ic_menu_info_details" />
+    <item
+        android:id="@+id/action_copy_all"
+        android:title="@string/text_copy_all"
+        android:icon="@drawable/ic_menu_copy" />
+    <item
+        android:id="@+id/action_hide_button"
+        android:title="@string/text_hide_button"
+        android:icon="@drawable/ic_menu_view" />
+    <item
+        android:id="@+id/action_exit"
+        android:title="@string/text_exit"
+        android:icon="@drawable/ic_menu_close_clear_cancel" />
+</menu>

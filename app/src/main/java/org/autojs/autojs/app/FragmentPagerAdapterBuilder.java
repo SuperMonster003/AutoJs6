@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,15 +18,15 @@ import java.util.List;
 public class FragmentPagerAdapterBuilder {
 
     public interface OnFragmentInstantiateListener {
-        void OnInstantiate(int pos, Fragment fragment);
+        void onInstantiate(int pos, Fragment fragment);
     }
 
     private final List<Fragment> mFragments = new ArrayList<>();
     private final List<String> mTitles = new ArrayList<>();
-    private final FragmentActivity mActivity;
+    private final WeakReference<FragmentActivity> mActivity;
 
     public FragmentPagerAdapterBuilder(FragmentActivity activity) {
-        mActivity = activity;
+        mActivity = new WeakReference<>(activity);
     }
 
     public FragmentPagerAdapterBuilder add(Fragment fragment, String title) {
@@ -35,11 +36,11 @@ public class FragmentPagerAdapterBuilder {
     }
 
     public FragmentPagerAdapterBuilder add(Fragment fragment, int titleResId) {
-        return add(fragment, mActivity.getString(titleResId));
+        return add(fragment, mActivity.get().getString(titleResId));
     }
 
     public StoredFragmentPagerAdapter build() {
-        return new StoredFragmentPagerAdapter(mActivity.getSupportFragmentManager()) {
+        return new StoredFragmentPagerAdapter(mActivity.get().getSupportFragmentManager()) {
             @NonNull
             @Override
             public Fragment getItem(int position) {
@@ -72,9 +73,9 @@ public class FragmentPagerAdapterBuilder {
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
             Fragment fragment = (Fragment) super.instantiateItem(container, position);
             mStoredFragments.put(position, fragment);
-            if(mOnFragmentInstantiateListener != null){
-                mOnFragmentInstantiateListener.OnInstantiate(position, fragment);
-            }
+            if (mOnFragmentInstantiateListener != null) {
+                mOnFragmentInstantiateListener.onInstantiate(position, fragment);
+        }
             return fragment;
         }
 
@@ -82,11 +83,11 @@ public class FragmentPagerAdapterBuilder {
         public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
             mStoredFragments.remove(position);
             super.destroyItem(container, position, object);
-        }
+    }
 
         public Fragment getStoredFragment(int position) {
             return mStoredFragments.get(position);
-        }
+    }
 
         public void setOnFragmentInstantiateListener(OnFragmentInstantiateListener onFragmentInstantiateListener) {
             mOnFragmentInstantiateListener = onFragmentInstantiateListener;

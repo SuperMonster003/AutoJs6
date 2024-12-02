@@ -22,7 +22,6 @@ interface KeyInterceptor {
             return mKeyInterceptors.remove(interrupter)
         }
 
-
         override fun onInterceptKeyEvent(event: KeyEvent): Boolean {
             for (interrupter in mKeyInterceptors) {
                 try {

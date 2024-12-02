@@ -8,9 +8,13 @@ import com.tencent.bugly.crashreport.CrashReport
 import com.tencent.bugly.crashreport.CrashReport.CrashHandleCallback
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.AccessibilityService
+import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs6.BuildConfig
 import org.mozilla.javascript.RhinoException
 import java.lang.Thread.UncaughtExceptionHandler
+import java.lang.ref.WeakReference
+import kotlin.system.exitProcess
 
 /**
  * Created by Stardust on Feb 2, 2017.
@@ -24,14 +28,16 @@ class CrashHandler(private val errorReportClass: Class<*>) : CrashHandleCallback
         Thread.getDefaultUncaughtExceptionHandler()
     }
 
+    private var mCachedExceptionMessage: MutableList<WeakReference<Throwable>> = ArrayList()
+
     @Synchronized
-    override fun onCrashHandleStart(crashType: Int, errorType: String, errorMessage: String, errorStack: String): Map<String, String> {
+    override fun onCrashHandleStart(crashType: Int, errorType: String?, errorMessage: String?, errorStack: String?): MutableMap<String, String>? {
         Log.d(TAG, "onCrashHandleStart: crashType = $crashType, errorType = $errorType, msg = $errorMessage, stack = $errorStack")
         try {
             if (crashTooManyTimes()) {
                 return super.onCrashHandleStart(crashType, errorType, errorMessage, errorStack)
             }
-            startErrorReportActivity("$errorType: $errorMessage", errorStack)
+            startErrorReportActivity("$errorType: $errorMessage", errorStack ?: "[ No stack message ]")
         } catch (e: Throwable) {
             e.printStackTrace()
         }
@@ -40,7 +46,17 @@ class CrashHandler(private val errorReportClass: Class<*>) : CrashHandleCallback
 
     override fun uncaughtException(thread: Thread, ex: Throwable) {
         Log.e(TAG, "Uncaught Exception", ex)
-        if (thread !== Looper.getMainLooper().thread) {
+        ScriptRuntime.popException(ex.message ?: "Uncaught Exception")
+        val latestMessage = ex.message ?: "[ No error message ]"
+        if (mCachedExceptionMessage.size > 4) {
+            if (mCachedExceptionMessage.all { it.get()?.message == latestMessage } || mCachedExceptionMessage.size > 20) {
+                ScriptRuntime.popException(latestMessage)
+                ClipboardUtils.setClip(GlobalAppContext.get(), ex.stackTraceToString())
+                exitProcess(1)
+            }
+        }
+        mCachedExceptionMessage.add(WeakReference(ex))
+        if (thread != Looper.getMainLooper().thread) {
             if (ex !is RhinoException) {
                 CrashReport.postCatchedException(ex, thread)
             }

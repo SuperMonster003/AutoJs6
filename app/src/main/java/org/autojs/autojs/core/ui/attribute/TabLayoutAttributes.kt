@@ -7,14 +7,15 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Gravities
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
-open class TabLayoutAttributes(resourceParser: ResourceParser, view: View) : HorizontalScrollViewAttributes(resourceParser, view) {
+open class TabLayoutAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : HorizontalScrollViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as TabLayout
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("tabGravity") { view.tabGravity = Gravities.parse(it) }
         registerAttrs(arrayOf("selectedTabIndicatorColor", "tabIndicatorColor")) { view.setSelectedTabIndicatorColor(ColorUtils.parse(view, it)) }

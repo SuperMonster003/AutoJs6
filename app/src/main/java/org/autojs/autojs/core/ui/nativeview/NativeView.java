@@ -1,13 +1,12 @@
 package org.autojs.autojs.core.ui.nativeview;
 
 import android.view.View;
-
 import org.autojs.autojs.core.ui.JsViewHelper;
 import org.autojs.autojs.core.ui.ViewExtras;
 import org.autojs.autojs.core.ui.attribute.ViewAttributes;
 import org.autojs.autojs.rhino.NativeJavaObjectWithPrototype;
 import org.autojs.autojs.runtime.ScriptRuntime;
-import org.mozilla.javascript.NativeObject;
+import org.autojs.autojs.util.RhinoUtils;
 import org.mozilla.javascript.Scriptable;
 
 public class NativeView extends NativeJavaObjectWithPrototype {
@@ -34,18 +33,17 @@ public class NativeView extends NativeJavaObjectWithPrototype {
         }
     }
 
-
     private final ViewAttributes mViewAttributes;
     private final View mView;
     private final ViewPrototype mViewPrototype;
 
     public NativeView(Scriptable scope, View view, Class<?> staticType, ScriptRuntime runtime) {
         super(scope, view, staticType);
-        mViewAttributes = ViewExtras.getViewAttributes(view, runtime.ui.getResourceParser());
+        mViewAttributes = ViewExtras.getViewAttributes(runtime, view, runtime.ui.getResourceParser());
         mView = view;
         mViewPrototype = new ViewPrototype(mView, mViewAttributes, scope, runtime);
         prototype = new NativeJavaObjectWithPrototype(scope, mViewPrototype, mViewPrototype.getClass());
-        prototype.setPrototype(new NativeObject());
+        prototype.setPrototype(RhinoUtils.newNativeObject());
     }
 
     @Override

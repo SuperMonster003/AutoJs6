@@ -37,22 +37,22 @@ public class Shell extends AbstractShell {
 
         @Override
         public void onOutput(String str) {
-
+            /* Empty body. */
         }
 
         @Override
         public void onNewLine(String str) {
-
+            /* Empty body. */
         }
 
         @Override
         public void onInitialized() {
-
+            /* Empty body. */
         }
 
         @Override
         public void onInterrupted(InterruptedException e) {
-
+            /* Empty body. */
         }
     }
 
@@ -254,7 +254,7 @@ public class Shell extends AbstractShell {
         }
 
         private void onOutput(String str) {
-            if (!str.isEmpty() && !str.contains("/dev/input/event")) {
+            if (!str.isEmpty()) {
                 logDebug("onOutput: " + str);
             }
             if (!mInitialized) {
@@ -267,10 +267,22 @@ public class Shell extends AbstractShell {
             while (true) {
                 i = str.indexOf("\n", start);
                 if (i > 0) {
-                    onNewLine((mStringBuffer + str.substring(0, i - 1)).trim());
-                    mStringBuffer.delete(0, mStringBuffer.length());
+                    mStringBuffer.append(str.substring(start, i));
+                    onNewLine(mStringBuffer.toString().trim());
+                    mStringBuffer.setLength(0);
+                    // onNewLine((mStringBuffer + str.substring(0, i - 1)).trim());
+                    // mStringBuffer.delete(0, mStringBuffer.length());
                 } else {
                     if (start <= str.length() - 1) {
+                        int len = mStringBuffer.length();
+                        if (len > 1 << 24) {
+                            Log.e(TAG, " String buffer was cleared as its huge length of " + len);
+
+                            mStringBuffer.setLength(0);
+                            // mStringBuffer.delete(0, len);
+                        } else if (len > 0) {
+                            logDebug("Length of string buffer: " + len);
+                        }
                         mStringBuffer.append(str.substring(start));
                     }
                     break;
@@ -285,7 +297,6 @@ public class Shell extends AbstractShell {
                 mCallback.onOutput(str.replace("\r", ""));
             }
         }
-
 
         @Override
         protected void processInput(byte[] data, int offset, int count) {

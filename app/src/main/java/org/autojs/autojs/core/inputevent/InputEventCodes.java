@@ -7,7 +7,6 @@ package org.autojs.autojs.core.inputevent;
  */
 public class InputEventCodes {
 
-
     public static final int UP = 0x00;
     public static final int DOWN = 0x01;
 
@@ -753,7 +752,6 @@ public class InputEventCodes {
     public static final int ABS_MT_DISTANCE = 0x3b;	/* Contact hover distance */
     public static final int ABS_MT_TOOL_X = 0x3c;	/* Center X tool position */
     public static final int ABS_MT_TOOL_Y = 0x3d;	/* Center Y tool position */
-
 
     public static final int ABS_MAX = 0x3f;
     public static final int ABS_CNT = (ABS_MAX + 1);

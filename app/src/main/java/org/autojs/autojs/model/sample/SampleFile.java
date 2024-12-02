@@ -1,10 +1,8 @@
 package org.autojs.autojs.model.sample;
 
 import android.content.res.AssetManager;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
@@ -16,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+
+import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 
 /**
  * Created by Stardust on Oct 28, 2017.
@@ -59,7 +59,7 @@ public class SampleFile extends ScriptFile {
 
     @Override
     public boolean isFile() {
-        return getName().endsWith(".js");
+        return getName().endsWith(JAVASCRIPT.extensionWithDot);
     }
 
     @Override

@@ -3,8 +3,9 @@ package org.autojs.autojs.core.ui.attribute
 import android.view.View
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.widget.JsScrollView
+import org.autojs.autojs.runtime.ScriptRuntime
 
-class JsScrollViewAttributes(resourceParser: ResourceParser, view: View) : ScrollViewAttributes(resourceParser, view) {
+class JsScrollViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ScrollViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as JsScrollView
 

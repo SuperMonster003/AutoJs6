@@ -28,7 +28,6 @@
                 android:textColor="@android:color/white"
                 android:textSize="15sp" />
 
-
         <ImageView
                 android:id="@+id/execute"
                 android:layout_width="28dp"

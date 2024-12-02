@@ -1,13 +1,13 @@
 package org.autojs.autojs.rhino;
 
-import android.os.Looper;
 import android.util.Log;
-
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.mozilla.javascript.Context;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.autojs.autojs.util.RhinoUtils.isBackgroundThread;
 
 public class InterruptibleAndroidContextFactory extends AndroidContextFactory {
 
@@ -25,7 +25,7 @@ public class InterruptibleAndroidContextFactory extends AndroidContextFactory {
 
     @Override
     protected void observeInstructionCount(Context cx, int instructionCount) {
-        if (Thread.currentThread().isInterrupted() && Looper.myLooper() != Looper.getMainLooper()) {
+        if (Thread.currentThread().isInterrupted() && isBackgroundThread()) {
             throw new ScriptInterruptedException();
         }
     }

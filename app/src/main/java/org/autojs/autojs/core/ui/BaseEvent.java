@@ -16,12 +16,9 @@ public class BaseEvent extends NativeJavaObjectWithPrototype {
         super(scope, javaObject, staticType, isAdapter);
     }
 
-
-
     public BaseEvent(Scriptable scope, Object javaObject) {
         super(scope, javaObject, javaObject.getClass());
     }
-
 
     @Override
     public boolean has(String name, Scriptable start) {

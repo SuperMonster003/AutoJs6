@@ -20,5 +20,5 @@ package zhao.arsceditor.ResDecoder.data.value;
  * @author Ryszard Wiśniewski <brut.alll@gmail.com>
  */
 public class ResValue {
-
+    /* Empty body. */
 }

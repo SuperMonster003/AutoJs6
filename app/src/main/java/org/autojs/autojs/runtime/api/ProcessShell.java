@@ -1,9 +1,8 @@
 package org.autojs.autojs.runtime.api;
 
-import static org.autojs.autojs.util.StringUtils.str;
-
 import android.util.Log;
-
+import kotlin.text.Regex;
+import kotlin.text.RegexOption;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.util.ProcessUtils;
 import org.autojs.autojs6.R;
@@ -13,6 +12,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import static org.autojs.autojs.util.StringUtils.str;
 
 /**
  * Created by Stardust on Jan 20, 2017.
@@ -25,14 +26,14 @@ public class ProcessShell extends AbstractShell {
 
     private Process mProcess;
     private DataOutputStream mCommandOutputStream;
-    private BufferedReader mSucceedReader;
+    private BufferedReader mSuccessReader;
     private BufferedReader mErrorReader;
 
-    private final StringBuilder mSucceedOutput = new StringBuilder();
+    private final StringBuilder mSuccessOutput = new StringBuilder();
     private final StringBuilder mErrorOutput = new StringBuilder();
 
     public ProcessShell() {
-
+        /* Empty body. */
     }
 
     public ProcessShell(boolean root) {
@@ -44,7 +45,7 @@ public class ProcessShell extends AbstractShell {
         try {
             mProcess = new ProcessBuilder(initialCommand).redirectErrorStream(true).start();
             mCommandOutputStream = new DataOutputStream(mProcess.getOutputStream());
-            mSucceedReader = new BufferedReader(new InputStreamReader(mProcess.getInputStream()));
+            mSuccessReader = new BufferedReader(new InputStreamReader(mProcess.getInputStream()));
             mErrorReader = new BufferedReader(new InputStreamReader(mProcess.getErrorStream()));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -71,19 +72,19 @@ public class ProcessShell extends AbstractShell {
             mProcess.destroy();
             mProcess = null;
         }
-        if (mSucceedReader != null) {
+        if (mSuccessReader != null) {
             try {
-                mSucceedReader.close();
+                mSuccessReader.close();
             } catch (IOException ignored) {
-
+                /* Empty body. */
             }
-            mSucceedReader = null;
+            mSuccessReader = null;
         }
         if (mErrorReader != null) {
             try {
                 mErrorReader.close();
             } catch (IOException ignored) {
-
+                /* Empty body. */
             }
             mErrorReader = null;
         }
@@ -106,11 +107,11 @@ public class ProcessShell extends AbstractShell {
     }
 
     public ProcessShell readAll() {
-        return readSucceedOutput().readErrorOutput();
+        return readSuccessOutput().readErrorOutput();
     }
 
-    public ProcessShell readSucceedOutput() {
-        read(mSucceedReader, mSucceedOutput);
+    public ProcessShell readSuccessOutput() {
+        read(mSuccessReader, mSuccessOutput);
         return this;
     }
 
@@ -130,8 +131,8 @@ public class ProcessShell extends AbstractShell {
         return this;
     }
 
-    public StringBuilder getSucceedOutput() {
-        return mSucceedOutput;
+    public StringBuilder getSuccessOutput() {
+        return mSuccessOutput;
     }
 
     public StringBuilder getErrorOutput() {
@@ -142,32 +143,30 @@ public class ProcessShell extends AbstractShell {
         return mProcess;
     }
 
-    public BufferedReader getSucceedReader() {
-        return mSucceedReader;
+    public BufferedReader getSuccessReader() {
+        return mSuccessReader;
     }
 
     public BufferedReader getErrorReader() {
         return mErrorReader;
     }
 
-    public static Result exec(String command, boolean isRoot) {
+    public static Result exec(String command, boolean withRoot) {
         String[] commands = command.split(COMMAND_LINE_END);
-        return exec(commands, isRoot);
+        return exec(commands, withRoot);
     }
 
-    public static Result exec(String[] commands, boolean isRoot) {
+    public static Result exec(String[] commands, boolean withRoot) {
         ProcessShell shell = null;
         try {
-            shell = new ProcessShell(isRoot);
+            shell = new ProcessShell(withRoot);
             for (String command : commands) {
                 shell.exec(command);
             }
             shell.exec(COMMAND_EXIT);
-            Result result = new Result();
-            result.code = shell.waitFor();
+            int code = shell.waitFor();
             shell.readAll();
-            result.error = shell.getErrorOutput().toString();
-            result.result = shell.getSucceedOutput().toString();
+            Result result = new Result(code, shell);
             shell.exit();
             return result;
         } finally {
@@ -177,26 +176,21 @@ public class ProcessShell extends AbstractShell {
         }
     }
 
-    public static Result execCommand(String[] commands, boolean isRoot) {
+    public static Result execCommand(String[] commands, boolean withRoot) {
         try {
-            Process process = isRoot ? getRootProcess() : getShellProcess();
+            Process process = withRoot ? getRootProcess() : getShellProcess();
             return execCommand(commands, process);
         } catch (Exception e) {
-            Result result = new Result();
-            String message = e.getMessage();
-            result.code = 1;
-            result.result = "";
-            result.error = message != null ? message : "";
-            return result;
+            return new Result(1, e);
         }
     }
 
     public static Result execCommand(String[] commands, Process process) {
-        Result commandResult = new Result();
         if (commands == null || commands.length == 0) {
             throw new IllegalArgumentException(str(R.string.error_empty_shell_command));
         }
         DataOutputStream os = null;
+        Result commandResult;
         try {
             os = new DataOutputStream(process.getOutputStream());
             for (String command : commands) {
@@ -209,26 +203,27 @@ public class ProcessShell extends AbstractShell {
             os.writeBytes(COMMAND_EXIT);
             os.flush();
             Log.d(TAG, "pid = " + ProcessUtils.getProcessPid(process));
-            commandResult.code = process.waitFor();
-            commandResult.result = readAll(process.getInputStream());
-            commandResult.error = readAll(process.getErrorStream());
+            commandResult = new Result(process.waitFor(),
+                    readAll(process.getInputStream()),
+                    readAll(process.getErrorStream()));
             Log.d(TAG, commandResult.toString());
         } catch (Exception e) {
             // @Overwrite by SuperMonster003 on Apr 26, 2022.
-            //  ! Try write exception into commandResult and make it visible to AutoJs6 console.
+            //  ! Try writing exception into commandResult and make it visible to AutoJs6 console.
             //  ! Example (for non-root devices): log(shell('date', true));
-
-            // throw new ScriptInterruptedException(e);
+            //  ! zh-CN:
+            //  ! 尝试将异常信息写入 commandResult 并于 AutoJs6 控制台可见.
+            //  ! 例如 (对于非 root 权限设备): log(shell('date', true));
+            //  !
+            //  # throw new ScriptInterruptedException(e);
 
             String message = e.getMessage();
             String aimErrStr = "error=";
 
             int index = message != null ? message.indexOf(aimErrStr) : -1;
 
-            commandResult.code = index < 0 ? 1 : Integer.parseInt(message.substring(index + aimErrStr.length()).replaceAll("^(\\d+).+", "$1"));
-            commandResult.result = "";
-            commandResult.error = message != null ? message : "";
-
+            int code = index < 0 ? 1 : Integer.parseInt(message.substring(index + aimErrStr.length()).replaceAll("^(\\d+).+", "$1"));
+            commandResult = new Result(code, e);
             e.printStackTrace();
         } finally {
             try {
@@ -238,7 +233,7 @@ public class ProcessShell extends AbstractShell {
                     process.getOutputStream().close();
                 }
             } catch (IOException ignored) {
-
+                /* Ignored. */
             }
             if (process != null) {
                 process.destroy();
@@ -266,6 +261,8 @@ public class ProcessShell extends AbstractShell {
     }
 
     public static Result execCommand(String command, boolean withRoot) {
+        Regex regex = new Regex("^\\s*adb\\s+shell\\s+", RegexOption.IGNORE_CASE);
+        command = regex.replace(command, "");
         String[] commands = command.split(COMMAND_LINE_END);
         return execCommand(commands, withRoot);
     }

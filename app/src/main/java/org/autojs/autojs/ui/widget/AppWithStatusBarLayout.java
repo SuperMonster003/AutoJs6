@@ -27,7 +27,6 @@ public class AppWithStatusBarLayout extends AppBarLayout {
         super(context, attrs);
     }
 
-
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
@@ -62,7 +61,6 @@ public class AppWithStatusBarLayout extends AppBarLayout {
         return rect.top;
     }
 
-
     @Nullable
     private Window getWindow() {
         return getWindowForContext(getContext());
@@ -78,6 +76,5 @@ public class AppWithStatusBarLayout extends AppBarLayout {
         }
         return null;
     }
-
 
 }

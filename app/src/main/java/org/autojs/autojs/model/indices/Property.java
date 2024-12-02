@@ -23,6 +23,7 @@ public class Property {
     private boolean mVariable = false;
 
     public Property() {
+        /* Empty body. */
     }
 
     public Property(String key, String url, String summary, boolean global) {

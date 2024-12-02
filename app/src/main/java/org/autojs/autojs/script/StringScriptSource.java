@@ -1,6 +1,5 @@
 package org.autojs.autojs.script;
 
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 

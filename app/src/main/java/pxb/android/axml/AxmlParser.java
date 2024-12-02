@@ -179,7 +179,7 @@ public class AxmlParser implements ResConst {
                         in.getInt();/* skip, 0xFFFFFFFF */
                         nsIdx = in.getInt();
                         nameIdx = in.getInt();
-                        int flag = in.getInt();// 0x00140014 ?
+                        int flag = in.getInt();// 0x00140014?
                         if (flag != 0x00140014) {
                             throw new RuntimeException();
                         }

@@ -117,7 +117,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         val shell = Shell(true)
         shell.setCallback(object : Shell.Callback {
             override fun onOutput(str: String) {
-
+                /* Empty body. */
             }
 
             override fun onNewLine(line: String) {
@@ -125,10 +125,11 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
             }
 
             override fun onInitialized() {
+                /* Empty body. */
             }
 
             override fun onInterrupted(e: InterruptedException) {
-
+                /* Empty body. */
             }
         })
         shell.exec(DUMP_WINDOW_COMMAND.format(dumpInterval))

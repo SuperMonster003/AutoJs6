@@ -26,6 +26,7 @@ import org.autojs.autojs.core.ui.widget.*
 import org.autojs.autojs.core.ui.widget.JsCanvasView
 import org.autojs.autojs.core.ui.widget.JsCheckedTextView
 import org.autojs.autojs.core.ui.widget.JsConsoleView
+import org.autojs.autojs.runtime.ScriptRuntime
 
 /**
  * Modified by SuperMonster003 as of May 26, 2022.
@@ -38,6 +39,7 @@ object ViewAttributesFactory {
     init {
         // @Hint by SuperMonster003 on Jun 12, 2023.
         //  ! ASCII Tree for Views with attributes appended to.
+        //  ! zh-CN: 附加属性值的视图 ASCII 树.
         //  !
         //  ! android.view.View
         //  ! ├─ android.view.SurfaceView
@@ -270,28 +272,28 @@ object ViewAttributesFactory {
         put(JsToggleButton::class.java, ::JsToggleButtonAttributes)
     }
 
-    fun put(clazz: Class<out View>, creator: (ResourceParser, View) -> ViewAttributes) {
+    fun put(clazz: Class<out View>, creator: (ScriptRuntime, ResourceParser, View) -> ViewAttributes) {
         sViewAttributesCreators[clazz] = object : ViewAttributesCreator {
-            override fun create(resourceParser: ResourceParser, view: View) = creator(resourceParser, view)
+            override fun create(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) = creator(scriptRuntime, resourceParser, view)
         }
     }
 
     @JvmStatic
-    fun create(resourceParser: ResourceParser, view: View): ViewAttributes {
+    fun create(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View): ViewAttributes {
         var viewClass: Class<*>? = view.javaClass
         while (viewClass != null && viewClass != Any::class.java) {
             val creator = sViewAttributesCreators[viewClass]
             if (creator != null) {
-                return creator.create(resourceParser, view)
+                return creator.create(scriptRuntime, resourceParser, view)
             }
             viewClass = viewClass.superclass
         }
-        return ViewAttributes(resourceParser, view)
+        return ViewAttributes(scriptRuntime, resourceParser, view)
     }
 
     interface ViewAttributesCreator {
 
-        fun create(resourceParser: ResourceParser, view: View): ViewAttributes
+        fun create(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View): ViewAttributes
 
     }
 

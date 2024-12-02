@@ -19,7 +19,6 @@
         android:gravity="center"
         android:textColor="@android:color/primary_text_light"/>
 
-
     <org.autojs.autojs.theme.widget.ThemeColorImageViewCompat
         android:id="@+id/expand_hint"
         android:layout_width="match_parent"

@@ -4,7 +4,10 @@ import android.util.Log
 import android.view.View
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
-import org.autojs.autojs.execution.ExecutionConfig
+import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
+import org.autojs.autojs.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.project.ScriptConfig
@@ -14,10 +17,17 @@ import org.autojs.autojs.rhino.RhinoAndroidHelper
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.JavaScriptSource
+import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.autojs.util.RhinoUtils.js_object_assign
+import org.autojs.autojs.util.RhinoUtils.js_require
+import org.autojs.autojs.util.RhinoUtils.withTimeConsuming
+import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeArray
+import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Script
 import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.commonjs.module.RequireBuilder
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
 import java.io.File
@@ -25,26 +35,24 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.Reader
 import java.net.URI
-import java.util.Locale
+import java.util.*
 
 /**
  * Created by Stardust on Apr 2, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  */
-open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Context) : JavaScriptEngine() {
+open class RhinoJavaScriptEngine(private val scriptRuntime: ScriptRuntime, private val androidContext: android.content.Context) : JavaScriptEngine() {
 
+    private val mWrapFactory = WrapFactory()
     val context: Context = enterContext()
-
     val scriptable: TopLevelScope = createScope(context)
 
     lateinit var thread: Thread
         private set
 
-    private val wrapFactory = WrapFactory()
-
     private val mInitScript: Script by lazy {
         try {
-            val reader = InputStreamReader(mAndroidContext.assets.open(SOURCE_FILE_INIT))
+            val reader = InputStreamReader(androidContext.assets.open(SOURCE_FILE_INIT))
             context.compileReader(reader, SOURCE_NAME_INIT, 1, null)
         } catch (e: IOException) {
             throw UncheckedIOException(e)
@@ -52,7 +60,7 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
     }
 
     override fun put(name: String, value: Any?) {
-        ScriptableObject.putProperty(scriptable, name, Context.javaToJS(value, scriptable))
+        scriptable.defineProp(name, Context.javaToJS(value, scriptable))
     }
 
     override fun setRuntime(runtime: ScriptRuntime) {
@@ -75,10 +83,6 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
         }
     }
 
-    fun hasFeature(feature: String): Boolean {
-        return (getTag(ExecutionConfig.tag) as ExecutionConfig? ?: return false).scriptConfig.hasFeature(feature)
-    }
-
     @Throws(IOException::class)
     protected fun preprocess(script: Reader) = script
 
@@ -96,22 +100,73 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
 
     override fun init() {
         thread = Thread.currentThread()
-        ScriptableObject.putProperty(scriptable, "__engine__", this)
+        scriptable.defineProp("__engine__", this)
         initRequireBuilder(context, scriptable)
-        try {
-            context.executeScriptWithContinuations(mInitScript, scriptable)
-        } catch (e: IllegalArgumentException) {
-            if (e.message?.contains("Script argument was not a script or was not created by interpreted mode") == true) {
-                mInitScript.exec(context, scriptable)
-            } else {
-                throw e
+
+        runtime.withTimeConsuming("runtime-init-prologue") {
+            it.initPrologue()
+        }
+
+        mInitScript.withTimeConsuming("script-init") { initScript ->
+            runCatching {
+                scriptable.defineProp("global", scriptable, PERMANENT)
+                context.executeScriptWithContinuations(initScript, scriptable)
+            }.getOrElse { e ->
+                if (e.message?.contains("Script argument was not a script or was not created by interpreted mode") == true) {
+                    initScript.exec(context, scriptable)
+                } else throw e
+            }.let { export ->
+                when (export) {
+                    is BaseFunction -> export.call(context, scriptable, scriptable, arrayOf(runtime, scriptable))
+                    is NativeArray -> export.map { coerceString(it) }.distinct().forEach { bindModule(it) }
+                    is NativeObject -> export.entries.forEach { entry -> bindModule(coerceString(entry.key), coerceString(entry.value)) }
+                    is String -> when {
+                        export.contains("|") -> export.split("|").forEach { bindModule(it) }
+                        else -> bindModule(export)
+                    }
+                    is Number -> bindModule(coerceString(export))
+                    else -> require(export.isJsNullish()) { "Invalid init script evaluated value ${export.jsBrief()}" }
+                }
             }
         }
+
+        runtime.withTimeConsuming("runtime-init-epilogue") {
+            it.initEpilogue()
+        }
+    }
+
+    private fun bindModule(fileName: String) = bindModule(fileName, fileName)
+
+    private fun bindModule(moduleName: String, fileName: String) {
+        val niceModuleName = moduleName.trim()
+        val niceFileName = fileName.trim()
+        val exportedRaw = kotlin.runCatching {
+            js_require(runtime, "__${niceFileName}__")
+        }.getOrElse { js_require(runtime, niceFileName) }
+        val exported: Any? = when (exportedRaw) {
+            is BaseFunction -> exportedRaw.call(context, scriptable, scriptable, arrayOf(runtime, scriptable))
+            else -> exportedRaw
+        }
+        if (exported.isJsNullish()) {
+            return
+        }
+        val globalObject = scriptable.prop(niceModuleName)
+        if (globalObject.isJsNullish()) {
+            scriptable.defineProp(niceModuleName, exported)
+            return
+        }
+        require(globalObject is Scriptable) {
+            "Global value global.$niceModuleName is ${globalObject.jsBrief()}, which must be a Scriptable to be assigned to"
+        }
+        require(exported is Scriptable) {
+            "Module $niceModuleName exported value ${exported.jsBrief()} must be a Scriptable to be assigned to the global object"
+        }
+        js_object_assign(globalObject, exported)
     }
 
     private fun initRequireBuilder(context: Context, scope: Scriptable) {
         val provider = AssetAndUrlModuleSourceProvider(
-            mAndroidContext, MODULES_ROOT_PATH, listOf<URI>(File(File.separator).toURI())
+            androidContext, MODULES_ROOT_PATH, listOf<URI>(File(File.separator).toURI())
         )
         RequireBuilder()
             .setModuleScriptProvider(SoftCachingModuleScriptProvider(provider))
@@ -120,26 +175,20 @@ open class RhinoJavaScriptEngine(private val mAndroidContext: android.content.Co
             .install(scope)
     }
 
-    protected fun createScope(context: Context): TopLevelScope {
-        return TopLevelScope().apply {
-            initStandardObjects(context, false)
-        }
+    protected fun createScope(context: Context) = TopLevelScope().apply {
+        initStandardObjects(context, false)
     }
 
-    fun enterContext(): Context {
-        return RhinoAndroidHelper(mAndroidContext).enterContext().also { setupContext(it) }
-    }
+    fun enterContext(): Context = RhinoAndroidHelper(androidContext).enterContext().also { setupContext(it) }
 
-    fun setupContext(context: Context) {
-        context.also {
-            if (it is AutoJsContext) {
-                it.rhinoJavaScriptEngine = this
-            }
-            it.optimizationLevel = -1
-            it.languageVersion = Context.VERSION_ES6
-            it.locale = Locale.getDefault()
-            it.wrapFactory = WrapFactory()
+    fun setupContext(context: Context) = context.apply {
+        if (this is AutoJsContext) {
+            rhinoJavaScriptEngine = this@RhinoJavaScriptEngine
         }
+        optimizationLevel = -1
+        languageVersion = Context.VERSION_ES6
+        locale = Locale.getDefault()
+        wrapFactory = mWrapFactory
     }
 
     private inner class WrapFactory : AndroidContextFactory.WrapFactory() {

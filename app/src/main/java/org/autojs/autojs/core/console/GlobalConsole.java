@@ -43,24 +43,14 @@ public class GlobalConsole extends ConsoleImpl {
     }
 
     protected Priority toLog4jLevel(int level) {
-        switch (level) {
-            case VERBOSE, DEBUG -> {
-                return Level.DEBUG;
-            }
-            case INFO -> {
-                return Level.INFO;
-            }
-            case WARN -> {
-                return Level.WARN;
-            }
-            case ERROR -> {
-                return Level.ERROR;
-            }
-            case ASSERT -> {
-                return Level.FATAL;
-            }
+        return switch (level) {
+            case VERBOSE, DEBUG -> Level.DEBUG;
+            case INFO -> Level.INFO;
+            case WARN -> Level.WARN;
+            case ERROR -> Level.ERROR;
+            case ASSERT -> Level.FATAL;
             default -> throw new IllegalArgumentException(GlobalConsole.class.getSimpleName() + ".toLog4jLevel");
-        }
+        };
     }
 
     protected String getLevelChar(int level) {

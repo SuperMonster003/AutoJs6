@@ -3,9 +3,10 @@ package org.autojs.autojs.core.accessibility
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.os.Build
 import android.util.Log
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.accessibility.AccessibilityService as CoreAccessibilityService
 
-class AccessibilityServiceUsher : AccessibilityService() {
+class AccessibilityServiceUsher : CoreAccessibilityService() {
 
     override fun onServiceConnected() {
         Log.d(TAG, "onServiceConnected")

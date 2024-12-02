@@ -4,14 +4,15 @@ import android.content.res.ColorStateList
 import android.view.View
 import android.widget.CompoundButton
 import org.autojs.autojs.core.ui.inflater.ResourceParser
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
-open class CompoundButtonAttributes(resourceParser: ResourceParser, view: View) : ButtonAttributes(resourceParser, view) {
+open class CompoundButtonAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ButtonAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as CompoundButton
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttrs(arrayOf("checked", "check", "isChecked")) { setChecked(it.toBoolean()) }
         registerAttr("buttonDrawable") { view.buttonDrawable = drawables.parse(view, it) }

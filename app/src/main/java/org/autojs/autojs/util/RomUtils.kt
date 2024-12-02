@@ -9,7 +9,7 @@ import android.os.Build
 import android.os.Process
 import android.provider.Settings
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.pref.Language
+import org.autojs.autojs.core.pref.Language
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader

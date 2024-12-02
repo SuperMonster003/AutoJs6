@@ -27,7 +27,6 @@ import java.util.concurrent.Executors;
  */
 public class JsBeautifier {
 
-
     public interface Callback {
 
         void onSuccess(String beautifiedCode);
@@ -103,7 +102,6 @@ public class JsBeautifier {
             }
         });
     }
-
 
     private void prepareIfNeeded() {
         if (mJsBeautifyFunction != null)

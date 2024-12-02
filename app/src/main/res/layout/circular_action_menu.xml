@@ -50,7 +50,6 @@
             android:padding="8dp"
             android:src="@drawable/ic_close_white_48dp" />
 
-
     <ImageView
             android:id="@+id/action_menu_more"
             android:layout_width="42dp"
@@ -60,6 +59,5 @@
             android:foreground="?selectableItemBackgroundBorderless"
             android:padding="8dp"
             android:src="@drawable/ic_more_horiz_white_48dp" />
-
 
 </org.autojs.autojs.ui.floating.CircularActionMenu>

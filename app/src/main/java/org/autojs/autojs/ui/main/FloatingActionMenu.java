@@ -94,7 +94,6 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
                 .start();
     }
 
-
     private void animateY(View view, float y, Animator.AnimatorListener l) {
         view.animate()
                 .translationY(y)

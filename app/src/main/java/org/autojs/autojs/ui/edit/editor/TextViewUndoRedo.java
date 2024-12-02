@@ -83,7 +83,6 @@ public class TextViewUndoRedo {
         return mInitialHistoryStackSize != mEditHistory.size();
     }
 
-
     public void markTextAsUnchanged() {
         mInitialHistoryStackSize = mEditHistory.size();
     }

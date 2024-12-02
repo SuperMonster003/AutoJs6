@@ -4,13 +4,14 @@ import android.view.View
 import android.webkit.WebView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Strings
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class WebViewAttributes(resourceParser: ResourceParser, view: View) : ViewGroupAttributes(resourceParser, view) {
+open class WebViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewGroupAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as WebView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("url") { view.loadUrl(it) }
         registerAttrs(arrayOf("scale", "initialScale")) { view.setInitialScale(it.toInt()) }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>综述 (Overview) | AutoJs6 文档 - 6.5.0</title>
+    <title>综述 (Overview) | AutoJs6 文档 - 6.6.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -162,7 +162,7 @@
 
     <div id="column1" data-id="all" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <h1>AutoJs6 文档 - 6.6.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -474,10 +474,6 @@
 <li><span class="stability_undefined"><a href="#global_isfunction_o">isFunction(o)</a></span></li>
 </ul>
 </li>
-<li><span class="stability_undefined"><a href="#global_m_ishtmldocument">[m] isHTMLDocument</a></span><ul>
-<li><span class="stability_undefined"><a href="#global_ishtmldocument_o">isHTMLDocument(o)</a></span></li>
-</ul>
-</li>
 <li><span class="stability_undefined"><a href="#global_m_isint16array">[m] isInt16Array</a></span><ul>
 <li><span class="stability_undefined"><a href="#global_isint16array_o">isInt16Array(o)</a></span></li>
 </ul>
@@ -560,10 +556,6 @@
 </li>
 <li><span class="stability_undefined"><a href="#global_m_isweakset">[m] isWeakSet</a></span><ul>
 <li><span class="stability_undefined"><a href="#global_isweakset_o">isWeakSet(o)</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#global_m_iswindow">[m] isWindow</a></span><ul>
-<li><span class="stability_undefined"><a href="#global_iswindow_o">isWindow(o)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#global_m_isxml">[m] isXML</a></span><ul>
@@ -1484,8 +1476,16 @@
 <li><span class="stability_undefined"><a href="#console_settitlebackgroundcolor_color">setTitleBackgroundColor(color)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#console_m_settitlebackgroundtint">[m] setTitleBackgroundTint</a></span><ul>
+<li><span class="stability_undefined"><a href="#console_settitlebackgroundtint_color">setTitleBackgroundTint(color)</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#console_m_settitlebackgroundalpha">[m] setTitleBackgroundAlpha</a></span><ul>
 <li><span class="stability_undefined"><a href="#console_settitlebackgroundalpha_alpha">setTitleBackgroundAlpha(alpha)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#console_m_resettitlebackgroundalpha">[m] resetTitleBackgroundAlpha</a></span><ul>
+<li><span class="stability_undefined"><a href="#console_resettitlebackgroundalpha">resetTitleBackgroundAlpha()</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#console_m_settitleiconstint">[m] setTitleIconsTint</a></span><ul>
@@ -1509,6 +1509,10 @@
 <li><span class="stability_undefined"><a href="#console_setcontentbackgroundalpha_alpha">setContentBackgroundAlpha(alpha)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#console_m_resetcontentbackgroundalpha">[m] resetContentBackgroundAlpha</a></span><ul>
+<li><span class="stability_undefined"><a href="#console_resetcontentbackgroundalpha">resetContentBackgroundAlpha()</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#console_m_settextsize">[m] setTextSize</a></span><ul>
 <li><span class="stability_undefined"><a href="#console_settextsize_size">setTextSize(size)</a></span></li>
 </ul>
@@ -1523,6 +1527,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#console_m_setbackgroundalpha">[m] setBackgroundAlpha</a></span><ul>
 <li><span class="stability_undefined"><a href="#console_setbackgroundalpha_alpha">setBackgroundAlpha(alpha)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#console_m_resetbackgroundalpha">[m] resetBackgroundAlpha</a></span><ul>
+<li><span class="stability_undefined"><a href="#console_resetbackgroundalpha">resetBackgroundAlpha()</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#console_m_verbose">[m] verbose</a></span><ul>
@@ -2744,10 +2752,10 @@ console.log(UiObject.bounds()); /* 访问的是类 UiObject 的静态方法 boun
 <h3>AutoJs6 如何使用<span><a class="mark" href="#qa_autojs6_2" id="qa_autojs6_2">#</a></span></h3>
 <p>详见 <a href="manual.html">AutoJs6 使用手册</a> 章节.</p>
 <h3>AutoJs6 是否免费<span><a class="mark" href="#qa_autojs6_3" id="qa_autojs6_3">#</a></span></h3>
-<p>AutoJs6 永久免费, 它是基于开源版本 (Auto.js 4.1.1 alpha2) 二次开发的, 将保持开源免费.</p>
+<p>AutoJs6 永久免费, 它是基于开源版本 (Auto.js 4.1.1 Alpha2) 二次开发的, 将保持开源免费.</p>
 <h3>AutoJs6 目标<span><a class="mark" href="#qa_autojs6_4" id="qa_autojs6_4">#</a></span></h3>
-<p>开源版本 (Auto.js 4.1.1 alpha2) 是非常好的学习资料, AutoJs6 之所以存在, 恰恰是因为站在巨人的肩膀上.</p>
-<p>AutoJs6 的目标是对开源版本 (Auto.js 4.1.1 alpha2) 进行完善及扩展.</p>
+<p>开源版本 (Auto.js 4.1.1 Alpha2) 是非常好的学习资料, AutoJs6 之所以存在, 恰恰是因为站在巨人的肩膀上.</p>
+<p>AutoJs6 的目标是对开源版本 (Auto.js 4.1.1 Alpha2) 进行完善及扩展.</p>
 <h3>AutoJs6 特色<span><a class="mark" href="#qa_autojs6_5" id="qa_autojs6_5">#</a></span></h3>
 <p>AutoJs6 对以下功能进行了十足的打磨:</p>
 <ul>
@@ -4274,13 +4282,6 @@ species.isRegExp(/test$/); // true
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
 </ul>
 </div><p>判断对象的 &quot;种类&quot; 是否为 <code>Function</code>.</p>
-<h3>[m] isHTMLDocument<span><a class="mark" href="#global_m_ishtmldocument" id="global_m_ishtmldocument">#</a></span></h3>
-<h4>isHTMLDocument(o)<span><a class="mark" href="#global_ishtmldocument_o" id="global_ishtmldocument_o">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
-</ul>
-</div><p>判断对象的 &quot;种类&quot; 是否为 <code>HTMLDocument</code>.</p>
 <h3>[m] isInt16Array<span><a class="mark" href="#global_m_isint16array" id="global_m_isint16array">#</a></span></h3>
 <h4>isInt16Array(o)<span><a class="mark" href="#global_isint16array_o" id="global_isint16array_o">#</a></span></h4>
 <div class="signature"><ul>
@@ -4428,13 +4429,6 @@ species.isRegExp(/test$/); // true
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
 </ul>
 </div><p>判断对象的 &quot;种类&quot; 是否为 <code>WeakSet</code>.</p>
-<h3>[m] isWindow<span><a class="mark" href="#global_m_iswindow" id="global_m_iswindow">#</a></span></h3>
-<h4>isWindow(o)<span><a class="mark" href="#global_iswindow_o" id="global_iswindow_o">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
-</ul>
-</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Window</code>.</p>
 <h3>[m] isXML<span><a class="mark" href="#global_m_isxml" id="global_m_isxml">#</a></span></h3>
 <h4>isXML(o)<span><a class="mark" href="#global_isxml_o" id="global_isxml_o">#</a></span></h4>
 <div class="signature"><ul>
@@ -10099,11 +10093,31 @@ notice.channel.getAll().map(ch =&gt; ch.getId()); /* 获取所有渠道的 ID. *
 <ul>
 <li>控制台日志内容的管理 - [ 按分级显示内容 / 内容清空 / 时间跟踪 / 栈追踪 / 存入文件 ] 等<ul>
 <li><a href="#all_m_log">console.log</a></li>
+<li><a href="#all_m_warn">console.warn</a></li>
+<li><a href="#all_m_clear">console.clear</a></li>
+<li><a href="#all_m_time">console.time</a></li>
+<li><a href="#all_m_timeend">console.timeEnd</a></li>
+<li><a href="#all_m_printallstacktrace">console.printAllStackTrace</a></li>
 <li><a href="#all_m_setgloballogconfig">console.setGlobalLogConfig</a></li>
+<li>... ...</li>
 </ul>
 </li>
 <li>控制台浮动窗口的管理 - [ 窗口样式 / 文字样式 / 窗口显示与隐藏 / 窗口位置与尺寸 ] 等<ul>
+<li><a href="#all_m_setbackgroundcolor">console.setBackgroundColor</a></li>
+<li><a href="#all_m_setbackgroundtint">console.setBackgroundTint</a></li>
+<li><a href="#all_m_setbackgroundalpha">console.setBackgroundAlpha</a></li>
+<li><a href="#all_m_settouchable">console.setTouchable</a></li>
+<li><a href="#all_m_settitle">console.setTitle</a></li>
+<li><a href="#all_m_settextcolor">console.setTextColor</a></li>
+<li><a href="#all_m_settextsize">console.setTextSize</a></li>
 <li><a href="#all_m_show">console.show</a></li>
+<li><a href="#all_m_hide">console.hide</a></li>
+<li><a href="#all_m_collapse">console.collapse</a></li>
+<li><a href="#all_m_expand">console.expand</a></li>
+<li><a href="#all_m_setsize">console.setSize</a></li>
+<li><a href="#all_m_setposition">console.setPosition</a></li>
+<li><a href="#all_m_setgravity">console.setGravity</a></li>
+<li>... ...</li>
 </ul>
 </li>
 <li>控制台 Activity 活动窗口管理<ul>
@@ -10450,6 +10464,32 @@ console
     .setTitleBackgroundAlpha(0.5)
     .show();
 </code></pre>
+<p>如需在设置颜色时保留原有的背景透明度值, 可使用 <a href="#all_m_settitlebackgroundtint">setTitleBackgroundTint</a> 方法:</p>
+<pre><code class="lang-js">/* 深蓝色背景, 透明度丢失, 即完全不透明. */
+console.setTitleBackgroundColor(&#39;dark-blue&#39;).show();
+
+/* 深蓝色背景, 透明度保留. */
+console.setTitleBackgroundTint(&#39;dark-blue&#39;).show();
+</code></pre>
+<h2>[m] setTitleBackgroundTint<span><a class="mark" href="#console_m_settitlebackgroundtint" id="console_m_settitlebackgroundtint">#</a></span></h2>
+<h3>setTitleBackgroundTint(color)<span><a class="mark" href="#console_settitlebackgroundtint_color" id="console_settitlebackgroundtint_color">#</a></span></h3>
+<p><strong><code>6.6.0</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniTint</a></span> } - 浮动窗口标题显示区域背景颜色</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="console.html">this</a></span> }</li>
+</ul>
+<p>设置控制台浮动窗口的标题显示区域背景着色, 保留原有透明度值.</p>
+<pre><code class="lang-js">/* 设置标题显示区域背景着色为深蓝色. */
+console.setTitleBackgroundTint(&#39;dark-blue&#39;).show();
+console.build({ titleBackgroundTint: &#39;dark-blue&#39; }).show(); /* 效果同上. */
+</code></pre>
+<p>与 <a href="#all_m_settitlebackgroundcolor">setTitleBackgroundColor</a> 的区别:</p>
+<pre><code class="lang-js">/* 深蓝色背景, 透明度保留. */
+console.setTitleBackgroundTint(&#39;dark-blue&#39;).show();
+
+/* 深蓝色背景, 透明度丢失, 即完全不透明. */
+console.setTitleBackgroundColor(&#39;dark-blue&#39;).show();
+</code></pre>
 <h2>[m] setTitleBackgroundAlpha<span><a class="mark" href="#console_m_settitlebackgroundalpha" id="console_m_settitlebackgroundalpha">#</a></span></h2>
 <h3>setTitleBackgroundAlpha(alpha)<span><a class="mark" href="#console_settitlebackgroundalpha_alpha" id="console_settitlebackgroundalpha_alpha">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
@@ -10467,6 +10507,20 @@ console
     .setTitleBackgroundColor(&#39;dark-blue&#39;)
     .setTitleBackgroundAlpha(0.5)
     .show();
+</code></pre>
+<p>使用 <code>-1</code> 可重置标题区域的透明度 (为 <code>0.8</code>):</p>
+<pre><code class="lang-js">console.setTitleBackgroundAlpha(-1).show();
+console.resetTitleBackgroundAlpha().show(); /* 同上. */
+</code></pre>
+<h2>[m] resetTitleBackgroundAlpha<span><a class="mark" href="#console_m_resettitlebackgroundalpha" id="console_m_resettitlebackgroundalpha">#</a></span></h2>
+<h3>resetTitleBackgroundAlpha()<span><a class="mark" href="#console_resettitlebackgroundalpha" id="console_resettitlebackgroundalpha">#</a></span></h3>
+<p><strong><code>6.6.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="console.html">this</a></span> }</li>
+</ul>
+<p>重置控制台浮动窗口的标题显示区域背景颜色透明度, 默认值为 <code>0.8</code>.</p>
+<pre><code class="lang-js">console.resetTitleBackgroundAlpha().show();
+console.setTitleBackgroundAlpha(-1).show(); /* 同上. */
 </code></pre>
 <h2>[m] setTitleIconsTint<span><a class="mark" href="#console_m_settitleiconstint" id="console_m_settitleiconstint">#</a></span></h2>
 <h3>setTitleIconsTint(color)<span><a class="mark" href="#console_settitleiconstint_color" id="console_settitleiconstint_color">#</a></span></h3>
@@ -10582,6 +10636,20 @@ console
     .setContentBackgroundAlpha(0.5)
     .show();
 </code></pre>
+<p>使用 <code>-1</code> 可重置日志区域的透明度 (为 <code>0.6</code>):</p>
+<pre><code class="lang-js">console.setContentBackgroundAlpha(-1).show();
+console.resetContentBackgroundAlpha().show(); /* 同上. */
+</code></pre>
+<h2>[m] resetContentBackgroundAlpha<span><a class="mark" href="#console_m_resetcontentbackgroundalpha" id="console_m_resetcontentbackgroundalpha">#</a></span></h2>
+<h3>resetContentBackgroundAlpha()<span><a class="mark" href="#console_resetcontentbackgroundalpha" id="console_resetcontentbackgroundalpha">#</a></span></h3>
+<p><strong><code>6.6.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="console.html">this</a></span> }</li>
+</ul>
+<p>重置控制台浮动窗口的日志显示区域背景颜色透明度, 默认值为 <code>0.6</code>.</p>
+<pre><code class="lang-js">console.resetContentBackgroundAlpha().show();
+console.setContentBackgroundAlpha(-1).show(); /* 同上. */
+</code></pre>
 <h2>[m] setTextSize<span><a class="mark" href="#console_m_settextsize" id="console_m_settextsize">#</a></span></h2>
 <h3>setTextSize(size)<span><a class="mark" href="#console_settextsize_size" id="console_settextsize_size">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
@@ -10652,6 +10720,21 @@ console
     .setBackgroundColor(&#39;light-yellow&#39;)
     .setBackgroundAlpha(0.5)
     .show();
+</code></pre>
+<p>使用 <code>-1</code> 可同时重置标题区域的透明度 (为 <code>0.8</code>), 以及日志区域的透明度 (为 <code>0.6</code>):</p>
+<pre><code class="lang-js">console.setBackgroundAlpha(-1).show();
+console.resetBackgroundAlpha().show(); /* 同上. */
+</code></pre>
+<h2>[m] resetBackgroundAlpha<span><a class="mark" href="#console_m_resetbackgroundalpha" id="console_m_resetbackgroundalpha">#</a></span></h2>
+<h3>resetBackgroundAlpha()<span><a class="mark" href="#console_resetbackgroundalpha" id="console_resetbackgroundalpha">#</a></span></h3>
+<p><strong><code>6.6.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="console.html">this</a></span> }</li>
+</ul>
+<p>重置控制台浮动窗口的标题及日志显示区域背景颜色透明度, 分别为 <code>0.8</code> 及 <code>0.6</code>.</p>
+<p>相当于 <a href="#all_m_resettitlebackgroundalpha">resetTitleBackgroundAlpha</a> 和 <a href="#all_m_resetcontentbackgroundalpha">resetContentBackgroundAlpha</a> 的集成.</p>
+<pre><code class="lang-js">console.resetBackgroundAlpha().show();
+console.setBackgroundAlpha(-1).show(); /* 同上. */
 </code></pre>
 <h2>[m] verbose<span><a class="mark" href="#console_m_verbose" id="console_m_verbose">#</a></span></h2>
 <h3>verbose(data, ...args)<span><a class="mark" href="#console_verbose_data_args" id="console_verbose_data_args">#</a></span></h3>
@@ -10991,8 +11074,32 @@ console.timeEnd(&#39;fruit&#39;);
 <h1>Shell<span><a class="mark" href="#shell_shell" id="shell_shell">#</a></span></h1>
 <hr>
 <p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
-<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 22, 2022.</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Nov 13, 2024.</p>
 
+<hr>
+<p style="font: italic 1em sans-serif; color: #78909C">TypeScript Declarations (v6.6.0+)</p>
+
+<pre><code class="lang-typescript">interface Shell {
+
+    (command: string): AbstractShell.Result;
+    (command: string, withRoot: boolean | number): AbstractShell.Result;
+    (command: string, commandArgument: object | string): AbstractShell.Result;
+    (command: string, commandArgument: object | string, withRoot: boolean | number): AbstractShell.Result;
+
+    execCommand(command: string): AbstractShell.Result;
+    execCommand(command: string, withRoot: boolean | number): AbstractShell.Result;
+    execCommand(command: string, commandArgument: object | string): AbstractShell.Result;
+    execCommand(command: string, commandArgument: object | string, withRoot: boolean | number): AbstractShell.Result;
+
+    getCommand(command: string): string;
+    getCommand(command: string, withRoot: boolean | number): string;
+    getCommand(command: string, commandArgument: object | string): string;
+    getCommand(command: string, commandArgument: object | string, withRoot: boolean | number): string;
+
+    fromIntent(i: Intent.Common): string;
+
+}
+</code></pre>
 <hr>
 <p>shell即Unix Shell, 在类Unix系统提供与操作系统交互的一系列命令.</p>
 <p>很多程序可以用来执行shell命令, 例如终端模拟器.</p>
@@ -14646,10 +14753,10 @@ console.log(dc); // hello
 console.log(dc === message); // true
 </code></pre>
 <p>但需额外注意, 某些算法生成的密钥对, 仅仅用作密钥交换, 密钥交换后将确定一个对称密钥, 最终使用一个对称密钥算法 (如 DES) 进行加解密. 因此密钥对不一定参与非对称加解密过程.</p>
-<p>上述情况典型的样例, 当属 Diffie-Hellman（迪菲-赫尔曼) 算法:</p>
+<p>上述情况典型的样例, 当属 Diffie-Hellman (迪菲-赫尔曼) 算法:</p>
 <pre><code class="lang-js">let message = &#39;hello&#39;;
 
-/* 生成 Diffie-Hellman（迪菲-赫尔曼) 密钥对. */
+/* 生成 Diffie-Hellman (迪菲-赫尔曼) 密钥对. */
 let keyPair = crypto.generateKeyPair(&#39;DiffieHellman&#39;);
 
 /* 借助 Diffie-Hellman 密钥对, 使用 DES 算法生成一个确定的密钥. */

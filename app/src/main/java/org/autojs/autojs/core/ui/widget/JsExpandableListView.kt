@@ -8,6 +8,7 @@ class JsExpandableListView : ExpandableListView {
 
     // TODO by SuperMonster003 on Jun 8, 2023.
     //  ! Adapter and DataSource etc.
+    //  ! zh-CN: Adapter 和 DataSource 等.
 
     constructor(context: Context) : super(context)
 

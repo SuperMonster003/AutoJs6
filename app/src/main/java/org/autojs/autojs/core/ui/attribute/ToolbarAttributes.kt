@@ -6,14 +6,15 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Strings
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
-open class ToolbarAttributes(resourceParser: ResourceParser, view: View) : ViewGroupAttributes(resourceParser, view) {
+open class ToolbarAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewGroupAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as Toolbar
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("collapseContentDescription") { view.collapseContentDescription = Strings.parse(view, it) }
         registerAttr("collapseIcon") { view.collapseIcon = drawables.parse(view, it) }

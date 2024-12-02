@@ -7,12 +7,13 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
 import org.autojs.autojs.core.ui.widget.JsSpinner
+import org.autojs.autojs.runtime.ScriptRuntime
 
 /**
  * Created by Stardust on Nov 29, 2017.
  * Transformed by SuperMonster003 on Apr 12, 2023.
  */
-class JsSpinnerInflater(resourceParser: ResourceParser) : AppCompatSpinnerInflater<JsSpinner>(resourceParser) {
+class JsSpinnerInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : AppCompatSpinnerInflater<JsSpinner>(scriptRuntime, resourceParser) {
 
     override fun getCreator(): ViewCreator<JsSpinner> = object : ViewCreator<JsSpinner> {
         override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsSpinner {

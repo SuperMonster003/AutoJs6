@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration
 import org.autojs.autojs.core.accessibility.NodeInfo
+import org.autojs.autojs.extension.NumberExtensions.string
 import org.autojs.autojs.util.ClipboardUtils
-import org.autojs.autojs.util.NumberUtils.toElegantlyDoubleString
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.opencv.core.Point
@@ -28,7 +28,10 @@ import kotlin.math.floor
 class NodeInfoView : RecyclerView {
 
     // TODO by 抠脚本人 on Jul 12, 2023.
-    //  ! 调整数据结构, 对话框关闭后根据已勾选的属性, 生成选择器
+    //  ! 调整数据结构, 对话框关闭后根据已勾选的属性, 生成选择器.
+    //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+    //  ! Adjust the data structure.
+    //  ! When the dialog is dismissed, generate selectors based on the selected attributes.
     private val data = Array(FIELDS.size + 1) { Array(2) { "" } }
 
     constructor(context: Context) : super(context)
@@ -65,7 +68,7 @@ class NodeInfoView : RecyclerView {
                     else -> {
                         when (FIELDS[i].name) {
                             "bounds" -> (value as? Rect)?.let { "[ ${it.left}, ${it.top}, ${it.right}, ${it.bottom} ]" } ?: value?.toString() ?: ""
-                            "center" -> (value as? Point)?.let { "[ ${toElegantlyDoubleString(it.x)}, ${toElegantlyDoubleString(it.y)} ]" } ?: value?.toString() ?: ""
+                            "center" -> (value as? Point)?.let { "[ ${it.x.string}, ${it.y.string} ]" } ?: value?.toString() ?: ""
                             else -> value?.toString() ?: ""
                         }
                     }
@@ -88,7 +91,9 @@ class NodeInfoView : RecyclerView {
 
     fun getCheckedDate(): Array<String> {
         // TODO by 抠脚本人 on Jul 12, 2023.
-        //  ! 数据增加 checked 属性, 区分已选中项目
+        //  ! 数据增加 checked 属性, 区分已选中项目.
+        //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+        //  ! Add the checked attribute to the data to distinguish the selected items.
         val checkedArr = data.filter { it[0] == "id" || it[0] == "text" }
         return Array(checkedArr.size) {
             dataToFx(checkedArr[it])
@@ -153,13 +158,13 @@ class NodeInfoView : RecyclerView {
                 result = if (x == x.toLong().toDouble()) {
                     result.replace("%X%", x.toLong().toString())
                 } else {
-                    result.replace("%X%", "${toElegantlyDoubleString(floor(x))}, ${toElegantlyDoubleString(ceil(x))}")
+                    result.replace("%X%", "${floor(x).string}, ${ceil(x).string}")
                 }
 
                 result = if (y == y.toLong().toDouble()) {
                     result.replace("%Y%", y.toLong().toString())
                 } else {
-                    result.replace("%Y%", "${toElegantlyDoubleString(floor(y))}, ${toElegantlyDoubleString(ceil(y))}")
+                    result.replace("%Y%", "${floor(y).string}, ${ceil(y).string}")
                 }
 
                 return result
@@ -190,7 +195,7 @@ class NodeInfoView : RecyclerView {
             "rowCount", "columnCount", "row", "column", "rowSpan", "columnSpan",
             "drawingOrder",
 
-            // Arrays
+            // Last
             "actionNames",
         )
 

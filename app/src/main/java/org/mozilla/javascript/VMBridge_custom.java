@@ -1,8 +1,7 @@
 package org.mozilla.javascript;
 
-import android.os.Looper;
 import android.util.Log;
-
+import org.autojs.autojs.engine.RhinoJavaScriptEngine;
 import org.autojs.autojs.rhino.AutoJsContext;
 import org.mozilla.javascript.jdk18.VMBridge_jdk18;
 
@@ -11,18 +10,20 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static org.autojs.autojs.util.RhinoUtils.isUiThread;
+
 @SuppressWarnings("unused")
 public class VMBridge_custom extends VMBridge_jdk18 {
 
     // @Hint by SuperMonster003 on Oct 30, 2022.
-    //  ! Current class (VMBridge_custom) was used in the following method(s):
-    //  ! - org.mozilla.javascript.VMBridge.makeInstance
+    //  ! Current class was used in method `org.mozilla.javascript.VMBridge.makeInstance`.
+    //  ! zh-CN: 当前类在 `org.mozilla.javascript.VMBridge.makeInstance` 方法中被使用.
 
-    private static final String LOG_TAG = "VMBridge_custom";
+    private static final String LOG_TAG = VMBridge_custom.class.getSimpleName();
 
     @SuppressWarnings("RedundantThrows")
     public VMBridge_custom() throws SecurityException, InstantiationException {
-
+        /* Empty body. */
     }
 
     @Override
@@ -49,7 +50,7 @@ public class VMBridge_custom extends VMBridge_jdk18 {
             }
             // Add thread check
             // Check if the current thread is ui thread
-            if (Looper.myLooper() == Looper.getMainLooper()) {
+            if (isUiThread()) {
                 // If so, catch any exception of invoking
                 // Because an exception on ui thread will cause the whole app to crash
                 try {
@@ -59,13 +60,16 @@ public class VMBridge_custom extends VMBridge_jdk18 {
                     return defaultValue(method.getReturnType());
                 } catch (Throwable e) {
                     e.printStackTrace();
-                    // @Reference to aiselp (https://github.com/aiselp) on Nov 7, 2023.
+                    // @Reference to aiselp (https://github.com/aiselp) by SuperMonster003 on Nov 7, 2023.
                     //  ! https://github.com/kkevsekk1/AutoX/commit/9cfeb00280447ef2807bdc5e195095d5a83afb39#diff-18d5934044cd3d259e52c3b1053ecd57e653ae70d14a7c0f31700029e97da239
                     if (context instanceof AutoJsContext) {
                         // notify the script thread to exit
-                        org.autojs.autojs.runtime.ScriptRuntime runtime = ((AutoJsContext) context).getRhinoJavaScriptEngine().getRuntime();
-                        Log.d(LOG_TAG, "runtime = " + runtime);
-                        runtime.exit(e);
+                        var engine = ((AutoJsContext) context).getRhinoJavaScriptEngine();
+                        if (engine != null) {
+                            var runtime = engine.getRuntime();
+                            Log.d(LOG_TAG, "runtime = " + runtime);
+                            runtime.exit(e);
+                        }
                     }
                     // even if we caught the exception, we must return a value to for the method call.
                     return defaultValue(method.getReturnType());

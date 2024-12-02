@@ -14,6 +14,7 @@ import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.ui.explorer.ExplorerView;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
 import org.autojs.autojs6.R;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -70,11 +71,12 @@ public class FileChooseListView extends ExplorerView {
         }
     }
 
+    @NotNull
     @Override
-    protected BindableViewHolder<?> onCreateViewHolder(LayoutInflater inflater, ViewGroup parent, int viewType) {
+    protected BindableViewHolder<Object> onCreateViewHolder(LayoutInflater inflater, ViewGroup parent, int viewType) {
         return switch (viewType) {
-            case VIEW_TYPE_ITEM -> new ExplorerItemViewHolder(this, inflater.inflate(R.layout.file_choose_list_file, parent, false));
-            case VIEW_TYPE_PAGE -> new ExplorerPageViewHolder(this, inflater.inflate(R.layout.file_choose_list_directory, parent, false));
+            case VIEW_TYPE_ITEM -> new org.autojs.autojs.ui.filechooser.ExplorerItemViewHolder(this, inflater.inflate(R.layout.file_choose_list_file, parent, false));
+            case VIEW_TYPE_PAGE -> new org.autojs.autojs.ui.filechooser.ExplorerPageViewHolder(this, inflater.inflate(R.layout.file_choose_list_directory, parent, false));
             default -> super.onCreateViewHolder(inflater, parent, viewType);
         };
     }
@@ -91,6 +93,5 @@ public class FileChooseListView extends ExplorerView {
         }
         mSelectedFiles.put(file, position);
     }
-
 
 }

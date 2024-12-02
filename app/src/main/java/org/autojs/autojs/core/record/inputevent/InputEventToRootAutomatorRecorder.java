@@ -1,19 +1,15 @@
 package org.autojs.autojs.core.record.inputevent;
 
 import androidx.annotation.NonNull;
-
 import org.autojs.autojs.core.inputevent.InputEventCodes;
 import org.autojs.autojs.core.inputevent.InputEventObserver;
 import org.autojs.autojs.engine.RootAutomatorEngine;
-
-import static org.autojs.autojs.runtime.api.ScreenMetrics.getDeviceScreenHeight;
-import static org.autojs.autojs.runtime.api.ScreenMetrics.getDeviceScreenWidth;
+import org.autojs.autojs.runtime.api.ScreenMetrics;
 
 /**
  * Created by Stardust on Aug 1, 2017.
  */
 public class InputEventToRootAutomatorRecorder extends InputEventRecorder {
-
 
     private double mLastEventTime;
     private final StringBuilder mCode = new StringBuilder();
@@ -21,8 +17,9 @@ public class InputEventToRootAutomatorRecorder extends InputEventRecorder {
 
     public InputEventToRootAutomatorRecorder() {
         mCode.append("var ra = new RootAutomator();\n")
-                .append("ra.setScreenMetrics(").append(getDeviceScreenWidth()).append(", ")
-                .append(getDeviceScreenHeight()).append(");\n");
+                .append("ra.setScreenMetrics(")
+                .append(ScreenMetrics.getDeviceScreenWidth()).append(", ")
+                .append(ScreenMetrics.getDeviceScreenHeight()).append(");\n");
     }
 
     @Override
@@ -75,6 +72,5 @@ public class InputEventToRootAutomatorRecorder extends InputEventRecorder {
         super.stop();
         mCode.append("ra.exit();");
     }
-
 
 }

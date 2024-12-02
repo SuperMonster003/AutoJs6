@@ -8,8 +8,10 @@ import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import com.google.mlkit.vision.barcode.common.Barcode as MLKitBarcode
 
-
 class WrappedBarcode(val barcode: MLKitBarcode) : IWrappedBarcode {
+
+    val value
+        get() = displayValue
 
     override fun getFormat(): Int = barcode.format
 
@@ -74,5 +76,11 @@ class WrappedBarcode(val barcode: MLKitBarcode) : IWrappedBarcode {
     override fun getRawBytes(): ByteArray? = barcode.rawBytes
 
     override fun getCornerPoints(): Array<Point>? = barcode.cornerPoints
+
+    override fun toString(): String = listOf(
+        "[" + getFormatName().replaceFirst(Regex("^FORMAT_"), "") + "]",
+        "<" + getValueTypeName().replaceFirst(Regex("^TYPE_"), "") + ">",
+        displayValue,
+    ).joinToString("\u0020")
 
 }

@@ -25,7 +25,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 
@@ -56,7 +56,7 @@ object ViewUtils {
         get() = Pref.keyKeepScreenOnWhenInForeground == key(R.string.key_keep_screen_on_when_in_foreground_all_pages)
 
     private var keepScreenOnWhenInForegroundFromLastEnabledState: String
-        get() = Pref.getString(R.string.key_keep_screen_on_when_in_foreground_last_enabled, key(R.string.key_keep_screen_on_when_in_foreground_homepage_only))!!
+        get() = Pref.getString(R.string.key_keep_screen_on_when_in_foreground_last_enabled, key(R.string.key_keep_screen_on_when_in_foreground_homepage_only))
         set(s) = Pref.putString(R.string.key_keep_screen_on_when_in_foreground_last_enabled, s)
 
     var isAutoNightModeEnabled: Boolean
@@ -76,6 +76,9 @@ object ViewUtils {
     // FIXME by Stardust on Jan 23, 2018.
     //  ! Not working in some devices.
     //  ! https://github.com/hyb1996/Auto.js/issues/268
+    //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
+    //  ! 在一些设备上无法正常获取结果.
+    //  ! 参阅: https://github.com/hyb1996/Auto.js/issues/268
     fun getStatusBarHeightLegacy(context: Context): Int {
         return context.resources.getIdentifier("status_bar_height", "dimen", "android").let { resourceId ->
             when (resourceId > 0) {
@@ -90,7 +93,7 @@ object ViewUtils {
         return getWindowForContext(context)?.let { window ->
             Rect().let { rect ->
                 window.decorView.getWindowVisibleDisplayFrame(rect)
-                rect.top.takeIf { it > 0 }
+                rect.top.takeIf { it >= 0 }
             }
         } ?: TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, context.resources.displayMetrics).toInt()
     }
@@ -167,6 +170,8 @@ object ViewUtils {
                 // @Hint by SuperMonster003 on Sep 9, 2022.
                 //  ! On devices running with Android 7.x and with dark theme disabled,
                 //  ! navigation bar would be white background with white buttons.
+                //  ! zh-CN:
+                //  ! 在安卓 7.x 设备, 暗色主题禁用时, 导航栏背景是白色, 上面的按钮也是白色.
                 activity.getColor(R.color.navigation_bar_background_before_android_o)
             }
             else -> Color.TRANSPARENT

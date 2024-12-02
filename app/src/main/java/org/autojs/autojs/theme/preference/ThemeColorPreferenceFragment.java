@@ -21,7 +21,7 @@ public class ThemeColorPreferenceFragment extends PreferenceFragmentCompat imple
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
-
+        /* Empty body. */
     }
 
     @Override

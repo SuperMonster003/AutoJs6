@@ -1,6 +1,5 @@
 package org.autojs.autojs.storage.database;
 
-
 public abstract class BaseModel {
     private long mId;
 

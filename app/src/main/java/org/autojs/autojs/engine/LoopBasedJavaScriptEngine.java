@@ -5,13 +5,16 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-
 import org.autojs.autojs.core.looper.LooperHelper;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.ScriptSource;
 import org.autojs.autojs6.BuildConfig;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mozilla.javascript.ContinuationPending;
+
+import static org.autojs.autojs.util.RhinoUtils.isBackgroundThread;
 
 /**
  * Created by Stardust on Jul 28, 2017.
@@ -23,23 +26,23 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
     private Handler mHandler;
     private boolean mLooping = false;
 
-    public LoopBasedJavaScriptEngine(Context context) {
-        super(context);
+    public LoopBasedJavaScriptEngine(ScriptRuntime scriptRuntime, Context context) {
+        super(scriptRuntime, context);
     }
 
     public interface ExecuteCallback {
-        void onResult(Object r);
+        void onResult(@Nullable Object r);
 
         void onException(Throwable e);
     }
 
     @Override
-    public Object execute(final JavaScriptSource source) {
+    public Object execute(@NotNull JavaScriptSource source) {
         execute(source, null);
         return null;
     }
 
-    public void execute(final ScriptSource source, final ExecuteCallback callback) {
+    public void execute(ScriptSource source, ExecuteCallback callback) {
         Runnable r = () -> {
             try {
                 Object o = LoopBasedJavaScriptEngine.super.execute((JavaScriptSource) source);
@@ -47,6 +50,7 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
                     callback.onResult(o);
                 }
             } catch (ContinuationPending ignored) {
+                /* Ignored. */
             } catch (Throwable e) {
                 if (e.getMessage() != null) {
                     Log.e(TAG, e.getMessage());
@@ -61,7 +65,7 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
 
         mHandler.post(r);
 
-        if (!mLooping && Looper.myLooper() != Looper.getMainLooper()) {
+        if (!mLooping && isBackgroundThread()) {
             mLooping = true;
             while (true) {
                 try {

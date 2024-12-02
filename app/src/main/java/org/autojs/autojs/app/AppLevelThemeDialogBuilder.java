@@ -15,6 +15,9 @@ public class AppLevelThemeDialogBuilder extends MaterialDialog.Builder {
         titleColor(context.getColor(R.color.day_night));
         contentColor(context.getColor(R.color.day_night));
         backgroundColor(context.getColor(R.color.window_background));
+        positiveColorRes(R.color.dialog_button_default);
+        negativeColorRes(R.color.dialog_button_default);
+        neutralColorRes(R.color.dialog_button_default);
     }
 
 }

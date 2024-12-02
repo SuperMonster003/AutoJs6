@@ -29,6 +29,7 @@ import org.autojs.autojs.util.DisplayUtils;
 import org.autojs.autojs6.R;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
@@ -43,9 +44,10 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     private final static int sRefreshInterval = 100;
     private final Map<Integer, Integer> mColors = new MapBuilder<Integer, Integer>().build();
     private ConsoleImpl mConsole;
-    private LogActivity mLogActivity;
+    private WeakReference<LogActivity> mLogActivity = null;
     private RecyclerView mLogListRecyclerView;
     private EditText mEditText;
+    private LinearLayout mInputContainer;
     private ResizableExpandableFloatyWindow mWindow;
     private boolean mShouldStopRefresh = false;
     private final ArrayList<ConsoleImpl.LogEntry> mLogEntries = new ArrayList<>();
@@ -70,6 +72,10 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     public ConsoleView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(attrs);
+    }
+
+    public Map<Integer, Integer> getTextColors() {
+        return mColors;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -256,7 +262,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
     private void initEditText() {
         mEditText = findViewById(R.id.input);
         mEditText.setFocusableInTouchMode(true);
-        LinearLayout mInputContainer = findViewById(R.id.input_container);
+        mInputContainer = findViewById(R.id.input_container);
         OnClickListener listener = v -> {
             if (mWindow != null) {
                 mWindow.requestWindowFocus();
@@ -272,19 +278,26 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         mConsole.setConsoleView(this);
     }
 
+    public void setInputContainerVisibility(int visibility) {
+        mInputContainer.setVisibility(visibility);
+    }
+
     public void setLogActivity(LogActivity activity) {
-        mLogActivity = activity;
+        mLogActivity = new WeakReference<>(activity);
     }
 
     public void export(String fileName) {
         if (mLogActivity != null) {
-            mLogActivity.export(fileName);
+            LogActivity logActivityRef = mLogActivity.get();
+            if (logActivityRef != null) {
+                logActivityRef.export(fileName);
+            }
         }
     }
 
     @Override
     public void onNewLog(ConsoleImpl.LogEntry logEntry) {
-
+        /* Empty body. */
     }
 
     @Override
@@ -307,7 +320,6 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         super.onDetachedFromWindow();
         mShouldStopRefresh = true;
     }
-
 
     @Override
     public void onLogClear() {

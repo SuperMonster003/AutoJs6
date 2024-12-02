@@ -2,14 +2,13 @@ package org.autojs.autojs.project;
 
 import android.content.Context;
 import android.text.TextUtils;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.pio.PFiles;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,6 +41,7 @@ public class ProjectConfig {
     @SerializedName("main")
     private String mMainScriptFile;
 
+    @Nullable
     @SerializedName("assets")
     private List<String> mAssets = new ArrayList<>();
 
@@ -53,6 +53,14 @@ public class ProjectConfig {
 
     @SerializedName("icon")
     private String mIcon;
+
+    @Nullable
+    @SerializedName(value = "abis", alternate = {"abi", "abiList"})
+    private List<String> mAbis = new ArrayList<>();
+
+    @Nullable
+    @SerializedName(value = "libs", alternate = {"lib", "libList"})
+    private List<String> mLibs = new ArrayList<>();
 
     @SerializedName("scripts")
     private final Map<String, ScriptConfig> mScriptConfigs = new HashMap<>();
@@ -87,7 +95,6 @@ public class ProjectConfig {
         return config.getVersionCode() != -1;
     }
 
-
     public static ProjectConfig fromAssets(Context context, String path) {
         try {
             return fromJson(PFiles.read(context.getAssets().open(path)));
@@ -96,6 +103,7 @@ public class ProjectConfig {
         }
     }
 
+    @Nullable
     public static ProjectConfig fromFile(String path) {
         try {
             return fromJson(PFiles.read(path));
@@ -108,6 +116,7 @@ public class ProjectConfig {
         return fromProjectDir(page.getPath()) != null;
     }
 
+    @Nullable
     public static ProjectConfig fromProjectDir(String path) {
         return fromFile(configFileOfDir(path));
     }
@@ -160,8 +169,9 @@ public class ProjectConfig {
         return this;
     }
 
+    @NonNull
     public String getMainScriptFile() {
-        return mMainScriptFile;
+        return mMainScriptFile != null ? mMainScriptFile : "main.js";
     }
 
     public ProjectConfig setMainScriptFile(String mainScriptFile) {
@@ -220,11 +230,29 @@ public class ProjectConfig {
         mIcon = icon;
     }
 
+    public List<String> getAbis() {
+        if (mAbis == null) {
+            mAbis = Collections.emptyList();
+        }
+        return mAbis;
+    }
+
+    public List<String> getLibs() {
+        if (mLibs == null) {
+            mLibs = Collections.emptyList();
+        }
+        return mLibs;
+    }
+
     public String getBuildDir() {
         return "build";
     }
 
+    @NonNull
     public List<String> getFeatures() {
+        if (mFeatures == null) {
+            mFeatures = Collections.emptyList();
+        }
         return mFeatures;
     }
 

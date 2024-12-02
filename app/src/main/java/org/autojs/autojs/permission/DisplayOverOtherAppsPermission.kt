@@ -3,10 +3,11 @@ package org.autojs.autojs.permission
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import org.autojs.autojs.ui.enhancedfloaty.util.FloatingWindowPermissionUtil
 import ezy.assist.compat.SettingsCompat
 import org.autojs.autojs.ui.common.NotAskAgainDialog
+import org.autojs.autojs.ui.enhancedfloaty.util.FloatingWindowPermissionUtil
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
+import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ThreadUtils
 import org.autojs.autojs.util.ViewUtils
@@ -43,7 +44,7 @@ class DisplayOverOtherAppsPermission(override val context: Context) : Permission
             toggle()
             ViewUtils.showToast(context, R.string.error_no_display_over_other_apps_permission)
         }
-        if (Looper.myLooper() != Looper.getMainLooper()) {
+        if (!isMainThread()) {
             Handler(Looper.getMainLooper()).post(r)
         } else {
             r.run()

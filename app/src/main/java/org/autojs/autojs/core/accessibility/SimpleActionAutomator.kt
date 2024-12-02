@@ -2,6 +2,7 @@
 
 package org.autojs.autojs.core.accessibility
 
+import android.accessibilityservice.AccessibilityService.GestureResultCallback
 import android.accessibilityservice.GestureDescription
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -26,6 +27,7 @@ import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.util.DeveloperUtils
+import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicInteger
 import android.accessibilityservice.AccessibilityService as AndroidAccessibilityService
 
@@ -34,24 +36,26 @@ import android.accessibilityservice.AccessibilityService as AndroidAccessibility
  */
 class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge, private val scriptRuntime: ScriptRuntime) {
 
-    private val globalActionAutomatorRaw
-        get() = GlobalActionAutomator(scriptRuntime.uiHandler.applicationContext, Handler(scriptRuntime.loopers.servantLooper)) {
+    private val mGlobalActionAutomatorRaw by lazy {
+        GlobalActionAutomator(scriptRuntime.uiHandler.applicationContext, Handler(scriptRuntime.loopers.servantLooper)) {
             ensureService()
             accessibilityBridge.service!!
         }
-
-    private val globalActionAutomator by lazy {
-        globalActionAutomatorRaw
     }
 
-    private val globalActionAutomatorForGesture by lazy {
-        globalActionAutomatorRaw.apply { setScreenMetrics(mScreenMetrics) }
+    private val mGlobalActionAutomator by lazy {
+        mGlobalActionAutomatorRaw
+    }
+
+    private val mGlobalActionAutomatorForGesture by lazy {
+        mGlobalActionAutomatorRaw.apply { setScreenMetrics(mScreenMetrics) }
     }
 
     private val isRunningPackageSelf
         get() = DeveloperUtils.isSelfPackage(accessibilityBridge.infoProvider.latestPackage)
 
     private var mScreenMetrics: ScreenMetrics? = null
+    private val mScriptRuntime = WeakReference(scriptRuntime)
 
     private var mPromiseAdapter: ScriptPromiseAdapter? = null
 
@@ -104,91 +108,94 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     fun appendText(target: ActionTarget, text: String) = performAction(target.createAction(UiObject.ACTION_APPEND_TEXT, text))
 
     @ScriptInterface
-    fun back() = globalActionAutomator.back()
+    fun back() = mGlobalActionAutomator.back()
 
     @ScriptInterface
-    fun home() = globalActionAutomator.home()
+    fun home() = mGlobalActionAutomator.home()
 
     @ScriptInterface
-    fun recents() = globalActionAutomator.recents()
+    fun recents() = mGlobalActionAutomator.recents()
 
     @ScriptInterface
-    fun notifications() = globalActionAutomator.notifications()
+    fun notifications() = mGlobalActionAutomator.notifications()
 
     @ScriptInterface
-    fun quickSettings() = globalActionAutomator.quickSettings()
+    fun quickSettings() = mGlobalActionAutomator.quickSettings()
 
     @ScriptInterface
-    fun powerDialog() = globalActionAutomator.powerDialog()
+    fun powerDialog() = mGlobalActionAutomator.powerDialog()
 
     @ScriptInterface
-    fun splitScreen() = globalActionAutomator.splitScreen()
+    fun splitScreen() = mGlobalActionAutomator.splitScreen()
 
     @ScriptInterface
-    fun lockScreen() = globalActionAutomator.lockScreen()
+    fun lockScreen() = mGlobalActionAutomator.lockScreen()
 
     @ScriptInterface
-    fun takeScreenshot() = globalActionAutomator.takeScreenshot()
+    fun takeScreenshot() = mGlobalActionAutomator.takeScreenshot()
 
     @ScriptInterface
-    fun headsethook() = globalActionAutomator.headsethook()
+    fun headsethook() = mGlobalActionAutomator.headsethook()
 
     @ScriptInterface
-    fun accessibilityButton() = globalActionAutomator.accessibilityButton()
+    fun accessibilityButton() = mGlobalActionAutomator.accessibilityButton()
 
     @ScriptInterface
-    fun accessibilityButtonChooser() = globalActionAutomator.accessibilityButtonChooser()
+    fun accessibilityButtonChooser() = mGlobalActionAutomator.accessibilityButtonChooser()
 
     @ScriptInterface
-    fun accessibilityShortcut() = globalActionAutomator.accessibilityShortcut()
+    fun accessibilityShortcut() = mGlobalActionAutomator.accessibilityShortcut()
 
     @ScriptInterface
-    fun accessibilityAllApps() = globalActionAutomator.accessibilityAllApps()
+    fun accessibilityAllApps() = mGlobalActionAutomator.accessibilityAllApps()
 
     @ScriptInterface
-    fun dismissNotificationShade() = globalActionAutomator.dismissNotificationShade()
+    fun dismissNotificationShade() = mGlobalActionAutomator.dismissNotificationShade()
 
     @ScriptInterface
-    fun gesture(start: Long, duration: Long, vararg points: IntArray) = globalActionAutomatorForGesture.gesture(start, duration, *points)
+    fun gesture(start: Long, duration: Long, points: Array<IntArray>) = mGlobalActionAutomatorForGesture.gesture(start, duration, *points)
 
     @ScriptInterface
-    fun gestureAsync(start: Long, duration: Long, vararg points: IntArray) = globalActionAutomatorForGesture.gestureAsync(start, duration, *points)
+    @JvmOverloads
+    fun gestureAsync(start: Long, duration: Long, points: Array<IntArray>, callback: GestureResultCallback? = null) = mGlobalActionAutomatorForGesture.gestureAsync(start, duration, points, callback)
 
     @ScriptInterface
-    @Suppress("UNCHECKED_CAST")
-    fun gestures(strokes: Any) = globalActionAutomatorForGesture.gestures(*strokes as Array<GestureDescription.StrokeDescription>)
+    fun gestures(strokes: Array<GestureDescription.StrokeDescription>) = mGlobalActionAutomatorForGesture.gestures(*strokes)
 
     @ScriptInterface
-    @Suppress("UNCHECKED_CAST")
-    fun gesturesAsync(strokes: Any) = globalActionAutomatorForGesture.gesturesAsync(*strokes as Array<GestureDescription.StrokeDescription>)
+    @JvmOverloads
+    fun gesturesAsync(strokes: Array<GestureDescription.StrokeDescription>, callback: GestureResultCallback? = null) = mGlobalActionAutomatorForGesture.gesturesAsync(strokes, callback)
 
     @ScriptInterface
-    fun click(x: Int, y: Int) = globalActionAutomatorForGesture.click(x, y)
+    fun click(x: Int, y: Int) = mGlobalActionAutomatorForGesture.click(x, y)
 
     @ScriptInterface
-    fun press(x: Int, y: Int, delay: Int) = globalActionAutomatorForGesture.press(x, y, delay)
+    fun press(x: Int, y: Int, duration: Int) = mGlobalActionAutomatorForGesture.press(x, y, duration)
 
     @ScriptInterface
-    fun longClick(x: Int, y: Int) = globalActionAutomatorForGesture.longClick(x, y)
+    fun longClick(x: Int, y: Int) = mGlobalActionAutomatorForGesture.longClick(x, y)
 
     @ScriptInterface
-    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, duration: Int) = globalActionAutomatorForGesture.swipe(x1, y1, x2, y2, duration.toLong())
+    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, duration: Int) = mGlobalActionAutomatorForGesture.swipe(x1, y1, x2, y2, duration.toLong())
 
     @ScriptInterface
     fun paste(target: ActionTarget) = performAction(target.createAction(AccessibilityNodeInfo.ACTION_PASTE))
 
     @ScriptInterface
-    fun isServiceRunning() = AccessibilityService.isRunning()
+    fun isServiceRunning() = AccessibilityService.hasInstance()
 
     @ScriptInterface
     fun ensureService() = accessibilityBridge.ensureServiceStarted()
 
     // @Created by 抠脚本人 on Jul 10, 2023.
     // TODO by 抠脚本人 on Jul 10, 2023.
-    //  ! 优化实现方式
+    //  ! 优化实现方式.
+    //  ! en-US (translated by SuperMonster003 on Jul 26, 2024):
+    //  ! Optimize implementation method.
     // TODO by SuperMonster003 on Jul 12, 2023.
-    //  ! Ref to Auto.js Pro
-    fun registerEvent(eventName: String, callback: AccessibilityEventCallback) {
+    //  ! Ref to Auto.js Pro.
+    //  ! zh-CN: 参考 Auto.js Pro.
+    fun registerEvent(eventName: String, callback: AccessibilityEventCallback?) {
         ensureService()
         AccessibilityService.instance?.addAccessibilityEventCallback(eventName, callback)
     }
@@ -222,18 +229,20 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
         val executor = service.mainExecutor
         val callback = object : AndroidAccessibilityService.TakeScreenshotCallback {
             override fun onSuccess(screenshot: AndroidAccessibilityService.ScreenshotResult) {
-                val hardwareBuffer = Bitmap.wrapHardwareBuffer(screenshot.hardwareBuffer, screenshot.colorSpace)
+                Bitmap.wrapHardwareBuffer(screenshot.hardwareBuffer, screenshot.colorSpace)?.let { hardwareBuffer ->
+                    // @Hint by SuperMonster003 on Jun 9, 2023.
+                    //  ! To avoid the exception as below.
+                    //  # java.lang.IllegalStateException: unable to getPixel(), pixel access is not supported on Config#HARDWARE bitmaps.
+                    //  ! Reference: https://stackoverflow.com/questions/60462841/.
+                    //  ! zh-CN:
+                    //  ! 用于避免以下异常发生.
+                    //  # java.lang.IllegalStateException: 无法调用 getPixel(), Config#HARDWARE 位图不支持像素访问.
+                    //  ! 参阅: https://stackoverflow.com/questions/60462841/.
+                    val bitmap = hardwareBuffer.copy(Bitmap.Config.ARGB_8888, true)
 
-                // @Hint by SuperMonster003 on Jun 9, 2023.
-                //  ! To avoid the exception as below.
-                //  !
-                //  ! Wrapped java.lang.IllegalStateException: unable to getPixel(), pixel access is not supported on Config#HARDWARE bitmaps.
-                //  !
-                //  ! Reference: https://stackoverflow.com/questions/60462841/
-                val bitmap = hardwareBuffer?.copy(Bitmap.Config.ARGB_8888, true)
-
-                hardwareBuffer?.recycle()
-                promiseAdapter.resolve(ImageWrapper.ofBitmap(bitmap))
+                    hardwareBuffer.recycle()
+                    promiseAdapter.resolve(ImageWrapper.ofBitmap(bitmap))
+                }
                 mPromiseAdapter = null
             }
 

@@ -6,6 +6,8 @@ import android.widget.LinearLayout
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.theme.preference.MaterialPreference
+import org.autojs.autojs.ui.doc.DocumentationActivity
+import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.util.ShortcutUtils
 import org.autojs.autojs6.R
 
@@ -25,7 +27,7 @@ class LauncherShortcutsPreference : MaterialPreference {
                 ShortcutUtils.requestPinShortcut(
                     prefContext,
                     R.string.id_launcher_shortcut_settings,
-                    "org.autojs.autojs.ui.settings.PreferencesActivity",
+                    PreferencesActivity::class.java.name,
                     R.string.text_app_shortcut_settings_long_label,
                     R.string.text_app_shortcut_settings_short_label,
                     R.mipmap.ic_app_shortcut_settings_adaptive,
@@ -37,7 +39,7 @@ class LauncherShortcutsPreference : MaterialPreference {
                 ShortcutUtils.requestPinShortcut(
                     prefContext,
                     R.string.id_launcher_shortcut_docs,
-                    "org.autojs.autojs.ui.doc.DocumentationActivity",
+                    DocumentationActivity::class.java.name,
                     R.string.text_app_shortcut_docs_long_label,
                     R.string.text_app_shortcut_docs_short_label,
                     R.mipmap.ic_app_shortcut_docs_adaptive,
@@ -49,7 +51,7 @@ class LauncherShortcutsPreference : MaterialPreference {
                 ShortcutUtils.requestPinShortcut(
                     prefContext,
                     R.string.id_launcher_shortcut_log,
-                    "org.autojs.autojs.ui.log.LogActivity",
+                    LogActivity::class.java.name,
                     R.string.text_app_shortcut_log_long_label,
                     R.string.text_app_shortcut_log_short_label,
                     R.mipmap.ic_app_shortcut_log_adaptive,

@@ -60,7 +60,7 @@ public class JsViewPager extends ViewPager implements ShouldCallOnFinishInflate 
 
             @Override
             public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-
+                /* Empty body. */
             }
         });
     }

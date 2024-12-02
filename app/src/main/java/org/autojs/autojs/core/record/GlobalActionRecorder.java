@@ -1,24 +1,24 @@
 package org.autojs.autojs.core.record;
 
 import android.content.Context;
-import android.os.Looper;
 import android.view.ContextThemeWrapper;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
 import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.app.GlobalAppContext;
+import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.record.inputevent.InputEventRecorder;
 import org.autojs.autojs.core.record.inputevent.InputEventToAutoFileRecorder;
 import org.autojs.autojs.core.record.inputevent.InputEventToRootAutomatorRecorder;
 import org.autojs.autojs.core.record.inputevent.TouchRecorder;
-import org.autojs.autojs.pref.Pref;
 import org.autojs.autojs.ui.common.ScriptOperations;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static org.autojs.autojs.util.RhinoUtils.isBackgroundThread;
+import static org.autojs.autojs.util.RhinoUtils.isMainThread;
 
 /**
  * Created by Stardust on Aug 6, 2017.
@@ -41,7 +41,6 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
     public GlobalActionRecorder(Context context) {
         mContext = new ContextThemeWrapper(context.getApplicationContext(), R.style.AppTheme);
     }
-
 
     public void start() {
         if (mTouchRecorder == null) {
@@ -145,9 +144,8 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
         stop();
     }
 
-
     private void handleRecordedScript(final String script) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isMainThread()) {
             showRecordHandleDialog(script);
         } else {
             GlobalAppContext.post(() -> showRecordHandleDialog(script));
@@ -155,7 +153,7 @@ public class GlobalActionRecorder implements Recorder.OnStateChangedListener {
     }
 
     private void handleRecordedFile(final String path) {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
+        if (isBackgroundThread()) {
             GlobalAppContext.post(() -> handleRecordedFile(path));
             return;
         }

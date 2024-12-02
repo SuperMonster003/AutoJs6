@@ -3,13 +3,14 @@ package org.autojs.autojs.core.ui.attribute
 import android.view.View
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.widget.JsEditText
+import org.autojs.autojs.runtime.ScriptRuntime
 
-class JsEditTextAttributes(resourceParser: ResourceParser, view: View) : EditTextAttributes(resourceParser, view) {
+class JsEditTextAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : EditTextAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as JsEditText
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("selectAll") {
             if (view.text.isNotEmpty() && it.toBoolean()) {
@@ -36,7 +37,7 @@ class JsEditTextAttributes(resourceParser: ResourceParser, view: View) : EditTex
                 val (startIndex, stopIndex) = it.split(Regex("[,\\s]+"))
                 return@registerAttr view.setSelection(startIndex.toInt(), stopIndex.toInt())
             }
-            throw Exception("Can't resolve attr { name: setSelection, value: $it }")
+            throw Exception("Cannot resolve attr { name: setSelection, value: $it }")
         }
 
     }

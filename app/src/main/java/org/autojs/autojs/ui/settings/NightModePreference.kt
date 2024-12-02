@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.AttributeSet
 import androidx.core.content.res.TypedArrayUtils
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils

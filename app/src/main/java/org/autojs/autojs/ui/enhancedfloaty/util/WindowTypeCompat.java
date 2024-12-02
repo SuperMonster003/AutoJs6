@@ -5,7 +5,6 @@ import android.view.WindowManager;
 
 public class WindowTypeCompat {
 
-
     public static int getWindowType() {
         return getWindowType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
     }

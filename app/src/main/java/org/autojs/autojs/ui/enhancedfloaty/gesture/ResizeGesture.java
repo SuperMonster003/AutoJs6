@@ -41,7 +41,6 @@ public class ResizeGesture extends GestureDetector.SimpleOnGestureListener {
     private final int mStatusBarHeight;
     private final View mResizableView;
 
-
     public ResizeGesture(WindowBridge windowBridge, View resizerView, @Nullable View resizableView) {
         mWindowBridge = windowBridge;
         mResizerView = resizerView;

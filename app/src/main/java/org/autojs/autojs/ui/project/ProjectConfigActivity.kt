@@ -127,12 +127,12 @@ class ProjectConfigActivity : BaseActivity() {
                 mVersionName.setText(config.versionName)
                 mMainFileName.setText(config.mainScriptFile)
                 mProjectLocationWrapper.visibility = View.GONE
-                val icon = config.icon
-                val iconFile = File(mDirectory, icon)
-                if (icon != null && iconFile.exists()) {
-                    Glide.with(this)
-                        .load(iconFile)
-                        .into(mIcon)
+                config.icon?.let { icon ->
+                    File(mDirectory, icon).takeIf { it.exists() }?.let { iconFile ->
+                        Glide.with(this)
+                            .load(iconFile)
+                            .into(mIcon)
+                    }
                 }
             }
         }
@@ -193,11 +193,13 @@ class ProjectConfigActivity : BaseActivity() {
     }
 
     private fun syncProjectConfig() {
-        mProjectConfig!!.name = mAppName.text.toString()
-        mProjectConfig!!.versionCode = mVersionCode.text.toString().toInt()
-        mProjectConfig!!.versionName = mVersionName.text.toString()
-        mProjectConfig!!.mainScriptFile = mMainFileName.text.toString()
-        mProjectConfig!!.packageName = mPackageName.text.toString()
+        mProjectConfig!!.let {
+            it.name = mAppName.text.toString()
+            it.versionCode = mVersionCode.text.toString().toInt()
+            it.versionName = mVersionName.text.toString()
+            it.mainScriptFile = mMainFileName.text.toString()
+            it.packageName = mPackageName.text.toString()
+        }
         if (mNewProject) {
             val location = mProjectLocation.text.toString()
             mDirectory = File(location)
@@ -229,7 +231,9 @@ class ProjectConfigActivity : BaseActivity() {
     private fun checkNotEmpty(editText: EditText?): Boolean {
         if (!TextUtils.isEmpty(editText!!.text)) return true
         // TODO by Stardust on Dec 8, 2017.
-        //   ! More beautiful ways?
+        //  ! More beautiful ways?
+        //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
+        //  ! 更优雅的方式?
         val hint = (editText.parent.parent as TextInputLayout).hint.toString()
         editText.error = hint + getString(R.string.text_should_not_be_empty)
         return false
@@ -269,6 +273,17 @@ class ProjectConfigActivity : BaseActivity() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { iconPath: String? -> mProjectConfig!!.icon = iconPath }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        mDirectory = null
+        mParentDirectory = null
+        mProjectConfig = null
+
+        mIconBitmap?.recycle()
+        mIconBitmap = null
     }
 
     companion object {

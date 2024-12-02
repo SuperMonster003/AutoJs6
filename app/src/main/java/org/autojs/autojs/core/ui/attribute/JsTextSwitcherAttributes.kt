@@ -17,11 +17,12 @@ import org.autojs.autojs.core.ui.inflater.util.Res
 import org.autojs.autojs.core.ui.inflater.util.Strings
 import org.autojs.autojs.core.ui.widget.JsTextSwitcher
 import org.autojs.autojs.core.ui.widget.JsTextView
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
 import kotlin.text.RegexOption.IGNORE_CASE
 
-class JsTextSwitcherAttributes(resourceParser: ResourceParser, view: View) : TextSwitcherAttributes(resourceParser, view) {
+class JsTextSwitcherAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : TextSwitcherAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as JsTextSwitcher
 
@@ -35,12 +36,20 @@ class JsTextSwitcherAttributes(resourceParser: ResourceParser, view: View) : Tex
     private var mTypeface: String? = null
     private var mTextStyle: Int? = null
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         val textViews by lazy { view.textViews }
 
-        registerAttr("autoLink") { value -> textViews.forEach { it.autoLinkMask = TextViewInflater.AUTO_LINK_MASKS[value] } }
+        registerAttr("autoLink") { value ->
+            textViews.forEach {
+                it.autoLinkMask = TextViewInflater.AUTO_LINK_MASKS[value]
+                // @Hint by SuperMonster003 on Nov 9, 2024.
+                //  ! To trigger linkification.
+                //  ! zh-CN: 触发链接化.
+                it.text = it.text
+            }
+        }
         registerAttr("autoText") { value -> mAutoText = value.toBoolean(); setKeyListener(textViews) }
         registerAttr("capitalize") { value -> mCapitalize = TextViewInflater.CAPITALIZE[value]; setKeyListener(textViews) }
         registerAttr("digit") { value -> setDigit(textViews, value) }
@@ -135,7 +144,7 @@ class JsTextSwitcherAttributes(resourceParser: ResourceParser, view: View) : Tex
                 entry.value.invoke().also { return }
             }
         }
-        throw Exception("Can't parse animations for $value")
+        throw Exception("Cannot parse animations for $value")
     }
 
     private fun setAnimations(`in`: Int, out: Int) {
@@ -210,7 +219,7 @@ class JsTextSwitcherAttributes(resourceParser: ResourceParser, view: View) : Tex
 
     private fun setTypeface(view: JsTextView) {
         if (mFontFamily != null) {
-            //ignore typeface as android does
+            // ignore typeface as android does
             mTypeface = mFontFamily
         }
         if (mTypeface != null) {

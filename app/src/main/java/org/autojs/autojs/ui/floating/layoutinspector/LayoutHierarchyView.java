@@ -125,31 +125,28 @@ public class LayoutHierarchyView extends MultiLevelListView {
 
         // @Overruled by SuperMonster003 on Jul 21, 2023.
         //  ! Author: 抠脚本人
-        //  ! Related PR:
-        //  ! http://pr.autojs6.com/98
-        //  ! Reason:
-        //  ! Pending processing.
-        //  ! zh-CN: 将于后续版本继续处理.
+        //  ! Related PR: http://pr.autojs6.com/98
+        //  ! Reason: Pending processing [zh-CN: 将于后续版本继续处理].
         //  !
-        // ArrayList<ViewHolder> list = new ArrayList<>();
-        // NodeInfo currentInfo = info;
-        // while (true) {
-        //     currentInfo = currentInfo.getParent();
-        //     if (currentInfo == null) break;
-        //     ViewHolder vh = nodeMap.get(currentInfo);
-        //     list.add(vh);
-        // }
-        // // TODO: 选用能适应深色模式的字体颜色
-        // // FIXME: 列表滑动时 ListView 数据错乱
-        // if (draw) {
-        //     for (ViewHolder vh : list) {
-        //         vh.nameView.setTextColor(Color.RED); // 设置字体颜色为红色
-        //     }
-        // } else {
-        //     for (ViewHolder vh : list) {
-        //         vh.nameView.setTextColor(Color.BLACK); // 设置字体颜色为红色
-        //     }
-        // }
+        //  # ArrayList<ViewHolder> list = new ArrayList<>();
+        //  # NodeInfo currentInfo = info;
+        //  # while (true) {
+        //  #     currentInfo = currentInfo.getParent();
+        //  #     if (currentInfo == null) break;
+        //  #     ViewHolder vh = nodeMap.get(currentInfo);
+        //  #     list.add(vh);
+        //  # }
+        //  # // TODO: 选用能适应深色模式的字体颜色
+        //  # // FIXME: 列表滑动时 ListView 数据错乱
+        //  # if (draw) {
+        //  #     for (ViewHolder vh : list) {
+        //  #         vh.nameView.setTextColor(Color.RED); // 设置字体颜色为红色
+        //  #     }
+        //  # } else {
+        //  #     for (ViewHolder vh : list) {
+        //  #         vh.nameView.setTextColor(Color.BLACK); // 设置字体颜色为红色
+        //  #     }
+        //  # }
     }
 
     private void initPaint() {
@@ -264,15 +261,15 @@ public class LayoutHierarchyView extends MultiLevelListView {
 
             // @Overruled by SuperMonster003 on Jul 12, 2023.
             //  ! Author: 抠脚本人
-            //  ! Related PR:
-            //  ! http://pr.autojs6.com/98
-            //  ! Reason:
-            //  ! Pending processing.
-            //  ! zh-CN: 将于后续版本继续处理.
+            //  ! Related PR: http://pr.autojs6.com/98
+            //  ! Reason: Pending processing [zh-CN: 将于后续版本继续处理].
             //  !
-            // @Hint by 抠脚本人 on Jul 10, 2023.
-            //  ! 对于 id, desc, text, clickable, longClickable 不为空的显示额外信息
-            // viewHolder.nameView.setText(extraInfo(nodeInfo));
+            // @Hint by 抠脚本人 (https://github.com/little-alei) on Jul 10, 2023.
+            //  ! 对于 id, desc, text, clickable, longClickable 不为空的显示额外信息.
+            //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+            //  ! Show extra info for non-null id, desc, text, clickable, longClickable.
+            //  !
+            //  # viewHolder.nameView.setText(extraInfo(nodeInfo));
             viewHolder.nameView.setText(simplifyClassName(nodeInfo.getClassName()));
 
             viewHolder.nodeInfo = nodeInfo;

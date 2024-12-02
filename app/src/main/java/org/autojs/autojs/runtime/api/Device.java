@@ -1,7 +1,5 @@
 package org.autojs.autojs.runtime.api;
 
-import static android.content.Context.WINDOW_SERVICE;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -13,21 +11,17 @@ import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.BatteryManager;
-import android.os.Build;
-import android.os.PowerManager;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.*;
 import android.provider.Settings;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+import ezy.assist.compat.SettingsCompat;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
+import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.util.DeviceUtils;
 import org.autojs.autojs.util.RomUtils;
 import org.autojs.autojs.util.RomUtils.Brand;
@@ -38,7 +32,7 @@ import java.net.SocketException;
 import java.util.Collections;
 import java.util.List;
 
-import ezy.assist.compat.SettingsCompat;
+import static android.content.Context.WINDOW_SERVICE;
 
 /**
  * Created by Stardust on Dec 2, 2017.
@@ -91,21 +85,19 @@ public class Device {
     public static final String codename = Build.VERSION.CODENAME;
 
     public static String serial;
-
     public static String imei;
+    private final static Vibrator sVibrator = ScriptRuntime.getApplicationContext().getSystemService(Vibrator.class);
 
     public final Manufacturers manufacturers;
     public final RomUtils roms;
     public final Brand brands;
 
     private final Context mContext;
-    private final Vibrator mVibrator;
     private PowerManager.WakeLock mWakeLock;
     private int mWakeLockFlag;
 
     public Device(Context context) {
         mContext = context;
-        mVibrator = context.getSystemService(Vibrator.class);
         manufacturers = new Manufacturers();
         roms = RomUtils.INSTANCE;
         brands = Brand.INSTANCE;
@@ -294,27 +286,39 @@ public class Device {
     }
 
     public void vibrate(long millis) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mVibrator.vibrate(VibrationEffect.createOneShot(millis, VibrationEffect.DEFAULT_AMPLITUDE));
-        } else {
-            mVibrator.vibrate(millis);
-        }
+        doVibrate(millis);
     }
 
     public void vibrate(long off, long millis) {
-        vibrate(new long[]{off, millis});
+        doVibrate(off, millis);
     }
 
     public void vibrate(long[] timings) {
+        doVibrate(timings);
+    }
+
+    public static void doVibrate(long millis) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mVibrator.vibrate(VibrationEffect.createWaveform(timings, -1));
+            sVibrator.vibrate(VibrationEffect.createOneShot(millis, VibrationEffect.DEFAULT_AMPLITUDE));
         } else {
-            mVibrator.vibrate(timings, -1);
+            sVibrator.vibrate(millis);
+        }
+    }
+
+    public static void doVibrate(long off, long millis) {
+        doVibrate(new long[]{off, millis});
+    }
+
+    public static void doVibrate(long[] timings) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            sVibrator.vibrate(VibrationEffect.createWaveform(timings, -1));
+        } else {
+            sVibrator.vibrate(timings, -1);
         }
     }
 
     public void cancelVibration() {
-        mVibrator.cancel();
+        sVibrator.cancel();
     }
 
     public int getOrientation() {
@@ -433,25 +437,25 @@ public class Device {
     @Override
     public String toString() {
         return "Device{" +
-                "width=" + getWidth() +
-                ", height=" + getHeight() +
-                ", buildId='" + buildId + '\'' +
-                ", buildDisplay='" + buildDisplay + '\'' +
-                ", product='" + product + '\'' +
-                ", board='" + board + '\'' +
-                ", brand='" + brand + '\'' +
-                ", device='" + device + '\'' +
-                ", model='" + model + '\'' +
-                ", bootloader='" + bootloader + '\'' +
-                ", hardware='" + hardware + '\'' +
-                ", fingerprint='" + fingerprint + '\'' +
-                ", sdkInt=" + sdkInt +
-                ", incremental='" + incremental + '\'' +
-                ", release='" + release + '\'' +
-                ", baseOS='" + baseOS + '\'' +
-                ", securityPatch='" + securityPatch + '\'' +
-                ", serial='" + serial + '\'' +
-                '}';
+               "width=" + getWidth() +
+               ", height=" + getHeight() +
+               ", buildId='" + buildId + '\'' +
+               ", buildDisplay='" + buildDisplay + '\'' +
+               ", product='" + product + '\'' +
+               ", board='" + board + '\'' +
+               ", brand='" + brand + '\'' +
+               ", device='" + device + '\'' +
+               ", model='" + model + '\'' +
+               ", bootloader='" + bootloader + '\'' +
+               ", hardware='" + hardware + '\'' +
+               ", fingerprint='" + fingerprint + '\'' +
+               ", sdkInt=" + sdkInt +
+               ", incremental='" + incremental + '\'' +
+               ", release='" + release + '\'' +
+               ", baseOS='" + baseOS + '\'' +
+               ", securityPatch='" + securityPatch + '\'' +
+               ", serial='" + serial + '\'' +
+               '}';
     }
 
     private Display getDefaultDisplay() {

@@ -1,0 +1,23 @@
+<resources>
+
+    <plurals name="text_items_total_sum">
+        <item quantity="other">共计: %d 项</item>
+    </plurals>
+
+    <plurals name="text_already_stop_n_scripts">
+        <item quantity="other">已停止运行 %d 个脚本</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_n_arguments">
+        <item quantity="other">方法仅可接受 %d 个参数</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_more_than_n_arguments">
+        <item quantity="other">方法仅可接受不多于 %d 个参数</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_less_than_n_arguments">
+        <item quantity="other">方法仅可接受不少于 %d 个参数</item>
+    </plurals>
+
+</resources>

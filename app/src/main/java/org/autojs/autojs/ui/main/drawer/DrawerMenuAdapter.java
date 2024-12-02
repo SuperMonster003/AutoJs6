@@ -15,10 +15,8 @@ import java.util.List;
  */
 public class DrawerMenuAdapter extends RecyclerView.Adapter<BindableViewHolder<DrawerMenuItem>> {
 
-
     private static final int VIEW_TYPE_ITEM = 0;
     private static final int VIEW_TYPE_GROUP = 1;
-
 
     private final List<DrawerMenuItem> mDrawerMenuItems;
 

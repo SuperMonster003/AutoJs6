@@ -1,0 +1,11 @@
+<resources>
+
+    <plurals name="text_items_total_sum">
+        <item quantity="other">총: %d 개 항목</item>
+    </plurals>
+
+    <plurals name="text_already_stop_n_scripts">
+        <item quantity="other">%d 개의 스크립트가 중지되었습니다</item>
+    </plurals>
+
+</resources>

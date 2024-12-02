@@ -20,8 +20,8 @@ import java.util.List;
 public class AccessibilityActionConverter {
 
     private static final SparseArray<EventToScriptConverter> CONVERTER_MAP = new SparseArrayEntries<EventToScriptConverter>()
-            .entry(AccessibilityEvent.TYPE_VIEW_CLICKED, new DoUtilSucceedConverter("click"))
-            .entry(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED, new DoUtilSucceedConverter("longClick"))
+            .entry(AccessibilityEvent.TYPE_VIEW_CLICKED, new DoUntilSuccessConverter("click"))
+            .entry(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED, new DoUntilSuccessConverter("longClick"))
             .entry(AccessibilityEvent.TYPE_VIEW_SCROLLED, new DoOnceConverter("//scroll???"))
             .entry(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED, new SetTextEventConverter())
             .sparseArray();
@@ -72,7 +72,7 @@ public class AccessibilityActionConverter {
             AccessibilityNodeInfo source = event.getSource();
             if (source == null)
                 return;
-            String bounds = NodeInfo.Companion.boundsToString(AccessibilityNodeInfoHelper.getBoundsInScreen(source));
+            String bounds = NodeInfo.boundsToString(AccessibilityNodeInfoHelper.getBoundsInScreen(source));
             source.recycle();
             onAccessibilityEvent(event, bounds, sb);
         }
@@ -95,11 +95,11 @@ public class AccessibilityActionConverter {
         }
     }
 
-    private static class DoUtilSucceedConverter extends BoundsEventConverter {
+    private static class DoUntilSuccessConverter extends BoundsEventConverter {
 
         private final String mActionFunction;
 
-        DoUtilSucceedConverter(String actionFunction) {
+        DoUntilSuccessConverter(String actionFunction) {
             mActionFunction = actionFunction;
         }
 

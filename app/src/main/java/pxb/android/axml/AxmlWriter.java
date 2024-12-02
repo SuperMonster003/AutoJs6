@@ -25,7 +25,7 @@ import java.util.*;
 
 import static pxb.android.axml.AxmlParser.*;
 
-import org.autojs.autojs.pref.Language;
+import org.autojs.autojs.core.pref.Language;
 
 /**
  * a class to write android axml
@@ -79,6 +79,7 @@ public class AxmlWriter extends AxmlVisitor {
 
     @Override
     public void end() {
+        /* Empty body. */
     }
 
     @Override
@@ -272,7 +273,7 @@ public class AxmlWriter extends AxmlVisitor {
         @Override
         public void attr(String ns, String name, int resourceId, int type, Object value) {
             if (name == null) {
-                throw new RuntimeException("name can't be null");
+                throw new RuntimeException("name cannot be null");
             }
             Attr a = new Attr(ns == null ? null : new StringItem(ns), new StringItem(name), resourceId);
             a.type = type;
@@ -321,6 +322,7 @@ public class AxmlWriter extends AxmlVisitor {
 
         @Override
         public void end() {
+            /* Empty body. */
         }
 
         @Override

@@ -12,6 +12,7 @@ import org.autojs.autojs.core.ui.attribute.ViewAttributes
 import org.autojs.autojs.core.ui.nativeview.NativeView.LongClickEvent
 import org.autojs.autojs.core.ui.widget.JsListView
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 import java.util.Collections
@@ -24,6 +25,7 @@ class ViewPrototype(
     runtime: ScriptRuntime,
 ) {
     var widget: Any? = null
+
     val maxListeners
         get() = mEventEmitter.maxListeners
 
@@ -46,25 +48,25 @@ class ViewPrototype(
         view.performLongClick()
     }
 
-    fun click(listener: Any) {
+    fun click(listener: BaseFunction) {
         on("click", listener)
     }
 
-    fun longClick(listener: Any) {
+    fun longClick(listener: BaseFunction) {
         on("long_click", listener)
     }
 
-    fun once(eventName: String, listener: Any): EventEmitter {
+    fun once(eventName: String, listener: BaseFunction): EventEmitter {
         registerEventIfNeeded(eventName)
         return mEventEmitter.once(eventName, listener)
     }
 
-    fun on(eventName: String, listener: Any): EventEmitter {
+    fun on(eventName: String, listener: BaseFunction): EventEmitter {
         registerEventIfNeeded(eventName)
         return mEventEmitter.on(eventName, listener)
     }
 
-    fun addListener(eventName: String, listener: Any): EventEmitter {
+    fun addListener(eventName: String, listener: BaseFunction): EventEmitter {
         registerEventIfNeeded(eventName)
         return mEventEmitter.addListener(eventName, listener)
     }
@@ -175,15 +177,15 @@ class ViewPrototype(
 
     fun listeners(eventName: String): Array<Any> = mEventEmitter.listeners(eventName)
 
-    fun prependListener(eventName: String, listener: Any): EventEmitter = mEventEmitter.prependListener(eventName, listener)
+    fun prependListener(eventName: String, listener: BaseFunction): EventEmitter = mEventEmitter.prependListener(eventName, listener)
 
-    fun prependOnceListener(eventName: String, listener: Any): EventEmitter = mEventEmitter.prependOnceListener(eventName, listener)
+    fun prependOnceListener(eventName: String, listener: BaseFunction): EventEmitter = mEventEmitter.prependOnceListener(eventName, listener)
 
     fun removeAllListeners(): EventEmitter = mEventEmitter.removeAllListeners()
 
     fun removeAllListeners(eventName: String): EventEmitter = mEventEmitter.removeAllListeners(eventName)
 
-    fun removeListener(eventName: String, listener: Any): EventEmitter = mEventEmitter.removeListener(eventName, listener)
+    fun removeListener(eventName: String, listener: BaseFunction): EventEmitter = mEventEmitter.removeListener(eventName, listener)
 
     fun setMaxListeners(n: Int): EventEmitter = mEventEmitter.setMaxListeners(n)
 

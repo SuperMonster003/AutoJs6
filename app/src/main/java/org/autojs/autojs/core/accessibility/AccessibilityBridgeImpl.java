@@ -12,22 +12,21 @@ import org.autojs.autojs.runtime.accessibility.AccessibilityConfig;
 public class AccessibilityBridgeImpl extends AccessibilityBridge {
 
     private final AbstractAutoJs mAutoJs;
-    private final AccessibilityTool.Service mToolService;
+    private final AccessibilityTool mA11yTool = new AccessibilityTool();
     private final String TAG = AccessibilityBridgeImpl.class.getSimpleName();
 
     public AccessibilityBridgeImpl(AbstractAutoJs autoJs) {
         super(autoJs.getApplicationContext(), new AccessibilityConfig(), autoJs.getUiHandler());
         mAutoJs = autoJs;
-        mToolService = new AccessibilityTool(autoJs.getApplicationContext()).getService();
     }
 
     @Override
     public void ensureServiceStarted(boolean isForcibleRestart) {
-        if (isForcibleRestart && mToolService.exists()) {
-            mToolService.stop();
+        if (isForcibleRestart && mA11yTool.serviceExists()) {
+            mA11yTool.stopService(true);
             Log.d(TAG, "isForcibleRestart");
         }
-        mToolService.ensure();
+        mA11yTool.ensureService();
     }
 
     public void ensureServiceStarted() {

@@ -24,7 +24,6 @@ public interface NodeHandler {
         }
     }
 
-
     class NameRouter extends Adapter {
 
         private final Map<String, NodeHandler> mNodeHandlerMap = new HashMap<>();

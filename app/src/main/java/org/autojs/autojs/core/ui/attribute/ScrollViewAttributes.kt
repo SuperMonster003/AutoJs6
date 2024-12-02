@@ -4,14 +4,15 @@ import android.os.Build
 import android.view.View
 import android.widget.ScrollView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
-open class ScrollViewAttributes(resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(resourceParser, view) {
+open class ScrollViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as ScrollView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("isFillViewport") { view.isFillViewport = it.toBoolean() }
         registerAttrs(arrayOf("isSmoothScrollingEnabled", "isSmoothScrolling", "smoothScrollingEnabled", "enableSmoothScrolling")) { view.isSmoothScrollingEnabled = it.toBoolean() }

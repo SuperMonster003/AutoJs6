@@ -4,6 +4,8 @@
     <color name="day_night">#DE212121</color>
     <color name="day_night_full">#212121</color>
     <color name="day_night_alpha_70">#B3212121</color>
+    <color name="day_night_alpha_30">#4D212121</color>
+    <color name="day_night_alpha_20">#33212121</color>
     <color name="night_day">#DEFBFBFB</color>
     <color name="night_day_full">#FBFBFB</color>
     <color name="window_background">#FFFFFF</color>
@@ -138,5 +140,7 @@
     <color name="circular_menu_icon_red">#ef5350</color>
     <color name="circular_menu_icon_white">#ffffff</color>
     <color name="drawer_item_subtitle_color">#616161</color>
+    <color name="floating_console_content_bg">#99262626</color>
+    <color name="floating_console_title_bar_bg">#cc181818</color>
 
 </resources>

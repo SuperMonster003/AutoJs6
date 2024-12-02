@@ -16,13 +16,14 @@ import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Gravities
 import org.autojs.autojs.core.ui.inflater.util.Res
 import org.autojs.autojs.core.ui.inflater.util.Strings
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils.parse
 
 /**
  * Created by SuperMonster003 on Apr 12, 2023.
  * Transformed by SuperMonster003 on Apr 12, 2023.
  */
-open class TextViewAttributes(resourceParser: ResourceParser, view: View) : ViewAttributes(resourceParser, view) {
+open class TextViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewAttributes(scriptRuntime, resourceParser, view) {
 
     private var mDrawableLeft: Drawable? = null
     private var mDrawableTop: Drawable? = null
@@ -36,10 +37,16 @@ open class TextViewAttributes(resourceParser: ResourceParser, view: View) : View
 
     override val view = super.view as TextView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
-        registerAttr("autoLink") { view.autoLinkMask = TextViewInflater.AUTO_LINK_MASKS[it] }
+        registerAttr("autoLink") {
+            view.autoLinkMask = TextViewInflater.AUTO_LINK_MASKS[it]
+            // @Hint by SuperMonster003 on Nov 9, 2024.
+            //  ! To trigger linkification.
+            //  ! zh-CN: 触发链接化.
+            view.text = view.text
+        }
         registerAttr("autoText") { mAutoText = it.toBoolean(); setKeyListener() }
         registerAttr("capitalize") { mCapitalize = TextViewInflater.CAPITALIZE[it]; setKeyListener() }
         registerAttr("digit") { setDigit(it) }

@@ -10,7 +10,7 @@ public class PReadableBinaryFile implements Closeable {
 
     @Override
     public void close() throws IOException {
-
+        /* Empty body. */
     }
 
 }

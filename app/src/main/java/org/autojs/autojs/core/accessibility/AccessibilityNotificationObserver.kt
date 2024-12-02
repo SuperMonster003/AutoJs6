@@ -21,17 +21,13 @@ class AccessibilityNotificationObserver(private val mContext: Context) : Notific
         get() = EVENT_TYPES
 
     inner class Toast(val packageName: String, texts: List<CharSequence>) {
-        val texts: MutableList<String>
+
+        private val texts: MutableList<String> = ArrayList(texts.size)
 
         val text: String?
-            get() {
-                return if (texts.isEmpty()) {
-                    null
-                } else texts[0]
-            }
+            get() = if (texts.isEmpty()) null else texts[0]
 
         init {
-            this.texts = ArrayList(texts.size)
             for (t in texts) {
                 this.texts.add(t.toString())
             }
@@ -46,7 +42,6 @@ class AccessibilityNotificationObserver(private val mContext: Context) : Notific
         fun onToast(toast: Toast)
     }
 
-
     fun addNotificationListener(listener: NotificationListener) {
         mNotificationListeners.add(listener)
     }
@@ -54,7 +49,6 @@ class AccessibilityNotificationObserver(private val mContext: Context) : Notific
     fun removeNotificationListener(listener: NotificationListener): Boolean {
         return mNotificationListeners.remove(listener)
     }
-
 
     fun addToastListener(listener: ToastListener) {
         mToastListeners.add(listener)
@@ -77,7 +71,6 @@ class AccessibilityNotificationObserver(private val mContext: Context) : Notific
             }
             onToast(Toast(event.packageName.toString(), list))
         }
-
         return false
     }
 
@@ -88,7 +81,6 @@ class AccessibilityNotificationObserver(private val mContext: Context) : Notific
             } catch (e: Exception) {
                 Log.e(TAG, "Error onNotification: $toast Listener: $listener", e)
             }
-
         }
     }
 

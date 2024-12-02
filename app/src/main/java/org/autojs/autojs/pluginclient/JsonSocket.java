@@ -10,11 +10,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.util.Pair;
-
 import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -22,7 +20,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonReader;
 
-import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.Device;
 import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs6.BuildConfig;
@@ -75,7 +72,7 @@ abstract public class JsonSocket extends Socket {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public static final int HEADER_SIZE = 16;
-    public static final int HANDSHAKE_TIMEOUT = 5 * 1000;
+    public static final int HANDSHAKE_TIMEOUT = 6400;
 
     public static final String TYPE_HELLO = DevPluginService.TYPE_HELLO;
     public static final String TYPE_COMMAND = DevPluginService.TYPE_COMMAND;
@@ -198,11 +195,23 @@ abstract public class JsonSocket extends Socket {
 
             int dataSize = parseHeaderInt(header, 0, HEADER_SIZE - 2);
             Log.d(TAG, "Data length from header: " + dataSize);
+            if (dataSize < 0) {
+                Log.e(TAG, "Invalid data length, ignored");
+                return;
+            }
 
             int dataType = parseHeaderInt(header, HEADER_SIZE - 2, 2);
             Log.d(TAG, "Data type from header: " + dataType);
+            if (dataType < 0) {
+                Log.e(TAG, "Unknown data type, ignored");
+                return;
+            }
 
             mFragment = new Fragment(dataSize, dataType);
+            if (HEADER_SIZE > bytes.length) {
+                Log.e(TAG, "Bytes length (" + bytes.length + ") is less than header size (" + HEADER_SIZE + "), ignored");
+                return;
+            }
             overload = mFragment.splice(Arrays.copyOfRange(bytes, HEADER_SIZE, bytes.length));
         }
 
@@ -218,7 +227,8 @@ abstract public class JsonSocket extends Socket {
         } else if (type == Type.BYTES) {
             onMessage(ByteString.of(charsToBytes(restored, ISO_8859_1)));
         } else {
-            ScriptRuntime.popException("Unknown data type (" + type + ") for message dispatching");
+            Log.e(TAG, "Unknown data type (" + type + ") for message dispatching");
+            return;
         }
 
         if (overload != null) {
@@ -228,11 +238,14 @@ abstract public class JsonSocket extends Socket {
 
     private static int parseHeaderInt(String header, int offset, int length) {
         try {
-            return Integer.parseInt(new String(header.getBytes(UTF_8), offset, length).replaceAll("\\D", ""));
+            String s = new String(header.getBytes(UTF_8), offset, length).replaceAll("\\D", "");
+            if (!s.isEmpty()) {
+                return Integer.parseInt(s);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return 0;
         }
+        return -1;
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -311,9 +324,13 @@ abstract public class JsonSocket extends Socket {
 
     public void monitorMessage(Socket socket, JsonSocket jsonSocket) {
 
-        // CAUTION by SuperMonster003 on May 30, 2023.
+        // @Caution by SuperMonster003 on May 30, 2023.
         //  ! DO NOT use BufferedReader#readLine as it doesn't distinguish U+000A (\n) and U+000D (\r),
-        //  ! which makes MD5 not matching the one from Node.js.
+        //  ! which makes MD5 not matching the one from Node.js .
+        //  ! zh-CN:
+        //  ! 不要使用 BufferedReader 的 readLine 方法,
+        //  ! 因为它不能区分换行符 \n (U+000A) 和回车符 \r (U+000D),
+        //  ! 这将导致产生的 MD5 散列值与在 Node.js 环境中得到的 MD5 散列值不匹配.
 
         executorService.execute(() -> {
             // try (AutoCloseable) { ... }
@@ -409,30 +426,30 @@ abstract public class JsonSocket extends Socket {
 
     private static class Fragment {
 
-        private final int aimLength;
-        private final int aimDataType;
+        private final int mAimLength;
+        private final int mAimDataType;
 
         private char[] bytes = new char[0];
         private int currentLength = 0;
 
         public Fragment(int aimLength, int aimDataType) {
-            this.aimLength = aimLength;
-            this.aimDataType = aimDataType;
+            mAimLength = aimLength;
+            mAimDataType = aimDataType;
         }
 
         public boolean isRestored() {
-            return currentLength >= aimLength;
+            return currentLength >= mAimLength;
         }
 
         public char[] splice(char[] charBytes) {
             int tempLength = currentLength + charBytes.length;
-            if (tempLength <= aimLength) {
+            if (tempLength <= mAimLength) {
                 this.bytes = joinBytes(this.bytes, charBytes);
                 currentLength = currentLength + charBytes.length;
-                Log.d(TAG, "currentLength: " + currentLength + "/" + aimLength);
+                Log.d(TAG, "currentLength: " + currentLength + "/" + mAimLength);
                 return null;
             }
-            int overloadLength = tempLength - aimLength;
+            int overloadLength = tempLength - mAimLength;
             Log.w(TAG, "charBytes overloaded: " + overloadLength);
             char[] leftPart = Arrays.copyOfRange(charBytes, 0, charBytes.length - overloadLength);
             char[] rightPart = Arrays.copyOfRange(charBytes, charBytes.length - overloadLength, charBytes.length);
@@ -446,7 +463,7 @@ abstract public class JsonSocket extends Socket {
         }
 
         public int getAimDataType() {
-            return aimDataType;
+            return mAimDataType;
         }
 
         private static char[] joinBytes(final char[] array1, char[] array2) {

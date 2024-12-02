@@ -27,7 +27,6 @@ public class ScriptLoopDialog {
     private final EditText mLoopInterval;
     private final EditText mLoopDelay;
 
-
     public ScriptLoopDialog(Context context, ScriptFile file) {
         mScriptFile = file;
 

@@ -2,7 +2,7 @@ package org.autojs.autojs.permission
 
 import android.content.Context
 import android.os.Build
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
 import org.autojs.autojs.util.NotificationUtils

@@ -1,64 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingVertical="4dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="8dp">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="52dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingVertical="4dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="8dp">
 
     <ImageView
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_project" />
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:padding="4dp"
+        android:src="@drawable/ic_project" />
 
     <TextView
-            android:id="@+id/project_name"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="11dp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:singleLine="true"
-            android:ellipsize="middle"
-            android:text="Project"
-            android:textColor="@color/project_toolbar_title"
-            android:textSize="17sp" />
+        android:id="@+id/project_name"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="11dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:ellipsize="middle"
+        android:text="Project"
+        android:textColor="@color/project_toolbar_title"
+        android:textSize="17sp" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/commands">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/commands">
 
         <ImageView
-                android:id="@+id/project_run"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?selectableItemBackgroundBorderless"
-                android:paddingVertical="6dp"
-                android:src="@drawable/ic_play_arrow_white_48dp"
-                app:tint="@color/project_toolbar_button" />
+            android:id="@+id/project_run"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:paddingVertical="6dp"
+            android:src="@drawable/ic_play_arrow_white_48dp"
+            app:tint="@color/project_toolbar_button" />
 
         <ImageView
-                android:id="@+id/project_edit"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?selectableItemBackgroundBorderless"
-                android:paddingVertical="9dp"
-                android:src="@drawable/ic_edit_white_24dp"
-                app:tint="@color/project_toolbar_button" />
+            android:id="@+id/project_edit"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:paddingVertical="9dp"
+            android:src="@drawable/ic_edit_white_24dp"
+            app:tint="@color/project_toolbar_button" />
 
         <ImageView
-                android:id="@+id/project_build"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?selectableItemBackgroundBorderless"
-                android:paddingVertical="9dp"
-                android:src="@drawable/ic_packaging"
-                app:tint="@color/project_toolbar_button" />
+            android:id="@+id/project_build"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:paddingVertical="9dp"
+            android:src="@drawable/ic_packaging"
+            app:tint="@color/project_toolbar_button" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

@@ -35,5 +35,4 @@ public interface ViewHolderSupplier<VH extends RecyclerView.ViewHolder> {
                 );
     }
 
-
 }

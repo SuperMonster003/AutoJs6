@@ -70,6 +70,7 @@ class NodeInfo(private val resources: Resources?, private val node: UiObject, va
 
     companion object {
 
+        @JvmStatic
         fun boundsToString(rect: Rect) = rect.toString().replace(" - ", " , ").replace(" ", "").substring(4)
 
         internal fun capture(resourcesCache: HashMap<String, Resources>, context: Context, uiObject: UiObject, parent: NodeInfo?): NodeInfo {

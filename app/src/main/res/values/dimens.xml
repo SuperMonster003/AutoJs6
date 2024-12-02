@@ -45,4 +45,11 @@
     <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
     <dimen name="side_circular_menu_icon">42dp</dimen>
 
+    <!-- Material Dialogs -->
+    <dimen name="ref_md_dialog_frame_margin">24dp</dimen>
+    <dimen name="ref_md_listitem_margin_left">24dp</dimen>
+    <dimen name="ref_md_listitem_vertical_margin">12dp</dimen>
+    <dimen name="ref_md_listitem_textsize">16sp</dimen>
+    <dimen name="ref_md_listitem_height">48dp</dimen>
+
 </resources>

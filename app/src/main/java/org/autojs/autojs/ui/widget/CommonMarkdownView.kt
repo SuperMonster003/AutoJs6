@@ -9,6 +9,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.util.TextUtils.renderMarkdown
 
 /**
@@ -65,11 +66,11 @@ class CommonMarkdownView : WebView {
         mOnPageFinishedListener = onPageFinishedListener
     }
 
-    private fun loadHtml(html: String) = loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
+    private fun loadHtml(html: String) = loadDataWithBaseURL(null, html, Mime.TEXT_HTML, Charsets.UTF_8.name(), null)
 
     fun setText(resId: Int) = setText(context.getString(resId))
 
-    private fun setText(text: String) = loadDataWithBaseURL(null, text, "text/plain", "utf-8", null)
+    private fun setText(text: String) = loadDataWithBaseURL(null, text, Mime.TEXT_PLAIN, Charsets.UTF_8.name(), null)
 
     override fun goBack() {
         super.goBack()
@@ -80,12 +81,10 @@ class CommonMarkdownView : WebView {
 
     class DialogBuilder(context: Context) : MaterialDialog.Builder(context) {
 
-        private val mMarkdownView: CommonMarkdownView
-        private val mContainer: FrameLayout
+        private val mMarkdownView = CommonMarkdownView(context)
+        private val mContainer = FrameLayout(context)
 
         init {
-            mContainer = FrameLayout(context)
-            mMarkdownView = CommonMarkdownView(context)
             mContainer.addView(mMarkdownView)
             mContainer.clipToPadding = true
             customView(mContainer, false)

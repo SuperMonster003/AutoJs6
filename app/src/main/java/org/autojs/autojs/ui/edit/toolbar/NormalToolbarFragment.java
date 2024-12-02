@@ -16,10 +16,13 @@ import java.util.List;
 
 public class NormalToolbarFragment extends ToolbarFragment {
 
+    private FragmentNormalToolbarBinding binding;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return FragmentNormalToolbarBinding.inflate(inflater, container, false).getRoot();
+        binding = FragmentNormalToolbarBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -27,4 +30,9 @@ public class NormalToolbarFragment extends ToolbarFragment {
         return Arrays.asList(R.id.run, R.id.undo, R.id.redo, R.id.save);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
 }

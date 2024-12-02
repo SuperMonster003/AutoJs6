@@ -51,7 +51,7 @@ public class TimedTask extends BaseModel {
     private final Context mGlobalAppContext = GlobalAppContext.get();
 
     public TimedTask() {
-
+        /* Empty body. */
     }
 
     public TimedTask(long millis, long timeFlag, String scriptPath, ExecutionConfig config) {
@@ -203,7 +203,6 @@ public class TimedTask extends BaseModel {
                 .putExtra(ScriptIntents.EXTRA_KEY_LOOP_INTERVAL, mInterval);
     }
 
-
     public PendingIntent createPendingIntent(Context context) {
         return PendingIntent.getBroadcast(context, (int) ((REQUEST_CODE + 1 + getId()) % 65535),
                 createIntent(), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -223,7 +222,6 @@ public class TimedTask extends BaseModel {
                 ", mScriptPath='" + mScriptPath + '\'' +
                 '}';
     }
-
 
     public static TimedTask dailyTask(LocalTime time, String scriptPath, ExecutionConfig config) {
         return new TimedTask(time.getMillisOfDay(), FLAG_EVERYDAY, scriptPath, config);

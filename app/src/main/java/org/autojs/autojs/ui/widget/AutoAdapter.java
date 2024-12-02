@@ -24,7 +24,6 @@ public class AutoAdapter<DT> extends RecyclerView.Adapter<BindableViewHolder<DT>
         mViewHolderSupplier = ViewHolderSupplier.of(viewHolderCreator, layoutRes);
     }
 
-
     @NonNull
     @Override
     public BindableViewHolder<DT> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

@@ -5,13 +5,14 @@ import android.widget.LinearLayout
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Gravities
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class LinearLayoutAttributes(resourceParser: ResourceParser, view: View) : ViewGroupAttributes(resourceParser, view) {
+open class LinearLayoutAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewGroupAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as LinearLayout
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttrs(arrayOf("isBaselineAligned", "baselineAligned")) { view.isBaselineAligned = it.toBoolean() }
         registerAttr("baselineAlignedChildIndex") { view.baselineAlignedChildIndex = it.toInt() }

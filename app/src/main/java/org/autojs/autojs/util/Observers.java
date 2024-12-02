@@ -10,7 +10,7 @@ public class Observers {
 
     @SuppressWarnings("rawtypes")
     private static final Consumer CONSUMER = ignored -> {
-
+        /* Empty body. */
     };
 
     private static final Consumer<Throwable> TOAST_MESSAGE = e -> {
@@ -31,22 +31,22 @@ public class Observers {
         return new Observer<>() {
             @Override
             public void onSubscribe(Disposable d) {
-
+                /* Empty body. */
             }
 
             @Override
             public void onNext(T t) {
-
+                /* Empty body. */
             }
 
             @Override
             public void onError(Throwable e) {
-
+                /* Empty body. */
             }
 
             @Override
             public void onComplete() {
-
+                /* Empty body. */
             }
         };
 

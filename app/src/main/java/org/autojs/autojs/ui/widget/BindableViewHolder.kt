@@ -1,17 +1,14 @@
-package org.autojs.autojs.ui.widget;
+package org.autojs.autojs.ui.widget
 
-import androidx.recyclerview.widget.RecyclerView;
-import android.view.View;
+import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * Created by Stardust on Apr 8, 2017.
+ * Transformed by SuperMonster003 on Nov 23, 2024.
  */
-public abstract class BindableViewHolder<DataType> extends RecyclerView.ViewHolder{
+abstract class BindableViewHolder<DataType>(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
+    abstract fun bind(data: DataType, position: Int)
 
-    public BindableViewHolder(View itemView) {
-        super(itemView);
-    }
-
-    public abstract void bind(DataType data, int position);
 }

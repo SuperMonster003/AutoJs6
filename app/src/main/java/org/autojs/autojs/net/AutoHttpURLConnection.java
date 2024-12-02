@@ -17,7 +17,6 @@ public class AutoHttpURLConnection extends HttpURLConnection implements AutoClos
     private InputStream mInputStream;
     private OutputStream mOutputStream;
 
-
     public AutoHttpURLConnection(URL url) throws IOException {
         super(url);
         mHttpURLConnection = (HttpURLConnection) url.openConnection();

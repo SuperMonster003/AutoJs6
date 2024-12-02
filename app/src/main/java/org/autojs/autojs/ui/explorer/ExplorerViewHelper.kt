@@ -1,65 +1,56 @@
-package org.autojs.autojs.ui.explorer;
+package org.autojs.autojs.ui.explorer
 
-import static org.autojs.autojs.util.FileUtils.TYPE.AUTO;
-import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
-import static org.autojs.autojs.util.FileUtils.TYPE.PROJECT;
-import static org.autojs.autojs.util.FileUtils.TYPE.UNKNOWN;
+import android.content.Context
+import org.autojs.autojs.model.explorer.ExplorerFileItem
+import org.autojs.autojs.model.explorer.ExplorerItem
+import org.autojs.autojs.model.explorer.ExplorerPage
+import org.autojs.autojs.model.explorer.ExplorerProjectPage
+import org.autojs.autojs.model.explorer.ExplorerSamplePage
+import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
+import org.autojs.autojs.util.FileUtils
+import org.autojs.autojs6.R
+import java.util.*
 
-import android.content.Context;
+/**
+ * Transformed by SuperMonster003 on Nov 29, 2024.
+ */
+object ExplorerViewHelper {
 
-import androidx.annotation.NonNull;
-
-import org.autojs.autojs.model.explorer.ExplorerFileItem;
-import org.autojs.autojs.model.explorer.ExplorerItem;
-import org.autojs.autojs.model.explorer.ExplorerPage;
-import org.autojs.autojs.model.explorer.ExplorerProjectPage;
-import org.autojs.autojs.model.explorer.ExplorerSamplePage;
-import org.autojs.autojs.pio.PFiles;
-import org.autojs.autojs.pref.Language;
-import org.autojs.autojs.util.FileUtils.TYPE;
-import org.autojs.autojs6.R;
-
-public class ExplorerViewHelper {
-
-    public static String getDisplayName(Context context, ExplorerItem item) {
-        if (item instanceof ExplorerSamplePage && ((ExplorerSamplePage) item).isRoot()) {
-            return context.getString(R.string.text_sample);
-        }
-        if (item instanceof ExplorerPage) {
-            return item.getName();
-        }
-        TYPE type = item.getType();
-        if (type == JAVASCRIPT || type == AUTO) {
-            if (item instanceof ExplorerFileItem) {
-                return ((ExplorerFileItem) item).getFile().getSimplifiedName();
+    @JvmStatic
+    fun getDisplayName(context: Context, item: ExplorerItem): String {
+        return when {
+            item is ExplorerSamplePage && item.isRoot -> context.getString(R.string.text_sample)
+            item is ExplorerPage -> item.getName()
+            else -> when (item.type) {
+                FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> when (item) {
+                    is ExplorerFileItem -> item.file.simplifiedName
+                    else -> getNameWithoutExtension(item.name)
+                }
+                else -> item.name
             }
-            return PFiles.getNameWithoutExtension(item.getName());
         }
-        return item.getName();
     }
 
-    public static String getIconText(@NonNull ExplorerItem item) {
-        TYPE type = item.getType();
-        switch (type) {
-            case UNKNOWN:
-                return UNKNOWN.getIconText();
-            case AUTO:
-                return AUTO.getIconText();
+    @JvmStatic
+    fun getIcon(item: ExplorerItem): FileUtils.TYPE.Icon {
+        val type = item.type
+        FileUtils.TYPE.entries.forEach { t ->
+            if (t == type) {
+                return t.icon
+            }
         }
-        if (item.getName().equalsIgnoreCase(PROJECT.getTypeName())) {
-            return PROJECT.getIconText();
+        // Fallback for project type match
+        return when {
+            item.name.equals(FileUtils.TYPE.PROJECT.typeName, ignoreCase = true) -> FileUtils.TYPE.PROJECT.icon
+            else -> FileUtils.TYPE.Icon(type.typeName.substring(0, 1).uppercase(Locale.getDefault()))
         }
-        return type.getTypeName().substring(0, 1).toUpperCase(Language.getPrefLanguage().getLocale());
     }
 
-    public static int getIcon(ExplorerPage page) {
-        if (page instanceof ExplorerSamplePage) {
-            return R.drawable.ic_sample_dir;
-        }
-        if (page instanceof ExplorerProjectPage) {
-            return R.drawable.ic_project;
-        }
-        return R.drawable.ic_folder_yellow_100px;
+    @JvmStatic
+    fun getIconRes(page: ExplorerPage?): Int = when (page) {
+        is ExplorerSamplePage -> R.drawable.ic_sample_dir
+        is ExplorerProjectPage -> R.drawable.ic_project
+        else -> R.drawable.ic_folder_yellow_100px
     }
 
 }

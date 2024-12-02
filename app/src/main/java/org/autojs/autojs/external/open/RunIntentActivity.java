@@ -43,4 +43,5 @@ public class RunIntentActivity extends Activity {
             ScriptIntents.handleIntent(this, intent);
         }
     }
+
 }

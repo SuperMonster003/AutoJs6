@@ -12,12 +12,12 @@ import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs.network.UpdateChecker
 import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.network.entity.VersionInfo
-import org.autojs.autojs.pref.Pref
-import org.autojs.autojs.pref.Pref.isAutoCheckForUpdatesEnabled
-import org.autojs.autojs.pref.Pref.lastNoNewerUpdatesTimestamp
-import org.autojs.autojs.pref.Pref.lastUpdatesAutoCheckedTimestamp
-import org.autojs.autojs.pref.Pref.lastUpdatesPostponedTimestamp
-import org.autojs.autojs.pref.Pref.refreshLastUpdatesAutoCheckedTimestamp
+import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.Pref.isAutoCheckForUpdatesEnabled
+import org.autojs.autojs.core.pref.Pref.lastNoNewerUpdatesTimestamp
+import org.autojs.autojs.core.pref.Pref.lastUpdatesAutoCheckedTimestamp
+import org.autojs.autojs.core.pref.Pref.lastUpdatesPostponedTimestamp
+import org.autojs.autojs.core.pref.Pref.refreshLastUpdatesAutoCheckedTimestamp
 import org.autojs.autojs.tool.SimpleObserver
 import org.autojs.autojs6.R
 

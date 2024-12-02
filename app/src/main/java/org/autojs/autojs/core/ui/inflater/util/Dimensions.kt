@@ -64,9 +64,11 @@ object Dimensions {
             throw InflateException(context.getString(R.string.error_illegal_argument, "dimension", dimension))
         }
         val unit = if (m.groupCount() == 2) UNITS[m.group(2), TypedValue.COMPLEX_UNIT_DIP] else TypedValue.COMPLEX_UNIT_DIP
-        return m.group(1)?.toInt()?.toFloat()?.let {
-             TypedValue.applyDimension(unit, it, context.resources.displayMetrics)
-        } ?: 0f
+        runCatching {
+            return m.group(1)?.toFloat()?.let {
+                TypedValue.applyDimension(unit, it, context.resources.displayMetrics)
+            } ?: 0f
+        }.getOrElse { e -> throw RuntimeException(e) }
     }
 
     fun parseToIntPixel(value: String, view: View): Int {

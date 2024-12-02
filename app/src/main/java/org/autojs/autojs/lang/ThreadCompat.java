@@ -14,9 +14,13 @@ public class ThreadCompat extends Thread {
     // FIXME by Stardust on Dec 29, 2017.
     //  ! 是否需要用 synchronizedMap?
     //  ! 这里虽然线程不安全, 但竞争很小.
+    //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
+    //  ! Is synchronizedMap needed here?
+    //  ! Competition is very little although it's thread-unsafe here.
     private static final Set<Thread> interruptedThreads = Collections.newSetFromMap(new WeakHashMap<>());
 
     public ThreadCompat() {
+        /* Empty body. */
     }
 
     public ThreadCompat(Runnable target) {

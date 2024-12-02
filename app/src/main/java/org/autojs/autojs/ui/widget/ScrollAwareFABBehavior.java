@@ -86,5 +86,4 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
                 .start();
     }
 
-
 }

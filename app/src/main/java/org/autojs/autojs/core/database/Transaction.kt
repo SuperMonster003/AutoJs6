@@ -1,30 +1,13 @@
-package org.autojs.autojs.core.database;
+package org.autojs.autojs.core.database
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+class Transaction(val database: Database) {
 
-public class Transaction {
-
-    private final SQLiteDatabase mDatabase;
-
-    public SQLiteDatabase getDatabase() {
-        return mDatabase;
+    fun end() {
+        database.endTransaction()
     }
 
-    public Transaction(SQLiteDatabase database) {
-        mDatabase = database;
+    fun succeed() {
+        database.setTransactionSuccessful()
     }
 
-    public void executeSql(String sqlStatement, String[] arguments, StatementCallback callback, StatementErrorCallback errorCallback){
-        Cursor cursor = mDatabase.rawQuery(sqlStatement,  arguments);
-        callback.handleEvent(this, DatabaseResultSet.fromCursor(cursor));
-    }
-
-     void succeed() {
-        mDatabase.setTransactionSuccessful();
-    }
-
-     void end() {
-        mDatabase.endTransaction();
-    }
 }

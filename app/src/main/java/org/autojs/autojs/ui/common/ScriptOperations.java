@@ -1,26 +1,24 @@
 package org.autojs.autojs.ui.common;
 
-import static org.autojs.autojs.app.DialogUtils.fixCheckBoxGravity;
-import static org.autojs.autojs.app.DialogUtils.showDialog;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.tencent.bugly.crashreport.BuglyLog;
-
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.explorer.Explorer;
@@ -32,6 +30,7 @@ import org.autojs.autojs.model.sample.SampleFile;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.network.download.DownloadManager;
+import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
@@ -47,13 +46,18 @@ import org.reactivestreams.Publisher;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.internal.functions.ObjectHelper;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
+import static org.autojs.autojs.app.DialogUtils.fixCheckBoxGravity;
+import static org.autojs.autojs.app.DialogUtils.showDialog;
+import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
+import static org.autojs.autojs.util.RhinoUtils.isMainThread;
 
 /**
  * Created by Stardust on Jul 31, 2017.
@@ -90,8 +94,8 @@ public class ScriptOperations {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void newScriptFileForScript(final String script) {
-        showFileNameInputDialog("", "js").subscribe(input ->
-                createScriptFile(getCurrentDirectoryPath() + input + ".js", script, false)
+        showFileNameInputDialog("", JAVASCRIPT.extension).subscribe(input ->
+                createScriptFile(getCurrentDirectoryPath() + input + JAVASCRIPT.extensionWithDot, script, false)
         );
     }
 
@@ -132,49 +136,112 @@ public class ScriptOperations {
     }
 
     public void newFile() {
+        final AtomicReference<MaterialDialog> dialogRef = new AtomicReference<>();
         MaterialDialog dialog = new MaterialDialog.Builder(mContext)
                 .title(R.string.text_name)
                 .inputType(InputType.TYPE_CLASS_TEXT)
                 .alwaysCallInputCallback()
-                .input(getString(R.string.text_please_input_name), "", false, (d, input) ->
-                        validateInput(d, d.isPromptCheckBoxChecked() ? ".js" : null))
-                .checkBoxPromptRes(R.string.text_js_file, true, (buttonView, isChecked) -> {
-                    /* Ignored. */
+                .input(getString(R.string.text_please_input_name), getNewFileNamePresetPrefill("test"), false, (d, input) -> {
+                    validateInput(d, d.isPromptCheckBoxChecked() ? JAVASCRIPT.extensionWithDot : null);
                 })
-                .onPositive((d, which) -> {
-                    boolean createJs = d.isPromptCheckBoxChecked();
-                    assert d.getInputEditText() != null;
-                    if (createJs) {
-                        createScriptFile(getCurrentDirectoryPath() + d.getInputEditText().getText() + ".js", null, true);
-                    } else {
-                        createScriptFile(getCurrentDirectoryPath() + d.getInputEditText().getText(), null, false);
+                .checkBoxPromptRes(R.string.text_js_file, true, (buttonView, isChecked) -> {
+                    MaterialDialog dialogInstance = dialogRef.get();
+                    if (dialogInstance != null) {
+                        validateInput(dialogInstance, isChecked ? JAVASCRIPT.extensionWithDot : null);
                     }
                 })
+                .positiveText(R.string.dialog_button_confirm)
+                .onPositive((d, which) -> {
+                    assert d.getInputEditText() != null;
+                    boolean createJs = d.isPromptCheckBoxChecked() || d.getInputEditText().getText().toString().endsWith(JAVASCRIPT.extensionWithDot);
+                    String fileNameSuffix = createJs ? JAVASCRIPT.extensionWithDot : "";
+                    createScriptFile(getCurrentDirectoryPath() + d.getInputEditText().getText() + fileNameSuffix, null, createJs);
+                    d.dismiss();
+                })
+                .negativeText(R.string.dialog_button_cancel)
+                .onNegative((d, which) -> d.dismiss())
+                .neutralText(R.string.dialog_button_default_prefix)
+                .neutralColor(mContext.getColor(R.color.dialog_button_hint))
+                .onNeutral((d, which) -> {
+                    // TODO Activity 或富 Dialog 形式
+                    //  ! [Aa] 大小写切换图标支持点击循环切换
+                    //  ! [A/文] 语言图标支持点击循环切换
+                    //  ! [+] 添加图标支持添加自定义项目 (max 限制)
+                    MaterialDialog dialogDefaultPrefix = new MaterialDialog.Builder(mContext)
+                            .title(R.string.text_default_prefix)
+                            // TODO 多语言支持? 英文+当前
+                            // TODO 大小写支持? FirstCharUpperCase/UpperCase/LowerCase
+                            // TODO 自定义前缀
+                            // TODO 添加 "无/禁用"
+                            .items(List.of("test", "untitled", "unnamed", "script"))
+                            .itemsCallbackSingleChoice(0, (dDefaultPrefix, view, i, text) -> {
+                                EditText editText = dialogRef.get().getInputEditText();
+                                if (editText != null) {
+                                    editText.setText(getNewFileNamePresetPrefill(text));
+                                    editText.setSelection(editText.getText().length());
+                                }
+                                return true;
+                            })
+                            .positiveText(R.string.dialog_button_confirm)
+                            .negativeText(R.string.dialog_button_back)
+                            .build();
+                    showDialog(dialogDefaultPrefix);
+                })
+                .autoDismiss(false)
                 .build();
+        dialogRef.set(dialog);
 
         showDialog(fixCheckBoxGravity(dialog));
     }
 
+    private String getNewFileNamePresetPrefill(CharSequence prefix) {
+        var idx = 1;
+        PFile[] fileList = getCurrentDirectory().listFiles();
+        if (fileList == null) {
+            return prefix + "-" + idx;
+        }
+        var nums = new ArrayList<Integer>();
+        for (PFile file : fileList) {
+            var fileName = file.getSimplifiedName();
+            Pattern pattern = Pattern.compile(prefix + "[\\s-_@#]*(\\d+)", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(fileName);
+            if (!matcher.find()) {
+                continue;
+            }
+            String currentNum = matcher.group(1);
+            if (currentNum == null) {
+                continue;
+            }
+            int currentNumInt = Integer.parseInt(currentNum);
+            nums.add(currentNumInt);
+        }
+        if (nums.isEmpty()) {
+            return prefix + "-" + idx;
+        }
+        int max = Collections.max(nums);
+        while (idx <= max) {
+            if (!nums.contains(idx)) {
+                break;
+            }
+            idx += 1;
+        }
+        return prefix + "-" + idx;
+    }
+
     private void validateInput(MaterialDialog dialog, String extension) {
         EditText editText = dialog.getInputEditText();
-        if (editText == null)
+        if (editText == null) {
             return;
+        }
         Editable input = editText.getText();
-        int errorResId = 0;
         if (input == null || input.length() == 0) {
             dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
             return;
         }
-        if (new File(getCurrentDirectory(), extension == null ? input.toString() : input + extension).exists()) {
-            errorResId = R.string.text_file_exists;
-        }
-        if (errorResId == 0) {
-            editText.setError(null);
-            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
-        } else {
-            editText.setError(getString(errorResId));
-            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
-        }
+        boolean exists = new File(getCurrentDirectory(), extension == null ? input.toString() : input + extension).exists();
+        CharSequence errorMessage = exists ? getString(R.string.text_file_exists) : null;
+        editText.setError(errorMessage);
+        dialog.getActionButton(DialogAction.POSITIVE).setEnabled(!exists);
     }
 
     public Observable<String> importFile(final String pathFrom) {
@@ -208,7 +275,6 @@ public class ScriptOperations {
                 });
     }
 
-
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void newDirectory() {
         showNameInputDialog("", new InputCallback())
@@ -224,7 +290,7 @@ public class ScriptOperations {
     }
 
     private void showMessage(final int resId) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isMainThread()) {
             showMessageWithoutThreadSwitch(resId);
         }
         // switch to ui thread to show message
@@ -238,7 +304,6 @@ public class ScriptOperations {
             ViewUtils.showToast(mContext, resId);
         }
     }
-
 
     private Observable<String> showFileNameInputDialog(String prefix, String ext) {
         return showNameInputDialog(prefix, new InputCallback(ext));
@@ -280,6 +345,9 @@ public class ScriptOperations {
         String originalName = item.getName();
         return showNameInputDialog(originalName, new InputCallback(null, originalName))
                 .map(newName -> {
+                    if (newName.equals(originalName)) {
+                        return item;
+                    }
                     ExplorerFileItem newItem = item.rename(newName);
                     if (ObjectHelper.equals(newItem.toScriptFile(), item.toScriptFile())) {
                         showMessage(R.string.error_cannot_rename);
@@ -306,7 +374,10 @@ public class ScriptOperations {
                 .negativeText(R.string.text_cancel)
                 .positiveText(R.string.text_ok)
                 .positiveColorRes(R.color.dialog_button_caution)
-                .onPositive((dialog, which) -> deleteWithoutConfirm(scriptFile))
+                .onPositive((dialog, which) -> {
+                    deleteWithoutConfirm(scriptFile);
+                    Explorers.workspace().refreshAll();
+                })
                 .build()
                 .show();
     }
@@ -319,7 +390,7 @@ public class ScriptOperations {
             return;
         }
         String content = mContext.getString(R.string.text_old_path) + ": " + oldPath + "\n"
-                + mContext.getString(R.string.text_new_path) + ": " + newPath;
+                         + mContext.getString(R.string.text_new_path) + ": " + newPath;
         new MaterialDialog.Builder(mContext)
                 .title(mContext.getString(R.string.text_prompt))
                 .content(content)
@@ -417,7 +488,7 @@ public class ScriptOperations {
         private boolean mIsFirstTextChanged = true;
         private final String mExtension;
 
-        InputCallback(@Nullable String ext, String excluded) {
+        InputCallback(@Nullable String ext, @Nullable String excluded) {
             mExtension = ext == null ? null : "." + ext;
             mExcluded = excluded;
         }
@@ -437,9 +508,10 @@ public class ScriptOperations {
                 return;
             }
             EditText editText = dialog.getInputEditText();
-            if (editText == null)
+            if (editText == null) {
                 return;
-            if (input.equals(mExcluded)) {
+            }
+            if (mExcluded != null && mExcluded.contentEquals(input)) {
                 editText.setError(null);
                 dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
                 return;

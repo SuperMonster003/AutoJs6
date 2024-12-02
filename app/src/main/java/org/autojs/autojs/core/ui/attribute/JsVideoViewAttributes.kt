@@ -3,13 +3,14 @@ package org.autojs.autojs.core.ui.attribute
 import android.view.View
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.widget.JsVideoView
+import org.autojs.autojs.runtime.ScriptRuntime
 
-class JsVideoViewAttributes(resourceParser: ResourceParser, view: View) : VideoViewAttributes(resourceParser, view) {
+class JsVideoViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : VideoViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as JsVideoView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttrs(arrayOf("controller", "mediaController", "isControllerEnabled", "controllerEnabled", "enableController", "isMediaControllerEnabled", "mediaControllerEnabled", "enableMediaController")) {
             when (it) {

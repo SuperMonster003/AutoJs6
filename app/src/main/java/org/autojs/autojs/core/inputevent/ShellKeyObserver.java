@@ -26,7 +26,7 @@ public class ShellKeyObserver implements InputEventObserver.InputEventListener {
     private KeyListener mKeyListener;
 
     public ShellKeyObserver() {
-
+        /* Empty body. */
     }
 
     public void setKeyListener(KeyListener keyListener) {
@@ -49,7 +49,6 @@ public class ShellKeyObserver implements InputEventObserver.InputEventListener {
     public static String keyCodeToKeyName(int code) {
         return keyCodeToName.get(code);
     }
-
 
     public static int keyNameToCode(String name) {
         Integer code = keyNameToCode.get(name);

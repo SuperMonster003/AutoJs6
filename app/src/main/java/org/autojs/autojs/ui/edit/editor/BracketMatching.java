@@ -8,10 +8,8 @@ public class BracketMatching {
     public static int UNMATCHED_BRACKET = -2;
     public static int BRACKET_NOT_FOUND = -1;
 
-
     private static final char[] PAIR_LEFT = {'(', '{', '['};
     private static final char[] PAIR_RIGHT = {')', '}', ')'};
-
 
     public static int bracketMatching(CharSequence text, int index) {
         char ch = text.charAt(index);

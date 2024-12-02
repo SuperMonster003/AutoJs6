@@ -7,6 +7,8 @@ import android.net.Uri;
 import org.autojs.autojs.app.OnActivityResultDelegate;
 import org.autojs.autojs6.R;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Created by Stardust on Mar 5, 2017.
  */
@@ -17,21 +19,21 @@ public class ImageSelector implements OnActivityResultDelegate {
     }
 
     private static final int REQUEST_CODE = "LOVE HONMUA".hashCode() >> 16;
-    private final Activity mActivity;
+    private final WeakReference<Activity> mActivityRef;
     private final ImageSelectorCallback mCallback;
     private final Mediator mMediator;
     private boolean mDisposable;
 
     public ImageSelector(Activity activity, OnActivityResultDelegate.Mediator mediator, ImageSelectorCallback callback) {
         mediator.addDelegate(REQUEST_CODE, this);
-        mActivity = activity;
+        mActivityRef = new WeakReference<>(activity);
         mCallback = callback;
         mMediator = mediator;
     }
 
     public void select() {
-        mActivity.startActivityForResult(Intent.createChooser(
-                new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), mActivity.getString(R.string.text_select_image)),
+        mActivityRef.get().startActivityForResult(Intent.createChooser(
+                new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), mActivityRef.get().getString(R.string.text_select_image)),
                 REQUEST_CODE);
     }
 
@@ -50,7 +52,6 @@ public class ImageSelector implements OnActivityResultDelegate {
             return;
         }
         mCallback.onImageSelected(this, data.getData());
-
     }
 
 }

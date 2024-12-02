@@ -22,7 +22,6 @@ public class ShortcutManager {
     private final Context mContext;
     private final android.content.pm.ShortcutManager mShortcutManager;
 
-
     public ShortcutManager(Context context) {
         mContext = context;
         mShortcutManager = (android.content.pm.ShortcutManager) context.getSystemService(Context.SHORTCUT_SERVICE);
@@ -34,7 +33,6 @@ public class ShortcutManager {
         }
         return sInstance;
     }
-
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void addPinnedShortcut(CharSequence label, String id, Icon icon, Intent intent) {

@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api
 
 import android.widget.Toast
 import org.autojs.autojs.runtime.ScriptRuntime
+import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -12,32 +13,28 @@ import java.util.concurrent.ConcurrentHashMap
 object ScriptToast {
 
     @JvmField
-    val pool = ConcurrentHashMap<Toast, ScriptRuntime>()
+    val pool = ConcurrentHashMap<Toast, WeakReference<ScriptRuntime>>()
 
     @JvmStatic
-    fun add(t: Any?, scriptRuntime: ScriptRuntime) {
-        if (t is Toast) {
-            pool[t] = scriptRuntime
-        }
+    fun add(t: Toast, scriptRuntime: ScriptRuntime) {
+        pool[t] = WeakReference(scriptRuntime)
     }
 
     @JvmStatic
     fun dismissAll(scriptRuntime: ScriptRuntime) {
-        for (entry in pool.entries) {
-            if (entry.value === scriptRuntime) {
+        pool.entries.forEach { entry ->
+            if (entry.value.get() == scriptRuntime) {
+                pool.remove(entry.key)
                 entry.key.cancel()
-                pool.remove(entry.key, scriptRuntime)
             }
         }
     }
 
     @JvmStatic
     fun clear(scriptRuntime: ScriptRuntime) {
-        for (entry in pool.entries) {
-            if (entry.value === scriptRuntime) {
-                pool.remove(entry.key, scriptRuntime)
-            }
-        }
+        pool.entries
+            .filter { it.value.get() == scriptRuntime }
+            .forEach { pool.remove(it.key) }
     }
 
 }

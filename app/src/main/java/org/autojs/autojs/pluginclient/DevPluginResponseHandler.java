@@ -3,15 +3,17 @@ package org.autojs.autojs.pluginclient;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
-
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.io.Zip;
+import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.project.ProjectLauncher;
@@ -21,16 +23,8 @@ import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.HashMap;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Stardust on May 11, 2017.
@@ -158,10 +152,11 @@ public class DevPluginResponseHandler implements Handler {
 
         // @Comment by SuperMonster003 on Jun 1, 2022.
         //  ! Keep the original extension name of source file.
-        // name = PFiles.getNameWithoutExtension(name);
-        // if (!name.endsWith(".js")) {
-        //     name = name + ".js";
-        // }
+        //  ! zh-CN: 源文件保留其原始扩展名.
+        //  # name = PFiles.getNameWithoutExtension(name);
+        //  # if (!name.endsWith(".js")) {
+        //  #     name = name + ".js";
+        //  # }
 
         File file = new File(WorkingDirectoryUtils.getPath(), name);
         PFiles.ensureDir(file.getPath());
@@ -187,7 +182,10 @@ public class DevPluginResponseHandler implements Handler {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        dest -> ViewUtils.showToast(mContext, mContext.getString(R.string.text_remote_project_saved_to_local_storage_successfully), true),
+                        dest -> {
+                            ViewUtils.showToast(mContext, mContext.getString(R.string.text_remote_project_saved_to_local_storage_successfully), true);
+                            Explorers.workspace().refreshAll();
+                        },
                         err -> {
                             var msg = mContext.getString(R.string.text_failed_to_save_remote_project_to_local_storage);
                             var e = err.getMessage();

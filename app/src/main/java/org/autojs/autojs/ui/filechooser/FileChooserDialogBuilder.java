@@ -49,7 +49,7 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
     public FileChooserDialogBuilder(@NonNull Context context) {
         super(context);
         mFileChooseListView = new FileChooseListView(context);
-        mFileChooseListView.setProjectRecognitionEnabled(false);
+        mFileChooseListView.isProjectRecognitionEnabled = false;
         customView(mFileChooseListView, false);
         positiveText(R.string.text_ok);
         negativeText(R.string.text_cancel);
@@ -89,7 +89,6 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
         return this;
     }
 
-
     public FileChooserDialogBuilder chooseDir() {
         mFileFilter = File::isDirectory;
         mFileChooseListView.setCanChooseDir(true);
@@ -97,7 +96,7 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
     }
 
     public FileChooserDialogBuilder setProjectRecognition(boolean b) {
-        mFileChooseListView.setProjectRecognitionEnabled(b);
+        mFileChooseListView.isProjectRecognitionEnabled = b;
         return this;
     }
 
@@ -106,7 +105,6 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
         mCallback = files -> callback.onSelected(files.get(0));
         return this;
     }
-
 
     public FileChooserDialogBuilder multiChoice(MultiChoiceCallback callback) {
         return multiChoice(Integer.MAX_VALUE, callback);

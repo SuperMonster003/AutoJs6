@@ -47,6 +47,7 @@ public class ThemeColorRecyclerView extends RecyclerView implements ThemeColorMu
             if (edgeEffectCompat != null)
                 return setEdgeEffectColor(edgeEffectCompat, mColorPrimary);
         } catch (Exception ignored) {
+            /* Ignored. */
         }
         return false;
     }
@@ -78,7 +79,7 @@ public class ThemeColorRecyclerView extends RecyclerView implements ThemeColorMu
                 edgeEffect.setColor(color);
             }
         } catch (Exception ignored) {
-
+            /* Ignored. */
         }
         return true;
     }

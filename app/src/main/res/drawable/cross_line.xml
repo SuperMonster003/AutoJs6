@@ -1,0 +1,13 @@
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Vertical Line -->
+    <item>
+        <shape>
+            <size
+                android:width="36dp"
+                android:height="36dp" />
+            <solid android:color="@color/day_night" />
+        </shape>
+    </item>
+
+</layer-list>

@@ -143,10 +143,15 @@ public abstract class TaskGroup implements Parent<Task> {
             //  ! and then switch from FILE tab to TASK tab rapidly,
             //  ! there will be two tasks of the same instance in the list.
             //  ! Checking its existence before invoking `mTasks.add` solved the problem.
-
-            // int pos = mTasks.size();
-            // mTasks.add(new Task.RunningTask(getContext(), engine));
-            // return pos;
+            //  ! zh-CN:
+            //  ! 在 AutoJs6 主页运行一个脚本,
+            //  ! 此时如果迅速从 "文件" 标签页切换到 "任务" 标签页,
+            //  ! 列表中会出现同一个实例的两个相同的任务.
+            //  ! 在调用 `mTasks.add` 之前检查其存在性可解决此问题.
+            //  !
+            //  # int pos = mTasks.size();
+            //  # mTasks.add(new Task.RunningTask(getContext(), engine));
+            //  # return pos;
 
             int size = mTasks.size();
             if (size == 0 || indexOf(engine) == -1) {

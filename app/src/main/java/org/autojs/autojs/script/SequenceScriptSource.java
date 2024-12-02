@@ -17,7 +17,6 @@ public class SequenceScriptSource extends JavaScriptSource {
     private final JavaScriptSource mSecondScriptSource;
     private final JavaScriptSource mFirstScriptSource;
 
-
     public SequenceScriptSource(String name, JavaScriptSource firstScriptSource, JavaScriptSource secondScriptSource) {
         super(name);
         mSecondScriptSource = secondScriptSource;

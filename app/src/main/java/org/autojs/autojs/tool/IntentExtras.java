@@ -15,24 +15,24 @@ public class IntentExtras implements Serializable {
 
     public static final String EXTRA_ID = "org.autojs.autojs.tool.IntentExtras.id";
 
+    public static final SparseArray<Map<String, Object>> extraStore = new SparseArray<>();
     private static final AtomicInteger mMaxId = new AtomicInteger(-1);
-    private static final SparseArray<Map<String, Object>> extraStore = new SparseArray<>();
 
-    private final Map<String, Object> mMap;
+    public final Map<String, Object> map;
     private int mId;
 
-    private IntentExtras() {
-        mMap = new HashMap<>();
+    public IntentExtras() {
+        map = new HashMap<>();
         mId = mMaxId.incrementAndGet();
-        extraStore.put(mId, mMap);
+        synchronized (extraStore) {
+            extraStore.put(mId, map);
+        }
     }
 
-
-    private IntentExtras(int id, Map<String, Object> map) {
+    public IntentExtras(int id, Map<String, Object> map) {
         mId = id;
-        mMap = map;
+        this.map = map;
     }
-
 
     public static IntentExtras newExtras() {
         return new IntentExtras();
@@ -63,7 +63,6 @@ public class IntentExtras implements Serializable {
         return new IntentExtras(id, map);
     }
 
-
     public static IntentExtras fromIntent(Intent intent) {
         int id = intent.getIntExtra(EXTRA_ID, -1);
         if (id < 0) {
@@ -72,23 +71,22 @@ public class IntentExtras implements Serializable {
         return fromId(id);
     }
 
-
     public int getId() {
         return mId;
     }
 
     @SuppressWarnings("unchecked")
     public <T> T get(String key) {
-        return (T) mMap.get(key);
+        return (T) map.get(key);
     }
 
     public IntentExtras put(String key, Object value) {
-        mMap.put(key, value);
+        map.put(key, value);
         return this;
     }
 
     public IntentExtras putAll(IntentExtras extras) {
-        mMap.putAll(extras.mMap);
+        map.putAll(extras.map);
         return this;
     }
 
@@ -101,6 +99,5 @@ public class IntentExtras implements Serializable {
         extraStore.remove(mId);
         mId = -1;
     }
-
 
 }

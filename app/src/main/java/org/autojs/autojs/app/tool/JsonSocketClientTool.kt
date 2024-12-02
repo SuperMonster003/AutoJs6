@@ -6,13 +6,12 @@ import android.text.InputFilter
 import android.view.KeyEvent
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.app.DialogUtils
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.pluginclient.JsonSocketClient
-import org.autojs.autojs.pref.Pref
 import org.autojs.autojs.ui.main.drawer.DrawerMenuDisposableItem
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
-import java.lang.Exception
 
 class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
 
@@ -32,7 +31,8 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     override fun connect(): Boolean {
         inputRemoteHost(isAutoConnect = !isNormallyClosed)
         // @Hint by SuperMonster003 on Nov 9, 2023.
-        //  ! Function with a dialog always returns false.
+        //  ! Method with showing a dialog always returns false.
+        //  ! zh-CN: 含对话框显示的方法总是返回 false 值.
         return false
     }
 
@@ -46,12 +46,9 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
 
     override fun disconnect(): Boolean {
         mClientModeItem?.subtitle = null
-        val result = try {
+        val result = runCatching {
             devPlugin.jsonSocketClient?.switchOff()
-            true
-        } catch (_: Exception) {
-            false
-        }
+        }.isSuccess
         isNormallyClosed = true
         return result
     }
@@ -132,15 +129,33 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                         val fullText = dest.substring(0, dstart) +
                                 source.subSequence(start, end) +
                                 dest.substring(dend)
+                        if (source.length > 1) /* Take source as copied from clipboard. */ {
+                            val splitTextSegments = fullText.split(Regex("$REGEX_DOT+")).dropLastWhile { it.isEmpty() }
+                            val newFullText = splitTextSegments
+                                .slice(0..splitTextSegments.lastIndex.coerceIn(0..4))
+                                .mapIndexed { idx, part ->
+                                    part + when (idx) {
+                                        splitTextSegments.lastIndex -> ""
+                                        in 0..2 -> "."
+                                        3 -> ":"
+                                        else -> ""
+                                    }
+                                }
+                                .joinToString("")
+                            return@InputFilter newFullText.slice(dstart until newFullText.length - dend)
+                        }
                         if (dstart > 0) {
-                            val prevNearest = dest[dstart - 1]
-                            if (Regex(REGEX_DOT).matches(prevNearest.toString()) && Regex(REGEX_DOT).matches(source)) {
-                                showSnack(dialog, R.string.error_repeated_dot_symbol)
+                            if (triggerRepeatedCharacter(dialog, source, /* prevNearest */ dest[dstart - 1])) {
                                 return@InputFilter ""
                             }
-                            if (Regex(REGEX_COLON).matches(prevNearest.toString()) && Regex(REGEX_COLON).matches(source)) {
-                                showSnack(dialog, R.string.error_repeated_colon_symbol)
+                            if (dest.length > dstart && triggerRepeatedCharacter(dialog, source, /* nextNearest */ dest[dstart])) {
                                 return@InputFilter ""
+                            }
+                            if (source.matches(Regex("[\\u0020\\u3000]"))) {
+                                val prevText = dest.substring(0, dstart)
+                                if (prevText.matches(Regex("(\\d+\\.){3}\\d+"))) {
+                                    return@InputFilter ":"
+                                }
                             }
                         }
                         if (!rexAcceptable.matches(fullText)) {
@@ -186,18 +201,14 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             }
     }
 
-    private fun showSnack(dialog: MaterialDialog, strRes: Int) {
-        ViewUtils.showSnack(dialog.view, dialog.context.getString(strRes))
-    }
-
     @SuppressLint("CheckResult")
     private fun connectToRemoteServer(dialog: MaterialDialog) {
         val input = dialog.inputEditText?.text?.toString() ?: ""
         if (!rexValidIp.matches(input)) {
             if (input.isEmpty()) {
-                ViewUtils.showSnack(dialog.view, dialog.context.getString(R.string.error_ip_address_should_not_be_empty))
+                showSnack(dialog, R.string.error_ip_address_should_not_be_empty)
             } else {
-                ViewUtils.showSnack(dialog.view, dialog.context.getString(R.string.error_invalid_ip_address))
+                showSnack(dialog, R.string.error_invalid_ip_address)
             }
             return
         }
@@ -207,9 +218,29 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             .subscribe({ Pref.setServerAddress(input) }, onConnectionException)
     }
 
+    private fun showSnack(dialog: MaterialDialog, strRes: Int) {
+        ViewUtils.showSnack(dialog.view, dialog.context.getString(strRes))
+    }
+
+    private fun isRepeatedCharacter(source: CharSequence, nearest: Char, regex: String): Boolean {
+        return Regex(regex).matches(nearest.toString()) && Regex(regex).matches(source)
+    }
+
+    private fun triggerRepeatedCharacter(dialog: MaterialDialog, source: CharSequence, nearest: Char): Boolean {
+        if (isRepeatedCharacter(source, nearest, REGEX_DOT)) {
+            showSnack(dialog, R.string.error_repeated_dot_symbol)
+            return true
+        }
+        if (isRepeatedCharacter(source, nearest, REGEX_COLON)) {
+            showSnack(dialog, R.string.error_repeated_colon_symbol)
+            return true
+        }
+        return false
+    }
+
     companion object {
 
-        const val REGEX_DOT = "[,.，。\\u0020]"
+        const val REGEX_DOT = "[,.，。\\u0020\\u3000]"
         const val REGEX_COLON = "[:：]"
 
         private const val REGEX_IP_DEC = "\\d{1,3}"

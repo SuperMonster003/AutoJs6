@@ -6,6 +6,7 @@ import org.autojs.autojs.engine.ScriptEngine;
 import org.autojs.autojs.engine.ScriptEngineManager;
 import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption;
 import org.autojs.autojs.script.JavaScriptSource;
+import org.autojs.autojs.script.ScriptSource;
 import org.autojs.autojs6.BuildConfig;
 
 /**
@@ -17,12 +18,12 @@ public class LoopedBasedJavaScriptExecution extends RunnableScriptExecution {
         super(manager, task);
     }
 
-    protected Object doExecution(final ScriptEngine engine) {
+    protected Object doExecution(ScriptEngine<? extends ScriptSource> engine) {
         engine.setTag(ScriptEngine.TAG_SOURCE, getSource());
         getListener().onStart(this);
         long delay = getConfig().getDelay();
         sleep(delay);
-        final long interval = getConfig().getInterval();
+        long interval = getConfig().getInterval();
 
         var javaScriptEngine = BuildConfig.isInrt
                 ? (LoopBasedJavaScriptEngineWithDecryption) engine

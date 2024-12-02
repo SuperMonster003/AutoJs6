@@ -23,7 +23,6 @@ public class AutoFileSource extends ScriptSource {
         this(new File(path));
     }
 
-
     @Override
     public String getEngineName() {
         return ENGINE;

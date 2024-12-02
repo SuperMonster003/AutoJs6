@@ -75,7 +75,6 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
         return false;
     }
 
-
     public void expand() {
         mSearchMenuItem.expandActionView();
     }

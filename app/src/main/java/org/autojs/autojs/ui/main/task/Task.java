@@ -1,12 +1,12 @@
 package org.autojs.autojs.ui.main.task;
 
 import android.content.Context;
-
 import org.autojs.autojs.engine.ScriptEngine;
 import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.script.AutoFileSource;
 import org.autojs.autojs.script.JavaScriptSource;
+import org.autojs.autojs.script.ScriptSource;
 import org.autojs.autojs.timing.IntentTask;
 import org.autojs.autojs.timing.TimedTask;
 import org.autojs.autojs.timing.TimedTaskManager;
@@ -14,6 +14,8 @@ import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
 import org.joda.time.format.DateTimeFormat;
+
+import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 
 /**
  * Created by Stardust on Nov 28, 2017.
@@ -106,7 +108,7 @@ public abstract class Task {
 
         @Override
         public String getEngineName() {
-            if (getScriptPath().endsWith(".js")) {
+            if (getScriptPath().endsWith(JAVASCRIPT.extensionWithDot)) {
                 return JavaScriptSource.ENGINE;
             } else {
                 return AutoFileSource.ENGINE;
@@ -158,7 +160,7 @@ public abstract class Task {
 
         @Override
         public void cancel() {
-            ScriptEngine engine = mScriptExecution.getEngine();
+            ScriptEngine<? extends ScriptSource> engine = mScriptExecution.getEngine();
             if (engine != null) {
                 engine.forceStop();
             }

@@ -4,12 +4,13 @@ import android.view.ViewGroup
 import android.widget.RadioGroup
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Ids
+import org.autojs.autojs.runtime.ScriptRuntime
 
 /**
  * Created by Stardust on Nov 29, 2017.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
-open class RadioGroupInflater<V : RadioGroup>(resourceParser: ResourceParser) : LinearLayoutInflater<V>(resourceParser) {
+open class RadioGroupInflater<V : RadioGroup>(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : LinearLayoutInflater<V>(scriptRuntime, resourceParser) {
 
     private var mCheckedButton: Int? = null
 

@@ -26,6 +26,5 @@ public class MD5 {
         }
         return hexString.toString();
 
-
     }
 }

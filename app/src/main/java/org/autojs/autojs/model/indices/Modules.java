@@ -20,7 +20,7 @@ import io.reactivex.schedulers.Schedulers;
 public class Modules {
 
     private static final Type MODULE_LIST_TYPE = new TypeToken<List<Module>>() {
-
+        /* Empty body. */
     }.getType();
     private static final String MODULES_JSON_PATH = "indices/all.json";
     private static final Modules sInstance = new Modules();

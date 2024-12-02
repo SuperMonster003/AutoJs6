@@ -5,6 +5,7 @@ import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs.util.UpdateUtils.isVersionIgnored
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import kotlin.math.roundToInt
 
 /**
  * Created by Stardust on Sep 20, 2017.
@@ -42,7 +43,7 @@ class VersionInfo : ExtendedVersionInfo {
                 Log.d(TAG, "versionName: $versionName")
             }
             if (versionCode <= 0 && string.contains(regexVersionCode)) {
-                versionCode = regexVersionCode.find(string)?.groupValues?.get(1)?.toInt() ?: -1
+                versionCode = regexVersionCode.find(string)?.groupValues?.get(1)?.toDouble()?.roundToInt() ?: -1
                 Log.d(TAG, "versionCode: $versionCode")
             }
             if (versionName.isNotEmpty() && versionCode > 0) {

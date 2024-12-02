@@ -10,9 +10,9 @@ import android.view.ScaleGestureDetector
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
-import org.autojs.autojs.pref.Pref.getEditorTextSize
-import org.autojs.autojs.pref.Pref.getString
-import org.autojs.autojs.pref.Pref.setEditorTextSize
+import org.autojs.autojs.core.pref.Pref.getEditorTextSize
+import org.autojs.autojs.core.pref.Pref.getString
+import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.script.JsBeautifier
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ClipboardUtils.setClip
@@ -101,6 +101,7 @@ class CodeEditor : HVScrollView {
 
             // TODO by SuperMonster003 on Oct 16, 2022.
             //  ! Show a floating text size changing bar.
+            //  ! zh-CN: 显示一个浮动的字体大小调整栏.
 
             // override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             //     return super.onScaleBegin(detector)
@@ -109,6 +110,7 @@ class CodeEditor : HVScrollView {
             override fun onScaleEnd(detector: ScaleGestureDetector) {
                 // TODO by SuperMonster003 on Oct 16, 2022.
                 //  ! Dismiss a floating text size changing bar in 2 seconds.
+                //  ! zh-CN: 字体大小调整栏于 2 秒钟后消失.
                 mLastScaleFactor = 1.0
                 setEditorTextSize(lastTextSize)
                 super.onScaleEnd(detector)
@@ -152,8 +154,7 @@ class CodeEditor : HVScrollView {
     private fun applyScaleGesture(key: String? = null) {
         var niceKey = key
         if (niceKey == null) {
-            val defKey = key(R.string.default_key_editor_pinch_to_zoom_strategy)
-            niceKey = getString(key(R.string.key_editor_pinch_to_zoom_strategy), defKey)
+            niceKey = getString(R.string.key_editor_pinch_to_zoom_strategy, R.string.default_key_editor_pinch_to_zoom_strategy)
         }
         when (niceKey) {
             key(R.string.key_editor_pinch_to_zoom_change_text_size) -> {
@@ -234,10 +235,7 @@ class CodeEditor : HVScrollView {
     }
 
     fun jumpToEnd() {
-        val text = codeEditText.text
-        if (text != null) {
-            codeEditText.setSelection(text.length)
-        }
+        codeEditText.text?.let { codeEditText.setSelection(it.length) }
     }
 
     fun jumpToLineStart() {
@@ -252,7 +250,8 @@ class CodeEditor : HVScrollView {
         val layout = codeEditText.layout
         val line = LayoutHelper.getLineOfChar(layout, minOf(codeEditText.selectionStart, codeEditText.selectionEnd))
         if (line >= 0 && line < layout.lineCount) {
-            codeEditText.setSelection(layout.getLineEnd(line) - 1)
+            codeEditText.setSelection(layout.getLineEnd(line))
+            // codeEditText.setSelection(layout.getLineEnd(line) - 1)
         }
     }
 
@@ -268,13 +267,9 @@ class CodeEditor : HVScrollView {
         invalidate()
     }
 
-    fun canUndo(): Boolean {
-        return mTextViewRedoUndo.canUndo()
-    }
+    fun canUndo() = mTextViewRedoUndo.canUndo()
 
-    fun canRedo(): Boolean {
-        return mTextViewRedoUndo.canRedo()
-    }
+    fun canRedo() = mTextViewRedoUndo.canRedo()
 
     fun setInitialText(text: String?) {
         codeEditText.setText(text)
@@ -297,14 +292,15 @@ class CodeEditor : HVScrollView {
     }
 
     fun setProgress(progress: Boolean) {
-        if (mProcessDialog != null) {
-            mProcessDialog!!.dismiss()
+        mProcessDialog?.dismiss()
+        mProcessDialog = when {
+            !progress -> null
+            else -> MaterialDialog.Builder(context)
+                .content(R.string.text_processing)
+                .progress(true, 0)
+                .cancelable(false)
+                .show()
         }
-        mProcessDialog = if (!progress) null else MaterialDialog.Builder(context)
-            .content(R.string.text_processing)
-            .progress(true, 0)
-            .cancelable(false)
-            .show()
     }
 
     fun addCursorChangeCallback(callback: CursorChangeCallback?) {
@@ -315,13 +311,9 @@ class CodeEditor : HVScrollView {
         codeEditText.removeCursorChangeCallback(callback!!)
     }
 
-    fun undo() {
-        mTextViewRedoUndo.undo()
-    }
+    fun undo() = mTextViewRedoUndo.undo()
 
-    fun redo() {
-        mTextViewRedoUndo.redo()
-    }
+    fun redo() = mTextViewRedoUndo.redo()
 
     @Throws(CheckedPatternSyntaxException::class)
     fun find(keywords: String, usingRegex: Boolean) {
@@ -433,8 +425,10 @@ class CodeEditor : HVScrollView {
         mJsBeautifier.beautify(codeEditText.text.toString(), object : JsBeautifier.Callback {
             override fun onSuccess(beautifiedCode: String) {
                 codeEditText.setText(beautifiedCode)
-                // @Hint by 抠脚本人 on Jul 11, 2023.
-                //  ! 格式化后恢复光标位置
+                // @Hint by 抠脚本人 (https://github.com/little-alei) on Jul 11, 2023.
+                //  ! 格式化后恢复光标位置.
+                //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+                //  ! Return the cursor back to where it was before formatting.
                 codeEditText.setSelection(pos)
                 setProgress(false)
                 showToast(context, R.string.text_formatting_completed)
@@ -553,11 +547,13 @@ class CodeEditor : HVScrollView {
             if (!hasEverMatched) {
                 // FIXME by SuperMonster003 on Jul 20, 2023.
                 //  ! Behaves abnormally for empty line(s).
-                // replaceSelectedLines(Regex(".*")) { matchResult ->
-                //     prefix
-                //         .also { selectionEnd += it.length }
-                //         .let { "$it${matchResult.value}" }
-                // }
+                //  ! zh-CN: 对于空白行表现异常.
+                //  !
+                //  # replaceSelectedLines(Regex(".*")) { matchResult ->
+                //  #     prefix
+                //  #         .also { selectionEnd += it.length }
+                //  #         .let { "$it${matchResult.value}" }
+                //  # }
             }
 
             codeEditText.setSelection(selectionEnd)
@@ -602,46 +598,48 @@ class CodeEditor : HVScrollView {
 
     // @Archived by SuperMonster003 on Jul 12, 2023.
     //  ! Author: 抠脚本人
-    //  ! Reason: Replaced with CommentHelper class.
-    // fun commentLine() {
-    //     // 如果没有选中，则添加文本/，否则选中的行前加//
-    //     val selectionText: String = getSelectionRaw()
-    //     if (selectionText == "") {
-    //         insert("/")
-    //     } else {
-    //         val lines = selectionText.split("\\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-    //         val commentedText = StringBuilder()
-    //         // 处理取消注释
-    //         if (lines[0].startsWith("//")) {
-    //             for (line in lines) {
-    //                 commentedText.append(line.substring(2)).append("\n")
-    //             }
-    //         } else {
-    //             for (line in lines) {
-    //                 commentedText.append("//").append(line).append("\n")
-    //             }
-    //         }
-    //         mReplacement = commentedText.toString().replace("\\n$".toRegex(), "")
-    //         replaceSelection()
-    //     }
-    // }
+    //  ! Reason: Replaced with CommentHelper class [zh-CN: 已由 CommentHelper 类替代].
+    //  !
+    //  # fun commentLine() {
+    //  #     // 如果没有选中, 则添加文本 "/", 否则选中的行前加 "//".
+    //  #     val selectionText: String = getSelectionRaw()
+    //  #     if (selectionText == "") {
+    //  #         insert("/")
+    //  #     } else {
+    //  #         val lines = selectionText.split("\\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+    //  #         val commentedText = StringBuilder()
+    //  #         // 处理取消注释
+    //  #         if (lines[0].startsWith("//")) {
+    //  #             for (line in lines) {
+    //  #                 commentedText.append(line.substring(2)).append("\n")
+    //  #             }
+    //  #         } else {
+    //  #             for (line in lines) {
+    //  #                 commentedText.append("//").append(line).append("\n")
+    //  #             }
+    //  #         }
+    //  #         mReplacement = commentedText.toString().replace("\\n$".toRegex(), "")
+    //  #         replaceSelection()
+    //  #     }
+    //  # }
 
     // @Archived by SuperMonster003 on Jul 12, 2023.
     //  ! Author: 抠脚本人
-    //  ! Reason: Replaced with CommentHelper class.
-    // fun commentBlock() {
-    //     val selectionText: String = getSelectionRaw()
-    //     if (!selectionText.isEmpty()) {
-    //         val regex = "/\\*([^*]|\\*+[^*/])*\\*/"
-    //         mReplacement = if (selectionText.matches(regex)) {
-    //             // 取消块注释
-    //             selectionText.substring(2, selectionText.length - 2)
-    //         } else {
-    //             // 增加块注释
-    //             "/*$selectionText*/"
-    //         }
-    //         replaceSelection()
-    //     }
-    // }
+    //  ! Reason: Replaced with CommentHelper class [zh-CN: 已由 CommentHelper 类替代].
+    //  !
+    //  # fun commentBlock() {
+    //  #     val selectionText: String = getSelectionRaw()
+    //  #     if (!selectionText.isEmpty()) {
+    //  #         val regex = "/\\*([^*]|\\*+[^*/])*\\*/"
+    //  #         mReplacement = if (selectionText.matches(regex)) {
+    //  #             // 取消块注释
+    //  #             selectionText.substring(2, selectionText.length - 2)
+    //  #         } else {
+    //  #             // 增加块注释
+    //  #             "/*$selectionText*/"
+    //  #         }
+    //  #         replaceSelection()
+    //  #     }
+    //  # }
 
 }

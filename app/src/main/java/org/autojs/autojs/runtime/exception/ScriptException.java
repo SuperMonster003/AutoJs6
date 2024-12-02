@@ -5,15 +5,16 @@ package org.autojs.autojs.runtime.exception;
  */
 public class ScriptException extends RuntimeException {
 
+    public ScriptException() {
+        /* Empty body. */
+    }
+
     public ScriptException(String message, Throwable cause) {
         super(message, cause);
     }
 
     public ScriptException(String message) {
         super(message);
-    }
-
-    public ScriptException() {
     }
 
     public ScriptException(Throwable cause) {

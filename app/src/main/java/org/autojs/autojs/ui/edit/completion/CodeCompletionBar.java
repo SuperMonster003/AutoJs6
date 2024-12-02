@@ -93,7 +93,6 @@ public class CodeCompletionBar extends RecyclerView {
         getAdapter().notifyDataSetChanged();
     }
 
-
     private void init() {
         setAdapter(new CodeCompletionAdapter());
         setLayoutManager(new WrapContentLinearLayoutManager(getContext(), HORIZONTAL, false));
@@ -130,6 +129,5 @@ public class CodeCompletionBar extends RecyclerView {
             itemView.setOnLongClickListener(mOnCodeCompletionItemLongClickListener);
         }
     }
-
 
 }

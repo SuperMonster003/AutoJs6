@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Shizuku | AutoJs6 文档 - 6.5.0</title>
+    <title>Shizuku | AutoJs6 文档 - 6.6.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -162,7 +162,7 @@
 
     <div id="column1" data-id="shizuku" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <h1>AutoJs6 文档 - 6.6.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -191,8 +191,24 @@
             <h1>Shizuku<span><a class="mark" href="#shizuku_shizuku" id="shizuku_shizuku">#</a></span></h1>
 <hr>
 <p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
-<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 30, 2023.</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Nov 14, 2024.</p>
 
+<hr>
+<p style="font: italic 1em sans-serif; color: #78909C">TypeScript Declarations (v6.6.0+)</p>
+
+<pre><code class="lang-typescript">interface Shizuku extends org.autojs.autojs.runtime.api.WrappedShizuku {
+
+    (command: string | string[]): AbstractShell.Result;
+    (command: string | string[], commandArgument: object | string): AbstractShell.Result;
+
+    execCommand(command: string | string[]): AbstractShell.Result;
+    execCommand(command: string | string[], commandArgument: object | string): AbstractShell.Result;
+
+    getCommand(command: string | string[]): string;
+    getCommand(command: string | string[], commandArgument: object | string): string;
+
+}
+</code></pre>
 <hr>
 <p>通过 <a href="https://shizuku.rikka.app/introduction/">Shizuku</a> 可以获得 ADB 特权并使用系统 API.</p>
 <p>使用 Shizuku 需满足以下全部条件</p>
@@ -226,7 +242,7 @@ shizuku(&#39;input keyevent 26&#39;);
 shizuku(`input keyevent ${KeyEvent.KEYCODE_POWER}`); /* 同上. */
 
 /* 点击屏幕坐标 (100, 120). */
-shizuku(&quot;input tap 100 120&quot;);
+shizuku(&#39;input tap 100 120&#39;);
 
 /* 授予 AutoJs6 &quot;修改安全设置&quot; 权限. */
 shizuku(&#39;pm grant org.autojs.autojs6 android.permission.WRITE_SECURE_SETTINGS&#39;);
@@ -234,11 +250,33 @@ shizuku(&#39;pm grant org.autojs.autojs6 android.permission.WRITE_SECURE_SETTING
 /* 授予 AutoJs6 &quot;投影媒体&quot; 权限. */
 shizuku(&#39;appops set org.autojs.autojs6 PROJECT_MEDIA allow&#39;);
 
-/* 启用 AutoJs6 &quot;无障碍服务&quot;. */
-shizuku(&#39;settings put secure enabled_accessibility_services org.autojs.autojs6/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher&#39;);
-
 /* 获取当前时间. */
 console.log(shizuku(&#39;date&#39;).result.trim());
+</code></pre>
+<p>使用 shizuku 启用 AutoJs6 无障碍服务 (共计 4 步):</p>
+<pre><code class="lang-js">
+/* [ 1. 获取无障碍服务列表, 列表是一个字符串, 不同无障碍服务之间以 &quot;:&quot; 分隔. ] */
+let services = shizuku(&#39;settings get secure enabled_accessibility_services&#39;).result.trim(); /* 结尾 &quot;\n&quot; 可通过 trim() 方法去除. */
+
+/* [ 2. 确保无障碍服务列表中不存在 AutoJs6. ] */
+let servicesWithoutAutoJs6 = services
+    .split(&#39;:&#39;) /* 通过 &quot;:&quot; 分割, 获取无障碍服务数组. */
+    .filter(it =&gt; !it.startsWith(`${autojs.packageName}/`)) /* 过滤可能的 AutoJs6 无障碍服务, 避免重复. */
+    .join(&#39;:&#39;); /* 重新组合过滤后的无障碍服务, 生成列表. */
+
+/* [ 3. 无障碍服务列表中加入 AutoJs6. ] */
+let servicesWithAutoJs6 = (() =&gt; {
+    /* 无障碍服务格式: &quot;包名/服务类名&quot; */
+    let serviceAutoJs6 = `${autojs.packageName}/${org.autojs.autojs.core.accessibility.AccessibilityServiceUsher.class.getName()}`;
+    return servicesWithoutAutoJs6.length &gt; 0 ? `${servicesWithoutAutoJs6}:${serviceAutoJs6}` : serviceAutoJs6;
+})();
+
+/* [ 4. 通过覆盖系统的无障碍物服列表, 使 AutoJs6 无障碍服务生效. ] */
+shizuku(`settings put secure enabled_accessibility_services ${servicesWithAutoJs6}`);
+
+/* 需特别留意, 如果只执行 shizuku(`settings put secure enabled_accessibility_services ${AutoJs6 包名}/${AutoJs6 服务类名}`), 系统将只启用 AutoJs6 无障碍服务, 其他应用的无障碍服务将全部关闭. */
+
+/* 另, 禁用 AutoJs6 无障碍服务, 只需执行上述示例的 [ 1, 2, 4 ] 步骤即可. */
 </code></pre>
 <h3>shizuku(cmdList)<span><a class="mark" href="#shizuku_shizuku_cmdlist" id="shizuku_shizuku_cmdlist">#</a></span></h3>
 <p><strong><code>6.4.0</code></strong> <strong><code>Overload 2/2</code></strong></p>

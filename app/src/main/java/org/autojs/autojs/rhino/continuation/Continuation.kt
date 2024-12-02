@@ -26,6 +26,25 @@ class Continuation(val context: AutoJsContext, val scope: Scriptable, private va
             @JvmStatic
             fun failure(error: Any?) = Result(null, error)
 
+            @JvmStatic
+            fun handle(o: Any?) = when (o) {
+                is Result -> o.error?.also {
+                    ScriptRuntime.popException(Context.toString(it))
+                } ?: o.result
+                else -> o
+            }
+
+            @JvmStatic
+            fun getOrThrow(o: Any?) = when (o) {
+                is Result -> o.error?.also {
+                    when (it) {
+                        is Throwable -> throw it
+                        else -> throw RuntimeException(Context.toString(it))
+                    }
+                } ?: o.result
+                else -> o
+            }
+
         }
 
     }
@@ -47,10 +66,10 @@ class Continuation(val context: AutoJsContext, val scope: Scriptable, private va
             str(R.string.error_continuation_resume_called_without_suspend)
         )
         if (mThread == Thread.currentThread()) {
-            context.resumeContinuation(continuation, scope, result)
+            context.resumeContinuation(continuation, scope, Result.handle(result))
         } else {
             mTimer.postDelayed({
-                context.resumeContinuation(continuation, scope, result)
+                context.resumeContinuation(continuation, scope, Result.handle(result))
             }, 0)
         }
     }
@@ -59,7 +78,8 @@ class Continuation(val context: AutoJsContext, val scope: Scriptable, private va
 
         fun create(runtime: ScriptRuntime, scope: Scriptable): Continuation {
             val context = Context.getCurrentContext() as AutoJsContext
-            return Continuation(context, scope, runtime.timers.timerForCurrentThread)
+            val timers = runtime.timers
+            return Continuation(context, scope, timers.timerForCurrentThread ?: timers.mainTimer)
         }
 
     }

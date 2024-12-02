@@ -9,11 +9,15 @@ import org.autojs.autojs.core.automator.UiObject
 class StringMatchFilter internal constructor(private val mRegex: String, private val mKeyGetter: KeyGetter) : Filter {
 
     // @Hint by SuperMonster003 on Oct 17, 2022.
-    //  ! Similar to JavaScript String.prototype.match
-    //  ! Returns the result of matching a string against a regular expression.
+    //  ! Similar to JavaScript "String.prototype.match"
+    //  ! which returns the result of matching a string against a regular expression.
     //  ! https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match
     //  ! https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.text/-regex/contains-match-in.html
     //  ! https://stackoverflow.com/questions/21883629/difference-in-results-between-java-matches-vs-javascript-match
+    //  ! zh-CN:
+    //  ! 与 JavaScript 的方法 "String.prototype.match" 类似,
+    //  ! 它返回字符串与正则表达式匹配的结果.
+    //  ! 参考链接见上.
     override fun filter(node: UiObject) = mKeyGetter.getKey(node)?.contains(mRegex.toRegex()) ?: false
 
     override fun toString(): String {

@@ -20,9 +20,7 @@ events.on("key", function(code, event){
     }
 });
 
-loop();
-
-
+// loop();
 
 function getKeyName(code, event){
     var keyCodeStr = event.keyCodeToString(code);

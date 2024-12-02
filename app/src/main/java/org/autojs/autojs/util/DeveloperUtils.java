@@ -69,10 +69,12 @@ public class DeveloperUtils {
         }
     }
 
-    /**
-     * 此方法仅防止那些不会改源码直接用apk编辑器修改应用内字符串(QQ群号)等的恶意用户行为。
-     * 为了开源社区的发展，请善用源码:-)
-     */
+    // @Hint by Stardust (https://github.com/hyb1996) on Aug 15, 2017.
+    //  ! 此方法仅防止那些不会改源码直接用 APK 编辑器修改应用内字符串 (QQ群号) 等的恶意用户行为.
+    //  ! 为了开源社区的发展, 请善用源码 :-)
+    //  !
+    // @Hint by SuperMonster003 on Nov 28, 2024.
+    //  ! Peace.
     public static boolean checkSignature(Context context) {
         return checkSignature(context, context.getPackageName());
     }
@@ -153,9 +155,9 @@ public class DeveloperUtils {
     }
 
     public static void verifyApk(Activity activity) {
-        final WeakReference<Activity> activityWeakReference = new WeakReference<>(activity);
+        final WeakReference<Activity> activityRef = new WeakReference<>(activity);
         sExecutor.execute(() -> {
-            Activity a = activityWeakReference.get();
+            Activity a = activityRef.get();
             if (a != null && !checkSignature(a)) {
                 a.finish();
             }

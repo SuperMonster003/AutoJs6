@@ -7,11 +7,12 @@ public class Value<T> {
 
     private T mValue;
 
-    public Value(T value) {
-        mValue = value;
+    public Value() {
+        /* Empty body. */
     }
 
-    public Value() {
+    public Value(T value) {
+        mValue = value;
     }
 
     public T get() {
@@ -21,6 +22,5 @@ public class Value<T> {
     public void set(T value) {
         mValue = value;
     }
-
 
 }

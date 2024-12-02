@@ -30,7 +30,7 @@ public class ResFileValue extends ResIntBasedValue implements GetResValues {
 
 	public ResFileValue(String path, int rawIntValue) {
 		super(rawIntValue);
-		this.mPath = path;
+		mPath = path;
 	}
 
 	public String getPath() {

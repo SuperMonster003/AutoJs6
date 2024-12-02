@@ -4,14 +4,15 @@ import android.os.Build
 import android.view.View
 import android.widget.HorizontalScrollView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
-open class HorizontalScrollViewAttributes(resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(resourceParser, view) {
+open class HorizontalScrollViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as HorizontalScrollView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttrs(arrayOf("isFillViewport", "fillViewport")) { view.isFillViewport = it.toBoolean() }
         registerAttrs(arrayOf("smoothScrollingEnabled", "enableSmoothScrolling", "isSmoothScrollingEnabled", "isSmoothScrolling")) { view.isSmoothScrollingEnabled = it.toBoolean() }

@@ -2,16 +2,14 @@ package org.autojs.autojs.inrt
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-
-import org.autojs.autojs.inrt.autojs.AutoJs
-import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
+import androidx.appcompat.widget.Toolbar
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.console.ConsoleView
+import org.autojs.autojs.inrt.autojs.AutoJs
+import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs6.R
 
@@ -46,7 +44,7 @@ class LogActivity : BaseActivity() {
 
     companion object {
 
-
         const val EXTRA_LAUNCH_SCRIPT = "launch_script"
+
     }
 }

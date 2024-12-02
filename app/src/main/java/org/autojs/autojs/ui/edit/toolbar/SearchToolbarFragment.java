@@ -18,10 +18,13 @@ public class SearchToolbarFragment extends ToolbarFragment {
 
     public static final String ARGUMENT_SHOW_REPLACE_ITEM = "show_replace_item";
 
+    private FragmentSearchToolbarBinding binding;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return FragmentSearchToolbarBinding.inflate(inflater, container, false).getRoot();
+        binding = FragmentSearchToolbarBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -39,4 +42,9 @@ public class SearchToolbarFragment extends ToolbarFragment {
         return Arrays.asList(R.id.replace, R.id.find_next, R.id.find_prev, R.id.cancel_search);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
 }

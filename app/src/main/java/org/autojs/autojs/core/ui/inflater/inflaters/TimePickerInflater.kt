@@ -6,13 +6,14 @@ import android.view.ViewGroup
 import android.widget.TimePicker
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on Nov 29, 2017.
  * Transformed by SuperMonster003 on May 23, 2023.
  */
-open class TimePickerInflater<V : TimePicker>(resourceParser: ResourceParser) : FrameLayoutInflater<V>(resourceParser) {
+open class TimePickerInflater<V : TimePicker>(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : FrameLayoutInflater<V>(scriptRuntime, resourceParser) {
 
     override fun getCreator(): ViewCreator<in V> {
         return object : ViewCreator<TimePicker> {

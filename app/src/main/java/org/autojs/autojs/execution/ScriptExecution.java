@@ -12,7 +12,7 @@ public interface ScriptExecution {
 
     int NO_ID = -1;
 
-    ScriptEngine getEngine();
+    ScriptEngine<? extends ScriptSource> getEngine();
 
     ScriptSource getSource();
 
@@ -35,7 +35,7 @@ public interface ScriptExecution {
         }
 
         @Override
-        public abstract ScriptEngine getEngine();
+        public abstract ScriptEngine<? extends ScriptSource> getEngine();
 
         @Override
         public ScriptSource getSource() {

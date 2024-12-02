@@ -49,5 +49,4 @@ public class ViewStack {
         mStack.push(view);
     }
 
-
 }

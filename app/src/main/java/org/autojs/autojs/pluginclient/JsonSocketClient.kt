@@ -12,9 +12,9 @@ import com.google.gson.JsonObject
 import io.github.g00fy2.versioncompare.Version
 import io.reactivex.subjects.PublishSubject
 import org.autojs.autojs.AutoJs
-import org.autojs.autojs.pref.Pref
-import org.autojs.autojs.pref.Pref.getBoolean
-import org.autojs.autojs.pref.Pref.putBoolean
+import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.Pref.getBoolean
+import org.autojs.autojs.core.pref.Pref.putBoolean
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
@@ -23,7 +23,6 @@ import java.io.IOException
 import java.net.Socket
 import java.net.SocketTimeoutException
 import java.util.concurrent.Executors
-
 
 class JsonSocketClient(service: DevPluginService?, private val ctx: Context, host: String?, port: Int) : JsonSocket(service) {
 

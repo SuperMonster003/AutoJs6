@@ -38,14 +38,10 @@ open class PreferencesActivity : BaseActivity() {
 
         @JvmStatic
         @JvmOverloads
-        fun launch(context: Context = GlobalAppContext.get()) = try {
-            true.also {
-                Intent(context, PreferencesActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .let { context.startActivity(it) }
-            }
-        } catch (e: Exception) {
-            false.also { e.printStackTrace() }
+        fun launch(context: Context = GlobalAppContext.get()) {
+            Intent(context, PreferencesActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .let { context.startActivity(it) }
         }
 
     }

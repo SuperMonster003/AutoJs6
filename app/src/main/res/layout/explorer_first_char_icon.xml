@@ -1,19 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
     <org.autojs.autojs.ui.widget.FirstCharView
-            android:id="@+id/first_char"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/ring"
-            android:gravity="center"
-            android:textSize="23sp"
-            tools:textColor="@color/day_night"
-            tools:text="J" />
+        android:id="@+id/first_char"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/ring"
+        android:gravity="center"
+        tools:includeFontPadding="false"
+        tools:textSize="23sp"
+        tools:paddingStart="0sp"
+        tools:paddingEnd="0sp"
+        tools:paddingTop="0sp"
+        tools:paddingBottom="0sp"
+        tools:rotation="0"
+        tools:textColor="@color/day_night"
+        tools:text="ꘈ" />
+
+    <!-- <FrameLayout -->
+    <!--     android:layout_marginStart="8dp" -->
+    <!--     android:layout_width="match_parent" -->
+    <!--     android:layout_height="match_parent"> -->
+
+    <!--     <org.autojs.autojs.ui.widget.FirstCharView -->
+    <!--         android:id="@+id/first_char" -->
+    <!--         android:layout_width="36dp" -->
+    <!--         android:layout_height="36dp" -->
+    <!--         android:layout_gravity="center_vertical" -->
+    <!--         android:background="@drawable/ring" -->
+    <!--         android:gravity="center" -->
+    <!--         tools:includeFontPadding="false" -->
+    <!--         tools:textSize="22sp" -->
+    <!--         tools:paddingStart="0sp" -->
+    <!--         tools:paddingEnd="0sp" -->
+    <!--         tools:paddingTop="0sp" -->
+    <!--         tools:paddingBottom="1sp" -->
+    <!--         tools:rotation="180" -->
+    <!--         tools:textColor="@color/day_night" -->
+    <!--         tools:text="❖" /> -->
+
+    <!--     <ImageView -->
+    <!--         android:layout_width="1dp" -->
+    <!--         android:layout_height="36dp" -->
+    <!--         android:layout_gravity="center" -->
+    <!--         android:background="@drawable/cross_line" -->
+    <!--         android:gravity="center" /> -->
+
+    <!--     <ImageView -->
+    <!--         android:layout_width="36dp" -->
+    <!--         android:layout_height="1dp" -->
+    <!--         android:layout_gravity="center" -->
+    <!--         android:background="@drawable/cross_line" -->
+    <!--         android:gravity="center" /> -->
+
+    <!-- </FrameLayout> -->
+
 
 </androidx.appcompat.widget.LinearLayoutCompat>

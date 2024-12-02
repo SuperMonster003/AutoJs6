@@ -43,7 +43,7 @@ public class ArscWriter implements ResConst {
     }
 
     private static void D(String fmt, Object... args) {
-
+        /* Empty body. */
     }
 
     public static void main(String... args) throws IOException {

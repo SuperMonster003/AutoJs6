@@ -6,11 +6,11 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
 import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 import android.view.accessibility.AccessibilityNodeInfo
-import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_START_TIMEOUT
+import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_SERVICE_START_TIMEOUT
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
 import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.event.EventDispatcher
-import org.autojs.autojs.pref.Language
+import org.autojs.autojs.core.pref.Language
 import java.util.TreeMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -28,7 +28,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
     var fastRootInActiveWindow: AccessibilityNodeInfo? = null
     var bridge: AccessibilityBridge? = null
 
-    private val eventBox = TreeMap<Int, AccessibilityEventCallback>()
+    private val eventBox = TreeMap<Int, AccessibilityEventCallback?>()
 
     private val gestureEventDispatcher = EventDispatcher<GestureListener>()
 
@@ -46,7 +46,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         }
     }
 
-    fun addAccessibilityEventCallback(name: String, callback: AccessibilityEventCallback) {
+    fun addAccessibilityEventCallback(name: String, callback: AccessibilityEventCallback?) {
         eventBox[eventNameToType(name)] = callback
     }
 
@@ -128,6 +128,10 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         LOCK.unlock()
         // FIXME by Stardust on Feb 12, 2017.
         //  ! 有时在无障碍中开启服务后这里不会调用服务也不会运行, 安卓的 BUG ???
+        //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+        //  ! Sometimes, when accessibility service of AutoJs6 started,
+        //  ! `onServiceConnected` won't be triggered here.
+        //  ! Is this an Android bug?
     }
 
     companion object {
@@ -153,11 +157,13 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
         val stickOnKeyObserver = OnKeyListener.Observer()
 
-        fun isRunning() = instance != null
+        fun hasInstance() = instance != null
 
         fun addDelegate(uniquePriority: Int, delegate: AccessibilityDelegate) {
-            // @Hint by 抠脚本人 on Jul 10, 2023.
+            // @Hint by 抠脚本人 (https://github.com/little-alei) on Jul 10, 2023.
             //  ! 用于记录 eventTypes 中的事件 id.
+            //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+            //  ! To record the event id in eventTypes.
             delegates[uniquePriority] = delegate
             val set = delegate.eventTypes
             if (set == null) {
@@ -175,13 +181,13 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             false
         }
 
-        fun waitForStarted(timeout: Long = DEFAULT_A11Y_START_TIMEOUT): Boolean {
-            if (isRunning()) {
+        fun waitForStarted(timeout: Long = DEFAULT_A11Y_SERVICE_START_TIMEOUT): Boolean {
+            if (hasInstance()) {
                 return true
             }
             LOCK.lock()
             try {
-                if (isRunning()) {
+                if (hasInstance()) {
                     return true
                 }
                 if (timeout == -1L) {
@@ -202,7 +208,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             instance?.eventBox?.clear()
         }
 
-        fun setCallback(listener: AccessibilityServiceCallback) {
+        fun setCallback(listener: AccessibilityServiceCallback?) {
             callback = listener
         }
 

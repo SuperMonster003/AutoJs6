@@ -38,7 +38,7 @@ open class LayoutBoundsView : View {
         color = context.getColor(R.color.layout_bounds_view_shadow)
     }
 
-    var mStatusBarHeight = 0
+    var statusBarHeight = 0
         protected set
 
     constructor(context: Context) : super(context)
@@ -51,7 +51,7 @@ open class LayoutBoundsView : View {
 
     init {
         this.setWillNotDraw(false)
-        mStatusBarHeight = ViewUtils.getStatusBarHeight(context)
+        statusBarHeight = ViewUtils.getStatusBarHeight(context)
     }
 
     fun setOnNodeInfoSelectListener(onNodeInfoSelectListener: OnNodeInfoSelectListener?) {
@@ -68,13 +68,13 @@ open class LayoutBoundsView : View {
         if (mBoundsInScreen == null) {
             mBoundsInScreen = IntArray(4)
             getLocationOnScreen(mBoundsInScreen)
-            mStatusBarHeight = mBoundsInScreen!![1]
+            statusBarHeight = mBoundsInScreen!![1]
         }
         if (mTouchedNode != null) {
             canvas.save()
             if (mTouchedNodeBounds == null) {
                 mTouchedNodeBounds = Rect(mTouchedNode!!.boundsInScreen)
-                mTouchedNodeBounds!!.offset(0, -mStatusBarHeight)
+                mTouchedNodeBounds!!.offset(0, -statusBarHeight)
             }
             @Suppress("DEPRECATION")
             canvas.clipRect(mTouchedNodeBounds!!, Region.Op.DIFFERENCE)
@@ -87,13 +87,13 @@ open class LayoutBoundsView : View {
         draw(canvas, mRootNode)
         if (mTouchedNode != null) {
             boundsPaint.color = touchedNodeBoundsColor
-            drawRect(canvas, mTouchedNode!!.boundsInScreen, mStatusBarHeight, boundsPaint)
+            drawRect(canvas, mTouchedNode!!.boundsInScreen, statusBarHeight, boundsPaint)
         }
     }
 
     private fun draw(canvas: Canvas, node: NodeInfo?) {
         if (node == null) return
-        drawRect(canvas, node.boundsInScreen, mStatusBarHeight, boundsPaint)
+        drawRect(canvas, node.boundsInScreen, statusBarHeight, boundsPaint)
         for (child in node.children) {
             draw(canvas, child)
         }

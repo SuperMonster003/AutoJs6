@@ -83,7 +83,7 @@ object XmlConverter {
                 .map(arrayOf("webview", "web"), JsWebView::class.java.name)
                 .map(
                     "text",
-                    // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on Mar 20, 2022.
+                    // @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) by SuperMonster003 on Mar 20, 2022.
                     when (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                         true -> JsTextViewLegacy::class.java.name
                         else -> JsTextView::class.java.name
@@ -157,10 +157,12 @@ object XmlConverter {
     private fun handleText(nodeName: String, textContent: String?, layoutXml: StringBuilder) {
         if (!textContent.isNullOrEmpty()) {
             if (nodeName == "text" || nodeName == "button" || nodeName == "input") {
-                layoutXml.append("android:text=\"").append(textContent).append("\"\n")
+                layoutXml.append("android:text=\"").append(escapeXml(textContent)).append("\"\n")
             }
         }
     }
+
+    private fun escapeXml(text: String) = text.replace("\"", "&quot;")
 
     private fun handleChildren(nodes: NodeList?, layoutXml: StringBuilder) {
         nodes ?: return

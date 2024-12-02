@@ -5,8 +5,9 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatTextView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class AppCompatTextViewInflater<V : AppCompatTextView>(resourceParser: ResourceParser) : TextViewInflater<V>(resourceParser) {
+open class AppCompatTextViewInflater<V : AppCompatTextView>(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : TextViewInflater<V>(scriptRuntime, resourceParser) {
 
     override fun getCreator(): ViewCreator<in AppCompatTextView> = object : ViewCreator<AppCompatTextView> {
         override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): AppCompatTextView {

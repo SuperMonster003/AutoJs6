@@ -1,16 +1,15 @@
 package org.autojs.autojs.rhino
 
-import android.os.Looper
 import android.util.Log
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.runtime.ScriptBridges
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
-import org.autojs.autojs.util.KotlinUtils
+import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.Scriptable
 import java.io.File
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -32,7 +31,7 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
     /**
      * Create a ClassLoader which is able to deal with bytecode
      *
-     * @param parent the parent of the create classloader
+     * @param parent the parent of the creation classloader
      * @return a new ClassLoader
      */
     final override fun createClassLoader(parent: ClassLoader): AndroidClassLoader {
@@ -40,7 +39,7 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
     }
 
     override fun observeInstructionCount(cx: Context, instructionCount: Int) {
-        if (Thread.currentThread().isInterrupted && Looper.myLooper() != Looper.getMainLooper()) {
+        if (Thread.currentThread().isInterrupted && isBackgroundThread()) {
             throw ScriptInterruptedException()
         }
     }
@@ -52,11 +51,13 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
     }
 
     private fun setupContext(context: Context) {
-        context.instructionObserverThreshold = 10000
-        context.optimizationLevel = -1
-        context.languageVersion = Context.VERSION_ES6
-        context.locale = Locale.getDefault()
-        context.wrapFactory = wrapFactory
+        context.apply {
+            instructionObserverThreshold = 10000
+            optimizationLevel = -1
+            languageVersion = Context.VERSION_ES6
+            locale = Locale.getDefault()
+            wrapFactory = this@AndroidContextFactory.wrapFactory
+        }
     }
 
     override fun onContextCreated(cx: Context) {
@@ -73,9 +74,8 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
 
     open class WrapFactory : org.mozilla.javascript.WrapFactory() {
         override fun wrap(cx: Context, scope: Scriptable, obj: Any?, staticType: Class<*>?): Any? = when {
-            obj is KotlinUtils.KotlinBoxed -> bridges.toPrimitive(obj.get())
             obj is String -> bridges.toString(obj.toString())
-            staticType == UiObjectCollection::class.java -> (obj as? UiObjectCollection)?.let { bridges.asArray(it) } ?: UiObjectCollection.EMPTY
+            staticType == UiObjectCollection::class.java -> (obj as? UiObjectCollection)?.let { bridges.asArray(it.nodes) } ?: UiObjectCollection.EMPTY
             else -> super.wrap(cx, scope, obj, staticType)
         }
     }

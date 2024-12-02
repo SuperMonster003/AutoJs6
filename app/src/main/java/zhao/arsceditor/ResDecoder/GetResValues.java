@@ -21,7 +21,6 @@ import java.io.IOException;
 
 import zhao.arsceditor.ResDecoder.data.ResResource;
 
-
 /**
  * @author Ryszard Wiśniewski <brut.alll@gmail.com>
  * @author ZhaoHai

@@ -2,6 +2,7 @@ package org.autojs.autojs.execution
 
 import android.os.Parcel
 import android.os.Parcelable
+import org.autojs.autojs.extension.ArrayExtensions.toHashCode
 import org.autojs.autojs.project.ScriptConfig
 
 /**
@@ -9,17 +10,17 @@ import org.autojs.autojs.project.ScriptConfig
  */
 data class ExecutionConfig(
     var workingDirectory: String = "",
-    var path: Array<out String> = emptyArray(),
+    var envPath: Array<out String> = emptyArray(),
     var intentFlags: Int = 0,
     var delay: Long = 0,
     var interval: Long = 0,
     var loopTimes: Int = 1,
-    var scriptConfig: ScriptConfig = ScriptConfig()
+    var scriptConfig: ScriptConfig = ScriptConfig(),
 ) : Parcelable {
 
     private val mArguments = HashMap<String, Any>()
 
-    val arguments: Map<String, Any>
+    val arguments: HashMap<String, Any>
         get() = mArguments
 
     constructor(parcel: Parcel) : this(
@@ -50,7 +51,7 @@ data class ExecutionConfig(
         other as ExecutionConfig
 
         if (workingDirectory != other.workingDirectory) return false
-        if (!path.contentEquals(other.path)) return false
+        if (!envPath.contentEquals(other.envPath)) return false
         if (intentFlags != other.intentFlags) return false
         if (delay != other.delay) return false
         if (interval != other.interval) return false
@@ -60,32 +61,46 @@ data class ExecutionConfig(
         return true
     }
 
-    override fun hashCode(): Int {
-        var result = workingDirectory.hashCode()
-        result = 31 * result + path.contentHashCode()
-        result = 31 * result + intentFlags
-        result = 31 * result + delay.hashCode()
-        result = 31 * result + interval.hashCode()
-        result = 31 * result + loopTimes
-        result = 31 * result + mArguments.hashCode()
-        return result
-    }
+    override fun hashCode(): Int = listOf(
+        workingDirectory,
+        envPath,
+        intentFlags,
+        delay,
+        interval,
+        loopTimes,
+        mArguments,
+    ).toHashCode()
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(workingDirectory)
-        parcel.writeStringArray(path)
-        parcel.writeInt(intentFlags)
-        parcel.writeLong(delay)
-        parcel.writeLong(interval)
-        parcel.writeInt(loopTimes)
+        parcel.apply {
+            writeString(workingDirectory)
+            writeStringArray(envPath)
+            writeInt(intentFlags)
+            writeLong(delay)
+            writeLong(interval)
+            writeInt(loopTimes)
+        }
     }
 
     override fun describeContents(): Int {
         return 0
     }
 
+    // @Hint by SuperMonster003 on Jun 26, 2024.
+    //  ! Compatible purpose only.
+    //  ! zh-CN: 仅用于兼容.
+    fun getPath() = envPath
+
+    // @Hint by SuperMonster003 on Jun 26, 2024.
+    //  ! Compatible purpose only.
+    //  ! zh-CN: 仅用于兼容.
+    fun setPath(path: Array<out String>) {
+        envPath = path
+    }
+
     companion object CREATOR : Parcelable.Creator<ExecutionConfig> {
 
+        @Suppress("ConstPropertyName")
         const val tag = "execution.config"
 
         @JvmStatic
@@ -102,5 +117,7 @@ data class ExecutionConfig(
         override fun newArray(size: Int): Array<ExecutionConfig?> {
             return arrayOfNulls(size)
         }
+
     }
+
 }

@@ -1,7 +1,7 @@
 package org.autojs.autojs.model.explorer;
 
 import org.autojs.autojs.pio.PFile;
-import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.core.pref.Pref;
 
 import java.io.FileFilter;
 
@@ -27,9 +27,9 @@ public class ExplorerFileProvider implements ExplorerProvider {
         String path = page.getPath();
         return listFiles(new PFile(path))
                 .collectInto(createExplorerPage(path, parent), (p, file) -> {
-                    if(file.isDirectory()){
+                    if (file.isDirectory()) {
                         p.addChild(new ExplorerDirPage(file, p));
-                    }else {
+                    } else {
                         p.addChild(new ExplorerFileItem(file, p));
                     }
                 })

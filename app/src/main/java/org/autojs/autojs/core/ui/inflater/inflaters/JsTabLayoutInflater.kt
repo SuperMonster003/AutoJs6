@@ -6,12 +6,13 @@ import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsTabLayout
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs6.R
 
 /**
  * Transformed by SuperMonster003 on May 20, 2023.
  */
-class JsTabLayoutInflater(resourceParser: ResourceParser) : TabLayoutInflater<JsTabLayout>(resourceParser) {
+class JsTabLayoutInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : TabLayoutInflater<JsTabLayout>(scriptRuntime, resourceParser) {
 
     override fun getCreator(): ViewCreator<in JsTabLayout> = object : ViewCreator<JsTabLayout> {
         override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsTabLayout {
