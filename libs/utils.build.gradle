@@ -108,11 +108,26 @@ class Utils {
         }
 
         LibDeployer setDestDir(String destDir) {
-            def destFile = destDir.matches("[/\\\\].+") ? project.file(destDir.substring(1)) : project.file(destDir)
-            println(destDir.matches("[/\\\\].+"))
-            println(project.file(destDir))
-            println(project.file(destDir.substring(1)))
-            println(destFile.absolutePath)
+
+            // @Hint by SuperMonster003 on Dec 2, 2024.
+            //  ! On some platforms (such as Temurin),
+            //  ! using project.file might not correctly retrieve the absolute path of the current project.
+            //  ! For example, using "/foo/bar",
+            //  ! Expected path: "/.../AutoJs6/libs/.../src/sdk/native",
+            //  ! Actual path: "/src/sdk/native",
+            //  ! In this case, the leading path separator should be removed, using "foo/bar" instead of "/foo/bar".
+            //  !
+            //  ! zh-CN:
+            //  !
+            //  ! 某些平台 (如 Temurin) 使用 project.file 可能无法正确获取当前项目的绝对路径.
+            //  ! 以 "/foo/bar" 为例,
+            //  ! 预期路径: "/.../AutoJs6/libs/.../src/sdk/native",
+            //  ! 实际路径: "/src/sdk/native",
+            //  ! 这种情况下需要去除路径分隔符前缀, 即使用 "foo/bar" 而非 "/foo/bar".
+            def destFile = destDir.startsWith(File.separator)
+                    ? project.file(destDir.substring(1))
+                    : project.file(destDir)
+
             destFile.mkdirs()
             this.destDir = destDir
             this.destFile = destFile

@@ -186,8 +186,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val widgets = scriptRuntime.ui.widgets
             if (widgets.contains(viewName)) {
                 val ctor = widgets.prop(viewName) as NativeFunction
-                val widget = withRhinoContext {
-                    ctor.construct(it, scriptRuntime.topLevelScope, arrayOf())
+                val widget = withRhinoContext { ctx ->
+                    ctor.construct(ctx, scriptRuntime.topLevelScope, arrayOf())
                 } as ScriptableObject
                 val f = widget.prop("renderInternal") as BaseFunction
                 return __inflateRhinoRuntime__(scriptRuntime, scriptRuntime.ui.layoutInflater.newInflateContext().also { ctx ->
