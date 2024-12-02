@@ -35,14 +35,14 @@ class ExplorerPageViewHolder extends BindableViewHolder<Object> {
         } else {
             binding.checkbox.setVisibility(View.GONE);
         }
-        binding.checkbox.setOnCheckedChangeListener((_, _) -> {
+        binding.checkbox.setOnCheckedChangeListener((listener, isChecked) -> {
             if (binding.checkbox.isChecked()) {
                 fileChooseListView.check(mExplorerPage.toScriptFile(), getAdapterPosition());
             } else {
                 fileChooseListView.getSelectedFiles().remove(mExplorerPage.toScriptFile());
             }
         });
-        binding.item.setOnClickListener(_ -> fileChooseListView.enterDirectChildPage(mExplorerPage));
+        binding.item.setOnClickListener(view -> fileChooseListView.enterDirectChildPage(mExplorerPage));
     }
 
 }
