@@ -222,12 +222,12 @@ pluginManagement {
             val temurin = object : Platform(
                 name = "Temurin", vendor = "temurin", abbr = "Adoptium", /* More common as "Eclipse Adoptium". */
                 androidVersionMap = mapOf(
-                    "20.0.2+9" to "8.1.2", /* Oct 31, 2023. */
-                    consts.IDENTIFIER_FALLBACK to "8.1.2", /* Oct 30, 2023. */
+                    "20.0.2+9" to "8.2.2", /* Dec 2, 2024. */
+                    consts.IDENTIFIER_FALLBACK to "8.2.2", /* Dec 2, 2024. */
                 ),
                 kotlinVersionMap = mapOf(
-                    "20.0.2+9" to "1.9.20-RC2", /* Oct 31, 2023. */
-                    consts.IDENTIFIER_FALLBACK to "1.8.21", /* Oct 30, 2023. */
+                    "20.0.2+9" to "1.9.24", /* Dec 2, 2024. */
+                    consts.IDENTIFIER_FALLBACK to "1.9.24", /* Dec 2, 2024. */
                 ),
             ) {
                 override val weight = 5
@@ -509,20 +509,20 @@ pluginManagement {
             mapOf("id" to it.id, "version" to version, "isApply" to it.isApply)
         }
 
-        private inner class Version(private val map: Map<String, String>, version: String) {
+        private inner class Version(private val map: Map<String, String>, platformVersion: String) {
 
             val bestMatchingKey: String?
             val bestMatchingValue: String?
             val isBestMatchingOperated: Boolean
 
             init {
-                bestMatchingKey = findBestMatchingMapKey(version)
+                bestMatchingKey = findBestMatchingMapKey(platformVersion)
                 bestMatchingValue = bestMatchingKey?.let { map[it] }
-                isBestMatchingOperated = bestMatchingKey != null && bestMatchingKey != version
+                isBestMatchingOperated = bestMatchingKey != null && bestMatchingKey != platformVersion
             }
 
-            private fun findBestMatchingMapKey(ideVersion: String): String? {
-                val (ideVersionNumbers, ideVersionSuffix) = toVersionParts(ideVersion)
+            private fun findBestMatchingMapKey(platformVersion: String): String? {
+                val (platformVersionNumbers, platformVersionSuffix) = toVersionParts(platformVersion)
                 val sortedVersions = map.keys.filter { it != identifier.fallback }.sortedWith { v1, v2 ->
                     val (ver1Numbers, ver1Suffix) = toVersionParts(v1)
                     val (ver2Numbers, ver2Suffix) = toVersionParts(v2)
@@ -530,11 +530,11 @@ pluginManagement {
                 }
                 for (version in sortedVersions) {
                     val (versionNumbers, versionSuffix) = toVersionParts(version)
-                    val versionComparisonScore = compareVersionParts(versionNumbers, ideVersionNumbers)
+                    val versionComparisonScore = compareVersionParts(versionNumbers, platformVersionNumbers)
                     if (versionComparisonScore < 0) {
                         return version
                     }
-                    if (versionComparisonScore == 0 && compareSuffix(versionSuffix, ideVersionSuffix) <= 0) {
+                    if (versionComparisonScore == 0 && compareSuffix(versionSuffix, platformVersionSuffix) <= 0) {
                         return version
                     }
                 }
@@ -551,7 +551,7 @@ pluginManagement {
             }
 
             private fun compareSuffix(suffix1: Pair<String, Int>, suffix2: Pair<String, Int>): Int {
-                val suffixPriority = mapOf("" to 0, "Alpha" to 1, "Beta" to 2, "RC" to 3)
+                val suffixPriority = mapOf("" to 10, "Alpha" to 1, "Beta" to 2, "RC" to 5)
                 val (suffixName1, suffixNumber1) = suffix1
                 val (suffixName2, suffixNumber2) = suffix2
                 val priority1 = suffixPriority[suffixName1] ?: Int.MAX_VALUE
@@ -560,15 +560,15 @@ pluginManagement {
             }
 
             private fun toVersionParts(version: String): Pair<List<Int>, Pair<String, Int>> {
-                val parts = version.split('-')
+                val parts = version.split(Regex("[+-]"))
                 val numberParts = parts[0].split('.').map {
                     it.toIntOrNull() ?: throw IllegalArgumentException("Invalid version part: '$it' in version: '$version'")
                 }
 
-                val suffixPattern = "([A-Za-z]+)(\\d*)".toRegex()
+                val suffixPattern = Regex("([A-Za-z]+)(\\d*)|([A-Za-z]*)(\\d+)")
                 val suffixMatch = suffixPattern.matchEntire(parts.getOrElse(1) { "" }) ?: return numberParts to ("" to 0)
 
-                val suffixName = suffixMatch.groupValues[1]
+                val suffixName = suffixMatch.groupValues[1] // "Alpha", "Beta", "RC" or empty string
                 val suffixNumber = suffixMatch.groupValues[2].toIntOrNull() ?: 1 // Default to 1 for suffixes like "Alpha", "Beta", "RC"
 
                 return numberParts to (suffixName to suffixNumber)
