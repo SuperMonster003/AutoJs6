@@ -79,22 +79,12 @@ class Utils {
         String cacheFileName
         String cacheFileExtensionName
 
-        private File privateSkipFile = null
-
         File getSkipFile() {
-            if (privateSkipFile == null) {
-                privateSkipFile = project.file(new File(destFile, "${cacheFileName}.skip"))
-            }
-            privateSkipFile
+            project.file(new File(destFile, "${cacheFileName}.skip"))
         }
 
-        private File privateTempOutFile = null
-
         File getTempOutFile() {
-            if (privateTempOutFile == null) {
-                privateTempOutFile = project.file(new File(destFile, "temp-extracted"))
-            }
-            privateTempOutFile
+            project.file(new File(destFile, "temp-extracted"))
         }
 
         LibDeployer(Project project, String name, String downloadUrl) {
