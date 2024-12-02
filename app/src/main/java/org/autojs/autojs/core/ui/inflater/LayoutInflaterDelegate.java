@@ -3,6 +3,7 @@ package org.autojs.autojs.core.ui.inflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
 import org.autojs.autojs.core.ui.inflater.inflaters.ViewGroupInflater;
 import org.autojs.autojs.core.ui.inflater.inflaters.ViewInflater;
 import org.w3c.dom.Node;
@@ -20,6 +21,7 @@ public interface LayoutInflaterDelegate {
 
     View afterInflation(InflateContext inflateContext, View doInflation, String xml, ViewGroup parent);
 
+    @Nullable
     String beforeConvertXml(InflateContext inflateContext, String xml);
 
     String afterConvertXml(InflateContext inflateContext, String xml);
@@ -96,7 +98,7 @@ public interface LayoutInflaterDelegate {
 
         @Override
         public void afterApplyAttributes(InflateContext inflateContext, View view, ViewInflater<View> inflater, HashMap<String, String> attrs, ViewGroup parent) {
-
+            /* Empty body. */
         }
 
         @Override
@@ -106,12 +108,12 @@ public interface LayoutInflaterDelegate {
 
         @Override
         public void afterInflateChildren(InflateContext inflateContext, ViewInflater<View> inflater, Node node, ViewGroup parent) {
-
+            /* Empty body. */
         }
 
         @Override
         public void afterApplyPendingAttributesOfChildren(InflateContext inflateContext, ViewGroupInflater inflater, ViewGroup view) {
-
+            /* Empty body. */
         }
 
         @Override
@@ -126,7 +128,7 @@ public interface LayoutInflaterDelegate {
 
         @Override
         public void afterApplyAttribute(InflateContext inflateContext, ViewInflater<View> inflater, View view, String ns, String attrName, String value, ViewGroup parent) {
-
+            /* Empty body. */
         }
     }
 }

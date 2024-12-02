@@ -8,8 +8,7 @@ import org.autojs.autojs.core.inputevent.RootAutomator
 import org.autojs.autojs.engine.RootAutomatorEngine
 import org.autojs.autojs.engine.RootAutomatorEngine.Companion.setTouchDevice
 import org.autojs.autojs.pio.UncheckedIOException
-import org.autojs.autojs.runtime.api.ScreenMetrics.Companion.deviceScreenHeight
-import org.autojs.autojs.runtime.api.ScreenMetrics.Companion.deviceScreenWidth
+import org.autojs.autojs.runtime.api.ScreenMetrics
 import java.io.DataOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -21,7 +20,7 @@ import java.io.IOException
 class InputEventToAutoFileRecorder(context: Context) : InputEventRecorder() {
     private var mLastEventTime = 0.0
     private var mTouchDevice = -1
-    private var mDataOutputStream: DataOutputStream? = null
+    private var mDataOutputStream: DataOutputStream
     private var mTmpFile: File? = null
 
     init {
@@ -38,12 +37,12 @@ class InputEventToAutoFileRecorder(context: Context) : InputEventRecorder() {
 
     @Throws(IOException::class)
     private fun writeFileHeader() {
-        mDataOutputStream!!.writeInt(0x00B87B6D)
-        mDataOutputStream!!.writeInt(RootAutomatorEngine.VERSION)
-        mDataOutputStream!!.writeInt(deviceScreenWidth)
-        mDataOutputStream!!.writeInt(deviceScreenHeight)
+        mDataOutputStream.writeInt(0x00B87B6D)
+        mDataOutputStream.writeInt(RootAutomatorEngine.VERSION)
+        mDataOutputStream.writeInt(ScreenMetrics.deviceScreenWidth)
+        mDataOutputStream.writeInt(ScreenMetrics.deviceScreenHeight)
         for (i in 0..239) {
-            mDataOutputStream!!.writeByte(0)
+            mDataOutputStream.writeByte(0)
         }
     }
 
@@ -83,36 +82,36 @@ class InputEventToAutoFileRecorder(context: Context) : InputEventRecorder() {
         if (device != mTouchDevice) {
             return
         }
-        mDataOutputStream!!.writeByte(RootAutomator.DATA_TYPE_EVENT.toInt())
-        mDataOutputStream!!.writeShort(type.toInt())
-        mDataOutputStream!!.writeShort(code.toInt())
-        mDataOutputStream!!.writeInt(value)
+        mDataOutputStream.writeByte(RootAutomator.DATA_TYPE_EVENT.toInt())
+        mDataOutputStream.writeShort(type.toInt())
+        mDataOutputStream.writeShort(code.toInt())
+        mDataOutputStream.writeInt(value)
         Log.d(LOG_TAG, "write event: $event")
     }
 
     @Throws(IOException::class)
     private fun writeSleep(millis: Int) {
-        mDataOutputStream!!.writeByte(RootAutomator.DATA_TYPE_SLEEP.toInt())
-        mDataOutputStream!!.writeInt(millis)
+        mDataOutputStream.writeByte(RootAutomator.DATA_TYPE_SLEEP.toInt())
+        mDataOutputStream.writeInt(millis)
         Log.d(LOG_TAG, "write sleep: $millis")
     }
 
     @Throws(IOException::class)
     private fun writeSyncReport() {
-        mDataOutputStream!!.writeByte(RootAutomator.DATA_TYPE_EVENT_SYNC_REPORT.toInt())
+        mDataOutputStream.writeByte(RootAutomator.DATA_TYPE_EVENT_SYNC_REPORT.toInt())
         Log.d(LOG_TAG, "write sync report")
     }
 
     @Throws(IOException::class)
     private fun writeTouch(code: Short, value: Int) {
         if (code.toInt() == InputEventCodes.ABS_MT_POSITION_X) {
-            mDataOutputStream!!.writeByte(RootAutomator.DATA_TYPE_EVENT_TOUCH_X.toInt())
+            mDataOutputStream.writeByte(RootAutomator.DATA_TYPE_EVENT_TOUCH_X.toInt())
             Log.d(LOG_TAG, "write touch x: $value")
         } else {
-            mDataOutputStream!!.writeByte(RootAutomator.DATA_TYPE_EVENT_TOUCH_Y.toInt())
+            mDataOutputStream.writeByte(RootAutomator.DATA_TYPE_EVENT_TOUCH_Y.toInt())
             Log.d(LOG_TAG, "write touch y: $value")
         }
-        mDataOutputStream!!.writeInt(value)
+        mDataOutputStream.writeInt(value)
     }
 
     override fun getCode(): String? {
@@ -126,7 +125,7 @@ class InputEventToAutoFileRecorder(context: Context) : InputEventRecorder() {
     override fun stop() {
         super.stop()
         try {
-            mDataOutputStream!!.close()
+            mDataOutputStream.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }

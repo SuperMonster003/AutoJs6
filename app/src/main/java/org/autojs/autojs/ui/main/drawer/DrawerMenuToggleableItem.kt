@@ -1,35 +1,32 @@
 package org.autojs.autojs.ui.main.drawer
 
 import android.annotation.SuppressLint
-import android.content.Context
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs6.R
 
 open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
 
     private lateinit var mItemHelper: DrawerMenuItemHelper
-    private lateinit var mContext: Context
 
     constructor(helper: DrawerMenuItemHelper, icon: Int, title: Int) : super(icon, title, DEFAULT_PREFERENCE_KEY) {
-        init(helper, helper.context, null)
+        init(helper, null)
     }
 
     constructor(helper: DrawerMenuItemHelper, icon: Int, title: Int, content: Int) : super(icon, title, DEFAULT_PREFERENCE_KEY) {
-        init(helper, helper.context, helper.context.takeUnless { content == DEFAULT_DIALOG_CONTENT }?.getString(content))
+        init(helper, helper.context.takeUnless { content == DEFAULT_DIALOG_CONTENT }?.getString(content))
     }
 
     constructor(helper: DrawerMenuItemHelper, icon: Int, title: Int, content: Int, prefKey: Int = DEFAULT_PREFERENCE_KEY) : super(icon, title, prefKey) {
-        init(helper, helper.context, helper.context.takeUnless { content == DEFAULT_DIALOG_CONTENT }?.getString(content))
+        init(helper, helper.context.takeUnless { content == DEFAULT_DIALOG_CONTENT }?.getString(content))
     }
 
-    private fun init(itemHelper: DrawerMenuItemHelper, context: Context, content: String?) {
+    private fun init(itemHelper: DrawerMenuItemHelper, content: String?) {
         mItemHelper = itemHelper
-        mContext = context
         setContent(content)
         setAction { holder ->
             when (holder.switchCompat.isChecked) {
@@ -65,8 +62,8 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
     fun getPrompt(aimState: Boolean): MaterialDialog? {
         return content?.let {
             var isPositiveButtonPressed = false
-            val key = "${DrawerMenuToggleableItem::class.simpleName}\$${mContext.getString(title)}"
-            NotAskAgainDialog.Builder(mContext, key)
+            val key = "${DrawerMenuToggleableItem::class.simpleName}\$${mItemHelper.context.getString(title)}"
+            NotAskAgainDialog.Builder(mItemHelper.context, key)
                 .title(title)
                 .content(it)
                 .negativeText(R.string.dialog_button_cancel)

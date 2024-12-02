@@ -6,7 +6,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import org.autojs.autojs.core.ui.widget.JsSwitch;
-import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.theme.ThemeColor;
 import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs.theme.ThemeColorManager;
@@ -20,6 +20,7 @@ public class PrefSwitch extends JsSwitch implements SharedPreferences.OnSharedPr
 
     private String mPrefKey;
     private boolean mDefaultChecked;
+    private boolean mIsOnSharedPreferenceChangeListenerRegistered;
 
     public PrefSwitch(Context context) {
         super(context);
@@ -44,7 +45,7 @@ public class PrefSwitch extends JsSwitch implements SharedPreferences.OnSharedPr
         mPrefKey = a.getString(R.styleable.PrefSwitch_key);
         mDefaultChecked = a.getBoolean(R.styleable.PrefSwitch_defaultVal, false);
         if (mPrefKey != null) {
-            Pref.registerOnSharedPreferenceChangeListener(this);
+            registerOnSharedPreferenceChangeListenerIfNeeded();
             readInitialState();
         } else {
             setChecked(mDefaultChecked, false);
@@ -52,6 +53,7 @@ public class PrefSwitch extends JsSwitch implements SharedPreferences.OnSharedPr
         a.recycle();
     }
 
+    @Override
     public void setThemeColor(ThemeColor color) {
         ThemeColorHelper.setColorPrimary(this, color.colorPrimary);
     }
@@ -68,9 +70,16 @@ public class PrefSwitch extends JsSwitch implements SharedPreferences.OnSharedPr
         }
     }
 
+    private void registerOnSharedPreferenceChangeListenerIfNeeded() {
+        if (!mIsOnSharedPreferenceChangeListenerRegistered) {
+            mIsOnSharedPreferenceChangeListenerRegistered = true;
+            Pref.registerOnSharedPreferenceChangeListener(this);
+        }
+    }
+
     public void setPrefKey(String prefKey) {
         mPrefKey = prefKey;
-        Pref.registerOnSharedPreferenceChangeListener(this);
+        registerOnSharedPreferenceChangeListenerIfNeeded();
         if (mPrefKey != null) {
             setChecked(Pref.getBoolean(mPrefKey, mDefaultChecked), false);
         }

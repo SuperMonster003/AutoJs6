@@ -4,10 +4,10 @@ import android.view.KeyEvent
 
 object EventUtils {
 
-    private fun isKeyBack(e: KeyEvent) = e.keyCode == KeyEvent.KEYCODE_BACK
+    fun isKeyBackAndActionUp(e: KeyEvent) = e.keyCode == KeyEvent.KEYCODE_BACK && e.action == KeyEvent.ACTION_UP
 
-    private fun isActionUp(e: KeyEvent) = e.action == KeyEvent.ACTION_UP
+    fun isKeyVolumeDownAndActionDown(e: KeyEvent) = e.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && e.action == KeyEvent.ACTION_DOWN
 
-    fun isKeyBackAndActionUp(e: KeyEvent) = isKeyBack(e) && isActionUp(e)
+    fun isKeyVolumeUpAndActionDown(e: KeyEvent) = e.keyCode == KeyEvent.KEYCODE_VOLUME_UP && e.action == KeyEvent.ACTION_DOWN
 
 }

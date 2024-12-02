@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Color (颜色类) | AutoJs6 文档 - 6.5.0</title>
+    <title>Color (颜色类) | AutoJs6 文档 - 6.6.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -162,7 +162,7 @@
 
     <div id="column1" data-id="colorType" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <h1>AutoJs6 文档 - 6.6.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -196,8 +196,8 @@
 <li><span class="stability_undefined"><a href="#colortype_tofullhex">toFullHex()</a></span></li>
 </ul>
 </li>
-<li><span class="stability_undefined"><a href="#colortype_m_digest">[m#] digest</a></span><ul>
-<li><span class="stability_undefined"><a href="#colortype_digest">digest()</a></span></li>
+<li><span class="stability_undefined"><a href="#colortype_m_summary">[m#] summary</a></span><ul>
+<li><span class="stability_undefined"><a href="#colortype_summary">summary()</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#colortype_m_alpha">[m#] alpha</a></span><ul>
@@ -456,8 +456,8 @@ colors.toHex(colorWithAlpha);
 <pre><code class="lang-js">new Color(&#39;blue&#39;);
 Color(&#39;blue&#39;); /* 效果同上. */
 
-new Color().setAlpha(0.5).digest();
-Color().setAlpha(0.5).digest();  /* 结果同上. */
+new Color().setAlpha(0.5).summary();
+Color().setAlpha(0.5).summary();  /* 结果同上. */
 </code></pre>
 <p>需额外留意, Color 类的 <code>new</code> 关键字省略, 是 AutoJs6 开发者在编写 Color 类时为便于使用而专门设计的, 并不适用于所有构造器, 详情参阅 JavaScript 语法规范.</p>
 <blockquote>
@@ -692,8 +692,8 @@ Color(cD).toHex(3); /* 抛出异常. */
 <pre><code class="lang-js">Color(&#39;#CC5500&#39;).toHex(); // #CC5500
 Color(&#39;#CC5500&#39;).toFullHex(); // #FFCC5500
 </code></pre>
-<h2>[m#] digest<span><a class="mark" href="#colortype_m_digest" id="colortype_m_digest">#</a></span></h2>
-<h3>digest()<span><a class="mark" href="#colortype_digest" id="colortype_digest">#</a></span></h3>
+<h2>[m#] summary<span><a class="mark" href="#colortype_m_summary" id="colortype_m_summary">#</a></span></h2>
+<h3>summary()<span><a class="mark" href="#colortype_summary" id="colortype_summary">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
 <ul>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_string">string</a></span> } - 颜色摘要</li>
@@ -737,16 +737,16 @@ Color(&#39;#CC5500&#39;).toFullHex(); // #FFCC5500
 </table>
 <p>示例:</p>
 <pre><code class="lang-js">// hex(#009688), rgba(0,150,136/1.0), int(-16738680)
-Color(&#39;#009688&#39;).digest();
+Color(&#39;#009688&#39;).summary();
 
 // hex(#BE009688), rgba(0,150,136/0.75), int(-1107257720)
-Color(&#39;#BE009688&#39;).digest();
+Color(&#39;#BE009688&#39;).summary();
 
 // hex(#FF0000), rgba(255,0,0/1.0), int(-65536)
-Color(&#39;red&#39;).digest();
+Color(&#39;red&#39;).summary();
 
 // hex(#6400008B), rgba(0,0,139/0.39), int(1677721739)
-Color(&#39;dark-blue&#39;).setAlpha(100).digest();
+Color(&#39;dark-blue&#39;).setAlpha(100).summary();
 </code></pre>
 <h2>[m#] alpha<span><a class="mark" href="#colortype_m_alpha" id="colortype_m_alpha">#</a></span></h2>
 <h3>alpha()<span><a class="mark" href="#colortype_alpha" id="colortype_alpha">#</a></span></h3>

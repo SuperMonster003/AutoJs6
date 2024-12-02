@@ -30,7 +30,7 @@ object DisplayUtils {
     fun dpToPx(dp: Float) = TypedValue.applyDimension(COMPLEX_UNIT_DIP, dp, displayMetrics)
 
     /**
-     * This method converts device specific pixels to density independent pixels.
+     * This method converts device-specific pixels to density independent pixels.
      *
      * @param px A value in px (pixels) unit. Which we need to convert into db
      * @return A float value to represent dp equivalent to px value

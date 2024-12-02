@@ -3,12 +3,11 @@ package org.autojs.autojs.core.ui.inflater.util;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
-
-import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.runtime.ScriptRuntime;
-import org.autojs.autojs.runtime.api.Files;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
 
 /**
  * Created by Stardust on Nov 4, 2017.
@@ -40,13 +39,11 @@ public class Strings {
             }
             return "android.resource://" + context.getPackageName() + "/" + rawId;
         }
-        Files files = AutoJs.getInstance().getRuntime().files;
-        String nicePath = files.path(path);
-        if (!files.exists(nicePath)) {
+        if (!new File(path).exists()) {
             ScriptRuntime.popException("Invalid path: " + path);
             return null;
         }
-        return nicePath;
+        return path;
     }
 
     public static int parseAnimation(@NotNull View view, @NotNull String anim) {

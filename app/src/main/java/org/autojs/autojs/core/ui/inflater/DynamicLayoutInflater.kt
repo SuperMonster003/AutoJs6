@@ -9,16 +9,110 @@ import android.util.Log
 import android.view.InflateException
 import android.view.View
 import android.view.ViewGroup
-import org.autojs.autojs.core.ui.widget.JsCheckedTextView
 import android.widget.Space
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.core.ui.widget.JsConsoleView
-import org.autojs.autojs.core.ui.widget.JsCanvasView
-import org.autojs.autojs.core.ui.inflater.inflaters.*
+import org.autojs.autojs.core.ui.inflater.inflaters.BaseViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsActionMenuViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsAppBarLayoutInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsButtonInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsCalendarViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsCanvasViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsCardViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsCheckBoxInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsCheckedTextViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsChronometerInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsConsoleViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsDatePickerInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsDrawerLayoutInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsEditTextInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsFloatingActionButtonInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsFrameLayoutInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsGridViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsImageButtonInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsImageSwitcherInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsImageViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsLinearLayoutInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsListViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsNumberPickerInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsProgressBarInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsQuickContactBadgeInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsRadioButtonInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsRadioGroupInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsRatingBarInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsRelativeLayoutInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsScrollViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsSearchViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsSeekBarInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsSpinnerInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsSwitchInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsTabLayoutInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsTextClockInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsTextSwitcherInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsTextViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsTextViewLegacyInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsTimePickerInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsToggleButtonInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsToolbarInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsVideoViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsViewFlipperInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsViewPagerInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsViewSwitcherInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.JsWebViewInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.SpaceInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.ViewGroupInflater
+import org.autojs.autojs.core.ui.inflater.inflaters.ViewInflater
 import org.autojs.autojs.core.ui.inflater.util.Res
-import org.autojs.autojs.core.ui.widget.*
+import org.autojs.autojs.core.ui.widget.JsActionMenuView
+import org.autojs.autojs.core.ui.widget.JsAppBarLayout
+import org.autojs.autojs.core.ui.widget.JsButton
+import org.autojs.autojs.core.ui.widget.JsCalendarView
+import org.autojs.autojs.core.ui.widget.JsCanvasView
+import org.autojs.autojs.core.ui.widget.JsCardView
+import org.autojs.autojs.core.ui.widget.JsCheckBox
+import org.autojs.autojs.core.ui.widget.JsCheckedTextView
+import org.autojs.autojs.core.ui.widget.JsChronometer
+import org.autojs.autojs.core.ui.widget.JsConsoleView
+import org.autojs.autojs.core.ui.widget.JsDatePicker
+import org.autojs.autojs.core.ui.widget.JsDrawerLayout
+import org.autojs.autojs.core.ui.widget.JsEditText
+import org.autojs.autojs.core.ui.widget.JsFloatingActionButton
+import org.autojs.autojs.core.ui.widget.JsFrameLayout
+import org.autojs.autojs.core.ui.widget.JsGridView
+import org.autojs.autojs.core.ui.widget.JsImageButton
+import org.autojs.autojs.core.ui.widget.JsImageSwitcher
+import org.autojs.autojs.core.ui.widget.JsImageView
+import org.autojs.autojs.core.ui.widget.JsLinearLayout
+import org.autojs.autojs.core.ui.widget.JsListView
+import org.autojs.autojs.core.ui.widget.JsNumberPicker
+import org.autojs.autojs.core.ui.widget.JsProgressBar
+import org.autojs.autojs.core.ui.widget.JsQuickContactBadge
+import org.autojs.autojs.core.ui.widget.JsRadioButton
+import org.autojs.autojs.core.ui.widget.JsRadioGroup
+import org.autojs.autojs.core.ui.widget.JsRatingBar
+import org.autojs.autojs.core.ui.widget.JsRelativeLayout
+import org.autojs.autojs.core.ui.widget.JsScrollView
+import org.autojs.autojs.core.ui.widget.JsSearchView
+import org.autojs.autojs.core.ui.widget.JsSeekBar
+import org.autojs.autojs.core.ui.widget.JsSpinner
+import org.autojs.autojs.core.ui.widget.JsSwitch
+import org.autojs.autojs.core.ui.widget.JsTabLayout
+import org.autojs.autojs.core.ui.widget.JsTextClock
+import org.autojs.autojs.core.ui.widget.JsTextSwitcher
+import org.autojs.autojs.core.ui.widget.JsTextView
+import org.autojs.autojs.core.ui.widget.JsTextViewLegacy
+import org.autojs.autojs.core.ui.widget.JsTimePicker
+import org.autojs.autojs.core.ui.widget.JsToggleButton
+import org.autojs.autojs.core.ui.widget.JsToolbar
+import org.autojs.autojs.core.ui.widget.JsVideoView
+import org.autojs.autojs.core.ui.widget.JsViewFlipper
+import org.autojs.autojs.core.ui.widget.JsViewPager
+import org.autojs.autojs.core.ui.widget.JsViewSwitcher
+import org.autojs.autojs.core.ui.widget.JsWebView
 import org.autojs.autojs.core.ui.xml.XmlConverter
+import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.exception.WrappedRuntimeException
+import org.autojs.autojs6.R
 import org.w3c.dom.Node
 import java.io.ByteArrayInputStream
 import javax.xml.parsers.DocumentBuilderFactory
@@ -28,17 +122,24 @@ open class DynamicLayoutInflater {
     private var mViewAttrSetters: MutableMap<String, ViewInflater<*>> = HashMap()
     private var mViewCreators: MutableMap<String, ViewCreator<*>> = HashMap()
 
+    internal var privateContext: Context? = null
+
     @get:ScriptInterface
     @set:ScriptInterface
     var layoutInflaterDelegate: LayoutInflaterDelegate = LayoutInflaterDelegate.NO_OP
 
-    var context: Context? = GlobalAppContext.get()
+    var context: Context
+        get() = privateContext ?: GlobalAppContext.get()
+        set(value) {
+            privateContext = value
+        }
+
     val resourceParser: ResourceParser
     var inflateFlags = 0
 
-    constructor(resourceParser: ResourceParser) {
+    constructor(resourceParser: ResourceParser, scriptRuntime: ScriptRuntime) {
         this.resourceParser = resourceParser
-        registerViewAttrSetters()
+        registerViewAttrSetters(scriptRuntime)
     }
 
     constructor(inflater: DynamicLayoutInflater) {
@@ -48,66 +149,69 @@ open class DynamicLayoutInflater {
         mViewCreators = HashMap(inflater.mViewCreators)
     }
 
-    protected fun registerViewAttrSetters() {
-        registerViewAttrSetter(JsActionMenuView::class.java, JsActionMenuViewInflater(resourceParser))
-        registerViewAttrSetter(JsAppBarLayout::class.java, JsAppBarLayoutInflater(resourceParser))
-        registerViewAttrSetter(JsButton::class.java, JsButtonInflater(resourceParser))
-        registerViewAttrSetter(JsCanvasView::class.java, JsCanvasViewInflater(resourceParser))
-        registerViewAttrSetter(JsCardView::class.java, JsCardViewInflater(resourceParser))
-        registerViewAttrSetter(JsCalendarView::class.java, JsCalendarViewInflater(resourceParser))
-        registerViewAttrSetter(JsCheckBox::class.java, JsCheckBoxInflater(resourceParser))
-        registerViewAttrSetter(JsCheckedTextView::class.java, JsCheckedTextViewInflater(resourceParser))
-        registerViewAttrSetter(JsChronometer::class.java, JsChronometerInflater(resourceParser))
-        registerViewAttrSetter(JsConsoleView::class.java, JsConsoleViewInflater(resourceParser))
-        registerViewAttrSetter(JsDatePicker::class.java, JsDatePickerInflater(resourceParser))
-        registerViewAttrSetter(JsDrawerLayout::class.java, JsDrawerLayoutInflater(resourceParser))
-        registerViewAttrSetter(JsEditText::class.java, JsEditTextInflater(resourceParser))
-        registerViewAttrSetter(JsFloatingActionButton::class.java, JsFloatingActionButtonInflater(resourceParser))
-        registerViewAttrSetter(JsFrameLayout::class.java, JsFrameLayoutInflater(resourceParser))
-        registerViewAttrSetter(JsGridView::class.java, JsGridViewInflater<JsGridView>(resourceParser))
-        registerViewAttrSetter(JsImageButton::class.java, JsImageButtonInflater(resourceParser))
-        registerViewAttrSetter(JsImageView::class.java, JsImageViewInflater(resourceParser))
-        registerViewAttrSetter(JsImageSwitcher::class.java, JsImageSwitcherInflater(resourceParser))
-        registerViewAttrSetter(JsLinearLayout::class.java, JsLinearLayoutInflater(resourceParser))
-        registerViewAttrSetter(JsListView::class.java, JsListViewInflater<JsListView>(resourceParser))
-        registerViewAttrSetter(JsNumberPicker::class.java, JsNumberPickerInflater(resourceParser))
-        registerViewAttrSetter(JsProgressBar::class.java, JsProgressBarInflater(resourceParser))
-        registerViewAttrSetter(JsQuickContactBadge::class.java, JsQuickContactBadgeInflater(resourceParser))
-        registerViewAttrSetter(JsRadioButton::class.java, JsRadioButtonInflater(resourceParser))
-        registerViewAttrSetter(JsRadioGroup::class.java, JsRadioGroupInflater(resourceParser))
-        registerViewAttrSetter(JsRatingBar::class.java, JsRatingBarInflater(resourceParser))
-        registerViewAttrSetter(JsRelativeLayout::class.java, JsRelativeLayoutInflater(resourceParser))
-        registerViewAttrSetter(JsScrollView::class.java, JsScrollViewInflater(resourceParser))
-        registerViewAttrSetter(JsSearchView::class.java, JsSearchViewInflater(resourceParser))
-        registerViewAttrSetter(JsSeekBar::class.java, JsSeekBarInflater(resourceParser))
-        registerViewAttrSetter(JsSpinner::class.java, JsSpinnerInflater(resourceParser))
-        registerViewAttrSetter(JsSwitch::class.java, JsSwitchInflater(resourceParser))
-        registerViewAttrSetter(JsTabLayout::class.java, JsTabLayoutInflater(resourceParser))
-        registerViewAttrSetter(JsTextClock::class.java, JsTextClockInflater(resourceParser))
-        registerViewAttrSetter(JsTextSwitcher::class.java, JsTextSwitcherInflater(resourceParser))
-        registerViewAttrSetter(JsTimePicker::class.java, JsTimePickerInflater(resourceParser))
-        registerViewAttrSetter(JsToggleButton::class.java, JsToggleButtonInflater(resourceParser))
-        registerViewAttrSetter(JsToolbar::class.java, JsToolbarInflater(resourceParser))
-        registerViewAttrSetter(JsVideoView::class.java, JsVideoViewInflater(resourceParser))
-        registerViewAttrSetter(JsViewFlipper::class.java, JsViewFlipperInflater(resourceParser))
-        registerViewAttrSetter(JsViewPager::class.java, JsViewPagerInflater(resourceParser))
-        registerViewAttrSetter(JsViewSwitcher::class.java, JsViewSwitcherInflater(resourceParser))
-        registerViewAttrSetter(JsWebView::class.java, JsWebViewInflater(resourceParser))
+    protected fun registerViewAttrSetters(scriptRuntime: ScriptRuntime) {
+        registerViewAttrSetter(JsActionMenuView::class.java, JsActionMenuViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsAppBarLayout::class.java, JsAppBarLayoutInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsButton::class.java, JsButtonInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsCanvasView::class.java, JsCanvasViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsCardView::class.java, JsCardViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsCalendarView::class.java, JsCalendarViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsCheckBox::class.java, JsCheckBoxInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsCheckedTextView::class.java, JsCheckedTextViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsChronometer::class.java, JsChronometerInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsConsoleView::class.java, JsConsoleViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsDatePicker::class.java, JsDatePickerInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsDrawerLayout::class.java, JsDrawerLayoutInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsEditText::class.java, JsEditTextInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsFloatingActionButton::class.java, JsFloatingActionButtonInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsFrameLayout::class.java, JsFrameLayoutInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsGridView::class.java, JsGridViewInflater<JsGridView>(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsImageButton::class.java, JsImageButtonInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsImageView::class.java, JsImageViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsImageSwitcher::class.java, JsImageSwitcherInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsLinearLayout::class.java, JsLinearLayoutInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsListView::class.java, JsListViewInflater<JsListView>(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsNumberPicker::class.java, JsNumberPickerInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsProgressBar::class.java, JsProgressBarInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsQuickContactBadge::class.java, JsQuickContactBadgeInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsRadioButton::class.java, JsRadioButtonInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsRadioGroup::class.java, JsRadioGroupInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsRatingBar::class.java, JsRatingBarInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsRelativeLayout::class.java, JsRelativeLayoutInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsScrollView::class.java, JsScrollViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsSearchView::class.java, JsSearchViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsSeekBar::class.java, JsSeekBarInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsSpinner::class.java, JsSpinnerInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsSwitch::class.java, JsSwitchInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsTabLayout::class.java, JsTabLayoutInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsTextClock::class.java, JsTextClockInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsTextSwitcher::class.java, JsTextSwitcherInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsTimePicker::class.java, JsTimePickerInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsToggleButton::class.java, JsToggleButtonInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsToolbar::class.java, JsToolbarInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsVideoView::class.java, JsVideoViewInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsViewFlipper::class.java, JsViewFlipperInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsViewPager::class.java, JsViewPagerInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsViewSwitcher::class.java, JsViewSwitcherInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(JsWebView::class.java, JsWebViewInflater(scriptRuntime, resourceParser))
 
         when (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            true -> registerViewAttrSetter(JsTextViewLegacy::class.java, JsTextViewLegacyInflater(resourceParser))
-            else -> registerViewAttrSetter(JsTextView::class.java, JsTextViewInflater(resourceParser))
+            true -> registerViewAttrSetter(JsTextViewLegacy::class.java, JsTextViewLegacyInflater(scriptRuntime, resourceParser))
+            else -> registerViewAttrSetter(JsTextView::class.java, JsTextViewInflater(scriptRuntime, resourceParser))
         }
 
         // TODO by SuperMonster003 on Jun 8, 2023.
-        //  ! Android XML like menu, shape, paths and so forth.
+        //  ! Support Android XML like menu, shape, paths and so forth.
         //  ! Not easy as expected.
+        //  ! zh-CN:
+        //  ! 支持安卓 XML (如 menu, shape, paths 等).
+        //  ! 并不像预期的那么容易.
 
         // registerViewAttrSetter("menu", JsMenuInflater(resourceParser))
 
-        registerViewAttrSetter(Space::class.java, SpaceInflater(resourceParser))
-        registerViewAttrSetter(ViewGroup::class.java, ViewGroupInflater<ViewGroup>(resourceParser))
-        registerViewAttrSetter(View::class.java, BaseViewInflater<View>(resourceParser))
+        registerViewAttrSetter(Space::class.java, SpaceInflater(scriptRuntime, resourceParser))
+        registerViewAttrSetter(ViewGroup::class.java, ViewGroupInflater<ViewGroup>(scriptRuntime, resourceParser))
+        registerViewAttrSetter(View::class.java, BaseViewInflater<View>(scriptRuntime, resourceParser))
     }
 
     fun registerViewAttrSetter(clazz: Class<*>, inflater: ViewInflater<*>) {
@@ -207,7 +311,7 @@ open class DynamicLayoutInflater {
         var setter = mViewAttrSetters[view.javaClass.name]
         var c: Class<*> = view.javaClass
         while (setter == null && c != View::class.java) {
-            c = c.superclass
+            c = c.superclass as Class<*>
             setter = mViewAttrSetters[c.name]
         }
         @Suppress("UNCHECKED_CAST")
@@ -236,7 +340,7 @@ open class DynamicLayoutInflater {
         }
     }
 
-    protected fun doCreateView(context: InflateContext?, node: Node?, viewName: String, parent: ViewGroup?, attrs: HashMap<String, String>): View {
+    protected fun doCreateView(context: InflateContext, node: Node?, viewName: String, parent: ViewGroup?, attrs: HashMap<String, String>): View {
         val view = layoutInflaterDelegate.beforeCreateView(context, node, viewName, parent)
         return view ?: layoutInflaterDelegate.afterCreateView(context, createViewForName(viewName, attrs, parent), node, viewName, parent)
     }
@@ -255,9 +359,11 @@ open class DynamicLayoutInflater {
             }
             val creator = mViewCreators[niceName]
             if (creator != null) {
-                context?.let { ctx -> return creator.create(ctx, attrs, parent) }
+                return creator.create(context, attrs, parent)
             }
-            val clazz = Class.forName(niceName)
+            val clazz: Class<*> = runCatching { Class.forName(niceName) }.getOrElse {
+                throw WrappedRuntimeException(context.getString(R.string.error_unknown_element_name, name))
+            }
             val style = attrs["style"]
             if (style == null) {
                 clazz.getConstructor(Context::class.java).newInstance(context) as View

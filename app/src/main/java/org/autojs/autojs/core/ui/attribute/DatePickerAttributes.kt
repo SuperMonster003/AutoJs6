@@ -1,19 +1,16 @@
 package org.autojs.autojs.core.ui.attribute
 
-import android.view.InflateException
 import android.view.View
 import android.widget.DatePicker
 import org.autojs.autojs.core.ui.inflater.ResourceParser
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Locale
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class DatePickerAttributes(resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(resourceParser, view) {
+open class DatePickerAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as DatePicker
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("minDate") { setMinDate(view, it) }
         registerAttr("maxDate") { setMaxDate(view, it) }

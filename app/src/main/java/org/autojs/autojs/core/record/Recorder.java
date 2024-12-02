@@ -38,7 +38,6 @@ public interface Recorder {
         }
     }
 
-
     int STATE_NOT_START = 0;
     int STATE_RECORDING = 1;
     int STATE_PAUSED = 2;
@@ -65,25 +64,24 @@ public interface Recorder {
         private static final OnStateChangedListener NO_OPERATION_LISTENER = new OnStateChangedListener() {
             @Override
             public void onStart() {
-
+                /* Empty body. */
             }
 
             @Override
             public void onStop() {
-
+                /* Empty body. */
             }
 
             @Override
             public void onPause() {
-
+                /* Empty body. */
             }
 
             @Override
             public void onResume() {
-
+                /* Empty body. */
             }
         };
-
 
         private OnStateChangedListener mOnStateChangedListener = NO_OPERATION_LISTENER;
 
@@ -124,7 +122,7 @@ public interface Recorder {
         }
 
         protected void pauseImpl() {
-
+            /* Empty body. */
         }
 
         protected synchronized void setState(int state) {
@@ -163,7 +161,7 @@ public interface Recorder {
         }
 
         protected void resumeImpl() {
-
+            /* Empty body. */
         }
 
         public void setOnStateChangedListener(OnStateChangedListener onStateChangedListener) {

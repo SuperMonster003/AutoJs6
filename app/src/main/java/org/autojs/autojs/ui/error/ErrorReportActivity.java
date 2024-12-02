@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.error;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.os.Build;
@@ -25,7 +26,7 @@ import java.util.TimerTask;
  */
 public class ErrorReportActivity extends BaseActivity {
 
-    private static final String TAG = "ErrorReportActivity";
+    private static final String TAG = ErrorReportActivity.class.getSimpleName();
 
     private String mTitle;
 
@@ -37,7 +38,7 @@ public class ErrorReportActivity extends BaseActivity {
             handleIntent();
         } catch (Throwable throwable) {
             Log.e(TAG, "", throwable);
-            exit();
+            exitAfter(3000);
         }
 
     }
@@ -57,7 +58,7 @@ public class ErrorReportActivity extends BaseActivity {
                 .onPositive((dialog, which) -> exit())
                 .onNegative((dialog, which) -> {
                     copyToClip(getDeviceMessage() + message + "\n" + errorDetail);
-                    exitAfter();
+                    exitAfter(1500);
                 })
                 .cancelable(false)
                 .show();
@@ -67,13 +68,13 @@ public class ErrorReportActivity extends BaseActivity {
         return String.format(Locale.getDefault(), "Version: %s\nAndroid: %d\n", BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);
     }
 
-    private void exitAfter() {
+    private void exitAfter(int delay) {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 exit();
             }
-        }, 1000);
+        }, delay);
     }
 
     private void copyToClip(String text) {
@@ -95,6 +96,7 @@ public class ErrorReportActivity extends BaseActivity {
         Objects.requireNonNull(getSupportActionBar()).setHomeButtonEnabled(false);
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
         exit();
@@ -105,5 +107,4 @@ public class ErrorReportActivity extends BaseActivity {
     }
 
 }
-
 

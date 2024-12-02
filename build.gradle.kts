@@ -1,11 +1,10 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 // @Hint by SuperMonster003 on Aug 16, 2023.
-//  !  Blocks "buildscript" and "plugins" have been moved to "settings.gradle.kts".
+//  ! Blocks "buildscript" and "plugins" have been moved to "settings.gradle.kts".
+//  ! zh-CN: 代码块 "buildscript" 以及 "plugins" 已迁移至 "settings.gradle.kts".
 
-extra.apply {
-    set("configurationName", "default")
-}
+extra["configurationName"] = "default"
 
 allprojects {
     repositories {

@@ -1,24 +1,9 @@
 ( /* @ModuleIIFE */ () => {
-
-    const Looper = android.os.Looper;
-
-    let _ = {
-        isUiThread() {
-            return Looper.myLooper() === Looper.getMainLooper();
-        },
-        getOrThrow(result) {
-            if (result.error) {
-                throw result.error;
-            }
-            return result.result;
-        },
-    };
-
     /**
      * @class
      * @extends {Internal.ResultAdapter}
      */
-    let ResultAdapter = _.isUiThread()
+    let ResultAdapter = RhinoUtils.isUiThread()
         ? function () {
             this.cont = continuation.create();
             this.impl = {
@@ -32,7 +17,7 @@
             this.impl = {
                 setResult: result => this.disposable.setAndNotify({ result }),
                 setError: error => this.disposable.setAndNotify({ error }),
-                get: () => _.getOrThrow(this.disposable.blockedGet()),
+                get: () => ContinuationResult.getOrThrow(this.disposable.blockedGet()),
             };
         };
 
@@ -54,12 +39,15 @@
             },
             get() {
                 if (this.result) {
-                    return _.getOrThrow(this.result);
+                    return ContinuationResult.getOrThrow(this.result);
                 }
                 this.result = null;
                 return this.impl.get();
             },
         },
+    });
+
+    Object.setPrototypeOf(ResultAdapter, {
         /**
          * @param {org.autojs.autojs.runtime.api.ScriptPromiseAdapter} promiseAdapter
          * @return {Promise<unknown>}

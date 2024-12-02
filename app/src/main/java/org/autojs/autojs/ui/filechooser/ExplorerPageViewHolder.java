@@ -9,7 +9,7 @@ import org.autojs.autojs.ui.explorer.ExplorerViewHelper;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
 import org.autojs.autojs6.databinding.FileChooseListDirectoryBinding;
 
-class ExplorerPageViewHolder extends BindableViewHolder<ExplorerPage> {
+class ExplorerPageViewHolder extends BindableViewHolder<Object> {
 
     private final FileChooseListView fileChooseListView;
     @NonNull
@@ -24,24 +24,25 @@ class ExplorerPageViewHolder extends BindableViewHolder<ExplorerPage> {
     }
 
     @Override
-    public void bind(ExplorerPage data, int position) {
-        mExplorerPage = data;
-        binding.name.setText(ExplorerViewHelper.getDisplayName(fileChooseListView.getContext(), data));
-        binding.icon.setImageResource(ExplorerViewHelper.getIcon(data));
+    public void bind(Object item, int position) {
+        if (!(item instanceof ExplorerPage explorerPage)) return;
+        mExplorerPage = explorerPage;
+        binding.name.setText(ExplorerViewHelper.getDisplayName(fileChooseListView.getContext(), explorerPage));
+        binding.icon.setImageResource(ExplorerViewHelper.getIconRes(explorerPage));
         if (fileChooseListView.getCanChooseDir()) {
             binding.checkbox.setVisibility(View.VISIBLE);
-            binding.checkbox.setChecked(fileChooseListView.getSelectedFiles().containsKey(data.toScriptFile()), false);
+            binding.checkbox.setChecked(fileChooseListView.getSelectedFiles().containsKey(explorerPage.toScriptFile()), false);
         } else {
             binding.checkbox.setVisibility(View.GONE);
         }
-        binding.checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        binding.checkbox.setOnCheckedChangeListener((_, _) -> {
             if (binding.checkbox.isChecked()) {
                 fileChooseListView.check(mExplorerPage.toScriptFile(), getAdapterPosition());
             } else {
                 fileChooseListView.getSelectedFiles().remove(mExplorerPage.toScriptFile());
             }
         });
-        binding.item.setOnClickListener(v -> fileChooseListView.enterDirectChildPage(mExplorerPage));
+        binding.item.setOnClickListener(_ -> fileChooseListView.enterDirectChildPage(mExplorerPage));
     }
 
 }

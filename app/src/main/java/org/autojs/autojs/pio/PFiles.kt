@@ -4,9 +4,10 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.text.TextUtils
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.pref.Language
+import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.tool.Func1
 import org.autojs.autojs.util.EnvironmentUtils
+import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs6.R
 import java.io.Closeable
 import java.io.File
@@ -326,13 +327,12 @@ object PFiles {
     }
 
     @JvmStatic
-    fun getExtension(fileName: String): String {
-        val i = fileName.lastIndexOf('.')
-        return if (i < 0 || i + 1 >= fileName.length - 1) "" else fileName.substring(i + 1)
-    }
+    fun getExtension(fileName: String): String = FileUtils.getExtension(fileName)
 
     fun generateNotExistingPath(path: String, extension: String): String {
-        if (!File(path + extension).exists()) return path + extension
+        if (!File(path + extension).exists()) {
+            return path + extension
+        }
         var i = 0
         while (true) {
             val pathI = "$path($i)$extension"

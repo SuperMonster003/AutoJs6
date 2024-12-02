@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>控制台 (Console) | AutoJs6 文档 - 6.5.0</title>
+    <title>控制台 (Console) | AutoJs6 文档 - 6.6.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -162,7 +162,7 @@
 
     <div id="column1" data-id="console" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <h1>AutoJs6 文档 - 6.6.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -244,8 +244,16 @@
 <li><span class="stability_undefined"><a href="#console_settitlebackgroundcolor_color">setTitleBackgroundColor(color)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#console_m_settitlebackgroundtint">[m] setTitleBackgroundTint</a></span><ul>
+<li><span class="stability_undefined"><a href="#console_settitlebackgroundtint_color">setTitleBackgroundTint(color)</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#console_m_settitlebackgroundalpha">[m] setTitleBackgroundAlpha</a></span><ul>
 <li><span class="stability_undefined"><a href="#console_settitlebackgroundalpha_alpha">setTitleBackgroundAlpha(alpha)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#console_m_resettitlebackgroundalpha">[m] resetTitleBackgroundAlpha</a></span><ul>
+<li><span class="stability_undefined"><a href="#console_resettitlebackgroundalpha">resetTitleBackgroundAlpha()</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#console_m_settitleiconstint">[m] setTitleIconsTint</a></span><ul>
@@ -269,6 +277,10 @@
 <li><span class="stability_undefined"><a href="#console_setcontentbackgroundalpha_alpha">setContentBackgroundAlpha(alpha)</a></span></li>
 </ul>
 </li>
+<li><span class="stability_undefined"><a href="#console_m_resetcontentbackgroundalpha">[m] resetContentBackgroundAlpha</a></span><ul>
+<li><span class="stability_undefined"><a href="#console_resetcontentbackgroundalpha">resetContentBackgroundAlpha()</a></span></li>
+</ul>
+</li>
 <li><span class="stability_undefined"><a href="#console_m_settextsize">[m] setTextSize</a></span><ul>
 <li><span class="stability_undefined"><a href="#console_settextsize_size">setTextSize(size)</a></span></li>
 </ul>
@@ -283,6 +295,10 @@
 </li>
 <li><span class="stability_undefined"><a href="#console_m_setbackgroundalpha">[m] setBackgroundAlpha</a></span><ul>
 <li><span class="stability_undefined"><a href="#console_setbackgroundalpha_alpha">setBackgroundAlpha(alpha)</a></span></li>
+</ul>
+</li>
+<li><span class="stability_undefined"><a href="#console_m_resetbackgroundalpha">[m] resetBackgroundAlpha</a></span><ul>
+<li><span class="stability_undefined"><a href="#console_resetbackgroundalpha">resetBackgroundAlpha()</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#console_m_verbose">[m] verbose</a></span><ul>
@@ -371,11 +387,31 @@
 <ul>
 <li>控制台日志内容的管理 - [ 按分级显示内容 / 内容清空 / 时间跟踪 / 栈追踪 / 存入文件 ] 等<ul>
 <li><a href="#console_m_log">console.log</a></li>
+<li><a href="#console_m_warn">console.warn</a></li>
+<li><a href="#console_m_clear">console.clear</a></li>
+<li><a href="#console_m_time">console.time</a></li>
+<li><a href="#console_m_timeend">console.timeEnd</a></li>
+<li><a href="#console_m_printallstacktrace">console.printAllStackTrace</a></li>
 <li><a href="#console_m_setgloballogconfig">console.setGlobalLogConfig</a></li>
+<li>... ...</li>
 </ul>
 </li>
 <li>控制台浮动窗口的管理 - [ 窗口样式 / 文字样式 / 窗口显示与隐藏 / 窗口位置与尺寸 ] 等<ul>
+<li><a href="#console_m_setbackgroundcolor">console.setBackgroundColor</a></li>
+<li><a href="#console_m_setbackgroundtint">console.setBackgroundTint</a></li>
+<li><a href="#console_m_setbackgroundalpha">console.setBackgroundAlpha</a></li>
+<li><a href="#console_m_settouchable">console.setTouchable</a></li>
+<li><a href="#console_m_settitle">console.setTitle</a></li>
+<li><a href="#console_m_settextcolor">console.setTextColor</a></li>
+<li><a href="#console_m_settextsize">console.setTextSize</a></li>
 <li><a href="#console_m_show">console.show</a></li>
+<li><a href="#console_m_hide">console.hide</a></li>
+<li><a href="#console_m_collapse">console.collapse</a></li>
+<li><a href="#console_m_expand">console.expand</a></li>
+<li><a href="#console_m_setsize">console.setSize</a></li>
+<li><a href="#console_m_setposition">console.setPosition</a></li>
+<li><a href="#console_m_setgravity">console.setGravity</a></li>
+<li>... ...</li>
 </ul>
 </li>
 <li>控制台 Activity 活动窗口管理<ul>
@@ -722,6 +758,32 @@ console
     .setTitleBackgroundAlpha(0.5)
     .show();
 </code></pre>
+<p>如需在设置颜色时保留原有的背景透明度值, 可使用 <a href="#console_m_settitlebackgroundtint">setTitleBackgroundTint</a> 方法:</p>
+<pre><code class="lang-js">/* 深蓝色背景, 透明度丢失, 即完全不透明. */
+console.setTitleBackgroundColor(&#39;dark-blue&#39;).show();
+
+/* 深蓝色背景, 透明度保留. */
+console.setTitleBackgroundTint(&#39;dark-blue&#39;).show();
+</code></pre>
+<h2>[m] setTitleBackgroundTint<span><a class="mark" href="#console_m_settitlebackgroundtint" id="console_m_settitlebackgroundtint">#</a></span></h2>
+<h3>setTitleBackgroundTint(color)<span><a class="mark" href="#console_settitlebackgroundtint_color" id="console_settitlebackgroundtint_color">#</a></span></h3>
+<p><strong><code>6.6.0</code></strong></p>
+<ul>
+<li><strong>color</strong> { <span class="type"><a href="omniTypes.html#omnitypes_omnicolor">OmniTint</a></span> } - 浮动窗口标题显示区域背景颜色</li>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="console.html">this</a></span> }</li>
+</ul>
+<p>设置控制台浮动窗口的标题显示区域背景着色, 保留原有透明度值.</p>
+<pre><code class="lang-js">/* 设置标题显示区域背景着色为深蓝色. */
+console.setTitleBackgroundTint(&#39;dark-blue&#39;).show();
+console.build({ titleBackgroundTint: &#39;dark-blue&#39; }).show(); /* 效果同上. */
+</code></pre>
+<p>与 <a href="#console_m_settitlebackgroundcolor">setTitleBackgroundColor</a> 的区别:</p>
+<pre><code class="lang-js">/* 深蓝色背景, 透明度保留. */
+console.setTitleBackgroundTint(&#39;dark-blue&#39;).show();
+
+/* 深蓝色背景, 透明度丢失, 即完全不透明. */
+console.setTitleBackgroundColor(&#39;dark-blue&#39;).show();
+</code></pre>
 <h2>[m] setTitleBackgroundAlpha<span><a class="mark" href="#console_m_settitlebackgroundalpha" id="console_m_settitlebackgroundalpha">#</a></span></h2>
 <h3>setTitleBackgroundAlpha(alpha)<span><a class="mark" href="#console_settitlebackgroundalpha_alpha" id="console_settitlebackgroundalpha_alpha">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
@@ -739,6 +801,20 @@ console
     .setTitleBackgroundColor(&#39;dark-blue&#39;)
     .setTitleBackgroundAlpha(0.5)
     .show();
+</code></pre>
+<p>使用 <code>-1</code> 可重置标题区域的透明度 (为 <code>0.8</code>):</p>
+<pre><code class="lang-js">console.setTitleBackgroundAlpha(-1).show();
+console.resetTitleBackgroundAlpha().show(); /* 同上. */
+</code></pre>
+<h2>[m] resetTitleBackgroundAlpha<span><a class="mark" href="#console_m_resettitlebackgroundalpha" id="console_m_resettitlebackgroundalpha">#</a></span></h2>
+<h3>resetTitleBackgroundAlpha()<span><a class="mark" href="#console_resettitlebackgroundalpha" id="console_resettitlebackgroundalpha">#</a></span></h3>
+<p><strong><code>6.6.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="console.html">this</a></span> }</li>
+</ul>
+<p>重置控制台浮动窗口的标题显示区域背景颜色透明度, 默认值为 <code>0.8</code>.</p>
+<pre><code class="lang-js">console.resetTitleBackgroundAlpha().show();
+console.setTitleBackgroundAlpha(-1).show(); /* 同上. */
 </code></pre>
 <h2>[m] setTitleIconsTint<span><a class="mark" href="#console_m_settitleiconstint" id="console_m_settitleiconstint">#</a></span></h2>
 <h3>setTitleIconsTint(color)<span><a class="mark" href="#console_settitleiconstint_color" id="console_settitleiconstint_color">#</a></span></h3>
@@ -854,6 +930,20 @@ console
     .setContentBackgroundAlpha(0.5)
     .show();
 </code></pre>
+<p>使用 <code>-1</code> 可重置日志区域的透明度 (为 <code>0.6</code>):</p>
+<pre><code class="lang-js">console.setContentBackgroundAlpha(-1).show();
+console.resetContentBackgroundAlpha().show(); /* 同上. */
+</code></pre>
+<h2>[m] resetContentBackgroundAlpha<span><a class="mark" href="#console_m_resetcontentbackgroundalpha" id="console_m_resetcontentbackgroundalpha">#</a></span></h2>
+<h3>resetContentBackgroundAlpha()<span><a class="mark" href="#console_resetcontentbackgroundalpha" id="console_resetcontentbackgroundalpha">#</a></span></h3>
+<p><strong><code>6.6.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="console.html">this</a></span> }</li>
+</ul>
+<p>重置控制台浮动窗口的日志显示区域背景颜色透明度, 默认值为 <code>0.6</code>.</p>
+<pre><code class="lang-js">console.resetContentBackgroundAlpha().show();
+console.setContentBackgroundAlpha(-1).show(); /* 同上. */
+</code></pre>
 <h2>[m] setTextSize<span><a class="mark" href="#console_m_settextsize" id="console_m_settextsize">#</a></span></h2>
 <h3>setTextSize(size)<span><a class="mark" href="#console_settextsize_size" id="console_settextsize_size">#</a></span></h3>
 <p><strong><code>6.3.0</code></strong></p>
@@ -924,6 +1014,21 @@ console
     .setBackgroundColor(&#39;light-yellow&#39;)
     .setBackgroundAlpha(0.5)
     .show();
+</code></pre>
+<p>使用 <code>-1</code> 可同时重置标题区域的透明度 (为 <code>0.8</code>), 以及日志区域的透明度 (为 <code>0.6</code>):</p>
+<pre><code class="lang-js">console.setBackgroundAlpha(-1).show();
+console.resetBackgroundAlpha().show(); /* 同上. */
+</code></pre>
+<h2>[m] resetBackgroundAlpha<span><a class="mark" href="#console_m_resetbackgroundalpha" id="console_m_resetbackgroundalpha">#</a></span></h2>
+<h3>resetBackgroundAlpha()<span><a class="mark" href="#console_resetbackgroundalpha" id="console_resetbackgroundalpha">#</a></span></h3>
+<p><strong><code>6.6.0</code></strong></p>
+<ul>
+<li><ins><strong>returns</strong></ins> { <span class="type"><a href="console.html">this</a></span> }</li>
+</ul>
+<p>重置控制台浮动窗口的标题及日志显示区域背景颜色透明度, 分别为 <code>0.8</code> 及 <code>0.6</code>.</p>
+<p>相当于 <a href="#console_m_resettitlebackgroundalpha">resetTitleBackgroundAlpha</a> 和 <a href="#console_m_resetcontentbackgroundalpha">resetContentBackgroundAlpha</a> 的集成.</p>
+<pre><code class="lang-js">console.resetBackgroundAlpha().show();
+console.setBackgroundAlpha(-1).show(); /* 同上. */
 </code></pre>
 <h2>[m] verbose<span><a class="mark" href="#console_m_verbose" id="console_m_verbose">#</a></span></h2>
 <h3>verbose(data, ...args)<span><a class="mark" href="#console_verbose_data_args" id="console_verbose_data_args">#</a></span></h3>

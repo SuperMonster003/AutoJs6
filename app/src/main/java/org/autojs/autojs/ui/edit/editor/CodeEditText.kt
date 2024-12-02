@@ -130,6 +130,9 @@ class CodeEditText : AppCompatEditText {
         // TODO by Stardust on Feb 24, 2018.
         //  ! 优化效率.
         //  ! 不绘制透明字体.
+        //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+        //  ! Optimize efficiency.
+        //  ! Don't draw transparent fonts.
         super.onDraw(canvas)
         canvas.save()
         canvas.translate(0f, extendedPaddingTop.toFloat())

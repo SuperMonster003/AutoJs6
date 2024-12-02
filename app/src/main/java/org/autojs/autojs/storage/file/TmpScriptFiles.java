@@ -1,11 +1,12 @@
 package org.autojs.autojs.storage.file;
 
 import android.content.Context;
-
 import org.autojs.autojs.pio.PFiles;
 
 import java.io.File;
 import java.io.IOException;
+
+import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 
 /**
  * Created by Stardust on Oct 21, 2017.
@@ -14,7 +15,7 @@ public class TmpScriptFiles {
 
     public static File create(Context context) throws IOException {
         ensureTmpDir(context);
-        File tmp = new File(getTmpDir(context), "tmp-" + System.currentTimeMillis() + ".js");
+        File tmp = new File(getTmpDir(context), "tmp-" + System.currentTimeMillis() + JAVASCRIPT.extensionWithDot);
         tmp.createNewFile();
         return tmp;
     }

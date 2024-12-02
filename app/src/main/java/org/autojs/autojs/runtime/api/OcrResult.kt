@@ -3,8 +3,15 @@ package org.autojs.autojs.runtime.api
 import android.graphics.Rect
 import kotlin.math.abs
 
-// @Reference to com.baidu.paddle.lite.ocr.OcrResult on Mar 18, 2023.
+// @Reference to com.baidu.paddle.lite.ocr.OcrResult by SuperMonster003 on Mar 18, 2023.
 //  ! https://github.com/PaddlePaddle/PaddleOCR
+/**
+ * Represents a result from Optical Character Recognition (OCR) processing.
+ *
+ * @property label The recognized text label.
+ * @property confidence The confidence score of the recognition, ranging from 0 (least confident) to 1 (most confident).
+ * @property bounds The bounding box coordinates of the recognized text region.
+ */
 class OcrResult(@JvmField val label: String, @JvmField val confidence: Float, @JvmField val bounds: Rect) : Comparable<OcrResult> {
 
     override fun compareTo(other: OcrResult): Int {

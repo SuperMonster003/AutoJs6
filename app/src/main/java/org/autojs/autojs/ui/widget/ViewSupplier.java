@@ -13,8 +13,8 @@ import java.io.Serializable;
  * So, implementations should not has any non-serializable fields.
  */
 
-
 public interface ViewSupplier extends Serializable {
 
     View inflateView(Context context);
+
 }

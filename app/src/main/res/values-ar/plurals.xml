@@ -1,0 +1,21 @@
+<resources>
+
+    <plurals name="text_items_total_sum">
+        <item quantity="zero">المجموع: لا شيء</item>
+        <item quantity="one">المجموع: عنصر واحد</item>
+        <item quantity="two">المجموع: عنصران</item>
+        <item quantity="few">المجموع: %d عناصر</item>
+        <item quantity="many">المجموع: %d عنصرًا</item>
+        <item quantity="other">المجموع: %d عناصر</item>
+    </plurals>
+
+    <plurals name="text_already_stop_n_scripts">
+        <item quantity="zero">لم يتم إيقاف أي برنامج نصي</item>
+        <item quantity="one">تم إيقاف %d برنامج نصي</item>
+        <item quantity="two">تم إيقاف برنامجين نصيين</item>
+        <item quantity="few">تم إيقاف %d نصوص</item>
+        <item quantity="many">تم إيقاف %d نصوص</item>
+        <item quantity="other">تم إيقاف %d نصوص</item>
+    </plurals>
+
+</resources>

@@ -31,12 +31,16 @@ import java.io.File
 
 class WorkingDirectoryPreference : MaterialPreference {
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    @Suppress("unused")
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
+    @Suppress("unused")
     constructor(context: Context) : super(context)
 
     init {
@@ -44,10 +48,7 @@ class WorkingDirectoryPreference : MaterialPreference {
     }
 
     override fun onClick() {
-        WorkingDirectoryDialogBuilder().apply {
-            onFinish = { notifyChanged() }
-            show()
-        }
+        WorkingDirectoryDialogBuilder().show()
         super.onClick()
     }
 
@@ -61,8 +62,6 @@ class WorkingDirectoryPreference : MaterialPreference {
 
         private val mPrefFullPath = WorkingDirectoryUtils.path
         private val mExtStoragePath = EnvironmentUtils.externalStoragePath
-
-        var onFinish = {}
 
         init {
             build()
@@ -144,7 +143,7 @@ class WorkingDirectoryPreference : MaterialPreference {
                     MainActivity.shouldRecreateMainActivity = true
                 }
                 dialog.dismiss()
-                onFinish()
+                notifyChanged()
             }
             .autoDismiss(false)
             .build()

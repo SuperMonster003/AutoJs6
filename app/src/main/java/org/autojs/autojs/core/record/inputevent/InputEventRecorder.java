@@ -13,9 +13,7 @@ import java.util.regex.Pattern;
  */
 public abstract class InputEventRecorder extends Recorder.AbstractRecorder implements InputEventObserver.InputEventListener {
 
-
     private final static Pattern LAST_INT_PATTERN = Pattern.compile("[^0-9]+([0-9]+)$");
-
 
     protected boolean mRecording = false;
 
@@ -45,7 +43,6 @@ public abstract class InputEventRecorder extends Recorder.AbstractRecorder imple
         }
         return -1;
     }
-
 
     @Override
     public void onInputEvent(@NonNull InputEventObserver.InputEvent e) {

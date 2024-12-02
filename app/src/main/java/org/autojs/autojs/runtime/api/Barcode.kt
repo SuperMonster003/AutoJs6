@@ -12,9 +12,9 @@ import com.google.mlkit.vision.barcode.common.Barcode as MLKitBarcode
  */
 class Barcode {
 
-    @JvmOverloads
-    fun detect(image: ImageWrapper?, formats: IntArray = intArrayOf(), enableAllPotentialBarcodes: Boolean = false): Array<WrappedBarcode> {
-        image?.takeUnless { image.isRecycled } ?: return emptyArray()
+    fun detect(image: ImageWrapper?, formats: IntArray = intArrayOf(), enableAllPotentialBarcodes: Boolean = false, onlyOneResult: Boolean = false): List<WrappedBarcode> {
+
+        image?.takeUnless { image.isRecycled } ?: return emptyList()
 
         val options = BarcodeScannerOptions.Builder()
             .setBarcodeFormats(MLKitBarcode.FORMAT_ALL_FORMATS, *formats)
@@ -24,11 +24,14 @@ class Barcode {
         val scanner = BarcodeScanning.getClient(options)
         val inputImage = InputImage.fromBitmap(image.bitmap, 0)
 
-        var results: Array<WrappedBarcode>? = null
+        var results: List<WrappedBarcode>? = null
 
         val resultScan = scanner.process(inputImage)
             .addOnSuccessListener { barcodes: MutableList<MLKitBarcode> ->
-                results = barcodes.map { WrappedBarcode(it) }.toTypedArray()
+                when {
+                    onlyOneResult -> barcodes.firstOrNull()?.let { results = listOf(WrappedBarcode(it)) }
+                    else -> results = barcodes.map { WrappedBarcode(it) }
+                }
                 lockNotify()
             }
             .addOnFailureListener { e ->
@@ -53,7 +56,7 @@ class Barcode {
         if (!resultScan.isSuccessful) {
             Log.w(TAG, "Barcode scanning is not successful")
         }
-        return results ?: emptyArray()
+        return results ?: emptyList()
     }
 
     private fun lockNotify() = synchronized(lock) { lock.notify() }

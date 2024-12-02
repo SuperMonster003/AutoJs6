@@ -19,7 +19,6 @@ public class StateObserver {
         void initState(boolean state);
     }
 
-
     public static abstract class SimpleOnStateChangedListener<T> implements OnStateChangedListener {
 
         @Override
@@ -28,14 +27,12 @@ public class StateObserver {
         }
     }
 
-
     private final Map<String, List<OnStateChangedListener>> mKeyStateListenersMap = new HashMap<>();
     private final SharedPreferences mSharedPreferences;
 
     public StateObserver(SharedPreferences sharedPreferences) {
         mSharedPreferences = sharedPreferences;
     }
-
 
     public void register(String key, OnStateChangedListener listener) {
         initState(key, listener);
@@ -44,7 +41,6 @@ public class StateObserver {
             listeners.add(listener);
         }
     }
-
 
     private void unregister(String key, OnStateChangedListener stateChangedListener) {
         synchronized (mKeyStateListenersMap) {
@@ -86,6 +82,5 @@ public class StateObserver {
         }
         return listeners;
     }
-
 
 }

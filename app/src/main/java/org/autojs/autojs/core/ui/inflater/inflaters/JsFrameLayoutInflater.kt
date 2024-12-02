@@ -8,12 +8,13 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.inflater.util.Gravities
 import org.autojs.autojs.core.ui.widget.JsFrameLayout
+import org.autojs.autojs.runtime.ScriptRuntime
 
 /**
  * Created by Stardust on Nov 29, 2017.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
-class JsFrameLayoutInflater(resourceParser: ResourceParser) : FrameLayoutInflater<JsFrameLayout>(resourceParser) {
+class JsFrameLayoutInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : FrameLayoutInflater<JsFrameLayout>(scriptRuntime, resourceParser) {
 
     private var mGravity: Int? = null
 

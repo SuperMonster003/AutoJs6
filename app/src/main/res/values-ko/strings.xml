@@ -3,6 +3,7 @@
 <!-- Translator: [ QTranslate (https://quest-app.appspot.com) ] -->
 <!-- Translator: [ DeepL (https://www.deepl.com/translator) ] -->
 <!-- Proofreader: [ SuperMonster003 ] -->
+<!-- Proofreader: [ JetBrains AI Assistant ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
 
@@ -11,11 +12,25 @@
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">포장...</string>
     <string name="apk_builder_plugin_version_incompatible">\"APK Builder\" 의 호환되지 않는 버전.\n지금 다운로드 하시겠습니까?</string>
     <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">준비...</string>
+    <string name="apk_info_device_sdk">디바이스 SDK</string>
+    <string name="apk_info_installed_version">설치됨</string>
+    <string name="apk_info_max_sdk">최대 SDK</string>
+    <string name="apk_info_min_sdk">최소 SDK</string>
+    <string name="apk_info_package_name">패키지</string>
+    <string name="apk_info_target_sdk">대상 SDK</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">UI 스레드에서 블로킹 작업을 수행할 수 없습니다. `waitForActivity` 를 하위 스레드나 하위 스크립트에서 실행하거나, `setInterval` 를 사용하여 활동을 확인하기 위해 루프를 사용해 보세요</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">UI 스레드에서 블로킹 작업을 수행할 수 없습니다. `waitForPackage` 를 하위 스레드나 하위 스크립트에서 실행하거나, `setInterval` 를 사용하여 패키지를 확인하기 위해 루프를 사용해 보세요</string>
+    <string name="config_abi_options_contains_invalid">설정 \"abi\" 에 잘못된 옵션이 포함되어 있습니다</string>
+    <string name="config_abi_options_contains_unavailable">설정 \"abi\" 에 사용할 수 없는 옵션이 포함되어 있습니다</string>
+    <string name="config_lib_options_contains_invalid">설정 \"lib\" 에 잘못된 옵션이 포함되어 있습니다</string>
+    <string name="config_lib_options_contains_unavailable">설정 \"lib\" 에 사용할 수 없는 옵션이 포함되어 있습니다</string>
     <string name="confirm_overwrite_file">존재하는 파일입니다.\n덮어 쓰기?</string>
     <string name="content_about_app_tips">1. 홈 페이지에서 애플리케이션 이름 (AutoJs6) 을 길게 눌러 설정 페이지로 이동합니다.\n2. 설정 페이지에서 특정 설정 옵션을 길게 누르면 자세한 정보를 볼 수 있습니다.</string>
+    <string name="content_description_fab_for_display_manifest">매니페스트를 표시하기 위한 플로팅 액션 버튼 위젯</string>
     <string name="content_github_feedback">문제를보고하기 위해 웹 페이지가 시작됩니다.\nGitHub 에 대한 계정이 필요할 수 있습니다.</string>
     <string name="content_way_of_output_for_recorded_script">재설계된 스크립트의 출력 방법 선택</string>
     <string name="crash_feedback">디버깅 로그를 복사하거나 직접 종료하십시오</string>
+    <string name="current_available_abi_options">현재 사용 가능한 \"abi\" 옵션 목록</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">스크립트의 알림</string>
@@ -32,6 +47,7 @@
     <string name="description_extending_js_build_in_objects">JavaScript 내장 개체를 확장하면 코드 유연성이 향상되고 더 풍부한 기능을 사용할 수 있지만 충돌이 발생하고 파손될 수도 있습니다.\n옵션이 켜져 있을 때 모든 스크립트에는 기본적으로 활성화된 내장 확장이 있습니다.\n기본 제공 확장은 종종 안전하지 않으며 기본 제공 확장의 원칙과 위험을 명확하게 이해하지 않는 한 권장되지 않습니다.\n옵션이 꺼져 있어도 프로젝트 문서에 설명된 대로 플러그인 전역 개체를 통해 내장 확장을 계속 활성화할 수 있습니다.</string>
     <string name="description_hidden_files_preference">AutoJs6 파일 탐색기에서 숨겨진 파일 및 폴더(보통 \".\" 로 시작)를 표시할지 여부를 설정하는 데 사용됩니다.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 이 포그라운드에 있을 때 장치의 화면을 켜고 밝게 유지하기 위한 기본 설정입니다.\nAutoJs6 애플리케이션의 모든 페이지 중 홈페이지에서만 발생하도록 하려면 \"홈페이지만\" 옵션을 선택합니다.</string>
+    <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
     <string name="description_manage_ignored_updates_preference">목록 항목을 보거나 관리하려면 클릭하세요.\n목록 항목을 제거하려면 길게 누릅니다.</string>
     <string name="description_night_mode_preference">야간 모드 (다크 테마라고도 함) 는 Android 시스템 UI 와 장치에서 실행되는 앱 모두에 적용되어 저시력 사용자와 밝은 빛에 민감한 사용자의 가시성을 향상시키고 누구나 쉽게 장치를 사용할 수 있습니다. 저조도 환경에서.\n\n시스템 따르기: AutoJs6 에는 Android 시스템과 동일한 야간 모드 설정이 있습니다.\n항상 켜짐: AutoJs6 은 Android 시스템 설정에 관계없이 야간 모드를 유지합니다.\n항상 끄기: AutoJs6 은 야간 모드를 끈 상태로 유지합니다(Android 시스템 설정에 관계없이).\n\n참고: 팔로우 시스템 옵션은 Android API 레벨 28 (Android 9) [P] 이상에만 적용됩니다.</string>
     <string name="description_night_mode_preference_more">Android 시스템에서 야간 모드를 활성화하려면:\n- Android API 레벨 29 (Android 10) [Q] 이상: 설정 -> 디스플레이 -> 테마.\n- Android API 레벨 28 (Android 9) [P]: 개발자 옵션 -> 야간 모드.\n\nWebView 구성 요소(예: AutoJs6 설명서 페이지)를 사용하여 웹 기반 콘텐츠에 야간 모드 (어두운 테마) 를 적용하려면 다음 조건을 충족해야 합니다.\n1. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P]: 버전 >= 105\n2. WebView 구성 요소의 웹 기반 콘텐츠는 Dark 테마에 맞게 조정됩니다 (CSS 또는 Android XML 리소스 등).</string>
@@ -40,12 +56,14 @@
     <string name="description_stable_mode">안정 모드는 레이아웃 경계를 얻을 때 더 안정적이지만 일부 결과는 무시할 수 있습니다.\n접근성 서비스의 재시작이 필요합니다.</string>
     <string name="description_theme_color_preference">테마 색상은 다음을 포함하되 이에 국한되지 않는 위젯에 적용됩니다.\n상태 표시 줄\n앱바\n파일 아이콘\n작업 항목 아이콘\n팹\n설정 카테고리 제목\n스위치 버튼\n\n참고: AutoJs6 버전 6.2.0 현재 기본 색상, 기본 어두운 색상 및 강조 색상 사이에는 아직 차이가 없습니다.</string>
     <string name="dialog_button_back">@string/text_back</string>
-    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">취소</string>
     <string name="dialog_button_cancel_download">취소</string>
     <string name="dialog_button_confirm">확인</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_default_prefix">기본 접두사</string>
     <string name="dialog_button_details">세부</string>
+    <string name="dialog_button_dismiss">Dismiss</string>
     <string name="dialog_button_download_with_browser">브라우저</string>
     <string name="dialog_button_history">역사</string>
     <string name="dialog_button_ignore_current_update">무시하다</string>
@@ -59,8 +77,7 @@
     <string name="dialog_button_system_settings_simplified">시스템</string>
     <string name="dialog_button_update_now">업데이트</string>
     <string name="dialog_button_use_default">기본값을 사용하십시오</string>
-    <string name="text_app_shortcut_docs_long_label">AutoJs6 문서</string>
-    <string name="text_app_shortcut_docs_short_label">문서</string>
+    <string name="dialog_button_view_file">파일 보기</string>
     <string name="edit_and_run_handle_intent_error">파일을 처리 할 수 없습니다</string>
     <string name="edit_exit_without_save_warn">콘텐츠가 저장되지 않았습니다. 나가시겠습니까?</string>
     <string name="entry_app_language_auto">시스템을 따르십시오</string>
@@ -84,10 +101,18 @@
     <string name="entry_root_record_out_file_type_js">자바 스크립트 유형 (편집 가능)</string>
     <string name="error_a_runtime_has_been_set">런타임이 설정되었습니다</string>
     <string name="error_abandoned_method">%s 메서드는 중단되었으며 사용해서는 안 됩니다</string>
+    <string name="error_action_cannot_be_completed_with_negative_coordinate">매개 변수에 음수 좌표 값 (%2$d, %3$d)이 포함되어 있으므로 \"%1$s\" 작업을 완료할 수 없습니다</string>
+    <string name="error_activity_is_required_for_ui_exec_mode">UI 실행 모드를 위한 활동이 필요합니다</string>
+    <string name="error_an_operation_is_not_implemented">작업이 구현되지 않았습니다</string>
     <string name="error_app_not_installed">앱이 설치되지 않았습니다: \"%s\"</string>
+    <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">%2$s#%3$s 에 대한 인수 %1$s 는 null 값을 가질 수 없습니다</string>
+    <string name="error_arguments_cannot_be_empty">인수를 비울 수 없습니다</string>
+    <string name="error_arguments_must_be_empty">인수는 비어 있어야 합니다</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">하나 이상의 ABI 를 선택해야 합니다.</string>
     <string name="error_both_bitmap_and_mat_are_null">비트 맵과 매트는 모두 null입니다</string>
     <string name="error_cannot_be_null">%s는 null 이 될 수 없다</string>
     <string name="error_cannot_connect_to_github">GitHub 에 연결할 수 없습니다</string>
+    <string name="error_cannot_convert_value_into_a_script_runtime_path">%s 를 스크립트 런타임 경로로 변환할 수 없습니다</string>
     <string name="error_cannot_find_editor_view_from_child_view">Child View: %s 에서 EditorView 를 찾을 수 없습니다</string>
     <string name="error_cannot_get_download_url">URL 다운로드를받을 수 없습니다</string>
     <string name="error_cannot_rename">이름을 바꾸지 못했습니다</string>
@@ -108,7 +133,18 @@
     <string name="error_empty_github_release_assets">다운로드 할 자산이 없습니다</string>
     <string name="error_empty_shell_command">명령이 비어 있습니다</string>
     <string name="error_enable_server">AutoJs6 서버를 활성화 할 수 없습니다: %s</string>
+    <string name="error_excessive_height_for_template_n_region">높이 초과: 템플릿 [%1$d] > 영역 [%2$d]</string>
+    <string name="error_excessive_width_for_template_n_region">너비 초과: 템플릿 [%1$d] > 영역 [%2$d]</string>
+    <string name="error_failed_to_call_method">메서드 \"%s\"를 호출하지 못했습니다</string>
+    <string name="error_failed_to_call_method_with_cause"><![CDATA[메서드 \"%1$s\"를 호출하지 못했습니다: [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">%s 값을 Drawable로 변환하지 못했습니다</string>
+    <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
+    <string name="error_failed_to_instantiate">\"%s\" 인스턴스 생성에 실패했습니다</string>
+    <string name="error_failed_to_instantiate_with_cause"><![CDATA[인스턴스 생성 \"%1$s\" 에 실패했습니다: [ %2$s ]]]></string>
+    <string name="error_failed_to_invoke_method_with_description">메소드 %1$s 호출에 실패했습니다</string>
+    <string name="error_failed_to_revoke_shizuku_access">Shizuku 권한 해지에 실패했습니다</string>
+    <string name="error_failed_to_run_script">스크립트 실행 실패</string>
+    <string name="error_file_in_path_does_not_exist">경로 \"%1$s\" 에 파일이 존재하지 않습니다</string>
     <string name="error_function_called_in_ui_thread">UI 스레드는 차단할 수 없습니다. 하위 스레드 또는 하위 스크립트에서 %s() 를 실행하십시오</string>
     <string name="error_function_called_more_than_once">%s() 가 두 번 이상 호출됩니다</string>
     <string name="error_get_github_latest_release">최신 GitHub 릴리스를 얻을 수 없습니다</string>
@@ -119,6 +155,9 @@
     <string name="error_illegal_url_argument" formatted="false">URL은 \"https://\" 등의 프로토콜로 시작해야합니다.</string>
     <string name="error_illegal_widget_command" formatted="false">매개 변수 %s (%s) 는 %s 유형으로 캐스트 될 수 있어야합니다.</string>
     <string name="error_image_has_been_recycled">이미지가 재활용되었습니다</string>
+    <string name="error_images_must_have_the_same_size">이미지의 크기가 같아야 합니다</string>
+    <string name="error_images_must_have_the_same_size_and_type">이미지는 같은 크기와 유형이어야 합니다</string>
+    <string name="error_input_fields_check_failed">입력 필드 확인 실패</string>
     <string name="error_invalid_compass">잘못된 나침반: %s</string>
     <string name="error_invalid_github_repo">유효하지 않은 GitHub 저장소: %s</string>
     <string name="error_invalid_ip_address">잘못된 IP 주소</string>
@@ -129,10 +168,13 @@
     <string name="error_max_listeners_exceeded">최대 청취자를 초과했습니다: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 은 \"auto\" 파일을 실행할 루트 액세스 권한이 없을 수 있습니다.</string>
     <string name="error_method_called_with_null_argument" formatted="false">널 인수로 호출 된 %s(): %s</string>
+    <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">메소드는 [%1$d..%2$d] 범위의 인수만 허용합니다</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">필요한 라이브러리 파일이 부족하여 \"%s\" 모듈이 작동하지 않습니다</string>
     <string name="error_no_accessibility_permission">접근성 서비스가 비활성화되고 스크립트가 중지되었습니다</string>
     <string name="error_no_accessibility_permission_to_capture">접근성 서비스는 활성화되지 않습니다</string>
     <string name="error_no_accessibility_service">접근성 서비스가 없습니다</string>
     <string name="error_no_display_over_other_apps_permission">\"다른 앱 위에 표시\"권한이 없습니다</string>
+    <string name="error_no_permission_to_access_shizuku">Shizuku 에 액세스할 수 있는 권한이 없습니다</string>
     <string name="error_no_post_notifications_permission">\"게시물 알림\" 권한 없음</string>
     <string name="error_no_read_phone_state_permission">\"전화 상태 읽기\"권한이 없습니다</string>
     <string name="error_no_screen_capture_permission">화면 캡처 허가가 없습니다</string>
@@ -145,19 +187,28 @@
     <string name="error_parse_version_info">버전 정보를 구문 분석하지 못했습니다</string>
     <string name="error_pattern_syntax">잘못된 패턴 구문</string>
     <string name="error_port_num_over_65535">65535 이상의 포트 번호</string>
+    <string name="error_project_main_script_file_with_abs_path_does_not_exist">프로젝트 메인 스크립트 파일 \"%1$s\" 이 존재하지 않습니다</string>
     <string name="error_put_value_into_json">가치 %s 를 JSON 에 넣을 수 없습니다</string>
     <string name="error_regex_find_prev">Regex 와 함께 이전을 찾을 수 없습니다</string>
     <string name="error_repeated_colon_symbol">반복 콜론 기호</string>
     <string name="error_repeated_dot_symbol">반복되는 점 기호</string>
+    <string name="error_required_property_is_nullish_or_does_not_exist">필수 속성 \"%1$s\" 가 null 이거나 존재하지 않습니다</string>
     <string name="error_script_is_on_exiting">스크립트가 종료 중입니다</string>
     <string name="error_selector_method_without_calling">셀렉터 메소드는 매개 변수로 전달되지 않고 호출되어야합니다: %s</string>
     <string name="error_selector_result_type_with_compass">결과 유형이 선택기 일 때 나침반을 사용할 수 없습니다</string>
     <string name="error_set_both_icon_res_and_icon">아이콘과 아이콘을 모두 설정할 수 없습니다</string>
+    <string name="error_shizuku_is_not_installed">Shizuku 가 설치되지 않았습니다</string>
+    <string name="error_shizuku_service_may_be_not_running">Shizuku 서비스가 실행되고 있지 않을 수 있습니다</string>
+    <string name="error_shizuku_version_is_not_supported">지원되지 않는 Shizuku 버전</string>
+    <string name="error_the_transformer_for_required_property_cannot_return_nullish">필수 속성 \"%1$s\" 에 대한 변환기는 null 값을 반환할 수 없습니다</string>
     <string name="error_thread_is_not_alive">스레드는 살아 있지 않습니다</string>
+    <string name="error_unable_to_use_shizuku_service">Shizuku 서비스를 사용할 수 없음</string>
     <string name="error_unacceptable_character">허용되지 않는 문자</string>
     <string name="error_unknown">알수없는 오류</string>
     <string name="error_unknown_algorithm_selector_param">알 수없는 알고리즘 선택기 매개 변수: %s</string>
     <string name="error_unknown_color_name">알 수 없는 색상 이름: %s</string>
+    <string name="error_unknown_element_name">알 수 없는 요소 이름: %1$s</string>
+    <string name="error_unknown_gravity_for">알 수 없는 중력: %s</string>
     <string name="error_unknown_operation">알 수없는 작업</string>
     <string name="error_unknown_picker_result_type">알 수없는 결과 유형 {이름: %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">알 수없는 결과 유형 {이름: %s, 매개 변수: %s}</string>
@@ -168,7 +219,7 @@
     <string name="foreground_notification_text">AutoJs6 을 시작하려면 클릭하십시오</string>
     <string name="foreground_notification_title">AutoJs6 전경 서비스</string>
     <string name="format_build_succeeded" formatted="true">빌드가 성공했습니다.\n파일 경로: %s</string>
-    <string name="format_debug_bar_title">디버그 [%s]</string>
+    <string name="format_debug_bar_title"><![CDATA[디버그 [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">숯: %d\n라인: %d\n크기: %s</string>
     <string name="format_file_downloaded" formatted="true">파일은 %s 로 다운로드했습니다</string>
     <string name="go_to_accessibility_settings"><![CDATA[설정 -> 접근성 서비스 -> AutoJs6 [할 수 있게 하다]]></string>
@@ -176,6 +227,18 @@
     <string name="hint_long_click_run_to_debug">\"실행\" 버튼을 긴 클릭하여 디버그를 클릭하십시오</string>
     <string name="hint_loop_delay">루프 전 지연</string>
     <string name="hint_loop_times">무한 루프의 경우 0</string>
+    <string name="media_info_album_label">앨범</string>
+    <string name="media_info_aspect_ratio_label">종횡비</string>
+    <string name="media_info_audio_format_label">오디오</string>
+    <string name="media_info_bit_rate_label">비트레이트</string>
+    <string name="media_info_container_format_label">컨테이너</string>
+    <string name="media_info_duration_label">지속 시간</string>
+    <string name="media_info_file_size_label">파일 크기</string>
+    <string name="media_info_frame_rate_label">프레임 속도</string>
+    <string name="media_info_performer_label">아티스트</string>
+    <string name="media_info_resolution_label">해상도</string>
+    <string name="media_info_track_name_label">제목</string>
+    <string name="media_info_video_format_label">비디오</string>
     <string name="mt_color_picker_title">색상 선택기</string>
     <string name="mt_custom">관습</string>
     <string name="no_apk_builder_plugin">APK 빌더가 설치되지 않았습니다</string>
@@ -196,16 +259,13 @@
     <string name="summary_pre_execute_script">스크립트 파일 전에 실행하십시오</string>
     <string name="summary_record_prompt">스크립트 기록을 시작하거나 중지할 때 메시지 표시</string>
     <string name="summary_stable_mode">보다 안정적인 레이아웃 분석이지만 더 나쁜 코드 호환성 (접근성 서비스 재시작 필요)</string>
+    <string name="summary_text_launcher_shortcuts">런처에 바로 가기 추가</string>
     <string name="summary_use_volume_control_record">부동 버튼이 표시 될 때 볼륨 다운 키로 제어 된 녹음 시작 또는 중지</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">실행 중인 모든 스크립트를 중지하려면 \"볼륨 크게\" 키를 누르십시오.</string>
     <string name="text_a11y_service">접근성 서비스</string>
     <string name="text_a11y_service_description">스크립트 자동 작동에 필요합니다 (클릭, 긴 프레스, 슬라이드 등).</string>
     <string name="text_a11y_service_enabled_but_not_running">접근성 서비스가 활성화되었지만 실행되지 않음 (장치를 다시 활성화 또는 재부팅)</string>
     <string name="text_a11y_service_may_be_needed">접근성 서비스가 필요할 수 있습니다</string>
-    <string name="text_supported_libraries_short">라이브러리</string>
-    <string name="text_supported_abis_short">ABI</string>
-    <string name="text_supported_abis_short_32bit">ABI (32 비트)</string>
-    <string name="text_supported_abis_short_64bit">ABI (64 비트)</string>
     <string name="text_about">에 대한</string>
     <string name="text_about_all_files_access">모든 파일 액세스에 대해</string>
     <string name="text_about_app_and_developer">앱과 개발자에 대해</string>
@@ -223,9 +283,11 @@
     <string name="text_action">동작</string>
     <string name="text_activity_not_found_for_apk_installing">APK 설치 프로그램이 없습니다</string>
     <string name="text_adb_tool_needed">ADB 도구가 필요합니다</string>
+    <string name="text_alias">별칭</string>
     <string name="text_all_files_access">모든 파일에 액세스합니다</string>
     <string name="text_all_files_access_is_needed">\"모든 파일 액세스\"는 전화기의 스크립트 파일에 액세스하려면 필요합니다.</string>
     <string name="text_already_copied_to_clip">클립 보드에 복사</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">클립보드에 이미 복사되었습니다(최신 %d 항목만)</string>
     <string name="text_already_created">만들어진</string>
     <string name="text_already_deleted">삭제</string>
     <string name="text_android_build_id">안드로이드 빌드 ID</string>
@@ -256,6 +318,13 @@
     <string name="text_app_name_parallel_space">평행 공간</string>
     <string name="text_app_name_qqmusic">QQMUSIC</string>
     <string name="text_app_name_wechat">Wechat</string>
+    <string name="text_app_shortcut_disabled">이 바로 가기가 비활성화되었습니다</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 문서</string>
+    <string name="text_app_shortcut_docs_short_label">문서</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 통나무</string>
+    <string name="text_app_shortcut_log_short_label">통나무</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 설정</string>
+    <string name="text_app_shortcut_settings_short_label">설정</string>
     <string name="text_app_source_code">소스 코드</string>
     <string name="text_app_version_code">앱 버전 코드</string>
     <string name="text_app_version_name">앱 버전 이름</string>
@@ -264,6 +333,7 @@
     <string name="text_auto_check_for_updates">자동 확인 업데이트</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">자동으로 업데이트를 확인하고 홈페이지에 스낵바를 표시합니다.</string>
     <string name="text_auto_night_mode">자동 밤 모드</string>
+    <string name="text_available_windows">사용 가능한 창</string>
     <string name="text_back">뒤</string>
     <string name="text_broadcast_action">동작</string>
     <string name="text_broadcast_task">방송 작업</string>
@@ -272,6 +342,21 @@
     <string name="text_cancel">취소</string>
     <string name="text_cancel_simplified">취소</string>
     <string name="text_cannot_read_file">파일을 읽을 수 없다</string>
+    <string name="text_captured_window_info_order">순서</string>
+    <string name="text_captured_window_info_package_name">패키지</string>
+    <string name="text_captured_window_info_package_name_unknown">알 수 없는 패키지</string>
+    <string name="text_captured_window_info_root_node">루트</string>
+    <string name="text_captured_window_info_root_node_unknown">알 수 없는 루트</string>
+    <string name="text_captured_window_info_title">제목</string>
+    <string name="text_captured_window_info_title_null">없음</string>
+    <string name="text_captured_window_info_type">유형</string>
+    <string name="text_captured_window_info_type_of_accessibility_overlay">접근성</string>
+    <string name="text_captured_window_info_type_of_application">앱</string>
+    <string name="text_captured_window_info_type_of_input_method">입력 방식</string>
+    <string name="text_captured_window_info_type_of_magnification_overlay">확대 오버레이</string>
+    <string name="text_captured_window_info_type_of_split_screen_divider">화면 분할</string>
+    <string name="text_captured_window_info_type_of_system">시스템</string>
+    <string name="text_captured_window_info_type_unknown">알 수 없음</string>
     <string name="text_change_working_dir">작업 디렉토리를 변경하십시오</string>
     <string name="text_check_for_updates">업데이트 확인</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">업데이트 확인 ...</string>
@@ -322,6 +407,7 @@
     <string name="text_debug_step_into">들어가십시오</string>
     <string name="text_debug_step_out">나가</string>
     <string name="text_debug_step_over">한 걸음 더</string>
+    <string name="text_default_prefix">기본 접두사</string>
     <string name="text_delete">삭제</string>
     <string name="text_delete_line">라인 삭제</string>
     <string name="text_details">세부</string>
@@ -346,8 +432,11 @@
     <string name="text_documentation_source">문서 소스</string>
     <string name="text_done">완료</string>
     <string name="text_download">다운로드</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">위의 ABI가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"%s\" 포함)</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">모든 ABI가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"universal\" 포함)</string>
     <string name="text_download_cancelled">다운로드 취소</string>
     <string name="text_download_interruption_warning">계속하면 현재 다운로드가 중단됩니다</string>
+    <string name="text_download_link_for_autojs6">AutoJs6 다운로드 링크</string>
     <string name="text_download_url">URL 을 다운로드하십시오</string>
     <string name="text_downloading">다운로드</string>
     <string name="text_drawer_close">가까운 서랍</string>
@@ -374,16 +463,19 @@
     <string name="text_exit">출구</string>
     <string name="text_exit_directly">출구</string>
     <string name="text_export">내보내다</string>
+    <string name="text_exported">내보낸</string>
     <string name="text_extending_js_build_in_objects">JavaScript 내장 개체 확장</string>
     <string name="text_extensibility">확장성</string>
     <string name="text_failed">실패한</string>
     <string name="text_failed_to_build">건축에 실패했습니다</string>
+    <string name="text_failed_to_copy">복사하지 못했습니다</string>
     <string name="text_failed_to_create">만들지 못했습니다</string>
     <string name="text_failed_to_delete">삭제하지 못했습니다</string>
     <string name="text_failed_to_disable_a11y_service">접근성 서비스를 비활성화하지 못했습니다</string>
     <string name="text_failed_to_download">다운로드하지 못했습니다</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">루트 액세스로 접근성 서비스를 활성화하지 못했습니다</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">안전한 설정으로 접근성 서비스를 활성화하지 못했습니다</string>
+    <string name="text_failed_to_export_log_entries">로그 항목을 내보내지 못했습니다</string>
     <string name="text_failed_to_format">포맷 실패</string>
     <string name="text_failed_to_generate">코드를 생성하지 못했습니다</string>
     <string name="text_failed_to_grant_access">액세스 권한을 부여하지 못했습니다</string>
@@ -393,11 +485,13 @@
     <string name="text_failed_to_register">등록하지 못했습니다</string>
     <string name="text_failed_to_report">제출하지 못했습니다</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">원격 프로젝트를 로컬 저장소에 저장하지 못했습니다</string>
+    <string name="text_failed_to_send_log_entries">로그 항목을 보내지 못했습니다</string>
     <string name="text_failed_to_write_file">파일을 쓰지 못했습니다</string>
     <string name="text_file">파일</string>
     <string name="text_file_exists">존재하는 파일입니다</string>
     <string name="text_file_name">파일 이름</string>
     <string name="text_file_not_exists">파일이 존재하지 않는다</string>
+    <string name="text_file_with_abs_path_is_not_an_executable_script">\"%1$s\" 파일은 실행 가능한 스크립트가 아닙니다</string>
     <string name="text_files_transfer">파일 전송</string>
     <string name="text_find">찾다</string>
     <string name="text_find_java_classes">Java 클래스를 찾으십시오</string>
@@ -417,11 +511,14 @@
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">릴리스 노트 검색 ...</string>
     <string name="text_github_backup_url_used">백업 URL 이 사용되었습니다</string>
     <string name="text_go_to_settings">설정으로 바로 가기\"</string>
+    <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 부여하기</string>
     <string name="text_granted">부여된</string>
     <string name="text_guard_mode">가드 모드</string>
     <string name="text_help">돕다</string>
     <string name="text_hidden_files_description">숨겨진 파일과 폴더가 파일 탐색기에 표시되는지 여부. 이름이 기간 문자로 시작되면 파일 또는 폴더가 숨겨진 것으로 간주됩니다 ( \".\").</string>
     <string name="text_hidden_files_title">숨겨진 파일과 폴더</string>
+    <string name="text_hide">숨기기</string>
+    <string name="text_hide_button">버튼 숨기기</string>
     <string name="text_histories">역사</string>
     <string name="text_icon">상</string>
     <string name="text_ignore_battery_optimizations">배터리 최적화를 무시합니다</string>
@@ -437,6 +534,7 @@
     <string name="text_inspect_layout_bounds">레이아웃 경계를 검사하십시오</string>
     <string name="text_inspect_layout_hierarchy">레이아웃 계층 구조를 검사하십시오</string>
     <string name="text_install">설치</string>
+    <string name="text_invalid_character_is_removed">잘못된 문자가 제거되었습니다</string>
     <string name="text_invalid_package_name">잘못된 패키지 이름</string>
     <string name="text_invalid_project">잘못된 프로젝트</string>
     <string name="text_is_latest_version">새로운 버전이 발견되지 않았습니다</string>
@@ -449,16 +547,17 @@
     <string name="text_jump_to_line_start">라인 시작으로 이동하십시오</string>
     <string name="text_jump_to_start">시작으로 점프하십시오</string>
     <string name="text_keep_screen_on_when_in_foreground">포그라운드에 있을 때 화면을 켜두세요</string>
+    <string name="text_label_name">이름</string>
     <string name="text_last_updates_checked_time">마지막으로 확인 된: %s</string>
     <string name="text_latest_activity">최신 활동</string>
     <string name="text_latest_package">최신 패키지</string>
     <string name="text_launch_config">구성을 시작하십시오</string>
     <string name="text_launch_debugger">디버거를 시작하십시오</string>
+    <string name="text_launcher_shortcuts">런처 바로 가기</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">레이아웃 검사 ...</string>
     <string name="text_licenses">오픈 소스 라이센스</string>
+    <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">로딩 중...</string>
     <string name="text_log">통나무</string>
-    <string name="text_app_shortcut_log_long_label">AutoJs6 통나무</string>
-    <string name="text_app_shortcut_log_short_label">통나무</string>
     <string name="text_logging_in">로그인</string>
     <string name="text_login">로그인</string>
     <string name="text_login_succeed">로그인이 성공했습니다</string>
@@ -468,6 +567,7 @@
     <string name="text_loop_times">루프 시간</string>
     <string name="text_lower_than">보다 낮은</string>
     <string name="text_main_file_name">기본 스크립트 파일 이름</string>
+    <string name="text_malfunctioning">오작동</string>
     <string name="text_manage">관리하다</string>
     <string name="text_manage_a11y_service">접근성 서비스를 관리합니다</string>
     <string name="text_manage_ignored_updates">무시 된 업데이트를 관리합니다</string>
@@ -489,8 +589,12 @@
     <string name="text_next_run_time">다음 달리기</string>
     <string name="text_night_mode">야간 모드</string>
     <string name="text_no_browser">브라우저가 설치되지 않았습니다</string>
+    <string name="text_no_content">내용 없음</string>
     <string name="text_no_histories">역사가 없습니다</string>
     <string name="text_no_ignored_updates">무시되지 않았습니다</string>
+    <string name="text_no_log_entries_to_copy">복사할 로그 항목이 없습니다</string>
+    <string name="text_no_log_entries_to_export">내보낼 로그 항목이 없습니다</string>
+    <string name="text_no_log_entries_to_send">보낼 로그 항목이 없습니다</string>
     <string name="text_no_root">뿌리가 아닌</string>
     <string name="text_no_root_access">루트 액세스가 없습니다</string>
     <string name="text_no_scripts_to_stop_running">실행을 멈출 스크립트가 없습니다</string>
@@ -500,9 +604,11 @@
     <string name="text_notification_access_permission">알림 액세스</string>
     <string name="text_notification_service_disabled">알림 서비스가 작동하지 않습니다</string>
     <string name="text_null">없는</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">로그 항목 수 %d개가 전송 제한을 초과했습니다</string>
     <string name="text_number_format_error">잘못된 번호 형식</string>
     <string name="text_ok">확인</string>
     <string name="text_old_path">오래된 길</string>
+    <string name="text_only_latest_few_items_will_be_sent">최신 %d 항목만 전송됩니다</string>
     <string name="text_open">열려 있는</string>
     <string name="text_open_by_other_apps">다른 앱으로 열립니다</string>
     <string name="text_open_main_activity">열린 주요 활동</string>
@@ -520,23 +626,33 @@
     <string name="text_pc_server_address">PC 서버 주소</string>
     <string name="text_permission_granted">허가가 부여되었습니다</string>
     <string name="text_permission_granted_failed_with_root">허가를 부여하지 못했습니다 (루트 포함)</string>
+    <string name="text_permission_granted_failed_with_shizuku">권한을 부여하지 못함 (Shizuku 사용)</string>
     <string name="text_permission_granted_with_root">부여 된 권한 (루트 포함)</string>
+    <string name="text_permission_granted_with_shizuku">권한 부여됨 (Shizuku 사용)</string>
     <string name="text_permission_revoked">허가가 취소되었습니다</string>
     <string name="text_permission_revoked_failed_with_root">허가를 철회하지 못했습니다 (루트 포함)</string>
+    <string name="text_permission_revoked_failed_with_shizuku">권한을 취소하지 못했습니다 (Shizuku 사용)</string>
     <string name="text_permission_revoked_with_root">허가가 취소되었습니다 (루트 포함)</string>
+    <string name="text_permission_revoked_with_shizuku">권한 취소됨 (Shizuku 사용)</string>
     <string name="text_permission_test">파마 테스트</string>
     <string name="text_permissions">권한</string>
+    <string name="text_permissions_list">권한 목록</string>
+    <string name="text_pin_shortcut_not_unsupported">런처에 바로가기를 고정하는 것은 지원되지 않습니다</string>
     <string name="text_pinch_to_zoom">확대하려면 핀치</string>
+    <string name="text_play">재생</string>
     <string name="text_please_choose">선택하십시오</string>
     <string name="text_please_choose_a_script">스크립트를 선택하십시오</string>
     <string name="text_please_input_name">입력 이름</string>
-    <string name="text_pointer_location">포인터 위치 (루트 포함)</string>
+    <string name="text_pointer_location">포인터 위치</string>
     <string name="text_pointer_location_toggle_failed_with_hint">\"포인터 위치\"토글이 실패했습니다.\n루트 액세스가 필요합니다.</string>
     <string name="text_post_notifications_permission">게시물 알림</string>
     <string name="text_pre_execute_script">사전 배제 스크립트</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">준비 ...</string>
+    <string name="text_preset_dialog_content">사전 설정 대화 상자 내용</string>
+    <string name="text_preset_dialog_title">사전 설정 대화 상자 제목</string>
     <string name="text_press_again_to_dismiss_dialog">다시 눌러 대화 상자를 무시하십시오</string>
     <string name="text_press_again_to_exit">종료하려면 다시 누릅니다</string>
+    <string name="text_press_back_or_vol_down_to_close_window">창을 닫으려면 \"뒤로\" 또는 \"볼륨 감소\" 버튼을 누르세요</string>
     <string name="text_preview">시사</string>
     <string name="text_processing">처리</string>
     <string name="text_project">프로젝트</string>
@@ -545,6 +661,7 @@
     <string name="text_project_media_access_description">프로젝트 미디어 액세스를 사용하면 화면 기록에 대한 보안 경고가 중요하지 않습니다.</string>
     <string name="text_prompt">즉각적인</string>
     <string name="text_quit">그만두다</string>
+    <string name="text_recommended">권장</string>
     <string name="text_record_finished">녹음 완료</string>
     <string name="text_record_prompt">녹음 프롬프트</string>
     <string name="text_record_stopped">녹화 중지됨</string>
@@ -575,6 +692,7 @@
     <string name="text_reset_to_initial_content_only_for_assets">재설정은 샘플에만 해당됩니다</string>
     <string name="text_restart_app">재시작</string>
     <string name="text_result">결과</string>
+    <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 취소하기</string>
     <string name="text_root_mode_title">강제 설정 루트 검사</string>
     <string name="text_run">운영</string>
     <string name="text_run_on_battery_change">배터리가 변경되었습니다</string>
@@ -622,24 +740,32 @@
     <string name="text_set_as_working_dir">작업 디렉토리로</string>
     <string name="text_set_breakpoint">중단 점을 설정하십시오</string>
     <string name="text_settings">설정</string>
-    <string name="text_app_shortcut_settings_long_label">AutoJs6 설정</string>
-    <string name="text_app_shortcut_settings_short_label">설정</string>
+    <string name="text_shizuku_access">Shizuku 권한</string>
+    <string name="text_shizuku_access_description">Shizuku 를 사용하면 ADB 권한과 시스템 API 에 대한 액세스 권한을 얻을 수 있습니다</string>
+    <string name="text_shizuku_service_may_need_to_be_run_first">먼저 Shizuku 서비스를 실행해야 할 수 있습니다</string>
     <string name="text_should_not_be_empty">텍스트는 비어질 수 없다</string>
     <string name="text_show_layout_bounds">레이아웃 경계보기</string>
     <string name="text_show_layout_hierarchy">레이아웃 계층 구조보기</string>
     <string name="text_show_widget_information">위젯 정보를 보여줍니다</string>
     <string name="text_size">크기</string>
+    <string name="text_some_items_exported">내보낸 %d 항목</string>
     <string name="text_source_file_path">소스 코드 경로</string>
     <string name="text_stable_mode">안정적인 모드</string>
     <string name="text_star">별</string>
     <string name="text_start_record">녹음을 시작하십시오</string>
     <string name="text_start_running">달리기</string>
     <string name="text_stop">중지</string>
+    <string name="text_supported_abis_short">ABI</string>
+    <string name="text_supported_abis_short_32bit">ABI (32 비트)</string>
+    <string name="text_supported_abis_short_64bit">ABI (64 비트)</string>
+    <string name="text_supported_libraries_short">라이브러리</string>
+    <string name="text_switch_window">창 전환</string>
     <string name="text_symbols_settings">기호 설정</string>
     <string name="text_tailor_made_developer">맞춤형 개발자</string>
     <string name="text_task">일</string>
     <string name="text_text_size">텍스트 크기</string>
     <string name="text_text_size_current_value" formatted="true">텍스트 크기: %d</string>
+    <string name="text_the_following_solutions_can_be_referred_to">다음 해결 방법을 참조할 수 있습니다</string>
     <string name="text_theme_color">테마 색상</string>
     <string name="text_time">시간</string>
     <string name="text_timed_task">시간이 정한 작업</string>
@@ -647,10 +773,14 @@
     <string name="text_tools">도구</string>
     <string name="text_tutorial">지도 시간</string>
     <string name="text_type">유형</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">현재 버전의 AutoJs6에 위의 ABI가 포함되어 있지 않으므로 선택한 ABI \"%s\" 를 사용하여 패키지 응용 프로그램을 만들 수 없습니다.</string>
+    <string name="text_unavailable">사용할 수 없음</string>
+    <string name="text_unavailable_abi_for">ABI \"%s\" 를 사용할 수 없습니다</string>
     <string name="text_under_development_content">기능은 다음 몇 가지 업데이트에서 사용할 준비가됩니다.</string>
     <string name="text_under_development_title">개발중인</string>
     <string name="text_undo">실행 취소</string>
     <string name="text_undo_simplified">뒤</string>
+    <string name="text_unknown">알 수 없음</string>
     <string name="text_updates">업데이트</string>
     <string name="text_updates_checked_states_cleared">확인 된 상태가 지워졌습니다</string>
     <string name="text_updates_snack_bar_act_later">나중</string>
@@ -671,6 +801,7 @@
     <string name="text_version_code">버전 코드</string>
     <string name="text_version_info">버전 정보</string>
     <string name="text_version_name">버전 이름</string>
+    <string name="text_view">보기</string>
     <string name="text_view_docs">문서를 봅니다</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 확장 버전이 요구 사항을 충족하지 않습니다</string>
     <string name="text_weekly_task">주간 과제</string>
@@ -680,53 +811,5 @@
     <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="theme_color_default">기본</string>
-    <string name="text_only_latest_few_items_will_be_sent">최신 %d 항목만 전송됩니다</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">로그 항목 수 %d개가 전송 제한을 초과했습니다</string>
-    <string name="text_failed_to_send_log_entries">로그 항목을 보내지 못했습니다</string>
-    <string name="text_no_log_entries_to_send">보낼 로그 항목이 없습니다</string>
-    <string name="text_no_log_entries_to_export">내보낼 로그 항목이 없습니다</string>
-    <string name="text_no_log_entries_to_copy">복사할 로그 항목이 없습니다</string>
-    <string name="text_failed_to_copy">복사하지 못했습니다</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">클립보드에 이미 복사되었습니다(최신 %d 항목만)</string>
-    <string name="text_failed_to_export_log_entries">로그 항목을 내보내지 못했습니다</string>
-    <string name="dialog_button_dismiss">Dismiss</string>
-    <string name="dialog_button_view_file">파일 보기</string>
-    <string name="text_exported">내보낸</string>
-    <string name="text_some_items_exported">내보낸 %d 항목</string>
-    <string name="text_app_shortcut_disabled">이 바로 가기가 비활성화되었습니다</string>
-    <string name="text_launcher_shortcuts">런처 바로 가기</string>
-    <string name="description_launcher_shortcuts">바로가기는 AutoJs6 에서 특정 작업을 수행할 수 있습니다. 사용자는 지원되는 런처에 이러한 바로가기를 표시하고 AutoJs6 애플리케이션 문서 읽기, AutoJs6 설정 페이지 실행 등과 같은 일부 작업을 빠르게 시작하거나 활동을 실행할 수 있습니다.</string>
-    <string name="summary_text_launcher_shortcuts">런처에 바로 가기 추가</string>
-    <string name="text_pin_shortcut_not_unsupported">런처에 바로가기를 고정하는 것은 지원되지 않습니다</string>
-    <string name="text_shizuku_access_description">Shizuku 를 사용하면 ADB 권한과 시스템 API 에 대한 액세스 권한을 얻을 수 있습니다</string>
-    <string name="text_shizuku_access">Shizuku 권한</string>
-    <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 부여하기</string>
-    <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku 애플리케이션에서 AutoJs6 권한 취소하기</string>
-    <string name="text_shizuku_service_may_need_to_be_run_first">먼저 Shizuku 서비스를 실행해야 할 수 있습니다</string>
-    <string name="error_shizuku_is_not_installed">Shizuku 가 설치되지 않았습니다</string>
-    <string name="error_shizuku_version_is_not_supported">지원되지 않는 Shizuku 버전</string>
-    <string name="error_failed_to_revoke_shizuku_access">Shizuku 권한 해지에 실패했습니다</string>
-    <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
-    <string name="error_unable_to_use_shizuku_service">Shizuku 서비스를 사용할 수 없음</string>
-    <string name="error_input_fields_check_failed">입력 필드 확인 실패</string>
-    <string name="error_at_least_one_abi_needs_to_be_selected">하나 이상의 ABI 를 선택해야 합니다.</string>
-    <string name="text_malfunctioning">오작동</string>
-    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">필요한 라이브러리 파일이 부족하여 \"%s\" 모듈이 작동하지 않습니다</string>
-    <string name="text_unavailable">사용할 수 없음</string>
-    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">현재 버전의 AutoJs6에 위의 ABI가 포함되어 있지 않으므로 선택한 ABI \"%s\" 를 사용하여 패키지 응용 프로그램을 만들 수 없습니다.</string>
-    <string name="text_the_following_solutions_can_be_referred_to">다음 해결 방법을 참조할 수 있습니다</string>
-    <string name="text_download_and_install_autojs6_including_above_abi">위의 ABI가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"%s\" 포함)</string>
-    <string name="text_download_and_install_autojs6_including_all_abis">모든 ABI가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"universal\" 포함)</string>
-    <string name="text_recommended">권장</string>
-    <string name="text_download_link_for_autojs6">AutoJs6 다운로드 링크</string>
-    <string name="text_unavailable_abi_for">ABI \"%s\" 를 사용할 수 없습니다</string>
-
-    <plurals name="text_items_total_sum">
-        <item quantity="other">총: %d 개 항목</item>
-    </plurals>
-
-    <plurals name="text_already_stop_n_scripts">
-        <item quantity="other">%d 개의 스크립트가 중지되었습니다</item>
-    </plurals>
 
 </resources>

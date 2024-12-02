@@ -63,23 +63,28 @@ interface ColorDetector {
             val wB = 2 + (255 - meanR) / 256
 
             // @Hint by SuperMonster003 on Feb 17, 2023.
-            //  ! Code snippet in Auto.js 4.1.1 alpha2:
-            //  !
-            //  ! mThreshold = threshold * threshold * 8;
-            //  !
+            //  ! Code snippet in Auto.js 4.1.1 Alpha2:
+            //  # mThreshold = threshold * threshold * 8;
             //  ! I guess that it should be 9 instead of 8.
+            //  ! zh-CN:
+            //  ! Auto.js 4.1.1 Alpha2 中的代码片段:
+            //  # mThreshold = threshold * threshold * 8;
+            //  ! 我认为应当是 9 而非 8.
             return sqrt((wR * dR.pow(2) + wG * dG.pow(2) + wB * dB.pow(2))) / 3.0 <= threshold
         }
     }
 
     class HDistanceDetector(color: Int, private val threshold: Int) : AbstractColorDetector(color) {
         override fun detectColor(r: Int, g: Int, b: Int): Boolean {
+
             // @Hint by SuperMonster003 on Feb 17, 2023.
-            //  ! Code snippet in Auto.js 4.1.1 alpha2:
-            //  !
-            //  ! return Math.abs(mH - getH(R, G, B)) <= mThreshold;
-            //  !
-            //  ! I guess that abs(a, b) is not the exact distance when a and b are in a circle path.
+            //  ! Code snippet in Auto.js 4.1.1 Alpha2:
+            //  # return Math.abs(mH - getH(R, G, B)) <= mThreshold;
+            //  ! I guess that Math.abs(a, b) is not the exact distance when a and b are in a circle path.
+            //  ! zh-CN:
+            //  ! Auto.js 4.1.1 Alpha2 中的代码片段:
+            //  # return Math.abs(mH - getH(R, G, B)) <= mThreshold;
+            //  ! 我认为当 a 和 b 在一个圆形路径中时, Math.abs(a, b) 不能代表它们之间的精确距离.
 
             val colorH = getHueFromRGB(colorR, colorG, colorB)
             val h = getHueFromRGB(r, g, b)

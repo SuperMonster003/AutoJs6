@@ -39,8 +39,8 @@ object Scripts {
     @JvmField
     val FILE_FILTER = FileFilter { file ->
         file.isDirectory ||
-        file.name.endsWith(FileUtils.TYPE.JAVASCRIPT.extension) ||
-        file.name.endsWith(FileUtils.TYPE.AUTO.extension)
+        file.name.endsWith(FileUtils.TYPE.JAVASCRIPT.extension, true) ||
+        file.name.endsWith(FileUtils.TYPE.AUTO.extension, true)
     }
 
     private val BROADCAST_SENDER_SCRIPT_EXECUTION_LISTENER = object : SimpleScriptExecutionListener() {
@@ -57,7 +57,7 @@ object Scripts {
                 line = rhinoException.lineNumber()
                 col = rhinoException.columnNumber()
             }
-            if (ScriptInterruptedException.causedByInterrupted(e)) {
+            if (ScriptInterruptedException.causedByInterrupt(e)) {
                 globalAppContext.sendBroadcast(
                     Intent(ACTION_ON_EXECUTION_FINISHED)
                         .putExtra(EXTRA_EXCEPTION_LINE_NUMBER, line)
@@ -74,7 +74,6 @@ object Scripts {
         }
 
     }
-
 
     @JvmStatic
     fun openByOtherApps(uri: Uri) {
@@ -114,7 +113,6 @@ object Scripts {
         ViewUtils.showToast(context, e.message, true)
         null
     }
-
 
     @JvmStatic
     fun run(context: Context, source: ScriptSource): ScriptExecution? = try {

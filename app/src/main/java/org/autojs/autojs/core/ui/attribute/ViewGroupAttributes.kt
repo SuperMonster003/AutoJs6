@@ -5,13 +5,14 @@ import android.view.View
 import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class ViewGroupAttributes(resourceParser: ResourceParser, view: View) : ViewAttributes(resourceParser, view) {
+open class ViewGroupAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as ViewGroup
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("addStatesFromChildren") { view.setAddStatesFromChildren(it.toBoolean()) }
         registerAttr("animateLayoutChanges") { view.layoutTransition = if (it == "true") LayoutTransition() else null }

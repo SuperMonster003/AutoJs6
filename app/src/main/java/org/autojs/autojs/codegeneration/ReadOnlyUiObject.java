@@ -137,7 +137,6 @@ public class ReadOnlyUiObject extends UiObject {
         outBounds.set(mNodeInfo.getBoundsInScreen());
     }
 
-
     @Override
     public int depth() {
         return mNodeInfo.getDepth();
@@ -258,7 +257,6 @@ public class ReadOnlyUiObject extends UiObject {
         return scrollable();
     }
 
-
     @Override
     public boolean isContextClickable() {
         return mNodeInfo.getContextClickable();
@@ -306,7 +304,7 @@ public class ReadOnlyUiObject extends UiObject {
 
     @Override
     public void recycle() {
-
+        /* Empty body. */
     }
 
     @Override

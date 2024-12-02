@@ -32,9 +32,11 @@ Promise.resolve().then(() => {
 // @Test images
 
 // FIXME by SuperMonster003 on May 7, 2022.
-//  ! Auto.js freezes or won't respond when calling images.requestScreenCapture()
-// assert(noError(images.requestScreenCapture, images), 'images.requestScreenCapture()');
-// assert(noError(() => images.captureScreen()), 'images.captureScreen()');
+//  ! AutoJs6 won't respond when calling images.requestScreenCapture() .
+//  ! zh-CN: 当调用 images.requestScreenCapture() 方法时, AutoJs6 应用将会无响应.
+//  !
+//  # assert(noError(images.requestScreenCapture, images), 'images.requestScreenCapture()');
+//  # assert(noError(() => images.captureScreen()), 'images.captureScreen()');
 
 // @Test dialogs
 
@@ -62,8 +64,10 @@ assert(typeof engines.myEngine().getSource().getName() === 'string', 'engines.my
 // @Test floaty
 
 // FIXME by SuperMonster003 on May 7, 2022.
-//  ! Auto.js freezes or won't respond when calling floaty.rawWindow()
-// assert(noError(() => floaty.rawWindow('<vertical/>')), 'floaty.rawWindow()');
+//  ! AutoJs6 won't respond when calling floaty.rawWindow() .
+//  ! zh-CN: 当调用 floaty.rawWindow() 方法时, AutoJs6 应用将会无响应.
+//  !
+//  # assert(noError(() => floaty.rawWindow('<vertical/>')), 'floaty.rawWindow()');
 assert(noError(() => floaty.closeAll()), 'floaty.closeAll()');
 
 // @Test continuation

@@ -19,7 +19,7 @@ import org.autojs.autojs.concurrent.VolatileBox;
 import org.autojs.autojs.network.api.DownloadApi;
 import org.autojs.autojs.network.entity.VersionInfo;
 import org.autojs.autojs.pio.PFiles;
-import org.autojs.autojs.pref.Language;
+import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.tool.SimpleObserver;
 import org.autojs.autojs.util.StreamUtils;
 import org.autojs.autojs.util.UpdateUtils;
@@ -337,9 +337,13 @@ public class DownloadManager {
             // FIXME by SuperMonster003 on May 31, 2022.
             //  ! Seems like none of the ways below could stop the downloading process.
             //  ! Even worse, progress may stuck at around 99% and suspend.
-            // disposeIfNeeded();
-            // getOkHttpClient().dispatcher().cancelAll();
-            // body.close();
+            //  ! zh-CN:
+            //  ! 看起来下面几种方法均无法停止下载进程.
+            //  ! 更糟的是, 下载进程可能在 99% 附近卡住.
+            //  !
+            //  # [1] disposeIfNeeded();
+            //  # [2] getOkHttpClient().dispatcher().cancelAll();
+            //  # [3] body.close();
 
             mDownloadStatuses.remove(mUrl);
             StreamUtils.closeSilently(mInputStream, mFileOutputStream);

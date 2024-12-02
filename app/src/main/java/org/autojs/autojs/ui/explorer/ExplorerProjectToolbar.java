@@ -57,6 +57,7 @@ public class ExplorerProjectToolbar extends CardView {
     }
 
     private void init() {
+        setVisibility(GONE);
         binding = ExplorerProjectToolbarBinding.inflate(LayoutInflater.from(getContext()), this, true);
 
         mProjectName = binding.projectName;
@@ -71,10 +72,11 @@ public class ExplorerProjectToolbar extends CardView {
         ProjectConfig projectConfig = ProjectConfig.fromProjectDir(dir.getPath());
         if (projectConfig == null) {
             setVisibility(GONE);
-            return;
+        } else {
+            setVisibility(VISIBLE);
+            mDirectory = dir;
+            mProjectName.setText(projectConfig.getName());
         }
-        mDirectory = dir;
-        mProjectName.setText(projectConfig.getName());
     }
 
     public void refresh() {

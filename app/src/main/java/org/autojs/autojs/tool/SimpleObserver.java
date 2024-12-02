@@ -10,21 +10,21 @@ import io.reactivex.disposables.Disposable;
 public class SimpleObserver<T> implements Observer<T> {
     @Override
     public void onSubscribe(@NonNull Disposable d) {
-
+        /* Empty body. */
     }
 
     @Override
     public void onNext(@NonNull T t) {
-
+        /* Empty body. */
     }
 
     @Override
     public void onError(@NonNull Throwable e) {
-
+        /* Empty body. */
     }
 
     @Override
     public void onComplete() {
-
+        /* Empty body. */
     }
 }

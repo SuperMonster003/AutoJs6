@@ -10,13 +10,13 @@ import org.autojs.autojs.core.image.ImageWrapper
 /**
  * Created by SuperMonster003 on Mar 18, 2023.
  */
-// @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) on Mar 18, 2023.
+// @Reference to TonyJiangWJ/Auto.js (https://github.com/TonyJiangWJ/Auto.js) by SuperMonster003 on Mar 18, 2023.
 class OcrMLKit {
 
     private var recognizer: TextRecognizer? = null
 
     private fun initIfNeeded() {
-        recognizer?:let {
+        recognizer ?: let {
             recognizer = TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build())
         }
     }
@@ -68,13 +68,13 @@ class OcrMLKit {
         return ocrResults
     }
 
-    fun recognizeText(image: ImageWrapper?): Array<String> {
-        image?.takeUnless { image.isRecycled } ?: return emptyArray()
+    fun recognizeText(image: ImageWrapper?): List<String> {
+        image?.takeUnless { image.isRecycled } ?: return emptyList()
         initIfNeeded()
         val words = detect(image).sorted()
-        val output = mutableListOf<String>()
-        words.indices.forEach { i -> words[i].label.let { output.add(it) } }
-        return output.toTypedArray()
+        return mutableListOf<String>().also { list ->
+            words.indices.forEach { i -> words[i].label.let { list.add(it) } }
+        }
     }
 
     private fun lockNotify() = synchronized(lock) { lock.notify() }

@@ -9,27 +9,27 @@ interface ActionTarget {
 
     fun createAction(action: Int, vararg params: Any): SimpleAction
 
-    class TextActionTarget(private var mText: String, private var mIndex: Int) : ActionTarget {
+    class TextActionTarget(private var text: String, private var index: Int) : ActionTarget {
 
-        override fun createAction(action: Int, vararg params: Any) = ActionFactory.createActionWithTextFilter(action, mText, mIndex)
-
-    }
-
-    class BoundsActionTarget(private var mBoundsInRect: Rect) : ActionTarget {
-
-        override fun createAction(action: Int, vararg params: Any) = ActionFactory.createActionWithBoundsFilter(action, mBoundsInRect)
+        override fun createAction(action: Int, vararg params: Any) = ActionFactory.createActionWithTextFilter(action, text, index)
 
     }
 
-    class EditableActionTarget(private val mIndex: Int) : ActionTarget {
+    class BoundsActionTarget(private var boundsInRect: Rect) : ActionTarget {
 
-        override fun createAction(action: Int, vararg params: Any) = ActionFactory.createActionWithEditableFilter(action, mIndex, params[0].toString())
+        override fun createAction(action: Int, vararg params: Any) = ActionFactory.createActionWithBoundsFilter(action, boundsInRect)
 
     }
 
-    class IdActionTarget(private val mId: String) : ActionTarget {
+    class EditableActionTarget(private val index: Int) : ActionTarget {
 
-        override fun createAction(action: Int, vararg params: Any) = ActionFactory.createActionWithIdFilter(action, mId)
+        override fun createAction(action: Int, vararg params: Any) = ActionFactory.createActionWithEditableFilter(action, index, params[0].toString())
+
+    }
+
+    class IdActionTarget(private val id: String) : ActionTarget {
+
+        override fun createAction(action: Int, vararg params: Any) = ActionFactory.createActionWithIdFilter(action, id)
 
     }
 

@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.pref.Pref.containsKey
-import org.autojs.autojs.pref.Pref.getInt
-import org.autojs.autojs.pref.Pref.putInt
+import org.autojs.autojs.core.pref.Pref.containsKey
+import org.autojs.autojs.core.pref.Pref.getInt
+import org.autojs.autojs.core.pref.Pref.putInt
+import org.autojs.autojs.extension.ArrayExtensions.toHashCode
 import org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor
 import org.autojs.autojs6.R
 
@@ -71,6 +72,10 @@ class ThemeColor {
         colorPrimary = getInt(R.string.key_theme_color_primary, defaultThemeColor.colorPrimary)
         colorAccent = getInt(R.string.key_theme_color_accent, defaultThemeColor.colorAccent)
         colorPrimaryDark = getInt(R.string.key_theme_color_primary_dark, defaultThemeColor.colorPrimaryDark)
+    }
+
+    override fun hashCode(): Int {
+        return listOf(colorPrimary, colorPrimaryDark, colorAccent).toHashCode()
     }
 
     companion object {

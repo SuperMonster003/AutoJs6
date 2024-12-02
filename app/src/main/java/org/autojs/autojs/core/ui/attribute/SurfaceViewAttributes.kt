@@ -4,13 +4,14 @@ import android.graphics.Rect
 import android.view.SurfaceView
 import android.view.View
 import org.autojs.autojs.core.ui.inflater.ResourceParser
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class SurfaceViewAttributes(resourceParser: ResourceParser, view: View) : ViewAttributes(resourceParser, view) {
+open class SurfaceViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as SurfaceView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("clipBounds") { value ->
             val (left, top, right, bottom) = parseAttrValue(value).map { it.toInt() }

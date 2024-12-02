@@ -40,7 +40,7 @@ public class ScriptCanvas {
     }
 
     public ScriptCanvas() {
-
+        /* Empty body. */
     }
 
     public Canvas getAndroidCanvas() {
@@ -320,7 +320,6 @@ public class ScriptCanvas {
     public void drawArc(float left, float top, float right, float bottom, float startAngle, float sweepAngle, boolean useCenter, @NonNull Paint paint) {
         mCanvas.drawArc(left, top, right, bottom, startAngle, sweepAngle, useCenter, paint);
     }
-
 
     public void drawRoundRect(@NonNull RectF rect, float rx, float ry, @NonNull Paint paint) {
         mCanvas.drawRoundRect(rect, rx, ry, paint);

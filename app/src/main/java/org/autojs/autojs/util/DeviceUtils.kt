@@ -109,13 +109,24 @@ object DeviceUtils {
         val intent = getBatteryChangedActionIntent(context)
 
         // @Comment by SuperMonster003 on Jun 7, 2023.
-        //  ! EXTRA_STATUS may be better than EXTRA_PLUGGED getting battery charging state.
-
-        // int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-        // return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+        //  ! EXTRA_STATUS may be better than EXTRA_PLUGGED for getting battery charging state.
+        //  ! Using EXTRA_PLUGGED, it will return true once the device is connected to a power source,
+        //  ! which could be used to check if the device is connected to an AC, wireless or USB power supply, etc.
+        //  ! However, the downside of this method is that it'll still show the device as "charging" state
+        //  ! even if the battery has already been fully charged, as long as it remains connected to the power source.
+        //  ! zh-CN:
+        //  ! 在获取电池充电状态方面, EXTRA_STATUS 或许要优于 EXTRA_PLUGGED.
+        //  ! 使用 EXTRA_PLUGGED, 设备连接到电源后返回 true, 可用于检查设备是连接到交流电源, 无线充电电源 或 USB 电源等.
+        //  ! 但其缺点在于, 即使电池已充满, 只要设备连接到电源, 它依然会返回 "正在充电" 的状态.
+        //  !
+        //  # val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+        //  # return /**/plugged == BatteryManager.BATTERY_PLUGGED_AC
+        //  #         || plugged == BatteryManager.BATTERY_PLUGGED_USB
+        //  #         || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
 
         val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-        return status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+        return /**/status == BatteryManager.BATTERY_STATUS_CHARGING
+                || status == BatteryManager.BATTERY_STATUS_FULL
     }
 
     @JvmStatic

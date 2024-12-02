@@ -9,7 +9,7 @@ public class VolatileBox<T> {
     private volatile T mValue;
 
     public VolatileBox() {
-
+        /* Empty body. */
     }
 
     public VolatileBox(T value) {

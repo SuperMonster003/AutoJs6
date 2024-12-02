@@ -9,17 +9,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ThemeColorRecyclerView;
-
 import com.bignerdranch.expandablerecyclerview.ChildViewHolder;
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
-
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.execution.ScriptExecution;
 import org.autojs.autojs.execution.ScriptExecutionListener;
@@ -29,15 +28,13 @@ import org.autojs.autojs.script.AutoFileSource;
 import org.autojs.autojs.storage.database.ModelChange;
 import org.autojs.autojs.timing.TimedTaskManager;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
+import org.autojs.autojs.util.FileUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding;
 import org.autojs.autojs6.databinding.TaskListRecyclerViewItemBinding;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 
 /**
  * Created by Stardust on Mar 24, 2017.
@@ -56,9 +53,13 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
     private final ScriptExecutionListener mScriptExecutionListener = new SimpleScriptExecutionListener() {
         @Override
         public void onStart(final ScriptExecution execution) {
-            int i = mRunningTaskGroup.addTask(execution);
-            if (i != -1) {
-                post(() -> mAdapter.notifyChildInserted(0, i));
+            try {
+                int i = mRunningTaskGroup.addTask(execution);
+                if (i != -1) {
+                    post(() -> mAdapter.notifyChildInserted(0, i));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -125,7 +126,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         for (TaskGroup group : mTaskGroups) {
             group.refresh();
         }
-        // notifyDataSetChanged doesn't work ?
+        // notifyDataSetChanged doesn't work?
         // mAdapter.notifyDataSetChanged();
     }
 
@@ -160,7 +161,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         mIntentTaskChangeDisposable.dispose();
     }
 
-    void onTaskChange(ModelChange taskChange) {
+    void onTaskChange(ModelChange<?> taskChange) {
         if (taskChange.getAction() == ModelChange.INSERT) {
             mAdapter.notifyChildInserted(1, mPendingTaskGroup.addTask(taskChange.getData()));
         } else if (taskChange.getAction() == ModelChange.DELETE) {
@@ -232,13 +233,13 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         public void bind(Task task) {
             mTask = task;
             firstCharIconBinding.firstChar
-                    .setIconText(AutoFileSource.ENGINE.equals(mTask.getEngineName()) ? "R" : "J")
-                    .setIconTextThemeColor()
-                    .setStrokeThemeColor()
+                    .setIcon(AutoFileSource.ENGINE.equals(mTask.getEngineName()) ? FileUtils.TYPE.AUTO.icon : FileUtils.TYPE.JAVASCRIPT.icon)
+                    // .setIconTextThemeColor()
+                    // .setStrokeThemeColor()
                     .setFillTransparent();
             itemBinding.name.setText(task.getName());
             itemBinding.taskListFilePath.setText(task.getDesc());
-            itemBinding.stop.setOnClickListener(v -> {
+            itemBinding.stop.setOnClickListener(_ -> {
                 if (mTask != null) {
                     mTask.cancel();
                 }
@@ -266,7 +267,7 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
             super(itemView);
             title = itemView.findViewById(R.id.title);
             icon = itemView.findViewById(R.id.icon);
-            itemView.setOnClickListener(view -> {
+            itemView.setOnClickListener(_ -> {
                 if (isExpanded()) {
                     collapseView();
                 } else {

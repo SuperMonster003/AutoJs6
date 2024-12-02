@@ -6,8 +6,9 @@ import androidx.appcompatlegacy.widget.AppCompatTextView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsTextViewLegacy
+import org.autojs.autojs.runtime.ScriptRuntime
 
-class JsTextViewLegacyInflater(resourceParser: ResourceParser) : TextViewLegacyInflater<JsTextViewLegacy>(resourceParser) {
+class JsTextViewLegacyInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : TextViewLegacyInflater<JsTextViewLegacy>(scriptRuntime, resourceParser) {
 
     override fun getCreator(): ViewCreator<in AppCompatTextView> = object : ViewCreator<AppCompatTextView> {
         override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsTextViewLegacy {

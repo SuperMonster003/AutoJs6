@@ -2,6 +2,7 @@ package org.autojs.autojs.core.image;
 
 import android.graphics.Color;
 
+import androidx.annotation.Nullable;
 import org.autojs.autojs.annotation.CodeAuthor;
 import org.autojs.autojs.annotation.ScriptInterface;
 import org.autojs.autojs.core.opencv.Mat;
@@ -30,21 +31,25 @@ public class ColorFinder {
         mScreenMetrics = screenMetrics;
     }
 
+    @Nullable
     @ScriptInterface
     public Point findPointByColor(ImageWrapper imageWrapper, int color) {
         return findPointByColor(imageWrapper, color, null);
     }
 
+    @Nullable
     @ScriptInterface
     public Point findPointByColor(ImageWrapper imageWrapper, int color, Rect region) {
         return findPointByColor(imageWrapper, color, 0, region);
     }
 
+    @Nullable
     @ScriptInterface
     public Point findPointByColor(ImageWrapper imageWrapper, int color, int threshold) {
         return findPointByColor(imageWrapper, color, threshold, null);
     }
 
+    @Nullable
     @ScriptInterface
     public Point findPointByColor(ImageWrapper image, int color, int threshold, Rect rect) {
         MatOfPoint matOfPoint = findColorInner(image, color, threshold, rect);
@@ -79,6 +84,7 @@ public class ColorFinder {
         return points;
     }
 
+    @Nullable
     private MatOfPoint findColorInner(ImageWrapper image, int color, int threshold, Rect rect) {
         Mat bi = new Mat();
         Scalar lowerBound = new Scalar(Color.red(color) - threshold, Color.green(color) - threshold,
@@ -105,6 +111,7 @@ public class ColorFinder {
         return result;
     }
 
+    @Nullable
     @ScriptInterface
     public Point findPointByColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {
         Point[] firstPoints = findPointsByColor(image, firstColor, threshold, rect);
@@ -163,6 +170,7 @@ public class ColorFinder {
         return true;
     }
 
+    @Nullable
     @Deprecated
     @ScriptInterface
     @SuppressWarnings("deprecation")
@@ -170,6 +178,7 @@ public class ColorFinder {
         return findColorEquals(imageWrapper, color, null);
     }
 
+    @Nullable
     @Deprecated
     @ScriptInterface
     @SuppressWarnings("deprecation")
@@ -177,12 +186,14 @@ public class ColorFinder {
         return findColor(imageWrapper, color, 0, region);
     }
 
+    @Nullable
     @Deprecated
     @ScriptInterface
     public Point findColor(ImageWrapper imageWrapper, int color, int threshold) {
         return findPointByColor(imageWrapper, color, threshold);
     }
 
+    @Nullable
     @Deprecated
     @ScriptInterface
     public Point findColor(ImageWrapper image, int color, int threshold, Rect rect) {
@@ -195,6 +206,7 @@ public class ColorFinder {
         return findPointsByColor(image, color, threshold, rect);
     }
 
+    @Nullable
     @Deprecated
     @ScriptInterface
     public Point findMultiColors(ImageWrapper image, int firstColor, int threshold, Rect rect, int[] points) {

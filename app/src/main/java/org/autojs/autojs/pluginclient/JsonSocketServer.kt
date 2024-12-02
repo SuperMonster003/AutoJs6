@@ -5,8 +5,8 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.google.gson.JsonElement
 import io.reactivex.subjects.PublishSubject
-import org.autojs.autojs.pref.Pref.getBoolean
-import org.autojs.autojs.pref.Pref.putBoolean
+import org.autojs.autojs.core.pref.Pref.getBoolean
+import org.autojs.autojs.core.pref.Pref.putBoolean
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R

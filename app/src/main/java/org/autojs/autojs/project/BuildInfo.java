@@ -15,9 +15,6 @@ public class BuildInfo {
     @SerializedName("build_number")
     private long mBuildNumber;
 
-    public BuildInfo() {
-    }
-
     public long getBuildNumber() {
         return mBuildNumber;
     }

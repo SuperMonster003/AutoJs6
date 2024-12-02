@@ -5,20 +5,20 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Build;
 import android.os.Looper;
-
-import androidx.annotation.Nullable;
-
 import android.view.WindowManager;
-
+import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
+import org.autojs.autojs.concurrent.VolatileDispose;
 import org.autojs.autojs.runtime.ScriptBridges;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
-import org.autojs.autojs.concurrent.VolatileDispose;
-import org.autojs.autojs.util.ArrayUtils;
 import org.autojs.autojs.tool.UiHandler;
+import org.autojs.autojs.util.ArrayUtils;
+import org.mozilla.javascript.BaseFunction;
+
+import static org.autojs.autojs.util.RhinoUtils.isUiThread;
 
 /**
  * Created by Stardust on May 8, 2017.
@@ -59,14 +59,14 @@ public class BlockedMaterialDialog extends MaterialDialog {
 
         private VolatileDispose<Object> mResultBox;
         private final UiHandler mUiHandler;
-        private final Object mCallback;
+        private final BaseFunction mCallback;
         private final ScriptBridges mScriptBridges;
         private boolean mNotified = false;
 
-        public Builder(Context context, ScriptRuntime runtime, Object callback) {
+        public Builder(Context context, ScriptRuntime runtime, BaseFunction callback) {
             super(context);
             super.theme(Theme.LIGHT);
-            mUiHandler = runtime.uiHandler;
+            mUiHandler = runtime.getUiHandler();
             mScriptBridges = runtime.bridges;
             mCallback = callback;
             if (Looper.getMainLooper() != Looper.myLooper()) {
@@ -155,9 +155,8 @@ public class BlockedMaterialDialog extends MaterialDialog {
             return this;
         }
 
-
         public Object showAndGet() {
-            if (Looper.myLooper() == Looper.getMainLooper()) {
+            if (isUiThread()) {
                 super.show();
             } else {
                 mUiHandler.post(Builder.super::show);

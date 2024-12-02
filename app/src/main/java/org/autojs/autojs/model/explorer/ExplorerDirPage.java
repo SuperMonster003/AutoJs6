@@ -98,6 +98,7 @@ public class ExplorerDirPage extends ExplorerFileItem implements ExplorerPage {
         return new ExplorerDirPage(path, null);
     }
 
+    @NonNull
     public static ExplorerPage createRoot(File directory) {
         return new ExplorerDirPage(directory, null);
     }

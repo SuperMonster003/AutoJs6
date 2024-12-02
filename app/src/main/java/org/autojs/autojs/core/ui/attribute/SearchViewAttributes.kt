@@ -6,13 +6,14 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.inflaters.TextViewInflater
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Strings
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class SearchViewAttributes(resourceParser: ResourceParser, view: View) : LinearLayoutAttributes(resourceParser, view) {
+open class SearchViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : LinearLayoutAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as SearchView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("imeOptions") { view.imeOptions = TextViewInflater.IME_OPTIONS.split(it) }
         registerAttr("inputType") { view.inputType = TextViewInflater.INPUT_TYPES.split(it) }

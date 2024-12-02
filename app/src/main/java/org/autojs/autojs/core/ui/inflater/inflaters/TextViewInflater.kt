@@ -12,13 +12,14 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.ValueMapper
+import org.autojs.autojs.runtime.ScriptRuntime
 
 /**
  * Created by Stardust on Nov 3, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  * Transformed by SuperMonster003 on Apr 12, 2023.
  */
-open class TextViewInflater<V : TextView>(resourceParser: ResourceParser) : BaseViewInflater<V>(resourceParser) {
+open class TextViewInflater<V : TextView>(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : BaseViewInflater<V>(scriptRuntime, resourceParser) {
 
     private var mAutoText = false
     private var mCapitalize: Capitalize? = null

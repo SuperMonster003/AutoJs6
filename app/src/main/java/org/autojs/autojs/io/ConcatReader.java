@@ -61,7 +61,6 @@ public class ConcatReader extends Reader {
      */
     private boolean doneAddingReaders = false;
 
-
     /**
      * Causes the addReader method to throw IllegalStateException
      * and read() methods to return -1 (end of stream)
@@ -81,7 +80,7 @@ public class ConcatReader extends Reader {
      * concatenate data.
      *
      * @param in Reader to add to the concatenation.
-     * @throws IllegalStateException if more readers can't be added because lastReaderAdded() has been called, close() has been called, or a constructor with reader parameters was used.
+     * @throws IllegalStateException if more readers cannot be added because lastReaderAdded() has been called, close() has been called, or a constructor with reader parameters was used.
      * @since ostermillerutils 1.04.01
      */
     public void addReader(Reader in) {
@@ -99,7 +98,7 @@ public class ConcatReader extends Reader {
      * concatenate data.
      *
      * @param in Reader to add to the concatenation.
-     * @throws IllegalStateException if more readers can't be added because lastReaderAdded() has been called, close() has been called, or a constructor with reader parameters was used.
+     * @throws IllegalStateException if more readers cannot be added because lastReaderAdded() has been called, close() has been called, or a constructor with reader parameters was used.
      * @throws NullPointerException  the array of readers, or any of the contents is null.
      * @since ostermillerutils 1.04.01
      */

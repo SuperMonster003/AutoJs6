@@ -1,7 +1,6 @@
 package org.autojs.autojs.execution;
 
 import android.util.Log;
-
 import org.autojs.autojs.engine.ScriptEngine;
 import org.autojs.autojs.engine.ScriptEngineManager;
 import org.autojs.autojs.lang.ThreadCompat;
@@ -14,7 +13,7 @@ import org.autojs.autojs.script.ScriptSource;
 public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecution implements Runnable {
 
     private static final String TAG = "RunnableJSExecution";
-    private ScriptEngine mScriptEngine;
+    private ScriptEngine<? extends ScriptSource> mScriptEngine;
     private final ScriptEngineManager mScriptEngineManager;
 
     public RunnableScriptExecution(ScriptEngineManager manager, ScriptExecutionTask task) {
@@ -34,7 +33,7 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
         return execute(mScriptEngine);
     }
 
-    private Object execute(ScriptEngine engine) {
+    private Object execute(ScriptEngine<? extends ScriptSource> engine) {
         try {
             prepare(engine);
             Object r = doExecution(engine);
@@ -54,18 +53,18 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
         }
     }
 
-    protected void onException(ScriptEngine engine, Throwable e) {
+    protected void onException(ScriptEngine<? extends ScriptSource> engine, Throwable e) {
         Log.w(TAG, "onException: engine = " + engine, e);
         getListener().onException(this, e);
     }
 
-    private void prepare(ScriptEngine engine) {
+    private void prepare(ScriptEngine<? extends ScriptSource> engine) {
         engine.setTag(ScriptEngine.TAG_WORKING_DIRECTORY, getConfig().getWorkingDirectory());
-        engine.setTag(ScriptEngine.TAG_ENV_PATH, getConfig().getPath());
+        engine.setTag(ScriptEngine.TAG_ENV_PATH, getConfig().getEnvPath());
         engine.init();
     }
 
-    protected Object doExecution(ScriptEngine engine) {
+    protected Object doExecution(ScriptEngine<? extends ScriptSource> engine) {
         engine.setTag(ScriptEngine.TAG_SOURCE, getSource());
         getListener().onStart(this);
         Object result = null;
@@ -101,7 +100,7 @@ public class RunnableScriptExecution extends ScriptExecution.AbstractScriptExecu
     }
 
     @Override
-    public ScriptEngine getEngine() {
+    public ScriptEngine<? extends ScriptSource> getEngine() {
         return mScriptEngine;
     }
 

@@ -60,11 +60,10 @@ public interface ScriptEngine<S extends ScriptSource> {
     void init();
 
     interface OnDestroyListener {
-        void onDestroy(ScriptEngine engine);
+        void onDestroy(ScriptEngine<? extends ScriptSource> engine);
     }
 
     abstract class AbstractScriptEngine<S extends ScriptSource> implements ScriptEngine<S> {
-
 
         private final Map<String, Object> mTags = new ConcurrentHashMap<>();
         private OnDestroyListener mOnDestroyListener;

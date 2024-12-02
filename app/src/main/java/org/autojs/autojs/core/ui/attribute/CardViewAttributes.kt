@@ -4,14 +4,15 @@ import android.view.View
 import androidx.cardview.widget.CardView
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
-open class CardViewAttributes(resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(resourceParser, view) {
+open class CardViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : FrameLayoutAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as CardView
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttrs(arrayOf("cardBackgroundColor", "cardBgColor", "cardBg")) { view.setCardBackgroundColor(ColorUtils.parse(view, it)) }
         registerAttrs(arrayOf("radius", "cardCornerRadius", "cornerRadius")) { view.radius = parseDimensionToPixel(it) }

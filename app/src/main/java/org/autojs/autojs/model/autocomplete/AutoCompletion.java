@@ -162,7 +162,6 @@ public class AutoCompletion {
         return completions;
     }
 
-
     public void shutdown(){
         mEditText.removeTextChangedListener(mAnyWordsCompletion);
         mExecutorService.shutdownNow();

@@ -8,15 +8,16 @@ import org.mozilla.javascript.Scriptable;
  */
 public class NativeJavaObjectWithPrototype extends NativeJavaObject {
 
+    public NativeJavaObjectWithPrototype() {
+        /* Empty body. */
+    }
+
     public NativeJavaObjectWithPrototype(Scriptable scope, Object javaObject, Class<?> staticType) {
         super(scope, javaObject, staticType);
     }
 
     public NativeJavaObjectWithPrototype(Scriptable scope, Object javaObject, Class<?> staticType, boolean isAdapter) {
         super(scope, javaObject, staticType, isAdapter);
-    }
-
-    public NativeJavaObjectWithPrototype() {
     }
 
     @Override

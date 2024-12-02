@@ -5,16 +5,20 @@ import android.os.Handler
 import android.os.Looper
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.runtime.api.ProcessShell
+import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.ui.main.drawer.IPermissionItem.Companion.ACTION
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
-interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRootItem, IPermissionAdbItem {
+interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRootItem, IPermissionShizukuItem, IPermissionAdbItem {
 
     override fun request(): Boolean {
         if (RootUtils.isRootAvailable() && requestWithRoot()) {
+            return true
+        }
+        if (WrappedShizuku.hasPermission() && WrappedShizuku.isRunning() && requestWithShizuku()) {
             return true
         }
         return requestWithAdb()
@@ -24,12 +28,11 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
         if (RootUtils.isRootAvailable() && revokeWithRoot()) {
             return true
         }
+        if (WrappedShizuku.hasPermission() && WrappedShizuku.isRunning() && revokeWithShizuku()) {
+            return true
+        }
         return revokeWithAdb()
     }
-
-    override fun requestWithAdb() = withAdb(ACTION.REQUEST)
-
-    override fun revokeWithAdb() = withAdb(ACTION.REVOKE)
 
     override fun requestWithRoot() = withRoot(
         ACTION.REQUEST,
@@ -43,6 +46,22 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
         R.string.text_permission_revoked_failed_with_root,
     )
 
+    override fun requestWithShizuku() = withShizuku(
+        ACTION.REQUEST,
+        R.string.text_permission_granted_with_shizuku,
+        R.string.text_permission_granted_failed_with_shizuku,
+    )
+
+    override fun revokeWithShizuku() = withShizuku(
+        ACTION.REVOKE,
+        R.string.text_permission_revoked_with_shizuku,
+        R.string.text_permission_revoked_failed_with_shizuku,
+    )
+
+    override fun requestWithAdb() = withAdb(ACTION.REQUEST)
+
+    override fun revokeWithAdb() = withAdb(ACTION.REVOKE)
+
     fun isActionMatched(action: ACTION) = when (has()) {
         true -> action == ACTION.REQUEST
         else -> action == ACTION.REVOKE
@@ -51,6 +70,18 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
     fun withRoot(action: ACTION, onSuccessMessageRes: Int, onFailureMessageRes: Int): Boolean {
         try {
             ProcessShell.execCommand(getCommand(action), true)
+            if (isActionMatched(action)) {
+                return true.also { ViewUtils.showToast(context, onSuccessMessageRes) }
+            }
+        } catch (ignore: Exception) {
+            /* Ignored. */
+        }
+        return false.also { ViewUtils.showToast(context, onFailureMessageRes, true) }
+    }
+
+    fun withShizuku(action: ACTION, onSuccessMessageRes: Int, onFailureMessageRes: Int): Boolean {
+        try {
+            WrappedShizuku.execCommand(context, getCommand(action))
             if (isActionMatched(action)) {
                 return true.also { ViewUtils.showToast(context, onSuccessMessageRes) }
             }

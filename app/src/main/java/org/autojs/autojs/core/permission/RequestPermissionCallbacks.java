@@ -9,18 +9,16 @@ public class RequestPermissionCallbacks {
 
     private final List<OnRequestPermissionsResultCallback> mCallbacks = new ArrayList<>();
 
-
     public void addCallback(OnRequestPermissionsResultCallback callback) {
         mCallbacks.add(callback);
     }
-
 
     public boolean removeCallback(OnRequestPermissionsResultCallback callback) {
         return mCallbacks.remove(callback);
     }
 
     public boolean onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (mCallbacks.size() == 0) {
+        if (mCallbacks.isEmpty()) {
             return false;
         }
         for (OnRequestPermissionsResultCallback callback : mCallbacks) {

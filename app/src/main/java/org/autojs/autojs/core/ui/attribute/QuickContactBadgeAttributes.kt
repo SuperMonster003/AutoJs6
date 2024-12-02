@@ -6,13 +6,14 @@ import android.view.View
 import android.widget.QuickContactBadge
 import org.autojs.autojs.core.ui.BiMaps
 import org.autojs.autojs.core.ui.inflater.ResourceParser
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class QuickContactBadgeAttributes(resourceParser: ResourceParser, view: View) : ImageViewAttributes(resourceParser, view) {
+open class QuickContactBadgeAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ImageViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as QuickContactBadge
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("overlay") { view.setOverlay(drawables.parse(view, it)) }
         registerAttr("prioritizedMimeType") { view.setPrioritizedMimeType(PRIORITIZED_MIME_TYPES[it]) }
@@ -49,6 +50,5 @@ open class QuickContactBadgeAttributes(resourceParser: ResourceParser, view: Vie
             .build()
 
     }
-
 
 }

@@ -1,7 +1,6 @@
 
 package org.autojs.autojs.model.editor;
 
-
 import com.google.gson.annotations.SerializedName;
 
 public class EditorColors {

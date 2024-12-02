@@ -9,7 +9,6 @@ import android.text.Layout;
  */
 public class LayoutHelper {
 
-
     private static final Rect sTempRect = new Rect();
 
     public static long getLineRangeForDraw(Layout layout, Canvas canvas) {
@@ -48,7 +47,6 @@ public class LayoutHelper {
     public static int unpackRangeEndFromLong(long range) {
         return (int) (range & 0x00000000FFFFFFFFL);
     }
-
 
     public static int getLineOfChar(Layout layout, int charIndex) {
         int low = 0;

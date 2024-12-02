@@ -1,6 +1,5 @@
 package org.autojs.autojs.ui.edit.theme;
 
-
 import org.mozilla.javascript.Token;
 
 import java.util.ArrayList;

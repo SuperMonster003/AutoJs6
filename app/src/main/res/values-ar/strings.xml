@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- Translator: [ QTranslate (https://quest-app.appspot.com) ] -->
+<!-- Translator: [ DeepL (https://www.deepl.com/translator) ] -->
 <!-- Proofreader: [ SuperMonster003 ] -->
+<!-- Proofreader: [ JetBrains AI Assistant ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
 
@@ -10,11 +12,25 @@
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">التغليف ...</string>
     <string name="apk_builder_plugin_version_incompatible">نسخة غير متوافقة من \"APK Builder\".\nتحميله الآن؟</string>
     <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">خطة...</string>
+    <string name="apk_info_device_sdk">SDK الجهاز</string>
+    <string name="apk_info_installed_version">مثبت</string>
+    <string name="apk_info_max_sdk">SDK الأقصى</string>
+    <string name="apk_info_min_sdk">SDK الأدنى</string>
+    <string name="apk_info_package_name">الحزمة</string>
+    <string name="apk_info_target_sdk">SDK المستهدف</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">لا يمكن تنفيذ العمليات المحظورة في واجهة المستخدم. جرِّب الانتظار لتنفيذ `waitForActivity` في مؤثِّر فرعي أو نص برمجي فرعي، أو استخدم `setInterval` للتكرار والتحقق من النشاط</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">لا يمكن تنفيذ العمليات المحظورة في واجهة المستخدم. جرِّب الانتظار لتنفيذ `waitForPackage` في مؤثِّر فرعي أو نص برمجي فرعي، أو استخدم `setInterval` للتكرار والتحقق من الحزمة</string>
+    <string name="config_abi_options_contains_invalid">تحتوي الإعدادات \"abi\" على خيارات غير صالحة</string>
+    <string name="config_abi_options_contains_unavailable">تحتوي الإعدادات \"abi\" على خيارات غير متاحة</string>
+    <string name="config_lib_options_contains_invalid">تحتوي الإعدادات \"lib\" على خيارات غير صالحة</string>
+    <string name="config_lib_options_contains_unavailable">تحتوي الإعدادات \"lib\" على خيارات غير متاحة</string>
     <string name="confirm_overwrite_file">ملف موجود بالفعل.\nالكتابة فوق؟</string>
     <string name="content_about_app_tips">1. اضغط مع الاستمرار على اسم التطبيق (AutoJs6) في الصفحة الرئيسية للانتقال إلى صفحة الإعدادات\n2. اضغط مع الاستمرار على خيار إعدادات معين في صفحة الإعدادات لعرض معلومات مفصلة</string>
+    <string name="content_description_fab_for_display_manifest">زر عائم لعرض المحتوي الفعلي</string>
     <string name="content_github_feedback">سيتم إطلاق صفحة ويب للإبلاغ عن مشكلة.\nقد تكون هناك حاجة إلى حساب GitHub.</string>
     <string name="content_way_of_output_for_recorded_script">اختر طريقة إخراج للنصوص المعاد تصميمها</string>
     <string name="crash_feedback">نسخ سجل الأخطاء أو الخروج مباشرة</string>
+    <string name="current_available_abi_options">القائمة الحالية لخيارات \"abi\" المتاحة</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">إعلام من البرنامج النصي</string>
@@ -31,6 +47,7 @@
     <string name="description_extending_js_build_in_objects">يمكن أن يؤدي توسيع كائنات JavaScript المضمنة إلى زيادة مرونة التعليمات البرمجية وتمكين وظائف أكثر ثراءً ، ولكن يمكن أن يتسبب في حدوث تعارضات وحتى حدوث تعطل.\nتحتوي جميع البرامج النصية على امتدادات مضمنة يتم تمكينها افتراضيًا عند تشغيل الخيار.\nغالبًا ما تكون الامتدادات المضمنة غير آمنة ، ولا يوصى بها ما لم يتم فهم مبادئ ومخاطر الإضافات المضمنة بوضوح.\nعند إيقاف تشغيل الخيار ، لا يزال من الممكن تمكين الامتدادات المضمنة من خلال الكائن العام للمكونات الإضافية ، كما هو موضح في وثائق المشروع.</string>
     <string name="description_hidden_files_preference">تُستخدم لتعيين إظهار الملفات والمجلدات المخفية (تبدأ عادةً بـ \".\") في مستكشف الملفات AutoJs6 أم لا.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">تفضيل إبقاء شاشة الجهاز قيد التشغيل وساطعة عندما يكون AutoJs6 في المقدمة.\nلتحقيق ذلك فقط على الصفحة الرئيسية بين جميع صفحات تطبيق AutoJs6 ، اختر خيار \"الصفحة الرئيسية فقط\".</string>
+    <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
     <string name="description_manage_ignored_updates_preference">انقر لعرض أو إدارة عناصر القائمة.\nاضغط لفترة طويلة لإزالة عنصر القائمة.</string>
     <string name="description_night_mode_preference">ينطبق الوضع الليلي (المعروف أيضًا باسم Dark theme) على كل من واجهة مستخدم نظام Android والتطبيقات التي تعمل على الجهاز ، مما يحسن الرؤية للمستخدمين ضعاف البصر وأولئك الذين لديهم حساسية للضوء الساطع ، ويسهل على أي شخص استخدام الجهاز. في بيئة الإضاءة المنخفضة.\n\nنظام المتابعة: يحتوي AutoJs6 على إعدادات الوضع الليلي مثل نظام Android\nيعمل دائمًا: يحافظ AutoJs6 على تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\nإيقاف التشغيل دائمًا: يقوم AutoJs6 بإيقاف تشغيل الوضع الليلي (بغض النظر عن إعدادات نظام Android)\n\nملاحظة: خيار متابعة النظام متاح فقط لـ Android API Level 28 (Android 9) [P] وما فوق.</string>
     <string name="description_night_mode_preference_more">لتمكين الوضع الليلي في نظام Android:\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإعدادات -> العرض -> المظهر.\n- Android API المستوى 28 (Android 9) [P]: خيارات المطور -> الوضع الليلي.\n\nيجب استيفاء الشروط التالية لتطبيق الوضع الليلي (المظهر الداكن) على المحتوى المستند إلى الويب باستخدام مكون WebView (مثل صفحة وثائق AutoJs6):\n1.عرض ويب نظام Android (أو متصفحات مثل Google Chrome):\n- Android API المستوى 29 (Android 10) [Q] وما فوق: الإصدار> = 76\n- مستوى واجهة برمجة تطبيقات Android 28 (Android 9) [P]: الإصدار> = 105\n2. تم تكييف المحتوى المستند إلى الويب في مكون WebView مع المظهر الداكن (عن طريق موارد CSS أو Android XML وما إلى ذلك)</string>
@@ -39,12 +56,14 @@
     <string name="description_stable_mode">يجعل الوضع المستقر أكثر استقرارًا عند الحصول على حدود تخطيط ، ولكن قد يتم تجاهل بعض النتائج.\nإعادة تشغيل خدمة الوصول المطلوبة.</string>
     <string name="description_theme_color_preference">يتم تطبيق لون النسق على عناصر واجهة المستخدم بما في ذلك على سبيل المثال لا الحصر العناصر التالية:\nشريط الحالة\nAppbar\nرمز الملف\nرمز عنصر المهمة\nفاب\nعنوان فئة الإعدادات\nزر التغيير\n\nملاحظة: اعتبارًا من الإصدار 6.2.0 من AutoJs6 ، لم يكن هناك فرق بين اللون الأساسي واللون الأساسي الداكن ولون التمييز حتى الآن.</string>
     <string name="dialog_button_back">@string/text_back</string>
-    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">يلغي</string>
     <string name="dialog_button_cancel_download">يلغي</string>
     <string name="dialog_button_confirm">نعم</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_default_prefix">بادئة افتراضية</string>
     <string name="dialog_button_details">تفاصيل</string>
+    <string name="dialog_button_dismiss">رفض</string>
     <string name="dialog_button_download_with_browser">متصفح</string>
     <string name="dialog_button_history">تاريخ</string>
     <string name="dialog_button_ignore_current_update">يتجاهل</string>
@@ -58,8 +77,7 @@
     <string name="dialog_button_system_settings_simplified">النظام</string>
     <string name="dialog_button_update_now">تحديث</string>
     <string name="dialog_button_use_default">استخدم الافتراضي</string>
-    <string name="text_app_shortcut_docs_long_label">AutoJs6 توثيق</string>
-    <string name="text_app_shortcut_docs_short_label">توثيق</string>
+    <string name="dialog_button_view_file">استعراض الملف</string>
     <string name="edit_and_run_handle_intent_error">لا يمكن معالجة الملف</string>
     <string name="edit_exit_without_save_warn">لم يتم حفظ المحتوى ، هل أنت متأكد من الخروج؟</string>
     <string name="entry_app_language_auto">اتبع النظام</string>
@@ -83,10 +101,18 @@
     <string name="entry_root_record_out_file_type_js">نوع JavaScript (قابل للتحرير)</string>
     <string name="error_a_runtime_has_been_set">تم تعيين وقت التشغيل</string>
     <string name="error_abandoned_method">تم التخلي عن الأسلوب %s ويجب عدم استخدامه</string>
+    <string name="error_action_cannot_be_completed_with_negative_coordinate">يتعذر إكمال العملية \"%1$s\" لأن المعلمة تحتوي على قيم إحداثيات سالبة (%2$d, %3$d)</string>
+    <string name="error_activity_is_required_for_ui_exec_mode">تتطلب عملية تنفيذ واجهة المستخدم نشاطًا يمكن توفيره من خلال وضع التنفيذ \"ui\"</string>
+    <string name="error_an_operation_is_not_implemented">لم يتم تنفيذ العملية</string>
     <string name="error_app_not_installed">التطبيق غير مثبت: \"%s\"</string>
+    <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">لا يمكن أن تكون الوسائط %1$s بالنسبة لـ %2$s#%3$s فارغة</string>
+    <string name="error_arguments_cannot_be_empty">لا يمكن أن تكون الوسائط فارغة</string>
+    <string name="error_arguments_must_be_empty">يجب أن تكون الوسائط فارغة</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">يجب تحديد ABI واحد على الأقل</string>
     <string name="error_both_bitmap_and_mat_are_null">كلا النقطات والحصيرة فارغة</string>
     <string name="error_cannot_be_null">%s لا يمكن أن يكون فارغا</string>
     <string name="error_cannot_connect_to_github">لا يمكن الاتصال بـ GitHub</string>
+    <string name="error_cannot_convert_value_into_a_script_runtime_path">لا يمكن تحويل %s إلى مسار وقت تشغيل البرنامج النصي</string>
     <string name="error_cannot_find_editor_view_from_child_view">لا يمكن العثور على EditorView من عرض الطفل: %s</string>
     <string name="error_cannot_get_download_url">لا يمكن الحصول على تنزيل عنوان URL</string>
     <string name="error_cannot_rename">فشل في إعادة تسمية</string>
@@ -107,7 +133,18 @@
     <string name="error_empty_github_release_assets">لا توجد أصول إصدار GitHub للتنزيل</string>
     <string name="error_empty_shell_command">الأمر فارغ</string>
     <string name="error_enable_server">لا يمكن تمكين خادم AutoJs6: %s</string>
+    <string name="error_excessive_height_for_template_n_region">الارتفاع الزائد: القالب [%1$d] > المنطقة [%2$d]</string>
+    <string name="error_excessive_width_for_template_n_region">العرض الزائد: القالب [%1$d] > المنطقة [%2$d]</string>
+    <string name="error_failed_to_call_method">فشل استدعاء الأسلوب \"%s\"</string>
+    <string name="error_failed_to_call_method_with_cause"><![CDATA[فشل استدعاء الأسلوب \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">فشل تحويل القيمة %s إلى قابل للرسم</string>
+    <string name="error_failed_to_grant_shizuku_access">فشل منح Shizuku حق الوصول</string>
+    <string name="error_failed_to_instantiate">فشل إنشاء المثيل \"%s\"</string>
+    <string name="error_failed_to_instantiate_with_cause"><![CDATA[فشل إنشاء المثيل \"%1$s\": [ %2$s ]]]></string>
+    <string name="error_failed_to_invoke_method_with_description">فشل في استدعاء الطريقة %1$s</string>
+    <string name="error_failed_to_revoke_shizuku_access">فشل في إلغاء وصول Shizuku</string>
+    <string name="error_failed_to_run_script">فشل في تشغيل البرنامج النصي</string>
+    <string name="error_file_in_path_does_not_exist">الملف في المسار \"%1$s\" غير موجود</string>
     <string name="error_function_called_in_ui_thread">لا يمكن حظر مؤشر ترابط واجهة المستخدم. حاول تشغيل %s() في الخيط الفرعي أو النصف الفرعي</string>
     <string name="error_function_called_more_than_once">%s() دعا أكثر من مرة</string>
     <string name="error_get_github_latest_release">لا يمكن الحصول على أحدث إصدار من GitHub</string>
@@ -118,6 +155,9 @@
     <string name="error_illegal_url_argument" formatted="false">يجب أن يبدأ عنوان URL ببروتوكول مثل \"https://\" وهكذا دواليك</string>
     <string name="error_illegal_widget_command" formatted="false">المعلمة %s (%s) يجب أن تكون أو يمكن إلقاؤها على %s نوع</string>
     <string name="error_image_has_been_recycled">تم إعادة تدوير الصورة</string>
+    <string name="error_images_must_have_the_same_size">يجب أن يكون للصور نفس الحجم</string>
+    <string name="error_images_must_have_the_same_size_and_type">يجب أن تكون الصور بنفس الحجم والنوع</string>
+    <string name="error_input_fields_check_failed">فشل فحص حقول الإدخال</string>
     <string name="error_invalid_compass">بوصلة غير صالحة: %s</string>
     <string name="error_invalid_github_repo">مستودع جيثب غير صالح: %s</string>
     <string name="error_invalid_ip_address">عنوان إب غير صالح</string>
@@ -128,10 +168,13 @@
     <string name="error_max_listeners_exceeded">تم تجاوز مستمعي أقصى: %s</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">قد لا يكون لدى AutoJs6 ملف الجذر لتشغيل ملف \"auto\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() دعا مع الوسيطة الفارغة: %s</string>
+    <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">تقبل الطريقة عددًا من الوسائط في النطاق [%1$d..%2$d]</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">الوحدة النمطية \"%s\" لا تعمل بسبب عدم توفر ملفات المكتبة الضرورية</string>
     <string name="error_no_accessibility_permission">يتم تعطيل خدمة إمكانية الوصول وتوقف البرنامج النصي</string>
     <string name="error_no_accessibility_permission_to_capture">لم يتم تنشيط خدمة إمكانية الوصول</string>
     <string name="error_no_accessibility_service">لا توجد خدمة إمكانية الوصول</string>
     <string name="error_no_display_over_other_apps_permission">لا يوجد إذن \"عرض عبر التطبيقات الأخرى\"</string>
+    <string name="error_no_permission_to_access_shizuku">لا يوجد إذن للوصول إلى Shizuku</string>
     <string name="error_no_post_notifications_permission">لا يوجد إذن \"نشر الإخطارات\"</string>
     <string name="error_no_read_phone_state_permission">لا يوجد إذن \"اقرأ حالة الهاتف\"</string>
     <string name="error_no_screen_capture_permission">لا يوجد إذن التقاط الشاشة</string>
@@ -144,19 +187,28 @@
     <string name="error_parse_version_info">فشل في تحليل معلومات الإصدار</string>
     <string name="error_pattern_syntax">بناء جملة نمط غير صالح</string>
     <string name="error_port_num_over_65535">رقم المنفذ أكثر من 65535</string>
+    <string name="error_project_main_script_file_with_abs_path_does_not_exist">ملف البرنامج النصي الرئيسي للمشروع \"%1$s\" غير موجود</string>
     <string name="error_put_value_into_json">لا يمكن وضع القيمة %s في JSON</string>
     <string name="error_regex_find_prev">لا يمكن العثور على السابق مع Regex</string>
     <string name="error_repeated_colon_symbol">رمز القولون المتكرر</string>
     <string name="error_repeated_dot_symbol">تكرار رمز النقطة</string>
+    <string name="error_required_property_is_nullish_or_does_not_exist">الخاصية المطلوبة \"%1$s\" خالية أو غير موجودة</string>
     <string name="error_script_is_on_exiting">السيناريو عند الخروج</string>
     <string name="error_selector_method_without_calling">يجب أن تسمى طريقة المحدد بدلاً من تمريرها كمعلمة: %s</string>
     <string name="error_selector_result_type_with_compass">لا يمكن استخدام بوصلة عندما يكون نوع النتيجة محددًا</string>
     <string name="error_set_both_icon_res_and_icon">لا يمكن تعيين كل من الأيقونات والأيقونة</string>
+    <string name="error_shizuku_is_not_installed">لم يتم تثبيت Shizuku</string>
+    <string name="error_shizuku_service_may_be_not_running">قد لا تكون خدمة Shizuku قيد التشغيل</string>
+    <string name="error_shizuku_version_is_not_supported">نسخة Shizuku غير مدعومة</string>
+    <string name="error_the_transformer_for_required_property_cannot_return_nullish">لا يمكن لمحول الخاصية المطلوبة \"%1$s\" إرجاع قيمة فارغة</string>
     <string name="error_thread_is_not_alive">الموضوع ليس على قيد الحياة</string>
+    <string name="error_unable_to_use_shizuku_service">غير قادر على استخدام خدمة Shizuku</string>
     <string name="error_unacceptable_character">الطابع غير المقبول</string>
     <string name="error_unknown">خطأ غير معروف</string>
     <string name="error_unknown_algorithm_selector_param">محدد خوارزمية غير معروف بارام: %s</string>
     <string name="error_unknown_color_name">اسم لون غير معروف: %s</string>
+    <string name="error_unknown_element_name">اسم عنصر غير معروف: %1$s</string>
+    <string name="error_unknown_gravity_for">الجاذبية غير معروفة: %s</string>
     <string name="error_unknown_operation">عملية غير معروفة</string>
     <string name="error_unknown_picker_result_type">نوع نتيجة غير معروف {name: %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">نوع نتيجة غير معروف {name: %s ، params: %s}</string>
@@ -167,7 +219,7 @@
     <string name="foreground_notification_text">انقر لإطلاق AutoJs6</string>
     <string name="foreground_notification_title">خدمة مقدمة AutoJs6</string>
     <string name="format_build_succeeded" formatted="true">نجح بناء.\nمسار الملف: %s</string>
-    <string name="format_debug_bar_title">تصحيح [%s]</string>
+    <string name="format_debug_bar_title"><![CDATA[تصحيح [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">chars: %s\nالخطوط: %s\nبحجم: %s</string>
     <string name="format_file_downloaded" formatted="true">تم تنزيل الملف إلى %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[إعدادات -> خدمات إمكانية الوصول -> AutoJs6 (يُمكَِن)]]></string>
@@ -175,6 +227,18 @@
     <string name="hint_long_click_run_to_debug">انقر الطويل على زر \"تشغيل\" لتصحيح الأخطاء</string>
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
+    <string name="media_info_album_label">الألبوم</string>
+    <string name="media_info_aspect_ratio_label">نسبة العرض إلى الارتفاع</string>
+    <string name="media_info_audio_format_label">الصوت</string>
+    <string name="media_info_bit_rate_label">معدل البت</string>
+    <string name="media_info_container_format_label">الوعاء</string>
+    <string name="media_info_duration_label">المدة</string>
+    <string name="media_info_file_size_label">حجم الملف</string>
+    <string name="media_info_frame_rate_label">معدل الإطارات</string>
+    <string name="media_info_performer_label">الفنان</string>
+    <string name="media_info_resolution_label">الدقة</string>
+    <string name="media_info_track_name_label">العنوان</string>
+    <string name="media_info_video_format_label">الفيديو</string>
     <string name="mt_color_picker_title">أداة انتقاء اللون</string>
     <string name="mt_custom">العادة</string>
     <string name="no_apk_builder_plugin">لم يتم تثبيت منشئ APK</string>
@@ -195,16 +259,13 @@
     <string name="summary_pre_execute_script">تنفيذ قبل ملف البرنامج النصي</string>
     <string name="summary_record_prompt">إظهار الرسالة عند بدء أو إيقاف تسجيل البرنامج النصي</string>
     <string name="summary_stable_mode">تحليل تخطيط أكثر استقرارًا ولكن توافق رمز أسوأ (إعادة تشغيل خدمة إمكانية الوصول المطلوبة)</string>
+    <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
     <string name="summary_use_volume_control_record">ابدأ أو توقف عن التسجيل الذي يتم التحكم فيه بواسطة مفتاح خفض مستوى الصوت عند عرض الزر العائم</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">اضغط على مفتاح \"رفع الصوت\" لإيقاف تشغيل جميع البرامج النصية</string>
     <string name="text_a11y_service">خدمة إمكانية الوصول</string>
     <string name="text_a11y_service_description">مطلوب من خلال العملية التلقائية البرنامج النصي (انقر فوق ، اضغط لفترة طويلة ، شريحة ، إلخ).</string>
     <string name="text_a11y_service_enabled_but_not_running">تم تمكين خدمة إمكانية الوصول ولكن لا تعمل (إعادة تمكين أو إعادة تشغيل الجهاز)</string>
     <string name="text_a11y_service_may_be_needed">قد تكون هناك حاجة إلى خدمة إمكانية الوصول</string>
-    <string name="text_supported_libraries_short">المكتبات</string>
-    <string name="text_supported_abis_short">قيم ABIs</string>
-    <string name="text_supported_abis_short_32bit">ABIs (32 بت)</string>
-    <string name="text_supported_abis_short_64bit">ABIs (64 بت)</string>
     <string name="text_about">حول</string>
     <string name="text_about_all_files_access">حول كل الملفات وصول</string>
     <string name="text_about_app_and_developer">حول التطبيق والمطور</string>
@@ -222,9 +283,11 @@
     <string name="text_action">عمل</string>
     <string name="text_activity_not_found_for_apk_installing">لا مثبت APK</string>
     <string name="text_adb_tool_needed">هناك حاجة إلى أداة ADB</string>
+    <string name="text_alias">اسم مستعار</string>
     <string name="text_all_files_access">جميع الملفات وصول</string>
     <string name="text_all_files_access_is_needed">هناك حاجة إلى \"All Files Access\" للوصول إلى ملفات البرنامج النصي على الهاتف</string>
     <string name="text_already_copied_to_clip">نسخ إلى الحافظة</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">تم النسخ بالفعل إلى الحافظة (فقط أحدث %d عنصر)</string>
     <string name="text_already_created">مخلوق</string>
     <string name="text_already_deleted">تم الحذف</string>
     <string name="text_android_build_id">معرّف إصدار Android</string>
@@ -255,6 +318,13 @@
     <string name="text_app_name_parallel_space">مساحة موازية</string>
     <string name="text_app_name_qqmusic">qqmusic</string>
     <string name="text_app_name_wechat">WeChat</string>
+    <string name="text_app_shortcut_disabled">تم تعطيل هذا الاختصار</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 توثيق</string>
+    <string name="text_app_shortcut_docs_short_label">توثيق</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 سجل</string>
+    <string name="text_app_shortcut_log_short_label">سجل</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 إعدادات</string>
+    <string name="text_app_shortcut_settings_short_label">إعدادات</string>
     <string name="text_app_source_code">مصدر الرمز</string>
     <string name="text_app_version_code">كود إصدار التطبيق</string>
     <string name="text_app_version_name">اسم إصدار التطبيق</string>
@@ -263,6 +333,7 @@
     <string name="text_auto_check_for_updates">تحقق من التحديثات التلقائية</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">تحقق من وجود التحديثات تلقائيًا وعرض تناول وجبة خفيفة على الصفحة الرئيسية</string>
     <string name="text_auto_night_mode">وضع الليل التلقائي</string>
+    <string name="text_available_windows">النوافذ المتاحة</string>
     <string name="text_back">خلف</string>
     <string name="text_broadcast_action">عمل</string>
     <string name="text_broadcast_task">مهمة البث</string>
@@ -271,6 +342,21 @@
     <string name="text_cancel">يلغي</string>
     <string name="text_cancel_simplified">إلغاء</string>
     <string name="text_cannot_read_file">لا يمكن قراءة الملف</string>
+    <string name="text_captured_window_info_order">الترتيب</string>
+    <string name="text_captured_window_info_package_name">الحزمة</string>
+    <string name="text_captured_window_info_package_name_unknown">حزمة غير معروفة</string>
+    <string name="text_captured_window_info_root_node">الجذر</string>
+    <string name="text_captured_window_info_root_node_unknown">جذر غير معروف</string>
+    <string name="text_captured_window_info_title">العنوان</string>
+    <string name="text_captured_window_info_title_null">بدون عنوان</string>
+    <string name="text_captured_window_info_type">النوع</string>
+    <string name="text_captured_window_info_type_of_accessibility_overlay">التسهيلات</string>
+    <string name="text_captured_window_info_type_of_application">تطبيق</string>
+    <string name="text_captured_window_info_type_of_input_method">طريقة الإدخال</string>
+    <string name="text_captured_window_info_type_of_magnification_overlay">توسيع</string>
+    <string name="text_captured_window_info_type_of_split_screen_divider">مقسم الشاشة</string>
+    <string name="text_captured_window_info_type_of_system">النظام</string>
+    <string name="text_captured_window_info_type_unknown">نوع غير معروف</string>
     <string name="text_change_working_dir">تغيير دليل العمل</string>
     <string name="text_check_for_updates">تحقق من وجود تحديثات</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">البحث عن تحديثات...</string>
@@ -280,7 +366,7 @@
     <string name="text_clear_pre_execute_script">مسح السيناريو قبل التنفيذ</string>
     <string name="text_clear_updates_checked_states">تحديثات مسح الحالات التي تم فحصها</string>
     <string name="text_click_item_to_remove">انقر فوق العنصر لإزالته</string>
-    <string name="text_click_ok_to_go_to_access_settings">انقر فوق \"موافق\" للانتقال إلى الإعدادات</string>
+    <string name="text_click_ok_to_go_to_access_settings">انقر فوق \"نعم\" للانتقال إلى الإعدادات</string>
     <string name="text_click_too_frequently">التشغيل المتكرر</string>
     <string name="text_client_mode">وضع العميل</string>
     <string name="text_close">قريب</string>
@@ -321,6 +407,7 @@
     <string name="text_debug_step_into">خطوة الى</string>
     <string name="text_debug_step_out">يخرج</string>
     <string name="text_debug_step_over">خطوة أكثر</string>
+    <string name="text_default_prefix">بادئة افتراضية</string>
     <string name="text_delete">حذف</string>
     <string name="text_delete_line">حذف الخط</string>
     <string name="text_details">تفاصيل</string>
@@ -345,8 +432,11 @@
     <string name="text_documentation_source">مصدر الوثائق</string>
     <string name="text_done">فعله</string>
     <string name="text_download">تحميل</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن ABI أعلاه (يحتوي اسم الملف على \"%s\")</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن كافة واجهات برمجة التطبيقات (يحتوي اسم الملف على \"universal\")</string>
     <string name="text_download_cancelled">تنزيل إلغاء</string>
     <string name="text_download_interruption_warning">سيتم مقاطعة التنزيل الحالي إذا استمر</string>
+    <string name="text_download_link_for_autojs6">رابط تحميل AutoJs6</string>
     <string name="text_download_url">تنزيل URL</string>
     <string name="text_downloading">جارى التحميل</string>
     <string name="text_drawer_close">وثيق درج</string>
@@ -373,16 +463,19 @@
     <string name="text_exit">مخرج</string>
     <string name="text_exit_directly">مخرج</string>
     <string name="text_export">يصدّر</string>
+    <string name="text_exported">تصدير</string>
     <string name="text_extending_js_build_in_objects">تمديد كائنات JavaScript المدمجة</string>
     <string name="text_extensibility">التمدد</string>
     <string name="text_failed">باءت بالفشل</string>
     <string name="text_failed_to_build">فشل في البناء</string>
+    <string name="text_failed_to_copy">فشل النسخ</string>
     <string name="text_failed_to_create">فشل في انشاء</string>
     <string name="text_failed_to_delete">فشل في حذف</string>
     <string name="text_failed_to_disable_a11y_service">فشل في تعطيل خدمة الوصول</string>
     <string name="text_failed_to_download">فشل في التحميل</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">فشل في تمكين خدمة الوصول مع الوصول إلى الجذر</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">فشل في تمكين خدمة إمكانية الوصول مع إعدادات آمنة</string>
+    <string name="text_failed_to_export_log_entries">فشل تصدير إدخالات السجل</string>
     <string name="text_failed_to_format">فشل التنسيق</string>
     <string name="text_failed_to_generate">فشل إنشاء رمز</string>
     <string name="text_failed_to_grant_access">فشل في منح الوصول</string>
@@ -392,11 +485,13 @@
     <string name="text_failed_to_register">فشل في تسجيل</string>
     <string name="text_failed_to_report">فشل في تقديم</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">فشل حفظ المشروع البعيد في التخزين المحلي</string>
+    <string name="text_failed_to_send_log_entries">فشل في إرسال إدخالات السجل</string>
     <string name="text_failed_to_write_file">فشل في كتابة الملف</string>
     <string name="text_file">ملف</string>
     <string name="text_file_exists">ملف موجود بالفعل</string>
     <string name="text_file_name">اسم الملف</string>
     <string name="text_file_not_exists">ملف غير موجود</string>
+    <string name="text_file_with_abs_path_is_not_an_executable_script">الملف \"%1$s\" ليس برنامجًا نصيًا قابلًا للتنفيذ</string>
     <string name="text_files_transfer">نقل الملفات</string>
     <string name="text_find">تجد</string>
     <string name="text_find_java_classes">العثور على فصول جافا</string>
@@ -416,11 +511,14 @@
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">استرداد ملاحظات الإصدار ...</string>
     <string name="text_github_backup_url_used">تم استخدام عنوان URL للنسخ الاحتياطي</string>
     <string name="text_go_to_settings">اذهب للاعدادات\"</string>
+    <string name="text_grant_autojs6_access_in_shizuku_app">منح الوصول إلى AutoJs6 في تطبيق Shizuku</string>
     <string name="text_granted">ممنوح</string>
     <string name="text_guard_mode">وضع الحرس</string>
     <string name="text_help">مساعدة</string>
     <string name="text_hidden_files_description">ما إذا كانت الملفات والمجلدات المخفية تظهر أم لا في مستكشف الملفات. يعتبر ملف أو مجلد مخفيًا إذا بدأ اسمه بحرف فترة (\".\").</string>
     <string name="text_hidden_files_title">الملفات والمجلدات المخفية</string>
+    <string name="text_hide">إخفاء</string>
+    <string name="text_hide_button">زر الإخفاء</string>
     <string name="text_histories">التاريخ</string>
     <string name="text_icon">أيقونة</string>
     <string name="text_ignore_battery_optimizations">تجاهل تحسينات البطارية</string>
@@ -436,6 +534,7 @@
     <string name="text_inspect_layout_bounds">فحص حدود التصميم</string>
     <string name="text_inspect_layout_hierarchy">فحص التسلسل الهرمي للتخطيط</string>
     <string name="text_install">تثبيت</string>
+    <string name="text_invalid_character_is_removed">تمت إزالة حرف غير صالح</string>
     <string name="text_invalid_package_name">اسم الحزمة غير صالح</string>
     <string name="text_invalid_project">مشروع غير صالح</string>
     <string name="text_is_latest_version">لم يتم العثور على نسخة أحدث</string>
@@ -448,16 +547,17 @@
     <string name="text_jump_to_line_start">قفز إلى خط البداية</string>
     <string name="text_jump_to_start">القفز للبدء</string>
     <string name="text_keep_screen_on_when_in_foreground">حافظ على الشاشة قيد التشغيل عندما تكون في المقدمة</string>
+    <string name="text_label_name">ملصق</string>
     <string name="text_last_updates_checked_time">آخر فحص: %s</string>
     <string name="text_latest_activity">النشاط الاخير</string>
     <string name="text_latest_package">أحدث حزمة</string>
     <string name="text_launch_config">إطلاق التكوين</string>
     <string name="text_launch_debugger">إطلاق الأخطاء</string>
+    <string name="text_launcher_shortcuts">اختصارات المشغل</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">فحص التصميم ...</string>
     <string name="text_licenses">تراخيص المصادر المفتوحة</string>
+    <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">جار التحميل...</string>
     <string name="text_log">سجل</string>
-    <string name="text_app_shortcut_log_long_label">AutoJs6 سجل</string>
-    <string name="text_app_shortcut_log_short_label">سجل</string>
     <string name="text_logging_in">تسجيل الدخول</string>
     <string name="text_login">تسجيل الدخول</string>
     <string name="text_login_succeed">نجح تسجيل الدخول</string>
@@ -467,6 +567,7 @@
     <string name="text_loop_times">أوقات حلقة</string>
     <string name="text_lower_than">أقل من</string>
     <string name="text_main_file_name">اسم ملف البرنامج النصي الرئيسي</string>
+    <string name="text_malfunctioning">خلل</string>
     <string name="text_manage">يدير</string>
     <string name="text_manage_a11y_service">إدارة خدمة إمكانية الوصول</string>
     <string name="text_manage_ignored_updates">إدارة التحديثات التي تم تجاهلها</string>
@@ -488,8 +589,12 @@
     <string name="text_next_run_time">الجولة التالية</string>
     <string name="text_night_mode">وضع الليل</string>
     <string name="text_no_browser">لم يتم تثبيت متصفح</string>
+    <string name="text_no_content">لا يوجد محتوى</string>
     <string name="text_no_histories">لا تاريخ</string>
     <string name="text_no_ignored_updates">لا تحديثات تم تجاهلها</string>
+    <string name="text_no_log_entries_to_copy">لا توجد إدخالات سجل لنسخها</string>
+    <string name="text_no_log_entries_to_export">لا توجد إدخالات سجل للتصدير</string>
+    <string name="text_no_log_entries_to_send">لا توجد إدخالات سجل لإرسالها</string>
     <string name="text_no_root">غير الجذر</string>
     <string name="text_no_root_access">لا الوصول إلى الجذر</string>
     <string name="text_no_scripts_to_stop_running">لا توجد نصوص للتوقف عن الجري</string>
@@ -499,9 +604,11 @@
     <string name="text_notification_access_permission">الوصول إلى الإخطار</string>
     <string name="text_notification_service_disabled">خدمة الإخطار لا تعمل</string>
     <string name="text_null">لا شيء</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">عدد إدخالات السجل %d يتجاوز حد الإرسال</string>
     <string name="text_number_format_error">تنسيق رقم غير صالح</string>
     <string name="text_ok">نعم</string>
     <string name="text_old_path">المسار القديم</string>
+    <string name="text_only_latest_few_items_will_be_sent">سيتم إرسال أحدث %d من العناصر فقط</string>
     <string name="text_open">فتح</string>
     <string name="text_open_by_other_apps">افتح من قبل التطبيقات الأخرى</string>
     <string name="text_open_main_activity">فتح النشاط الرئيسي</string>
@@ -519,23 +626,33 @@
     <string name="text_pc_server_address">عنوان خادم الكمبيوتر</string>
     <string name="text_permission_granted">تم تأمين التصريح</string>
     <string name="text_permission_granted_failed_with_root">فشل في منح إذن (مع الجذر)</string>
+    <string name="text_permission_granted_failed_with_shizuku">فشل منح الإذن (مع Shizuku)</string>
     <string name="text_permission_granted_with_root">منح إذن (مع الجذر)</string>
+    <string name="text_permission_granted_with_shizuku">تم منح الإذن (مع Shizuku)</string>
     <string name="text_permission_revoked">إلغاء الإذن</string>
     <string name="text_permission_revoked_failed_with_root">فشل إلغاء الإذن (مع الجذر)</string>
+    <string name="text_permission_revoked_failed_with_shizuku">فشل إبطال الإذن (مع Shizuku)</string>
     <string name="text_permission_revoked_with_root">إلغاء الإذن (مع الجذر)</string>
+    <string name="text_permission_revoked_with_shizuku">تم إبطال الإذن (مع Shizuku)</string>
     <string name="text_permission_test">اختبار بيرم</string>
     <string name="text_permissions">أذونات</string>
+    <string name="text_permissions_list">الأذونات</string>
+    <string name="text_pin_shortcut_not_unsupported">تثبيت الاختصارات على المشغل غير مدعوم</string>
     <string name="text_pinch_to_zoom">قرصة للتكبير</string>
+    <string name="text_play">تشغيل</string>
     <string name="text_please_choose">اختر من فضلك</string>
     <string name="text_please_choose_a_script">اختر نصًا</string>
     <string name="text_please_input_name">اسم الإدخال</string>
-    <string name="text_pointer_location">موقع المؤشر (مع الجذر)</string>
+    <string name="text_pointer_location">موقع المؤشر</string>
     <string name="text_pointer_location_toggle_failed_with_hint">فشل تبديل \"موقع المؤشر\".\nالوصول إلى الجذر مطلوب.</string>
     <string name="text_post_notifications_permission">نشر الإخطارات</string>
     <string name="text_pre_execute_script">البرنامج النصي مسبقا</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">خطة...</string>
+    <string name="text_preset_dialog_content">محتوى مربع الحوار المعين مسبقاً</string>
+    <string name="text_preset_dialog_title">عنوان مربع الحوار المعين مسبقاً</string>
     <string name="text_press_again_to_dismiss_dialog">اضغط مرة أخرى لرفض الحوار</string>
     <string name="text_press_again_to_exit">اضغط مرة أخرى للخروج</string>
+    <string name="text_press_back_or_vol_down_to_close_window">لإغلاق، اضغط على \"رجوع\" أو \"خفض الصوت\"</string>
     <string name="text_preview">معاينة</string>
     <string name="text_processing">يعالج</string>
     <string name="text_project">مشروع</string>
@@ -544,6 +661,7 @@
     <string name="text_project_media_access_description">مع الوصول إلى وسائط المشروع ، لن يطلب منك التحذير الأمني لتسجيل الشاشة.</string>
     <string name="text_prompt">مستعجل</string>
     <string name="text_quit">يترك</string>
+    <string name="text_recommended">مُستَحسَن</string>
     <string name="text_record_finished">انتهى التسجيل</string>
     <string name="text_record_prompt">موجه التسجيل</string>
     <string name="text_record_stopped">توقف التسجيل</string>
@@ -574,6 +692,7 @@
     <string name="text_reset_to_initial_content_only_for_assets">إعادة التعيين هي فقط للعينات</string>
     <string name="text_restart_app">إعادة بدء</string>
     <string name="text_result">نتيجة</string>
+    <string name="text_revoke_autojs6_access_in_shizuku_app">قم بإلغاء الوصول إلى AutoJs6 في تطبيق Shizuku</string>
     <string name="text_root_mode_title">فحص الجذر مجموعة القوة</string>
     <string name="text_run">يجري</string>
     <string name="text_run_on_battery_change">على البطارية تغيرت</string>
@@ -621,24 +740,32 @@
     <string name="text_set_as_working_dir">تعيين كدليل العمل</string>
     <string name="text_set_breakpoint">ضبط نقطة توقف</string>
     <string name="text_settings">إعدادات</string>
-    <string name="text_app_shortcut_settings_long_label">AutoJs6 إعدادات</string>
-    <string name="text_app_shortcut_settings_short_label">إعدادات</string>
+    <string name="text_shizuku_access">وصول Shizuku</string>
+    <string name="text_shizuku_access_description">يتيح Shizuku استخدام واجهة برمجة تطبيقات النظام مع امتيازات ADB</string>
+    <string name="text_shizuku_service_may_need_to_be_run_first">قد يلزم تشغيل خدمة Shizuku أولاً</string>
     <string name="text_should_not_be_empty">النص لا يمكن أن يكون فارغًا</string>
     <string name="text_show_layout_bounds">عرض في حدود التصميم</string>
     <string name="text_show_layout_hierarchy">عرض في التسلسل الهرمي للتخطيط</string>
     <string name="text_show_widget_information">إظهار معلومات القطعة</string>
     <string name="text_size">مقاس</string>
+    <string name="text_some_items_exported">تم تصدير %d من العناصر</string>
     <string name="text_source_file_path">مسار رمز المصدر</string>
     <string name="text_stable_mode">وضع مستقر</string>
     <string name="text_star">نجمة</string>
     <string name="text_start_record">ابدأ التسجيل</string>
     <string name="text_start_running">ادارة</string>
     <string name="text_stop">قف</string>
+    <string name="text_supported_abis_short">قيم ABIs</string>
+    <string name="text_supported_abis_short_32bit">ABIs (32 بت)</string>
+    <string name="text_supported_abis_short_64bit">ABIs (64 بت)</string>
+    <string name="text_supported_libraries_short">المكتبات</string>
+    <string name="text_switch_window">تبديل النافذة</string>
     <string name="text_symbols_settings">إعدادات الرموز</string>
     <string name="text_tailor_made_developer">مطور مصممة خصيصا</string>
     <string name="text_task">مهمة</string>
     <string name="text_text_size">حجم الخط</string>
     <string name="text_text_size_current_value" formatted="true">حجم النص: %d</string>
+    <string name="text_the_following_solutions_can_be_referred_to">ويمكن الرجوع إلى الحلول التالية</string>
     <string name="text_theme_color">لون الموضوع</string>
     <string name="text_time">زمن</string>
     <string name="text_timed_task">مهمة توقيت</string>
@@ -646,10 +773,14 @@
     <string name="text_tools">أدوات</string>
     <string name="text_tutorial">الدورة التعليمية</string>
     <string name="text_type">يكتب</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">لا يمكن استخدام ABI المحدد \"%s\" لإنشاء تطبيق مجمع، لأن الإصدار الحالي من AutoJs6 لا يتضمن ABI أعلاه.</string>
+    <string name="text_unavailable">غير متوفره</string>
+    <string name="text_unavailable_abi_for">واجهة برمجة التطبيقات \"%s\" غير متوفرة</string>
     <string name="text_under_development_content">ستكون الميزة جاهزة للاستخدام في التحديثات القليلة التالية</string>
     <string name="text_under_development_title">تحت التطوير</string>
     <string name="text_undo">الغاء التحميل</string>
     <string name="text_undo_simplified">ينسحب</string>
+    <string name="text_unknown">غير معروف</string>
     <string name="text_updates">التحديثات</string>
     <string name="text_updates_checked_states_cleared">تم مسح الحالات التي تم فحصها</string>
     <string name="text_updates_snack_bar_act_later">في وقت لاحق</string>
@@ -670,6 +801,7 @@
     <string name="text_version_code">رمز الإصدار</string>
     <string name="text_version_info">معلومات الإصدار</string>
     <string name="text_version_name">اسم الإصدار</string>
+    <string name="text_view">عرض</string>
     <string name="text_view_docs">عرض المستندات</string>
     <string name="text_vsc_ext_version_not_meet_requirement">إصدار امتداد VSCode لا يفي بالمتطلبات</string>
     <string name="text_weekly_task">مهمة أسبوعية</string>
@@ -679,55 +811,5 @@
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="theme_color_default">تقصير</string>
-    <string name="text_only_latest_few_items_will_be_sent">سيتم إرسال أحدث %d من العناصر فقط</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">عدد إدخالات السجل %d يتجاوز حد الإرسال</string>
-    <string name="text_failed_to_send_log_entries">فشل في إرسال إدخالات السجل</string>
-    <string name="text_no_log_entries_to_send">لا توجد إدخالات سجل لإرسالها</string>
-    <string name="text_no_log_entries_to_export">لا توجد إدخالات سجل للتصدير</string>
-    <string name="text_no_log_entries_to_copy">لا توجد إدخالات سجل لنسخها</string>
-    <string name="text_failed_to_copy">فشل النسخ</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">تم النسخ بالفعل إلى الحافظة (فقط أحدث %d عنصر)</string>
-    <string name="text_failed_to_export_log_entries">فشل تصدير إدخالات السجل</string>
-    <string name="dialog_button_dismiss">رفض</string>
-    <string name="dialog_button_view_file">استعراض الملف</string>
-    <string name="text_exported">تصدير</string>
-    <string name="text_some_items_exported">تم تصدير %d من العناصر</string>
-    <string name="text_app_shortcut_disabled">تم تعطيل هذا الاختصار</string>
-    <string name="text_launcher_shortcuts">اختصارات المشغل</string>
-    <string name="description_launcher_shortcuts">يمكن للاختصارات تنفيذ إجراءات محددة في AutoJs6. يمكن للمستخدمين عرض هذه الاختصارات في مشغل مدعوم وبدء بعض المهام أو تشغيل نشاط بسرعة، مثل قراءة وثائق تطبيق AutoJs6، وتشغيل صفحة إعدادات AutoJs6، وما إلى ذلك.</string>
-    <string name="summary_text_launcher_shortcuts">أضف اختصارات إلى المشغل</string>
-    <string name="text_pin_shortcut_not_unsupported">تثبيت الاختصارات على المشغل غير مدعوم</string>
-    <string name="text_shizuku_access_description">يتيح Shizuku استخدام واجهة برمجة تطبيقات النظام مع امتيازات ADB</string>
-    <string name="text_shizuku_access">وصول Shizuku</string>
-    <string name="text_grant_autojs6_access_in_shizuku_app">منح الوصول إلى AutoJs6 في تطبيق Shizuku</string>
-    <string name="text_revoke_autojs6_access_in_shizuku_app">قم بإلغاء الوصول إلى AutoJs6 في تطبيق Shizuku</string>
-    <string name="text_shizuku_service_may_need_to_be_run_first">قد يلزم تشغيل خدمة Shizuku أولاً</string>
-    <string name="error_shizuku_is_not_installed">لم يتم تثبيت Shizuku</string>
-    <string name="error_shizuku_version_is_not_supported">نسخة Shizuku غير مدعومة</string>
-    <string name="error_failed_to_revoke_shizuku_access">فشل في إلغاء وصول Shizuku</string>
-    <string name="error_failed_to_grant_shizuku_access">فشل منح Shizuku حق الوصول</string>
-    <string name="error_unable_to_use_shizuku_service">غير قادر على استخدام خدمة Shizuku</string>
-    <string name="error_input_fields_check_failed">فشل فحص حقول الإدخال</string>
-    <string name="error_at_least_one_abi_needs_to_be_selected">يجب تحديد ABI واحد على الأقل</string>
-    <string name="text_malfunctioning">خلل</string>
-    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">الوحدة النمطية \"%s\" لا تعمل بسبب عدم توفر ملفات المكتبة الضرورية</string>
-    <string name="text_unavailable">غير متوفره</string>
-    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">لا يمكن استخدام ABI المحدد \"%s\" لإنشاء تطبيق مجمع، لأن الإصدار الحالي من AutoJs6 لا يتضمن ABI أعلاه.</string>
-    <string name="text_the_following_solutions_can_be_referred_to">ويمكن الرجوع إلى الحلول التالية</string>
-    <string name="text_download_and_install_autojs6_including_above_abi">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن ABI أعلاه (يحتوي اسم الملف على \"%s\")</string>
-    <string name="text_download_and_install_autojs6_including_all_abis">قم بتنزيل وتثبيت إصدار AutoJs6 الذي يتضمن كافة واجهات برمجة التطبيقات (يحتوي اسم الملف على \"universal\")</string>
-    <string name="text_recommended">مُستَحسَن</string>
-    <string name="text_download_link_for_autojs6">رابط تحميل AutoJs6</string>
-    <string name="text_unavailable_abi_for">واجهة برمجة التطبيقات \"%s\" غير متوفرة</string>
-
-    <plurals name="text_items_total_sum">
-        <item quantity="one">المجموع: عنصر واحد</item>
-        <item quantity="other">المجموع: %d عنصرًا</item>
-    </plurals>
-
-    <plurals name="text_already_stop_n_scripts">
-        <item quantity="one">%d توقف البرنامج النصي</item>
-        <item quantity="other">توقف %d نصوص</item>
-    </plurals>
 
 </resources>

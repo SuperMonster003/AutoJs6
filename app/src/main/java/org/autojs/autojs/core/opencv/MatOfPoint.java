@@ -1,56 +1,62 @@
 package org.autojs.autojs.core.opencv;
 
-import org.autojs.autojs.util.ResourceMonitor;
-
-import org.opencv.core.Mat;
+import org.autojs.autojs.core.cleaner.Cleaner;
+import org.autojs.autojs.core.ref.MonitorResource;
+import org.autojs.autojs.core.ref.NativeObjectReference;
 import org.opencv.core.Point;
 
-import java.util.concurrent.atomic.AtomicInteger;
+/**
+ * Modified by SuperMonster003 as of Jan 21, 2023.
+ */
+// @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Dec 18, 2023.
+public class MatOfPoint extends org.opencv.core.MatOfPoint implements MonitorResource {
 
-public class MatOfPoint extends org.opencv.core.MatOfPoint implements ResourceMonitor.Resource {
-
-    private static final AtomicInteger sResourceId = new AtomicInteger();
     private volatile boolean mReleased = false;
-    private final int mResourceId = sResourceId.incrementAndGet();
+
+    private NativeObjectReference<MonitorResource> mReference;
 
     public MatOfPoint() {
-        super();
-        ResourceMonitor.onOpen(this);
+        init();
     }
 
-    public MatOfPoint(long addr) {
-        super(addr);
-        ResourceMonitor.onOpen(this);
+    public MatOfPoint(long l) {
+        super(l);
+        init();
     }
 
-    public MatOfPoint(Mat m) {
-        super(m);
-        ResourceMonitor.onOpen(this);
+    public MatOfPoint(org.opencv.core.Mat mat) {
+        super(mat);
+        init();
     }
 
-    public MatOfPoint(Point... a) {
-        super(a);
-        ResourceMonitor.onOpen(this);
+    public MatOfPoint(Point... pointArray) {
+        super(pointArray);
+        init();
+    }
+
+    private void init() {
+        Cleaner.instance.cleanup(this, Mat.MAT_CLEANER);
     }
 
     @Override
     public void release() {
-        super.release();
-        mReleased = true;
-        ResourceMonitor.onClose(this);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        if (!mReleased) {
-            ResourceMonitor.onFinalize(this);
+        if (mReleased) return;
+        synchronized (this) {
+            if (mReleased) return;
+            mReleased = true;
+            if (mReference != null) {
+                mReference.pointer = 0L;
+            }
             super.release();
         }
-        super.finalize();
     }
 
-    @Override
-    public int getResourceId() {
-        return mResourceId;
+    public long getPointer() {
+        return nativeObj;
     }
+
+    public void setNativeObjectReference(NativeObjectReference<MonitorResource> reference) {
+        mReference = reference;
+    }
+
 }

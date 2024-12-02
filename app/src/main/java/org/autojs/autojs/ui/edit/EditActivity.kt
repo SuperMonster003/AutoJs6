@@ -176,8 +176,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     }
 
     override fun onDestroy() {
-        mEditorView.destroy()
         super.onDestroy()
+        mEditorView.destroy()
     }
 
     override fun getOnActivityResultDelegateMediator(): OnActivityResultDelegate.Mediator {
@@ -257,21 +257,21 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
         @JvmStatic
         fun editFile(context: Context, uri: Uri?, newTask: Boolean) {
-            try {
+            runCatching {
                 context.startActivity(newIntent(context).setData(uri))
-            } catch (_: Exception) {
+            }.getOrElse {
                 context.startActivity(newIntentFallback(context, newTask).setData(uri))
             }
         }
 
         @JvmStatic
         fun editFile(context: Context, name: String?, path: String?, newTask: Boolean) {
-            try {
+            runCatching {
                 context.startActivity(newIntent(context).apply {
                     putExtra(EditorView.EXTRA_PATH, path)
                     putExtra(EditorView.EXTRA_NAME, name)
                 })
-            } catch (_: Exception) {
+            }.getOrElse {
                 context.startActivity(newIntentFallback(context, newTask).apply {
                     putExtra(EditorView.EXTRA_PATH, path)
                     putExtra(EditorView.EXTRA_NAME, name)
@@ -281,13 +281,13 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
         @JvmStatic
         fun viewContent(context: Context, name: String?, content: String?, newTask: Boolean) {
-            try {
+            runCatching {
                 context.startActivity(newIntent(context).apply {
                     putExtra(EditorView.EXTRA_CONTENT, content)
                     putExtra(EditorView.EXTRA_NAME, name)
                     putExtra(EditorView.EXTRA_READ_ONLY, true)
                 })
-            } catch (_: Exception) {
+            }.getOrElse {
                 context.startActivity(newIntentFallback(context, newTask).apply {
                     putExtra(EditorView.EXTRA_CONTENT, content)
                     putExtra(EditorView.EXTRA_NAME, name)
@@ -298,11 +298,17 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
         private fun newIntent(context: Context): Intent {
             // @Caution by SuperMonster003 on Sep 11, 2022.
-            //  ! FLAG_ACTIVITY_NEW_TASK makes screen flash when activity started.
+            //  ! FLAG_ACTIVITY_NEW_TASK makes screen flash when Activity started.
             //  ! The safety of disabling this flag has been well-tested on several AOSP system
             //  ! and Android Studio AVD (from API Level 24 to 33),
             //  ! but not on other systems like MIUI, EMUI, ColorOS, Oxygen OS and so forth.
             //  ! There, therefor, is a fallback named "newIntentFallback".
+            //  ! zh-CN:
+            //  ! FLAG_ACTIVITY_NEW_TASK 标识在启动 Activity (活动) 时会使屏幕闪烁.
+            //  ! 禁用上述标识的安全性在多个 AOSP 系统
+            //  ! 以及 Android Studio AVD (API 级别 24 到 33) 上均已经过良好测试,
+            //  ! 但在 MIUI, EMUI, ColorOS, Oxygen OS 等其他系统上并未进行测试.
+            //  ! 因此, 这里有一个名为 "newIntentFallback" 的后备方案.
             return Intent(context, EditActivity::class.java)
         }
 

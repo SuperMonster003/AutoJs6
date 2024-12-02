@@ -1,69 +1,61 @@
-package org.autojs.autojs.runtime.api;
+package org.autojs.autojs.runtime.api
 
-import org.autojs.autojs.engine.JavaScriptEngine;
-import org.autojs.autojs.engine.ScriptEngine;
-import org.autojs.autojs.engine.ScriptEngineService;
-import org.autojs.autojs.execution.ExecutionConfig;
-import org.autojs.autojs.execution.ScriptExecution;
-import org.autojs.autojs.runtime.ScriptRuntime;
-import org.autojs.autojs.script.AutoFileSource;
-import org.autojs.autojs.script.JavaScriptFileSource;
-import org.autojs.autojs.script.StringScriptSource;
-
-import java.util.Set;
+import org.autojs.autojs.AutoJs
+import org.autojs.autojs.engine.JavaScriptEngine
+import org.autojs.autojs.engine.ScriptEngine
+import org.autojs.autojs.execution.ExecutionConfig
+import org.autojs.autojs.execution.ScriptExecution
+import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
+import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.script.AutoFileSource
+import org.autojs.autojs.script.JavaScriptFileSource
+import org.autojs.autojs.script.ScriptSource
+import org.autojs.autojs.script.StringScriptSource
+import org.mozilla.javascript.NativeArray
 
 /**
  * Created by Stardust on Aug 4, 2017.
+ * Transformed by SuperMonster003 on Oct 26, 2024.
  */
-public class Engines {
+class Engines(private val mScriptRuntime: ScriptRuntime) {
 
-    private final ScriptEngineService mEngineService;
-    private JavaScriptEngine mScriptEngine;
-    private final ScriptRuntime mScriptRuntime;
+    private lateinit var mScriptEngine: JavaScriptEngine
 
-    public Engines(ScriptEngineService engineService, ScriptRuntime scriptRuntime) {
-        mEngineService = engineService;
-        mScriptRuntime = scriptRuntime;
+    val engines: Set<ScriptEngine<out ScriptSource?>>
+        get() = AutoJs.instance.scriptEngineService.engines
+
+    fun setCurrentEngine(engine: JavaScriptEngine) {
+        check(!::mScriptEngine.isInitialized)
+        mScriptEngine = engine
     }
 
-    public ScriptExecution execScript(String name, String script, ExecutionConfig config) {
-        StringScriptSource scriptSource = new StringScriptSource(name, script);
-        scriptSource.setPrefix("$engine/");
-        return mEngineService.execute(scriptSource, config);
+    fun myEngine(): JavaScriptEngine = mScriptEngine
+
+    fun execScript(name: String, script: String, config: ExecutionConfig): ScriptExecution {
+        return execScriptInternal(name, script, config)
     }
 
-    public ScriptExecution execScriptFile(String path, ExecutionConfig config) {
-        return mEngineService.execute(new JavaScriptFileSource(mScriptRuntime.files.path(path)), config);
+    fun execScriptFile(path: String?, config: ExecutionConfig?): ScriptExecution {
+        return AutoJs.instance.scriptEngineService.execute(JavaScriptFileSource(mScriptRuntime.files.path(path)), config)
     }
 
-    public ScriptExecution execAutoFile(String path, ExecutionConfig config) {
-        return mEngineService.execute(new AutoFileSource(mScriptRuntime.files.path(path)), config);
+    fun execAutoFile(path: String?, config: ExecutionConfig?): ScriptExecution {
+        return AutoJs.instance.scriptEngineService.execute(AutoFileSource(mScriptRuntime.files.path(path)), config)
     }
 
-    public Object all() {
-        return mScriptRuntime.bridges.toArray(mEngineService.getEngines());
-    }
+    fun all(): NativeArray = engines.toNativeArray()
 
-    public int stopAll() {
-        return mEngineService.stopAll();
-    }
+    fun stopAll(): Int = AutoJs.instance.scriptEngineService.stopAll()
 
-    public void stopAllAndToast() {
-        mEngineService.stopAllAndToast();
-    }
+    fun stopAllAndToast(): Int = AutoJs.instance.scriptEngineService.stopAllAndToast()
 
-    public void setCurrentEngine(JavaScriptEngine engine) {
-        if (mScriptEngine != null)
-            throw new IllegalStateException();
-        mScriptEngine = engine;
-    }
+    companion object {
 
-    public Set<ScriptEngine> getEngines() {
-        return mEngineService.getEngines();
-    }
+        private fun execScriptInternal(name: String, script: String, config: ExecutionConfig): ScriptExecution {
+            val scriptSource = StringScriptSource(name, script).apply { prefix = "\$engine/" }
+            return AutoJs.instance.scriptEngineService.execute(scriptSource, config)
+        }
 
-    public JavaScriptEngine myEngine() {
-        return mScriptEngine;
     }
 
 }

@@ -88,15 +88,15 @@ object ThemeColorManager {
 
     private object StatusBarManager {
 
-        private val activities = Vector<WeakReference<Activity>>()
+        private val activityRefs = Vector<WeakReference<Activity>>()
 
         fun add(activity: Activity) {
-            activities.add(WeakReference(activity))
+            activityRefs.add(WeakReference(activity))
             activity.window.statusBarColor = currentThemeColor.colorPrimary
         }
 
         fun setColor(color: Int) {
-            activities.iterator().let {
+            activityRefs.iterator().let {
                 while (it.hasNext()) {
                     it.next().get()?.apply { window.statusBarColor = color } ?: it.remove()
                 }

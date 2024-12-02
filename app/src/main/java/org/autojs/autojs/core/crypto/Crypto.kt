@@ -3,9 +3,10 @@
 package org.autojs.autojs.core.crypto
 
 import android.util.Base64
-import org.autojs.autojs.AutoJs
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.util.ArrayUtils
+import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Undefined
@@ -30,12 +31,10 @@ import javax.crypto.spec.SecretKeySpec
 /**
  * Created by SuperMonster003 on Jun 15, 2023.
  */
-// @Reference to com.stardust.autojs.core.cypto.Crypto.class from Auto.js Pro 9.3.11 on Jun 15, 2023.
+// @Reference to com.stardust.autojs.core.cypto.Crypto.class from Auto.js Pro 9.3.11 by SuperMonster003 on Jun 15, 2023.
 //  ! There is a strong possibility that "cypto" is a typo.
-// @Reference to module __$crypto__.js from Auto.js Pro 9.3.11  on Jun 15, 2023.
+// @Reference to module __$crypto__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Jun 15, 2023.
 object Crypto {
-
-    private val scriptRuntime by lazy { AutoJs.instance.runtime }
 
     private const val A = 97
     private const val F = 102
@@ -44,6 +43,7 @@ object Crypto {
 
     private const val DEFAULT_DIGEST_ALGORITHM = "MD5"
 
+    @Suppress("SpellCheckingInspection")
     private val HEX_DIGITS = "0123456789abcdef".toCharArray()
 
     private fun singleHexToNumber(paramChar: Char): Byte {
@@ -83,7 +83,7 @@ object Crypto {
 
     @JvmStatic
     @JvmOverloads
-    fun digest(message: String, algorithm: String = DEFAULT_DIGEST_ALGORITHM, options: NativeObject = NativeObject()): Serializable {
+    fun digest(message: String, algorithm: String = DEFAULT_DIGEST_ALGORITHM, options: NativeObject = newNativeObject()): Serializable {
         val messageDigest = MessageDigest.getInstance(algorithm)
         input(message, options) { bytes: ByteArray, start: Int, length: Int ->
             messageDigest.update(/* input = */ bytes, /* offset = */ start, /* len = */ length)
@@ -96,13 +96,13 @@ object Crypto {
 
     @JvmStatic
     @JvmOverloads
-    fun encrypt(data: Any, key: Any, transformation: String, options: NativeObject = NativeObject()): Serializable {
+    fun encrypt(data: Any, key: Any, transformation: String, options: NativeObject = newNativeObject()): Serializable {
         return cipher(data, Cipher.ENCRYPT_MODE, key, transformation, options)
     }
 
     @JvmStatic
     @JvmOverloads
-    fun decrypt(data: Any, key: Any, transformation: String, options: NativeObject = NativeObject()): Serializable {
+    fun decrypt(data: Any, key: Any, transformation: String, options: NativeObject = newNativeObject()): Serializable {
         return cipher(data, Cipher.DECRYPT_MODE, key, transformation, options)
     }
 
@@ -113,18 +113,18 @@ object Crypto {
             else -> throw Exception("Unknown type of key: ${key::class.java}")
         }
         val cipher = Cipher.getInstance(transformation)
-        when (val iv = options["iv"]) {
+        when (val iv = options.prop("iv")) {
             is String -> cipher.init(mode, niceKey.toKeySpec(transformation), IvParameterSpec(iv.toByteArray()))
             is ByteArray -> cipher.init(mode, niceKey.toKeySpec(transformation), IvParameterSpec(iv))
             is NativeArray -> cipher.init(mode, niceKey.toKeySpec(transformation), IvParameterSpec(ArrayUtils.jsBytesToByteArray(iv)))
             is AlgorithmParameterSpec -> cipher.init(mode, niceKey.toKeySpec(transformation), iv)
             else -> cipher.init(mode, niceKey.toKeySpec(transformation))
         }
-        if (options["output"] == "file") {
-            val dest = options["dest"] as? String ?: throw IllegalArgumentException(
-                "Property \"dest\" is required when writing output to a file"
+        if (options.prop("output") == "file") {
+            val dest = options.prop("dest") as? String ?: throw IllegalArgumentException(
+                "Property \"dest\" is required when writing output to a file",
             )
-            val fos = FileOutputStream(scriptRuntime.files.path(dest))
+            val fos = FileOutputStream(dest)
             writeInputData(fos, cipher, data, options)
         }
         val bos = ByteArrayOutputStream()
@@ -159,9 +159,9 @@ object Crypto {
         when (input) {
             is ByteArray -> callback(input, 0, input.size)
             is NativeArray -> callback(ArrayUtils.jsBytesToByteArray(input), 0, input.size)
-            is String -> when (options["input"]) {
+            is String -> when (options.prop("input")) {
                 "file" -> {
-                    val fis = FileInputStream(scriptRuntime.files.path(input))
+                    val fis = FileInputStream(input)
                     val buffer = ByteArray(4096)
                     var read: Int
                     while (fis.read(buffer).also { read = it } != -1) {
@@ -175,7 +175,7 @@ object Crypto {
                     callback(it, 0, it.size)
                 }
                 else -> {
-                    val encoding = when (val optEncoding = options["encoding"]) {
+                    val encoding = when (val optEncoding = options.prop("encoding")) {
                         is String -> Charset.forName(optEncoding)
                         else -> Charsets.UTF_8
                     }
@@ -189,11 +189,11 @@ object Crypto {
     }
 
     private fun output(bytes: ByteArray, options: NativeObject, defaultFormat: String): Serializable {
-        return when (options["output"]?.takeUnless { it is Undefined } ?: defaultFormat) {
+        return when (options.prop("output")?.takeUnless { it is Undefined } ?: defaultFormat) {
             "bytes" -> bytes
             "base64" -> Base64.encodeToString(bytes, Base64.NO_WRAP)
             "string" -> {
-                val encoding = when (val optEncoding = options["encoding"]) {
+                val encoding = when (val optEncoding = options.prop("encoding")) {
                     is String -> Charset.forName(optEncoding)
                     else -> Charsets.UTF_8
                 }
@@ -210,16 +210,15 @@ object Crypto {
 
         val data: ByteArray
 
-        val keyPair: String?
+        val keyPair: String? = isPublic?.let {
+            if (it) KEY_PAIR_PUBLIC else KEY_PAIR_PRIVATE
+        } ?: (options.prop("keyPair") as? String)?.also {
+            if (it != KEY_PAIR_PUBLIC && it != KEY_PAIR_PRIVATE) {
+                throw Exception("Unknown keyPair ($it)")
+            }
+        }
 
         init {
-            this.keyPair = isPublic?.let {
-                if (it) KEY_PAIR_PUBLIC else KEY_PAIR_PRIVATE
-            } ?: (options["keyPair"] as? String) ?.also {
-                if (it != KEY_PAIR_PUBLIC && it != KEY_PAIR_PRIVATE) {
-                    throw Exception("Unknown keyPair ($it)")
-                }
-            }
             val bos = ByteArrayOutputStream()
             input(data, options) { bytes, start, length ->
                 bos.write(bytes, start, length)
@@ -227,7 +226,7 @@ object Crypto {
             this.data = bos.toByteArray()
         }
 
-        constructor(data: Any) : this(data, NativeObject())
+        constructor(data: Any) : this(data, newNativeObject())
 
         constructor(data: Any, options: NativeObject) : this(data, options, null)
 
@@ -267,10 +266,10 @@ object Crypto {
     class KeyPair(publicKeyData: Any, privateKeyData: Any, options: NativeObject) {
 
         @get:ScriptInterface
-        val publicKey: Key
+        val publicKey = Key(publicKeyData, options, true)
 
         @get:ScriptInterface
-        val privateKey: Key
+        val privateKey = Key(privateKeyData, options, false)
 
         internal var keyPairGeneratorAlgorithm: String? = null
 
@@ -278,17 +277,12 @@ object Crypto {
          * @param publicKeyData { String | ByteArray | NativeArray }
          * @param privateKeyData { String | ByteArray | NativeArray }
          */
-        constructor(publicKeyData: Any, privateKeyData: Any) : this(publicKeyData, privateKeyData, NativeObject())
-
-        init {
-            this.publicKey = Key(publicKeyData, options, true)
-            this.privateKey = Key(privateKeyData, options, false)
-        }
+        constructor(publicKeyData: Any, privateKeyData: Any) : this(publicKeyData, privateKeyData, newNativeObject())
 
         fun toKeySpec(transformation: String): java.security.Key {
             val keyFactory = KeyFactory.getInstance(
                 keyPairGeneratorAlgorithm
-                ?: throw Exception("keyPairGeneratorAlgorithm must be defined first")
+                    ?: throw Exception("keyPairGeneratorAlgorithm must be defined first")
             )
 
             val x509KeySpec = X509EncodedKeySpec(publicKey.data)

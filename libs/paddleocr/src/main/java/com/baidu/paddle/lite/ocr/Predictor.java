@@ -272,7 +272,6 @@ public class Predictor {
         return true;
     }
 
-
     public List<OcrResult> runOcr(Bitmap inputImage) {
         if (inputImage == null || !isLoaded()) {
             return Collections.emptyList();
@@ -303,7 +302,6 @@ public class Predictor {
         Collections.sort(ocrResults);
         return ocrResults;
     }
-
 
     public boolean isLoaded() {
         return paddlePredictor != null && isLoaded;
@@ -375,6 +373,5 @@ public class Predictor {
             r.setClsLabel(r.getClsIdx() == 1 ? "180" : "0");
         }
     }
-
 
 }

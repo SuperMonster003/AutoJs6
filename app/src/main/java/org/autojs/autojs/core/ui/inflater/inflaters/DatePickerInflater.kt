@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.DatePicker
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs6.R
 
 /**
@@ -13,7 +14,7 @@ import org.autojs.autojs6.R
  * Modified by SuperMonster003 as of Apr 12, 2023.
  * Transformed by SuperMonster003 on Apr 12, 2023.
  */
-open class DatePickerInflater<V: DatePicker>(resourceParser: ResourceParser) : FrameLayoutInflater<V>(resourceParser) {
+open class DatePickerInflater<V: DatePicker>(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : FrameLayoutInflater<V>(scriptRuntime, resourceParser) {
 
     override fun getCreator(): ViewCreator<in V> {
         return object : ViewCreator<DatePicker> {

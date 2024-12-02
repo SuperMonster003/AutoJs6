@@ -96,12 +96,11 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
         Observable.timer(2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(t -> mSwipeRefreshLayout.setRefreshing(false));
-
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
+        /* Empty body. */
     }
 
     protected class MyWebChromeClient extends WebChromeClient {
@@ -112,7 +111,7 @@ public class EWebView extends FrameLayout implements SwipeRefreshLayout.OnRefres
             mProgressBar.setProgress(newProgress);
         }
 
-        //For Android  >= 4.1
+        // For Android  >= 4.1
         public void openFileChooser(ValueCallback<Uri> valueCallback,
                                     String acceptType, String capture) {
             if (acceptType == null) {

@@ -1,0 +1,13 @@
+/build/
+/.cxx/
+/.idea/
+/cache/
+
+/src/main/sharedLibs/
+/src/main/assets/models/
+/src/sdk/native/
+/src/main/onnx/
+/src/main/onnxruntime-shared/
+
+*.skip
+**/temp-extracted/

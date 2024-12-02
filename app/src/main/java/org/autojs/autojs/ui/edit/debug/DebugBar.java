@@ -22,7 +22,6 @@ import org.autojs.autojs6.R;
 
 import java.util.List;
 
-
 public class DebugBar extends FrameLayout {
 
     private AutoAdapter<WatchingVariable> mVariablesAdapter;
@@ -114,7 +113,6 @@ public class DebugBar extends FrameLayout {
         mVariablesAdapter.unregisterAdapterDataObserver(observer);
     }
 
-
     private void showVariable(WatchingVariable variable) {
         new MaterialDialog.Builder(getContext())
                 .title(variable.getDisplayName())
@@ -125,7 +123,6 @@ public class DebugBar extends FrameLayout {
                 .onNegative((dialog, which) -> ClipboardUtils.setClip(getContext(), variable.getValue()))
                 .show();
     }
-
 
     class VariableViewHolder extends BindableViewHolder<WatchingVariable> {
 
@@ -160,6 +157,5 @@ public class DebugBar extends FrameLayout {
             mIcon.setVisibility(data.isPinned() ? View.INVISIBLE : View.VISIBLE);
         }
     }
-
 
 }

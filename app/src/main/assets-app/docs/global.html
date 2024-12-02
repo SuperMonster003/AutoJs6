@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>全局对象 (Global) | AutoJs6 文档 - 6.5.0</title>
+    <title>全局对象 (Global) | AutoJs6 文档 - 6.6.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -162,7 +162,7 @@
 
     <div id="column1" data-id="global" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <h1>AutoJs6 文档 - 6.6.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -371,10 +371,6 @@
 <li><span class="stability_undefined"><a href="#global_isfunction_o">isFunction(o)</a></span></li>
 </ul>
 </li>
-<li><span class="stability_undefined"><a href="#global_m_ishtmldocument">[m] isHTMLDocument</a></span><ul>
-<li><span class="stability_undefined"><a href="#global_ishtmldocument_o">isHTMLDocument(o)</a></span></li>
-</ul>
-</li>
 <li><span class="stability_undefined"><a href="#global_m_isint16array">[m] isInt16Array</a></span><ul>
 <li><span class="stability_undefined"><a href="#global_isint16array_o">isInt16Array(o)</a></span></li>
 </ul>
@@ -457,10 +453,6 @@
 </li>
 <li><span class="stability_undefined"><a href="#global_m_isweakset">[m] isWeakSet</a></span><ul>
 <li><span class="stability_undefined"><a href="#global_isweakset_o">isWeakSet(o)</a></span></li>
-</ul>
-</li>
-<li><span class="stability_undefined"><a href="#global_m_iswindow">[m] isWindow</a></span><ul>
-<li><span class="stability_undefined"><a href="#global_iswindow_o">isWindow(o)</a></span></li>
 </ul>
 </li>
 <li><span class="stability_undefined"><a href="#global_m_isxml">[m] isXML</a></span><ul>
@@ -1791,13 +1783,6 @@ species.isRegExp(/test$/); // true
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
 </ul>
 </div><p>判断对象的 &quot;种类&quot; 是否为 <code>Function</code>.</p>
-<h3>[m] isHTMLDocument<span><a class="mark" href="#global_m_ishtmldocument" id="global_m_ishtmldocument">#</a></span></h3>
-<h4>isHTMLDocument(o)<span><a class="mark" href="#global_ishtmldocument_o" id="global_ishtmldocument_o">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
-</ul>
-</div><p>判断对象的 &quot;种类&quot; 是否为 <code>HTMLDocument</code>.</p>
 <h3>[m] isInt16Array<span><a class="mark" href="#global_m_isint16array" id="global_m_isint16array">#</a></span></h3>
 <h4>isInt16Array(o)<span><a class="mark" href="#global_isint16array_o" id="global_isint16array_o">#</a></span></h4>
 <div class="signature"><ul>
@@ -1945,13 +1930,6 @@ species.isRegExp(/test$/); // true
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
 </ul>
 </div><p>判断对象的 &quot;种类&quot; 是否为 <code>WeakSet</code>.</p>
-<h3>[m] isWindow<span><a class="mark" href="#global_m_iswindow" id="global_m_iswindow">#</a></span></h3>
-<h4>isWindow(o)<span><a class="mark" href="#global_iswindow_o" id="global_iswindow_o">#</a></span></h4>
-<div class="signature"><ul>
-<li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
-<li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
-</ul>
-</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Window</code>.</p>
 <h3>[m] isXML<span><a class="mark" href="#global_m_isxml" id="global_m_isxml">#</a></span></h3>
 <h4>isXML(o)<span><a class="mark" href="#global_isxml_o" id="global_isxml_o">#</a></span></h4>
 <div class="signature"><ul>

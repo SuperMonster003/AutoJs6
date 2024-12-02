@@ -12,7 +12,7 @@ object ClipboardUtils {
     private fun getManager(context: Context) = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
     @JvmStatic
-    fun setClip(context: Context, text: CharSequence?) = getManager(context).setPrimaryClip(ClipData.newPlainText("", text))
+    fun setClip(context: Context, text: CharSequence?) = getManager(context).setPrimaryClip(ClipData.newPlainText("Script", text))
 
     @JvmStatic
     fun getClip(context: Context) = getManager(context).primaryClip?.getItemAt(0)?.text

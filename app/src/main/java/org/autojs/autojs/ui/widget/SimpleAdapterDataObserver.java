@@ -29,6 +29,6 @@ public class SimpleAdapterDataObserver extends RecyclerView.AdapterDataObserver 
     }
 
     public void onSomethingChanged() {
-
+        /* Empty body. */
     }
 }

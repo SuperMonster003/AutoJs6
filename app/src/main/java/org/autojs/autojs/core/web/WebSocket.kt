@@ -8,15 +8,20 @@ import okhttp3.WebSocketListener
 import okio.ByteString
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.eventloop.EventEmitter
+import org.autojs.autojs.runtime.ScriptRuntime
+import org.mozilla.javascript.BaseFunction
 import java.lang.ref.WeakReference
 
 /**
  * Created by SuperMonster003 on Apr 30, 2023.
  */
-// @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) on Apr 30, 2023.
-class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: String, isInCurrentThread: Boolean = true) : EventEmitter(
-    AutoJs.instance.runtime.bridges, AutoJs.instance.runtime.timers.timerForCurrentThread.takeIf { isInCurrentThread }
-), okhttp3.WebSocket {
+// @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Apr 30, 2023.
+class WebSocket @JvmOverloads constructor(
+    scriptRuntime: ScriptRuntime,
+    val client: OkHttpClient,
+    val url: String,
+    isInCurrentThread: Boolean = true,
+) : EventEmitter(scriptRuntime.bridges, scriptRuntime.timers.timerForCurrentThread.takeIf { isInCurrentThread }), okhttp3.WebSocket {
 
     private var maxRebuildTimes = Int.MAX_VALUE
     private var currentRebuildTimes = 0
@@ -68,8 +73,8 @@ class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: Str
 
     override fun send(bytes: ByteString) = webSocket.send(bytes)
 
-    override fun on(eventName: String, listener: Any) = this.also { super.on(eventName, listener) }
-    override fun once(eventName: String, listener: Any) = this.also { super.once(eventName, listener) }
+    override fun on(eventName: String, listener: BaseFunction) = this.also { super.on(eventName, listener) }
+    override fun once(eventName: String, listener: BaseFunction) = this.also { super.once(eventName, listener) }
 
     @JvmOverloads
     fun exitOnClose(isExitOnClose: Boolean = true) {
@@ -141,7 +146,7 @@ class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: Str
         const val CODE_CLOSE_PROTOCOL_ERROR = 1002
 
         /**
-         * Endpoint received an unsupported frame (e.g. binary-only endpoint received text frame).
+         * Endpoint received an unsupported frame (e.g., binary-only endpoint received text frame).
          *
          * zh-CN: 终端因帧数据类型不支持而即将终止连接.
          */
@@ -155,7 +160,7 @@ class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: Str
         const val CODE_CLOSED_NO_STATUS = 1005
 
         /**
-         * No close code frame has been receieved.
+         * No close code frame has been received.
          *
          * zh-CN: 异常关闭 (如浏览器关闭).
          */
@@ -211,7 +216,7 @@ class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: Str
         const val CODE_TRY_AGAIN_LATER = 1013
 
         /**
-         * Server acting as gateway received an invalid response.
+         * The server acting as gateway received an invalid response.
          *
          * zh-CN: 网关服务器接收到无效的请求.
          */
@@ -245,7 +250,7 @@ class WebSocket @JvmOverloads constructor(val client: OkHttpClient, val url: Str
                         Log.d(TAG, "onExit triggered after delayed")
                         if (it.isExitOnClose) it.close(CODE_CLOSE_NORMAL, reason)
                     }
-                    AutoJs.instance.runtime.uiHandler.postDelayed(r, it.exitOnCloseTimeout)
+                    AutoJs.instance.uiHandler.postDelayed(r, it.exitOnCloseTimeout)
                 }
             }
         }

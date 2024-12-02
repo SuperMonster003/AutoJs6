@@ -1,14 +1,16 @@
-package org.autojs.autojs.annotation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.autojs.autojs.annotation
 
 /**
  * Created by Stardust on Apr 2, 2017.
+ * Transformed by SuperMonster003 on Jul 18, 2024.
  */
-@Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.METHOD})
-public @interface ScriptInterface {
-}
+@Retention(AnnotationRetention.SOURCE)
+@Target(
+    AnnotationTarget.FIELD,
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.CLASS,
+    AnnotationTarget.PROPERTY,
+)
+annotation class ScriptInterface

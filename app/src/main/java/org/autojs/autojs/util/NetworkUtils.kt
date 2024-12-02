@@ -119,6 +119,7 @@ object NetworkUtils {
             try {
                 `is`.close()
             } catch (ignored: Exception) {
+                /* Ignored. */
             }
         }
     }
@@ -143,6 +144,7 @@ object NetworkUtils {
                 return buf.toString()
             }
         } catch (ignored: Exception) {
+            /* Ignored. */
         } // for now eat exceptions
         return ""
         /*try {

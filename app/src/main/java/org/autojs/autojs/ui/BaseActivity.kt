@@ -8,7 +8,8 @@ import android.os.Bundle
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import org.autojs.autojs.pref.Language
+import org.autojs.autojs.core.accessibility.AccessibilityTool
+import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.ViewUtils
@@ -37,6 +38,11 @@ abstract class BaseActivity : AppCompatActivity() {
         ViewUtils.makeBarsAdaptToNightMode(this)
 
         setApplicationLocale(this)
+
+        // @Dubious by SuperMonster003 on Oct 28, 2024.
+        //  ! Is it property to start a11y service automatically here?
+        //  ! zh-CN: 无障碍服务自启动放在这里是否合适?
+        AccessibilityTool(this).apply { if (!isServiceRunning()) startService(false) }
     }
 
     private fun setApplicationLocale(context: Context) {

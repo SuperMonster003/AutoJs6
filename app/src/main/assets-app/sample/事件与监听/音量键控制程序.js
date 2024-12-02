@@ -21,7 +21,7 @@ events.onKeyDown("volume_down", function(event){
 
 task();
 
-loop();
+// loop();
 
 function task1(){
     toast("任务1运行中，音量下键结束，音量上键切换任务");

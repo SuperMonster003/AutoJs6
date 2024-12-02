@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.util.AttributeSet
 import androidx.preference.Preference.SummaryProvider
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs6.R

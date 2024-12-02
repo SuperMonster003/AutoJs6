@@ -1,51 +1,40 @@
-package org.autojs.autojs.runtime.accessibility;
+package org.autojs.autojs.runtime.accessibility
 
-import org.autojs.autojs.pref.Pref;
-import org.autojs.autojs.util.DeveloperUtils;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.util.DeveloperUtils
 
 /**
  * Created by Stardust on Apr 29, 2017.
+ * Modified by SuperMonster003 as of Apr 2, 2024.
+ * Transformed by SuperMonster003 on Apr 2, 2024.
  */
-public class AccessibilityConfig {
+class AccessibilityConfig {
 
-    private static boolean isUnintendedGuardEnabled = false;
+    private val mBlacklist = ArrayList<String>()
+    private var mSealed = false
 
-    private final List<String> mWhiteList = new ArrayList<>();
-    private boolean mSealed = false;
-
-    public AccessibilityConfig() {
+    init {
         if (isUnintendedGuardEnabled()) {
-            mWhiteList.add(DeveloperUtils.selfPackage());
+            addBlacklist(DeveloperUtils.selfPackage())
         }
     }
 
-    public static boolean isUnintendedGuardEnabled() {
-        return isUnintendedGuardEnabled;
+    fun isInBlacklist(packageName: String) = mBlacklist.contains(packageName)
+
+    fun addBlacklist(packageName: String) {
+        check(!mSealed) { "Sealed" }
+        mBlacklist.add(packageName)
     }
 
-    public static void setIsUnintendedGuardEnabled(boolean isUnintendedGuardEnabled) {
-        AccessibilityConfig.isUnintendedGuardEnabled = isUnintendedGuardEnabled;
+    fun seal() {
+        mSealed = true
     }
 
-    public static void refreshUnintendedGuardState() {
-        setIsUnintendedGuardEnabled(Pref.isGuardModeEnabled());
-    }
+    companion object {
 
-    public boolean whiteListContains(String packageName) {
-        return mWhiteList.contains(packageName);
-    }
+        @JvmStatic
+        fun isUnintendedGuardEnabled() = Pref.isGuardModeEnabled
 
-    public void addWhiteList(String packageName) {
-        if (mSealed)
-            throw new IllegalStateException("Sealed");
-        mWhiteList.add(packageName);
-    }
-
-    public final void seal() {
-        mSealed = true;
     }
 
 }

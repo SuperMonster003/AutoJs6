@@ -55,17 +55,17 @@ open class AccessibilityNodeInfoAllocator {
                 notRecycledCount++
                 value?.let { Log.w(TAG, it) }
             } catch (_: IllegalStateException) {
-                // Ignored
+                /* Ignored. */
             }
         }
         notRecycledCount.also { Log.v(TAG, "Total: ${this.size}; Not recycled: $it") }
     }
 
     fun add(nodeInfo: AccessibilityNodeInfo?): AccessibilityNodeInfo? =
-        nodeInfo?.also { mAccessibilityNodeInfoList[it] = Arrays.toString(Thread.currentThread().stackTrace) }
+        nodeInfo?.also { mAccessibilityNodeInfoList[it] = Thread.currentThread().stackTrace.contentToString() }
 
     private fun addAll(nodeInfoList: Collection<*>) {
-        Arrays.toString(Thread.currentThread().stackTrace).run {
+        Thread.currentThread().stackTrace.contentToString().run {
             nodeInfoList.forEach {
                 when (it) {
                     is AccessibilityNodeInfo -> mAccessibilityNodeInfoList[it] = this

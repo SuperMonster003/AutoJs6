@@ -1,8 +1,6 @@
 package org.autojs.autojs.util
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.Closeable
@@ -15,69 +13,48 @@ object IOUtils {
 
     private val TAG = IOUtils::class.java.simpleName
 
-    fun close(io: Closeable?) {
+    @JvmStatic
+    @JvmOverloads
+    fun close(closeable: Closeable?, exceptionMatters: Boolean = true) {
         try {
-            io?.close()
+            closeable?.close()
         } catch (e: IOException) {
-            Log.w(TAG, "ex: $e")
-        }
-    }
-
-    @Throws(IOException::class)
-    fun close(io: Closeable?, exceptionMatters: Boolean) {
-        try {
-            io?.close()
-        } catch (e: IOException) {
-            if (exceptionMatters) {
-                throw e
+            when {
+                exceptionMatters -> throw e
+                else -> Log.w(TAG, "ex: $e")
             }
         }
     }
 
-    fun gzip(str: String): ByteArray? {
-        var out: ByteArrayOutputStream? = null
-        var gzip: GZIPOutputStream? = null
-        try {
-            return ByteArrayOutputStream()
-                .also {
-                    gzip = GZIPOutputStream(it).apply {
-                        write(str.toByteArray(StandardCharsets.UTF_8))
-                        finish()
-                    }
-                }
-                .also { out = it }.toByteArray()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            close(out)
-            close(gzip)
+    @JvmStatic
+    fun closeQuietly(closeable: Closeable?) = close(closeable, false)
+
+    @JvmStatic
+    fun gzip(string: String): ByteArray? = try {
+        ByteArrayOutputStream().use { outputStream ->
+            GZIPOutputStream(outputStream).use { gzipOutputStream ->
+                gzipOutputStream.write(string.toByteArray(StandardCharsets.UTF_8))
+            }
+            outputStream.toByteArray()
         }
-        return null
+    } catch (e: Exception) {
+        null.also { e.printStackTrace() }
     }
 
-    fun gunzip(bytes: ByteArray?): String? {
-        var out: ByteArrayOutputStream? = null
-        var gzip: GZIPInputStream? = null
-        try {
-            return ByteArrayOutputStream()
-                .also { outputStream ->
-                    gzip = GZIPInputStream(ByteArrayInputStream(bytes)).apply {
-                        var res: Int
-                        val buf = ByteArray(1024)
-                        while (read(buf).also { res = it } != -1) {
-                            outputStream.write(buf, 0, res)
-                        }
-                        outputStream.flush()
-                    }
+    @JvmStatic
+    fun gunzip(bytes: ByteArray): String? = try {
+        ByteArrayOutputStream().use { outputStream ->
+            GZIPInputStream(ByteArrayInputStream(bytes)).use { gzipInputStream ->
+                val buffer = ByteArray(1024)
+                var bytesRead: Int
+                while (gzipInputStream.read(buffer).also { bytesRead = it } != -1) {
+                    outputStream.write(buffer, 0, bytesRead)
                 }
-                .also { out = it }.toString("UTF-8")
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            close(out)
-            close(gzip)
+                outputStream.toString("UTF-8")
+            }
         }
-        return null
+    } catch (e: Exception) {
+        null.also { e.printStackTrace() }
     }
 
 }

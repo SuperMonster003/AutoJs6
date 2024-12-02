@@ -1,11 +1,11 @@
 package org.autojs.autojs.ui.enhancedfloaty;
 
+import android.graphics.PixelFormat;
+import android.os.Build;
 import android.view.View;
 import android.view.WindowManager;
-
 import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
-
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 
@@ -18,6 +18,8 @@ public abstract class FloatyWindow {
 
     private WindowBridge mWindowBridge;
     private WindowManager.LayoutParams mWindowLayoutParams;
+
+    @Nullable
     private View mWindowView;
 
     public Size initialSize;
@@ -31,41 +33,44 @@ public abstract class FloatyWindow {
         onCreateWindow(service, manager);
     }
 
+    @CallSuper
     protected void onCreateWindow(FloatyService service, WindowManager manager) {
         setWindowLayoutParams(onCreateWindowLayoutParams());
         setWindowView(onCreateView(service));
         setWindowBridge(onCreateWindowBridge(getWindowLayoutParams()));
 
-        onViewCreated(getWindowView());
+        onViewCreated(mWindowView);
 
         // attach to window
-        attachToWindow(getWindowView(), manager);
+        attachToWindow(mWindowView, manager);
     }
 
     protected void onViewCreated(View view) {
-
+        /* Empty body. */
     }
 
     protected void attachToWindow(View view, WindowManager manager) {
-        getWindowManager().addView(view, getWindowLayoutParams());
-        onAttachToWindow(view, manager);
+        if (view != null) {
+            mWindowManager.addView(view, getWindowLayoutParams());
+            onAttachToWindow(view, manager);
+        }
     }
 
     protected void onAttachToWindow(View view, WindowManager manager) {
-
+        /* Empty body. */
     }
 
     protected abstract View onCreateView(FloatyService service);
 
     protected WindowBridge onCreateWindowBridge(WindowManager.LayoutParams params) {
-        return new WindowBridge.DefaultImpl(params, getWindowManager(), getWindowView());
+        return new WindowBridge.DefaultImpl(params, mWindowManager, mWindowView);
     }
 
     protected abstract WindowManager.LayoutParams onCreateWindowLayoutParams();
 
     public void updateWindowLayoutParams(WindowManager.LayoutParams params) {
         setWindowLayoutParams(params);
-        mWindowManager.updateViewLayout(getWindowView(), getWindowLayoutParams());
+        mWindowManager.updateViewLayout(mWindowView, getWindowLayoutParams());
     }
 
     protected void setWindowManager(WindowManager windowManager) {
@@ -73,13 +78,14 @@ public abstract class FloatyWindow {
     }
 
     public WindowManager.LayoutParams getWindowLayoutParams() {
-        return mWindowLayoutParams;
+        return mWindowLayoutParams != null ? mWindowLayoutParams : getDefaultWindowLayoutParams();
     }
 
-    public void setWindowLayoutParams(WindowManager.LayoutParams windowLayoutParams) {
+    public void setWindowLayoutParams(@Nullable WindowManager.LayoutParams windowLayoutParams) {
         mWindowLayoutParams = windowLayoutParams;
     }
 
+    @Nullable
     public View getWindowView() {
         return mWindowView;
     }
@@ -111,10 +117,32 @@ public abstract class FloatyWindow {
 
     public void close() {
         try {
-            getWindowManager().removeView(getWindowView());
+            mWindowManager.removeView(mWindowView);
             FloatyService.removeWindow(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    private WindowManager.LayoutParams getDefaultWindowLayoutParams() {
+        return new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                getDefaultWindowType(),
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+        );
+    }
+
+    /**
+     * @noinspection deprecation
+     */
+    private int getDefaultWindowType() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            return WindowManager.LayoutParams.TYPE_PHONE;
+        }
+    }
+
 }

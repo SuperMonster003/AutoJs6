@@ -4,8 +4,8 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import android.util.SparseArray;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Stardust on Mar 5, 2017.
@@ -22,7 +22,7 @@ public interface OnActivityResultDelegate {
     class Mediator implements OnActivityResultDelegate {
 
         private final SparseArray<OnActivityResultDelegate> mSpecialDelegate = new SparseArray<>();
-        private final List<OnActivityResultDelegate> mDelegates = new ArrayList<>();
+        private final List<OnActivityResultDelegate> mDelegates = new CopyOnWriteArrayList<>();
 
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             OnActivityResultDelegate delegate = mSpecialDelegate.get(requestCode);
@@ -44,7 +44,10 @@ public interface OnActivityResultDelegate {
 
         public void removeDelegate(OnActivityResultDelegate delegate) {
             if (mDelegates.remove(delegate)) {
-                mSpecialDelegate.removeAt(mSpecialDelegate.indexOfValue(delegate));
+                int index = mSpecialDelegate.indexOfValue(delegate);
+                if (index > -1) {
+                    mSpecialDelegate.removeAt(index);
+                }
             }
         }
     }

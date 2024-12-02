@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.lang.ThreadCompat;
+import org.mozilla.javascript.BaseFunction;
 
 import java.util.Map;
 
@@ -20,7 +21,7 @@ public class MainThreadProxy {
         mRuntime = runtime;
     }
 
-    public int setTimeout(Object callback, long delay, Object... args) {
+    public double setTimeout(BaseFunction callback, long delay, Object... args) {
         return getMainTimer().setTimeout(callback, delay, args);
     }
 
@@ -32,15 +33,15 @@ public class MainThreadProxy {
         return getMainTimer().clearTimeout(id);
     }
 
-    public int setInterval(Object listener, long interval, Object... args) {
-        return getMainTimer().setInterval(listener, interval, args);
+    public double setInterval(BaseFunction callback, long interval, Object... args) {
+        return getMainTimer().setInterval(callback, interval, args);
     }
 
     public boolean clearInterval(int id) {
         return getMainTimer().clearInterval(id);
     }
 
-    public int setImmediate(Object listener, Object... args) {
+    public double setImmediate(BaseFunction listener, Object... args) {
         return getMainTimer().setImmediate(listener, args);
     }
 

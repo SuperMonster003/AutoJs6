@@ -6,10 +6,12 @@ import android.os.Environment
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.twofortyfouram.locale.sdk.client.ui.activity.AbstractAppCompatPluginActivity
 import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.ScriptIntents.isTaskerJsonObjectValid
 import org.autojs.autojs.model.explorer.ExplorerDirPage
+import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.ui.edit.EditorView
 import org.autojs.autojs.ui.explorer.ExplorerView
@@ -44,10 +46,12 @@ class TaskPrefEditActivity : AbstractAppCompatPluginActivity() {
     private fun initScriptListRecyclerView() {
         val explorerView = findViewById<ExplorerView>(R.id.script_list)
         explorerView.setExplorer(Explorers.external(), ExplorerDirPage.createRoot(Environment.getExternalStorageDirectory()))
-        explorerView.setOnItemClickListener { _, item ->
-            mSelectedScriptFilePath = item.path
-            finish()
-        }
+        explorerView.setOnItemClickListener(object : ExplorerView.OnItemClickListener {
+            override fun onItemClick(view: View?, item: ExplorerItem) {
+                mSelectedScriptFilePath = item.path
+                finish()
+            }
+        })
     }
 
     private fun editPreExecuteScript() {

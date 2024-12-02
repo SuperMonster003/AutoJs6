@@ -1,9 +1,13 @@
 package org.autojs.autojs.tool;
 
-import static org.autojs.autojs.util.StringUtils.str;
-
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
+import org.autojs.autojs.util.ForegroundServiceUtils;
+
+import static org.autojs.autojs.util.ForegroundServiceUtils.FOREGROUND_SERVICE_TYPE_UNKNOWN;
+import static org.autojs.autojs.util.StringUtils.str;
 
 /**
  * Created by SuperMonster003 on Apr 11, 2022.
@@ -69,6 +73,29 @@ public class ForegroundServiceCreator {
         this.serviceDescription = service.description;
         this.notificationTitle = notification.title;
         this.notificationContent = notification.content;
+    }
+
+    public void startForeground(int foregroundServiceType) {
+        ForegroundServiceUtils.createNotificationChannelIfNeeded(service,
+                className,
+                serviceName,
+                serviceDescription);
+
+        Notification notification = ForegroundServiceUtils.getNotification(service,
+                intent,
+                className,
+                notificationTitle,
+                notificationContent);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && foregroundServiceType != FOREGROUND_SERVICE_TYPE_UNKNOWN) {
+                service.startForeground(notificationId, notification, foregroundServiceType);
+        } else {
+                service.startForeground(notificationId, notification);
+        }
+    }
+
+    public void stopForeground(int notificationBehavior) {
+        service.stopForeground(notificationBehavior);
     }
 
     public static class Builder {

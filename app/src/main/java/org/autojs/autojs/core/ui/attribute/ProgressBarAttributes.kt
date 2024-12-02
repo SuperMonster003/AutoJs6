@@ -1,25 +1,33 @@
 package org.autojs.autojs.core.ui.attribute
 
+import android.os.Build
 import android.view.View
 import android.widget.ProgressBar
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
 /**
  * Created by SuperMonster003 on May 20, 2023.
  */
-open class ProgressBarAttributes(resourceParser: ResourceParser, view: View) : ViewAttributes(resourceParser, view) {
+open class ProgressBarAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : ViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as ProgressBar
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttrs(arrayOf("isIndeterminate", "indeterminate")) { view.isIndeterminate = it.toBoolean() }
         registerAttr("indeterminateDrawable") { view.indeterminateDrawable = drawables.parse(view, it) }
         registerAttr("indeterminateTint") { view.indeterminateTintList = ColorUtils.toColorStateList(view, it) }
         registerAttr("indeterminateTintMode") { view.indeterminateTintMode = TINT_MODES[it] }
+        registerAttr("min") {
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> view.min = it.toInt()
+                else -> throw RuntimeException("Attribute \"min\" is not supported to set before API Level 26 (Android 8.0) [O]")
+            }
+        }
         registerAttr("max") { view.max = it.toInt() }
         registerAttr("minHeight") { view.minimumHeight = Dimensions.parseToIntPixel(it, view) }
         registerAttr("minWidth") { view.minimumWidth = Dimensions.parseToIntPixel(it, view) }
@@ -38,7 +46,6 @@ open class ProgressBarAttributes(resourceParser: ResourceParser, view: View) : V
             arrayOf(
                 "animationResolution",
                 "mirrorForRtl",
-                "min",
                 "maxWidth",
                 "maxHeight",
                 "interpolator",

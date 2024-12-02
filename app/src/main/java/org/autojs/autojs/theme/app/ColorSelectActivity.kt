@@ -23,12 +23,13 @@ import androidx.recyclerview.widget.ThemeColorRecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils.appendSystemUiVisibility
 import org.autojs.autojs6.R
 import kotlin.math.hypot
@@ -45,6 +46,7 @@ class ColorSelectActivity : BaseActivity() {
     private lateinit var mColorSettingRecyclerView: ColorSettingRecyclerView
 
     private var mCurrentColor = 0
+
     private val mOnItemClickListener = object : OnItemClickListener {
         override fun onItemClick(v: View?, position: Int) {
             mColorSettingRecyclerView.selectedThemeColor?.let {
@@ -94,9 +96,9 @@ class ColorSelectActivity : BaseActivity() {
     override fun finish() {
         mColorSettingRecyclerView.selectedThemeColor?.let {
             ThemeColorManager.setThemeColor(it.colorPrimary)
+            Pref.putString(key(R.string.key_theme_color), getColorString(this))
         }
         super.finish()
-        onFinish()
     }
 
     private fun setColorWithAnimation(view: View, colorTo: Int) {
@@ -135,8 +137,6 @@ class ColorSelectActivity : BaseActivity() {
 
         private val defaultColorPosition: Int
             get() = customColorPosition + 1
-
-        var onFinish = {}
 
         @JvmStatic
         fun startActivity(context: Context) {

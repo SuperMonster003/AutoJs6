@@ -3,33 +3,41 @@ package org.autojs.autojs.core.ui.dialog;
 import android.content.Context;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.looper.Loopers;
 import org.autojs.autojs.core.looper.Timer;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.tool.UiHandler;
+import org.jetbrains.annotations.NotNull;
+import org.mozilla.javascript.BaseFunction;
 
 /**
  * Created by Stardust on Apr 17, 2018.
  * Modified by SuperMonster003 as of Mar 20, 2022.
- * Modified by aiselp as of Jun 10, 2023.
  */
 public class JsDialogBuilder extends MaterialDialog.Builder {
 
     private final EventEmitter mEmitter;
     private final UiHandler mUiHandler;
-    private final Timer mTimer;
+    private volatile Timer mTimer;
     private final Loopers mLoopers;
+    private final ScriptRuntime mRuntime;
     private JsDialog mDialog;
-    private volatile Loopers.AsyncTask task;
+    private volatile int mWaitId = -1;
 
-    public JsDialogBuilder(Context context, ScriptRuntime runtime) {
+    @Nullable
+    public Object thread;
+
+    public JsDialogBuilder(Context context, ScriptRuntime scriptRuntime) {
         super(context);
-        mTimer = runtime.timers.getTimerForCurrentThread();
-        mLoopers = runtime.loopers;
-        mEmitter = new EventEmitter(runtime.bridges);
-        mUiHandler = runtime.uiHandler;
+        mRuntime = scriptRuntime;
+        mLoopers = scriptRuntime.loopers;
+        mEmitter = new EventEmitter(scriptRuntime.bridges);
+        mUiHandler = scriptRuntime.getUiHandler();
         setUpEvents();
     }
 
@@ -56,36 +64,42 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
             }
         });
         dismissListener(dialog -> {
-            mTimer.postDelayed(() -> mLoopers.removeAsyncTask(task), 0);
+            mTimer.postDelayed(() -> mLoopers.doNotWaitWhenIdle(mWaitId), 0);
             emit("dismiss", dialog);
         });
         cancelListener(dialog -> emit("cancel", dialog));
     }
 
     public void onShowCalled() {
-        mTimer.postDelayed(() -> task = mLoopers.createAndAddAsyncTask("js-dialog"), 0);
+        mTimer = mRuntime.timers.getTimerForCurrentThread();
+        mWaitId = mLoopers.waitWhenIdle();
     }
 
     public JsDialog getDialog() {
         return mDialog;
     }
 
-    public JsDialog buildDialog() {
-        mDialog = new JsDialog(this, mEmitter, mUiHandler);
-        return mDialog;
+    @Override
+    public JsDialogBuilder theme(@NonNull @NotNull Theme theme) {
+        super.theme(theme);
+        return this;
     }
 
-    public JsDialogBuilder once(String eventName, Object listener) {
+    public JsDialog buildDialog() {
+        return mDialog = new JsDialog(this, mEmitter, mUiHandler);
+    }
+
+    public JsDialogBuilder once(String eventName, BaseFunction listener) {
         mEmitter.once(eventName, listener);
         return this;
     }
 
-    public JsDialogBuilder on(String eventName, Object listener) {
+    public JsDialogBuilder on(String eventName, BaseFunction listener) {
         mEmitter.on(eventName, listener);
         return this;
     }
 
-    public JsDialogBuilder addListener(String eventName, Object listener) {
+    public JsDialogBuilder addListener(String eventName, BaseFunction listener) {
         mEmitter.addListener(eventName, listener);
         return this;
     }
@@ -106,12 +120,12 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
         return mEmitter.listeners(eventName);
     }
 
-    public JsDialogBuilder prependListener(String eventName, Object listener) {
+    public JsDialogBuilder prependListener(String eventName, BaseFunction listener) {
         mEmitter.prependListener(eventName, listener);
         return this;
     }
 
-    public JsDialogBuilder prependOnceListener(String eventName, Object listener) {
+    public JsDialogBuilder prependOnceListener(String eventName, BaseFunction listener) {
         mEmitter.prependOnceListener(eventName, listener);
         return this;
     }
@@ -126,7 +140,7 @@ public class JsDialogBuilder extends MaterialDialog.Builder {
         return this;
     }
 
-    public JsDialogBuilder removeListener(String eventName, Object listener) {
+    public JsDialogBuilder removeListener(String eventName, BaseFunction listener) {
         mEmitter.removeListener(eventName, listener);
         return this;
     }

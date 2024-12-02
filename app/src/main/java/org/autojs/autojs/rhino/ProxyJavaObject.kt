@@ -1,11 +1,13 @@
 package org.autojs.autojs.rhino
 
-import org.mozilla.javascript.Context
-import org.mozilla.javascript.NativeFunction
+import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
+import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_OBJECT_KEY
+import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_SETTER_KEY
+import org.autojs.autojs.util.RhinoUtils.callFunction
+import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.UniqueTag
 
 /**
  * Created by Stardust on Dec 6, 2017.
@@ -13,8 +15,8 @@ import org.mozilla.javascript.UniqueTag
  */
 class ProxyJavaObject : NativeJavaObject {
 
-    private var mGetter: NativeFunction? = null
-    private var mSetter: NativeFunction? = null
+    private var mGetter: BaseFunction? = null
+    private var mSetter: BaseFunction? = null
 
     constructor()
     @JvmOverloads
@@ -23,12 +25,12 @@ class ProxyJavaObject : NativeJavaObject {
     @JvmOverloads
     constructor(scope: Scriptable, javaObject: Any, staticType: Class<*>, proxyObject: Any, isAdapter: Boolean = false) : super(scope, javaObject, staticType, isAdapter) {
         val proxy = proxyObject as NativeObject
-        val getter = proxy["get", scope]
-        if (getter is NativeFunction) {
+        val getter = proxy[PROXY_GETTER_KEY, scope]
+        if (getter is BaseFunction) {
             mGetter = getter
         }
-        val setter = proxy["set", scope]
-        if (setter is NativeFunction) {
+        val setter = proxy[PROXY_SETTER_KEY, scope]
+        if (setter is BaseFunction) {
             mSetter = setter
         }
     }
@@ -39,39 +41,34 @@ class ProxyJavaObject : NativeJavaObject {
     @JvmOverloads
     constructor(scope: Scriptable, javaObject: Any, proxyObject: Any, isAdapter: Boolean = false) : this(scope, javaObject, javaObject.javaClass, proxyObject, isAdapter)
 
-    override fun put(name: String, start: Scriptable, value: Any) {
-        if (name == "__proxy__") {
-            val proxy = value as NativeObject
-            val getter = proxy["get", start]
-            if (getter is NativeFunction) {
-                mGetter = getter
+    override fun put(key: String, start: Scriptable, value: Any) {
+        when {
+            key == PROXY_OBJECT_KEY -> {
+                val proxy = value as NativeObject
+                proxy[PROXY_GETTER_KEY, start].let { if (it is BaseFunction) mGetter = it }
+                proxy[PROXY_SETTER_KEY, start].let { if (it is BaseFunction) mSetter = it }
             }
-            val setter = proxy["set", start]
-            if (setter is NativeFunction) {
-                mSetter = setter
+            else -> when (val setter = mSetter) {
+                null -> super.put(key, start, value)
+                else -> callFunction(setter, start, start, arrayOf(key, value))
             }
-        } else if (mSetter != null) {
-            mSetter!!.call(Context.getCurrentContext(), start, start, arrayOf(name, value))
-        } else {
-            super.put(name, start, value)
         }
-    }
-
-    fun getWithoutProxy(name: String?, start: Scriptable?): Any {
-        return super.get(name, start)
     }
 
     override fun get(name: String, start: Scriptable): Any {
-        var value = super.get(name, start)
-        if (value != null && value !== UniqueTag.NOT_FOUND) {
-            return value
+        val value = super.get(name, start)
+        return if (value != null && value != NOT_FOUND) {
+            value
+        } else {
+            when (val getter = mGetter) {
+                null -> value
+                else -> callFunction(getter, start, start, arrayOf(name))
+            } ?: NOT_FOUND
         }
-        if (mGetter != null) {
-            value = mGetter!!.call(Context.getCurrentContext(), start, start, arrayOf<Any>(name))
-        }
-        return value
     }
 
     override fun getDefaultValue(typeHint: Class<*>?) = toString()
+
+    fun getWithoutProxy(name: String?, start: Scriptable?): Any = super.get(name, start)
 
 }

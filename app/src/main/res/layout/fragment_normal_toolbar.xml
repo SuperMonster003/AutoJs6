@@ -39,5 +39,4 @@
             app:icon_color="@color/toolbar_text"
             app:text="@string/text_save_simplified" />
 
-
 </LinearLayout>

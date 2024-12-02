@@ -1,129 +1,110 @@
-package org.autojs.autojs.ui.widget;
+package org.autojs.autojs.ui.widget
 
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
-import android.util.AttributeSet;
-import android.widget.TextView;
+import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.util.AttributeSet
+import android.util.TypedValue
+import android.view.Gravity
+import android.widget.TextView
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import org.autojs.autojs.theme.ThemeColorManagerCompat
+import org.autojs.autojs.util.FileUtils
+import org.autojs.autojs6.R
+import kotlin.math.roundToInt
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.ColorRes;
-import androidx.annotation.Nullable;
+class FirstCharView : TextView {
 
-import org.autojs.autojs.theme.ThemeColorManagerCompat;
-import org.autojs.autojs6.R;
+    constructor(context: Context?) : super(context) {
+        init()
+    }
 
-@SuppressWarnings("UnusedReturnValue")
-public class FirstCharView extends TextView {
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+        init()
+    }
 
-    private GradientDrawable mBackground;
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        init()
+    }
 
-    private final int COLOR_RES_DAY_NIGHT = R.color.day_night;
-    private final int COLOR_RES_NIGHT_DAY = R.color.night_day;
-    private final int COLOR_TRANSPARENT = Color.TRANSPARENT;
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+        init()
+    }
 
-    private GradientDrawable background() {
-        if (mBackground == null) {
-            mBackground = (GradientDrawable) getBackground();
+    private fun init() {
+        gravity = Gravity.CENTER
+        setLineSpacing(0f, 1f)
+    }
+
+    private val strokeWidth: Int
+        get() = context.resources.getDimensionPixelSize(R.dimen.first_char_view_stroke_width)
+
+    private var privateBackground: GradientDrawable? = null
+
+    private fun background(): GradientDrawable {
+        if (privateBackground == null) {
+            privateBackground = background as GradientDrawable
         }
-        return mBackground;
+        return privateBackground!!
     }
 
-    public FirstCharView(Context context) {
-        super(context);
+    private fun convertColorResToInt(@ColorRes colorRes: Int) = context.getColor(colorRes)
+
+    fun setIconText(text: CharSequence?) = also { setText(text) }
+
+    fun setIcon(icon: FileUtils.TYPE.Icon): FirstCharView {
+        setIconText(icon.text)
+        icon.textSize?.let { setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat()) }
+        icon.textPadding?.let { padding ->
+            val (start, top, end, bottom) = padding.map {
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, it.toFloat(), resources.displayMetrics).roundToInt()
+            }
+            setPadding(start, top, end, bottom)
+        }
+        icon.rotation?.let { rotation = it.toFloat() }
+        icon.includeFontPadding?.let { includeFontPadding = it }
+        return this
     }
 
-    public FirstCharView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
+    fun setIconTextColor(@ColorInt color: Int) = also { setTextColor(color) }
 
-    public FirstCharView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
+    fun setIconTextColorRes(@ColorRes colorRes: Int) = also { setTextColor(convertColorResToInt(colorRes)) }
 
-    public FirstCharView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
+    fun setIconTextThemeColor() = setIconTextColor(ThemeColorManagerCompat.getColorPrimary())
 
-    private int convertColorResToInt(@ColorRes int colorRes) {
-        return getContext().getColor(colorRes);
-    }
+    fun setIconTextColorDayNight() = setIconTextColorRes(COLOR_RES_DAY_NIGHT)
 
-    private int getStrokeWidth() {
-        return getContext().getResources().getDimensionPixelSize(R.dimen.first_char_view_stroke_width);
-    }
+    fun setIconTextColorNightDay() = setIconTextColorRes(COLOR_RES_NIGHT_DAY)
 
-    public FirstCharView setIconText(CharSequence text) {
-        setText(text);
-        return this;
-    }
+    fun setStrokeColor(@ColorInt color: Int) = also { background().setStroke(strokeWidth, color) }
 
-    public FirstCharView setIconTextColor(@ColorInt int color) {
-        setTextColor(color);
-        return this;
-    }
+    fun setStrokeColorRes(@ColorRes colorRes: Int): FirstCharView = setStrokeColor(convertColorResToInt(colorRes))
 
-    public FirstCharView setIconTextColorRes(@ColorRes int colorRes) {
-        setTextColor(convertColorResToInt(colorRes));
-        return this;
-    }
+    fun setStrokeThemeColor() = setStrokeColor(ThemeColorManagerCompat.getColorPrimary())
 
-    public FirstCharView setIconTextThemeColor() {
-        return setIconTextColor(ThemeColorManagerCompat.getColorPrimary());
-    }
+    fun setStrokeColorDayNight() = setStrokeColorRes(COLOR_RES_DAY_NIGHT)
 
-    public FirstCharView setIconTextColorDayNight() {
-        return setIconTextColorRes(COLOR_RES_DAY_NIGHT);
-    }
+    fun setStrokeColorNightDay() = setStrokeColorRes(COLOR_RES_NIGHT_DAY)
 
-    public FirstCharView setIconTextColorNightDay() {
-        return setIconTextColorRes(COLOR_RES_NIGHT_DAY);
-    }
+    fun setFillColor(@ColorInt color: Int) = also { background().setColor(color) }
 
-    public FirstCharView setStrokeColor(@ColorInt int color) {
-        background().setStroke(getStrokeWidth(), color);
-        return this;
-    }
+    fun setFillColorRes(@ColorRes colorRes: Int) = setFillColor(convertColorResToInt(colorRes))
 
-    public FirstCharView setStrokeColorRes(@ColorRes int colorRes) {
-        return setStrokeColor(convertColorResToInt(colorRes));
-    }
+    fun setFillThemeColor() = setFillColor(ThemeColorManagerCompat.getColorPrimary())
 
-    public FirstCharView setStrokeThemeColor() {
-        return setStrokeColor(ThemeColorManagerCompat.getColorPrimary());
-    }
+    fun setFillTransparent() = setFillColor(COLOR_TRANSPARENT)
 
-    public FirstCharView setStrokeColorDayNight() {
-        return setStrokeColorRes(COLOR_RES_DAY_NIGHT);
-    }
+    fun setFillColorDayNight() = setFillColorRes(COLOR_RES_DAY_NIGHT)
 
-    public FirstCharView setStrokeColorNightDay() {
-        return setStrokeColorRes(COLOR_RES_NIGHT_DAY);
-    }
+    fun setFillColorNightDay() = setFillColorRes(COLOR_RES_NIGHT_DAY)
 
-    public FirstCharView setFillColor(@ColorInt int color) {
-        background().setColor(color);
-        return this;
-    }
+    companion object {
 
-    public FirstCharView setFillColorRes(@ColorRes int colorRes) {
-        return setFillColor(convertColorResToInt(colorRes));
-    }
+        private val COLOR_RES_DAY_NIGHT = R.color.day_night
+        private val COLOR_RES_NIGHT_DAY = R.color.night_day
+        private const val COLOR_TRANSPARENT = Color.TRANSPARENT
 
-    public FirstCharView setFillThemeColor() {
-        return setFillColor(ThemeColorManagerCompat.getColorPrimary());
-    }
-
-    public FirstCharView setFillTransparent() {
-        return setFillColor(COLOR_TRANSPARENT);
-    }
-
-    public FirstCharView setFillColorDayNight() {
-        return setFillColorRes(COLOR_RES_DAY_NIGHT);
-    }
-
-    public FirstCharView setFillColorNightDay() {
-        return setFillColorRes(COLOR_RES_NIGHT_DAY);
     }
 
 }

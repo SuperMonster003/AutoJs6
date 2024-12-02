@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.enhancedfloaty;
 
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -8,6 +9,9 @@ import android.view.WindowManager;
  * Created by Stardust on Apr 18, 2017.
  */
 public interface WindowBridge {
+
+    String TAG = WindowBridge.class.getSimpleName();
+
     int getX();
 
     int getY();
@@ -27,9 +31,9 @@ public interface WindowBridge {
     class DefaultImpl implements WindowBridge {
 
         DisplayMetrics mDisplayMetrics;
-        private WindowManager.LayoutParams mWindowLayoutParams;
-        private WindowManager mWindowManager;
-        private View mWindowView;
+        private final WindowManager.LayoutParams mWindowLayoutParams;
+        private final WindowManager mWindowManager;
+        private final View mWindowView;
 
         public DefaultImpl(WindowManager.LayoutParams windowLayoutParams, WindowManager windowManager, View windowView) {
             mWindowLayoutParams = windowLayoutParams;
@@ -49,6 +53,7 @@ public interface WindowBridge {
 
         @Override
         public void updatePosition(int x, int y) {
+            Log.d(TAG, "updatePosition(x: " + x + ", y: " + y + ")");
             mWindowLayoutParams.x = x;
             mWindowLayoutParams.y = y;
             try {
@@ -56,9 +61,11 @@ public interface WindowBridge {
             } catch (Exception e) {
                 // @Hint by SuperMonster003 on Nov 9, 2023.
                 //  ! If the user repeatedly switches the switch "Floating button" rapidly, an exception may happen.
-                //  !
-                //  ! java.lang.IllegalArgumentException: View=org.autojs.autojs.ui.floating.CircularActionView
-                //  ! not attached to window manager.
+                //  # java.lang.IllegalArgumentException: View=org.autojs.autojs.ui.floating.CircularActionView
+                //  # not attached to window manager.
+                //  ! zh-CN: 用户快速反复切换 "浮动按钮" 开关时, 可能导致异常.
+                //  # java.lang.IllegalArgumentException: View=org.autojs.autojs.ui.floating.CircularActionView
+                //  # 尚未附加到窗口管理器上.
                 e.printStackTrace();
             }
         }

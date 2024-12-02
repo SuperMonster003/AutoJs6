@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Shell | AutoJs6 文档 - 6.5.0</title>
+    <title>Shell | AutoJs6 文档 - 6.6.0</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -162,7 +162,7 @@
 
     <div id="column1" data-id="shell" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.5.0</h1>
+            <h1>AutoJs6 文档 - 6.6.0</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -252,8 +252,32 @@
             <h1>Shell<span><a class="mark" href="#shell_shell" id="shell_shell">#</a></span></h1>
 <hr>
 <p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
-<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 22, 2022.</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Nov 13, 2024.</p>
 
+<hr>
+<p style="font: italic 1em sans-serif; color: #78909C">TypeScript Declarations (v6.6.0+)</p>
+
+<pre><code class="lang-typescript">interface Shell {
+
+    (command: string): AbstractShell.Result;
+    (command: string, withRoot: boolean | number): AbstractShell.Result;
+    (command: string, commandArgument: object | string): AbstractShell.Result;
+    (command: string, commandArgument: object | string, withRoot: boolean | number): AbstractShell.Result;
+
+    execCommand(command: string): AbstractShell.Result;
+    execCommand(command: string, withRoot: boolean | number): AbstractShell.Result;
+    execCommand(command: string, commandArgument: object | string): AbstractShell.Result;
+    execCommand(command: string, commandArgument: object | string, withRoot: boolean | number): AbstractShell.Result;
+
+    getCommand(command: string): string;
+    getCommand(command: string, withRoot: boolean | number): string;
+    getCommand(command: string, commandArgument: object | string): string;
+    getCommand(command: string, commandArgument: object | string, withRoot: boolean | number): string;
+
+    fromIntent(i: Intent.Common): string;
+
+}
+</code></pre>
 <hr>
 <p>shell即Unix Shell, 在类Unix系统提供与操作系统交互的一系列命令.</p>
 <p>很多程序可以用来执行shell命令, 例如终端模拟器.</p>

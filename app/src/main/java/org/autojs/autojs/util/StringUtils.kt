@@ -4,7 +4,7 @@ import android.content.res.Configuration
 import android.text.TextUtils
 import org.autojs.autojs.annotation.LocaleNonRelated
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.pref.Language
+import org.autojs.autojs.core.pref.Language
 import java.util.Locale
 import kotlin.math.min
 import kotlin.math.pow
@@ -19,21 +19,22 @@ object StringUtils {
 
     private val globalAppContext by lazy { GlobalAppContext.get() }
 
-    // @Hint by SuperMonster003 on Oct 1, 2022.
-    //  ! Ensure that `resId` is not locale-related
     @JvmStatic
     fun str(@LocaleNonRelated resId: Int, vararg args: Any): String = globalAppContext.getString(resId, *args)
 
-    // @Hint by SuperMonster003 on Oct 1, 2022.
-    //  ! Ensure that `resId` is not locale-related
     @JvmStatic
     fun key(@LocaleNonRelated resId: Int): String = globalAppContext.getString(resId)
 
     // @Overwrite by SuperMonster003 on May 5, 2022.
     //  ! Dunno what "better implementation" really means.
     //  ! The only thing I did was make code more "lightweight". ;)
+    //  ! zh-CN:
+    //  ! 不清楚 "更好的实现方式" 的真正含义.
+    //  ! 唯一做的只是使代码更 "轻量级". [眨眼符号]
     // @TodoDiary by Stardust on Jan 30, 2018.
-    //  ! 更好的实现方式。
+    //  ! 更好的实现方式.
+    //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+    //  ! Better implementation.
     @JvmStatic
     fun convertRegex(regex: String) = regex.apply { if (shouldTakenAsRegex(this)) return replace(regexPattern, "$1") }
 
@@ -194,9 +195,13 @@ object StringUtils {
     }
 
     @JvmStatic
-    fun toUpperCaseFirst(str: String) = if (str.isEmpty()) str else {
-        val pre = str[0].toString()
-        str.replaceFirst(pre.toRegex(), pre.uppercase(Language.getPrefLanguage().locale))
-    }
+    fun uppercaseFirstChar(s: String) = if (s.isEmpty()) s else s.replaceFirstChar { s[0].uppercaseChar() }
+
+    @JvmStatic
+    fun lowercaseFirstChar(s: String) = if (s.isEmpty()) s else s.replaceFirstChar { s[0].lowercaseChar() }
+
+    @JvmStatic
+    @Deprecated("Deprecated since v6.6.0", ReplaceWith("uppercaseFirstChar(s)"))
+    fun toUpperCaseFirst(s: String) = uppercaseFirstChar(s)
 
 }

@@ -1,11 +1,11 @@
 package org.autojs.autojs.runtime
 
-import android.os.Looper
-import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
+import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeJavaMethod
 import org.mozilla.javascript.Scriptable
@@ -21,69 +21,51 @@ import org.mozilla.javascript.Undefined
  */
 class ScriptBridges : IScriptBridges {
 
-    var engine: RhinoJavaScriptEngine? = null
+    lateinit var engine: RhinoJavaScriptEngine
 
     fun setup(engine: RhinoJavaScriptEngine) {
         this.engine = engine
     }
 
-    private fun <T> useJsContext(f: (context: Context) -> T): T {
-        val context = Context.getCurrentContext()
-        val cx: Context = context ?: with(Context.enter()) {
-            engine?.setupContext(this)
-            this
-        }
-        try {
-            return f(cx)
-        } finally {
-            context ?: Context.exit()
-        }
+    override fun call(func: BaseFunction, target: Any?, args: Array<*>) = useJsContext { cx ->
+        val scope = func.parentScope
+        val niceScope = scope ?: ImporterTopLevel(cx)
+        val niceArgs = args.map { Context.javaToJS(it, niceScope) }.toTypedArray()
+        val thisObj = Context.javaToJS(target, niceScope) as? Scriptable ?: Undefined.SCRIPTABLE_UNDEFINED
+
+        callFunction(engine.runtime, func, niceScope, thisObj, niceArgs)
     }
 
-    override fun call(func: Any?, target: Any?, args: Array<*>) = useJsContext<Any?> { context ->
-        val jsFn = func as BaseFunction
-        val scope = jsFn.parentScope
-        val arg = args.map { Context.javaToJS(it, scope) }.toTypedArray()
-
-        try {
-            val thisObj = Context.javaToJS(target, scope) as? Scriptable ?: Undefined.SCRIPTABLE_UNDEFINED
-            jsFn.call(context, scope, thisObj, arg)
-        } catch (e: Exception) {
-            if (Looper.getMainLooper() == Looper.myLooper()) {
-                engine?.runtime?.exit(e) ?: throw e
-            } else {
-                throw e
-            }
-        }
-    }
-
-    override fun toArray(o: Iterable<*>?): NativeArray? = useJsContext { context ->
+    override fun toArray(o: Iterable<*>?): NativeArray = useJsContext { context ->
         val scope = context.initStandardObjects()
-        context.newArray(scope, o?.map { Context.javaToJS(it, scope) }?.toTypedArray()) as? NativeArray
+        context.newArray(scope, o?.map { Context.javaToJS(it, scope) }?.toTypedArray()) as NativeArray
     }
 
-    override fun toString(obj: Any?): String {
-        return Context.toString(obj)
-    }
-
-    override fun toPrimitive(obj: Any?): Any = useJsContext { context ->
-        val scope = context.initStandardObjects()
-        Context.javaToJS(obj, scope)
-    }
-
-    override fun asArray(uiObjectCollection: Any?): NativeArray? = useJsContext { context ->
-        if (uiObjectCollection !is UiObjectCollection) {
-            return@useJsContext null
-        }
-        val arr = toArray(uiObjectCollection.nodes) ?: NativeArray(emptyArray())
-        val boundThis = Context.javaToJS(uiObjectCollection, arr) as Scriptable
-        uiObjectCollection::class.java.methods.forEach {
+    override fun asArray(list: Iterable<*>): NativeArray = useJsContext { context ->
+        val arr = toArray(list)
+        val boundThis = Context.javaToJS(list, arr) as Scriptable
+        list::class.java.methods.forEach {
             val name = it.name
             val method = NativeJavaMethod(it, name)
             val bound = BoundFunction(context, arr, method, boundThis, emptyArray())
             arr.put(name, arr, bound)
         }
         return@useJsContext arr
+    }
+
+    override fun toString(obj: Any?): String = Context.toString(obj)
+
+    override fun toPrimitive(obj: Any?): Any = useJsContext { context ->
+        Context.javaToJS(obj, context.initStandardObjects())
+    }
+
+    private fun <T> useJsContext(f: (Context) -> T): T {
+        val currentContext = Context.getCurrentContext()
+        return try {
+            f(currentContext ?: engine.setupContext(Context.enter()))
+        } finally {
+            currentContext ?: Context.exit()
+        }
     }
 
 }

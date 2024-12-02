@@ -4,6 +4,7 @@
 
     @Caution by SuperMonster003 on Nov 1, 2023.
      ! Property "shortcutId" must be a static constant.
+     ! zh-CN: 属性 "shortcutId" 需为静态常量.
 
  -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">

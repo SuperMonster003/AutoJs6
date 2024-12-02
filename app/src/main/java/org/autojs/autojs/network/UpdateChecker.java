@@ -20,12 +20,11 @@ import com.google.gson.GsonBuilder;
 
 import org.autojs.autojs.annotation.Lazy;
 import org.autojs.autojs.core.ui.widget.CustomSnackbar;
-import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.network.api.UpdateCheckerApi;
 import org.autojs.autojs.network.download.DownloadManager;
 import org.autojs.autojs.network.entity.ExtendedVersionInfo;
 import org.autojs.autojs.network.entity.VersionInfo;
-import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.tool.SimpleObserver;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.IntentUtils;
@@ -213,28 +212,28 @@ public class UpdateChecker {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
-    private void download(Context ctx, VersionInfo versionInfo) {
+    private void download(Context context, VersionInfo versionInfo) {
         Consumer<File> onNext = file -> {
             mUpdateDialog = null;
-            IntentUtils.installApkOrToast(ctx, file.getPath(), AppFileProvider.AUTHORITY);
+            IntentUtils.installApk(context, file.getPath());
         };
 
         Consumer<Throwable> onError = e -> {
             e.printStackTrace();
 
             String msg = e.getMessage();
-            msg = msg == null ? ctx.getString(R.string.error_unknown) : msg;
+            msg = msg == null ? context.getString(R.string.error_unknown) : msg;
 
-            MaterialDialog d = new Dialog.Builder.Prompt(ctx, R.string.text_failed_to_download, msg)
+            MaterialDialog d = new Dialog.Builder.Prompt(context, R.string.text_failed_to_download, msg)
                     .neutralText("")
                     .negativeText(R.string.text_cancel)
-                    .negativeColor(ctx.getColor(R.color.dialog_button_default))
+                    .negativeColor(context.getColor(R.color.dialog_button_default))
                     .onNegative((dialog, which) -> {
                         dialog.dismiss();
                         mUpdateDialog = null;
                     })
                     .positiveText("")
-                    .positiveColor(ctx.getColor(R.color.dialog_button_failure))
+                    .positiveColor(context.getColor(R.color.dialog_button_failure))
                     .autoDismiss(false)
                     .cancelable(false)
                     .build();
@@ -245,7 +244,7 @@ public class UpdateChecker {
 
             if (mUpdateDialog != null) {
                 d.getActionButton(DialogAction.NEGATIVE).setText(R.string.dialog_button_quit);
-                d.getActionButton(DialogAction.NEGATIVE).setTextColor(ctx.getColor(R.color.dialog_button_caution));
+                d.getActionButton(DialogAction.NEGATIVE).setTextColor(context.getColor(R.color.dialog_button_caution));
                 d.getActionButton(DialogAction.POSITIVE).setText(R.string.dialog_button_retry);
                 d.getActionButton(DialogAction.POSITIVE).setOnClickListener(v -> {
                     d.dismiss();
@@ -255,17 +254,17 @@ public class UpdateChecker {
 
             if (versionInfo.getDownloadUrl() != null) {
                 d.getActionButton(DialogAction.NEUTRAL).setText(R.string.dialog_button_download_with_browser);
-                d.getActionButton(DialogAction.NEUTRAL).setTextColor(ctx.getColor(R.color.dialog_button_hint));
+                d.getActionButton(DialogAction.NEUTRAL).setTextColor(context.getColor(R.color.dialog_button_hint));
                 d.getActionButton(DialogAction.NEUTRAL).setOnClickListener(v -> {
                     d.dismiss();
-                    UpdateUtils.openUrl(ctx, versionInfo.getDownloadUrl());
+                    UpdateUtils.openUrl(context, versionInfo.getDownloadUrl());
                 });
             }
 
             d.show();
         };
 
-        DownloadManager.getInstance().downloadWithProgress(ctx, versionInfo)
+        DownloadManager.getInstance().downloadWithProgress(context, versionInfo)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(onNext, onError);
     }
@@ -505,6 +504,9 @@ public class UpdateChecker {
                     // TODO by SuperMonster003 on May 29, 2022.
                     //  ! Add a "CANCEL" button for interruption.
                     //  ! Concurrent programming may be needed.
+                    //  ! zh-CN:
+                    //  ! 添加一个 "取消" 按钮用于中断操作.
+                    //  ! 可能需要用到并发编程.
                     this
                             .content(content)
                             .cancelable(false);
@@ -568,6 +570,9 @@ public class UpdateChecker {
                     // FIXME by SuperMonster003 on May 31, 2022.
                     //  ! Given that java.time package was added only in Android O (API 26),
                     //  ! API 24 and 25 will throw an java.lang.NoClassDefFoundError here.
+                    //  ! zh-CN:
+                    //  ! 鉴于安卓 O (API 26) 才开始引入 java.time 包,
+                    //  ! API 24 以及 25 在此处将抛出一个 java.lang.NoClassDefFoundError 异常.
                     mGitHubConnection = GitHub.connectAnonymously();
                 }
                 return mGitHubConnection;

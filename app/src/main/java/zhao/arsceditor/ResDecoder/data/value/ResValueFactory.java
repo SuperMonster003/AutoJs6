@@ -30,7 +30,7 @@ public class ResValueFactory {
 	private final ResPackage mPackage;
 
 	public ResValueFactory(ResPackage pakage_) {
-		this.mPackage = pakage_;
+		mPackage = pakage_;
 	}
 
 	public ResBagValue bagFactory(int parent, Duo<Integer, ResScalarValue>[] items) throws IOException {

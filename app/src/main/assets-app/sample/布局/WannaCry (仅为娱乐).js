@@ -62,6 +62,6 @@ ui.decrypt.click(() => {
 	activity.finish();
 });
 ui.decrypt.longClick(() => {
-	toast("You can't decrypt!");
+	toast("You cannot decrypt!");
 	return true;
 });

@@ -11,7 +11,7 @@ import org.autojs.autojs.ui.widget.BindableViewHolder;
 import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding;
 import org.autojs.autojs6.databinding.FileChooseListFileBinding;
 
-class ExplorerItemViewHolder extends BindableViewHolder<ExplorerItem> {
+class ExplorerItemViewHolder extends BindableViewHolder<Object> {
 
     private final FileChooseListView fileChooseListView;
     @NonNull
@@ -30,20 +30,21 @@ class ExplorerItemViewHolder extends BindableViewHolder<ExplorerItem> {
     }
 
     @Override
-    public void bind(ExplorerItem item, int position) {
-        mExplorerItem = item;
-        listFileBinding.name.setText(ExplorerViewHelper.getDisplayName(fileChooseListView.getContext(), item));
-        listFileBinding.item.setOnClickListener(v -> listFileBinding.checkbox.toggle());
-        listFileBinding.checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+    public void bind(Object item, int position) {
+        if (!(item instanceof ExplorerItem explorerItem)) return;
+        mExplorerItem = explorerItem;
+        listFileBinding.name.setText(ExplorerViewHelper.getDisplayName(fileChooseListView.getContext(), explorerItem));
+        listFileBinding.item.setOnClickListener(_ -> listFileBinding.checkbox.toggle());
+        listFileBinding.checkbox.setOnCheckedChangeListener((_, _) -> {
             if (listFileBinding.checkbox.isChecked()) {
                 fileChooseListView.check(mExplorerItem.toScriptFile(), getAdapterPosition());
             } else {
                 fileChooseListView.getSelectedFiles().remove(mExplorerItem.toScriptFile());
             }
         });
-        listFileBinding.scriptFileSize.setText(PFiles.getHumanReadableSize(item.getSize()));
+        listFileBinding.scriptFileSize.setText(PFiles.getHumanReadableSize(explorerItem.getSize()));
 
-        switch (item.getType()) {
+        switch (explorerItem.getType()) {
             case JAVASCRIPT, AUTO -> firstCharIconBinding.firstChar
                     .setIconTextColorNightDay()
                     .setStrokeThemeColor()
@@ -53,7 +54,8 @@ class ExplorerItemViewHolder extends BindableViewHolder<ExplorerItem> {
                     .setStrokeColorDayNight()
                     .setFillTransparent();
         }
-        firstCharIconBinding.firstChar.setIconText(ExplorerViewHelper.getIconText(item));
+
+        firstCharIconBinding.firstChar.setIcon(ExplorerViewHelper.getIcon(explorerItem));
 
         listFileBinding.checkbox.setChecked(fileChooseListView.getSelectedFiles().containsKey(mExplorerItem.toScriptFile()), false);
     }

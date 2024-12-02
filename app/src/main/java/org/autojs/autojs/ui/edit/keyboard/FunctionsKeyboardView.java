@@ -118,15 +118,23 @@ public class FunctionsKeyboardView extends FrameLayout {
             throw new IllegalStateException();
         }
         List<Integer> spanSizes = new ArrayList<>();
-        // 初始化 spanSizes 列表.
+        // @Hint by Stardust (https://github.com/hyb1996) on Dec 10, 2017.
+        //  ! 初始化 spanSizes 列表.
+        //  ! en-US (translated by SuperMonster003 on Jul 28, 2024):
+        //  ! Initialize spanSizes.
         for (Property property : mSelectedModule.getProperties()) {
             int width = Math.max(getTextWidth(property.getKey()), getTextWidth(property.getSummary()));
             if (mGridDividerView != null) {
                 // @Hint by SuperMonster003 on Nov 30, 2023.
                 //  ! Increase the width as much as possible to prevent multi-line module names in TextView.
                 //  ! Like:
-                //  ! [ stopAllAndToas ]
-                //  ! [        t       ]
+                //  ! [ stopAllAndToa ]
+                //  ! [      st       ]
+                //  ! zh-CN:
+                //  ! 尽可能增加宽度以避免 TextView 控件中的模块名称出现多行现象.
+                //  ! 像是这样:
+                //  ! [ stopAllAndToa ]
+                //  ! [      st       ]
                 width += mGridDividerView.getIntrinsicWidth() * 2;
             }
             int spanSize = (int) Math.ceil(width / ((double) getMeasuredWidth() / SPAN_COUNT));
@@ -214,7 +222,6 @@ public class FunctionsKeyboardView extends FrameLayout {
 
     private class ModuleViewHolder extends RecyclerView.ViewHolder {
 
-
         private final TextView mTextView;
         private Module mModule;
 
@@ -235,7 +242,6 @@ public class FunctionsKeyboardView extends FrameLayout {
                 return false;
             });
         }
-
 
         void bind(Module module) {
             mModule = module;

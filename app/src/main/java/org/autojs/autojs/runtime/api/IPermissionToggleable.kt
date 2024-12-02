@@ -14,10 +14,10 @@ interface IPermissionToggleable {
         } catch (e: Exception) {
             when (e) {
                 is PermissionRequestException -> {
-                    throw PermissionToggleException("$description can't ..., may be not able to request")
+                    throw PermissionToggleException("$description cannot ..., may be not able to request")
                 }
                 is PermissionRevokeException -> {
-                    throw PermissionToggleException("$description can't ..., may be not able to revoke")
+                    throw PermissionToggleException("$description cannot ..., may be not able to revoke")
                 }
                 else -> throw e
             }
@@ -29,7 +29,7 @@ interface IPermissionToggleable {
             try {
                 revoke()
             } catch (e: PermissionRevokeException) {
-                throw PermissionRequestException("$description can't ...")
+                throw PermissionRequestException("$description cannot ...")
             }
         }
         request()
@@ -39,7 +39,7 @@ interface IPermissionToggleable {
         try {
             config()
         } catch (e: PermissionConfigException) {
-            throw PermissionRequestException("$description can't ...")
+            throw PermissionRequestException("$description cannot ...")
         }
     }
 
@@ -51,7 +51,7 @@ interface IPermissionToggleable {
         try {
             config()
         } catch (e: PermissionConfigException) {
-            throw PermissionRevokeException("$description can't ...")
+            throw PermissionRevokeException("$description cannot ...")
         }
     }
 
@@ -60,7 +60,7 @@ interface IPermissionToggleable {
     }
 
     fun config() {
-        throw PermissionConfigException("$description can't ...")
+        throw PermissionConfigException("$description cannot ...")
     }
 
     class PermissionRequestException(e: String) : Exception(e)

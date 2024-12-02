@@ -9,14 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.Message;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -35,20 +28,25 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
+import androidx.recyclerview.widget.RecyclerView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.internal.MDButton;
 import com.google.android.material.snackbar.Snackbar;
-
 import org.autojs.autojs.app.DialogUtils;
-import org.autojs.autojs6.R;
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.tool.UiHandler;
+import org.autojs.autojs6.R;
+import org.mozilla.javascript.BaseFunction;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.autojs.autojs.util.RhinoUtils.isUiThread;
 
 /**
  * Created by Stardust on Apr 17, 2018.
@@ -69,7 +67,7 @@ public class JsDialog {
 
     public JsDialog show() {
         checkWindowType();
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.show();
         } else {
             mUiHandler.post(mDialog::show);
@@ -117,7 +115,7 @@ public class JsDialog {
     }
 
     public void setActionButton(String action, String text) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             setActionButton(getDialogAction(action), text);
         } else {
             mUiHandler.post(() -> setActionButton(getDialogAction(action), text));
@@ -203,7 +201,7 @@ public class JsDialog {
 
     @UiThread
     public void setTitle(@NonNull CharSequence newTitle) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setTitle(newTitle);
         } else {
             mUiHandler.post(() -> mDialog.setTitle(newTitle));
@@ -212,7 +210,7 @@ public class JsDialog {
 
     @UiThread
     public void setTitle(int newTitleRes) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setTitle(newTitleRes);
         } else {
             mUiHandler.post(() -> mDialog.setTitle(newTitleRes));
@@ -221,7 +219,7 @@ public class JsDialog {
 
     @UiThread
     public void setTitle(int newTitleRes, @Nullable Object... formatArgs) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setTitle(newTitleRes, formatArgs);
         } else {
             mUiHandler.post(() -> mDialog.setTitle(newTitleRes, formatArgs));
@@ -230,7 +228,7 @@ public class JsDialog {
 
     @UiThread
     public void setIcon(int resId) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setIcon(resId);
         } else {
             mUiHandler.post(() -> mDialog.setIcon(resId));
@@ -239,7 +237,7 @@ public class JsDialog {
 
     @UiThread
     public void setIcon(Drawable d) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setIcon(d);
         } else {
             mUiHandler.post(() -> mDialog.setIcon(d));
@@ -248,7 +246,7 @@ public class JsDialog {
 
     @UiThread
     public void setIconAttribute(int attrId) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setIconAttribute(attrId);
         } else {
             mUiHandler.post(() -> mDialog.setIconAttribute(attrId));
@@ -257,7 +255,7 @@ public class JsDialog {
 
     @UiThread
     public void setContent(CharSequence newContent) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setContent(newContent);
         } else {
             mUiHandler.post(() -> mDialog.setContent(newContent));
@@ -266,7 +264,7 @@ public class JsDialog {
 
     @UiThread
     public void setContent(int newContentRes) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setContent(newContentRes);
         } else {
             mUiHandler.post(() -> mDialog.setContent(newContentRes));
@@ -275,7 +273,7 @@ public class JsDialog {
 
     @UiThread
     public void setContent(int newContentRes, @Nullable Object... formatArgs) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setContent(newContentRes, formatArgs);
         } else {
             mUiHandler.post(() -> mDialog.setContent(newContentRes, formatArgs));
@@ -289,7 +287,7 @@ public class JsDialog {
 
     @UiThread
     public void setItems(CharSequence... items) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setItems(items);
         } else {
             mUiHandler.post(() -> mDialog.setItems(items));
@@ -320,7 +318,7 @@ public class JsDialog {
     }
 
     public void incrementProgress(int by) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.incrementProgress(by);
         } else {
             mUiHandler.post(() -> mDialog.incrementProgress(by));
@@ -328,7 +326,7 @@ public class JsDialog {
     }
 
     public void setProgress(int progress) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (isUiThread()) {
             mDialog.setProgress(progress);
         } else {
             mUiHandler.post(() -> mDialog.setProgress(progress));
@@ -485,6 +483,7 @@ public class JsDialog {
         mDialog.onRestoreInstanceState(savedInstanceState);
     }
 
+    @Nullable
     public Window getWindow() {
         return mDialog.getWindow();
     }
@@ -753,17 +752,17 @@ public class JsDialog {
         mDialog.onProvideKeyboardShortcuts(data, menu, deviceId);
     }
 
-    public JsDialog once(String eventName, Object listener) {
+    public JsDialog once(String eventName, BaseFunction listener) {
         mEmitter.once(eventName, listener);
         return this;
     }
 
-    public JsDialog on(String eventName, Object listener) {
+    public JsDialog on(String eventName, BaseFunction listener) {
         mEmitter.on(eventName, listener);
         return this;
     }
 
-    public JsDialog addListener(String eventName, Object listener) {
+    public JsDialog addListener(String eventName, BaseFunction listener) {
         mEmitter.addListener(eventName, listener);
         return this;
     }
@@ -784,12 +783,12 @@ public class JsDialog {
         return mEmitter.listeners(eventName);
     }
 
-    public JsDialog prependListener(String eventName, Object listener) {
+    public JsDialog prependListener(String eventName, BaseFunction listener) {
         mEmitter.prependListener(eventName, listener);
         return this;
     }
 
-    public JsDialog prependOnceListener(String eventName, Object listener) {
+    public JsDialog prependOnceListener(String eventName, BaseFunction listener) {
         mEmitter.prependOnceListener(eventName, listener);
         return this;
     }
@@ -804,7 +803,7 @@ public class JsDialog {
         return this;
     }
 
-    public JsDialog removeListener(String eventName, Object listener) {
+    public JsDialog removeListener(String eventName, BaseFunction listener) {
         mEmitter.removeListener(eventName, listener);
         return this;
     }
@@ -821,6 +820,5 @@ public class JsDialog {
     public static int defaultMaxListeners() {
         return EventEmitter.defaultMaxListeners();
     }
-
 
 }

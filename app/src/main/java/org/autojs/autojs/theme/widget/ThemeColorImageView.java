@@ -53,7 +53,7 @@ public class ThemeColorImageView extends AppCompatImageView implements ThemeColo
     }
 
     private void setColor(int color) {
-        setImageDrawable(DrawableUtils.filterDrawableColor(getDrawable(), color));
+        setImageDrawable(DrawableUtils.setDrawableColorFilterSrcIn(getDrawable(), color));
     }
 
 }

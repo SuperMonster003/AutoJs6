@@ -56,7 +56,7 @@ public class ApkPackager {
     }
 
     public void cleanWorkspace() {
-
+        /* Empty body. */
     }
 
 }

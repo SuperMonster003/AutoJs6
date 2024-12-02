@@ -1,6 +1,5 @@
 package org.autojs.autojs.storage.database;
 
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -45,7 +44,6 @@ public class TimedTaskDatabase extends Database<TimedTask> {
         return task;
     }
 
-
     private static class SQLHelper extends SQLiteOpenHelper {
 
         public SQLHelper(Context context) {
@@ -67,7 +65,7 @@ public class TimedTaskDatabase extends Database<TimedTask> {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+            /* Empty body. */
         }
     }
 

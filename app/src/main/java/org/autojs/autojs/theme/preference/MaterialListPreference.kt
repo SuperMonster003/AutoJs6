@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import androidx.core.content.res.TypedArrayUtils
 import androidx.preference.Preference.SummaryProvider
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
@@ -22,7 +22,7 @@ open class MaterialListPreference : MaterialDialogPreference {
         get() = getKeyIndex(mItemDefaultKey) ?: 0
 
     private var itemPrefIndex: Int?
-        get() = getKeyIndex(Pref.getString(key, null))
+        get() = getKeyIndex(Pref.getStringOrNull(key))
         set(index) {
             index?.let {
                 Pref.putString(key, mItemKeys.toList()[it].toString())
@@ -33,7 +33,6 @@ open class MaterialListPreference : MaterialDialogPreference {
 
     protected val entry: CharSequence?
         get() = mItemValues.takeIf { it.isNotEmpty() }?.toList()?.get(itemPrefIndex ?: mItemDefaultIndex)
-
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int, bundle: Bundle) : super(context, attrs, defStyleAttr, defStyleRes) {
         obtainStyledAttrs(context, attrs, R.styleable.MaterialListPreference, defStyleAttr, defStyleRes)

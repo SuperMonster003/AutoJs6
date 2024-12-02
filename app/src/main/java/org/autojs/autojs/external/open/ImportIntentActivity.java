@@ -4,9 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-
 import androidx.annotation.Nullable;
-
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.ScriptOperations;
@@ -15,6 +13,8 @@ import org.autojs.autojs6.R;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+
+import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
 
 /**
  * Created by Stardust on Feb 2, 2017.
@@ -43,7 +43,7 @@ public class ImportIntentActivity extends BaseActivity {
         if (uri != null && "content".equals(uri.getScheme())) {
             String ext = PFiles.getExtension(uri.getScheme());
             if (TextUtils.isEmpty(ext)) {
-                ext = "js";
+                ext = JAVASCRIPT.extension;
             }
             InputStream stream = getContentResolver().openInputStream(uri);
             new ScriptOperations(this, null)

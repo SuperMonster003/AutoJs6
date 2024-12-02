@@ -11,26 +11,26 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoAllocator
 import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper
 import org.autojs.autojs.core.accessibility.UiSelector
-import org.autojs.autojs.core.accessibility.UiSelector.Companion.ID_IDENTIFIER
+import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.isJsUndefined
+import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.DisplayUtils.toRoundIntX
 import org.autojs.autojs.util.DisplayUtils.toRoundIntY
-import org.autojs.autojs.util.KotlinUtils
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.Undefined
 import org.opencv.core.Point
 import org.opencv.core.Size
+import kotlin.math.roundToInt
 
 /**
  * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
  */
-
-@Suppress("unused", "DEPRECATION")
+@Suppress("unused", "DEPRECATION", "MemberVisibilityCanBePrivate")
 open class UiObject(
     info: Any?,
     private val allocator: AccessibilityNodeInfoAllocator?,
@@ -38,7 +38,7 @@ open class UiObject(
     private val indexInParent: Int,
 ) : AccessibilityNodeInfoCompat(info), UiObjectActions {
 
-    private val bounds by lazy { AccessibilityNodeInfoHelper.getBoundsInScreen(this) }
+    private val accessibilityBridge by lazy { AutoJs.instance.createAccessibilityBridge() }
 
     constructor(
         info: Any?,
@@ -58,6 +58,7 @@ open class UiObject(
             UiObject(node.unwrap(), depth - 1, node.parent?.run {
                 // @Dubious by SuperMonster003 on May 26, 2022.
                 //  ! May lead to poor performance?
+                //  ! zh-CN: 可能导致性能不佳?
                 (0 until childCount).firstOrNull { getChild(it) == node } ?: -1
             } ?: 0)
         }
@@ -82,7 +83,7 @@ open class UiObject(
 
     // @Deprecated by SuperMonster003 on Jul 20, 2023.
     //  ! Author: 抠脚本人
-    //  ! Reason: Replaced with offset(i).
+    //  ! Reason: Replaced with offset(i) [zh-CN: 替代为 offset(i)].
     @Deprecated("Deprecated in Java", ReplaceWith("offset(i)"))
     open fun brother(i: Int): UiObject? = offset(i)
 
@@ -131,47 +132,47 @@ open class UiObject(
 
     fun findOne(selector: UiSelector): UiObject? = selector.findOneOf(this)
 
-    open fun bounds() = bounds
+    open fun bounds() = AccessibilityNodeInfoHelper.getBoundsInScreen(this)
 
-    fun boundsInScreen() = bounds
+    fun boundsInScreen() = bounds()
 
-    fun boundsLeft() = bounds.left
+    fun boundsLeft() = bounds().left
 
     fun left() = boundsLeft()
 
-    fun boundsTop() = bounds.top
+    fun boundsTop() = bounds().top
 
     fun top() = boundsTop()
 
-    fun boundsRight() = bounds.right
+    fun boundsRight() = bounds().right
 
     fun right() = boundsRight()
 
-    fun boundsBottom() = bounds.bottom
+    fun boundsBottom() = bounds().bottom
 
     fun bottom() = boundsBottom()
 
-    fun boundsWidth() = bounds.width()
+    fun boundsWidth() = bounds().width()
 
     fun width() = boundsWidth()
 
-    fun boundsHeight() = bounds.height()
+    fun boundsHeight() = bounds().height()
 
     fun height() = boundsHeight()
 
-    fun boundsCenterX() = bounds.centerX()
+    fun boundsCenterX() = bounds().centerX()
 
     fun centerX() = boundsCenterX()
 
-    fun boundsExactCenterX() = bounds.exactCenterX()
+    fun boundsExactCenterX() = bounds().exactCenterX()
 
     fun exactCenterX() = boundsExactCenterX()
 
-    fun boundsCenterY() = bounds.centerY()
+    fun boundsCenterY() = bounds().centerY()
 
     fun centerY() = boundsCenterY()
 
-    fun boundsExactCenterY() = bounds.exactCenterY()
+    fun boundsExactCenterY() = bounds().exactCenterY()
 
     fun exactCenterY() = boundsExactCenterY()
 
@@ -183,7 +184,14 @@ open class UiObject(
 
     @JvmOverloads
     fun clickBounds(offsetX: Double = 0.0, offsetY: Double = 0.0): Boolean {
-        return AutoJs.instance.runtime.automator.click(
+        // @Hint by SuperMonster003 on Jul 10, 2024.
+        //  ! Without ScreenMetrics info related to ScriptRuntime.
+        //  ! 未包含 "脚本运行时" 相关联的 ScreenMetrics 信息.
+        val automatorTmp = GlobalActionAutomator(ScriptRuntime.applicationContext, null) {
+            accessibilityBridge.ensureServiceStarted()
+            accessibilityBridge.service!!
+        }
+        return automatorTmp.click(
             centerX() + toRoundIntX(offsetX, false),
             centerY() + toRoundIntY(offsetY, false),
         )
@@ -200,8 +208,8 @@ open class UiObject(
     open fun id(): String? = fullId()
 
     fun idEntry() = fullId()?.let {
-        when (it.contains(ID_IDENTIFIER)) {
-            true -> it.split(ID_IDENTIFIER).last()
+        when (it.contains(UiSelector.ID_IDENTIFIER)) {
+            true -> it.split(UiSelector.ID_IDENTIFIER).last()
             else -> it
         }
     }
@@ -304,10 +312,10 @@ open class UiObject(
         var compass = compassArg?.takeUnless { it == COMPASS_PASS_ON }?.also { ensureCompass(it) } ?: return w
 
         while (compass.isNotEmpty()) {
-            // p2 ( .parent().parent() )
-            // p ( p1 )
-            // ppp ( p3 )
-            // p4ppp12p ( p4 pp p12 p -> 4 + 2 + 12 + 1 -> p19 )
+            // p2 : [ .parent().parent() ]
+            // p : [ p1 ]
+            // ppp : [ p3 ]
+            // p4ppp12p : [ p4, pp, p12, p -> 4, 2, 12, 1 -> p19 ]
             val mP = "^p[p\\d]*".toRegex().find(compass)
             if (mP != null) {
                 var upMax: Int = "^p\\d+|^p+(?!\\d)".toRegex().findAll(compass).fold(0) { acc: Int, result ->
@@ -320,11 +328,11 @@ open class UiObject(
                 continue
             }
 
-            // c0c2c0c1 ( .child(0).child(2).child(0).child(1) )
-            // c0>2>0>1 ( .child(0).child(2).child(0).child(1) )
-            // c-3 ( .child(childCount()-3) )
-            // c-3c2c-1 ( .child(childCount()-3).child(2).child(childCount()-1) )
-            // c1>2>3>0>-1>1 ( c1 c2 c3 c0 c-1 c1 )
+            // c0c2c0c1 : [ .child(0).child(2).child(0).child(1) ]
+            // c0>2>0>1 : [ .child(0).child(2).child(0).child(1) ]
+            // c-3 : [ .child(childCount()-3) ]
+            // c-3c2c-1 : [ .child(childCount()-3).child(2).child(childCount()-1) ]
+            // c1>2>3>0>-1>1 : [ c1 c2 c3 c0 c-1 c1 ]
             val mC = "^c-?\\d+([>c]?-?\\d+)*".toRegex().find(compass)
             if (mC != null) {
                 val numbers = mC.value.split("[>c]".toRegex()).filterNot { it.isEmpty() }
@@ -337,16 +345,16 @@ open class UiObject(
                 continue
             }
 
-            // s2  ( .parent().child(2) )
-            // s-2  ( .parent().child(childCount() - 2) )
-            // s>2  ( .parent().child(idxInParent() + 2) )
-            // s<2  ( .parent().child(idxInParent() - 2) )
+            // s2 : [ .parent().child(2) ]
+            // s-2 : [ .parent().child(childCount() - 2) ]
+            // s>2 : [ .parent().child(idxInParent() + 2) ]
+            // s<2 : [ .parent().child(idxInParent() - 2) ]
             val mS = "^s[<>]?-?\\d+".toRegex().find(compass)
             if (mS != null) {
                 val parent = w.parent() ?: return null
                 var idx = w.indexInParent().takeIf { it >= 0 } ?: return null
                 val str = mS.value
-                val offset: Int = "-?\\d+".toRegex().find(str)?.value?.toInt() ?: return null
+                val offset: Int = "-?\\d+".toRegex().find(str)?.value?.toDouble()?.roundToInt() ?: return null
                 val cc by lazy { parent.childCount() }
                 when {
                     str.contains('>') -> idx += offset
@@ -358,9 +366,9 @@ open class UiObject(
                 continue
             }
 
-            // k/k1  ( .clickable() || .parent().clickable() aka pk/p1k )
-            // k2  ( .clickable() || .parent().clickable() || .p2.clickable() aka p2k )
-            // kn  ( .clickable() || .pn.clickable() aka pnk )
+            // k/k1 : [ .clickable() || .parent().clickable() aka pk/p1k ]
+            // k2 : [ .clickable() || .parent().clickable() || .p2.clickable() aka p2k ]
+            // kn : [ .clickable() || .pn.clickable() aka pnk ]
             val mK = "^k[k\\d]*".toRegex().find(compass)
             if (mK != null) {
                 var upMax = "^k(\\d*)".toRegex().findAll(compass)
@@ -475,17 +483,17 @@ open class UiObject(
         ).joinToString("\n")
     ).plus("}").joinToString("\n")
 
-    override fun toString() = "$className ${summary()}"
+    override fun toString() = "[${UiObject::class.java.simpleName}] $className ${summary()}"
+
+    override fun hashCode(): Int {
+        return super.hashCode()
+    }
 
     companion object {
 
         internal const val ACTION_APPEND_TEXT = 0x00200001
         internal const val COMPASS_PASS_ON = "%"
         internal const val RESULT_TYPE_WIDGET = "widget"
-
-        private val cContext = Context::class.java
-        private val cScriptable = Scriptable::class.java
-        private val cArray = Array::class.java
 
         private val RESULT_GROUP_WIDGET by lazy { arrayOf("#", "w", RESULT_TYPE_WIDGET) }
         private val RESULT_GROUP_WIDGET_COLLECTION by lazy {
@@ -506,8 +514,7 @@ open class UiObject(
 
         @JvmStatic
         fun isCompass(s: Any?): Boolean {
-            return (s as? CharSequence)?.run { this == COMPASS_PASS_ON || isEmpty() || contains("^(([pkc>]|s[<>]?)-?\\d*)+$".toRegex()) }
-                ?: false
+            return s is CharSequence && (s == COMPASS_PASS_ON || s.isEmpty() || s.contains("^(([pkc>]|s[<>]?)-?\\d*)+$".toRegex()))
         }
 
         @JvmStatic
@@ -519,89 +526,87 @@ open class UiObject(
         }
 
         @JvmStatic
-        fun detect(w: UiObject?, compass: CharSequence?, resultType: Any?, callback: BaseFunction? = null): Any? {
+        fun detect(scriptRuntime: ScriptRuntime, w: UiObject?, compass: CharSequence?, resultType: Any?, callback: BaseFunction? = null): Any? {
             return Detector(compass, object : Detector.Result(resultType) {
 
                 override fun byOne() = w
 
                 override fun byAll() = throw IllegalResultTypeException(resultType.toString())
 
-            }, callback).detect()
+            }, callback).detect(scriptRuntime)
         }
 
         // @Hint by SuperMonster003 on May 12, 2022.
-        //  ! Param root should be nullable because an exception
-        //  ! will happen on devices with API Level >= 31 (Android 12) [S].
-        //  !
-        //  ! Wrapped java.lang.NullPointerException: Parameter specified as non-null is null:
-        //  ! method kotlin.jvm.internal.Intrinsics.checkNotNullParameter, parameter root.
+        //  ! Argument root should be nullable because an exception
+        //  ! will happen on devices with Android API Level >= 31 (12) [S].
+        //  # java.lang.NullPointerException: Parameter specified as non-null is null:
+        //  # method kotlin.jvm.internal.Intrinsics.checkNotNullParameter, parameter root.
+        //  ! zh-CN:
+        //  ! 参数 root 应该是可空的, 因为在安卓 API 级别 >= 31 (12) [S] 的设备上会发生异常.
+        //  # java.lang.NullPointerException: 指定的非空参数为空:
+        //  # 方法 kotlin.jvm.internal.Intrinsics.checkNotNullParameter, 参数 root.
         @JvmStatic
         fun createRoot(root: AccessibilityNodeInfo?) = UiObject(root, null, 0, -1)
 
         internal fun createRoot(root: AccessibilityNodeInfo?, allocator: AccessibilityNodeInfoAllocator?) =
             UiObject(root, allocator, 0, -1)
 
-        private fun arrayAliases(symbol: String, vararg others: String): Array<String> {
-            return arrayOf("$symbol$symbol", "$symbol[]", "[$symbol]").plus(others.map { listOf("$it[]", "[$it]") }
-                .flatten())
-        }
+        private fun arrayAliases(symbol: String, vararg others: String) = arrayOf(
+            "$symbol$symbol", "$symbol[]", "[$symbol]",
+        ) + others.map { listOf("$it[]", "[$it]") }.flatten()
 
-        private fun listAliases(
-            @Suppress("SameParameterValue") symbol: String,
-            @Suppress("SameParameterValue") vararg others: String,
-        ): Array<String> {
-            return arrayOf("$symbol{}", "{$symbol}").plus(others.map { listOf("$it{}", "{$it}") }.flatten())
-        }
+        @Suppress("SameParameterValue")
+        private fun listAliases(symbol: String, vararg others: String) = arrayOf(
+            "$symbol{}", "{$symbol}",
+        ) + others.map { listOf("$it{}", "{$it}") }.flatten()
 
         // @Hint Copied by SuperMonster003 on Nov 5, 2022.
-        //  ! from androidx.core.view.accessibility.AccessibilityNodeInfoCompat.getActionSymbolicName
-        private fun getActionSymbolicName(action: Int): String {
-            return when (action) {
-                ACTION_FOCUS -> "ACTION_FOCUS"
-                ACTION_CLEAR_FOCUS -> "ACTION_CLEAR_FOCUS"
-                ACTION_SELECT -> "ACTION_SELECT"
-                ACTION_CLEAR_SELECTION -> "ACTION_CLEAR_SELECTION"
-                ACTION_CLICK -> "ACTION_CLICK"
-                ACTION_LONG_CLICK -> "ACTION_LONG_CLICK"
-                ACTION_ACCESSIBILITY_FOCUS -> "ACTION_ACCESSIBILITY_FOCUS"
-                ACTION_CLEAR_ACCESSIBILITY_FOCUS -> "ACTION_CLEAR_ACCESSIBILITY_FOCUS"
-                ACTION_NEXT_AT_MOVEMENT_GRANULARITY -> "ACTION_NEXT_AT_MOVEMENT_GRANULARITY"
-                ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY -> "ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY"
-                ACTION_NEXT_HTML_ELEMENT -> "ACTION_NEXT_HTML_ELEMENT"
-                ACTION_PREVIOUS_HTML_ELEMENT -> "ACTION_PREVIOUS_HTML_ELEMENT"
-                ACTION_SCROLL_FORWARD -> "ACTION_SCROLL_FORWARD"
-                ACTION_SCROLL_BACKWARD -> "ACTION_SCROLL_BACKWARD"
-                ACTION_CUT -> "ACTION_CUT"
-                ACTION_COPY -> "ACTION_COPY"
-                ACTION_PASTE -> "ACTION_PASTE"
-                ACTION_SET_SELECTION -> "ACTION_SET_SELECTION"
-                ACTION_EXPAND -> "ACTION_EXPAND"
-                ACTION_COLLAPSE -> "ACTION_COLLAPSE"
-                ACTION_SET_TEXT -> "ACTION_SET_TEXT"
-                ACTION_DISMISS -> "ACTION_DISMISS"
-                android.R.id.accessibilityActionDragStart -> "ACTION_DRAG_START"
-                android.R.id.accessibilityActionDragDrop -> "ACTION_DRAG_DROP"
-                android.R.id.accessibilityActionDragCancel -> "ACTION_DRAG_CANCEL"
-                android.R.id.accessibilityActionScrollUp -> "ACTION_SCROLL_UP"
-                android.R.id.accessibilityActionScrollLeft -> "ACTION_SCROLL_LEFT"
-                android.R.id.accessibilityActionScrollDown -> "ACTION_SCROLL_DOWN"
-                android.R.id.accessibilityActionScrollRight -> "ACTION_SCROLL_RIGHT"
-                android.R.id.accessibilityActionPageDown -> "ACTION_PAGE_DOWN"
-                android.R.id.accessibilityActionPageUp -> "ACTION_PAGE_UP"
-                android.R.id.accessibilityActionPageLeft -> "ACTION_PAGE_LEFT"
-                android.R.id.accessibilityActionPageRight -> "ACTION_PAGE_RIGHT"
-                android.R.id.accessibilityActionShowOnScreen -> "ACTION_SHOW_ON_SCREEN"
-                android.R.id.accessibilityActionScrollToPosition -> "ACTION_SCROLL_TO_POSITION"
-                android.R.id.accessibilityActionContextClick -> "ACTION_CONTEXT_CLICK"
-                android.R.id.accessibilityActionSetProgress -> "ACTION_SET_PROGRESS"
-                android.R.id.accessibilityActionMoveWindow -> "ACTION_MOVE_WINDOW"
-                android.R.id.accessibilityActionShowTextSuggestions -> "ACTION_SHOW_TEXT_SUGGESTIONS"
-                android.R.id.accessibilityActionShowTooltip -> "ACTION_SHOW_TOOLTIP"
-                android.R.id.accessibilityActionHideTooltip -> "ACTION_HIDE_TOOLTIP"
-                android.R.id.accessibilityActionPressAndHold -> "ACTION_PRESS_AND_HOLD"
-                android.R.id.accessibilityActionImeEnter -> "ACTION_IME_ENTER"
-                else -> "ACTION_UNKNOWN"
-            }
+        //  ! androidx.core.view.accessibility.AccessibilityNodeInfoCompat.getActionSymbolicName
+        private fun getActionSymbolicName(action: Int) = when (action) {
+            ACTION_FOCUS -> "ACTION_FOCUS"
+            ACTION_CLEAR_FOCUS -> "ACTION_CLEAR_FOCUS"
+            ACTION_SELECT -> "ACTION_SELECT"
+            ACTION_CLEAR_SELECTION -> "ACTION_CLEAR_SELECTION"
+            ACTION_CLICK -> "ACTION_CLICK"
+            ACTION_LONG_CLICK -> "ACTION_LONG_CLICK"
+            ACTION_ACCESSIBILITY_FOCUS -> "ACTION_ACCESSIBILITY_FOCUS"
+            ACTION_CLEAR_ACCESSIBILITY_FOCUS -> "ACTION_CLEAR_ACCESSIBILITY_FOCUS"
+            ACTION_NEXT_AT_MOVEMENT_GRANULARITY -> "ACTION_NEXT_AT_MOVEMENT_GRANULARITY"
+            ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY -> "ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY"
+            ACTION_NEXT_HTML_ELEMENT -> "ACTION_NEXT_HTML_ELEMENT"
+            ACTION_PREVIOUS_HTML_ELEMENT -> "ACTION_PREVIOUS_HTML_ELEMENT"
+            ACTION_SCROLL_FORWARD -> "ACTION_SCROLL_FORWARD"
+            ACTION_SCROLL_BACKWARD -> "ACTION_SCROLL_BACKWARD"
+            ACTION_CUT -> "ACTION_CUT"
+            ACTION_COPY -> "ACTION_COPY"
+            ACTION_PASTE -> "ACTION_PASTE"
+            ACTION_SET_SELECTION -> "ACTION_SET_SELECTION"
+            ACTION_EXPAND -> "ACTION_EXPAND"
+            ACTION_COLLAPSE -> "ACTION_COLLAPSE"
+            ACTION_SET_TEXT -> "ACTION_SET_TEXT"
+            ACTION_DISMISS -> "ACTION_DISMISS"
+            android.R.id.accessibilityActionDragStart -> "ACTION_DRAG_START"
+            android.R.id.accessibilityActionDragDrop -> "ACTION_DRAG_DROP"
+            android.R.id.accessibilityActionDragCancel -> "ACTION_DRAG_CANCEL"
+            android.R.id.accessibilityActionScrollUp -> "ACTION_SCROLL_UP"
+            android.R.id.accessibilityActionScrollLeft -> "ACTION_SCROLL_LEFT"
+            android.R.id.accessibilityActionScrollDown -> "ACTION_SCROLL_DOWN"
+            android.R.id.accessibilityActionScrollRight -> "ACTION_SCROLL_RIGHT"
+            android.R.id.accessibilityActionPageDown -> "ACTION_PAGE_DOWN"
+            android.R.id.accessibilityActionPageUp -> "ACTION_PAGE_UP"
+            android.R.id.accessibilityActionPageLeft -> "ACTION_PAGE_LEFT"
+            android.R.id.accessibilityActionPageRight -> "ACTION_PAGE_RIGHT"
+            android.R.id.accessibilityActionShowOnScreen -> "ACTION_SHOW_ON_SCREEN"
+            android.R.id.accessibilityActionScrollToPosition -> "ACTION_SCROLL_TO_POSITION"
+            android.R.id.accessibilityActionContextClick -> "ACTION_CONTEXT_CLICK"
+            android.R.id.accessibilityActionSetProgress -> "ACTION_SET_PROGRESS"
+            android.R.id.accessibilityActionMoveWindow -> "ACTION_MOVE_WINDOW"
+            android.R.id.accessibilityActionShowTextSuggestions -> "ACTION_SHOW_TEXT_SUGGESTIONS"
+            android.R.id.accessibilityActionShowTooltip -> "ACTION_SHOW_TOOLTIP"
+            android.R.id.accessibilityActionHideTooltip -> "ACTION_HIDE_TOOLTIP"
+            android.R.id.accessibilityActionPressAndHold -> "ACTION_PRESS_AND_HOLD"
+            android.R.id.accessibilityActionImeEnter -> "ACTION_IME_ENTER"
+            else -> "ACTION_UNKNOWN"
         }
 
         internal class Detector(
@@ -611,39 +616,63 @@ open class UiObject(
             private val selector: UiSelector? = UiSelector(),
         ) {
 
-            fun detect(): Any? = when (val type = result.type.let { if (it is List<*>) it[0] else it }.toString()) {
-                in RESULT_GROUP_WIDGET -> getUiObject()
-                in RESULT_GROUP_WIDGET_COLLECTION -> getUiObjectCollection { it?.compass(compass) }
-                in RESULT_GROUP_WIDGETS -> getUiObjectArray { it?.compass(compass) }
+            fun detect(scriptRuntime: ScriptRuntime): Any? {
+                val resultType = result.type.takeUnless { it == "" } ?: return null
+                return when (resultType) {
+                    in RESULT_GROUP_WIDGET -> getUiObject()
+                    in RESULT_GROUP_WIDGET_COLLECTION -> getUiObjectCollection { it?.compass(compass) }
+                    in RESULT_GROUP_WIDGETS -> getUiObjectArray { it?.compass(compass) }
 
-                in RESULT_GROUP_CONTENT -> getUiObject()?.content() ?: ""
-                in RESULT_GROUP_CONTENTS -> getUiObjectArray { it?.compass(compass)?.content() }
+                    in RESULT_GROUP_CONTENT -> getUiObject()?.content() ?: ""
+                    in RESULT_GROUP_CONTENTS -> getUiObjectArray { it?.compass(compass)?.content() }
 
-                in RESULT_GROUP_POINT -> getUiObject()?.point()
-                in RESULT_GROUP_POINTS -> getUiObjectArray { it?.compass(compass)?.point() }
+                    in RESULT_GROUP_POINT -> getUiObject()?.point()
+                    in RESULT_GROUP_POINTS -> getUiObjectArray { it?.compass(compass)?.point() }
 
-                in RESULT_GROUP_SELECTOR -> when (compass) {
-                    null, COMPASS_PASS_ON -> selector
-                    else -> throw IllegalArgumentException(str(R.string.error_selector_result_type_with_compass))
-                }
-
-                in RESULT_GROUP_EXISTENCE -> when (compass) {
-                    null, COMPASS_PASS_ON -> selector?.exists() ?: false
-                    else -> getUiObject() != null
-                }
-
-                else -> result.type.let {
-                    (it as? List<*>)?.takeLast(it.size - 1)?.toTypedArray().let { args: Array<Any?>? ->
-                        Invoker(getUiObject(), type, args).invoke()
+                    in RESULT_GROUP_SELECTOR -> when (compass) {
+                        null, COMPASS_PASS_ON -> selector
+                        else -> throw IllegalArgumentException(str(R.string.error_selector_result_type_with_compass))
                     }
-                }
-            }.let { result ->
-                if (callback == null) result else {
-                    detectWithCallback(callback, result).let {
-                        if (it is Undefined) result else it
+
+                    in RESULT_GROUP_EXISTENCE -> when (compass) {
+                        null, COMPASS_PASS_ON -> selector?.exists() ?: false
+                        else -> getUiObject() != null
                     }
+
+                    is List<*> -> when {
+                        resultType.isEmpty() /* taken as widgets */ -> getUiObjectArray { it?.compass(compass) }
+                        else -> invoke(resultType)
+                    }
+
+                    else -> invoke(resultType)
+                }.let { result ->
+                    if (callback.isJsNullish()) result else {
+                        detectWithCallback(scriptRuntime, callback, result).let {
+                            if (it.isJsUndefined()) result else it
+                        }
+                    }
+                }.let { Context.javaToJS(it, scriptRuntime.topLevelScope) }
+            }
+
+            private fun invoke(resultType: Any?, args: Array<Any?> = emptyArray()) = (resultType as? String)?.let {
+                Invoker(getUiObject(), it, args).invoke()
+            }
+
+            private fun invoke(dataList: List<*> /* [ funcName | resultType, ...args[] ] */) = try {
+                invoke(dataList[0], dataList.takeLast(dataList.size - 1).toTypedArray())
+            } catch (e: Exception) {
+                when (dataList.size) {
+                    1 -> invokeAsUiObjectArray(dataList[0], e)
+                    else -> throw e
                 }
-            }.let { KotlinUtils.boxing(it) }
+            }
+
+            private fun invokeAsUiObjectArray(resultType: Any?, e: Exception) = when (resultType) {
+                in RESULT_GROUP_WIDGET -> getUiObjectArray { it?.compass(compass) }
+                in RESULT_GROUP_CONTENT -> getUiObjectArray { it?.compass(compass)?.content() }
+                in RESULT_GROUP_POINT -> getUiObjectArray { it?.compass(compass)?.point() }
+                else -> throw e
+            }
 
             internal abstract class Result(val type: Any? = RESULT_TYPE_WIDGET) {
 
@@ -655,38 +684,53 @@ open class UiObject(
 
             private fun getUiObject() = result.byOne()?.compass(compass)
 
-            private fun getUiObjectCollection(transformer: (UiObject?) -> UiObject?) =
-                UiObjectCollection.transform(result.byAll(), transformer).let { RhinoUtils.wrap(it) }
+            private fun getUiObjectCollection(transformer: (UiObject?) -> UiObject?) = UiObjectCollection
+                .transform(result.byAll(), transformer)
+                .let { RhinoUtils.wrap(it) }
 
-            private fun getUiObjectArray(transformer: (UiObject?) -> Any?) =
-                UiObjectCollection.mapNotNull(result.byAll(), transformer).let { RhinoUtils.toArray(it) }
+            private fun getUiObjectArray(transformer: (UiObject?) -> Any?) = UiObjectCollection
+                .mapNotNull(result.byAll(), transformer)
+                .toNativeArray()
 
-            private fun detectWithCallback(callback: BaseFunction?, args: Array<*>): Any? =
-                callback?.let { RhinoUtils.callFunction(it, args) }
+            private fun detectWithCallback(scriptRuntime: ScriptRuntime, callback: BaseFunction?, args: Array<Any?>) = callback?.let {
+                RhinoUtils.callFunction(scriptRuntime, it, args)
+            }
 
-            private fun detectWithCallback(callback: BaseFunction?, arg: Any?): Any? =
-                callback?.let { detectWithCallback(it, arrayOf(arg)) }
+            private fun detectWithCallback(scriptRuntime: ScriptRuntime, callback: BaseFunction?, arg: Any?) = callback?.let {
+                detectWithCallback(scriptRuntime, it, arrayOf(arg))
+            }
 
         }
 
         private class Invoker(val w: UiObject?, val name: String, val params: Array<Any?>?) {
 
-            fun invoke(): Any? = w?.let { w ->
-                if (name.isEmpty()) return null
-                Interceptor(name, params).let {
+            fun invoke(): Any? = when {
+                w == null -> null
+                name.isEmpty() -> null
+                else -> Interceptor(name, params).let { interceptor ->
                     try {
-                        w.javaClass.getMethod(it.name, *it.classes).invoke(w, *it.args)
+                        invokeMethod(w, interceptor.name, interceptor)
                     } catch (e: Exception) {
                         e.printStackTrace()
+                        if (isIgnoredException(e)) return null
                         try {
-                            val s = "get${it.name.slice(0 until 1).uppercase()}${it.name.substring(1)}"
-                            w.javaClass.getMethod(s, *it.classes).invoke(w, *it.args)
+                            val getterName = "get${interceptor.name.replaceFirstChar { s -> s.uppercase() }}"
+                            invokeMethod(w, getterName, interceptor)
                         } catch (e: Exception) {
                             e.printStackTrace()
+                            if (isIgnoredException(e)) return null
                             throw IllegalResultTypeException(name, params)
                         }
                     }
                 }
+            }
+
+            private fun invokeMethod(w: UiObject, getterName: String, interceptor: Interceptor): Any? = w.javaClass.getMethod(getterName, *interceptor.classes).invoke(w, *interceptor.args)
+
+            private fun isIgnoredException(e: Exception): Boolean {
+                return e.cause is NullPointerException ||
+                        e.cause is InterruptedException ||
+                        e.cause?.cause is InterruptedException
             }
 
         }
@@ -697,10 +741,10 @@ open class UiObject(
             var args: Array<Any?> = emptyArray()
 
             init {
-                params?.run {
+                if (params != null) {
                     if (has(name)) {
                         classes = interceptedMap[name]!!.args
-                        args = mapIndexed { i, param ->
+                        args = params.mapIndexed { i, param ->
                             param.also {
                                 if (it is Double) {
                                     when (classes[i]) {
@@ -711,8 +755,8 @@ open class UiObject(
                             }
                         }.toTypedArray()
                     } else {
-                        classes = map { javaClass }.toTypedArray()
-                        args = this
+                        classes = params.map { params.javaClass }.toTypedArray()
+                        args = params
                     }
                 }
             }
@@ -792,13 +836,13 @@ open class UiObject(
             constructor(s: String) : super(str(R.string.error_illegal_ui_object_result_type, s))
 
             constructor(resultType: String, resultParams: Array<Any?>?) : super(
-                when (resultParams) {
-                    null -> str(R.string.error_unknown_picker_result_type, resultType)
-                    else -> str(
+                when (resultParams?.isNotEmpty()) {
+                    true -> str(
                         R.string.error_unknown_picker_result_type_with_params,
                         resultType,
                         "[${resultParams.joinToString { it.toString() }}]"
                     )
+                    else -> str(R.string.error_unknown_picker_result_type, resultType)
                 }
             )
 

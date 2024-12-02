@@ -21,9 +21,6 @@ public class TokenColor {
     @SerializedName("settings")
     private TokenColorSettings mSettings;
 
-    public TokenColor() {
-    }
-
     public String getName() {
         return mName;
     }

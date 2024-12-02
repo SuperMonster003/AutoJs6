@@ -30,7 +30,6 @@ public class ExpandableRecyclerView extends ThemeColorRecyclerView {
         void onClick(View view, int position);
     }
 
-
     private final OnClickListener mOnTitleClickListener = v -> toggle();
     private final OnClickListener mOnChildClickListenerWrapper = new OnClickListener() {
 
@@ -60,7 +59,7 @@ public class ExpandableRecyclerView extends ThemeColorRecyclerView {
     }
 
     private void init() {
-
+        /* Empty body. */
     }
 
     public void toggle() {
@@ -70,7 +69,6 @@ public class ExpandableRecyclerView extends ThemeColorRecyclerView {
             expand();
         }
     }
-
 
     public boolean isExpanded() {
         return mExpanded;
@@ -173,13 +171,11 @@ public class ExpandableRecyclerView extends ThemeColorRecyclerView {
             return new TitleViewHolder(LayoutInflater.from(getContext()).inflate(R.layout.expanded_recycler_view_default_title, parent, false));
         }
 
-
         @Override
         protected void onBindTitleViewHolder(RecyclerView.ViewHolder holder) {
             TitleViewHolder viewHolder = (TitleViewHolder) holder;
             viewHolder.mExpandHint.setImageResource(isExpanded() ? R.drawable.ic_expanded : R.drawable.ic_collapsed);
         }
-
 
         private class TitleViewHolder extends RecyclerView.ViewHolder {
 
@@ -199,6 +195,5 @@ public class ExpandableRecyclerView extends ThemeColorRecyclerView {
         }
 
     }
-
 
 }

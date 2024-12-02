@@ -29,8 +29,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class TinySign {
-    public TinySign() {
-    }
 
     private static byte[] dBase64(String data) {
         return Base64.decode(data.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
@@ -181,12 +179,12 @@ public class TinySign {
 
         public SignatureOutputStream(OutputStream out, Signature sig) {
             super(out);
-            this.mSignature = sig;
+            mSignature = sig;
         }
 
         public void write(byte[] buffer) throws IOException {
             try {
-                this.mSignature.update(buffer);
+                mSignature.update(buffer);
             } catch (SignatureException e) {
                 throw new IOException("SignatureException: " + e);
             }
@@ -196,7 +194,7 @@ public class TinySign {
 
         public void write(byte[] b, int off, int len) throws IOException {
             try {
-                this.mSignature.update(b, off, len);
+                mSignature.update(b, off, len);
             } catch (SignatureException e) {
                 throw new IOException("SignatureException: " + e);
             }
@@ -206,7 +204,7 @@ public class TinySign {
 
         public void write(int b) throws IOException {
             try {
-                this.mSignature.update((byte) b);
+                mSignature.update((byte) b);
             } catch (SignatureException e) {
                 throw new IOException("SignatureException: " + e);
             }

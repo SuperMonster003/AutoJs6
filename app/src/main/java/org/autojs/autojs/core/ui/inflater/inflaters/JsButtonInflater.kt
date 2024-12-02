@@ -7,8 +7,9 @@ import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.inflater.util.Res
 import org.autojs.autojs.core.ui.widget.JsButton
+import org.autojs.autojs.runtime.ScriptRuntime
 
-class JsButtonInflater(resourceParser: ResourceParser) : ButtonInflater<JsButton>(resourceParser) {
+class JsButtonInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : ButtonInflater<JsButton>(scriptRuntime, resourceParser) {
 
     override fun getCreator(): ViewCreator<in JsButton> = object : ViewCreator<JsButton> {
         override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsButton {
@@ -31,6 +32,5 @@ class JsButtonInflater(resourceParser: ResourceParser) : ButtonInflater<JsButton
             return JsButton(context)
         }
     }
-
 
 }

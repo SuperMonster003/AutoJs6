@@ -1,88 +1,131 @@
-package org.autojs.autojs.runtime.api;
+package org.autojs.autojs.runtime.api
 
-import android.os.Looper;
-
-import org.autojs.autojs.core.looper.Timer;
-import org.autojs.autojs.core.looper.TimerThread;
-import org.autojs.autojs.runtime.ScriptRuntime;
+import android.os.Looper
+import android.os.SystemClock
+import org.autojs.autojs.concurrent.VolatileBox
+import org.autojs.autojs.core.looper.Timer
+import org.autojs.autojs.core.looper.Timer.Companion.getTimerId
+import org.autojs.autojs.core.looper.TimerThread
+import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.util.RhinoUtils.isUiThread
+import org.mozilla.javascript.BaseFunction
+import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Created by Stardust on Jul 21, 2017.
  * Modified by SuperMonster003 as of May 26, 2022.
- * Modified by aiselp as of Jun 10, 2023.
+ * Transformed by SuperMonster003 on Jul 5, 2024.
  */
-public class Timers {
+// @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
+class Timers(scriptRuntime: ScriptRuntime) {
 
-    private static final String LOG_TAG = "Timers";
+    val mainTimer: Timer
+    val maxCallbackUptimeMillisForAllThreads = VolatileBox(0L)
 
-    // private VolatileBox<Long> mMaxCallbackUptimeMillisForAllThreads = new VolatileBox<>(0L);
-    private Threads mThreads;
-    private Timer mUiTimer;
-    private ScriptRuntime mRuntime;
+    val timerForCurrentThread: Timer?
+        get() = getTimerForThread(Thread.currentThread())
 
-    public Timers(ScriptRuntime runtime) {
-        mUiTimer = new Timer(runtime, Looper.getMainLooper());
-        mThreads = runtime.threads;
-        mRuntime = runtime;
+    private val mTimerForCurrentOrMainThread: Timer
+        get() = timerForCurrentThread ?: mainTimer
+
+    private val mThreads = scriptRuntime.threads
+    private val mUiTimer: Timer
+    private val mTimers = ConcurrentHashMap<Int, WeakReference<Timer>>()
+    private val mNextTimerId = AtomicInteger(2)
+
+    init {
+        mainTimer = Timer(scriptRuntime, maxCallbackUptimeMillisForAllThreads, TIMER_ID_MAIN)
+        mUiTimer = Timer(scriptRuntime, maxCallbackUptimeMillisForAllThreads, Looper.getMainLooper(), TIMER_ID_UI)
     }
 
-    public Timer getMainTimer() {
-        return mRuntime.loopers.getTimer();
-    }
-
-    public Timer getTimerForCurrentThread() {
-        return getTimerForThread(Thread.currentThread());
-    }
-
-    public Timer getTimerForThread(Thread thread) {
-        if (thread == mThreads.getMainThread()) {
-            return mRuntime.loopers.getTimer();
+    fun getTimerForThread(thread: Thread): Timer? = when {
+        thread == mThreads.mainThread -> mainTimer
+        else -> {
+            val timer = TimerThread.getTimerForThread(thread)
+            when {
+                timer != null -> timer
+                isUiThread() -> mUiTimer
+                else -> null
+            }
         }
-        Timer timer = TimerThread.getTimerForThread(thread);
-        if (timer == null && Looper.myLooper() == Looper.getMainLooper()) {
-            return mUiTimer;
+    }
+
+    fun getTimerForId(id: Double): Timer? {
+        return when (val timerId = getTimerId(id)) {
+            TIMER_ID_MAIN -> mainTimer
+            TIMER_ID_UI -> mUiTimer
+            else -> mTimers[timerId]?.get()
         }
-        if (timer == null) {
-            return mRuntime.loopers.getTimer();
+    }
+
+    fun setTimeout(callback: BaseFunction, delay: Long, vararg args: Any?): Double {
+        return mTimerForCurrentOrMainThread.setTimeout(callback, delay, *args)
+    }
+
+    fun setTimeout(callback: BaseFunction): Double {
+        return setTimeout(callback, 1)
+    }
+
+    fun clearTimeout(id: Double): Boolean {
+        return getTimerForId(id)?.clearTimeout(id) == true
+    }
+
+    fun setInterval(callback: BaseFunction, interval: Long, vararg args: Any?): Double {
+        return mTimerForCurrentOrMainThread.setInterval(callback, interval, *args)
+    }
+
+    fun setInterval(callback: BaseFunction): Double {
+        return setInterval(callback, 1)
+    }
+
+    fun clearInterval(id: Double): Boolean {
+        return getTimerForId(id)?.clearInterval(id) == true
+    }
+
+    fun setImmediate(callback: BaseFunction, vararg args: Any?): Double {
+        return mTimerForCurrentOrMainThread.setImmediate(callback, *args)
+    }
+
+    fun clearImmediate(id: Double): Boolean {
+        return getTimerForId(id)?.clearImmediate(id) == true
+    }
+
+    fun recycle() {
+        mainTimer.removeAllCallbacks()
+    }
+
+    fun hasPendingCallbacks(): Boolean {
+        val mainThread = mThreads.mainThread
+        val currentThread = Thread.currentThread()
+        var hasPendingCallbacks = false
+        if (mainThread == currentThread) {
+            val upTime = maxCallbackUptimeMillisForAllThreads.get()
+            if (upTime > SystemClock.uptimeMillis()) {
+                hasPendingCallbacks = true
+            }
         } else {
-            return timer;
+            val timer = timerForCurrentThread
+            if (timer != null) {
+                hasPendingCallbacks = timer.hasPendingCallbacks()
+            }
+        }
+        return hasPendingCallbacks
+    }
+
+    fun newTimer(scriptRuntime: ScriptRuntime): Timer {
+        val id = mNextTimerId.getAndIncrement()
+        return Timer(scriptRuntime, maxCallbackUptimeMillisForAllThreads, id).also {
+            mTimers[id] = WeakReference(it)
         }
     }
 
-    public int setTimeout(Object callback, long delay, Object... args) {
-        return getTimerForCurrentThread().setTimeout(callback, delay, args);
-    }
+    companion object {
 
-    public int setTimeout(Object callback) {
-        return setTimeout(callback, 1);
-    }
+        private const val TIMER_ID_MAIN = 0
+        private const val TIMER_ID_UI = 1
 
-    public boolean clearTimeout(int id) {
-        return getTimerForCurrentThread().clearTimeout(id);
-    }
-
-    public int setInterval(Object listener, long interval, Object... args) {
-        return getTimerForCurrentThread().setInterval(listener, interval, args);
-    }
-
-    public int setInterval(Object listener) {
-        return setInterval(listener, 1);
-    }
-
-    public boolean clearInterval(int id) {
-        return getTimerForCurrentThread().clearInterval(id);
-    }
-
-    public int setImmediate(Object listener, Object... args) {
-        return getTimerForCurrentThread().setImmediate(listener, args);
-    }
-
-    public boolean clearImmediate(int id) {
-        return getTimerForCurrentThread().clearImmediate(id);
-    }
-
-    public void recycle() {
-        mRuntime.loopers.getTimer().removeAllCallbacks();
     }
 
 }

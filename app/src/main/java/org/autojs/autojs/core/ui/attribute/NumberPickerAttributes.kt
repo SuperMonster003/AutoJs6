@@ -6,14 +6,15 @@ import android.widget.NumberPicker
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Dimensions
 import org.autojs.autojs.core.ui.inflater.util.Strings
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 
-open class NumberPickerAttributes(resourceParser: ResourceParser, view: View) : LinearLayoutAttributes(resourceParser, view) {
+open class NumberPickerAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : LinearLayoutAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as NumberPicker
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttrs(arrayOf("maxValue", "max")) { view.maxValue = it.toInt() }
         registerAttrs(arrayOf("minValue", "min")) { view.minValue = it.toInt() }

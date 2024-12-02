@@ -5,7 +5,7 @@ import android.util.Log;
 
 public abstract class ClassSearchingItem implements Comparable<ClassSearchingItem> {
 
-    static final String BASE_URL = "http://www.android-doc.com/reference/";
+    static final String BASE_URL = "https://www.android-doc.com/reference/";
 
     protected int rank;
 
@@ -77,7 +77,6 @@ public abstract class ClassSearchingItem implements Comparable<ClassSearchingIte
             Log.d("ClassSearching", "rank = " + rank + ", word = " + mAndroidClass.getFullName());
             return rank > 0;
         }
-
 
         public String getLabel() {
             return String.format("%s (%s)", mAndroidClass.getClassName(), mAndroidClass.getPackageName());

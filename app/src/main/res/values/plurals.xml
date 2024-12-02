@@ -1,0 +1,28 @@
+<resources>
+
+    <plurals name="text_items_total_sum">
+        <item quantity="one">Total: %d item</item>
+        <item quantity="other">Total: %d items</item>
+    </plurals>
+
+    <plurals name="text_already_stop_n_scripts">
+        <item quantity="one">%d script stopped</item>
+        <item quantity="other">%d scripts stopped</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_n_arguments">
+        <item quantity="one">Method only accepts %d argument</item>
+        <item quantity="other">Method only accepts %d arguments</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_more_than_n_arguments">
+        <item quantity="one">Method only accepts no more than %d argument</item>
+        <item quantity="other">Method only accepts no more than %d arguments</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_less_than_n_arguments">
+        <item quantity="one">Method only accepts no less than %d argument</item>
+        <item quantity="other">Method only accepts no less than %d arguments</item>
+    </plurals>
+
+</resources>

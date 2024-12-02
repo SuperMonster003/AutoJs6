@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/item"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        android:orientation="horizontal"
-        android:padding="8dp">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/item"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="?selectableItemBackground"
+              android:clickable="true"
+              android:focusable="true"
+              android:orientation="horizontal"
+              android:padding="8dp">
 
-    <!-- @Overruled by SuperMonster003 on Jul 21, 2023.-->
-    <!-- ! Author: 抠脚本人-->
-    <!-- ! Related PR:-->
-    <!-- ! http://pr.autojs6.com/98-->
-    <!-- ! Reason:-->
-    <!-- ! Pending processing.-->
-    <!-- ! zh-CN: 将于后续版本继续处理.-->
-    <!-- ! -->
-    <!-- <CheckBox-->
-    <!--     android:id="@+id/generate"-->
-    <!--     android:layout_width="wrap_content"-->
-    <!--     android:layout_height="wrap_content"-->
-    <!--     tools:ignore="TouchTargetSizeCheck" />-->
+    <!-- @Overruled by SuperMonster003 on Jul 21, 2023. -->
+    <!--  ! Author: 抠脚本人 -->
+    <!--  ! Related PR: -->
+    <!--  ! http://pr.autojs6.com/98 -->
+    <!--  ! Reason: -->
+    <!--  ! Pending processing. -->
+    <!--  ! zh-CN: 将于后续版本继续处理. -->
+    <!--  ! -->
+    <!--  # <CheckBox -->
+    <!--  #     android:id="@+id/generate" -->
+    <!--  #     android:layout_width="wrap_content" -->
+    <!--  #     android:layout_height="wrap_content" -->
+    <!--  #     tools:ignore="TouchTargetSizeCheck" /> -->
 
     <TextView
             android:id="@+id/name"
@@ -31,7 +31,7 @@
             android:layout_weight="1"
             android:textColor="@color/day_night"
             android:textSize="13sp"
-            tools:text="@string/text_sample_string" />
+            tools:text="@string/text_sample_string"/>
 
     <TextView
             android:id="@+id/value"
@@ -40,5 +40,5 @@
             android:layout_weight="1.2"
             android:textColor="@color/day_night"
             android:textSize="13sp"
-            tools:text="@string/text_sample_string" />
+            tools:text="@string/text_sample_string"/>
 </LinearLayout>

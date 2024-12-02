@@ -1,27 +1,28 @@
 package org.autojs.autojs.util;
 
-import android.webkit.MimeTypeMap;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.annotation.ReservedForCompatibility;
+import org.autojs.autojs.runtime.api.Mime;
 
 /**
  * Created by Stardust on Feb 12, 2018.
+ * Modified by SuperMonster003 as of Apr 11, 2024.
  */
+@ReservedForCompatibility
 public class MimeTypesUtils {
 
     @Nullable
+    @ReservedForCompatibility
     public static String fromFile(String path) {
-        String ext = PFiles.getExtension(path);
-        return android.text.TextUtils.isEmpty(ext) ? "*/*" : MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+        return Mime.fromFile(path);
     }
 
     @NonNull
-    public static String fromFileOr(String path, String defaultType) {
-        String mimeType = fromFile(path);
-        return mimeType == null ? defaultType : mimeType;
+    @ReservedForCompatibility
+    public static String fromFileOr(String path, @Nullable String defaultType) {
+        return Mime.fromFileOr(path, defaultType);
     }
 
 }

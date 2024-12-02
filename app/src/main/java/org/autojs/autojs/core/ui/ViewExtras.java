@@ -3,6 +3,7 @@ package org.autojs.autojs.core.ui;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import org.autojs.autojs.core.ui.attribute.ViewAttributes;
 import org.autojs.autojs.core.ui.attribute.ViewAttributesFactory;
 import org.autojs.autojs.core.ui.inflater.ResourceParser;
@@ -18,7 +19,7 @@ public class ViewExtras {
 
     private ViewAttributes mViewAttributes;
 
-    public static ViewExtras get(View view) {
+    public static ViewExtras get(@NonNull View view) {
         ViewExtras extras;
         Object tag = view.getTag(R.id.view_tag_view_extras);
         Log.d(LOG_TAG, "view = " + view + ", tag = " + tag);
@@ -31,11 +32,11 @@ public class ViewExtras {
         return extras;
     }
 
-    public static ViewAttributes getViewAttributes(View view, ResourceParser parser) {
+    public static ViewAttributes getViewAttributes(ScriptRuntime scriptRuntime, View view, ResourceParser parser) {
         ViewExtras extras = get(view);
         ViewAttributes attributes = extras.getViewAttributes();
         if (attributes == null) {
-            attributes = ViewAttributesFactory.create(parser, view);
+            attributes = ViewAttributesFactory.create(scriptRuntime, parser, view);
             extras.setViewAttributes(attributes);
         }
         return attributes;
@@ -51,7 +52,7 @@ public class ViewExtras {
         return nativeView;
     }
 
-    public static NativeView getNativeView(View view) {
+    public static NativeView getNativeView(@NonNull View view) {
         ViewExtras extras = get(view);
         return extras.getNativeView();
     }

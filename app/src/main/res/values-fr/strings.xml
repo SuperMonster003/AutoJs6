@@ -2,6 +2,7 @@
 
 <!-- Translator: [ DeepL (https://www.deepl.com/translator) ] -->
 <!-- Proofreader: [ Bastien ] -->
+<!-- Proofreader: [ JetBrains AI Assistant ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
 
@@ -10,11 +11,25 @@
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Emballage...</string>
     <string name="apk_builder_plugin_version_incompatible">Version incompatible de \"apk builder\".\nTéléchargez-la maintenant?</string>
     <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">Préparation...</string>
+    <string name="apk_info_device_sdk">SDK de l\'appareil</string>
+    <string name="apk_info_installed_version">Installé</string>
+    <string name="apk_info_max_sdk">SDK maximum</string>
+    <string name="apk_info_min_sdk">SDK minimum</string>
+    <string name="apk_info_package_name">Package</string>
+    <string name="apk_info_target_sdk">SDK cible</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">Les opérations bloquantes ne peuvent pas être effectuées sur le thread UI. Essayez d\'exécuter `waitForActivity` dans un sous-processus ou un sous-script, ou utilisez `setInterval` pour répéter et vérifier l\'activité</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">Les opérations bloquantes ne peuvent pas être effectuées sur le thread UI. Essayez d\'exécuter `waitForPackage` dans un sous-processus ou un sous-script, ou utilisez `setInterval` pour répéter et vérifier le paquet</string>
+    <string name="config_abi_options_contains_invalid">La configuration \"abi\" contient des options invalides</string>
+    <string name="config_abi_options_contains_unavailable">La configuration \"abi\" contient des options non disponibles</string>
+    <string name="config_lib_options_contains_invalid">La configuration \"lib\" contient des options invalides</string>
+    <string name="config_lib_options_contains_unavailable">La configuration \"lib\" contient des options non disponibles</string>
     <string name="confirm_overwrite_file">Fichier déjà existant.>Surécrire?</string>
     <string name="content_about_app_tips">1. Appuyez et maintenez le nom de l\'application (AutoJs6) sur la page d\'accueil pour accéder à la page des paramètres.\n2. Appuyez et maintenez une certaine option de paramètres sur la page de paramètres pour afficher des informations détaillées.</string>
+    <string name="content_description_fab_for_display_manifest">Un bouton d\'action flottant pour afficher le manifeste</string>
     <string name="content_github_feedback">Une page web sera lancée pour signaler un problème.\nUn compte pour GitHub peut être nécessaire.</string>
     <string name="content_way_of_output_for_recorded_script">Sélectionnez un mode de sortie pour le script enregistré</string>
     <string name="crash_feedback">Copier le journal de débogage ou quitter directement</string>.
+    <string name="current_available_abi_options">Liste actuelle des options \"abi\" disponibles</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">Notification à partir d\'un script</string>
@@ -31,6 +46,7 @@
     <string name="description_extending_js_build_in_objects">L\'extension des objets JavaScript intégrés peut augmenter la flexibilité du code et permettre des fonctionnalités plus riches, mais elle peut provoquer des conflits et même des pannes.\nTous les scripts ont des extensions intégrées activées par défaut lorsque l\'option est activée.\nLes extensions intégrées sont souvent peu sûres et ne sont pas recommandées, sauf si les principes et les risques des extensions intégrées sont clairement compris.\nLorsque l\'option est désactivée, les extensions intégrées peuvent toujours être activées via l\'objet global plugins, comme décrit dans la documentation du projet.</string>
     <string name="description_hidden_files_preference">Permet d\'afficher ou non les fichiers et dossiers cachés (commençant généralement par \".\") dans l\'explorateur de fichiers d\'AutoJs6.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Préférence pour que l\'écran de l\'appareil reste allumé et lumineux lorsque AutoJs6 est au premier plan.\nPour que cela se produise uniquement sur la page d\'accueil parmi toutes les pages de l\'application AutoJs6, choisissez l\'option \"page d\'accueil uniquement\".</string>
+    <string name="description_launcher_shortcuts">Les raccourcis permettent d\'effectuer des actions spécifiques dans AutoJs6. Les utilisateurs peuvent afficher ces raccourcis dans un lanceur pris en charge et démarrer rapidement certaines tâches ou lancer une activité, comme la lecture de la documentation de l\'application AutoJs6, le lancement de la page de configuration d\'AutoJs6, etc.</string>
     <string name="description_manage_ignored_updates_preference">Cliquez pour afficher ou gérer les éléments de la liste.\nAppuyez longuement pour supprimer l\'élément de la liste.</string>
     <string name="description_night_mode_preference">Le mode nuit (également connu sous le nom de thème sombre) s\'applique à la fois à l\'interface utilisateur du système Android et aux applications exécutées sur l\'appareil, ce qui améliore la visibilité pour les utilisateurs malvoyants et ceux qui sont sensibles à la lumière vive, et facilite l\'utilisation d\'un appareil par quiconque dans un environnement à faible luminosité.\n\nSystème de suivi: AutoJs6 possède des paramètres de mode nuit identiques à ceux du système Android\nToujours activé: AutoJs6 maintient le mode Nuit activé (indépendamment des paramètres du système Android).\nToujours désactivé: AutoJs6 désactive le mode Nuit (indépendamment des paramètres du système Android).\n\nRemarque: l\'option Suivre le système n\'est disponible qu\'à partir du niveau 28 de l\'API Android (Android 9) [P].</string>
     <string name="description_night_mode_preference_more">Pour activer le mode Nuit dans le système Android :\n- Niveau 29 de l\'API Android (Android 10) [Q] et supérieur: Paramètres -> Affichage -> Thème.\n- Niveau 28 de l\'API Android (Android 9) [P]: Options du développeur -> Mode nuit.\n\nLes conditions suivantes doivent être remplies pour appliquer un mode nuit (thème sombre) à un contenu Web à l\'aide d\'un composant WebView (comme la page de documentation AutoJs6) :\n1. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et plus: version >= 76\n- API Android Niveau 28 (Android 9) [P]: version >= 105\n2. Le contenu Web du composant WebView est adapté au thème sombre (par des ressources CSS ou Android XML, etc.).</string>
@@ -39,12 +55,14 @@
     <string name="description_stable_mode">Le mode stable le rend plus stable lors de l\'obtention des limites de mise en page, mais certains résultats peuvent être ignorés.\nA11y service\'s restart required.</string>
     <string name="description_theme_color_preference">La couleur du thème est appliquée aux widgets, y compris, mais sans s\'y limiter, aux widgets suivants :\nBarre d\'état\nBarre d\'applications\nIcône de fichier\nIcône d\'élément de tâche\nFab\nTitre de la catégorie Paramètres\nBouton de commutation\n\nRemarque: Depuis la version 6.2.0 d\'AutoJs6, il n\'y a pas encore de différence entre la couleur primaire, la couleur primaire foncée et la couleur d\'accentuation.</string>
     <string name="dialog_button_back">@string/text_back</string>
-    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Annulation</string>
     <string name="dialog_button_confirm">OK</string>
+    <string name="dialog_button_continue">@string/text_continue</string>
     <string name="dialog_button_copy">@string/text_copy</string>
+    <string name="dialog_button_default_prefix">Préfixe def</string>
     <string name="dialog_button_details">Details</string>
+    <string name="dialog_button_dismiss">Quitter</string>
     <string name="dialog_button_download_with_browser">Navigateur</string>
     <string name="dialog_button_history">Histoire</string>
     <string name="dialog_button_ignore_current_update">Ignorer</string>
@@ -58,9 +76,8 @@
     <string name="dialog_button_system_settings_simplified">Système</string>
     <string name="dialog_button_update_now">Mise à jour</string>
     <string name="dialog_button_use_default">Par défaut</string>
-    <string name="text_app_shortcut_docs_long_label">AutoJs6 Docs</string>
-    <string name="text_app_shortcut_docs_short_label">Docs</string>
-    <string name="edit_and_run_handle_intent_error">Can\'t process file</string>
+    <string name="dialog_button_view_file">Voir le fichier</string>
+    <string name="edit_and_run_handle_intent_error">Cannot process file</string>
     <string name="edit_exit_without_save_warn">Le contenu n\'a pas été enregistré, êtes-vous sûr de vouloir quitter?</string>
     <string name="entry_app_language_auto">Suivre le système</string>
     <string name="entry_documentation_source_local">Documents locaux</string>
@@ -83,12 +100,20 @@
     <string name="entry_root_record_out_file_type_js">Type JavaScript (modifiable)</string>
     <string name="error_a_runtime_has_been_set">Un runtime a été défini</string>
     <string name="error_abandoned_method">La méthode %s a été abandonnée et ne doit pas être utilisée</string>
+    <string name="error_action_cannot_be_completed_with_negative_coordinate">L\'opération \"%1$s\" ne peut pas être terminée car le paramètre contient des valeurs de coordonnées négatives (%2$d, %3$d)</string>
+    <string name="error_activity_is_required_for_ui_exec_mode">Une activité est requise, qui pourrait être fournie en exécutant en mode d\'exécution \"ui\"</string>
+    <string name="error_an_operation_is_not_implemented">Une opération n\'est pas mise en œuvre</string>
     <string name="error_app_not_installed">L\'application n\'est pas installée: \"%s\"</string>
+    <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">L\'argument %1$s pour %2$s#%3$s ne peut pas être nul</string>
+    <string name="error_arguments_cannot_be_empty">Les arguments ne peuvent pas être vides</string>
+    <string name="error_arguments_must_be_empty">Les arguments doivent être vides</string>
+    <string name="error_at_least_one_abi_needs_to_be_selected">Au moins un ABI doit être sélectionné</string>
     <string name="error_both_bitmap_and_mat_are_null">Le bitmap et le mat sont tous deux nuls</string>
-    <string name="error_cannot_be_null">%s can\'t be null</string>
+    <string name="error_cannot_be_null">%s cannot be null</string>
     <string name="error_cannot_connect_to_github">Impossible de se connecter à GitHub</string>
+    <string name="error_cannot_convert_value_into_a_script_runtime_path">Impossible de convertir %s en chemin d\'exécution de script</string>
     <string name="error_cannot_find_editor_view_from_child_view">Impossible de trouver l\'EditorView depuis la vue enfant: %s</string>
-    <string name="error_cannot_get_download_url">Can\'t get downloading URL</string>
+    <string name="error_cannot_get_download_url">Cannot get downloading URL</string>
     <string name="error_cannot_rename">Failed to rename</string>
     <string name="error_cannot_retrieve_battery_state">Impossible de récupérer l\'état de la batterie</string>
     <string name="error_change_password_error_length">Utiliser plus de caractères pour le mot de passe</string>.
@@ -106,11 +131,22 @@
     <string name="error_empty_broadcast_selection">Il faut sélectionner au moins une diffusion</string>.
     <string name="error_empty_github_release_assets">Aucun actif de la version GitHub à télécharger</string>.
     <string name="error_empty_shell_command">Command est vide</string>
-    <string name="error_enable_server">Can\'t enable AutoJs6 server: %s</string>
+    <string name="error_enable_server">Cannot enable AutoJs6 server: %s</string>
+    <string name="error_excessive_height_for_template_n_region">Hauteur excessive : modèle [%1$d] > région [%2$d]</string>
+    <string name="error_excessive_width_for_template_n_region">Largeur excessive : modèle [%1$d] > région [%2$d]</string>
+    <string name="error_failed_to_call_method">Échec de l\'appel à la méthode \"%s\"</string>
+    <string name="error_failed_to_call_method_with_cause"><![CDATA[Échec de l\'appel à la méthode \"%1$s\" : [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">Échec de la conversion de la valeur %s en un objet à dessiner</string>
+    <string name="error_failed_to_grant_shizuku_access">Échec de l\'octroi de la permission de Shizuku</string>
+    <string name="error_failed_to_instantiate">Échec de l\'instanciation de \"%s\"</string>
+    <string name="error_failed_to_instantiate_with_cause"><![CDATA[Échec de l\'instanciation de \"%1$s\": [ %2$s ]]]></string>
+    <string name="error_failed_to_invoke_method_with_description">Échec de l\'appel de la méthode %1$s</string>
+    <string name="error_failed_to_revoke_shizuku_access">La révocation des droits de Shizuku a échoué</string>
+    <string name="error_failed_to_run_script">Échec de l\'exécution du script</string>
+    <string name="error_file_in_path_does_not_exist">Le fichier dans le chemin \"%1$s\" n\'existe pas</string>
     <string name="error_function_called_in_ui_thread">Le thread d\'interface utilisateur ne peut pas être bloqué. Essayez d\'exécuter %s() dans un sous-fil ou un sous-script</string>.
     <string name="error_function_called_more_than_once">%s() appelé plus d\'une fois</string>
-    <string name="error_get_github_latest_release">Can\'t get latest GitHub release</string>
+    <string name="error_get_github_latest_release">Cannot get latest GitHub release</string>
     <string name="error_handshake_timed_out">Handshake timed out after %d ms</string>
     <string name="error_illegal_argument" formatted="false">Argument illégal %s: %s</string>
     <string name="error_illegal_relative_url_argument_without_base">L\'URL relative ne peut pas être utilisée sans URL de base</string>
@@ -118,6 +154,9 @@
     <string name="error_illegal_url_argument" formatted="false">L\'URL doit commencer par un protocole comme \"https://\" et ainsi de suite</string>
     <string name="error_illegal_widget_command" formatted="false">Paramètre %s (%s) doit être ou peut être coulé en %s type</string>
     <string name="error_image_has_been_recycled">L\'image a été recyclée</string>
+    <string name="error_images_must_have_the_same_size">Les images doivent avoir la même taille</string>
+    <string name="error_images_must_have_the_same_size_and_type">Les images doivent avoir la même taille et le même type</string>
+    <string name="error_input_fields_check_failed">Échec de la vérification du champ de saisie</string>
     <string name="error_invalid_compass">Compas non valide: %s</string>
     <string name="error_invalid_github_repo">Invalide le dépôt GitHub: %s</string>
     <string name="error_invalid_ip_address">Adresse IP invalide</string>
@@ -128,10 +167,13 @@
     <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 peut ne pas avoir l\'accès root pour exécuter le fichier \"auto\"</string>.
     <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
+    <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">La méthode n\'accepte qu\'un nombre d\'arguments dans la plage [%1$d..%2$d]</string>
+    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">Le module \"%s\" ne fonctionne pas en raison de l\'absence des fichiers de bibliothèque nécessaires</string>
     <string name="error_no_accessibility_permission">Le service d\'accessibilité est désactivé et le script s\'est arrêté</string>.
     <string name="error_no_accessibility_permission_to_capture">Le service d\'accessibilité n\'est pas activé</string>.
     <string name="error_no_accessibility_service">No accessibility service</string>
     <string name="error_no_display_over_other_apps_permission">Aucune permission \"display over other apps\"</string>
+    <string name="error_no_permission_to_access_shizuku">Pas de permission pour accéder à Shizuku</string>
     <string name="error_no_post_notifications_permission">Pas d\'autorisation pour les \"notifications d\'envoi\"</string>
     <string name="error_no_read_phone_state_permission">Aucune autorisation de \"lire l\'état du téléphone\"</string>
     <string name="error_no_screen_capture_permission">Aucune autorisation de capture d\'écran</string>
@@ -144,19 +186,28 @@
     <string name="error_parse_version_info">Fail to parse version information</string>
     <string name="error_pattern_syntax">Syntaxe de motif invalide</string>
     <string name="error_port_num_over_65535">Numéro de port supérieur à 65535</string>
-    <string name="error_put_value_into_json">Can\'t put value %s into JSON</string>
-    <string name="error_regex_find_prev">Can\'t find previous with regex</string>
+    <string name="error_project_main_script_file_with_abs_path_does_not_exist">Le fichier de script principal du projet \"%1$s\" n\'existe pas</string>
+    <string name="error_put_value_into_json">Cannot put value %s into JSON</string>
+    <string name="error_regex_find_prev">Cannot find previous with regex</string>
     <string name="error_repeated_colon_symbol">Symbole deux-points répété</string>
     <string name="error_repeated_dot_symbol">Symbole point répété</string>
+    <string name="error_required_property_is_nullish_or_does_not_exist">La propriété requise \"%1$s\" est nulle ou n\'existe pas</string>
     <string name="error_script_is_on_exiting">Le script est en train de sortir</string>
     <string name="error_selector_method_without_calling">La méthode du sélecteur doit être appelée plutôt que passée en paramètre: %s</string>.
-    <string name="error_selector_result_type_with_compass">Can\'t use a compass when result type is selector</string>
-    <string name="error_set_both_icon_res_and_icon">Can\'t set both iconRes and icon</string>
+    <string name="error_selector_result_type_with_compass">Cannot use a compass when result type is selector</string>
+    <string name="error_set_both_icon_res_and_icon">Cannot set both iconRes and icon</string>
+    <string name="error_shizuku_is_not_installed">Shizuku n\'est pas installé</string>
+    <string name="error_shizuku_service_may_be_not_running">Le service Shizuku n\'est peut-être pas en cours d\'exécution</string>
+    <string name="error_shizuku_version_is_not_supported">La version de Shizuku n\'est pas prise en charge</string>
+    <string name="error_the_transformer_for_required_property_cannot_return_nullish">Le transformateur pour la propriété requise \"%1$s\" ne peut pas retourner une valeur nulle</string>
     <string name="error_thread_is_not_alive">Thread n\'est pas vivant</string>
+    <string name="error_unable_to_use_shizuku_service">Impossible d\'utiliser le service Shizuku</string>
     <string name="error_unacceptable_character">Caractère inacceptable</string>
     <string name="error_unknown">Erreur inconnue</string>
     <string name="error_unknown_algorithm_selector_param">Param inconnu du sélecteur d\'algorithme: %s</string>
     <string name="error_unknown_color_name">Nom de couleur inconnu: %s</string>
+    <string name="error_unknown_element_name">Nom d\'élément inconnu: %1$s</string>
+    <string name="error_unknown_gravity_for">Gravité inconnue : %s</string>
     <string name="error_unknown_operation">Opération inconnue</string>
     <string name="error_unknown_picker_result_type">Unknown result type {name: %s}</string>
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Type de résultat inconnu {nom: %s, params: %s}</string>
@@ -167,7 +218,7 @@
     <string name="foreground_notification_text">Cliquez pour lancer AutoJs6</string>
     <string name="foreground_notification_title">Service AutoJs6 au premier plan</string>
     <string name="format_build_succeeded" formatted="true">Construction réussie.\nPlateau du fichier: %s</string>
-    <string name="format_debug_bar_title">Debug [ %s ]</string>
+    <string name="format_debug_bar_title"><![CDATA[Debug [ %s ]]]></string>
     <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
     <string name="format_file_downloaded" formatted="true">Fichier téléchargé sur %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Go to] Settings -> Accessibility Services -> AutoJs6 [Enable]]]></string>
@@ -175,6 +226,18 @@
     <string name="hint_long_click_run_to_debug">Cliquez longuement sur le bouton \"Run\" pour déboguer</string>
     <string name="hint_loop_delay">Délai avant boucle</string>
     <string name="hint_loop_times">0 pour une boucle infinie</string>
+    <string name="media_info_album_label">Album</string>
+    <string name="media_info_aspect_ratio_label">Ratio d\'aspect</string>
+    <string name="media_info_audio_format_label">Audio</string>
+    <string name="media_info_bit_rate_label">Taux de bits</string>
+    <string name="media_info_container_format_label">Conteneur</string>
+    <string name="media_info_duration_label">Durée</string>
+    <string name="media_info_file_size_label">Taille du fichier</string>
+    <string name="media_info_frame_rate_label">Taux de cadre</string>
+    <string name="media_info_performer_label">Artiste</string>
+    <string name="media_info_resolution_label">Résolution</string>
+    <string name="media_info_track_name_label">Titre</string>
+    <string name="media_info_video_format_label">Vidéo</string>
     <string name="mt_color_picker_title">Color picker</string>
     <string name="mt_custom">Custom</string>
     <string name="no_apk_builder_plugin">APK Builder n\'est pas installé</string>
@@ -195,16 +258,13 @@
     <string name="summary_pre_execute_script">Exécuter avant le fichier script</string>
     <string name="summary_record_prompt">Afficher un message lors du démarrage ou de l\'arrêt de l\'enregistrement d\'un script</string>
     <string name="summary_stable_mode">Analyse de la mise en page plus stable mais moins bonne compatibilité du code (redémarrage du service a11y nécessaire)</string>.
+    <string name="summary_text_launcher_shortcuts">Ajouter des raccourcis au lanceur</string>
     <string name="summary_use_volume_control_record">Démarrer ou arrêter l\'enregistrement contrôlé par la touche de réduction du volume lorsque le bouton flottant est affiché</string>.
     <string name="summary_use_volume_key_to_stop_running_scripts">Appuyez sur la touche \"Volume fort\" pour arrêter tous les scripts en cours d\'exécution.</string>
     <string name="text_a11y_service">Service d\'accessibilité</string>
     <string name="text_a11y_service_description">Requise par le fonctionnement automatique du script (clic, appui long, glissement, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Service d\'accessibilité activé mais non exécuté (réactivation ou redémarrage du périphérique)</string>.
     <string name="text_a11y_service_may_be_needed">Un service d\'accessibilité peut être nécessaire</string>
-    <string name="text_supported_libraries_short">Bibliothèques</string>
-    <string name="text_supported_abis_short">ABIs</string>
-    <string name="text_supported_abis_short_32bit">ABIs (32-bit)</string>
-    <string name="text_supported_abis_short_64bit">ABIs (64-bit)</string>
     <string name="text_about">A propos</string>
     <string name="text_about_all_files_access">A propos de l\'accès à tous les fichiers</string>
     <string name="text_about_app_and_developer">A propos de l\'application et du développeur</string>
@@ -222,9 +282,11 @@
     <string name="text_action">Action</string>
     <string name="text_activity_not_found_for_apk_installing">Pas d\'installateur d\'APK</string>
     <string name="text_adb_tool_needed">L\'outil ADB est nécessaire</string>
+    <string name="text_alias">alias</string>
     <string name="text_all_files_access">Accès à tous les fichiers</string>
     <string name="text_all_files_access_is_needed">L\'option \"Accès à tous les fichiers\" est nécessaire pour accéder aux fichiers de script sur le téléphone.</string>
     <string name="text_already_copied_to_clip">Copié dans le presse-papiers</string>
+    <string name="text_already_copied_to_clip_but_only_latest_few_items">Déjà copié dans le presse-papiers (seulement les derniers %d éléments)</string>
     <string name="text_already_created">Créé</string>
     <string name="text_already_deleted">Deleted</string>
     <string name="text_android_build_id">ID de la version Android</string>
@@ -255,6 +317,13 @@
     <string name="text_app_name_parallel_space">Parallel Space</string>
     <string name="text_app_name_qqmusic">QQMusic</string>
     <string name="text_app_name_wechat">WeChat</string>
+    <string name="text_app_shortcut_disabled">Ce raccourci est désactivé</string>
+    <string name="text_app_shortcut_docs_long_label">AutoJs6 Docs</string>
+    <string name="text_app_shortcut_docs_short_label">Docs</string>
+    <string name="text_app_shortcut_log_long_label">AutoJs6 Journal</string>
+    <string name="text_app_shortcut_log_short_label">Journal</string>
+    <string name="text_app_shortcut_settings_long_label">AutoJs6 Réglages</string>
+    <string name="text_app_shortcut_settings_short_label">Réglages</string>
     <string name="text_app_source_code">Code source</string>
     <string name="text_app_version_code">Code de la version de l\'application</string>
     <string name="text_app_version_name">Nom de la version de l\'application</string>
@@ -263,6 +332,7 @@
     <string name="text_auto_check_for_updates">Vérification automatique des mises à jour</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">Vérification automatique des mises à jour et affichage d\'un snackbar sur la page d\'accueil</string>
     <string name="text_auto_night_mode">Mode nuit automatique</string>
+    <string name="text_available_windows">Fenêtres disponibles</string>
     <string name="text_back">Retour</string>
     <string name="text_broadcast_action">Action</string>
     <string name="text_broadcast_task">Tâche de diffusion</string>
@@ -271,6 +341,21 @@
     <string name="text_cancel">Annulation</string>
     <string name="text_cancel_simplified">Annul</string>
     <string name="text_cannot_read_file">Impossible de lire le fichier</string>
+    <string name="text_captured_window_info_order">Ordre</string>
+    <string name="text_captured_window_info_package_name">Paquet</string>
+    <string name="text_captured_window_info_package_name_unknown">Paquet inconnu</string>
+    <string name="text_captured_window_info_root_node">Racine</string>
+    <string name="text_captured_window_info_root_node_unknown">Racine inconnue</string>
+    <string name="text_captured_window_info_title">Titre</string>
+    <string name="text_captured_window_info_title_null">Aucun titre</string>
+    <string name="text_captured_window_info_type">Type</string>
+    <string name="text_captured_window_info_type_of_accessibility_overlay">Superposition d\'accessibilité</string>
+    <string name="text_captured_window_info_type_of_application">Application</string>
+    <string name="text_captured_window_info_type_of_input_method">Méthode de saisie</string>
+    <string name="text_captured_window_info_type_of_magnification_overlay">Superposition de grossissement</string>
+    <string name="text_captured_window_info_type_of_split_screen_divider">Séparateur d\'écran partagé</string>
+    <string name="text_captured_window_info_type_of_system">Système</string>
+    <string name="text_captured_window_info_type_unknown">Type inconnu</string>
     <string name="text_change_working_dir">Changer de répertoire de travail</string>
     <string name="text_check_for_updates">Vérifier les mises à jour</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Checking for updates...</string>
@@ -321,6 +406,7 @@
     <string name="text_debug_step_into">Step into</string>
     <string name="text_debug_step_out">Step out</string>
     <string name="text_debug_step_over">Step over</string>
+    <string name="text_default_prefix">Préfixe par défaut</string>
     <string name="text_delete">Suppression</string>
     <string name="text_delete_line">Supprimer la ligne</string>
     <string name="text_details">Détails</string>
@@ -345,8 +431,11 @@
     <string name="text_documentation_source">Source de la documentation</string>
     <string name="text_done">Done</string>
     <string name="text_download">Téléchargement</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">Téléchargez et installez la version d\'AutoJs6 qui inclut l\'ABI ci-dessus (le nom du fichier contient \"%s\")</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">Télécharger et installer la version d\'AutoJs6 qui inclut tous les ABI (le nom du fichier contient \"universal\")</string>
     <string name="text_download_cancelled">Téléchargement annulé</string>
     <string name="text_download_interruption_warning">Le téléchargement en cours sera interrompu si l\'on continue</string>.
+    <string name="text_download_link_for_autojs6">Lien de téléchargement pour AutoJs6</string>
     <string name="text_download_url">Url de téléchargement</string>
     <string name="text_downloading">Téléchargement</string>
     <string name="text_drawer_close">Fermer le tiroir</string>
@@ -373,16 +462,19 @@
     <string name="text_exit">Sortir</string>
     <string name="text_exit_directly">Exit</string>
     <string name="text_export">Export</string>
+    <string name="text_exported">Exporté</string>
     <string name="text_extending_js_build_in_objects">Extension des objets intégrés de JavaScript</string>
     <string name="text_extensibility">Extensibilité</string>
     <string name="text_failed">Failed</string>
     <string name="text_failed_to_build">Failed to build</string>
+    <string name="text_failed_to_copy">Échec de la copie</string>
     <string name="text_failed_to_create">Fail to create</string>
     <string name="text_failed_to_delete">Échec de la suppression</string>
     <string name="text_failed_to_disable_a11y_service">Failed to disable accessibility service</string>
     <string name="text_failed_to_download">Fail to download</string>
     <string name="text_failed_to_enable_a11y_service_with_root_access">Failed to enable accessibility service with root access</string>
     <string name="text_failed_to_enable_a11y_service_with_secure_settings">Failed to enable accessibility service with secure settings</string>
+    <string name="text_failed_to_export_log_entries">Échec de l\'exportation des entrées de journal</string>
     <string name="text_failed_to_format">Échec du formatage</string>
     <string name="text_failed_to_generate">Fail to generate code</string>
     <string name="text_failed_to_grant_access">Failed to grant access</string>
@@ -392,11 +484,13 @@
     <string name="text_failed_to_register">Failed to register</string>
     <string name="text_failed_to_report">Failed to submit</string>
     <string name="text_failed_to_save_remote_project_to_local_storage">Échec de l\'enregistrement du projet distant dans le stockage local</string>
+    <string name="text_failed_to_send_log_entries">Échec de l\'envoi des entrées de journal</string>
     <string name="text_failed_to_write_file">Fail to write file</string>
     <string name="text_file">Fichier</string>
     <string name="text_file_exists">Fichier déjà existant</string>
     <string name="text_file_name">Nom du fichier</string>
     <string name="text_file_not_exists">Le fichier n\'existe pas</string>
+    <string name="text_file_with_abs_path_is_not_an_executable_script">Le fichier \"%1$s\" n\'est pas un script exécutable</string>
     <string name="text_files_transfer">Transfert de fichiers</string>
     <string name="text_find">Recherche</string>
     <string name="text_find_java_classes">Recherche de classes Java</string>
@@ -416,11 +510,14 @@
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">Retrouver les release notes...</string>
     <string name="text_github_backup_url_used">L\'URL de sauvegarde a été utilisée</string>
     <string name="text_go_to_settings">Aller à \"Settings\"</string>
+    <string name="text_grant_autojs6_access_in_shizuku_app">Accorder des privilèges AutoJs6 dans une application Shizuku</string>
     <string name="text_granted">Granted</string>
     <string name="text_guard_mode">Mode garde</string>
     <string name="text_help">Help</string>
     <string name="text_hidden_files_description">Si les fichiers et dossiers cachés s\'affichent ou non dans l\'explorateur de fichiers. Un fichier ou un dossier est considéré comme caché si son nom commence par un caractère de point (\".\").</string>
     <string name="text_hidden_files_title">Fichiers et dossiers cachés</string>
+    <string name="text_hide">Cacher</string>
+    <string name="text_hide_button">Bouton de cacher</string>
     <string name="text_histories">Histoires</string>
     <string name="text_icon">Icône</string>
     <string name="text_ignore_battery_optimizations">Ignorer les optimisations de la batterie</string>.
@@ -436,6 +533,7 @@
     <string name="text_inspect_layout_bounds">Inspecter les limites de la mise en page</string>
     <string name="text_inspect_layout_hierarchy">Inspecter la hiérarchie des dispositions</string>
     <string name="text_install">Installation</string>
+    <string name="text_invalid_character_is_removed">Caractère invalide est supprimé</string>
     <string name="text_invalid_package_name">Nom de paquet non valide</string>
     <string name="text_invalid_project">Projet non valide</string>
     <string name="text_is_latest_version">Pas de version plus récente trouvée</string>
@@ -448,16 +546,17 @@
     <string name="text_jump_to_line_start">Sauter au début de la ligne</string>
     <string name="text_jump_to_start">Sauter pour commencer</string>
     <string name="text_keep_screen_on_when_in_foreground">Garder l\'écran allumé lorsqu\'il est au premier plan</string>
+    <string name="text_label_name">Étiquette</string>
     <string name="text_last_updates_checked_time">Dernière vérification: %s</string>
     <string name="text_latest_activity">Dernière activité</string>
     <string name="text_latest_package">Dernier paquet</string>
     <string name="text_launch_config">Launch config</string>
     <string name="text_launch_debugger">Launch debugger</string>
+    <string name="text_launcher_shortcuts">Raccourcis du lanceur</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecter la mise en page...</string>
     <string name="text_licenses">Licences Open Sources</string>
+    <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Chargement...</string>
     <string name="text_log">Journal</string>
-    <string name="text_app_shortcut_log_long_label">AutoJs6 Journal</string>
-    <string name="text_app_shortcut_log_short_label">Journal</string>
     <string name="text_logging_in">Logging in</string>
     <string name="text_login">Login</string>
     <string name="text_login_succeed">Login réussi</string>
@@ -467,6 +566,7 @@
     <string name="text_loop_times">Temps de boucle</string>
     <string name="text_lower_than">Inférieure à</string>
     <string name="text_main_file_name">Nom du fichier du script principal</string>
+    <string name="text_malfunctioning">Dysfonctionnement</string>
     <string name="text_manage">Gestion</string>
     <string name="text_manage_a11y_service">Gestion du service d\'accessibilité</string>
     <string name="text_manage_ignored_updates">Gérer les mises à jour ignorées</string>
@@ -488,8 +588,12 @@
     <string name="text_next_run_time">Prochaine exécution</string>
     <string name="text_night_mode">Mode nuit</string>
     <string name="text_no_browser">Aucun navigateur n\'est installé</string>
+    <string name="text_no_content">Pas de contenu</string>
     <string name="text_no_histories">Aucun Histoire</string>
     <string name="text_no_ignored_updates">Aucune mise à jour ignorée</string>
+    <string name="text_no_log_entries_to_copy">Aucune entrée de journal à copier</string>
+    <string name="text_no_log_entries_to_export">Aucune entrée de journal à exporter</string>
+    <string name="text_no_log_entries_to_send">Aucune entrée de journal à envoyer</string>
     <string name="text_no_root">Non-root</string>
     <string name="text_no_root_access">Aucun accès root</string>
     <string name="text_no_scripts_to_stop_running">Pas de scripts à arrêter de fonctionner</string>
@@ -499,9 +603,11 @@
     <string name="text_notification_access_permission">Accès à la notification</string>
     <string name="text_notification_service_disabled">Le service de notification ne fonctionne pas</string>
     <string name="text_null">Null</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">Le nombre d\'entrées de journal %d dépasse la limite d\'envoi</string>
     <string name="text_number_format_error">Format de numéro invalide</string>
     <string name="text_ok">OK</string>
     <string name="text_old_path">Ancien chemin</string>
+    <string name="text_only_latest_few_items_will_be_sent">Seuls les derniers %d éléments seront envoyés</string>
     <string name="text_open">Ouvrir</string>
     <string name="text_open_by_other_apps">Ouvrir par d\'autres apps</string>
     <string name="text_open_main_activity">Ouvrir l\'activité principale</string>
@@ -519,23 +625,33 @@
     <string name="text_pc_server_address">Adresse du serveur du PC</string>
     <string name="text_permission_granted">Permission accordée</string>
     <string name="text_permission_granted_failed_with_root">Fail to grant permission (with root)</string>
+    <string name="text_permission_granted_failed_with_shizuku">L\'autorisation n\'a pas été accordée (avec Shizuku)</string>
     <string name="text_permission_granted_with_root">Permission accordée (avec root)</string>
+    <string name="text_permission_granted_with_shizuku">Permission accordée (avec Shizuku)</string>
     <string name="text_permission_revoked">Permission révoquée</string>
     <string name="text_permission_revoked_failed_with_root">Fail to revoked permission (with root)</string>.
+    <string name="text_permission_revoked_failed_with_shizuku">Échec de la révocation de la permission (avec Shizuku)</string>
     <string name="text_permission_revoked_with_root">Permission révoquée (avec root)</string>
+    <string name="text_permission_revoked_with_shizuku">Permission révoquée (avec Shizuku)</string>
     <string name="text_permission_test">Test de permission</string>
     <string name="text_permissions">Permissions</string>
+    <string name="text_permissions_list">Permissions</string>
+    <string name="text_pin_shortcut_not_unsupported">L\'épinglage de raccourcis dans le lanceur n\'est pas pris en charge</string>
     <string name="text_pinch_to_zoom">Pincez pour zoomer</string>
+    <string name="text_play">Jouer</string>
     <string name="text_please_choose">Veuillez choisir</string>
     <string name="text_please_choose_a_script">Choisissez un script</string>
     <string name="text_please_input_name">Nom de l\'entrée</string>
-    <string name="text_pointer_location">L\'emplacement du pointeur (avec la racine)</string>
+    <string name="text_pointer_location">L\'emplacement du pointeur</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nL\'accès à la racine est nécessaire.</string>
     <string name="text_post_notifications_permission">Notifications postales</string>
     <string name="text_pre_execute_script">Pré-exécution du script</string>
     <string name="text_preparing" tools:ignore="TypographyEllipsis">Préparation...</string>
+    <string name="text_preset_dialog_content">Contenu de la boîte de dialogue prédéfinie</string>
+    <string name="text_preset_dialog_title">Titre de la boîte de dialogue prédéfini</string>
     <string name="text_press_again_to_dismiss_dialog">Appuyez à nouveau sur la touche pour rejeter la boîte de dialogue</string>.
     <string name="text_press_again_to_exit">Appuyez à nouveau pour quitter</string>
+    <string name="text_press_back_or_vol_down_to_close_window">Pour fermer, appuyez sur \"Retour\" ou \"Volume bas\"</string>
     <string name="text_preview">Préview</string>
     <string name="text_processing">Traitement</string>
     <string name="text_project">Projet</string>
@@ -544,6 +660,7 @@
     <string name="text_project_media_access_description">Avec l\'accès aux médias du projet, l\'avertissement de sécurité pour l\'enregistrement d\'écran ne sera pas demandé.</string>
     <string name="text_prompt">Prompt</string>
     <string name="text_quit">Quit</string>
+    <string name="text_recommended">Recommandé</string>
     <string name="text_record_finished">Enregistrement terminé</string>
     <string name="text_record_prompt">Demande d\'enregistrement</string>
     <string name="text_record_stopped">Enregistrement arrêté</string>
@@ -574,6 +691,7 @@
     <string name="text_reset_to_initial_content_only_for_assets">Reset n\'est que pour les échantillons</string>
     <string name="text_restart_app">Redémarrer</string>
     <string name="text_result">Résultat</string>
+    <string name="text_revoke_autojs6_access_in_shizuku_app">Révoquer les privilèges AutoJs6 dans une application Shizuku</string>
     <string name="text_root_mode_title">Force set root check</string>
     <string name="text_run">Exécuter</string>
     <string name="text_run_on_battery_change">Sur changement de batterie</string>
@@ -621,24 +739,32 @@
     <string name="text_set_as_working_dir">Comme répertoire de travail</string>
     <string name="text_set_breakpoint">Définir un point d\'arrêt</string>
     <string name="text_settings">Réglages</string>
-    <string name="text_app_shortcut_settings_long_label">AutoJs6 Réglages</string>
-    <string name="text_app_shortcut_settings_short_label">Réglages</string>
+    <string name="text_shizuku_access">Permissions de Shizuku</string>
+    <string name="text_shizuku_access_description">Shizuku vous permet d\'obtenir des privilèges ADB et d\'accéder aux API du système</string>
+    <string name="text_shizuku_service_may_need_to_be_run_first">Il se peut que vous deviez d\'abord exécuter le service Shizuku</string>
     <string name="text_should_not_be_empty">Le texte ne peut pas être vide</string>
     <string name="text_show_layout_bounds">Afficher les bords de la disposition</string>
     <string name="text_show_layout_hierarchy">Afficher la hiérarchie de la disposition</string>
     <string name="text_show_widget_information">Afficher les informations du widget</string>
     <string name="text_size">Taille</string>
+    <string name="text_some_items_exported">%d items exported</string>
     <string name="text_source_file_path">Chemin du code source</string>
     <string name="text_stable_mode">Mode stable</string>
     <string name="text_star">Star</string>
     <string name="text_start_record">Démarrer l\'enregistrement</string>
     <string name="text_start_running">Running</string>
     <string name="text_stop">Stop</string>
+    <string name="text_supported_abis_short">ABIs</string>
+    <string name="text_supported_abis_short_32bit">ABIs (32-bit)</string>
+    <string name="text_supported_abis_short_64bit">ABIs (64-bit)</string>
+    <string name="text_supported_libraries_short">Bibliothèques</string>
+    <string name="text_switch_window">Changer de fenêtre</string>
     <string name="text_symbols_settings">Param des symboles</string>
     <string name="text_tailor_made_developer">Développeur sur mesure</string>
     <string name="text_task">Task</string>
     <string name="text_text_size">Taille du texte</string>
     <string name="text_text_size_current_value" formatted="true">Taille du texte: %d</string>
+    <string name="text_the_following_solutions_can_be_referred_to">Les solutions suivantes peuvent être utilisées</string>
     <string name="text_theme_color">Couleur du thème</string>
     <string name="text_time">Heure</string>
     <string name="text_timed_task">Tâche chronométrée</string>
@@ -646,10 +772,14 @@
     <string name="text_tools">Outils</string>
     <string name="text_tutorial">Tutorial</string>
     <string name="text_type">Type</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">L\'ABI sélectionné \"%s\" ne peut pas être utilisé pour créer une application packagée, car la version actuelle d\'AutoJs6 n\'inclut pas l\'ABI ci-dessus.</string>
+    <string name="text_unavailable">Indisponible</string>
+    <string name="text_unavailable_abi_for">L\'ABI \"%s\" n\'est pas disponible</string>
     <string name="text_under_development_content">La fonctionnalité sera prête à être utilisée dans les prochaines mises à jour</string>.
     <string name="text_under_development_title">En cours de développement</string>
     <string name="text_undo">Révoquer</string>
     <string name="text_undo_simplified">Révoq</string>
+    <string name="text_unknown">Inconnu</string>
     <string name="text_updates">Mises à jour</string>
     <string name="text_updates_checked_states_cleared">Mise à jour des états vérifiés et effacés</string>
     <string name="text_updates_snack_bar_act_later">Plus tard</string>
@@ -670,6 +800,7 @@
     <string name="text_version_code">Code de version</string>
     <string name="text_version_info">Informations de la version</string>
     <string name="text_version_name">Nom de la version</string>
+    <string name="text_view">Voir</string>
     <string name="text_view_docs">Voir les documents</string>
     <string name="text_vsc_ext_version_not_meet_requirement">La version de l\'extension VSCode ne répond pas aux exigences</string>
     <string name="text_weekly_task">Tâche hebdomadaire</string>
@@ -679,57 +810,5 @@
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="theme_color_default">Default</string>
-    <string name="text_only_latest_few_items_will_be_sent">Seuls les derniers %d éléments seront envoyés</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">Le nombre d\'entrées de journal %d dépasse la limite d\'envoi</string>
-    <string name="text_failed_to_send_log_entries">Échec de l\'envoi des entrées de journal</string>
-    <string name="text_no_log_entries_to_send">Aucune entrée de journal à envoyer</string>
-    <string name="text_no_log_entries_to_export">Aucune entrée de journal à exporter</string>
-    <string name="text_no_log_entries_to_copy">Aucune entrée de journal à copier</string>
-    <string name="text_failed_to_copy">Échec de la copie</string>
-    <string name="text_already_copied_to_clip_but_only_latest_few_items">Déjà copié dans le presse-papiers (seulement les derniers %d éléments)</string>
-    <string name="text_failed_to_export_log_entries">Échec de l\'exportation des entrées de journal</string>
-    <string name="dialog_button_dismiss">Quitter</string>
-    <string name="dialog_button_view_file">Voir le fichier</string>
-    <string name="text_exported">Exporté</string>
-    <string name="text_some_items_exported">%d items exported</string>
-    <string name="text_app_shortcut_disabled">Ce raccourci est désactivé</string>
-    <string name="text_launcher_shortcuts">Raccourcis du lanceur</string>
-    <string name="description_launcher_shortcuts">Les raccourcis permettent d\'effectuer des actions spécifiques dans AutoJs6. Les utilisateurs peuvent afficher ces raccourcis dans un lanceur pris en charge et démarrer rapidement certaines tâches ou lancer une activité, comme la lecture de la documentation de l\'application AutoJs6, le lancement de la page de configuration d\'AutoJs6, etc.</string>
-    <string name="summary_text_launcher_shortcuts">Ajouter des raccourcis au lanceur</string>
-    <string name="text_pin_shortcut_not_unsupported">L\'épinglage de raccourcis dans le lanceur n\'est pas pris en charge</string>
-    <string name="text_shizuku_access_description">Shizuku vous permet d\'obtenir des privilèges ADB et d\'accéder aux API du système</string>
-    <string name="text_shizuku_access">Permissions de Shizuku</string>
-    <string name="text_grant_autojs6_access_in_shizuku_app">Accorder des privilèges AutoJs6 dans une application Shizuku</string>
-    <string name="text_revoke_autojs6_access_in_shizuku_app">Révoquer les privilèges AutoJs6 dans une application Shizuku</string>
-    <string name="text_shizuku_service_may_need_to_be_run_first">Il se peut que vous deviez d\'abord exécuter le service Shizuku</string>
-    <string name="error_shizuku_is_not_installed">Shizuku n\'est pas installé</string>
-    <string name="error_shizuku_version_is_not_supported">La version de Shizuku n\'est pas prise en charge</string>
-    <string name="error_failed_to_revoke_shizuku_access">La révocation des droits de Shizuku a échoué</string>
-    <string name="error_failed_to_grant_shizuku_access">Échec de l\'octroi de la permission de Shizuku</string>
-    <string name="error_unable_to_use_shizuku_service">Impossible d\'utiliser le service Shizuku</string>
-    <string name="error_input_fields_check_failed">Échec de la vérification du champ de saisie</string>
-    <string name="error_at_least_one_abi_needs_to_be_selected">Au moins un ABI doit être sélectionné</string>
-    <string name="text_malfunctioning">Dysfonctionnement</string>
-    <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">Le module \"%s\" ne fonctionne pas en raison de l\'absence des fichiers de bibliothèque nécessaires</string>
-    <string name="text_unavailable">Indisponible</string>
-    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">L\'ABI sélectionné \"%s\" ne peut pas être utilisé pour créer une application packagée, car la version actuelle d\'AutoJs6 n\'inclut pas l\'ABI ci-dessus.</string>
-    <string name="text_the_following_solutions_can_be_referred_to">Les solutions suivantes peuvent être utilisées</string>
-    <string name="text_download_and_install_autojs6_including_above_abi">Téléchargez et installez la version d\'AutoJs6 qui inclut l\'ABI ci-dessus (le nom du fichier contient \"%s\")</string>
-    <string name="text_download_and_install_autojs6_including_all_abis">Télécharger et installer la version d\'AutoJs6 qui inclut tous les ABI (le nom du fichier contient \"universal\")</string>
-    <string name="text_recommended">Recommandé</string>
-    <string name="text_download_link_for_autojs6">Lien de téléchargement pour AutoJs6</string>
-    <string name="text_unavailable_abi_for">L\'ABI \"%s\" n\'est pas disponible</string>
-
-    <plurals name="text_items_total_sum">
-        <item quantity="one">Total: %d article</item>
-        <item quantity="many">Total: %d articles</item>
-        <item quantity="other">Total: %d articles</item>
-    </plurals>
-
-    <plurals name="text_already_stop_n_scripts">
-        <item quantity="one">%d script arrêté</item>
-        <item quantity="many">%d scripts arrêtés</item>
-        <item quantity="other">%d scripts arrêtés</item>
-    </plurals>
-
+    
 </resources>

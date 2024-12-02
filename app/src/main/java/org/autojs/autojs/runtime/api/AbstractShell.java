@@ -2,32 +2,70 @@ package org.autojs.autojs.runtime.api;
 
 import android.content.Context;
 import android.text.TextUtils;
-
+import android.util.Log;
 import androidx.annotation.NonNull;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-
 import org.autojs.autojs.engine.RootAutomatorEngine;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Stardust on Apr 24, 2017.
  */
 public abstract class AbstractShell {
 
+    private static final String TAG = AbstractShell.class.getSimpleName();
+
     public static class Result {
 
         private static final Gson sGson = new GsonBuilder().setPrettyPrinting().create();
 
         @SerializedName("code")
-        public int code = -1;
+        public int code;
 
         @SerializedName("result")
-        public String result = "";
+        public String result;
 
         @SerializedName("error")
-        public String error = "";
+        public String error;
+
+        public Result() {
+            this(-1);
+        }
+
+        public Result(int code) {
+            this(code, "");
+        }
+
+        public Result(int code, String result) {
+            this(code, result, "");
+        }
+
+        public Result(int code, String result, String error) {
+            this.code = code;
+            this.result = result;
+            this.error = error;
+
+            if (!error.isEmpty()) {
+                Matcher matcher = Pattern.compile("^Error type (\\d+)").matcher(error);
+                if (matcher.find()) {
+                    this.code = Integer.parseInt(matcher.group(1));
+                }
+                if (this.code == 0) this.code = 1;
+            }
+        }
+
+        public Result(int code, @NotNull Exception e) {
+            this(code, "", e.getMessage() != null ? e.getMessage() : "");
+        }
+
+        public Result(int code, ProcessShell shell) {
+            this(code, shell.getSuccessOutput().toString(), shell.getErrorOutput().toString());
+        }
 
         @NonNull
         @Override
@@ -43,8 +81,22 @@ public abstract class AbstractShell {
             return sGson.toJson(this);
         }
 
+        public void throwIfError() throws ShellException {
+            if (code != 0) {
+                throw new ShellException(this);
+            }
+        }
+
         public static Result fromJson(String json) {
             return sGson.fromJson(json, Result.class);
+        }
+
+        public static class ShellException extends Exception {
+
+            public ShellException(Result result) {
+                super("code: " + result.code + ", error: " + result.error);
+            }
+
         }
 
     }
@@ -71,8 +123,9 @@ public abstract class AbstractShell {
     public AbstractShell(Context context, boolean isExecWithRoot) {
         mContext = context;
         mIsExecWithRoot = isExecWithRoot;
-        if (context != null)
-            mTouchDevice = RootAutomatorEngine.getTouchDevice(context);
+        if (context != null) {
+            mTouchDevice = RootAutomatorEngine.getTouchDeviceId(context);
+        }
         init(isExecWithRoot ? COMMAND_SU : COMMAND_SH);
     }
 
@@ -97,7 +150,9 @@ public abstract class AbstractShell {
     }
 
     public void SendEvent(int device, int type, int code, int value) {
-        exec(TextUtils.join("", new Object[]{"sendevent /dev/input/event", device, " ", type, " ", code, " ", value}));
+        String eventCommand = TextUtils.join("", new Object[]{"sendevent /dev/input/event", device, " ", type, " ", code, " ", value});
+        Log.d(TAG, eventCommand);
+        exec(eventCommand);
     }
 
     public void SetScreenMetrics(int width, int height) {

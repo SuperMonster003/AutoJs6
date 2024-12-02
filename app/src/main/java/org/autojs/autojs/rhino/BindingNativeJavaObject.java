@@ -6,6 +6,7 @@ import org.mozilla.javascript.Scriptable;
 public class BindingNativeJavaObject extends NativeJavaObject {
 
     public BindingNativeJavaObject() {
+        /* Empty body. */
     }
 
     public BindingNativeJavaObject(Scriptable scope, Object javaObject, Class<?> staticType) {
@@ -24,7 +25,6 @@ public class BindingNativeJavaObject extends NativeJavaObject {
         } else {
             dynamicType = this.staticType;
         }
-
-
     }
+
 }

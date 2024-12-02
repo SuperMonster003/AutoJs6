@@ -4,7 +4,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.autojs.autojs.pref.Language;
+import org.autojs.autojs.core.pref.Language;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,7 +33,6 @@ public class RomUtil {
     private static final String KEY_VERSION_GIONEE = "ro.gn.sv.version";
     private static final String KEY_VERSION_LENOVO = "ro.lenovo.lvp.version";
     private static final String KEY_VERSION_FLYME = "ro.build.display.id";
-
 
     private static final String KEY_EMUI_VERSION_CODE = "ro.build.hw_emui_api_level";
 

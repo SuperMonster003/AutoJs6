@@ -18,16 +18,18 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomViewTarget
 import com.bumptech.glide.request.transition.Transition
 import com.flurry.android.FlurryAgent
+import com.hjq.toast.Toaster
 import com.tencent.bugly.Bugly
 import com.tencent.bugly.crashreport.CrashReport
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.core.accessibility.AccessibilityTool
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.event.GlobalKeyObserver
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
+import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.pluginclient.DevPluginService
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.timing.TimedTaskManager
 import org.autojs.autojs.timing.TimedTaskScheduler
 import org.autojs.autojs.tool.CrashHandler
@@ -36,6 +38,7 @@ import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
+import org.greenrobot.eventbus.EventBus
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
 
@@ -56,20 +59,21 @@ class App : MultiDexApplication() {
 
         GlobalAppContext.set(this)
         instance = WeakReference(this)
+        devPluginService = DevPluginService(this)
 
         setUpStaticsTool()
         setUpDebugEnvironment()
+        setUpLeakCanary()
 
         AutoJs.initInstance(this)
         GlobalKeyObserver.initIfNeeded()
         setupDrawableImageLoader()
         TimedTaskScheduler.init(this)
         initDynamicBroadcastReceivers()
+        Toaster.init(this)
 
         setUpDefaultNightMode()
-        AccessibilityTool(this).service.start(false)
-
-        devPluginService = DevPluginService(this)
+        WrappedShizuku.onCreate()
     }
 
     override fun attachBaseContext(base: Context) {
@@ -97,6 +101,10 @@ class App : MultiDexApplication() {
 
         crashHandler.setBuglyHandler(Thread.getDefaultUncaughtExceptionHandler())
         Thread.setDefaultUncaughtExceptionHandler(crashHandler)
+    }
+
+    private fun setUpLeakCanary() {
+        LeakCanarySetup.setup(this)
     }
 
     private fun setUpDefaultNightMode() {
@@ -217,6 +225,7 @@ class App : MultiDexApplication() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         ViewUtils.onConfigurationChanged(newConfig)
+        EventBus.getDefault().post(newConfig)
         FloatyWindowManger.getCircularMenu()?.savePosition(newConfig)
         super.onConfigurationChanged(newConfig)
     }

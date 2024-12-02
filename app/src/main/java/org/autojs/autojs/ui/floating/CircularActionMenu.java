@@ -46,27 +46,27 @@ public class CircularActionMenu extends FrameLayout {
 
         @Override
         public void onExpanding(CircularActionMenu menu) {
-
+            /* Empty body. */
         }
 
         @Override
         public void onExpanded(CircularActionMenu menu) {
-
+            /* Empty body. */
         }
 
         @Override
         public void onCollapsing(CircularActionMenu menu) {
-
+            /* Empty body. */
         }
 
         @Override
         public void onCollapsed(CircularActionMenu menu) {
-
+            /* Empty body. */
         }
 
         @Override
         public void onMeasured(CircularActionMenu menu) {
-
+            /* Empty body. */
         }
 
     }
@@ -82,7 +82,6 @@ public class CircularActionMenu extends FrameLayout {
     private int mExpandedHeight = -1;
     private int mExpandedWidth = -1;
     private final Interpolator mInterpolator = new FastOutSlowInInterpolator();
-
 
     public CircularActionMenu(@NonNull Context context) {
         super(context);
@@ -114,6 +113,8 @@ public class CircularActionMenu extends FrameLayout {
             params.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
             // FIXME by Stardust on Oct 17, 2017.
             //  ! Not working.
+            //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
+            //  ! 无效果.
             updateViewLayout(v, params);
         }
         requestLayout();
@@ -252,6 +253,8 @@ public class CircularActionMenu extends FrameLayout {
             maxX = Math.max((int) (mItemExpandedPositionOffsets[i].x + item.getMeasuredWidth()), maxX);
             // FIXME by Stardust on Sep 26, 2017.
             //  ! 这样算出来的高度略大.
+            //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+            //  ! The height calculated in this way is slightly larger.
             maxY = Math.max((int) (mItemExpandedPositionOffsets[i].y + item.getMeasuredHeight()), maxY);
             minY = Math.min((int) (mItemExpandedPositionOffsets[i].y - item.getMeasuredHeight()), minY);
         }

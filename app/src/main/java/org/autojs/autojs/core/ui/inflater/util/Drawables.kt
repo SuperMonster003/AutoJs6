@@ -19,6 +19,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ColorUtils.toInt
 import org.autojs.autojs6.R
+import java.io.File
 import java.net.URL
 import java.util.concurrent.Executors
 import java.util.regex.Pattern
@@ -48,6 +49,13 @@ open class Drawables {
         }
         try {
             return ColorDrawable(toInt(value))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        try {
+            if (File(value).exists()) {
+                return decodeImage(context, value)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }

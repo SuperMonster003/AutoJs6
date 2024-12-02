@@ -16,7 +16,7 @@ import org.mozilla.javascript.Scriptable
  */
 @ScriptClass
 @SuppressLint("ViewConstructor", "SetJavaScriptEnabled")
-class InjectableWebView(context: Context?, jsCtx: org.mozilla.javascript.Context, scriptable: Scriptable, url: String?) : WebView(context!!) {
+class InjectableWebView(context: Context, jsCtx: org.mozilla.javascript.Context, scriptable: Scriptable, url: String?) : WebView(context) {
 
     private var mInjectableWebClient: InjectableWebClient
 

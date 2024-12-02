@@ -56,4 +56,5 @@ public class ScriptWidget extends AppWidgetProvider {
         ScriptWidgets.setPathForAppWidgetId(widgetId, path);
         return true;
     }
+
 }

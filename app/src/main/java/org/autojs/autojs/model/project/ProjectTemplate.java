@@ -13,7 +13,6 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ProjectTemplate {
 
-
     private final ProjectConfig mProjectConfig;
     private final File mProjectDir;
 

@@ -3,8 +3,9 @@ package org.autojs.autojs.core.ui.attribute
 import android.view.View
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.widget.JsRadioButton
+import org.autojs.autojs.runtime.ScriptRuntime
 
-class JsRadioButtonAttributes(resourceParser: ResourceParser, view: View) : RadioButtonAttributes(resourceParser, view) {
+class JsRadioButtonAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : RadioButtonAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as JsRadioButton
 

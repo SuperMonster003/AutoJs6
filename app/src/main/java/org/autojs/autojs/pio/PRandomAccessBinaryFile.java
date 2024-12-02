@@ -10,7 +10,6 @@ import java.io.RandomAccessFile;
  */
 public class PRandomAccessBinaryFile extends RandomAccessFile {
 
-
     private RandomAccessFile mRandomAccessFile;
 
     public PRandomAccessBinaryFile(String name, String mode) throws FileNotFoundException {
@@ -24,9 +23,5 @@ public class PRandomAccessBinaryFile extends RandomAccessFile {
     public String readline() throws IOException {
         return super.readLine();
     }
-
-
-
-
 
 }

@@ -1,28 +1,11 @@
 package org.autojs.autojs.core.inputevent;
 
-import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_POSITION_X;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_POSITION_Y;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_SLOT;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_TOUCH_MAJOR;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_TRACKING_ID;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.ABS_MT_WIDTH_MAJOR;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.BTN_TOUCH;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.DOWN;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.EV_ABS;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.EV_KEY;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.EV_SYN;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.SYN_MT_REPORT;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.SYN_REPORT;
-import static org.autojs.autojs.core.inputevent.InputEventCodes.UP;
-
 import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.ViewConfiguration;
-
 import androidx.annotation.Nullable;
-
 import org.autojs.autojs.engine.RootAutomatorEngine;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.runtime.api.Shell;
@@ -31,6 +14,8 @@ import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.autojs.autojs.core.inputevent.InputEventCodes.*;
 
 /**
  * Created by Stardust on Jul 16, 2017.
@@ -205,10 +190,10 @@ public class RootAutomator implements Shell.Callback {
         mSlotIdMap.put(id, 0);
         sendEvent(EV_ABS, ABS_MT_TRACKING_ID, mTracingId.getAndIncrement());
         sendEvent(EV_KEY, BTN_TOUCH, DOWN);
-        //sendEvent(EV_KEY, BTN_TOOL_FINGER, 0x00000001);
+        // sendEvent(EV_KEY, BTN_TOOL_FINGER, 0x00000001);
         sendEvent(EV_ABS, ABS_MT_POSITION_X, scaleX(x));
         sendEvent(EV_ABS, ABS_MT_POSITION_Y, scaleY(y));
-        //sendEvent(EV_ABS, ABS_MT_PRESSURE, 200);
+        // sendEvent(EV_ABS, ABS_MT_PRESSURE, 200);
         sendEvent(EV_ABS, ABS_MT_TOUCH_MAJOR, 5);
         sendEvent(EV_ABS, ABS_MT_WIDTH_MAJOR, 5);
         sendEvent(EV_SYN, SYN_REPORT, 0);
@@ -231,7 +216,7 @@ public class RootAutomator implements Shell.Callback {
         sendEvent(EV_ABS, ABS_MT_TRACKING_ID, 0xffffffff);
         if (mSlotIdMap.size() == 0) {
             sendEvent(EV_KEY, BTN_TOUCH, UP);
-            //sendEvent(EV_KEY, BTN_TOOL_FINGER, 0x00000000);
+            // sendEvent(EV_KEY, BTN_TOOL_FINGER, 0x00000000);
         }
         sendEvent(EV_SYN, SYN_REPORT, 0x00000000);
     }
@@ -277,26 +262,27 @@ public class RootAutomator implements Shell.Callback {
     public void exit() throws IOException {
         int interval = 20;
         int maxTryTimes = 3;
-        
+
         sleep(interval);
         sendEventInternal(0xffff, 0xffff, 0xefefefef);
-        
+
         while (maxTryTimes-- > 0) {
             sleep(interval);
             mShell.exec("exit");
         }
-        
+
         sleep(interval);
         mShell.exit();
     }
 
     @Override
     public void onOutput(String str) {
-
+        /* Empty body. */
     }
 
     @Override
     public void onNewLine(String line) {
+        /* Empty body. */
     }
 
     @Override
@@ -305,8 +291,10 @@ public class RootAutomator implements Shell.Callback {
         String deviceNameOrPath = RootAutomatorEngine.getDeviceNameOrPath(mContext, InputDevices.getTouchDeviceName());
         Log.d(LOG_TAG, "deviceNameOrPath: " + deviceNameOrPath);
         mShell.exec("chmod 777 " + path);
-        String command = String.format(Locale.getDefault(), "%s -d %s -sw %d -sh %d", path, deviceNameOrPath,
-                ScreenMetrics.getDeviceScreenWidth(), ScreenMetrics.getDeviceScreenHeight());
+        String command = String.format(Locale.getDefault(),
+                "%s -d %s -sw %d -sh %d", path, deviceNameOrPath,
+                ScreenMetrics.getDeviceScreenWidth(),
+                ScreenMetrics.getDeviceScreenHeight());
         mShell.exec(command);
         synchronized (mReadyLock) {
             Log.d(LOG_TAG, "notify ready");
@@ -317,7 +305,7 @@ public class RootAutomator implements Shell.Callback {
 
     @Override
     public void onInterrupted(InterruptedException e) {
-
+        /* Empty body. */
     }
 }
 

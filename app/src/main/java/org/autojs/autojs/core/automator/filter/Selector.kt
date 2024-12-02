@@ -14,6 +14,6 @@ open class Selector : Filter {
 
     fun append(uiSelector: UiSelector) = filters.addAll(uiSelector.selector.filters)
 
-    override fun toString() = filters.joinToString(".").ifEmpty { Selector::class.java.toString() }
+    override fun toString() = filters.joinToString(".").ifEmpty { "selector()" }
 
 }

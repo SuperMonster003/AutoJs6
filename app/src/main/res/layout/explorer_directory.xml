@@ -69,6 +69,5 @@
                 android:src="@drawable/ic_more_vert_black_24dp"
                 app:tint="#A9AAAB" />
 
-
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.edit.theme;
 import android.content.Context;
 
 import org.autojs.autojs.pio.UncheckedIOException;
-import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.util.ViewUtils;
 
 import java.io.File;
@@ -21,7 +21,6 @@ import io.reactivex.subjects.PublishSubject;
  * Created by Stardust on Feb 22, 2018.
  */
 public class Themes {
-
 
     private static final String ASSETS_THEMES_PATH = "editor/theme";
     private static final String DEFAULT_THEME = "Quiet Light";

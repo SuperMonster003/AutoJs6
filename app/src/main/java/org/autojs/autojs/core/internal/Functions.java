@@ -26,7 +26,7 @@ public class Functions {
     }
 
     public interface Func {
-
+        /* Empty body. */
     }
 
     public interface Func0<R> extends Func {
@@ -64,6 +64,5 @@ public class Functions {
     public interface VoidFunc4<T1, T2, T3, T4> extends Func {
         void call(T1 t1, T2 t2, T3 t3, T4 t4);
     }
-
 
 }

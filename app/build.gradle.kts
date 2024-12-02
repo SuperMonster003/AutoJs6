@@ -14,7 +14,8 @@ import java.util.TimeZone
 import java.util.zip.CRC32
 import kotlin.text.RegexOption.IGNORE_CASE
 
-val applicationId = "org.autojs.autojs6"
+val globalApplicationId = "org.autojs.autojs6"
+
 val sign = Sign("$rootDir/sign.properties")
 val versions = Versions("$rootDir/version.properties")
 
@@ -33,13 +34,21 @@ plugins {
 }
 
 dependencies /* Unclassified */ {
+    // Compose
+    // implementation("androidx.compose.ui:ui-android:1.6.7")
+
+    // Kotlin reflect
+    implementation(kotlin("reflect"))
+
     // LeakCanary
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.12")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
 
     // Android supports
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.multidex:multidex:2.0.1")
-    implementation("com.google.android.material:material:1.10.0")
+
+    // Material Components
+    implementation("com.google.android.material:material:1.12.0")
 
     // SwipeRefreshLayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
@@ -53,13 +62,13 @@ dependencies /* Unclassified */ {
     // Licenses Dialog
     implementation("de.psdev.licensesdialog:licensesdialog:2.2.0")
 
-    // Commons Lang
-    implementation("org.apache.commons:commons-lang3:3.13.0")
+    // Apache Commons
+    implementation("org.apache.commons:commons-lang3:3.16.0")
 
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.retrofit2:adapter-rxjava2:2.9.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.retrofit2:adapter-rxjava2:2.11.0")
     implementation("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
 
     // Glide
@@ -67,7 +76,7 @@ dependencies /* Unclassified */ {
     ksp("com.github.bumptech.glide:ksp:4.16.0")
 
     // Joda Time
-    implementation("joda-time:joda-time:2.12.5")
+    implementation("joda-time:joda-time:2.12.7")
 
     // Flurry
     implementation("com.flurry.android:analytics:14.4.0")
@@ -76,19 +85,38 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:com.tencent.bugly.crashreport-4.0.4"))
 
     // OkHttp
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
+    // implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.12")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Webkit
-    implementation("androidx.webkit:webkit:1.8.0")
+    implementation("androidx.webkit:webkit:1.12.1")
 
     // Gson
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.11.0")
 
     // Zip4j
     implementation("net.lingala.zip4j:zip4j:2.11.5")
 
     // Log4j
     implementation("de.mindpipe.android:android-logging-log4j:1.0.3")
+    // FIXME by SuperMonster003 on Aug 14, 2024.
+    //  ! Vulnerable dependency (5 vulnerabilities) for log4j (version 1):
+    //  ! - CVE-2022-23307, Score: 8.8
+    //  ! - CVE-2022-23305, Score: 9.8
+    //  ! - CVE-2022-23302, Score: 8.8
+    //  ! - CVE-2021-4104, Score: 7.5
+    //  ! - CVE-2019-17571, Score: 9.8
+    //  ! However, log4j version 2 which requires Android API Level not lower than 26
+    //  ! is not compatible with current project with min API Level 24.
+    //  ! zh-CN:
+    //  ! 依赖库 log4j (第一版本) 是易受攻击的 (含 5 项漏洞):
+    //  ! - CVE-2022-23307, 评分: 8.8
+    //  ! - CVE-2022-23305, 评分: 9.8
+    //  ! - CVE-2022-23302, 评分: 8.8
+    //  ! - CVE-2021-4104, 评分: 7.5
+    //  ! - CVE-2019-17571, 评分: 9.8
+    //  ! 但 log4j 第二版本要求安卓 API 级别不低于 26,
+    //  ! 与最低 API 级别为 24 的当前项目无法兼容.
     implementation("log4j:log4j:1.2.17")
 
     // Preference
@@ -124,11 +152,23 @@ dependencies /* Unclassified */ {
     // PaddleOCR
     implementation(project(":libs:paddleocr"))
 
+    // RapidOCR
+    implementation(project(":libs:rapidocr"))
+
     // Android Job
     implementation(project(":libs:android-job-simplified-1.4.3"))
 
+    // APK Parser (https://github.com/jaredrummler/APKParser)
+    implementation(project(":libs:apk-parser-1.0.2"))
+
+    // Prism4j
+    implementation(files("$rootDir/libs/prism4j-2.0.0.jar"))
+    implementation(files("$rootDir/libs/prism4j-bundler-2.0.0.jar"))
+    implementation(project(":libs:markwon-core-4.6.2"))
+    implementation(project(":libs:markwon-syntax-highlight-4.6.2"))
+
     // Rhino
-    implementation(files("$rootDir/libs/org.mozilla.rhino-1.7.15-snapshot.jar"))
+    implementation(files("$rootDir/libs/org.mozilla.rhino-1.7.16-snapshot.jar"))
 
     // Tiny Sign
     implementation(files("$rootDir/libs/tiny-sign-0.9.jar"))
@@ -144,25 +184,39 @@ dependencies /* Unclassified */ {
     implementation(files("$rootDir/libs/javamail-android/mail.jar"))
 
     // Shizuku
-    implementation(project(":libs:dev.rikka.shizuku-shared-13.1.5"))
-    implementation(project(":libs:dev.rikka.shizuku-aidl-13.1.5"))
-    implementation(project(":libs:dev.rikka.shizuku-api-13.1.5"))
-    implementation(project(":libs:dev.rikka.shizuku-provider-13.1.5"))
+    implementation("dev.rikka.shizuku:api:13.1.5")
+    implementation("dev.rikka.shizuku:provider:13.1.5")
 
     // ARSCLib
-    implementation("io.github.reandroid:ARSCLib:1.2.4")
+    implementation("io.github.reandroid:ARSCLib:1.3.1")
+
+    // Toaster
+    implementation("com.github.getActivity:Toaster:12.6")
+    implementation("com.github.getActivity:EasyWindow:10.3")
+}
+
+dependencies /* MIME */ {
+    // @Hint by SuperMonster003 on Oct 5, 2023.
+    //  ! Only for Android API 26 (8.0) [O] and above.
+    //  ! zh-CN: 仅适用于安卓 API 级别 26 (8.0) [O] 及以上.
+    // Apache Tika Core
+    // implementation("org.apache.tika:tika-core:2.9.2")
+
+    // MIME Util
+    // implementation("eu.medsea.mimeutil:mime-util:2.1.3")
+    implementation(files("$rootDir/libs/mime-util-2.1.3.jar"))
 }
 
 dependencies /* Test */ {
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter:5.10.3")
 }
 
 dependencies /* Annotations */ {
     // Android Annotations
     implementation("org.androidannotations:androidannotations-api:4.8.0")
-    implementation("androidx.annotation:annotation:1.7.0")
+    implementation("androidx.annotation:annotation:1.9.1")
     ksp("org.androidannotations:androidannotations:4.8.0")
 
     // JCIP Annotations
@@ -173,22 +227,13 @@ dependencies /* Annotations */ {
 }
 
 dependencies /* AppCompat */ {
-    // @Obsoleted by SuperMonster003 on Oct 5, 2023.
-    //  ! Comment with related code will be removed since Jan 5, 2024.
-    //
-    // @Hint by SuperMonster003 on Oct 5, 2023.
-    //  ! It looks like that bugs below in version 1.5.x has gone away since 1.6.x.
-    // implementation("androidx.appcompat:appcompat") {
-    //     version {
-    //         strictly("1.4.2")
-    //         because("Version 1.5.0 duplicates some classes")
-    //     }
-    // }
-    //
     // @Hint by SuperMonster003 on Oct 5, 2023.
     //  ! To check the releases for Appcompat library,
-    //  ! visit https://developer.android.com/jetpack/androidx/releases/appcompat
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    //  ! visit https://developer.android.com/jetpack/androidx/releases/appcompat.
+    //  ! zh-CN:
+    //  ! 查看 Appcompat 库的发行版本,
+    //  ! 可访问 https://developer.android.com/jetpack/androidx/releases/appcompat.
+    implementation("androidx.appcompat:appcompat:1.7.0")
 
     // AppCompat for legacy views (such as JsTextViewLegacy)
     implementation(project(":libs:androidx.appcompat-1.0.2")) {
@@ -199,16 +244,17 @@ dependencies /* AppCompat */ {
 dependencies /* Material Dialogs */ {
     // Material Dialogs
     // TODO by SuperMonster003 on Feb 5, 2022.
-    //  ! Upgrade to 3.3.0 (more difficult than expected)
+    //  ! Upgrade to 3.3.0 (more difficult than expected).
+    //  ! zh-CN: 升级至 3.3.0 (实际难度超出预期较多).
     val configuration: (ExternalModuleDependency).() -> Unit = {
         version {
             prefer("0.9.6.0")
             because("Not ready to update to version 3.3.0 yet")
         }
     }
-    configuration.let {
-        implementation("com.afollestad.material-dialogs:core", it)
-        implementation("com.afollestad.material-dialogs:commons", it)
+    configuration.let { cfg ->
+        implementation("com.afollestad.material-dialogs:core", cfg)
+        implementation("com.afollestad.material-dialogs:commons", cfg)
     }
 }
 
@@ -248,22 +294,22 @@ dependencies /* GitHub API */ {
     implementation("com.fasterxml.jackson.core:jackson-databind") {
         because("Compatibility for Android API Level < 26 (Android 8.0) [O]")
         version {
-            strictly("2.13.3")
+            strictly("2.13.4.2")
             because("Exception on 2.14.x: 'No virtual method getParameterCount()I in class Ljava/lang/reflect/Method'")
         }
     }
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3") {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4") {
         because("Compatibility of java.time.* for Android API Level < 26 (Android 8.0) [O]")
     }
 }
 
 dependencies /* MLKit */ {
     // OCR
-    implementation("com.google.mlkit:text-recognition-chinese:16.0.0")
+    implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
 
     // Barcode
-    implementation("com.google.mlkit:barcode-scanning:17.2.0")
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
 }
 
 dependencies /* OpenCC */ {
@@ -274,19 +320,19 @@ dependencies /* OpenCC */ {
 dependencies /* Auto.js Extensions */ {
     // Settings Compat
     // @Integrated by SuperMonster003 on Mar 30, 2023.
-    // implementation("com.github.hyb1996:settingscompat:1.1.5")
+    //  # implementation("com.github.hyb1996:settingscompat:1.1.5")
 
     // Enhanced Floaty
     // @Integrated by SuperMonster003 on Mar 30, 2023.
-    // implementation("com.github.hyb1996:EnhancedFloaty:0.31")
+    //  # implementation("com.github.hyb1996:EnhancedFloaty:0.31")
 
     // MultiLevelListView
     // @Integrated by SuperMonster003 on Mar 30, 2023.
-    // implementation("com.github.hyb1996:android-multi-level-listview:1.1")
+    //  # implementation("com.github.hyb1996:android-multi-level-listview:1.1")
 
     // Auto.js APK Builder
     // @Integrated by SuperMonster003 on Mar 30, 2023.
-    // implementation(project(":libs:Auto.js-ApkBuilder-1.0.3"))
+    //  # implementation(project(":libs:Auto.js-ApkBuilder-1.0.3"))
 
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
     // @Legacy com.jrummyapps:colorpicker:2.1.7
@@ -300,13 +346,24 @@ dependencies /* Archived */ {
     // @Comment by SuperMonster003 on May 19, 2022.
     //  ! It is no longer necessary to declare a dependency on the stdlib library in any Kotlin Gradle project.
     //  ! The dependency is added by default.
-    //  ! See https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library
+    //  ! See https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
+    //  ! zh-CN:
+    //  ! 已无需在 Kotlin Gradle 项目中显式声明标准库 (stdlib).
+    //  ! 相关依赖已默认被添加.
+    //  ! 参阅 https://kotlinlang.org/docs/gradle.html#dependency-on-the-standard-library.
     // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.21")
 
     // Google Guava
     // @Comment by SuperMonster003 on Jun 1, 2022.
     //  ! Not necessary for current project but worth keeping the trace.
+    //  ! zh-CN: 于当前项目已不再需要, 但依然值得留存其踪迹 (以备不时之需).
     // implementation("com.google.guava:guava:31.1-jre")
+
+    // Javax WS RS API (Java API for RESTful Web Services)
+    // @Comment by SuperMonster003 on Apr 9, 2024.
+    //  ! It was ever imported and used for MediaType constants.
+    //  ! zh-CN: 曾用于 MediaType 常量的导入及使用.
+    // implementation("javax.ws.rs:javax.ws.rs-api:2.1.1")
 }
 
 dependencies /* Reserved for auto append by IDE */ {
@@ -315,7 +372,7 @@ dependencies /* Reserved for auto append by IDE */ {
 
 android {
 
-    namespace = applicationId
+    namespace = globalApplicationId
     compileSdk = versions.sdkVersionCompile
 
     defaultConfig {
@@ -370,7 +427,7 @@ android {
                 )
             )
             packagingOptions.apply {
-                // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) on Nov 16, 2023.
+                // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
                 //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L91
                 jniLibs.excludes += "*"
                 resources.excludes.addAll(
@@ -383,7 +440,7 @@ android {
                     )
                 )
             }
-            // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) on Nov 16, 2023.
+            // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
             //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L93
             // noinspection ChromeOsAbiSupport
             ndk.abiFilters += ""
@@ -397,7 +454,7 @@ android {
                             copy {
                                 val src = "build/outputs/apk/$flavorNameInrt/$buildTypeRelease"
 
-                                // @Reference to LZX284 (https://github.com/LZX284) on Nov 16, 2022.
+                                // @Reference to LZX284 (https://github.com/LZX284) by SuperMonster003 on Nov 16, 2023.
                                 val dst = "src/main/assets-$flavorNameApp"
 
                                 val ext = Utils.FILE_EXTENSION_APK
@@ -438,6 +495,9 @@ android {
                 // @Hint by SuperMonster003 on Oct 16, 2023.
                 //  ! Runtime assets will be copied from flavor "app"
                 //  ! while building an apk on org.autojs.autojs.ui.project.BuildActivity.
+                //  ! zh-CN:
+                //  ! 类 org.autojs.autojs.ui.project.BuildActivity 构建 APK 时,
+                //  ! 运行时资产文件 (runtime assets) 将由名为 "app" 的 Gradle flavor 作为源地址进行复制.
                 ignoreAssetsPatterns.addAll(emptyList())
             }
         }
@@ -446,15 +506,25 @@ android {
 
     sourceSets {
 
-        // @Hint by LZX284 on Nov 15, 2023.
+        // @Hint by LZX284 (https://github.com/LZX284) on Nov 15, 2023.
         //  ! The assets file is divided into three directories according to different flavors.
         //  ! But the files are not actually moved to avoid conflicts with the latest modifications.
+        //  ! zh-CN (translated by SuperMonster003 on Jul 26, 2024):
+        //  ! 资产文件根据不同的 Gradle flavor 被隔离为三个不同的目录.
+        //  ! 不过真实文件并没有进行移动, 以避免与最新的项目修改发生冲突.
         //  !
         // @Hint by SuperMonster003 on Nov 16, 2023.
         //  ! The assets division idea was accepted, and it wouldn't hurt to try. :)
+        //  ! zh-CN: 资产隔离的想法可以被接受, 毕竟试一下也无妨. [笑脸符号]
 
         getByName("main") {
             assets.srcDirs("src/main/assets")
+        }
+        getByName("release") {
+            java.srcDirs("src/release/java")
+        }
+        getByName("debug") {
+            java.srcDirs("src/debug/java")
         }
         getByName(flavorNameApp) {
             assets.srcDirs("src/main/assets-$flavorNameApp")
@@ -471,8 +541,12 @@ android {
         targetCompatibility = versions.javaVersion
     }
 
-    // @Legacy packagingOptions { ... }
-    packaging {
+    // @Hint by SuperMonster003 on Sep 25, 2024.
+    //  ! To maintain compatibility with lower versions of Gradle (such as 7.4.2).
+    //  ! zh-CN: 为了兼容低版本 Gradle (如 7.4.2).
+    //  # packaging { ... }
+    @Suppress("DEPRECATION")
+    packagingOptions {
         arrayOf(
             "META-INF/DEPENDENCIES",
             "META-INF/LICENSE",
@@ -524,13 +598,13 @@ android {
         val niceSigningConfig = takeIf { sign.isValid }?.let {
             signingConfigs.getByName(buildTypeRelease)
         }
-        getByName(buildTypeRelease) {
-            isMinifyEnabled = false
+        debug {
+            isMinifyEnabled = getByName(buildTypeRelease).isMinifyEnabled
             proguardFiles(*proguardFiles)
             niceSigningConfig?.let { signingConfig = it }
         }
-        getByName(buildTypeDebug) {
-            isMinifyEnabled = getByName(buildTypeRelease).isMinifyEnabled
+        release {
+            isMinifyEnabled = false
             proguardFiles(*proguardFiles)
             niceSigningConfig?.let { signingConfig = it }
         }
@@ -541,7 +615,14 @@ android {
         viewBinding = true
         // @Hint by SuperMonster003 on Aug 14, 2023.
         //  ! Substitution of "android.defaults.buildfeatures.buildconfig=true"
+        //  ! zh-CN: "android.defaults.buildfeatures.buildconfig=true" 的替代方案
         buildConfig = true
+        // @Archived by SuperMonster003 on Sep 23, 2024.
+        //  ! Jetpack Compose
+        //  # compose = true
+        //  # composeOptions {
+        //  #     kotlinCompilerExtensionVersion = "1.5.12"
+        //  # }
     }
 
     defaultConfig {
@@ -551,7 +632,7 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 mapOf(
-                    "resourcePackageName" to (this@defaultConfig.applicationId ?: this@Build_gradle.applicationId),
+                    "resourcePackageName" to (this@defaultConfig.applicationId ?: globalApplicationId),
                     "androidManifestFile" to ("$projectDir/src/main/AndroidManifest.xml")
                 ).let { arguments(it) }
             }
@@ -615,13 +696,14 @@ tasks {
 
         // @Hint by SuperMonster003 on May 18, 2022.
         //  ! Comment or remove this option if you are tired of plenty of warnings. :)
+        //  ! zh-CN: 注释或移除此选项可避免过多警告消息造成的困扰. [笑脸符号]
         // options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
     }
 
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = versions.javaVersion.toString()
-        }
+        // @Archived by SuperMonster003 on Aug 14, 2024.
+        //  # kotlinOptions { jvmTarget = versions.javaVersion.toString() }
+        compilerOptions { jvmTarget.set(JvmTarget.valueOf("JVM_${versions.javaVersion}")) }
     }
 
     register<Copy>("appendDigestToReleasedFiles") {
@@ -670,7 +752,7 @@ class Versions(filePath: String) {
     private val properties = Properties()
     private val file = File(filePath).apply {
         if (!canRead()) {
-            throw FileNotFoundException("Can't read file '$filePath'")
+            throw FileNotFoundException("Cannot read file '$filePath'")
         }
         properties.load(FileInputStream(this))
     }
@@ -695,27 +777,8 @@ class Versions(filePath: String) {
                 )
             }
         }
-    private val javaVersionMinSuggested: Int = properties["JAVA_VERSION_MIN_SUGGESTED"]
-        .let { it as String }.toInt()
-        .also {
-            if (currentVersionInt < it) {
-                logger.error(
-                    "It is recommended to upgrade current Gradle JDK version ${JavaVersion.current()} " +
-                            "to $it or higher (but lower than $javaVersionMinRadical)."
-                )
-            }
-        }
-    private val javaVersionMinRadical: Int = properties["JAVA_VERSION_MIN_RADICAL"]
-        .let { it as String }.toInt()
-        .also {
-            if (it in currentVersionInt downTo 1) {
-                logger.error(
-                    "It is recommended to downgrade current Gradle JDK version $currentVersionInt " +
-                            "to ${it - 1}${if (it - 1 > javaVersionMinSuggested) " or lower (but not lower than $javaVersionMinSuggested)" else ""}, " +
-                            "as Gradle may be not compatible with JDK $it${if (currentVersionInt > it) " (and above)" else ""} for now."
-                )
-            }
-        }
+    private val javaVersionMinSuggested: Int = properties["JAVA_VERSION_MIN_SUGGESTED"].let { it as String }.toInt()
+    private val javaVersionMinRadical: Int = properties["JAVA_VERSION_MIN_RADICAL"].let { it as String }.toInt()
     private val javaVersionRaw = properties["JAVA_VERSION"] as String
     private var javaVersionInfoSuffix = ""
     private val javaVersionCeilMap = mapOf(
@@ -743,9 +806,9 @@ class Versions(filePath: String) {
         }
 
         val platformVersion = gradle.extra["platformVersion"] as String
-        val platformType = gradle.extra["platformType"] as String
+        val platformAbbr = gradle.extra["platformAbbr"] as String
 
-        javaVersionCeilMap[platformType]?.get(platformVersion)?.let { ceil: Int ->
+        javaVersionCeilMap[platformAbbr]?.get(platformVersion)?.let { ceil: Int ->
             if (niceVersionInt > ceil) {
                 niceVersionInt = ceil
                 javaVersionInfoSuffix += " [coerced]"
@@ -766,7 +829,7 @@ class Versions(filePath: String) {
     private val isBuildGapEnough
         get() = properties["BUILD_TIME"]?.let {
             Date().time - (it as String).toLong() > minBuildTimeGap
-        } ?: false
+        } == true
 
     private fun appendToTask(project: Project, flavorName: String, buildType: String) {
         project.tasks.getByName(Utils.getAssembleTaskName(flavorName, buildType)).doLast {
@@ -783,6 +846,23 @@ class Versions(filePath: String) {
         }
         properties["BUILD_TIME"] = "${Date().time}"
         properties.store(file.writer(), null)
+    }
+
+    init {
+        if (currentVersionInt < javaVersionMinSuggested) {
+            logger.error(
+                "It is recommended to upgrade current Gradle JDK version ${JavaVersion.current()} to $javaVersionMinSuggested or higher${
+                    if (javaVersionMinRadical > 0) " (but lower than $javaVersionMinRadical)" else ""
+                }."
+            )
+        }
+        if (javaVersionMinRadical in 1..currentVersionInt) {
+            logger.error(
+                "It is recommended to downgrade current Gradle JDK version $currentVersionInt " +
+                        "to ${javaVersionMinRadical - 1}${if (javaVersionMinRadical - 1 > javaVersionMinSuggested) " or lower (but not lower than $javaVersionMinSuggested)" else ""}, " +
+                        "as Gradle may be not compatible with JDK $javaVersionMinRadical${if (currentVersionInt > javaVersionMinRadical) " (and above)" else ""} for now."
+            )
+        }
     }
 
     fun showInfo() {

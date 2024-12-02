@@ -5,8 +5,9 @@ import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsSwitch
+import org.autojs.autojs.runtime.ScriptRuntime
 
-class JsSwitchInflater(resourceParser: ResourceParser) : SwitchCompatInflater<JsSwitch>(resourceParser) {
+class JsSwitchInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : SwitchCompatInflater<JsSwitch>(scriptRuntime, resourceParser) {
 
     override fun getCreator(): ViewCreator<in JsSwitch> = object : ViewCreator<JsSwitch> {
         override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsSwitch {

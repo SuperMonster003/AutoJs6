@@ -1,7 +1,5 @@
 package org.autojs.autojs.engine;
 
-import android.content.Context;
-
 import org.autojs.autojs.runtime.api.Console;
 import org.autojs.autojs.tool.UiHandler;
 
@@ -10,32 +8,31 @@ import org.autojs.autojs.tool.UiHandler;
  */
 public class ScriptEngineServiceBuilder {
 
-    ScriptEngineManager mScriptEngineManager;
-    Console mGlobalConsole;
-    UiHandler mUiHandler;
+    ScriptEngineManager scriptEngineManager;
+    Console globalConsole;
+    UiHandler uiHandler;
 
     public ScriptEngineServiceBuilder() {
-
+        /* Empty body. */
     }
 
     public ScriptEngineServiceBuilder uiHandler(UiHandler uiHandler) {
-        mUiHandler = uiHandler;
+        this.uiHandler = uiHandler;
         return this;
     }
 
     public ScriptEngineServiceBuilder engineManger(ScriptEngineManager manager) {
-        mScriptEngineManager = manager;
+        scriptEngineManager = manager;
         return this;
     }
 
     public ScriptEngineServiceBuilder globalConsole(Console console) {
-        mGlobalConsole = console;
+        globalConsole = console;
         return this;
     }
 
     public ScriptEngineService build() {
         return new ScriptEngineService(this);
     }
-
 
 }

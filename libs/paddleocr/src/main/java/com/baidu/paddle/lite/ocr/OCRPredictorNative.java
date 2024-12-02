@@ -49,7 +49,6 @@ public class OCRPredictorNative {
         }
     }
 
-
     public ArrayList<OcrResultModel> runImage(Bitmap originalImage, int max_size_len, int run_det, int run_cls, int run_rec) {
         lock.lock();
         try {

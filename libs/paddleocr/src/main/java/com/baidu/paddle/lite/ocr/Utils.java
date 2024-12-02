@@ -101,7 +101,6 @@ public class Utils {
         }
     }
 
-
     public static float[] parseFloatsFromString(String string, String delimiter) {
         String[] pieces = string.trim().toLowerCase().split(delimiter);
         float[] floats = new float[pieces.length];

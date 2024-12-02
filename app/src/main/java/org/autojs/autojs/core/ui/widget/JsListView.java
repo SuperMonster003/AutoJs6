@@ -4,18 +4,17 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
-
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.core.ui.ViewExtras;
 import org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater;
 import org.autojs.autojs.core.ui.nativeview.NativeView;
 import org.autojs.autojs.core.ui.nativeview.ViewPrototype;
-import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
+import org.autojs.autojs.runtime.ScriptRuntime;
+import org.autojs.autojs.util.ViewUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -24,26 +23,12 @@ import org.w3c.dom.NodeList;
  */
 public class JsListView extends RecyclerView {
 
-    public interface DataSourceAdapter {
-
-        int getItemCount(Object dataSource);
-
-        Object getItem(Object dataSource, int i);
-
-        void setDataSource(Object dataSource);
-    }
-
-    public interface OnItemTouchListener {
-        void onItemClick(JsListView listView, View itemView, Object item, int pos);
-
-        boolean onItemLongClick(JsListView listView, View itemView, Object item, int pos);
-    }
-
     private Node mItemTemplate;
     private DynamicLayoutInflater mDynamicLayoutInflater;
     private Object mDataSource;
     private DataSourceAdapter mDataSourceAdapter;
     private OnItemTouchListener mOnItemTouchListener;
+    private ScriptRuntime mScriptRuntime;
 
     public JsListView(Context context) {
         super(context);
@@ -65,8 +50,8 @@ public class JsListView extends RecyclerView {
         setLayoutManager(new WrapContentLinearLayoutManager(getContext()));
     }
 
-    protected ScriptRuntime getScriptRuntime() {
-        return AutoJs.getInstance().getRuntime();
+    public void initWithScriptRuntime(ScriptRuntime scriptRuntime) {
+        mScriptRuntime = scriptRuntime;
     }
 
     public void setOnItemTouchListener(OnItemTouchListener onItemTouchListener) {
@@ -93,7 +78,6 @@ public class JsListView extends RecyclerView {
         mDynamicLayoutInflater = inflater;
         mItemTemplate = itemTemplate;
     }
-
 
     public static class ItemHolder {
         private final ViewHolder mViewHolder;
@@ -147,7 +131,9 @@ public class JsListView extends RecyclerView {
                 mDynamicLayoutInflater.setInflateFlags(DynamicLayoutInflater.FLAG_IGNORES_DYNAMIC_ATTRS);
                 return new ViewHolder(mDynamicLayoutInflater.inflate(mDynamicLayoutInflater.newInflateContext(), mItemTemplate, parent, false));
             } catch (Exception e) {
-                getScriptRuntime().exit(e);
+                ViewUtils.showToast(getContext(), e.getMessage());
+                AutoJs.getInstance().getGlobalConsole().printAllStackTrace(e);
+                if (mScriptRuntime != null) mScriptRuntime.exit(e);
                 return new ViewHolder(new View(parent.getContext()));
             } finally {
                 mDynamicLayoutInflater.setInflateFlags(DynamicLayoutInflater.FLAG_DEFAULT);
@@ -156,7 +142,6 @@ public class JsListView extends RecyclerView {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            ScriptRuntime mScriptRuntime = getScriptRuntime();
             try {
                 Object oldCtx = mScriptRuntime.ui.getBindingContext();
                 Object item = mDataSourceAdapter.getItem(mDataSource, position);
@@ -166,7 +151,9 @@ public class JsListView extends RecyclerView {
                 applyDynamicAttrs(mItemTemplate, holder.itemView, JsListView.this);
                 mScriptRuntime.ui.setBindingContext(oldCtx);
             } catch (Exception e) {
-                mScriptRuntime.exit(e);
+                ViewUtils.showToast(getContext(), e.getMessage());
+                AutoJs.getInstance().getGlobalConsole().printAllStackTrace(e);
+                if (mScriptRuntime != null) mScriptRuntime.exit(e);
             } finally {
                 mDynamicLayoutInflater.setInflateFlags(DynamicLayoutInflater.FLAG_DEFAULT);
             }
@@ -192,6 +179,23 @@ public class JsListView extends RecyclerView {
                     : mDataSourceAdapter == null ? 0
                     : mDataSourceAdapter.getItemCount(mDataSource);
         }
+    }
+
+    public interface DataSourceAdapter {
+
+        int getItemCount(Object dataSource);
+
+        Object getItem(Object dataSource, int i);
+
+        void setDataSource(Object dataSource);
+    }
+
+    public interface OnItemTouchListener {
+
+        void onItemClick(JsListView listView, View itemView, Object item, int pos);
+
+        boolean onItemLongClick(JsListView listView, View itemView, Object item, int pos);
+
     }
 
 }

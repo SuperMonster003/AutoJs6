@@ -8,5 +8,5 @@ console.error(`Text from \`console.error\``);
 try {
     console.assert(false, `Text from \`console.assert\``);
 } catch (e) {
-    // Ignored.
+    /* Ignored. */
 }

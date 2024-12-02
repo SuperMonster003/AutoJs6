@@ -18,7 +18,7 @@ events.onKeyUp("back", function(event){
     clearTimeout(timeoutId);
 });
 
-loop();
+// loop();
 
 function backBackBackBack(){
     while(curPackage === currentPackage()){

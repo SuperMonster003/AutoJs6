@@ -8,8 +8,7 @@ import androidx.annotation.NonNull;
 
 import com.stericson.RootShell.RootShell;
 
-import org.autojs.autojs.pref.Pref;
-import org.autojs.autojs.runtime.api.ProcessShell;
+import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs6.R;
 
 import java.text.MessageFormat;
@@ -21,16 +20,6 @@ import java.text.MessageFormat;
 public class RootUtils {
 
     private static String runtimeOverriddenRootMode = RootMode.AUTO_DETECT.key;
-
-    public enum PointerLocation {
-        ENABLED(1), DISABLED(0);
-
-        public final int value;
-
-        PointerLocation(int value) {
-            this.value = value;
-        }
-    }
 
     public enum RootMode {
         FORCE_ROOT(key(R.string.key_root_mode_force_root), getStringByLocal(R.string.entry_root_mode_force_root, "en")),
@@ -56,7 +45,7 @@ public class RootUtils {
         @NonNull
         @Override
         public String toString() {
-            return MessageFormat.format("RootMode'{'value={0}, description=''{1}'''}'", key, description);
+            return MessageFormat.format("RootMode'{'key={0}, description=''{1}'''}'", key, description);
         }
 
     }
@@ -97,44 +86,6 @@ public class RootUtils {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    public static boolean togglePointerLocation() {
-        try {
-            boolean aimState = !isPointerLocationEnabled();
-            setPointerLocationState(aimState);
-            return aimState ? isPointerLocationEnabled() : isPointerLocationDisabled();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private static boolean isPointerLocationEnabled() {
-        return getPointerLocationResult() == PointerLocation.ENABLED.value;
-    }
-
-    private static boolean isPointerLocationDisabled() {
-        return getPointerLocationResult() == PointerLocation.DISABLED.value;
-    }
-
-    private static int getPointerLocationResult() {
-        try {
-            // @Caution by SuperMonster003 on Mar 2, 2022.
-            //  ! Result of execCommand() contains a "\n" and its length() is 2.
-            return Integer.parseInt(ProcessShell.execCommand("settings get system pointer_location", true).result.trim());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    private static void setPointerLocationState(boolean isEnabled) {
-        try {
-            ProcessShell.execCommand("settings put system pointer_location " + (isEnabled ? 1 : 0), true);
-        } catch (Exception ignored) {
-            /* Ignored. */
         }
     }
 

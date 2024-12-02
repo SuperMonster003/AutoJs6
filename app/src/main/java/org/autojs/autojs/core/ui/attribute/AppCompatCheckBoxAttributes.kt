@@ -3,8 +3,9 @@ package org.autojs.autojs.core.ui.attribute
 import android.view.View
 import androidx.appcompat.widget.AppCompatCheckBox
 import org.autojs.autojs.core.ui.inflater.ResourceParser
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class AppCompatCheckBoxAttributes(resourceParser: ResourceParser, view: View) : CheckBoxAttributes(resourceParser, view) {
+open class AppCompatCheckBoxAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : CheckBoxAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as AppCompatCheckBox
 

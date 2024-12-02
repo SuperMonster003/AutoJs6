@@ -55,8 +55,11 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
         }
 
         // @Hint by SuperMonster003 on Nov 30, 2023.
-        //  ! Try to avoid java.lang.SecurityException which looks like below (API Level 34+):
-        //  ! Writable dex file '/data/user/0/org.autojs.autojs6/cache/classes/xxx.jar' is not allowed.
+        //  ! Try to avoid the exception which looks like below (API Level 34+):
+        //  # java.lang.SecurityException: Writable dex file '/data/user/0/org.autojs.autojs6/cache/classes/xxx.jar' is not allowed.
+        //  ! zh-CN:
+        //  ! 尝试避免如下异常 (API 级别 34+):
+        //  # java.lang.SecurityException: 不允许可写的 dex 文件 '/data/user/0/org.autojs.autojs6/cache/classes/xxx.jar'.
         file.setReadOnly()
 
         return DexClassLoader(path, cacheDir.path, null, parent).also {

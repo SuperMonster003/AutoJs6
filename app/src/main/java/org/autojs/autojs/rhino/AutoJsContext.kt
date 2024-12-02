@@ -8,23 +8,23 @@ import org.mozilla.javascript.Scriptable
 
 class AutoJsContext(factory: ContextFactory?) : Context(factory) {
 
-    private val mContinuations = HashSet<Any>()
+    val continuations = HashSet<Any>()
 
     var rhinoJavaScriptEngine: RhinoJavaScriptEngine? = null
 
     override fun captureContinuation(): ContinuationPending {
         val continuationPending = super.captureContinuation()
-        mContinuations.add(continuationPending.continuation)
+        continuations.add(continuationPending.continuation)
         return continuationPending
     }
 
     override fun resumeContinuation(continuation: Any, scope: Scriptable?, functionResult: Any?): Any {
-        mContinuations.remove(continuation)
+        continuations.remove(continuation)
         return super.resumeContinuation(continuation, scope, functionResult)
     }
 
     fun hasPendingContinuation(): Boolean {
-        return mContinuations.isNotEmpty()
+        return continuations.isNotEmpty()
     }
 
 }

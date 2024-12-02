@@ -5,7 +5,7 @@ import android.content.Intent
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.pref.Language
+import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.LocaleUtils

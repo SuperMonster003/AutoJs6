@@ -19,7 +19,7 @@ package zhao.arsceditor.ResDecoder;
 
 import android.util.TypedValue;
 
-import org.autojs.autojs.pref.Language;
+import org.autojs.autojs.core.pref.Language;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;

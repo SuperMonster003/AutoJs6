@@ -13,9 +13,6 @@ public class TokenColorSettings {
     @SerializedName("fontStyle")
     private String mFontStyle;
 
-    public TokenColorSettings() {
-    }
-
     public String getForeground() {
         return mForeground;
     }
@@ -31,6 +28,5 @@ public class TokenColorSettings {
     public void setFontStyle(String fontStyle) {
         mFontStyle = fontStyle;
     }
-
 
 }

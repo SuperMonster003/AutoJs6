@@ -1,6 +1,5 @@
 package org.autojs.autojs.model.indices;
 
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
@@ -42,6 +41,7 @@ public class AndroidClassIndices {
     private static AndroidClassIndices sInstance;
 
     private static final Type ANDROID_CLASS_LIST_TYPE = new TypeToken<List<AndroidClass>>() {
+        /* Empty body. */
     }.getType();
     // packageName -> package classes
     private final LinkedHashMap<String, ArrayList<ClassSearchingItem>> mPackages = new LinkedHashMap<>();
@@ -49,7 +49,6 @@ public class AndroidClassIndices {
     private final ExecutorService mSingleThreadExecutor = new ThreadPoolExecutor(1, 1,
             2, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
     private Throwable mLoadThrowable;
-
 
     protected AndroidClassIndices(Context context) {
         mContext = context.getApplicationContext();
@@ -106,7 +105,6 @@ public class AndroidClassIndices {
                     t.printStackTrace();
                 });
     }
-
 
     private void load(Reader reader) throws IOException {
         try (reader) {

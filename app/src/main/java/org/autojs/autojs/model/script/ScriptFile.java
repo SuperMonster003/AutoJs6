@@ -7,6 +7,9 @@ import org.autojs.autojs.script.ScriptSource;
 
 import java.io.File;
 
+import static org.autojs.autojs.util.FileUtils.TYPE.AUTO;
+import static org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT;
+
 /**
  * Created by Stardust on Jan 23, 2017.
  */
@@ -14,7 +17,7 @@ public class ScriptFile extends PFile {
 
     public static final int TYPE_UNKNOWN = 0;
     public static final int TYPE_AUTO = 1;
-    public static final int TYPE_JAVA_SCRIPT = 2;
+    public static final int TYPE_JAVASCRIPT = 2;
 
     private int mType = -1;
 
@@ -36,9 +39,8 @@ public class ScriptFile extends PFile {
 
     public int getType() {
         if (mType == -1) {
-            mType = getName().endsWith(".js") ? TYPE_JAVA_SCRIPT :
-                    getName().endsWith(".auto") ? TYPE_AUTO :
-                            TYPE_UNKNOWN;
+            mType = getName().endsWith(JAVASCRIPT.extensionWithDot) ? TYPE_JAVASCRIPT :
+                    getName().endsWith(AUTO.extensionWithDot) ? TYPE_AUTO : TYPE_UNKNOWN;
         }
         return mType;
     }
@@ -52,7 +54,7 @@ public class ScriptFile extends PFile {
     }
 
     public ScriptSource toSource() {
-        if (getType() == TYPE_JAVA_SCRIPT) {
+        if (getType() == TYPE_JAVASCRIPT) {
             return new JavaScriptFileSource(this);
         } else {
             return new AutoFileSource(this);

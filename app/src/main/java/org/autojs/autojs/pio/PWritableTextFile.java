@@ -72,7 +72,6 @@ public class PWritableTextFile implements Closeable, PFileInterface {
         this(path, encoding, bufferSize, false);
     }
 
-
     public void write(String str) {
         try {
             mBufferedWriter.write(str);
@@ -115,7 +114,6 @@ public class PWritableTextFile implements Closeable, PFileInterface {
             throw new UncheckedIOException(e);
         }
     }
-
 
     @Override
     public String getPath() {

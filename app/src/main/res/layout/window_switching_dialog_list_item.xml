@@ -1,0 +1,273 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:focusable="true"
+    android:clickable="true"
+    android:gravity="center_vertical|start"
+    android:minHeight="@dimen/ref_md_listitem_height"
+    android:paddingBottom="@dimen/ref_md_listitem_vertical_margin"
+    android:paddingTop="@dimen/ref_md_listitem_vertical_margin">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/title_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ref_md_dialog_frame_margin"
+        android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/type_parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/title_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            tools:text="标题"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintWidth_max="wrap"
+            app:layout_constraintWidth_percent="0.31"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/title_colon" />
+
+        <TextView
+            android:id="@+id/title_colon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:layout_marginEnd="4sp"
+            android:text="@string/symbol_colon"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/title_label"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/title_value" />
+
+        <TextView
+            android:id="@+id/title_value"
+            tools:text="标题内容足够长用于测试触发换行时的实际效果"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:paddingBottom="0dp"
+            android:paddingTop="0dp"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/title_colon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/order_value" />
+
+        <TextView
+            android:id="@+id/order_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:layout_marginStart="4dp"
+            tools:text="# 3"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/title_value"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/type_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ref_md_dialog_frame_margin"
+        android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_parent"
+        app:layout_constraintBottom_toTopOf="@id/package_parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/type_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            tools:text="类型"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintWidth_max="wrap"
+            app:layout_constraintWidth_percent="0.31"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/type_colon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/type_colon"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:layout_marginEnd="4sp"
+            android:text="@string/symbol_colon"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/type_label"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/type_value" />
+
+        <TextView
+            android:id="@+id/type_value"
+            tools:text="类型内容"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:paddingBottom="0dp"
+            android:paddingTop="0dp"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/type_colon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/package_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ref_md_dialog_frame_margin"
+        android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/type_parent"
+        app:layout_constraintBottom_toTopOf="@id/root_node_parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/package_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            tools:text="包名"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintWidth_max="wrap"
+            app:layout_constraintWidth_percent="0.31"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/package_colon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/package_colon"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:layout_marginEnd="4sp"
+            android:text="@string/symbol_colon"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/package_label"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/package_value" />
+
+        <TextView
+            android:id="@+id/package_value"
+            tools:text="包名内容\n包名内容第二行"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:paddingBottom="0dp"
+            android:paddingTop="0dp"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/package_colon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/root_node_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ref_md_dialog_frame_margin"
+        android:layout_marginStart="@dimen/ref_md_listitem_margin_left"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/package_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/root_node_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            tools:text="根节点标题长度超过限制"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintWidth_max="wrap"
+            app:layout_constraintWidth_percent="0.31"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/root_node_colon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/root_node_colon"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:layout_marginEnd="4sp"
+            android:text="@string/symbol_colon"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/root_node_label"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/root_node_value" />
+
+        <TextView
+            android:id="@+id/root_node_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|start"
+            android:textAlignment="viewStart"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:paddingBottom="0dp"
+            android:paddingTop="0dp"
+            android:lineSpacingExtra="2dp"
+            android:textSize="@dimen/ref_md_listitem_textsize"
+            app:layout_constraintStart_toEndOf="@id/root_node_colon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="根节点内容足够长用于测试触发换行时的实际效果" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,20 +12,27 @@ output-metadata.json
 desktop.ini
 sync.ffs_db
 
-.bak
-.git
-.gradle
-.idea
-.run
+.bak/
+.git/
+.gradle/
+.hprof/
 
-/build
-/libs/**/build
-/captures
-/release
-/tools
+!.run
+
+.idea/*
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/shared-intellij-idea-settings.zip
+
+/build/
+/libs/**/build/
+/captures/
+/release/
+/releases/
+/tools/
 
 /local.properties
 /sign.properties
 
-**/assets-app/declarations
-**/assets-app/sample/declarations
+**/assets-app/declarations/
+**/assets-app/sample/declarations/

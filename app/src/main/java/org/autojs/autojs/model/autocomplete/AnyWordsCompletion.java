@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AnyWordsCompletion extends SimpleTextWatcher {
 
-
     private static final String PATTERN = "[\\W]";
     private final ExecutorService mExecutorService;
     private volatile DictionaryTree<String> mDictionaryTree;

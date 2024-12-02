@@ -2,14 +2,13 @@ package org.autojs.autojs.runtime.api;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 import androidx.annotation.NonNull;
 
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.looper.Loopers;
+import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.runtime.ScriptBridges;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.tool.MapBuilder;
@@ -22,42 +21,13 @@ import java.util.Set;
 /**
  * Created by Stardust on Feb 5, 2018.
  * Modified by SuperMonster003 as of Dec 5, 2021.
- * Modified by aiselp as of Jun 10, 2023.
  */
-public class Sensors extends EventEmitter {
+public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
 
-    public class SensorEventEmitter extends EventEmitter implements SensorEventListener {
+    public boolean ignoresUnsupportedSensor = false;
 
-        public SensorEventEmitter(ScriptBridges bridges) {
-            super(bridges);
-        }
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            Object[] args = new Object[event.values.length + 1];
-            args[0] = event;
-            for (int i = 1; i < args.length; i++) {
-                args[i] = event.values[i - 1];
-            }
-            emit("change", args);
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            emit("accuracy_change", accuracy);
-        }
-
-        public void unregister() {
-            Sensors.this.unregister(this);
-        }
-    }
-
-    public static class Delay {
-        public static final int normal = SensorManager.SENSOR_DELAY_NORMAL;
-        public static final int ui = SensorManager.SENSOR_DELAY_UI;
-        public static final int game = SensorManager.SENSOR_DELAY_GAME;
-        public static final int fastest = SensorManager.SENSOR_DELAY_FASTEST;
-    }
+    @SuppressWarnings("InstantiationOfUtilityClass")
+    public final Delay delay = new Delay();
 
     private static final Map<String, Integer> SENSORS = new MapBuilder<String, Integer>()
             .put("ACCELEROMETER", Sensor.TYPE_ACCELEROMETER)
@@ -74,31 +44,26 @@ public class Sensors extends EventEmitter {
             .put("TEMPERATURE", Sensor.TYPE_AMBIENT_TEMPERATURE)
             .build();
 
-    public boolean ignoresUnsupportedSensor = false;
-
-    @SuppressWarnings("InstantiationOfUtilityClass")
-    public final Delay delay = new Delay();
-
     private final Set<SensorEventEmitter> mSensorEventEmitters = new HashSet<>();
     private final SensorManager mSensorManager;
     private final ScriptBridges mScriptBridges;
     private final SensorEventEmitter mNoOpSensorEventEmitter;
     private final ScriptRuntime mScriptRuntime;
-    private final Loopers.AsyncTask mAsyncTask = new Loopers.AsyncTask("Sensors") {
-        @Override
-        public boolean onFinish(@NonNull Loopers loopers) {
-            return !mSensorEventEmitters.isEmpty();
-        }
-    };
 
-
-    public Sensors(Context context, ScriptRuntime runtime) {
-        super(runtime.bridges);
+    public Sensors(Context context, ScriptRuntime scriptRuntime) {
+        super(scriptRuntime.bridges);
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        mScriptBridges = runtime.bridges;
-        mNoOpSensorEventEmitter = new SensorEventEmitter(runtime.bridges);
-        mScriptRuntime = runtime;
-        runtime.loopers.addAsyncTask(mAsyncTask);
+        mScriptBridges = scriptRuntime.bridges;
+        mNoOpSensorEventEmitter = new SensorEventEmitter(this, scriptRuntime.bridges);
+        mScriptRuntime = scriptRuntime;
+        scriptRuntime.loopers.addLooperQuitHandler(this);
+    }
+
+    public static class Delay {
+        public static final int normal = SensorManager.SENSOR_DELAY_NORMAL;
+        public static final int ui = SensorManager.SENSOR_DELAY_UI;
+        public static final int game = SensorManager.SENSOR_DELAY_GAME;
+        public static final int fastest = SensorManager.SENSOR_DELAY_FASTEST;
     }
 
     public SensorEventEmitter register(String sensorName) {
@@ -122,27 +87,11 @@ public class Sensors extends EventEmitter {
     }
 
     private SensorEventEmitter register(@NonNull Sensor sensor, int delay) {
-        SensorEventEmitter emitter = new SensorEventEmitter(mScriptBridges);
+        SensorEventEmitter emitter = new SensorEventEmitter(this, mScriptBridges);
         mSensorManager.registerListener(emitter, sensor, delay);
         synchronized (mSensorEventEmitters) {
             mSensorEventEmitters.add(emitter);
-        }
-        return emitter;
-    }
-
-    public Sensor getSensor(String sensorName) {
-        sensorName = sensorName.toUpperCase();
-        Integer type = SENSORS.get(sensorName);
-        type = type == null ? getSensorTypeByReflect(sensorName) : type;
-        return type == null ? null : mSensorManager.getDefaultSensor(type);
-    }
-
-    private Integer getSensorTypeByReflect(String sensorName) {
-        try {
-            Field field = Sensor.class.getField("TYPE_" + sensorName);
-            return (Integer) field.get(null);
-        } catch (Exception e) {
-            return null;
+            return emitter;
         }
     }
 
@@ -157,11 +106,33 @@ public class Sensors extends EventEmitter {
 
     public void unregisterAll() {
         synchronized (mSensorEventEmitters) {
-            for (SensorEventEmitter emitter : mSensorEventEmitters) {
-                mSensorManager.unregisterListener(emitter);
+            for (SensorEventEmitter sensorEventEmitter : mSensorEventEmitters) {
+                mSensorManager.unregisterListener(sensorEventEmitter);
             }
             mSensorEventEmitters.clear();
+            mScriptRuntime.loopers.removeLooperQuitHandler(this);
         }
-        mScriptRuntime.loopers.removeAsyncTask(mAsyncTask);
     }
+
+    public Sensor getSensor(String sensorName) {
+        sensorName = sensorName.toUpperCase();
+        Integer type = SENSORS.get(sensorName);
+        type = type == null ? getSensorTypeByReflect(sensorName) : type;
+        return type == null ? null : mSensorManager.getDefaultSensor(type);
+    }
+
+    private Integer getSensorTypeByReflect(String sensorName) {
+        try {
+            Field field = Sensor.class.getField("TYPE_" + sensorName.toUpperCase(Language.getPrefLanguage().getLocale()));
+            return (Integer) field.get(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean shouldQuit() {
+        return mSensorEventEmitters.isEmpty();
+    }
+
 }

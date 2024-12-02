@@ -8,20 +8,20 @@ import java.util.concurrent.Executors
 
 /**
  * Created by Stardust on Mar 10, 2017.
+ * Modified by SuperMonster003 as of May 26, 2022.
  */
 class LayoutInspector(private val mContext: Context) {
 
     @Volatile
-    var capture: NodeInfo? = null
+    var capture: Capture? = null
         private set
-    @Volatile
-    var isDumping = false
-        private set
-    private val mExecutor = Executors.newSingleThreadExecutor()
+
     private val mCaptureAvailableListeners = CopyOnWriteArrayList<CaptureAvailableListener>()
+    private val mExecutor = Executors.newSingleThreadExecutor()
+    private val mA11yTool = AccessibilityTool(mContext)
 
     interface CaptureAvailableListener {
-        fun onCaptureAvailable(capture: NodeInfo?, context: Context)
+        fun onCaptureAvailable(capture: Capture, context: Context)
     }
 
     fun captureCurrentWindow(): Boolean {
@@ -31,6 +31,7 @@ class LayoutInspector(private val mContext: Context) {
             capture = null
             return false
         }
+        mA11yTool.clearCache()
         val root = getRootInActiveWindow(service)
         if (root == null) {
             Log.d(LOG_TAG, "captureCurrentWindow: root = null")
@@ -38,11 +39,12 @@ class LayoutInspector(private val mContext: Context) {
             return false
         }
         mExecutor.execute {
-            isDumping = true
-            capture = NodeInfo.capture(mContext, root)
-            isDumping = false
+            val windowInfoList = service.windows.map {
+                WindowInfo.create(mContext, it)
+            }
+            capture = Capture(windowInfoList, NodeInfo.capture(mContext, root))
             for (l in mCaptureAvailableListeners) {
-                l.onCaptureAvailable(capture, mContext)
+                l.onCaptureAvailable(capture!!, mContext)
             }
         }
         return true
@@ -61,8 +63,7 @@ class LayoutInspector(private val mContext: Context) {
     }
 
     private fun refreshChildList(root: AccessibilityNodeInfo?) {
-        if (root == null) return
-        root.refresh()
+        root?.refresh() ?: return
         val childCount = root.childCount
         for (i in 0 until childCount) {
             refreshChildList(root.getChild(i))

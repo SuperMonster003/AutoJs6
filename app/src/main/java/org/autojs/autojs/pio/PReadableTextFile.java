@@ -40,7 +40,6 @@ public class PReadableTextFile implements Closeable, PFileInterface {
         }
     }
 
-
     private void ensureBufferReader() {
         if (mBufferedReader == null) {
             try {

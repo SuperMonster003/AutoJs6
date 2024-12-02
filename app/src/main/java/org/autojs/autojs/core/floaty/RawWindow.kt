@@ -18,21 +18,17 @@ import org.autojs.autojs6.R
  * Modified by SuperMonster003 as of Mar 27, 2022.
  * Transformed by SuperMonster003 on Mar 27, 2022.
  */
-class RawWindow(rawFloaty: RawFloaty, context: Context) : FloatyWindow() {
-
-    interface RawFloaty {
-        fun inflateWindowView(service: Context?, parent: ViewGroup?): View
-    }
+class RawWindow(rawFloaty: BaseResizableFloatyWindow.ViewSupplier, context: Context) : FloatyWindow() {
 
     private val mInflateException = VolatileDispose<RuntimeException>()
 
     var contentView: View
 
-    // @Reference to aiselp (https://github.com/aiselp) on Mar 27, 2023.
+    // @Reference to aiselp (https://github.com/aiselp) by SuperMonster003 on Mar 27, 2023.
     //  ! https://github.com/kkevsekk1/AutoX/pull/529/commits/782f1c3c12dee64d9b1ad70aba462afaf60313a4#diff-b8e544bc658140f04a7fa7171cc938032f18c92495ca25bb08e2d2eb546b70f5
     init {
         val windowView = View.inflate(context, R.layout.raw_window, null) as ViewGroup
-        contentView = rawFloaty.inflateWindowView(context, windowView)
+        contentView = rawFloaty.inflate(context, windowView)
 
         val mWindowLayoutParams = createWindowLayoutParams()
         super.setWindowView(windowView)
@@ -51,7 +47,7 @@ class RawWindow(rawFloaty: RawFloaty, context: Context) : FloatyWindow() {
         mInflateException.setAndNotify(Exceptions.NO_EXCEPTION)
     }
 
-    override fun onCreateView(floatyService: FloatyService): View = super.getWindowView()
+    override fun onCreateView(floatyService: FloatyService): View? = super.getWindowView()
 
     override fun onCreateWindowLayoutParams(): LayoutParams = super.getWindowLayoutParams()
 
@@ -77,7 +73,7 @@ class RawWindow(rawFloaty: RawFloaty, context: Context) : FloatyWindow() {
             flags = flags and LayoutParams.FLAG_NOT_FOCUSABLE.inv()
             updateWindowLayoutParams(this)
         }
-        windowView.requestLayout()
+        windowView?.requestLayout()
     }
 
     fun setTouchable(touchable: Boolean) {

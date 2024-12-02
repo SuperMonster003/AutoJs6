@@ -7,9 +7,9 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
 import org.autojs.autojs.AutoJs
-import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptToast
+import org.autojs.autojs.util.RhinoUtils.isMainThread
 
 /**
  * Created by Stardust on May 2, 2017.
@@ -17,30 +17,19 @@ import org.autojs.autojs.runtime.api.ScriptToast
  */
 class UiHandler(val applicationContext: Context) : Handler(Looper.getMainLooper()) {
 
-    @ScriptInterface
-    @JvmOverloads
-    fun toast(message: String?, isLong: Boolean = false) {
-        post {
-            message?.let {
-                val rawToast = Toast.makeText(applicationContext, it, if (isLong) LENGTH_LONG else LENGTH_SHORT)
-                when (Looper.getMainLooper() == Looper.myLooper()) {
-                    true -> addAndShow(rawToast)
-                    else -> GlobalAppContext.post { addAndShow(rawToast) }
-                }
-            }
+    fun toast(scriptRuntime: ScriptRuntime, message: String, isLong: Boolean = false) {
+        val showRunnable = Runnable {
+            val toastLength = if (isLong) LENGTH_LONG else LENGTH_SHORT
+            Toast.makeText(AutoJs.instance.application, message, toastLength)
+                .also { ScriptToast.add(it, scriptRuntime) }
+                .show()
+        }
+        when {
+            isMainThread() -> showRunnable.run()
+            else -> this@UiHandler.post(showRunnable)
         }
     }
 
-    @ScriptInterface
-    @JvmOverloads
-    fun toast(resId: Int, isLong: Boolean = false) = toast(applicationContext.getString(resId), isLong)
-
-    @ScriptInterface
-    fun dismissAllToasts() = ScriptToast.dismissAll(AutoJs.instance.runtime)
-
-    private fun addAndShow(rawToast: Toast) {
-        rawToast.show()
-        ScriptToast.add(rawToast, AutoJs.instance.runtime)
-    }
+    fun dismissAllToasts(scriptRuntime: ScriptRuntime) = ScriptToast.dismissAll(scriptRuntime)
 
 }

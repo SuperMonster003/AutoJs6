@@ -39,7 +39,6 @@ public class ClassSearchDialogBuilder extends MaterialDialog.Builder {
     private final Handler mHandler;
     private MaterialDialog mDialog;
 
-
     public ClassSearchDialogBuilder(@NonNull Context context) {
         super(new ContextThemeWrapper(context, R.style.AppTheme));
         mHandler = new Handler();

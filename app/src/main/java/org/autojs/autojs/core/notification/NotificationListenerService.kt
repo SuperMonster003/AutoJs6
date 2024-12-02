@@ -38,7 +38,6 @@ class NotificationListenerService : android.service.notification.NotificationLis
         return mNotificationListeners.remove(listener)
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         instance = null

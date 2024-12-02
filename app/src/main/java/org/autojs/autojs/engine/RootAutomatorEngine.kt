@@ -22,17 +22,13 @@ import java.util.regex.Pattern
  * Created by Stardust on Aug 1, 2017.
  * Modified by SuperMonster003 as of Sep 10, 2022.
  */
-class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Context, deviceNameOrPath: String? = InputDevices.getTouchDeviceName()) : ScriptEngine.AbstractScriptEngine<AutoFileSource?>() {
+class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Context, deviceNameOrPath: String? = InputDevices.touchDeviceName) : ScriptEngine.AbstractScriptEngine<AutoFileSource?>() {
 
-    private val mDeviceNameOrPath: String?
+    private val mDeviceNameOrPath: String? = getDeviceNameOrPath(mContext, deviceNameOrPath)
     private var mThread: Thread? = null
     private var mExecutablePath: String? = null
     private var mPid: String? = null
     private var mProcess: Process? = null
-
-    init {
-        mDeviceNameOrPath = getDeviceNameOrPath(mContext, deviceNameOrPath)
-    }
 
     fun execute(autoFile: String) {
         Log.d(LOG_TAG, "exec: $autoFile")
@@ -123,7 +119,7 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
 
         private val KEY_TOUCH_DEVICE = RootAutomatorEngine::class.java.name + ".touch_device"
         private val PID_PATTERN = Pattern.compile("\\d{2,}")
-        private var sTouchDevice = -1
+        private var sTouchDeviceId = -1
 
         private const val LOG_TAG = "RootAutomatorEngine"
         private const val ROOT_AUTOMATOR_EXECUTABLE_ASSET = "binary/root_automator"
@@ -131,14 +127,14 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
         @JvmStatic
         fun getDeviceNameOrPath(context: Context?, deviceNameOrPath: String?): String? {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context!!)
-            if (sTouchDevice < 0) {
+            if (sTouchDeviceId < 0) {
                 val prefTouchDevice = getDefaultTouchDevice(context).also { setTouchDevice(it) }
                 if (prefTouchDevice < 0) {
                     return deviceNameOrPath
                 }
             }
-            prefs.edit().putInt(KEY_TOUCH_DEVICE, sTouchDevice).apply()
-            return "/dev/input/event$sTouchDevice"
+            prefs.edit().putInt(KEY_TOUCH_DEVICE, sTouchDeviceId).apply()
+            return "/dev/input/event$sTouchDeviceId"
         }
 
         @JvmStatic
@@ -150,17 +146,25 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
 
         @JvmStatic
         fun setTouchDevice(device: Int) {
-            sTouchDevice = device
+            sTouchDeviceId = device
         }
 
         @JvmStatic
-        fun getTouchDevice(context: Context?) = when (sTouchDevice >= 0) {
-            true -> sTouchDevice
+        fun getTouchDeviceId(context: Context) = when (sTouchDeviceId >= 0) {
+            true -> sTouchDeviceId
             else -> getDefaultTouchDevice(context)
         }
 
-        private fun getDefaultTouchDevice(context: Context?): Int {
-            return PreferenceManager.getDefaultSharedPreferences(context!!).getInt(KEY_TOUCH_DEVICE, -1)
+        private fun getDefaultTouchDevice(context: Context): Int {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            var touchDeviceId = prefs.getInt(KEY_TOUCH_DEVICE, -1)
+            if (touchDeviceId < 0) {
+                touchDeviceId = InputDevices.touchDeviceId.also {
+                    prefs.edit().putInt(KEY_TOUCH_DEVICE, it).apply()
+                    setTouchDevice(it)
+                }
+            }
+            return touchDeviceId
         }
 
     }

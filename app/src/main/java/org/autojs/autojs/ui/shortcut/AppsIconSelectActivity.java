@@ -22,6 +22,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
+import org.autojs.autojs.runtime.api.Mime;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityAppsIconSelectBinding;
@@ -98,7 +99,7 @@ public class AppsIconSelectActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT)
-                .setType("image/*"), 11234);
+                .setType(Mime.IMAGE_WILDCARD), 11234);
         return true;
     }
 
@@ -143,7 +144,6 @@ public class AppsIconSelectActivity extends BaseActivity {
             icon.setOnClickListener(v -> selectApp(mAppList.get(getAdapterPosition())));
         }
     }
-
 
     private class AppsAdapter extends RecyclerView.Adapter<AppIconViewHolder> {
 

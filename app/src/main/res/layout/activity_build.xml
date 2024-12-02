@@ -1,242 +1,251 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay"
-            android:fitsSystemWindows="true">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:fitsSystemWindows="true">
 
         <org.autojs.autojs.theme.widget.ThemeColorToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:theme="@style/ToolBarStyle" />
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ToolBarStyle" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="6dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="6dp">
 
         <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="24dp"
-                            android:text="@string/text_file"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                            android:textColor="?android:textColorSecondary" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="24dp"
+                        android:text="@string/text_file"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                        android:textColor="?android:textColorSecondary" />
 
                     <LinearLayout
-                            android:id="@+id/source_path_container"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:orientation="horizontal">
-
-                        <com.google.android.material.textfield.TextInputLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:hint="@string/text_source_file_path">
-
-                            <androidx.appcompat.widget.AppCompatEditText
-                                    android:id="@+id/source_path"
-                                    android:inputType="textUri|textMultiLine"
-                                    android:maxLines="2"
-                                    android:lineSpacingMultiplier="1.1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <ImageView
-                                android:id="@+id/select_source"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:paddingHorizontal="2dp"
-                                android:paddingBottom="6dp"
-                                android:src="@drawable/ic_folder"
-                                android:alpha="0.8"
-                                android:clickable="true"
-                                android:focusable="true"
-                                android:layout_gravity="bottom|center" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:orientation="horizontal">
-
-                        <com.google.android.material.textfield.TextInputLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:hint="@string/text_output_apk_path">
-
-                            <androidx.appcompat.widget.AppCompatEditText
-                                    android:id="@+id/output_path"
-                                    android:inputType="textUri|textMultiLine"
-                                    android:maxLines="2"
-                                    android:lineSpacingMultiplier="1.1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <ImageView
-                                android:id="@+id/select_output"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:paddingHorizontal="2dp"
-                                android:paddingBottom="6dp"
-                                android:src="@drawable/ic_folder"
-                                android:alpha="0.8"
-                                android:clickable="true"
-                                android:focusable="true"
-                                android:layout_gravity="bottom|center" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <LinearLayout
-                        android:id="@+id/app_config"
+                        android:id="@+id/source_path_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="16dp"
-                        android:paddingBottom="16dp">
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
 
-                    <TextView
-                            android:layout_width="wrap_content"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="24dp"
-                            android:text="@string/text_config"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                            android:textColor="?android:textColorSecondary" />
+                            android:layout_weight="1"
+                            android:hint="@string/text_source_file_path"
+                            app:expandedHintEnabled="false">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/text_app_name">
-
-                        <androidx.appcompat.widget.AppCompatEditText
-                                android:id="@+id/app_name"
-                                android:inputType="text"
+                            <androidx.appcompat.widget.AppCompatEditText
+                                android:id="@+id/source_path"
+                                android:inputType="textUri|textMultiLine"
+                                android:maxLines="2"
+                                android:lineSpacingMultiplier="1.1"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" />
 
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <ImageView
+                            android:id="@+id/select_source"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="2dp"
+                            android:paddingBottom="6dp"
+                            android:src="@drawable/ic_folder"
+                            android:alpha="0.8"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:layout_gravity="bottom|center" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/text_output_apk_path"
+                            app:expandedHintEnabled="false">
+
+                            <androidx.appcompat.widget.AppCompatEditText
+                                android:id="@+id/output_path"
+                                android:inputType="textUri|textMultiLine"
+                                android:maxLines="2"
+                                android:lineSpacingMultiplier="1.1"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <ImageView
+                            android:id="@+id/select_output"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="2dp"
+                            android:paddingBottom="6dp"
+                            android:src="@drawable/ic_folder"
+                            android:alpha="0.8"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:layout_gravity="bottom|center" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/app_config"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="24dp"
+                        android:text="@string/text_config"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                        android:textColor="?android:textColorSecondary" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/text_app_name"
+                        app:expandedHintEnabled="false">
+
+                        <androidx.appcompat.widget.AppCompatEditText
+                            android:id="@+id/app_name"
+                            android:inputType="text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="@string/text_package_name"
+                        app:expandedHintEnabled="false">
+
+                        <!-- @Hint by SuperMonster003 on Nov 18, 2024. -->
+                        <!--  ! Input limitation will be handled in Java/Kotlin class. -->
+                        <!--  ! zh-CN: 将于 Java/Kotlin 类中处理输入限制. -->
+                        <!--  # android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_." -->
+                        <org.autojs.autojs.ui.widget.PackageNameEditTextView
+                            android:id="@+id/package_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:hint="@string/text_package_name">
-
-                        <androidx.appcompat.widget.AppCompatEditText
-                                android:id="@+id/package_name"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:inputType="text"
-                                android:imeOptions="actionNext"
-                                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_." />
+                            android:inputType="text"
+                            android:imeOptions="actionNext" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:baselineAligned="false">
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
 
                         <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
                             <com.google.android.material.textfield.TextInputLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:hint="@string/text_version_name">
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:hint="@string/text_version_name"
+                                app:expandedHintEnabled="false">
 
                                 <androidx.appcompat.widget.AppCompatEditText
-                                        android:id="@+id/version_name"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:inputType="text"
-                                        android:text="1.0.0" />
+                                    android:id="@+id/version_name"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="text"
+                                    android:text="1.0.0" />
 
                             </com.google.android.material.textfield.TextInputLayout>
 
                             <com.google.android.material.textfield.TextInputLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="8dp"
-                                    android:hint="@string/text_version_code">
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:hint="@string/text_version_code"
+                                app:expandedHintEnabled="false">
 
                                 <androidx.appcompat.widget.AppCompatEditText
-                                        android:id="@+id/version_code"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:inputType="number"
-                                        android:text="1" />
+                                    android:id="@+id/version_code"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="number"
+                                    android:text="1" />
 
                             </com.google.android.material.textfield.TextInputLayout>
 
                         </LinearLayout>
 
                         <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom|center"
-                                android:orientation="vertical">
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center"
+                            android:orientation="vertical">
 
                             <ImageView
-                                    android:id="@+id/app_icon"
-                                    android:layout_width="64dp"
-                                    android:layout_height="64dp"
-                                    android:layout_gravity="center"
-                                    android:background="@drawable/transparent"
-                                    android:padding="8dp"
-                                    android:clickable="true"
-                                    android:focusable="true"
-                                    android:src="@mipmap/ic_launcher" />
+                                android:id="@+id/app_icon"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:layout_gravity="center"
+                                android:background="@drawable/transparent"
+                                android:padding="8dp"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:src="@mipmap/ic_launcher" />
 
                             <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:layout_marginBottom="8dp"
-                                    android:text="@string/text_icon"
-                                    android:textSize="12sp"
-                                    android:gravity="center" />
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:layout_marginBottom="8dp"
+                                android:text="@string/text_icon"
+                                android:textSize="12sp"
+                                android:gravity="center" />
 
                         </LinearLayout>
 
@@ -245,85 +254,85 @@
                 </LinearLayout>
 
                 <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="0dp"
-                        android:paddingBottom="16dp">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="0dp"
+                    android:paddingBottom="16dp">
 
                     <TextView
-                            android:id="@+id/text_abis"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="24dp"
-                            android:paddingHorizontal="16dp"
-                            android:text="@string/text_supported_abis_short"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                            android:textColor="?android:textColorSecondary" />
+                        android:id="@+id/text_abis"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="24dp"
+                        android:paddingHorizontal="16dp"
+                        android:text="@string/text_supported_abis_short"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                        android:textColor="?android:textColorSecondary" />
 
                     <com.google.android.flexbox.FlexboxLayout
-                            android:id="@+id/flexbox_abis"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|top"
-                            android:layout_marginBottom="4dp"
-                            app:showDivider="middle"
-                            app:dividerDrawable="@drawable/round_checkbox_with_text_divider"
-                            app:flexDirection="row"
-                            app:flexWrap="wrap"
-                            app:alignContent="center" />
+                        android:id="@+id/flexbox_abis"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center|top"
+                        android:layout_marginBottom="4dp"
+                        app:showDivider="middle"
+                        app:dividerDrawable="@drawable/round_checkbox_with_text_divider"
+                        app:flexDirection="row"
+                        app:flexWrap="wrap"
+                        app:alignContent="center" />
 
                 </LinearLayout>
 
                 <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="0dp"
-                        android:paddingBottom="16dp">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="0dp"
+                    android:paddingBottom="16dp">
 
                     <TextView
-                            android:id="@+id/text_libs"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="24dp"
-                            android:paddingHorizontal="16dp"
-                            android:text="@string/text_supported_libraries_short"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                            android:textColor="?android:textColorSecondary" />
+                        android:id="@+id/text_libs"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="24dp"
+                        android:paddingHorizontal="16dp"
+                        android:text="@string/text_supported_libraries_short"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                        android:textColor="?android:textColorSecondary" />
 
                     <com.google.android.flexbox.FlexboxLayout
-                            android:id="@+id/flexbox_libraries"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|top"
-                            android:layout_marginBottom="4dp"
-                            app:showDivider="middle"
-                            app:dividerDrawable="@drawable/round_checkbox_with_text_divider"
-                            app:flexDirection="row"
-                            app:flexWrap="wrap"
-                            app:alignContent="center" />
+                        android:id="@+id/flexbox_libraries"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center|top"
+                        android:layout_marginBottom="4dp"
+                        app:showDivider="middle"
+                        app:dividerDrawable="@drawable/round_checkbox_with_text_divider"
+                        app:flexDirection="row"
+                        app:flexWrap="wrap"
+                        app:alignContent="center" />
 
                 </LinearLayout>
 
                 <View
-                        android:layout_width="match_parent"
-                        android:layout_height="72dp"
-                        android:background="@android:color/transparent" />
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:background="@android:color/transparent" />
 
             </LinearLayout>
 
         </ScrollView>
 
         <org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
-                android:id="@+id/fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end|bottom"
-                android:layout_margin="16dp"
-                android:src="@drawable/ic_packaging"
-                app:backgroundTint="?attr/colorPrimary"
-                android:tint="@color/toolbar_text" />
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_packaging"
+            app:backgroundTint="?attr/colorPrimary"
+            android:tint="@color/toolbar_text" />
 
     </FrameLayout>
 

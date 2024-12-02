@@ -175,9 +175,24 @@ module.exports = (/* @IIFE */ () => {
                 },
             );
         },
+        await() {
+            return continuation.await(this);
+        },
+        wait() {
+            let disposable = threads.disposable();
+            this
+                .then(result => disposable.setAndNotify({ result: result }))
+                .catch(error => disposable.setAndNotify({ error: error }));
+
+            let resultObj = disposable.blockedGet();
+            if (resultObj.error) {
+                throw resultObj.error;
+            }
+            return resultObj.result;
+        },
     });
 
-    Object.assign(Promise, {
+    Object.setPrototypeOf(Promise, {
         // Use polyfill for setImmediate for performance gains
         _immediateFn(fn) {
             typeof setImmediate === 'function'
@@ -253,7 +268,7 @@ module.exports = (/* @IIFE */ () => {
                                     res(i, val);
                                 },
                                 function (e) {
-                                    args[i] = {status: 'rejected', reason: e};
+                                    args[i] = { status: 'rejected', reason: e };
                                     if (--remaining === 0) {
                                         resolve(args);
                                     }
@@ -262,7 +277,7 @@ module.exports = (/* @IIFE */ () => {
                             return;
                         }
                     }
-                    args[i] = {status: 'fulfilled', value: val};
+                    args[i] = { status: 'fulfilled', value: val };
                     if (--remaining === 0) {
                         resolve(args);
                     }

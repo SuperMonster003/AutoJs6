@@ -3,12 +3,9 @@ package org.autojs.autojs.external.widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import androidx.annotation.Nullable;
-
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.ExplorerFileProvider;
@@ -41,18 +38,16 @@ public class ScriptWidgetSettingsActivity extends BaseActivity {
         initScriptListRecyclerView();
     }
 
-
     private void initScriptListRecyclerView() {
         mExplorer = new Explorer(new ExplorerFileProvider(Scripts.FILE_FILTER), 0);
         ExplorerView explorerView = binding.scriptList;
         String workingDirPath = WorkingDirectoryUtils.getPath();
         explorerView.setExplorer(mExplorer, ExplorerDirPage.createRoot(workingDirPath));
-        explorerView.setOnItemClickListener((view, file) -> {
+        explorerView.setOnItemClickListener((_, file) -> {
             mSelectedScriptFilePath = file.getPath();
             finish();
         });
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -63,7 +58,6 @@ public class ScriptWidgetSettingsActivity extends BaseActivity {
         }
         return true;
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

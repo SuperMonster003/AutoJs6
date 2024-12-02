@@ -1,24 +1,21 @@
 package org.autojs.autojs.ui.edit;
 
-import static org.autojs.autojs.util.StringUtils.key;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.MenuItem;
-
 import androidx.annotation.Nullable;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import org.autojs.autojs.core.pref.Language;
+import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.pio.PFiles;
-import org.autojs.autojs.pref.Language;
-import org.autojs.autojs.pref.Pref;
-import org.autojs.autojs.script.JavaScriptSource;
+import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
 import org.autojs.autojs.ui.project.BuildActivity;
@@ -32,8 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
+import static org.autojs.autojs.util.StringUtils.key;
 
 /**
  * Created by Stardust on Sep 28, 2017.
@@ -112,7 +108,6 @@ public class EditorMenu {
         return false;
     }
 
-
     private boolean onMoreOptionsSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.action_console) {
@@ -183,13 +178,19 @@ public class EditorMenu {
                     dialog.dismiss();
                 })
                 .onNegative((ignored, which) -> {
-                    // TODO by SuperMonster003 on Oct 20, 2023.
-                    //  ! Check by execution mode in class org.autojs.autojs.script.JavaScriptSource .
-                    if (mEditor.getText().startsWith(JavaScriptSource.EXECUTION_MODE_UI_PREFIX)) {
-                        mEditor.insert(1, item.getImportText() + ";\n");
-                    } else {
-                        mEditor.insert(0, item.getImportText() + ";\n");
-                    }
+                    // @Overwrite by SuperMonster003 on Jul 28, 2024.
+                    //  ! Adaptive to any circumstances by parsing a line number
+                    //  ! with JavaScriptFileSource.parseExecutionMode.
+                    //  ! zh-CN:
+                    //  ! 使用 JavaScriptFileSource.parseExecutionMode 解析行号以适配任何情况.
+                    //  !
+                    //  # if (mEditor.getText().startsWith(JavaScriptSource.EXECUTION_MODE_UI_PREFIX)) {
+                    //  #     mEditor.insert(1, item.getImportText() + ";\n");
+                    //  # } else {
+                    //  #     mEditor.insert(0, item.getImportText() + ";\n");
+                    //  # }
+                    var executionInfo = JavaScriptFileSource.parseExecutionMode(mEditor.getText());
+                    mEditor.insert(executionInfo.getLineno(), item.getImportText() + ";\n");
                 })
                 .onNeutral((ignored, which) -> IntentUtils.browse(mContext, item.getUrl()))
                 .onAny((ignored, which) -> dialog.dismiss())
@@ -240,6 +241,7 @@ public class EditorMenu {
 
         // TODO by SuperMonster003 on Oct 17, 2022.
         //  ! Implementation for "scale view".
+        //  ! zh-CN: 实现 "scale view".
         makeEditorPinchToZoomScaleViewUnderDev(builder, itemKeys.indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view)));
     }
 

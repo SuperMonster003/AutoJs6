@@ -15,7 +15,6 @@ import java.lang.ref.WeakReference;
 
 public class Debugger implements DebugCallbackInternal {
 
-
     private static final String LOG_TAG = "Debugger";
 
     private final ScriptEngineService mScriptEngineService;
@@ -35,14 +34,13 @@ public class Debugger implements DebugCallbackInternal {
     private volatile Dim.SourceInfo mCurrentSourceInfo;
     private WeakReference<DebugCallback> mWeakDebugCallback;
 
-
     public Debugger(ScriptEngineService scriptEngineService, ContextFactory contextFactory) {
         mScriptEngineService = scriptEngineService;
         mContextFactory = contextFactory;
     }
 
     public void attach(ScriptExecution execution) {
-        if(isAttached()){
+        if (isAttached()) {
             detach();
         }
         mScriptExecution = execution;
@@ -57,30 +55,32 @@ public class Debugger implements DebugCallbackInternal {
             return;
         }
         mCurrentSourceInfo = sourceInfo;
-        if(mDebugCallback != null){
+        if (mDebugCallback != null) {
             mDebugCallback.updateSourceText(sourceInfo);
         }
         DebugCallback callback = mWeakDebugCallback == null ? null : mWeakDebugCallback.get();
-        if(callback != null){
+        if (callback != null) {
             callback.updateSourceText(sourceInfo);
         }
     }
 
     @Override
     public void enterInterrupt(Dim.StackFrame lastFrame, String threadTitle, String alertMessage) {
+
         Log.d(LOG_TAG, "enterInterrupt: threadName = " + threadTitle + ", url = " + lastFrame.getUrl() + ", line = " + lastFrame.getLineNumber());
-        //刚启动调试时会在init脚本的第一行自动停下，此时应该让脚本继续运行
+
+        /* 刚启动调试时会在 init 脚本的第一行自动停下, 此时应该让脚本继续运行. */
         if (mSkipOtherFileBreakpoint && !lastFrame.getUrl().equals(mSourceUrl) && alertMessage == null) {
             mHandler.post(this::resume);
             return;
         }
         mSkipOtherFileBreakpoint = false;
         mCurrentSourceInfo = lastFrame.sourceInfo();
-        if(mDebugCallback != null){
+        if (mDebugCallback != null) {
             mDebugCallback.enterInterrupt(lastFrame, threadTitle, alertMessage);
         }
         DebugCallback callback = mWeakDebugCallback == null ? null : mWeakDebugCallback.get();
-        if(callback != null){
+        if (callback != null) {
             callback.enterInterrupt(lastFrame, threadTitle, alertMessage);
         }
     }
@@ -92,7 +92,7 @@ public class Debugger implements DebugCallbackInternal {
 
     @Override
     public void dispatchNextGuiEvent() {
-
+        /* Empty body. */
     }
 
     @Override

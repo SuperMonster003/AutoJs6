@@ -52,7 +52,6 @@ public class Shortcut {
         return this;
     }
 
-
     public Shortcut iconRes(Intent.ShortcutIconResource icon) {
         if (mIcon != null) {
             throw new IllegalStateException(mContext.getString(R.string.error_set_both_icon_res_and_icon));
@@ -64,7 +63,6 @@ public class Shortcut {
     public Shortcut iconRes(int resId) {
         return iconRes(Intent.ShortcutIconResource.fromContext(mContext, resId));
     }
-
 
     public Shortcut icon(Bitmap icon) {
         if (mIconRes != null) {
@@ -81,7 +79,6 @@ public class Shortcut {
     public Intent.ShortcutIconResource getIconRes() {
         return mIconRes;
     }
-
 
     public Shortcut duplicate(boolean duplicate) {
         mDuplicate = duplicate;

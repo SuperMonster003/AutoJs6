@@ -1,20 +1,19 @@
 package org.autojs.autojs.ui.floating;
 
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
-
-import org.autojs.autojs.pref.Pref;
+import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
 import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 import org.autojs.autojs.ui.floating.gesture.BounceDragGesture;
 import org.jetbrains.annotations.NotNull;
+
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 public class CircularMenuWindow extends FloatyWindow {
 
@@ -43,6 +42,9 @@ public class CircularMenuWindow extends FloatyWindow {
 
     @Override
     protected void onCreateWindow(FloatyService service, WindowManager manager) {
+
+        super.onCreateWindow(service, manager);
+
         mActionViewWindowLayoutParams = createWindowLayoutParams();
         mMenuWindowLayoutParams = createWindowLayoutParams();
         inflateWindowViews(service);
@@ -52,19 +54,20 @@ public class CircularMenuWindow extends FloatyWindow {
         setInitialState();
 
         // @Comment by SuperMonster003 on Aug 2, 2023.
-        //  ! Seems useless.
+        //  ! Seems to be useless.
+        //  ! zh-CN: 似乎没有用处.
         //  !
-        // mOrientationEventListener = new OrientationEventListener(mContext) {
-        //     @Override
-        //     public void onOrientationChanged(int orientation) {
-        //         if (mActionViewWindowBridge.isOrientationChanged(mContext.getResources().getConfiguration().orientation)) {
-        //             keepToSide();
-        //         }
-        //     }
-        // };
-        // if (mOrientationEventListener.canDetectOrientation()) {
-        //     mOrientationEventListener.enable();
-        // }
+        //  # mOrientationEventListener = new OrientationEventListener(mContext) {
+        //  #     @Override
+        //  #     public void onOrientationChanged(int orientation) {
+        //  #         if (mActionViewWindowBridge.isOrientationChanged(mContext.getResources().getConfiguration().orientation)) {
+        //  #             keepToSide();
+        //  #         }
+        //  #     }
+        //  # };
+        //  # if (mOrientationEventListener.canDetectOrientation()) {
+        //  #     mOrientationEventListener.enable();
+        //  # }
     }
 
     @Override

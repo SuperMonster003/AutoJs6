@@ -31,22 +31,20 @@ import org.autojs.autojs6.databinding.RawWindowBinding
  */
 class BaseResizableFloatyWindow(context: Context, viewSupplier: ViewSupplier) : FloatyWindow() {
 
-    interface ViewSupplier {
-        fun inflate(context: Context?, parent: ViewGroup?): View
-    }
-
     private var rawWindowBinding: RawWindowBinding
 
     private val mInflateException = VolatileDispose<RuntimeException>()
     private var mOffset = context.resources.getDimensionPixelSize(R.dimen.floaty_window_offset)
+
     private val mFloaty = MyFloaty(context, viewSupplier)
+
     val rootView = mFloaty.rootView
+
     private var mCloseButton = mFloaty.getCloseButtonView(rootView)
     private var mMoveCursor = mFloaty.getMoveCursorView(rootView)
     private var mResizer = mFloaty.getResizerView(rootView)
 
-
-    // @Reference to aiselp (https://github.com/aiselp) on Mar 27, 2023.
+    // @Reference to aiselp (https://github.com/aiselp) by SuperMonster003 on Mar 27, 2023.
     //  ! https://github.com/kkevsekk1/AutoX/pull/529/commits/782f1c3c12dee64d9b1ad70aba462afaf60313a4#diff-b8e544bc658140f04a7fa7171cc938032f18c92495ca25bb08e2d2eb546b70f5
     init {
         val layoutParams = createWindowLayoutParams()
@@ -61,6 +59,10 @@ class BaseResizableFloatyWindow(context: Context, viewSupplier: ViewSupplier) : 
         super.setWindowView(windowView)
         super.setWindowManager(context.getSystemService(FloatyService.WINDOW_SERVICE) as WindowManager)
         super.setWindowBridge(super.onCreateWindowBridge(layoutParams))
+    }
+
+    interface ViewSupplier {
+        fun inflate(context: Context, parent: ViewGroup?): View
     }
 
     private fun createWindowLayoutParams() = LayoutParams(
@@ -133,7 +135,7 @@ class BaseResizableFloatyWindow(context: Context, viewSupplier: ViewSupplier) : 
             }
         }
 
-    override fun onCreateView(floatyService: FloatyService?): View = super.getWindowView()
+    override fun onCreateView(floatyService: FloatyService?): View? = super.getWindowView()
 
     fun disableWindowFocus() {
         windowLayoutParams.apply {
@@ -147,7 +149,7 @@ class BaseResizableFloatyWindow(context: Context, viewSupplier: ViewSupplier) : 
             flags = flags and LayoutParams.FLAG_NOT_FOCUSABLE.inv()
             updateWindowLayoutParams(this)
         }
-        windowView.requestLayout()
+        windowView?.requestLayout()
     }
 
     private class MyFloaty(context: Context, contentViewSupplier: ViewSupplier) : ResizableFloaty {

@@ -6,26 +6,24 @@ import android.os.Build;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.accessibility.AccessibilityTool;
+import org.autojs.autojs.core.accessibility.Capture;
 import org.autojs.autojs.core.accessibility.LayoutInspector;
-import org.autojs.autojs.core.accessibility.NodeInfo;
 import org.autojs.autojs.ui.floating.FloatyWindowManger;
 import org.autojs.autojs.ui.floating.FullScreenFloatyWindow;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class LayoutInspectTileService extends TileService implements LayoutInspector.CaptureAvailableListener {
 
     private boolean mCapturing = false;
 
-    AccessibilityTool.Service mA11yService = new AccessibilityTool(this).getService();
+    AccessibilityTool mA11yTool = new AccessibilityTool(this);
 
     @Override
     public void onCreate() {
@@ -56,9 +54,17 @@ public abstract class LayoutInspectTileService extends TileService implements La
         Log.d(getClass().getName(), "onClick");
 
         // FIXME by SuperMonster003 on Mar 19, 2022.
-        //   ! Collapse quick settings panel.
-        //   ! Sometimes, there'll be a delay for a few seconds.
-        //   ! Dunno whether a better way exists.
+        //  ! Collapse quick settings panel.
+        //  ! Sometimes, there'll be a delay for a few seconds.
+        //  ! Dunno if there's a better way.
+        //  ! zh-CN:
+        //  ! 折叠快速设置面板. 有时会有几秒钟的延迟. 不知是否有更好的方法.
+        //  !
+        // @Hint by SuperMonster003 on Jul 27, 2024.
+        //  ! GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE isn't helpful for collapsing quick settings panel.
+        //  ! It could be used for collapsing notification panel.
+        //  ! zh-CN:
+        //  ! GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE 无法用于折叠快速设置面板. 它可以用来折叠通知面板.
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 collapseTile();
@@ -67,20 +73,18 @@ public abstract class LayoutInspectTileService extends TileService implements La
             }
         } catch (Exception e) {
             /* Ignored. */
-            // FIXME by SuperMonster003 on Sep 4, 2022.
-            //  ! Maybe GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE could be helpful ?
         }
 
-        if (mA11yService.isRunning()) {
+        if (mA11yTool.isServiceRunning()) {
             mCapturing = true;
             captureCurrentWindowDelayed();
         } else {
-            if (mA11yService.start(false)) {
+            if (mA11yTool.startService(false)) {
                 mCapturing = true;
                 captureCurrentWindowDelayed();
             } else {
                 ViewUtils.showToast(this, R.string.error_no_accessibility_permission_to_capture);
-                mA11yService.launchSettings();
+                mA11yTool.launchSettings();
                 updateTile();
             }
         }
@@ -90,8 +94,9 @@ public abstract class LayoutInspectTileService extends TileService implements La
         GlobalAppContext.postDelayed(() -> AutoJs.getInstance().getLayoutInspector().captureCurrentWindow(), 1000);
     }
 
-    // @Hint by SuperMonster003 on Oct 8, 2022.
+    // FIXME by SuperMonster003 on Oct 8, 2022.
     //  ! Apparently not a good idea.
+    //  ! zh-CN: 显然不是一个好主意.
     private void collapseTile() {
         MaterialDialog dialog = new MaterialDialog.Builder(getApplicationContext()).build();
         showDialog(dialog);
@@ -120,7 +125,7 @@ public abstract class LayoutInspectTileService extends TileService implements La
     }
 
     @Override
-    public void onCaptureAvailable(NodeInfo capture, @NonNull Context context) {
+    public void onCaptureAvailable(@NotNull Capture capture, @NonNull Context context) {
         Log.d(getClass().getName(), "onCaptureAvailable: capturing = " + mCapturing);
         if (!mCapturing) {
             return;
@@ -134,6 +139,6 @@ public abstract class LayoutInspectTileService extends TileService implements La
         });
     }
 
-    protected abstract FullScreenFloatyWindow onCreateWindow(NodeInfo capture, Context context);
+    protected abstract FullScreenFloatyWindow onCreateWindow(Capture capture, Context context);
 
 }

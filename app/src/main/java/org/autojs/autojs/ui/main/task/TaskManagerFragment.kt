@@ -20,7 +20,7 @@ import org.autojs.autojs6.databinding.FragmentTaskManagerBinding
  */
 open class TaskManagerFragment : ViewPagerFragment(45), ViewStatesManageable {
 
-    private lateinit var binding: FragmentTaskManagerBinding
+    private var binding: FragmentTaskManagerBinding? = null
 
     private var mTaskListRecyclerView: TaskListRecyclerView? = null
     private var mSwipeRefreshLayout: SwipeRefreshLayout? = null
@@ -35,8 +35,8 @@ open class TaskManagerFragment : ViewPagerFragment(45), ViewStatesManageable {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mSwipeRefreshLayout = binding.swipeRefreshLayout
-        mTaskListRecyclerView = binding.taskList.also { recyclerView ->
+        mSwipeRefreshLayout = binding!!.swipeRefreshLayout
+        mTaskListRecyclerView = binding!!.taskList.also { recyclerView ->
             recyclerView.adapter?.registerAdapterDataObserver(object : SimpleAdapterDataObserver() {
                 override fun onSomethingChanged() {
                     // To do something here maybe some day.
@@ -69,6 +69,13 @@ open class TaskManagerFragment : ViewPagerFragment(45), ViewStatesManageable {
 
     override fun restoreViewStates() {
         // mListState?.let { mTaskListRecyclerView?.layoutManager?.onRestoreInstanceState(it) }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
+        mTaskListRecyclerView = null
+        mSwipeRefreshLayout = null
     }
 
 }

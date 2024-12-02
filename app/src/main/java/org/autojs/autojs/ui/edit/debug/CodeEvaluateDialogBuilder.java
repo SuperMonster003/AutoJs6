@@ -54,5 +54,4 @@ public class CodeEvaluateDialogBuilder extends MaterialDialog.Builder {
         return this;
     }
 
-
 }

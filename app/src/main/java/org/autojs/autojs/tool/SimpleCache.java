@@ -85,7 +85,6 @@ public class SimpleCache<T> {
         U value;
         private final long mSaveMillis;
 
-
         Item(U value) {
             mSaveMillis = System.currentTimeMillis();
             this.value = value;

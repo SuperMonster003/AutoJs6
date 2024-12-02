@@ -9,43 +9,43 @@ import org.autojs.autojs.annotation.ScriptInterface
 interface Console {
 
     @ScriptInterface
-    fun verbose(data: Any?, vararg options: Any?)
+    fun verbose(data: Any?, vararg formatArgs: Any?)
 
     @ScriptInterface
     fun verbose(data: Any?) = verbose(data, *emptyArray())
 
     @ScriptInterface
-    fun log(data: Any?, vararg options: Any?)
+    fun log(data: Any?, vararg formatArgs: Any?)
 
     @ScriptInterface
     fun log(data: Any?) = log(data, *emptyArray())
 
     @ScriptInterface
-    fun print(level: Int, data: Any?, vararg options: Any?)
+    fun print(level: Int, data: Any?, vararg formatArgs: Any?)
 
     @ScriptInterface
     fun print(level: Int, data: Any?) = print(level, data, *emptyArray())
 
     @ScriptInterface
-    fun info(data: Any?, vararg options: Any?)
+    fun info(data: Any?, vararg formatArgs: Any?)
 
     @ScriptInterface
     fun info(data: Any?) = info(data, *emptyArray())
 
     @ScriptInterface
-    fun warn(data: Any?, vararg options: Any?)
+    fun warn(data: Any?, vararg formatArgs: Any?)
 
     @ScriptInterface
     fun warn(data: Any?) = warn(data, *emptyArray())
 
     @ScriptInterface
-    fun error(data: Any?, vararg options: Any?)
+    fun error(data: Any?, vararg formatArgs: Any?)
 
     @ScriptInterface
     fun error(data: Any?) = error(data, *emptyArray())
 
     @ScriptInterface
-    fun assertTrue(value: Boolean, data: Any?, vararg options: Any?)
+    fun assertTrue(value: Boolean, data: Any?, vararg formatArgs: Any?)
 
     @ScriptInterface
     fun assertTrue(value: Boolean, data: Any?) = assertTrue(value, data, *emptyArray())

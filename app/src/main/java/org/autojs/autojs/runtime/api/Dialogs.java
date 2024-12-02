@@ -15,6 +15,7 @@ import org.autojs.autojs.core.ui.dialog.JsDialogBuilder;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.util.ArrayUtils;
 import org.autojs.autojs6.R;
+import org.mozilla.javascript.BaseFunction;
 
 /**
  * Created by Stardust on May 8, 2017.
@@ -32,7 +33,7 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object rawInput(String title, String prefill, Object callback) {
+    public Object rawInput(String title, String prefill, BaseFunction callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .input(null, prefill, true)
                 .title(title))
@@ -40,7 +41,7 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object alert(String title, String content, Object callback) {
+    public Object alert(String title, String content, BaseFunction callback) {
         MaterialDialog.Builder builder = dialogBuilder(callback)
                 .alert()
                 .title(title)
@@ -52,7 +53,7 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object confirm(String title, String content, Object callback) {
+    public Object confirm(String title, String content, BaseFunction callback) {
         MaterialDialog.Builder builder = dialogBuilder(callback)
                 .confirm()
                 .title(title)
@@ -67,12 +68,12 @@ public class Dialogs {
     private Context getContext() {
         if (mThemeWrapper != null)
             return mThemeWrapper;
-        mThemeWrapper = new ContextThemeWrapper(mRuntime.uiHandler.getApplicationContext().getApplicationContext(), androidx.appcompat.R.style.Theme_AppCompat_Light);
+        mThemeWrapper = new ContextThemeWrapper(mRuntime.getUiHandler().getApplicationContext().getApplicationContext(), androidx.appcompat.R.style.Theme_AppCompat_Light);
         return mThemeWrapper;
     }
 
     @ScriptInterface
-    public Object select(String title, String[] items, Object callback) {
+    public Object select(String title, String[] items, BaseFunction callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallback()
                 .title(title)
@@ -81,7 +82,7 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object singleChoice(String title, int selectedIndex, String[] items, Object callback) {
+    public Object singleChoice(String title, int selectedIndex, String[] items, BaseFunction callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallbackSingleChoice(selectedIndex)
                 .title(title)
@@ -91,7 +92,7 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object multiChoice(String title, int[] indices, String[] items, Object callback) {
+    public Object multiChoice(String title, int[] indices, String[] items, BaseFunction callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .itemsCallbackMultiChoice(ArrayUtils.box(indices))
                 .title(title)
@@ -101,14 +102,14 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public Object selectFile(String title, String prefill, Object callback) {
+    public Object selectFile(String title, String prefill, BaseFunction callback) {
         return ((BlockedMaterialDialog.Builder) dialogBuilder(callback)
                 .input(null, prefill, true)
                 .title(title))
                 .showAndGet();
     }
 
-    private BlockedMaterialDialog.Builder dialogBuilder(Object callback) {
+    private BlockedMaterialDialog.Builder dialogBuilder(BaseFunction callback) {
         Context context = mRuntime.app.getCurrentActivity();
         if (context == null || ((Activity) context).isFinishing()) {
             context = getContext();
@@ -118,7 +119,7 @@ public class Dialogs {
     }
 
     @ScriptInterface
-    public MaterialDialog.Builder newBuilder() {
+    public JsDialogBuilder newBuilder() {
         Context context = mRuntime.app.getCurrentActivity();
         if (context == null || ((Activity) context).isFinishing()) {
             context = getContext();
@@ -129,32 +130,32 @@ public class Dialogs {
 
     public class NonUiDialogs {
 
-        public String rawInput(String title, String prefill, Object callback) {
+        public String rawInput(String title, String prefill, BaseFunction callback) {
             return (String) Dialogs.this.rawInput(title, prefill, callback);
         }
 
         @ScriptInterface
-        public boolean confirm(String title, String content, Object callback) {
+        public boolean confirm(String title, String content, BaseFunction callback) {
             return (boolean) Dialogs.this.confirm(title, content, callback);
         }
 
         @ScriptInterface
-        public int select(String title, String[] items, Object callback) {
+        public int select(String title, String[] items, BaseFunction callback) {
             return (Integer) Dialogs.this.select(title, items, callback);
         }
 
         @ScriptInterface
-        public int singleChoice(String title, int selectedIndex, String[] items, Object callback) {
+        public int singleChoice(String title, int selectedIndex, String[] items, BaseFunction callback) {
             return (int) Dialogs.this.singleChoice(title, selectedIndex, items, callback);
         }
 
         @ScriptInterface
-        public int[] multiChoice(String title, int[] indices, String[] items, Object callback) {
+        public int[] multiChoice(String title, int[] indices, String[] items, BaseFunction callback) {
             return (int[]) Dialogs.this.multiChoice(title, indices, items, callback);
         }
 
         @ScriptInterface
-        public Object alert(String title, String content, Object callback) {
+        public Object alert(String title, String content, BaseFunction callback) {
             return Dialogs.this.alert(title, content, callback);
         }
 

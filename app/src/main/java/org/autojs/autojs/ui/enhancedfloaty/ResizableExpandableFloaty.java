@@ -9,7 +9,6 @@ import androidx.annotation.Nullable;
  */
 public interface ResizableExpandableFloaty {
 
-
     View inflateCollapsedView(FloatyService service, ResizableExpandableFloatyWindow window);
 
     View inflateExpandedView(FloatyService service, ResizableExpandableFloatyWindow window);
@@ -26,12 +25,9 @@ public interface ResizableExpandableFloaty {
 
     float getCollapsedViewPressedAlpha();
 
-
     boolean shouldRequestFocusWhenExpand();
 
-
     int getInitialX();
-
 
     int getInitialY();
 

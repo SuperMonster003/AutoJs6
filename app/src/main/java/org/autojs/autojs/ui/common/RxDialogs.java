@@ -14,7 +14,6 @@ import io.reactivex.subjects.PublishSubject;
  */
 public class RxDialogs {
 
-
     public static Observable<Boolean> confirm(Context context, String text) {
         PublishSubject<Boolean> subject = PublishSubject.create();
         new MaterialDialog.Builder(context)

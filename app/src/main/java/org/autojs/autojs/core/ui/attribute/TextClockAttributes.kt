@@ -4,13 +4,14 @@ import android.view.View
 import android.widget.TextClock
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.util.Strings
+import org.autojs.autojs.runtime.ScriptRuntime
 
-open class TextClockAttributes(resourceParser: ResourceParser, view: View) : TextViewAttributes(resourceParser, view) {
+open class TextClockAttributes(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser, view: View) : TextViewAttributes(scriptRuntime, resourceParser, view) {
 
     override val view = super.view as TextClock
 
-    override fun onRegisterAttrs() {
-        super.onRegisterAttrs()
+    override fun onRegisterAttrs(scriptRuntime: ScriptRuntime) {
+        super.onRegisterAttrs(scriptRuntime)
 
         registerAttr("format12Hour") { view.format12Hour = Strings.parse(view, it) }
         registerAttr("format24Hour") { view.format24Hour = Strings.parse(view, it) }

@@ -1,27 +1,19 @@
 package org.autojs.autojs.model.explorer;
 
 import androidx.annotation.NonNull;
-
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.util.FileUtils;
 import org.autojs.autojs.util.Objects;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
-
 
 public class ExplorerFileItem implements ExplorerItem {
 
-    private static final Set<String> sEditableFileExtensions = new HashSet<>(Arrays.asList(
-            "js", "java", "xml", "json", "txt", "log", "ts", "md", "ini", "html", "css", "kt"
-    ));
-
     private final PFile mFile;
     private final ExplorerPage mParent;
+
+    private FileUtils.TYPE cachedType;
 
     public ExplorerFileItem(PFile file, ExplorerPage parent) {
         if (file == null) {
@@ -89,26 +81,22 @@ public class ExplorerFileItem implements ExplorerItem {
         return new ExplorerFileItem(mFile.renameTo(newName), getParent());
     }
 
-    @NonNull
     @Override
+    @NonNull
     public FileUtils.TYPE getType() {
-        if (mFile.isDirectory()) {
-            return FileUtils.TYPE.DIRECTORY;
+        if (cachedType == null) {
+            cachedType = FileUtils.TYPE.determineBy(mFile);
         }
-        if (getName().equals(FileUtils.TYPE.PROJECT.getTypeName())) {
-            return FileUtils.TYPE.PROJECT;
-        }
-        String extension = mFile.getExtension();
-        @NonNull Stream<FileUtils.TYPE> values = Arrays.stream(FileUtils.TYPE.values())
-                .filter(type -> type.getTypeName().matches("[\\w.]+"));
-        return (FileUtils.TYPE) Arrays.stream(values.toArray())
-                .filter(value -> ((FileUtils.TYPE) value).getExtension().equals(extension))
-                .findFirst()
-                .orElse(FileUtils.TYPE.UNKNOWN);
+        return cachedType;
     }
 
     public String getExtension() {
         return mFile.getExtension();
+    }
+
+    public String getNonEmptyExtension() {
+        String extension = getExtension();
+        return !extension.isEmpty() ? extension : mFile.getName();
     }
 
     @Override
@@ -119,17 +107,6 @@ public class ExplorerFileItem implements ExplorerItem {
     @Override
     public ScriptFile toScriptFile() {
         return new ScriptFile(mFile);
-    }
-
-    @Override
-    public boolean isEditable() {
-        return sEditableFileExtensions.contains(getExtension());
-    }
-
-    @Override
-    public boolean isExecutable() {
-        FileUtils.TYPE type = getType();
-        return type == FileUtils.TYPE.JAVASCRIPT || type == FileUtils.TYPE.AUTO;
     }
 
     private boolean isInSampleDir(PFile file) {
@@ -156,4 +133,3 @@ public class ExplorerFileItem implements ExplorerItem {
         return Objects.hashCode(mFile);
     }
 }
-

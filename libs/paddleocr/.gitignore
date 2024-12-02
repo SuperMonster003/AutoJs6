@@ -1,4 +1,9 @@
-/build
-.cxx/
-cache/
-OpenCV/
+/build/
+/.cxx/
+/.idea/
+/cache/
+
+/src/sdk/native/
+
+*.skip
+**/temp-extracted/

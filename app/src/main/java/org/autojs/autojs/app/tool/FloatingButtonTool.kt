@@ -18,8 +18,8 @@ open class FloatingButtonTool(final override val context: Context) : ShowableIte
     override fun show(): Boolean {
         FloatyWindowManger.showCircularMenu(context)
         // @Comment by SuperMonster003 on Nov 16, 2023.
-        //  ! Seems pointless to force a11y service
-        //  ! to start along with showing floating button.
+        //  ! Seems irrational to force a11y service to start along with showing floating button.
+        //  ! zh-CN: 看起来强制无妨碍服务伴随浮动窗口显示而启动并非合理.
         // return when (isShowing) {
         //     true -> true.also { mAccessibilityService.startIfNeeded() }
         //     else -> false
@@ -33,12 +33,9 @@ open class FloatingButtonTool(final override val context: Context) : ShowableIte
         }
     }
 
-    override fun hide() = try {
+    override fun hide() = runCatching {
         val isSaveState = !(context as Activity).isFinishing
         FloatyWindowManger.hideCircularMenu(isSaveState)
-        true
-    } catch (_: Exception) {
-        false
-    }
+    }.isSuccess
 
 }

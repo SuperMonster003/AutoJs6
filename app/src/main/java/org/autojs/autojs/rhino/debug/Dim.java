@@ -10,6 +10,7 @@ import org.autojs.autojs.engine.RhinoJavaScriptEngine;
 import org.autojs.autojs.engine.ScriptEngine;
 import org.autojs.autojs.engine.ScriptEngineManager;
 import org.autojs.autojs.engine.ScriptEngineService;
+import org.autojs.autojs.script.ScriptSource;
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
@@ -330,6 +331,7 @@ public class Dim {
                             break openStream;
                         }
                     } catch (SecurityException ignored) {
+                        /* Ignored. */
                     }
                     // No existing file, assume missed http://
                     if (sourceUrl.startsWith("//")) {
@@ -382,7 +384,7 @@ public class Dim {
             for (int i = 0; i != sourceInfo.functionSourcesTop(); ++i) {
                 FunctionSource fsource = sourceInfo.functionSource(i);
                 String name = fsource.name();
-                if (name.length() != 0) {
+                if (!name.isEmpty()) {
                     functionNames.put(name, fsource);
                 }
             }
@@ -777,6 +779,7 @@ public class Dim {
                     try {
                         callback.dispatchNextGuiEvent();
                     } catch (InterruptedException ignored) {
+                        /* Ignored. */
                     }
                 }
             }
@@ -843,6 +846,7 @@ public class Dim {
                         try {
                             callback.dispatchNextGuiEvent();
                         } catch (InterruptedException ignored) {
+                            /* Ignored. */
                         }
                     }
                     returnValue = this.returnValue;
@@ -1030,7 +1034,7 @@ public class Dim {
         }
 
         @Override
-        public void onEngineCreate(ScriptEngine engine) {
+        public void onEngineCreate(ScriptEngine<? extends ScriptSource> engine) {
             if (type != IPROXY_LISTEN) Kit.codeBug();
             if (!(engine instanceof RhinoJavaScriptEngine) ||
                     !callback.shouldAttachDebugger((RhinoJavaScriptEngine) engine)) {
@@ -1047,7 +1051,7 @@ public class Dim {
         }
 
         @Override
-        public void onEngineRemove(ScriptEngine engine) {
+        public void onEngineRemove(ScriptEngine<? extends ScriptSource> engine) {
             if (type != IPROXY_LISTEN) Kit.codeBug();
         }
 

@@ -25,26 +25,39 @@ object TimedTaskManager {
     private val mIntentTaskDatabase = IntentTaskDatabase(globalAppContext)
 
     @JvmStatic
-    @SuppressLint("CheckResult")
-    fun notifyTaskFinished(id: Long) {
-        val task = getTimedTask(id) ?: return
-        if (task.isDisposable) {
-            mTimedTaskDatabase.delete(task)
-                .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
-        } else {
-            task.isScheduled = false
-            mTimedTaskDatabase.update(task)
-                .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
-        }
+    val allTasks: Flowable<TimedTask>
+        get() = mTimedTaskDatabase.queryAllAsFlowable()
+
+    @JvmStatic
+    val allIntentTasks: Flowable<IntentTask>
+        get() = mIntentTaskDatabase.queryAllAsFlowable()
+
+    @JvmStatic
+    val allTasksAsList: List<TimedTask>
+        get() = mTimedTaskDatabase.queryAll()
+
+    @JvmStatic
+    val allIntentTasksAsList: List<IntentTask>
+        get() = mIntentTaskDatabase.queryAll()
+
+    @JvmStatic
+    val timeTaskChanges: Observable<ModelChange<TimedTask>>
+        get() = mTimedTaskDatabase.modelChange
+
+    @JvmStatic
+    val intentTaskChanges: Observable<ModelChange<IntentTask>>
+        get() = mIntentTaskDatabase.modelChange
+
+    @JvmStatic
+    fun getTimedTask(taskId: Long): TimedTask? {
+        return mTimedTaskDatabase.queryById(taskId)
     }
 
     @JvmStatic
-    @SuppressLint("CheckResult")
-    fun removeTask(timedTask: TimedTask) {
-        cancel(timedTask)
-        mTimedTaskDatabase.delete(timedTask)
-            .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
-    }
+    fun getIntentTask(intentTaskId: Long): IntentTask? = mIntentTaskDatabase.queryById(intentTaskId)
+
+    @JvmStatic
+    fun getIntentTaskOfAction(action: String?): Flowable<IntentTask> = mIntentTaskDatabase.query("action = ?", action)
 
     @JvmStatic
     @SuppressLint("CheckResult")
@@ -63,9 +76,29 @@ object TimedTaskManager {
             .subscribe({
                 if (!TextUtils.isEmpty(intentTask.action)) {
                     app.dynamicBroadcastReceivers
-                        .register(intentTask)
+                        .registerIntent(intentTask)
                 }
             }) { obj: Throwable -> obj.printStackTrace() }
+    }
+
+    @JvmStatic
+    fun addTaskSync(timedTask: TimedTask) {
+        timedTask.id = mTimedTaskDatabase.insertSync(timedTask)
+        scheduleTaskIfNeeded(globalAppContext, timedTask, false)
+    }
+
+    @JvmStatic
+    fun addTaskSync(intentTask: IntentTask) {
+        intentTask.id = mIntentTaskDatabase.insertSync(intentTask)
+        app.dynamicBroadcastReceivers.registerIntent(intentTask)
+    }
+
+    @JvmStatic
+    @SuppressLint("CheckResult")
+    fun removeTask(timedTask: TimedTask) {
+        cancel(timedTask)
+        mTimedTaskDatabase.delete(timedTask)
+            .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
     }
 
     @JvmStatic
@@ -80,30 +113,15 @@ object TimedTaskManager {
             }) { obj: Throwable -> obj.printStackTrace() }
     }
 
-    val allTasks: Flowable<TimedTask>
-        get() = mTimedTaskDatabase.queryAllAsFlowable()
-
     @JvmStatic
-    fun getIntentTaskOfAction(action: String?): Flowable<IntentTask> = mIntentTaskDatabase.query("action = ?", action)
-
-    @JvmStatic
-    val timeTaskChanges: Observable<ModelChange<TimedTask>>
-        get() = mTimedTaskDatabase.modelChange
-
-    @SuppressLint("CheckResult")
-    fun notifyTaskScheduled(timedTask: TimedTask) {
-        timedTask.isScheduled = true
-        mTimedTaskDatabase.update(timedTask)
-            .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
+    fun removeTaskSync(timedTask: TimedTask): Boolean {
+        cancel(timedTask)
+        return mTimedTaskDatabase.deleteSync(timedTask) > 0
     }
 
     @JvmStatic
-    val allTasksAsList: List<TimedTask>
-        get() = mTimedTaskDatabase.queryAll()
-
-    @JvmStatic
-    fun getTimedTask(taskId: Long): TimedTask? {
-        return mTimedTaskDatabase.queryById(taskId)
+    fun removeTaskSync(intentTask: IntentTask): Boolean {
+        return mIntentTaskDatabase.deleteSync(intentTask) > 0
     }
 
     @JvmStatic
@@ -115,10 +133,13 @@ object TimedTaskManager {
         scheduleTaskIfNeeded(globalAppContext, task, false)
     }
 
+    @JvmStatic
     @SuppressLint("CheckResult")
-    fun updateTaskWithoutReScheduling(task: TimedTask) {
-        mTimedTaskDatabase.update(task)
-            .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
+    fun updateTaskSync(task: TimedTask): Boolean {
+        val id = mTimedTaskDatabase.updateSync(task)
+        cancel(task)
+        scheduleTaskIfNeeded(globalAppContext, task, false)
+        return id > 0
     }
 
     @JvmStatic
@@ -128,26 +149,49 @@ object TimedTaskManager {
             .subscribe({ i: Int ->
                 if (i > 0 && !TextUtils.isEmpty(task.action)) {
                     app.dynamicBroadcastReceivers
-                        .register(task)
+                        .registerIntent(task)
                 }
             }) { obj: Throwable -> obj.printStackTrace() }
     }
 
+    @JvmStatic
+    @SuppressLint("CheckResult")
+    fun updateTaskSync(task: IntentTask): Boolean {
+        val id = mIntentTaskDatabase.updateSync(task)
+        if (id > 0 && !TextUtils.isEmpty(task.action)) {
+            app.dynamicBroadcastReceivers
+                .registerIntent(task)
+        }
+        return id > 0
+    }
+
+    @SuppressLint("CheckResult")
+    fun updateTaskWithoutReScheduling(task: TimedTask) {
+        mTimedTaskDatabase.update(task)
+            .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
+    }
+
+    @SuppressLint("CheckResult")
+    fun notifyTaskScheduled(timedTask: TimedTask) {
+        timedTask.isScheduled = true
+        mTimedTaskDatabase.update(timedTask)
+            .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
+    }
+
+    @JvmStatic
+    @SuppressLint("CheckResult")
+    fun notifyTaskFinished(id: Long) {
+        val task = getTimedTask(id) ?: return
+        if (task.isDisposable) {
+            mTimedTaskDatabase.delete(task)
+                .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
+        } else {
+            task.isScheduled = false
+            mTimedTaskDatabase.update(task)
+                .subscribe(Observers.emptyConsumer()) { obj: Throwable -> obj.printStackTrace() }
+        }
+    }
+
     fun countTasks() = mTimedTaskDatabase.count()
-
-    @JvmStatic
-    val allIntentTasksAsList: List<IntentTask>
-        get() = mIntentTaskDatabase.queryAll()
-
-    @JvmStatic
-    val intentTaskChanges: Observable<ModelChange<IntentTask>>
-        get() = mIntentTaskDatabase.modelChange
-
-    @JvmStatic
-    fun getIntentTask(intentTaskId: Long): IntentTask? = mIntentTaskDatabase.queryById(intentTaskId)
-
-    @JvmStatic
-    val allIntentTasks: Flowable<IntentTask>
-        get() = mIntentTaskDatabase.queryAllAsFlowable()
 
 }

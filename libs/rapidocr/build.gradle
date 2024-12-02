@@ -1,0 +1,144 @@
+/**
+ * Rapid OCR (https://github.com/RapidAI/RapidOCR) build script (Groovy).
+ *
+ * Created by SuperMonster003 on Sep 19, 2024.
+ */
+
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'kotlin-parcelize'
+apply from: '../utils.build.gradle'
+
+ext["projectName"] = "Rapid OCR"
+
+def versions = Utils.newVersions(project)
+
+def versionMap = [
+        "OFFICIAL_NAME"      : "1.3.0", /* From original build.gradle file. */
+        "MIN_SDK"            : versions["MIN_SDK"] as Integer,
+        "COMPILE_SDK"        : versions["COMPILE_SDK"] as Integer,
+        "TARGET_SDK"         : versions["TARGET_SDK"] as Integer,
+        "NDK"                : versions["RAPID_OCR/NDK"],
+        "CMAKE"              : versions["RAPID_OCR/CMAKE"],
+        "OPENCV_MOBILE"      : versions["RAPID_OCR/OPENCV_MOBILE"],
+        "OPENCV_MOBILE_LABEL": versions["RAPID_OCR/OPENCV_MOBILE_LABEL"],
+        "ONNX"               : versions["RAPID_OCR/ONNX"],
+        "ONNX_RUNTIME"       : versions["RAPID_OCR/ONNX_RUNTIME"],
+]
+
+def nameMap = [
+        "PROJECT"            : ext["projectName"],
+        "OPENCV_MOBILE"      : "OpenCV Mobile",
+        "OPENCV_MOBILE_LABEL": "OpenCV Mobile Label",
+        "ONNX"               : "Onnx",
+        "ONNX_RUNTIME"       : "Onnx Runtime",
+        "NDK"                : "NDK",
+        "CMAKE"              : "Cmake",
+]
+
+def libsToDeploy = [
+        Utils.newLibDeployer(project, nameMap.OPENCV_MOBILE, "https://github.com/nihui/opencv-mobile/releases/download" +
+                "/v${versionMap.OPENCV_MOBILE_LABEL}/opencv-mobile-${versionMap.OPENCV_MOBILE}-android.zip")
+                .setSourceDir("/opencv-mobile-${versionMap.OPENCV_MOBILE}-android/sdk/native/")
+                .setDestDir("/src/sdk/native/"),
+        Utils.newLibDeployer(project, nameMap.ONNX, "https://github.com/RapidAI/RapidOcrOnnx/releases/download" +
+                "/${versionMap.ONNX}/Project_RapidOcrOnnx-${versionMap.ONNX}.7z")
+                .setSourceDir("/Project_RapidOcrOnnx-${versionMap.ONNX}/models/")
+                .setDestDir("/src/main/assets/models/"),
+        Utils.newLibDeployer(project, nameMap.ONNX_RUNTIME, "https://github.com/RapidAI/OnnxruntimeBuilder/releases/download" +
+                "/${versionMap.ONNX_RUNTIME}/onnxruntime-${versionMap.ONNX_RUNTIME}-android-shared.7z")
+                .setSourceDir("/onnxruntime-shared/")
+                .setDestDir("/src/main/onnxruntime-shared/"),
+]
+
+android {
+
+    namespace = "com.benjaminwan.ocrlibrary"
+
+    ndkVersion versionMap.NDK
+    compileSdk versionMap.COMPILE_SDK
+
+    defaultConfig {
+        minSdk versionMap.MIN_SDK
+        targetSdk versionMap.TARGET_SDK
+        versionName versionMap.OFFICIAL_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        externalNativeBuild {
+            cmake {
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64', 'x86'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.majorVersion
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version versionMap.CMAKE
+        }
+    }
+
+    libraryVariants.all {
+        variant ->
+            variant.outputs.all {
+                outputFileName = "${project.name}-${defaultConfig.versionName}-${variant.buildType.name}.aar"
+            }
+    }
+
+}
+
+dependencies {
+
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+
+}
+
+clean.doFirst {
+    delete project.layout.buildDirectory
+    ['.cxx'].forEach { delete file(it) }
+    if (gradle.ext["isCleanupRapidOcr"] as Boolean) {
+        libsToDeploy.forEach { it.clean() }
+    } else {
+        println("The library files of ${project.ext["projectName"]} won't be cleaned up due to the configuration")
+    }
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.allTasks.any { it.name == "clean" }) return
+
+    Utils.newFormatted("Version information for ${nameMap.PROJECT} library", [
+            "OPENCV_MOBILE",
+            "OPENCV_MOBILE_LABEL",
+            "ONNX",
+            "ONNX_RUNTIME",
+            "NDK",
+            "CMAKE",
+    ].collect { "${nameMap[it]}: ${versionMap[it]}" }).print()
+
+    libsToDeploy.forEach { it.deploy() }
+}

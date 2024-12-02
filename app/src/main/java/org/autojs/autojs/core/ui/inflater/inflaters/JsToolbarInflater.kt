@@ -6,13 +6,14 @@ import android.view.ViewGroup
 import org.autojs.autojs.core.ui.inflater.ResourceParser
 import org.autojs.autojs.core.ui.inflater.ViewCreator
 import org.autojs.autojs.core.ui.widget.JsToolbar
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on Nov 5, 2017.
  * Transformed by SuperMonster003 on May 20, 2023.
  */
-class JsToolbarInflater(resourceParser: ResourceParser) : ToolbarInflater<JsToolbar>(resourceParser) {
+class JsToolbarInflater(scriptRuntime: ScriptRuntime, resourceParser: ResourceParser) : ToolbarInflater<JsToolbar>(scriptRuntime, resourceParser) {
 
     override fun getCreator() = object : ViewCreator<JsToolbar> {
         override fun create(context: Context, attrs: HashMap<String, String>, parent: ViewGroup?): JsToolbar {

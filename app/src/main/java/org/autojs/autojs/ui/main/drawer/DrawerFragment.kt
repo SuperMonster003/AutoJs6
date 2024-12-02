@@ -25,11 +25,12 @@ import org.autojs.autojs.permission.WriteSystemSettingsPermission
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.pluginclient.JsonSocketServer
-import org.autojs.autojs.pref.Pref
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.service.AccessibilityService
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
 import org.autojs.autojs.theme.app.ColorSelectActivity
+import org.autojs.autojs.ui.floating.CircularMenu
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.settings.AboutActivity
@@ -43,6 +44,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentDrawerBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import java.lang.ref.WeakReference
 
 /**
  * Created by Stardust on Jan 30, 2017.
@@ -51,11 +53,29 @@ import org.greenrobot.eventbus.Subscribe
  */
 open class DrawerFragment : Fragment() {
 
-    private lateinit var binding: FragmentDrawerBinding
+    private var binding: FragmentDrawerBinding? = null
 
-    private lateinit var mDrawerMenu: RecyclerView
-    private lateinit var mContext: Context
-    private lateinit var mActivity: MainActivity
+    private var privateDrawerMenu: RecyclerView? = null
+    private var privateContext: WeakReference<Context?>? = null
+    private var privateActivity: WeakReference<MainActivity?>? = null
+
+    private var mContext
+        set(value) {
+            privateContext = WeakReference(value)
+        }
+        get() = privateContext!!.get()!!
+
+    private var mActivity
+        set(value) {
+            privateActivity = WeakReference(value)
+        }
+        get() = privateActivity!!.get()!!
+
+    private var mDrawerMenu
+        set(value) {
+            privateDrawerMenu = value
+        }
+        get() = privateDrawerMenu!!
 
     private lateinit var mAccessibilityServiceItem: DrawerMenuToggleableItem
     private lateinit var mForegroundServiceItem: DrawerMenuToggleableItem
@@ -77,7 +97,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mThemeColorItem: DrawerMenuShortcutItem
     private lateinit var mAboutAppAndDevItem: DrawerMenuShortcutItem
 
-    private lateinit var mA11yService: AccessibilityTool.Service
+    private lateinit var mA11yTool: AccessibilityTool
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,9 +106,9 @@ open class DrawerFragment : Fragment() {
 
         mContext = requireContext()
 
-        mActivity = (requireActivity() as MainActivity)
+        mActivity = requireActivity() as MainActivity
 
-        mA11yService = AccessibilityTool(mContext).service
+        mA11yTool = AccessibilityTool(mContext)
 
         mAccessibilityServiceItem = DrawerMenuToggleableItem(
             object : AccessibilityService(mContext) {
@@ -96,8 +116,8 @@ open class DrawerFragment : Fragment() {
                 override fun refreshSubtitle(aimState: Boolean) {
                     val oldSubtitle = mAccessibilityServiceItem.subtitle
                     if (aimState) {
-                        if (mA11yService.exists() && !mA11yService.isRunning()) {
-                            mAccessibilityServiceItem.subtitle = mContext.getString(R.string.text_malfunctioning)
+                        if (mA11yTool.serviceExists() && !mA11yTool.isServiceRunning()) {
+                            mAccessibilityServiceItem.subtitle = context.getString(R.string.text_malfunctioning)
                         } else {
                             mAccessibilityServiceItem.subtitle = null
                         }
@@ -128,7 +148,7 @@ open class DrawerFragment : Fragment() {
 
         mFloatingWindowItem = DrawerMenuToggleableItem(
             object : FloatingButtonTool(mContext) {
-                override fun toggle(aimState: Boolean): Boolean = try {
+                override fun toggle(aimState: Boolean): Boolean = runCatching {
                     // @BeforeSuper
                     if (!aimState /* is to switch off */) {
                         FloatyWindowManger.getCircularMenu()?.let { circularMenu ->
@@ -146,10 +166,7 @@ open class DrawerFragment : Fragment() {
                     //         mAccessibilityServiceItem.syncDelay()
                     //     }
                     // }
-                    true
-                } catch (_: Exception) {
-                    false
-                }
+                }.isSuccess
             },
             R.drawable.ic_robot_64,
             R.string.text_floating_button,
@@ -171,7 +188,7 @@ open class DrawerFragment : Fragment() {
                 })
             setOnConnectionException { e: Throwable ->
                 mClientModeItem.setCheckedIfNeeded(false)
-                ViewUtils.showToast(mContext, getString(R.string.error_connect_to_remote, e.message), true)
+                ViewUtils.showToast(context, getString(R.string.error_connect_to_remote, e.message), true)
             }
             setOnConnectionDialogDismissed { mClientModeItem.setCheckedIfNeeded(false) }
             connectIfNotNormallyClosed()
@@ -188,7 +205,7 @@ open class DrawerFragment : Fragment() {
                 })
             setOnConnectionException { e: Throwable ->
                 mServerModeItem.setCheckedIfNeeded(false)
-                ViewUtils.showToast(mContext, getString(R.string.error_enable_server, e.message), true)
+                ViewUtils.showToast(context, getString(R.string.error_enable_server, e.message), true)
             }
             mServerModeItem = DrawerMenuDisposableItem(this, R.drawable.ic_smartphone_black_48dp, R.string.text_server_mode)
             connectIfNotNormallyClosed()
@@ -254,7 +271,7 @@ open class DrawerFragment : Fragment() {
 
         mAutoNightModeItem = DrawerMenuToggleableItem(
             object : DrawerMenuItemCustomHelper(mContext) {
-                override fun toggle(): Boolean = try {
+                override fun toggle(): Boolean = runCatching {
                     val isTurningOn = !isActive
                     val isNightModeYes = isNightModeYes(resources.configuration)
                     val mode = when {
@@ -272,10 +289,7 @@ open class DrawerFragment : Fragment() {
                             else -> MODE.DAY.key
                         }.let { Pref.putString(R.string.key_night_mode, it) }
                     }
-                    true
-                } catch (_: Exception) {
-                    false
-                }
+                }.isSuccess
 
                 override val isActive
                     get() = ViewUtils.isAutoNightModeEnabled
@@ -290,7 +304,7 @@ open class DrawerFragment : Fragment() {
 
         mNightModeItem = DrawerMenuToggleableItem(
             object : DrawerMenuItemCustomHelper(mContext) {
-                override fun toggle(): Boolean = try {
+                override fun toggle(): Boolean = runCatching {
                     if (!mAutoNightModeItem.isHidden) {
                         ViewUtils.isAutoNightModeEnabled = false
                     }
@@ -304,10 +318,7 @@ open class DrawerFragment : Fragment() {
                             Pref.putString(R.string.key_night_mode, MODE.DAY.key)
                         }
                     }
-                    true
-                } catch (_: Exception) {
-                    false
-                }
+                }.isSuccess
 
                 override val isActive
                     get() = ViewUtils.isNightModeEnabled
@@ -325,21 +336,18 @@ open class DrawerFragment : Fragment() {
                 override val isActive: Boolean
                     get() = ViewUtils.isKeepScreenOnWhenInForegroundEnabled
 
-                override fun toggle(): Boolean = try {
+                override fun toggle(): Boolean = runCatching {
                     when (/* isTurningOn */ !isActive) {
                         true -> ViewUtils.setKeepScreenOnWhenInForegroundFromLastEnabledState()
                         else -> ViewUtils.setKeepScreenOnWhenInForegroundDisabled()
                     }
                     refreshSubtitle(!isActive)
-                    true
-                } catch (_: Exception) {
-                    false
-                }
+                }.isSuccess
 
                 override fun refreshSubtitle(aimState: Boolean) {
                     val oldSubtitle = mKeepScreenOnWhenInForegroundItem.subtitle
                     val aimSubtitle = if (ViewUtils.isKeepScreenOnWhenInForegroundDisabled) null else {
-                        val i = resources.getStringArray(R.array.keys_keep_screen_on_when_in_foreground).indexOf(Pref.keyKeepScreenOnWhenInForeground!!)
+                        val i = resources.getStringArray(R.array.keys_keep_screen_on_when_in_foreground).indexOf(Pref.keyKeepScreenOnWhenInForeground)
                         resources.getStringArray(R.array.values_keep_screen_on_when_in_foreground)[i]
                     }
                     if (mKeepScreenOnWhenInForegroundItem.subtitle != aimSubtitle) {
@@ -371,21 +379,21 @@ open class DrawerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mDrawerMenu = binding.drawerMenu
+        mDrawerMenu = binding!!.drawerMenu
         initMenuItems()
         initMenuItemStates()
         setupListeners()
     }
 
     private fun setupListeners() {
-        binding.settings.setOnClickListener { view ->
+        binding!!.settings.setOnClickListener { view ->
             startActivity(
                 Intent(view.context, PreferencesActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
         }
-        binding.restart.setOnClickListener { view -> mActivity.rebirth(view) }
-        binding.exit.setOnClickListener { mActivity.exitCompletely() }
+        binding!!.restart.setOnClickListener { mActivity.rebirth() }
+        binding!!.exit.setOnClickListener { mActivity.exitCompletely() }
     }
 
     override fun onResume() {
@@ -401,20 +409,29 @@ open class DrawerFragment : Fragment() {
         // mActivity.unregisterReceiver(mReceiver)
     }
 
-    // @Subscribe
-    // fun onCircularMenuStateChange(event: CircularMenu.StateChangeEvent) {
-    //     mFloatingWindowItem.toggle(event.currentState != CircularMenu.STATE_CLOSED)
-    // }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
+        privateDrawerMenu = null
+        privateContext = null
+        privateActivity = null
+    }
+
+    @Suppress("unused", "UNUSED_PARAMETER")
+    @Subscribe
+    fun onCircularMenuStateChange(event: CircularMenu.StateChangeEvent) {
+        // mFloatingWindowItem.toggle(event.currentState != CircularMenu.STATE_CLOSED)
+    }
 
     @Subscribe
-    @Suppress("UNUSED_PARAMETER")
+    @Suppress("unused", "UNUSED_PARAMETER")
     fun onDrawerOpened(event: Event.OnDrawerOpened) {
         // ViewCompat.getWindowInsetsController(mActivity.window.decorView)?.hide(WindowInsets.Type.systemBars())
         syncMenuItemStates()
     }
 
     @Subscribe
-    @Suppress("UNUSED_PARAMETER")
+    @Suppress("unused", "UNUSED_PARAMETER")
     fun onDrawerClosed(event: Event.OnDrawerClosed) {
         // ViewCompat.getWindowInsetsController(mActivity.window.decorView)?.show(WindowInsets.Type.systemBars())
     }
@@ -450,7 +467,7 @@ open class DrawerFragment : Fragment() {
 
         mDrawerMenu.apply {
             adapter = drawerMenuAdapter
-            layoutManager = LinearLayoutManager(mContext)
+            layoutManager = LinearLayoutManager(context)
         }
     }
 

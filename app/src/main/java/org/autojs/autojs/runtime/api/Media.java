@@ -4,10 +4,8 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
-import org.autojs.autojs.util.MimeTypesUtils;
 
 import java.io.IOException;
 
@@ -27,13 +25,13 @@ public class Media implements MediaScannerConnection.MediaScannerConnectionClien
     }
 
     public void scanFile(String path) {
-        String mimeType = MimeTypesUtils.fromFileOr(path, null);
+        String mimeType = Mime.fromFileOrWildcard(path);
         mScannerConnection.scanFile(mRuntime.files.path(path), mimeType);
     }
 
     @Override
     public void onMediaScannerConnected() {
-
+        /* Empty body. */
     }
 
     public void playMusic(String path, float volume) {
@@ -102,10 +100,9 @@ public class Media implements MediaScannerConnection.MediaScannerConnectionClien
         mMediaPlayer.stop();
     }
 
-
     @Override
     public void onScanCompleted(String path, Uri uri) {
-
+        /* Empty body. */
     }
 
     public void recycle() {
@@ -185,7 +182,7 @@ public class Media implements MediaScannerConnection.MediaScannerConnectionClien
                     reset();
                 }
             } catch (IllegalStateException ignored) {
-
+                /* Ignored. */
             }
         }
     }

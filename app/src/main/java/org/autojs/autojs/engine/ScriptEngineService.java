@@ -3,10 +3,8 @@ package org.autojs.autojs.engine;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
-
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-
 import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.execution.LoopedBasedJavaScriptExecution;
 import org.autojs.autojs.execution.RunnableScriptExecution;
@@ -22,14 +20,22 @@ import org.autojs.autojs.runtime.api.Console;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.ScriptSource;
-import org.autojs.autojs.tool.UiHandler;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODES;
+import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_MODULE_AXIOS;
+import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_MODULE_CHEERIO;
+import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_MODULE_DAYJS;
+import static org.autojs.autojs.script.JavaScriptSource.EXECUTION_MODE_MODULE_I18N;
 
 /**
  * Created by Stardust on Jan 23, 2017.
@@ -38,14 +44,19 @@ public class ScriptEngineService {
 
     private static final String TAG = ScriptEngineService.class.getSimpleName();
 
+    public static final List<Integer> GLOBAL_MODULES = List.of(
+            EXECUTION_MODE_MODULE_AXIOS,
+            EXECUTION_MODE_MODULE_CHEERIO,
+            EXECUTION_MODE_MODULE_DAYJS,
+            EXECUTION_MODE_MODULE_I18N);
+
     private static ScriptEngineService sInstance;
     private final Context mApplicationContext;
-    private final UiHandler mUiHandler;
     private final Console mGlobalConsole;
     private final ScriptEngineManager mScriptEngineManager;
     private final EngineLifecycleObserver mEngineLifecycleObserver = new EngineLifecycleObserver() {
         @Override
-        public void onEngineRemove(ScriptEngine engine) {
+        public void onEngineRemove(ScriptEngine<? extends ScriptSource> engine) {
             mScriptExecutions.remove(engine.getId());
             super.onEngineRemove(engine);
         }
@@ -54,10 +65,9 @@ public class ScriptEngineService {
     private final LinkedHashMap<Integer, ScriptExecution> mScriptExecutions = new LinkedHashMap<>();
 
     ScriptEngineService(ScriptEngineServiceBuilder builder) {
-        mUiHandler = builder.mUiHandler;
-        mApplicationContext = mUiHandler.getApplicationContext();
-        mScriptEngineManager = builder.mScriptEngineManager;
-        mGlobalConsole = builder.mGlobalConsole;
+        mApplicationContext = builder.uiHandler.getApplicationContext();
+        mScriptEngineManager = builder.scriptEngineManager;
+        mGlobalConsole = builder.globalConsole;
         mScriptEngineManager.setEngineLifecycleCallback(mEngineLifecycleObserver);
         mScriptExecutionObserver.registerScriptExecutionListener(new SimpleScriptExecutionListener() {
             @Override
@@ -85,7 +95,7 @@ public class ScriptEngineService {
                 e.printStackTrace();
                 onFinish(execution);
                 String message = null;
-                if (!ScriptInterruptedException.causedByInterrupted(e)) {
+                if (!ScriptInterruptedException.causedByInterrupt(e)) {
                     message = e.getMessage();
                     if (execution.getEngine() instanceof JavaScriptEngine engine) {
                         engine.getRuntime().console.error(e);
@@ -100,7 +110,8 @@ public class ScriptEngineService {
                 }
                 if (message != null) {
                     Log.e(TAG, message);
-                    mUiHandler.toast(getLanguageContext().getString(R.string.text_error) + ": " + message);
+                    // ViewUtils.showToast(mApplicationContext, getLanguageContext().getString(R.string.text_error) + ": " + message, true);
+                    ViewUtils.showToast(mApplicationContext, message, true);
                 } else {
                     Log.e(TAG, "No exception message");
                 }
@@ -148,8 +159,9 @@ public class ScriptEngineService {
             task.setExecutionListener(mScriptExecutionObserver);
         }
         ScriptSource source = task.getSource();
-        if (source instanceof JavaScriptSource) {
-            int mode = ((JavaScriptSource) source).getExecutionMode();
+        if (source instanceof JavaScriptSource src) {
+            GLOBAL_MODULES.forEach((mode) -> handleGlobalModuleExecution(src, mode, getModuleNameFromMode(mode)));
+            int mode = src.getExecutionMode();
             if ((mode & JavaScriptSource.EXECUTION_MODE_UI) != 0) {
                 return ScriptExecuteActivity.execute(mApplicationContext, mScriptEngineManager, task);
             }
@@ -164,6 +176,24 @@ public class ScriptEngineService {
         }
         new ThreadCompat(r).start();
         return r;
+    }
+
+    @Nullable
+    public static String getModuleNameFromMode(Integer value) {
+        return EXECUTION_MODES.entrySet().stream()
+                .filter(entry -> value.equals(entry.getValue()))
+                .findFirst()
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
+
+    private void handleGlobalModuleExecution(JavaScriptSource source, int executionMode, @Nullable String moduleName) {
+        if (moduleName == null) return;
+        if ((source.getExecutionMode() & executionMode) != 0) {
+            mScriptEngineManager.putGlobal(moduleName, new ScriptModuleIdentifier(moduleName));
+        } else {
+            mScriptEngineManager.removeGlobal(moduleName);
+        }
     }
 
     public ScriptExecution execute(ScriptSource source, ScriptExecutionListener listener, ExecutionConfig config) {
@@ -181,12 +211,12 @@ public class ScriptEngineService {
     public int stopAllAndToast() {
         int n = stopAll();
         if (n > 0) {
-            mUiHandler.toast(mApplicationContext.getResources().getQuantityString(R.plurals.text_already_stop_n_scripts, n, n));
+            ViewUtils.showToast(mApplicationContext, mApplicationContext.getResources().getQuantityString(R.plurals.text_already_stop_n_scripts, n, n));
         }
         return n;
     }
 
-    public Set<ScriptEngine> getEngines() {
+    public Set<ScriptEngine<? extends ScriptSource>> getEngines() {
         return mScriptEngineManager.getEngines();
     }
 
@@ -218,7 +248,7 @@ public class ScriptEngineService {
         private final Set<ScriptEngineManager.EngineLifecycleCallback> mEngineLifecycleCallbacks = new LinkedHashSet<>();
 
         @Override
-        public void onEngineCreate(ScriptEngine engine) {
+        public void onEngineCreate(ScriptEngine<? extends ScriptSource> engine) {
             synchronized (mEngineLifecycleCallbacks) {
                 for (ScriptEngineManager.EngineLifecycleCallback callback : mEngineLifecycleCallbacks) {
                     callback.onEngineCreate(engine);
@@ -227,7 +257,7 @@ public class ScriptEngineService {
         }
 
         @Override
-        public void onEngineRemove(ScriptEngine engine) {
+        public void onEngineRemove(ScriptEngine<? extends ScriptSource> engine) {
             synchronized (mEngineLifecycleCallbacks) {
                 for (ScriptEngineManager.EngineLifecycleCallback callback : mEngineLifecycleCallbacks) {
                     callback.onEngineRemove(engine);
@@ -264,6 +294,16 @@ public class ScriptEngineService {
 
         public String getMessage() {
             return mMessage;
+        }
+
+    }
+
+    public static class ScriptModuleIdentifier {
+
+        public String moduleFileName;
+
+        public ScriptModuleIdentifier(String moduleFileName) {
+            this.moduleFileName = moduleFileName;
         }
 
     }

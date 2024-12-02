@@ -6,9 +6,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import org.autojs.autojs.app.GlobalAppContext
@@ -71,6 +73,9 @@ object NotificationUtils {
         intent: Intent?,
         priority: Int?,
     ) {
+        if (ActivityCompat.checkSelfPermission(globalAppContext, POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            throw RuntimeException(globalAppContext.getString(R.string.error_no_post_notifications_permission))
+        }
         NotificationManagerCompat.from(globalAppContext).notify(
             notificationId ?: defaultNotificationId,
             builder.apply {
@@ -135,7 +140,7 @@ object NotificationUtils {
                 enableLights?.let { this.enableLights(it) }
                 lightColor?.let { this.lightColor = it }
             }.also {
-                // Register the channel with the system; you can't change the importance
+                // Register the channel with the system; you cannot change the importance
                 // or other notification behaviors after this
                 globalAppContext.getSystemService(NotificationManager::class.java).createNotificationChannel(it)
             }

@@ -198,7 +198,6 @@ void OCR_PPredictor::infer_rec(const cv::Mat &origin_img, int run_cls, OCRPredic
     ocr_result.cls_label = cls_res.cls_label;
   }
 
-
   float wh_ratio = float(crop_img.cols) / float(crop_img.rows);
   cv::Mat input_image = crnn_resize_img(crop_img, wh_ratio);
   input_image.convertTo(input_image, CV_32FC3, 1 / 255.0f);

@@ -62,7 +62,6 @@ public interface AttributeHandler {
             return this;
         }
 
-
         private String mapAttrName(String nodeName, String attrName) {
             String mappedAttrName = mAttrNameMap.get(attrName);
             if (mappedAttrName == null)

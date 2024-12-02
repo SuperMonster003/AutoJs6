@@ -6,14 +6,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.WindowManager
+import com.benjaminwan.ocrlibrary.OcrEngine
 import org.autojs.autojs.app.SimpleActivityLifecycleCallbacks
 import org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl
 import org.autojs.autojs.core.accessibility.AccessibilityNotificationObserver
-import org.autojs.autojs.core.accessibility.AccessibilityService.Companion.addDelegate
+import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.LayoutInspector
 import org.autojs.autojs.core.activity.ActivityInfoProvider
 import org.autojs.autojs.core.console.GlobalConsole
-import org.autojs.autojs.core.image.capture.ScreenCaptureRequesterImpl
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.engine.RootAutomatorEngine
@@ -21,7 +21,7 @@ import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.engine.ScriptEngineServiceBuilder
 import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
-import org.autojs.autojs.pref.Pref.registerOnSharedPreferenceChangeListener
+import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.rhino.InterruptibleAndroidContextFactory
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils
@@ -30,14 +30,11 @@ import org.autojs.autojs.runtime.api.Shell
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.tool.UiHandler
-import org.autojs.autojs.util.ResourceMonitor
-import org.autojs.autojs.util.ResourceMonitor.UnclosedResourceException
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.mozilla.javascript.ContextFactory
-import org.mozilla.javascript.WrappedException
 import java.io.File
 
 /**
@@ -46,20 +43,13 @@ import java.io.File
  * Transformed by SuperMonster003 on Oct 10, 2022.
  * Modified by LZX284 (https://github.com/LZX284) as of Sep 30, 2023.
  */
-abstract class AbstractAutoJs protected constructor(protected val application: Application) {
-
-    lateinit var runtime: ScriptRuntime
-        private set
-
-    private val scriptEngine
-        get() = when (BuildConfig.isInrt) {
-            true -> LoopBasedJavaScriptEngineWithDecryption(applicationContext)
-            else -> LoopBasedJavaScriptEngine(applicationContext)
-        }
+abstract class AbstractAutoJs protected constructor(val application: Application) {
 
     val applicationContext: Context = application.applicationContext
     val appUtils by lazy { createAppUtils(applicationContext) }
     val globalConsole by lazy { createGlobalConsole() }
+
+    val rapidOcrEngine by lazy { OcrEngine(applicationContext) }
 
     val layoutInspector = LayoutInspector(applicationContext)
     val uiHandler = UiHandler(applicationContext)
@@ -67,9 +57,11 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     val scriptEngineService: ScriptEngineService = run {
         val scriptEngineManager = ScriptEngineManager(applicationContext)
         scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
-            scriptEngine.also { engine ->
-                engine.runtime = createRuntime().also { runtime = it }
-            }
+            val rt = createRuntime()
+            when (BuildConfig.isInrt) {
+                true -> LoopBasedJavaScriptEngineWithDecryption(rt, applicationContext)
+                else -> LoopBasedJavaScriptEngine(rt, applicationContext)
+            }.also { it.runtime = rt }
         }
         initContextFactory()
         scriptEngineManager.registerEngine(AutoFileSource.ENGINE) { RootAutomatorEngine(applicationContext) }
@@ -88,7 +80,6 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     init {
         addAccessibilityServiceDelegates()
         registerActivityLifecycleCallbacks()
-        getResourceMonitorReady()
     }
 
     private fun initContextFactory() {
@@ -98,17 +89,17 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
     protected open fun createRuntime(): ScriptRuntime = ScriptRuntime.Builder()
         .setConsole(globalConsole)
         .setUiHandler(uiHandler)
-        .setScreenCaptureRequester(ScreenCaptureRequesterImpl(this))
-        .setAccessibilityBridge(AccessibilityBridgeImpl(this))
+        .setAccessibilityBridge(createAccessibilityBridge())
         .setAppUtils(appUtils)
-        .setEngineService(scriptEngineService)
         .setShellSupplier { Shell(applicationContext, true) }
         .build()
 
+    fun createAccessibilityBridge() = AccessibilityBridgeImpl(this)
+
     private fun addAccessibilityServiceDelegates() {
-        addDelegate(100, infoProvider)
-        addDelegate(200, notificationObserver)
-        addDelegate(300, accessibilityActionRecorder)
+        AccessibilityService.addDelegate(100, infoProvider)
+        AccessibilityService.addDelegate(200, notificationObserver)
+        AccessibilityService.addDelegate(300, accessibilityActionRecorder)
     }
 
     private fun registerActivityLifecycleCallbacks() {
@@ -139,19 +130,6 @@ abstract class AbstractAutoJs protected constructor(protected val application: A
                 }
             }
         })
-    }
-
-    private fun getResourceMonitorReady() {
-        ResourceMonitor.setExceptionCreator { resource: ResourceMonitor.Resource? ->
-            if (org.mozilla.javascript.Context.getCurrentContext() != null) {
-                WrappedException(UnclosedResourceException(resource))
-            } else {
-                UnclosedResourceException(resource)
-            }.apply { fillInStackTrace() }
-        }
-        ResourceMonitor.setUnclosedResourceDetectedHandler { unclosedResourceDetectedException ->
-            globalConsole.error(unclosedResourceDetectedException)
-        }
     }
 
     open fun createAppUtils(context: Context) = AppUtils(context)

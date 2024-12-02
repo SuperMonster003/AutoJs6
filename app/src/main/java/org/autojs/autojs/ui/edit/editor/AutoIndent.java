@@ -22,6 +22,7 @@ public class AutoIndent implements TextWatcher {
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        /* Empty body. */
     }
 
     /**
@@ -96,6 +97,5 @@ public class AutoIndent implements TextWatcher {
         }
         return mEditText.getText().subSequence(lastLineStart, lastLineEnd);
     }
-
 
 }

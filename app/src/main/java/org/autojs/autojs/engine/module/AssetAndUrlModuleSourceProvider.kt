@@ -2,21 +2,17 @@ package org.autojs.autojs.engine.module
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.autojs.autojs.engine.encryption.ScriptEncryption.decrypt
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.autojs.script.EncryptedScriptFileHeader.isValidFile
+import org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT
 import org.mozilla.javascript.commonjs.module.provider.ModuleSource
-import java.io.ByteArrayInputStream
-import java.io.File
+import java.io.*
 import java.io.File.separator
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.io.Reader
 import java.net.URI
 import java.net.URISyntaxException
 import java.net.URLConnection
@@ -32,33 +28,28 @@ import java.nio.charset.StandardCharsets
 //  ! http://pr.autojs6.com/75
 //  ! http://pr.autojs6.com/78
 // @Hint by SuperMonster003 on Jul 17, 2023.
-//  ! Project-structured directories with package.json
-//  ! was not yet adapted,
+//  ! Project-structured dirs with package.json was not yet adapted,
 //  ! as it doesn't seem to matter as much. :)
+//  ! zh-CN:
+//  ! 暂未适配含 package.json 的项目结构目录,
+//  ! 因其似乎并不具备高紧急性. [笑脸符号]
 class AssetAndUrlModuleSourceProvider(
     private val context: Context,
     private val assetDirPath: String,
-    list: List<URI>
+    list: List<URI>,
 ) : UrlModuleSourceProvider(list, null) {
 
     private val mOkHttpClient by lazy { OkHttpClient.Builder().followRedirects(true).build() }
     private val mAssetBaseURI = URI.create("file:///android_asset$separator$assetDirPath")
     private val mAssetManager = context.assets
-    private val mJavaScriptExtensionName = ".js"
+    private val mJavaScriptExtensionName = JAVASCRIPT.extensionWithDot
     private val mRegexUrl = "^(https?|ftp|file)://[-a-zA-Z\\d+&@#/%?=~_|!:,.;]*[-a-zA-Z\\d+&@#/%=~_|]".toRegex()
 
     @Throws(IOException::class, URISyntaxException::class)
-    override fun loadFromPrivilegedLocations(moduleId: String, validator: Any?): ModuleSource? {
-        return when (moduleId.matches(mRegexUrl)) {
-            true -> loadFromURL(moduleId, validator)
-            else -> try {
-                loadFromAsset(moduleId, validator)
-            } catch (e: Exception) {
-                return when (moduleId.startsWith(separator)) {
-                    true -> loadFromFile(File(moduleId), validator = validator)
-                    else -> null
-                }
-            }
+    override fun loadFromPrivilegedLocations(moduleId: String, validator: Any?): ModuleSource? = when {
+        moduleId.matches(mRegexUrl) -> loadFromURL(moduleId, validator)
+        else -> runCatching { loadFromAsset(moduleId, validator) }.getOrElse {
+            if (moduleId.startsWith(separator)) loadFromFile(File(moduleId), validator = validator) else null
         }
     }
 
@@ -68,12 +59,25 @@ class AssetAndUrlModuleSourceProvider(
             else -> moduleId + mJavaScriptExtensionName
         }
         return try {
-            createModuleSource(
-                mAssetManager.open("$assetDirPath$separator$moduleIdWithExtension"),
-                URI("$mAssetBaseURI$separator$moduleIdWithExtension"),
-                mAssetBaseURI,
-                validator,
-            )
+            val moduleDirPrefix = assetDirPath + separator
+            when {
+                moduleIdWithExtension.startsWith(moduleDirPrefix) -> {
+                    Log.d(TAG, "moduleIdWithExtension: $moduleIdWithExtension")
+                    val id = moduleIdWithExtension.substring(moduleDirPrefix.length)
+                    createModuleSource(
+                        mAssetManager.open("$assetDirPath$separator$id"),
+                        URI("$mAssetBaseURI$separator$id"),
+                        mAssetBaseURI,
+                        validator,
+                    )
+                }
+                else -> createModuleSource(
+                    mAssetManager.open("$assetDirPath$separator$moduleIdWithExtension"),
+                    URI("$mAssetBaseURI$separator$moduleIdWithExtension"),
+                    mAssetBaseURI,
+                    validator,
+                )
+            }
         } catch (_: FileNotFoundException) {
             super.loadFromPrivilegedLocations(moduleId, validator)
         }
@@ -86,8 +90,8 @@ class AssetAndUrlModuleSourceProvider(
                 if (!response.isSuccessful) {
                     return null.also { response.close() }
                 }
-                response.body.let {
-                    return createModuleSource(it.byteStream(), URI.create(url), null, validator, it.contentType()?.charset())
+                return response.body?.let {
+                    createModuleSource(it.byteStream(), URI.create(url), null, validator, it.contentType()?.charset())
                 }
             }
         } catch (e: Exception) {
@@ -126,6 +130,12 @@ class AssetAndUrlModuleSourceProvider(
         } else {
             InputStreamReader(ByteArrayInputStream(bytes))
         }
+    }
+
+    companion object {
+
+        private val TAG = AssetAndUrlModuleSourceProvider::class.java.simpleName
+
     }
 
 }

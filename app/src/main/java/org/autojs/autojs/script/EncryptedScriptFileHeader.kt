@@ -8,8 +8,8 @@ object EncryptedScriptFileHeader {
 
     const val FLAG_INVALID_FILE: Short = Short.MIN_VALUE
 
-    const val FLAG_EXECUTION_MODE_UI: Short = 0x0001
-    const val FLAG_EXECUTION_MODE_AUTO: Short = 0x0002
+    const val FLAG_EXECUTION_MODE_UI: Short = JavaScriptSource.EXECUTION_MODE_UI.toShort()
+    const val FLAG_EXECUTION_MODE_AUTO: Short = JavaScriptSource.EXECUTION_MODE_AUTO.toShort()
 
     const val BLOCK_SIZE = 8
     private val BLOCK = byteArrayOf(0x77, 0x01, 0x17, 0x7F, 0x12, 0x12)
@@ -44,6 +44,5 @@ object EncryptedScriptFileHeader {
         os.write(byte6)
         os.write(byte7)
     }
-
 
 }

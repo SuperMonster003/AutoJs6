@@ -6,63 +6,67 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.*
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.external.fileprovider.AppFileProvider
+import org.autojs.autojs.ui.doc.DocumentationActivity
+import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow
+import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
+import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
+import org.autojs.autojs.ui.log.LogActivity
+import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.ui.project.BuildActivity
+import org.autojs.autojs.ui.settings.AboutActivity
+import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.util.App
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
 import java.net.URI
+import org.autojs.autojs.runtime.api.augment.app.App as AugmentableApp
 
 /**
  * Created by Stardust on Apr 2, 2017.
  * Modified by SuperMonster003 as of Jul 13, 2022.
  */
-class AppUtils {
+class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority: String? = AppFileProvider.AUTHORITY) {
 
-    private val mContext: Context
-    private val mPackageManager: PackageManager
+    private val mContext: Context = context
+    private val mPackageManager = mContext.packageManager
 
     @Volatile
-    private var mCurrentActivity = WeakReference<Activity?>(null)
+    private var mCurrentActivityRef = WeakReference<Activity?>(null)
 
-    @get:ScriptInterface
-    val fileProviderAuthority: String?
-
-    constructor(context: Context) {
-        mContext = context
-        mPackageManager = mContext.packageManager
-        fileProviderAuthority = null
-    }
-
-    constructor(context: Context, fileProviderAuthority: String?) {
-        mContext = context
-        mPackageManager = mContext.packageManager
-        this.fileProviderAuthority = fileProviderAuthority
+    @ScriptInterface
+    fun launch(o: Any?) = when (o) {
+        is App -> launchPackage(o)
+        is String -> launchPackage(o)
+        null -> launchPackage(null)
+        else -> throw IllegalArgumentException(mContext.getString(R.string.error_illegal_argument, "o for app.launch()", o))
     }
 
     @ScriptInterface
-    fun launchPackage(packageName: String?): Boolean {
-        try {
-            packageName?.let {
-                mPackageManager.getLaunchIntentForPackage(it)?.run {
-                    mContext.startActivity(addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                    return true
-                }
-            }
-        } catch (_: Exception) {
-            // Ignored
-        }
-        return false
-    }
+    fun launchPackage(app: App) = launchPackage(app.packageName)
+
+    /**
+     * @param o < alias | packageName >
+     */
+    @ScriptInterface
+    fun launchPackage(o: String?) = runCatching {
+        o ?: return false
+        val nicePackageName = getAppByAlias(alias = o)?.packageName ?: (/* packageName = */ o)
+        val intent = mPackageManager.getLaunchIntentForPackage(nicePackageName) ?: return false
+        mContext.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }.isSuccess
 
     @ScriptInterface
     @Suppress("unused")
     fun sendLocalBroadcastSync(intent: Intent?) {
-        intent?.let { LocalBroadcastManager.getInstance(mContext).sendBroadcastSync(it) }
+        AugmentableApp.sendLocalBroadcastSyncInternal(intent)
     }
 
     @ScriptInterface
@@ -101,9 +105,8 @@ class AppUtils {
 
     val currentActivity: Activity?
         get() {
-            mCurrentActivity.run {
-                Log.d("App", "getCurrentActivity: ${get()}")
-                return get()
+            mCurrentActivityRef.run {
+                return get().also { Log.d("App", "getCurrentActivity: $it") }
             }
         }
 
@@ -125,9 +128,9 @@ class AppUtils {
     @Throws(Exception::class)
     @Suppress("unused")
     fun ensureInstalled(packageName: String?) {
-        try {
+        runCatching {
             getPackageInfoCompat(mPackageManager, packageName!!, 0)
-        } catch (_: Exception) {
+        }.getOrElse {
             throw Exception(mContext.getString(R.string.error_app_not_installed, packageName))
         }
     }
@@ -135,9 +138,9 @@ class AppUtils {
     @ScriptInterface
     @Throws(Exception::class)
     fun ensureInstalled(app: App) {
-        try {
+        runCatching {
             getPackageInfoCompat(mPackageManager, app.packageName, 0)
-        } catch (_: Exception) {
+        }.getOrElse {
             throw Exception("${mContext.getString(R.string.error_app_not_installed, app.getAppName())} [ ${app.packageName} ]")
         }
     }
@@ -165,11 +168,7 @@ class AppUtils {
 
     @ScriptInterface
     fun openUrl(url: String) {
-        val prefix = "http://".takeUnless { url.contains("://") } ?: ""
-        Intent(Intent.ACTION_VIEW)
-            .setData(Uri.parse(prefix + url))
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            .let { mContext.startActivity(it) }
+        AugmentableApp.openUrlInternal(url)
     }
 
     @ScriptInterface
@@ -177,55 +176,64 @@ class AppUtils {
 
     fun setCurrentActivity(currentActivity: Activity?) {
         currentActivity.let {
-            mCurrentActivity = WeakReference(it)
+            mCurrentActivityRef = WeakReference(it)
             Log.d("App", "setCurrentActivity: $it")
         }
     }
 
+    private fun getAppByAlias(alias: String) = App.getAppByAlias(alias)
+
     companion object {
 
-        const val activityShortFormPrefix = "class."
+        const val ACTIVITY_SHORT_FORM_PREFIX = "class."
+        const val BROADCAST_SHORT_FORM_PREFIX = "broadcast."
 
-        const val broadcastShortFormPrefix = "broadcast."
+        private val packageManager by lazy {
+            GlobalAppContext.get().packageManager
+        }
 
-        enum class ActivityShortForm(val shortName: String) {
+        enum class ActivityShortForm(val shortName: String, val classType: Class<out Activity>) {
 
-            SETTINGS("settings"),
-            PREFERENCES("preferences"),
-            PREF("pref"),
+            SETTINGS("settings", PreferencesActivity::class.java),
+            PREFERENCES("preferences", PreferencesActivity::class.java),
+            PREF("pref", PreferencesActivity::class.java),
 
-            DOCUMENTATION("documentation"),
-            DOCS("docs"),
-            DOC("doc"),
+            DOCUMENTATION("documentation", DocumentationActivity::class.java),
+            DOCS("docs", DocumentationActivity::class.java),
+            DOC("doc", DocumentationActivity::class.java),
 
-            CONSOLE("console"),
-            LOG("log"),
+            CONSOLE("console", LogActivity::class.java),
+            LOG("log", LogActivity::class.java),
 
-            HOMEPAGE("homepage"),
-            HOME("home"),
+            HOMEPAGE("homepage", MainActivity::class.java),
+            HOME("home", MainActivity::class.java),
 
-            ABOUT("about"),
+            ABOUT("about", AboutActivity::class.java),
 
-            BUILD("build"),
+            BUILD("build", BuildActivity::class.java),
             ;
 
             val fullName
-                get() = activityShortFormPrefix + shortName
+                get() = ACTIVITY_SHORT_FORM_PREFIX + shortName
 
         }
 
-        enum class BroadcastShortForm(val shortName: String) {
+        enum class BroadcastShortForm(val shortName: String, private val classType: Class<out FloatyWindow>) {
 
-            INSPECT_LAYOUT_BOUNDS("inspect_layout_bounds"),
-            LAYOUT_BOUNDS("layout_bounds"),
-            BOUNDS("bounds"),
-            INSPECT_LAYOUT_HIERARCHY("inspect_layout_hierarchy"),
-            LAYOUT_HIERARCHY("layout_hierarchy"),
-            HIERARCHY("hierarchy"),
+            INSPECT_LAYOUT_BOUNDS("inspect_layout_bounds", LayoutBoundsFloatyWindow::class.java),
+            LAYOUT_BOUNDS("layout_bounds", LayoutBoundsFloatyWindow::class.java),
+            BOUNDS("bounds", LayoutBoundsFloatyWindow::class.java),
+
+            INSPECT_LAYOUT_HIERARCHY("inspect_layout_hierarchy", LayoutHierarchyFloatyWindow::class.java),
+            LAYOUT_HIERARCHY("layout_hierarchy", LayoutHierarchyFloatyWindow::class.java),
+            HIERARCHY("hierarchy", LayoutHierarchyFloatyWindow::class.java),
             ;
 
-            val fullName
-                get() = broadcastShortFormPrefix + shortName
+            val fullName: String
+                get() = BROADCAST_SHORT_FORM_PREFIX + shortName
+
+            val className: String
+                get() = classType.name
 
         }
 
@@ -248,6 +256,50 @@ class AppUtils {
                     it.getInstalledApplications(GET_META_DATA)
                 }
             }
+        }
+
+        @JvmStatic
+        fun getInstalledAppIcon(packageName: String): Drawable? = runCatching {
+            packageManager.getApplicationInfo(packageName, 0).loadIcon(packageManager)
+        }.getOrNull()
+
+        @JvmStatic
+        fun generateNextVersionInfo(packageName: String): SimpleVersionInfo? {
+            return getInstalledVersionInfo(packageName)?.let {
+                val currentVersionName = it.versionName
+                val newVersionName = incrementVersionName(currentVersionName)
+                val currentVersionCode = it.versionCode
+                val newVersionCode = currentVersionCode + 1
+                SimpleVersionInfo(newVersionName, newVersionCode)
+            }
+        }
+
+        fun getInstalledVersionInfo(packageName: String): SimpleVersionInfo? = runCatching {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            val versionCode = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> packageInfo.longVersionCode
+                else -> @Suppress("DEPRECATION") packageInfo.versionCode.toLong()
+            }
+            val versionName = packageInfo.versionName
+            SimpleVersionInfo(versionName, versionCode)
+        }.getOrNull()
+
+        private fun incrementVersionName(versionName: String): String {
+            val numericSuffixPattern = Regex("(\\d+)$")
+            return when {
+                versionName.contains(numericSuffixPattern) -> {
+                    val matchResult = numericSuffixPattern.find(versionName)!!
+                    val numberPart = matchResult.value
+                    versionName.replace(numericSuffixPattern, "${numberPart.toLong() + 1}")
+                }
+                versionName.contains(Regex("\\w$")) -> "${versionName}2"
+                else -> versionName
+            }
+        }
+
+        data class SimpleVersionInfo(@JvmField val versionName: String, @JvmField val versionCode: Long) {
+            @JvmField
+            val versionCodeString = versionCode.toString()
         }
 
     }

@@ -1,32 +1,17 @@
-package org.autojs.autojs.core.ui.inflater;
+package org.autojs.autojs.core.ui.inflater
 
-import java.util.HashMap;
+class InflateContext {
 
-public class InflateContext {
+    private val mProperties by lazy { HashMap<String, Any>() }
 
-    private HashMap<String, Object> mProperties;
-
-    public void put(String key, Object value) {
-        if (mProperties == null) {
-            mProperties = new HashMap<>();
-        }
-        mProperties.put(key, value);
+    fun put(key: String, value: Any) {
+        mProperties[key] = value
     }
 
-    public Object get(String key) {
-        if(mProperties == null)
-            return null;
-        return mProperties.get(key);
-    }
+    fun get(key: String) = mProperties[key]
 
+    fun remove(key: String) = mProperties.remove(key)
 
-    public Object remove(String key){
-        if(mProperties == null)
-            return null;
-        return mProperties.remove(key);
-    }
+    fun has(key: String) = mProperties.containsKey(key)
 
-    public boolean has(String key) {
-        return mProperties.containsKey(key);
-    }
 }

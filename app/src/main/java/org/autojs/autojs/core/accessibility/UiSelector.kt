@@ -2,12 +2,10 @@
 
 package org.autojs.autojs.core.accessibility
 
-import android.os.Looper
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.FloatRange
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.core.automator.ActionArgument
 import org.autojs.autojs.core.automator.UiObject
@@ -44,9 +42,13 @@ import org.autojs.autojs.core.automator.filter.ToleranceFilter
 import org.autojs.autojs.core.automator.search.BFS
 import org.autojs.autojs.core.automator.search.DFS
 import org.autojs.autojs.core.automator.search.SearchAlgorithm
+import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.StringReadable
+import org.autojs.autojs.runtime.api.augment.util.Inspect
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.App
 import org.autojs.autojs.util.RhinoUtils
+import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.StringUtils.convertRegex
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
@@ -60,7 +62,7 @@ import java.math.BigInteger
  * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of Jun 11, 2022.
  */
-open class UiSelector : UiObjectActions {
+open class UiSelector : UiObjectActions, StringReadable {
 
     internal var selector = Selector()
 
@@ -69,6 +71,8 @@ open class UiSelector : UiObjectActions {
     private val mAccessibilityBridge: AccessibilityBridge?
 
     private val mAllocator: AccessibilityNodeInfoAllocator?
+
+    private val mA11yTool = AccessibilityTool()
 
     constructor() : this(AccessibilityService.bridge)
 
@@ -659,7 +663,7 @@ open class UiSelector : UiObjectActions {
 
     @ScriptInterface
     fun findOne(timeout: Long): UiObject? {
-        if (isUiThread()) {
+        if (isMainThread()) {
             throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, "findOne"))
         }
         val start = SystemClock.uptimeMillis()
@@ -676,7 +680,7 @@ open class UiSelector : UiObjectActions {
 
     @ScriptInterface
     fun untilFindOne(): UiObject {
-        if (isUiThread()) {
+        if (isMainThread()) {
             throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, "untilFindOne"))
         }
         return findOne(-1)!!
@@ -684,7 +688,7 @@ open class UiSelector : UiObjectActions {
 
     @ScriptInterface
     fun untilFind(): UiObjectCollection {
-        if (isUiThread()) {
+        if (isMainThread()) {
             throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, "untilFind"))
         }
         do {
@@ -695,7 +699,7 @@ open class UiSelector : UiObjectActions {
     @ScriptInterface
     @Deprecated("Deprecated in Java", ReplaceWith("untilFind()"))
     fun waitFor(): UiObjectCollection {
-        if (isUiThread()) {
+        if (isMainThread()) {
             throw IllegalThreadStateException(str(R.string.error_function_called_in_ui_thread, "waitFor"))
         }
         return untilFind()
@@ -711,6 +715,8 @@ open class UiSelector : UiObjectActions {
 
     override fun toString() = selector.toString()
 
+    override fun toStringReadable() = "[${UiSelector::class.java.simpleName}: ${toString()}]"
+
     internal fun findOf(root: UiObject): UiObjectCollection = findOf(root, Int.MAX_VALUE)
 
     internal fun findOneOf(root: UiObject): UiObject? = findOf(root, 1).takeIf { it.size() > 0 }?.get(0)
@@ -722,22 +728,22 @@ open class UiSelector : UiObjectActions {
     protected fun findImpl(node: AccessibilityNodeInfo, max: Int): UiObjectCollection = findImpl(listOf(node), max)
 
     protected fun findImpl(roots: List<AccessibilityNodeInfo?>, max: Int): UiObjectCollection {
-        val result: MutableList<UiObject?> = ArrayList()
+        mAccessibilityBridge ?: return of(emptyList())
+        fun isInWhitelist(node: AccessibilityNodeInfo) = !mAccessibilityBridge.config.isInBlacklist("${node.packageName}")
+        val result = mutableListOf<UiObject?>()
         for (root in roots.filterNotNull()) {
-            if (mAccessibilityBridge == null || !mAccessibilityBridge.config.whiteListContains("${root.packageName}")) {
+            if (isInWhitelist(root)) {
                 result.addAll(findAndReturnList(UiObject.createRoot(root, mAllocator), max - result.size))
-                if (result.size >= max) {
-                    break
-                }
+                if (result.size >= max) break
             }
         }
         return of(result)
     }
 
     protected fun find(max: Int): UiObjectCollection {
-        a11yToolService.ensure()
+        mA11yTool.ensureService()
         mAccessibilityBridge ?: return findImpl(max)
-        if (isUiThread()) return findImpl(max)
+        if (isMainThread()) return findImpl(max)
         if (mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0) return findImpl(max)
         return VolatileBox<UiObjectCollection>().run {
             mAccessibilityBridge.post { unblock(findImpl(max)) }
@@ -767,25 +773,22 @@ open class UiSelector : UiObjectActions {
 
         internal const val ID_IDENTIFIER = ":id/"
 
-        private val a11yToolService by lazy {
-            AccessibilityTool(GlobalAppContext.get()).service
-        }
-
         @JvmStatic
         fun pickup(
+            scriptRuntime: ScriptRuntime,
             root: UiObject?,
             selector: Any?,
             compass: CharSequence?,
             resultType: Any?,
             callback: BaseFunction? = null,
-        ) = Picker.Builder()
+        ): Any? = Picker.Builder()
             .setRoot(root)
             .setCompass(compass)
             .setResultType(resultType)
-            .setSelector(selector)
+            .setSelector(scriptRuntime, selector)
             .setCallback(callback)
             .build()
-            .pick()
+            .pick(scriptRuntime)
 
         internal class Picker private constructor(
             val root: UiObject?,
@@ -795,7 +798,7 @@ open class UiSelector : UiObjectActions {
             val callback: BaseFunction? = null,
         ) {
 
-            internal fun pick() = Detector(compass, object : Result(resultType) {
+            internal fun pick(scriptRuntime: ScriptRuntime) = Detector(compass, object : Result(resultType) {
 
                 override fun byOne() = selector?.let { sel ->
                     root?.let { return sel.findOneOf(it) } ?: sel.findOnce()
@@ -805,12 +808,12 @@ open class UiSelector : UiObjectActions {
                     root?.let { return sel.findOf(it) } ?: sel.find()
                 } ?: EMPTY
 
-            }, callback, selector).detect()
+            }, callback, selector).detect(scriptRuntime)
 
             internal class Builder {
 
                 private var mRoot: UiObject? = null
-                private var mSelector = UiSelector(AccessibilityService.bridge)
+                private var mSelector = UiSelector()
                 private var mCompass: CharSequence? = COMPASS_PASS_ON
                 private var mResultType: Any = RESULT_TYPE_WIDGET
                 private var mCallback: BaseFunction? = null
@@ -925,14 +928,14 @@ open class UiSelector : UiObjectActions {
 
                 fun setRoot(root: UiObject?) = also { mRoot = root }
 
-                fun setSelector(selector: Any?) = also {
+                fun setSelector(scriptRuntime: ScriptRuntime, selector: Any?) = also {
                     when (selector) {
                         null -> return@also
                         is String -> setSelector(selector)
                         is NativeRegExp -> setSelector(selector)
                         is UiSelector -> setSelector(selector)
-                        is Map<*, *> -> setSelector(selector)
-                        is List<*> -> setSelector(selector)
+                        is Map<*, *> -> setSelector(scriptRuntime, selector)
+                        is List<*> -> setSelector(scriptRuntime, selector)
                         is BigInteger -> setSelector(selector.toString())
                         is Double -> setSelector(selector.toInt().toString())
                         is NativeJavaMethod -> throw SelectorMethodWithoutCallingException(selector)
@@ -952,18 +955,21 @@ open class UiSelector : UiObjectActions {
                     mSelector.append(UiSelector().contentMatch(selector))
                 }
 
-                private fun setSelector(selector: List<*>): Builder = also {
-                    selector.filterNotNull().forEach { setSelector(it) }
+                private fun setSelector(scriptRuntime: ScriptRuntime, selector: List<*>): Builder = also {
+                    selector.filterNotNull().forEach { setSelector(scriptRuntime, it) }
                 }
 
-                private fun setSelector(selector: Map<*, *>) = also {
-                    mSelector.append(checkSelectorMap(selector))
+                private fun setSelector(scriptRuntime: ScriptRuntime, selector: Map<*, *>) = also {
+                    mSelector.append(checkSelectorMap(scriptRuntime, selector))
                 }
 
                 // FIXME by SuperMonster003 on Nov 23, 2022.
                 //  ! A more elegant way is needed.
                 //  ! Especially for list<*> typed value handling.
-                private fun checkSelectorMap(selector: Map<*, *>) = UiSelector().also { tmp ->
+                //  ! zh-CN:
+                //  ! 需要一种更优雅的方式.
+                //  ! 尤其是对于 list<*> 类型值的处理.
+                private fun checkSelectorMap(scriptRuntime: ScriptRuntime, selector: Map<*, *>) = UiSelector().also { tmp ->
                     selector.entries.forEach { (key, value) ->
                         try {
                             when (key) {
@@ -976,7 +982,7 @@ open class UiSelector : UiObjectActions {
                                 "filter" -> tmp.filter(object : BooleanFilter.BooleanSupplier {
                                     override fun get(node: UiObject): Boolean {
                                         val func = (if (value is NativeArray) value[0] else value) as BaseFunction
-                                        return RhinoUtils.callFunction(func, arrayOf(node)) as Boolean
+                                        return RhinoUtils.callFunction(scriptRuntime, func, arrayOf(node)) as Boolean
                                     }
                                 })
                                 else -> when (value) {
@@ -1006,7 +1012,7 @@ open class UiSelector : UiObjectActions {
                                     is BaseFunction -> tmp::class.java
                                         .getMethod(key, cBooleanSupplier)
                                         .invoke(tmp, object : BooleanFilter.BooleanSupplier {
-                                            override fun get(node: UiObject) = RhinoUtils.callFunction(value, arrayOf(node)) as Boolean
+                                            override fun get(node: UiObject) = RhinoUtils.callFunction(scriptRuntime, value, arrayOf(node)) as Boolean
                                         })
                                     is List<*> -> when {
                                         doubleTypes.containsKey(key) -> when (val types = doubleTypes.getValue(key)) {
@@ -1119,8 +1125,6 @@ open class UiSelector : UiObjectActions {
         internal class SelectorMethodWithoutCallingException(selector: NativeJavaMethod) : IllegalArgumentException(
             str(R.string.error_selector_method_without_calling, selector.toString())
         )
-
-        private fun isUiThread() = Looper.myLooper() == Looper.getMainLooper()
 
         private fun intermission() {
             if (Thread.currentThread().isInterrupted) {

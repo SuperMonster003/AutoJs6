@@ -15,7 +15,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:id="@+id/title_bar"
-                android:background="@drawable/floating_console_bg_top"
+                android:background="@drawable/floating_console_title_bar_bg"
                 android:orientation="horizontal">
 
             <TextView
@@ -75,7 +75,7 @@
                 android:id="@+id/console"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/floating_console_bg_bottom"
+                android:background="@drawable/floating_console_content_bg"
                 android:padding="8dp" />
 
     </LinearLayout>

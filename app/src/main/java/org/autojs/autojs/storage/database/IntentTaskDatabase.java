@@ -1,6 +1,5 @@
 package org.autojs.autojs.storage.database;
 
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -40,7 +39,6 @@ public class IntentTaskDatabase extends Database<IntentTask> {
         task.setLocal(cursor.getInt(5) != 0);
         return task;
     }
-
 
     private static class SQLHelper extends SQLiteOpenHelper {
 

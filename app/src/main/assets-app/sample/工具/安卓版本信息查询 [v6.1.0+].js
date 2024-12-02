@@ -68,9 +68,7 @@ let $ = {
         }
     },
     parseInputAndSetView(inputText) {
-        let result = util.versionCodes.search(inputText.toString());
-        let infos = Array.isArray(result) ? result : result ? [result] : [];
-        infos.forEach((info) => {
+        util.versionCodes.searchAll(inputText.toString()).forEach((info) => {
             this.setInfoView(info);
             this.setSplitLineView();
         });
@@ -84,7 +82,7 @@ let $ = {
             // e.g. versionCode -> Version Code
             // e.g. platformVersion -> Platform Version
             let prop = key.replace(/^([a-z]+)(([A-Z][a-z]+)*)$/, ($, $1, $2) => /* @AXR */ (
-                StringUtils.toUpperCaseFirst($1) + $2.replace(/[A-Z](?=[a-z])/g, ' $&')
+                StringUtils.uppercaseFirstChar($1) + $2.replace(/[A-Z](?=[a-z])/g, ' $&')
             ));
             infoView['text'].setText(`${prop}: ${info[key]}`);
             infoView['text'].setTextSize(_.textSize);
