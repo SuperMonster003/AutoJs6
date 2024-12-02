@@ -71,7 +71,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun recognizeText(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 2) { argList ->
+        fun recognizeText(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 3) { argList ->
             val (arg0, arg1, arg2) = argList
 
             when {
@@ -149,7 +149,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun detect(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 2) { argList ->
+        fun detect(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 3) { argList ->
             val (arg0, arg1, arg2) = argList
 
             when {
