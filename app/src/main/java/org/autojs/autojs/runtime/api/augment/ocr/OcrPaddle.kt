@@ -33,13 +33,13 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun recognizeText(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 2) {
+        fun recognizeText(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 3) {
             Ocr.commonRecognizeText(scriptRuntime, OcrMode.PADDLE, *it)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun detect(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 2) {
+        fun detect(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 3) {
             Ocr.commonDetect(scriptRuntime, OcrMode.PADDLE, *it)
         }
 
