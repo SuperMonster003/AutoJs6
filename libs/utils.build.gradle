@@ -134,17 +134,21 @@ class Utils {
             }
 
             if (shouldExtract) {
+                printExtractInfo()
                 try {
-                    printExtractInfo()
                     extractCacheFile()
-                    generateMd5File(cacheFile)
                 } catch (Exception e) {
+                    println("\n") // two line breaks
                     println("Cache file was deleted as there is an error during extraction")
                     println("Cache file: ${cacheFile.absolutePath}")
                     cacheFile.delete()
+                    if (e.message != null) {
+                        println("Error message: $e.message")
+                    }
                     println()
                     throw e
                 }
+                generateMd5File(cacheFile)
             }
         }
 
