@@ -69,7 +69,10 @@ class Utils {
         Project project
 
         String sourceDir = File.separator
+        File sourceFile = project.file(File.separator)
+
         String destDir = File.separator
+        File destFile = project.file(File.separator)
 
         File cacheFile
         File cacheRootFile
@@ -80,7 +83,7 @@ class Utils {
 
         File getSkipFile() {
             if (privateSkipFile == null) {
-                privateSkipFile = project.file(new File(destDir, "${cacheFileName}.skip"))
+                privateSkipFile = project.file(new File(destFile, "${cacheFileName}.skip"))
             }
             privateSkipFile
         }
@@ -89,7 +92,7 @@ class Utils {
 
         File getTempOutFile() {
             if (privateTempOutFile == null) {
-                privateTempOutFile = project.file(new File(destDir, "temp-extracted"))
+                privateTempOutFile = project.file(new File(destFile, "temp-extracted"))
             }
             privateTempOutFile
         }
@@ -109,13 +112,16 @@ class Utils {
         }
 
         LibDeployer setSourceDir(String sourceDir) {
-            this.sourceDir = new File(sourceDir).path
+            this.sourceDir = sourceDir
+            this.sourceFile = project.file(sourceDir)
             return this
         }
 
         LibDeployer setDestDir(String destDir) {
-            this.destDir = new File(destDir).path
-            project.file(destDir).mkdirs()
+            def destFile = project.file(destDir)
+            destFile.mkdirs()
+            this.destDir = destDir
+            this.destFile = destFile
             return this
         }
 
@@ -154,6 +160,7 @@ class Utils {
 
         void clean() {
             project.delete skipFile
+            println(skipFile)
             project.delete tempOutFile
             deleteDestAccordingToSrc()
             deleteCacheAccordingToMd5()
@@ -265,8 +272,8 @@ class Utils {
 
         private void printExtractInfo() {
             def title = "Extract the archive file for \"${project.ext["projectName"]}\" Gradle project"
-            def srcInfo = "Source: ${cacheFile.absolutePath}"
-            def destInfo = "Destination: ${project.file(destDir).absolutePath}"
+            def srcInfo = "Source: $cacheFile"
+            def destInfo = "Destination: $destFile"
             def hintInfo = cacheFileExtensionName == "7z" ? [
                     "Extracting \"7z\" archive file may take some time to complete.",
             ] : []
@@ -318,7 +325,7 @@ class Utils {
                 default:
                     throw new GradleException("Unknown archive file type: $cacheFileExtensionName")
             }
-            println("All files extracted into [ ${project.file(destDir)} ]")
+            println("All files extracted into [ $destFile ]")
             if (!skipFile.exists()) {
                 skipFile.parentFile.mkdirs()
                 skipFile.createNewFile()
@@ -345,9 +352,9 @@ class Utils {
             // @Caution by SuperMonster003 on Oct 22, 2024.
             //  ! This operation is NOT safe.
             //  ! zh-CN: 此操作存在安全隐患.
-            project.delete destDir
+            project.delete destFile.absolutePath
 
-            def tmp = project.file(destDir).parentFile
+            def tmp = destFile.parentFile
             while (tmp != project.projectDir) {
                 if (tmp.listFiles().toList().isEmpty()) {
                     println("Delete empty directory: $tmp.absolutePath")
@@ -484,7 +491,7 @@ class Utils {
             }
 
             String formattedTotalExtractedSize = formatFileSize(totalExtractedSize)
-            print String.format("\rExtraction complete [ %s | %s ]\n", project.file(destDir).absolutePath, formattedTotalExtractedSize)
+            print String.format("\rExtraction complete [ %s | %s ]\n", destFile.absolutePath, formattedTotalExtractedSize)
             System.out.flush()
             println()
 
@@ -492,7 +499,7 @@ class Utils {
 
             project.copy {
                 from tempOutFile
-                into destDir
+                into destFile
             }
             project.delete tempOutFile
         }
@@ -550,14 +557,14 @@ class Utils {
             }
 
             String formattedUncompressedSize = formatFileSize(totalExtractedSize)
-            print String.format("\rExtraction complete [ %s | %s ]\n", project.file(destDir).absolutePath, formattedUncompressedSize)
+            print String.format("\rExtraction complete [ %s | %s ]\n", destFile.absolutePath, formattedUncompressedSize)
             System.out.flush()
 
             sevenZFile.close()
 
             project.copy {
                 from tempOutFile
-                into destDir
+                into destFile
             }
             project.delete tempOutFile
         }
