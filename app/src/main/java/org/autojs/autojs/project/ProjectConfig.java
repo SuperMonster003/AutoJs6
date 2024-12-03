@@ -9,13 +9,19 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.util.JsonUtils;
+import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Stardust on Jan 24, 2018.
@@ -42,7 +48,7 @@ public class ProjectConfig {
     private String mMainScriptFile;
 
     @Nullable
-    @SerializedName("assets")
+    @SerializedName(value = "assets", alternate = {"asset", "assetList"})
     private List<String> mAssets = new ArrayList<>();
 
     @SerializedName("launchConfig")
@@ -65,7 +71,7 @@ public class ProjectConfig {
     @SerializedName("scripts")
     private final Map<String, ScriptConfig> mScriptConfigs = new HashMap<>();
 
-    @SerializedName("useFeatures")
+    @SerializedName(value = "useFeatures", alternate = {"useFeature", "useFeatureList"})
     private List<String> mFeatures = new ArrayList<>();
 
     public static ProjectConfig fromJson(String json) {
@@ -105,15 +111,151 @@ public class ProjectConfig {
 
     @Nullable
     public static ProjectConfig fromFile(String path) {
+        String fileContents = null;
         try {
-            return fromJson(PFiles.read(path));
-        } catch (Exception e) {
-            return null;
+            fileContents = PFiles.read(path);
+            return fromJson(fileContents);
+        } catch (Exception e1) {
+            if (fileContents == null) return null;
+        try {
+                return fromJson(JsonUtils.repairJson(fileContents));
+            } catch (Exception e2) {
+                return tryReadCrucialData(fileContents, path);
+            }
+        }
+    }
+
+    private static ProjectConfig tryReadCrucialData(String s, String jsonFilePath) {
+        ProjectConfig config = new ProjectConfig();
+        BuildInfo buildInfo = new BuildInfo();
+        ScriptConfig scriptConfig = new ScriptConfig();
+        LaunchConfig launchConfig = new LaunchConfig();
+
+        Pattern namePattern = Pattern.compile(stringPattern("name"));
+        Pattern versionNamePattern = Pattern.compile(stringPattern("versionName"));
+        Pattern versionCodePattern = Pattern.compile(numberPattern("versionCode"));
+        Pattern packageNamePattern = Pattern.compile(stringPattern("packageName"));
+        Pattern mainPattern = Pattern.compile(stringPattern("main"));
+        Pattern iconPattern = Pattern.compile(stringPattern("icon"));
+
+        Pattern assetsPattern = Pattern.compile(listPattern("asset"));
+        Pattern abisPattern = Pattern.compile(listPattern("abi"));
+        Pattern libsPattern = Pattern.compile(listPattern("lib"));
+        Pattern useFeaturesPattern = Pattern.compile(listPattern("useFeature"));
+
+        Pattern buildTimePattern = Pattern.compile(numberPattern("buildTime"));
+        Pattern buildNumberPattern = Pattern.compile(numberPattern("buildNumber"));
+        Pattern buildIdPattern = Pattern.compile(stringPattern("buildId"));
+
+        Pattern launchConfigPattern = Pattern.compile(booleanPattern("hideLogs"));
+
+        Pattern scriptsUiModePattern = Pattern.compile(booleanPattern("uiMode"));
+
+        setFieldIfMatches(namePattern, s, config::setName);
+        setFieldIfMatches(versionNamePattern, s, config::setVersionName);
+        setFieldForIntIfMatches(versionCodePattern, s, config::setVersionCode);
+        setFieldIfMatches(packageNamePattern, s, config::setPackageName);
+        setFieldIfMatches(mainPattern, s, config::setMainScriptFile);
+        setFieldIfMatches(iconPattern, s, config::setIcon);
+
+        setListIfMatches(assetsPattern, s, config::setAssets);
+        setListIfMatches(abisPattern, s, config::setAbis);
+        setListIfMatches(libsPattern, s, config::setLibs);
+        setListIfMatches(useFeaturesPattern, s, config::setFeatures);
+
+        setFieldForIntIfMatches(buildTimePattern, s, buildInfo::setBuildTime);
+        setFieldForIntIfMatches(buildNumberPattern, s, buildInfo::setBuildNumber);
+        setFieldIfMatches(buildIdPattern, s, buildInfo::setBuildId);
+
+        setFieldForBooleanIfMatches(launchConfigPattern, s, launchConfig::setHideLogs);
+
+        setFieldForBooleanIfMatches(scriptsUiModePattern, s, scriptConfig::setUiMode);
+
+        if (config.getName() == null || config.getName().isBlank()) {
+            if (jsonFilePath.endsWith(CONFIG_FILE_NAME)) {
+                File parentFile = new File(jsonFilePath).getParentFile();
+                if (parentFile != null) {
+                    config.setName(parentFile.getName());
+                }
+            }
+        }
+
+        return config;
+    }
+
+    @NotNull
+    @Language("RegExp")
+    private static String listPattern(String name) {
+        return "\"" + parseNamePattern(name) + "(s|List)?\"\\s*:\\s*\\[([^\"]*)]";
+    }
+
+    @NotNull
+    @Language("RegExp")
+    private static String numberPattern(String name) {
+        return "\"" + parseNamePattern(name) + "\"\\s*:\\s*\"?(\\d+)\"?";
+    }
+
+    @NotNull
+    @Language("RegExp")
+    private static String booleanPattern(String name) {
+        return "\"" + parseNamePattern(name) + "\"\\s*:\\s*\"?(true|false)\"?";
+    }
+
+    @NotNull
+    @Language("RegExp")
+    private static String stringPattern(String name) {
+        return "\"" + parseNamePattern(name) + "\"\\s*:\\s*\"((?:[^\"]|(?<=\\\\)\")*?)(?<!\\\\)\"";
+    }
+
+    @NotNull
+    private static String parseNamePattern(String name) {
+        return Pattern.quote(name.replaceAll("(?<=[a-z])([A-Z]+)", "(?:$1|_$1)"));
+    }
+
+    private static void setFieldIfMatches(Pattern pattern, String s, java.util.function.Consumer<String> setter) {
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.find()) {
+            setter.accept(matcher.group(1));
+        }
+    }
+
+    private static void setFieldForIntIfMatches(Pattern pattern, String s, java.util.function.IntConsumer setter) {
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.find()) {
+            setter.accept(Integer.parseInt(matcher.group(1)));
+        }
+    }
+
+    private static void setFieldForBooleanIfMatches(Pattern pattern, String s, java.util.function.Consumer<Boolean> setter) {
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.find()) {
+            setter.accept(Boolean.getBoolean(matcher.group(1)));
+        }
+    }
+
+    private static void setListIfMatches(Pattern pattern, String s, java.util.function.Consumer<List<String>> setter) {
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.find()) {
+            String content = matcher.group(1);
+            if (content == null) {
+                setter.accept(Collections.emptyList());
+            } else {
+                List<String> list = Arrays.asList(content.split("\\s*,\\s*"));
+                setter.accept(list);
+            }
         }
     }
 
     public static boolean isProject(ExplorerPage page) {
-        return fromProjectDir(page.getPath()) != null;
+        // @Hint by SuperMonster003 on Dec 2, 2024.
+        //  ! It is considered a valid project regardless of whether project.json
+        //  ! contains the necessary information or can be parsed correctly.
+        //  ! zh-CN: 无论 project.json 是否包含必要信息或是否可以正常解析, 都认为是一个有效项目.
+        //  !
+        //  # return fromProjectDir(page.getPath()) != null;
+        String path = page.getPath();
+        String pathname = configFileOfDir(path);
+        return new File(pathname).exists();
     }
 
     @Nullable
@@ -232,16 +374,24 @@ public class ProjectConfig {
 
     public List<String> getAbis() {
         if (mAbis == null) {
-            mAbis = Collections.emptyList();
+            setAbis(Collections.emptyList());
         }
         return mAbis;
     }
 
+    public void setAbis(@Nullable List<String> abis) {
+        mAbis = abis;
+    }
+
     public List<String> getLibs() {
         if (mLibs == null) {
-            mLibs = Collections.emptyList();
+            setLibs(Collections.emptyList());
         }
         return mLibs;
+    }
+
+    public void setLibs(@Nullable List<String> libs) {
+        mLibs = libs;
     }
 
     public String getBuildDir() {
