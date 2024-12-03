@@ -805,13 +805,13 @@ class Versions(filePath: String) {
             javaVersionInfoSuffix += " [fallback]"
         }
 
-        val platformVersion = gradle.extra["platformVersion"] as String
-        val platformAbbr = gradle.extra["platformAbbr"] as String
-
-        javaVersionCeilMap[platformAbbr]?.get(platformVersion)?.let { ceil: Int ->
-            if (niceVersionInt > ceil) {
-                niceVersionInt = ceil
-                javaVersionInfoSuffix += " [coerced]"
+        if (gradle.extra.has("gradleVersionToCoerceJavaVersion")) {
+            (gradle.extra["gradleVersionToCoerceJavaVersion"] as? String)?.let {
+                val maxGradleVersion = getMaxSupportedJavaVersion(it)
+                if (niceVersionInt > maxGradleVersion) {
+                    niceVersionInt = maxGradleVersion
+                    javaVersionInfoSuffix += " [coerced]"
+                }
             }
         }
 
@@ -830,23 +830,6 @@ class Versions(filePath: String) {
         get() = properties["BUILD_TIME"]?.let {
             Date().time - (it as String).toLong() > minBuildTimeGap
         } == true
-
-    private fun appendToTask(project: Project, flavorName: String, buildType: String) {
-        project.tasks.getByName(Utils.getAssembleTaskName(flavorName, buildType)).doLast {
-            updateProperties()
-            println()
-            showInfo()
-        }
-    }
-
-    private fun updateProperties() {
-        if (isBuildGapEnough) {
-            properties["VERSION_BUILD"] = "${appVersionCode + 1}"
-            isBuildNumberAutoIncremented = true
-        }
-        properties["BUILD_TIME"] = "${Date().time}"
-        properties.store(file.writer(), null)
-    }
 
     init {
         if (currentVersionInt < javaVersionMinSuggested) {
@@ -899,6 +882,67 @@ class Versions(filePath: String) {
                 return showInfo()
             }
         })
+    }
+
+    private fun appendToTask(project: Project, flavorName: String, buildType: String) {
+        project.tasks.getByName(Utils.getAssembleTaskName(flavorName, buildType)).doLast {
+            updateProperties()
+            println()
+            showInfo()
+        }
+    }
+
+    private fun updateProperties() {
+        if (isBuildGapEnough) {
+            properties["VERSION_BUILD"] = "${appVersionCode + 1}"
+            isBuildNumberAutoIncremented = true
+        }
+        properties["BUILD_TIME"] = "${Date().time}"
+        properties.store(file.writer(), null)
+    }
+
+    private fun getMaxSupportedJavaVersion(gradleVersion: String): Int {
+
+        /* https://docs.gradle.org/current/userguide/compatibility.html . */
+        val presetVersionMap = listOf(
+            17 to "7.3",
+            18 to "7.5",
+            19 to "7.6",
+            20 to "8.3",
+            21 to "8.5",
+            22 to "8.8",
+            23 to "8.10",
+        )
+
+        fun parseVersion(version: String) = version.split(Regex("[.-]")).map { it.toIntOrNull() ?: 0 }
+
+        val inputGradleVersionInts = parseVersion(gradleVersion)
+
+        var maxJavaVersion: Int = presetVersionMap.first().first
+
+        for ((presetJavaVersion, presetGradleVersion) in presetVersionMap) {
+            val presetGradleVersionInts: List<Int> = parseVersion(presetGradleVersion)
+
+            for (i in presetGradleVersionInts.indices) {
+                when {
+                    i > inputGradleVersionInts.lastIndex -> {
+                        break
+                    }
+                    inputGradleVersionInts[i] > presetGradleVersionInts[i] -> {
+                        maxJavaVersion = presetJavaVersion
+                        break
+                    }
+                    inputGradleVersionInts[i] < presetGradleVersionInts[i] -> {
+                        break
+                    }
+                    i == presetGradleVersionInts.lastIndex -> {
+                        maxJavaVersion = presetJavaVersion
+                    }
+                }
+            }
+        }
+
+        return maxJavaVersion
     }
 
 }

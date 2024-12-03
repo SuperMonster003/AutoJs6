@@ -64,14 +64,15 @@ pluginManagement {
             ?: System.getProperty("java.vendor")
             ?: System.getProperty("java.vm.vendor")
         val concerns: List<String> by lazy {
-            val concernedKeyWords = setOf("name", "vendor", "version", "platform", "paths")
-            val unconcernedKeyWords = setOf("url", "user", "runtime", "specification", "os", "date")
+            val concernedKeyWords = setOf("name", "vendor", "version", "platform", "paths", "os")
+            val unconcernedKeyWords = setOf("url", "user", "runtime", "specification", "date")
             val unconcernedKeys = setOf(
                 "java.class.version",
                 "java.vm.name",
                 "java.vm.version",
                 "java.version",
                 "platform.random.idempotence.check.rate",
+                "sun.os.patch.level",
             )
             System.getProperties().filterKeys { key ->
                 return@filterKeys key is String
@@ -80,6 +81,7 @@ pluginManagement {
                         && key.split(Regex("\\W")).none { it in unconcernedKeyWords }
             }.map { (key, value) -> "[ $key: $value ]" }
         }
+        var isConcernsAlreadyPrinted = false
     }
 
     data class Classpath(val id: String, val version: String)
@@ -114,8 +116,16 @@ pluginManagement {
         /* Print concerned info by `System.getProperties()`. */
         val isShowConcernedSystemProperties = true
 
+        /* https://docs.gradle.org/current/userguide/compatibility.html . */
+        val isJavaVersionCoercedByGradleVersion = true
+
         val isCleanupPaddleOcr = false
         val isCleanupRapidOcr = false
+
+        val fallbackGradleVersion = "8.0.2"
+        val fallbackKotlinVersion = "1.9.22"
+        val recommendedMinGradleVersion = "8.5.2"
+        val recommendedMinKotlinVersion = "1.9.24"
 
         @Suppress("unused")
         val platforms = object {
@@ -132,19 +142,13 @@ pluginManagement {
                     "2022.3" to "8.1.4", /* Mar 31, 2024. */
                     "2022.2" to "8.0.2", /* May 26, 2023. */
                     "2022.1" to "7.4.2", /* Mar 25, 2023. */
-                    consts.IDENTIFIER_FALLBACK to "8.0.2", /* Jan 21, 2024. */
+                    consts.IDENTIFIER_FALLBACK to fallbackGradleVersion,
                 ),
                 kotlinVersionMap = mapOf(
                     "2024.3" to "2.1.0", /* Nov 29, 2024. */
                     "2024.2" to "2.1.0", /* Nov 29, 2024. */
                     "2024.1" to "2.0.0", /* Aug 13, 2024. */
-                    "2023.3" to "1.9.20-RC2", /* Jan 21, 2024. */
-                    "2023.2" to "1.9.20-RC2", /* Jan 21, 2024. */
-                    "2023.1" to "1.9.20-RC2", /* Oct 25, 2023. */
-                    "2022.3" to "1.9.0-RC", /* Jul 3, 2023. */
-                    "2022.2" to "1.8.20-RC2", /* Mar 23, 2023. */
-                    "2022.1" to "1.8.0-RC2", /* Dec 20, 2022. */
-                    consts.IDENTIFIER_FALLBACK to "1.8.0", /* Aug 17, 2023. */
+                    consts.IDENTIFIER_FALLBACK to fallbackKotlinVersion,
                 ),
                 codenameVersionMap = mapOf(
                     "2024.3" to "M", /* Nov 29, 2024. */
@@ -200,18 +204,14 @@ pluginManagement {
                     "2023.3" to "8.2.2", /* Jan 19, 2024. */
                     "2023.1" to "7.4.2", /* May 26, 2023. */
                     "2022.3" to "7.4.0-beta02", /* Mar 25, 2023. */
-                    consts.IDENTIFIER_FALLBACK to "8.1.2", /* Jan 21, 2024. */
+                    consts.IDENTIFIER_FALLBACK to fallbackGradleVersion,
                 ),
                 kotlinVersionMap = mapOf(
                     "2024.2.3" to "2.0.21", /* Oct 17, 2024. */
                     "2024.2" to "2.0.21-RC", /* Sep 27, 2024. */
-                    "2024.1.2" to "1.9.24", /* Apr 24, 2024. */
-                    "2024.1" to "1.9.23", /* Apr 6, 2024. */
+                    "2024.1" to "1.9.24", /* Dec 3, 2024. */
                     "2023.3" to "1.9.23", /* Mar 29, 2024. */
-                    "2023.2" to "1.9.21", /* Dec 2, 2023. */
-                    "2023.1" to "1.8.21", /* Apr 25, 2023. */
-                    "2022.3" to "1.8.21", /* Apr 25, 2023. */
-                    consts.IDENTIFIER_FALLBACK to "1.8.21", /* May 3, 2023. */
+                    consts.IDENTIFIER_FALLBACK to fallbackKotlinVersion,
                 ),
             ) {
                 override val weight = 10
@@ -223,11 +223,11 @@ pluginManagement {
                 name = "Temurin", vendor = "temurin", abbr = "Adoptium", /* More common as "Eclipse Adoptium". */
                 androidVersionMap = mapOf(
                     "20.0.2+9" to "8.2.2", /* Dec 2, 2024. */
-                    consts.IDENTIFIER_FALLBACK to "8.2.2", /* Dec 2, 2024. */
+                    consts.IDENTIFIER_FALLBACK to recommendedMinGradleVersion,
                 ),
                 kotlinVersionMap = mapOf(
                     "20.0.2+9" to "1.9.24", /* Dec 2, 2024. */
-                    consts.IDENTIFIER_FALLBACK to "1.9.24", /* Dec 2, 2024. */
+                    consts.IDENTIFIER_FALLBACK to recommendedMinKotlinVersion,
                 ),
             ) {
                 override val weight = 5
@@ -236,10 +236,10 @@ pluginManagement {
             val unknown = object : Platform(
                 name = "Unknown", abbr = consts.IDENTIFIER_UNKNOWN, vendor = consts.IDENTIFIER_UNKNOWN,
                 androidVersionMap = mapOf(
-                    consts.IDENTIFIER_FALLBACK to "8.1.2", /* Oct 30, 2023. */
+                    consts.IDENTIFIER_FALLBACK to recommendedMinGradleVersion,
                 ),
                 kotlinVersionMap = mapOf(
-                    consts.IDENTIFIER_FALLBACK to "1.8.21", /* Oct 30, 2023. */
+                    consts.IDENTIFIER_FALLBACK to recommendedMinKotlinVersion,
                 ),
             ) {
                 fun declare() = systemProperties.platform?.let {
@@ -248,7 +248,7 @@ pluginManagement {
                     "Current platform is unknown",
                     systemProperties.concerns,
                     "However, here are some props may be useful for determining platform info",
-                ).print()
+                ).print().also { systemProperties.isConcernsAlreadyPrinted = true }
             }
 
             fun determine(): Platform {
@@ -260,7 +260,10 @@ pluginManagement {
                     }
                 }
                 return when {
-                    candidates.isEmpty() -> unknown.also { it.declare() }
+                    candidates.isEmpty() -> when (val osName = System.getProperty("os.name")) {
+                        is String -> unknown.also { it.name = osName }
+                        else -> unknown.also { it.declare() }
+                    }
                     candidates.size > 1 -> candidates.maxBy { it.weight }
                     else -> candidates.first()
                 }.also {
@@ -332,11 +335,11 @@ pluginManagement {
             "1.8.20-RC2" to "1.0.9", /* Aug 16, 2023. */
             "1.8.0" to "1.0.9", /* Aug 16, 2023. */
             "1.8.0-RC2" to "1.0.8", /* Aug 16, 2023. */
-            consts.IDENTIFIER_FALLBACK to "1.8.0-1.0.9", /* Aug 16, 2023. */
+            consts.IDENTIFIER_FALLBACK to "1.9.24-1.0.20", /* Dec 3, 2024. */
         )
 
         abstract inner class Platform(
-            val name: String,
+            var name: String,
             val abbr: String,
             val vendor: String,
             val androidVersionMap: Map<String, String>,
@@ -345,10 +348,12 @@ pluginManagement {
             val codenameMap: Map<String, String>? = null,
         ) {
 
-            open val fullName: String = uppercaseFirstChar(name)
             open val gradleSettingsName: String? = null
             open val weight: Int = -Int.MAX_VALUE
             open var version: String = consts.DEFAULT_VERSION
+
+            open val fullName
+                get() = uppercaseFirstChar(name)
 
             open fun matchEnvironment() = systemProperties.platform?.startsWith(name) == true
                     || systemProperties.vendorName?.contains(vendor, true) == true
@@ -410,12 +415,14 @@ pluginManagement {
 
     }
 
+    val platform = config.platforms.determine()
+
     val console = object {
 
         val versionInfo = mutableListOf<String>()
 
         fun printConcernedSystemPropertiesIfNeeded() {
-            if (config.isShowConcernedSystemProperties) {
+            if (config.isShowConcernedSystemProperties && !systemProperties.isConcernsAlreadyPrinted) {
                 Formatted("Information for concerned system properties", systemProperties.concerns).print(true)
             }
         }
@@ -425,8 +432,6 @@ pluginManagement {
         }
 
     }
-
-    val platform = config.platforms.determine()
 
     platform.ensureMinimalGradleJdkVersion()
     platform.prependConsoleInformation(console.versionInfo)
@@ -485,6 +490,9 @@ pluginManagement {
                 else -> it.version.also {
                     suffix += identifier.specifiedSuffix
                 }
+            }
+            if (config.isJavaVersionCoercedByGradleVersion && it.id == "com.android.tools.build:gradle") {
+                gradle.extra.set("gradleVersionToCoerceJavaVersion", version)
             }
             "${it.id}:$version".also { notation ->
                 console.versionInfo += "Classpath: \"$notation\"$suffix"
@@ -606,8 +614,6 @@ pluginManagement {
     }
 
     gradle.extra.apply {
-        set("platformVersion", platform.version)
-        set("platformAbbr", platform.abbr)
         set("isCleanupPaddleOcr", config.isCleanupPaddleOcr)
         set("isCleanupRapidOcr", config.isCleanupRapidOcr)
     }
