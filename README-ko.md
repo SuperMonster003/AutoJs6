@@ -107,8 +107,8 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01`에 다시 �
 * [문서](https://docs.autojs6.com)
 * [사용 설명서 (작성 중)](https://docs.autojs6.com/#/manual)
 * [문제 해결](https://docs.autojs6.com/#/qa)
-* [프로젝트 컴파일 및 빌드](#프로젝트 컴파일 및 빌드)
-* [스크립트 개발 지원](#스크립트 개발 지원)
+* [프로젝트 컴파일 및 빌드](#project-compilation-and-build)
+* [스크립트 개발 지원](#script-development-assistance)
 
 ******
 
@@ -309,7 +309,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 
 ******
 
-### 프로젝트 컴파일 및 빌드
+### <a id="project-compilation-and-build"></a>프로젝트 컴파일 및 빌드
 
 ******
 
@@ -368,7 +368,7 @@ SDK Tools (SDK 도구) (오른쪽 창에 위치)
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다..
 
-2024 년 12 월 2 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `23`입니다..
+2024 년 12 월 4 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `23`입니다..
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다..
 
@@ -421,7 +421,7 @@ Android Studio 메인 화면에서 `Get from VCS (버전 관리 시스템에서 
 
 ******
 
-### 스크립트 개발 지원
+### <a id="script-development-assistance"></a>스크립트 개발 지원
 
 ******
 

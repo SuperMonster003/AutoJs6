@@ -98,8 +98,8 @@
 * [{{ li_manual_documentation }}](https://docs.autojs6.com)
 * [{{ li_manual_user_manual }}](https://docs.autojs6.com/#/manual)
 * [{{ li_manual_troubleshooting }}](https://docs.autojs6.com/#/qa)
-* [{{ h3_project_compilation_and_build }}](#{{ h3_project_compilation_and_build }})
-* [{{ h3_script_development_assistance }}](#{{ h3_script_development_assistance }})
+* [{{ h3_project_compilation_and_build }}](#project-compilation-and-build)
+* [{{ h3_script_development_assistance }}](#script-development-assistance)
 
 ******
 
@@ -153,7 +153,7 @@
 
 ******
 
-### {{ h3_project_compilation_and_build }}
+### <a id="project-compilation-and-build"></a>{{ h3_project_compilation_and_build }}
 
 ******
 
@@ -265,7 +265,7 @@ Gradle
 
 ******
 
-### {{ h3_script_development_assistance }}
+### <a id="script-development-assistance"></a>{{ h3_script_development_assistance }}
 
 ******
 
