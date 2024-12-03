@@ -107,8 +107,8 @@ En la tabla, Auto.js Pro 7/8/9 son versiones pagas, mientras que las demás son 
 * [Documentación de la aplicación](https://docs.autojs6.com)
 * [Manual del usuario (Por escribir)](https://docs.autojs6.com/#/manual)
 * [Solución de problemas](https://docs.autojs6.com/#/qa)
-* [Compilación y construcción del proyecto](#Compilación y construcción del proyecto)
-* [Asistencia en el desarrollo de scripts](#Asistencia en el desarrollo de scripts)
+* [Compilación y construcción del proyecto](#project-compilation-and-build)
+* [Asistencia en el desarrollo de scripts](#script-development-assistance)
 
 ******
 
@@ -309,7 +309,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ******
 
-### Compilación y construcción del proyecto
+### <a id="project-compilation-and-build"></a>Compilación y construcción del proyecto
 
 ******
 
@@ -368,7 +368,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `19`.
 
-Hasta el 2 de December de 2024, AutoJs6 soporta hasta la versión `23` de JDK.
+Hasta el 4 de December de 2024, AutoJs6 soporta hasta la versión `23` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 
@@ -421,7 +421,7 @@ Empaque el proyecto y genere un archivo APK que se puede instalar en dispositivo
 
 ******
 
-### Asistencia en el desarrollo de scripts
+### <a id="script-development-assistance"></a>Asistencia en el desarrollo de scripts
 
 ******
 

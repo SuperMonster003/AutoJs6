@@ -107,8 +107,8 @@ Auto.js Pro 7/8/9 in the table are paid versions, and the rest are free open-sou
 * [Application Documentation](https://docs.autojs6.com)
 * [User Manual (to be written)](https://docs.autojs6.com/#/manual)
 * [Troubleshooting](https://docs.autojs6.com/#/qa)
-* [Project Compilation and Build](#Project Compilation and Build)
-* [Script Development Assistance](#Script Development Assistance)
+* [Project Compilation and Build](#project-compilation-and-build)
+* [Script Development Assistance](#script-development-assistance)
 
 ******
 
@@ -309,7 +309,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 ******
 
-### Project Compilation and Build
+### <a id="project-compilation-and-build"></a>Project Compilation and Build
 
 ******
 
@@ -368,7 +368,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of Dec 2 , 2024, AutoJs6 supports up to version `23` of the JDK.
+As of Dec 4 , 2024, AutoJs6 supports up to version `23` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 
@@ -421,7 +421,7 @@ Package the project and generate an APK file that can be installed on an Android
 
 ******
 
-### Script Development Assistance
+### <a id="script-development-assistance"></a>Script Development Assistance
 
 ******
 

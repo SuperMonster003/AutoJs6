@@ -107,8 +107,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * [应用文档](https://docs.autojs6.com)
 * [使用手册 (待编写)](https://docs.autojs6.com/#/manual)
 * [疑难解答](https://docs.autojs6.com/#/qa)
-* [项目编译构建](#项目编译构建)
-* [脚本开发辅助](#脚本开发辅助)
+* [项目编译构建](#project-compilation-and-build)
+* [脚本开发辅助](#script-development-assistance)
 
 ******
 
@@ -153,6 +153,14 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 ### 版本历史
 
 ******
+
+# v6.6.1
+
+###### 2024/12/03
+
+* `修复` 部分环境因回退版本过低而无法正常编译项目的问题
+* `优化` 脚本项目识别在 project.json 损坏情况下尽可能还原关键信息
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
 # v6.6.0
 
@@ -284,32 +292,13 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 控制台打印错误消息时附加详细的堆栈信息
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
 
-# v6.4.2
-
-###### 2023/11/15
-
-* `新增` dialogs.build() 选项参数属性 inputSingleLine
-* `新增` console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_
-* `修复` ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
-* `修复` Android 7.x 发现新版本时无法获取版本详情的问题
-* `修复` Android 14+ 申请截图权限时导致应用崩溃的问题
-* `修复` 主页抽屉快速切换 "浮动按钮" 开关时可能导致应用崩溃的问题
-* `修复` 使用菜单关闭浮动按钮时重启应用后浮动按钮可能依然显示的问题
-* `修复` Android 13+ 设置页面选择并切换 AutoJs6 语言后无法生效的问题
-* `修复` 构建工具初次构建时无法自动完成 OpenCV 资源部署的问题
-* `优化` 原生化 bridges 模块以提升脚本执行效率 (Ref to [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
-* `优化` 重构无障碍服务相关代码以增强无障碍服务的功能稳定性 (实验性) _[`issue #167`](http://issues.autojs6.com/167)_
-* `优化` UiObject 和 UiObjectCollection 的打印输出格式
-* `优化` 构建工具在构建环境 Gradle JDK 版本不满足要求时作出升级提示
-* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v642)_
-
 ##### 更多版本历史可参阅
 
 * [CHANGELOG.md](http://changelog.autojs6.com)
 
 ******
 
-### 项目编译构建
+### <a id="project-compilation-and-build"></a>项目编译构建
 
 ******
 
@@ -368,7 +357,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2024 年 12 月 2 日, AutoJs6 可支持 JDK 最高版本为 `23`.
+截至 2024 年 12 月 4 日, AutoJs6 可支持 JDK 最高版本为 `23`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
@@ -421,7 +410,7 @@ Gradle
 
 ******
 
-### 脚本开发辅助
+### <a id="script-development-assistance"></a>脚本开发辅助
 
 ******
 

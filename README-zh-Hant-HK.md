@@ -107,8 +107,8 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * [應用文檔](https://docs.autojs6.com)
 * [使用手冊 (待編寫)](https://docs.autojs6.com/#/manual)
 * [疑難解答](https://docs.autojs6.com/#/qa)
-* [項目編譯構建](#項目編譯構建)
-* [腳本開發輔助](#腳本開發輔助)
+* [項目編譯構建](#project-compilation-and-build)
+* [腳本開發輔助](#script-development-assistance)
 
 ******
 
@@ -309,7 +309,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 ******
 
-### 項目編譯構建
+### <a id="project-compilation-and-build"></a>項目編譯構建
 
 ******
 
@@ -368,7 +368,7 @@ SDK Tools (SDK 工具) (位於右側窗口)
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `19`.
 
-截至 2024 年 12 月 2 日, AutoJs6 可支持 JDK 最高版本為 `23`.
+截至 2024 年 12 月 4 日, AutoJs6 可支持 JDK 最高版本為 `23`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 
@@ -421,7 +421,7 @@ Gradle
 
 ******
 
-### 腳本開發輔助
+### <a id="script-development-assistance"></a>腳本開發輔助
 
 ******
 
