@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Space
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.automator.filter.ClassNameFilter
 import org.autojs.autojs.core.ui.inflater.inflaters.BaseViewInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsActionMenuViewInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.JsAppBarLayoutInflater
@@ -355,7 +356,7 @@ open class DynamicLayoutInflater {
                 return View(context)
             }
             if (!niceName.contains(".") && !androidWidgetPrefixBlacklist.contains(niceName)) {
-                niceName = "android.widget.$niceName"
+                niceName = ClassNameFilter.extendedClassNameMap[niceName] ?: "android.widget.$niceName"
             }
             val creator = mViewCreators[niceName]
             if (creator != null) {
