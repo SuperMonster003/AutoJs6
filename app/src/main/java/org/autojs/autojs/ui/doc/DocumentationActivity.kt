@@ -12,19 +12,19 @@ import org.autojs.autojs6.databinding.ActivityDocumentationBinding
  */
 class DocumentationActivity : BaseActivity() {
 
-    private lateinit var binding: ActivityDocumentationBinding
+    private var binding: ActivityDocumentationBinding? = null
 
     private lateinit var mWebView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDocumentationBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(binding!!.root)
         setupViews()
     }
 
     private fun setupViews() {
-        mWebView = binding.ewebView.webView.also {
+        mWebView = binding!!.ewebView.webView.also {
             it.loadUrl(intent.getStringExtra(EXTRA_URL) ?: getUrl("index.html"))
         }
     }
@@ -38,6 +38,11 @@ class DocumentationActivity : BaseActivity() {
             // super.onBackPressed()
             onBackPressedDispatcher.onBackPressed()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding = null
     }
 
     companion object {

@@ -99,18 +99,34 @@ public class ShortcutCreateActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N_MR1)
     private void createShortcutByShortcutManager() {
-        CharSequence name = mName.getText();
+
+        // @Caution by SuperMonster003 on Dec 7, 2024.
+        //  ! It is necessary to convert to String type here,
+        //  ! rather than retaining the CharSequence type obtained from getText().
+        //  ! This is because on certain devices [such as MIUI 14 (Android 13)],
+        //  ! ShortcutInfoCompat.Builder#setShortLabel and setLongLabel
+        //  ! can only accept String type data returned by getText().
+        //  ! If CharSequence type data is directly passed in, the shortcut will fail to create properly.
+        //  !
+        //  ! zh-CN:
+        //  !
+        //  ! 此处需要转换为 String 类型, 而不能保留 getText() 方法得到的 CharSequence 类型.
+        //  ! 这是因为在一些特殊设备上 [如 MIUI 14 (Android 13)],
+        //  ! ShortcutInfoCompat.Builder#setShortLabel 及 setLongLabel 只能接受 getText() 返回的 String 类型数据,
+        //  ! 如果直接传入 CharSequence 类型数据, 快捷方式将无法正常创建.
+        //  !
+        //  # CharSequence name = mName.getText();
+        String name = mName.getText().toString();
+
         /* To make each script be able to have its own individual icon. */
         String id = ShortcutActivity.class.getName() + "$" + name + "@" + System.currentTimeMillis();
         Intent intent = new Intent(this, ShortcutActivity.class)
                 .putExtra(ScriptIntents.EXTRA_KEY_PATH, mScriptFile.getPath())
                 .setAction(Intent.ACTION_MAIN);
         if (mIsDefaultIcon) {
-            Icon icon = Icon.createWithResource(this, R.drawable.ic_file_type_js_dark_green);
-            ShortcutUtils.requestPinShortcut(this, id, intent, name, name, icon);
+            ShortcutUtils.requestPinShortcut(this, id, intent, name, name, R.drawable.ic_file_type_js_dark_green);
         } else {
-            Bitmap bitmap = BitmapUtils.drawableToBitmap(mIcon.getDrawable());
-            ShortcutUtils.requestPinShortcut(this, id, intent, name, name, bitmap);
+            ShortcutUtils.requestPinShortcut(this, id, intent, name, name, mIcon.getDrawable());
         }
     }
 
