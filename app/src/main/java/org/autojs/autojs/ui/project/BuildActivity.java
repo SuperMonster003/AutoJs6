@@ -31,6 +31,7 @@ import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.AppUtils;
 import org.autojs.autojs.runtime.api.AppUtils.Companion.SimpleVersionInfo;
+import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
@@ -386,8 +387,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private static String generatePackageNameSuffix(ScriptFile file) {
-        String name = file.getSimplifiedName()
-                .replaceAll("\\W+", "_");
+        String name = file.getSimplifiedName();
+        if (name.matches(".*[\\u4e00-\\u9fff].*")) {
+            name = Pinyin.ofRhino(name);
+        }
+        name = name.replaceAll("\\W+", "_");
         if (name.matches("^\\d.*")) {
             name = "app_" + name;
         }
