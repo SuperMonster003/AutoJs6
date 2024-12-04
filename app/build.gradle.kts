@@ -193,6 +193,10 @@ dependencies /* Unclassified */ {
     // Toaster
     implementation("com.github.getActivity:Toaster:12.6")
     implementation("com.github.getActivity:EasyWindow:10.3")
+
+    // pinyin4j
+    implementation("com.belerweb:pinyin4j:2.5.0")
+
 }
 
 dependencies /* MIME */ {
