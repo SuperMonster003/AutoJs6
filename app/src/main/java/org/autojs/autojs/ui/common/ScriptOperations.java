@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.pm.ShortcutManagerCompat;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.tencent.bugly.crashreport.BuglyLog;
@@ -38,6 +39,7 @@ import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.shortcut.ShortcutCreateActivity;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
 import org.autojs.autojs.util.EnvironmentUtils;
+import org.autojs.autojs.util.ShortcutUtils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
@@ -363,8 +365,14 @@ public class ScriptOperations {
     }
 
     public void createShortcut(ScriptFile file) {
-        mContext.startActivity(new Intent(mContext, ShortcutCreateActivity.class)
-                .putExtra(ShortcutCreateActivity.EXTRA_FILE, file));
+        if (!ShortcutManagerCompat.isRequestPinShortcutSupported(mContext)) {
+            ShortcutUtils.showPinShortcutNotSupportedDialog(mContext);
+            return;
+        }
+        Intent intent = new Intent(mContext, ShortcutCreateActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .putExtra(ShortcutCreateActivity.EXTRA_FILE, file);
+        mContext.startActivity(intent);
     }
 
     public void delete(final ScriptFile scriptFile) {
@@ -390,7 +398,7 @@ public class ScriptOperations {
             return;
         }
         String content = mContext.getString(R.string.text_old_path) + ": " + oldPath + "\n"
-                         + mContext.getString(R.string.text_new_path) + ": " + newPath;
+                + mContext.getString(R.string.text_new_path) + ": " + newPath;
         new MaterialDialog.Builder(mContext)
                 .title(mContext.getString(R.string.text_prompt))
                 .content(content)
