@@ -459,11 +459,11 @@ object RhinoUtils {
     fun coerceNumber(o: Any?, def: Number? = null): Double = when {
         !o.isJsNullish() -> Context.toNumber(o).also {
             require(!it.isNaN() || def == RhinoScriptRuntime.NaN) {
-                "Failed to coerce ${o.jsBrief()} into a number"
+                "Failed to coerce ${o.jsBrief()} into a valid number"
             }
         }
         !def.isJsNullish() -> def!!.toDouble()
-        else -> throw IllegalArgumentException("Failed to coerce nullish (${o.jsSpecies()}) into a number")
+        else -> throw IllegalArgumentException("Failed to coerce nullish (${o.jsSpecies()}) into a valid number")
     }
 
     @JvmStatic
