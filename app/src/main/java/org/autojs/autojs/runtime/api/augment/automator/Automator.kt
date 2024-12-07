@@ -17,11 +17,12 @@ import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.isJsNumber
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
@@ -35,6 +36,8 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.NativeJavaObject
 import org.mozilla.javascript.NativeObject
+import android.graphics.Point as AndroidPoint
+import org.opencv.core.Point as OpencvPoint
 
 @Suppress("unused", "SameParameterValue", "UNUSED_PARAMETER")
 class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
@@ -86,10 +89,10 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
          */
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun click(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = unwrapArguments(args) {
-            require(it.isNotEmpty()) { "Arguments cannot be empty for automator.click" }
-            when (it.size) {
-                1 -> when (val o = it[0]) {
+        fun click(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = unwrapArguments(args) { argList ->
+            require(argList.isNotEmpty()) { "Arguments cannot be empty for automator.click" }
+            when (argList.size) {
+                1 -> when (val o = argList[0]) {
                     is Rect -> return@unwrapArguments click(scriptRuntime, arrayOf(o.centerX(), o.centerY()))
                     is UiObject -> return@unwrapArguments when {
                         o.clickable() -> o.click()
@@ -102,32 +105,75 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                             if (y.isJsNullish()) return@unwrapArguments click(scriptRuntime, arrayOf(x, x))
                         }
                     }
+                    is AndroidPoint -> return@unwrapArguments click(scriptRuntime, arrayOf(o.x, o.y))
+                    is OpencvPoint -> return@unwrapArguments click(scriptRuntime, arrayOf(o.x, o.y))
+                    is NativeObject -> {
+                        val x = o.inquire("x", ::coerceIntNumber) ?: throw IllegalStateException(
+                            "Property \"x\" for automator.click must be a valid number",
+                        )
+                        val y = o.inquire("y", ::coerceIntNumber) ?: throw IllegalStateException(
+                            "Property \"y\" for automator.click must be a valid number",
+                        )
+                        return@unwrapArguments click(scriptRuntime, arrayOf(x, y))
+                    }
                 }
                 2 -> {
-                    val (x, y) = it
-                    return@unwrapArguments scriptRuntime.automator.click(coerceIntNumber(x), coerceIntNumber(y))
+                    val (x, y) = argList
+                    if (x.isJsNumber() && y.isJsNumber()) {
+                        return@unwrapArguments scriptRuntime.automator.click(coerceIntNumber(x), coerceIntNumber(y))
+                    }
                 }
             }
-            return@unwrapArguments performAction(scriptRuntime, fun(target: ActionTarget) = scriptRuntime.automator.click(target), it)
+            return@unwrapArguments performAction(scriptRuntime, fun(target: ActionTarget) = scriptRuntime.automator.click(target), argList)
         }
 
         /**
          * TypeScript Declarations:
          * - longClick(x: number, y: number): boolean
+         * - longClick(point: [x: number, y: number]): boolean
          * - longClick(text: string, index?: number): boolean
          * - longClick(left: number, top: number, right: number, bottom: number): boolean
+         * - longClick(widget: UiObject): boolean
+         * - longClick(bounds: Rect): boolean
          */
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun longClick(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = unwrapArguments(args) {
-            require(it.isNotEmpty()) { "Arguments cannot be empty for automator.longClick" }
-            when (it.size) {
-                2 -> {
-                    val (x, y) = it
-                    scriptRuntime.automator.longClick(coerceIntNumber(x), coerceIntNumber(y))
+        fun longClick(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = unwrapArguments(args) { argList ->
+            require(argList.isNotEmpty()) { "Arguments cannot be empty for automator.longClick" }
+            when (argList.size) {
+                1 -> when (val o = argList[0]) {
+                    is Rect -> return@unwrapArguments longClick(scriptRuntime, arrayOf(o.centerX(), o.centerY()))
+                    is UiObject -> return@unwrapArguments when {
+                        o.longClickable() -> o.longClick()
+                        else -> longClick(scriptRuntime, arrayOf(o.bounds()))
+                    }
+                    is List<*> -> {
+                        val (x, y) = o
+                        if (x.isJsNumber()) {
+                            if (y.isJsNumber()) return@unwrapArguments longClick(scriptRuntime, arrayOf(x, y))
+                            if (y.isJsNullish()) return@unwrapArguments longClick(scriptRuntime, arrayOf(x, x))
+                        }
+                    }
+                    is AndroidPoint -> return@unwrapArguments longClick(scriptRuntime, arrayOf(o.x, o.y))
+                    is OpencvPoint -> return@unwrapArguments longClick(scriptRuntime, arrayOf(o.x, o.y))
+                    is NativeObject -> {
+                        val x = o.inquire("x", ::coerceIntNumber) ?: throw IllegalStateException(
+                            "Property \"x\" for automator.longClick must be a valid number",
+                        )
+                        val y = o.inquire("y", ::coerceIntNumber) ?: throw IllegalStateException(
+                            "Property \"y\" for automator.longClick must be a valid number",
+                        )
+                        return@unwrapArguments longClick(scriptRuntime, arrayOf(x, y))
+                    }
                 }
-                else -> performAction(scriptRuntime, fun(target: ActionTarget) = scriptRuntime.automator.longClick(target), it)
+                2 -> {
+                    val (x, y) = argList
+                    if (x.isJsNumber() && y.isJsNumber()) {
+                        return@unwrapArguments scriptRuntime.automator.longClick(coerceIntNumber(x), coerceIntNumber(y))
+                    }
+                }
             }
+            return@unwrapArguments performAction(scriptRuntime, fun(target: ActionTarget) = scriptRuntime.automator.longClick(target), argList)
         }
 
         /**
