@@ -417,14 +417,20 @@ public class Images {
                 mPreCaptureImage.recycleInternal();
                 mPreCaptureImage = null;
             }
+            releaseScreenCaptureRequester();
         }
     }
 
     public void stopScreenCapturerForegroundService() {
         var applicationContext = AutoJs.getInstance().getApplication().getApplicationContext();
         applicationContext.stopService(new Intent(applicationContext, ScreenCapturerForegroundService.class));
+        releaseScreenCaptureRequester();
+    }
+
+    private void releaseScreenCaptureRequester() {
         if (mScreenCaptureRequester != null) {
             mScreenCaptureRequester.unbindService();
+            mScreenCaptureRequester = null;
         }
     }
 

@@ -149,7 +149,7 @@
 
 ##### {{ h5_for_more_version_history }}
 
-* [CHANGELOG.md](http://changelog.autojs6.com)
+* {{ placeholder_read_more_in_changelog_md }}
 
 ******
 

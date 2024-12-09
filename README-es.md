@@ -305,7 +305,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ##### Para más historial de versiones, consulte
 
-* [CHANGELOG.md](http://changelog.autojs6.com)
+* [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-es.md)
 
 ******
 
@@ -368,7 +368,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `19`.
 
-Hasta el 4 de December de 2024, AutoJs6 soporta hasta la versión `23` de JDK.
+Hasta el 9 de December de 2024, AutoJs6 soporta hasta la versión `23` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

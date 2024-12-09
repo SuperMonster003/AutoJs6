@@ -14,6 +14,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.LayoutInspector
 import org.autojs.autojs.core.activity.ActivityInfoProvider
 import org.autojs.autojs.core.console.GlobalConsole
+import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.core.record.accessibility.AccessibilityActionRecorder
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine
 import org.autojs.autojs.engine.RootAutomatorEngine
@@ -21,12 +22,12 @@ import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.engine.ScriptEngineServiceBuilder
 import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
-import org.autojs.autojs.core.pref.Pref.registerOnSharedPreferenceChangeListener
 import org.autojs.autojs.rhino.InterruptibleAndroidContextFactory
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.Shell
+import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.tool.UiHandler
@@ -80,6 +81,7 @@ abstract class AbstractAutoJs protected constructor(val application: Application
     init {
         addAccessibilityServiceDelegates()
         registerActivityLifecycleCallbacks()
+        WrappedShizuku.onCreate()
     }
 
     private fun initContextFactory() {

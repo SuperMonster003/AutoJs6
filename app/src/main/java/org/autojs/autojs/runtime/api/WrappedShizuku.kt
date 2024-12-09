@@ -31,7 +31,10 @@ object WrappedShizuku {
 
     private val TAG: String = WrappedShizuku::class.java.simpleName
 
-    private val mRequestCode = "shizuku-request-code".hashCode()
+    private val mRequestCode = when {
+        BuildConfig.isInrt -> "shizuku-request-code-inrt".hashCode()
+        else -> "shizuku-request-code".hashCode()
+    }
     private var mHasBinder = false
 
     private val mUserServiceConnection: ServiceConnection = object : ServiceConnection {

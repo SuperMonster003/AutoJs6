@@ -29,7 +29,7 @@ class ToastParser(private val msg: Any?, long: Any? = null, forcible: Any? = nul
         val niceMsg = when {
             Undefined.isUndefined(msg) || msg == NOT_FOUND -> "undefined"
             msg == null -> "null"
-            else -> coerceString(msg, msg.toString())
+            else -> Context.toString(msg)
         }
         AutoJs.instance.uiHandler.toast(scriptRuntime, niceMsg, isLong)
     }

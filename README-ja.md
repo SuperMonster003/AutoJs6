@@ -305,7 +305,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 ##### 他のバージョン履歴については以下を参照してください。
 
-* [CHANGELOG.md](http://changelog.autojs6.com)
+* [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ja.md)
 
 ******
 
@@ -368,7 +368,7 @@ SDK Tools (SDK ツール) (右側のウィンドウにあります)
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で、それ以下のバージョンは推奨されませんが、最低でも `19` の使用を推奨します。.
 
-2024 年 12 月 4 日 現在、AutoJs6がサポートする最大のJDKバージョンは `23` です。.
+2024 年 12 月 9 日 現在、AutoJs6がサポートする最大のJDKバージョンは `23` です。.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合、この節の内容をスキップできます。.
 
