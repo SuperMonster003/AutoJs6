@@ -7,9 +7,11 @@ import android.os.Looper
 import android.os.Parcelable
 import android.util.Log
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsSpecies
+import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.TopLevelScope
@@ -812,6 +814,22 @@ object RhinoUtils {
 
     @JvmStatic
     fun newNativeArray(array: Array<Any?>) = NativeArray(array).also { it.exportAsJSClass(NativeArray.MAX_PROTOTYPE_ID, it, false) }
+
+    @JvmStatic
+    fun hashCodeOfScriptable(other: Any?): Int? {
+        if (other !is Scriptable) return null
+        val getClassFunc = other["getClass"]
+        if (getClassFunc is BaseFunction) {
+            val clazz = callFunction(getClassFunc, emptyArray()).jsUnwrapped()
+            if (clazz != UiObjectCollection::class.java) return null
+        }
+        val hashCodeFunc = other["hashCode"]
+        if (hashCodeFunc is BaseFunction) {
+            val hashCode = callFunction(hashCodeFunc, emptyArray()).jsUnwrapped()
+            if (hashCode is Number) return hashCode.toInt()
+        }
+        return null
+    }
 
     class ObsoletedRhinoFunctionException(funcName: String) : Exception(
         "Function \"$funcName\" can no longer be used as it has been obsoleted",
