@@ -137,6 +137,8 @@
 
     <uses-permission android:name="android.permission.READ_SMS" />
 
+    <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
+
     <!-- Property "largeHeap" is not recommended to set to true. -->
     <!-- https://stackoverflow.com/questions/27396892/what-are-advantages-of-setting-largeheap-to-true -->
     <!-- However, "largeHeap" may be helpful for prevent LeakCanary from OOM when analyzing detected memory leaks. -->
@@ -642,11 +644,15 @@
         <!-- This provider is required by Shizuku, remove this if your app only supports Sui -->
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
-            android:authorities="org.autojs.autojs6.shizuku"
+            android:authorities="${applicationId}.shizuku"
             android:enabled="true"
             android:exported="true"
             android:multiprocess="false"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
+        <meta-data
+            android:name="moe.shizuku.client.V3_SUPPORT"
+            android:value="true" />
 
     </application>
 

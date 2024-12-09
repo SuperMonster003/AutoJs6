@@ -73,7 +73,6 @@ class App : MultiDexApplication() {
         Toaster.init(this)
 
         setUpDefaultNightMode()
-        WrappedShizuku.onCreate()
     }
 
     override fun attachBaseContext(base: Context) {

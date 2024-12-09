@@ -207,6 +207,8 @@ def handle_readme_placeholder(aim_lang_code, aim_content):
 
     aim_content['placeholder_latest_three_version_histories'] = "\n".join(extract_latest_versions(aim_lang_code, aim_content)).rstrip("\n")
 
+    aim_content['placeholder_read_more_in_changelog_md'] = f"[CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-{aim_lang_code}.md)"
+
 
 def render_dynamic_strings(data, placeholder_map):
     """ Recursively render dynamic strings within the JSON data using Jinja environment """

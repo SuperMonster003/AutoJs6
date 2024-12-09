@@ -305,7 +305,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 ##### 更多版本歷史可參閲
 
-* [CHANGELOG.md](http://changelog.autojs6.com)
+* [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-zh-Hant-HK.md)
 
 ******
 
@@ -368,7 +368,7 @@ SDK Tools (SDK 工具) (位於右側窗口)
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `19`.
 
-截至 2024 年 12 月 4 日, AutoJs6 可支持 JDK 最高版本為 `23`.
+截至 2024 年 12 月 9 日, AutoJs6 可支持 JDK 最高版本為 `23`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

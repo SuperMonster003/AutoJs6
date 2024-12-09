@@ -156,10 +156,16 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.6.1
 
-###### 2024/12/03
+###### 2024/12/09
 
+* `新增` pinyin 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin))
 * `修复` 部分环境因回退版本过低而无法正常编译项目的问题
+* `修复` 调用不存在的方法时可能出现的 "非原始类型值" 异常
+* `修复` 部分设备无法正常添加脚本快捷方式的问题 (试修) _[`issue #221`](http://issues.autojs6.com/221)_
+* `修复` automator.click/longClick 方法参数类型限制错误 _[`issue #275`](http://issues.autojs6.com/275)_
 * `优化` 脚本项目识别在 project.json 损坏情况下尽可能还原关键信息
+* `优化` 打包单文件时自动生成的包名后缀支持将简体中文自动转换为拼音
+* `优化` UI 元素及 className 相关选择器支持更多的包名前缀省略形式 (如 RecyclerView, Snackbar 等)
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
 # v6.6.0
@@ -294,7 +300,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 ##### 更多版本历史可参阅
 
-* [CHANGELOG.md](http://changelog.autojs6.com)
+* [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-zh-Hans.md)
 
 ******
 
@@ -357,7 +363,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2024 年 12 月 4 日, AutoJs6 可支持 JDK 最高版本为 `23`.
+截至 2024 年 12 月 9 日, AutoJs6 可支持 JDK 最高版本为 `23`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
