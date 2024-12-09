@@ -1,7 +1,9 @@
 package org.autojs.autojs.runtime
 
+import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.util.RhinoUtils.callFunction
+import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Context
@@ -41,16 +43,22 @@ class ScriptBridges : IScriptBridges {
         context.newArray(scope, o?.map { Context.javaToJS(it, scope) }?.toTypedArray()) as NativeArray
     }
 
-    override fun asArray(list: Iterable<*>): NativeArray = useJsContext { context ->
-        val arr = toArray(list)
-        val boundThis = Context.javaToJS(list, arr) as Scriptable
-        list::class.java.methods.forEach {
-            val name = it.name
-            val method = NativeJavaMethod(it, name)
-            val bound = BoundFunction(context, arr, method, boundThis, emptyArray())
-            arr.put(name, arr, bound)
+    override fun asArray(listLike: Any): NativeArray = useJsContext { context ->
+        if (listLike is Iterable<*>) {
+            return@useJsContext toArray(listLike)
         }
-        return@useJsContext arr
+        if (listLike is UiObjectCollection) {
+            val arr = toArray(listLike.nodes)
+            val boundThis = Context.javaToJS(listLike, arr) as Scriptable
+            listLike::class.java.methods.forEach {
+                val name = it.name
+                val method = NativeJavaMethod(it, name)
+                val bound = BoundFunction(context, arr, method, boundThis, emptyArray())
+                arr.put(name, arr, bound)
+            }
+            return@useJsContext arr
+        }
+        return@useJsContext newNativeArray()
     }
 
     override fun toString(obj: Any?): String = Context.toString(obj)

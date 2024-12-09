@@ -9,7 +9,7 @@ interface IScriptBridges {
 
     fun toArray(o: Iterable<*>?): NativeArray
 
-    fun asArray(list: Iterable<*>): NativeArray
+    fun asArray(listLike: Any): NativeArray
 
     fun toString(obj: Any?): String
 

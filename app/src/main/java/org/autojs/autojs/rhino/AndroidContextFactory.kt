@@ -75,7 +75,7 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
     open class WrapFactory : org.mozilla.javascript.WrapFactory() {
         override fun wrap(cx: Context, scope: Scriptable, obj: Any?, staticType: Class<*>?): Any? = when {
             obj is String -> bridges.toString(obj.toString())
-            staticType == UiObjectCollection::class.java -> (obj as? UiObjectCollection)?.let { bridges.asArray(it.nodes) } ?: UiObjectCollection.EMPTY
+            staticType == UiObjectCollection::class.java -> (obj as? UiObjectCollection)?.let { bridges.asArray(it) } ?: UiObjectCollection.EMPTY
             else -> super.wrap(cx, scope, obj, staticType)
         }
     }
