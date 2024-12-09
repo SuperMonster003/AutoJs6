@@ -13,6 +13,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityNodeInfoHelper
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.isJsUndefined
+import org.autojs.autojs.extension.ArrayExtensions.toHashCode
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.DisplayUtils.toRoundIntX
@@ -22,6 +23,7 @@ import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.Scriptable
 import org.opencv.core.Point
 import org.opencv.core.Size
 import kotlin.math.roundToInt
@@ -485,8 +487,109 @@ open class UiObject(
 
     override fun toString() = "[${UiObject::class.java.simpleName}] $className ${summary()}"
 
-    override fun hashCode(): Int {
-        return super.hashCode()
+    override fun hashCode() = listOf(
+        "${packageName()}",
+        "$parent",
+        "${id()}",
+        "${fullId()}",
+        "${idHex()}",
+        "${desc()}",
+        text(),
+        "${bounds()}",
+        "${className()}",
+        "${clickable()}",
+        "${longClickable()}",
+        "${scrollable()}",
+        "${indexInParent()}",
+        "${childCount()}",
+        "${depth()}",
+        "${checked()}",
+        "${enabled()}",
+        "${editable()}",
+        "${focusable()}",
+        "${checkable()}",
+        "${selected()}",
+        "$isDismissable",
+        "${visibleToUser()}",
+        "$isContextClickable",
+        "${focused()}",
+        "$isAccessibilityFocused",
+        "${rowCount()}",
+        "${columnCount()}",
+        "${row()}",
+        "${column()}",
+        "${rowSpan()}",
+        "${columnSpan()}",
+        "$drawingOrder",
+        "${actionNames()}",
+        "${isSingleton()}",
+        "${firstSibling()}",
+        "${lastSibling()}",
+        "${firstChild()}",
+        "${lastChild()}",
+    ).toHashCode()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is UiObject) return false
+
+        return packageName() == other.packageName() &&
+                parent == other.parent &&
+                id() == other.id() &&
+                fullId() == other.fullId() &&
+                idHex() == other.idHex() &&
+                desc() == other.desc() &&
+                text() == other.text() &&
+                bounds() == other.bounds() &&
+                className() == other.className() &&
+                clickable() == other.clickable() &&
+                longClickable() == other.longClickable() &&
+                scrollable() == other.scrollable() &&
+                indexInParent() == other.indexInParent() &&
+                childCount() == other.childCount() &&
+                depth() == other.depth() &&
+                checked() == other.checked() &&
+                enabled() == other.enabled() &&
+                editable() == other.editable() &&
+                focusable() == other.focusable() &&
+                checkable() == other.checkable() &&
+                selected() == other.selected() &&
+                isDismissable == other.isDismissable &&
+                visibleToUser() == other.visibleToUser() &&
+                isContextClickable == other.isContextClickable &&
+                focused() == other.focused() &&
+                isAccessibilityFocused == other.isAccessibilityFocused &&
+                rowCount() == other.rowCount() &&
+                columnCount() == other.columnCount() &&
+                row() == other.row() &&
+                column() == other.column() &&
+                rowSpan() == other.rowSpan() &&
+                columnSpan() == other.columnSpan() &&
+                drawingOrder == other.drawingOrder &&
+                actionNames() == other.actionNames() &&
+                isSingleton() == other.isSingleton() &&
+                "${firstSibling()}" == "${other.firstSibling()}" &&
+                "${lastSibling()}" == "${other.lastSibling()}" &&
+                "${firstChild()}" == "${other.firstChild()}" &&
+                "${lastChild()}" == "${other.lastChild()}"
+    }
+
+    fun isSimilar(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null) return false
+        when (other) {
+            is Scriptable -> {
+                val thisHashCode = hashCode()
+                val otherHashCode = RhinoUtils.hashCodeOfScriptable(other) ?: return false
+                return thisHashCode == otherHashCode
+            }
+            else -> {
+                return when {
+                    other.javaClass != UiObject::class.java -> false
+                    else -> hashCode() == other.hashCode()
+                }
+            }
+        }
     }
 
     companion object {
@@ -496,14 +599,7 @@ open class UiObject(
         internal const val RESULT_TYPE_WIDGET = "widget"
 
         private val RESULT_GROUP_WIDGET by lazy { arrayOf("#", "w", RESULT_TYPE_WIDGET) }
-        private val RESULT_GROUP_WIDGET_COLLECTION by lazy {
-            arrayOf("{}", "wc", "collection", "list").plus(
-                listAliases(
-                    "#",
-                    "w"
-                )
-            )
-        }
+        private val RESULT_GROUP_WIDGET_COLLECTION by lazy { arrayOf("{}", "wc", "collection", "list").plus(listAliases("#", "w")) }
         private val RESULT_GROUP_WIDGETS by lazy { arrayOf("[]", "ws", "widgets").plus(arrayAliases("#", "w")) }
         private val RESULT_GROUP_CONTENT by lazy { arrayOf("$", "txt", "content") }
         private val RESULT_GROUP_CONTENTS by lazy { arrayOf("contents").plus(arrayAliases("$", "txt", "content")) }
@@ -520,9 +616,8 @@ open class UiObject(
         @JvmStatic
         @Throws(IllegalArgumentException::class)
         fun ensureCompass(s: CharSequence?) {
-            if (s != null && !isCompass(s)) {
-                throw IllegalArgumentException(str(R.string.error_invalid_compass, s))
-            }
+            s ?: return
+            require(isCompass(s)) { str(R.string.error_invalid_compass, s) }
         }
 
         @JvmStatic

@@ -1,7 +1,10 @@
 package org.autojs.autojs.core.automator
 
 import org.autojs.autojs.core.accessibility.UiSelector
+import org.autojs.autojs.extension.ArrayExtensions.toHashCode
 import org.autojs.autojs.tool.Consumer
+import org.autojs.autojs.util.RhinoUtils
+import org.mozilla.javascript.Scriptable
 
 /**
  * Created by Stardust on Mar 9, 2017.
@@ -62,7 +65,36 @@ class UiObjectCollection private constructor(val nodes: List<UiObject?>) : UiObj
     }
 
     override fun toString(): String {
-        return "${UiObjectCollection::class.java.name}@${hashCode()}"
+        return "${UiObjectCollection::class.java.name}@${super.hashCode()}"
+    }
+
+    override fun hashCode(): Int = when {
+        nodes.isEmpty() -> super.hashCode()
+        else -> nodes.map { it.hashCode() }.toHashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is UiObjectCollection) return false
+        return nodes == other.nodes
+    }
+
+    fun isSimilar(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null) return false
+        when (other) {
+            is Scriptable -> {
+                val thisHashCode = hashCode()
+                val otherHashCode = RhinoUtils.hashCodeOfScriptable(other) ?: return false
+                return thisHashCode == otherHashCode
+            }
+            else -> {
+                return when {
+                    other.javaClass != UiObjectCollection::class.java -> false
+                    else -> hashCode() == other.hashCode()
+                }
+            }
+        }
     }
 
     companion object {
