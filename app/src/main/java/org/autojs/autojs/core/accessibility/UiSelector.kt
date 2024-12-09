@@ -44,7 +44,6 @@ import org.autojs.autojs.core.automator.search.DFS
 import org.autojs.autojs.core.automator.search.SearchAlgorithm
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.StringReadable
-import org.autojs.autojs.runtime.api.augment.util.Inspect
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.App
 import org.autojs.autojs.util.RhinoUtils
@@ -653,13 +652,53 @@ open class UiSelector : UiObjectActions, StringReadable {
     fun findOnce(): UiObject? = findOnce(0)
 
     @ScriptInterface
-    fun findOnce(index: Int): UiObject? = find(index + 1).takeIf { index < it.size() }?.get(index)
+    fun findOnce(index: Int): UiObject? = when {
+        index >= 0 -> find(index + 1).let { found ->
+            when (index) {
+                in 0 until found.size() -> found[index]
+                else -> null
+            }
+        }
+        else -> find().let { found ->
+            when (val reverseIndex = index + found.size()) {
+                in 0 until found.size() -> found[reverseIndex]
+                else -> null
+            }
+        }
+    }
 
     @ScriptInterface
     fun exists() = findOnce() != null
 
     @ScriptInterface
     fun find(): UiObjectCollection = find(Int.MAX_VALUE)
+
+    @ScriptInterface
+    fun find(max: Int): UiObjectCollection {
+        mA11yTool.ensureService()
+        return when {
+            max >= 0 -> findInternal(max)
+            else -> findInternal(Int.MAX_VALUE).let { found ->
+                val foundSize = found.size()
+                when (val startIndex = foundSize + max) {
+                    in 0 until foundSize -> {
+                        of(found.nodes.slice(startIndex until foundSize))
+                    }
+                    else -> EMPTY
+                }
+            }
+        }
+    }
+
+    private fun findInternal(max: Int) = when {
+        mAccessibilityBridge == null -> findImpl(max)
+        isMainThread() -> findImpl(max)
+        mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0 -> findImpl(max)
+        else -> VolatileBox<UiObjectCollection>().run {
+            mAccessibilityBridge.post { unblock(findImpl(max)) }
+            blockedGet()
+        }
+    }
 
     @ScriptInterface
     fun findOne(timeout: Long): UiObject? {
@@ -738,17 +777,6 @@ open class UiSelector : UiObjectActions, StringReadable {
             }
         }
         return of(result)
-    }
-
-    protected fun find(max: Int): UiObjectCollection {
-        mA11yTool.ensureService()
-        mAccessibilityBridge ?: return findImpl(max)
-        if (isMainThread()) return findImpl(max)
-        if (mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0) return findImpl(max)
-        return VolatileBox<UiObjectCollection>().run {
-            mAccessibilityBridge.post { unblock(findImpl(max)) }
-            blockedGet()
-        }
     }
 
     private fun findOf(root: UiObject, max: Int): UiObjectCollection = of(findAndReturnList(root, max))
