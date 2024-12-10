@@ -98,7 +98,6 @@ dependencies /* Unclassified */ {
     implementation("net.lingala.zip4j:zip4j:2.11.5")
 
     // Log4j
-    implementation("de.mindpipe.android:android-logging-log4j:1.0.3")
     // FIXME by SuperMonster003 on Aug 14, 2024.
     //  ! Vulnerable dependency (5 vulnerabilities) for log4j (version 1):
     //  ! - CVE-2022-23307, Score: 8.8
@@ -108,7 +107,9 @@ dependencies /* Unclassified */ {
     //  ! - CVE-2019-17571, Score: 9.8
     //  ! However, log4j version 2 which requires Android API Level not lower than 26
     //  ! is not compatible with current project with min API Level 24.
+    //  !
     //  ! zh-CN:
+    //  !
     //  ! 依赖库 log4j (第一版本) 是易受攻击的 (含 5 项漏洞):
     //  ! - CVE-2022-23307, 评分: 8.8
     //  ! - CVE-2022-23305, 评分: 9.8
@@ -118,6 +119,9 @@ dependencies /* Unclassified */ {
     //  ! 但 log4j 第二版本要求安卓 API 级别不低于 26,
     //  ! 与最低 API 级别为 24 的当前项目无法兼容.
     implementation("log4j:log4j:1.2.17")
+
+    // Android Logging Log4j
+    implementation("de.mindpipe.android:android-logging-log4j:1.0.3")
 
     // Preference
     implementation("androidx.preference:preference-ktx:1.2.1")
