@@ -39,6 +39,13 @@ class ScriptExecuteActivity : AppCompatActivity() {
     private var mRuntime: ScriptRuntime? = null
 
     @ScriptInterface
+    val emitter: EventEmitter?
+        get() = when {
+            ::eventEmitter.isInitialized -> eventEmitter
+            else -> null
+        }
+
+    @ScriptInterface
     lateinit var eventEmitter: EventEmitter
         private set
 
@@ -199,7 +206,9 @@ class ScriptExecuteActivity : AppCompatActivity() {
     }
 
     fun emit(event: String?, vararg args: Any?) {
+        event ?: return
         try {
+            mRuntime?.events?.emit(event, *args)
             eventEmitter.emit(event, *args)
         } catch (e: Exception) {
             mRuntime?.exit(e)
