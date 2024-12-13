@@ -632,7 +632,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
     fun getContentTextSize() = getFloatingConsoleView()?.textSize ?: 0f
 
     @ScriptInterface
-    fun setContentTextColors(colors: Array<out Int?>) = runWithWindow({ configurator.setContentTextColors(colors) }) {
+    fun setContentTextColors(colors: Array<out Int>) = runWithWindow({ configurator.setContentTextColors(colors) }) {
         getFloatingConsoleView()?.setTextColors(colors)
     }
 
@@ -859,7 +859,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             private set
 
         @Volatile
-        var contentTextColors: Array<out Int?>? = null
+        var contentTextColors: Array<out Int>? = null
             private set
 
         @Volatile
@@ -923,7 +923,7 @@ open class ConsoleImpl(val uiHandler: UiHandler) : AbstractConsole() {
             contentTextSize = size
         }
 
-        fun setContentTextColors(colors: Array<out Int?>) = also {
+        fun setContentTextColors(colors: Array<out Int>) = also {
             contentTextColors = colors
         }
 

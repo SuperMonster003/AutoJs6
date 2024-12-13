@@ -413,7 +413,7 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
                         scriptRuntime.console.setContentTextColors(o.map { S13n.color(arrayOf(it)) }.toTypedArray())
                     }
                     is NativeObject -> {
-                        val tmp = Array<Int?>(6) { null }
+                        val tmp = Array(6) { 0 }
                         listOf("verbose", "log", "info", "warn", "error", "assert").forEachIndexed { index, key ->
                             if (o.hasProp(key)) {
                                 tmp[index] = S13n.color(arrayOf(o.prop(key)))
