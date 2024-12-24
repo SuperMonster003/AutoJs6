@@ -4,6 +4,7 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
@@ -18,6 +19,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import java.lang.reflect.Method
@@ -110,7 +112,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
 
     private fun convertArgumentsIfNeeded(method: Method, args: Array<out Any?>): Array<Any?> {
         return method.parameterTypes.mapIndexed { index, paramType ->
-            val arg = args[index]
+            val arg = args[index].jsUnwrapped()
             when {
                 arg !is Double -> arg
                 paramType == Double::class.java || paramType == java.lang.Double.TYPE -> arg

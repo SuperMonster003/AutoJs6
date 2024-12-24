@@ -12,6 +12,7 @@
         "调用不存在的方法时可能出现的 \"非原始类型值\" 异常",
         "部分设备无法正常添加脚本快捷方式的问题 (试修) _[`issue #221`](http://issues.autojs6.com/221)_",
         "automator.click/longClick 方法参数类型限制错误 _[`issue #275`](http://issues.autojs6.com/275)_",
+        "选择器不支持 ConsString 类型参数的问题 _[`issue #277`](http://issues.autojs6.com/277)_",
         "UiObjectCollection 实例缺失自身方法及属性的问题"
       ],
       "improvement": [
