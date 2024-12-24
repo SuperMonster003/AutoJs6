@@ -16,6 +16,7 @@
         "UiObjectCollection 实例缺失自身方法及属性的问题"
       ],
       "improvement": [
+        "恢复日志活动窗口单个条目文本内容的双击或长按选择功能",
         "脚本项目识别在 project.json 损坏情况下尽可能还原关键信息",
         "打包单文件时自动生成的包名后缀支持将简体中文转换为拼音 (支持多音字)",
         "UiSelector#findOnce 及 UiSelector#find 方法支持负数参数",

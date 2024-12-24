@@ -389,10 +389,8 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            ConsoleImpl.LogEntry logEntry = mLogEntries.get(position);
-
             TextView textView = holder.textView;
-
+            ConsoleImpl.LogEntry logEntry = mLogEntries.get(position);
             textView.setText(logEntry.content);
             Integer color = mColors.get(logEntry.level);
             if (color != null) {
@@ -403,9 +401,6 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
             } else {
                 textSize = DisplayUtils.pxToSp(textView.getTextSize());
             }
-            textView.setClickable(false);
-            textView.setLongClickable(false);
-            textView.setTextIsSelectable(false);
         }
 
         public void setTextSize(float size) {
