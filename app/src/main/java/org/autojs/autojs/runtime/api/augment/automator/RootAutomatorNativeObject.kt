@@ -24,7 +24,7 @@ class RootAutomatorNativeObject(scriptRuntime: ScriptRuntime, waitForReady: Any?
 
     init {
         super.exportAsJSClass(MAX_PROTOTYPE_ID, this, false)
-        defineProperty("__ra__", mRootAutomatorObject, DONTENUM or READONLY or PERMANENT)
+        defineProperty("__ra__", mRootAutomatorObject, READONLY or DONTENUM or PERMANENT)
     }
 
     override fun has(name: String?): Boolean {

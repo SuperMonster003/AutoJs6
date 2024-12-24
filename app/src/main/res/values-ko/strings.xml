@@ -811,5 +811,8 @@
     <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="theme_color_default">기본</string>
+    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">패키지 이름 (계산 중...)</string>
+    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">버전 이름 (계산 중...)</string>
+    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">버전 코드 (계산 중...)</string>
 
 </resources>

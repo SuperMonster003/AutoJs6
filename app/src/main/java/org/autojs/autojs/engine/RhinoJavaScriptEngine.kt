@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.view.View
 import org.autojs.autojs.core.ui.ViewExtras
@@ -179,7 +180,16 @@ open class RhinoJavaScriptEngine(private val scriptRuntime: ScriptRuntime, priva
         initStandardObjects(context, false)
     }
 
-    fun enterContext(): Context = RhinoAndroidHelper(androidContext).enterContext().also { setupContext(it) }
+    @SuppressLint("VisibleForTests")
+    fun enterContext(): Context {
+        val rhinoAndroidHelper = RhinoAndroidHelper(androidContext)
+        val enterContext = try {
+            rhinoAndroidHelper.enterContext()
+        } catch (e: SecurityException) {
+            rhinoAndroidHelper.contextFactory.enterContext()
+        }
+        return enterContext.also { setupContext(it) }
+    }
 
     fun setupContext(context: Context) = context.apply {
         if (this is AutoJsContext) {

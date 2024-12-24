@@ -19,6 +19,9 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.huaban.analysis.jieba.CharsDictionaryDatabase
+import com.huaban.analysis.jieba.PhrasesDictionaryDatabase
+import com.huaban.analysis.jieba.WordDictionaryDatabase
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder
 import org.autojs.autojs.app.FragmentPagerAdapterBuilder.StoredFragmentPagerAdapter
@@ -230,12 +233,20 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     fun exitCompletely() {
         FloatyWindowManger.hideCircularMenuAndSaveState()
+
         stopService(Intent(this, FloatyService::class.java))
         stopService(Intent(this, ScreenCapturerForegroundService::class.java))
+
         AutoJs.instance.scriptEngineService.stopAll()
+
+        WordDictionaryDatabase.getInstance(this).close()
+        CharsDictionaryDatabase.getInstance(this).close()
+        PhrasesDictionaryDatabase.getInstance(this).close()
+
         mA11yTool.stopService(false)
         mForeGroundService.stopIfNeeded()
         WrappedShizuku.onDestroy()
+
         Process.killProcess(Process.myPid())
     }
 

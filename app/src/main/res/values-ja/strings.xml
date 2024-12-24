@@ -810,5 +810,8 @@
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリのUIを通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="theme_color_default">デフォルト</string>
+    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">パッケージ名 (計算中...)</string>
+    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">バージョン名 (計算中...)</string>
+    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">バージョンコード (計算中...)</string>
 
 </resources>

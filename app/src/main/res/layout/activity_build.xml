@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -156,10 +157,11 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/package_name_parent"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:hint="@string/text_package_name"
+                        android:hint="@string/text_package_name_with_computing"
                         app:expandedHintEnabled="false">
 
                         <!-- @Hint by SuperMonster003 on Nov 18, 2024. -->
@@ -188,10 +190,11 @@
                             android:orientation="vertical">
 
                             <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/version_name_parent"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/text_version_name"
+                                android:hint="@string/text_version_name_with_computing"
                                 app:expandedHintEnabled="false">
 
                                 <androidx.appcompat.widget.AppCompatEditText
@@ -199,15 +202,16 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="text"
-                                    android:text="1.0.0" />
+                                    tools:text="1.0.0" />
 
                             </com.google.android.material.textfield.TextInputLayout>
 
                             <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/version_code_parent"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/text_version_code"
+                                android:hint="@string/text_version_code_with_computing"
                                 app:expandedHintEnabled="false">
 
                                 <androidx.appcompat.widget.AppCompatEditText
@@ -215,7 +219,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="number"
-                                    android:text="1" />
+                                    tools:text="1" />
 
                             </com.google.android.material.textfield.TextInputLayout>
 

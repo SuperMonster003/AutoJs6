@@ -234,8 +234,8 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
             mTask = task;
             firstCharIconBinding.firstChar
                     .setIcon(AutoFileSource.ENGINE.equals(mTask.getEngineName()) ? FileUtils.TYPE.AUTO.icon : FileUtils.TYPE.JAVASCRIPT.icon)
-                    // .setIconTextThemeColor()
-                    // .setStrokeThemeColor()
+                    .setIconTextThemeColor()
+                    .setStrokeThemeColor()
                     .setFillTransparent();
             itemBinding.name.setText(task.getName());
             itemBinding.taskListFilePath.setText(task.getDesc());

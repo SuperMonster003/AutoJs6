@@ -810,5 +810,8 @@
     <string name="text_write_secure_settings_description">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
     <string name="theme_color_default">Por defecto</string>
+    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Nombre del paquete (Calculando...)</string>
+    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Nombre de la versión (Calculando...)</string>
+    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Código de la versión (Calculando...)</string>
 
 </resources>

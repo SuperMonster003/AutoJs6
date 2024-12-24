@@ -277,7 +277,7 @@ object Util : Augmentable() {
             else -> withRhinoContext { context ->
                 val tmp = object : BaseFunction() {
                     override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable?, args: Array<out Any?>) = newNativeObject().also {
-                        it.defineProperty("constructor", d, READONLY or PERMANENT or DONTENUM)
+                        it.defineProperty("constructor", d, READONLY or DONTENUM or PERMANENT)
                     }
                 }
                 tmp.construct(context, ImporterTopLevel(context), arrayOf()).also { instance ->
@@ -718,7 +718,7 @@ object Util : Augmentable() {
                 it.defineFunctionProperties(
                     arrayOf("toString"),
                     RegularFunction::class.java,
-                    READONLY or PERMANENT or DONTENUM,
+                    READONLY or DONTENUM or PERMANENT,
                 )
             }
         }

@@ -198,8 +198,12 @@ dependencies /* Unclassified */ {
     implementation("com.github.getActivity:Toaster:12.6")
     implementation("com.github.getActivity:EasyWindow:10.3")
 
-    // pinyin4j
+    // Pinyin4j
     implementation("com.belerweb:pinyin4j:2.5.0")
+
+    // Jieba Analysis (zh-CN: 结巴分词)
+    // implementation("com.huaban:jieba-analysis:1.0.2")
+    implementation(project(":jieba-analysis"))
 
 }
 
@@ -741,6 +745,12 @@ extra {
     versions.handleIfNeeded(project, flavorNameApp, listOf(buildTypeDebug, buildTypeRelease))
 }
 
+gradle.beforeProject {
+    extensions.extraProperties["compileSdk"] = versions.sdkVersionCompile
+    extensions.extraProperties["minSdk"] = versions.sdkVersionMin
+    extensions.extraProperties["targetSdk"] = versions.sdkVersionTarget
+}
+
 class Sign(filePath: String) {
 
     var isValid = false
@@ -826,6 +836,10 @@ class Versions(filePath: String) {
         if (niceVersionInt > currentVersionInt) {
             niceVersionInt = currentVersionInt
             javaVersionInfoSuffix += " [consistent]"
+        }
+
+        gradle.beforeProject {
+            extensions.extraProperties["javaVersion"] = niceVersionInt
         }
 
         JavaVersion.toVersion(niceVersionInt)
