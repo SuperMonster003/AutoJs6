@@ -56,7 +56,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -115,8 +114,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     EditText mOutputPath;
     EditText mAppName;
     EditText mPackageName;
+    TextInputLayout mPackageNameParent;
     EditText mVersionName;
+    TextInputLayout mVersionNameParent;
     EditText mVersionCode;
+    TextInputLayout mVersionCodeParent;
     ImageView mIcon;
     LinearLayout mAppConfig;
 
@@ -181,11 +183,15 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             }
             return false;
         });
+        mPackageNameParent = binding.packageNameParent;
 
         mVersionName = binding.versionName;
+        mVersionNameParent = binding.versionNameParent;
         mVersionCode = binding.versionCode;
+        mVersionCodeParent = binding.versionCodeParent;
 
         mIcon = binding.appIcon;
+        mIcon.setVisibility(View.INVISIBLE);
         mIcon.setOnClickListener(v -> selectIcon());
 
         mAppConfig = binding.appConfig;
@@ -261,11 +267,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         NotAskAgainDialog.Builder builder = new NotAskAgainDialog.Builder(context, key);
         builder.title(R.string.text_prompt);
         builder.content(getString(R.string.text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi, abiText) + "\n\n" +
-                getString(R.string.text_the_following_solutions_can_be_referred_to) + ":\n\n" +
-                "- " + getString(R.string.text_download_and_install_autojs6_including_above_abi, abiText) + "\n" +
-                "- " + getString(R.string.text_download_and_install_autojs6_including_all_abis) + " [" + getString(R.string.text_recommended) + "]\n\n" +
-                getString(R.string.text_download_link_for_autojs6) + ":\n" +
-                getString(R.string.uri_autojs6_download_link));
+                        getString(R.string.text_the_following_solutions_can_be_referred_to) + ":\n\n" +
+                        "- " + getString(R.string.text_download_and_install_autojs6_including_above_abi, abiText) + "\n" +
+                        "- " + getString(R.string.text_download_and_install_autojs6_including_all_abis) + " [" + getString(R.string.text_recommended) + "]\n\n" +
+                        getString(R.string.text_download_link_for_autojs6) + ":\n" +
+                        getString(R.string.uri_autojs6_download_link));
         builder.positiveText(R.string.dialog_button_dismiss);
         MaterialDialog dialog = builder.show();
         if (dialog != null) {
@@ -360,6 +366,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         return list.stream().anyMatch(item -> item.equalsIgnoreCase(s));
     }
 
+    @SuppressLint("CheckResult")
     private void setupWithSourceFile(ScriptFile file) {
         String dir = file.getParent();
         if (dir != null && dir.startsWith(getFilesDir().getPath())) {
@@ -368,20 +375,42 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mOutputPath.setText(dir);
         mAppName.setText(file.getSimplifiedName());
 
-        String packageName = getString(R.string.format_default_package_name, generatePackageNameSuffix(file));
-        mPackageName.setText(packageName);
+        Observable.fromCallable(() -> {
+                    String packageNameSuffix = generatePackageNameSuffix(file);
+                    return getString(R.string.format_default_package_name, packageNameSuffix);
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(packageName -> {
+                    mPackageName.setText(packageName);
+                    mPackageNameParent.setHint(R.string.text_package_name);
 
-        SimpleVersionInfo nextVersionInfo = AppUtils.generateNextVersionInfo(packageName);
-        if (nextVersionInfo != null) {
-            mVersionName.setText(nextVersionInfo.versionName);
-            mVersionCode.setText(nextVersionInfo.versionCodeString);
-        }
+                    SimpleVersionInfo nextVersionInfo = AppUtils.generateNextVersionInfo(packageName);
+                    if (nextVersionInfo != null) {
+                        mVersionName.setText(nextVersionInfo.versionName);
+                        mVersionCode.setText(nextVersionInfo.versionCodeString);
+                    } else {
+                        mVersionName.setText(R.string.default_build_apk_version_name);
+                        mVersionCode.setText(R.string.default_build_apk_version_code);
+                    }
+                    mVersionNameParent.setHint(R.string.text_version_name);
+                    mVersionCodeParent.setHint(R.string.text_version_code);
 
-        Drawable iconDrawable = AppUtils.getInstalledAppIcon(packageName);
-        if (iconDrawable != null) {
-            mIcon.setImageDrawable(iconDrawable);
-            mIsDefaultIcon = false;
-        }
+                    Drawable iconDrawable = AppUtils.getInstalledAppIcon(packageName);
+                    if (iconDrawable != null) {
+                        mIcon.setImageDrawable(iconDrawable);
+                        mIsDefaultIcon = false;
+                    }
+                    mIcon.setVisibility(View.VISIBLE);
+                }, throwable -> {
+                    mPackageName.setText(getString(R.string.format_default_package_name, file.getSimplifiedName().toLowerCase(Language.getPrefLanguage().getLocale())));
+                    mVersionName.setText(R.string.default_build_apk_version_name);
+                    mVersionCode.setText(R.string.default_build_apk_version_code);
+                    mPackageNameParent.setHint(R.string.text_package_name);
+                    mVersionNameParent.setHint(R.string.text_version_name);
+                    mVersionCodeParent.setHint(R.string.text_version_code);
+                    mIcon.setVisibility(View.VISIBLE);
+                });
 
         setSource(file);
     }
@@ -389,7 +418,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private static String generatePackageNameSuffix(ScriptFile file) {
         String name = file.getSimplifiedName();
         if (name.matches(".*[\\u4e00-\\u9fff].*")) {
-            name = Pinyin.ofRhino(name);
+            // name = Pinyin4j.ofRhino(name);
+            name = Pinyin.INSTANCE.simpleRhino(name, false, true);
         }
         name = name.replaceAll("\\W+", "_");
         if (name.matches("^\\d.*")) {
@@ -461,11 +491,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return checkNotEmpty(mOutputPath);
         }
         return checkNotEmpty(mSourcePath)
-                & checkNotEmpty(mOutputPath)
-                & checkNotEmpty(mAppName)
-                & checkNotEmpty(mVersionCode)
-                & checkNotEmpty(mVersionName)
-                & checkPackageNameValid(mPackageName);
+               & checkNotEmpty(mOutputPath)
+               & checkNotEmpty(mAppName)
+               & checkNotEmpty(mVersionCode)
+               & checkNotEmpty(mVersionName)
+               & checkPackageNameValid(mPackageName);
     }
 
     private boolean checkAbis() {
@@ -482,9 +512,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private boolean checkPackageNameValid(EditText editText) {
         Editable text = editText.getText();
-        String hint = Objects.requireNonNull(((TextInputLayout) editText.getParent().getParent()).getHint()).toString();
         if (TextUtils.isEmpty(text)) {
-            editText.setError(hint + getString(R.string.text_should_not_be_empty));
+            editText.setError(getString(R.string.text_should_not_be_empty));
             return false;
         }
         if (!REGEX_PACKAGE_NAME.matcher(text).matches()) {
@@ -495,15 +524,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private boolean checkNotEmpty(EditText editText) {
-        if (!TextUtils.isEmpty(editText.getText()) || !editText.isShown())
-            return true;
-        // TODO by Stardust on Dec 8, 2017.
-        //  ! More beautiful ways?
-        //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
-        //  ! 更优雅的方式?
-        String hint = Objects.requireNonNull(((TextInputLayout) editText.getParent().getParent()).getHint()).toString();
-        editText.setError(hint + getString(R.string.text_should_not_be_empty));
-        return false;
+        if (TextUtils.isEmpty(editText.getText()) && editText.isShown()) {
+            editText.setError(getString(R.string.text_should_not_be_empty));
+            return false;
+        }
+        return true;
     }
 
     private void showHintDialogIfNeeded() {
@@ -586,18 +611,18 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private boolean isWideCharacter(char c) {
         Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
         return block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS ||
-                block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A ||
-                block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B ||
-                block == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS ||
-                block == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT ||
-                block == Character.UnicodeBlock.HIRAGANA ||
-                block == Character.UnicodeBlock.KATAKANA ||
-                block == Character.UnicodeBlock.HANGUL_SYLLABLES ||
-                block == Character.UnicodeBlock.HANGUL_JAMO ||
-                block == Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO ||
-                block == Character.UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS ||
-                block == Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS ||
-                block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS;
+               block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A ||
+               block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B ||
+               block == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS ||
+               block == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT ||
+               block == Character.UnicodeBlock.HIRAGANA ||
+               block == Character.UnicodeBlock.KATAKANA ||
+               block == Character.UnicodeBlock.HANGUL_SYLLABLES ||
+               block == Character.UnicodeBlock.HANGUL_JAMO ||
+               block == Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO ||
+               block == Character.UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS ||
+               block == Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS ||
+               block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS;
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

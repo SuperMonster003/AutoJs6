@@ -27,7 +27,7 @@
 
 include(
     ":app",
-
+    ":jieba-analysis",
     ":libs:android-job-simplified-1.4.3",
     ":libs:androidx.appcompat-1.0.2",
     ":libs:apk-parser-1.0.2",
@@ -46,6 +46,8 @@ include(
     ":libs:markwon-core-4.6.2",
     ":libs:markwon-syntax-highlight-4.6.2",
 )
+
+project(":jieba-analysis").projectDir = file("jieba-analysis")
 
 pluginManagement {
 
@@ -617,6 +619,12 @@ pluginManagement {
     gradle.extra.apply {
         set("isCleanupPaddleOcr", config.isCleanupPaddleOcr)
         set("isCleanupRapidOcr", config.isCleanupRapidOcr)
+    }
+
+    gradle.beforeProject {
+        extensions.extraProperties["kotlinVersion"] = notations.classpath.find {
+            it.contains("kotlin-gradle-plugin")
+        }?.substringAfterLast(":") ?: config.fallbackKotlinVersion
     }
 
 }

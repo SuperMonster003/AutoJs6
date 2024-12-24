@@ -161,7 +161,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 val key = coerceString(keyArg)
                 value?.let { mProperties[key] = it } ?: mProperties.remove(key)
             }, NOT_CONSTRUCTABLE))
-        }, PERMANENT or READONLY)
+        }, READONLY or PERMANENT)
     }
 
     @Suppress("SameReturnValue")
@@ -599,11 +599,11 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         private fun initWidgetConstructor(ctor: BaseFunction) {
             val prototype = ctor.prop("prototype") as? ScriptableObject ?: newNativeObject()
             assignWidgetProperties(prototype)
-            ctor.defineProp("prototype", prototype, PERMANENT or DONTENUM)
+            ctor.defineProp("prototype", prototype, DONTENUM or PERMANENT)
         }
 
         private fun assignWidgetProperties(o: ScriptableObject) {
-            o.defineProperty("__attrs__", newNativeObject(), PERMANENT or DONTENUM)
+            o.defineProperty("__attrs__", newNativeObject(), DONTENUM or PERMANENT)
             o.defineFunctionProperties(
                 arrayOf(
                     "renderInternal",

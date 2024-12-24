@@ -807,5 +807,8 @@
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="theme_color_default">Default</string>
+    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
+    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Version name (computing...)</string>
+    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Version code (computing...)</string>
 
 </resources>

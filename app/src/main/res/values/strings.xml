@@ -1030,5 +1030,10 @@
     <string name="value_app_language_english" translatable="false">EN</string>
     <string name="value_app_language_follow_system" translatable="false">Auto</string>
     <string name="value_app_language_simplified_chinese" translatable="false">ZH_CN</string>
+    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Package name (computing...)</string>
+    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Version name (computing...)</string>
+    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Version code (computing...)</string>
+    <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
+    <string name="default_build_apk_version_code" translatable="false">1</string>
 
 </resources>

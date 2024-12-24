@@ -810,5 +810,8 @@
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="theme_color_default">По умолчанию</string>
+    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Имя пакета (Вычисление...)</string>
+    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Название версии (Вычисление...)</string>
+    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Код версии (Вычисление...)</string>
 
 </resources>

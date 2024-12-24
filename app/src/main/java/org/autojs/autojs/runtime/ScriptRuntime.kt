@@ -72,6 +72,7 @@ import org.autojs.autojs.runtime.api.augment.ocr.OcrPaddle
 import org.autojs.autojs.runtime.api.augment.ocr.OcrRapid
 import org.autojs.autojs.runtime.api.augment.opencc.OpenCC
 import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin
+import org.autojs.autojs.runtime.api.augment.pinyin4j.Pinyin4j
 import org.autojs.autojs.runtime.api.augment.plugins.Plugins
 import org.autojs.autojs.runtime.api.augment.recorder.Recorder
 import org.autojs.autojs.runtime.api.augment.s13n.S13n
@@ -763,6 +764,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         SQLite(this).augment(target, true)
         NanoID.augment(target, true)
         Pinyin.augment(target, true)
+        Pinyin4j.augment(target, true)
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
     }

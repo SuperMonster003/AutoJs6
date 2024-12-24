@@ -809,5 +809,8 @@
     <string name="text_write_secure_settings_description">安全設置包含應用程序可讀但不可寫入的設置選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設置權限\" 後, 普通應用可直接修改上述安全設置 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設置</string>
     <string name="theme_color_default">默認</string>
+    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">包名 (計算中...)</string>
+    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">版本名稱 (計算中...)</string>
+    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">版本號 (計算中...)</string>
 
 </resources>

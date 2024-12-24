@@ -75,11 +75,11 @@ android {
 
                 arguments(*[
                         // @Hint by LZX284 (https://github.com/LZX284) on Sep 30, 2023.
-                        //  ! "ANDROID_PLATFORM" 默认为 "android-23", 这里修改为与 AutoJs6 最低 SDK 版本一致的 24.
+                        //  ! "ANDROID_PLATFORM" 默认为 "android-23", 这里修改为与 AutoJs6 最低 SDK 版本一致的 `versionMap.MIN_SDK`.
                         //  ! en-US (translated by SuperMonster003 on Oct 22, 2024):
-                        //  ! "ANDROID_PLATFORM" with default value "android-23" was changed to 24
+                        //  ! "ANDROID_PLATFORM" with default value "android-23" was changed to `versionMap.MIN_SDK`
                         //  ! to align with the min SDK version of AutoJs6.
-                        ANDROID_PLATFORM: "android-24",
+                        ANDROID_PLATFORM: "android-${versionMap.MIN_SDK}",
                         ANDROID_STL     : "c++_shared",
                         ANDROID_ARM_NEON: "TRUE",
                 ].collect {

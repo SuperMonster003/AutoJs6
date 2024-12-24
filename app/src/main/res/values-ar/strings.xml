@@ -811,5 +811,8 @@
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="theme_color_default">تقصير</string>
+    <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">اسم الحزمة (جارٍ الحساب...)</string>
+    <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">اسم الإصدار (جارٍ الحساب...)</string>
+    <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">رمز الإصدار (جارٍ الحساب...)</string>
 
 </resources>
