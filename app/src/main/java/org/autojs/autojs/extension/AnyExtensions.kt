@@ -11,6 +11,7 @@ import org.autojs.autojs.util.RhinoUtils.js_typeof
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
+import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeError
 import org.mozilla.javascript.Scriptable
@@ -80,11 +81,12 @@ object AnyExtensions {
      */
     fun <T> T?.jsSanitize() = if (this.isJsNullish()) null else this
 
-    fun Any?.jsUnwrapped() = when (this) {
+    fun Any?.jsUnwrapped(): Any? = when (this) {
         is String -> this
+        is ConsString -> this.toString()
         is Number -> Context.toNumber(this)
         is Boolean -> Context.toBoolean(this)
-        is Wrapper -> this.unwrap()
+        is Wrapper -> this.unwrap().jsUnwrapped()
         is Unit -> UNDEFINED
         is List<*> -> this.toNativeArray()
         is Array<*> -> this.toNativeArray()
