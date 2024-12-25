@@ -30,15 +30,15 @@
 当前自述文件 `README.md` 支持以下语言:
 
  - 简体中文 [zh-Hans] # 当前
- - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/README-zh-Hant-HK.md)
- - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/README-zh-Hant-TW.md)
- - [English [en]](http://project.autojs6.com/blob/master/README-en.md)
- - [Français [fr]](http://project.autojs6.com/blob/master/README-fr.md)
- - [Español [es]](http://project.autojs6.com/blob/master/README-es.md)
- - [日本語 [ja]](http://project.autojs6.com/blob/master/README-ja.md)
- - [한국어 [ko]](http://project.autojs6.com/blob/master/README-ko.md)
- - [Русский [ru]](http://project.autojs6.com/blob/master/README-ru.md)
- - [العربية [ar]](http://project.autojs6.com/blob/master/README-ar.md)
+ - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-HK.md)
+ - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-TW.md)
+ - [English [en]](http://project.autojs6.com/blob/master/.readme/README-en.md)
+ - [Français [fr]](http://project.autojs6.com/blob/master/.readme/README-fr.md)
+ - [Español [es]](http://project.autojs6.com/blob/master/.readme/README-es.md)
+ - [日本語 [ja]](http://project.autojs6.com/blob/master/.readme/README-ja.md)
+ - [한국어 [ko]](http://project.autojs6.com/blob/master/.readme/README-ko.md)
+ - [Русский [ru]](http://project.autojs6.com/blob/master/.readme/README-ru.md)
+ - [العربية [ar]](http://project.autojs6.com/blob/master/.readme/README-ar.md)
 
 ******
 
@@ -156,15 +156,21 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.6.1
 
-###### 2024/12/09
+###### 2024/12/25
 
 * `新增` pinyin 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin))
+* `新增` pinyin4j 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin4j))
+* `新增` UiObject#isSimilar 及 UiObjectCollection#isSimilar 方法, 用于确定控件或控件集合是否相似
 * `修复` 部分环境因回退版本过低而无法正常编译项目的问题
 * `修复` 调用不存在的方法时可能出现的 "非原始类型值" 异常
 * `修复` 部分设备无法正常添加脚本快捷方式的问题 (试修) _[`issue #221`](http://issues.autojs6.com/221)_
 * `修复` automator.click/longClick 方法参数类型限制错误 _[`issue #275`](http://issues.autojs6.com/275)_
+* `修复` 选择器不支持 ConsString 类型参数的问题 _[`issue #277`](http://issues.autojs6.com/277)_
+* `修复` UiObjectCollection 实例缺失自身方法及属性的问题
+* `优化` 恢复日志活动窗口单个条目文本内容的双击或长按选择功能 _[`issue #280`](http://issues.autojs6.com/280)_
 * `优化` 脚本项目识别在 project.json 损坏情况下尽可能还原关键信息
-* `优化` 打包单文件时自动生成的包名后缀支持将简体中文自动转换为拼音
+* `优化` 打包单文件时自动生成的包名后缀支持将简体中文转换为拼音 (支持多音字)
+* `优化` UiSelector#findOnce 及 UiSelector#find 方法支持负数参数
 * `优化` UI 元素及 className 相关选择器支持更多的包名前缀省略形式 (如 RecyclerView, Snackbar 等)
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
@@ -314,12 +320,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Ladybug | 2024.2.1 Patch 2` 版本 (按需选择其一):
+下载 `Android Studio Ladybug | 2024.2.1 Patch 3` 版本 (按需选择其一):
 
-- [android-studio-2024.2.1.11-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.11/android-studio-2024.2.1.11-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.11-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.11/android-studio-2024.2.1.11-windows.zip) (1.14 GB)
+- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
+- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
 
-> 注: 上述版本发布时间为 2024 年 10 月 31 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2024 年 12 月 2 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -363,7 +369,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2024 年 12 月 9 日, AutoJs6 可支持 JDK 最高版本为 `23`.
+截至 2024 年 12 月 25 日, AutoJs6 可支持 JDK 最高版本为 `23`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

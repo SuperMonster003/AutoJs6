@@ -29,16 +29,16 @@
 
 現在の README.md ファイルは以下の言語に対応しています:
 
- - [简体中文 [zh-Hans]](http://project.autojs6.com/blob/master/README-zh-Hans.md)
- - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/README-zh-Hant-HK.md)
- - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/README-zh-Hant-TW.md)
- - [English [en]](http://project.autojs6.com/blob/master/README-en.md)
- - [Français [fr]](http://project.autojs6.com/blob/master/README-fr.md)
- - [Español [es]](http://project.autojs6.com/blob/master/README-es.md)
+ - [简体中文 [zh-Hans]](http://project.autojs6.com/blob/master/.readme/README-zh-Hans.md)
+ - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-HK.md)
+ - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-TW.md)
+ - [English [en]](http://project.autojs6.com/blob/master/.readme/README-en.md)
+ - [Français [fr]](http://project.autojs6.com/blob/master/.readme/README-fr.md)
+ - [Español [es]](http://project.autojs6.com/blob/master/.readme/README-es.md)
  - 日本語 [ja] # 現在
- - [한국어 [ko]](http://project.autojs6.com/blob/master/README-ko.md)
- - [Русский [ru]](http://project.autojs6.com/blob/master/README-ru.md)
- - [العربية [ar]](http://project.autojs6.com/blob/master/README-ar.md)
+ - [한국어 [ko]](http://project.autojs6.com/blob/master/.readme/README-ko.md)
+ - [Русский [ru]](http://project.autojs6.com/blob/master/.readme/README-ru.md)
+ - [العربية [ar]](http://project.autojs6.com/blob/master/.readme/README-ar.md)
 
 ******
 
@@ -153,6 +153,26 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 ### バージョン履歴
 
 ******
+
+# v6.6.1
+
+###### 2024/12/25
+
+* `新機能` 中国語のピンイン変換用の Pinyin モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin))
+* `新機能` 中国語のピンイン変換用の Pinyin4j モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin4j))
+* `新機能` コントロールまたはコントロールコレクションが類似しているかを判定する UiObject#isSimilar と UiObjectCollection#isSimilar メソッド
+* `修正` 一部の環境でバージョンを低く戻すことでプロジェクトが正常にコンパイルできなくなる問題
+* `修正` 存在しないメソッドを呼び出す際に発生する可能性がある「非プリミティブ型の値」エラー
+* `修正` 一部のデバイスでスクリプトショートカットが正常に追加できない問題 (暫定修正) _[`issue #221`](http://issues.autojs6.com/221)_
+* `修正` automator.click/longClick メソッドのパラメーター型制限の誤り _[`issue #275`](http://issues.autojs6.com/275)_
+* `修正` セレクターが ConsString 型のパラメーターをサポートしない問題 _[`issue #277`](http://issues.autojs6.com/277)_
+* `修正` UiObjectCollection インスタンスにメソッドおよびプロパティが欠如している問題
+* `改善` ログアクティビティウィンドウの個別エントリのテキスト内容をダブルクリックまたは長押しで選択する機能を復元 _[`issue #280`](http://issues.autojs6.com/280)_
+* `改善` project.json ファイルが破損した場合でも、スクリプトプロジェクトの重要な情報を可能な限り復元
+* `改善` 単一ファイルをパッケージ化する際に、自動生成されるパッケージ名のサフィックスを簡体字中国語からピンインに変換 (多音字対応)
+* `改善` UiSelector#findOnce と UiSelector#find メソッドで負の引数をサポート
+* `改善` UI要素や className に関連するセレクターが RecyclerView や Snackbar などのパッケージ名プレフィックス省略形式にさらに対応
+* `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
 # v6.6.0
 
@@ -284,25 +304,6 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` コンソールはエラーメッセージを印刷するときに詳細なスタック情報を含みます。
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
 
-# v6.4.2
-
-###### 2023/11/15
-
-* `新機能` dialogs.build() オプションパラメータ属性 inputSingleLine
-* `新機能` console.setTouchable メソッド _[`issue #122`](http://issues.autojs6.com/122)_
-* `修正` ocr モジュールの一部の方法でエリアパラメータを認識できなかった問題 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
-* `修正` Android 7.x で新バージョンを検出する際にバージョン情報を取得できなかった問題
-* `修正` Android 14 でスクリーンショット権限を要求するとアプリがクラッシュする問題
-* `修正` ホームドロワーで「浮動ボタン」を切り替えるとアプリがクラッシュすることがある問題
-* `修正` メニューを使用して浮動ボタンを閉じた後にアプリを再起動すると浮動ボタンが表示されたままになることがある問題
-* `修正` Android 13 以降のシステム設定ページでAutoJs6の言語を選択および切り替えると反映されない問題
-* `修正` ビルドツールが最初のビルド時にOpenCVリソースの自動デプロイを完了できない問題
-* `改善` bridges モジュールのネイティブ化によるスクリプト実行効率の向上 (Ref to [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
-* `改善` 無障害サービス関連コードのリファクタリングにより無障害サービスの機能安定性を強化 (実験的) _[`issue #167`](http://issues.autojs6.com/167)_
-* `改善` UiObject と UiObjectCollection の印刷出力形式
-* `改善` ビルドツールでGradle JDKバージョンが要件を満たしていない場合のアップグレード通知
-* `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v642)_
-
 ##### 他のバージョン履歴については以下を参照してください。
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ja.md)
@@ -319,12 +320,12 @@ AutoJs6 オープンソース プロジェクトのデバッグや開発が必�
 
 #### Android Studioの準備
 
-`Android Studio Ladybug | 2024.2.1 Patch 2` バージョンをダウンロードしてください (いずれかを選択)。:
+`Android Studio Ladybug | 2024.2.1 Patch 3` バージョンをダウンロードしてください (いずれかを選択)。:
 
-- [android-studio-2024.2.1.11-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.11/android-studio-2024.2.1.11-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.11-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.11/android-studio-2024.2.1.11-windows.zip) (1.14 GB)
+- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
+- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
 
-> 注: 上述バージョンのリリース日は 2024 年 10 月 31 日 です。その他のバージョンをダウンロードするか、上記のリンクが失効している場合は、[Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください。.
+> 注: 上述バージョンのリリース日は 2024 年 12 月 2 日 です。その他のバージョンをダウンロードするか、上記のリンクが失効している場合は、[Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください。.
 
 上記のファイルをインストールまたは解凍し、Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -368,7 +369,7 @@ SDK Tools (SDK ツール) (右側のウィンドウにあります)
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で、それ以下のバージョンは推奨されませんが、最低でも `19` の使用を推奨します。.
 
-2024 年 12 月 9 日 現在、AutoJs6がサポートする最大のJDKバージョンは `23` です。.
+2024 年 12 月 25 日 現在、AutoJs6がサポートする最大のJDKバージョンは `23` です。.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合、この節の内容をスキップできます。.
 

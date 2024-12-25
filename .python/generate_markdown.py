@@ -202,7 +202,7 @@ def handle_readme_placeholder(aim_lang_code, aim_content):
             new_array.append(f" - {content['$name']} [{lang_code}] # {content['text_current_lowercase']}")
         else:
             # noinspection HttpUrlsUsage
-            new_array.append(f" - [{content['$name']} [{lang_code}]](http://project.autojs6.com/blob/master/README-{lang_code}.md)")
+            new_array.append(f" - [{content['$name']} [{lang_code}]](http://project.autojs6.com/blob/master/.readme/README-{lang_code}.md)")
     aim_content['placeholder_ul_languages_all_supported'] = "\n".join(new_array)
 
     aim_content['placeholder_latest_three_version_histories'] = "\n".join(extract_latest_versions(aim_lang_code, aim_content)).rstrip("\n")
@@ -247,7 +247,7 @@ def generate_readme_files():
         handle_readme_placeholder(lang_code, content)
         output = template_readme.render(**content)
         output_file = f'README-{lang_code}.md'
-        output_path = os.path.join(project_root_dir, output_file)
+        output_path = os.path.join(project_root_dir, '.readme', output_file)
 
         with open(output_path, 'w', encoding='utf-8') as file:
             file.write(output)

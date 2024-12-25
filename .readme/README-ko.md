@@ -29,16 +29,16 @@
 
 현재 README.md 파일에서 지원하는 언어:
 
- - [简体中文 [zh-Hans]](http://project.autojs6.com/blob/master/README-zh-Hans.md)
- - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/README-zh-Hant-HK.md)
- - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/README-zh-Hant-TW.md)
- - [English [en]](http://project.autojs6.com/blob/master/README-en.md)
- - [Français [fr]](http://project.autojs6.com/blob/master/README-fr.md)
- - [Español [es]](http://project.autojs6.com/blob/master/README-es.md)
- - [日本語 [ja]](http://project.autojs6.com/blob/master/README-ja.md)
+ - [简体中文 [zh-Hans]](http://project.autojs6.com/blob/master/.readme/README-zh-Hans.md)
+ - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-HK.md)
+ - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-TW.md)
+ - [English [en]](http://project.autojs6.com/blob/master/.readme/README-en.md)
+ - [Français [fr]](http://project.autojs6.com/blob/master/.readme/README-fr.md)
+ - [Español [es]](http://project.autojs6.com/blob/master/.readme/README-es.md)
+ - [日本語 [ja]](http://project.autojs6.com/blob/master/.readme/README-ja.md)
  - 한국어 [ko] # 현재
- - [Русский [ru]](http://project.autojs6.com/blob/master/README-ru.md)
- - [العربية [ar]](http://project.autojs6.com/blob/master/README-ar.md)
+ - [Русский [ru]](http://project.autojs6.com/blob/master/.readme/README-ru.md)
+ - [العربية [ar]](http://project.autojs6.com/blob/master/.readme/README-ar.md)
 
 ******
 
@@ -153,6 +153,26 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 ### 버전 역사
 
 ******
+
+# v6.6.1
+
+###### 2024/12/25
+
+* `추가` 중국어 병음 변환을 위한 Pinyin 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin))
+* `추가` 중국어 병음 변환을 위한 Pinyin4j 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin4j))
+* `추가` 컨트롤 또는 컨트롤 컬렉션이 유사한지 여부를 확인하는 UiObject#isSimilar 및 UiObjectCollection#isSimilar 메서드
+* `수정` 일부 환경에서 이전 버전으로 롤백하여 프로젝트가 정상적으로 컴파일되지 않는 문제
+* `수정` 존재하지 않는 메서드를 호출할 때 발생할 수 있는 "비원시 값" 예외
+* `수정` 일부 기기에서 스크립트 바로가기를 정상적으로 추가할 수 없는 문제 (임시 수정) _[`issue #221`](http://issues.autojs6.com/221)_
+* `수정` automator.click/longClick 메서드의 파라미터 유형 제한 오류 _[`issue #275`](http://issues.autojs6.com/275)_
+* `수정` 선택자가 ConsString 유형의 파라미터를 지원하지 않는 문제 _[`issue #277`](http://issues.autojs6.com/277)_
+* `수정` UiObjectCollection 인스턴스에서 메서드 및 속성이 누락된 문제
+* `개선` 로그 활동 창의 개별 항목 텍스트 내용을 더블 클릭 또는 길게 눌러 선택하는 기능 복원 _[`issue #280`](http://issues.autojs6.com/280)_
+* `개선` project.json 파일이 손상된 경우에도 가능한 한 중요한 정보를 복원
+* `개선` 단일 파일을 패키징할 때 자동 생성된 패키지 이름 접미사를 간체자로부터 병음으로 변환 (다음 음도 지원)
+* `개선` UiSelector#findOnce 및 UiSelector#find 메서드에서 음수 인수 지원
+* `개선` UI 요소 및 className 관련 선택자가 RecyclerView, Snackbar 등과 같은 더욱 다양한 패키지 이름 접두사 생략 형식을 지원
+* `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
 # v6.6.0
 
@@ -284,25 +304,6 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 * `개선` 콘솔에는 오류 메시지를 인쇄할 때 상세한 스택 정보가 포함됩니다.
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
 
-# v6.4.2
-
-###### 2023/11/15
-
-* `추가` dialogs.build() 옵션 매개변수 속성 inputSingleLine
-* `추가` console.setTouchable 메서드 _[`issue #122`](http://issues.autojs6.com/122)_
-* `수정` ocr 모듈 일부 메서드가 영역 매개변수를 인식하지 못하는 문제 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
-* `수정` Android 7.x에서 새로운 버전을 발견했을 때 버전 세부 정보를 가져올 수 없는 문제
-* `수정` Android 14에서 스크린샷 권한을 요청할 때 애플리케이션이 충돌하는 문제
-* `수정` 홈 화면 드로어에서 '플로팅 버튼' 스위치를 빠르게 전환할 때 애플리케이션이 충돌할 수 있는 문제
-* `수정` 메뉴를 사용해 플로팅 버튼을 닫을 때 애플리케이션을 재시작하면 플로팅 버튼이 여전히 표시되는 문제
-* `수정` Android 13 이상의 시스템 설정 페이지에서 AutoJs6 언어를 선택하고 전환한 후 적용되지 않는 문제
-* `수정` 빌드 도구가 처음 빌드할 때 OpenCV 리소스를 자동으로 배포하지 못하는 문제
-* `개선` 네이티브 bridges 모듈로 스크립트 실행 효율성 향상 (Ref to [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
-* `개선` 접근성 서비스 관련 코드를 리팩토링하여 접근성 서비스의 기능 안정성 향상 (실험성) _[`issue #167`](http://issues.autojs6.com/167)_
-* `개선` UiObject 및 UiObjectCollection의 출력 형식
-* `개선` Gradle JDK 버전이 요구 사항을 충족하지 않을 때 빌드 도구에서 업그레이드 알림
-* `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v642)_
-
 ##### 더 많은 버전 기록은 참조하십시오.
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ko.md)
@@ -319,12 +320,12 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 
 #### Android Studio 준비
 
-`Android Studio Ladybug | 2024.2.1 Patch 2` 버전을 다운로드하십시오 (필요에 따라 선택):
+`Android Studio Ladybug | 2024.2.1 Patch 3` 버전을 다운로드하십시오 (필요에 따라 선택):
 
-- [android-studio-2024.2.1.11-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.11/android-studio-2024.2.1.11-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.11-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.11/android-studio-2024.2.1.11-windows.zip) (1.14 GB)
+- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
+- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
 
-> 메모: 상기 버전 출시 날짜는 2024 년 10 월 31 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오..
+> 메모: 상기 버전 출시 날짜는 2024 년 12 월 2 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오..
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -368,7 +369,7 @@ SDK Tools (SDK 도구) (오른쪽 창에 위치)
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다..
 
-2024 년 12 월 9 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `23`입니다..
+2024 년 12 월 25 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `23`입니다..
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다..
 

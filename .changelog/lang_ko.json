@@ -1,5 +1,32 @@
 {
   "$data": {
+    "v6.6.1": {
+      "released_date": "2024/12/25",
+      "feature": [
+        "중국어 병음 변환을 위한 Pinyin 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin))",
+        "중국어 병음 변환을 위한 Pinyin4j 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin4j))",
+        "컨트롤 또는 컨트롤 컬렉션이 유사한지 여부를 확인하는 UiObject#isSimilar 및 UiObjectCollection#isSimilar 메서드"
+      ],
+      "fix": [
+        "일부 환경에서 이전 버전으로 롤백하여 프로젝트가 정상적으로 컴파일되지 않는 문제",
+        "존재하지 않는 메서드를 호출할 때 발생할 수 있는 \"비원시 값\" 예외",
+        "일부 기기에서 스크립트 바로가기를 정상적으로 추가할 수 없는 문제 (임시 수정) _[`issue #221`](http://issues.autojs6.com/221)_",
+        "automator.click/longClick 메서드의 파라미터 유형 제한 오류 _[`issue #275`](http://issues.autojs6.com/275)_",
+        "선택자가 ConsString 유형의 파라미터를 지원하지 않는 문제 _[`issue #277`](http://issues.autojs6.com/277)_",
+        "UiObjectCollection 인스턴스에서 메서드 및 속성이 누락된 문제"
+      ],
+      "improvement": [
+        "로그 활동 창의 개별 항목 텍스트 내용을 더블 클릭 또는 길게 눌러 선택하는 기능 복원 _[`issue #280`](http://issues.autojs6.com/280)_",
+        "project.json 파일이 손상된 경우에도 가능한 한 중요한 정보를 복원",
+        "단일 파일을 패키징할 때 자동 생성된 패키지 이름 접미사를 간체자로부터 병음으로 변환 (다음 음도 지원)",
+        "UiSelector#findOnce 및 UiSelector#find 메서드에서 음수 인수 지원",
+        "UI 요소 및 className 관련 선택자가 RecyclerView, Snackbar 등과 같은 더욱 다양한 패키지 이름 접두사 생략 형식을 지원"
+      ],
+      "dependency": [
+        "Jieba Analysis 버전 1.0.3-SNAPSHOT (수정된 버전) 추가",
+        "Gradle 버전을 8.11.1에서 8.12로 업그레이드"
+      ]
+    },
     "v6.6.0": {
       "released_date": "2024/12/02",
       "released_hint": "내장 모듈 재작성, 신중한 업그레이드 필요",

@@ -29,15 +29,15 @@
 
 ملف README.md الحالي يدعم اللغات التالية:
 
- - [简体中文 [zh-Hans]](http://project.autojs6.com/blob/master/README-zh-Hans.md)
- - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/README-zh-Hant-HK.md)
- - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/README-zh-Hant-TW.md)
- - [English [en]](http://project.autojs6.com/blob/master/README-en.md)
- - [Français [fr]](http://project.autojs6.com/blob/master/README-fr.md)
- - [Español [es]](http://project.autojs6.com/blob/master/README-es.md)
- - [日本語 [ja]](http://project.autojs6.com/blob/master/README-ja.md)
- - [한국어 [ko]](http://project.autojs6.com/blob/master/README-ko.md)
- - [Русский [ru]](http://project.autojs6.com/blob/master/README-ru.md)
+ - [简体中文 [zh-Hans]](http://project.autojs6.com/blob/master/.readme/README-zh-Hans.md)
+ - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-HK.md)
+ - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-TW.md)
+ - [English [en]](http://project.autojs6.com/blob/master/.readme/README-en.md)
+ - [Français [fr]](http://project.autojs6.com/blob/master/.readme/README-fr.md)
+ - [Español [es]](http://project.autojs6.com/blob/master/.readme/README-es.md)
+ - [日本語 [ja]](http://project.autojs6.com/blob/master/.readme/README-ja.md)
+ - [한국어 [ko]](http://project.autojs6.com/blob/master/.readme/README-ko.md)
+ - [Русский [ru]](http://project.autojs6.com/blob/master/.readme/README-ru.md)
  - العربية [ar] # حالي
 
 ******
@@ -153,6 +153,26 @@
 ### تاريخ الإصدارات
 
 ******
+
+# v6.6.1
+
+###### 2024/12/25
+
+* `إضافة جديدة` وحدة Pinyin لتحويل النصوص الصينية إلى بينيين (راجع وثائق المشروع > [البينيين الصيني](https://docs.autojs6.com/#/pinyin))
+* `إضافة جديدة` وحدة Pinyin4j لتحويل النصوص الصينية إلى بينيين (راجع وثائق المشروع > [البينيين الصيني](https://docs.autojs6.com/#/pinyin4j))
+* `إضافة جديدة` الطرق UiObject#isSimilar و UiObjectCollection#isSimilar لتحديد ما إذا كان العنصر أو مجموعة العناصر متشابهة
+* `تصليح` مشكلة عدم قدرة المشروع على التجميع بشكل صحيح في بعض البيئات بسبب الرجوع إلى إصدار أقدم
+* `تصليح` خطأ "قيمة غير أولية" قد يحدث عند استدعاء طرق غير موجودة
+* `تصليح` مشكلة عدم إمكانية إضافة اختصارات النصوص على بعض الأجهزة (إصلاح مؤقت) _[`issue #221`](http://issues.autojs6.com/221)_
+* `تصليح` خطأ في قيود نوع الوسائط للطرق automator.click/longClick _[`issue #275`](http://issues.autojs6.com/275)_
+* `تصليح` مشكلة عدم دعم المصفوفات مع الوسائط من نوع ConsString _[`issue #277`](http://issues.autojs6.com/277)_
+* `تصليح` مشكلة فقدان الطرق والخصائص في مثيلات UiObjectCollection
+* `تحسين` استعادة إمكانية اختيار محتوى النص لكل عنصر في نافذة النشاط الخاصة بالسجلات بالنقر المزدوج أو الضغط المطول _[`issue #280`](http://issues.autojs6.com/280)_
+* `تحسين` استعادة أكبر قدر ممكن من المعلومات الأساسية لمشاريع النصوص عند تلف ملف project.json
+* `تحسين` تحويل اللغة الصينية المبسطة تلقائيًا إلى نظام بينيين (بما في ذلك الحروف متعددة النغمات) عند توليد اللواحق للأسماء في الملفات المفردة
+* `تحسين` دعم الوسائط السلبية في الطرق UiSelector#findOnce و UiSelector#find
+* `تحسين` دعم أشكال مختصرة إضافية لبادئات الأسماء في المصفوفات المرتبطة بعناصر الواجهة (مثل RecyclerView و Snackbar وغيرها)
+* `تحسين` تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
 # v6.6.0
 
@@ -284,25 +304,6 @@
 * `تحسين` تتضمن وحدة التحكم معلومات مفصلة عن المكدس عند طباعة رسائل الخطأ.
 * `تحسين` تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
 
-# v6.4.2
-
-###### 2023/11/15
-
-* `إضافة جديدة` خصائص خيار المعلمة inputSingleLine في dialogs.build()
-* `إضافة جديدة` طريقة console.setTouchable _[`issue #122`](http://issues.autojs6.com/122)_
-* `تصليح` مشكلة بعض طرق التعرف على المنطقة في وحدة ocr _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
-* `تصليح` مشكلة تعذر الحصول على تفاصيل الإصدار عند اكتشاف إصدار جديد على Android 7.x
-* `تصليح` مشكلة تعطل التطبيق عند طلب إذن لقطة الشاشة على Android 14
-* `تصليح` مشكلة تعطل التطبيق عند التبديل السريع لـ "زر عائم" في درج الصفحة الرئيسية
-* `تصليح` مشكلة استمرار ظهور الزر العائم بعد إعادة تشغيل التطبيق عند إغلاقه باستخدام القائمة
-* `تصليح` مشكلة عدم فعالية اختيار وتبديل لغة AutoJs6 في صفحة إعدادات النظام على Android 13 والإصدارات الأحدث
-* `تصليح` مشكلة تعذر إكمال نشر موارد OpenCV تلقائيًا عند البناء الأول باللغة
-* `تحسين` تعديل وحدة bridges الأصلية لتحسين كفاءة تنفيذ السكريبت (المرجع [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
-* `تحسين` إعادة هيكلة الكود المرتبط بخدمات إمكانية الوصول لتعزيز استقرار الخدمة (تجريبية) _[`issue #167`](http://issues.autojs6.com/167)_
-* `تحسين` تنسيق إخراج UiObject وUiObjectCollection
-* `تحسين` إضافة إشعار للترقية عند عدم استيفاء إصدار Gradle JDK لمتطلبات بيئة البناء
-* `تحسين` تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v642)_
-
 ##### لمزيد من تاريخ الإصدارات، ارجع إلى
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ar.md)
@@ -319,12 +320,12 @@
 
 #### تحضير Android Studio
 
-قم بتنزيل إصدار `Android Studio Ladybug | 2024.2.1 Patch 2` (حدد أحدها حسب الحاجة):
+قم بتنزيل إصدار `Android Studio Ladybug | 2024.2.1 Patch 3` (حدد أحدها حسب الحاجة):
 
-- [android-studio-2024.2.1.11-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.11/android-studio-2024.2.1.11-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.11-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.11/android-studio-2024.2.1.11-windows.zip) (1.14 GB)
+- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
+- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
 
-> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 31 October 2024. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
+> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 2 December 2024. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 قم بتثبيت أو فك ضغط الملف المذكور سابقًا، ثم قم بتشغيل برنامج Android Studio (مثل `"D:\android-studio\bin\studio64.exe"`).
 
@@ -368,7 +369,7 @@ SDK Tools  (أدوات SDK) (في النافذة اليمنى)
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `19`.
 
-اعتبارًا من 9 December 2024، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `23`.
+اعتبارًا من 25 December 2024، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `23`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 
