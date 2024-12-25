@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.1": {
-      "released_date": "2024/12/09",
+      "released_date": "2024/12/25",
       "feature": [
         "pinyin 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin))",
         "pinyin4j 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin4j))",
