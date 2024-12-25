@@ -320,12 +320,12 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 #### Android Studio 準備
 
-下載 `Android Studio Ladybug | 2024.2.1 Patch 3` 版本 (按需選擇其一):
+下載 `Android Studio Ladybug Feature Drop | 2024.2.2 RC 2` 版本 (按需選擇其一):
 
-- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.12/android-studio-2024.2.2.12-windows.exe) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.12/android-studio-2024.2.2.12-windows.zip) (1.15 GB)
 
-> 注: 上述版本釋出時間為 2024 年 12 月 2 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
+> 注: 上述版本釋出時間為 2024 年 12 月 16 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
 
 安裝或解壓上述檔案, 執行 Android Studio 軟體 (如 `"D:\android-studio\bin\studio64.exe"`).
 
