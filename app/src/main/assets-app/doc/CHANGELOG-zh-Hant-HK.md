@@ -22,6 +22,7 @@
 * `優化` 打包單文件時自動生成的包名後綴支持將簡體中文轉換為拼音 (支持多音字)
 * `優化` UiSelector#findOnce 及 UiSelector#find 方法支持負數參數
 * `優化` UI 元素及 className 相關選擇器支持更多的包名前綴省略形式 (如 RecyclerView, Snackbar 等)
+* `優化` 同步最新的 Rhino 引擎官方上游代碼並進行必要的代碼適配
 * `依賴` 附加 Jieba Analysis 版本 1.0.3-SNAPSHOT (modified)
 * `依賴` 升級 Gradle 版本 8.11.1 -> 8.12
 

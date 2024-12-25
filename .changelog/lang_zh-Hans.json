@@ -20,7 +20,8 @@
         "脚本项目识别在 project.json 损坏情况下尽可能还原关键信息",
         "打包单文件时自动生成的包名后缀支持将简体中文转换为拼音 (支持多音字)",
         "UiSelector#findOnce 及 UiSelector#find 方法支持负数参数",
-        "UI 元素及 className 相关选择器支持更多的包名前缀省略形式 (如 RecyclerView, Snackbar 等)"
+        "UI 元素及 className 相关选择器支持更多的包名前缀省略形式 (如 RecyclerView, Snackbar 等)",
+        "同步最新的 Rhino 引擎官方上游代码并进行必要的代码适配"
       ],
       "dependency": [
         "附加 Jieba Analysis 版本 1.0.3-SNAPSHOT (modified)",

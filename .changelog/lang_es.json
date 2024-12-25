@@ -20,7 +20,8 @@
         "Recuperar la mayor cantidad de información crítica posible para proyectos de scripts cuando el archivo project.json está dañado",
         "Convertir automáticamente chino simplificado a Pinyin (incluyendo caracteres con múltiples tonos) para los sufijos de nombres de paquetes generados al empaquetar archivos individuales",
         "Soporte para argumentos negativos en los métodos UiSelector#findOnce y UiSelector#find",
-        "Mayor soporte para formas abreviadas de prefijos de nombres de paquetes en selectores relacionados con elementos UI y className (por ejemplo, RecyclerView, Snackbar, etc.)"
+        "Mayor soporte para formas abreviadas de prefijos de nombres de paquetes en selectores relacionados con elementos UI y className (por ejemplo, RecyclerView, Snackbar, etc.)",
+        "Sincronizar el código más reciente del upstream del motor Rhino y adaptarlo al proyecto existente"
       ],
       "dependency": [
         "Agregado Jieba Analysis versión 1.0.3-SNAPSHOT (modificada)",

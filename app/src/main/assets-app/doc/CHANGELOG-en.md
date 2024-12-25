@@ -22,6 +22,7 @@
 * `Improvement` Automatically convert Simplified Chinese to Pinyin (including multi-tone characters) for generated package name suffixes when packaging single files
 * `Improvement` Support for negative arguments in the UiSelector#findOnce and UiSelector#find methods
 * `Improvement` UI elements and className-related selectors now support more package name prefix omission forms (e.g., RecyclerView, Snackbar, etc.)
+* `Improvement` Synchronize with the latest upstream code of the Rhino engine and adapt it to the existing project
 * `Dependency` Added Jieba Analysis version 1.0.3-SNAPSHOT (modified)
 * `Dependency` Upgrade Gradle version from 8.11.1 to 8.12
 

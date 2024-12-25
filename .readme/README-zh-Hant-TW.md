@@ -172,6 +172,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `最佳化` 打包單檔案時自動生成的包名字尾支援將簡體中文轉換為拼音 (支援多音字)
 * `最佳化` UiSelector#findOnce 及 UiSelector#find 方法支援負數引數
 * `最佳化` UI 元素及 className 相關選擇器支援更多的包名字首省略形式 (如 RecyclerView, Snackbar 等)
+* `最佳化` 同步最新的 Rhino 引擎官方上游程式碼並進行必要的程式碼適配
 * `最佳化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
 # v6.6.0

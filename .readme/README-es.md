@@ -172,6 +172,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Convertir automáticamente chino simplificado a Pinyin (incluyendo caracteres con múltiples tonos) para los sufijos de nombres de paquetes generados al empaquetar archivos individuales
 * `Mejora` Soporte para argumentos negativos en los métodos UiSelector#findOnce y UiSelector#find
 * `Mejora` Mayor soporte para formas abreviadas de prefijos de nombres de paquetes en selectores relacionados con elementos UI y className (por ejemplo, RecyclerView, Snackbar, etc.)
+* `Mejora` Sincronizar el código más reciente del upstream del motor Rhino y adaptarlo al proyecto existente
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
 # v6.6.0
