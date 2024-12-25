@@ -249,7 +249,10 @@ object Inspect : Augmentable(), Invokable {
         return formatValue(ctx, obj, ctx.depth)
     }
 
-    private fun formatValue(ctx: Ctx, value: Any?, recurseTimes: Int?): String {
+    private fun formatValue(ctx: Ctx, `val`: Any?, recurseTimes: Int?): String {
+        var value = `val`
+
+        while (value is Wrapper) value = value.unwrap()
 
         if (value is TopLevel) return "[object ${value.className}]"
 
@@ -296,21 +299,10 @@ object Inspect : Augmentable(), Invokable {
         //  ! zh-CN: 显式声明其非空性.
         if (value == null) throw ShouldNeverHappenException()
 
-        if (value !is ScriptableObject) {
-            return when {
-                value is NativeJavaPackage -> value.toString()
-                value is NativeJavaClass -> value.toString()
-                value is Wrapper -> {
-                    val o = value.unwrap()
-                    when {
-                        o.javaClass.isArray -> javaArrayToString(o)
-                        else -> toJavaObjectString(o)
-                    }
-                }
-                value.javaClass.isArray -> javaArrayToString(value)
-                else -> Context.toString(value)
-            }
-        }
+        if (value is NativeJavaPackage) return value.toString()
+        if (value is NativeJavaClass) return value.toString()
+        if (value.javaClass.isArray) return javaArrayToString(value)
+        if (value !is ScriptableObject) return Context.toString(value)
 
         // @Hint by SuperMonster003 on Apr 16, 2024.
         //  ! Check if the object has a custom overwritten toString() method.
@@ -424,7 +416,7 @@ object Inspect : Augmentable(), Invokable {
         return reduceToSingleString(output, base, braces)
     }
 
-    internal fun toJavaObjectString(value: Any) = "[JavaObject: ${value.javaClass.name}@${Integer.toHexString(value.hashCode())}]"
+    private fun toJavaObjectString(value: Any) = "[JavaObject: ${value.javaClass.name}@${Integer.toHexString(value.hashCode())}]"
 
     private fun toJavaObjectString(className: Any?, value: Any?) = "[JavaObject: $className@${Integer.toHexString(value.hashCode())}]"
 

@@ -28,7 +28,7 @@ class MorseCodeNativeObject(val parser: MorseCodeParser) : NativeObject(), Strin
     init {
         super.exportAsJSClass(MAX_PROTOTYPE_ID, this, false)
         defineFunctionProperties(mFunctionNames, javaClass, PERMANENT)
-        defineProperty(StringReadable.KEY, newBaseFunction(StringReadable.KEY, { toStringReadable() }, NOT_CONSTRUCTABLE), PERMANENT)
+        defineProperty(StringReadable.KEY, newBaseFunction(StringReadable.KEY, { toStringReadable() }, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
         defineProperty("pattern", { parser.pattern.toNativeArray() }, null, PERMANENT)
         defineProperty("code", { parser.code }, null, PERMANENT)
     }

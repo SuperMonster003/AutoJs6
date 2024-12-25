@@ -3,11 +3,6 @@
     <option name="RIGHT_MARGIN" value="1000" />
     <AndroidXmlCodeStyleSettings>
       <option name="USE_CUSTOM_SETTINGS" value="true" />
-      <option name="LAYOUT_SETTINGS">
-        <value>
-          <option name="INSERT_LINE_BREAK_BEFORE_NAMESPACE_DECLARATION" value="true" />
-        </value>
-      </option>
       <option name="MANIFEST_SETTINGS">
         <value>
           <option name="INSERT_LINE_BREAK_BEFORE_NAMESPACE_DECLARATION" value="true" />
