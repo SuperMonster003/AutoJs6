@@ -29,16 +29,16 @@
 
 El archivo actual `README.md` admite los siguientes idiomas:
 
- - [简体中文 [zh-Hans]](http://project.autojs6.com/blob/master/README-zh-Hans.md)
- - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/README-zh-Hant-HK.md)
- - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/README-zh-Hant-TW.md)
- - [English [en]](http://project.autojs6.com/blob/master/README-en.md)
- - [Français [fr]](http://project.autojs6.com/blob/master/README-fr.md)
+ - [简体中文 [zh-Hans]](http://project.autojs6.com/blob/master/.readme/README-zh-Hans.md)
+ - [繁體中文 (香港) [zh-Hant-HK]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-HK.md)
+ - [繁體中文 (台灣) [zh-Hant-TW]](http://project.autojs6.com/blob/master/.readme/README-zh-Hant-TW.md)
+ - [English [en]](http://project.autojs6.com/blob/master/.readme/README-en.md)
+ - [Français [fr]](http://project.autojs6.com/blob/master/.readme/README-fr.md)
  - Español [es] # actualmente
- - [日本語 [ja]](http://project.autojs6.com/blob/master/README-ja.md)
- - [한국어 [ko]](http://project.autojs6.com/blob/master/README-ko.md)
- - [Русский [ru]](http://project.autojs6.com/blob/master/README-ru.md)
- - [العربية [ar]](http://project.autojs6.com/blob/master/README-ar.md)
+ - [日本語 [ja]](http://project.autojs6.com/blob/master/.readme/README-ja.md)
+ - [한국어 [ko]](http://project.autojs6.com/blob/master/.readme/README-ko.md)
+ - [Русский [ru]](http://project.autojs6.com/blob/master/.readme/README-ru.md)
+ - [العربية [ar]](http://project.autojs6.com/blob/master/.readme/README-ar.md)
 
 ******
 
@@ -153,6 +153,26 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 ### Historial de versiones
 
 ******
+
+# v6.6.1
+
+###### 2024/12/25
+
+* `Nuevo` Módulo Pinyin para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin))
+* `Nuevo` Módulo Pinyin4j para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin4j))
+* `Nuevo` Métodos UiObject#isSimilar y UiObjectCollection#isSimilar para determinar si un control o una colección de controles son similares
+* `Corrección` Problema donde no se podía compilar correctamente el proyecto en determinados entornos debido a una reversión a una versión anterior
+* `Corrección` Excepción de "valor no primitivo" que puede ocurrir al llamar a métodos inexistentes
+* `Corrección` Problema donde los accesos directos de scripts no se podían agregar correctamente en algunos dispositivos (arreglo tentativa) _[`issue #221`](http://issues.autojs6.com/221)_
+* `Corrección` Restricción de tipo de parámetro incorrecta en los métodos automator.click/longClick _[`issue #275`](http://issues.autojs6.com/275)_
+* `Corrección` Problema donde los selectores no admitían parámetros del tipo ConsString _[`issue #277`](http://issues.autojs6.com/277)_
+* `Corrección` Problema donde las instancias de UiObjectCollection carecían de métodos y propiedades propios
+* `Mejora` Restaurar la capacidad de seleccionar el contenido del texto de entradas individuales en la ventana de actividad del registro mediante doble clic o pulsación larga _[`issue #280`](http://issues.autojs6.com/280)_
+* `Mejora` Recuperar la mayor cantidad de información crítica posible para proyectos de scripts cuando el archivo project.json está dañado
+* `Mejora` Convertir automáticamente chino simplificado a Pinyin (incluyendo caracteres con múltiples tonos) para los sufijos de nombres de paquetes generados al empaquetar archivos individuales
+* `Mejora` Soporte para argumentos negativos en los métodos UiSelector#findOnce y UiSelector#find
+* `Mejora` Mayor soporte para formas abreviadas de prefijos de nombres de paquetes en selectores relacionados con elementos UI y className (por ejemplo, RecyclerView, Snackbar, etc.)
+* `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
 # v6.6.0
 
@@ -284,25 +304,6 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` La consola incluye información detallada de la pila al imprimir mensajes de error.
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
 
-# v6.4.2
-
-###### 2023/11/15
-
-* `Nuevo` Propiedad inputSingleLine añadida a la opción de parámetros de dialogs.build()
-* `Nuevo` Método console.setTouchable _[`issue #122`](http://issues.autojs6.com/122)_
-* `Corrección` Problema de parámetros de área de no reconocimiento en ciertos métodos del módulo ocr _[`issue #162`](http://issues.autojs6.com/162)_ _[`issue #175`](http://issues.autojs6.com/175)_
-* `Corrección` Problema de no obtención de detalles de versión al encontrar una nueva versión en Android 7.x
-* `Corrección` Problema de cierre inesperado de la aplicación al solicitar permisos de captura de pantalla en Android 14
-* `Corrección` Problema de cierre inesperado de la aplicación al alternar rápidamente el interruptor de "botón flotante" en el cajón de la página principal
-* `Corrección` Problema de botón flotante que todavía aparece después de reiniciar la aplicación tras cerrarlo con el menú
-* `Corrección` Problema de no efectividad para cambiar el idioma de AutoJs6 desde la página de configuraciones del sistema en Android 13 y superior
-* `Corrección` Problema de despliegue no automático de recursos de OpenCV al construir herramientas por primera vez
-* `Mejora` Uso del módulo bridges nativo para mejorar la eficiencia de ejecución de scripts (Ref a [aiselp](https://github.com/aiselp/AutoX/commit/7c41af6d2b9b36d00440a9c8b7e971d025f98327))
-* `Mejora` Reestructuración del código relacionado con el servicio de accesibilidad para mejorar su estabilidad (experimental) _[`issue #167`](http://issues.autojs6.com/167)_
-* `Mejora` Formato de salida del print para UiObject y UiObjectCollection
-* `Mejora` Sugerencias de actualización de versión en caso de requerimientos de versión no satisfechos en el entorno de construcción Gradle JDK
-* `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v642)_
-
 ##### Para más historial de versiones, consulte
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-es.md)
@@ -319,12 +320,12 @@ Esta sección toma como ejemplo Android Studio para presentar los métodos de co
 
 #### Preparación de Android Studio
 
-Descarga la versión `Android Studio Ladybug | 2024.2.1 Patch 2` (elige una según tus necesidades):
+Descarga la versión `Android Studio Ladybug | 2024.2.1 Patch 3` (elige una según tus necesidades):
 
-- [android-studio-2024.2.1.11-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.11/android-studio-2024.2.1.11-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.11-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.11/android-studio-2024.2.1.11-windows.zip) (1.14 GB)
+- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
+- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
 
-> Nota: La fecha de lanzamiento de la versión anterior es el 31 de October de 2024. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Nota: La fecha de lanzamiento de la versión anterior es el 2 de December de 2024. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Instala o descomprime los archivos mencionados anteriormente y ejecuta el software Android Studio (por ejemplo, `"D:\android-studio\bin\studio64.exe"`).
 
@@ -368,7 +369,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `19`.
 
-Hasta el 9 de December de 2024, AutoJs6 soporta hasta la versión `23` de JDK.
+Hasta el 25 de December de 2024, AutoJs6 soporta hasta la versión `23` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

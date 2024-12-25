@@ -6,16 +6,24 @@
 
 # v6.6.1
 
-###### 2024/12/08
+###### 2024/12/25
 
 * `新增` pinyin 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin))
+* `新增` pinyin4j 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin4j))
+* `新增` UiObject#isSimilar 及 UiObjectCollection#isSimilar 方法, 用于确定控件或控件集合是否相似
 * `修复` 部分环境因回退版本过低而无法正常编译项目的问题
 * `修复` 调用不存在的方法时可能出现的 "非原始类型值" 异常
 * `修复` 部分设备无法正常添加脚本快捷方式的问题 (试修) _[`issue #221`](http://issues.autojs6.com/221)_
 * `修复` automator.click/longClick 方法参数类型限制错误 _[`issue #275`](http://issues.autojs6.com/275)_
+* `修复` 选择器不支持 ConsString 类型参数的问题 _[`issue #277`](http://issues.autojs6.com/277)_
+* `修复` UiObjectCollection 实例缺失自身方法及属性的问题
+* `优化` 恢复日志活动窗口单个条目文本内容的双击或长按选择功能 _[`issue #280`](http://issues.autojs6.com/280)_
 * `优化` 脚本项目识别在 project.json 损坏情况下尽可能还原关键信息
-* `优化` 打包单文件时自动生成的包名后缀支持将简体中文自动转换为拼音
+* `优化` 打包单文件时自动生成的包名后缀支持将简体中文转换为拼音 (支持多音字)
+* `优化` UiSelector#findOnce 及 UiSelector#find 方法支持负数参数
 * `优化` UI 元素及 className 相关选择器支持更多的包名前缀省略形式 (如 RecyclerView, Snackbar 等)
+* `依赖` 附加 Jieba Analysis 版本 1.0.3-SNAPSHOT (modified)
+* `依赖` 升级 Gradle 版本 8.11.1 -> 8.12
 
 # v6.6.0
 

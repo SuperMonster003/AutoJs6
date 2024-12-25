@@ -1,5 +1,32 @@
 {
   "$data": {
+    "v6.6.1": {
+      "released_date": "2024/12/25",
+      "feature": [
+        "中国語のピンイン変換用の Pinyin モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin))",
+        "中国語のピンイン変換用の Pinyin4j モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin4j))",
+        "コントロールまたはコントロールコレクションが類似しているかを判定する UiObject#isSimilar と UiObjectCollection#isSimilar メソッド"
+      ],
+      "fix": [
+        "一部の環境でバージョンを低く戻すことでプロジェクトが正常にコンパイルできなくなる問題",
+        "存在しないメソッドを呼び出す際に発生する可能性がある「非プリミティブ型の値」エラー",
+        "一部のデバイスでスクリプトショートカットが正常に追加できない問題 (暫定修正) _[`issue #221`](http://issues.autojs6.com/221)_",
+        "automator.click/longClick メソッドのパラメーター型制限の誤り _[`issue #275`](http://issues.autojs6.com/275)_",
+        "セレクターが ConsString 型のパラメーターをサポートしない問題 _[`issue #277`](http://issues.autojs6.com/277)_",
+        "UiObjectCollection インスタンスにメソッドおよびプロパティが欠如している問題"
+      ],
+      "improvement": [
+        "ログアクティビティウィンドウの個別エントリのテキスト内容をダブルクリックまたは長押しで選択する機能を復元 _[`issue #280`](http://issues.autojs6.com/280)_",
+        "project.json ファイルが破損した場合でも、スクリプトプロジェクトの重要な情報を可能な限り復元",
+        "単一ファイルをパッケージ化する際に、自動生成されるパッケージ名のサフィックスを簡体字中国語からピンインに変換 (多音字対応)",
+        "UiSelector#findOnce と UiSelector#find メソッドで負の引数をサポート",
+        "UI要素や className に関連するセレクターが RecyclerView や Snackbar などのパッケージ名プレフィックス省略形式にさらに対応"
+      ],
+      "dependency": [
+        "Jieba Analysis バージョン 1.0.3-SNAPSHOT (修正版) を追加",
+        "Gradle バージョンを 8.11.1 から 8.12 にアップグレード"
+      ]
+    },
     "v6.6.0": {
       "released_date": "2024/12/02",
       "released_hint": "組み込みモジュールの書き換え、慎重にアップグレードしてください",

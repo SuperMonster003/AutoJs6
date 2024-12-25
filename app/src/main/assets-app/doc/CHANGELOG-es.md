@@ -4,6 +4,27 @@
 
 ******
 
+# v6.6.1
+
+###### 2024/12/25
+
+* `Nuevo` Módulo Pinyin para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin))
+* `Nuevo` Módulo Pinyin4j para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin4j))
+* `Nuevo` Métodos UiObject#isSimilar y UiObjectCollection#isSimilar para determinar si un control o una colección de controles son similares
+* `Corrección` Problema donde no se podía compilar correctamente el proyecto en determinados entornos debido a una reversión a una versión anterior
+* `Corrección` Excepción de "valor no primitivo" que puede ocurrir al llamar a métodos inexistentes
+* `Corrección` Problema donde los accesos directos de scripts no se podían agregar correctamente en algunos dispositivos (arreglo tentativa) _[`issue #221`](http://issues.autojs6.com/221)_
+* `Corrección` Restricción de tipo de parámetro incorrecta en los métodos automator.click/longClick _[`issue #275`](http://issues.autojs6.com/275)_
+* `Corrección` Problema donde los selectores no admitían parámetros del tipo ConsString _[`issue #277`](http://issues.autojs6.com/277)_
+* `Corrección` Problema donde las instancias de UiObjectCollection carecían de métodos y propiedades propios
+* `Mejora` Restaurar la capacidad de seleccionar el contenido del texto de entradas individuales en la ventana de actividad del registro mediante doble clic o pulsación larga _[`issue #280`](http://issues.autojs6.com/280)_
+* `Mejora` Recuperar la mayor cantidad de información crítica posible para proyectos de scripts cuando el archivo project.json está dañado
+* `Mejora` Convertir automáticamente chino simplificado a Pinyin (incluyendo caracteres con múltiples tonos) para los sufijos de nombres de paquetes generados al empaquetar archivos individuales
+* `Mejora` Soporte para argumentos negativos en los métodos UiSelector#findOnce y UiSelector#find
+* `Mejora` Mayor soporte para formas abreviadas de prefijos de nombres de paquetes en selectores relacionados con elementos UI y className (por ejemplo, RecyclerView, Snackbar, etc.)
+* `Dependencia` Agregado Jieba Analysis versión 1.0.3-SNAPSHOT (modificada)
+* `Dependencia` Actualizar la versión de Gradle de 8.11.1 a 8.12
+
 # v6.6.0
 
 ###### 2024/12/02 - Reescritura de módulos integrados, actualización con precaución

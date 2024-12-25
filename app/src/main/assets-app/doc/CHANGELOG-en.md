@@ -4,6 +4,27 @@
 
 ******
 
+# v6.6.1
+
+###### 2024/12/25
+
+* `Feature` Pinyin module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))
+* `Feature` Pinyin4j module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))
+* `Feature` Methods UiObject#isSimilar and UiObjectCollection#isSimilar for determining whether a control or a collection of controls is similar
+* `Fix` Issue where the project could not compile properly in certain environments due to a rollback to an earlier version
+* `Fix` "Non-primitive value" exception that may occur when calling non-existent methods
+* `Fix` Issue where script shortcuts could not be added properly on certain devices (tentative fix) _[`issue #221`](http://issues.autojs6.com/221)_
+* `Fix` Incorrect parameter type restrictions for the automator.click/longClick methods _[`issue #275`](http://issues.autojs6.com/275)_
+* `Fix` Issue where selectors did not support ConsString type parameters _[`issue #277`](http://issues.autojs6.com/277)_
+* `Fix` Missing methods and properties on UiObjectCollection instances
+* `Improvement` Restore the ability to select text content of individual entries in the log activity window via double-click or long press _[`issue #280`](http://issues.autojs6.com/280)_
+* `Improvement` Recover as much critical information as possible for script projects when project.json is corrupted
+* `Improvement` Automatically convert Simplified Chinese to Pinyin (including multi-tone characters) for generated package name suffixes when packaging single files
+* `Improvement` Support for negative arguments in the UiSelector#findOnce and UiSelector#find methods
+* `Improvement` UI elements and className-related selectors now support more package name prefix omission forms (e.g., RecyclerView, Snackbar, etc.)
+* `Dependency` Added Jieba Analysis version 1.0.3-SNAPSHOT (modified)
+* `Dependency` Upgrade Gradle version from 8.11.1 to 8.12
+
 # v6.6.0
 
 ###### 2024/12/02 - Built-in module rewrite, upgrade cautiously
