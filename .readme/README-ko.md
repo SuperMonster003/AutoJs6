@@ -172,6 +172,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 * `개선` 단일 파일을 패키징할 때 자동 생성된 패키지 이름 접미사를 간체자로부터 병음으로 변환 (다음 음도 지원)
 * `개선` UiSelector#findOnce 및 UiSelector#find 메서드에서 음수 인수 지원
 * `개선` UI 요소 및 className 관련 선택자가 RecyclerView, Snackbar 등과 같은 더욱 다양한 패키지 이름 접두사 생략 형식을 지원
+* `개선` Rhino 엔진의 최신 업스트림 코드를 동기화하고 기존 프로젝트에 맞게 조정합니다
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
 # v6.6.0

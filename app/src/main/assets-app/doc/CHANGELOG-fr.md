@@ -22,6 +22,7 @@
 * `Amélioration` Convertir automatiquement le chinois simplifié en pinyin (y compris les caractères à tons multiples) pour les suffixes de noms de paquet générés lors de l'empaquetage de fichiers uniques
 * `Amélioration` Soutien des arguments négatifs dans les méthodes UiSelector#findOnce et UiSelector#find
 * `Amélioration` Prise en charge des formes abrégées supplémentaires pour les préfixes de noms de paquet dans les sélecteurs liés aux éléments de l'interface utilisateur et aux className (par exemple RecyclerView, Snackbar, etc.)
+* `Amélioration` Synchroniser le code en amont le plus récent du moteur Rhino et l'adapter au projet existant
 * `Dépendance` Ajout de Jieba Analysis version 1.0.3-SNAPSHOT (modifiée)
 * `Dépendance` Mise à niveau de la version de Gradle de 8.11.1 à 8.12
 
@@ -532,7 +533,7 @@
 * `Amélioration` Les méthodes associées à l'utilisation d'applications dans le module app prennent en charge des paramètres de type App et des paramètres d'alias d'application.
 * `Amélioration` Les méthodes associées au rappel asynchrone dans le module dialogs prennent en charge l'omission des paramètres pré-remplis.
 * `Amélioration` app.startActivity et autres prennent en charge des paramètres d'option d'URL (voir code d'exemple > Applications > Intention).
-* `Amélioration` Le module device renvoie null au lieu de lancer une exception lorsque l'obtention de l’IMEI ou du numéro de série matériel échoue.
+* `Amélioration` Le module device renvoie null au lieu de lancer une exception lorsque l'obtention de l'IMEI ou du numéro de série matériel échoue.
 * `Amélioration` Augmenter la luminosité du texte dans le journal de la fenêtre flottante affichée par console.show pour améliorer la lisibilité du contenu.
 * `Amélioration` ImageWrapper#saveTo prend en charge la sauvegarde de fichiers image dans des chemins relatifs.
 * `Amélioration` Reconcevoir l'objet global colors et inclure la prise en charge des modes de couleur HSV / HSL (consultez la documentation du projet > [Couleurs](https://docs.autojs6.com/#/color)).
@@ -575,7 +576,7 @@
 * `Amélioration` Internationalisation partielle des messages d'erreur (en / zh)
 * `Amélioration` Réorganisation des boutons de la boîte de dialogue de contenu non enregistré et ajout de la différenciation des couleurs
 * `Dépendance` Ajout de la version 1.306 de github-api
-* `Dépendance` Remplacement de la version 1.0.0 de retrofit2-rxjava2-adapter par la version 2.9.0 d’adapter-rxjava2
+* `Dépendance` Remplacement de la version 1.0.0 de retrofit2-rxjava2-adapter par la version 2.9.0 d'adapter-rxjava2
 
 # v6.1.0
 
@@ -604,12 +605,12 @@
 * `Correction` Problème de non-exécution des Thenable retournées par Promise.resolve() à la fin du script
 * `Correction` Erreurs potentielles dans les noms des packages ou classes (boardcast -> broadcast / auojs -> autojs)
 * `Correction` Problème potentiel de crash de l'application lors de l'utilisation de images.requestScreenCapture() sous les versions Android ≥ 31
-* `Correction` Problème potentiel de crash de l'application lors de demandes simultanées d’images.requestScreenCapture() par plusieurs scripts
+* `Correction` Problème potentiel de crash de l'application lors de demandes simultanées d'images.requestScreenCapture() par plusieurs scripts
 * `Correction` Problème de gel potentiel lors de l'appel à new RootAutomator()
 * `Amélioration` RootAutomator ne peut pas être instancié sans permissions Root
 * `Amélioration` Refonte de la page "À propos de l'application et du développeur"
 * `Amélioration` Refactorisation de tous les modules JavaScript intégrés
-* `Amélioration` Refactorisation de tous les scripts Gradle de la construction et ajout d’un script de configuration commun (config.gradle)
+* `Amélioration` Refactorisation de tous les scripts Gradle de la construction et ajout d'un script de configuration commun (config.gradle)
 * `Amélioration` L'outil de construction Gradle prend en charge la gestion automatique des numéros de version et le nommage automatique des fichiers de construction
 * `Amélioration` L'outil de construction Gradle ajoute une tâche pour joindre un résumé CRC32 aux fichiers de construction (appendDigestToReleasedFiles)
 * `Amélioration` L'écriture des exceptions dans le résultat de retour au lieu de lancer directement des exceptions lors d'un appel de shell() (aucune nécessité de try/catch)
@@ -657,7 +658,7 @@
 * `Amélioration` Ajout de la détection de l'état et des messages de résultat pour l'affichage de la position du pointeur
 * `Amélioration` Support des systèmes d'exploitation en 64 bits (référence à [TonyJiangWJ](https://github.com/TonyJiangWJ))
 * `Amélioration` Application immédiate des paramètres de transparence des boutons flottants lors de l'initialisation (sans nécessiter un clic supplémentaire pour appliquer la transparence)
-* `Amélioration` Ajout de la détection des fichiers de code d'exemple lors de la réinitialisation du contenu des fichiers et fourniture d’un message de résultat
+* `Amélioration` Ajout de la détection des fichiers de code d'exemple lors de la réinitialisation du contenu des fichiers et fourniture d'un message de résultat
 * `Amélioration` Migration de l'adresse de téléchargement des plugins packagés de GitHub vers JsDelivr
 * `Dépendance` Ajout de la version 1.5.1 de Zeugma Solutions LocaleHelper
 * `Dépendance` Rétrogradation de la version de Android Material de 1.6.0-alpha02 à 1.5.0

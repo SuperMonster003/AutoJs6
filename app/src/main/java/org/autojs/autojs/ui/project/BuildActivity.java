@@ -421,7 +421,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             // name = Pinyin4j.ofRhino(name);
             name = Pinyin.INSTANCE.simpleRhino(name, false, true);
         }
-        name = name.replaceAll("\\W+", "_");
+        name = name
+                .replaceAll("\\W+", "_")
+                .replaceAll("(.+)_+$", "$1");
         if (name.matches("^\\d.*")) {
             name = "app_" + name;
         }

@@ -7,11 +7,11 @@
 package org.autojs.autojs.rhino;
 
 import org.mozilla.javascript.Kit;
-import org.mozilla.javascript.ObjToIntMap;
 import org.mozilla.javascript.Token;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
 
 public class TokenStream {
     public static final double NaN = Double
@@ -1049,7 +1049,7 @@ public class TokenStream {
                 if (result != Token.EOF) {
                     return result;
                 }
-                this.string = (String) allStrings.intern(str);
+                this.string = internString(str);
                 return Token.NAME;
             }
 
@@ -1275,7 +1275,7 @@ public class TokenStream {
                 }
 
                 String str = getStringFromBuffer();
-                this.string = (String) allStrings.intern(str);
+                this.string = internString(str);
                 return Token.STRING;
             }
 
@@ -2262,7 +2262,7 @@ public class TokenStream {
 
     private char[] stringBuffer = new char[128];
     private int stringBufferTop;
-    private final ObjToIntMap allStrings = new ObjToIntMap(50);
+    private final HashMap<String, String> allStrings = new HashMap<>();
 
     // Room to backtrace from to < on failed match of the last - in <!--
     private final int[] ungetBuffer = new int[3];
@@ -2302,4 +2302,18 @@ public class TokenStream {
 
     private final String commentPrefix = "";
     private int commentCursor = -1;
+
+    // Use a HashMap to ensure that we only have one copy -- the original one
+    // of any particular string. Yes, the "String.intern" function also does this,
+    // but this is how Rhino has worked for years and it's not clear that we
+    // want to make the JVM-wide intern pool as big as it might happen if we
+    // used that.
+    private String internString(String s) {
+        String existing = allStrings.putIfAbsent(s, s);
+        if (existing == null) {
+            // First time we saw it
+            return s;
+        }
+        return existing;
+    }
 }

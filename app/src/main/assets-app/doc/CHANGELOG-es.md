@@ -22,6 +22,7 @@
 * `Mejora` Convertir automáticamente chino simplificado a Pinyin (incluyendo caracteres con múltiples tonos) para los sufijos de nombres de paquetes generados al empaquetar archivos individuales
 * `Mejora` Soporte para argumentos negativos en los métodos UiSelector#findOnce y UiSelector#find
 * `Mejora` Mayor soporte para formas abreviadas de prefijos de nombres de paquetes en selectores relacionados con elementos UI y className (por ejemplo, RecyclerView, Snackbar, etc.)
+* `Mejora` Sincronizar el código más reciente del upstream del motor Rhino y adaptarlo al proyecto existente
 * `Dependencia` Agregado Jieba Analysis versión 1.0.3-SNAPSHOT (modificada)
 * `Dependencia` Actualizar la versión de Gradle de 8.11.1 a 8.12
 

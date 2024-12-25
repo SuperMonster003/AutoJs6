@@ -18,7 +18,6 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.Kit;
 import org.mozilla.javascript.NativeCall;
-import org.mozilla.javascript.ObjArray;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -37,9 +36,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -343,11 +345,11 @@ public class Dim {
                     }
                 }
 
-                is = (new URL(sourceUrl)).openStream();
+                is = new URL(sourceUrl).openStream();
             }
 
             try {
-                source = Kit.readReader(new InputStreamReader(is));
+                source = Kit.readReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             } finally {
                 is.close();
             }
@@ -489,9 +491,8 @@ public class Dim {
     /**
      * Returns an array of all functions in the given script.
      */
-    private static DebuggableScript[] getAllFunctions
-    (DebuggableScript function) {
-        ObjArray functions = new ObjArray();
+    private static DebuggableScript[] getAllFunctions(DebuggableScript function) {
+        ArrayList<DebuggableScript> functions = new ArrayList<>();
         collectFunctions_r(function, functions);
         DebuggableScript[] result = new DebuggableScript[functions.size()];
         functions.toArray(result);
@@ -501,8 +502,7 @@ public class Dim {
     /**
      * Helper function for {@link #getAllFunctions(DebuggableScript)}.
      */
-    private static void collectFunctions_r(DebuggableScript function,
-                                           ObjArray array) {
+    private static void collectFunctions_r(DebuggableScript function, List<DebuggableScript> array) {
         array.add(function);
         for (int i = 0; i != function.getFunctionCount(); ++i) {
             collectFunctions_r(function.getFunction(i), array);
@@ -1037,7 +1037,7 @@ public class Dim {
         public void onEngineCreate(ScriptEngine<? extends ScriptSource> engine) {
             if (type != IPROXY_LISTEN) Kit.codeBug();
             if (!(engine instanceof RhinoJavaScriptEngine) ||
-                    !callback.shouldAttachDebugger((RhinoJavaScriptEngine) engine)) {
+                !callback.shouldAttachDebugger((RhinoJavaScriptEngine) engine)) {
                 return;
             }
 
@@ -1094,7 +1094,7 @@ public class Dim {
         /**
          * The stack frames.
          */
-        private final ObjArray frameStack = new ObjArray();
+        private ArrayList<StackFrame> frameStack = new ArrayList<>();
 
         /**
          * Whether the debugger should break at the next line in this context.
@@ -1143,14 +1143,14 @@ public class Dim {
          * Pushes a stack frame on to the stack.
          */
         private void pushFrame(StackFrame frame) {
-            frameStack.push(frame);
+            frameStack.add(frame);
         }
 
         /**
          * Pops a stack frame from the stack.
          */
         private void popFrame() {
-            frameStack.pop();
+            frameStack.remove(frameStack.size() - 1);
         }
     }
 
@@ -1228,7 +1228,7 @@ public class Dim {
                 boolean lineBreak = contextData.breakNextLine;
                 if (lineBreak && contextData.stopAtFrameDepth >= 0) {
                     lineBreak = (contextData.frameCount()
-                            <= contextData.stopAtFrameDepth);
+                                 <= contextData.stopAtFrameDepth);
                 }
                 if (!lineBreak) {
                     return;
@@ -1373,6 +1373,9 @@ public class Dim {
      * Class to store information about a script source.
      */
     public static class SourceInfo {
+
+        /** Lock for same */
+        private final Object breakpointsLock = new Object();
 
         /**
          * An empty array of booleans.
@@ -1533,7 +1536,7 @@ public class Dim {
          */
         public boolean breakableLine(int line) {
             return (line < this.breakableLines.length)
-                    && this.breakableLines[line];
+                   && this.breakableLines[line];
         }
 
         /**
@@ -1554,7 +1557,7 @@ public class Dim {
                 return false;
             }
             boolean changed;
-            synchronized (breakpoints) {
+            synchronized (breakpointsLock) {
                 if (breakpoints[line] != value) {
                     breakpoints[line] = value;
                     changed = true;
@@ -1569,7 +1572,7 @@ public class Dim {
          * Removes all breakpoints from the script.
          */
         public void removeAllBreakpoints() {
-            synchronized (breakpoints) {
+            synchronized (breakpointsLock) {
                 Arrays.fill(breakpoints, false);
             }
         }

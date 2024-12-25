@@ -22,6 +22,7 @@
 * `개선` 단일 파일을 패키징할 때 자동 생성된 패키지 이름 접미사를 간체자로부터 병음으로 변환 (다음 음도 지원)
 * `개선` UiSelector#findOnce 및 UiSelector#find 메서드에서 음수 인수 지원
 * `개선` UI 요소 및 className 관련 선택자가 RecyclerView, Snackbar 등과 같은 더욱 다양한 패키지 이름 접두사 생략 형식을 지원
+* `개선` Rhino 엔진의 최신 업스트림 코드를 동기화하고 기존 프로젝트에 맞게 조정합니다
 * `의존성` Jieba Analysis 버전 1.0.3-SNAPSHOT (수정된 버전) 추가
 * `의존성` Gradle 버전을 8.11.1에서 8.12로 업그레이드
 
