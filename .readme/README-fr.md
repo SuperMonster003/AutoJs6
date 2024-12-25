@@ -320,12 +320,12 @@ Cette section présente la méthode de compilation et de construction du projet 
 
 #### Préparation de Android Studio
 
-Téléchargez la version `Android Studio Ladybug | 2024.2.1 Patch 3` (choisissez-en une selon vos besoins):
+Téléchargez la version `Android Studio Ladybug Feature Drop | 2024.2.2 RC 2` (choisissez-en une selon vos besoins):
 
-- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.12/android-studio-2024.2.2.12-windows.exe) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.12/android-studio-2024.2.2.12-windows.zip) (1.15 GB)
 
-> Note : La version mentionnée ci-dessus a été publiée le 2 December 2024. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Note : La version mentionnée ci-dessus a été publiée le 16 December 2024. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Installez ou extrayez le fichier ci-dessus, exécutez Android Studio (par exemple `"D:\android-studio\bin\studio64.exe"`).
 

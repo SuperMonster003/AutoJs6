@@ -320,12 +320,12 @@ AutoJs6 разработан на основе финальной версии �
 
 #### Подготовка Android Studio
 
-Скачайте версию `Android Studio Ladybug | 2024.2.1 Patch 3` (выберите одну из них по необходимости):
+Скачайте версию `Android Studio Ladybug Feature Drop | 2024.2.2 RC 2` (выберите одну из них по необходимости):
 
-- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.12/android-studio-2024.2.2.12-windows.exe) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.12/android-studio-2024.2.2.12-windows.zip) (1.15 GB)
 
-> Примечание: Указанная версия была выпущена 2 December 2024 г.. Для загрузки других версий или если указанная ссылка недействительна, посетите страницу [архива версий Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Примечание: Указанная версия была выпущена 16 December 2024 г.. Для загрузки других версий или если указанная ссылка недействительна, посетите страницу [архива версий Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Установите или распакуйте указанные файлы, запустите программное обеспечение Android Studio (например, `"D:\android-studio\bin\studio64.exe"`).
 

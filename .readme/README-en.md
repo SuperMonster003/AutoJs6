@@ -320,12 +320,12 @@ This section introduces the compilation and build methods of the AutoJs6 open-so
 
 #### Android Studio Preparation
 
-Download `Android Studio Ladybug | 2024.2.1 Patch 3` version (choose one as needed):
+Download `Android Studio Ladybug Feature Drop | 2024.2.2 RC 2` version (choose one as needed):
 
-- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.12/android-studio-2024.2.2.12-windows.exe) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.12/android-studio-2024.2.2.12-windows.zip) (1.15 GB)
 
-> Note: The release date for the above version is Dec 2 , 2024. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page..
+> Note: The release date for the above version is Dec 16 , 2024. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page..
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 

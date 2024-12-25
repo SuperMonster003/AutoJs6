@@ -320,12 +320,12 @@ AutoJs6 オープンソース プロジェクトのデバッグや開発が必�
 
 #### Android Studioの準備
 
-`Android Studio Ladybug | 2024.2.1 Patch 3` バージョンをダウンロードしてください (いずれかを選択)。:
+`Android Studio Ladybug Feature Drop | 2024.2.2 RC 2` バージョンをダウンロードしてください (いずれかを選択)。:
 
-- [android-studio-2024.2.1.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.1.12/android-studio-2024.2.1.12-windows.exe) (1.13 GB)
-- [android-studio-2024.2.1.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.1.12/android-studio-2024.2.1.12-windows.zip) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.12/android-studio-2024.2.2.12-windows.exe) (1.14 GB)
+- [android-studio-2024.2.2.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.12/android-studio-2024.2.2.12-windows.zip) (1.15 GB)
 
-> 注: 上述バージョンのリリース日は 2024 年 12 月 2 日 です。その他のバージョンをダウンロードするか、上記のリンクが失効している場合は、[Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください。.
+> 注: 上述バージョンのリリース日は 2024 年 12 月 16 日 です。その他のバージョンをダウンロードするか、上記のリンクが失効している場合は、[Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください。.
 
 上記のファイルをインストールまたは解凍し、Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
 
