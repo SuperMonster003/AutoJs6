@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.1": {
-      "released_date": "2024/12/25",
+      "released_date": "2024/12/26",
       "feature": [
         "pinyin 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin))",
         "pinyin4j 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin4j))",
@@ -24,6 +24,7 @@
         "同步最新的 Rhino 引擎官方上游代碼並進行必要的代碼適配"
       ],
       "dependency": [
+        "附加 Pinyin4j 版本 2.5.0",
         "附加 Jieba Analysis 版本 1.0.3-SNAPSHOT (modified)",
         "升級 Gradle 版本 8.11.1 -> 8.12"
       ]

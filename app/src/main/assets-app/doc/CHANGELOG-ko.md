@@ -6,7 +6,7 @@
 
 # v6.6.1
 
-###### 2024/12/25
+###### 2024/12/26
 
 * `추가` 중국어 병음 변환을 위한 Pinyin 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin))
 * `추가` 중국어 병음 변환을 위한 Pinyin4j 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin4j))
@@ -23,6 +23,7 @@
 * `개선` UiSelector#findOnce 및 UiSelector#find 메서드에서 음수 인수 지원
 * `개선` UI 요소 및 className 관련 선택자가 RecyclerView, Snackbar 등과 같은 더욱 다양한 패키지 이름 접두사 생략 형식을 지원
 * `개선` Rhino 엔진의 최신 업스트림 코드를 동기화하고 기존 프로젝트에 맞게 조정합니다
+* `의존성` Pinyin4j 버전 2.5.0 추가
 * `의존성` Jieba Analysis 버전 1.0.3-SNAPSHOT (수정된 버전) 추가
 * `의존성` Gradle 버전을 8.11.1에서 8.12로 업그레이드
 

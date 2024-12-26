@@ -6,7 +6,7 @@
 
 # v6.6.1
 
-###### 2024/12/25
+###### 2024/12/26
 
 * `Nuevo` Módulo Pinyin para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin))
 * `Nuevo` Módulo Pinyin4j para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin4j))
@@ -23,6 +23,7 @@
 * `Mejora` Soporte para argumentos negativos en los métodos UiSelector#findOnce y UiSelector#find
 * `Mejora` Mayor soporte para formas abreviadas de prefijos de nombres de paquetes en selectores relacionados con elementos UI y className (por ejemplo, RecyclerView, Snackbar, etc.)
 * `Mejora` Sincronizar el código más reciente del upstream del motor Rhino y adaptarlo al proyecto existente
+* `Dependencia` Agregado Pinyin4j versión 2.5.0
 * `Dependencia` Agregado Jieba Analysis versión 1.0.3-SNAPSHOT (modificada)
 * `Dependencia` Actualizar la versión de Gradle de 8.11.1 a 8.12
 
