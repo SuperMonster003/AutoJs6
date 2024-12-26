@@ -6,7 +6,7 @@
 
 # v6.6.1
 
-###### 2024/12/25
+###### 2024/12/26
 
 * `新增` pinyin 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin))
 * `新增` pinyin4j 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin4j))
@@ -23,6 +23,7 @@
 * `优化` UiSelector#findOnce 及 UiSelector#find 方法支持负数参数
 * `优化` UI 元素及 className 相关选择器支持更多的包名前缀省略形式 (如 RecyclerView, Snackbar 等)
 * `优化` 同步最新的 Rhino 引擎官方上游代码并进行必要的代码适配
+* `依赖` 附加 Pinyin4j 版本 2.5.0
 * `依赖` 附加 Jieba Analysis 版本 1.0.3-SNAPSHOT (modified)
 * `依赖` 升级 Gradle 版本 8.11.1 -> 8.12
 

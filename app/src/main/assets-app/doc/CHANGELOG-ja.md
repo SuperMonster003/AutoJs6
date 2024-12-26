@@ -6,7 +6,7 @@
 
 # v6.6.1
 
-###### 2024/12/25
+###### 2024/12/26
 
 * `新機能` 中国語のピンイン変換用の Pinyin モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin))
 * `新機能` 中国語のピンイン変換用の Pinyin4j モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin4j))
@@ -23,6 +23,7 @@
 * `改善` UiSelector#findOnce と UiSelector#find メソッドで負の引数をサポート
 * `改善` UI要素や className に関連するセレクターが RecyclerView や Snackbar などのパッケージ名プレフィックス省略形式にさらに対応
 * `改善` Rhino エンジンの最新の上流コードを同期し, 既存のプロジェクトに適応させる
+* `依存関係` Pinyin4j バージョン 2.5.0 を追加
 * `依存関係` Jieba Analysis バージョン 1.0.3-SNAPSHOT (修正版) を追加
 * `依存関係` Gradle バージョンを 8.11.1 から 8.12 にアップグレード
 

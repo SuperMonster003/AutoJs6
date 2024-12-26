@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.1": {
-      "released_date": "2024/12/25",
+      "released_date": "2024/12/26",
       "feature": [
         "中国語のピンイン変換用の Pinyin モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin))",
         "中国語のピンイン変換用の Pinyin4j モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin4j))",
@@ -24,6 +24,7 @@
         "Rhino エンジンの最新の上流コードを同期し, 既存のプロジェクトに適応させる"
       ],
       "dependency": [
+        "Pinyin4j バージョン 2.5.0 を追加",
         "Jieba Analysis バージョン 1.0.3-SNAPSHOT (修正版) を追加",
         "Gradle バージョンを 8.11.1 から 8.12 にアップグレード"
       ]

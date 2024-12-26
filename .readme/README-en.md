@@ -156,7 +156,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.6.1
 
-###### 2024/12/25
+###### 2024/12/26
 
 * `Feature` Pinyin module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))
 * `Feature` Pinyin4j module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))
@@ -370,7 +370,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of Dec 25 , 2024, AutoJs6 supports up to version `23` of the JDK.
+As of Dec 26 , 2024, AutoJs6 supports up to version `23` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

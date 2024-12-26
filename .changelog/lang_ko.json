@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.1": {
-      "released_date": "2024/12/25",
+      "released_date": "2024/12/26",
       "feature": [
         "중국어 병음 변환을 위한 Pinyin 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin))",
         "중국어 병음 변환을 위한 Pinyin4j 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin4j))",
@@ -24,6 +24,7 @@
         "Rhino 엔진의 최신 업스트림 코드를 동기화하고 기존 프로젝트에 맞게 조정합니다"
       ],
       "dependency": [
+        "Pinyin4j 버전 2.5.0 추가",
         "Jieba Analysis 버전 1.0.3-SNAPSHOT (수정된 버전) 추가",
         "Gradle 버전을 8.11.1에서 8.12로 업그레이드"
       ]

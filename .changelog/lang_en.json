@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.1": {
-      "released_date": "2024/12/25",
+      "released_date": "2024/12/26",
       "feature": [
         "Pinyin module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))",
         "Pinyin4j module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))",
@@ -24,6 +24,7 @@
         "Synchronize with the latest upstream code of the Rhino engine and adapt it to the existing project"
       ],
       "dependency": [
+        "Added Pinyin4j version 2.5.0",
         "Added Jieba Analysis version 1.0.3-SNAPSHOT (modified)",
         "Upgrade Gradle version from 8.11.1 to 8.12"
       ]
