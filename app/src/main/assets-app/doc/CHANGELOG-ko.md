@@ -6,7 +6,7 @@
 
 # v6.6.1
 
-###### 2024/12/26
+###### 2024/12/27
 
 * `추가` 중국어 병음 변환을 위한 Pinyin 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin))
 * `추가` 중국어 병음 변환을 위한 Pinyin4j 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin4j))
@@ -21,6 +21,7 @@
 * `개선` project.json 파일이 손상된 경우에도 가능한 한 중요한 정보를 복원
 * `개선` 단일 파일을 패키징할 때 자동 생성된 패키지 이름 접미사를 간체자로부터 병음으로 변환 (다음 음도 지원)
 * `개선` UiSelector#findOnce 및 UiSelector#find 메서드에서 음수 인수 지원
+* `개선` app.startActivity/startDualActivity 메서드의 적응성이 향상되었습니다
 * `개선` UI 요소 및 className 관련 선택자가 RecyclerView, Snackbar 등과 같은 더욱 다양한 패키지 이름 접두사 생략 형식을 지원
 * `개선` Rhino 엔진의 최신 업스트림 코드를 동기화하고 기존 프로젝트에 맞게 조정합니다
 * `의존성` Pinyin4j 버전 2.5.0 추가

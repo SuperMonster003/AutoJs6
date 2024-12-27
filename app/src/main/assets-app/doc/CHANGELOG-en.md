@@ -6,7 +6,7 @@
 
 # v6.6.1
 
-###### 2024/12/26
+###### 2024/12/27
 
 * `Feature` Pinyin module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))
 * `Feature` Pinyin4j module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))
@@ -21,6 +21,7 @@
 * `Improvement` Recover as much critical information as possible for script projects when project.json is corrupted
 * `Improvement` Automatically convert Simplified Chinese to Pinyin (including multi-tone characters) for generated package name suffixes when packaging single files
 * `Improvement` Support for negative arguments in the UiSelector#findOnce and UiSelector#find methods
+* `Improvement` Enhanced adaptability of app.startActivity/startDualActivity methods
 * `Improvement` UI elements and className-related selectors now support more package name prefix omission forms (e.g., RecyclerView, Snackbar, etc.)
 * `Improvement` Synchronize with the latest upstream code of the Rhino engine and adapt it to the existing project
 * `Dependency` Added Pinyin4j version 2.5.0

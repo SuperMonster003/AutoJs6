@@ -156,7 +156,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.6.1
 
-###### 2024/12/26
+###### 2024/12/27
 
 * `新增` pinyin 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin))
 * `新增` pinyin4j 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin4j))
@@ -171,6 +171,7 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 * `優化` 腳本項目識別在 project.json 損壞情況下儘可能還原關鍵信息
 * `優化` 打包單文件時自動生成的包名後綴支持將簡體中文轉換為拼音 (支持多音字)
 * `優化` UiSelector#findOnce 及 UiSelector#find 方法支持負數參數
+* `優化` app.startActivity/startDualActivity 方法增強適配性
 * `優化` UI 元素及 className 相關選擇器支持更多的包名前綴省略形式 (如 RecyclerView, Snackbar 等)
 * `優化` 同步最新的 Rhino 引擎官方上游代碼並進行必要的代碼適配
 * `優化` 部分依賴或本地庫版本調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
@@ -370,7 +371,7 @@ SDK Tools (SDK 工具) (位於右側窗口)
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `19`.
 
-截至 2024 年 12 月 26 日, AutoJs6 可支持 JDK 最高版本為 `23`.
+截至 2024 年 12 月 27 日, AutoJs6 可支持 JDK 最高版本為 `23`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 
