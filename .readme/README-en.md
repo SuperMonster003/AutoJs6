@@ -156,7 +156,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 # v6.6.1
 
-###### 2024/12/26
+###### 2024/12/27
 
 * `Feature` Pinyin module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))
 * `Feature` Pinyin4j module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))
@@ -171,6 +171,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Recover as much critical information as possible for script projects when project.json is corrupted
 * `Improvement` Automatically convert Simplified Chinese to Pinyin (including multi-tone characters) for generated package name suffixes when packaging single files
 * `Improvement` Support for negative arguments in the UiSelector#findOnce and UiSelector#find methods
+* `Improvement` Enhanced adaptability of app.startActivity/startDualActivity methods
 * `Improvement` UI elements and className-related selectors now support more package name prefix omission forms (e.g., RecyclerView, Snackbar, etc.)
 * `Improvement` Synchronize with the latest upstream code of the Rhino engine and adapt it to the existing project
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
@@ -370,7 +371,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of Dec 26 , 2024, AutoJs6 supports up to version `23` of the JDK.
+As of Dec 27 , 2024, AutoJs6 supports up to version `23` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

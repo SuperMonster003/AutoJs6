@@ -6,7 +6,7 @@
 
 # v6.6.1
 
-###### 2024/12/26
+###### 2024/12/27
 
 * `新增` pinyin 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin))
 * `新增` pinyin4j 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin4j))
@@ -21,6 +21,7 @@
 * `優化` 腳本項目識別在 project.json 損壞情況下儘可能還原關鍵信息
 * `優化` 打包單文件時自動生成的包名後綴支持將簡體中文轉換為拼音 (支持多音字)
 * `優化` UiSelector#findOnce 及 UiSelector#find 方法支持負數參數
+* `優化` app.startActivity/startDualActivity 方法增強適配性
 * `優化` UI 元素及 className 相關選擇器支持更多的包名前綴省略形式 (如 RecyclerView, Snackbar 等)
 * `優化` 同步最新的 Rhino 引擎官方上游代碼並進行必要的代碼適配
 * `依賴` 附加 Pinyin4j 版本 2.5.0

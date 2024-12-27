@@ -7,11 +7,13 @@ import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceFunction
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
+import org.mozilla.javascript.Undefined
 
 @Suppress("unused", "UNUSED_PARAMETER")
 open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
@@ -89,10 +91,11 @@ open class Timers(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun loop(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Unit = ensureArgumentsIsEmpty(args) {
+        fun loop(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
             AutoJs.instance.globalConsole.warn("")
             AutoJs.instance.globalConsole.warn(AutoJs.instance.applicationContext.getString(R.string.error_abandoned_method, "loop"))
             AutoJs.instance.globalConsole.warn("")
+            UNDEFINED
         }
 
         @JvmStatic

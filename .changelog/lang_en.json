@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.1": {
-      "released_date": "2024/12/26",
+      "released_date": "2024/12/27",
       "feature": [
         "Pinyin module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))",
         "Pinyin4j module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))",
@@ -20,6 +20,7 @@
         "Recover as much critical information as possible for script projects when project.json is corrupted",
         "Automatically convert Simplified Chinese to Pinyin (including multi-tone characters) for generated package name suffixes when packaging single files",
         "Support for negative arguments in the UiSelector#findOnce and UiSelector#find methods",
+        "Enhanced adaptability of app.startActivity/startDualActivity methods",
         "UI elements and className-related selectors now support more package name prefix omission forms (e.g., RecyclerView, Snackbar, etc.)",
         "Synchronize with the latest upstream code of the Rhino engine and adapt it to the existing project"
       ],
