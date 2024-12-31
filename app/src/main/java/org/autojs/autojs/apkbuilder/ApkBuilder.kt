@@ -12,6 +12,7 @@ import com.mcal.apksigner.ApkSigner
 import com.reandroid.arsc.chunk.TableBlock
 import org.apache.commons.io.FileUtils.copyFile
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
+import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
@@ -292,9 +293,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         mAppConfig.keyStore?.let {
             keyStoreFile = File(it.absolutePath)
-            password = it.password
+            password = AESUtils.decrypt(it.password)
             alias = it.alias
-            aliasPassword = it.aliasPassword
+            aliasPassword = AESUtils.decrypt(it.aliasPassword)
         }
 
         // 使用 ApkSigner 重新签名

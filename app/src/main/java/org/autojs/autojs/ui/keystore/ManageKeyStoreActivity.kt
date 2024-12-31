@@ -16,6 +16,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.mcal.apksigner.CertCreator
 import com.mcal.apksigner.utils.DistinguishedNameValues
 import com.mcal.apksigner.utils.KeyStoreHelper
+import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.apkbuilder.keystore.KeyStore
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs6.R
@@ -174,9 +175,9 @@ class ManageKeyStoreActivity : BaseActivity() {
             val newKeyStore = KeyStore(
                 absolutePath = file.absolutePath,
                 filename = file.name,
-                password = configs.password,
+                password = AESUtils.encrypt(configs.password),
                 alias = configs.alias,
-                aliasPassword = configs.aliasPassword,
+                aliasPassword = AESUtils.encrypt(configs.aliasPassword),
                 verified = true
             )
             keyStoreViewModel.upsertKeyStore(newKeyStore)
@@ -247,9 +248,9 @@ class ManageKeyStoreActivity : BaseActivity() {
         val verifiedKeyStore = KeyStore(
             absolutePath = keyStore.absolutePath,
             filename = keyStore.filename,
-            password = configs.password,
+            password = AESUtils.encrypt(configs.password),
             alias = configs.alias,
-            aliasPassword = configs.aliasPassword,
+            aliasPassword = AESUtils.encrypt(configs.aliasPassword),
             verified = true
         )
         keyStoreViewModel.upsertKeyStore(verifiedKeyStore)
