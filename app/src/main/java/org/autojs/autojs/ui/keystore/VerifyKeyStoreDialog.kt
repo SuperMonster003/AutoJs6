@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.fragment.app.DialogFragment
+import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.apkbuilder.keystore.KeyStore
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.DialogVerifyKeyStoreBinding
@@ -43,9 +44,9 @@ open class VerifyKeyStoreDialog(
         if (keyStore.verified) {
             binding.imgVerifyState.setImageResource(R.drawable.ic_key_store_verified)
             binding.textVerifyState.text = getString(R.string.text_verified)
-            binding.password.setText(keyStore.password)
+            binding.password.setText(AESUtils.decrypt(keyStore.password))
             binding.alias.setText(keyStore.alias)
-            binding.aliasPassword.setText(keyStore.aliasPassword)
+            binding.aliasPassword.setText(AESUtils.decrypt(keyStore.aliasPassword))
         } else {
             binding.imgVerifyState.setImageResource(R.drawable.ic_key_store_unverified)
             binding.textVerifyState.text = getString(R.string.text_unverified)
