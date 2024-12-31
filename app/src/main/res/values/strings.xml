@@ -966,6 +966,51 @@
     <string name="text_supported_abis_short_32bit">ABIs (32-bit)</string>
     <string name="text_supported_abis_short_64bit">ABIs (64-bit)</string>
     <string name="text_supported_libraries_short">Libraries</string>
+    <string name="text_jks" translatable="false">JKS</string>
+    <string name="text_bks" translatable="false">BKS</string>
+    <string name="text_default_alias" translatable="false">key0</string>
+    <string name="text_default_validity_years" translatable="false">25</string>
+    <string name="text_default_country_code" translatable="false">CN</string>
+    <string name="text_str_colon_space_str_formatter" translatable="false">%s: %s</string>
+    <string name="text_signature_configuration">Signature Configuration</string>
+    <string name="text_key_store">Keystore</string>
+    <string name="text_default_key_store">Default Keystore</string>
+    <string name="text_manage_key_store">Manage Keystore</string>
+    <string name="text_signature_scheme">Signature Scheme</string>
+    <string name="text_new_key_store">New Key Store</string>
+    <string name="text_key_store_password">Key Store Password</string>
+    <string name="text_key_alias">Alias</string>
+    <string name="text_alias_password">Alias Password</string>
+    <string name="text_signature_algorithm">Signature Algorithm</string>
+    <string name="text_validity_years">Validity (Years)</string>
+    <string name="text_first_and_last_name">Full Name</string>
+    <string name="text_organization">Organization Name</string>
+    <string name="text_organizational_unit">Organizational Unit</string>
+    <string name="text_country_code">Country Code (XX)</string>
+    <string name="text_state_or_province">State or Province</string>
+    <string name="text_city_or_locality">City or Locality</string>
+    <string name="text_street">Street</string>
+    <string name="text_filename_cannot_be_empty">Filename cannot be empty</string>
+    <string name="text_filename_cannot_contain_invalid_character">Filename cannot contain the following characters: \\ / : * ? &quot; &lt; &gt; |</string>
+    <string name="text_filename_is_too_long">Filename is too long</string>
+    <string name="text_password_requires_at_least_n_characters">Password must be at least %d characters long</string>
+    <string name="text_alias_cannot_be_empty">Alias cannot be empty</string>
+    <string name="text_validity_years_cannot_be_empty">Validity years cannot be empty</string>
+    <string name="text_validity_years_cannot_be_zero">Validity years cannot be zero</string>
+    <string name="text_country_code_must_be_two_capital_letters">Country code must be two capital letters</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">At least one field from \"Full Name, Organization Name, Organizational Unit, Country Code, State or Province, City or Locality, Street\" must be filled</string>
+    <string name="text_successfully_created_key_store">Successfully created signature key</string>
+    <string name="text_failed_to_create_key_store">Failed to create signature key</string>
+    <string name="text_key_store_has_not_been_verified">Keystore has not been verified</string>
+    <string name="text_key_store_has_been_verified">Keystore has been verified</string>
+    <string name="text_verify">Verify</string>
+    <string name="text_delete_all">Delete All</string>
+    <string name="text_unverified">Unverified</string>
+    <string name="text_verified">Verified</string>
+    <string name="text_verify_key_store">Verify Keystore</string>
+    <string name="text_verify_success">Verification successful</string>
+    <string name="text_verify_failed">Verification failed</string>
+    <string name="text_file_path">File Path</string>
     <string name="text_switch_window">Switch window</string>
     <string name="text_symbols_settings">Symbols settings</string>
     <string name="text_tailor_made_developer">Tailor-made developer</string>

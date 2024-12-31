@@ -11,12 +11,16 @@ import android.text.util.Linkify;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.textfield.TextInputLayout;
@@ -34,6 +38,9 @@ import org.autojs.autojs.runtime.api.AppUtils.Companion.SimpleVersionInfo;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
+import org.autojs.autojs.apkbuilder.keystore.KeyStore;
+import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel;
+import org.autojs.autojs.ui.keystore.ManageKeyStoreActivity;
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
 import org.autojs.autojs.ui.widget.RoundCheckboxWithText;
 import org.autojs.autojs.util.AndroidUtils;
@@ -109,6 +116,16 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         put(ApkBuilder.Constants.MLKIT_BARCODE, /* MLKit Barcode */ List.of("barcode", "mlkit-barcode", "mlkit_barcode"));
     }};
 
+    private static final ArrayList<String> SIGNATURE_SCHEMES = new ArrayList<>() {{
+        add("V1 + V2");
+        add("V1 + V3");
+        add("V1 + V2 + V3");
+        add("V1");
+        add("V2 + V3 (Android 7.0+)");
+        add("V2 (Android 7.0+)");
+        add("V3 (Android 9.0+)");
+    }};
+
     EditText mSourcePath;
     View mSourcePathContainer;
     EditText mOutputPath;
@@ -126,12 +143,16 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private boolean mIsProjectLevelBuilding;
     private FlexboxLayout mFlexboxAbis;
     private FlexboxLayout mFlexboxLibs;
+    private Spinner mSignatureSchemes;
+    private Spinner mVerifiedKeyStores;
 
     private final ArrayList<String> mInvalidAbis = new ArrayList<>();
     private final ArrayList<String> mUnavailableAbis = new ArrayList<>();
     private final ArrayList<String> mUnavailableStandardAbis = new ArrayList<>();
     private final ArrayList<String> mInvalidLibs = new ArrayList<>();
     private final ArrayList<String> mUnavailableLibs = new ArrayList<>();
+
+    private KeyStoreViewModel mKeyStoreViewModel;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -195,6 +216,15 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mFlexboxLibs = binding.flexboxLibraries;
         initLibsChildren();
 
+        mKeyStoreViewModel = new ViewModelProvider(this, new KeyStoreViewModel.Factory(getApplicationContext())).get(KeyStoreViewModel.class);
+        mKeyStoreViewModel.updateVerifiedKeyStores();
+
+        mSignatureSchemes = binding.spinnerSignatureSchemes;
+        initSignatureSchemeSpinner();
+
+        mVerifiedKeyStores = binding.spinnerVerifiedKeyStores;
+        initVerifiedKeyStoresSpinner();
+
         binding.fab.setOnClickListener(v -> buildApk());
         binding.selectSource.setOnClickListener(v -> selectSourceFilePath());
         binding.selectOutput.setOnClickListener(v -> selectOutputDirPath());
@@ -204,6 +234,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return true;
         });
         binding.textLibs.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxLibs));
+        binding.manageKeyStore.setOnClickListener(v -> ManageKeyStoreActivity.Companion.startActivity(this));
 
         setToolbarAsBack(R.string.text_build_apk);
         mSource = getIntent().getStringExtra(EXTRA_SOURCE);
@@ -215,6 +246,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         syncLibsCheckedStates();
 
         showHintDialogIfNeeded();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mKeyStoreViewModel.updateVerifiedKeyStores();
     }
 
     private void toggleAllFlexboxChildren(FlexboxLayout mFlexboxLibs) {
@@ -339,6 +376,32 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         }
 
         mInvalidLibs.addAll(candidates);
+    }
+
+    private void initSignatureSchemeSpinner() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, SIGNATURE_SCHEMES);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSignatureSchemes.setAdapter(adapter);
+    }
+
+    private void initVerifiedKeyStoresSpinner() {
+        ArrayList<KeyStore> verifiedKeyStores = new ArrayList<>();
+        // 添加 默认密钥库 下拉选项
+        KeyStore defaultKeyStore = new KeyStore("", getString(R.string.text_default_key_store), "", "", "", false); // 仅用于显示下拉列表
+        verifiedKeyStores.add(defaultKeyStore);
+
+        ArrayAdapter<KeyStore> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, verifiedKeyStores);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mVerifiedKeyStores.setAdapter(adapter);
+
+        mKeyStoreViewModel.getVerifiedKeyStores().observe(this, keyStores -> {
+            // 清空现有的选项，但保留第一个元素，即默认密钥库
+            if (verifiedKeyStores.size() > 1) {
+                verifiedKeyStores.subList(1, verifiedKeyStores.size()).clear();
+            }
+            verifiedKeyStores.addAll(keyStores);
+            adapter.notifyDataSetChanged();
+        });
     }
 
     private boolean isAliasMatching(Map<String, List<String>> aliases, String aliasKey, List<String> candidates) {
@@ -632,6 +695,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
         appConfig.setAbis(abis);
         appConfig.setLibs(libs);
+        appConfig.setSignatureSchemes(mSignatureSchemes.getSelectedItem().toString());
+        if (mVerifiedKeyStores.getSelectedItemPosition() > 0) {
+            appConfig.setKeyStore((KeyStore) mVerifiedKeyStores.getSelectedItem());
+        } else {
+            appConfig.setKeyStore(null);
+        }
 
         return appConfig;
     }
