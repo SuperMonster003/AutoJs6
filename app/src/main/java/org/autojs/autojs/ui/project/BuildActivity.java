@@ -9,8 +9,10 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -63,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -126,6 +129,51 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         add("V3 (Android 9.0+)");
     }};
 
+    private final Map<String, Integer> SUPPORTED_PERMISSIONS = new TreeMap<>() {{
+        put("android.permission.ACCESS_COARSE_LOCATION", R.string.text_permission_access_coarse_location);
+        put("android.permission.ACCESS_FINE_LOCATION", R.string.text_permission_access_fine_location);
+        put("android.permission.ACCESS_NETWORK_STATE", R.string.text_permission_access_network_state);
+        put("android.permission.ACCESS_WIFI_STATE", R.string.text_permission_access_wifi_state);
+        put("android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS", R.string.text_permission_broadcast_close_system_dialogs);
+        put("android.permission.CAPTURE_VIDEO_OUTPUT", R.string.text_permission_capture_video_output);
+        put("android.permission.DUMP", R.string.text_permission_dump);
+        put("android.permission.FOREGROUND_SERVICE", R.string.text_permission_foreground_service);
+        put("android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION", R.string.text_permission_foreground_service_media_projection);
+        put("android.permission.FOREGROUND_SERVICE_SPECIAL_USE", R.string.text_permission_foreground_service_special_use);
+        put("android.permission.INTERNET", R.string.text_permission_internet);
+        put("android.permission.INTERACT_ACROSS_USERS_FULL", R.string.text_permission_interact_across_users_full);
+        put("android.permission.MANAGE_EXTERNAL_STORAGE", R.string.text_permission_manage_external_storage);
+        put("android.permission.MANAGE_USERS", R.string.text_permission_manage_users);
+        put("android.permission.POST_NOTIFICATIONS", R.string.text_permission_post_notifications);
+        put("android.permission.QUERY_ALL_PACKAGES", R.string.text_permission_query_all_packages);
+        put("android.permission.READ_EXTERNAL_STORAGE", R.string.text_permission_read_external_storage);
+        put("android.permission.READ_MEDIA_AUDIO", R.string.text_permission_read_media_audio);
+        put("android.permission.READ_MEDIA_IMAGES", R.string.text_permission_read_media_images);
+        put("android.permission.READ_MEDIA_VIDEO", R.string.text_permission_read_media_video);
+        put("android.permission.READ_PHONE_STATE", R.string.text_permission_read_phone_state);
+        put("android.permission.READ_PRIVILEGED_PHONE_STATE", R.string.text_permission_read_privileged_phone_state);
+        put("android.permission.READ_SMS", R.string.text_permission_read_sms);
+        put("android.permission.RECEIVE_BOOT_COMPLETED", R.string.text_permission_receive_boot_completed);
+        put("android.permission.RECORD_AUDIO", R.string.text_permission_record_audio);
+        put("android.permission.REORDER_TASKS", R.string.text_permission_reorder_tasks);
+        put("android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS", R.string.text_permission_request_ignore_battery_optimizations);
+        put("android.permission.REQUEST_INSTALL_PACKAGES", R.string.text_permission_request_install_packages);
+        put("android.permission.SCHEDULE_EXACT_ALARM", R.string.text_permission_schedule_exact_alarm);
+        put("android.permission.SYSTEM_ALERT_WINDOW", R.string.text_permission_system_alert_window);
+        put("android.permission.UNLIMITED_TOASTS", R.string.text_permission_unlimited_toasts);
+        put("android.permission.UNINSTALL_SHORTCUT", R.string.text_permission_uninstall_shortcut);
+        put("android.permission.USE_EXACT_ALARM", R.string.text_permission_use_exact_alarm);
+        put("android.permission.VIBRATE", R.string.text_permission_vibrate);
+        put("android.permission.WAKE_LOCK", R.string.text_permission_wake_lock);
+        put("android.permission.WRITE_EXTERNAL_STORAGE", R.string.text_permission_write_external_storage);
+        put("android.permission.WRITE_SECURE_SETTINGS", R.string.text_permission_write_secure_settings);
+        put("android.permission.WRITE_SETTINGS", R.string.text_permission_write_settings);
+        put("com.android.launcher.permission.INSTALL_SHORTCUT", R.string.text_permission_install_shortcut);
+        put("com.android.launcher.permission.UNINSTALL_SHORTCUT", R.string.text_permission_uninstall_shortcut);
+        put("com.termux.permission.RUN_COMMAND", R.string.text_permission_run_command);
+        put("moe.shizuku.manager.permission.API_V23", R.string.text_permission_shizuku);
+    }};
+
     EditText mSourcePath;
     View mSourcePathContainer;
     EditText mOutputPath;
@@ -145,6 +193,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private FlexboxLayout mFlexboxLibs;
     private Spinner mSignatureSchemes;
     private Spinner mVerifiedKeyStores;
+    private FlexboxLayout mFlexboxPermissions;
 
     private final ArrayList<String> mInvalidAbis = new ArrayList<>();
     private final ArrayList<String> mUnavailableAbis = new ArrayList<>();
@@ -225,6 +274,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mVerifiedKeyStores = binding.spinnerVerifiedKeyStores;
         initVerifiedKeyStoresSpinner();
 
+        mFlexboxPermissions = binding.flexboxPermissions;
+        initPermissionsChildren();
+
         binding.fab.setOnClickListener(v -> buildApk());
         binding.selectSource.setOnClickListener(v -> selectSourceFilePath());
         binding.selectOutput.setOnClickListener(v -> selectOutputDirPath());
@@ -235,6 +287,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         });
         binding.textLibs.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxLibs));
         binding.manageKeyStore.setOnClickListener(v -> ManageKeyStoreActivity.Companion.startActivity(this));
+        binding.textPermissions.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxPermissions));
 
         setToolbarAsBack(R.string.text_build_apk);
         mSource = getIntent().getStringExtra(EXTRA_SOURCE);
@@ -266,6 +319,14 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     isAllChecked = false;
                     break;
                 }
+            } else if (child instanceof CheckBox) {
+                if (!child.isEnabled()) {
+                    continue;
+                }
+                if (!((CheckBox) child).isChecked()) {
+                    isAllChecked = false;
+                    break;
+                }
             }
         }
         for (int i = 0; i < mFlexboxLibs.getChildCount(); i += 1) {
@@ -275,6 +336,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     continue;
                 }
                 ((RoundCheckboxWithText) child).setChecked(!isAllChecked);
+            } else if (child instanceof CheckBox) {
+                if (!child.isEnabled()) {
+                    continue;
+                }
+                ((CheckBox) child).setChecked(!isAllChecked);
             }
         }
     }
@@ -401,6 +467,25 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             }
             verifiedKeyStores.addAll(keyStores);
             adapter.notifyDataSetChanged();
+        });
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void initPermissionsChildren() {
+        SUPPORTED_PERMISSIONS.forEach((permission, descriptionResId) -> {
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            checkBox.setAlpha(0.87f);
+            checkBox.setText(permission + "\n" + getString(descriptionResId));
+            checkBox.setButtonDrawable(R.drawable.round_checkbox);
+            checkBox.setGravity(Gravity.CENTER_VERTICAL);
+            checkBox.setTextSize(12);
+            int marginInPixels = (int) (8 * getResources().getDisplayMetrics().density);
+            checkBox.setPadding(marginInPixels, 0, 0, 0);
+            checkBox.setChecked(false);
+            mFlexboxPermissions.addView(checkBox);
         });
     }
 
@@ -682,6 +767,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private ApkBuilder.AppConfig createAppConfig() {
         ArrayList<String> abis = collectCheckedItems(mFlexboxAbis);
         ArrayList<String> libs = collectCheckedItems(mFlexboxLibs);
+        ArrayList<String> permissions = collectCheckedItems(mFlexboxPermissions);
 
         ApkBuilder.AppConfig appConfig = mProjectConfig != null
                 ? ApkBuilder.AppConfig.fromProjectConfig(mSource, mProjectConfig)
@@ -701,6 +787,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         } else {
             appConfig.setKeyStore(null);
         }
+        appConfig.setPermissions(permissions);
 
         return appConfig;
     }
@@ -716,6 +803,13 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     CharSequence charSequence = ((RoundCheckboxWithText) child).getText();
                     if (charSequence != null) {
                         libs.add(charSequence.toString());
+                    }
+                }
+            } else if (child instanceof CheckBox) {
+                if (((CheckBox) child).isChecked()) {
+                    CharSequence charSequence = ((CheckBox) child).getText();
+                    if (charSequence != null) {
+                        libs.add(charSequence.toString().split("\n")[0]);
                     }
                 }
             }

@@ -397,6 +397,38 @@
                     </GridLayout>
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="0dp"
+                    android:paddingBottom="16dp">
+
+                    <TextView
+                        android:id="@+id/text_permissions"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="24dp"
+                        android:paddingHorizontal="16dp"
+                        android:text="@string/text_supported_permissions_short"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                        android:textColor="?android:textColorSecondary" />
+
+                    <com.google.android.flexbox.FlexboxLayout
+                        android:id="@+id/flexbox_permissions"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start|top"
+                        android:layout_marginBottom="4dp"
+                        android:paddingHorizontal="16dp"
+                        app:alignContent="center"
+                        app:dividerDrawable="@drawable/round_checkbox_with_text_divider"
+                        app:flexDirection="column"
+                        app:flexWrap="wrap"
+                        app:showDivider="middle" />
+
+                </LinearLayout>
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="72dp"

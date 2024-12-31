@@ -364,6 +364,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             private set
         var signatureSchemes: String = "V1 + V2"
             private set
+        var permissions: List<String> = emptyList()
+            private set
 
         fun ignoreDir(dir: File) = also { ignoredDirs.add(dir) }
 
@@ -389,6 +391,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         fun setSignatureSchemes(signatureSchemes: String) = also { this.signatureSchemes = signatureSchemes }
 
+        fun setPermissions(permissions: List<String>) = also { this.permissions = permissions }
+
         companion object {
             @JvmStatic
             fun fromProjectConfig(projectDir: String?, projectConfig: ProjectConfig) = AppConfig()
@@ -411,6 +415,10 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     super.onAttr(this)
                 }
             }
+        }
+
+        override fun isPermissionRequired(permissionName: String): Boolean {
+            return mAppConfig.permissions.contains(permissionName)
         }
     }
 
