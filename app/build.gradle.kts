@@ -193,6 +193,14 @@ dependencies /* Unclassified */ {
     // Toaster
     implementation("com.github.getActivity:Toaster:12.6")
     implementation("com.github.getActivity:EasyWindow:10.3")
+
+    // apksigner
+    implementation("com.github.TimScriptov:apksigner:1.2.0")
+
+    // room
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
 }
 
 dependencies /* MIME */ {

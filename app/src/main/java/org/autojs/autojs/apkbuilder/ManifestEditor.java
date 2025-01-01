@@ -88,6 +88,10 @@ public class ManifestEditor {
         }
     }
 
+    public boolean isPermissionRequired(String permissionName) {
+        return true;
+    }
+
     private class MutableAxmlWriter extends AxmlWriter {
         private class MutableNodeImpl extends AxmlWriter.NodeImpl {
 
@@ -97,6 +101,9 @@ public class ManifestEditor {
 
             @Override
             protected void onAttr(AxmlWriter.Attr a) {
+                if ("uses-permission".equals(this.name.data) && "name".equals(a.name.data) && a.value instanceof StringItem) {
+                    this.ignore = !ManifestEditor.this.isPermissionRequired(((StringItem) a.value).data);
+                }
                 ManifestEditor.this.onAttr(a);
                 super.onAttr(a);
             }

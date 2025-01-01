@@ -8,7 +8,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
+import com.mcal.apksigner.ApkSigner
 import com.reandroid.arsc.chunk.TableBlock
+import org.apache.commons.io.FileUtils.copyFile
+import org.apache.commons.io.FileUtils.copyInputStreamToFile
+import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
@@ -16,6 +20,7 @@ import org.autojs.autojs.project.BuildInfo
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.EncryptedScriptFileHeader.writeHeader
 import org.autojs.autojs.script.JavaScriptFileSource
+import org.autojs.autojs.apkbuilder.keystore.KeyStore
 import org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT
 import org.autojs.autojs.util.MD5Utils
 import org.autojs.autojs6.BuildConfig
@@ -269,6 +274,40 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         val fos = FileOutputStream(outApkFile)
         TinySign.sign(File(workspacePath), fos)
         fos.close()
+
+        val defaultKeyStoreFile = File(workspacePath, "default_key_store.bks")
+        val tmpOutputApk = File(workspacePath, "temp.apk")
+        copyInputStreamToFile(GlobalAppContext.get().assets.open("default_key_store.bks"), defaultKeyStoreFile)
+
+        val signer = ApkSigner(outApkFile, tmpOutputApk)
+        signer.useDefaultSignatureVersion = false
+        signer.v1SigningEnabled = mAppConfig.signatureSchemes.contains("V1")
+        signer.v2SigningEnabled = mAppConfig.signatureSchemes.contains("V2")
+        signer.v3SigningEnabled = mAppConfig.signatureSchemes.contains("V3")
+        signer.v4SigningEnabled = mAppConfig.signatureSchemes.contains("V4")
+
+        var keyStoreFile = defaultKeyStoreFile
+        var password = "AutoJs6"
+        var alias = "AutoJs6"
+        var aliasPassword = "AutoJs6"
+
+        mAppConfig.keyStore?.let {
+            keyStoreFile = File(it.absolutePath)
+            password = AESUtils.decrypt(it.password)
+            alias = it.alias
+            aliasPassword = AESUtils.decrypt(it.aliasPassword)
+        }
+
+        // 使用 ApkSigner 重新签名
+        if (!signer.signRelease(keyStoreFile, password, alias, aliasPassword)) {
+            throw java.lang.RuntimeException("Failed to re-sign using ApkSigner")
+        }
+
+        try {
+            copyFile(tmpOutputApk, outApkFile)
+        } catch (e: java.lang.Exception) {
+            throw java.lang.RuntimeException(e)
+        }
     }
 
     fun cleanWorkspace() = also {
@@ -321,6 +360,12 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             private set
         var libs: List<String> = emptyList()
             private set
+        var keyStore: KeyStore? = null
+            private set
+        var signatureSchemes: String = "V1 + V2"
+            private set
+        var permissions: List<String> = emptyList()
+            private set
 
         fun ignoreDir(dir: File) = also { ignoredDirs.add(dir) }
 
@@ -341,6 +386,12 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         fun setAbis(abis: List<String>) = also { this.abis = abis }
 
         fun setLibs(libs: List<String>) = also { this.libs = libs }
+
+        fun setKeyStore(keyStore: KeyStore?) = also { this.keyStore = keyStore }
+
+        fun setSignatureSchemes(signatureSchemes: String) = also { this.signatureSchemes = signatureSchemes }
+
+        fun setPermissions(permissions: List<String>) = also { this.permissions = permissions }
 
         companion object {
             @JvmStatic
@@ -364,6 +415,10 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     super.onAttr(this)
                 }
             }
+        }
+
+        override fun isPermissionRequired(permissionName: String): Boolean {
+            return mAppConfig.permissions.contains(permissionName)
         }
     }
 
