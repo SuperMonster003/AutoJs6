@@ -112,12 +112,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }};
 
     private static final Map<String, List<String>> LIB_ALIASES = new HashMap<>() {{
-        put(ApkBuilder.Constants.OPENCV, /* OpenCV */ List.of("cv"));
-        put(ApkBuilder.Constants.MLKIT_OCR, /* MLKit OCR */ List.of("mlkit", "mlkitocr", "mlkit-ocr", "mlkit_ocr"));
-        put(ApkBuilder.Constants.PADDLE_OCR, /* Paddle OCR */ List.of("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"));
-        put(ApkBuilder.Constants.RAPID_OCR, /* Rapid OCR */ List.of("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"));
-        put(ApkBuilder.Constants.OPENCC, /* OpenCC */ List.of("cc"));
-        put(ApkBuilder.Constants.MLKIT_BARCODE, /* MLKit Barcode */ List.of("barcode", "mlkit-barcode", "mlkit_barcode"));
+        put(ApkBuilder.Constants.OPENCV, List.of("cv"));
+        put(ApkBuilder.Constants.MLKIT_OCR, List.of("mlkit", "mlkitocr", "mlkit-ocr", "mlkit_ocr"));
+        put(ApkBuilder.Constants.PADDLE_OCR, List.of("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"));
+        put(ApkBuilder.Constants.RAPID_OCR, List.of("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"));
+        put(ApkBuilder.Constants.OPENCC, List.of("cc"));
+        put(ApkBuilder.Constants.MLKIT_BARCODE, List.of("barcode", "mlkit-barcode", "mlkit_barcode"));
     }};
 
     private static final ArrayList<String> SIGNATURE_SCHEMES = new ArrayList<>() {{

@@ -5,7 +5,8 @@
       "feature": [
         "Pinyin module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))",
         "Pinyin4j module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))",
-        "Methods UiObject#isSimilar and UiObjectCollection#isSimilar for determining whether a control or a collection of controls is similar"
+        "Methods UiObject#isSimilar and UiObjectCollection#isSimilar for determining whether a control or a collection of controls is similar",
+        "Global method \"currentComponent\", used to obtain the name information of the currently active component"
       ],
       "fix": [
         "Issue where the project could not compile properly in certain environments due to a rollback to an earlier version",
@@ -16,6 +17,9 @@
         "Missing methods and properties on UiObjectCollection instances"
       ],
       "improvement": [
+        "The packaging page supports signature configuration, keystore management, and permission settings (by [luckyloogn]()) _[`pr #286`]()_",
+        "Improved accuracy in identifying the current package name and activity name of the floating window (Priority: Shizuku > Root > A11Y)",
+        "Improved accuracy in recognizing `currentPackage` and `currentActivity` (Priority: Shizuku > Root > A11Y)",
         "Restore the ability to select text content of individual entries in the log activity window via double-click or long press _[`issue #280`](http://issues.autojs6.com/280)_",
         "Recover as much critical information as possible for script projects when project.json is corrupted",
         "Automatically convert Simplified Chinese to Pinyin (including multi-tone characters) for generated package name suffixes when packaging single files",

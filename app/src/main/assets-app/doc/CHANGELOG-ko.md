@@ -6,17 +6,21 @@
 
 # v6.6.1
 
-###### 2024/12/27
+###### 2025/01/01
 
 * `추가` 중국어 병음 변환을 위한 Pinyin 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin))
 * `추가` 중국어 병음 변환을 위한 Pinyin4j 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin4j))
 * `추가` 컨트롤 또는 컨트롤 컬렉션이 유사한지 여부를 확인하는 UiObject#isSimilar 및 UiObjectCollection#isSimilar 메서드
+* `추가` "currentComponent" 전역 메서드로, 현재 활성화된 구성 요소의 이름 정보를 가져오는 데 사용됩니다
 * `수정` 일부 환경에서 이전 버전으로 롤백하여 프로젝트가 정상적으로 컴파일되지 않는 문제
 * `수정` 존재하지 않는 메서드를 호출할 때 발생할 수 있는 "비원시 값" 예외
 * `수정` 일부 기기에서 스크립트 바로가기를 정상적으로 추가할 수 없는 문제 (임시 수정) _[`issue #221`](http://issues.autojs6.com/221)_
 * `수정` automator.click/longClick 메서드의 파라미터 유형 제한 오류 _[`issue #275`](http://issues.autojs6.com/275)_
 * `수정` 선택자가 ConsString 유형의 파라미터를 지원하지 않는 문제 _[`issue #277`](http://issues.autojs6.com/277)_
 * `수정` UiObjectCollection 인스턴스에서 메서드 및 속성이 누락된 문제
+* `개선` 패키징 페이지에서 서명 구성, 키 저장소 관리 및 권한 설정을 지원합니다. ([luckyloogn]()) _[`pr #286`]()_
+* `개선` 플로팅 윈도우의 현재 패키지 이름 및 현재 활동 이름의 인식 정확도가 향상되었습니다 (우선 순위: Shizuku > Root > A11Y)
+* `개선` currentPackage 및 currentActivity의 인식 정확도가 향상되었습니다 (우선 순위: Shizuku > Root > A11Y)
 * `개선` 로그 활동 창의 개별 항목 텍스트 내용을 더블 클릭 또는 길게 눌러 선택하는 기능 복원 _[`issue #280`](http://issues.autojs6.com/280)_
 * `개선` project.json 파일이 손상된 경우에도 가능한 한 중요한 정보를 복원
 * `개선` 단일 파일을 패키징할 때 자동 생성된 패키지 이름 접미사를 간체자로부터 병음으로 변환 (다음 음도 지원)

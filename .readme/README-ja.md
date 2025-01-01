@@ -156,17 +156,21 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 # v6.6.1
 
-###### 2024/12/27
+###### 2025/01/01
 
 * `新機能` 中国語のピンイン変換用の Pinyin モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin))
 * `新機能` 中国語のピンイン変換用の Pinyin4j モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin4j))
 * `新機能` コントロールまたはコントロールコレクションが類似しているかを判定する UiObject#isSimilar と UiObjectCollection#isSimilar メソッド
+* `新機能` グローバルメソッド「currentComponent」、現在アクティブなコンポーネントの名前情報を取得するために使用されます
 * `修正` 一部の環境でバージョンを低く戻すことでプロジェクトが正常にコンパイルできなくなる問題
 * `修正` 存在しないメソッドを呼び出す際に発生する可能性がある「非プリミティブ型の値」エラー
 * `修正` 一部のデバイスでスクリプトショートカットが正常に追加できない問題 (暫定修正) _[`issue #221`](http://issues.autojs6.com/221)_
 * `修正` automator.click/longClick メソッドのパラメーター型制限の誤り _[`issue #275`](http://issues.autojs6.com/275)_
 * `修正` セレクターが ConsString 型のパラメーターをサポートしない問題 _[`issue #277`](http://issues.autojs6.com/277)_
 * `修正` UiObjectCollection インスタンスにメソッドおよびプロパティが欠如している問題
+* `改善` パッケージ化ページで署名設定、キーストア管理、権限設定をサポートします（[luckyloogn]() による） _[`pr #286`]()_
+* `改善` フローティングウィンドウの現在のパッケージ名および現在のアクティビティ名の認識精度を向上 (優先順位: Shizuku > Root > A11Y)
+* `改善` currentPackage と currentActivity の認識精度を向上 (優先順位: Shizuku > Root > A11Y)
 * `改善` ログアクティビティウィンドウの個別エントリのテキスト内容をダブルクリックまたは長押しで選択する機能を復元 _[`issue #280`](http://issues.autojs6.com/280)_
 * `改善` project.json ファイルが破損した場合でも, スクリプトプロジェクトの重要な情報を可能な限り復元
 * `改善` 単一ファイルをパッケージ化する際に, 自動生成されるパッケージ名のサフィックスを簡体字中国語からピンインに変換 (多音字対応)
@@ -371,7 +375,7 @@ SDK Tools (SDK ツール) (右側のウィンドウにあります)
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で、それ以下のバージョンは推奨されませんが、最低でも `19` の使用を推奨します。.
 
-2024 年 12 月 27 日 現在、AutoJs6がサポートする最大のJDKバージョンは `23` です。.
+2025 年 1 月 1 日 現在、AutoJs6がサポートする最大のJDKバージョンは `23` です。.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合、この節の内容をスキップできます。.
 
@@ -462,6 +466,7 @@ AutoJs6 プロジェクト開発に参加したすべての貢献者に感謝し
 
 |     <span style="word-break:keep-all;white-space:nowrap">貢献者</span>     |                   <span style="word-break:keep-all;white-space:nowrap">コミット数</span>                    | <span style="word-break:keep-all;white-space:nowrap">最近の提出</span> |
 |:----------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|     <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>      |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>            |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
 |  <span style="word-break:keep-all;white-space:nowrap">[chenguangming](https://github.com/chenguangming)</span>   | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Achenguangming)</span> |                    <span style="word-break:keep-all;white-space:nowrap">`2024/05/14`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[LZX284](https://github.com/LZX284)</span>          |         <span style="word-break:keep-all;white-space:nowrap">[17](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2023/11/19`</span>                    |
@@ -470,7 +475,7 @@ AutoJs6 プロジェクト開発に参加したすべての貢献者に感謝し
 |         <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>          |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86)</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-データは 2024 年 10 月 23 日 に更新されました。.
+データは 2025 年 1 月 1 日 に更新されました。.
 
 データ項目は `最近の提出` の降順で並べ替えられます.
 
@@ -494,7 +499,7 @@ AutoJs6 プロジェクト開発に参加したすべての貢献者に感謝し
         - Update contribution section
     - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
     - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation by running the python script
+    - Re-generate documentation/markdown by running the python script
     - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field
