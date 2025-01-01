@@ -94,6 +94,9 @@ public class AxmlWriter extends AxmlVisitor {
         int size = 0;
 
         for (NodeImpl first : firsts) {
+            if (first.ignore) {
+                continue;
+            }
             size += first.prepare(this);
         }
         int a = 0;
@@ -163,6 +166,9 @@ public class AxmlWriter extends AxmlVisitor {
         }
 
         for (NodeImpl first : firsts) {
+            if (first.ignore) {
+                continue;
+            }
             first.write(out);
         }
 
@@ -259,10 +265,11 @@ public class AxmlWriter extends AxmlVisitor {
         Attr clz;
         protected List<NodeImpl> children = new ArrayList<NodeImpl>();
         private int line;
-        private StringItem name;
+        protected StringItem name;
         private StringItem ns;
         private StringItem text;
         private int textLineNumber;
+        protected boolean ignore = false;
 
         public NodeImpl(String ns, String name) {
             super(null);
@@ -344,6 +351,9 @@ public class AxmlWriter extends AxmlVisitor {
             int size = 24 + 36 + attrs.size() * 20;// 24 for end tag,36+x*20 for
             // start tag
             for (NodeImpl child : children) {
+                if (child.ignore) {
+                    continue;
+                }
                 size += child.prepare(axmlWriter);
             }
             if (text != null) {
@@ -400,6 +410,9 @@ public class AxmlWriter extends AxmlVisitor {
 
             // children
             for (NodeImpl child : children) {
+                if (child.ignore) {
+                    continue;
+                }
                 child.write(out);
             }
 

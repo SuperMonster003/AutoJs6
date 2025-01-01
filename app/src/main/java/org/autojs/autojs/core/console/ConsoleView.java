@@ -178,7 +178,7 @@ public class ConsoleView extends FrameLayout implements ConsoleImpl.LogListener 
         return /* default text size */ 14;
     }
 
-    public void setTextColors(@NotNull Integer[] colors) {
+    public void setTextColors(Integer[] colors) {
         Adapter adapter = (Adapter) mLogListRecyclerView.getAdapter();
         if (adapter != null) {
             adapter.setTextColors(colors);
