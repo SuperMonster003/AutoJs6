@@ -174,9 +174,6 @@ dependencies /* Unclassified */ {
     // Rhino
     implementation(files("$rootDir/libs/org.mozilla.rhino-1.7.16-snapshot.jar"))
 
-    // Tiny Sign
-    implementation(files("$rootDir/libs/tiny-sign-0.9.jar"))
-
     // Tasker Plugin
     implementation(project(":libs:android-spackle-9.0.0"))
     implementation(project(":libs:android-assertion-9.0.0"))
@@ -205,6 +202,16 @@ dependencies /* Unclassified */ {
     // implementation("com.huaban:jieba-analysis:1.0.2")
     implementation(project(":jieba-analysis"))
 
+    // Tiny Sign
+    implementation(files("$rootDir/libs/tiny-sign-0.9.jar"))
+
+    // ApkSigner
+    implementation("com.github.TimScriptov:apksigner:1.2.0")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
 }
 
 dependencies /* MIME */ {

@@ -259,6 +259,9 @@
         <activity android:name="org.autojs.autojs.ui.project.ProjectConfigActivity" />
 
         <activity
+            android:name="org.autojs.autojs.ui.keystore.ManageKeyStoreActivity" />
+
+        <activity
             android:name="org.autojs.autojs.ui.log.LogActivity"
             android:exported="true"
             android:label="@string/text_app_shortcut_log_long_label"
