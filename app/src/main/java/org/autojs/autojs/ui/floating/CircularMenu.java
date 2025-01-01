@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.floating;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.os.RemoteException;
 import android.text.TextUtils;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -24,6 +25,8 @@ import org.autojs.autojs.core.record.Recorder;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.Scripts;
+import org.autojs.autojs.runtime.api.WrappedShizuku;
+import org.autojs.autojs.runtime.api.augment.shell.Shell;
 import org.autojs.autojs.tool.Func1;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
@@ -173,9 +176,7 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
                 mSettingsDialog.dismiss();
             }
 
-            ActivityInfoProvider infoProvider = AutoJs.getInstance().getInfoProvider();
-            mRunningPackage = infoProvider.getLatestPackageByUsageStatsIfGranted();
-            mRunningActivity = infoProvider.getLatestActivity();
+            applyComponentInformation();
 
             // noinspection CodeBlock2Expr
             mSettingsDialog = new CircularMenuOperationDialogBuilder(mContext)
@@ -210,6 +211,26 @@ public class CircularMenu implements Recorder.OnStateChangedListener, LayoutInsp
 
             DialogUtils.showDialog(mSettingsDialog);
         });
+    }
+
+    private void applyComponentInformation() {
+        if (WrappedShizuku.isOperational() && WrappedShizuku.service != null) {
+            try {
+                mRunningPackage = WrappedShizuku.service.currentPackage();
+                mRunningActivity = WrappedShizuku.service.currentActivity();
+                return;
+            } catch (RemoteException ignored) {
+
+            }
+        }
+        if (RootUtils.isRootAvailable()) {
+            mRunningPackage = Shell.currentPackageRhino();
+            mRunningActivity = Shell.currentActivityRhino();
+            return;
+        }
+        ActivityInfoProvider infoProvider = AutoJs.getInstance().getInfoProvider();
+        mRunningPackage = infoProvider.getLatestPackageByUsageStatsIfGranted();
+        mRunningActivity = infoProvider.getLatestActivity();
     }
 
     @NonNull
