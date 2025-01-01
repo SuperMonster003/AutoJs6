@@ -234,6 +234,7 @@ pluginManagement {
                 ),
             ) {
                 override val weight = 5
+                override val shouldPrintProgress = false
             }
 
             val unknown = object : Platform(
@@ -355,6 +356,7 @@ pluginManagement {
             open val gradleSettingsName: String? = null
             open val weight: Int = -Int.MAX_VALUE
             open var version: String = consts.DEFAULT_VERSION
+            open val shouldPrintProgress: Boolean = true
 
             open val fullName
                 get() = uppercaseFirstChar(name)
@@ -626,6 +628,7 @@ pluginManagement {
         extensions.extraProperties["kotlinVersion"] = notations.classpath.find {
             it.contains("kotlin-gradle-plugin")
         }?.substringAfterLast(":") ?: config.fallbackKotlinVersion
+        extensions.extraProperties["platform"] = platform
     }
 
 }

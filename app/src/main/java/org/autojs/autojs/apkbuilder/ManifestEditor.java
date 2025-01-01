@@ -101,6 +101,13 @@ public class ManifestEditor {
 
             @Override
             protected void onAttr(AxmlWriter.Attr a) {
+                if ("permission".equals(this.name.data) && "name".equals(a.name.data) && a.value instanceof StringItem) {
+                    if ("org.autojs.autojs6.inrt.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION".equals(((StringItem) a.value).data)) {
+                        ((StringItem) a.value).data = mPackageName + ".DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION";
+                        super.onAttr(a);
+                        return;
+                    }
+                }
                 if ("uses-permission".equals(this.name.data) && "name".equals(a.name.data) && a.value instanceof StringItem) {
                     this.ignore = !ManifestEditor.this.isPermissionRequired(((StringItem) a.value).data);
                 }
