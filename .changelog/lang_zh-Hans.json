@@ -17,6 +17,7 @@
         "UiObjectCollection 实例缺失自身方法及属性的问题"
       ],
       "improvement": [
+        "提升浮动窗口当前包名及当前活动名的识别准确性 (优先级: Shizuku > Root > A11Y)",
         "提升 currentPackage/currentActivity 识别准确性 (优先级: Shizuku > Root > A11Y)",
         "恢复日志活动窗口单个条目文本内容的双击或长按选择功能 _[`issue #280`](http://issues.autojs6.com/280)_",
         "脚本项目识别在 project.json 损坏情况下尽可能还原关键信息",

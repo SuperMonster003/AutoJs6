@@ -117,6 +117,7 @@ object WrappedShizuku {
         false.also { if (e.message?.contains(Regex("binder .+n[o']t been received", RegexOption.IGNORE_CASE)) == false) e.printStackTrace() }
     }
 
+    @JvmStatic
     @ScriptInterface
     fun isOperational(): Boolean = isRunning() && hasPermission()
 

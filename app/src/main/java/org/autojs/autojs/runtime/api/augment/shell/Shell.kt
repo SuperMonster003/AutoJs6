@@ -97,15 +97,23 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun currentPackage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
-            currentComponent(scriptRuntime, args).substringBefore("/")
+            currentPackageRhino()
         }
+
+        @JvmStatic
+        fun currentPackageRhino(): String = currentComponentRhino().substringBefore("/")
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun currentActivity(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
-            val component = currentComponent(scriptRuntime, args)
+            currentActivityRhino()
+        }
+
+        @JvmStatic
+        fun currentActivityRhino(): String {
+            val component = currentComponentRhino()
             val className = component.substringAfterLast("/")
-            when {
+            return when {
                 className.startsWith(".") -> component
                 else -> className
             }
@@ -114,7 +122,12 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun currentComponent(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
-            if (!RootUtils.isRootAvailable()) return@ensureArgumentsIsEmpty ""
+            currentComponentRhino()
+        }
+
+        @JvmStatic
+        fun currentComponentRhino(): String {
+            if (!RootUtils.isRootAvailable()) return ""
             try {
                 val process = Runtime.getRuntime().exec("su -c dumpsys activity activities")
                 process.inputStream.bufferedReader().useLines { lines ->
@@ -127,14 +140,14 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
                             part.contains("/")
                         }?.let { part ->
                             Log.d(TAG, "current activity part: $part")
-                            return@ensureArgumentsIsEmpty part.replace("\\W+$".toRegex(), "")
+                            return part.replace("\\W+$".toRegex(), "")
                         }
                     }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error reading current component", e)
             }
-            return@ensureArgumentsIsEmpty ""
+            return ""
         }
 
         @JvmStatic

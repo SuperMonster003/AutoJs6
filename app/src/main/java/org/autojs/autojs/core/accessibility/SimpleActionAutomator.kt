@@ -26,6 +26,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
+import org.autojs.autojs.runtime.api.augment.global.Global
 import org.autojs.autojs.util.DeveloperUtils
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicInteger
@@ -52,7 +53,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     }
 
     private val isRunningPackageSelf
-        get() = DeveloperUtils.isSelfPackage(accessibilityBridge.infoProvider.latestPackage)
+        get() = DeveloperUtils.isSelfPackage(Global.currentPackage(scriptRuntime, emptyArray()))
 
     private var mScreenMetrics: ScreenMetrics? = null
     private val mScriptRuntime = WeakReference(scriptRuntime)
