@@ -173,6 +173,11 @@ object Pref {
     fun getScriptDirPath() = WorkingDirectoryUtils.path
 
     @JvmStatic
+    fun getKeyStorePath(): String {
+        return getScriptDirPath() + "/.KeyStore/"
+    }
+
+    @JvmStatic
     fun registerOnSharedPreferenceChangeListener(listener: OnSharedPreferenceChangeListener) {
         sPref.registerOnSharedPreferenceChangeListener(listener)
     }
