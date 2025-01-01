@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.shell
 
+import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.IntRange
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
@@ -16,6 +17,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.undefined
+import org.autojs.autojs.util.RootUtils
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Undefined
@@ -28,6 +30,9 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
         ::getCommand.name,
         ::fromIntent.name,
         ::kill.name,
+        ::currentPackage.name,
+        ::currentActivity.name,
+        ::currentComponent.name,
     )
 
     override val globalAssignmentFunctions = listOf(
@@ -56,6 +61,8 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
 
     companion object : FlexibleArray() {
 
+        private val TAG = Shell::class.java.simpleName
+
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun execCommand(scriptRuntime: ScriptRuntime, args: Array<out Any?>): AbstractShell.Result = ensureArgumentsLengthInRange(args, 1..3) { argList ->
@@ -80,10 +87,54 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun kill(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { app ->
+            if (!RootUtils.isRootAvailable()) return@ensureArgumentsOnlyOne false
             when (val packageName = App.getPackageName(scriptRuntime, arrayOf(app))) {
                 null -> false
                 else -> execCommand(scriptRuntime, arrayOf("am force-stop $packageName", true)).code == 0
             }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun currentPackage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
+            currentComponent(scriptRuntime, args).substringBefore("/")
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun currentActivity(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
+            val component = currentComponent(scriptRuntime, args)
+            val className = component.substringAfterLast("/")
+            when {
+                className.startsWith(".") -> component
+                else -> className
+            }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun currentComponent(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
+            if (!RootUtils.isRootAvailable()) return@ensureArgumentsIsEmpty ""
+            try {
+                val process = Runtime.getRuntime().exec("su -c dumpsys activity activities")
+                process.inputStream.bufferedReader().useLines { lines ->
+                    val resumedActivityLine = lines.find {
+                        it.contains("Resumed:") || it.contains("ResumedActivity")
+                    }
+                    resumedActivityLine?.let { line ->
+                        Log.d(TAG, "Found Resumed Activity: $line")
+                        line.split("\\s+".toRegex()).firstOrNull { part ->
+                            part.contains("/")
+                        }?.let { part ->
+                            Log.d(TAG, "current activity part: $part")
+                            return@ensureArgumentsIsEmpty part.replace("\\W+$".toRegex(), "")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error reading current component", e)
+            }
+            return@ensureArgumentsIsEmpty ""
         }
 
         @JvmStatic
@@ -322,6 +373,17 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
             .replace(Regex("([A-Z])([A-Z][a-z])"), "$1-$2") // handle parseHTML as parse-html
             .replace(Regex("([a-z])([0-9])"), "$1-$2") // handle letters followed by numbers
             .lowercase()
+
+        private fun completeActivityNames(name: String): String {
+            val parts = name.split("/")
+            if (parts.size == 2) {
+                val (packageName, activityName) = parts
+                if (activityName.startsWith(".")) {
+                    return "$packageName/$packageName$activityName"
+                }
+            }
+            return name
+        }
 
         data class CommandArgumentsData(val arguments: String = "", val withRoot: Boolean = false, val withExit: Boolean = false)
 

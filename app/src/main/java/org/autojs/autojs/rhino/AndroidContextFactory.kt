@@ -53,6 +53,7 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
     private fun setupContext(context: Context) {
         context.apply {
             instructionObserverThreshold = 10000
+            @Suppress("DEPRECATION")
             optimizationLevel = -1
             languageVersion = Context.VERSION_ES6
             locale = Locale.getDefault()

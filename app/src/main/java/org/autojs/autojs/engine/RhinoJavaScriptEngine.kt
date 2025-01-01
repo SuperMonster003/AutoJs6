@@ -195,6 +195,7 @@ open class RhinoJavaScriptEngine(private val scriptRuntime: ScriptRuntime, priva
         if (this is AutoJsContext) {
             rhinoJavaScriptEngine = this@RhinoJavaScriptEngine
         }
+        @Suppress("DEPRECATION")
         optimizationLevel = -1
         languageVersion = Context.VERSION_ES6
         locale = Locale.getDefault()

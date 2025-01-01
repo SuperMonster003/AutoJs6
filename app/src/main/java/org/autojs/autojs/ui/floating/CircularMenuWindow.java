@@ -220,10 +220,12 @@ public class CircularMenuWindow extends FloatyWindow {
     }
 
     public void savePosition() {
-        int x = mActionViewWindowBridge.getX();
-        Pref.putFloatSync(KEY_POSITION_X_PERCENT, x / (float) ScreenMetrics.getDeviceScreenWidth());
-        int y = mActionViewWindowBridge.getY();
-        Pref.putFloatSync(KEY_POSITION_Y_PERCENT, y / (float) ScreenMetrics.getDeviceScreenHeight());
+        if (mActionViewWindowBridge != null) {
+            int x = mActionViewWindowBridge.getX();
+            Pref.putFloatSync(KEY_POSITION_X_PERCENT, x / (float) ScreenMetrics.getDeviceScreenWidth());
+            int y = mActionViewWindowBridge.getY();
+            Pref.putFloatSync(KEY_POSITION_Y_PERCENT, y / (float) ScreenMetrics.getDeviceScreenHeight());
+        }
     }
 
     public void savePosition(@NotNull Configuration configuration) {
