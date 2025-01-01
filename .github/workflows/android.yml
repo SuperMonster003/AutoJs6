@@ -25,6 +25,11 @@ jobs:
           wget https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.sh
           chmod +x cmake-3.10.2-Linux-x86_64.sh
           sudo ./cmake-3.10.2-Linux-x86_64.sh --skip-license --prefix=/usr/local
+          
+      - name: Install Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
