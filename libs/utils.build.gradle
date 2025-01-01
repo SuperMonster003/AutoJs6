@@ -414,11 +414,12 @@ class Utils {
                             while ((bytesRead = inputStream.read(buffer)) != -1) {
                                 outputStream.write(buffer, 0, bytesRead)
                                 downloadedSize += bytesRead
-
-                                double progress = (downloadedSize * 100.0 / fileSize)
-                                String progressBar = generateProgressBar(progress)
-                                print String.format("\rDownloading... [ %s ] %.2f%%", progressBar, progress)
-                                System.out.flush()
+                                if (project.ext["platform"]["shouldPrintProgress"] == true) {
+                                    double progress = (downloadedSize * 100.0 / fileSize)
+                                    String progressBar = generateProgressBar(progress)
+                                    print String.format("\rDownloading... [ %s ] %.2f%%", progressBar, progress)
+                                    System.out.flush()
+                                }
                             }
                         }
                     }
@@ -489,11 +490,12 @@ class Utils {
                         }
                     }
 
-                    double progress = (processedEntries * 100.0 / totalEntries)
-                    String progressBar = generateProgressBar(progress)
-                    print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
-                    System.out.flush()
-
+                    if (project.ext["platform"]["shouldPrintProgress"] == true) {
+                        double progress = (processedEntries * 100.0 / totalEntries)
+                        String progressBar = generateProgressBar(progress)
+                        print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
+                        System.out.flush()
+                    }
                     processedEntries++
                 }
             }
@@ -555,11 +557,12 @@ class Utils {
                         }
                     }
 
-                    double progress = (processedEntries * 100.0 / totalEntries)
-                    String progressBar = generateProgressBar(progress)
-                    print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
-                    System.out.flush()
-
+                    if (project.ext["platform"]["shouldPrintProgress"] == true) {
+                        double progress = (processedEntries * 100.0 / totalEntries)
+                        String progressBar = generateProgressBar(progress)
+                        print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
+                        System.out.flush()
+                    }
                     processedEntries++
                 }
             }
