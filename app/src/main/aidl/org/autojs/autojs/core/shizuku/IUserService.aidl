@@ -8,4 +8,9 @@ interface IUserService {
 
     String execCommand(String command) = 2;
 
+    String currentPackage() = 11;
+    String currentActivity() = 12;
+    String currentComponent() = 13;
+    String currentComponentShort() = 14;
+
 }

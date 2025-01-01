@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.1": {
-      "released_date": "2024/12/27",
+      "released_date": "2025/01/01",
       "feature": [
         "중국어 병음 변환을 위한 Pinyin 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin))",
         "중국어 병음 변환을 위한 Pinyin4j 모듈 (프로젝트 문서 참고 > [중국어 병음](https://docs.autojs6.com/#/pinyin4j))",

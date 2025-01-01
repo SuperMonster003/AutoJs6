@@ -1,11 +1,12 @@
 {
   "$data": {
     "v6.6.1": {
-      "released_date": "2024/12/27",
+      "released_date": "2025/01/01",
       "feature": [
         "pinyin 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin))",
         "pinyin4j 模块, 用于汉语拼音转换 (参阅 项目文档 > [汉语拼音](https://docs.autojs6.com/#/pinyin4j))",
-        "UiObject#isSimilar 及 UiObjectCollection#isSimilar 方法, 用于确定控件或控件集合是否相似"
+        "UiObject#isSimilar 及 UiObjectCollection#isSimilar 方法, 用于确定控件或控件集合是否相似",
+        "currentComponent 全局方法, 用于获取当前活动的组件名称信息"
       ],
       "fix": [
         "部分环境因回退版本过低而无法正常编译项目的问题",
@@ -16,6 +17,7 @@
         "UiObjectCollection 实例缺失自身方法及属性的问题"
       ],
       "improvement": [
+        "提升 currentPackage/currentActivity 识别准确性 (优先级: Shizuku > Root > A11Y)",
         "恢复日志活动窗口单个条目文本内容的双击或长按选择功能 _[`issue #280`](http://issues.autojs6.com/280)_",
         "脚本项目识别在 project.json 损坏情况下尽可能还原关键信息",
         "打包单文件时自动生成的包名后缀支持将简体中文转换为拼音 (支持多音字)",

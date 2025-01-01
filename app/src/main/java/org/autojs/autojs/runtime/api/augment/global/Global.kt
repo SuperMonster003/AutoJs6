@@ -9,18 +9,22 @@ import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.NumberExtensions.string
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
+import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.runtime.api.augment.automator.Auto
 import org.autojs.autojs.runtime.api.augment.console.Console
 import org.autojs.autojs.runtime.api.augment.jsox.Numberx
 import org.autojs.autojs.runtime.api.augment.s13n.S13n
 import org.autojs.autojs.runtime.api.augment.selector.Selector
+import org.autojs.autojs.runtime.api.augment.shell.Shell
+import org.autojs.autojs.runtime.api.augment.shizuku.Shizuku
 import org.autojs.autojs.runtime.api.augment.toast.Toast
 import org.autojs.autojs.runtime.api.augment.util.Util
-import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.NotImplementedError
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -79,6 +83,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         ::getClip.name,
         ::currentPackage.name,
         ::currentActivity.name,
+        ::currentComponent.name,
         ::wait.name,
         ::waitForActivity.name,
         ::waitForPackage.name,
@@ -295,14 +300,50 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun currentPackage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
-            scriptRuntime.info.latestPackage
+        fun currentPackage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsAtMost(args, 1) { argList ->
+            val (o) = argList
+            when (parseComponentFetchMode(o)) {
+                ComponentFetchMode.ACCESSIBILITY -> Auto.currentPackage(scriptRuntime, emptyArray())
+                ComponentFetchMode.SHIZUKU -> Shizuku.currentPackage(scriptRuntime, emptyArray())
+                ComponentFetchMode.ROOT -> Shell.currentPackage(scriptRuntime, emptyArray())
+                ComponentFetchMode.AUTOMATISM -> listOf(
+                    { Shizuku.currentPackage(scriptRuntime, emptyArray()) },
+                    { Shell.currentPackage(scriptRuntime, emptyArray()) },
+                    { Auto.currentPackage(scriptRuntime, emptyArray()) }
+                ).firstNotNullOfOrNull { f -> f().takeUnless { it.isEmpty() } }.orEmpty()
+            }
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun currentActivity(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
-            scriptRuntime.info.latestActivity
+        fun currentActivity(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsAtMost(args, 1) { argList ->
+            val (o) = argList
+            when (parseComponentFetchMode(o)) {
+                ComponentFetchMode.ACCESSIBILITY -> Auto.currentActivity(scriptRuntime, emptyArray())
+                ComponentFetchMode.SHIZUKU -> Shizuku.currentActivity(scriptRuntime, emptyArray())
+                ComponentFetchMode.ROOT -> Shell.currentActivity(scriptRuntime, emptyArray())
+                ComponentFetchMode.AUTOMATISM -> listOf(
+                    { Shizuku.currentActivity(scriptRuntime, emptyArray()) },
+                    { Shell.currentActivity(scriptRuntime, emptyArray()) },
+                    { Auto.currentActivity(scriptRuntime, emptyArray()) }
+                ).firstNotNullOfOrNull { f -> f().takeUnless { it.isEmpty() } }.orEmpty()
+            }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun currentComponent(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsAtMost(args, 1) { argList ->
+            val (o) = argList
+            when (parseComponentFetchMode(o)) {
+                ComponentFetchMode.ACCESSIBILITY -> Auto.currentComponent(scriptRuntime, emptyArray())
+                ComponentFetchMode.SHIZUKU -> Shizuku.currentComponent(scriptRuntime, emptyArray())
+                ComponentFetchMode.ROOT -> Shell.currentComponent(scriptRuntime, emptyArray())
+                ComponentFetchMode.AUTOMATISM -> listOf(
+                    { Shizuku.currentComponent(scriptRuntime, emptyArray()) },
+                    { Shell.currentComponent(scriptRuntime, emptyArray()) },
+                    { Auto.currentComponent(scriptRuntime, emptyArray()) }
+                ).firstNotNullOfOrNull { f -> f().takeUnless { it.isEmpty() } }.orEmpty()
+            }
         }
 
         @JvmStatic
@@ -646,6 +687,20 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             args.isEmpty() -> emptyArray()
             else -> arrayOf(args.first())
         }
+
+        private fun parseComponentFetchMode(o: Any?): ComponentFetchMode = when {
+            o.isJsNullish() -> ComponentFetchMode.AUTOMATISM
+            o is NativeObject -> parseComponentFetchMode(o.inquire(listOf("by", "mode"), ::coerceString, ""))
+            else -> when (coerceString(o, "").lowercase()) {
+                "", "auto", "automatic", "automatism" -> ComponentFetchMode.AUTOMATISM
+                "a11y", "accessibility" -> ComponentFetchMode.ACCESSIBILITY
+                "shizuku" -> ComponentFetchMode.SHIZUKU
+                "root" -> ComponentFetchMode.ROOT
+                else -> throw WrappedIllegalArgumentException("Unknown component fetch mode: ${coerceString(o)}")
+            }
+        }
+
+        private enum class ComponentFetchMode { AUTOMATISM, ACCESSIBILITY, SHIZUKU, ROOT }
 
     }
 

@@ -67,28 +67,22 @@ public class Shell extends AbstractShell {
     private volatile boolean mInitialized = false;
     private volatile boolean mWaitingExit = false;
     private volatile String mCommandOutput = null;
-    private final boolean mShouldReadOutput;
     private Callback mCallback;
+
+    public Shell(Context context, boolean root) {
+        super(context, root);
+    }
 
     public Shell(Context context) {
         this(context, false);
     }
 
-    public Shell(Context context, boolean root) {
-        this(context, root, true);
-    }
-
-    public Shell(Context context, boolean root, boolean shouldReadOutput) {
-        super(context, root);
-        mShouldReadOutput = shouldReadOutput;
+    public Shell(boolean root) {
+        this(ScriptRuntime.getApplicationContext(), root);
     }
 
     public Shell() {
         this(false);
-    }
-
-    public Shell(boolean root) {
-        this(ScriptRuntime.getApplicationContext(), root);
     }
 
     @Override

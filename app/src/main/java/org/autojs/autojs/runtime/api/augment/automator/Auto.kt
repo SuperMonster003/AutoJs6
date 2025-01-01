@@ -31,6 +31,27 @@ import java.util.function.Supplier
 @Suppress("unused", "UNUSED_PARAMETER")
 class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
+    override val selfAssignmentFunctions = listOf(
+        ::start.name,
+        ::stop.name,
+        ::isRunning.name,
+        ::exists.name,
+        ::stateListener.name,
+        ::registerEvent.name,
+        ::registerEvents.name,
+        ::removeEvent.name,
+        ::removeEvents.name,
+        ::waitFor.name,
+        ::setMode.name,
+        ::setFlags.name,
+        ::setWindowFilter.name,
+        ::launchSettings.name,
+        ::clearCache.name,
+        ::currentPackage.name,
+        ::currentActivity.name,
+        ::currentComponent.name,
+    )
+
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
         "service" to Supplier {
             scriptRuntime.accessibilityBridge.service
@@ -50,24 +71,6 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         "windowRoots" to Supplier {
             scriptRuntime.accessibilityBridge.windowRoots().map { UiObject.createRoot(it) }.toNativeArray()
         },
-    )
-
-    override val selfAssignmentFunctions = listOf(
-        ::start.name,
-        ::stop.name,
-        ::isRunning.name,
-        ::exists.name,
-        ::stateListener.name,
-        ::registerEvent.name,
-        ::registerEvents.name,
-        ::removeEvent.name,
-        ::removeEvents.name,
-        ::waitFor.name,
-        ::setMode.name,
-        ::setFlags.name,
-        ::setWindowFilter.name,
-        ::launchSettings.name,
-        ::clearCache.name,
     )
 
     override fun invoke(vararg args: Any?): Any = ensureArgumentsAtMost(args, 2) {
@@ -134,21 +137,22 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         @RhinoRuntimeFunctionInterface
         fun stateListener(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsAtMost(args, 1) {
             val (listener) = it
-            scriptRuntime.accessibilityBridge.setAccessibilityListener(when {
-                listener.isJsNullish() -> null
-                listener is AccessibilityServiceCallback -> listener
-                listener is ScriptableObject -> {
-                    val adapter = NativeJavaObject.createInterfaceAdapter(
-                        AccessibilityServiceCallback::class.java, listener
-                    ) as AccessibilityServiceCallback
+            scriptRuntime.accessibilityBridge.setAccessibilityListener(
+                when {
+                    listener.isJsNullish() -> null
+                    listener is AccessibilityServiceCallback -> listener
+                    listener is ScriptableObject -> {
+                        val adapter = NativeJavaObject.createInterfaceAdapter(
+                            AccessibilityServiceCallback::class.java, listener
+                        ) as AccessibilityServiceCallback
 
-                    object : AccessibilityServiceCallback {
-                        override fun onConnected() = adapter.onConnected()
-                        override fun onDisconnected() = adapter.onDisconnected()
+                        object : AccessibilityServiceCallback {
+                            override fun onConnected() = adapter.onConnected()
+                            override fun onDisconnected() = adapter.onDisconnected()
+                        }
                     }
-                }
-                else -> throw WrappedIllegalArgumentException("Argument listener ($listener) is invalid for auto.setWindowFilter")
-            })
+                    else -> throw WrappedIllegalArgumentException("Argument listener ($listener) is invalid for auto.setWindowFilter")
+                })
             UNDEFINED
         }
 
@@ -157,19 +161,20 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         fun registerEvent(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsLength(args, 2) {
             val (name, listener) = it
             require(!name.isJsNullish()) { "Argument \"name\" for auto.registerEvent cannot be nullish" }
-            scriptRuntime.automator.registerEvent(Context.toString(name), when {
-                listener.isJsNullish() -> null
-                listener is AccessibilityEventCallback -> listener
-                listener is ScriptableObject -> {
-                    val adapter = NativeJavaObject.createInterfaceAdapter(
-                        AccessibilityEventCallback::class.java, listener
-                    ) as AccessibilityEventCallback
-                    object : AccessibilityEventCallback {
-                        override fun onAccessibilityEvent(event: AccessibilityEventWrapper) = adapter.onAccessibilityEvent(event)
+            scriptRuntime.automator.registerEvent(
+                Context.toString(name), when {
+                    listener.isJsNullish() -> null
+                    listener is AccessibilityEventCallback -> listener
+                    listener is ScriptableObject -> {
+                        val adapter = NativeJavaObject.createInterfaceAdapter(
+                            AccessibilityEventCallback::class.java, listener
+                        ) as AccessibilityEventCallback
+                        object : AccessibilityEventCallback {
+                            override fun onAccessibilityEvent(event: AccessibilityEventWrapper) = adapter.onAccessibilityEvent(event)
+                        }
                     }
-                }
-                else -> throw WrappedIllegalArgumentException("Argument listener ($listener) is invalid for auto.registerEvent")
-            })
+                    else -> throw WrappedIllegalArgumentException("Argument listener ($listener) is invalid for auto.registerEvent")
+                })
         }
 
         @JvmStatic
@@ -260,6 +265,26 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         @RhinoRuntimeFunctionInterface
         fun clearCache(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
             accessibilityTool.clearCache()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun currentPackage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
+            scriptRuntime.info.latestPackage
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun currentActivity(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
+            scriptRuntime.info.latestActivity
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun currentComponent(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
+            val latestPackage = scriptRuntime.info.latestPackage.takeUnless { it.isEmpty() } ?: return@ensureArgumentsIsEmpty ""
+            val latestActivity = scriptRuntime.info.latestActivity.takeUnless { it.isEmpty() } ?: return@ensureArgumentsIsEmpty ""
+            "$latestPackage/$latestActivity"
         }
 
         private fun ensureA11yServiceStarted(scriptRuntime: ScriptRuntime, isForcibleRestart: Any?) {

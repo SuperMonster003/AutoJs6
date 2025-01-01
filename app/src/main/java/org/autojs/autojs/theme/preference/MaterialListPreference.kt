@@ -9,7 +9,6 @@ import androidx.preference.Preference.SummaryProvider
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.common.NotAskAgainDialog
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 
 open class MaterialListPreference : MaterialDialogPreference {
@@ -43,12 +42,12 @@ open class MaterialListPreference : MaterialDialogPreference {
                 negativeText = getAttrString(a, R.styleable.MaterialListPreference_negativeText) ?: context.getString(R.string.dialog_button_cancel)
                 getAttrTextArray(a, R.styleable.MaterialListPreference_itemKeys)?.also { mItemKeys = it.toList() }
                 getAttrTextArray(a, R.styleable.MaterialListPreference_itemValues)?.also { mItemValues = it.toList() }
-                bundle.getString(key(R.string.key_pref_bundle_default_item), getAttrString(a, R.styleable.MaterialListPreference_itemDefaultKey))?.also { mItemDefaultKey = it }
+                bundle.getString(context.getString(R.string.key_pref_bundle_default_item), getAttrString(a, R.styleable.MaterialListPreference_itemDefaultKey))?.also { mItemDefaultKey = it }
                 getAttrString(a, R.styleable.MaterialListPreference_onConfirmPrompt)?.also { mConfirmedPrompt = it }
                 a.recycle()
             }
 
-        bundle.getIntegerArrayList(key(R.string.key_pref_bundle_disabled_items))?.map { context.getString(it) }?.let { disables ->
+        bundle.getIntegerArrayList(context.getString(R.string.key_pref_bundle_disabled_items))?.map { context.getString(it) }?.let { disables ->
             mItemKeys.forEachIndexed { index, it -> if (it in disables) mItemDisables += index }
         }
 
