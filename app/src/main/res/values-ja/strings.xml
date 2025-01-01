@@ -17,8 +17,8 @@
     <string name="apk_info_min_sdk">最小 SDK</string>
     <string name="apk_info_package_name">パッケージ</string>
     <string name="apk_info_target_sdk">ターゲット SDK</string>
-    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">UIスレッドでブロック操作は実行できません. `waitForActivity` をサブスレッドやサブスクリプトで実行するか, または `setInterval` を使用してチェックを繰り返してください</string>
-    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">UIスレッドでブロック操作は実行できません. `waitForPackage` をサブスレッドやサブスクリプトで実行するか, または `setInterval` を使用してチェックを繰り返してください</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">UI スレッドでブロック操作は実行できません. `waitForActivity` をサブスレッドやサブスクリプトで実行するか, または `setInterval` を使用してチェックを繰り返してください</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">UI スレッドでブロック操作は実行できません. `waitForPackage` をサブスレッドやサブスクリプトで実行するか, または `setInterval` を使用してチェックを繰り返してください</string>
     <string name="config_abi_options_contains_invalid">設定 \"abi\" に無効なオプションが含まれています</string>
     <string name="config_abi_options_contains_unavailable">設定 \"abi\" に利用できないオプションが含まれています</string>
     <string name="config_lib_options_contains_invalid">設定 \"lib\" に無効なオプションが含まれています</string>
@@ -46,11 +46,11 @@
     <string name="description_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張すると, コードの柔軟性が増し, より豊かな機能を実現できますが, 衝突や破損を引き起こす可能性もあります.\nこのオプションをオンにすると, すべてのスクリプトはデフォルトで組み込みの拡張機能を有効にします.\n組み込みの拡張機能は安全でないことが多いので, 組み込みの拡張機能の原理とリスクが明確に理解されていない限り, 推奨されません.\nこのオプションをオフにした場合でも, プロジェクトのドキュメントで説明されているように, plugins グローバルオブジェクトを使用して組み込み拡張機能を有効にすることができます</string>
     <string name="description_hidden_files_preference">AutoJs6 ファイルエクスプローラーで隠しファイルや隠しフォルダ (通常は「.」で始まる) を表示するかどうかを設定するために使用します</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">AutoJs6 がフォアグラウンドにあるとき, デバイスの画面をオンにして明るく保つための設定です.\nAutoJs6 アプリケーションの全ページのうち, ホームページでのみ使用する場合は, \"ホームページのみ\" オプションを選択します</string>
-    <string name="description_launcher_shortcuts">ショートカットは, AutoJs6 で特定のアクションを実行することができます. ユーザーは, サポートされているランチャーにこれらのショートカットを表示し, AutoJs6アプリケーションのドキュメントを読んだり, AutoJs6の設定ページを起動したりするなど, いくつかのタスクを素早く開始したり, アクティビティを起動したりすることができます</string>
+    <string name="description_launcher_shortcuts">ショートカットは, AutoJs6 で特定のアクションを実行することができます. ユーザーは, サポートされているランチャーにこれらのショートカットを表示し, AutoJs6 アプリケーションのドキュメントを読んだり, AutoJs6 の設定ページを起動したりするなど, いくつかのタスクを素早く開始したり, アクティビティを起動したりすることができます</string>
     <string name="description_manage_ignored_updates_preference">クリックすると, リストアイテムを表示または管理できます.\nリストアイテムを削除するには, 長押しします</string>
     <string name="description_night_mode_preference">ナイトモード (ダークテーマとも呼ばれる) は, Android システムの UI と端末上で動作するアプリケーションの両方に適用され, 弱視のユーザーや明るい光に敏感なユーザーの視認性を向上させ, 誰でも簡単に暗い環境下で端末を使用できるようにします.\n\nフォローシステム AutoJs6 では, Android と同じ Night モードが設定できます.\n常にオン Android のシステム設定に関係なく, 常に Night モードが ON になります.\n常にオフ Android のシステム設定に関係なく, AutoJs6 はナイトモードをオフにします.\n\n注: Follow system オプションは, Android API Level 28 (Android 9) [P] 以上の場合のみです</string>
     <string name="description_night_mode_preference_more">Android システムでナイトモードを有効にするには\n- Android API Level 29 (Android 10) [Q] 以上の場合: [設定] -> [ディスプレイ] -> [テーマ].\n- Android API Level 28 (Android 9) [P]: [開発者向けオプション] -> [ナイトモード].\n\nWebView コンポーネント (AutoJs6 のドキュメントページなど) を使って, Web ベースのコンテンツにナイトモード (ダークテーマ) を適用するには, 以下の条件を満たす必要があります.\n1. Android System WebView (または Google Chrome のようなブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P]: バージョン >= 105\n2. WebView コンポーネントの Web ベースのコンテンツは, Dark テーマに適合している (CSS や Android XML リソースなどによる) </string>
-    <string name="description_root_mode_preference">異国のrootやrootアクセスに異常がある場合, rootを強制的にrootまたはnon-rootに設定することができます</string>
+    <string name="description_root_mode_preference">異国の root や root アクセスに異常がある場合, root を強制的に root または non-root に設定することができます</string>
     <string name="description_root_record_out_file_type_preference">バイナリタイプ: 編集不可, ファイル拡張子は \"auto\"\nJavaScript タイプ: 直接編集またはコピー可能, ファイル拡張子は \"js\"</string>
     <string name="description_stable_mode">安定モードにするとレイアウト境界を取得する際に安定しますが, 一部の結果が無視されることがあります.\nアクセシビリティサービスの再起動が必要です</string>
     <string name="description_theme_color_preference">テーマカラーは, 以下のウィジェットに適用されますが, これに限定されるものではありません.\nステータスバー\nアプリバー\nファイルアイコン\nタスクアイテムアイコン\nファブ\n設定カテゴリのタイトル\nスイッチボタン\n\n注: AutoJs6 バージョン 6.2.0 では, 原色, 原色暗色, アクセントカラーの区別はまだありません</string>
@@ -101,10 +101,10 @@
     <string name="error_a_runtime_has_been_set">ランタイムが設定されている</string>
     <string name="error_abandoned_method">メソッド %s は放棄されたので, 使用しないでください</string>
     <string name="error_action_cannot_be_completed_with_negative_coordinate">\"%1$s\" 操作はパラメータに負の座標値 (%2$d, %3$d) が含まれているため, 完了できません</string>
-    <string name="error_activity_is_required_for_ui_exec_mode">UI実行モードに必要なアクティビティが不足しています</string>
+    <string name="error_activity_is_required_for_ui_exec_mode">UI 実行モードに必要なアクティビティが不足しています</string>
     <string name="error_an_operation_is_not_implemented">操作が実装されていません</string>
     <string name="error_app_not_installed">\"%s\" アプリがインストールされていません</string>
-    <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">%2$s#%3$s の引数 %1$s をnull値にはできません</string>
+    <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">%2$s#%3$s の引数 %1$s を null 値にはできません</string>
     <string name="error_arguments_cannot_be_empty">引数を空にできません</string>
     <string name="error_arguments_must_be_empty">引数は空でなければなりません</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">少なくとも 1 つの ABI を選択する必要がある</string>
@@ -119,13 +119,13 @@
     <string name="error_change_password_error_length">パスワードにもっと多くの文字を使用する</string>
     <string name="error_change_password_error_match">これらのパスワードは一致しませんでした</string>
     <string name="error_check_for_update">更新のチェックに失敗しました</string>
-    <string name="error_colon_must_follow_a_valid_ip_address">有効なIPアドレスの後にコロンが続くこと</string>
+    <string name="error_colon_must_follow_a_valid_ip_address">有効な IP アドレスの後にコロンが続くこと</string>
     <string name="error_compass_cannot_be_null">コンパスは null にできません</string>
     <string name="error_connect_to_remote">リモートサーバーに接続できません. %s</string>
     <string name="error_continuation_resume_called_without_suspend">resume() メソッドは suspend() の後に呼び出す必要があります</string>
     <string name="error_continuation_suspend_called_more_than_once">suspend() メソッドは一度だけコールされるべきです</string>
     <string name="error_corresponding_github_release_may_not_published">対応する GitHub のリリースがまだ公開されていない可能性があります</string>
-    <string name="error_dot_decimal_notation_num_over_255">255 を超えるドット10進数</string>
+    <string name="error_dot_decimal_notation_num_over_255">255 を超えるドット 10 進数</string>
     <string name="error_download_interrupted">ダウンロードが中断される</string>
     <string name="error_email_taken">メールが取られている</string>
     <string name="error_empty_broadcast_selection">少なくとも一つのブロードキャストが選択されていなければならない</string>
@@ -159,7 +159,7 @@
     <string name="error_input_fields_check_failed">入力フィールドのチェックに失敗</string>
     <string name="error_invalid_compass">コンパスが無効です: %s</string>
     <string name="error_invalid_github_repo">無効な GitHub リポジトリ: %s</string>
-    <string name="error_invalid_ip_address">無効なIPアドレス</string>
+    <string name="error_invalid_ip_address">無効な IP アドレス</string>
     <string name="error_invalid_login_credentials">無効なログイン認証情報</string>
     <string name="error_invalid_rest_compass">無効な残りコンパスです: %s</string>
     <string name="error_invalid_selector_map_element" formatted="false">無効なセレクタ・マップ要素です. { %s: %s (%s) } です</string>
@@ -280,8 +280,8 @@
     <string name="text_act_by_scroll_forward">前方にスクロールする (scrollForward)</string>
     <string name="text_act_by_set_text">テキストを設定する (setText)</string>
     <string name="text_action">動作</string>
-    <string name="text_activity_not_found_for_apk_installing">APKインストーラーなし</string>
-    <string name="text_adb_tool_needed">ADBツールが必要</string>
+    <string name="text_activity_not_found_for_apk_installing">APK インストーラーなし</string>
+    <string name="text_adb_tool_needed">ADB ツールが必要</string>
     <string name="text_alias">別名</string>
     <string name="text_all_files_access">全ファイルアクセス</string>
     <string name="text_all_files_access_is_needed">携帯電話上のスクリプトファイルにアクセスするために, \"すべてのファイルへのアクセス\" が必要です</string>
@@ -293,9 +293,9 @@
     <string name="text_android_build_version">Android ビルドバージョン</string>
     <string name="text_android_release_version">Android リリースバージョン</string>
     <string name="text_android_sdk_version">Android SDK バージョン</string>
-    <string name="text_apk_builder_plugin_unavailable">APK Builderは使用できません</string>
+    <string name="text_apk_builder_plugin_unavailable">APK Builder は使用できません</string>
     <string name="text_app_and_device_info">アプリとデバイスの情報</string>
-    <string name="text_app_crashed">AutoJs6がクラッシュしました</string>
+    <string name="text_app_crashed">AutoJs6 がクラッシュしました</string>
     <string name="text_app_language">言語</string>
     <string name="text_app_name">アプリ名</string>
     <string name="text_app_name_alipay">アリペイ</string>
@@ -307,13 +307,13 @@
     <string name="text_app_name_coolapk">CoolApk</string>
     <string name="text_app_name_dianping">Dianping</string>
     <string name="text_app_name_drive">ドライブ</string>
-    <string name="text_app_name_es">ESファイルエクスプローラー</string>
+    <string name="text_app_name_es">ES ファイルエクスプローラー</string>
     <string name="text_app_name_eudic">Eudic</string>
     <string name="text_app_name_geometric_weather">ジオメトリック天気</string>
     <string name="text_app_name_keep_notes">キープノート</string>
     <string name="text_app_name_meituan">名探偵コナン</string>
-    <string name="text_app_name_mt">MTマネージャー</string>
-    <string name="text_app_name_mxpro">MXプレーヤープロ</string>
+    <string name="text_app_name_mt">MT マネージャー</string>
+    <string name="text_app_name_mxpro">MX プレーヤープロ</string>
     <string name="text_app_name_parallel_space">平行空間</string>
     <string name="text_app_name_qqmusic">QQMusic</string>
     <string name="text_app_name_wechat">ウィーチャット</string>
@@ -336,7 +336,7 @@
     <string name="text_back">戻る</string>
     <string name="text_broadcast_action">動作</string>
     <string name="text_broadcast_task">タスクの実行</string>
-    <string name="text_build_apk">APKのビルド</string>
+    <string name="text_build_apk">APK のビルド</string>
     <string name="text_build_succeeded">ビルドに成功しました</string>
     <string name="text_cancel">取消</string>
     <string name="text_cancel_simplified">取消</string>
@@ -379,14 +379,14 @@
     <string name="text_config">設定</string>
     <string name="text_confirm_to_delete">本当に削除しますか？</string>
     <string name="text_confirm_to_remove">本当に削除しますか？</string>
-    <string name="text_connect_to_pc">PCに接続する</string>
+    <string name="text_connect_to_pc">PC に接続する</string>
     <string name="text_connection_cannot_be_established">接続が確立できない</string>
     <string name="text_console">コンソール</string>
     <string name="text_continue">続行</string>
     <string name="text_copy">コピー</string>
     <string name="text_copy_all">すべてコピー</string>
     <string name="text_copy_all_files_to_new_directory">すべてのファイルを新しいディレクトリにコピーします</string>
-    <string name="text_copy_command">cmdをコピー</string>
+    <string name="text_copy_command">cmd をコピー</string>
     <string name="text_copy_debug_info">デバッグログをコピー</string>
     <string name="text_copy_line">行をコピー</string>
     <string name="text_copy_to_clip">クリップボードにコピーする</string>
@@ -436,7 +436,7 @@
     <string name="text_download_cancelled">ダウンロード中止</string>
     <string name="text_download_interruption_warning">このままでは現在のダウンロードが中断されます</string>
     <string name="text_download_link_for_autojs6">AutoJs6 のダウンロードリンク</string>
-    <string name="text_download_url">ダウンロードURL</string>
+    <string name="text_download_url">ダウンロード URL</string>
     <string name="text_downloading">ダウンロード中</string>
     <string name="text_drawer_close">ドロワーを閉じる</string>
     <string name="text_drawer_open">ドロワーを開く</string>
@@ -493,7 +493,7 @@
     <string name="text_file_with_abs_path_is_not_an_executable_script">ファイル \"%1$s\" は実行可能なスクリプトではありません</string>
     <string name="text_files_transfer">ファイルの転送</string>
     <string name="text_find">検索</string>
-    <string name="text_find_java_classes">Javaクラスの検索</string>
+    <string name="text_find_java_classes">Java クラスの検索</string>
     <string name="text_find_next_simplified">次へ</string>
     <string name="text_find_or_replace">検索・置換</string>
     <string name="text_find_prev_simplified">前へ</string>
@@ -508,7 +508,7 @@
     <string name="text_generate_code">生成されるコード</string>
     <string name="text_generated_code">生成されたコード</string>
     <string name="text_getting_release_notes" tools:ignore="TypographyEllipsis">リリースノートの取得中...</string>
-    <string name="text_github_backup_url_used">バックアップURLを使用しました</string>
+    <string name="text_github_backup_url_used">バックアップ URL を使用しました</string>
     <string name="text_go_to_settings">\"設定\" に進む</string>
     <string name="text_grant_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を付与する</string>
     <string name="text_granted">許可する</string>
@@ -538,7 +538,7 @@
     <string name="text_invalid_project">プロジェクトが無効です</string>
     <string name="text_is_latest_version">新しいバージョンが見つかりません</string>
     <string name="text_issue_report">フィードバック</string>
-    <string name="text_js_file">*.jsファイル</string>
+    <string name="text_js_file">*.js ファイル</string>
     <string name="text_jump">ジャンプ</string>
     <string name="text_jump_to_end">末尾へジャンプ</string>
     <string name="text_jump_to_line">行頭へジャンプ</string>
@@ -572,7 +572,7 @@
     <string name="text_manage_ignored_updates">無視されたアップデートの管理</string>
     <string name="text_min_version">最小バージョン</string>
     <string name="text_min_version_of_vscode_vsc_ext">VSCode 拡張機能の最小バージョン</string>
-    <string name="text_mobile_qq_not_installed">「モバイルQQがインストールされていない</string>
+    <string name="text_mobile_qq_not_installed">「モバイル QQ がインストールされていない</string>
     <string name="text_more">詳細</string>
     <string name="text_more_details">詳細</string>
     <string name="text_move_all_files_to_new_directory">すべてのファイルを新しいディレクトリに移動する</string>
@@ -616,13 +616,13 @@
     <string name="text_options">オプション</string>
     <string name="text_original_developer">オリジナル開発者</string>
     <string name="text_others">その他</string>
-    <string name="text_output_apk_path">APK出力パス</string>
+    <string name="text_output_apk_path">APK 出力パス</string>
     <string name="text_package_name">パッケージ名</string>
     <string name="text_password">パスワード</string>
     <string name="text_password_cannot_be_empty">パスワードは空であってはならない</string>
     <string name="text_paste">貼り付け</string>
     <string name="text_path_is_empty">パスが空です</string>
-    <string name="text_pc_server_address">PCサーバーのアドレス</string>
+    <string name="text_pc_server_address">PC サーバーのアドレス</string>
     <string name="text_permission_granted">権限付与</string>
     <string name="text_permission_granted_failed_with_root">許可に失敗しました (root 権限)</string>
     <string name="text_permission_granted_failed_with_shizuku">許可に失敗しました (Shizuku を使用)</string>
@@ -682,7 +682,7 @@
     <string name="text_replace">置換</string>
     <string name="text_replace_all">すべてを置き換える</string>
     <string name="text_replace_simplified">置換</string>
-    <string name="text_repo_url_of_vscode_vsc_ext">VSCode 拡張機能のリポジトリURL</string>
+    <string name="text_repo_url_of_vscode_vsc_ext">VSCode 拡張機能のリポジトリ URL</string>
     <string name="text_report_succeed">送信に成功しました</string>
     <string name="text_requires_android_os_version" formatted="false">Android OS バージョン %s (API %s) が必要ですが, 現在のバージョンは %s (API %s)です</string>
     <string name="text_reset_password">パスワードのリセット</string>
@@ -692,7 +692,7 @@
     <string name="text_restart_app">再起動</string>
     <string name="text_result">結果</string>
     <string name="text_revoke_autojs6_access_in_shizuku_app">Shizuku アプリケーションで AutoJs6 権限を取り消す</string>
-    <string name="text_root_mode_title">強制的にrootにするチェック</string>
+    <string name="text_root_mode_title">強制的に root にするチェック</string>
     <string name="text_run">実行</string>
     <string name="text_run_on_battery_change">バッテリー交換時</string>
     <string name="text_run_on_boot">起動したとき</string>
@@ -707,8 +707,8 @@
     <string name="text_run_on_screen_off">オン スクリーン オフ</string>
     <string name="text_run_on_screen_on">On 画面をオンにした</string>
     <string name="text_run_on_screen_unlock">画面のロックが解除された</string>
-    <string name="text_run_on_startup">AutoJs6が起動したとき</string>
-    <string name="text_run_on_time_tick">1分ごとにオン</string>
+    <string name="text_run_on_startup">AutoJs6 が起動したとき</string>
+    <string name="text_run_on_time_tick">1 分ごとにオン</string>
     <string name="text_run_on_user_defined_broadcast">カスタムブロードキャスト</string>
     <string name="text_run_repeatedly">繰り返し実行</string>
     <string name="text_run_script">スクリプトの実行</string>
@@ -725,7 +725,7 @@
     <string name="text_search">検索</string>
     <string name="text_select">選択</string>
     <string name="text_select_by_exists">クリップが存在する場合 (exists)</string>
-    <string name="text_select_by_find_one">1つ見つけるまで (findOne)</string>
+    <string name="text_select_by_find_one">1 つ見つけるまで (findOne)</string>
     <string name="text_select_by_until_find">すべて見つけるまで (untilFind)</string>
     <string name="text_select_by_wait_for">表示されるのを待つ (waitFor)</string>
     <string name="text_select_file_to_import">インポートするファイルを選択</string>
@@ -755,8 +755,8 @@
     <string name="text_start_running">実行中</string>
     <string name="text_stop">停止</string>
     <string name="text_supported_abis_short">ABI</string>
-    <string name="text_supported_abis_short_32bit">ABI (32ビット)</string>
-    <string name="text_supported_abis_short_64bit">ABI (64ビット)</string>
+    <string name="text_supported_abis_short_32bit">ABI (32 ビット)</string>
+    <string name="text_supported_abis_short_64bit">ABI (64 ビット)</string>
     <string name="text_supported_libraries_short">ライブラリー</string>
     <string name="text_signature_configuration">署名設定</string>
     <string name="text_key_store">キーストア</string>
@@ -772,18 +772,18 @@
     <string name="text_first_and_last_name">氏名</string>
     <string name="text_organization">組織名</string>
     <string name="text_organizational_unit">組織単位</string>
-    <string name="text_country_code">国コード（XX）</string>
+    <string name="text_country_code">国コード (XX)</string>
     <string name="text_state_or_province">州または省</string>
     <string name="text_city_or_locality">市区町村</string>
     <string name="text_street">街</string>
     <string name="text_filename_cannot_be_empty">ファイル名は空にできません</string>
-    <string name="text_filename_cannot_contain_invalid_character">ファイル名に以下の文字を含めることはできません：\\ / : * ? &quot; &lt; &gt; |</string>
+    <string name="text_filename_cannot_contain_invalid_character">ファイル名に以下の文字を含めることはできません: \\ / : * ? &quot; &lt; &gt; |</string>
     <string name="text_filename_is_too_long">ファイル名が長すぎます</string>
-    <string name="text_password_requires_at_least_n_characters">パスワードは少なくとも%d文字以上である必要があります</string>
+    <string name="text_password_requires_at_least_n_characters">パスワードは少なくとも %d 文字以上である必要があります</string>
     <string name="text_alias_cannot_be_empty">エイリアスは空にできません</string>
     <string name="text_validity_years_cannot_be_empty">有効期限の年数は空にできません</string>
-    <string name="text_validity_years_cannot_be_zero">有効期限の年数は0にできません</string>
-    <string name="text_country_code_must_be_two_capital_letters">国コードは2文字の大文字でなければなりません</string>
+    <string name="text_validity_years_cannot_be_zero">有効期限の年数は 0 にできません</string>
+    <string name="text_country_code_must_be_two_capital_letters">国コードは 2 文字の大文字でなければなりません</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">「氏名、組織名、組織単位、国コード、州または省、市区町村、街」のいずれかの項目を入力する必要があります</string>
     <string name="text_successfully_created_key_store">署名キーが正常に作成されました</string>
     <string name="text_failed_to_create_key_store">署名キーの作成に失敗しました</string>
@@ -798,7 +798,7 @@
     <string name="text_verify_failed">確認失敗</string>
     <string name="text_file_path">ファイルパス</string>
     <string name="text_supported_permissions_short">必要な権限</string>
-    <string name="text_permission_access_wifi_state">アプリにWi-Fiの状態へのアクセスを許可する</string>
+    <string name="text_permission_access_wifi_state">アプリに Wi-Fi の状態へのアクセスを許可する</string>
     <string name="text_permission_write_external_storage">アプリに外部ストレージへの書き込みを許可する</string>
     <string name="text_permission_read_external_storage">アプリに外部ストレージからの読み取りを許可する</string>
     <string name="text_permission_read_media_images">アプリに共有ストレージから画像ファイルの読み取りを許可する</string>
@@ -824,7 +824,7 @@
     <string name="text_permission_foreground_service">アプリにフォアグラウンドサービスを実行する権限を与える</string>
     <string name="text_permission_foreground_service_media_projection">アプリにフォアグラウンドサービス内で画面録画とメディアプロジェクションを使用する権限を与える</string>
     <string name="text_permission_foreground_service_special_use">アプリにフォアグラウンドサービス内で特別な操作を行う権限を与える</string>
-    <string name="text_permission_unlimited_toasts">アプリに無制限のToast通知を表示する権限を与える</string>
+    <string name="text_permission_unlimited_toasts">アプリに無制限の Toast 通知を表示する権限を与える</string>
     <string name="text_permission_capture_video_output">アプリにビデオ出力をキャプチャする権限を与える</string>
     <string name="text_permission_dump">アプリにシステム情報をダンプする権限を与える</string>
     <string name="text_permission_query_all_packages">アプリにすべてのパッケージをクエリする権限を与える</string>
@@ -834,12 +834,12 @@
     <string name="text_permission_manage_users">アプリにユーザー管理を行う権限を与える</string>
     <string name="text_permission_interact_across_users_full">アプリにユーザー間でのインタラクションを許可する</string>
     <string name="text_permission_access_coarse_location">アプリにネットワークを使用して粗い位置情報にアクセスする権限を与える</string>
-    <string name="text_permission_access_fine_location">アプリにGPSを使用して正確な位置情報にアクセスする権限を与える</string>
+    <string name="text_permission_access_fine_location">アプリに GPS を使用して正確な位置情報にアクセスする権限を与える</string>
     <string name="text_permission_record_audio">アプリに音声を録音する権限を与える</string>
-    <string name="text_permission_run_command">Termuxアプリに特化したコマンド実行権限を与える</string>
-    <string name="text_permission_read_phone_state">アプリに電話の状態とIDを読み取る権限を与える</string>
-    <string name="text_permission_read_sms">アプリにSMSを読み取る権限を与える</string>
-    <string name="text_permission_shizuku">アプリにShizukuサービスを通じてシステムと高い権限でインタラクションする権限を与える</string>
+    <string name="text_permission_run_command">Termux アプリに特化したコマンド実行権限を与える</string>
+    <string name="text_permission_read_phone_state">アプリに電話の状態と ID を読み取る権限を与える</string>
+    <string name="text_permission_read_sms">アプリに SMS を読み取る権限を与える</string>
+    <string name="text_permission_shizuku">アプリに Shizuku サービスを通じてシステムと高い権限でインタラクションする権限を与える</string>
     <string name="text_switch_window">ウィンドウの切り替え</string>
     <string name="text_symbols_settings">シンボル設定</string>
     <string name="text_tailor_made_developer">テーラーメイド開発者</string>
@@ -868,13 +868,13 @@
     <string name="text_updates_snack_bar_act_view">表示</string>
     <string name="text_usage_stats_permission">使用統計へのアクセス</string>
     <string name="text_usage_stats_permission_description">デバイスの使用履歴や統計情報にアクセスできるようになり, currentPackage()の結果がより正確になります</string>
-    <string name="text_use_android_n_shortcut">Android 7.0のショートカットを使用</string>
+    <string name="text_use_android_n_shortcut">Android 7.0 のショートカットを使用</string>
     <string name="text_use_volume_control_record">\"Volume Down\" キーで録音を制御</string>
     <string name="text_use_volume_key_to_control_script_running">\"Volume Up\" キーでスクリプトの実行を制御します</string>
     <string name="text_username">ユーザー名</string>
     <string name="text_username_cannot_be_empty">「ユーザー名を空にすることはできません</string>
     <string name="text_using_desc_selector">降順セレクタを使用する</string>
-    <string name="text_using_id_selector">IDセレクタを使用する</string>
+    <string name="text_using_id_selector">ID セレクタを使用する</string>
     <string name="text_using_text_selector">テキストセレクタを使用する</string>
     <string name="text_value">値</string>
     <string name="text_variable_or_expr">変数または式</string>
@@ -886,10 +886,10 @@
     <string name="text_view_docs">ドキュメントを見る</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 拡張機能のバージョンが要件を満たしていない</string>
     <string name="text_weekly_task">週次タスク</string>
-    <string name="text_weekly_task_should_check_day_of_week">最低1日選択する必要があります</string>
+    <string name="text_weekly_task_should_check_day_of_week">最低 1 日選択する必要があります</string>
     <string name="text_working_dir_path">作業ディレクトリのパス</string>
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
-    <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリのUIを通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
+    <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="theme_color_default">デフォルト</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">パッケージ名 (計算中...)</string>

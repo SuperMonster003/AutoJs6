@@ -6,17 +6,21 @@
 
 # v6.6.1
 
-###### 2024/12/27
+###### 2025/01/01
 
 * `Fonctionnalité` Module Pinyin pour la conversion du pinyin chinois (Consultez la documentation du projet > [Pinyin chinois](https://docs.autojs6.com/#/pinyin))
 * `Fonctionnalité` Module Pinyin4j pour la conversion du pinyin chinois (Consultez la documentation du projet > [Pinyin chinois](https://docs.autojs6.com/#/pinyin4j))
 * `Fonctionnalité` Méthodes UiObject#isSimilar et UiObjectCollection#isSimilar pour déterminer si une commande ou une collection de commandes est similaire
+* `Fonctionnalité` Méthode globale "currentComponent", utilisée pour obtenir le nom du composant actif actuel
 * `Correction` Problème empêchant la compilation correcte du projet dans certains environnements suite à un retour à une ancienne version
 * `Correction` Exception "valeur non primitive" pouvant survenir lors de l'appel à des méthodes inexistantes
 * `Correction` Problème empêchant l'ajout correct de raccourcis de script sur certains appareils (correction provisoire) _[`issue #221`](http://issues.autojs6.com/221)_
 * `Correction` Erreur de restriction de type de paramètre dans les méthodes automator.click/longClick _[`issue #275`](http://issues.autojs6.com/275)_
 * `Correction` Problème avec les sélecteurs ne prenant pas en charge les paramètres de type ConsString _[`issue #277`](http://issues.autojs6.com/277)_
 * `Correction` Problème d'absence des méthodes et propriétés propres aux instances UiObjectCollection
+* `Amélioration` La page de packaging prend en charge la configuration des signatures, la gestion des clés et la configuration des autorisations (par [luckyloogn]()) _[`pr #286`]()_
+* `Amélioration` Amélioration de la précision de la reconnaissance du nom du package actuel et de l'activité en cours de la fenêtre flottante (Priorité : Shizuku > Root > A11Y)
+* `Amélioration` Amélioration de la précision de la reconnaissance de currentPackage et currentActivity (Priorité : Shizuku > Root > A11Y)
 * `Amélioration` Restauration de la possibilité de sélectionner le contenu texte d'une entrée individuelle dans la fenêtre de journal via un double-clic ou un appui long _[`issue #280`](http://issues.autojs6.com/280)_
 * `Amélioration` Récupérer autant d'informations critiques que possible pour les projets de script en cas de corruption du fichier project.json
 * `Amélioration` Convertir automatiquement le chinois simplifié en pinyin (y compris les caractères à tons multiples) pour les suffixes de noms de paquet générés lors de l'empaquetage de fichiers uniques

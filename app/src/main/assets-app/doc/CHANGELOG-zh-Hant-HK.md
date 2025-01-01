@@ -6,17 +6,21 @@
 
 # v6.6.1
 
-###### 2024/12/27
+###### 2025/01/01
 
 * `新增` pinyin 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin))
 * `新增` pinyin4j 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin4j))
 * `新增` UiObject#isSimilar 及 UiObjectCollection#isSimilar 方法, 用於確定控件或控件集合是否相似
+* `新增` currentComponent 全局方法, 用於獲取當前活動的組件名稱信息
 * `修復` 部分環境因回退版本過低而無法正常編譯項目的問題
 * `修復` 調用不存在的方法時可能出現的 "非原始類型值" 異常
 * `修復` 部分設備無法正常添加腳本快捷方式的問題 (試修) _[`issue #221`](http://issues.autojs6.com/221)_
 * `修復` automator.click/longClick 方法參數類型限制錯誤 _[`issue #275`](http://issues.autojs6.com/275)_
 * `修復` 選擇器不支持 ConsString 類型參數的問題 _[`issue #277`](http://issues.autojs6.com/277)_
 * `修復` UiObjectCollection 實例缺失自身方法及屬性的問題
+* `優化` 打包頁面支持簽名配置/密鑰庫管理/權限設置 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
+* `優化` 提升浮動窗口當前包名及當前活動名的識別準確性 (優先級: Shizuku > Root > A11Y)
+* `優化` 提升 currentPackage/currentActivity 識別準確性 (優先級: Shizuku > Root > A11Y)
 * `優化` 恢復日誌活動窗口單個條目文本內容的雙擊或長按選擇功能 _[`issue #280`](http://issues.autojs6.com/280)_
 * `優化` 腳本項目識別在 project.json 損壞情況下儘可能還原關鍵信息
 * `優化` 打包單文件時自動生成的包名後綴支持將簡體中文轉換為拼音 (支持多音字)

@@ -156,17 +156,21 @@
 
 # v6.6.1
 
-###### 2024/12/27
+###### 2025/01/01
 
 * `إضافة جديدة` وحدة Pinyin لتحويل النصوص الصينية إلى بينيين (راجع وثائق المشروع > [البينيين الصيني](https://docs.autojs6.com/#/pinyin))
 * `إضافة جديدة` وحدة Pinyin4j لتحويل النصوص الصينية إلى بينيين (راجع وثائق المشروع > [البينيين الصيني](https://docs.autojs6.com/#/pinyin4j))
 * `إضافة جديدة` الطرق UiObject#isSimilar و UiObjectCollection#isSimilar لتحديد ما إذا كان العنصر أو مجموعة العناصر متشابهة
+* `إضافة جديدة` الطريقة العامة "currentComponent"، تُستخدم للحصول على اسم المكون النشط الحالي
 * `تصليح` مشكلة عدم قدرة المشروع على التجميع بشكل صحيح في بعض البيئات بسبب الرجوع إلى إصدار أقدم
 * `تصليح` خطأ "قيمة غير أولية" قد يحدث عند استدعاء طرق غير موجودة
 * `تصليح` مشكلة عدم إمكانية إضافة اختصارات النصوص على بعض الأجهزة (إصلاح مؤقت) _[`issue #221`](http://issues.autojs6.com/221)_
 * `تصليح` خطأ في قيود نوع الوسائط للطرق automator.click/longClick _[`issue #275`](http://issues.autojs6.com/275)_
 * `تصليح` مشكلة عدم دعم المصفوفات مع الوسائط من نوع ConsString _[`issue #277`](http://issues.autojs6.com/277)_
 * `تصليح` مشكلة فقدان الطرق والخصائص في مثيلات UiObjectCollection
+* `تحسين` تدعم صفحة التغليف إعداد التوقيعات وإدارة مستودعات المفاتيح وإعداد الأذونات (بواسطة [luckyloogn]()) _[`pr #286`]()_
+* `تحسين` تم تحسين دقة التعرف على اسم الحزمة الحالية واسم النشاط الحالي في النوافذ العائمة (الأولوية: Shizuku > Root > A11Y)
+* `تحسين` تم تحسين دقة التعرف على currentPackage و currentActivity (الأولوية: Shizuku > Root > A11Y)
 * `تحسين` استعادة إمكانية اختيار محتوى النص لكل عنصر في نافذة النشاط الخاصة بالسجلات بالنقر المزدوج أو الضغط المطول _[`issue #280`](http://issues.autojs6.com/280)_
 * `تحسين` استعادة أكبر قدر ممكن من المعلومات الأساسية لمشاريع النصوص عند تلف ملف project.json
 * `تحسين` تحويل اللغة الصينية المبسطة تلقائيًا إلى نظام بينيين (بما في ذلك الحروف متعددة النغمات) عند توليد اللواحق للأسماء في الملفات المفردة
@@ -371,7 +375,7 @@ SDK Tools  (أدوات SDK) (في النافذة اليمنى)
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `19`.
 
-اعتبارًا من 27 December 2024، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `23`.
+اعتبارًا من 1 January 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `23`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 
@@ -462,6 +466,7 @@ Gradle
 
 |     <span style="word-break:keep-all;white-space:nowrap">المساهمون</span>     |                   <span style="word-break:keep-all;white-space:nowrap">عدد الإرساليات</span>                    | <span style="word-break:keep-all;white-space:nowrap">أحدث الإرساليات</span> |
 |:----------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|     <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>      |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>            |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
 |  <span style="word-break:keep-all;white-space:nowrap">[chenguangming](https://github.com/chenguangming)</span>   | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Achenguangming)</span> |                    <span style="word-break:keep-all;white-space:nowrap">`2024/05/14`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[LZX284](https://github.com/LZX284)</span>          |         <span style="word-break:keep-all;white-space:nowrap">[17](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2023/11/19`</span>                    |
@@ -470,7 +475,7 @@ Gradle
 |         <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>          |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86)</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-تم تحديث البيانات في 23 October 2024.
+تم تحديث البيانات في 1 January 2025.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `أحدث الإرساليات`.
 
@@ -494,7 +499,7 @@ Gradle
         - Update contribution section
     - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
     - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation by running the python script
+    - Re-generate documentation/markdown by running the python script
     - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field

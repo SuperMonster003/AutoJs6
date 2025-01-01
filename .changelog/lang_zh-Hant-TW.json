@@ -5,7 +5,8 @@
       "feature": [
         "pinyin 模組, 用於漢語拼音轉換 (參閱 專案文件 > [漢語拼音](https://docs.autojs6.com/#/pinyin))",
         "pinyin4j 模組, 用於漢語拼音轉換 (參閱 專案文件 > [漢語拼音](https://docs.autojs6.com/#/pinyin4j))",
-        "UiObject#isSimilar 及 UiObjectCollection#isSimilar 方法, 用於確定控制元件或控制元件集合是否相似"
+        "UiObject#isSimilar 及 UiObjectCollection#isSimilar 方法, 用於確定控制元件或控制元件集合是否相似",
+        "currentComponent 全域性方法, 用於獲取當前活動的元件名稱資訊"
       ],
       "fix": [
         "部分環境因回退版本過低而無法正常編譯專案的問題",
@@ -16,6 +17,9 @@
         "UiObjectCollection 例項缺失自身方法及屬性的問題"
       ],
       "improvement": [
+        "打包頁面支援簽名配置/金鑰庫管理/許可權設定 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_",
+        "提升浮動視窗當前包名及當前活動名的識別準確性 (優先順序: Shizuku > Root > A11Y)",
+        "提升 currentPackage/currentActivity 識別準確性 (優先順序: Shizuku > Root > A11Y)",
         "恢復日誌活動視窗單個條目文字內容的雙擊或長按選擇功能 _[`issue #280`](http://issues.autojs6.com/280)_",
         "指令碼專案識別在 project.json 損壞情況下儘可能還原關鍵資訊",
         "打包單檔案時自動生成的包名字尾支援將簡體中文轉換為拼音 (支援多音字)",

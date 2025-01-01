@@ -156,17 +156,21 @@ AutoJs6 在 Auto.js 最終項目的基礎上, 於 `2021/12/01` 進行二次開�
 
 # v6.6.1
 
-###### 2024/12/27
+###### 2025/01/01
 
 * `新增` pinyin 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin))
 * `新增` pinyin4j 模塊, 用於漢語拼音轉換 (參閲 項目文檔 > [漢語拼音](https://docs.autojs6.com/#/pinyin4j))
 * `新增` UiObject#isSimilar 及 UiObjectCollection#isSimilar 方法, 用於確定控件或控件集合是否相似
+* `新增` currentComponent 全局方法, 用於獲取當前活動的組件名稱信息
 * `修復` 部分環境因回退版本過低而無法正常編譯項目的問題
 * `修復` 調用不存在的方法時可能出現的 "非原始類型值" 異常
 * `修復` 部分設備無法正常添加腳本快捷方式的問題 (試修) _[`issue #221`](http://issues.autojs6.com/221)_
 * `修復` automator.click/longClick 方法參數類型限制錯誤 _[`issue #275`](http://issues.autojs6.com/275)_
 * `修復` 選擇器不支持 ConsString 類型參數的問題 _[`issue #277`](http://issues.autojs6.com/277)_
 * `修復` UiObjectCollection 實例缺失自身方法及屬性的問題
+* `優化` 打包頁面支持簽名配置/密鑰庫管理/權限設置 (by [luckyloogn](https://github.com/luckyloogn)) _[`pr #286`](http://pr.autojs6.com/286)_
+* `優化` 提升浮動窗口當前包名及當前活動名的識別準確性 (優先級: Shizuku > Root > A11Y)
+* `優化` 提升 currentPackage/currentActivity 識別準確性 (優先級: Shizuku > Root > A11Y)
 * `優化` 恢復日誌活動窗口單個條目文本內容的雙擊或長按選擇功能 _[`issue #280`](http://issues.autojs6.com/280)_
 * `優化` 腳本項目識別在 project.json 損壞情況下儘可能還原關鍵信息
 * `優化` 打包單文件時自動生成的包名後綴支持將簡體中文轉換為拼音 (支持多音字)
@@ -371,7 +375,7 @@ SDK Tools (SDK 工具) (位於右側窗口)
 
 AutoJs6 項目依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `19`.
 
-截至 2024 年 12 月 27 日, AutoJs6 可支持 JDK 最高版本為 `23`.
+截至 2025 年 1 月 1 日, AutoJs6 可支持 JDK 最高版本為 `23`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 
@@ -462,6 +466,7 @@ Gradle
 
 |     <span style="word-break:keep-all;white-space:nowrap">貢獻人員</span>     |                   <span style="word-break:keep-all;white-space:nowrap">提交數</span>                    | <span style="word-break:keep-all;white-space:nowrap">最近提交</span> |
 |:----------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|     <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>      |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>            |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
 |  <span style="word-break:keep-all;white-space:nowrap">[chenguangming](https://github.com/chenguangming)</span>   | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Achenguangming)</span> |                    <span style="word-break:keep-all;white-space:nowrap">`2024/05/14`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[LZX284](https://github.com/LZX284)</span>          |         <span style="word-break:keep-all;white-space:nowrap">[17](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2023/11/19`</span>                    |
@@ -470,7 +475,7 @@ Gradle
 |         <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>          |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86)</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-數據更新於 2024 年 10 月 23 日.
+數據更新於 2025 年 1 月 1 日.
 
 數據條目按 `最近提交` 降序排序.
 
@@ -494,7 +499,7 @@ Gradle
         - Update contribution section
     - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
     - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation by running the python script
+    - Re-generate documentation/markdown by running the python script
     - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field

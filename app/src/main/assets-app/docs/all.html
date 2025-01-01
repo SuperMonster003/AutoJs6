@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>综述 (Overview) | AutoJs6 文档 - 6.6.0</title>
+    <title>综述 (Overview) | AutoJs6 文档 - 6.6.1</title>
     <link rel="stylesheet" href="assets/fonts.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/sh.css">
@@ -162,7 +162,7 @@
 
     <div id="column1" data-id="all" class="interior">
         <header>
-            <h1>AutoJs6 文档 - 6.6.0</h1>
+            <h1>AutoJs6 文档 - 6.6.1</h1>
             <div id="gtoc">
                 <p class="index">
                     <a href="index.html" name="toc">索引</a> |
@@ -2752,10 +2752,10 @@ console.log(UiObject.bounds()); /* 访问的是类 UiObject 的静态方法 boun
 <h3>AutoJs6 如何使用<span><a class="mark" href="#qa_autojs6_2" id="qa_autojs6_2">#</a></span></h3>
 <p>详见 <a href="manual.html">AutoJs6 使用手册</a> 章节.</p>
 <h3>AutoJs6 是否免费<span><a class="mark" href="#qa_autojs6_3" id="qa_autojs6_3">#</a></span></h3>
-<p>AutoJs6 永久免费, 它是基于开源版本 (Auto.js 4.1.1 Alpha2) 二次开发的, 将保持开源免费.</p>
+<p>AutoJs6 永久免费, 它是基于开源版本 (Auto.js 4.1.1 alpha2) 二次开发的, 将保持开源免费.</p>
 <h3>AutoJs6 目标<span><a class="mark" href="#qa_autojs6_4" id="qa_autojs6_4">#</a></span></h3>
-<p>开源版本 (Auto.js 4.1.1 Alpha2) 是非常好的学习资料, AutoJs6 之所以存在, 恰恰是因为站在巨人的肩膀上.</p>
-<p>AutoJs6 的目标是对开源版本 (Auto.js 4.1.1 Alpha2) 进行完善及扩展.</p>
+<p>开源版本 (Auto.js 4.1.1 alpha2) 是非常好的学习资料, AutoJs6 之所以存在, 恰恰是因为站在巨人的肩膀上.</p>
+<p>AutoJs6 的目标是对开源版本 (Auto.js 4.1.1 alpha2) 进行完善及扩展.</p>
 <h3>AutoJs6 特色<span><a class="mark" href="#qa_autojs6_5" id="qa_autojs6_5">#</a></span></h3>
 <p>AutoJs6 对以下功能进行了十足的打磨:</p>
 <ul>
@@ -4249,11 +4249,12 @@ species.isRegExp(/test$/); // true
 </div><p>判断对象的 &quot;种类&quot; 是否为 <code>DataView</code>.</p>
 <h3>[m] isDate<span><a class="mark" href="#global_m_isdate" id="global_m_isdate">#</a></span></h3>
 <h4>isDate(o)<span><a class="mark" href="#global_isdate_o" id="global_isdate_o">#</a></span></h4>
-<div class="signature"><ul>
+<p>6</p>
+<ul>
 <li><strong>o</strong> { <span class="type"><a href="dataTypes.html#datatypes_any">any</a></span> } - 任意对象</li>
 <li><ins><strong>returns</strong></ins> { <span class="type"><a href="dataTypes.html#datatypes_boolean">boolean</a></span> }</li>
 </ul>
-</div><p>判断对象的 &quot;种类&quot; 是否为 <code>Date</code>.</p>
+<p>判断对象的 &quot;种类&quot; 是否为 <code>Date</code>.</p>
 <h3>[m] isError<span><a class="mark" href="#global_m_iserror" id="global_m_iserror">#</a></span></h3>
 <h4>isError(o)<span><a class="mark" href="#global_iserror_o" id="global_iserror_o">#</a></span></h4>
 <div class="signature"><ul>
@@ -11074,32 +11075,8 @@ console.timeEnd(&#39;fruit&#39;);
 <h1>Shell<span><a class="mark" href="#shell_shell" id="shell_shell">#</a></span></h1>
 <hr>
 <p style="font: italic 1em sans-serif; color: #78909C">此章节待补充或完善...</p>
-<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Nov 13, 2024.</p>
+<p style="font: italic 1em sans-serif; color: #78909C">Marked by SuperMonster003 on Oct 22, 2022.</p>
 
-<hr>
-<p style="font: italic 1em sans-serif; color: #78909C">TypeScript Declarations (v6.6.0+)</p>
-
-<pre><code class="lang-typescript">interface Shell {
-
-    (command: string): AbstractShell.Result;
-    (command: string, withRoot: boolean | number): AbstractShell.Result;
-    (command: string, commandArgument: object | string): AbstractShell.Result;
-    (command: string, commandArgument: object | string, withRoot: boolean | number): AbstractShell.Result;
-
-    execCommand(command: string): AbstractShell.Result;
-    execCommand(command: string, withRoot: boolean | number): AbstractShell.Result;
-    execCommand(command: string, commandArgument: object | string): AbstractShell.Result;
-    execCommand(command: string, commandArgument: object | string, withRoot: boolean | number): AbstractShell.Result;
-
-    getCommand(command: string): string;
-    getCommand(command: string, withRoot: boolean | number): string;
-    getCommand(command: string, commandArgument: object | string): string;
-    getCommand(command: string, commandArgument: object | string, withRoot: boolean | number): string;
-
-    fromIntent(i: Intent.Common): string;
-
-}
-</code></pre>
 <hr>
 <p>shell即Unix Shell, 在类Unix系统提供与操作系统交互的一系列命令.</p>
 <p>很多程序可以用来执行shell命令, 例如终端模拟器.</p>

@@ -109,8 +109,8 @@
     <string name="error_arguments_cannot_be_empty">인수를 비울 수 없습니다</string>
     <string name="error_arguments_must_be_empty">인수는 비어 있어야 합니다</string>
     <string name="error_at_least_one_abi_needs_to_be_selected">하나 이상의 ABI 를 선택해야 합니다.</string>
-    <string name="error_both_bitmap_and_mat_are_null">비트 맵과 매트는 모두 null입니다</string>
-    <string name="error_cannot_be_null">%s는 null 이 될 수 없다</string>
+    <string name="error_both_bitmap_and_mat_are_null">비트 맵과 매트는 모두 null 입니다</string>
+    <string name="error_cannot_be_null">%s 는 null 이 될 수 없다</string>
     <string name="error_cannot_connect_to_github">GitHub 에 연결할 수 없습니다</string>
     <string name="error_cannot_convert_value_into_a_script_runtime_path">%s 를 스크립트 런타임 경로로 변환할 수 없습니다</string>
     <string name="error_cannot_find_editor_view_from_child_view">Child View: %s 에서 EditorView 를 찾을 수 없습니다</string>
@@ -126,7 +126,7 @@
     <string name="error_continuation_resume_called_without_suspend">메소드 resume() 가 suspend() 후 호출해야합니다.</string>
     <string name="error_continuation_suspend_called_more_than_once">메소드 suspend() 는 한 번만 호출해야합니다</string>
     <string name="error_corresponding_github_release_may_not_published">해당 GitHub 릴리스는 아직 게시되지 않았을 수 있습니다</string>
-    <string name="error_dot_decimal_notation_num_over_255">255를 초과하는 점 십진수</string>
+    <string name="error_dot_decimal_notation_num_over_255">255 를 초과하는 점 십진수</string>
     <string name="error_download_interrupted">다운로드가 중단되었습니다</string>
     <string name="error_email_taken">이메일이 가져옵니다</string>
     <string name="error_empty_broadcast_selection">적어도 하나의 방송이 선택되어야합니다</string>
@@ -137,7 +137,7 @@
     <string name="error_excessive_width_for_template_n_region">너비 초과: 템플릿 [%1$d] > 영역 [%2$d]</string>
     <string name="error_failed_to_call_method">메서드 \"%s\"를 호출하지 못했습니다</string>
     <string name="error_failed_to_call_method_with_cause"><![CDATA[메서드 \"%1$s\"를 호출하지 못했습니다: [ %2$s ]]]></string>
-    <string name="error_failed_to_convert_into_drawable">%s 값을 Drawable로 변환하지 못했습니다</string>
+    <string name="error_failed_to_convert_into_drawable">%s 값을 Drawable 로 변환하지 못했습니다</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
     <string name="error_failed_to_instantiate">\"%s\" 인스턴스 생성에 실패했습니다</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[인스턴스 생성 \"%1$s\" 에 실패했습니다: [ %2$s ]]]></string>
@@ -150,9 +150,9 @@
     <string name="error_get_github_latest_release">최신 GitHub 릴리스를 얻을 수 없습니다</string>
     <string name="error_handshake_timed_out">핸드 셰이크는 %d ms 이후에 시간을 초과합니다</string>
     <string name="error_illegal_argument" formatted="false">불법 인수 %s: %s</string>
-    <string name="error_illegal_relative_url_argument_without_base">기본 URL 없이는 상대 URL을 사용할 수 없습니다</string>
+    <string name="error_illegal_relative_url_argument_without_base">기본 URL 없이는 상대 URL 을 사용할 수 없습니다</string>
     <string name="error_illegal_ui_object_result_type" formatted="false">결과 유형 \"%s\" 는 UiObject 에 지원되지 않습니다.</string>
-    <string name="error_illegal_url_argument" formatted="false">URL은 \"https://\" 등의 프로토콜로 시작해야합니다.</string>
+    <string name="error_illegal_url_argument" formatted="false">URL 은 \"https://\" 등의 프로토콜로 시작해야합니다.</string>
     <string name="error_illegal_widget_command" formatted="false">매개 변수 %s (%s) 는 %s 유형으로 캐스트 될 수 있어야합니다.</string>
     <string name="error_image_has_been_recycled">이미지가 재활용되었습니다</string>
     <string name="error_images_must_have_the_same_size">이미지의 크기가 같아야 합니다</string>
@@ -432,8 +432,8 @@
     <string name="text_documentation_source">문서 소스</string>
     <string name="text_done">완료</string>
     <string name="text_download">다운로드</string>
-    <string name="text_download_and_install_autojs6_including_above_abi">위의 ABI가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"%s\" 포함)</string>
-    <string name="text_download_and_install_autojs6_including_all_abis">모든 ABI가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"universal\" 포함)</string>
+    <string name="text_download_and_install_autojs6_including_above_abi">위의 ABI 가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"%s\" 포함)</string>
+    <string name="text_download_and_install_autojs6_including_all_abis">모든 ABI 가 포함된 AutoJs6 버전을 다운로드하여 설치합니다(파일 이름에 \"universal\" 포함)</string>
     <string name="text_download_cancelled">다운로드 취소</string>
     <string name="text_download_interruption_warning">계속하면 현재 다운로드가 중단됩니다</string>
     <string name="text_download_link_for_autojs6">AutoJs6 다운로드 링크</string>
@@ -604,7 +604,7 @@
     <string name="text_notification_access_permission">알림 액세스</string>
     <string name="text_notification_service_disabled">알림 서비스가 작동하지 않습니다</string>
     <string name="text_null">없는</string>
-    <string name="text_num_of_log_entries_exceeds_limit_for_sending">로그 항목 수 %d개가 전송 제한을 초과했습니다</string>
+    <string name="text_num_of_log_entries_exceeds_limit_for_sending">로그 항목 수 %d 개가 전송 제한을 초과했습니다</string>
     <string name="text_number_format_error">잘못된 번호 형식</string>
     <string name="text_ok">확인</string>
     <string name="text_old_path">오래된 길</string>
@@ -780,10 +780,10 @@
     <string name="text_filename_cannot_be_empty">파일 이름은 비워둘 수 없습니다</string>
     <string name="text_filename_cannot_contain_invalid_character">파일 이름에 다음 문자를 포함할 수 없습니다: \\ / : * ? &quot; &lt; &gt; |</string>
     <string name="text_filename_is_too_long">파일 이름이 너무 깁니다</string>
-    <string name="text_password_requires_at_least_n_characters">비밀번호는 최소 %d자 이상이어야 합니다</string>
+    <string name="text_password_requires_at_least_n_characters">비밀번호는 최소 %d 자 이상이어야 합니다</string>
     <string name="text_alias_cannot_be_empty">별칭은 비워둘 수 없습니다</string>
     <string name="text_validity_years_cannot_be_empty">유효 기간을 입력해야 합니다</string>
-    <string name="text_validity_years_cannot_be_zero">유효 기간은 0일 수 없습니다</string>
+    <string name="text_validity_years_cannot_be_zero">유효 기간은 0 일 수 없습니다</string>
     <string name="text_country_code_must_be_two_capital_letters">국가 코드는 두 개의 대문자로 입력해야 합니다</string>
     <string name="text_at_least_one_certificate_issuer_field_is_not_empty">"성명, 조직명, 조직 단위, 국가 코드, 주 또는 도, 시 또는 지역, 거리" 중 하나 이상을 입력해야 합니다</string>
     <string name="text_successfully_created_key_store">서명 키가 성공적으로 생성되었습니다</string>
@@ -835,11 +835,11 @@
     <string name="text_permission_manage_users">앱이 사용자 관리를 할 수 있도록 허용</string>
     <string name="text_permission_interact_across_users_full">앱이 사용자 간 상호작용을 할 수 있도록 허용</string>
     <string name="text_permission_access_coarse_location">앱이 네트워크를 통해 대략적인 위치에 접근할 수 있도록 허용</string>
-    <string name="text_permission_access_fine_location">앱이 GPS를 통해 정확한 위치에 접근할 수 있도록 허용</string>
+    <string name="text_permission_access_fine_location">앱이 GPS 를 통해 정확한 위치에 접근할 수 있도록 허용</string>
     <string name="text_permission_record_audio">앱이 오디오를 녹음할 수 있도록 허용</string>
     <string name="text_permission_run_command">Termux 앱에 대해 명령을 실행할 수 있도록 허용</string>
     <string name="text_permission_read_phone_state">앱이 전화 상태 및 신원을 읽을 수 있도록 허용</string>
-    <string name="text_permission_read_sms">앱이 SMS를 읽을 수 있도록 허용</string>
+    <string name="text_permission_read_sms">앱이 SMS 를 읽을 수 있도록 허용</string>
     <string name="text_permission_shizuku">앱이 Shizuku 서비스를 통해 시스템과 상호작용할 수 있도록 허용</string>
     <string name="text_switch_window">창 전환</string>
     <string name="text_symbols_settings">기호 설정</string>
@@ -855,7 +855,7 @@
     <string name="text_tools">도구</string>
     <string name="text_tutorial">지도 시간</string>
     <string name="text_type">유형</string>
-    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">현재 버전의 AutoJs6에 위의 ABI가 포함되어 있지 않으므로 선택한 ABI \"%s\" 를 사용하여 패키지 응용 프로그램을 만들 수 없습니다.</string>
+    <string name="text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi">현재 버전의 AutoJs6 에 위의 ABI 가 포함되어 있지 않으므로 선택한 ABI \"%s\" 를 사용하여 패키지 응용 프로그램을 만들 수 없습니다.</string>
     <string name="text_unavailable">사용할 수 없음</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" 를 사용할 수 없습니다</string>
     <string name="text_under_development_content">기능은 다음 몇 가지 업데이트에서 사용할 준비가됩니다.</string>
@@ -890,7 +890,7 @@
     <string name="text_weekly_task_should_check_day_of_week">최소한 하루를 선택해야합니다</string>
     <string name="text_working_dir_path">작업 디렉토리 경로</string>
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
-    <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
+    <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="theme_color_default">기본</string>
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">패키지 이름 (계산 중...)</string>

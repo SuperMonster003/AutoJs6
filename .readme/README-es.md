@@ -156,17 +156,21 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.6.1
 
-###### 2024/12/27
+###### 2025/01/01
 
 * `Nuevo` Módulo Pinyin para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin))
 * `Nuevo` Módulo Pinyin4j para la conversión de pinyin en chino (Consulte la documentación del proyecto > [Pinyin chino](https://docs.autojs6.com/#/pinyin4j))
 * `Nuevo` Métodos UiObject#isSimilar y UiObjectCollection#isSimilar para determinar si un control o una colección de controles son similares
+* `Nuevo` Método global "currentComponent", utilizado para obtener el nombre del componente activo actual
 * `Corrección` Problema donde no se podía compilar correctamente el proyecto en determinados entornos debido a una reversión a una versión anterior
 * `Corrección` Excepción de "valor no primitivo" que puede ocurrir al llamar a métodos inexistentes
 * `Corrección` Problema donde los accesos directos de scripts no se podían agregar correctamente en algunos dispositivos (arreglo tentativa) _[`issue #221`](http://issues.autojs6.com/221)_
 * `Corrección` Restricción de tipo de parámetro incorrecta en los métodos automator.click/longClick _[`issue #275`](http://issues.autojs6.com/275)_
 * `Corrección` Problema donde los selectores no admitían parámetros del tipo ConsString _[`issue #277`](http://issues.autojs6.com/277)_
 * `Corrección` Problema donde las instancias de UiObjectCollection carecían de métodos y propiedades propios
+* `Mejora` La página de empaquetado admite configuración de firma, gestión de almacenes de claves y configuración de permisos (por [luckyloogn]()) _[`pr #286`]()_
+* `Mejora` Mejorada la precisión en la identificación del nombre del paquete y de la actividad actual de la ventana flotante (Prioridad: Shizuku > Root > A11Y)
+* `Mejora` Mejorada la precisión en la identificación de currentPackage y currentActivity (Prioridad: Shizuku > Root > A11Y)
 * `Mejora` Restaurar la capacidad de seleccionar el contenido del texto de entradas individuales en la ventana de actividad del registro mediante doble clic o pulsación larga _[`issue #280`](http://issues.autojs6.com/280)_
 * `Mejora` Recuperar la mayor cantidad de información crítica posible para proyectos de scripts cuando el archivo project.json está dañado
 * `Mejora` Convertir automáticamente chino simplificado a Pinyin (incluyendo caracteres con múltiples tonos) para los sufijos de nombres de paquetes generados al empaquetar archivos individuales
@@ -371,7 +375,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `19`.
 
-Hasta el 27 de December de 2024, AutoJs6 soporta hasta la versión `23` de JDK.
+Hasta el 1 de January de 2025, AutoJs6 soporta hasta la versión `23` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 
@@ -462,6 +466,7 @@ Agradecemos a todos los que han contribuido al desarrollo del proyecto AutoJs6.
 
 |     <span style="word-break:keep-all;white-space:nowrap">Contribuyentes</span>     |                   <span style="word-break:keep-all;white-space:nowrap">Número de commits</span>                    | <span style="word-break:keep-all;white-space:nowrap">Últimas presentaciones</span> |
 |:----------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|     <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>      |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>            |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
 |  <span style="word-break:keep-all;white-space:nowrap">[chenguangming](https://github.com/chenguangming)</span>   | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Achenguangming)</span> |                    <span style="word-break:keep-all;white-space:nowrap">`2024/05/14`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[LZX284](https://github.com/LZX284)</span>          |         <span style="word-break:keep-all;white-space:nowrap">[17](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2023/11/19`</span>                    |
@@ -470,7 +475,7 @@ Agradecemos a todos los que han contribuido al desarrollo del proyecto AutoJs6.
 |         <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>          |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86)</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-Datos actualizados el 23 de October de 2024.
+Datos actualizados el 1 de January de 2025.
 
 Las entradas de datos están ordenadas en orden descendente por `últimas presentaciones`.
 
@@ -494,7 +499,7 @@ Algunos contribuyentes no aparecen en [GitHub Contributors](https://github.com/S
         - Update contribution section
     - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
     - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation by running the python script
+    - Re-generate documentation/markdown by running the python script
     - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field

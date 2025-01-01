@@ -156,17 +156,21 @@ AutoJs6 разработан на основе финальной версии �
 
 # v6.6.1
 
-###### 2024/12/27
+###### 2025/01/01
 
 * `Новое` Модуль Pinyin для преобразования китайского пиньиня (См. документацию проекта > [Китайский Пиньинь](https://docs.autojs6.com/#/pinyin))
 * `Новое` Модуль Pinyin4j для преобразования китайского пиньиня (См. документацию проекта > [Китайский Пиньинь](https://docs.autojs6.com/#/pinyin4j))
 * `Новое` Методы UiObject#isSimilar и UiObjectCollection#isSimilar для определения, схожи ли элементы управления или их коллекции
+* `Новое` Глобальный метод "currentComponent", используемый для получения информации о названии текущего активного компонента
 * `Исправление` Ошибка, из-за которой проект не мог быть корректно скомпилирован в некоторых средах из-за отката на предыдущую версию
 * `Исправление` Исключение "непримитивное значение", которое могло возникать при вызове несуществующих методов
 * `Исправление` Ошибка, из-за которой ярлыки скриптов не могли быть корректно добавлены на некоторых устройствах (промежуточное исправление) _[`issue #221`](http://issues.autojs6.com/221)_
 * `Исправление` Ошибка ограничения типа параметров для методов automator.click/longClick _[`issue #275`](http://issues.autojs6.com/275)_
 * `Исправление` Ошибка, из-за которой селекторы не поддерживали параметры типа ConsString _[`issue #277`](http://issues.autojs6.com/277)_
 * `Исправление` Ошибка, из-за которой экземпляры UiObjectCollection теряли собственные методы и свойства
+* `Улучшение` Страница упаковки поддерживает настройку подписи, управление хранилищем ключей и настройку разрешений (автор [luckyloogn]()) _[`pr #286`]()_
+* `Улучшение` Улучшена точность распознавания текущего имени пакета и имени активности для плавающего окна (приоритет: Shizuku > Root > A11Y)
+* `Улучшение` Улучшена точность распознавания currentPackage и currentActivity (приоритет: Shizuku > Root > A11Y)
 * `Улучшение` Восстановлена возможность выбора текста в отдельных записях в окне лога двойным щелчком или длительным нажатием _[`issue #280`](http://issues.autojs6.com/280)_
 * `Улучшение` Максимальное восстановление ключевой информации для проектов скриптов в случае повреждения файла project.json
 * `Улучшение` Автоматическая конвертация упрощенного китайского в пиньинь (включая многозначные символы) для суффиксов пакетов, создаваемых при упаковке отдельных файлов
@@ -371,7 +375,7 @@ SDK Tools (SDK Инструменты) (находится в правом ок�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `19`.
 
-По состоянию на 27 December 2024 г. AutoJs6 поддерживает JDK максимальной версии `23`.
+По состоянию на 1 January 2025 г. AutoJs6 поддерживает JDK максимальной версии `23`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 
@@ -462,6 +466,7 @@ Gradle
 
 |     <span style="word-break:keep-all;white-space:nowrap">Участники</span>     |                   <span style="word-break:keep-all;white-space:nowrap">Количество коммитов</span>                    | <span style="word-break:keep-all;white-space:nowrap">Последние коммиты</span> |
 |:----------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|     <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>      |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>            |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
 |  <span style="word-break:keep-all;white-space:nowrap">[chenguangming](https://github.com/chenguangming)</span>   | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Achenguangming)</span> |                    <span style="word-break:keep-all;white-space:nowrap">`2024/05/14`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[LZX284](https://github.com/LZX284)</span>          |         <span style="word-break:keep-all;white-space:nowrap">[17](https://github.com/SuperMonster003/AutoJs6/commits?author=LZX284)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2023/11/19`</span>                    |
@@ -470,7 +475,7 @@ Gradle
 |         <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>          |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86)</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-Данные обновлены на 23 October 2024 г..
+Данные обновлены на 1 January 2025 г..
 
 Данные отсортированы по `последним отправкам` в порядке убывания.
 
@@ -494,7 +499,7 @@ Gradle
         - Update contribution section
     - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
     - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation by running the python script
+    - Re-generate documentation/markdown by running the python script
     - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field

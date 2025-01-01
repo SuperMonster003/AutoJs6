@@ -302,15 +302,15 @@
     <string name="text_app_name_coolapk">酷安</string>
     <string name="text_app_name_dianping">大众点评</string>
     <string name="text_app_name_drive">云端硬盘</string>
-    <string name="text_app_name_es">ES文件浏览器</string>
+    <string name="text_app_name_es">ES 文件浏览器</string>
     <string name="text_app_name_eudic">欧路词典</string>
     <string name="text_app_name_geometric_weather">几何天气</string>
     <string name="text_app_name_keep_notes">Keep 记事</string>
     <string name="text_app_name_meituan">美团</string>
-    <string name="text_app_name_mt">MT管理器</string>
+    <string name="text_app_name_mt">MT 管理器</string>
     <string name="text_app_name_mxpro">MX 播放器专业版</string>
     <string name="text_app_name_parallel_space">平行空间(原双开大师)</string>
-    <string name="text_app_name_qqmusic">QQ音乐</string>
+    <string name="text_app_name_qqmusic">QQ 音乐</string>
     <string name="text_app_name_wechat">微信</string>
     <string name="text_app_shortcut_disabled">此快捷方式已禁用</string>
     <string name="text_app_shortcut_docs_long_label">AutoJs6 文档</string>
@@ -774,7 +774,7 @@
     <string name="text_filename_cannot_be_empty">文件名不能为空</string>
     <string name="text_filename_cannot_contain_invalid_character">文件名不能包含下列任何字符: \\ / : * ? &quot; &lt; &gt; |</string>
     <string name="text_filename_is_too_long">文件名太长</string>
-    <string name="text_password_requires_at_least_n_characters">密码至少需要%d位字符</string>
+    <string name="text_password_requires_at_least_n_characters">密码至少需要 %d 位字符</string>
     <string name="text_alias_cannot_be_empty">别名不能为空</string>
     <string name="text_validity_years_cannot_be_empty">有效年份不能为空</string>
     <string name="text_validity_years_cannot_be_zero">有效年份不能为0</string>
@@ -793,7 +793,7 @@
     <string name="text_verify_failed">验证失败</string>
     <string name="text_file_path">文件路径</string>
     <string name="text_supported_permissions_short">需要的权限</string>
-    <string name="text_permission_access_wifi_state">允许应用访问Wi-Fi状态</string>
+    <string name="text_permission_access_wifi_state">允许应用访问 Wi-Fi 状态</string>
     <string name="text_permission_write_external_storage">允许应用写入外部存储</string>
     <string name="text_permission_read_external_storage">允许应用读取外部存储</string>
     <string name="text_permission_read_media_images">允许应用读取共享存储中的图片文件</string>
@@ -819,7 +819,7 @@
     <string name="text_permission_foreground_service">允许应用运行前台服务</string>
     <string name="text_permission_foreground_service_media_projection">允许应用在前台服务中使用屏幕录制和媒体投影功能</string>
     <string name="text_permission_foreground_service_special_use">允许应用在前台服务中执行一些特殊操作</string>
-    <string name="text_permission_unlimited_toasts">允许应用显示无限数量的Toast通知</string>
+    <string name="text_permission_unlimited_toasts">允许应用显示无限数量的 Toast 通知</string>
     <string name="text_permission_capture_video_output">允许应用捕获视频输出</string>
     <string name="text_permission_dump">允许应用转储系统信息</string>
     <string name="text_permission_query_all_packages">允许应用查询所有软件包</string>
@@ -829,9 +829,9 @@
     <string name="text_permission_manage_users">允许应用管理用户</string>
     <string name="text_permission_interact_across_users_full">允许应用跨用户交互</string>
     <string name="text_permission_access_coarse_location">允许应用通过网络访问粗略的位置信息</string>
-    <string name="text_permission_access_fine_location">允许应用通过GPS获取精确的位置信息</string>
+    <string name="text_permission_access_fine_location">允许应用通过 GPS 获取精确的位置信息</string>
     <string name="text_permission_record_audio">允许应用录音</string>
-    <string name="text_permission_run_command">特定于Termux应用，允许运行命令</string>
+    <string name="text_permission_run_command">允许运行命令 (特定于 Termux 应用)</string>
     <string name="text_permission_read_phone_state">允许应用读取手机状态和身份</string>
     <string name="text_permission_read_sms">允许应用读取短信</string>
     <string name="text_permission_shizuku">允许应用通过 Shizuku 服务与系统进行更高权限的交互</string>

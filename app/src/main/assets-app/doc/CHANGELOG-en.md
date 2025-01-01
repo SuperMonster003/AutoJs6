@@ -6,17 +6,21 @@
 
 # v6.6.1
 
-###### 2024/12/27
+###### 2025/01/01
 
 * `Feature` Pinyin module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin))
 * `Feature` Pinyin4j module for Chinese Pinyin conversion (Refer to Project Documentation > [Chinese Pinyin](https://docs.autojs6.com/#/pinyin4j))
 * `Feature` Methods UiObject#isSimilar and UiObjectCollection#isSimilar for determining whether a control or a collection of controls is similar
+* `Feature` Global method "currentComponent", used to obtain the name information of the currently active component
 * `Fix` Issue where the project could not compile properly in certain environments due to a rollback to an earlier version
 * `Fix` "Non-primitive value" exception that may occur when calling non-existent methods
 * `Fix` Issue where script shortcuts could not be added properly on certain devices (tentative fix) _[`issue #221`](http://issues.autojs6.com/221)_
 * `Fix` Incorrect parameter type restrictions for the automator.click/longClick methods _[`issue #275`](http://issues.autojs6.com/275)_
 * `Fix` Issue where selectors did not support ConsString type parameters _[`issue #277`](http://issues.autojs6.com/277)_
 * `Fix` Missing methods and properties on UiObjectCollection instances
+* `Improvement` The packaging page supports signature configuration, keystore management, and permission settings (by [luckyloogn]()) _[`pr #286`]()_
+* `Improvement` Improved accuracy in identifying the current package name and activity name of the floating window (Priority: Shizuku > Root > A11Y)
+* `Improvement` Improved accuracy in recognizing `currentPackage` and `currentActivity` (Priority: Shizuku > Root > A11Y)
 * `Improvement` Restore the ability to select text content of individual entries in the log activity window via double-click or long press _[`issue #280`](http://issues.autojs6.com/280)_
 * `Improvement` Recover as much critical information as possible for script projects when project.json is corrupted
 * `Improvement` Automatically convert Simplified Chinese to Pinyin (including multi-tone characters) for generated package name suffixes when packaging single files
