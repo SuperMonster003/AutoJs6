@@ -20,12 +20,11 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Install CMake 3.10.2
+      - name: Install CMake 3.10.2 manually
         run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo apt-add-repository -y ppa:deadsnakes/ppa
-          sudo apt-get install -y cmake=3.10.2
+          wget https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.sh
+          chmod +x cmake-3.10.2-Linux-x86_64.sh
+          sudo ./cmake-3.10.2-Linux-x86_64.sh --skip-license --prefix=/usr/local
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
