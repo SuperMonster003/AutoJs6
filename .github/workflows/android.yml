@@ -25,7 +25,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y software-properties-common
           sudo apt-add-repository -y ppa:deadsnakes/ppa
-          sudo apt-get install -y cmake=3.10.2*
+          sudo apt-get install -y cmake=3.10.2
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
