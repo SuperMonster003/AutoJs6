@@ -12,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import com.android.apksig.ApkVerifier
 import com.jaredrummler.apkparser.ApkParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -192,6 +193,17 @@ object ApkInfoDialogManager {
             }
         }
     }
+
+    private fun getApkSignatureInfo(apkFilePath: String): String? = runCatching {
+        ApkVerifier.Builder(File(apkFilePath)).build().verify().run {
+            listOfNotNull(
+                "V1".takeIf { isVerifiedUsingV1Scheme },
+                "V2".takeIf { isVerifiedUsingV2Scheme },
+                "V3".takeIf { isVerifiedUsingV3Scheme },
+                "V4".takeIf { isVerifiedUsingV4Scheme },
+            ).takeUnless { it.isEmpty() }?.joinToString(" + ")
+        }
+    }.getOrNull()
 
     private data class ApkInfo(
         val label: String?,
