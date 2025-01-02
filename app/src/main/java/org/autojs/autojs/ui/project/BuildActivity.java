@@ -12,8 +12,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,7 +22,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.textfield.TextInputLayout;
@@ -30,6 +29,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
+import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
@@ -41,10 +41,9 @@ import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
-import org.autojs.autojs.apkbuilder.keystore.KeyStore;
-import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel;
 import org.autojs.autojs.ui.keystore.ManageKeyStoreActivity;
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
+import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel;
 import org.autojs.autojs.ui.widget.RoundCheckboxWithText;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.AndroidUtils.Abi;
@@ -65,7 +64,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -102,25 +100,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         put(Abi.ARMEABI, /* armeabi */ List.of("armeabi", "arme", "armv5te", "arm5te", "armv5", "v5", "arm5", "5"));
     }};
 
-    private static final ArrayList<String> SUPPORTED_LIBS = new ArrayList<>() {{
-        add(ApkBuilder.Constants.OPENCV);
-        add(ApkBuilder.Constants.MLKIT_OCR);
-        add(ApkBuilder.Constants.PADDLE_OCR);
-        add(ApkBuilder.Constants.RAPID_OCR);
-        add(ApkBuilder.Constants.OPENCC);
-        // add(ApkBuilder.Constants.PINYIN);
-        add(ApkBuilder.Constants.MLKIT_BARCODE);
-    }};
+    private static final ArrayList<String> SUPPORTED_LIBS = new ArrayList<>();
 
-    private static final Map<String, List<String>> LIB_ALIASES = new HashMap<>() {{
-        put(ApkBuilder.Constants.OPENCV, List.of("cv"));
-        put(ApkBuilder.Constants.MLKIT_OCR, List.of("mlkit", "mlkitocr", "mlkit-ocr", "mlkit_ocr"));
-        put(ApkBuilder.Constants.PADDLE_OCR, List.of("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"));
-        put(ApkBuilder.Constants.RAPID_OCR, List.of("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"));
-        put(ApkBuilder.Constants.OPENCC, List.of("cc"));
-        // put(ApkBuilder.Constants.PINYIN, List.of("pin"));
-        put(ApkBuilder.Constants.MLKIT_BARCODE, List.of("barcode", "mlkit-barcode", "mlkit_barcode"));
-    }};
+    private static final Map<String, List<String>> LIB_ALIASES = new HashMap<>();
 
     private static final ArrayList<String> SIGNATURE_SCHEMES = new ArrayList<>() {{
         add("V1 + V2");
@@ -208,6 +190,15 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     private final ArrayList<String> mUnavailableLibs = new ArrayList<>();
 
     private KeyStoreViewModel mKeyStoreViewModel;
+
+    static {
+        for (ApkBuilder.Libs entry : ApkBuilder.Libs.getEntries()) {
+            if (entry.enumerable) {
+                SUPPORTED_LIBS.add(entry.label);
+                LIB_ALIASES.put(entry.label, entry.aliases);
+            }
+        }
+    }
 
     @SuppressLint("SetTextI18n")
     @Override

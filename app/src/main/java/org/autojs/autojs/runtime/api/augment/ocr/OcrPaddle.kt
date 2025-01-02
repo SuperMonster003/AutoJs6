@@ -44,13 +44,13 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
         }
 
         fun recognizeTextInternal(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<String> {
-            ApkBuilder.Libs.ensure(OcrMode.PADDLE.value, ApkBuilder.Libs.PADDLE_LITE)
+            ApkBuilder.Libs.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
             val (cpuThreadNum, useSlim) = getOptions(options)
             return scriptRuntime.ocrPaddle.recognizeText(image, cpuThreadNum, useSlim)
         }
 
         fun detectInternal(scriptRuntime: ScriptRuntime, image: ImageWrapper, options: NativeObject): List<OcrResult> {
-            ApkBuilder.Libs.ensure(OcrMode.PADDLE.value, ApkBuilder.Libs.PADDLE_LITE)
+            ApkBuilder.Libs.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
             val (cpuThreadNum, useSlim) = getOptions(options)
             return scriptRuntime.ocrPaddle.detect(image, cpuThreadNum, useSlim).map { result ->
                 OcrResult(result.label, result.confidence, result.bounds)

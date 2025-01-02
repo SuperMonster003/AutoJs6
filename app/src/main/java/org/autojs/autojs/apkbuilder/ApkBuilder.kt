@@ -55,9 +55,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     private val mAssetManager: AssetManager by lazy { globalContext.assets }
 
-    private var mLibsIncludes = Libs.DEFALUT_INCLUDES.toMutableList()
-    private var mAssetsFileIncludes = Assets.File.DEFAULT_INCLUDES.toMutableList()
-    private var mAssetsDirExcludes = Assets.Dir.DEFAULT_EXCLUDES.toMutableList()
+    private var mLibsIncludes = Libs.defaultLibsToInclude.toMutableList()
+    private var mAssetsFileIncludes = Libs.defaultAssetFilesToInclude.toMutableList()
+    private var mAssetsDirExcludes = Libs.defaultAssetDirsToExclude.toMutableList()
 
     private val mManifestFile
         get() = File(workspacePath, "AndroidManifest.xml")
@@ -184,29 +184,12 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         projectConfig.run {
             mKey = MD5Utils.md5(packageName + versionName + mainScriptFile)
             mInitVector = MD5Utils.md5(buildInfo.buildId + name).substring(0, 16)
-            if (appConfig.libs.contains(Constants.OPENCV)) {
-                mLibsIncludes += Libs.OPENCV.toSet()
-                mAssetsDirExcludes -= Assets.Dir.OPENCV.toSet()
-            }
-            if (appConfig.libs.contains(Constants.MLKIT_OCR)) {
-                mLibsIncludes += Libs.MLKIT_GOOGLE_OCR.toSet()
-                mAssetsDirExcludes -= Assets.Dir.MLKIT_GOOGLE_OCR.toSet()
-            }
-            if (appConfig.libs.contains(Constants.PADDLE_OCR)) {
-                mLibsIncludes += Libs.PADDLE_LITE.toSet() + Libs.PADDLE_LITE_EXT.toSet()
-                mAssetsDirExcludes -= Assets.Dir.PADDLE_LITE.toSet()
-            }
-            if (appConfig.libs.contains(Constants.MLKIT_BARCODE)) {
-                mLibsIncludes += Libs.MLKIT_BARCODE.toSet()
-                mAssetsDirExcludes -= Assets.Dir.MLKIT_BARCODE.toSet()
-            }
-            if (appConfig.libs.contains(Constants.RAPID_OCR)) {
-                mLibsIncludes += Libs.RAPID_OCR.toSet()
-                mAssetsDirExcludes -= Assets.Dir.RAPID_OCR.toSet()
-            }
-            if (appConfig.libs.contains(Constants.OPENCC)) {
-                mLibsIncludes += Libs.OPENCC.toSet()
-                mAssetsDirExcludes -= Assets.Dir.OPENCC.toSet()
+            Libs.entries.forEach { entry ->
+                if (appConfig.libs.contains(entry.label)) {
+                    mLibsIncludes += entry.libsToInclude.toSet()
+                    mAssetsFileIncludes += entry.assetFilesToInclude.toSet()
+                    mAssetsDirExcludes -= entry.assetDirsToExclude.toSet()
+                }
             }
         }
     }
@@ -478,119 +461,126 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     }
 
-    @Suppress("SpellCheckingInspection")
-    object Libs {
+    enum class Libs(
+        @JvmField val label: String,
+        @JvmField val aliases: List<String> = emptyList(),
+        @JvmField val enumerable: Boolean = true,
+        internal val libsToInclude: List<String> = emptyList(),
+        internal val assetFilesToInclude: List<String> = emptyList(),
+        internal val assetDirsToExclude: List<String> = emptyList(),
+    ) {
 
-        private val BASIC = listOf(
-                "libjackpal-androidterm5.so", /* Terminal Emulator. */
-                "libjackpal-termexec2.so", /* Terminal Emulator. */
-            )
+        TERMINAL_EMULATOR(
+            label = "Terminal Emulator",
+            enumerable = false,
+            libsToInclude = listOf(
+                "libjackpal-androidterm5.so",
+                "libjackpal-termexec2.so",
+            ),
+        ),
 
-        private val MISCELLANEOUS = emptyList<String>()
-
-            @JvmField
-            val OPENCV = listOf(
+        OPENCV(
+            label = "OpenCV",
+            aliases = listOf("cv"),
+            libsToInclude = listOf(
                 "libc++_shared.so",
                 "libopencv_java4.so",
-            )
+            ),
+        ),
 
-            @JvmField
-            val MLKIT_GOOGLE_OCR = listOf(
+        MLKIT_OCR(
+            label = "MLKit OCR",
+            aliases = listOf("mlkit", "mlkitocr", "mlkit-ocr", "mlkit_ocr"),
+            libsToInclude = listOf(
                 "libmlkit_google_ocr_pipeline.so",
-            )
+            ),
+            assetDirsToExclude = listOf(
+                "mlkit-google-ocr-models",
+            ),
+        ),
 
-            @JvmField
-            val PADDLE_LITE = listOf(
+        PADDLE_OCR(
+            label = "Paddle OCR",
+            aliases = listOf("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"),
+            libsToInclude = listOf(
                 "libc++_shared.so",
                 "libpaddle_light_api_shared.so",
                 "libNative.so",
-            )
-
-            val PADDLE_LITE_EXT = listOf(
                 "libhiai.so",
                 "libhiai_ir.so",
                 "libhiai_ir_build.so",
+            ),
+            assetDirsToExclude = listOf(
+                "models",
             )
+        ),
 
-            @JvmField
-            val MLKIT_BARCODE = emptyList<String>()
-
-            @JvmField
-            val RAPID_OCR = listOf(
+        RAPID_OCR(
+            label = "Rapid OCR",
+            aliases = listOf("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"),
+            libsToInclude = listOf(
                 "libRapidOcr.so",
-            )
+            ),
+            assetDirsToExclude = listOf(
+                "labels",
+            ),
+        ),
 
-            @JvmField
-            val OPENCC = listOf(
+        OPENCC(
+            label = "OpenCC",
+            aliases = listOf("cc"),
+            libsToInclude = listOf(
                 "libChineseConverter.so",
-            )
+            ),
+            assetDirsToExclude = listOf(
+                "openccdata",
+            ),
+        ),
 
-        val DEFALUT_INCLUDES: List<String> = (BASIC + MISCELLANEOUS).distinct()
+        PINYIN(
+            label = "Pinyin",
+            aliases = listOf("pin"),
+            assetFilesToInclude = listOf(
+                "dict-chinese-words.db.gzip",
+                "dict-chinese-phrases.db.gzip",
+                "dict-chinese-chars.db.gzip",
+                "prob_emit.txt",
+            ),
+        ),
 
-        @JvmStatic
-        fun ensure(name: String, libNameList: List<String>) {
+        MLKIT_BARCODE(
+            label = "MLKit Barcode",
+            aliases = listOf("barcode", "mlkit-barcode", "mlkit_barcode"),
+            assetDirsToExclude = listOf(
+                "mlkit_barcode_models",
+            ),
+        );
+
+        fun ensureLibFiles(moduleName: String = label) {
             if (!BuildConfig.isInrt) return
             val nativeLibraryDir = File(globalContext.applicationInfo.nativeLibraryDir)
             val primaryNativeLibraries = nativeLibraryDir.list()?.toList() ?: emptyList()
-            if (!primaryNativeLibraries.containsAll(libNameList)) {
-                throw Exception(globalContext.getString(R.string.error_module_does_not_work_due_to_the_lack_of_necessary_library_files, name))
+            if (!primaryNativeLibraries.containsAll(libsToInclude)) {
+                throw Exception(globalContext.getString(R.string.error_module_does_not_work_due_to_the_lack_of_necessary_library_files, moduleName))
             }
         }
 
-    }
+        companion object {
 
-    @Suppress("SpellCheckingInspection")
-    object Assets {
+            val defaultLibsToInclude = listOf(
+                TERMINAL_EMULATOR,
+            ).flatMap { it.libsToInclude }
 
-        object File {
-
-            private val BASIC = listOf(
-                "init.js", "roboto_medium.ttf"
+            val defaultAssetFilesToInclude = listOf(
+                "init.js", "roboto_medium.ttf",
             )
 
-            private val MISCELLANEOUS = emptyList<String>()
-
-            val DEFAULT_INCLUDES = (BASIC + MISCELLANEOUS).distinct()
-
-        }
-
-        object Dir {
-
-            private val BASIC = listOf("doc", "docs", "editor", "indices", "js-beautify", "sample")
-
-            private val MISCELLANEOUS = listOf("stored-locales")
-
-                @JvmField
-                val OPENCV = emptyList<String>()
-
-                @JvmField
-                val MLKIT_GOOGLE_OCR = listOf("mlkit-google-ocr-models")
-
-                @JvmField
-                val MLKIT_BARCODE = listOf("mlkit_barcode_models")
-
-                @JvmField
-                val PADDLE_LITE = listOf("models")
-
-                @JvmField
-                val RAPID_OCR = listOf("labels")
-
-                @JvmField
-                val OPENCC = listOf("openccdata")
-
-            val DEFAULT_EXCLUDES = (BASIC + MLKIT_GOOGLE_OCR + MLKIT_BARCODE + PADDLE_LITE + RAPID_OCR + OPENCC + MISCELLANEOUS).distinct()
+            val defaultAssetDirsToExclude = listOf(
+                "doc", "docs", "editor", "indices", "js-beautify", "sample", "stored-locales",
+            ) + Libs.entries.flatMap { it.assetDirsToExclude }
 
         }
 
-    }
-
-    object Constants {
-        const val OPENCV = "OpenCV"
-        const val MLKIT_OCR = "MLKit OCR"
-        const val PADDLE_OCR = "Paddle OCR"
-        const val RAPID_OCR = "Rapid OCR"
-        const val OPENCC = "OpenCC"
-        const val MLKIT_BARCODE = "MLKit Barcode"
     }
 
 }

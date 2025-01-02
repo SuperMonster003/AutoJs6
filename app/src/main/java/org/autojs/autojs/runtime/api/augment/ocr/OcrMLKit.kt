@@ -40,7 +40,7 @@ class OcrMLKit(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         //  ! Reserved param `options`.
         //  ! zh-CN: 预留参数 `options`.
         fun recognizeTextInternal(scriptRuntime: ScriptRuntime, image: ImageWrapper, @Suppress("UNUSED_PARAMETER") options: NativeObject): List<String> {
-            ApkBuilder.Libs.ensure(OcrMode.MLKIT.value, ApkBuilder.Libs.MLKIT_GOOGLE_OCR)
+            ApkBuilder.Libs.MLKIT_OCR.ensureLibFiles(OcrMode.MLKIT.value)
             return scriptRuntime.ocrMLKit.recognizeText(image)
         }
 
@@ -48,7 +48,7 @@ class OcrMLKit(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         //  ! Reserved param `options`.
         //  ! zh-CN: 预留参数 `options`.
         fun detectInternal(scriptRuntime: ScriptRuntime, image: ImageWrapper, @Suppress("UNUSED_PARAMETER") options: NativeObject): List<OcrResult> {
-            ApkBuilder.Libs.ensure(OcrMode.MLKIT.value, ApkBuilder.Libs.MLKIT_GOOGLE_OCR)
+            ApkBuilder.Libs.MLKIT_OCR.ensureLibFiles(OcrMode.MLKIT.value)
             return scriptRuntime.ocrMLKit.detect(image)
         }
 
