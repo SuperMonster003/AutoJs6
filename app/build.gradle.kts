@@ -433,8 +433,10 @@ android {
             compileSdk = versions.sdkVersionCompile
             versionCode = versions.appVersionCode
             versionName = versions.appVersionName
+
             buildConfigField("String", "CHANNEL", "\"$flavorNameInrt\"")
             buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "true")
+
             manifestPlaceholders.putAll(
                 mapOf(
                     "CHANNEL" to flavorNameInrt,
@@ -445,20 +447,7 @@ android {
                     "icon" to "@mipmap/ic_launcher",
                 )
             )
-            packagingOptions.apply {
-                // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
-                //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L91
-                jniLibs.excludes += "*"
-                resources.excludes.addAll(
-                    listOf(
-                        "com/**/*",
-                        "frameworks/**/*",
-                        "junit/**/*",
-                        "LICENSE-junit.txt",
-                        "spec.txt",
-                    )
-                )
-            }
+
             // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
             //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L93
             // noinspection ChromeOsAbiSupport
@@ -566,7 +555,7 @@ android {
     //  # packaging { ... }
     @Suppress("DEPRECATION")
     packagingOptions {
-        arrayOf(
+        listOf(
             "META-INF/DEPENDENCIES",
             "META-INF/LICENSE",
             "META-INF/LICENSE.*",
@@ -584,7 +573,25 @@ android {
             "lib/armeabi/libc++_shared.so",
         ).let { resources.pickFirsts.addAll(it) }
 
+        listOf(
+            "com/**/*",
+            "frameworks/**/*",
+            "junit/**/*",
+            "LICENSE-junit.txt",
+            "spec.txt",
+        ).let { resources.excludes.addAll(it) }
+
+        if (gradle.startParameter.taskNames.any { it.contains(flavorNameInrt, true) }) {
+            listOf(
+                "**/prob_emit.txt", // Jieba Analysis (zh-CN: 结巴分词)
+                "**/dict-chinese-*.db.gzip", // Jieba Analysis (zh-CN: 结巴分词)
+            ).let { resources.excludes.addAll(it) }
+        }
+
         jniLibs {
+            // @Reference to kkevsekk1/AutoX (https://github.com/kkevsekk1/AutoX) by SuperMonster003 on Nov 16, 2023.
+            //  ! https://github.com/kkevsekk1/AutoX/blob/a6d482189291b460c3be60970b74c5321d26e457/inrt/build.gradle.kts#L91
+            excludes += "*"
             useLegacyPackaging = true
         }
     }
@@ -661,32 +668,36 @@ android {
     }
 
     applicationVariants.all {
-        mergeAssetsProvider
-            .configure {
-                doLast {
-                    mapOf(
-                        "dir" to outputDir,
-                        "includes" to when (variantName.startsWith(flavorNameInrt)) {
-                            true -> listOf(
-                                "mlkit-google-ocr-models/**/*",
-                                "mlkit_barcode_models/**/*",
-                                "models/**/*",
-                                "openccdata/**/*",
-                                "project/**/*",
-                                "android-devices.db",
-                                "autojs.keystore",
-                            )
-                            else -> listOf(
-                                "declarations/**/*",
-                                "sample/declarations/**/*",
-                            )
-                        },
-                    ).let { delete(fileTree(it)) }
-                }
+        mergeAssetsProvider.configure {
+            doLast {
+                mapOf(
+                    "dir" to outputDir,
+                    "includes" to when (variantName.startsWith(flavorNameInrt)) {
+                        true -> listOf(
+                            "mlkit-google-ocr-models/**/*",
+                            "mlkit_barcode_models/**/*",
+                            "models/**/*",
+                            "modules/obsolete/**/*",
+                            "openccdata/**/*",
+                            "project/**/*",
+                            "android-devices.db",
+                            "autojs.keystore",
+                            "**/prob_emit.txt", // Jieba Analysis (zh-CN: 结巴分词)
+                            "**/dict-chinese-*.db.gzip", // Jieba Analysis (zh-CN: 结巴分词)
+                        )
+                        else -> listOf(
+                            "declarations/**/*",
+                            "sample/declarations/**/*",
+                            "modules/obsolete/**/*",
+                        )
+                    },
+                ).let { delete(fileTree(it)) }
             }
-        outputs
-            .map { it as BaseVariantOutputImpl }
-            .forEach { it.outputFileName = Utils.getOutputFileName(this@all as ApplicationVariantImpl, it) }
+        }
+
+        outputs.map { it as BaseVariantOutputImpl }.forEach {
+            it.outputFileName = Utils.getOutputFileName(this@all as ApplicationVariantImpl, it)
+        }
     }
 
     splits {

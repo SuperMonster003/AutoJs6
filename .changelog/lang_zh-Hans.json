@@ -1,5 +1,11 @@
 {
   "$data": {
+    "v6.6.2": {
+      "released_date": "2025/01/02",
+      "improvement": [
+        "精简打包应用模板 APK 文件大小"
+      ]
+    },
     "v6.6.1": {
       "released_date": "2025/01/01",
       "feature": [

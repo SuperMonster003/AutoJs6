@@ -1,13 +1,13 @@
 package org.autojs.autojs.runtime.api.augment.util
 
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
-import org.mozilla.javascript.NativeObject
 
 object VersionCodesInfo {
 
-    // @UpTo Jun 3, 2024.
+    // @UpTo Jan 2, 2025.
     private val raw = mutableMapOf(
-        "VANILLA_ICE_CREAM" to listOf("Android 15", "Vanilla Ice Cream", "15", "35", "Q4, 2024"),
+        "BAKLAVA" to listOf("Android 16", "Baklava", "16", "36", "Q2, 2025"),
+        "VANILLA_ICE_CREAM" to listOf("Android 15", "Vanilla Ice Cream", "15", "35", "September 3, 2024"),
         "UPSIDE_DOWN_CAKE" to listOf("Android 14", "Upside Down Cake", "14", "34", "October 4, 2023"),
         "TIRAMISU" to listOf("Android 13", "Tiramisu", "13", "33", "August 15, 2022"),
         "S_V2" to listOf("Android 12L", "Snow Cone v2", "12.1", "32", "March 7, 2022"),

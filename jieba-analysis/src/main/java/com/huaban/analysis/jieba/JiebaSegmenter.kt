@@ -9,7 +9,7 @@ class JiebaSegmenter(context: Context) {
 
     val dictionary by lazy { WordDictionary.getInstance(context) }
 
-    private val finalSeg = FinalSeg.instance
+    private val finalSeg by lazy { FinalSeg.instance }
 
     enum class SegMode { INDEX, SEARCH }
 

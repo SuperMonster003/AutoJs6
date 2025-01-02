@@ -13,6 +13,7 @@ import com.reandroid.arsc.chunk.TableBlock
 import org.apache.commons.io.FileUtils.copyFile
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
+import org.autojs.autojs.apkbuilder.keystore.KeyStore
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
@@ -20,7 +21,6 @@ import org.autojs.autojs.project.BuildInfo
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.script.EncryptedScriptFileHeader.writeHeader
 import org.autojs.autojs.script.JavaScriptFileSource
-import org.autojs.autojs.apkbuilder.keystore.KeyStore
 import org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT
 import org.autojs.autojs.util.MD5Utils
 import org.autojs.autojs6.BuildConfig
@@ -482,48 +482,48 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     object Libs {
 
         private val BASIC = listOf(
-            "libjackpal-androidterm5.so", /* Terminal Emulator. */
-            "libjackpal-termexec2.so", /* Terminal Emulator. */
-        )
+                "libjackpal-androidterm5.so", /* Terminal Emulator. */
+                "libjackpal-termexec2.so", /* Terminal Emulator. */
+            )
 
         private val MISCELLANEOUS = emptyList<String>()
 
-        @JvmField
-        val OPENCV = listOf(
-            "libc++_shared.so",
-            "libopencv_java4.so",
-        )
+            @JvmField
+            val OPENCV = listOf(
+                "libc++_shared.so",
+                "libopencv_java4.so",
+            )
 
-        @JvmField
-        val MLKIT_GOOGLE_OCR = listOf(
-            "libmlkit_google_ocr_pipeline.so",
-        )
+            @JvmField
+            val MLKIT_GOOGLE_OCR = listOf(
+                "libmlkit_google_ocr_pipeline.so",
+            )
 
-        @JvmField
-        val PADDLE_LITE = listOf(
-            "libc++_shared.so",
-            "libpaddle_light_api_shared.so",
-            "libNative.so",
-        )
+            @JvmField
+            val PADDLE_LITE = listOf(
+                "libc++_shared.so",
+                "libpaddle_light_api_shared.so",
+                "libNative.so",
+            )
 
-        val PADDLE_LITE_EXT = listOf(
-            "libhiai.so",
-            "libhiai_ir.so",
-            "libhiai_ir_build.so",
-        )
+            val PADDLE_LITE_EXT = listOf(
+                "libhiai.so",
+                "libhiai_ir.so",
+                "libhiai_ir_build.so",
+            )
 
-        @JvmField
-        val MLKIT_BARCODE = emptyList<String>()
+            @JvmField
+            val MLKIT_BARCODE = emptyList<String>()
 
-        @JvmField
-        val RAPID_OCR = listOf(
-            "libRapidOcr.so",
-        )
+            @JvmField
+            val RAPID_OCR = listOf(
+                "libRapidOcr.so",
+            )
 
-        @JvmField
-        val OPENCC = listOf(
-            "libChineseConverter.so",
-        )
+            @JvmField
+            val OPENCC = listOf(
+                "libChineseConverter.so",
+            )
 
         val DEFALUT_INCLUDES: List<String> = (BASIC + MISCELLANEOUS).distinct()
 
@@ -560,23 +560,23 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
             private val MISCELLANEOUS = listOf("stored-locales")
 
-            @JvmField
-            val OPENCV = emptyList<String>()
+                @JvmField
+                val OPENCV = emptyList<String>()
 
-            @JvmField
-            val MLKIT_GOOGLE_OCR = listOf("mlkit-google-ocr-models")
+                @JvmField
+                val MLKIT_GOOGLE_OCR = listOf("mlkit-google-ocr-models")
 
-            @JvmField
-            val MLKIT_BARCODE = listOf("mlkit_barcode_models")
+                @JvmField
+                val MLKIT_BARCODE = listOf("mlkit_barcode_models")
 
-            @JvmField
-            val PADDLE_LITE = listOf("models")
+                @JvmField
+                val PADDLE_LITE = listOf("models")
 
-            @JvmField
-            val RAPID_OCR = listOf("labels")
+                @JvmField
+                val RAPID_OCR = listOf("labels")
 
-            @JvmField
-            val OPENCC = listOf("openccdata")
+                @JvmField
+                val OPENCC = listOf("openccdata")
 
             val DEFAULT_EXCLUDES = (BASIC + MLKIT_GOOGLE_OCR + MLKIT_BARCODE + PADDLE_LITE + RAPID_OCR + OPENCC + MISCELLANEOUS).distinct()
 
