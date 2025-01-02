@@ -32,7 +32,7 @@ android {
             // 主 Java/Kotlin 目录
             java.srcDirs = ['src/main/java']
             // 将资源文件夹指定为 assets 目录
-            assets.srcDirs = ['src/main/resources']
+            assets.srcDirs = ['src/main/assets']
         }
     }
 }

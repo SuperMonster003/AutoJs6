@@ -1,5 +1,6 @@
 package com.huaban.analysis.jieba.viterbi
 
+import android.content.Context
 import com.huaban.analysis.jieba.CharacterUtil
 import com.huaban.analysis.jieba.Log
 import com.huaban.analysis.jieba.Node
@@ -11,7 +12,7 @@ import java.nio.charset.Charset
 import java.util.*
 
 class FinalSeg private constructor() {
-    private fun loadModel() {
+    private fun loadModel(context: Context) {
         val s = System.currentTimeMillis()
         val prevStatus = HashMap<Char, CharArray>().also { prevStatus = it }
         prevStatus['B'] = charArrayOf('E', 'S')
@@ -43,7 +44,8 @@ class FinalSeg private constructor() {
         transS['S'] = -0.6658631448798212
         trans['S'] = transS
 
-        val `is` = javaClass.getResourceAsStream(PROB_EMIT)!!
+        // val `is` = javaClass.getResourceAsStream(PROB_EMIT)!!
+        val `is` = context.assets.open(PROB_EMIT)
         try {
             val br = BufferedReader(InputStreamReader(`is`, Charset.forName("UTF-8")))
             val emit = HashMap<Char, Map<Char, Double>>().also { emit = it }
@@ -181,7 +183,7 @@ class FinalSeg private constructor() {
 
     companion object {
         private var singleInstance: FinalSeg? = null
-        private const val PROB_EMIT = "/prob_emit.txt"
+        private const val PROB_EMIT = "prob_emit.txt"
         private val states = charArrayOf('B', 'M', 'E', 'S')
         private var emit: MutableMap<Char, Map<Char, Double>>? = null
         private var start: MutableMap<Char, Double>? = null
@@ -189,13 +191,12 @@ class FinalSeg private constructor() {
         private var prevStatus: MutableMap<Char, CharArray>? = null
         private const val MIN_FLOAT = -3.14e100
 
-        @get:Synchronized
-        val instance: FinalSeg
-            get() {
-                if (singleInstance == null) {
-                    singleInstance = FinalSeg().apply { loadModel() }
-                }
-                return singleInstance!!
+        @Synchronized
+        fun getInstance(context: Context): FinalSeg {
+            if (singleInstance == null) {
+                singleInstance = FinalSeg().apply { loadModel(context) }
             }
+            return singleInstance!!
+        }
     }
 }
