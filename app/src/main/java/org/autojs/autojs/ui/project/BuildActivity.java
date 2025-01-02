@@ -108,6 +108,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         add(ApkBuilder.Constants.PADDLE_OCR);
         add(ApkBuilder.Constants.RAPID_OCR);
         add(ApkBuilder.Constants.OPENCC);
+        // add(ApkBuilder.Constants.PINYIN);
         add(ApkBuilder.Constants.MLKIT_BARCODE);
     }};
 
@@ -117,6 +118,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         put(ApkBuilder.Constants.PADDLE_OCR, List.of("paddle", "paddleocr", "paddle-ocr", "paddle_ocr"));
         put(ApkBuilder.Constants.RAPID_OCR, List.of("rapid", "rapidocr", "rapid-ocr", "rapid_ocr"));
         put(ApkBuilder.Constants.OPENCC, List.of("cc"));
+        // put(ApkBuilder.Constants.PINYIN, List.of("pin"));
         put(ApkBuilder.Constants.MLKIT_BARCODE, List.of("barcode", "mlkit-barcode", "mlkit_barcode"));
     }};
 
