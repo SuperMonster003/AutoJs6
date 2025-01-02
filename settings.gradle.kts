@@ -27,7 +27,9 @@
 
 include(
     ":app",
-    ":jieba-analysis",
+    ":modules:jieba-analysis",
+    ":modules:apksigner",
+
     ":libs:android-job-simplified-1.4.3",
     ":libs:androidx.appcompat-1.0.2",
     ":libs:apk-parser-1.0.2",
@@ -47,7 +49,8 @@ include(
     ":libs:markwon-syntax-highlight-4.6.2",
 )
 
-project(":jieba-analysis").projectDir = file("jieba-analysis")
+project(":modules:jieba-analysis").projectDir = file("jieba-analysis")
+project(":modules:apksigner").projectDir = file("apksigner")
 
 pluginManagement {
 
