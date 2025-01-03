@@ -32,11 +32,10 @@ import java.util.jar.Attributes;
  */
 public abstract class ManifestWriter {
 
-    private static final byte[] CRLF = new byte[]{'\r', '\n'};
+    private static final byte[] CRLF = new byte[] {'\r', '\n'};
     private static final int MAX_LINE_LENGTH = 70;
 
-    private ManifestWriter() {
-    }
+    private ManifestWriter() {}
 
     public static void writeMainSection(OutputStream out, Attributes attributes)
             throws IOException {
@@ -72,17 +71,17 @@ public abstract class ManifestWriter {
         out.write(CRLF);
     }
 
-    static void writeAttribute(OutputStream out, Attributes.Name name, String value)
+    static void writeAttribute(OutputStream  out, Attributes.Name name, String value)
             throws IOException {
         writeAttribute(out, name.toString(), value);
     }
 
-    private static void writeAttribute(OutputStream out, String name, String value)
+    private static void writeAttribute(OutputStream  out, String name, String value)
             throws IOException {
         writeLine(out, name + ": " + value);
     }
 
-    private static void writeLine(OutputStream out, String line) throws IOException {
+    private static void writeLine(OutputStream  out, String line) throws IOException {
         byte[] lineBytes = line.getBytes(StandardCharsets.UTF_8);
         int offset = 0;
         int remaining = lineBytes.length;

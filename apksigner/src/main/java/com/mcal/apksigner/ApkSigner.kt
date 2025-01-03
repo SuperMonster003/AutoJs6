@@ -60,6 +60,7 @@ class ApkSigner(
     ): Boolean {
         return try {
             val keystore = KeyStoreHelper.loadKeyStore(keyFile, password.toCharArray())
+            @Suppress("DEPRECATION")
             ApkSigner.Builder(
                 listOf(
                     ApkSigner.SignerConfig.Builder(

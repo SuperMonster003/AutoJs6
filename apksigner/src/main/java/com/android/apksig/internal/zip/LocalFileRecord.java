@@ -20,7 +20,6 @@ import com.android.apksig.internal.util.ByteBufferSink;
 import com.android.apksig.util.DataSink;
 import com.android.apksig.util.DataSource;
 import com.android.apksig.zip.ZipFormatException;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -48,12 +47,14 @@ public class LocalFileRecord {
 
     private static final int DATA_DESCRIPTOR_SIZE_BYTES_WITHOUT_SIGNATURE = 12;
     private static final int DATA_DESCRIPTOR_SIGNATURE = 0x08074b50;
-    private static final ByteBuffer EMPTY_BYTE_BUFFER = ByteBuffer.allocate(0);
+
     private final String mName;
     private final int mNameSizeBytes;
     private final ByteBuffer mExtra;
+
     private final long mStartOffsetInArchive;
     private final long mSize;
+
     private final int mDataStartOffset;
     private final long mDataSize;
     private final boolean mDataCompressed;
@@ -80,6 +81,40 @@ public class LocalFileRecord {
         mUncompressedDataSize = uncompressedDataSize;
     }
 
+    public String getName() {
+        return mName;
+    }
+
+    public ByteBuffer getExtra() {
+        return (mExtra.capacity() > 0) ? mExtra.slice() : mExtra;
+    }
+
+    public int getExtraFieldStartOffsetInsideRecord() {
+        return HEADER_SIZE_BYTES + mNameSizeBytes;
+    }
+
+    public long getStartOffsetInArchive() {
+        return mStartOffsetInArchive;
+    }
+
+    public int getDataStartOffsetInRecord() {
+        return mDataStartOffset;
+    }
+
+    /**
+     * Returns the size (in bytes) of this record.
+     */
+    public long getSize() {
+        return mSize;
+    }
+
+    /**
+     * Returns {@code true} if this record's file data is stored in compressed form.
+     */
+    public boolean isDataCompressed() {
+        return mDataCompressed;
+    }
+
     /**
      * Returns the Local File record starting at the current position of the provided buffer
      * and advances the buffer's position immediately past the end of the record. The record
@@ -95,7 +130,7 @@ public class LocalFileRecord {
                 cdStartOffset,
                 true, // obtain extra field contents
                 true // include Data Descriptor (if present)
-        );
+                );
     }
 
     /**
@@ -259,126 +294,6 @@ public class LocalFileRecord {
     }
 
     /**
-     * Outputs the specified Local File Header record with its data and returns the number of bytes
-     * output.
-     */
-    public static long outputRecordWithDeflateCompressedData(
-            String name,
-            int lastModifiedTime,
-            int lastModifiedDate,
-            byte[] compressedData,
-            long crc32,
-            long uncompressedSize,
-            DataSink output) throws IOException {
-        byte[] nameBytes = name.getBytes(StandardCharsets.UTF_8);
-        int recordSize = HEADER_SIZE_BYTES + nameBytes.length;
-        ByteBuffer result = ByteBuffer.allocate(recordSize);
-        result.order(ByteOrder.LITTLE_ENDIAN);
-        result.putInt(RECORD_SIGNATURE);
-        ZipUtils.putUnsignedInt16(result, 0x14); // Minimum version needed to extract
-        result.putShort(ZipUtils.GP_FLAG_EFS); // General purpose flag: UTF-8 encoded name
-        result.putShort(ZipUtils.COMPRESSION_METHOD_DEFLATED);
-        ZipUtils.putUnsignedInt16(result, lastModifiedTime);
-        ZipUtils.putUnsignedInt16(result, lastModifiedDate);
-        ZipUtils.putUnsignedInt32(result, crc32);
-        ZipUtils.putUnsignedInt32(result, compressedData.length);
-        ZipUtils.putUnsignedInt32(result, uncompressedSize);
-        ZipUtils.putUnsignedInt16(result, nameBytes.length);
-        ZipUtils.putUnsignedInt16(result, 0); // Extra field length
-        result.put(nameBytes);
-        if (result.hasRemaining()) {
-            throw new RuntimeException("pos: " + result.position() + ", limit: " + result.limit());
-        }
-        result.flip();
-
-        long outputByteCount = result.remaining();
-        output.consume(result);
-        outputByteCount += compressedData.length;
-        output.consume(compressedData, 0, compressedData.length);
-        return outputByteCount;
-    }
-
-    /**
-     * Sends uncompressed data pointed to by the provided ZIP Central Directory (CD) record into the
-     * provided data sink.
-     */
-    public static void outputUncompressedData(
-            DataSource source,
-            CentralDirectoryRecord cdRecord,
-            long cdStartOffsetInArchive,
-            DataSink sink) throws ZipFormatException, IOException {
-        // IMPLEMENTATION NOTE: This method attempts to mimic the behavior of Android platform
-        // exhibited when reading an APK for the purposes of verifying its signatures.
-        // When verifying an APK, Android doesn't care reading the extra field or the Data
-        // Descriptor.
-        LocalFileRecord lfhRecord =
-                getRecord(
-                        source,
-                        cdRecord,
-                        cdStartOffsetInArchive,
-                        false, // don't care about the extra field
-                        false // don't read the Data Descriptor
-                );
-        lfhRecord.outputUncompressedData(source, sink);
-    }
-
-    /**
-     * Returns the uncompressed data pointed to by the provided ZIP Central Directory (CD) record.
-     */
-    public static byte[] getUncompressedData(
-            DataSource source,
-            CentralDirectoryRecord cdRecord,
-            long cdStartOffsetInArchive) throws ZipFormatException, IOException {
-        if (cdRecord.getUncompressedSize() > Integer.MAX_VALUE) {
-            throw new IOException(
-                    cdRecord.getName() + " too large: " + cdRecord.getUncompressedSize());
-        }
-        byte[] result = new byte[(int) cdRecord.getUncompressedSize()];
-        ByteBuffer resultBuf = ByteBuffer.wrap(result);
-        ByteBufferSink resultSink = new ByteBufferSink(resultBuf);
-        outputUncompressedData(
-                source,
-                cdRecord,
-                cdStartOffsetInArchive,
-                resultSink);
-        return result;
-    }
-
-    public String getName() {
-        return mName;
-    }
-
-    public ByteBuffer getExtra() {
-        return (mExtra.capacity() > 0) ? mExtra.slice() : mExtra;
-    }
-
-    public int getExtraFieldStartOffsetInsideRecord() {
-        return HEADER_SIZE_BYTES + mNameSizeBytes;
-    }
-
-    public long getStartOffsetInArchive() {
-        return mStartOffsetInArchive;
-    }
-
-    public int getDataStartOffsetInRecord() {
-        return mDataStartOffset;
-    }
-
-    /**
-     * Returns the size (in bytes) of this record.
-     */
-    public long getSize() {
-        return mSize;
-    }
-
-    /**
-     * Returns {@code true} if this record's file data is stored in compressed form.
-     */
-    public boolean isDataCompressed() {
-        return mDataCompressed;
-    }
-
-    /**
      * Outputs this record and returns returns the number of bytes output.
      */
     public long outputRecord(DataSource sourceApk, DataSink output) throws IOException {
@@ -415,6 +330,48 @@ public class LocalFileRecord {
     }
 
     /**
+     * Outputs the specified Local File Header record with its data and returns the number of bytes
+     * output.
+     */
+    public static long outputRecordWithDeflateCompressedData(
+            String name,
+            int lastModifiedTime,
+            int lastModifiedDate,
+            byte[] compressedData,
+            long crc32,
+            long uncompressedSize,
+            DataSink output) throws IOException {
+        byte[] nameBytes = name.getBytes(StandardCharsets.UTF_8);
+        int recordSize = HEADER_SIZE_BYTES + nameBytes.length;
+        ByteBuffer result = ByteBuffer.allocate(recordSize);
+        result.order(ByteOrder.LITTLE_ENDIAN);
+        result.putInt(RECORD_SIGNATURE);
+        ZipUtils.putUnsignedInt16(result,  0x14); // Minimum version needed to extract
+        result.putShort(ZipUtils.GP_FLAG_EFS); // General purpose flag: UTF-8 encoded name
+        result.putShort(ZipUtils.COMPRESSION_METHOD_DEFLATED);
+        ZipUtils.putUnsignedInt16(result, lastModifiedTime);
+        ZipUtils.putUnsignedInt16(result, lastModifiedDate);
+        ZipUtils.putUnsignedInt32(result, crc32);
+        ZipUtils.putUnsignedInt32(result, compressedData.length);
+        ZipUtils.putUnsignedInt32(result, uncompressedSize);
+        ZipUtils.putUnsignedInt16(result, nameBytes.length);
+        ZipUtils.putUnsignedInt16(result, 0); // Extra field length
+        result.put(nameBytes);
+        if (result.hasRemaining()) {
+            throw new RuntimeException("pos: " + result.position() + ", limit: " + result.limit());
+        }
+        result.flip();
+
+        long outputByteCount = result.remaining();
+        output.consume(result);
+        outputByteCount += compressedData.length;
+        output.consume(compressedData, 0, compressedData.length);
+        return outputByteCount;
+    }
+
+    private static final ByteBuffer EMPTY_BYTE_BUFFER = ByteBuffer.allocate(0);
+
+    /**
      * Sends uncompressed data of this record into the the provided data sink.
      */
     public void outputUncompressedData(
@@ -446,11 +403,63 @@ public class LocalFileRecord {
         } catch (IOException e) {
             throw new IOException(
                     "Failed to read data of " + ((mDataCompressed) ? "compressed" : "uncompressed")
-                            + " entry " + mName,
+                        + " entry " + mName,
                     e);
         }
         // Interestingly, Android doesn't check that uncompressed data's CRC-32 is as expected. We
         // thus don't check either.
+    }
+
+    /**
+     * Sends uncompressed data pointed to by the provided ZIP Central Directory (CD) record into the
+     * provided data sink.
+     */
+    public static void outputUncompressedData(
+            DataSource source,
+            CentralDirectoryRecord cdRecord,
+            long cdStartOffsetInArchive,
+            DataSink sink) throws ZipFormatException, IOException {
+        // IMPLEMENTATION NOTE: This method attempts to mimic the behavior of Android platform
+        // exhibited when reading an APK for the purposes of verifying its signatures.
+        // When verifying an APK, Android doesn't care reading the extra field or the Data
+        // Descriptor.
+        LocalFileRecord lfhRecord =
+                getRecord(
+                        source,
+                        cdRecord,
+                        cdStartOffsetInArchive,
+                        false, // don't care about the extra field
+                        false // don't read the Data Descriptor
+                        );
+        lfhRecord.outputUncompressedData(source, sink);
+    }
+
+    /**
+     * Returns the uncompressed data pointed to by the provided ZIP Central Directory (CD) record.
+     */
+    public static byte[] getUncompressedData(
+            DataSource source,
+            CentralDirectoryRecord cdRecord,
+            long cdStartOffsetInArchive) throws ZipFormatException, IOException {
+        if (cdRecord.getUncompressedSize() > Integer.MAX_VALUE) {
+            throw new IOException(
+                    cdRecord.getName() + " too large: " + cdRecord.getUncompressedSize());
+        }
+        byte[] result = null;
+        try {
+            result = new byte[(int) cdRecord.getUncompressedSize()];
+        } catch (OutOfMemoryError e) {
+            throw new IOException(
+                    cdRecord.getName() + " too large: " + cdRecord.getUncompressedSize(), e);
+        }
+        ByteBuffer resultBuf = ByteBuffer.wrap(result);
+        ByteBufferSink resultSink = new ByteBufferSink(resultBuf);
+        outputUncompressedData(
+                source,
+                cdRecord,
+                cdStartOffsetInArchive,
+                resultSink);
+        return result;
     }
 
     /**

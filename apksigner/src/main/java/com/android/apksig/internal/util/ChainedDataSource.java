@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
  * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +18,12 @@ package com.android.apksig.internal.util;
 
 import com.android.apksig.util.DataSink;
 import com.android.apksig.util.DataSource;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-/**
- * Pseudo {@link DataSource} that chains the given {@link DataSource} as a continuous one.
- */
+/** Pseudo {@link DataSource} that chains the given {@link DataSource} as a continuous one. */
 public class ChainedDataSource implements DataSource {
 
     private final DataSource[] mSources;
@@ -34,9 +31,7 @@ public class ChainedDataSource implements DataSource {
 
     public ChainedDataSource(DataSource... sources) {
         mSources = sources;
-        long totalSize = 0;
-        if (sources != null) for (DataSource source : sources) totalSize += source.size();
-        mTotalSize = totalSize;
+        mTotalSize = Arrays.stream(sources).mapToLong(src -> src.size()).sum();
     }
 
     @Override
@@ -91,7 +86,7 @@ public class ChainedDataSource implements DataSource {
         ByteBuffer buffer = ByteBuffer.allocate(size);
         for (; i < mSources.length && buffer.hasRemaining(); i++) {
             long sizeToCopy = Math.min(mSources[i].size() - offset, buffer.remaining());
-            mSources[i].copyTo(offset, MathCompat.toIntExact(sizeToCopy), buffer);
+            mSources[i].copyTo(offset, Math.toIntExact(sizeToCopy), buffer);
             offset = 0;  // may not be zero for the first source, but reset after that.
         }
         buffer.rewind();
@@ -134,7 +129,6 @@ public class ChainedDataSource implements DataSource {
 
     /**
      * Find the index of DataSource that offset is at.
-     *
      * @return Pair of DataSource index and the local offset in the DataSource.
      */
     private Pair<Integer, Long> locateDataSource(long offset) {

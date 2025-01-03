@@ -1123,5 +1123,8 @@
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Version code (computing...)</string>
     <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
     <string name="default_build_apk_version_code" translatable="false">1</string>
+    <string name="apk_info_file_size">File size</string>
+    <string name="apk_info_signature_scheme">Signature</string>
+    <string name="dialog_button_file_information">File info</string>
 
 </resources>

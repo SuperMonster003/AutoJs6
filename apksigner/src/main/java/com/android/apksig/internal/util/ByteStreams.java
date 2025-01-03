@@ -24,8 +24,7 @@ import java.io.InputStream;
  * Utilities for byte arrays and I/O streams.
  */
 public final class ByteStreams {
-    private ByteStreams() {
-    }
+    private ByteStreams() {}
 
     /**
      * Returns the data remaining in the provided input stream as a byte array

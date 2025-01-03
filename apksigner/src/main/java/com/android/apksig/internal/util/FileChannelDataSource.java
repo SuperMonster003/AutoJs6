@@ -18,7 +18,6 @@ package com.android.apksig.internal.util;
 
 import com.android.apksig.util.DataSink;
 import com.android.apksig.util.DataSource;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
@@ -64,29 +63,6 @@ public class FileChannelDataSource implements DataSource {
         mChannel = channel;
         mOffset = offset;
         mSize = size;
-    }
-
-    private static void checkChunkValid(long offset, long size, long sourceSize) {
-        if (offset < 0) {
-            throw new IndexOutOfBoundsException("offset: " + offset);
-        }
-        if (size < 0) {
-            throw new IndexOutOfBoundsException("size: " + size);
-        }
-        if (offset > sourceSize) {
-            throw new IndexOutOfBoundsException(
-                    "offset (" + offset + ") > source size (" + sourceSize + ")");
-        }
-        long endOffset = offset + size;
-        if (endOffset < offset) {
-            throw new IndexOutOfBoundsException(
-                    "offset (" + offset + ") + size (" + size + ") overflow");
-        }
-        if (endOffset > sourceSize) {
-            throw new IndexOutOfBoundsException(
-                    "offset (" + offset + ") + size (" + size
-                            + ") > source size (" + sourceSize + ")");
-        }
     }
 
     @Override
@@ -188,5 +164,28 @@ public class FileChannelDataSource implements DataSource {
         copyTo(offset, size, result);
         result.flip();
         return result;
+    }
+
+    private static void checkChunkValid(long offset, long size, long sourceSize) {
+        if (offset < 0) {
+            throw new IndexOutOfBoundsException("offset: " + offset);
+        }
+        if (size < 0) {
+            throw new IndexOutOfBoundsException("size: " + size);
+        }
+        if (offset > sourceSize) {
+            throw new IndexOutOfBoundsException(
+                    "offset (" + offset + ") > source size (" + sourceSize + ")");
+        }
+        long endOffset = offset + size;
+        if (endOffset < offset) {
+            throw new IndexOutOfBoundsException(
+                    "offset (" + offset + ") + size (" + size + ") overflow");
+        }
+        if (endOffset > sourceSize) {
+            throw new IndexOutOfBoundsException(
+                    "offset (" + offset + ") + size (" + size
+                            + ") > source size (" + sourceSize  +")");
+        }
     }
 }

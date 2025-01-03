@@ -18,7 +18,6 @@ package com.android.apksig.internal.util;
 
 import com.android.apksig.util.DataSink;
 import com.android.apksig.util.DataSource;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -99,7 +98,7 @@ public class ByteBufferDataSource implements DataSource {
         return new ByteBufferDataSource(
                 getByteBuffer(offset, (int) size),
                 false // no need to slice -- it's already a slice
-        );
+                );
     }
 
     private void checkChunkValid(long offset, long size) {
@@ -120,7 +119,7 @@ public class ByteBufferDataSource implements DataSource {
         }
         if (endOffset > mSize) {
             throw new IndexOutOfBoundsException(
-                    "offset (" + offset + ") + size (" + size + ") > source size (" + mSize + ")");
+                    "offset (" + offset + ") + size (" + size + ") > source size (" + mSize  +")");
         }
     }
 }

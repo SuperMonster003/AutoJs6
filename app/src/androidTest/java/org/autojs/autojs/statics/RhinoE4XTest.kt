@@ -1,20 +1,20 @@
-package org.autojs.autojs.statics;
+package org.autojs.autojs.statics
 
-import org.junit.Test;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
+import org.junit.Test
+import org.mozilla.javascript.Context
+import org.mozilla.javascript.Scriptable
 
 /**
  * Created by Stardust on May 13, 2017.
  */
-public class RhinoE4XTest {
-
+class RhinoE4XTest {
     @Test
-    public void testAttributeName() {
-        Context context = Context.enter();
-        Scriptable scriptable = context.initStandardObjects();
-        context.setOptimizationLevel(-1);
-        Object o = context.evaluateString(scriptable, "XML.ignoreProcessingInstructions = true; (<xml id=\"foo\"></xml>).attributes()[0].name()", "<e4x>", 1, null);
-        System.out.println(o);
+    @Suppress("DEPRECATION")
+    fun testAttributeName() {
+        val context = Context.enter()
+        val scriptable: Scriptable = context.initStandardObjects()
+        context.optimizationLevel = -1
+        val o = context.evaluateString(scriptable, "XML.ignoreProcessingInstructions = true; (<xml id=\"foo\"></xml>).attributes()[0].name()", "<e4x>", 1, null)
+        println(o)
     }
 }

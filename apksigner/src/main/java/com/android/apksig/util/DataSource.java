@@ -61,9 +61,10 @@ public interface DataSource {
      * Feeds the specified chunk from this data source into the provided sink.
      *
      * @param offset index (in bytes) at which the chunk starts inside data source
-     * @param size   size (in bytes) of the chunk
+     * @param size size (in bytes) of the chunk
+     *
      * @throws IndexOutOfBoundsException if {@code offset} or {@code size} is negative, or if
-     *                                   {@code offset + size} is greater than {@link #size()}.
+     *         {@code offset + size} is greater than {@link #size()}.
      */
     void feed(long offset, long size, DataSink sink) throws IOException;
 
@@ -76,9 +77,10 @@ public interface DataSource {
      * {@code size}.
      *
      * @param offset index (in bytes) at which the chunk starts inside data source
-     * @param size   size (in bytes) of the chunk
+     * @param size size (in bytes) of the chunk
+     *
      * @throws IndexOutOfBoundsException if {@code offset} or {@code size} is negative, or if
-     *                                   {@code offset + size} is greater than {@link #size()}.
+     *         {@code offset + size} is greater than {@link #size()}.
      */
     ByteBuffer getByteBuffer(long offset, int size) throws IOException;
 
@@ -87,9 +89,10 @@ public interface DataSource {
      * advancing the destination buffer's position by {@code size}.
      *
      * @param offset index (in bytes) at which the chunk starts inside data source
-     * @param size   size (in bytes) of the chunk
+     * @param size size (in bytes) of the chunk
+     *
      * @throws IndexOutOfBoundsException if {@code offset} or {@code size} is negative, or if
-     *                                   {@code offset + size} is greater than {@link #size()}.
+     *         {@code offset + size} is greater than {@link #size()}.
      */
     void copyTo(long offset, int size, ByteBuffer dest) throws IOException;
 
@@ -98,9 +101,10 @@ public interface DataSource {
      * to data represented by this data source will also be visible in the returned data source.
      *
      * @param offset index (in bytes) at which the region starts inside data source
-     * @param size   size (in bytes) of the region
+     * @param size size (in bytes) of the region
+     *
      * @throws IndexOutOfBoundsException if {@code offset} or {@code size} is negative, or if
-     *                                   {@code offset + size} is greater than {@link #size()}.
+     *         {@code offset + size} is greater than {@link #size()}.
      */
     DataSource slice(long offset, long size);
 }

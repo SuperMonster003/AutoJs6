@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.apksig.internal.util;
+package com.android.apksig.internal.apk;
 
-public class MathCompat {
+/**
+ * Base implementation of a supported signature for an APK.
+ */
+public class ApkSupportedSignature {
+    public final SignatureAlgorithm algorithm;
+    public final byte[] signature;
+
     /**
-     * Returns the value of the {@code long} argument;
-     * throwing an exception if the value overflows an {@code int}.
-     *
-     * @param value the long value
-     * @return the argument as an int
-     * @throws ArithmeticException if the {@code argument} overflows an int
+     * Constructs a new supported signature using the provided {@code algorithm} and {@code
+     * signature} bytes.
      */
-    public static int toIntExact(long value) {
-        if ((int) value != value) {
-            throw new ArithmeticException("integer overflow");
-        }
-        return (int) value;
+    public ApkSupportedSignature(SignatureAlgorithm algorithm, byte[] signature) {
+        this.algorithm = algorithm;
+        this.signature = signature;
     }
+
 }

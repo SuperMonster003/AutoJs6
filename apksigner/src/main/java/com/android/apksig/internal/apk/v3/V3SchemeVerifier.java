@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
  * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +19,7 @@ package com.android.apksig.internal.apk.v3;
 import static com.android.apksig.internal.apk.ApkSigningBlockUtils.getLengthPrefixedSlice;
 import static com.android.apksig.internal.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
 
+import com.android.apksig.ApkVerificationIssue;
 import com.android.apksig.ApkVerifier.Issue;
 import com.android.apksig.SigningCertificateLineage;
 import com.android.apksig.apk.ApkFormatException;
@@ -29,7 +29,6 @@ import com.android.apksig.internal.apk.ApkSigningBlockUtils.SignatureNotFoundExc
 import com.android.apksig.internal.apk.ContentDigestAlgorithm;
 import com.android.apksig.internal.apk.SignatureAlgorithm;
 import com.android.apksig.internal.apk.SignatureInfo;
-import com.android.apksig.internal.util.AndroidSdkVersion;
 import com.android.apksig.internal.util.ByteBufferUtils;
 import com.android.apksig.internal.util.GuaranteedEncodedFormX509Certificate;
 import com.android.apksig.internal.util.X509CertificateUtils;
@@ -39,6 +38,7 @@ import com.android.apksig.util.RunnablesExecutor;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -68,14 +69,41 @@ import java.util.TreeMap;
  *
  * @see <a href="https://source.android.com/security/apksigning/v2.html">APK Signature Scheme v2</a>
  */
-public abstract class V3SchemeVerifier {
+public class V3SchemeVerifier {
+    private final RunnablesExecutor mExecutor;
+    private final DataSource mApk;
+    private final ApkUtils.ZipSections mZipSections;
+    private final ApkSigningBlockUtils.Result mResult;
+    private final Set<ContentDigestAlgorithm> mContentDigestsToVerify;
+    private final int mMinSdkVersion;
+    private final int mMaxSdkVersion;
+    private final int mBlockId;
+    private final OptionalInt mOptionalRotationMinSdkVersion;
+    private final boolean mFullVerification;
 
-    private static final int APK_SIGNATURE_SCHEME_V3_BLOCK_ID = 0xf05368c0;
+    private ByteBuffer mApkSignatureSchemeV3Block;
 
-    /**
-     * Hidden constructor to prevent instantiation.
-     */
-    private V3SchemeVerifier() {
+    private V3SchemeVerifier(
+            RunnablesExecutor executor,
+            DataSource apk,
+            ApkUtils.ZipSections zipSections,
+            Set<ContentDigestAlgorithm> contentDigestsToVerify,
+            ApkSigningBlockUtils.Result result,
+            int minSdkVersion,
+            int maxSdkVersion,
+            int blockId,
+            OptionalInt optionalRotationMinSdkVersion,
+            boolean fullVerification) {
+        mExecutor = executor;
+        mApk = apk;
+        mZipSections = zipSections;
+        mContentDigestsToVerify = contentDigestsToVerify;
+        mResult = result;
+        mMinSdkVersion = minSdkVersion;
+        mMaxSdkVersion = maxSdkVersion;
+        mBlockId = blockId;
+        mOptionalRotationMinSdkVersion = optionalRotationMinSdkVersion;
+        mFullVerification = fullVerification;
     }
 
     /**
@@ -91,12 +119,15 @@ public abstract class V3SchemeVerifier {
      * this method returns a result with one or more errors and whose
      * {@code Result.verified == false}, or this method throws an exception.
      *
-     * @throws ApkFormatException         if the APK is malformed
-     * @throws NoSuchAlgorithmException   if the APK's signatures cannot be verified because a
-     *                                    required cryptographic algorithm implementation is missing
+     * <p>This method only verifies the v3.0 signing block without platform targeted rotation from
+     * a v3.1 signing block. To verify a v3.1 signing block, or a v3.0 signing block in the presence
+     * of a v3.1 block, configure a new {@link V3SchemeVerifier} using the {@code Builder}.
+     *
+     * @throws NoSuchAlgorithmException if the APK's signatures cannot be verified because a
+     *         required cryptographic algorithm implementation is missing
      * @throws SignatureNotFoundException if no APK Signature Scheme v3
-     *                                    signatures are found
-     * @throws IOException                if an I/O error occurs when reading the APK
+     * signatures are found
+     * @throws IOException if an I/O error occurs when reading the APK
      */
     public static ApkSigningBlockUtils.Result verify(
             RunnablesExecutor executor,
@@ -105,34 +136,11 @@ public abstract class V3SchemeVerifier {
             int minSdkVersion,
             int maxSdkVersion)
             throws IOException, NoSuchAlgorithmException, SignatureNotFoundException {
-        ApkSigningBlockUtils.Result result = new ApkSigningBlockUtils.Result(
-                ApkSigningBlockUtils.VERSION_APK_SIGNATURE_SCHEME_V3);
-        SignatureInfo signatureInfo =
-                ApkSigningBlockUtils.findSignature(apk, zipSections,
-                        APK_SIGNATURE_SCHEME_V3_BLOCK_ID, result);
-
-        DataSource beforeApkSigningBlock = apk.slice(0, signatureInfo.apkSigningBlockOffset);
-        DataSource centralDir =
-                apk.slice(
-                        signatureInfo.centralDirOffset,
-                        signatureInfo.eocdOffset - signatureInfo.centralDirOffset);
-        ByteBuffer eocd = signatureInfo.eocd;
-
-        // v3 didn't exist prior to P, so make sure that we're only judging v3 on its supported
-        // platforms
-        if (minSdkVersion < AndroidSdkVersion.P) {
-            minSdkVersion = AndroidSdkVersion.P;
-        }
-
-        verify(executor,
-                beforeApkSigningBlock,
-                signatureInfo.signatureBlock,
-                centralDir,
-                eocd,
-                minSdkVersion,
-                maxSdkVersion,
-                result);
-        return result;
+        return new V3SchemeVerifier.Builder(apk, zipSections, minSdkVersion, maxSdkVersion)
+                .setRunnablesExecutor(executor)
+                .setBlockId(V3SchemeConstants.APK_SIGNATURE_SCHEME_V3_BLOCK_ID)
+                .build()
+                .verify();
     }
 
     /**
@@ -141,34 +149,41 @@ public abstract class V3SchemeVerifier {
      * {@code result}. See {@link #verify(RunnablesExecutor, DataSource, ApkUtils.ZipSections, int,
      * int)} for more information about the contract of this method.
      *
-     * @param result result populated by this method with interesting information about the APK,
-     *               such as information about signers, and verification errors and warnings.
+     * @return {@link ApkSigningBlockUtils.Result} populated with interesting information about the
+     *        APK, such as information about signers, and verification errors and warnings
      */
-    private static void verify(
-            RunnablesExecutor executor,
-            DataSource beforeApkSigningBlock,
-            ByteBuffer apkSignatureSchemeV3Block,
-            DataSource centralDir,
-            ByteBuffer eocd,
-            int minSdkVersion,
-            int maxSdkVersion,
-            ApkSigningBlockUtils.Result result)
-            throws IOException, NoSuchAlgorithmException {
-        Set<ContentDigestAlgorithm> contentDigestsToVerify = new HashSet<>(1);
-        parseSigners(apkSignatureSchemeV3Block, contentDigestsToVerify, result);
-
-        if (result.containsErrors()) {
-            return;
+    public ApkSigningBlockUtils.Result verify()
+            throws IOException, NoSuchAlgorithmException, SignatureNotFoundException {
+        if (mApk == null || mZipSections == null) {
+            throw new IllegalStateException(
+                    "A non-null apk and zip sections must be specified to verify an APK's v3 "
+                            + "signatures");
         }
-        ApkSigningBlockUtils.verifyIntegrity(
-                executor, beforeApkSigningBlock, centralDir, eocd, contentDigestsToVerify, result);
+        SignatureInfo signatureInfo =
+                ApkSigningBlockUtils.findSignature(mApk, mZipSections, mBlockId, mResult);
+        mApkSignatureSchemeV3Block = signatureInfo.signatureBlock;
+
+        DataSource beforeApkSigningBlock = mApk.slice(0, signatureInfo.apkSigningBlockOffset);
+        DataSource centralDir =
+                mApk.slice(
+                        signatureInfo.centralDirOffset,
+                        signatureInfo.eocdOffset - signatureInfo.centralDirOffset);
+        ByteBuffer eocd = signatureInfo.eocd;
+
+        parseSigners();
+
+        if (mResult.containsErrors()) {
+            return mResult;
+        }
+        ApkSigningBlockUtils.verifyIntegrity(mExecutor, beforeApkSigningBlock, centralDir, eocd,
+                mContentDigestsToVerify, mResult);
 
         // make sure that the v3 signers cover the entire targeted sdk version ranges and that the
         // longest SigningCertificateHistory, if present, corresponds to the newest platform
         // versions
         SortedMap<Integer, ApkSigningBlockUtils.Result.SignerInfo> sortedSigners = new TreeMap<>();
-        for (ApkSigningBlockUtils.Result.SignerInfo signer : result.signers) {
-            sortedSigners.put(signer.minSdkVersion, signer);
+        for (ApkSigningBlockUtils.Result.SignerInfo signer : mResult.signers) {
+            sortedSigners.put(signer.maxSdkVersion, signer);
         }
 
         // first make sure there is neither overlap nor holes
@@ -177,7 +192,7 @@ public abstract class V3SchemeVerifier {
         int lastLineageSize = 0;
 
         // while we're iterating through the signers, build up the list of lineages
-        List<SigningCertificateLineage> lineages = new ArrayList<>(result.signers.size());
+        List<SigningCertificateLineage> lineages = new ArrayList<>(mResult.signers.size());
 
         for (ApkSigningBlockUtils.Result.SignerInfo signer : sortedSigners.values()) {
             int currentMin = signer.minSdkVersion;
@@ -186,8 +201,11 @@ public abstract class V3SchemeVerifier {
                 // first round sets up our basis
                 firstMin = currentMin;
             } else {
-                if (currentMin != lastMax + 1) {
-                    result.addError(Issue.V3_INCONSISTENT_SDK_VERSIONS);
+                // A signer's minimum SDK can equal the previous signer's maximum SDK if this signer
+                // is targeting a development release.
+                if (currentMin != (lastMax + 1)
+                        && !(currentMin == lastMax && signerTargetsDevRelease(signer))) {
+                    mResult.addError(Issue.V3_INCONSISTENT_SDK_VERSIONS);
                     break;
                 }
             }
@@ -197,7 +215,7 @@ public abstract class V3SchemeVerifier {
             if (signer.signingCertificateLineage != null) {
                 int currLineageSize = signer.signingCertificateLineage.size();
                 if (currLineageSize < lastLineageSize) {
-                    result.addError(Issue.V3_INCONSISTENT_LINEAGES);
+                    mResult.addError(Issue.V3_INCONSISTENT_LINEAGES);
                     break;
                 }
                 lastLineageSize = currLineageSize;
@@ -205,20 +223,24 @@ public abstract class V3SchemeVerifier {
             }
         }
 
-        // make sure we support our desired sdk ranges
-        if (firstMin > minSdkVersion || lastMax < maxSdkVersion) {
-            result.addError(Issue.V3_MISSING_SDK_VERSIONS, firstMin, lastMax);
+        // make sure we support our desired sdk ranges; if rotation is present in a v3.1 block
+        // then the max level only needs to support up to that sdk version for rotation.
+        if (firstMin > mMinSdkVersion
+                || lastMax < (mOptionalRotationMinSdkVersion.isPresent()
+                    ? mOptionalRotationMinSdkVersion.getAsInt() - 1 : mMaxSdkVersion)) {
+            mResult.addError(Issue.V3_MISSING_SDK_VERSIONS, firstMin, lastMax);
         }
 
         try {
-            result.signingCertificateLineage =
+            mResult.signingCertificateLineage =
                     SigningCertificateLineage.consolidateLineages(lineages);
         } catch (IllegalArgumentException e) {
-            result.addError(Issue.V3_INCONSISTENT_LINEAGES);
+            mResult.addError(Issue.V3_INCONSISTENT_LINEAGES);
         }
-        if (!result.containsErrors()) {
-            result.verified = true;
+        if (!mResult.containsErrors()) {
+            mResult.verified = true;
         }
+        return mResult;
     }
 
     /**
@@ -237,16 +259,49 @@ public abstract class V3SchemeVerifier {
             ByteBuffer apkSignatureSchemeV3Block,
             Set<ContentDigestAlgorithm> contentDigestsToVerify,
             ApkSigningBlockUtils.Result result) throws NoSuchAlgorithmException {
+        try {
+            new V3SchemeVerifier.Builder(apkSignatureSchemeV3Block)
+                    .setResult(result)
+                    .setContentDigestsToVerify(contentDigestsToVerify)
+                    .setFullVerification(false)
+                    .build()
+                    .parseSigners();
+        } catch (IOException | SignatureNotFoundException e) {
+            // This should never occur since the apkSignatureSchemeV3Block was already provided.
+            throw new IllegalStateException("An exception was encountered when attempting to parse"
+                    + " the signers from the provided APK Signature Scheme v3 block", e);
+        }
+    }
+
+    /**
+     * Parses each signer in the APK Signature Scheme v3 block and populates corresponding
+     * {@link ApkSigningBlockUtils.Result.SignerInfo} instances in the
+     * returned {@link ApkSigningBlockUtils.Result}.
+     *
+     * <p>This verifies signatures over {@code signed-data} block contained in each signer block.
+     * However, this does not verify the integrity of the rest of the APK but rather simply reports
+     * the expected digests of the rest of the APK (see {@link Builder#setContentDigestsToVerify}).
+     *
+     * <p>This method adds one or more errors to the returned {@code Result} if a verification error
+     * is encountered when parsing the signers.
+     */
+    public ApkSigningBlockUtils.Result parseSigners()
+            throws IOException, NoSuchAlgorithmException, SignatureNotFoundException {
         ByteBuffer signers;
         try {
-            signers = getLengthPrefixedSlice(apkSignatureSchemeV3Block);
+            if (mApkSignatureSchemeV3Block == null) {
+                SignatureInfo signatureInfo =
+                        ApkSigningBlockUtils.findSignature(mApk, mZipSections, mBlockId, mResult);
+                mApkSignatureSchemeV3Block = signatureInfo.signatureBlock;
+            }
+            signers = getLengthPrefixedSlice(mApkSignatureSchemeV3Block);
         } catch (ApkFormatException e) {
-            result.addError(Issue.V3_SIG_MALFORMED_SIGNERS);
-            return;
+            mResult.addError(Issue.V3_SIG_MALFORMED_SIGNERS);
+            return mResult;
         }
         if (!signers.hasRemaining()) {
-            result.addError(Issue.V3_SIG_NO_SIGNERS);
-            return;
+            mResult.addError(Issue.V3_SIG_NO_SIGNERS);
+            return mResult;
         }
 
         CertificateFactory certFactory;
@@ -262,15 +317,16 @@ public abstract class V3SchemeVerifier {
             ApkSigningBlockUtils.Result.SignerInfo signerInfo =
                     new ApkSigningBlockUtils.Result.SignerInfo();
             signerInfo.index = signerIndex;
-            result.signers.add(signerInfo);
+            mResult.signers.add(signerInfo);
             try {
                 ByteBuffer signer = getLengthPrefixedSlice(signers);
-                parseSigner(signer, certFactory, signerInfo, contentDigestsToVerify);
+                parseSigner(signer, certFactory, signerInfo);
             } catch (ApkFormatException | BufferUnderflowException e) {
                 signerInfo.addError(Issue.V3_SIG_MALFORMED_SIGNER);
-                return;
+                return mResult;
             }
         }
+        return mResult;
     }
 
     /**
@@ -285,11 +341,8 @@ public abstract class V3SchemeVerifier {
      * expected to be encountered on an Android platform version in the
      * {@code [minSdkVersion, maxSdkVersion]} range.
      */
-    private static void parseSigner(
-            ByteBuffer signerBlock,
-            CertificateFactory certFactory,
-            ApkSigningBlockUtils.Result.SignerInfo result,
-            Set<ContentDigestAlgorithm> contentDigestsToVerify)
+    private void parseSigner(ByteBuffer signerBlock, CertificateFactory certFactory,
+            ApkSigningBlockUtils.Result.SignerInfo result)
             throws ApkFormatException, NoSuchAlgorithmException {
         ByteBuffer signedData = getLengthPrefixedSlice(signerBlock);
         byte[] signedDataBytes = new byte[signedData.remaining()];
@@ -379,7 +432,7 @@ public abstract class V3SchemeVerifier {
                     return;
                 }
                 result.verifiedSignatures.put(signatureAlgorithm, sigBytes);
-                contentDigestsToVerify.add(signatureAlgorithm.getContentDigestAlgorithm());
+                mContentDigestsToVerify.add(signatureAlgorithm.getContentDigestAlgorithm());
             } catch (InvalidKeyException | InvalidAlgorithmParameterException
                     | SignatureException e) {
                 result.addError(Issue.V3_SIG_VERIFY_EXCEPTION, signatureAlgorithm, e);
@@ -439,7 +492,8 @@ public abstract class V3SchemeVerifier {
         X509Certificate mainCertificate = result.certs.get(0);
         byte[] certificatePublicKeyBytes;
         try {
-            certificatePublicKeyBytes = ApkSigningBlockUtils.encodePublicKey(mainCertificate.getPublicKey());
+            certificatePublicKeyBytes = ApkSigningBlockUtils.encodePublicKey(
+                    mainCertificate.getPublicKey());
         } catch (InvalidKeyException e) {
             System.out.println("Caught an exception encoding the public key: " + e);
             e.printStackTrace();
@@ -489,6 +543,7 @@ public abstract class V3SchemeVerifier {
 
         // Parse the additional attributes block.
         int additionalAttributeCount = 0;
+        boolean rotationAttrFound = false;
         while (additionalAttributes.hasRemaining()) {
             additionalAttributeCount++;
             try {
@@ -498,7 +553,7 @@ public abstract class V3SchemeVerifier {
                 byte[] value = ByteBufferUtils.toByteArray(attribute);
                 result.additionalAttributes.add(
                         new ApkSigningBlockUtils.Result.SignerInfo.AdditionalAttribute(id, value));
-                if (id == V3SchemeSigner.PROOF_OF_ROTATION_ATTR_ID) {
+                if (id == V3SchemeConstants.PROOF_OF_ROTATION_ATTR_ID) {
                     try {
                         // SigningCertificateLineage is verified when built
                         result.signingCertificateLineage =
@@ -516,6 +571,31 @@ public abstract class V3SchemeVerifier {
                     } catch (Exception e) {
                         result.addError(Issue.V3_SIG_MALFORMED_LINEAGE);
                     }
+                } else if (id == V3SchemeConstants.ROTATION_MIN_SDK_VERSION_ATTR_ID) {
+                    rotationAttrFound = true;
+                    // API targeting for rotation was added with V3.1; if the maxSdkVersion
+                    // does not support v3.1 then ignore this attribute.
+                    if (mMaxSdkVersion >= V3SchemeConstants.MIN_SDK_WITH_V31_SUPPORT
+                            && mFullVerification) {
+                        int attrRotationMinSdkVersion = ByteBuffer.wrap(value)
+                                .order(ByteOrder.LITTLE_ENDIAN).getInt();
+                        if (mOptionalRotationMinSdkVersion.isPresent()) {
+                            int rotationMinSdkVersion = mOptionalRotationMinSdkVersion.getAsInt();
+                            if (attrRotationMinSdkVersion != rotationMinSdkVersion) {
+                                result.addError(Issue.V31_ROTATION_MIN_SDK_MISMATCH,
+                                    attrRotationMinSdkVersion, rotationMinSdkVersion);
+                            }
+                        } else {
+                            result.addError(Issue.V31_BLOCK_MISSING, attrRotationMinSdkVersion);
+                        }
+                    }
+                } else if (id == V3SchemeConstants.ROTATION_ON_DEV_RELEASE_ATTR_ID) {
+                    // This attribute should only be used by a v3.1 signer to indicate rotation
+                    // is targeting the development release that is using the SDK version of the
+                    // previously released platform version.
+                    if (mBlockId != V3SchemeConstants.APK_SIGNATURE_SCHEME_V31_BLOCK_ID) {
+                        result.addWarning(Issue.V31_ROTATION_TARGETS_DEV_RELEASE_ATTR_ON_V3_SIGNER);
+                    }
                 } else {
                     result.addWarning(Issue.V3_SIG_UNKNOWN_ADDITIONAL_ATTRIBUTE, id);
                 }
@@ -524,6 +604,180 @@ public abstract class V3SchemeVerifier {
                         Issue.V3_SIG_MALFORMED_ADDITIONAL_ATTRIBUTE, additionalAttributeCount);
                 return;
             }
+        }
+        if (mFullVerification && mOptionalRotationMinSdkVersion.isPresent() && !rotationAttrFound) {
+            result.addWarning(Issue.V31_ROTATION_MIN_SDK_ATTR_MISSING,
+                    mOptionalRotationMinSdkVersion.getAsInt());
+        }
+    }
+
+    /**
+     * Returns whether the specified {@code signerInfo} is targeting a development release.
+     */
+    public static boolean signerTargetsDevRelease(
+            ApkSigningBlockUtils.Result.SignerInfo signerInfo) {
+        boolean result = signerInfo.additionalAttributes.stream()
+                .mapToInt(attribute -> attribute.getId())
+                .anyMatch(attrId -> attrId == V3SchemeConstants.ROTATION_ON_DEV_RELEASE_ATTR_ID);
+        return result;
+    }
+
+    /** Builder of {@link V3SchemeVerifier} instances. */
+    public static class Builder {
+        private RunnablesExecutor mExecutor = RunnablesExecutor.SINGLE_THREADED;
+        private DataSource mApk;
+        private ApkUtils.ZipSections mZipSections;
+        private ByteBuffer mApkSignatureSchemeV3Block;
+        private Set<ContentDigestAlgorithm> mContentDigestsToVerify;
+        private ApkSigningBlockUtils.Result mResult;
+        private int mMinSdkVersion;
+        private int mMaxSdkVersion;
+        private int mBlockId = V3SchemeConstants.APK_SIGNATURE_SCHEME_V3_BLOCK_ID;
+        private boolean mFullVerification = true;
+        private OptionalInt mOptionalRotationMinSdkVersion = OptionalInt.empty();
+
+        /**
+         * Instantiates a new {@code Builder} for a {@code V3SchemeVerifier} that can be used to
+         * verify the V3 signing block of the provided {@code apk} with the specified {@code
+         * zipSections} over the range from {@code minSdkVersion} to {@code maxSdkVersion}.
+         */
+        public Builder(DataSource apk, ApkUtils.ZipSections zipSections, int minSdkVersion,
+                int maxSdkVersion) {
+            mApk = apk;
+            mZipSections = zipSections;
+            mMinSdkVersion = minSdkVersion;
+            mMaxSdkVersion = maxSdkVersion;
+        }
+
+        /**
+         * Instantiates a new {@code Builder} for a {@code V3SchemeVerifier} that can be used to
+         * parse the {@link ApkSigningBlockUtils.Result.SignerInfo} instances from the {@code
+         * apkSignatureSchemeV3Block}.
+         *
+         * <note>Full verification of the v3 signature is not possible when instantiating a new
+         * {@code V3SchemeVerifier} with this method.</note>
+         */
+        public Builder(ByteBuffer apkSignatureSchemeV3Block) {
+            mApkSignatureSchemeV3Block = apkSignatureSchemeV3Block;
+        }
+
+        /**
+         * Sets the {@link RunnablesExecutor} to be used when verifying the APK's content digests.
+         */
+        public Builder setRunnablesExecutor(RunnablesExecutor executor) {
+            mExecutor = executor;
+            return this;
+        }
+
+        /**
+         * Sets the V3 {code blockId} to be verified in the provided APK.
+         *
+         * <p>This {@code V3SchemeVerifier} currently supports the block IDs for the {@link
+         * V3SchemeConstants#APK_SIGNATURE_SCHEME_V3_BLOCK_ID v3.0} and {@link
+         * V3SchemeConstants#APK_SIGNATURE_SCHEME_V31_BLOCK_ID v3.1} signature schemes.
+         */
+        public Builder setBlockId(int blockId) {
+            mBlockId = blockId;
+            return this;
+        }
+
+        /**
+         * Sets the {@code rotationMinSdkVersion} to be verified in the v3.0 signer's additional
+         * attribute.
+         *
+         * <p>This value can be obtained from the signers returned when verifying the v3.1 signing
+         * block of an APK; in the case of multiple signers targeting different SDK versions in the
+         * v3.1 signing block, the minimum SDK version from all the signers should be used.
+         */
+        public Builder setRotationMinSdkVersion(int rotationMinSdkVersion) {
+            mOptionalRotationMinSdkVersion = OptionalInt.of(rotationMinSdkVersion);
+            return this;
+        }
+
+        /**
+         * Sets the {@code result} instance to be used when returning verification results.
+         *
+         * <p>This method can be used when the caller already has a {@link
+         * ApkSigningBlockUtils.Result} and wants to store the verification results in this
+         * instance.
+         */
+        public Builder setResult(ApkSigningBlockUtils.Result result) {
+            mResult = result;
+            return this;
+        }
+
+        /**
+         * Sets the instance to be used to store the {@code contentDigestsToVerify}.
+         *
+         * <p>This method can be used when the caller needs access to the {@code
+         * contentDigestsToVerify} computed by this {@code V3SchemeVerifier}.
+         */
+        public Builder setContentDigestsToVerify(
+                Set<ContentDigestAlgorithm> contentDigestsToVerify) {
+            mContentDigestsToVerify = contentDigestsToVerify;
+            return this;
+        }
+
+        /**
+         * Sets whether full verification should be performed by the {@code V3SchemeVerifier} built
+         * from this instance.
+         *
+         * <note>{@link #verify()} will always verify the content digests for the APK, but this
+         * allows verification of the rotation minimum SDK version stripping attribute to be skipped
+         * for scenarios where this value may not have been parsed from a V3.1 signing block (such
+         * as when only {@link #parseSigners()} will be invoked.</note>
+         */
+        public Builder setFullVerification(boolean fullVerification) {
+            mFullVerification = fullVerification;
+            return this;
+        }
+
+        /**
+         * Returns a new {@link V3SchemeVerifier} built with the configuration provided to this
+         * {@code Builder}.
+         */
+        public V3SchemeVerifier build() {
+            int sigSchemeVersion;
+            switch (mBlockId) {
+                case V3SchemeConstants.APK_SIGNATURE_SCHEME_V3_BLOCK_ID:
+                    sigSchemeVersion = ApkSigningBlockUtils.VERSION_APK_SIGNATURE_SCHEME_V3;
+                    mMinSdkVersion = Math.max(mMinSdkVersion,
+                            V3SchemeConstants.MIN_SDK_WITH_V3_SUPPORT);
+                    break;
+                case V3SchemeConstants.APK_SIGNATURE_SCHEME_V31_BLOCK_ID:
+                    sigSchemeVersion = ApkSigningBlockUtils.VERSION_APK_SIGNATURE_SCHEME_V31;
+                    // V3.1 supports targeting an SDK version later than that of the initial release
+                    // in which it is supported; allow any range for V3.1 as long as V3.0 covers the
+                    // rest of the range.
+                    mMinSdkVersion = mMaxSdkVersion;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            String.format("Unsupported APK Signature Scheme V3 block ID: 0x%08x",
+                                    mBlockId));
+            }
+            if (mResult == null) {
+                mResult = new ApkSigningBlockUtils.Result(sigSchemeVersion);
+            }
+            if (mContentDigestsToVerify == null) {
+                mContentDigestsToVerify = new HashSet<>(1);
+            }
+
+            V3SchemeVerifier verifier = new V3SchemeVerifier(
+                    mExecutor,
+                    mApk,
+                    mZipSections,
+                    mContentDigestsToVerify,
+                    mResult,
+                    mMinSdkVersion,
+                    mMaxSdkVersion,
+                    mBlockId,
+                    mOptionalRotationMinSdkVersion,
+                    mFullVerification);
+            if (mApkSignatureSchemeV3Block != null) {
+                verifier.mApkSignatureSchemeV3Block = mApkSignatureSchemeV3Block;
+            }
+            return verifier;
         }
     }
 }

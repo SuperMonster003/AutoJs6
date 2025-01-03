@@ -25,32 +25,41 @@
 //  ! 查看 KSP (Kotlin Symbol Processing) 插件的发行版本,
 //  ! 可访问 https://github.com/google/ksp/releases.
 
-include(
-    ":app",
-    ":modules:jieba-analysis",
-    ":modules:apksigner",
-
-    ":libs:android-job-simplified-1.4.3",
-    ":libs:androidx.appcompat-1.0.2",
-    ":libs:apk-parser-1.0.2",
-    ":libs:com.tencent.bugly.crashreport-4.0.4",
-    ":libs:jackpal.androidterm-1.0.70",
-    ":libs:jackpal.androidterm.emulatorview-1.0.42",
-    ":libs:jackpal.androidterm.libtermexec-1.0",
-    ":libs:org.opencv-4.8.0",
-    ":libs:paddleocr",
-    ":libs:rapidocr",
-
-    ":libs:android-spackle-9.0.0",
-    ":libs:android-assertion-9.0.0",
-    ":libs:android-plugin-client-sdk-for-locale-9.0.0",
-
-    ":libs:markwon-core-4.6.2",
-    ":libs:markwon-syntax-highlight-4.6.2",
+private val modules = listOf(
+    "jieba-analysis",
+    "apksigner",
 )
 
-project(":modules:jieba-analysis").projectDir = file("jieba-analysis")
-project(":modules:apksigner").projectDir = file("apksigner")
+private val libs = listOf(
+    "android-job-simplified-1.4.3",
+    "androidx.appcompat-1.0.2",
+    "apk-parser-1.0.2",
+    "com.tencent.bugly.crashreport-4.0.4",
+    "org.opencv-4.8.0",
+    "paddleocr",
+    "rapidocr",
+
+    "jackpal.androidterm-1.0.70",
+    "jackpal.androidterm.emulatorview-1.0.42",
+    "jackpal.androidterm.libtermexec-1.0",
+
+    "android-spackle-9.0.0",
+    "android-assertion-9.0.0",
+    "android-plugin-client-sdk-for-locale-9.0.0",
+
+    "markwon-core-4.6.2",
+    "markwon-syntax-highlight-4.6.2",
+)
+
+include(
+    ":app",
+    *modules.map { ":modules:$it" }.toTypedArray(),
+    *libs.map { ":libs:$it" }.toTypedArray(),
+)
+
+modules.forEach {
+    project(":modules:$it").projectDir = file(it)
+}
 
 pluginManagement {
 

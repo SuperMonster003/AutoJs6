@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
  * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +21,6 @@ import com.android.apksig.internal.asn1.Asn1DecodingException;
 import com.android.apksig.internal.asn1.Asn1DerEncoder;
 import com.android.apksig.internal.asn1.Asn1EncodingException;
 import com.android.apksig.internal.x509.Certificate;
-import com.mcal.apksigner.utils.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,6 +30,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 
 /**
@@ -41,6 +40,8 @@ import java.util.Collection;
  */
 public class X509CertificateUtils {
 
+    private static volatile CertificateFactory sCertFactory = null;
+
     // The PEM certificate header and footer as specified in RFC 7468:
     //   There is exactly one space character (SP) separating the "BEGIN" or
     //   "END" from the label.  There are exactly five hyphen-minus (also
@@ -48,9 +49,16 @@ public class X509CertificateUtils {
     //   boundaries, no more, no less.
     public static final byte[] BEGIN_CERT_HEADER = "-----BEGIN CERTIFICATE-----".getBytes();
     public static final byte[] END_CERT_FOOTER = "-----END CERTIFICATE-----".getBytes();
-    private static CertificateFactory sCertFactory = null;
 
     private static void buildCertFactory() {
+        if (sCertFactory != null) {
+            return;
+        }
+
+        buildCertFactoryHelper();
+    }
+
+    private static synchronized void buildCertFactoryHelper() {
         if (sCertFactory != null) {
             return;
         }
@@ -84,9 +92,7 @@ public class X509CertificateUtils {
      */
     public static X509Certificate generateCertificate(byte[] encodedForm)
             throws CertificateException {
-        if (sCertFactory == null) {
-            buildCertFactory();
-        }
+        buildCertFactory();
         return generateCertificate(encodedForm, sCertFactory);
     }
 
@@ -97,7 +103,7 @@ public class X509CertificateUtils {
      * @throws CertificateException if the encodedForm cannot be decoded to a valid certificate.
      */
     public static X509Certificate generateCertificate(byte[] encodedForm,
-                                                      CertificateFactory certFactory) throws CertificateException {
+            CertificateFactory certFactory) throws CertificateException {
         X509Certificate certificate;
         try {
             certificate = (X509Certificate) certFactory.generateCertificate(
@@ -149,9 +155,7 @@ public class X509CertificateUtils {
      */
     public static Collection<? extends java.security.cert.Certificate> generateCertificates(
             InputStream in) throws CertificateException {
-        if (sCertFactory == null) {
-            buildCertFactory();
-        }
+        buildCertFactory();
         return generateCertificates(in, sCertFactory);
     }
 
@@ -210,7 +214,7 @@ public class X509CertificateUtils {
      * it is already DER encoded. If the buffer does begin with the PEM certificate header then the
      * certificate data is read from the buffer until the PEM certificate footer is reached; this
      * data is then base64 decoded and returned in a new ByteBuffer.
-     * <p>
+     *
      * If the buffer is in PEM format then the position of the buffer is moved to the end of the
      * current certificate; if the buffer is already DER encoded then the position of the buffer is
      * not modified.
@@ -261,7 +265,7 @@ public class X509CertificateUtils {
                                 + "valid certificate footer");
             }
         }
-        byte[] derEncoding = Base64.decode(pemEncoding.toString());
+        byte[] derEncoding = Base64.getDecoder().decode(pemEncoding.toString());
         // consume any trailing whitespace in the byte buffer
         int nextEncodedChar = certificateBuffer.position();
         while (certificateBuffer.hasRemaining()) {

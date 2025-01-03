@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
  * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +17,6 @@
 package com.android.apksig.internal.asn1;
 
 import com.android.apksig.internal.asn1.ber.BerEncoding;
-import com.android.apksig.internal.util.ClassCompat;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
@@ -38,30 +36,24 @@ import java.util.List;
  * containing fields annotated with {@link Asn1Field}.
  */
 public final class Asn1DerEncoder {
-    /**
-     * ASN.1 DER-encoded {@code NULL}.
-     */
-    public static final Asn1OpaqueObject ASN1_DER_NULL =
-            new Asn1OpaqueObject(new byte[]{BerEncoding.TAG_NUMBER_NULL, 0});
-
-    private Asn1DerEncoder() {
-    }
+    private Asn1DerEncoder() {}
 
     /**
      * Returns the DER-encoded form of the provided ASN.1 structure.
      *
      * @param container container to be encoded. The container's class must meet the following
-     *                  requirements:
-     *                  <ul>
-     *                  <li>The class must be annotated with {@link Asn1Class}.</li>
-     *                  <li>Member fields of the class which are to be encoded must be annotated with
-     *                      {@link Asn1Field} and be public.</li>
-     *                  </ul>
+     *        requirements:
+     *        <ul>
+     *        <li>The class must be annotated with {@link Asn1Class}.</li>
+     *        <li>Member fields of the class which are to be encoded must be annotated with
+     *            {@link Asn1Field} and be public.</li>
+     *        </ul>
+     *
      * @throws Asn1EncodingException if the input could not be encoded
      */
     public static byte[] encode(Object container) throws Asn1EncodingException {
         Class<?> containerClass = container.getClass();
-        Asn1Class containerAnnotation = ClassCompat.getDeclaredAnnotation(containerClass, Asn1Class.class);
+        Asn1Class containerAnnotation = containerClass.getDeclaredAnnotation(Asn1Class.class);
         if (containerAnnotation == null) {
             throw new Asn1EncodingException(
                     containerClass.getName() + " not annotated with " + Asn1Class.class.getName());
@@ -196,13 +188,35 @@ public final class Asn1DerEncoder {
                 serializedValues.toArray(new byte[0][]));
     }
 
+    /**
+     * Compares two bytes arrays based on their lexicographic order. Corresponding elements of the
+     * two arrays are compared in ascending order. Elements at out of range indices are assumed to
+     * be smaller than the smallest possible value for an element.
+     */
+    private static class ByteArrayLexicographicComparator implements Comparator<byte[]> {
+            private static final ByteArrayLexicographicComparator INSTANCE =
+                    new ByteArrayLexicographicComparator();
+
+            @Override
+            public int compare(byte[] arr1, byte[] arr2) {
+                int commonLength = Math.min(arr1.length, arr2.length);
+                for (int i = 0; i < commonLength; i++) {
+                    int diff = (arr1[i] & 0xff) - (arr2[i] & 0xff);
+                    if (diff != 0) {
+                        return diff;
+                    }
+                }
+                return arr1.length - arr2.length;
+            }
+    }
+
     private static List<AnnotatedField> getAnnotatedFields(Object container)
             throws Asn1EncodingException {
         Class<?> containerClass = container.getClass();
         Field[] declaredFields = containerClass.getDeclaredFields();
         List<AnnotatedField> result = new ArrayList<>(declaredFields.length);
         for (Field field : declaredFields) {
-            Asn1Field annotation = field.getAnnotation(Asn1Field.class);
+            Asn1Field annotation = field.getDeclaredAnnotation(Asn1Field.class);
             if (annotation == null) {
                 continue;
             }
@@ -329,89 +343,6 @@ public final class Asn1DerEncoder {
         }
     }
 
-    private static byte[] createTag(
-            int tagClass, boolean constructed, int tagNumber, byte[]... contents) {
-        if (tagNumber >= 0x1f) {
-            throw new IllegalArgumentException("High tag numbers not supported: " + tagNumber);
-        }
-        // tag class & number fit into the first byte
-        byte firstIdentifierByte =
-                (byte) ((tagClass << 6) | (constructed ? 1 << 5 : 0) | tagNumber);
-
-        int contentsLength = 0;
-        for (byte[] c : contents) {
-            contentsLength += c.length;
-        }
-        int contentsPosInResult;
-        byte[] result;
-        if (contentsLength < 0x80) {
-            // Length fits into one byte
-            contentsPosInResult = 2;
-            result = new byte[contentsPosInResult + contentsLength];
-            result[0] = firstIdentifierByte;
-            result[1] = (byte) contentsLength;
-        } else {
-            // Length is represented as multiple bytes
-            // The low 7 bits of the first byte represent the number of length bytes (following the
-            // first byte) in which the length is in big-endian base-256 form
-            if (contentsLength <= 0xff) {
-                contentsPosInResult = 3;
-                result = new byte[contentsPosInResult + contentsLength];
-                result[1] = (byte) 0x81; // 1 length byte
-                result[2] = (byte) contentsLength;
-            } else if (contentsLength <= 0xffff) {
-                contentsPosInResult = 4;
-                result = new byte[contentsPosInResult + contentsLength];
-                result[1] = (byte) 0x82; // 2 length bytes
-                result[2] = (byte) (contentsLength >> 8);
-                result[3] = (byte) (contentsLength & 0xff);
-            } else if (contentsLength <= 0xffffff) {
-                contentsPosInResult = 5;
-                result = new byte[contentsPosInResult + contentsLength];
-                result[1] = (byte) 0x83; // 3 length bytes
-                result[2] = (byte) (contentsLength >> 16);
-                result[3] = (byte) ((contentsLength >> 8) & 0xff);
-                result[4] = (byte) (contentsLength & 0xff);
-            } else {
-                contentsPosInResult = 6;
-                result = new byte[contentsPosInResult + contentsLength];
-                result[1] = (byte) 0x84; // 4 length bytes
-                result[2] = (byte) (contentsLength >> 24);
-                result[3] = (byte) ((contentsLength >> 16) & 0xff);
-                result[4] = (byte) ((contentsLength >> 8) & 0xff);
-                result[5] = (byte) (contentsLength & 0xff);
-            }
-            result[0] = firstIdentifierByte;
-        }
-        for (byte[] c : contents) {
-            System.arraycopy(c, 0, result, contentsPosInResult, c.length);
-            contentsPosInResult += c.length;
-        }
-        return result;
-    }
-
-    /**
-     * Compares two bytes arrays based on their lexicographic order. Corresponding elements of the
-     * two arrays are compared in ascending order. Elements at out of range indices are assumed to
-     * be smaller than the smallest possible value for an element.
-     */
-    private static class ByteArrayLexicographicComparator implements Comparator<byte[]> {
-        private static final ByteArrayLexicographicComparator INSTANCE =
-                new ByteArrayLexicographicComparator();
-
-        @Override
-        public int compare(byte[] arr1, byte[] arr2) {
-            int commonLength = Math.min(arr1.length, arr2.length);
-            for (int i = 0; i < commonLength; i++) {
-                int diff = (arr1[i] & 0xff) - (arr2[i] & 0xff);
-                if (diff != 0) {
-                    return diff;
-                }
-            }
-            return arr1.length - arr2.length;
-        }
-    }
-
     private static final class AnnotatedField {
         private final Field mField;
         private final Object mObject;
@@ -504,9 +435,69 @@ public final class Asn1DerEncoder {
         }
     }
 
-    private static final class JavaToDerConverter {
-        private JavaToDerConverter() {
+    private static byte[] createTag(
+            int tagClass, boolean constructed, int tagNumber, byte[]... contents) {
+        if (tagNumber >= 0x1f) {
+            throw new IllegalArgumentException("High tag numbers not supported: " + tagNumber);
         }
+        // tag class & number fit into the first byte
+        byte firstIdentifierByte =
+                (byte) ((tagClass << 6) | (constructed ? 1 << 5 : 0) | tagNumber);
+
+        int contentsLength = 0;
+        for (byte[] c : contents) {
+            contentsLength += c.length;
+        }
+        int contentsPosInResult;
+        byte[] result;
+        if (contentsLength < 0x80) {
+            // Length fits into one byte
+            contentsPosInResult = 2;
+            result = new byte[contentsPosInResult + contentsLength];
+            result[0] = firstIdentifierByte;
+            result[1] = (byte) contentsLength;
+        } else {
+            // Length is represented as multiple bytes
+            // The low 7 bits of the first byte represent the number of length bytes (following the
+            // first byte) in which the length is in big-endian base-256 form
+            if (contentsLength <= 0xff) {
+                contentsPosInResult = 3;
+                result = new byte[contentsPosInResult + contentsLength];
+                result[1] = (byte) 0x81; // 1 length byte
+                result[2] = (byte) contentsLength;
+            } else if (contentsLength <= 0xffff) {
+                contentsPosInResult = 4;
+                result = new byte[contentsPosInResult + contentsLength];
+                result[1] = (byte) 0x82; // 2 length bytes
+                result[2] = (byte) (contentsLength >> 8);
+                result[3] = (byte) (contentsLength & 0xff);
+            } else if (contentsLength <= 0xffffff) {
+                contentsPosInResult = 5;
+                result = new byte[contentsPosInResult + contentsLength];
+                result[1] = (byte) 0x83; // 3 length bytes
+                result[2] = (byte) (contentsLength >> 16);
+                result[3] = (byte) ((contentsLength >> 8) & 0xff);
+                result[4] = (byte) (contentsLength & 0xff);
+            } else {
+                contentsPosInResult = 6;
+                result = new byte[contentsPosInResult + contentsLength];
+                result[1] = (byte) 0x84; // 4 length bytes
+                result[2] = (byte) (contentsLength >> 24);
+                result[3] = (byte) ((contentsLength >> 16) & 0xff);
+                result[4] = (byte) ((contentsLength >> 8) & 0xff);
+                result[5] = (byte) (contentsLength & 0xff);
+            }
+            result[0] = firstIdentifierByte;
+        }
+        for (byte[] c : contents) {
+            System.arraycopy(c, 0, result, contentsPosInResult, c.length);
+            contentsPosInResult += c.length;
+        }
+        return result;
+    }
+
+    private static final class JavaToDerConverter {
+        private JavaToDerConverter() {}
 
         public static byte[] toDer(Object source, Asn1Type targetType, Asn1Type targetElementType)
                 throws Asn1EncodingException {
@@ -567,18 +558,20 @@ public final class Asn1DerEncoder {
                         return toOid((String) source);
                     }
                     break;
-                case SEQUENCE: {
+                case SEQUENCE:
+                {
                     Asn1Class containerAnnotation =
-                            ClassCompat.getDeclaredAnnotation(sourceType, Asn1Class.class);
+                            sourceType.getDeclaredAnnotation(Asn1Class.class);
                     if ((containerAnnotation != null)
                             && (containerAnnotation.type() == Asn1Type.SEQUENCE)) {
                         return toSequence(source);
                     }
                     break;
                 }
-                case CHOICE: {
+                case CHOICE:
+                {
                     Asn1Class containerAnnotation =
-                            ClassCompat.getDeclaredAnnotation(sourceType, Asn1Class.class);
+                            sourceType.getDeclaredAnnotation(Asn1Class.class);
                     if ((containerAnnotation != null)
                             && (containerAnnotation.type() == Asn1Type.CHOICE)) {
                         return toChoice(source);
@@ -597,4 +590,7 @@ public final class Asn1DerEncoder {
                     "Unsupported conversion: " + sourceType.getName() + " to ASN.1 " + targetType);
         }
     }
+    /** ASN.1 DER-encoded {@code NULL}. */
+    public static final Asn1OpaqueObject ASN1_DER_NULL =
+            new Asn1OpaqueObject(new byte[] {BerEncoding.TAG_NUMBER_NULL, 0});
 }

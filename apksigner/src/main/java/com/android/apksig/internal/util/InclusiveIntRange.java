@@ -32,20 +32,20 @@ public class InclusiveIntRange {
         this.max = max;
     }
 
-    public static InclusiveIntRange fromTo(int min, int max) {
-        return new InclusiveIntRange(min, max);
-    }
-
-    public static InclusiveIntRange from(int min) {
-        return new InclusiveIntRange(min, Integer.MAX_VALUE);
-    }
-
     public int getMin() {
         return min;
     }
 
     public int getMax() {
         return max;
+    }
+
+    public static InclusiveIntRange fromTo(int min, int max) {
+        return new InclusiveIntRange(min, max);
+    }
+
+    public static InclusiveIntRange from(int min) {
+        return new InclusiveIntRange(min, Integer.MAX_VALUE);
     }
 
     public List<InclusiveIntRange> getValuesNotIn(

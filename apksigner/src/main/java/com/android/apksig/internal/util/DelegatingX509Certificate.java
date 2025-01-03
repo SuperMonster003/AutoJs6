@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
  * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -212,12 +211,9 @@ public class DelegatingX509Certificate extends X509Certificate {
     }
 
     @Override
+    @SuppressWarnings("AndroidJdkLibsChecker")
     public void verify(PublicKey key, Provider sigProvider) throws CertificateException,
             NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//            mDelegate.verify(key, sigProvider);
-//        } else {
-//            throw new UnsupportedOperationException("Not supported before API 24");
-//        }
+        mDelegate.verify(key, sigProvider);
     }
 }

@@ -17,7 +17,6 @@
 package com.android.apksig.internal.util;
 
 import com.android.apksig.util.DataSink;
-
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;

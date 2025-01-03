@@ -90,20 +90,37 @@ public abstract class V4SchemeVerifier {
 
         V4Signature.HashingInfo hashingInfo = V4Signature.HashingInfo.fromByteArray(
                 signature.hashingInfo);
-        V4Signature.SigningInfo signingInfo = V4Signature.SigningInfo.fromByteArray(
-                signature.signingInfo);
 
-        final byte[] signedData = V4Signature.getSigningData(apk.size(), hashingInfo, signingInfo);
+        V4Signature.SigningInfos signingInfos = V4Signature.SigningInfos.fromByteArray(
+                signature.signingInfos);
 
-        // First, verify the signature over signedData.
-        ApkSigningBlockUtils.Result.SignerInfo signerInfo = parseAndVerifySignatureBlock(
-                signingInfo, signedData);
-        result.signers.add(signerInfo);
-        if (result.containsErrors()) {
-            return result;
+        final ApkSigningBlockUtils.Result.SignerInfo signerInfo;
+
+        // Verify the primary signature over signedData.
+        {
+            V4Signature.SigningInfo signingInfo = signingInfos.signingInfo;
+            final byte[] signedData = V4Signature.getSignedData(apk.size(), hashingInfo,
+                    signingInfo);
+            signerInfo = parseAndVerifySignatureBlock(signingInfo, signedData);
+            result.signers.add(signerInfo);
+            if (result.containsErrors()) {
+                return result;
+            }
         }
 
-        // Second, check if the root hash and the tree are correct.
+        // Verify all subsequent signatures.
+        for (V4Signature.SigningInfoBlock signingInfoBlock : signingInfos.signingInfoBlocks) {
+            V4Signature.SigningInfo signingInfo = V4Signature.SigningInfo.fromByteArray(
+                    signingInfoBlock.signingInfo);
+            final byte[] signedData = V4Signature.getSignedData(apk.size(), hashingInfo,
+                    signingInfo);
+            result.signers.add(parseAndVerifySignatureBlock(signingInfo, signedData));
+            if (result.containsErrors()) {
+                return result;
+            }
+        }
+
+        // Check if the root hash and the tree are correct.
         verifyRootHashAndTree(apk, signerInfo, hashingInfo.rawRootHash, tree);
         if (!result.containsErrors()) {
             result.verified = true;
@@ -218,8 +235,8 @@ public abstract class V4SchemeVerifier {
     }
 
     private static void verifyRootHashAndTree(DataSource apkContent,
-                                              ApkSigningBlockUtils.Result.SignerInfo signerInfo, byte[] expectedDigest,
-                                              byte[] expectedTree) throws IOException, NoSuchAlgorithmException {
+            ApkSigningBlockUtils.Result.SignerInfo signerInfo, byte[] expectedDigest,
+            byte[] expectedTree) throws IOException, NoSuchAlgorithmException {
         ApkSigningBlockUtils.VerityTreeAndDigest actualContentDigestInfo =
                 ApkSigningBlockUtils.computeChunkVerityTreeAndDigest(apkContent);
 

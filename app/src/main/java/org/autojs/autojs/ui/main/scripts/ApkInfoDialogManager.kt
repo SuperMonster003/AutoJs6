@@ -18,8 +18,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.model.explorer.ExplorerItem
+import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.AppUtils
+import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ApkFileInfoDialogListItemBinding
 import java.io.File
@@ -28,28 +29,30 @@ object ApkInfoDialogManager {
 
     @JvmStatic
     @SuppressLint("SetTextI18n")
-    fun showApkInfoDialog(context: Context, explorerItem: ExplorerItem) {
+    fun showApkInfoDialog(context: Context, apkFile: File) {
         val binding = ApkFileInfoDialogListItemBinding.inflate(LayoutInflater.from(context))
         val root = binding.root as ViewGroup
 
+        val apkFilePath = apkFile.absolutePath
+
         val dialog = MaterialDialog.Builder(context)
-            .title(explorerItem.name)
+            .title(apkFile.name)
             .customView(root, false)
             .autoDismiss(false)
             .iconRes(R.drawable.transparent)
             .limitIconToDefaultSize()
             .positiveText(R.string.text_install)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .onPositive { materialDialog, _ ->
                 materialDialog.dismiss()
-                explorerItem.install(context)
+                IntentUtils.installApk(context, apkFilePath)
             }
-            .positiveColorRes(R.color.dialog_button_attraction)
             .negativeText(R.string.text_cancel)
-            .onNegative { materialDialog, _ -> materialDialog.dismiss() }
+            .negativeColorRes(R.color.dialog_button_default)
             .neutralColorRes(R.color.dialog_button_hint)
+            .onNegative { materialDialog, _ -> materialDialog.dismiss() }
             .show()
 
-        val apkFilePath = explorerItem.toScriptFile().absolutePath
         val packageManager = context.packageManager
 
         CoroutineScope(Dispatchers.Main).launch {
@@ -66,6 +69,10 @@ object ApkInfoDialogManager {
                     else -> @Suppress("DEPRECATION") it.versionCode.toLong()
                 }
             }
+
+            val fileSize = withContext(Dispatchers.IO) { PFiles.getHumanReadableSize(apkFile.length()) }
+
+            val signatureScheme = withContext(Dispatchers.IO) { getApkSignatureInfo(apkFile) }
 
             withContext(Dispatchers.Main) {
                 // @Hint by SuperMonster003 on Nov 27, 2024.
@@ -85,12 +92,15 @@ object ApkInfoDialogManager {
                 binding.deviceSdkValue.text = "${Build.VERSION.SDK_INT}"
                 bindVersionInfo(binding, context, versionName, versionCode)
 
+                binding.fileSizeValue.setTextIfAbsent { fileSize }
+                binding.signatureSchemeValue.setTextIfAbsent { signatureScheme }
+
                 dialog.setIcon(applicationInfo?.apply {
                     sourceDir = apkFilePath
                     publicSourceDir = apkFilePath
                 }?.loadIcon(packageManager) ?: context.getDrawable(R.drawable.ic_packaging))
 
-                val apkInfo = getApkInfo(explorerItem.toScriptFile())
+                val apkInfo = getApkInfo(apkFile)
 
                 binding.labelNameValue.setTextIfAbsent { apkInfo?.label }
                 binding.packageNameValue.setTextIfAbsent { apkInfo?.packageName }
@@ -153,24 +163,22 @@ object ApkInfoDialogManager {
     }
 
     private fun restoreEssentialViews(binding: ApkFileInfoDialogListItemBinding, context: Context) {
-        binding.labelNameLabel.text = context.getString(R.string.text_label_name)
-        binding.labelNameColon.isVisible = true
-        binding.labelNameValue.isVisible = true
-        binding.packageNameLabel.text = context.getString(R.string.apk_info_package_name)
-        binding.packageNameColon.isVisible = true
-        binding.packageNameValue.isVisible = true
-        binding.versionPlaceholderLabel.text = context.getString(R.string.text_version)
-        binding.versionPlaceholderColon.isVisible = true
-        binding.versionPlaceholderValue.isVisible = true
-        binding.minSdkLabel.text = context.getString(R.string.apk_info_min_sdk)
-        binding.minSdkColon.isVisible = true
-        binding.minSdkValue.isVisible = true
-        binding.targetSdkLabel.text = context.getString(R.string.apk_info_target_sdk)
-        binding.targetSdkColon.isVisible = true
-        binding.targetSdkValue.isVisible = true
-        binding.deviceSdkLabel.text = context.getString(R.string.apk_info_device_sdk)
-        binding.deviceSdkColon.isVisible = true
-        binding.deviceSdkValue.isVisible = true
+        listOf(
+            Triple(binding.labelNameLabel, binding.labelNameColon, binding.labelNameValue) to R.string.text_label_name,
+            Triple(binding.packageNameLabel, binding.packageNameColon, binding.packageNameValue) to R.string.apk_info_package_name,
+            Triple(binding.versionPlaceholderLabel, binding.versionPlaceholderColon, binding.versionPlaceholderValue) to R.string.text_version,
+            Triple(binding.fileSizeLabel, binding.fileSizeColon, binding.fileSizeValue) to R.string.apk_info_file_size,
+            Triple(binding.signatureSchemeLabel, binding.signatureSchemeColon, binding.signatureSchemeValue) to R.string.apk_info_signature_scheme,
+            Triple(binding.minSdkLabel, binding.minSdkColon, binding.minSdkValue) to R.string.apk_info_min_sdk,
+            Triple(binding.targetSdkLabel, binding.targetSdkColon, binding.targetSdkValue) to R.string.apk_info_target_sdk,
+            Triple(binding.deviceSdkLabel, binding.deviceSdkColon, binding.deviceSdkValue) to R.string.apk_info_device_sdk,
+        ).forEach { pair ->
+            val (triple, labelTextRes) = pair
+            val (labelView, colonView, valueView) = triple
+            labelView.text = context.getString(labelTextRes)
+            colonView.isVisible = true
+            valueView.isVisible = true
+        }
     }
 
     private fun updateGuidelines(binding: ApkFileInfoDialogListItemBinding) {
@@ -178,6 +186,8 @@ object ApkInfoDialogManager {
             binding.labelNameLabel to binding.labelNameGuideline,
             binding.packageNameLabel to binding.packageNameGuideline,
             binding.versionPlaceholderLabel to binding.versionPlaceholderGuideline,
+            binding.fileSizeLabel to binding.fileSizeGuideline,
+            binding.signatureSchemeLabel to binding.signatureSchemeGuideline,
             binding.minSdkLabel to binding.minSdkGuideline,
             binding.targetSdkLabel to binding.targetSdkGuideline,
             binding.installedVersionLabel to binding.installedVersionGuideline,
@@ -194,8 +204,8 @@ object ApkInfoDialogManager {
         }
     }
 
-    private fun getApkSignatureInfo(apkFilePath: String): String? = runCatching {
-        ApkVerifier.Builder(File(apkFilePath)).build().verify().run {
+    private fun getApkSignatureInfo(apkFile: File): String? = runCatching {
+        ApkVerifier.Builder(apkFile).build().verify().run {
             listOfNotNull(
                 "V1".takeIf { isVerifiedUsingV1Scheme },
                 "V2".takeIf { isVerifiedUsingV2Scheme },

@@ -56,9 +56,6 @@ public class OidConstants {
 
     public static final Map<String, List<InclusiveIntRange>> SUPPORTED_SIG_ALG_OIDS =
             new HashMap<>();
-    public static final Map<String, String> OID_TO_JCA_DIGEST_ALG = new HashMap<>();
-    public static final Map<String, String> OID_TO_JCA_SIGNATURE_ALG = new HashMap<>();
-
     static {
         addSupportedSigAlg(
                 OID_DIGEST_MD5, OID_SIG_RSA,
@@ -374,37 +371,6 @@ public class OidConstants {
                 InclusiveIntRange.from(21));
     }
 
-    static {
-        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_MD5, "MD5");
-        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA1, "SHA-1");
-        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA224, "SHA-224");
-        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA256, "SHA-256");
-        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA384, "SHA-384");
-        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA512, "SHA-512");
-    }
-
-    static {
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_MD5_WITH_RSA, "MD5withRSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA1_WITH_RSA, "SHA1withRSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA224_WITH_RSA, "SHA224withRSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA256_WITH_RSA, "SHA256withRSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA384_WITH_RSA, "SHA384withRSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA512_WITH_RSA, "SHA512withRSA");
-
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA1_WITH_DSA, "SHA1withDSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA224_WITH_DSA, "SHA224withDSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA256_WITH_DSA, "SHA256withDSA");
-
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA1_WITH_ECDSA, "SHA1withECDSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA224_WITH_ECDSA, "SHA224withECDSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA256_WITH_ECDSA, "SHA256withECDSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA384_WITH_ECDSA, "SHA384withECDSA");
-        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA512_WITH_ECDSA, "SHA512withECDSA");
-    }
-
-    private OidConstants() {
-    }
-
     public static void addSupportedSigAlg(
             String digestAlgorithmOid,
             String signatureAlgorithmOid,
@@ -423,8 +389,9 @@ public class OidConstants {
     }
 
     public static class OidToUserFriendlyNameMapper {
-        private static final Map<String, String> OID_TO_USER_FRIENDLY_NAME = new HashMap<>();
+        private OidToUserFriendlyNameMapper() {}
 
+        private static final Map<String, String> OID_TO_USER_FRIENDLY_NAME = new HashMap<>();
         static {
             OID_TO_USER_FRIENDLY_NAME.put(OID_DIGEST_MD5, "MD5");
             OID_TO_USER_FRIENDLY_NAME.put(OID_DIGEST_SHA1, "SHA-1");
@@ -457,11 +424,40 @@ public class OidConstants {
             OID_TO_USER_FRIENDLY_NAME.put(OID_SIG_SHA512_WITH_ECDSA, "SHA-512 with ECDSA");
         }
 
-        private OidToUserFriendlyNameMapper() {
-        }
-
         public static String getUserFriendlyNameForOid(String oid) {
             return OID_TO_USER_FRIENDLY_NAME.get(oid);
         }
     }
+
+    public static final Map<String, String> OID_TO_JCA_DIGEST_ALG = new HashMap<>();
+    static {
+        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_MD5, "MD5");
+        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA1, "SHA-1");
+        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA224, "SHA-224");
+        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA256, "SHA-256");
+        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA384, "SHA-384");
+        OID_TO_JCA_DIGEST_ALG.put(OID_DIGEST_SHA512, "SHA-512");
+    }
+
+    public static final Map<String, String> OID_TO_JCA_SIGNATURE_ALG = new HashMap<>();
+    static {
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_MD5_WITH_RSA, "MD5withRSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA1_WITH_RSA, "SHA1withRSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA224_WITH_RSA, "SHA224withRSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA256_WITH_RSA, "SHA256withRSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA384_WITH_RSA, "SHA384withRSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA512_WITH_RSA, "SHA512withRSA");
+
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA1_WITH_DSA, "SHA1withDSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA224_WITH_DSA, "SHA224withDSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA256_WITH_DSA, "SHA256withDSA");
+
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA1_WITH_ECDSA, "SHA1withECDSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA224_WITH_ECDSA, "SHA224withECDSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA256_WITH_ECDSA, "SHA256withECDSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA384_WITH_ECDSA, "SHA384withECDSA");
+        OID_TO_JCA_SIGNATURE_ALG.put(OID_SIG_SHA512_WITH_ECDSA, "SHA512withECDSA");
+    }
+
+    private OidConstants() {}
 }

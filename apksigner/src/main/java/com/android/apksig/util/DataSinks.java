@@ -20,7 +20,6 @@ import com.android.apksig.internal.util.ByteArrayDataSink;
 import com.android.apksig.internal.util.MessageDigestSink;
 import com.android.apksig.internal.util.OutputStreamDataSink;
 import com.android.apksig.internal.util.RandomAccessFileDataSink;
-
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.security.MessageDigest;
@@ -29,8 +28,7 @@ import java.security.MessageDigest;
  * Utility methods for working with {@link DataSink} abstraction.
  */
 public abstract class DataSinks {
-    private DataSinks() {
-    }
+    private DataSinks() {}
 
     /**
      * Returns a {@link DataSink} which outputs received data into the provided
