@@ -98,7 +98,8 @@
     <string name="error_action_cannot_be_completed_with_negative_coordinate">无法完成 \"%1$s\" 操作, 因为参数中包含负数坐标值 (%2$d,%3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">缺少必要的 activity 对象, 可通过 \"ui\" 执行模式来提供</string>
     <string name="error_an_operation_is_not_implemented">操作尚未实现</string>
-    <string name="error_app_not_installed">应用未安装: \"%s\"</string>
+    <string name="error_app_not_installed_with_name">应用未安装: \"%s\"</string>
+    <string name="error_app_not_installed">应用未安装</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">参数 %1$s 对于 %2$s#%3$s 不可为 nullish</string>
     <string name="error_arguments_cannot_be_empty">参数列表不可为空</string>
     <string name="error_arguments_must_be_empty">参数列表需为空</string>

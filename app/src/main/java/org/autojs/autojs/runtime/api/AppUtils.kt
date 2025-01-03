@@ -131,7 +131,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
         runCatching {
             getPackageInfoCompat(mPackageManager, packageName!!, 0)
         }.getOrElse {
-            throw Exception(mContext.getString(R.string.error_app_not_installed, packageName))
+            throw Exception(mContext.getString(R.string.error_app_not_installed_with_name, packageName))
         }
     }
 
@@ -141,7 +141,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
         runCatching {
             getPackageInfoCompat(mPackageManager, app.packageName, 0)
         }.getOrElse {
-            throw Exception("${mContext.getString(R.string.error_app_not_installed, app.getAppName())} [ ${app.packageName} ]")
+            throw Exception("${mContext.getString(R.string.error_app_not_installed_with_name, app.getAppName())} [ ${app.packageName} ]")
         }
     }
 
