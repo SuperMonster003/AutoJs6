@@ -100,7 +100,8 @@
     <string name="error_action_cannot_be_completed_with_negative_coordinate">The \"%1$s\" operation cannot be completed because the parameter contains negative coordinate values (%2$d, %3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">An activity is required, which could be provided by running in \"ui\" execution mode</string>
     <string name="error_an_operation_is_not_implemented">An operation is not implemented</string>
-    <string name="error_app_not_installed">App is not installed: \"%s\"</string>
+    <string name="error_app_not_installed_with_name">App is not installed: \"%s\"</string>
+    <string name="error_app_not_installed">App is not installed</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Argument %1$s for %2$s#%3$s cannot be nullish</string>
     <string name="error_arguments_cannot_be_empty">Arguments cannot be empty</string>
     <string name="error_arguments_must_be_empty">Arguments must be empty</string>

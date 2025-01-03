@@ -103,7 +103,8 @@
     <string name="error_action_cannot_be_completed_with_negative_coordinate">L\'opération \"%1$s\" ne peut pas être terminée car le paramètre contient des valeurs de coordonnées négatives (%2$d, %3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">Une activité est requise, qui pourrait être fournie en exécutant en mode d\'exécution \"ui\"</string>
     <string name="error_an_operation_is_not_implemented">Une opération n\'est pas mise en œuvre</string>
-    <string name="error_app_not_installed">L\'application n\'est pas installée: \"%s\"</string>
+    <string name="error_app_not_installed_with_name">L\'application n\'est pas installée: \"%s\"</string>
+    <string name="error_app_not_installed">L\'application n\'est pas installée</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">L\'argument %1$s pour %2$s#%3$s ne peut pas être nul</string>
     <string name="error_arguments_cannot_be_empty">Les arguments ne peuvent pas être vides</string>
     <string name="error_arguments_must_be_empty">Les arguments doivent être vides</string>

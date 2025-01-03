@@ -104,7 +104,8 @@
     <string name="error_action_cannot_be_completed_with_negative_coordinate">يتعذر إكمال العملية \"%1$s\" لأن المعلمة تحتوي على قيم إحداثيات سالبة (%2$d, %3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">تتطلب عملية تنفيذ واجهة المستخدم نشاطًا يمكن توفيره من خلال وضع التنفيذ \"ui\"</string>
     <string name="error_an_operation_is_not_implemented">لم يتم تنفيذ العملية</string>
-    <string name="error_app_not_installed">التطبيق غير مثبت: \"%s\"</string>
+    <string name="error_app_not_installed_with_name">التطبيق غير مثبت: \"%s\"</string>
+    <string name="error_app_not_installed">التطبيق غير مثبت</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">لا يمكن أن تكون الوسائط %1$s بالنسبة لـ %2$s#%3$s فارغة</string>
     <string name="error_arguments_cannot_be_empty">لا يمكن أن تكون الوسائط فارغة</string>
     <string name="error_arguments_must_be_empty">يجب أن تكون الوسائط فارغة</string>

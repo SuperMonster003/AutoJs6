@@ -103,7 +103,8 @@
     <string name="error_action_cannot_be_completed_with_negative_coordinate">Операция \"%1$s\" не может быть завершена, так как параметр содержит отрицательные значения координат (%2$d, %3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">Требуется активность, которую можно предоставить, выполняя в режиме выполнения \"ui\"</string>
     <string name="error_an_operation_is_not_implemented">Операция не выполняется</string>
-    <string name="error_app_not_installed">Приложение не установлено: \"%s\"</string>
+    <string name="error_app_not_installed_with_name">Приложение не установлено: \"%s\"</string>
+    <string name="error_app_not_installed">Приложение не установлено</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">Аргумент %1$s для %2$s#%3$s не может быть пустым</string>
     <string name="error_arguments_cannot_be_empty">Аргументы не могут быть пустыми</string>
     <string name="error_arguments_must_be_empty">Аргументы должны быть пустыми</string>

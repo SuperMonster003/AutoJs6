@@ -102,7 +102,8 @@
     <string name="error_action_cannot_be_completed_with_negative_coordinate">無法完成 \"%1$s\" 操作, 因為參數中包含負數座標值 (%2$d,%3$d)</string>
     <string name="error_activity_is_required_for_ui_exec_mode">缺少必要的 activity 對象, 可通過 \"ui\" 執行模式來提供</string>
     <string name="error_an_operation_is_not_implemented">操作尚未實現</string>
-    <string name="error_app_not_installed">應用未安裝: \"%s\"</string>
+    <string name="error_app_not_installed_with_name">應用未安裝: \"%s\"</string>
+    <string name="error_app_not_installed">應用未安裝</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">參數 %1$s 對於 %2$s#%3$s 不可為 nullish</string>
     <string name="error_arguments_cannot_be_empty">參數列表不可為空</string>
     <string name="error_arguments_must_be_empty">參數列表需為空</string>

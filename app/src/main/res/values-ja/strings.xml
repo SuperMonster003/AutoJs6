@@ -103,7 +103,8 @@
     <string name="error_action_cannot_be_completed_with_negative_coordinate">\"%1$s\" 操作はパラメータに負の座標値 (%2$d, %3$d) が含まれているため, 完了できません</string>
     <string name="error_activity_is_required_for_ui_exec_mode">UI 実行モードに必要なアクティビティが不足しています</string>
     <string name="error_an_operation_is_not_implemented">操作が実装されていません</string>
-    <string name="error_app_not_installed">\"%s\" アプリがインストールされていません</string>
+    <string name="error_app_not_installed_with_name">\"%s\" アプリがインストールされていません</string>
+    <string name="error_app_not_installed">アプリがインストールされていません</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">%2$s#%3$s の引数 %1$s を null 値にはできません</string>
     <string name="error_arguments_cannot_be_empty">引数を空にできません</string>
     <string name="error_arguments_must_be_empty">引数は空でなければなりません</string>
