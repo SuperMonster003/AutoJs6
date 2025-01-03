@@ -34,39 +34,25 @@ import java.util.Map;
  */
 public class AndroidBinXmlParser {
 
-    /**
-     * Event: start of document.
-     */
+    /** Event: start of document. */
     public static final int EVENT_START_DOCUMENT = 1;
 
-    /**
-     * Event: end of document.
-     */
+    /** Event: end of document. */
     public static final int EVENT_END_DOCUMENT = 2;
 
-    /**
-     * Event: start of an element.
-     */
+    /** Event: start of an element. */
     public static final int EVENT_START_ELEMENT = 3;
 
-    /**
-     * Event: end of an document.
-     */
+    /** Event: end of an document. */
     public static final int EVENT_END_ELEMENT = 4;
 
-    /**
-     * Attribute value type is not supported by this parser.
-     */
+    /** Attribute value type is not supported by this parser. */
     public static final int VALUE_TYPE_UNSUPPORTED = 0;
 
-    /**
-     * Attribute value is a string. Use {@link #getAttributeStringValue(int)} to obtain it.
-     */
+    /** Attribute value is a string. Use {@link #getAttributeStringValue(int)} to obtain it. */
     public static final int VALUE_TYPE_STRING = 1;
 
-    /**
-     * Attribute value is an integer. Use {@link #getAttributeIntValue(int)} to obtain it.
-     */
+    /** Attribute value is an integer. Use {@link #getAttributeIntValue(int)} to obtain it. */
     public static final int VALUE_TYPE_INT = 2;
 
     /**
@@ -74,9 +60,7 @@ public class AndroidBinXmlParser {
      */
     public static final int VALUE_TYPE_REFERENCE = 3;
 
-    /**
-     * Attribute value is a boolean. Use {@link #getAttributeBooleanValue(int)} to obtain it.
-     */
+    /** Attribute value is a boolean. Use {@link #getAttributeBooleanValue(int)} to obtain it. */
     public static final int VALUE_TYPE_BOOLEAN = 4;
 
     private static final long NO_NAMESPACE = 0xffffffffL;
@@ -117,75 +101,6 @@ public class AndroidBinXmlParser {
             throw new XmlParserException("No XML chunk in file");
         }
         mXml = resXmlChunk.getContents();
-    }
-
-    /**
-     * Returns new byte buffer whose content is a shared subsequence of this buffer's content
-     * between the specified start (inclusive) and end (exclusive) positions. As opposed to
-     * {@link ByteBuffer#slice()}, the returned buffer's byte order is the same as the source
-     * buffer's byte order.
-     */
-    private static ByteBuffer sliceFromTo(ByteBuffer source, long start, long end) {
-        if (start < 0) {
-            throw new IllegalArgumentException("start: " + start);
-        }
-        if (end < start) {
-            throw new IllegalArgumentException("end < start: " + end + " < " + start);
-        }
-        int capacity = source.capacity();
-        if (end > source.capacity()) {
-            throw new IllegalArgumentException("end > capacity: " + end + " > " + capacity);
-        }
-        return sliceFromTo(source, (int) start, (int) end);
-    }
-
-    /**
-     * Returns new byte buffer whose content is a shared subsequence of this buffer's content
-     * between the specified start (inclusive) and end (exclusive) positions. As opposed to
-     * {@link ByteBuffer#slice()}, the returned buffer's byte order is the same as the source
-     * buffer's byte order.
-     */
-    private static ByteBuffer sliceFromTo(ByteBuffer source, int start, int end) {
-        if (start < 0) {
-            throw new IllegalArgumentException("start: " + start);
-        }
-        if (end < start) {
-            throw new IllegalArgumentException("end < start: " + end + " < " + start);
-        }
-        int capacity = source.capacity();
-        if (end > source.capacity()) {
-            throw new IllegalArgumentException("end > capacity: " + end + " > " + capacity);
-        }
-        int originalLimit = source.limit();
-        int originalPosition = source.position();
-        try {
-            source.position(0);
-            source.limit(end);
-            source.position(start);
-            ByteBuffer result = source.slice();
-            result.order(source.order());
-            return result;
-        } finally {
-            source.position(0);
-            source.limit(originalLimit);
-            source.position(originalPosition);
-        }
-    }
-
-    private static int getUnsignedInt8(ByteBuffer buffer) {
-        return buffer.get() & 0xff;
-    }
-
-    private static int getUnsignedInt16(ByteBuffer buffer) {
-        return buffer.getShort() & 0xffff;
-    }
-
-    private static long getUnsignedInt32(ByteBuffer buffer) {
-        return buffer.getInt() & 0xffffffffL;
-    }
-
-    private static long getUnsignedInt32(ByteBuffer buffer, int position) {
-        return buffer.getInt(position) & 0xffffffffL;
     }
 
     /**
@@ -244,8 +159,8 @@ public class AndroidBinXmlParser {
      * element or {@code 0} if the name is not associated with a resource ID.
      *
      * @throws IndexOutOfBoundsException if the index is out of range or the current event is not a
-     *                                   {@code start element} event
-     * @throws XmlParserException        if a parsing error is occurred
+     *         {@code start element} event
+     * @throws XmlParserException if a parsing error is occurred
      */
     public int getAttributeNameResourceId(int index) throws XmlParserException {
         return getAttribute(index).getNameResourceId();
@@ -255,8 +170,8 @@ public class AndroidBinXmlParser {
      * Returns the name of the specified attribute of the current element.
      *
      * @throws IndexOutOfBoundsException if the index is out of range or the current event is not a
-     *                                   {@code start element} event
-     * @throws XmlParserException        if a parsing error is occurred
+     *         {@code start element} event
+     * @throws XmlParserException if a parsing error is occurred
      */
     public String getAttributeName(int index) throws XmlParserException {
         return getAttribute(index).getName();
@@ -267,8 +182,8 @@ public class AndroidBinXmlParser {
      * the attribute is not associated with a namespace.
      *
      * @throws IndexOutOfBoundsException if the index is out of range or the current event is not a
-     *                                   {@code start element} event
-     * @throws XmlParserException        if a parsing error is occurred
+     *         {@code start element} event
+     * @throws XmlParserException if a parsing error is occurred
      */
     public String getAttributeNamespace(int index) throws XmlParserException {
         return getAttribute(index).getNamespace();
@@ -279,8 +194,8 @@ public class AndroidBinXmlParser {
      * {@code VALUE_TYPE_...} constants.
      *
      * @throws IndexOutOfBoundsException if the index is out of range or the current event is not a
-     *                                   {@code start element} event
-     * @throws XmlParserException        if a parsing error is occurred
+     *         {@code start element} event
+     * @throws XmlParserException if a parsing error is occurred
      */
     public int getAttributeValueType(int index) throws XmlParserException {
         int type = getAttribute(index).getValueType();
@@ -304,8 +219,8 @@ public class AndroidBinXmlParser {
      * {@code VALUE_TYPE_...} constants.
      *
      * @throws IndexOutOfBoundsException if the index is out of range or the current event is not a
-     *                                   {@code start element} event.
-     * @throws XmlParserException        if a parsing error is occurred
+     *         {@code start element} event.
+     * @throws XmlParserException if a parsing error is occurred
      */
     public int getAttributeIntValue(int index) throws XmlParserException {
         return getAttribute(index).getIntValue();
@@ -316,8 +231,8 @@ public class AndroidBinXmlParser {
      * {@code VALUE_TYPE_...} constants.
      *
      * @throws IndexOutOfBoundsException if the index is out of range or the current event is not a
-     *                                   {@code start element} event.
-     * @throws XmlParserException        if a parsing error is occurred
+     *         {@code start element} event.
+     * @throws XmlParserException if a parsing error is occurred
      */
     public boolean getAttributeBooleanValue(int index) throws XmlParserException {
         return getAttribute(index).getBooleanValue();
@@ -328,8 +243,8 @@ public class AndroidBinXmlParser {
      * {@code VALUE_TYPE_...} constants.
      *
      * @throws IndexOutOfBoundsException if the index is out of range or the current event is not a
-     *                                   {@code start element} event.
-     * @throws XmlParserException        if a parsing error is occurred
+     *         {@code start element} event.
+     * @throws XmlParserException if a parsing error is occurred
      */
     public String getAttributeStringValue(int index) throws XmlParserException {
         return getAttribute(index).getStringValue();
@@ -374,7 +289,8 @@ public class AndroidBinXmlParser {
                     mStringPool = new StringPool(chunk);
                     break;
 
-                case Chunk.RES_XML_TYPE_START_ELEMENT: {
+                case Chunk.RES_XML_TYPE_START_ELEMENT:
+                {
                     if (mStringPool == null) {
                         throw new XmlParserException(
                                 "Named element encountered before string pool");
@@ -395,12 +311,12 @@ public class AndroidBinXmlParser {
                     if (attrStartOffset > contents.remaining()) {
                         throw new XmlParserException(
                                 "Attributes start offset out of bounds: " + attrStartOffset
-                                        + ", max: " + contents.remaining());
+                                    + ", max: " + contents.remaining());
                     }
                     if (attrEndOffset > contents.remaining()) {
                         throw new XmlParserException(
                                 "Attributes end offset out of bounds: " + attrEndOffset
-                                        + ", max: " + contents.remaining());
+                                    + ", max: " + contents.remaining());
                     }
 
                     mCurrentElementName = mStringPool.getString(nameId);
@@ -417,7 +333,8 @@ public class AndroidBinXmlParser {
                     return mCurrentEvent;
                 }
 
-                case Chunk.RES_XML_TYPE_END_ELEMENT: {
+                case Chunk.RES_XML_TYPE_END_ELEMENT:
+                {
                     if (mStringPool == null) {
                         throw new XmlParserException(
                                 "Named element encountered before string pool");
@@ -591,6 +508,22 @@ public class AndroidBinXmlParser {
             mContents = contents;
         }
 
+        public ByteBuffer getContents() {
+            ByteBuffer result = mContents.slice();
+            result.order(mContents.order());
+            return result;
+        }
+
+        public ByteBuffer getHeader() {
+            ByteBuffer result = mHeader.slice();
+            result.order(mHeader.order());
+            return result;
+        }
+
+        public int getType() {
+            return mType;
+        }
+
         /**
          * Consumes the chunk located at the current position of the input and returns the chunk
          * or {@code null} if there is no chunk left in the input.
@@ -631,22 +564,6 @@ public class AndroidBinXmlParser {
                             sliceFromTo(input, contentStartPosition, chunkEndPosition));
             input.position((int) chunkEndPosition);
             return chunk;
-        }
-
-        public ByteBuffer getContents() {
-            ByteBuffer result = mContents.slice();
-            result.order(mContents.order());
-            return result;
-        }
-
-        public ByteBuffer getHeader() {
-            ByteBuffer result = mHeader.slice();
-            result.order(mHeader.order());
-            return result;
-        }
-
-        public int getType() {
-            return mType;
         }
     }
 
@@ -716,6 +633,40 @@ public class AndroidBinXmlParser {
 
             mUtf8Encoded = (flags & FLAG_UTF8) != 0;
             mChunkContents = contents;
+        }
+
+        /**
+         * Returns the string located at the specified {@code 0}-based index in this pool.
+         *
+         * @throws XmlParserException if the string does not exist or cannot be decoded
+         */
+        public String getString(long index) throws XmlParserException {
+            if (index < 0) {
+                throw new XmlParserException("Unsuported string index: " + index);
+            } else if (index >= mStringCount) {
+                throw new XmlParserException(
+                        "Unsuported string index: " + index + ", max: " + (mStringCount - 1));
+            }
+
+            int idx = (int) index;
+            String result = mCachedStrings.get(idx);
+            if (result != null) {
+                return result;
+            }
+
+            long offsetInStringsSection = getUnsignedInt32(mChunkContents, idx * 4);
+            if (offsetInStringsSection >= mStringsSection.capacity()) {
+                throw new XmlParserException(
+                        "Offset of string idx " + idx + " out of bounds: " + offsetInStringsSection
+                                + ", max: " + (mStringsSection.capacity() - 1));
+            }
+            mStringsSection.position((int) offsetInStringsSection);
+            result =
+                    (mUtf8Encoded)
+                            ? getLengthPrefixedUtf8EncodedString(mStringsSection)
+                            : getLengthPrefixedUtf16EncodedString(mStringsSection);
+            mCachedStrings.put(idx, result);
+            return result;
         }
 
         private static String getLengthPrefixedUtf16EncodedString(ByteBuffer encoded)
@@ -796,40 +747,6 @@ public class AndroidBinXmlParser {
                 throw new RuntimeException("UTF-8 character encoding not supported", e);
             }
         }
-
-        /**
-         * Returns the string located at the specified {@code 0}-based index in this pool.
-         *
-         * @throws XmlParserException if the string does not exist or cannot be decoded
-         */
-        public String getString(long index) throws XmlParserException {
-            if (index < 0) {
-                throw new XmlParserException("Unsuported string index: " + index);
-            } else if (index >= mStringCount) {
-                throw new XmlParserException(
-                        "Unsuported string index: " + index + ", max: " + (mStringCount - 1));
-            }
-
-            int idx = (int) index;
-            String result = mCachedStrings.get(idx);
-            if (result != null) {
-                return result;
-            }
-
-            long offsetInStringsSection = getUnsignedInt32(mChunkContents, idx * 4);
-            if (offsetInStringsSection >= mStringsSection.capacity()) {
-                throw new XmlParserException(
-                        "Offset of string idx " + idx + " out of bounds: " + offsetInStringsSection
-                                + ", max: " + (mStringsSection.capacity() - 1));
-            }
-            mStringsSection.position((int) offsetInStringsSection);
-            result =
-                    (mUtf8Encoded)
-                            ? getLengthPrefixedUtf8EncodedString(mStringsSection)
-                            : getLengthPrefixedUtf16EncodedString(mStringsSection);
-            mCachedStrings.put(idx, result);
-            return result;
-        }
     }
 
     /**
@@ -849,7 +766,7 @@ public class AndroidBinXmlParser {
             mChunkContents = chunk.getContents().slice();
             mChunkContents.order(chunk.getContents().order());
             // Each entry of the map is four bytes long, containing the int32 resource ID.
-            mEntryCount = mChunkContents.remaining() / 4;
+            mEntryCount = mChunkContents.remaining() /  4;
         }
 
         /**
@@ -864,6 +781,75 @@ public class AndroidBinXmlParser {
             // Each entry of the map is four bytes long, containing the int32 resource ID.
             return mChunkContents.getInt(idx * 4);
         }
+    }
+
+    /**
+     * Returns new byte buffer whose content is a shared subsequence of this buffer's content
+     * between the specified start (inclusive) and end (exclusive) positions. As opposed to
+     * {@link ByteBuffer#slice()}, the returned buffer's byte order is the same as the source
+     * buffer's byte order.
+     */
+    private static ByteBuffer sliceFromTo(ByteBuffer source, long start, long end) {
+        if (start < 0) {
+            throw new IllegalArgumentException("start: " + start);
+        }
+        if (end < start) {
+            throw new IllegalArgumentException("end < start: " + end + " < " + start);
+        }
+        int capacity = source.capacity();
+        if (end > source.capacity()) {
+            throw new IllegalArgumentException("end > capacity: " + end + " > " + capacity);
+        }
+        return sliceFromTo(source, (int) start, (int) end);
+    }
+
+    /**
+     * Returns new byte buffer whose content is a shared subsequence of this buffer's content
+     * between the specified start (inclusive) and end (exclusive) positions. As opposed to
+     * {@link ByteBuffer#slice()}, the returned buffer's byte order is the same as the source
+     * buffer's byte order.
+     */
+    private static ByteBuffer sliceFromTo(ByteBuffer source, int start, int end) {
+        if (start < 0) {
+            throw new IllegalArgumentException("start: " + start);
+        }
+        if (end < start) {
+            throw new IllegalArgumentException("end < start: " + end + " < " + start);
+        }
+        int capacity = source.capacity();
+        if (end > source.capacity()) {
+            throw new IllegalArgumentException("end > capacity: " + end + " > " + capacity);
+        }
+        int originalLimit = source.limit();
+        int originalPosition = source.position();
+        try {
+            source.position(0);
+            source.limit(end);
+            source.position(start);
+            ByteBuffer result = source.slice();
+            result.order(source.order());
+            return result;
+        } finally {
+            source.position(0);
+            source.limit(originalLimit);
+            source.position(originalPosition);
+        }
+    }
+
+    private static int getUnsignedInt8(ByteBuffer buffer) {
+        return buffer.get() & 0xff;
+    }
+
+    private static int getUnsignedInt16(ByteBuffer buffer) {
+        return buffer.getShort() & 0xffff;
+    }
+
+    private static long getUnsignedInt32(ByteBuffer buffer) {
+        return buffer.getInt() & 0xffffffffL;
+    }
+
+    private static long getUnsignedInt32(ByteBuffer buffer, int position) {
+        return buffer.getInt(position) & 0xffffffffL;
     }
 
     /**

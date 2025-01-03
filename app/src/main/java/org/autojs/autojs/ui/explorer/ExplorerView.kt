@@ -763,7 +763,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private fun showInfo() {
             when {
                 mExplorerItem.isInstallable -> {
-                    ApkInfoDialogManager.showApkInfoDialog(context, mExplorerItem)
+                    ApkInfoDialogManager.showApkInfoDialog(context, mExplorerItem.toScriptFile())
                     notifyItemOperated()
                 }
                 mExplorerItem.isMediaMenu || mExplorerItem.isMediaPlayable -> {

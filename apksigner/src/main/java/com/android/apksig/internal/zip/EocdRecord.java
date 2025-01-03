@@ -45,4 +45,13 @@ public class EocdRecord {
         ZipUtils.setUnsignedInt32(result, CD_OFFSET_OFFSET, centralDirectoryOffset);
         return result;
     }
+
+    public static ByteBuffer createWithPaddedComment(ByteBuffer original, int padding) {
+        ByteBuffer result = ByteBuffer.allocate((int) original.remaining() + padding);
+        result.order(ByteOrder.LITTLE_ENDIAN);
+        result.put(original.slice());
+        result.rewind();
+        ZipUtils.updateZipEocdCommentLen(result);
+        return result;
+    }
 }

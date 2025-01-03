@@ -23,6 +23,7 @@ import com.android.apksig.apk.ApkUtils;
 import com.android.apksig.internal.apk.ApkSigningBlockUtils;
 import com.android.apksig.internal.apk.SignatureAlgorithm;
 import com.android.apksig.internal.apk.SignatureInfo;
+import com.android.apksig.internal.apk.v3.V3SchemeConstants;
 import com.android.apksig.internal.apk.v3.V3SchemeSigner;
 import com.android.apksig.internal.apk.v3.V3SigningCertificateLineage;
 import com.android.apksig.internal.apk.v3.V3SigningCertificateLineage.SigningCertificateNode;
@@ -76,19 +77,13 @@ public class SigningCertificateLineage {
 
     private static final int CURRENT_VERSION = FIRST_VERSION;
 
-    /**
-     * accept data from already installed pkg with this cert
-     */
+    /** accept data from already installed pkg with this cert */
     private static final int PAST_CERT_INSTALLED_DATA = 1;
 
-    /**
-     * accept sharedUserId with pkg with this cert
-     */
+    /** accept sharedUserId with pkg with this cert */
     private static final int PAST_CERT_SHARED_USER_ID = 2;
 
-    /**
-     * grant SIGNATURE permissions to pkgs with this cert
-     */
+    /** grant SIGNATURE permissions to pkgs with this cert */
     private static final int PAST_CERT_PERMISSION = 4;
 
     /**
@@ -117,6 +112,16 @@ public class SigningCertificateLineage {
         mSigningLineage = list;
     }
 
+    /**
+     * Creates a {@code SigningCertificateLineage} with a single signer in the lineage.
+     */
+    private static SigningCertificateLineage createSigningLineage(int minSdkVersion,
+            SignerConfig signer, SignerCapabilities capabilities) {
+        SigningCertificateLineage signingCertificateLineage = new SigningCertificateLineage(
+                minSdkVersion, new ArrayList<>());
+        return signingCertificateLineage.spawnFirstDescendant(signer, capabilities);
+    }
+
     private static SigningCertificateLineage createSigningLineage(
             int minSdkVersion, SignerConfig parent, SignerCapabilities parentCapabilities,
             SignerConfig child, SignerCapabilities childCapabilities)
@@ -127,6 +132,11 @@ public class SigningCertificateLineage {
         signingCertificateLineage =
                 signingCertificateLineage.spawnFirstDescendant(parent, parentCapabilities);
         return signingCertificateLineage.spawnDescendant(parent, child, childCapabilities);
+    }
+
+    public static SigningCertificateLineage readFromBytes(byte[] lineageBytes)
+            throws IOException {
+        return readFromDataSource(DataSources.asDataSource(ByteBuffer.wrap(lineageBytes)));
     }
 
     public static SigningCertificateLineage readFromFile(File file)
@@ -152,11 +162,10 @@ public class SigningCertificateLineage {
      * Extracts a Signing Certificate Lineage from a v3 signer proof-of-rotation attribute.
      *
      * <note>
-     * this may not give a complete representation of an APK's signing certificate history,
-     * since the APK may have multiple signers corresponding to different platform versions.
-     * Use <code> readFromApkFile</code> to handle this case.
+     *     this may not give a complete representation of an APK's signing certificate history,
+     *     since the APK may have multiple signers corresponding to different platform versions.
+     *     Use <code> readFromApkFile</code> to handle this case.
      * </note>
-     *
      * @param attrValue
      */
     public static SigningCertificateLineage readFromV3AttributeValue(byte[] attrValue)
@@ -165,7 +174,7 @@ public class SigningCertificateLineage {
                 V3SigningCertificateLineage.readSigningCertificateLineage(ByteBuffer.wrap(
                         attrValue).order(ByteOrder.LITTLE_ENDIAN));
         int minSdkVersion = calculateMinSdkVersion(parsedLineage);
-        return new SigningCertificateLineage(minSdkVersion, parsedLineage);
+        return  new SigningCertificateLineage(minSdkVersion, parsedLineage);
     }
 
     /**
@@ -173,7 +182,7 @@ public class SigningCertificateLineage {
      * signature block of the provided APK File.
      *
      * @throws IllegalArgumentException if the provided APK does not contain a V3 signature block,
-     *                                  or if the V3 signature block does not contain a valid lineage.
+     * or if the V3 signature block does not contain a valid lineage.
      */
     public static SigningCertificateLineage readFromApkFile(File apkFile)
             throws IOException, ApkFormatException {
@@ -184,49 +193,105 @@ public class SigningCertificateLineage {
     }
 
     /**
-     * Extracts a Signing Certificate Lineage from the proof-of-rotation attribute in the V3
-     * signature block of the provided APK DataSource.
+     * Extracts a Signing Certificate Lineage from the proof-of-rotation attribute in the V3 and
+     * V3.1 signature blocks of the provided APK DataSource.
      *
-     * @throws IllegalArgumentException if the provided APK does not contain a V3 signature block,
-     *                                  or if the V3 signature block does not contain a valid lineage.
+     * @throws IllegalArgumentException if the provided APK does not contain a V3 nor V3.1
+     * signature block, or if the V3 and V3.1 signature blocks do not contain a valid lineage.
      */
+
     public static SigningCertificateLineage readFromApkDataSource(DataSource apk)
             throws IOException, ApkFormatException {
-        SignatureInfo signatureInfo;
+        return readFromApkDataSource(apk, /* readV31Lineage= */ true,  /* readV3Lineage= */true);
+    }
+
+    /**
+     * Extracts a Signing Certificate Lineage from the proof-of-rotation attribute in the V3.1
+     * signature blocks of the provided APK DataSource.
+     *
+     * @throws IllegalArgumentException if the provided APK does not contain a V3.1 signature block,
+     * or if the V3.1 signature block does not contain a valid lineage.
+     */
+
+    public static SigningCertificateLineage readV31FromApkDataSource(DataSource apk)
+            throws IOException, ApkFormatException {
+            return readFromApkDataSource(apk, /* readV31Lineage= */ true,
+                        /* readV3Lineage= */ false);
+    }
+
+    private static SigningCertificateLineage readFromApkDataSource(
+            DataSource apk,
+            boolean readV31Lineage,
+            boolean readV3Lineage)
+            throws IOException, ApkFormatException {
+        ApkUtils.ZipSections zipSections;
         try {
-            ApkUtils.ZipSections zipSections = ApkUtils.findZipSections(apk);
-            ApkSigningBlockUtils.Result result = new ApkSigningBlockUtils.Result(
-                    ApkSigningBlockUtils.VERSION_APK_SIGNATURE_SCHEME_V3);
-            signatureInfo =
-                    ApkSigningBlockUtils.findSignature(apk, zipSections,
-                            V3SchemeSigner.APK_SIGNATURE_SCHEME_V3_BLOCK_ID, result);
+            zipSections = ApkUtils.findZipSections(apk);
         } catch (ZipFormatException e) {
             throw new ApkFormatException(e.getMessage());
-        } catch (ApkSigningBlockUtils.SignatureNotFoundException e) {
-            throw new IllegalArgumentException(
-                    "The provided APK does not contain a valid V3 signature block.");
         }
 
-        // FORMAT:
-        // * length-prefixed sequence of length-prefixed signers:
-        //   * length-prefixed signed data
-        //   * minSDK
-        //   * maxSDK
-        //   * length-prefixed sequence of length-prefixed signatures
-        //   * length-prefixed public key
-        ByteBuffer signers = getLengthPrefixedSlice(signatureInfo.signatureBlock);
-        List<SigningCertificateLineage> lineages = new ArrayList<>(1);
-        while (signers.hasRemaining()) {
-            ByteBuffer signer = getLengthPrefixedSlice(signers);
-            ByteBuffer signedData = getLengthPrefixedSlice(signer);
+        List<SignatureInfo> signatureInfoList = new ArrayList<>();
+        if (readV31Lineage) {
             try {
-                SigningCertificateLineage lineage = readFromSignedData(signedData);
-                lineages.add(lineage);
-            } catch (IllegalArgumentException ignored) {
-                // The current signer block does not contain a valid lineage, but it is possible
-                // another block will.
+                ApkSigningBlockUtils.Result result = new ApkSigningBlockUtils.Result(
+                    ApkSigningBlockUtils.VERSION_APK_SIGNATURE_SCHEME_V31);
+                signatureInfoList.add(
+                    ApkSigningBlockUtils.findSignature(apk, zipSections,
+                        V3SchemeConstants.APK_SIGNATURE_SCHEME_V31_BLOCK_ID, result));
+            } catch (ApkSigningBlockUtils.SignatureNotFoundException ignored) {
+                // This could be expected if there's only a V3 signature block.
             }
         }
+        if (readV3Lineage) {
+            try {
+                ApkSigningBlockUtils.Result result = new ApkSigningBlockUtils.Result(
+                    ApkSigningBlockUtils.VERSION_APK_SIGNATURE_SCHEME_V3);
+                signatureInfoList.add(
+                    ApkSigningBlockUtils.findSignature(apk, zipSections,
+                        V3SchemeConstants.APK_SIGNATURE_SCHEME_V3_BLOCK_ID, result));
+            } catch (ApkSigningBlockUtils.SignatureNotFoundException ignored) {
+                // This could be expected if the provided APK is not signed with the V3 signature
+                // scheme
+            }
+        }
+        if (signatureInfoList.isEmpty()) {
+            String message;
+            if (readV31Lineage && readV3Lineage) {
+                message = "The provided APK does not contain a valid V3 nor V3.1 signature block.";
+            } else if (readV31Lineage) {
+                message = "The provided APK does not contain a valid V3.1 signature block.";
+            } else if (readV3Lineage) {
+                message = "The provided APK does not contain a valid V3 signature block.";
+            } else {
+                message = "No signature blocks were requested.";
+            }
+            throw new IllegalArgumentException(message);
+        }
+
+        List<SigningCertificateLineage> lineages = new ArrayList<>(1);
+        for (SignatureInfo signatureInfo : signatureInfoList) {
+            // FORMAT:
+            // * length-prefixed sequence of length-prefixed signers:
+            //   * length-prefixed signed data
+            //   * minSDK
+            //   * maxSDK
+            //   * length-prefixed sequence of length-prefixed signatures
+            //   * length-prefixed public key
+            ByteBuffer signers = getLengthPrefixedSlice(signatureInfo.signatureBlock);
+            while (signers.hasRemaining()) {
+                ByteBuffer signer = getLengthPrefixedSlice(signers);
+                ByteBuffer signedData = getLengthPrefixedSlice(signer);
+                try {
+                    SigningCertificateLineage lineage = readFromSignedData(signedData);
+                    lineages.add(lineage);
+                } catch (IllegalArgumentException ignored) {
+                    // The current signer block does not contain a valid lineage, but it is possible
+                    // another block will.
+                }
+            }
+        }
+
         SigningCertificateLineage result;
         if (lineages.isEmpty()) {
             throw new IllegalArgumentException(
@@ -244,7 +309,7 @@ public class SigningCertificateLineage {
      * signed data portion of a signer in a V3 signature block.
      *
      * @throws IllegalArgumentException if the provided signed data does not contain a valid
-     *                                  lineage.
+     * lineage.
      */
     public static SigningCertificateLineage readFromSignedData(ByteBuffer signedData)
             throws IOException, ApkFormatException {
@@ -270,7 +335,7 @@ public class SigningCertificateLineage {
         while (additionalAttributes.hasRemaining()) {
             ByteBuffer attribute = getLengthPrefixedSlice(additionalAttributes);
             int id = attribute.getInt();
-            if (id == V3SchemeSigner.PROOF_OF_ROTATION_ATTR_ID) {
+            if (id == V3SchemeConstants.PROOF_OF_ROTATION_ATTR_ID) {
                 byte[] value = ByteBufferUtils.toByteArray(attribute);
                 SigningCertificateLineage lineage = readFromV3AttributeValue(value);
                 lineages.add(lineage);
@@ -287,6 +352,154 @@ public class SigningCertificateLineage {
             result = lineages.get(0);
         }
         return result;
+    }
+
+    public byte[] getBytes() {
+        return write().array();
+    }
+
+    public void writeToFile(File file) throws IOException {
+        if (file == null) {
+            throw new NullPointerException("file == null");
+        }
+        RandomAccessFile outputFile = new RandomAccessFile(file, "rw");
+        writeToDataSink(new RandomAccessFileDataSink(outputFile));
+    }
+
+    public void writeToDataSink(DataSink dataSink) throws IOException {
+        if (dataSink == null) {
+            throw new NullPointerException("dataSink == null");
+        }
+        dataSink.consume(write());
+    }
+
+    /**
+     * Add a new signing certificate to the lineage.  This effectively creates a signing certificate
+     * rotation event, forcing APKs which include this lineage to be signed by the new signer. The
+     * flags associated with the new signer are set to a default value.
+     *
+     * @param parent current signing certificate of the containing APK
+     * @param child new signing certificate which will sign the APK contents
+     */
+    public SigningCertificateLineage spawnDescendant(SignerConfig parent, SignerConfig child)
+            throws CertificateEncodingException, InvalidKeyException, NoSuchAlgorithmException,
+            SignatureException {
+        if (parent == null || child == null) {
+            throw new NullPointerException("can't add new descendant to lineage with null inputs");
+        }
+        SignerCapabilities signerCapabilities = new SignerCapabilities.Builder().build();
+        return spawnDescendant(parent, child, signerCapabilities);
+    }
+
+    /**
+     * Add a new signing certificate to the lineage.  This effectively creates a signing certificate
+     * rotation event, forcing APKs which include this lineage to be signed by the new signer.
+     *
+     * @param parent current signing certificate of the containing APK
+     * @param child new signing certificate which will sign the APK contents
+     * @param childCapabilities flags
+     */
+    public SigningCertificateLineage spawnDescendant(
+            SignerConfig parent, SignerConfig child, SignerCapabilities childCapabilities)
+            throws CertificateEncodingException, InvalidKeyException,
+            NoSuchAlgorithmException, SignatureException {
+        if (parent == null) {
+            throw new NullPointerException("parent == null");
+        }
+        if (child == null) {
+            throw new NullPointerException("child == null");
+        }
+        if (childCapabilities == null) {
+            throw new NullPointerException("childCapabilities == null");
+        }
+        if (mSigningLineage.isEmpty()) {
+            throw new IllegalArgumentException("Cannot spawn descendant signing certificate on an"
+                    + " empty SigningCertificateLineage: no parent node");
+        }
+
+        // make sure that the parent matches our newest generation (leaf node/sink)
+        SigningCertificateNode currentGeneration = mSigningLineage.get(mSigningLineage.size() - 1);
+        if (!Arrays.equals(currentGeneration.signingCert.getEncoded(),
+                parent.getCertificate().getEncoded())) {
+            throw new IllegalArgumentException("SignerConfig Certificate containing private key"
+                    + " to sign the new SigningCertificateLineage record does not match the"
+                    + " existing most recent record");
+        }
+
+        // create data to be signed, including the algorithm we're going to use
+        SignatureAlgorithm signatureAlgorithm = getSignatureAlgorithm(parent);
+        ByteBuffer prefixedSignedData = ByteBuffer.wrap(
+                V3SigningCertificateLineage.encodeSignedData(
+                        child.getCertificate(), signatureAlgorithm.getId()));
+        prefixedSignedData.position(4);
+        ByteBuffer signedDataBuffer = ByteBuffer.allocate(prefixedSignedData.remaining());
+        signedDataBuffer.put(prefixedSignedData);
+        byte[] signedData = signedDataBuffer.array();
+
+        // create SignerConfig to do the signing
+        List<X509Certificate> certificates = new ArrayList<>(1);
+        certificates.add(parent.getCertificate());
+        ApkSigningBlockUtils.SignerConfig newSignerConfig =
+                new ApkSigningBlockUtils.SignerConfig();
+        newSignerConfig.keyConfig = parent.getKeyConfig();
+        newSignerConfig.certificates = certificates;
+        newSignerConfig.signatureAlgorithms = Collections.singletonList(signatureAlgorithm);
+
+        // sign it
+        List<Pair<Integer, byte[]>> signatures =
+                ApkSigningBlockUtils.generateSignaturesOverData(newSignerConfig, signedData);
+
+        // finally, add it to our lineage
+        SignatureAlgorithm sigAlgorithm = SignatureAlgorithm.findById(signatures.get(0).getFirst());
+        byte[] signature = signatures.get(0).getSecond();
+        currentGeneration.sigAlgorithm = sigAlgorithm;
+        SigningCertificateNode childNode =
+                new SigningCertificateNode(
+                        child.getCertificate(), sigAlgorithm, null,
+                        signature, childCapabilities.getFlags());
+        List<SigningCertificateNode> lineageCopy = new ArrayList<>(mSigningLineage);
+        lineageCopy.add(childNode);
+        return new SigningCertificateLineage(mMinSdkVersion, lineageCopy);
+    }
+
+    /**
+     * The number of signing certificates in the lineage, including the current signer, which means
+     * this value can also be used to V2determine the number of signing certificate rotations by
+     * subtracting 1.
+     */
+    public int size() {
+        return mSigningLineage.size();
+    }
+
+    private SignatureAlgorithm getSignatureAlgorithm(SignerConfig parent)
+            throws InvalidKeyException {
+        PublicKey publicKey = parent.getCertificate().getPublicKey();
+
+        // TODO switch to one signature algorithm selection, or add support for multiple algorithms
+        List<SignatureAlgorithm> algorithms = V3SchemeSigner.getSuggestedSignatureAlgorithms(
+                publicKey, mMinSdkVersion, false /* verityEnabled */,
+                false /* deterministicDsaSigning */);
+        return algorithms.get(0);
+    }
+
+    private SigningCertificateLineage spawnFirstDescendant(
+            SignerConfig parent, SignerCapabilities signerCapabilities) {
+        if (!mSigningLineage.isEmpty()) {
+            throw new IllegalStateException("SigningCertificateLineage already has its first node");
+        }
+
+        // check to make sure that the public key for the first node is acceptable for our minSdk
+        try {
+            getSignatureAlgorithm(parent);
+        } catch (InvalidKeyException e) {
+            throw new IllegalArgumentException("Algorithm associated with first signing certificate"
+                    + " invalid on desired platform versions", e);
+        }
+
+        // create "fake" signed data (there will be no signature over it, since there is no parent
+        SigningCertificateNode firstNode = new SigningCertificateNode(
+                parent.getCertificate(), null, null, new byte[0], signerCapabilities.getFlags());
+        return new SigningCertificateLineage(mMinSdkVersion, Collections.singletonList(firstNode));
     }
 
     private static SigningCertificateLineage read(ByteBuffer inputByteBuffer)
@@ -341,201 +554,6 @@ public class SigningCertificateLineage {
         return minSdkVersion;
     }
 
-    private static int calculateDefaultFlags() {
-        return PAST_CERT_INSTALLED_DATA | PAST_CERT_PERMISSION
-                | PAST_CERT_SHARED_USER_ID | PAST_CERT_AUTH;
-    }
-
-    /**
-     * Consolidates all of the lineages found in an APK into one lineage, which is the longest one.
-     * In so doing, it also checks that all of the smaller lineages are contained in the largest,
-     * and that they properly cover the desired platform ranges.
-     * <p>
-     * An APK may contain multiple lineages, one for each signer, which correspond to different
-     * supported platform versions.  In this event, the lineage(s) from the earlier platform
-     * version(s) need to be present in the most recent (longest) one to make sure that when a
-     * platform version changes.
-     *
-     * <note> This does not verify that the largest lineage corresponds to the most recent supported
-     * platform version.  That check requires is performed during v3 verification. </note>
-     */
-    public static SigningCertificateLineage consolidateLineages(
-            List<SigningCertificateLineage> lineages) {
-        if (lineages == null || lineages.isEmpty()) {
-            return null;
-        }
-        int largestIndex = 0;
-        int maxSize = 0;
-
-        // determine the longest chain
-        for (int i = 0; i < lineages.size(); i++) {
-            int curSize = lineages.get(i).size();
-            if (curSize > maxSize) {
-                largestIndex = i;
-                maxSize = curSize;
-            }
-        }
-
-        List<SigningCertificateNode> largestList = lineages.get(largestIndex).mSigningLineage;
-        // make sure all other lineages fit into this one, with the same capabilities
-        for (int i = 0; i < lineages.size(); i++) {
-            if (i == largestIndex) {
-                continue;
-            }
-            List<SigningCertificateNode> underTest = lineages.get(i).mSigningLineage;
-            if (!underTest.equals(largestList.subList(0, underTest.size()))) {
-                throw new IllegalArgumentException("Inconsistent SigningCertificateLineages. "
-                        + "Not all lineages are subsets of each other.");
-            }
-        }
-
-        // if we've made it this far, they all check out, so just return the largest
-        return lineages.get(largestIndex);
-    }
-
-    public void writeToFile(File file) throws IOException {
-        if (file == null) {
-            throw new NullPointerException("file == null");
-        }
-        RandomAccessFile outputFile = new RandomAccessFile(file, "rw");
-        writeToDataSink(new RandomAccessFileDataSink(outputFile));
-    }
-
-    public void writeToDataSink(DataSink dataSink) throws IOException {
-        if (dataSink == null) {
-            throw new NullPointerException("dataSink == null");
-        }
-        dataSink.consume(write());
-    }
-
-    /**
-     * Add a new signing certificate to the lineage.  This effectively creates a signing certificate
-     * rotation event, forcing APKs which include this lineage to be signed by the new signer. The
-     * flags associated with the new signer are set to a default value.
-     *
-     * @param parent current signing certificate of the containing APK
-     * @param child  new signing certificate which will sign the APK contents
-     */
-    public SigningCertificateLineage spawnDescendant(SignerConfig parent, SignerConfig child)
-            throws CertificateEncodingException, InvalidKeyException, NoSuchAlgorithmException,
-            SignatureException {
-        if (parent == null || child == null) {
-            throw new NullPointerException("can't add new descendant to lineage with null inputs");
-        }
-        SignerCapabilities signerCapabilities = new SignerCapabilities.Builder().build();
-        return spawnDescendant(parent, child, signerCapabilities);
-    }
-
-    /**
-     * Add a new signing certificate to the lineage.  This effectively creates a signing certificate
-     * rotation event, forcing APKs which include this lineage to be signed by the new signer.
-     *
-     * @param parent            current signing certificate of the containing APK
-     * @param child             new signing certificate which will sign the APK contents
-     * @param childCapabilities flags
-     */
-    public SigningCertificateLineage spawnDescendant(
-            SignerConfig parent, SignerConfig child, SignerCapabilities childCapabilities)
-            throws CertificateEncodingException, InvalidKeyException,
-            NoSuchAlgorithmException, SignatureException {
-        if (parent == null) {
-            throw new NullPointerException("parent == null");
-        }
-        if (child == null) {
-            throw new NullPointerException("child == null");
-        }
-        if (childCapabilities == null) {
-            throw new NullPointerException("childCapabilities == null");
-        }
-        if (mSigningLineage.isEmpty()) {
-            throw new IllegalArgumentException("Cannot spawn descendant signing certificate on an"
-                    + " empty SigningCertificateLineage: no parent node");
-        }
-
-        // make sure that the parent matches our newest generation (leaf node/sink)
-        SigningCertificateNode currentGeneration = mSigningLineage.get(mSigningLineage.size() - 1);
-        if (!Arrays.equals(currentGeneration.signingCert.getEncoded(),
-                parent.getCertificate().getEncoded())) {
-            throw new IllegalArgumentException("SignerConfig Certificate containing private key"
-                    + " to sign the new SigningCertificateLineage record does not match the"
-                    + " existing most recent record");
-        }
-
-        // create data to be signed, including the algorithm we're going to use
-        SignatureAlgorithm signatureAlgorithm = getSignatureAlgorithm(parent);
-        ByteBuffer prefixedSignedData = ByteBuffer.wrap(
-                V3SigningCertificateLineage.encodeSignedData(
-                        child.getCertificate(), signatureAlgorithm.getId()));
-        prefixedSignedData.position(4);
-        ByteBuffer signedDataBuffer = ByteBuffer.allocate(prefixedSignedData.remaining());
-        signedDataBuffer.put(prefixedSignedData);
-        byte[] signedData = signedDataBuffer.array();
-
-        // create SignerConfig to do the signing
-        List<X509Certificate> certificates = new ArrayList<>(1);
-        certificates.add(parent.getCertificate());
-        ApkSigningBlockUtils.SignerConfig newSignerConfig =
-                new ApkSigningBlockUtils.SignerConfig();
-        newSignerConfig.privateKey = parent.getPrivateKey();
-        newSignerConfig.certificates = certificates;
-        newSignerConfig.signatureAlgorithms = Collections.singletonList(signatureAlgorithm);
-
-        // sign it
-        List<Pair<Integer, byte[]>> signatures =
-                ApkSigningBlockUtils.generateSignaturesOverData(newSignerConfig, signedData);
-
-        // finally, add it to our lineage
-        SignatureAlgorithm sigAlgorithm = SignatureAlgorithm.findById(signatures.get(0).getFirst());
-        byte[] signature = signatures.get(0).getSecond();
-        currentGeneration.sigAlgorithm = sigAlgorithm;
-        SigningCertificateNode childNode =
-                new SigningCertificateNode(
-                        child.getCertificate(), sigAlgorithm, null,
-                        signature, childCapabilities.getFlags());
-        List<SigningCertificateNode> lineageCopy = new ArrayList<>(mSigningLineage);
-        lineageCopy.add(childNode);
-        return new SigningCertificateLineage(mMinSdkVersion, lineageCopy);
-    }
-
-    /**
-     * The number of signing certificates in the lineage, including the current signer, which means
-     * this value can also be used to V2determine the number of signing certificate rotations by
-     * subtracting 1.
-     */
-    public int size() {
-        return mSigningLineage.size();
-    }
-
-    private SignatureAlgorithm getSignatureAlgorithm(SignerConfig parent)
-            throws InvalidKeyException {
-        PublicKey publicKey = parent.getCertificate().getPublicKey();
-
-        // TODO switch to one signature algorithm selection, or add support for multiple algorithms
-        List<SignatureAlgorithm> algorithms = V3SchemeSigner.getSuggestedSignatureAlgorithms(
-                publicKey, mMinSdkVersion, false /* padding support */);
-        return algorithms.get(0);
-    }
-
-    private SigningCertificateLineage spawnFirstDescendant(
-            SignerConfig parent, SignerCapabilities signerCapabilities) {
-        if (!mSigningLineage.isEmpty()) {
-            throw new IllegalStateException("SigningCertificateLineage already has its first node");
-        }
-
-        // check to make sure that the public key for the first node is acceptable for our minSdk
-        try {
-            getSignatureAlgorithm(parent);
-        } catch (InvalidKeyException e) {
-            throw new IllegalArgumentException("Algorithm associated with first signing certificate"
-                    + " invalid on desired platform versions", e);
-        }
-
-        // create "fake" signed data (there will be no signature over it, since there is no parent
-        SigningCertificateNode firstNode = new SigningCertificateNode(
-                parent.getCertificate(), null, null, new byte[0], signerCapabilities.getFlags());
-        return new SigningCertificateLineage(mMinSdkVersion, Collections.singletonList(firstNode));
-    }
-
     private ByteBuffer write() {
         byte[] encodedLineage =
                 V3SigningCertificateLineage.encodeSigningCertificateLineage(mSigningLineage);
@@ -550,20 +568,8 @@ public class SigningCertificateLineage {
         return result;
     }
 
-    public byte[] generateV3SignerAttribute() {
-        // FORMAT (little endian):
-        // * length-prefixed bytes: attribute pair
-        //   * uint32: ID
-        //   * bytes: value - encoded V3 SigningCertificateLineage
-        byte[] encodedLineage =
-                V3SigningCertificateLineage.encodeSigningCertificateLineage(mSigningLineage);
-        int payloadSize = 4 + 4 + encodedLineage.length;
-        ByteBuffer result = ByteBuffer.allocate(payloadSize);
-        result.order(ByteOrder.LITTLE_ENDIAN);
-        result.putInt(4 + encodedLineage.length);
-        result.putInt(V3SchemeSigner.PROOF_OF_ROTATION_ATTR_ID);
-        result.put(encodedLineage);
-        return result.array();
+    public byte[] encodeSigningCertificateLineage() {
+        return V3SigningCertificateLineage.encodeSigningCertificateLineage(mSigningLineage);
     }
 
     public List<DefaultApkSignerEngine.SignerConfig> sortSignerConfigs(
@@ -637,11 +643,23 @@ public class SigningCertificateLineage {
         if (config == null) {
             throw new NullPointerException("config == null");
         }
+        updateSignerCapabilities(config.getCertificate(), capabilities);
+    }
 
-        X509Certificate cert = config.getCertificate();
+    /**
+     * Updates the {@code capabilities} for the signer with the provided {@code certificate} in the
+     * lineage. Only those capabilities that have been modified through the setXX methods will be
+     * updated for the signer to prevent unset default values from being applied.
+     */
+    public void updateSignerCapabilities(X509Certificate certificate,
+            SignerCapabilities capabilities) {
+        if (certificate == null) {
+            throw new NullPointerException("config == null");
+        }
+
         for (int i = 0; i < mSigningLineage.size(); i++) {
             SigningCertificateNode lineageNode = mSigningLineage.get(i);
-            if (lineageNode.signingCert.equals(cert)) {
+            if (lineageNode.signingCert.equals(certificate)) {
                 int flags = lineageNode.flags;
                 SignerCapabilities newCapabilities = new SignerCapabilities.Builder(
                         flags).setCallerConfiguredCapabilities(capabilities).build();
@@ -651,7 +669,7 @@ public class SigningCertificateLineage {
         }
 
         // the provided signer config was not found in the lineage
-        throw new IllegalArgumentException("Certificate (" + cert.getSubjectDN()
+        throw new IllegalArgumentException("Certificate (" + certificate.getSubjectDN()
                 + ") not found in the SigningCertificateLineage");
     }
 
@@ -696,7 +714,27 @@ public class SigningCertificateLineage {
     }
 
     /**
-     * Returns a new SigingCertificateLineage which terminates at the node corresponding to the
+     * Returns whether the provided {@code cert} is the latest signing certificate in the lineage.
+     *
+     * <p>This method will only compare the provided {@code cert} against the latest signing
+     * certificate in the lineage; if a certificate that is not in the lineage is provided, this
+     * method will return false.
+     */
+    public boolean isCertificateLatestInLineage(X509Certificate cert) {
+        if (cert == null) {
+            throw new NullPointerException("cert == null");
+        }
+
+        return mSigningLineage.get(mSigningLineage.size() - 1).signingCert.equals(cert);
+    }
+
+    private static int calculateDefaultFlags() {
+        return PAST_CERT_INSTALLED_DATA | PAST_CERT_PERMISSION
+                | PAST_CERT_SHARED_USER_ID | PAST_CERT_AUTH;
+    }
+
+    /**
+     * Returns a new SigningCertificateLineage which terminates at the node corresponding to the
      * given certificate.  This is useful in the event of rotating to a new signing algorithm that
      * is only supported on some platform versions.  It enables a v3 signature to be generated using
      * this signing certificate and the shortened proof-of-rotation record from this sub lineage in
@@ -704,6 +742,7 @@ public class SigningCertificateLineage {
      *
      * @param x509Certificate the signing certificate for which to search
      * @return A new SigningCertificateLineage if the given certificate is present.
+     *
      * @throws IllegalArgumentException if the provided certificate is not in the lineage.
      */
     public SigningCertificateLineage getSubLineage(X509Certificate x509Certificate) {
@@ -722,13 +761,178 @@ public class SigningCertificateLineage {
     }
 
     /**
+     * Consolidates all of the lineages found in an APK into one lineage. In so doing, it also
+     * checks that all of the lineages are contained in one common lineage.
+     *
+     * An APK may contain multiple lineages, one for each signer, which correspond to different
+     * supported platform versions.  In this event, the lineage(s) from the earlier platform
+     * version(s) should be present in the most recent, either directly or via a sublineage
+     * that would allow the earlier lineages to merge with the most recent.
+     *
+     * <note> This does not verify that the largest lineage corresponds to the most recent supported
+     * platform version.  That check is performed during v3 verification. </note>
+     */
+    public static SigningCertificateLineage consolidateLineages(
+            List<SigningCertificateLineage> lineages) {
+        if (lineages == null || lineages.isEmpty()) {
+            return null;
+        }
+        SigningCertificateLineage consolidatedLineage = lineages.get(0);
+        for (int i = 1; i < lineages.size(); i++) {
+            consolidatedLineage = consolidatedLineage.mergeLineageWith(lineages.get(i));
+        }
+        return consolidatedLineage;
+    }
+
+    /**
+     * Merges this lineage with the provided {@code otherLineage}.
+     *
+     * <p>The merged lineage does not currently handle merging capabilities of common signers and
+     * should only be used to determine the full signing history of a collection of lineages.
+     */
+    public SigningCertificateLineage mergeLineageWith(SigningCertificateLineage otherLineage) {
+        // Determine the ancestor and descendant lineages; if the original signer is in the other
+        // lineage, then it is considered a descendant.
+        SigningCertificateLineage ancestorLineage;
+        SigningCertificateLineage descendantLineage;
+        X509Certificate signerCert = mSigningLineage.get(0).signingCert;
+        if (otherLineage.isCertificateInLineage(signerCert)) {
+            descendantLineage = this;
+            ancestorLineage = otherLineage;
+        } else {
+            descendantLineage = otherLineage;
+            ancestorLineage = this;
+        }
+
+        int ancestorIndex = 0;
+        int descendantIndex = 0;
+        SigningCertificateNode ancestorNode;
+        SigningCertificateNode descendantNode = descendantLineage.mSigningLineage.get(
+                descendantIndex++);
+        List<SigningCertificateNode> mergedLineage = new ArrayList<>();
+        // Iterate through the ancestor lineage and add the current node to the resulting lineage
+        // until the first node of the descendant is found.
+        while (ancestorIndex < ancestorLineage.size()) {
+            ancestorNode = ancestorLineage.mSigningLineage.get(ancestorIndex++);
+            if (ancestorNode.signingCert.equals(descendantNode.signingCert)) {
+                break;
+            }
+            mergedLineage.add(ancestorNode);
+        }
+        // If all of the nodes in the ancestor lineage have been added to the merged lineage, then
+        // there is no overlap between this and the provided lineage.
+        if (ancestorIndex == mergedLineage.size()) {
+            throw new IllegalArgumentException(
+                    "The provided lineage is not a descendant or an ancestor of this lineage");
+        }
+        // The descendant lineage's first node was in the ancestor's lineage above; add it to the
+        // merged lineage.
+        mergedLineage.add(descendantNode);
+        while (ancestorIndex < ancestorLineage.size()
+                && descendantIndex < descendantLineage.size()) {
+            ancestorNode = ancestorLineage.mSigningLineage.get(ancestorIndex++);
+            descendantNode = descendantLineage.mSigningLineage.get(descendantIndex++);
+            if (!ancestorNode.signingCert.equals(descendantNode.signingCert)) {
+                throw new IllegalArgumentException(
+                        "The provided lineage diverges from this lineage");
+            }
+            mergedLineage.add(descendantNode);
+        }
+        // At this point, one or both of the lineages have been exhausted and all signers to this
+        // point were a match between the two lineages; add any remaining elements from either
+        // lineage to the merged lineage.
+        while (ancestorIndex < ancestorLineage.size()) {
+            mergedLineage.add(ancestorLineage.mSigningLineage.get(ancestorIndex++));
+        }
+        while (descendantIndex < descendantLineage.size()) {
+            mergedLineage.add(descendantLineage.mSigningLineage.get(descendantIndex++));
+        }
+        return new SigningCertificateLineage(Math.min(mMinSdkVersion, otherLineage.mMinSdkVersion),
+                mergedLineage);
+    }
+
+    /**
+     * Checks whether given lineages are compatible. Returns {@code true} if an installed APK with
+     * the oldLineage could be updated with an APK with the newLineage.
+     */
+    public static boolean checkLineagesCompatibility(
+        SigningCertificateLineage oldLineage, SigningCertificateLineage newLineage) {
+
+        final ArrayList<X509Certificate> oldCertificates = oldLineage == null ?
+                new ArrayList<X509Certificate>()
+                : new ArrayList(oldLineage.getCertificatesInLineage());
+        final ArrayList<X509Certificate> newCertificates = newLineage == null ?
+                new ArrayList<X509Certificate>()
+                : new ArrayList(newLineage.getCertificatesInLineage());
+
+        if (oldCertificates.isEmpty()) {
+            return true;
+        }
+        if (newCertificates.isEmpty()) {
+            return false;
+        }
+
+        // Both lineages contain exactly the same certificates or the new lineage extends
+        // the old one. The capabilities of particular certificates may have changed though but it
+        // does not matter in terms of current compatibility.
+        if (newCertificates.size() >= oldCertificates.size()
+                && newCertificates.subList(0, oldCertificates.size()).equals(oldCertificates)) {
+            return true;
+        }
+
+        ArrayList<X509Certificate> newCertificatesArray = new ArrayList(newCertificates);
+        ArrayList<X509Certificate> oldCertificatesArray = new ArrayList(oldCertificates);
+
+        int lastOldCertIndexInNew = newCertificatesArray.lastIndexOf(
+                    oldCertificatesArray.get(oldCertificatesArray.size()-1));
+
+        // The new lineage trims some nodes from the beginning of the old lineage and possibly
+        // extends it at the end. The new lineage must contain the old signing certificate and
+        // the nodes up until the node with signing certificate must be in the same order.
+        // Good example 1:
+        //    old: A -> B -> C
+        //    new: B -> C -> D
+        // Good example 2:
+        //    old: A -> B -> C
+        //    new: C
+        // Bad example 1:
+        //    old: A -> B -> C
+        //    new: A -> C
+        // Bad example 1:
+        //    old: A -> B
+        //    new: C -> B
+        if (lastOldCertIndexInNew >= 0) {
+            return newCertificatesArray.subList(0, lastOldCertIndexInNew+1).equals(
+                    oldCertificatesArray.subList(
+                            oldCertificates.size()-1-lastOldCertIndexInNew,
+                            oldCertificatesArray.size()));
+        }
+
+
+        // The new lineage can be shorter than the old one only if the last certificate of the new
+        // lineage exists in the old lineage and has a rollback capability there.
+        // Good example:
+        //    old: A -> B_withRollbackCapability -> C
+        //    new: A -> B
+        // Bad example 1:
+        //    old: A -> B -> C
+        //    new: A -> B
+        // Bad example 2:
+        //    old: A -> B_withRollbackCapability -> C
+        //    new: A -> B -> D
+        return  oldCertificates.subList(0, newCertificates.size()).equals(newCertificates)
+                && oldLineage.getSignerCapabilities(
+                        oldCertificates.get(newCertificates.size()-1)).hasRollback();
+    }
+
+    /**
      * Representation of the capabilities the APK would like to grant to its old signing
      * certificates.  The {@code SigningCertificateLineage} provides two conceptual data structures.
-     * 1) proof of rotation - Evidence that other parties can trust an APK's current signing
-     * certificate if they trust an older one in this lineage
-     * 2) self-trust - certain capabilities may have been granted by an APK to other parties based
-     * on its own signing certificate.  When it changes its signing certificate it may want to
-     * allow the other parties to retain those capabilities.
+     *   1) proof of rotation - Evidence that other parties can trust an APK's current signing
+     *      certificate if they trust an older one in this lineage
+     *   2) self-trust - certain capabilities may have been granted by an APK to other parties based
+     *      on its own signing certificate.  When it changes its signing certificate it may want to
+     *      allow the other parties to retain those capabilities.
      * {@code SignerCapabilties} provides a representation of the second structure.
      *
      * <p>Use {@link Builder} to obtain configuration instances.
@@ -737,10 +941,6 @@ public class SigningCertificateLineage {
         private final int mFlags;
 
         private final int mCallerConfiguredFlags;
-
-        private SignerCapabilities(int flags) {
-            this(flags, 0);
-        }
 
         private SignerCapabilities(int flags, int callerConfiguredFlags) {
             mFlags = flags;
@@ -755,8 +955,17 @@ public class SigningCertificateLineage {
          * Returns {@code true} if the capabilities of this object match those of the provided
          * object.
          */
-        public boolean equals(SignerCapabilities other) {
-            return this.mFlags == other.mFlags;
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (!(other instanceof SignerCapabilities)) return false;
+
+            return this.mFlags == ((SignerCapabilities) other).mFlags;
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * mFlags;
         }
 
         /**
@@ -935,26 +1144,33 @@ public class SigningCertificateLineage {
     }
 
     /**
-     * Configuration of a signer.  Used to add a new entry to the {@link SigningCertificateLineage}
+     * Configuration of a signer. Used to add a new entry to the {@link SigningCertificateLineage}
      *
      * <p>Use {@link Builder} to obtain configuration instances.
      */
     public static class SignerConfig {
-        private final PrivateKey mPrivateKey;
+        private final KeyConfig mKeyConfig;
         private final X509Certificate mCertificate;
 
-        private SignerConfig(
-                PrivateKey privateKey,
-                X509Certificate certificate) {
-            mPrivateKey = privateKey;
+        private SignerConfig(KeyConfig keyConfig, X509Certificate certificate) {
+            mKeyConfig = keyConfig;
             mCertificate = certificate;
         }
 
         /**
          * Returns the signing key of this signer.
+         *
+         * @deprecated Use {@link #getKeyConfig()} instead of accessing a {@link PrivateKey}
+         *     directly. If the user of ApkSigner is signing with a KMS instead of JCA, this method
+         *     will return null.
          */
+        @Deprecated
         public PrivateKey getPrivateKey() {
-            return mPrivateKey;
+            return mKeyConfig.match(jca -> jca.privateKey, kms -> null);
+        }
+
+        public KeyConfig getKeyConfig() {
+            return mKeyConfig;
         }
 
         /**
@@ -969,20 +1185,32 @@ public class SigningCertificateLineage {
          * Builder of {@link SignerConfig} instances.
          */
         public static class Builder {
-            private final PrivateKey mPrivateKey;
+            private final KeyConfig mKeyConfig;
             private final X509Certificate mCertificate;
 
             /**
              * Constructs a new {@code Builder}.
              *
-             * @param privateKey  signing key
-             * @param certificate the X.509 certificate with a subject public key of the
-             *                    {@code privateKey}.
+             * @deprecated use {@link #Builder(KeyConfig, X509Certificate)} instead
+             * @param privateKey signing key
+             * @param certificate the X.509 certificate with a subject public key of the {@code
+             *     privateKey}.
              */
-            public Builder(
-                    PrivateKey privateKey,
-                    X509Certificate certificate) {
-                mPrivateKey = privateKey;
+            @Deprecated
+            public Builder(PrivateKey privateKey, X509Certificate certificate) {
+                mKeyConfig = new KeyConfig.Jca(privateKey);
+                mCertificate = certificate;
+            }
+
+            /**
+             * Constructs a new {@code Builder}.
+             *
+             * @param keyConfig signing key configuration
+             * @param certificate the X.509 certificate with a subject public key of the {@code
+             *     privateKey}.
+             */
+            public Builder(KeyConfig keyConfig, X509Certificate certificate) {
+                mKeyConfig = keyConfig;
                 mCertificate = certificate;
             }
 
@@ -991,9 +1219,7 @@ public class SigningCertificateLineage {
              * this builder.
              */
             public SignerConfig build() {
-                return new SignerConfig(
-                        mPrivateKey,
-                        mCertificate);
+                return new SignerConfig(mKeyConfig, mCertificate);
             }
         }
     }
@@ -1007,13 +1233,12 @@ public class SigningCertificateLineage {
         private SignerCapabilities mOriginalCapabilities;
         private SignerCapabilities mNewCapabilities;
         private int mMinSdkVersion;
-
         /**
          * Constructs a new {@code Builder}.
          *
          * @param originalSignerConfig first signer in this lineage, parent of the next
-         * @param newSignerConfig      new signer in the lineage; the new signing key that the APK will
-         *                             use
+         * @param newSignerConfig new signer in the lineage; the new signing key that the APK will
+         *                        use
          */
         public Builder(
                 SignerConfig originalSignerConfig,
@@ -1024,6 +1249,21 @@ public class SigningCertificateLineage {
             }
             mOriginalSignerConfig = originalSignerConfig;
             mNewSignerConfig = newSignerConfig;
+        }
+
+        /**
+         * Constructs a new {@code Builder} that is intended to create a {@code
+         * SigningCertificateLineage} with a single signer in the signing history.
+         *
+         * @param originalSignerConfig first signer in this lineage
+         */
+        public Builder(SignerConfig originalSignerConfig) {
+            if (originalSignerConfig == null) {
+                throw new NullPointerException("Can't pass null SignerConfigs when constructing a "
+                        + "new SigningCertificateLineage");
+            }
+            mOriginalSignerConfig = originalSignerConfig;
+            mNewSignerConfig = null;
         }
 
         /**
@@ -1079,6 +1319,11 @@ public class SigningCertificateLineage {
 
             if (mOriginalCapabilities == null) {
                 mOriginalCapabilities = new SignerCapabilities.Builder().build();
+            }
+
+            if (mNewSignerConfig == null) {
+                return createSigningLineage(mMinSdkVersion, mOriginalSignerConfig,
+                        mOriginalCapabilities);
             }
 
             if (mNewCapabilities == null) {

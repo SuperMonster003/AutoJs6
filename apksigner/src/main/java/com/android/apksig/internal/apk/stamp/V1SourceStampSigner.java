@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
  * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +31,7 @@ import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -48,14 +48,11 @@ import java.util.Map;
  * <p>V1 of the source stamp allows signing the digest of at most one signature scheme only.
  */
 public abstract class V1SourceStampSigner {
+    public static final int V1_SOURCE_STAMP_BLOCK_ID =
+            SourceStampConstants.V1_SOURCE_STAMP_BLOCK_ID;
 
-    public static final int V1_SOURCE_STAMP_BLOCK_ID = 0x2b09189e;
-
-    /**
-     * Hidden constructor to prevent instantiation.
-     */
-    private V1SourceStampSigner() {
-    }
+    /** Hidden constructor to prevent instantiation. */
+    private V1SourceStampSigner() {}
 
     public static Pair<byte[], Integer> generateSourceStampBlock(
             SignerConfig sourceStampSignerConfig, Map<ContentDigestAlgorithm, byte[]> digestInfo)
@@ -68,7 +65,7 @@ public abstract class V1SourceStampSigner {
         for (Map.Entry<ContentDigestAlgorithm, byte[]> digest : digestInfo.entrySet()) {
             digests.add(Pair.of(digest.getKey().getId(), digest.getValue()));
         }
-        Collections.sort(digests, (o1, o2) -> o1.getFirst().compareTo(o2.getFirst()));
+        Collections.sort(digests, Comparator.comparing(Pair::getFirst));
 
         SourceStampBlock sourceStampBlock = new SourceStampBlock();
 
@@ -93,16 +90,16 @@ public abstract class V1SourceStampSigner {
         //   * length-prefixed bytes: signature of signed data
         byte[] sourceStampSignerBlock =
                 encodeAsSequenceOfLengthPrefixedElements(
-                        new byte[][]{
-                                sourceStampBlock.stampCertificate,
-                                encodeAsSequenceOfLengthPrefixedPairsOfIntAndLengthPrefixedBytes(
-                                        sourceStampBlock.signedDigests),
+                        new byte[][] {
+                            sourceStampBlock.stampCertificate,
+                            encodeAsSequenceOfLengthPrefixedPairsOfIntAndLengthPrefixedBytes(
+                                    sourceStampBlock.signedDigests),
                         });
 
         // FORMAT:
         // * length-prefixed stamp block.
-        return Pair.of(
-                encodeAsLengthPrefixedElement(sourceStampSignerBlock), V1_SOURCE_STAMP_BLOCK_ID);
+        return Pair.of(encodeAsLengthPrefixedElement(sourceStampSignerBlock),
+                SourceStampConstants.V1_SOURCE_STAMP_BLOCK_ID);
     }
 
     private static final class SourceStampBlock {

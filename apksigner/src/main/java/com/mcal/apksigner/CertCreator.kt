@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.mcal.apksigner
 
 import com.mcal.apksigner.utils.DistinguishedNameValues

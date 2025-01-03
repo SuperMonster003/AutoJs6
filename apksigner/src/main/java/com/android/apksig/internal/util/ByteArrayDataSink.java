@@ -19,7 +19,6 @@ package com.android.apksig.internal.util;
 import com.android.apksig.util.DataSink;
 import com.android.apksig.util.DataSource;
 import com.android.apksig.util.ReadableDataSink;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;

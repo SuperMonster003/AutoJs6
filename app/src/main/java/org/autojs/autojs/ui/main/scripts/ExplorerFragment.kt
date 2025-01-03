@@ -54,7 +54,7 @@ open class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickL
                 override fun onItemClick(view: View?, item: ExplorerItem) {
                     when {
                         item.isTextEditable -> Scripts.edit(requireActivity(), item.toScriptFile())
-                        item.isInstallable -> ApkInfoDialogManager.showApkInfoDialog(requireActivity(), item)
+                        item.isInstallable -> ApkInfoDialogManager.showApkInfoDialog(requireActivity(), item.toScriptFile())
                         item.isMediaMenu || item.isMediaPlayable -> MediaInfoDialogManager.showMediaInfoDialog(requireActivity(), item)
                         else -> viewFile(item)
                     }

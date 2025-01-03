@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.apksig.internal.util;
+package com.android.apksig.internal.apk.v2;
 
-@FunctionalInterface
-public interface SupplierCompat<T> {
-    T get();
+/** Constants used by the V2 Signature Scheme signing and verification. */
+public class V2SchemeConstants {
+    private V2SchemeConstants() {}
+
+    public static final int APK_SIGNATURE_SCHEME_V2_BLOCK_ID = 0x7109871a;
+    public static final int STRIPPING_PROTECTION_ATTR_ID = 0xbeeff00d;
 }

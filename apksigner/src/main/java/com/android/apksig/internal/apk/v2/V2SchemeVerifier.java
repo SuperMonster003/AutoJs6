@@ -16,6 +16,8 @@
 
 package com.android.apksig.internal.apk.v2;
 
+import static com.android.apksig.Constants.MAX_APK_SIGNERS;
+
 import com.android.apksig.ApkVerifier.Issue;
 import com.android.apksig.apk.ApkFormatException;
 import com.android.apksig.apk.ApkUtils;
@@ -24,11 +26,10 @@ import com.android.apksig.internal.apk.ContentDigestAlgorithm;
 import com.android.apksig.internal.apk.SignatureAlgorithm;
 import com.android.apksig.internal.apk.SignatureInfo;
 import com.android.apksig.internal.util.ByteBufferUtils;
-import com.android.apksig.internal.util.GuaranteedEncodedFormX509Certificate;
 import com.android.apksig.internal.util.X509CertificateUtils;
+import com.android.apksig.internal.util.GuaranteedEncodedFormX509Certificate;
 import com.android.apksig.util.DataSource;
 import com.android.apksig.util.RunnablesExecutor;
-
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -62,14 +63,8 @@ import java.util.Set;
  * @see <a href="https://source.android.com/security/apksigning/v2.html">APK Signature Scheme v2</a>
  */
 public abstract class V2SchemeVerifier {
-
-    private static final int APK_SIGNATURE_SCHEME_V2_BLOCK_ID = 0x7109871a;
-
-    /**
-     * Hidden constructor to prevent instantiation.
-     */
-    private V2SchemeVerifier() {
-    }
+    /** Hidden constructor to prevent instantiation. */
+    private V2SchemeVerifier() {}
 
     /**
      * Verifies the provided APK's APK Signature Scheme v2 signatures and returns the result of
@@ -84,12 +79,12 @@ public abstract class V2SchemeVerifier {
      * this method returns a result with one or more errors and whose
      * {@code Result.verified == false}, or this method throws an exception.
      *
-     * @throws ApkFormatException                              if the APK is malformed
-     * @throws NoSuchAlgorithmException                        if the APK's signatures cannot be verified because a
-     *                                                         required cryptographic algorithm implementation is missing
+     * @throws ApkFormatException if the APK is malformed
+     * @throws NoSuchAlgorithmException if the APK's signatures cannot be verified because a
+     *         required cryptographic algorithm implementation is missing
      * @throws ApkSigningBlockUtils.SignatureNotFoundException if no APK Signature Scheme v2
-     *                                                         signatures are found
-     * @throws IOException                                     if an I/O error occurs when reading the APK
+     * signatures are found
+     * @throws IOException if an I/O error occurs when reading the APK
      */
     public static ApkSigningBlockUtils.Result verify(
             RunnablesExecutor executor,
@@ -105,7 +100,7 @@ public abstract class V2SchemeVerifier {
                 ApkSigningBlockUtils.VERSION_APK_SIGNATURE_SCHEME_V2);
         SignatureInfo signatureInfo =
                 ApkSigningBlockUtils.findSignature(apk, zipSections,
-                        APK_SIGNATURE_SCHEME_V2_BLOCK_ID, result);
+                        V2SchemeConstants.APK_SIGNATURE_SCHEME_V2_BLOCK_ID , result);
 
         DataSource beforeApkSigningBlock = apk.slice(0, signatureInfo.apkSigningBlockOffset);
         DataSource centralDir =
@@ -134,7 +129,7 @@ public abstract class V2SchemeVerifier {
      * Set, int, int)} for more information about the contract of this method.
      *
      * @param result result populated by this method with interesting information about the APK,
-     *               such as information about signers, and verification errors and warnings.
+     *        such as information about signers, and verification errors and warnings.
      */
     private static void verify(
             RunnablesExecutor executor,
@@ -229,6 +224,9 @@ public abstract class V2SchemeVerifier {
                 return;
             }
         }
+        if (signerCount > MAX_APK_SIGNERS) {
+            result.addError(Issue.V2_SIG_MAX_SIGNATURES_EXCEEDED, MAX_APK_SIGNERS, signerCount);
+        }
     }
 
     /**
@@ -251,8 +249,7 @@ public abstract class V2SchemeVerifier {
             Map<Integer, String> supportedApkSigSchemeNames,
             Set<Integer> foundApkSigSchemeIds,
             int minSdkVersion,
-            int maxSdkVersion)
-            throws ApkFormatException, NoSuchAlgorithmException {
+            int maxSdkVersion) throws ApkFormatException, NoSuchAlgorithmException {
         ByteBuffer signedData = ApkSigningBlockUtils.getLengthPrefixedSlice(signerBlock);
         byte[] signedDataBytes = new byte[signedData.remaining()];
         signedData.get(signedDataBytes);
@@ -439,7 +436,7 @@ public abstract class V2SchemeVerifier {
                 result.additionalAttributes.add(
                         new ApkSigningBlockUtils.Result.SignerInfo.AdditionalAttribute(id, value));
                 switch (id) {
-                    case V2SchemeSigner.STRIPPING_PROTECTION_ATTR_ID:
+                    case V2SchemeConstants.STRIPPING_PROTECTION_ATTR_ID:
                         // stripping protection added when signing with a newer scheme
                         int foundId = ByteBuffer.wrap(value).order(
                                 ByteOrder.LITTLE_ENDIAN).getInt();

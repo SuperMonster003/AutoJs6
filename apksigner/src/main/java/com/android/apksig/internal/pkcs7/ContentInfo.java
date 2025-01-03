@@ -19,8 +19,8 @@ package com.android.apksig.internal.pkcs7;
 import com.android.apksig.internal.asn1.Asn1Class;
 import com.android.apksig.internal.asn1.Asn1Field;
 import com.android.apksig.internal.asn1.Asn1OpaqueObject;
-import com.android.apksig.internal.asn1.Asn1Tagging;
 import com.android.apksig.internal.asn1.Asn1Type;
+import com.android.apksig.internal.asn1.Asn1Tagging;
 
 /**
  * PKCS #7 {@code ContentInfo} as specified in RFC 5652.

@@ -16,7 +16,6 @@
 package com.android.apksig.internal.util;
 
 import com.android.apksig.util.DataSink;
-
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 

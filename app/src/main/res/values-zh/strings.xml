@@ -890,5 +890,8 @@
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">包名 (计算中...)</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">版本名称 (计算中...)</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">版本号 (计算中...)</string>
+    <string name="apk_info_file_size">文件大小</string>
+    <string name="apk_info_signature_scheme">签名方案</string>
+    <string name="dialog_button_file_information">文件信息</string>
 
 </resources>

@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
  * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +16,7 @@
 package com.android.apksig.internal.apk.stamp;
 
 import static com.android.apksig.internal.apk.ApkSigningBlockUtils.encodeAsSequenceOfLengthPrefixedPairsOfIntAndLengthPrefixedBytes;
-import static com.android.apksig.internal.apk.stamp.V1SourceStampSigner.V1_SOURCE_STAMP_BLOCK_ID;
+import static com.android.apksig.internal.apk.stamp.SourceStampConstants.V1_SOURCE_STAMP_BLOCK_ID;
 
 import com.android.apksig.ApkVerifier;
 import com.android.apksig.apk.ApkFormatException;
@@ -36,6 +35,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -46,11 +46,8 @@ import java.util.Map;
  */
 public abstract class V1SourceStampVerifier {
 
-    /**
-     * Hidden constructor to prevent instantiation.
-     */
-    private V1SourceStampVerifier() {
-    }
+    /** Hidden constructor to prevent instantiation. */
+    private V1SourceStampVerifier() {}
 
     /**
      * Verifies the provided APK's SourceStamp signatures and returns the result of verification.
@@ -58,11 +55,11 @@ public abstract class V1SourceStampVerifier {
      * {@code true}. If verification fails, the result will contain errors -- see {@link
      * ApkSigningBlockUtils.Result#getErrors()}.
      *
-     * @throws NoSuchAlgorithmException                        if the APK's signatures cannot be verified because a
-     *                                                         required cryptographic algorithm implementation is missing
+     * @throws NoSuchAlgorithmException if the APK's signatures cannot be verified because a
+     *     required cryptographic algorithm implementation is missing
      * @throws ApkSigningBlockUtils.SignatureNotFoundException if no SourceStamp signatures are
-     *                                                         found
-     * @throws IOException                                     if an I/O error occurs when reading the APK
+     *     found
+     * @throws IOException if an I/O error occurs when reading the APK
      */
     public static ApkSigningBlockUtils.Result verify(
             DataSource apk,
@@ -72,7 +69,7 @@ public abstract class V1SourceStampVerifier {
             int minSdkVersion,
             int maxSdkVersion)
             throws IOException, NoSuchAlgorithmException,
-            ApkSigningBlockUtils.SignatureNotFoundException {
+                    ApkSigningBlockUtils.SignatureNotFoundException {
         ApkSigningBlockUtils.Result result =
                 new ApkSigningBlockUtils.Result(ApkSigningBlockUtils.VERSION_SOURCE_STAMP);
         SignatureInfo signatureInfo =
@@ -136,7 +133,7 @@ public abstract class V1SourceStampVerifier {
                 apkContentDigests.entrySet()) {
             digests.add(Pair.of(apkContentDigest.getKey().getId(), apkContentDigest.getValue()));
         }
-        Collections.sort(digests, (o1, o2) -> o1.getFirst().compareTo(o2.getFirst()));
+        Collections.sort(digests, Comparator.comparing(Pair::getFirst));
         return digests;
     }
 }

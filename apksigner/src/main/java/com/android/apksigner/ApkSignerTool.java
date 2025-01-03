@@ -26,8 +26,6 @@ import com.android.apksig.util.DataSource;
 import com.android.apksig.util.DataSources;
 import com.android.apksigner.utils.FileUtils;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.BufferedReader;
@@ -611,7 +609,6 @@ public class ApkSignerTool {
         }
         if ((warningsTreatedAsErrors) && (warningsEncountered)) {
             //System.exit(1);
-            return;
         }
     }
 

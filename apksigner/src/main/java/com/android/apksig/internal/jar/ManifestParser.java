@@ -33,10 +33,10 @@ import java.util.jar.Attributes;
  */
 public class ManifestParser {
 
-    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
     private final byte[] mManifest;
     private int mOffset;
     private int mEndOffset;
+
     private byte[] mBufferedLine;
 
     /**
@@ -53,28 +53,6 @@ public class ManifestParser {
         mManifest = data;
         mOffset = offset;
         mEndOffset = offset + length;
-    }
-
-    private static Attribute parseAttr(String attr) {
-        // Name is separated from value by a semicolon followed by a single SPACE character.
-        // This permits trailing spaces in names and leading and trailing spaces in values.
-        // Some APK obfuscators take advantage of this fact. We thus need to preserve these unusual
-        // spaces to be able to parse such obfuscated APKs.
-        int delimiterIndex = attr.indexOf(": ");
-        if (delimiterIndex == -1) {
-            return new Attribute(attr, "");
-        } else {
-            return new Attribute(
-                    attr.substring(0, delimiterIndex),
-                    attr.substring(delimiterIndex + ": ".length()));
-        }
-    }
-
-    private static byte[] concat(byte[] arr1, byte[] arr2, int offset2, int length2) {
-        byte[] result = new byte[arr1.length + length2];
-        System.arraycopy(arr1, 0, result, 0, arr1.length);
-        System.arraycopy(arr2, offset2, result, arr1.length, length2);
-        return result;
     }
 
     /**
@@ -120,6 +98,21 @@ public class ManifestParser {
         int sectionSizeBytes = sectionEndOffset - sectionStartOffset;
 
         return new Section(sectionStartOffset, sectionSizeBytes, attrs);
+    }
+
+    private static Attribute parseAttr(String attr) {
+        // Name is separated from value by a semicolon followed by a single SPACE character.
+        // This permits trailing spaces in names and leading and trailing spaces in values.
+        // Some APK obfuscators take advantage of this fact. We thus need to preserve these unusual
+        // spaces to be able to parse such obfuscated APKs.
+        int delimiterIndex = attr.indexOf(": ");
+        if (delimiterIndex == -1) {
+            return new Attribute(attr, "");
+        } else {
+            return new Attribute(
+                    attr.substring(0, delimiterIndex),
+                    attr.substring(delimiterIndex + ": ".length()));
+        }
     }
 
     /**
@@ -209,6 +202,15 @@ public class ManifestParser {
         }
     }
 
+    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
+    private static byte[] concat(byte[] arr1, byte[] arr2, int offset2, int length2) {
+        byte[] result = new byte[arr1.length + length2];
+        System.arraycopy(arr1, 0, result, 0, arr1.length);
+        System.arraycopy(arr2, offset2, result, arr1.length, length2);
+        return result;
+    }
+
     /**
      * Returns the next line (without line delimiter characters) or {@code null} if end of input has
      * been reached.
@@ -293,8 +295,8 @@ public class ManifestParser {
          * Constructs a new {@code Section}.
          *
          * @param startOffset start offset (in bytes) of the section in the input file
-         * @param sizeBytes   size (in bytes) of the section in the input file
-         * @param attrs       attributes contained in the section
+         * @param sizeBytes size (in bytes) of the section in the input file
+         * @param attrs attributes contained in the section
          */
         public Section(int startOffset, int sizeBytes, List<Attribute> attrs) {
             mStartOffset = startOffset;

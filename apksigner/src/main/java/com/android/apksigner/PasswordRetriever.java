@@ -361,7 +361,7 @@ public class PasswordRetriever implements AutoCloseable {
      * <p>NOTE: This method adds only the passwords/variants which are not yet in the list.
      */
     private void addPasswords(List<char[]> passwords, char[] pwd, Charset... additionalEncodings) {
-        if ((additionalEncodings != null) && (additionalEncodings.length > 0)) {
+        if (additionalEncodings != null) {
             for (Charset encoding : additionalEncodings) {
                 // Password encoded using provided encoding (usually the console's character
                 // encoding) and upcast into char[]

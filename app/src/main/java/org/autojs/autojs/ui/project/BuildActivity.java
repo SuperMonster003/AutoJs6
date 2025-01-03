@@ -42,6 +42,7 @@ import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.keystore.ManageKeyStoreActivity;
+import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager;
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity;
 import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel;
 import org.autojs.autojs.ui.widget.RoundCheckboxWithText;
@@ -880,8 +881,13 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .title(R.string.text_build_succeeded)
                 .content(getString(R.string.format_build_succeeded, outApk.getPath()))
                 .positiveText(R.string.text_install)
-                .negativeText(R.string.text_cancel)
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive((dialog, which) -> IntentUtils.installApk(BuildActivity.this, outApk.getPath()))
+                .negativeText(R.string.text_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .neutralText(R.string.dialog_button_file_information)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .onNeutral((dialog, which) -> ApkInfoDialogManager.showApkInfoDialog(dialog.getContext(), outApk))
                 .show();
     }
 

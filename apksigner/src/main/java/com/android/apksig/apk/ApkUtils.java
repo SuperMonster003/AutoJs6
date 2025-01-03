@@ -17,6 +17,7 @@
 package com.android.apksig.apk;
 
 import com.android.apksig.internal.apk.AndroidBinXmlParser;
+import com.android.apksig.internal.apk.stamp.SourceStampConstants;
 import com.android.apksig.internal.apk.v1.V1SchemeVerifier;
 import com.android.apksig.internal.util.Pair;
 import com.android.apksig.internal.zip.CentralDirectoryRecord;
@@ -28,8 +29,6 @@ import com.android.apksig.zip.ZipFormatException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -44,67 +43,42 @@ public abstract class ApkUtils {
      */
     public static final String ANDROID_MANIFEST_ZIP_ENTRY_NAME = "AndroidManifest.xml";
 
-    /**
-     * Name of the SourceStamp certificate hash ZIP entry in APKs.
-     */
-    public static final String SOURCE_STAMP_CERTIFICATE_HASH_ZIP_ENTRY_NAME = "stamp-cert-sha256";
-    // See https://source.android.com/security/apksigning/v2.html
-    private static final long APK_SIG_BLOCK_MAGIC_HI = 0x3234206b636f6c42L;
-    private static final long APK_SIG_BLOCK_MAGIC_LO = 0x20676953204b5041L;
-    private static final int APK_SIG_BLOCK_MIN_SIZE = 32;
-    /**
-     * Android resource ID of the {@code android:minSdkVersion} attribute in AndroidManifest.xml.
-     */
-    private static final int MIN_SDK_VERSION_ATTR_ID = 0x0101020c;
-    /**
-     * Android resource ID of the {@code android:debuggable} attribute in AndroidManifest.xml.
-     */
-    private static final int DEBUGGABLE_ATTR_ID = 0x0101000f;
+    /** Name of the SourceStamp certificate hash ZIP entry in APKs. */
+    public static final String SOURCE_STAMP_CERTIFICATE_HASH_ZIP_ENTRY_NAME =
+            SourceStampConstants.SOURCE_STAMP_CERTIFICATE_HASH_ZIP_ENTRY_NAME;
 
-    private ApkUtils() {
-    }
+    private ApkUtils() {}
 
     /**
      * Finds the main ZIP sections of the provided APK.
      *
-     * @throws IOException        if an I/O error occurred while reading the APK
+     * @throws IOException if an I/O error occurred while reading the APK
      * @throws ZipFormatException if the APK is malformed
      */
     public static ZipSections findZipSections(DataSource apk)
             throws IOException, ZipFormatException {
-        Pair<ByteBuffer, Long> eocdAndOffsetInFile =
-                ZipUtils.findZipEndOfCentralDirectoryRecord(apk);
-        if (eocdAndOffsetInFile == null) {
-            throw new ZipFormatException("ZIP End of Central Directory record not found");
-        }
-
-        ByteBuffer eocdBuf = eocdAndOffsetInFile.getFirst();
-        long eocdOffset = eocdAndOffsetInFile.getSecond();
-        eocdBuf.order(ByteOrder.LITTLE_ENDIAN);
-        long cdStartOffset = ZipUtils.getZipEocdCentralDirectoryOffset(eocdBuf);
-        if (cdStartOffset > eocdOffset) {
-            throw new ZipFormatException(
-                    "ZIP Central Directory start offset out of range: " + cdStartOffset
-                            + ". ZIP End of Central Directory offset: " + eocdOffset);
-        }
-
-        long cdSizeBytes = ZipUtils.getZipEocdCentralDirectorySizeBytes(eocdBuf);
-        long cdEndOffset = cdStartOffset + cdSizeBytes;
-        if (cdEndOffset > eocdOffset) {
-            throw new ZipFormatException(
-                    "ZIP Central Directory overlaps with End of Central Directory"
-                            + ". CD end: " + cdEndOffset
-                            + ", EoCD start: " + eocdOffset);
-        }
-
-        int cdRecordCount = ZipUtils.getZipEocdCentralDirectoryTotalRecordCount(eocdBuf);
-
+        com.android.apksig.zip.ZipSections zipSections = ApkUtilsLite.findZipSections(apk);
         return new ZipSections(
-                cdStartOffset,
-                cdSizeBytes,
-                cdRecordCount,
-                eocdOffset,
-                eocdBuf);
+                zipSections.getZipCentralDirectoryOffset(),
+                zipSections.getZipCentralDirectorySizeBytes(),
+                zipSections.getZipCentralDirectoryRecordCount(),
+                zipSections.getZipEndOfCentralDirectoryOffset(),
+                zipSections.getZipEndOfCentralDirectory());
+    }
+
+    /**
+     * Information about the ZIP sections of an APK.
+     */
+    public static class ZipSections extends com.android.apksig.zip.ZipSections {
+        public ZipSections(
+                long centralDirectoryOffset,
+                long centralDirectorySizeBytes,
+                int centralDirectoryRecordCount,
+                long eocdOffset,
+                ByteBuffer eocd) {
+            super(centralDirectoryOffset, centralDirectorySizeBytes, centralDirectoryRecordCount,
+                    eocdOffset, eocd);
+        }
     }
 
     /**
@@ -112,8 +86,8 @@ public abstract class ApkUtils {
      * Directory record.
      *
      * @param zipEndOfCentralDirectory APK's ZIP End of Central Directory record
-     * @param offset                   offset of the ZIP Central Directory relative to the start of the archive. Must
-     *                                 be between {@code 0} and {@code 2^32 - 1} inclusive.
+     * @param offset offset of the ZIP Central Directory relative to the start of the archive. Must
+     *        be between {@code 0} and {@code 2^32 - 1} inclusive.
      */
     public static void setZipEocdCentralDirectoryOffset(
             ByteBuffer zipEndOfCentralDirectory, long offset) {
@@ -123,75 +97,73 @@ public abstract class ApkUtils {
     }
 
     /**
+     * Updates the length of EOCD comment.
+     *
+     * @param zipEndOfCentralDirectory APK's ZIP End of Central Directory record
+     */
+    public static void updateZipEocdCommentLen(ByteBuffer zipEndOfCentralDirectory) {
+        ByteBuffer eocd = zipEndOfCentralDirectory.slice();
+        eocd.order(ByteOrder.LITTLE_ENDIAN);
+        ZipUtils.updateZipEocdCommentLen(eocd);
+    }
+
+    /**
+     * Returns the APK Signing Block of the provided {@code apk}.
+     *
+     * @throws ApkFormatException if the APK is not a valid ZIP archive
+     * @throws IOException if an I/O error occurs
+     * @throws ApkSigningBlockNotFoundException if there is no APK Signing Block in the APK
+     *
+     * @see <a href="https://source.android.com/security/apksigning/v2.html">APK Signature Scheme v2
+     * </a>
+     */
+    public static ApkSigningBlock findApkSigningBlock(DataSource apk)
+            throws ApkFormatException, IOException, ApkSigningBlockNotFoundException {
+        ApkUtils.ZipSections inputZipSections;
+        try {
+            inputZipSections = ApkUtils.findZipSections(apk);
+        } catch (ZipFormatException e) {
+            throw new ApkFormatException("Malformed APK: not a ZIP archive", e);
+        }
+        return findApkSigningBlock(apk, inputZipSections);
+    }
+
+    /**
      * Returns the APK Signing Block of the provided APK.
      *
-     * @throws IOException                      if an I/O error occurs
+     * @throws IOException if an I/O error occurs
      * @throws ApkSigningBlockNotFoundException if there is no APK Signing Block in the APK
-     * @see <a href="https://source.android.com/security/apksigning/v2.html">APK Signature Scheme v2</a>
+     *
+     * @see <a href="https://source.android.com/security/apksigning/v2.html">APK Signature Scheme v2
+     * </a>
      */
     public static ApkSigningBlock findApkSigningBlock(DataSource apk, ZipSections zipSections)
             throws IOException, ApkSigningBlockNotFoundException {
-        // FORMAT (see https://source.android.com/security/apksigning/v2.html):
-        // OFFSET       DATA TYPE  DESCRIPTION
-        // * @+0  bytes uint64:    size in bytes (excluding this field)
-        // * @+8  bytes payload
-        // * @-24 bytes uint64:    size in bytes (same as the one above)
-        // * @-16 bytes uint128:   magic
+        ApkUtilsLite.ApkSigningBlock apkSigningBlock = ApkUtilsLite.findApkSigningBlock(apk,
+                zipSections);
+        return new ApkSigningBlock(apkSigningBlock.getStartOffset(), apkSigningBlock.getContents());
+    }
 
-        long centralDirStartOffset = zipSections.getZipCentralDirectoryOffset();
-        long centralDirEndOffset =
-                centralDirStartOffset + zipSections.getZipCentralDirectorySizeBytes();
-        long eocdStartOffset = zipSections.getZipEndOfCentralDirectoryOffset();
-        if (centralDirEndOffset != eocdStartOffset) {
-            throw new ApkSigningBlockNotFoundException(
-                    "ZIP Central Directory is not immediately followed by End of Central Directory"
-                            + ". CD end: " + centralDirEndOffset
-                            + ", EoCD start: " + eocdStartOffset);
+    /**
+     * Information about the location of the APK Signing Block inside an APK.
+     */
+    public static class ApkSigningBlock extends ApkUtilsLite.ApkSigningBlock {
+        /**
+         * Constructs a new {@code ApkSigningBlock}.
+         *
+         * @param startOffsetInApk start offset (in bytes, relative to start of file) of the APK
+         *        Signing Block inside the APK file
+         * @param contents contents of the APK Signing Block
+         */
+        public ApkSigningBlock(long startOffsetInApk, DataSource contents) {
+            super(startOffsetInApk, contents);
         }
-
-        if (centralDirStartOffset < APK_SIG_BLOCK_MIN_SIZE) {
-            throw new ApkSigningBlockNotFoundException(
-                    "APK too small for APK Signing Block. ZIP Central Directory offset: "
-                            + centralDirStartOffset);
-        }
-        // Read the magic and offset in file from the footer section of the block:
-        // * uint64:   size of block
-        // * 16 bytes: magic
-        ByteBuffer footer = apk.getByteBuffer(centralDirStartOffset - 24, 24);
-        footer.order(ByteOrder.LITTLE_ENDIAN);
-        if ((footer.getLong(8) != APK_SIG_BLOCK_MAGIC_LO)
-                || (footer.getLong(16) != APK_SIG_BLOCK_MAGIC_HI)) {
-            throw new ApkSigningBlockNotFoundException(
-                    "No APK Signing Block before ZIP Central Directory");
-        }
-        // Read and compare size fields
-        long apkSigBlockSizeInFooter = footer.getLong(0);
-        if ((apkSigBlockSizeInFooter < footer.capacity())
-                || (apkSigBlockSizeInFooter > Integer.MAX_VALUE - 8)) {
-            throw new ApkSigningBlockNotFoundException(
-                    "APK Signing Block size out of range: " + apkSigBlockSizeInFooter);
-        }
-        int totalSize = (int) (apkSigBlockSizeInFooter + 8);
-        long apkSigBlockOffset = centralDirStartOffset - totalSize;
-        if (apkSigBlockOffset < 0) {
-            throw new ApkSigningBlockNotFoundException(
-                    "APK Signing Block offset out of range: " + apkSigBlockOffset);
-        }
-        ByteBuffer apkSigBlock = apk.getByteBuffer(apkSigBlockOffset, 8);
-        apkSigBlock.order(ByteOrder.LITTLE_ENDIAN);
-        long apkSigBlockSizeInHeader = apkSigBlock.getLong(0);
-        if (apkSigBlockSizeInHeader != apkSigBlockSizeInFooter) {
-            throw new ApkSigningBlockNotFoundException(
-                    "APK Signing Block sizes in header and footer do not match: "
-                            + apkSigBlockSizeInHeader + " vs " + apkSigBlockSizeInFooter);
-        }
-        return new ApkSigningBlock(apkSigBlockOffset, apk.slice(apkSigBlockOffset, totalSize));
     }
 
     /**
      * Returns the contents of the APK's {@code AndroidManifest.xml}.
      *
-     * @throws IOException        if an I/O error occurs while reading the APK
+     * @throws IOException if an I/O error occurs while reading the APK
      * @throws ApkFormatException if the APK is malformed
      */
     public static ByteBuffer getAndroidManifest(DataSource apk)
@@ -226,11 +198,46 @@ public abstract class ApkUtils {
     }
 
     /**
+     * Android resource ID of the {@code android:minSdkVersion} attribute in AndroidManifest.xml.
+     */
+    private static final int MIN_SDK_VERSION_ATTR_ID = 0x0101020c;
+
+    /**
+     * Android resource ID of the {@code android:debuggable} attribute in AndroidManifest.xml.
+     */
+    private static final int DEBUGGABLE_ATTR_ID = 0x0101000f;
+
+    /**
+     * Android resource ID of the {@code android:targetSandboxVersion} attribute in
+     * AndroidManifest.xml.
+     */
+    private static final int TARGET_SANDBOX_VERSION_ATTR_ID = 0x0101054c;
+
+    /**
+     * Android resource ID of the {@code android:targetSdkVersion} attribute in
+     * AndroidManifest.xml.
+     */
+    private static final int TARGET_SDK_VERSION_ATTR_ID = 0x01010270;
+    private static final String USES_SDK_ELEMENT_TAG = "uses-sdk";
+
+    /**
+     * Android resource ID of the {@code android:versionCode} attribute in AndroidManifest.xml.
+     */
+    private static final int VERSION_CODE_ATTR_ID = 0x0101021b;
+    private static final String MANIFEST_ELEMENT_TAG = "manifest";
+
+    /**
+     * Android resource ID of the {@code android:versionCodeMajor} attribute in AndroidManifest.xml.
+     */
+    private static final int VERSION_CODE_MAJOR_ATTR_ID = 0x01010576;
+
+    /**
      * Returns the lowest Android platform version (API Level) supported by an APK with the
      * provided {@code AndroidManifest.xml}.
      *
      * @param androidManifestContents contents of {@code AndroidManifest.xml} in binary Android
-     *                                resource format
+     *        resource format
+     *
      * @throws MinSdkVersionException if an error occurred while determining the API Level
      */
     public static int getMinSdkVersionFromBinaryAndroidManifest(
@@ -294,6 +301,44 @@ public abstract class ApkUtils {
         }
     }
 
+    private static class CodenamesLazyInitializer {
+
+        /**
+         * List of platform codename (first letter of) to API Level mappings. The list must be
+         * sorted by the first letter. For codenames not in the list, the assumption is that the API
+         * Level is incremented by one for every increase in the codename's first letter.
+         */
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        private static final Pair<Character, Integer>[] SORTED_CODENAMES_FIRST_CHAR_TO_API_LEVEL =
+                new Pair[] {
+            Pair.of('C', 2),
+            Pair.of('D', 3),
+            Pair.of('E', 4),
+            Pair.of('F', 7),
+            Pair.of('G', 8),
+            Pair.of('H', 10),
+            Pair.of('I', 13),
+            Pair.of('J', 15),
+            Pair.of('K', 18),
+            Pair.of('L', 20),
+            Pair.of('M', 22),
+            Pair.of('N', 23),
+            Pair.of('O', 25),
+        };
+
+        private static final Comparator<Pair<Character, Integer>> CODENAME_FIRST_CHAR_COMPARATOR =
+                new ByFirstComparator();
+
+        private static class ByFirstComparator implements Comparator<Pair<Character, Integer>> {
+            @Override
+            public int compare(Pair<Character, Integer> o1, Pair<Character, Integer> o2) {
+                char c1 = o1.getFirst();
+                char c2 = o2.getFirst();
+                return c1 - c2;
+            }
+        }
+    }
+
     /**
      * Returns the API Level corresponding to the provided platform codename.
      *
@@ -308,6 +353,10 @@ public abstract class ApkUtils {
      * @throws CodenameMinSdkVersionException if the {@code codename} is not supported
      */
     static int getMinSdkVersionForCodename(String codename) throws CodenameMinSdkVersionException {
+        if ("Baklava".equals(codename)) {
+            return 34; // VIC (35) was the version before Baklava, return VIC version minus one
+        }
+
         char firstChar = codename.isEmpty() ? ' ' : codename.charAt(0);
         // Codenames are case-sensitive. Only codenames starting with A-Z are supported for now.
         // We only look at the first letter of the codename as this is the most important letter.
@@ -328,7 +377,7 @@ public abstract class ApkUtils {
             // element at insertionIndex (if present) is greater than firstChar.
             int insertionIndex = -1 - searchResult; // insertionIndex is in [0; array length]
             if (insertionIndex == 0) {
-                // 'A' or 'B' -- never released to public
+                // 'A' or 'B' (not Baklava) -- never released to public
                 return 1;
             } else {
                 // The element at insertionIndex - 1 is the newest older codename.
@@ -353,7 +402,8 @@ public abstract class ApkUtils {
      * See the {@code android:debuggable} attribute of the {@code application} element.
      *
      * @param androidManifestContents contents of {@code AndroidManifest.xml} in binary Android
-     *                                resource format
+     *        resource format
+     *
      * @throws ApkFormatException if the manifest is malformed
      */
     public static boolean getDebuggableFromBinaryAndroidManifest(
@@ -429,7 +479,8 @@ public abstract class ApkUtils {
      * {@code manifest} element.
      *
      * @param androidManifestContents contents of {@code AndroidManifest.xml} in binary Android
-     *                                resource format
+     *        resource format
+     *
      * @throws ApkFormatException if the manifest is malformed
      */
     public static String getPackageNameFromBinaryAndroidManifest(
@@ -468,150 +519,156 @@ public abstract class ApkUtils {
         }
     }
 
-    public static byte[] computeSha256DigestBytes(byte[] data) {
-        MessageDigest messageDigest;
+    /**
+     * Returns the security sandbox version targeted by an APK with the provided
+     * {@code AndroidManifest.xml}.
+     *
+     * <p>If the security sandbox version is not specified in the manifest a default value of 1 is
+     * returned.
+     *
+     * @param androidManifestContents contents of {@code AndroidManifest.xml} in binary Android
+     *                                resource format
+     */
+    public static int getTargetSandboxVersionFromBinaryAndroidManifest(
+            ByteBuffer androidManifestContents) {
         try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is not found", e);
-        }
-        messageDigest.update(data);
-        return messageDigest.digest();
-    }
-
-    /**
-     * Information about the ZIP sections of an APK.
-     */
-    public static class ZipSections {
-        private final long mCentralDirectoryOffset;
-        private final long mCentralDirectorySizeBytes;
-        private final int mCentralDirectoryRecordCount;
-        private final long mEocdOffset;
-        private final ByteBuffer mEocd;
-
-        public ZipSections(
-                long centralDirectoryOffset,
-                long centralDirectorySizeBytes,
-                int centralDirectoryRecordCount,
-                long eocdOffset,
-                ByteBuffer eocd) {
-            mCentralDirectoryOffset = centralDirectoryOffset;
-            mCentralDirectorySizeBytes = centralDirectorySizeBytes;
-            mCentralDirectoryRecordCount = centralDirectoryRecordCount;
-            mEocdOffset = eocdOffset;
-            mEocd = eocd;
-        }
-
-        /**
-         * Returns the start offset of the ZIP Central Directory. This value is taken from the
-         * ZIP End of Central Directory record.
-         */
-        public long getZipCentralDirectoryOffset() {
-            return mCentralDirectoryOffset;
-        }
-
-        /**
-         * Returns the size (in bytes) of the ZIP Central Directory. This value is taken from the
-         * ZIP End of Central Directory record.
-         */
-        public long getZipCentralDirectorySizeBytes() {
-            return mCentralDirectorySizeBytes;
-        }
-
-        /**
-         * Returns the number of records in the ZIP Central Directory. This value is taken from the
-         * ZIP End of Central Directory record.
-         */
-        public int getZipCentralDirectoryRecordCount() {
-            return mCentralDirectoryRecordCount;
-        }
-
-        /**
-         * Returns the start offset of the ZIP End of Central Directory record. The record extends
-         * until the very end of the APK.
-         */
-        public long getZipEndOfCentralDirectoryOffset() {
-            return mEocdOffset;
-        }
-
-        /**
-         * Returns the contents of the ZIP End of Central Directory.
-         */
-        public ByteBuffer getZipEndOfCentralDirectory() {
-            return mEocd;
+            return getAttributeValueFromBinaryAndroidManifest(androidManifestContents,
+                    MANIFEST_ELEMENT_TAG, TARGET_SANDBOX_VERSION_ATTR_ID);
+        } catch (ApkFormatException e) {
+            // An ApkFormatException indicates the target sandbox is not specified in the manifest;
+            // return a default value of 1.
+            return 1;
         }
     }
 
     /**
-     * Information about the location of the APK Signing Block inside an APK.
+     * Returns the SDK version targeted by an APK with the provided {@code AndroidManifest.xml}.
+     *
+     * <p>If the targetSdkVersion is not specified the minimumSdkVersion is returned. If neither
+     * value is specified then a value of 1 is returned.
+     *
+     * @param androidManifestContents contents of {@code AndroidManifest.xml} in binary Android
+     *                                resource format
      */
-    public static class ApkSigningBlock {
-        private final long mStartOffsetInApk;
-        private final DataSource mContents;
-
-        /**
-         * Constructs a new {@code ApkSigningBlock}.
-         *
-         * @param startOffsetInApk start offset (in bytes, relative to start of file) of the APK
-         *                         Signing Block inside the APK file
-         * @param contents         contents of the APK Signing Block
-         */
-        public ApkSigningBlock(long startOffsetInApk, DataSource contents) {
-            mStartOffsetInApk = startOffsetInApk;
-            mContents = contents;
+    public static int getTargetSdkVersionFromBinaryAndroidManifest(
+            ByteBuffer androidManifestContents) {
+        // If the targetSdkVersion is not specified then the platform will use the value of the
+        // minSdkVersion; if neither is specified then the platform will use a value of 1.
+        int minSdkVersion = 1;
+        try {
+            return getAttributeValueFromBinaryAndroidManifest(androidManifestContents,
+                    USES_SDK_ELEMENT_TAG, TARGET_SDK_VERSION_ATTR_ID);
+        } catch (ApkFormatException e) {
+            // Expected if the APK does not contain a targetSdkVersion attribute or the uses-sdk
+            // element is not specified at all.
         }
-
-        /**
-         * Returns the start offset (in bytes, relative to start of file) of the APK Signing Block.
-         */
-        public long getStartOffset() {
-            return mStartOffsetInApk;
+        androidManifestContents.rewind();
+        try {
+            minSdkVersion = getMinSdkVersionFromBinaryAndroidManifest(androidManifestContents);
+        } catch (ApkFormatException e) {
+            // Similar to above, expected if the APK does not contain a minSdkVersion attribute, or
+            // the uses-sdk element is not specified at all.
         }
-
-        /**
-         * Returns the data source which provides the full contents of the APK Signing Block,
-         * including its footer.
-         */
-        public DataSource getContents() {
-            return mContents;
-        }
+        return minSdkVersion;
     }
 
-    private static class CodenamesLazyInitializer {
+    /**
+     * Returns the versionCode of the APK according to its {@code AndroidManifest.xml}.
+     *
+     * <p>If the versionCode is not specified in the {@code AndroidManifest.xml} or is not a valid
+     * integer an ApkFormatException is thrown.
+     *
+     * @param androidManifestContents contents of {@code AndroidManifest.xml} in binary Android
+     *                                resource format
+     * @throws ApkFormatException if an error occurred while determining the versionCode, or if the
+     *                            versionCode attribute value is not available.
+     */
+    public static int getVersionCodeFromBinaryAndroidManifest(ByteBuffer androidManifestContents)
+            throws ApkFormatException {
+        return getAttributeValueFromBinaryAndroidManifest(androidManifestContents,
+                MANIFEST_ELEMENT_TAG, VERSION_CODE_ATTR_ID);
+    }
 
-        /**
-         * List of platform codename (first letter of) to API Level mappings. The list must be
-         * sorted by the first letter. For codenames not in the list, the assumption is that the API
-         * Level is incremented by one for every increase in the codename's first letter.
-         */
-        @SuppressWarnings({"rawtypes", "unchecked"})
-        private static final Pair<Character, Integer>[] SORTED_CODENAMES_FIRST_CHAR_TO_API_LEVEL =
-                new Pair[]{
-                        Pair.of('C', 2),
-                        Pair.of('D', 3),
-                        Pair.of('E', 4),
-                        Pair.of('F', 7),
-                        Pair.of('G', 8),
-                        Pair.of('H', 10),
-                        Pair.of('I', 13),
-                        Pair.of('J', 15),
-                        Pair.of('K', 18),
-                        Pair.of('L', 20),
-                        Pair.of('M', 22),
-                        Pair.of('N', 23),
-                        Pair.of('O', 25),
-                };
+    /**
+     * Returns the versionCode and versionCodeMajor of the APK according to its {@code
+     * AndroidManifest.xml} combined together as a single long value.
+     *
+     * <p>The versionCodeMajor is placed in the upper 32 bits, and the versionCode is in the lower
+     * 32 bits. If the versionCodeMajor is not specified then the versionCode is returned.
+     *
+     * @param androidManifestContents contents of {@code AndroidManifest.xml} in binary Android
+     *                                resource format
+     * @throws ApkFormatException if an error occurred while determining the version, or if the
+     *                            versionCode attribute value is not available.
+     */
+    public static long getLongVersionCodeFromBinaryAndroidManifest(
+            ByteBuffer androidManifestContents) throws ApkFormatException {
+        // If the versionCode is not found then allow the ApkFormatException to be thrown to notify
+        // the caller that the versionCode is not available.
+        int versionCode = getVersionCodeFromBinaryAndroidManifest(androidManifestContents);
+        long versionCodeMajor = 0;
+        try {
+            androidManifestContents.rewind();
+            versionCodeMajor = getAttributeValueFromBinaryAndroidManifest(androidManifestContents,
+                    MANIFEST_ELEMENT_TAG, VERSION_CODE_MAJOR_ATTR_ID);
+        } catch (ApkFormatException e) {
+            // This is expected if the versionCodeMajor has not been defined for the APK; in this
+            // case the return value is just the versionCode.
+        }
+        return (versionCodeMajor << 32) | versionCode;
+    }
 
-        private static final Comparator<Pair<Character, Integer>> CODENAME_FIRST_CHAR_COMPARATOR =
-                new ByFirstComparator();
+    /**
+     * Returns the integer value of the requested {@code attributeId} in the specified {@code
+     * elementName} from the provided {@code androidManifestContents} in binary Android resource
+     * format.
+     *
+     * @throws ApkFormatException if an error occurred while attempting to obtain the attribute, or
+     *                            if the requested attribute is not found.
+     */
+    private static int getAttributeValueFromBinaryAndroidManifest(
+            ByteBuffer androidManifestContents, String elementName, int attributeId)
+            throws ApkFormatException {
+        if (elementName == null) {
+            throw new NullPointerException("elementName cannot be null");
+        }
+        try {
+            AndroidBinXmlParser parser = new AndroidBinXmlParser(androidManifestContents);
+            int eventType = parser.getEventType();
+            while (eventType != AndroidBinXmlParser.EVENT_END_DOCUMENT) {
+                if ((eventType == AndroidBinXmlParser.EVENT_START_ELEMENT)
+                        && (elementName.equals(parser.getName()))) {
+                    for (int i = 0; i < parser.getAttributeCount(); i++) {
+                        if (parser.getAttributeNameResourceId(i) == attributeId) {
+                            int valueType = parser.getAttributeValueType(i);
+                            switch (valueType) {
+                                case AndroidBinXmlParser.VALUE_TYPE_INT:
+                                case AndroidBinXmlParser.VALUE_TYPE_STRING:
+                                    return parser.getAttributeIntValue(i);
+                                default:
+                                    throw new ApkFormatException(
+                                            "Unsupported value type, " + valueType
+                                                    + ", for attribute " + String.format("0x%08X",
+                                                    attributeId) + " under element " + elementName);
 
-        private static class ByFirstComparator implements Comparator<Pair<Character, Integer>> {
-            @Override
-            public int compare(Pair<Character, Integer> o1, Pair<Character, Integer> o2) {
-                char c1 = o1.getFirst();
-                char c2 = o2.getFirst();
-                return c1 - c2;
+                            }
+                        }
+                    }
+                }
+                eventType = parser.next();
             }
+            throw new ApkFormatException(
+                    "Failed to determine APK's " + elementName + " attribute "
+                            + String.format("0x%08X", attributeId) + " value");
+        } catch (AndroidBinXmlParser.XmlParserException e) {
+            throw new ApkFormatException(
+                    "Unable to determine value for attribute " + String.format("0x%08X",
+                            attributeId) + " under element " + elementName
+                            + "; malformed binary resource: " + ANDROID_MANIFEST_ZIP_ENTRY_NAME, e);
         }
+    }
+
+    public static byte[] computeSha256DigestBytes(byte[] data) {
+        return ApkUtilsLite.computeSha256DigestBytes(data);
     }
 }

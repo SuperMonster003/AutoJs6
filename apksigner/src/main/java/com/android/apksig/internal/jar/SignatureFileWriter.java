@@ -27,8 +27,7 @@ import java.util.jar.Attributes;
  * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/jar/jar.html#JAR_Manifest">JAR Manifest format</a>
  */
 public abstract class SignatureFileWriter {
-    private SignatureFileWriter() {
-    }
+    private SignatureFileWriter() {}
 
     public static void writeMainSection(OutputStream out, Attributes attributes)
             throws IOException {

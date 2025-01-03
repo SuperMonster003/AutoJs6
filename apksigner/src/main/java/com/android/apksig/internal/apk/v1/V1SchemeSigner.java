@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
  * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +16,9 @@
 
 package com.android.apksig.internal.apk.v1;
 
-import static com.android.apksig.internal.pkcs7.AlgorithmIdentifier.getSignerInfoDigestAlgorithmOid;
-import static com.android.apksig.internal.pkcs7.AlgorithmIdentifier.getSignerInfoSignatureAlgorithm;
-
+import android.os.Build;
+import com.android.apksig.KeyConfig;
+import com.android.apksig.SignerEngineFactory;
 import com.android.apksig.apk.ApkFormatException;
 import com.android.apksig.internal.apk.ApkSigningBlockUtils;
 import com.android.apksig.internal.asn1.Asn1EncodingException;
@@ -27,11 +26,11 @@ import com.android.apksig.internal.jar.ManifestWriter;
 import com.android.apksig.internal.jar.SignatureFileWriter;
 import com.android.apksig.internal.pkcs7.AlgorithmIdentifier;
 import com.android.apksig.internal.util.Pair;
-import com.mcal.apksigner.utils.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -43,6 +42,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -54,25 +54,65 @@ import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import static com.android.apksig.Constants.MAX_APK_SIGNERS;
+import static com.android.apksig.Constants.OID_RSA_ENCRYPTION;
+import static com.android.apksig.internal.pkcs7.AlgorithmIdentifier.getSignerInfoDigestAlgorithmOid;
+import static com.android.apksig.internal.pkcs7.AlgorithmIdentifier.getSignerInfoSignatureAlgorithm;
+
 /**
  * APK signer which uses JAR signing (aka v1 signing scheme).
  *
  * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/jar/jar.html#Signed_JAR_File">Signed JAR File</a>
  */
 public abstract class V1SchemeSigner {
+    public static final String MANIFEST_ENTRY_NAME = V1SchemeConstants.MANIFEST_ENTRY_NAME;
 
-    public static final String MANIFEST_ENTRY_NAME = "META-INF/MANIFEST.MF";
-    static final String SF_ATTRIBUTE_NAME_ANDROID_APK_SIGNED_NAME_STR = "X-Android-APK-Signed";
     private static final Attributes.Name ATTRIBUTE_NAME_CREATED_BY =
             new Attributes.Name("Created-By");
     private static final String ATTRIBUTE_VALUE_MANIFEST_VERSION = "1.0";
     private static final String ATTRIBUTE_VALUE_SIGNATURE_VERSION = "1.0";
+
     private static final Attributes.Name SF_ATTRIBUTE_NAME_ANDROID_APK_SIGNED_NAME =
-            new Attributes.Name(SF_ATTRIBUTE_NAME_ANDROID_APK_SIGNED_NAME_STR);
+            new Attributes.Name(V1SchemeConstants.SF_ATTRIBUTE_NAME_ANDROID_APK_SIGNED_NAME_STR);
 
     /**
-     * Hidden constructor to prevent instantiation.
+     * Signer configuration.
      */
+    public static class SignerConfig {
+        /** Name. */
+        public String name;
+
+        /**
+         * Private key.
+         *
+         * @deprecated all internal usage has migrated to use {@link #keyConfig}. This field is not
+         * removed so that compilation is not broken for clients referencing it, but using this
+         * field may lead to unexpected errors.
+         */
+        @Deprecated
+        public PrivateKey privateKey;
+
+        /** Signing key configuration */
+        public KeyConfig keyConfig;
+
+        /**
+         * Certificates, with the first certificate containing the public key corresponding to
+         * {@link #keyConfig}.
+         */
+        public List<X509Certificate> certificates;
+
+        /**
+         * Digest algorithm used for the signature.
+         */
+        public DigestAlgorithm signatureDigestAlgorithm;
+
+        /**
+         * If DSA is the signing algorithm, whether or not deterministic DSA signing should be used.
+         */
+        public boolean deterministicDsaSigning;
+    }
+
+    /** Hidden constructor to prevent instantiation. */
     private V1SchemeSigner() {
     }
 
@@ -87,7 +127,7 @@ public abstract class V1SchemeSigner {
     public static DigestAlgorithm getSuggestedSignatureDigestAlgorithm(
             PublicKey signingKey, int minSdkVersion) throws InvalidKeyException {
         String keyAlgorithm = signingKey.getAlgorithm();
-        if ("RSA".equalsIgnoreCase(keyAlgorithm)) {
+        if ("RSA".equalsIgnoreCase(keyAlgorithm) || OID_RSA_ENCRYPTION.equals((keyAlgorithm))) {
             // Prior to API Level 18, only SHA-1 can be used with RSA.
             if (minSdkVersion < 18) {
                 return DigestAlgorithm.SHA1;
@@ -126,9 +166,9 @@ public abstract class V1SchemeSigner {
         for (int i = 0; i < Math.min(nameCharsUpperCase.length, 8); i++) {
             char c = nameCharsUpperCase[i];
             if (((c >= 'A') && (c <= 'Z'))
-                    || ((c >= '0') && (c <= '9'))
-                    || (c == '-')
-                    || (c == '_')) {
+                || ((c >= '0') && (c <= '9'))
+                || (c == '-')
+                || (c == '_')) {
                 result.append(c);
             } else {
                 result.append('_');
@@ -184,15 +224,12 @@ public abstract class V1SchemeSigner {
         //   SIG-*
         String fileNameLowerCase =
                 entryName.substring("META-INF/".length()).toLowerCase(Locale.US);
-        if (("manifest.mf".equals(fileNameLowerCase))
-                || (fileNameLowerCase.endsWith(".sf"))
-                || (fileNameLowerCase.endsWith(".rsa"))
-                || (fileNameLowerCase.endsWith(".dsa"))
-                || (fileNameLowerCase.endsWith(".ec"))
-                || (fileNameLowerCase.startsWith("sig-"))) {
-            return false;
-        }
-        return true;
+        return (!"manifest.mf".equals(fileNameLowerCase))
+               && (!fileNameLowerCase.endsWith(".sf"))
+               && (!fileNameLowerCase.endsWith(".rsa"))
+               && (!fileNameLowerCase.endsWith(".dsa"))
+               && (!fileNameLowerCase.endsWith(".ec"))
+               && (!fileNameLowerCase.startsWith("sig-"));
     }
 
     /**
@@ -220,6 +257,11 @@ public abstract class V1SchemeSigner {
             CertificateException, SignatureException {
         if (signerConfigs.isEmpty()) {
             throw new IllegalArgumentException("At least one signer config must be provided");
+        }
+        if (signerConfigs.size() > MAX_APK_SIGNERS) {
+            throw new IllegalArgumentException(
+                    "APK Signature Scheme v1 only supports a maximum of " + MAX_APK_SIGNERS + ", "
+                    + signerConfigs.size() + " provided");
         }
         OutputManifestFile manifest =
                 generateManifestFile(
@@ -276,11 +318,11 @@ public abstract class V1SchemeSigner {
             PublicKey publicKey = signerConfig.certificates.get(0).getPublicKey();
             String signatureBlockFileName =
                     "META-INF/" + signerName + "."
-                            + publicKey.getAlgorithm().toUpperCase(Locale.US);
+                    + publicKey.getAlgorithm().toUpperCase(Locale.US);
             signatureJarEntries.add(
                     Pair.of(signatureBlockFileName, signatureBlock));
         }
-        signatureJarEntries.add(Pair.of(MANIFEST_ENTRY_NAME, manifest.contents));
+        signatureJarEntries.add(Pair.of(V1SchemeConstants.MANIFEST_ENTRY_NAME, manifest.contents));
         return signatureJarEntries;
     }
 
@@ -295,10 +337,10 @@ public abstract class V1SchemeSigner {
             PublicKey publicKey = signerConfig.certificates.get(0).getPublicKey();
             String signatureBlockFileName =
                     "META-INF/" + signerName + "."
-                            + publicKey.getAlgorithm().toUpperCase(Locale.US);
+                    + publicKey.getAlgorithm().toUpperCase(Locale.US);
             result.add(signatureBlockFileName);
         }
-        result.add(MANIFEST_ENTRY_NAME);
+        result.add(V1SchemeConstants.MANIFEST_ENTRY_NAME);
         return result;
     }
 
@@ -344,9 +386,10 @@ public abstract class V1SchemeSigner {
             checkEntryNameValid(entryName);
             byte[] entryDigest = jarEntryDigests.get(entryName);
             Attributes entryAttrs = new Attributes();
-            entryAttrs.putValue(
-                    entryDigestAttributeName,
-                    Base64.encode(entryDigest));
+            String encodedEntryDigest = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                    ? Base64.getEncoder().encodeToString(entryDigest)
+                    : com.mcal.apksigner.utils.Base64.encode(entryDigest);
+            entryAttrs.putValue(entryDigestAttributeName, encodedEntryDigest);
             ByteArrayOutputStream sectionOut = new ByteArrayOutputStream();
             byte[] sectionBytes;
             try {
@@ -382,6 +425,12 @@ public abstract class V1SchemeSigner {
         }
     }
 
+    public static class OutputManifestFile {
+        public byte[] contents;
+        public SortedMap<String, byte[]> individualSectionsContents;
+        public Attributes mainSectionAttributes;
+    }
+
     private static byte[] generateSignatureFile(
             List<Integer> apkSignatureSchemeIds,
             DigestAlgorithm manifestDigestAlgorithm,
@@ -402,7 +451,7 @@ public abstract class V1SchemeSigner {
                 if (attrValue.length() > 0) {
                     attrValue.append(", ");
                 }
-                attrValue.append(String.valueOf(id));
+                attrValue.append(id);
             }
             mainAttrs.put(
                     SF_ATTRIBUTE_NAME_ANDROID_APK_SIGNED_NAME,
@@ -411,9 +460,10 @@ public abstract class V1SchemeSigner {
 
         // Add main attribute containing the digest of MANIFEST.MF.
         MessageDigest md = getMessageDigestInstance(manifestDigestAlgorithm);
-        mainAttrs.putValue(
-                getManifestDigestAttributeName(manifestDigestAlgorithm),
-                Base64.encode(md.digest(manifest.contents)));
+        String encodedManifestDigest = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                ? Base64.getEncoder().encodeToString(md.digest(manifest.contents))
+                : com.mcal.apksigner.utils.Base64.encode(md.digest(manifest.contents));
+        mainAttrs.putValue(getManifestDigestAttributeName(manifestDigestAlgorithm), encodedManifestDigest);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             SignatureFileWriter.writeMainSection(out, mainAttrs);
@@ -427,9 +477,10 @@ public abstract class V1SchemeSigner {
             byte[] sectionContents = manifestSection.getValue();
             byte[] sectionDigest = md.digest(sectionContents);
             Attributes attrs = new Attributes();
-            attrs.putValue(
-                    entryDigestAttributeName,
-                    Base64.encode(sectionDigest));
+            String encodedSectionDigest = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                    ? Base64.getEncoder().encodeToString(sectionDigest)
+                    : com.mcal.apksigner.utils.Base64.encode(sectionDigest);
+            attrs.putValue(entryDigestAttributeName, encodedSectionDigest);
 
             try {
                 SignatureFileWriter.writeIndividualSection(out, sectionName, attrs);
@@ -452,6 +503,7 @@ public abstract class V1SchemeSigner {
         return out.toByteArray();
     }
 
+
     /**
      * Generates the CMS PKCS #7 signature block corresponding to the provided signature file and
      * signing configuration.
@@ -466,19 +518,20 @@ public abstract class V1SchemeSigner {
         PublicKey publicKey = signingCert.getPublicKey();
         DigestAlgorithm digestAlgorithm = signerConfig.signatureDigestAlgorithm;
         Pair<String, AlgorithmIdentifier> signatureAlgs =
-                getSignerInfoSignatureAlgorithm(publicKey, digestAlgorithm);
+                getSignerInfoSignatureAlgorithm(publicKey, digestAlgorithm,
+                        signerConfig.deterministicDsaSigning);
         String jcaSignatureAlgorithm = signatureAlgs.getFirst();
 
         // Generate the cryptographic signature of the signature file
         byte[] signatureBytes;
         try {
-            Signature signature = Signature.getInstance(jcaSignatureAlgorithm);
-            signature.initSign(signerConfig.privateKey);
-            signature.update(signatureFileBytes);
-            signatureBytes = signature.sign();
+            signatureBytes =
+                    SignerEngineFactory.getImplementation(
+                                    signerConfig.keyConfig, jcaSignatureAlgorithm, null)
+                            .sign(signatureFileBytes);
         } catch (InvalidKeyException e) {
             throw new InvalidKeyException("Failed to sign using " + jcaSignatureAlgorithm, e);
-        } catch (SignatureException e) {
+        } catch (InvalidAlgorithmParameterException | SignatureException e) {
             throw new SignatureException("Failed to sign using " + jcaSignatureAlgorithm, e);
         }
 
@@ -493,12 +546,12 @@ public abstract class V1SchemeSigner {
         } catch (InvalidKeyException e) {
             throw new InvalidKeyException(
                     "Failed to verify generated " + jcaSignatureAlgorithm + " signature using"
-                            + " public key from certificate",
+                    + " public key from certificate",
                     e);
         } catch (SignatureException e) {
             throw new SignatureException(
                     "Failed to verify generated " + jcaSignatureAlgorithm + " signature using"
-                            + " public key from certificate",
+                    + " public key from certificate",
                     e);
         }
 
@@ -515,6 +568,7 @@ public abstract class V1SchemeSigner {
             throw new SignatureException("Failed to encode signature block");
         }
     }
+
 
     private static String getEntryDigestAttributeName(DigestAlgorithm digestAlgorithm) {
         switch (digestAlgorithm) {
@@ -538,37 +592,5 @@ public abstract class V1SchemeSigner {
                 throw new IllegalArgumentException(
                         "Unexpected content digest algorithm: " + digestAlgorithm);
         }
-    }
-
-    /**
-     * Signer configuration.
-     */
-    public static class SignerConfig {
-        /**
-         * Name.
-         */
-        public String name;
-
-        /**
-         * Private key.
-         */
-        public PrivateKey privateKey;
-
-        /**
-         * Certificates, with the first certificate containing the public key corresponding to
-         * {@link #privateKey}.
-         */
-        public List<X509Certificate> certificates;
-
-        /**
-         * Digest algorithm used for the signature.
-         */
-        public DigestAlgorithm signatureDigestAlgorithm;
-    }
-
-    public static class OutputManifestFile {
-        public byte[] contents;
-        public SortedMap<String, byte[]> individualSectionsContents;
-        public Attributes mainSectionAttributes;
     }
 }

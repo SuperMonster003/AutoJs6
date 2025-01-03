@@ -16,28 +16,18 @@
 
 package com.android.apksig.internal.apk;
 
-/**
- * APK Signature Scheme v2 content digest algorithm.
- */
+/** APK Signature Scheme v2 content digest algorithm. */
 public enum ContentDigestAlgorithm {
-    /**
-     * SHA2-256 over 1 MB chunks.
-     */
+    /** SHA2-256 over 1 MB chunks. */
     CHUNKED_SHA256(1, "SHA-256", 256 / 8),
 
-    /**
-     * SHA2-512 over 1 MB chunks.
-     */
+    /** SHA2-512 over 1 MB chunks. */
     CHUNKED_SHA512(2, "SHA-512", 512 / 8),
 
-    /**
-     * SHA2-256 over 4 KB chunks for APK verity.
-     */
+    /** SHA2-256 over 4 KB chunks for APK verity. */
     VERITY_CHUNKED_SHA256(3, "SHA-256", 256 / 8),
 
-    /**
-     * Non-chunk SHA2-256.
-     */
+    /** Non-chunk SHA2-256. */
     SHA256(4, "SHA-256", 256 / 8);
 
     private final int mId;
@@ -51,9 +41,7 @@ public enum ContentDigestAlgorithm {
         mChunkDigestOutputSizeBytes = chunkDigestOutputSizeBytes;
     }
 
-    /**
-     * Returns the ID of the digest algorithm used on the APK.
-     */
+    /** Returns the ID of the digest algorithm used on the APK. */
     public int getId() {
         return mId;
     }
@@ -66,9 +54,7 @@ public enum ContentDigestAlgorithm {
         return mJcaMessageDigestAlgorithm;
     }
 
-    /**
-     * Returns the size (in bytes) of the digest of a chunk of content.
-     */
+    /** Returns the size (in bytes) of the digest of a chunk of content. */
     int getChunkDigestOutputSizeBytes() {
         return mChunkDigestOutputSizeBytes;
     }

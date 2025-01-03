@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2020 Muntashir Al-Islam
  * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +16,7 @@
 
 package com.android.apksig.internal.apk.v1;
 
+import static com.android.apksig.Constants.MAX_APK_SIGNERS;
 import static com.android.apksig.internal.oid.OidConstants.getSigAlgSupportedApiLevels;
 import static com.android.apksig.internal.pkcs7.AlgorithmIdentifier.getJcaDigestAlgorithm;
 import static com.android.apksig.internal.pkcs7.AlgorithmIdentifier.getJcaSignatureAlgorithm;
@@ -27,6 +27,7 @@ import com.android.apksig.ApkVerifier.Issue;
 import com.android.apksig.ApkVerifier.IssueWithParams;
 import com.android.apksig.apk.ApkFormatException;
 import com.android.apksig.apk.ApkUtils;
+import com.android.apksig.internal.apk.ApkSigningBlockUtils;
 import com.android.apksig.internal.asn1.Asn1BerParser;
 import com.android.apksig.internal.asn1.Asn1Class;
 import com.android.apksig.internal.asn1.Asn1DecodingException;
@@ -47,24 +48,29 @@ import com.android.apksig.internal.util.InclusiveIntRange;
 import com.android.apksig.internal.util.Pair;
 import com.android.apksig.internal.zip.CentralDirectoryRecord;
 import com.android.apksig.internal.zip.LocalFileRecord;
+import com.android.apksig.internal.zip.ZipUtils;
 import com.android.apksig.util.DataSinks;
 import com.android.apksig.util.DataSource;
 import com.android.apksig.zip.ZipFormatException;
-import com.mcal.apksigner.utils.Base64;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Base64.Decoder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -82,42 +88,7 @@ import java.util.jar.Attributes;
  * @see <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/jar/jar.html#Signed_JAR_File">Signed JAR File</a>
  */
 public abstract class V1SchemeVerifier {
-
-    private static final String MANIFEST_ENTRY_NAME = V1SchemeSigner.MANIFEST_ENTRY_NAME;
-    private static final String[] JB_MR2_AND_NEWER_DIGEST_ALGS = {
-            "SHA-512",
-            "SHA-384",
-            "SHA-256",
-            "SHA-1",
-    };
-    private static final Map<String, String> UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL;
-    private static final Map<String, Integer>
-            MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST;
-
-    static {
-        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL = new HashMap<>(8);
-        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("MD5", "MD5");
-        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA", "SHA-1");
-        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA1", "SHA-1");
-        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA-1", "SHA-1");
-        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA-256", "SHA-256");
-        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA-384", "SHA-384");
-        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA-512", "SHA-512");
-    }
-
-    static {
-        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST = new HashMap<>(5);
-        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put("MD5", 0);
-        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put("SHA-1", 0);
-        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put("SHA-256", 0);
-        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put(
-                "SHA-384", AndroidSdkVersion.GINGERBREAD);
-        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put(
-                "SHA-512", AndroidSdkVersion.GINGERBREAD);
-    }
-
-    private V1SchemeVerifier() {
-    }
+    private V1SchemeVerifier() {}
 
     /**
      * Verifies the provided APK's JAR signatures and returns the result of verification. APK is
@@ -130,10 +101,10 @@ public abstract class V1SchemeVerifier {
      * result with one or more errors and whose {@code Result.verified == false}, or this method
      * throws an exception.
      *
-     * @throws ApkFormatException       if the APK is malformed
-     * @throws IOException              if an I/O error occurs when reading the APK
+     * @throws ApkFormatException if the APK is malformed
+     * @throws IOException if an I/O error occurs when reading the APK
      * @throws NoSuchAlgorithmException if the APK's JAR signatures cannot be verified because a
-     *                                  required cryptographic algorithm implementation is missing
+     *         required cryptographic algorithm implementation is missing
      */
     public static Result verify(
             DataSource apk,
@@ -196,15 +167,15 @@ public abstract class V1SchemeVerifier {
     }
 
     /**
-     * Parses raw representation of MANIFEST.MF file into a pair of main entry manifest section
-     * representation and a mapping between entry name and its manifest section representation.
-     *
-     * @param manifestBytes raw representation of Manifest.MF
-     * @param cdEntryNames  expected set of entry names
-     * @param result        object to keep track of errors that happened during the parsing
-     * @return a pair of main entry manifest section representation and a mapping between entry name
-     * and its manifest section representation
-     */
+    * Parses raw representation of MANIFEST.MF file into a pair of main entry manifest section
+    * representation and a mapping between entry name and its manifest section representation.
+    *
+    * @param manifestBytes raw representation of Manifest.MF
+    * @param cdEntryNames expected set of entry names
+    * @param result object to keep track of errors that happened during the parsing
+    * @return a pair of main entry manifest section representation and a mapping between entry name
+    *     and its manifest section representation
+    */
     public static Pair<ManifestParser.Section, Map<String, ManifestParser.Section>> parseManifest(
             byte[] manifestBytes, Set<String> cdEntryNames, Result result) {
         ManifestParser manifest = new ManifestParser(manifestBytes);
@@ -231,283 +202,6 @@ public abstract class V1SchemeVerifier {
             }
         }
         return Pair.of(manifestMainSection, entryNameToManifestSection);
-    }
-
-    public static Collection<NamedDigest> getDigestsToVerify(
-            ManifestParser.Section section,
-            String digestAttrSuffix,
-            int minSdkVersion,
-            int maxSdkVersion) {
-        List<NamedDigest> result = new ArrayList<>(1);
-        if (minSdkVersion < AndroidSdkVersion.JELLY_BEAN_MR2) {
-            // Prior to JB MR2, Android platform's logic for picking a digest algorithm to verify is
-            // to rely on the ancient Digest-Algorithms attribute which contains
-            // whitespace-separated list of digest algorithms (defaulting to SHA-1) to try. The
-            // first digest attribute (with supported digest algorithm) found using the list is
-            // used.
-            String algs = section.getAttributeValue("Digest-Algorithms");
-            if (algs == null) {
-                algs = "SHA SHA1";
-            }
-            StringTokenizer tokens = new StringTokenizer(algs);
-            while (tokens.hasMoreTokens()) {
-                String alg = tokens.nextToken();
-                String attrName = alg + digestAttrSuffix;
-                String digestBase64 = section.getAttributeValue(attrName);
-                if (digestBase64 == null) {
-                    // Attribute not found
-                    continue;
-                }
-                alg = getCanonicalJcaMessageDigestAlgorithm(alg);
-                if ((alg == null)
-                        || (getMinSdkVersionFromWhichSupportedInManifestOrSignatureFile(alg)
-                        > minSdkVersion)) {
-                    // Unsupported digest algorithm
-                    continue;
-                }
-                // Supported digest algorithm
-                result.add(new NamedDigest(alg, Base64.decode(digestBase64)));
-                break;
-            }
-            // No supported digests found -- this will fail to verify on pre-JB MR2 Androids.
-            if (result.isEmpty()) {
-                return result;
-            }
-        }
-
-        if (maxSdkVersion >= AndroidSdkVersion.JELLY_BEAN_MR2) {
-            // On JB MR2 and newer, Android platform picks the strongest algorithm out of:
-            // SHA-512, SHA-384, SHA-256, SHA-1.
-            for (String alg : JB_MR2_AND_NEWER_DIGEST_ALGS) {
-                String attrName = getJarDigestAttributeName(alg, digestAttrSuffix);
-                String digestBase64 = section.getAttributeValue(attrName);
-                if (digestBase64 == null) {
-                    // Attribute not found
-                    continue;
-                }
-                byte[] digest = Base64.decode(digestBase64);
-                byte[] digestInResult = getDigest(result, alg);
-                if ((digestInResult == null) || (!Arrays.equals(digestInResult, digest))) {
-                    result.add(new NamedDigest(alg, digest));
-                }
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    private static String getCanonicalJcaMessageDigestAlgorithm(String algorithm) {
-        return UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.get(algorithm.toUpperCase(Locale.US));
-    }
-
-    public static int getMinSdkVersionFromWhichSupportedInManifestOrSignatureFile(
-            String jcaAlgorithmName) {
-        Integer result =
-                MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.get(
-                        jcaAlgorithmName.toUpperCase(Locale.US));
-        return (result != null) ? result : Integer.MAX_VALUE;
-    }
-
-    private static String getJarDigestAttributeName(
-            String jcaDigestAlgorithm, String attrNameSuffix) {
-        if ("SHA-1".equalsIgnoreCase(jcaDigestAlgorithm)) {
-            return "SHA1" + attrNameSuffix;
-        } else {
-            return jcaDigestAlgorithm + attrNameSuffix;
-        }
-    }
-
-    private static byte[] getDigest(Collection<NamedDigest> digests, String jcaDigestAlgorithm) {
-        for (NamedDigest digest : digests) {
-            if (digest.jcaDigestAlgorithm.equalsIgnoreCase(jcaDigestAlgorithm)) {
-                return digest.digest;
-            }
-        }
-        return null;
-    }
-
-    public static List<CentralDirectoryRecord> parseZipCentralDirectory(
-            DataSource apk,
-            ApkUtils.ZipSections apkSections)
-            throws IOException, ApkFormatException {
-        // Read the ZIP Central Directory
-        long cdSizeBytes = apkSections.getZipCentralDirectorySizeBytes();
-        if (cdSizeBytes > Integer.MAX_VALUE) {
-            throw new ApkFormatException("ZIP Central Directory too large: " + cdSizeBytes);
-        }
-        long cdOffset = apkSections.getZipCentralDirectoryOffset();
-        ByteBuffer cd = apk.getByteBuffer(cdOffset, (int) cdSizeBytes);
-        cd.order(ByteOrder.LITTLE_ENDIAN);
-
-        // Parse the ZIP Central Directory
-        int expectedCdRecordCount = apkSections.getZipCentralDirectoryRecordCount();
-        List<CentralDirectoryRecord> cdRecords = new ArrayList<>(expectedCdRecordCount);
-        for (int i = 0; i < expectedCdRecordCount; i++) {
-            CentralDirectoryRecord cdRecord;
-            int offsetInsideCd = cd.position();
-            try {
-                cdRecord = CentralDirectoryRecord.getRecord(cd);
-            } catch (ZipFormatException e) {
-                throw new ApkFormatException(
-                        "Malformed ZIP Central Directory record #" + (i + 1)
-                                + " at file offset " + (cdOffset + offsetInsideCd),
-                        e);
-            }
-            String entryName = cdRecord.getName();
-            if (entryName.endsWith("/")) {
-                // Ignore directory entries
-                continue;
-            }
-            cdRecords.add(cdRecord);
-        }
-        // There may be more data in Central Directory, but we don't warn or throw because Android
-        // ignores unused CD data.
-
-        return cdRecords;
-    }
-
-    /**
-     * Returns {@code true} if the provided JAR entry must be mentioned in signed JAR archive's
-     * manifest for the APK to verify on Android.
-     */
-    private static boolean isJarEntryDigestNeededInManifest(String entryName) {
-        // NOTE: This logic is different from what's required by the JAR signing scheme. This is
-        // because Android's APK verification logic differs from that spec. In particular, JAR
-        // signing spec includes into JAR manifest all files in subdirectories of META-INF and
-        // any files inside META-INF not related to signatures.
-        if (entryName.startsWith("META-INF/")) {
-            return false;
-        }
-        return !entryName.endsWith("/");
-    }
-
-    private static Set<Signer> verifyJarEntriesAgainstManifestAndSigners(
-            DataSource apk,
-            long cdOffsetInApk,
-            Collection<CentralDirectoryRecord> cdRecords,
-            Map<String, ManifestParser.Section> entryNameToManifestSection,
-            List<Signer> signers,
-            int minSdkVersion,
-            int maxSdkVersion,
-            Result result) throws ApkFormatException, IOException, NoSuchAlgorithmException {
-        // Iterate over APK contents as sequentially as possible to improve performance.
-        List<CentralDirectoryRecord> cdRecordsSortedByLocalFileHeaderOffset =
-                new ArrayList<>(cdRecords);
-        Collections.sort(
-                cdRecordsSortedByLocalFileHeaderOffset,
-                CentralDirectoryRecord.BY_LOCAL_FILE_HEADER_OFFSET_COMPARATOR);
-        List<Signer> firstSignedEntrySigners = null;
-        String firstSignedEntryName = null;
-        for (CentralDirectoryRecord cdRecord : cdRecordsSortedByLocalFileHeaderOffset) {
-            String entryName = cdRecord.getName();
-            if (!isJarEntryDigestNeededInManifest(entryName)) {
-                continue;
-            }
-
-            ManifestParser.Section manifestSection = entryNameToManifestSection.get(entryName);
-            if (manifestSection == null) {
-                result.addError(Issue.JAR_SIG_NO_ZIP_ENTRY_DIGEST_IN_MANIFEST, entryName);
-                continue;
-            }
-
-            List<Signer> entrySigners = new ArrayList<>(signers.size());
-            for (Signer signer : signers) {
-                if (signer.getSigFileEntryNames().contains(entryName)) {
-                    entrySigners.add(signer);
-                }
-            }
-            if (entrySigners.isEmpty()) {
-                result.addError(Issue.JAR_SIG_ZIP_ENTRY_NOT_SIGNED, entryName);
-                continue;
-            }
-            if (firstSignedEntrySigners == null) {
-                firstSignedEntrySigners = entrySigners;
-                firstSignedEntryName = entryName;
-            } else if (!entrySigners.equals(firstSignedEntrySigners)) {
-                result.addError(
-                        Issue.JAR_SIG_ZIP_ENTRY_SIGNERS_MISMATCH,
-                        firstSignedEntryName,
-                        getSignerNames(firstSignedEntrySigners),
-                        entryName,
-                        getSignerNames(entrySigners));
-                continue;
-            }
-
-            List<NamedDigest> expectedDigests =
-                    new ArrayList<>(
-                            getDigestsToVerify(
-                                    manifestSection, "-Digest", minSdkVersion, maxSdkVersion));
-            if (expectedDigests.isEmpty()) {
-                result.addError(Issue.JAR_SIG_NO_ZIP_ENTRY_DIGEST_IN_MANIFEST, entryName);
-                continue;
-            }
-
-            MessageDigest[] mds = new MessageDigest[expectedDigests.size()];
-            for (int i = 0; i < expectedDigests.size(); i++) {
-                mds[i] = getMessageDigest(expectedDigests.get(i).jcaDigestAlgorithm);
-            }
-
-            try {
-                LocalFileRecord.outputUncompressedData(
-                        apk,
-                        cdRecord,
-                        cdOffsetInApk,
-                        DataSinks.asDataSink(mds));
-            } catch (ZipFormatException e) {
-                throw new ApkFormatException("Malformed ZIP entry: " + entryName, e);
-            } catch (IOException e) {
-                throw new IOException("Failed to read entry: " + entryName, e);
-            }
-
-            for (int i = 0; i < expectedDigests.size(); i++) {
-                NamedDigest expectedDigest = expectedDigests.get(i);
-                byte[] actualDigest = mds[i].digest();
-                if (!Arrays.equals(expectedDigest.digest, actualDigest)) {
-                    result.addError(
-                            Issue.JAR_SIG_ZIP_ENTRY_DIGEST_DID_NOT_VERIFY,
-                            entryName,
-                            expectedDigest.jcaDigestAlgorithm,
-                            V1SchemeSigner.MANIFEST_ENTRY_NAME,
-                            Base64.encode(actualDigest),
-                            Base64.encode(expectedDigest.digest));
-                }
-            }
-        }
-
-        if (firstSignedEntrySigners == null) {
-            result.addError(Issue.JAR_SIG_NO_SIGNED_ZIP_ENTRIES);
-            return Collections.emptySet();
-        } else {
-            return new HashSet<>(firstSignedEntrySigners);
-        }
-    }
-
-    private static List<String> getSignerNames(List<Signer> signers) {
-        if (signers.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<String> result = new ArrayList<>(signers.size());
-        for (Signer signer : signers) {
-            result.add(signer.getName());
-        }
-        return result;
-    }
-
-    private static MessageDigest getMessageDigest(String algorithm)
-            throws NoSuchAlgorithmException {
-        return MessageDigest.getInstance(algorithm);
-    }
-
-    private static byte[] digest(String algorithm, byte[] data, int offset, int length)
-            throws NoSuchAlgorithmException {
-        MessageDigest md = getMessageDigest(algorithm);
-        md.update(data, offset, length);
-        return md.digest();
-    }
-
-    private static byte[] digest(String algorithm, byte[] data) throws NoSuchAlgorithmException {
-        return getMessageDigest(algorithm).digest(data);
     }
 
     /**
@@ -540,7 +234,8 @@ public abstract class V1SchemeVerifier {
                 if (!entryName.startsWith("META-INF/")) {
                     continue;
                 }
-                if ((manifestEntry == null) && (MANIFEST_ENTRY_NAME.equals(entryName))) {
+                if ((manifestEntry == null) && (V1SchemeConstants.MANIFEST_ENTRY_NAME.equals(
+                        entryName))) {
                     manifestEntry = cdRecord;
                     continue;
                 }
@@ -610,6 +305,11 @@ public abstract class V1SchemeVerifier {
             }
             if (signers.isEmpty()) {
                 result.addError(Issue.JAR_SIG_NO_SIGNATURES);
+                return;
+            }
+            if (signers.size() > MAX_APK_SIGNERS) {
+                result.addError(Issue.JAR_SIG_MAX_SIGNATURES_EXCEEDED, MAX_APK_SIGNERS,
+                        signers.size());
                 return;
             }
 
@@ -741,33 +441,6 @@ public abstract class V1SchemeVerifier {
             mSignatureFileEntry = sigFileEntry;
         }
 
-        public static List<X509Certificate> getCertificateChain(
-                List<X509Certificate> certs, X509Certificate leaf) {
-            List<X509Certificate> unusedCerts = new ArrayList<>(certs);
-            List<X509Certificate> result = new ArrayList<>(1);
-            result.add(leaf);
-            unusedCerts.remove(leaf);
-            X509Certificate root = leaf;
-            while (!root.getSubjectDN().equals(root.getIssuerDN())) {
-                Principal targetDn = root.getIssuerDN();
-                boolean issuerFound = false;
-                for (int i = 0; i < unusedCerts.size(); i++) {
-                    X509Certificate unusedCert = unusedCerts.get(i);
-                    if (targetDn.equals(unusedCert.getSubjectDN())) {
-                        issuerFound = true;
-                        unusedCerts.remove(i);
-                        result.add(unusedCert);
-                        root = unusedCert;
-                        break;
-                    }
-                }
-                if (!issuerFound) {
-                    break;
-                }
-            }
-            return result;
-        }
-
         public String getName() {
             return mName;
         }
@@ -798,7 +471,7 @@ public abstract class V1SchemeVerifier {
 
         public void verifySigBlockAgainstSigFile(
                 DataSource apk, long cdStartOffset, int minSdkVersion, int maxSdkVersion)
-                throws IOException, ApkFormatException, NoSuchAlgorithmException {
+                        throws IOException, ApkFormatException, NoSuchAlgorithmException {
             // Obtain the signature block from the APK
             byte[] sigBlockBytes;
             try {
@@ -826,7 +499,7 @@ public abstract class V1SchemeVerifier {
                         Asn1BerParser.parse(ByteBuffer.wrap(sigBlockBytes), ContentInfo.class);
                 if (!Pkcs7Constants.OID_SIGNED_DATA.equals(contentInfo.contentType)) {
                     throw new Asn1DecodingException(
-                            "Unsupported ContentInfo.contentType: " + contentInfo.contentType);
+                          "Unsupported ContentInfo.contentType: " + contentInfo.contentType);
                 }
                 signedData =
                         Asn1BerParser.parse(contentInfo.content.getEncoded(), SignedData.class);
@@ -930,8 +603,8 @@ public abstract class V1SchemeVerifier {
                 byte[] signatureFile,
                 int minSdkVersion,
                 int maxSdkVersion)
-                throws Pkcs7DecodingException, NoSuchAlgorithmException,
-                InvalidKeyException, SignatureException {
+                        throws Pkcs7DecodingException, NoSuchAlgorithmException,
+                                InvalidKeyException, SignatureException {
             String digestAlgorithmOid = signerInfo.digestAlgorithm.algorithm;
             String signatureAlgorithmOid = signerInfo.signatureAlgorithm.algorithm;
             InclusiveIntRange desiredApiLevels =
@@ -1015,7 +688,27 @@ public abstract class V1SchemeVerifier {
             String jcaSignatureAlgorithm =
                     getJcaSignatureAlgorithm(digestAlgorithmOid, signatureAlgorithmOid);
             Signature s = Signature.getInstance(jcaSignatureAlgorithm);
-            s.initVerify(signingCertificate.getPublicKey());
+            PublicKey publicKey = signingCertificate.getPublicKey();
+            try {
+                s.initVerify(publicKey);
+            } catch (InvalidKeyException e) {
+                // An InvalidKeyException could be caught if the PublicKey in the certificate is not
+                // properly encoded; attempt to resolve any encoding errors, generate a new public
+                // key, and reattempt the initVerify with the newly encoded key.
+                try {
+                    byte[] encodedPublicKey = ApkSigningBlockUtils.encodePublicKey(publicKey);
+                    publicKey = KeyFactory.getInstance(publicKey.getAlgorithm()).generatePublic(
+                            new X509EncodedKeySpec(encodedPublicKey));
+                } catch (InvalidKeySpecException ikse) {
+                    // If an InvalidKeySpecException is caught then throw the original Exception
+                    // since the key couldn't be properly re-encoded, and the original Exception
+                    // will have more useful debugging info.
+                    throw e;
+                }
+                s = Signature.getInstance(jcaSignatureAlgorithm);
+                s.initVerify(publicKey);
+            }
+
             if (signerInfo.signedAttrs != null) {
                 // Signed attributes present -- verify signature against the ASN.1 DER encoded form
                 // of signed attributes. This verifies integrity of the signature file because
@@ -1067,7 +760,7 @@ public abstract class V1SchemeVerifier {
                     }
                     byte[] actualSignatureFileDigest =
                             MessageDigest.getInstance(
-                                            getJcaDigestAlgorithm(digestAlgorithmOid))
+                                    getJcaDigestAlgorithm(digestAlgorithmOid))
                                     .digest(signatureFile);
                     if (!Arrays.equals(
                             expectedSignatureFileDigest, actualSignatureFileDigest)) {
@@ -1103,6 +796,38 @@ public abstract class V1SchemeVerifier {
             // Cryptographic signature verified
             return signingCertificate;
         }
+
+
+
+        public static List<X509Certificate> getCertificateChain(
+                List<X509Certificate> certs, X509Certificate leaf) {
+            List<X509Certificate> unusedCerts = new ArrayList<>(certs);
+            List<X509Certificate> result = new ArrayList<>(1);
+            result.add(leaf);
+            unusedCerts.remove(leaf);
+            X509Certificate root = leaf;
+            while (!root.getSubjectDN().equals(root.getIssuerDN())) {
+                Principal targetDn = root.getIssuerDN();
+                boolean issuerFound = false;
+                for (int i = 0; i < unusedCerts.size(); i++) {
+                    X509Certificate unusedCert = unusedCerts.get(i);
+                    if (targetDn.equals(unusedCert.getSubjectDN())) {
+                        issuerFound = true;
+                        unusedCerts.remove(i);
+                        result.add(unusedCert);
+                        root = unusedCert;
+                        break;
+                    }
+                }
+                if (!issuerFound) {
+                    break;
+                }
+            }
+            return result;
+        }
+
+
+
 
         public void verifySigFileAgainstManifest(
                 byte[] manifestBytes,
@@ -1243,11 +968,11 @@ public abstract class V1SchemeVerifier {
                 if (!Arrays.equals(expected, actual)) {
                     mResult.addWarning(
                             Issue.JAR_SIG_ZIP_ENTRY_DIGEST_DID_NOT_VERIFY,
-                            V1SchemeSigner.MANIFEST_ENTRY_NAME,
+                            V1SchemeConstants.MANIFEST_ENTRY_NAME,
                             jcaDigestAlgorithm,
                             mSignatureFileEntry.getName(),
-                            Base64.encode(actual),
-                            Base64.encode(expected));
+                            Base64.getEncoder().encodeToString(actual),
+                            Base64.getEncoder().encodeToString(expected));
                     verified = false;
                 }
             }
@@ -1288,8 +1013,8 @@ public abstract class V1SchemeVerifier {
                             Issue.JAR_SIG_MANIFEST_MAIN_SECTION_DIGEST_DID_NOT_VERIFY,
                             jcaDigestAlgorithm,
                             mSignatureFileEntry.getName(),
-                            Base64.encode(actual),
-                            Base64.encode(expected));
+                            Base64.getEncoder().encodeToString(actual),
+                            Base64.getEncoder().encodeToString(expected));
                 }
             }
         }
@@ -1341,8 +1066,8 @@ public abstract class V1SchemeVerifier {
                             entryName,
                             jcaDigestAlgorithm,
                             mSignatureFileEntry.getName(),
-                            Base64.encode(actual),
-                            Base64.encode(expected));
+                            Base64.getEncoder().encodeToString(actual),
+                            Base64.getEncoder().encodeToString(expected));
                 }
             }
         }
@@ -1353,7 +1078,7 @@ public abstract class V1SchemeVerifier {
                 Set<Integer> foundApkSigSchemeIds) {
             String signedWithApkSchemes =
                     sfMainSection.getAttributeValue(
-                            V1SchemeSigner.SF_ATTRIBUTE_NAME_ANDROID_APK_SIGNED_NAME_STR);
+                            V1SchemeConstants.SF_ATTRIBUTE_NAME_ANDROID_APK_SIGNED_NAME_STR);
             // This field contains a comma-separated list of APK signature scheme IDs which were
             // used to sign this APK. Android rejects APKs where an ID is known to the platform but
             // the APK didn't verify using that scheme.
@@ -1412,6 +1137,283 @@ public abstract class V1SchemeVerifier {
         }
     }
 
+    public static Collection<NamedDigest> getDigestsToVerify(
+            ManifestParser.Section section,
+            String digestAttrSuffix,
+            int minSdkVersion,
+            int maxSdkVersion) {
+        Decoder base64Decoder = Base64.getDecoder();
+        List<NamedDigest> result = new ArrayList<>(1);
+        if (minSdkVersion < AndroidSdkVersion.JELLY_BEAN_MR2) {
+            // Prior to JB MR2, Android platform's logic for picking a digest algorithm to verify is
+            // to rely on the ancient Digest-Algorithms attribute which contains
+            // whitespace-separated list of digest algorithms (defaulting to SHA-1) to try. The
+            // first digest attribute (with supported digest algorithm) found using the list is
+            // used.
+            String algs = section.getAttributeValue("Digest-Algorithms");
+            if (algs == null) {
+                algs = "SHA SHA1";
+            }
+            StringTokenizer tokens = new StringTokenizer(algs);
+            while (tokens.hasMoreTokens()) {
+                String alg = tokens.nextToken();
+                String attrName = alg + digestAttrSuffix;
+                String digestBase64 = section.getAttributeValue(attrName);
+                if (digestBase64 == null) {
+                    // Attribute not found
+                    continue;
+                }
+                alg = getCanonicalJcaMessageDigestAlgorithm(alg);
+                if ((alg == null)
+                        || (getMinSdkVersionFromWhichSupportedInManifestOrSignatureFile(alg)
+                                > minSdkVersion)) {
+                    // Unsupported digest algorithm
+                    continue;
+                }
+                // Supported digest algorithm
+                result.add(new NamedDigest(alg, base64Decoder.decode(digestBase64)));
+                break;
+            }
+            // No supported digests found -- this will fail to verify on pre-JB MR2 Androids.
+            if (result.isEmpty()) {
+                return result;
+            }
+        }
+
+        if (maxSdkVersion >= AndroidSdkVersion.JELLY_BEAN_MR2) {
+            // On JB MR2 and newer, Android platform picks the strongest algorithm out of:
+            // SHA-512, SHA-384, SHA-256, SHA-1.
+            for (String alg : JB_MR2_AND_NEWER_DIGEST_ALGS) {
+                String attrName = getJarDigestAttributeName(alg, digestAttrSuffix);
+                String digestBase64 = section.getAttributeValue(attrName);
+                if (digestBase64 == null) {
+                    // Attribute not found
+                    continue;
+                }
+                byte[] digest = base64Decoder.decode(digestBase64);
+                byte[] digestInResult = getDigest(result, alg);
+                if ((digestInResult == null) || (!Arrays.equals(digestInResult, digest))) {
+                    result.add(new NamedDigest(alg, digest));
+                }
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private static final String[] JB_MR2_AND_NEWER_DIGEST_ALGS = {
+            "SHA-512",
+            "SHA-384",
+            "SHA-256",
+            "SHA-1",
+    };
+
+    private static String getCanonicalJcaMessageDigestAlgorithm(String algorithm) {
+        return UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.get(algorithm.toUpperCase(Locale.US));
+    }
+
+    public static int getMinSdkVersionFromWhichSupportedInManifestOrSignatureFile(
+            String jcaAlgorithmName) {
+        Integer result =
+                MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.get(
+                        jcaAlgorithmName.toUpperCase(Locale.US));
+        return (result != null) ? result : Integer.MAX_VALUE;
+    }
+
+    private static String getJarDigestAttributeName(
+            String jcaDigestAlgorithm, String attrNameSuffix) {
+        if ("SHA-1".equalsIgnoreCase(jcaDigestAlgorithm)) {
+            return "SHA1" + attrNameSuffix;
+        } else {
+            return jcaDigestAlgorithm + attrNameSuffix;
+        }
+    }
+
+    private static final Map<String, String> UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL;
+    static {
+        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL = new HashMap<>(8);
+        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("MD5", "MD5");
+        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA", "SHA-1");
+        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA1", "SHA-1");
+        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA-1", "SHA-1");
+        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA-256", "SHA-256");
+        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA-384", "SHA-384");
+        UPPER_CASE_JCA_DIGEST_ALG_TO_CANONICAL.put("SHA-512", "SHA-512");
+    }
+
+    private static final Map<String, Integer>
+            MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST;
+    static {
+        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST = new HashMap<>(5);
+        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put("MD5", 0);
+        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put("SHA-1", 0);
+        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put("SHA-256", 0);
+        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put(
+                "SHA-384", AndroidSdkVersion.GINGERBREAD);
+        MIN_SDK_VESION_FROM_WHICH_DIGEST_SUPPORTED_IN_MANIFEST.put(
+                "SHA-512", AndroidSdkVersion.GINGERBREAD);
+    }
+
+    private static byte[] getDigest(Collection<NamedDigest> digests, String jcaDigestAlgorithm) {
+        for (NamedDigest digest : digests) {
+            if (digest.jcaDigestAlgorithm.equalsIgnoreCase(jcaDigestAlgorithm)) {
+                return digest.digest;
+            }
+        }
+        return null;
+    }
+
+    public static List<CentralDirectoryRecord> parseZipCentralDirectory(
+            DataSource apk,
+            ApkUtils.ZipSections apkSections)
+                    throws IOException, ApkFormatException {
+        return ZipUtils.parseZipCentralDirectory(apk, apkSections);
+    }
+
+    /**
+     * Returns {@code true} if the provided JAR entry must be mentioned in signed JAR archive's
+     * manifest for the APK to verify on Android.
+     */
+    private static boolean isJarEntryDigestNeededInManifest(String entryName) {
+        // NOTE: This logic is different from what's required by the JAR signing scheme. This is
+        // because Android's APK verification logic differs from that spec. In particular, JAR
+        // signing spec includes into JAR manifest all files in subdirectories of META-INF and
+        // any files inside META-INF not related to signatures.
+        if (entryName.startsWith("META-INF/")) {
+            return false;
+        }
+        return !entryName.endsWith("/");
+    }
+
+    private static Set<Signer> verifyJarEntriesAgainstManifestAndSigners(
+            DataSource apk,
+            long cdOffsetInApk,
+            Collection<CentralDirectoryRecord> cdRecords,
+            Map<String, ManifestParser.Section> entryNameToManifestSection,
+            List<Signer> signers,
+            int minSdkVersion,
+            int maxSdkVersion,
+            Result result) throws ApkFormatException, IOException, NoSuchAlgorithmException {
+        // Iterate over APK contents as sequentially as possible to improve performance.
+        List<CentralDirectoryRecord> cdRecordsSortedByLocalFileHeaderOffset =
+                new ArrayList<>(cdRecords);
+        Collections.sort(
+                cdRecordsSortedByLocalFileHeaderOffset,
+                CentralDirectoryRecord.BY_LOCAL_FILE_HEADER_OFFSET_COMPARATOR);
+        List<Signer> firstSignedEntrySigners = null;
+        String firstSignedEntryName = null;
+        for (CentralDirectoryRecord cdRecord : cdRecordsSortedByLocalFileHeaderOffset) {
+            String entryName = cdRecord.getName();
+            if (!isJarEntryDigestNeededInManifest(entryName)) {
+                continue;
+            }
+
+            ManifestParser.Section manifestSection = entryNameToManifestSection.get(entryName);
+            if (manifestSection == null) {
+                result.addError(Issue.JAR_SIG_NO_ZIP_ENTRY_DIGEST_IN_MANIFEST, entryName);
+                continue;
+            }
+
+            List<Signer> entrySigners = new ArrayList<>(signers.size());
+            for (Signer signer : signers) {
+                if (signer.getSigFileEntryNames().contains(entryName)) {
+                    entrySigners.add(signer);
+                }
+            }
+            if (entrySigners.isEmpty()) {
+                result.addError(Issue.JAR_SIG_ZIP_ENTRY_NOT_SIGNED, entryName);
+                continue;
+            }
+            if (firstSignedEntrySigners == null) {
+                firstSignedEntrySigners = entrySigners;
+                firstSignedEntryName = entryName;
+            } else if (!entrySigners.equals(firstSignedEntrySigners)) {
+                result.addError(
+                        Issue.JAR_SIG_ZIP_ENTRY_SIGNERS_MISMATCH,
+                        firstSignedEntryName,
+                        getSignerNames(firstSignedEntrySigners),
+                        entryName,
+                        getSignerNames(entrySigners));
+                continue;
+            }
+
+            List<NamedDigest> expectedDigests =
+                    new ArrayList<>(
+                            getDigestsToVerify(
+                                    manifestSection, "-Digest", minSdkVersion, maxSdkVersion));
+            if (expectedDigests.isEmpty()) {
+                result.addError(Issue.JAR_SIG_NO_ZIP_ENTRY_DIGEST_IN_MANIFEST, entryName);
+                continue;
+            }
+
+            MessageDigest[] mds = new MessageDigest[expectedDigests.size()];
+            for (int i = 0; i < expectedDigests.size(); i++) {
+                mds[i] = getMessageDigest(expectedDigests.get(i).jcaDigestAlgorithm);
+            }
+
+            try {
+                LocalFileRecord.outputUncompressedData(
+                        apk,
+                        cdRecord,
+                        cdOffsetInApk,
+                        DataSinks.asDataSink(mds));
+            } catch (ZipFormatException e) {
+                throw new ApkFormatException("Malformed ZIP entry: " + entryName, e);
+            } catch (IOException e) {
+                throw new IOException("Failed to read entry: " + entryName, e);
+            }
+
+            for (int i = 0; i < expectedDigests.size(); i++) {
+                NamedDigest expectedDigest = expectedDigests.get(i);
+                byte[] actualDigest = mds[i].digest();
+                if (!Arrays.equals(expectedDigest.digest, actualDigest)) {
+                    result.addError(
+                            Issue.JAR_SIG_ZIP_ENTRY_DIGEST_DID_NOT_VERIFY,
+                            entryName,
+                            expectedDigest.jcaDigestAlgorithm,
+                            V1SchemeConstants.MANIFEST_ENTRY_NAME,
+                            Base64.getEncoder().encodeToString(actualDigest),
+                            Base64.getEncoder().encodeToString(expectedDigest.digest));
+                }
+            }
+        }
+
+        if (firstSignedEntrySigners == null) {
+            result.addError(Issue.JAR_SIG_NO_SIGNED_ZIP_ENTRIES);
+            return Collections.emptySet();
+        } else {
+            return new HashSet<>(firstSignedEntrySigners);
+        }
+    }
+
+    private static List<String> getSignerNames(List<Signer> signers) {
+        if (signers.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> result = new ArrayList<>(signers.size());
+        for (Signer signer : signers) {
+            result.add(signer.getName());
+        }
+        return result;
+    }
+
+    private static MessageDigest getMessageDigest(String algorithm)
+            throws NoSuchAlgorithmException {
+        return MessageDigest.getInstance(algorithm);
+    }
+
+    private static byte[] digest(String algorithm, byte[] data, int offset, int length)
+            throws NoSuchAlgorithmException {
+        MessageDigest md = getMessageDigest(algorithm);
+        md.update(data, offset, length);
+        return md.digest();
+    }
+
+    private static byte[] digest(String algorithm, byte[] data) throws NoSuchAlgorithmException {
+        return getMessageDigest(algorithm).digest(data);
+    }
+
     public static class NamedDigest {
         public final String jcaDigestAlgorithm;
         public final byte[] digest;
@@ -1424,21 +1426,20 @@ public abstract class V1SchemeVerifier {
 
     public static class Result {
 
-        /**
-         * List of APK's signers. These signers are used by Android.
-         */
+        /** Whether the APK's JAR signature verifies. */
+        public boolean verified;
+
+        /** List of APK's signers. These signers are used by Android. */
         public final List<SignerInfo> signers = new ArrayList<>();
+
         /**
          * Signers encountered in the APK but not included in the set of the APK's signers. These
          * signers are ignored by Android.
          */
         public final List<SignerInfo> ignoredSigners = new ArrayList<>();
+
         private final List<IssueWithParams> mWarnings = new ArrayList<>();
         private final List<IssueWithParams> mErrors = new ArrayList<>();
-        /**
-         * Whether the APK's JAR signature verifies.
-         */
-        public boolean verified;
 
         private boolean containsErrors() {
             if (!mErrors.isEmpty()) {

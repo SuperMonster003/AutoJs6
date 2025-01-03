@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 package com.android.apksig;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.DataOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +36,49 @@ public final class Hints {
 
     private static int clampToInt(long value) {
         return (int) Math.max(0, Math.min(value, Integer.MAX_VALUE));
+    }
+
+    public static final class ByteRange {
+        final long start;
+        final long end;
+
+        public ByteRange(long start, long end) {
+            this.start = start;
+            this.end = end;
+        }
+    }
+
+    public static final class PatternWithRange {
+        final Pattern pattern;
+        final long offset;
+        final long size;
+
+        public PatternWithRange(String pattern) {
+            this.pattern = Pattern.compile(pattern);
+            this.offset= 0;
+            this.size = Long.MAX_VALUE;
+        }
+
+        public PatternWithRange(String pattern, long offset, long size) {
+            this.pattern = Pattern.compile(pattern);
+            this.offset = offset;
+            this.size = size;
+        }
+
+        public Matcher matcher(CharSequence input) {
+            return this.pattern.matcher(input);
+        }
+
+        public ByteRange ClampToAbsoluteByteRange(ByteRange rangeIn) {
+            if (rangeIn.end - rangeIn.start < this.offset) {
+                return null;
+            }
+            long rangeOutStart = rangeIn.start + this.offset;
+            long rangeOutSize = Math.min(rangeIn.end - rangeOutStart,
+                                           this.size);
+            return new ByteRange(rangeOutStart,
+                                 rangeOutStart + rangeOutSize);
+        }
     }
 
     /**
@@ -77,48 +119,5 @@ public final class Hints {
             throw new RuntimeException("UTF-8 must be supported", ex);
         }
         return pinPatterns;
-    }
-
-    public static final class ByteRange {
-        final long start;
-        final long end;
-
-        public ByteRange(long start, long end) {
-            this.start = start;
-            this.end = end;
-        }
-    }
-
-    public static final class PatternWithRange {
-        final Pattern pattern;
-        final long offset;
-        final long size;
-
-        public PatternWithRange(String pattern) {
-            this.pattern = Pattern.compile(pattern);
-            this.offset = 0;
-            this.size = Long.MAX_VALUE;
-        }
-
-        public PatternWithRange(String pattern, long offset, long size) {
-            this.pattern = Pattern.compile(pattern);
-            this.offset = offset;
-            this.size = size;
-        }
-
-        public Matcher matcher(CharSequence input) {
-            return this.pattern.matcher(input);
-        }
-
-        public ByteRange ClampToAbsoluteByteRange(ByteRange rangeIn) {
-            if (rangeIn.end - rangeIn.start < this.offset) {
-                return null;
-            }
-            long rangeOutStart = rangeIn.start + this.offset;
-            long rangeOutSize = Math.min(rangeIn.end - rangeOutStart,
-                    this.size);
-            return new ByteRange(rangeOutStart,
-                    rangeOutStart + rangeOutSize);
-        }
     }
 }
