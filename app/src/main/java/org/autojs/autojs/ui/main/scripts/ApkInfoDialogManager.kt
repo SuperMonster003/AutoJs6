@@ -44,7 +44,7 @@ object ApkInfoDialogManager {
             .title(apkFile.name)
             .customView(root, false)
             .autoDismiss(false)
-            .iconRes(R.drawable.transparent)
+            .iconRes(R.drawable.ic_three_dots_outline_small)
             .limitIconToDefaultSize()
             .positiveText(R.string.text_install)
             .positiveColorRes(R.color.dialog_button_attraction)
