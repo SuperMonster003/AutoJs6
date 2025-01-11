@@ -2,6 +2,9 @@
   "$data": {
     "v6.6.2": {
       "released_date": "2025/01/03",
+      "fix": [
+        "notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_"
+      ],
       "improvement": [
         "精简打包应用模板 APK 文件大小",
         "打包页面支持 Pinyin 库选项",

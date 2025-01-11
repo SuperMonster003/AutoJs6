@@ -28,6 +28,7 @@ import org.autojs.autojs.util.RhinoUtils.undefined
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Undefined
+import java.util.function.Supplier
 import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty1
 
@@ -42,6 +43,19 @@ import kotlin.reflect.KMutableProperty1
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+
+    override val selfAssignmentFunctions = listOf(
+        ::isEnabled.name,
+        ::ensureEnabled.name,
+        ::launchSettings.name,
+        ::config.name,
+        ::cancel.name,
+        ::getBuilder.name,
+    )
+
+    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
+        "builder" to Supplier { getBuilder(scriptRuntime, emptyArray()) }
+    )
 
     @Suppress("UnnecessaryVariable")
     override fun invoke(vararg args: Any?): Int = ensureArgumentsAtMost(args, 3) { argList ->

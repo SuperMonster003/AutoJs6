@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.notice
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -137,6 +138,7 @@ class Channel(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 }
             }
 
+            @SuppressLint("NewApi")
             if (scriptRuntime.notice.config.enableChannelInvalidModificationWarnings
                 && contains(scriptRuntime, arrayOf(id))
                 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
@@ -180,7 +182,7 @@ class Channel(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 else -> AugmentableNotice.parseChannelId(scriptRuntime, arg0)
             }
             if (!contains(scriptRuntime, arrayOf(channelId))) {
-                val options = if (arg0 is NativeObject) arg0 else arg1
+                val options = arg0 as? NativeObject ?: arg1
                 create(scriptRuntime, arrayOf(channelId, options))
             }
             UNDEFINED
