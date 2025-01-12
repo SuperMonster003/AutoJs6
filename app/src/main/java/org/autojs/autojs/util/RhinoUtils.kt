@@ -883,7 +883,7 @@ object RhinoUtils {
         override fun toString(): String = "function ${funcName ?: ""}() { ... }"
 
         override fun getDefaultValue(typeHint: Class<*>?) = when (typeHint) {
-            org.mozilla.javascript.ScriptRuntime.StringClass -> toString()
+            RhinoScriptRuntime.StringClass -> toString()
             else -> this
         }
 

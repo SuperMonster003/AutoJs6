@@ -1,7 +1,9 @@
 package org.autojs.autojs.rhino
 
+import android.os.Build
 import android.util.Log
 import com.android.dx.command.dexer.Main
+import com.legacy.android.dx.command.dexer.Main as LegacyMain
 import dalvik.system.DexClassLoader
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
@@ -156,11 +158,19 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
     @Throws(IOException::class)
     private fun dexJar(classFile: File, dexFile: File?): DexClassLoader {
         val niceDexFile = dexFile ?: generateTempFile("dex-" + classFile.path, true)
-        Main.Arguments().apply {
-            fileNames = arrayOf(classFile.path)
-            outName = niceDexFile.path
-            jarOutput = true
-            Main.run(this)
+        when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            true -> Main.Arguments().apply {
+                fileNames = arrayOf(classFile.path)
+                outName = niceDexFile.path
+                jarOutput = true
+                Main.run(this)
+            }
+            else -> LegacyMain.Arguments().apply {
+                fileNames = arrayOf(classFile.path)
+                outName = niceDexFile.path
+                jarOutput = true
+                LegacyMain.run(this)
+            }
         }
         val loader = loadDex(niceDexFile)
         if (dexFile == null) /* is temporary file generated */ {
