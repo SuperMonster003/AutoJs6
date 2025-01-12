@@ -67,6 +67,10 @@ public class ResizableFloatyWindow extends FloatyWindow {
         return layoutParams;
     }
 
+    protected ResizableFloaty getFloaty() {
+        return mFloaty;
+    }
+
     public View getRootView() {
         return mView;
     }

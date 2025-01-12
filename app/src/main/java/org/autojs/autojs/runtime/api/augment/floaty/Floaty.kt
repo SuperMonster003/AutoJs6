@@ -11,6 +11,7 @@ import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.ProxyJavaObject
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
+import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_OBJECT_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_SETTER_KEY
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Floaty
@@ -23,6 +24,9 @@ import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.undefined
+import org.mozilla.javascript.ScriptableObject.DONTENUM
+import org.mozilla.javascript.ScriptableObject.PERMANENT
+import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.xmlimpl.XML
 import android.content.Context as AndroidContext
@@ -88,7 +92,7 @@ class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
         }
 
-        private fun wrap(scriptRuntime: ScriptRuntime, windowFunction: (viewSupplier: BaseResizableFloatyWindow.ViewSupplier) -> JsWindow, xml: Any?): ProxyJavaObject {
+        private fun wrap(scriptRuntime: ScriptRuntime, windowFunction: (supplier: BaseResizableFloatyWindow.ViewSupplier) -> JsWindow, xml: Any?): ProxyJavaObject {
             require(xml is XML) { "Argument xml ${xml.jsBrief()} is invalid for Floaty#wrap" }
             val storage = mutableMapOf<String, Any?>()
             val layoutInflater = scriptRuntime.ui.layoutInflater
@@ -121,10 +125,12 @@ class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 return UNDEFINED
             }
             val proxyObject = newNativeObject().also {
-                it.defineProp(PROXY_GETTER_KEY, newBaseFunction(PROXY_GETTER_KEY, getter, NOT_CONSTRUCTABLE))
-                it.defineProp(PROXY_SETTER_KEY, newBaseFunction(PROXY_GETTER_KEY, setter, NOT_CONSTRUCTABLE))
+                it.defineProp(PROXY_GETTER_KEY, newBaseFunction(PROXY_GETTER_KEY, getter, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
+                it.defineProp(PROXY_SETTER_KEY, newBaseFunction(PROXY_GETTER_KEY, setter, NOT_CONSTRUCTABLE), READONLY or DONTENUM or PERMANENT)
             }
-            return ProxyJavaObject(scriptRuntime.topLevelScope, window, proxyObject)
+            return ProxyJavaObject(scriptRuntime.topLevelScope, window, window::class.java).also {
+                it.defineProp(PROXY_OBJECT_KEY, proxyObject, READONLY or DONTENUM or PERMANENT)
+            }
         }
 
         private fun toXMLString(xml: Any) = when (xml) {
