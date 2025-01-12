@@ -3,7 +3,6 @@ package org.autojs.autojs.rhino
 import android.os.Build
 import android.util.Log
 import com.android.dx.command.dexer.Main
-import com.legacy.android.dx.command.dexer.Main as LegacyMain
 import dalvik.system.DexClassLoader
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
@@ -17,6 +16,7 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import com.legacy.android.dx.command.dexer.Main as LegacyMain
 
 /**
  * Created by Stardust on Apr 5, 2017.
@@ -50,22 +50,37 @@ class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: 
 
     @Throws(FileNotFoundException::class)
     fun loadDex(file: File): DexClassLoader {
-        val path = file.path
-        Log.d(TAG, "loadDex: file = $path")
+        val originalPath = file.path
+        Log.d(TAG, "loadDex: file = $originalPath")
+
         if (!file.exists() || !file.canRead()) {
-            throw FileNotFoundException(str(R.string.file_not_exist_or_readable, path))
+            throw FileNotFoundException(str(R.string.file_not_exist_or_readable, originalPath))
         }
 
         // @Hint by SuperMonster003 on Nov 30, 2023.
         //  ! Try to avoid the exception which looks like below (API Level 34+):
         //  # java.lang.SecurityException: Writable dex file '/data/user/0/org.autojs.autojs6/cache/classes/xxx.jar' is not allowed.
-        //  ! zh-CN:
-        //  ! 尝试避免如下异常 (API 级别 34+):
+        //  ! zh-CN: 尝试避免如下异常 (API 级别 34+):
         //  # java.lang.SecurityException: 不允许可写的 dex 文件 '/data/user/0/org.autojs.autojs6/cache/classes/xxx.jar'.
-        file.setReadOnly()
+        //  !
+        // @Hint by SuperMonster003 on Jan 13, 2025.
+        //  ! Copy the dex file to the cache path and set it as read-only.
+        //  ! zh-CN: 将 dex 文件复制到缓存路径并设置只读.
+        //  # file.setReadOnly()
+        val safeDexFile = File(cacheDir, "safe_${file.name}")
+        try {
+            if (!safeDexFile.exists() || md5(file) != md5(safeDexFile)) {
+                file.copyTo(safeDexFile, overwrite = true)
+            }
+            if (!safeDexFile.setReadOnly()) {
+                Log.e(TAG, "Failed to set file as read-only: ${safeDexFile.path}")
+            }
+        } catch (e: IOException) {
+            throw FatalLoadingException(e)
+        }
 
-        return DexClassLoader(path, cacheDir.path, null, parent).also {
-            mDexClassLoaders[path] = it
+        return DexClassLoader(safeDexFile.path, cacheDir.path, null, parent).also {
+            mDexClassLoaders[safeDexFile.path] = it
         }
     }
 
