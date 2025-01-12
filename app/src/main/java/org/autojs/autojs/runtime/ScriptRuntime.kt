@@ -103,7 +103,6 @@ import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.RhinoUtils.js_object_assign
-import org.autojs.autojs.util.RhinoUtils.js_require
 import org.autojs.autojs.util.RootUtils
 import org.autojs.autojs.util.SdkVersionUtils
 import org.autojs.autojs.util.StringUtils
@@ -378,15 +377,17 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     internal lateinit var augmentedOcrRapid: ScriptableObject
 
+    private val rhinoRequireFunction by lazy { topLevelScope.prop("require") as BaseFunction }
+
     // @Commented by SuperMonster003 on May 24, 2022.
     //  ! Use internal Rhino JSON for better performance and compatibility.
     //  ! zh-CN: 使用 Rhino 内置的 JSON 以获得更好的性能及兼容性.
-    // val js_JSON by lazy { js_require(this, "json2") as ScriptableObject }
+    // val js_JSON by lazy { rhinoRequire("json2") as ScriptableObject }
 
     // @Commented by SuperMonster003 on May 26, 2024.
     //  ! Already implemented in Rhino 1.7.15 .
     //  ! zh-CN: 已在 Rhino 1.7.15 中实现.
-    // val js_polyfill by lazy { js_require(this, "polyfill") as ScriptableObject }
+    // val js_polyfill by lazy { rhinoRequire("polyfill") as ScriptableObject }
 
     /**
      * @Hint by SuperMonster003 on Apr 17, 2022.
@@ -415,19 +416,19 @@ class ScriptRuntime private constructor(builder: Builder) {
      * Substitution of Promise.
      * zh-CN: Promise 的替代方案.
      */
-    val js_Promise by lazy { js_require(this, "promise") as BaseFunction }
+    val js_Promise by lazy { rhinoRequire("promise") as BaseFunction }
 
-    val js_ResultAdapter by lazy { js_require(this, "result-adapter") as BaseFunction }
+    val js_ResultAdapter by lazy { rhinoRequire("result-adapter") as BaseFunction }
 
-    private val js_object_observe_lite_min by lazy { js_require(this, "object-observe-lite.min") as BaseFunction }
+    private val js_object_observe_lite_min by lazy { rhinoRequire("object-observe-lite.min") as BaseFunction }
 
-    private val js_array_observe_min by lazy { js_require(this, "array-observe.min") as BaseFunction }
+    private val js_array_observe_min by lazy { rhinoRequire("array-observe.min") as BaseFunction }
 
-    private val js_mod_continuation by lazy { js_require(this, "continuation") as ScriptableObject }
+    private val js_mod_continuation by lazy { rhinoRequire("continuation") as ScriptableObject }
 
-    private val js_mod_internal by lazy { js_require(this, "internal") as ScriptableObject }
+    private val js_mod_internal by lazy { rhinoRequire("internal") as ScriptableObject }
 
-    private val js_Module by lazy { js_require(this, "jvm-npm") as ScriptableObject }
+    private val js_Module by lazy { rhinoRequire("jvm-npm") as ScriptableObject }
 
     init {
         info = accessibilityBridge.infoProvider
@@ -475,21 +476,21 @@ class ScriptRuntime private constructor(builder: Builder) {
     }
 
     fun initEpilogue() {
-        // @Hint by Stardust (https://github.com/hyb1996) on Feb 27, 2018
-        //  ! 重定向 require 以支持相对路径和 npm 模块.
-        //  ! en-US (translated by SuperMonster003 on Jul 27, 2024):
-        //  ! Redirect the "require" method to support relative paths and npm modules.
-        topLevelScope.defineProp("Module", js_Module, PERMANENT)
-        topLevelScope.defineProp("require", js_Module.prop("require"), PERMANENT)
-
         // @OrderMatters by SuperMonster003 on Jul 24, 2024.
         //  ! "object observe" must be ahead of "array observe".
         //  ! zh-CN: "object observe" 需要先于 "array observe".
         callFunction(this, js_object_observe_lite_min, topLevelScope, topLevelScope, arrayOf(topLevelScope))
         callFunction(this, js_array_observe_min, topLevelScope, topLevelScope, arrayOf(topLevelScope))
 
-        if (Pref.isCompatibilityWithClassesForVer4xEnabled) js_require(this, "redirect")
+        if (Pref.isCompatibilityWithClassesForVer4xEnabled) rhinoRequire("redirect")
         if (Pref.isExtendingJsBuildInObjectsEnabled) Jsox.extendAllRhinoWithRuntime(this)
+
+        // @Hint by Stardust (https://github.com/hyb1996) on Feb 27, 2018
+        //  ! 重定向 require 以支持相对路径和 npm 模块.
+        //  ! en-US (translated by SuperMonster003 on Jul 27, 2024):
+        //  ! Redirect the "require" method to support relative paths and npm modules.
+        topLevelScope.defineProp("Module", js_Module, PERMANENT)
+        topLevelScope.defineProp("require", js_Module.prop("require"), PERMANENT)
     }
 
     @ScriptInterface
@@ -776,7 +777,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             if (module is Wrapper) module = module.unwrap()
             when (module) {
                 is ScriptEngineService.ScriptModuleIdentifier -> {
-                    global.defineProp(moduleName, js_require(this, module.moduleFileName), PERMANENT)
+                    global.defineProp(moduleName, rhinoRequire(module.moduleFileName), PERMANENT)
                 }
                 else -> global.deleteProp(moduleName)
             }
@@ -785,6 +786,10 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     private fun applyInternalModules(global: Scriptable) {
         js_object_assign(global, js_mod_internal)
+    }
+
+    private fun rhinoRequire(id: String): Any? {
+        return callFunction(this, rhinoRequireFunction, topLevelScope, topLevelScope, arrayOf(id))
     }
 
     class Builder {
