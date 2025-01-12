@@ -60,12 +60,12 @@ class FinalSeg private constructor() {
                     values!![tokens[0][0]] = tokens[1].toDouble()
                 }
             }
-        } catch (e: IOException) {
+        } catch (_: IOException) {
             Log.error(String.format(Locale.getDefault(), "%s: load model failure!", PROB_EMIT))
         } finally {
             try {
                 `is`.close()
-            } catch (e: IOException) {
+            } catch (_: IOException) {
                 Log.error(String.format(Locale.getDefault(), "%s: close failure!", PROB_EMIT))
             }
         }

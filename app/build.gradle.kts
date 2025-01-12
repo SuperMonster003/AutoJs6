@@ -149,6 +149,7 @@ dependencies /* Unclassified */ {
 
     // Dex
     implementation(files("$rootDir/libs/com.android.dx-1.14.jar"))
+    implementation(files("$rootDir/libs/com.legacy.android.dx-1.7.0.jar"))
 
     // OpenCV
     implementation(project(":libs:org.opencv-4.8.0"))
@@ -820,13 +821,6 @@ class Versions(filePath: String) {
     private val javaVersionMinRadical: Int = properties["JAVA_VERSION_MIN_RADICAL"].let { it as String }.toInt()
     private val javaVersionRaw = properties["JAVA_VERSION"] as String
     private var javaVersionInfoSuffix = ""
-    private val javaVersionCeilMap = mapOf(
-        "idea" to mapOf(
-            "2023.2" to javaVersionMinSuggested, /* Aug 17, 2023. */
-            "2023.1" to javaVersionMinSuggested, /* Aug 17, 2023. */
-            "2022.3" to javaVersionMinSuggested, /* Aug 17, 2023. */
-        ),
-    )
 
     val javaVersion: JavaVersion by lazy {
         var niceVersionInt = javaVersionRaw.toInt()
