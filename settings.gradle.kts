@@ -145,10 +145,10 @@ pluginManagement {
         val platforms = object {
 
             val androidStudio = object : Platform(
-                name = "AndroidStudio", abbr = "as", vendor = "Google",
+                name = "AndroidStudio", vendor = "Google",
                 androidVersionMap = mapOf(
-                    "2024.3" to "8.9.0-alpha07", /* Dec 25 2024. */
-                    "2024.2" to "8.8.0-rc02", /* Dec 25 2024. */
+                    "2024.3" to "8.9.0-alpha09", /* Jan 13, 2025. */
+                    "2024.2" to "8.8.0", /* Jan 13, 2025. */
                     "2024.1" to "8.6.0", /* Aug 30, 2024. */
                     "2023.3" to "8.5.0-alpha02", /* Mar 28, 2024. */
                     "2023.2" to "8.3.0-rc02", /* Feb 14, 2024. */
@@ -210,7 +210,7 @@ pluginManagement {
             }
 
             val intelliJIdea = object : Platform(
-                name = "IntelliJIdea", abbr = "idea", vendor = "Jetbrains",
+                name = "IntelliJIdea", vendor = "Jetbrains",
                 androidVersionMap = mapOf(
                     "2024.3.1" to "8.7.3", /* Dec 10, 2024. */
                     "2024.3" to "8.7.0-rc01", /* Nov 15, 2024. */
@@ -235,7 +235,7 @@ pluginManagement {
             }
 
             val temurin = object : Platform(
-                name = "Temurin", vendor = "temurin", abbr = "Adoptium", /* More common as "Eclipse Adoptium". */
+                name = "Temurin", vendor = "temurin",  /* More common as "Eclipse Adoptium". */
                 androidVersionMap = mapOf(
                     "20.0.2+9" to "8.2.2", /* Dec 2, 2024. */
                     consts.IDENTIFIER_FALLBACK to recommendedMinGradleVersion,
@@ -250,7 +250,7 @@ pluginManagement {
             }
 
             val unknown = object : Platform(
-                name = "Unknown", abbr = consts.IDENTIFIER_UNKNOWN, vendor = consts.IDENTIFIER_UNKNOWN,
+                name = "Unknown", vendor = consts.IDENTIFIER_UNKNOWN,
                 androidVersionMap = mapOf(
                     consts.IDENTIFIER_FALLBACK to recommendedMinGradleVersion,
                 ),
@@ -304,6 +304,7 @@ pluginManagement {
         )
 
         val kspVersionMap = mapOf(
+            "2.1.10-RC" to "1.0.29", /* Jan 13, 2025. */
             "2.1.20-Beta1" to "1.0.29", /* Dec 25, 2024. */
             "2.1.0" to "1.0.29", /* Nov 28, 2024. */
             "2.1.0" to "1.0.28", /* Nov 28, 2024. */
@@ -357,7 +358,6 @@ pluginManagement {
 
         abstract inner class Platform(
             var name: String,
-            val abbr: String,
             val vendor: String,
             val androidVersionMap: Map<String, String>,
             val kotlinVersionMap: Map<String, String>,
@@ -368,6 +368,8 @@ pluginManagement {
             open val gradleSettingsName: String? = null
             open val weight: Int = -Int.MAX_VALUE
             open var version: String = consts.DEFAULT_VERSION
+
+            @Suppress("unused")
             open val shouldPrintProgress: Boolean = true
 
             open val fullName

@@ -160,7 +160,7 @@ open class ImageWrapper : Recyclable, MonitorResource {
         }
         return try {
             true.also { saveWithBitmap(path) }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -246,7 +246,7 @@ open class ImageWrapper : Recyclable, MonitorResource {
         ensureNotRecycled()
         return when (val bitmap = mBitmap) {
             null -> ofMat(mat.clone())
-            else -> ofBitmap(bitmap.copy(bitmap.config, true))
+            else -> ofBitmap(bitmap.copy(bitmap.config ?: Bitmap.Config.ARGB_8888, true))
         }
     }
 

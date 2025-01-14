@@ -55,6 +55,7 @@ import java.util.List;
  * Command-line tool for signing APKs and for checking whether an APK's signature are expected to
  * verify on Android devices.
  */
+@SuppressWarnings("deprecation")
 public class ApkSignerTool {
 
     public static final int ZIP_MAGIC = 0x04034b50;
