@@ -29,7 +29,7 @@ import com.legacy.android.dx.command.dexer.Main as LegacyMain
  * @param parent   the parent
  * @param cacheDir the cache directory
  */
-class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: File) : ClassLoader(), GeneratedClassLoader {
+open class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: File) : ClassLoader(), GeneratedClassLoader {
 
     init {
         if (cacheDir.exists()) {

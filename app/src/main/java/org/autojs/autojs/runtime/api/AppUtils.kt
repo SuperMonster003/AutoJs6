@@ -70,7 +70,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
     }
 
     @ScriptInterface
-    fun launchApp(appName: String) = getPackageName(appName)?.let { launchPackage(it) } ?: false
+    fun launchApp(appName: String) = getPackageName(appName)?.let { launchPackage(it) } == true
 
     @ScriptInterface
     fun getPackageName(appName: String): String? = mPackageManager.let {
@@ -85,7 +85,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
     @ScriptInterface
     fun getAppName(packageName: String?) = try {
         packageName?.let { "${mPackageManager.getApplicationLabel(getApplicationInfoCompat(mPackageManager, it, 0))}" }
-    } catch (ignore: NameNotFoundException) {
+    } catch (_: NameNotFoundException) {
         null
     }
 
@@ -113,7 +113,7 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
     @ScriptInterface
     fun isInstalled(packageName: String?) = try {
         getPackageInfoCompat(mPackageManager, packageName!!, 0) != null
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 
