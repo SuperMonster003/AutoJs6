@@ -3,7 +3,6 @@
     <bool name="leak_canary_enabled">true</bool>
     <bool name="leak_canary_add_dynamic_shortcut">false</bool>
     <bool name="leak_canary_add_launcher_icon">true</bool>
-    <bool name="pref_compatibility_with_classes_for_ver_4_x">false</bool>
     <bool name="pref_extending_js_build_in_objects">false</bool>
     <bool name="pref_use_volume_control_running">true</bool>
     <bool name="pref_auto_check_for_updates">true</bool>

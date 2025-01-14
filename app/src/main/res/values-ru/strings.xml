@@ -40,7 +40,6 @@
     <string name="description_app_language_preference">Это предпочтение для изменения языка отображения AutoJs6, включая сообщения исключений от запущенных скриптов.\n\nПримечание: может потребоваться перезапуск приложения, чтобы язык был применен так, как ожидается.</string>
     <string name="description_change_working_dir_preference">Измените путь к директории, содержащей скрипты</string>
     <string name="description_check_for_updates_preference">AutoJs6 получает и загружает обновления с GitHub.\n\nПримечание: обновление пока не обеспечивает многоязыковую поддержку.</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">Обеспечивает определенную совместимость имен классов Java для версий 4.x путем переименования имен классов.\nПри включении этой опции при каждом запуске скрипта будет происходить задержка запуска (от десятков до сотен миллисекунд).\nРекомендуется всегда держать эту опцию выключенной, если в ней нет особой необходимости.</string>
     <string name="description_documentation_source_preference">Локальная документация: Использование встроенных файлов AutoJs6 в качестве источников документации, подключение к сети не требуется. Содержание меняется по мере обновления AutoJs6.\nОнлайн-документы: Использование страниц GitHub в качестве источников документации, требуется подключение к сети. Содержимое всегда обновляется.\n\nПримечание: Чтобы максимально улучшить качество чтения онлайн-документов, рекомендуется использовать широкоформатное устройство отображения, например настольный монитор.\nПримечание: Начиная с версии 6.2.0, документация находится на предварительной стадии разработки, и большая часть содержимого еще не была написана или обновлена.</string>
     <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P] и ниже: версия >= 105</string>
     <string name="description_extending_js_build_in_objects">Расширение встроенных объектов JavaScript может повысить гибкость кода и обеспечить более богатую функциональность, но может привести к конфликтам и даже поломкам.\nВсе сценарии имеют встроенные расширения, включенные по умолчанию, когда опция включена.\nВстроенные расширения часто небезопасны, и их не рекомендуется использовать, пока принципы и риски встроенных расширений не будут четко поняты.\nКогда опция выключена, встроенные расширения все еще можно включить через глобальный объект plugins, как описано в документации проекта.</string>
@@ -250,7 +249,6 @@
     <string name="screen_capturer_foreground_notification_text">Это уведомление отображается для захвата экрана</string>
     <string name="screen_capturer_foreground_notification_title">Служба захвата экрана на переднем плане</string>
     <string name="summary_about_app_tips">Лучший пользовательский опыт</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">Обеспечить определенную совместимость имен классов Java для версий 4.x</string>
     <string name="summary_enable_a11y_service_with_root_access">Автоматическое включение службы доступности с корневым доступом при необходимости</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Автоматическое включение службы доступности с безопасными настройками при необходимости</string>
     <string name="summary_extending_js_build_in_objects">Повысить гибкость кода и обеспечить более богатую функциональность за счет расширения встроенных объектов JavaScript</string>
@@ -376,7 +374,6 @@
     <string name="text_command_already_copied_to_clip">Команда скопирована в буфер обмена</string>
     <string name="text_comment">Комментарий</string>
     <string name="text_compatibility">Совместимость</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">Совместимость с классами Java для версии 4.x</string>
     <string name="text_config">Конфигурация</string>
     <string name="text_confirm_to_delete">Вы уверены, что хотите удалить?</string>
     <string name="text_confirm_to_remove">Вы уверены, что хотите удалить?</string>

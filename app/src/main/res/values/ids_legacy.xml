@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="legacy_rename" type="id"/>
+    <item name="legacy_open_by_other_apps" type="id"/>
+    <item name="legacy_create_shortcut" type="id"/>
+    <item name="legacy_delete" type="id"/>
+    <item name="legacy_package_name" type="id"/>
+    <item name="legacy_class_name" type="id"/>
+    <item name="legacy_open_launcher" type="id"/>
+    <item name="legacy_accessibility_service" type="id"/>
+    <item name="legacy_layout_bounds" type="id"/>
+    <item name="legacy_layout_hierarchy" type="id"/>
+    <item name="legacy_pointer_location" type="id"/>
+    <item name="legacy_disable_pointer_location" type="id"/>
+</resources>

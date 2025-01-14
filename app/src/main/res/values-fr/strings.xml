@@ -40,7 +40,6 @@
     <string name="description_app_language_preference">Cette préférence permet de modifier la langue d\'affichage d\'AutoJs6, y compris les messages d\'exception des scripts en cours d\'exécution.\n\nNote: un redémarrage de l\'application peut être nécessaire pour que la langue s\'applique comme prévu.</string>
     <string name="description_change_working_dir_preference">Changer le chemin du répertoire contenant les scripts</string>.
     <string name="description_check_for_updates_preference">AutoJs6 obtient et télécharge les mises à jour depuis GitHub.\n\nNote: La mise à jour ne fournit pas encore de support multilingue.</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">Assure un certain degré de compatibilité des noms de classe Java pour les versions 4.x grâce au remappage des noms de classe.\nSi cette option est activée, il y aura un délai de démarrage plus ou moins long (de quelques dizaines à quelques centaines de millisecondes) à chaque fois que le script sera lancé.\nIl est recommandé de laisser l\'option désactivée à tout moment si elle n\'est pas spécifiquement requise.</string>
     <string name="description_documentation_source_preference">Documentation locale: Utilisation des fichiers intégrés d\'AutoJs6 comme sources de documentation, aucune connexion réseau n\'est nécessaire. Le contenu change au fur et à mesure que AutoJs6 est mis à jour.\nDocumentation en ligne: Utilisation des pages GitHub comme sources de documentation, nécessitant une connexion réseau. Le contenu est toujours à jour.\n\nRemarque: pour optimiser l\'expérience de lecture des documents en ligne, il est recommandé d\'utiliser un dispositif d\'affichage grand écran tel qu\'un moniteur de bureau.\nRemarque: à partir de la version 6.2.0, la documentation est encore dans les phases préliminaires de développement, et la plupart du contenu n\'a pas encore été écrit ou mis à jour.</string>
     <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur: version >= 76\n- Android API Niveau 28 (Android 9) [P] et inférieur: version >= 105</string>
     <string name="description_extending_js_build_in_objects">L\'extension des objets JavaScript intégrés peut augmenter la flexibilité du code et permettre des fonctionnalités plus riches, mais elle peut provoquer des conflits et même des pannes.\nTous les scripts ont des extensions intégrées activées par défaut lorsque l\'option est activée.\nLes extensions intégrées sont souvent peu sûres et ne sont pas recommandées, sauf si les principes et les risques des extensions intégrées sont clairement compris.\nLorsque l\'option est désactivée, les extensions intégrées peuvent toujours être activées via l\'objet global plugins, comme décrit dans la documentation du projet.</string>
@@ -250,7 +249,6 @@
     <string name="screen_capturer_foreground_notification_text">Cette notification s\'affiche pour la capture d\'écran</string>.
     <string name="screen_capturer_foreground_notification_title">Service de capture d\'écran en avant-plan</string>
     <string name="summary_about_app_tips">Meilleure expérience utilisateur</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">Fournir un degré de compatibilité des noms de classe Java pour les versions 4.x.</string>
     <string name="summary_enable_a11y_service_with_root_access">Activer le service d\'accessibilité avec accès root automatiquement lorsque cela est nécessaire</string>.
     <string name="summary_enable_a11y_service_with_secure_settings">Activer le service d\'accessibilité avec des paramètres sécurisés automatiquement lorsque cela est nécessaire</string>.
     <string name="summary_extending_js_build_in_objects">Augmenter la flexibilité du code et permettre une fonctionnalité plus riche en étendant les objets intégrés JavaScript.</string>
@@ -376,7 +374,6 @@
     <string name="text_command_already_copied_to_clip">Commande copiée dans le presse-papiers</string>
     <string name="text_comment">Commentaire</string>
     <string name="text_compatibility">Compatibilité</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">Compatibilité avec les classes Java pour la version 4.x</string>
     <string name="text_config">Configuration</string>
     <string name="text_confirm_to_delete">Vous êtes sûr de vouloir supprimer?</string>
     <string name="text_confirm_to_remove">Etes-vous sûr de supprimer?</string>

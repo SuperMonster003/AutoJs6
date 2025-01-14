@@ -39,7 +39,6 @@
     <string name="description_app_language_preference">設置選項用於修改 AutoJs6 應用的文本內容顯示語言, 同時包括腳本運行產生的錯誤消息等.\n\n注: 部分內容可能需要重啓應用才能完成語言切換.</string>
     <string name="description_change_working_dir_preference">更改包含腳本的文件夾路徑</string>
     <string name="description_check_for_updates_preference">AutoJs6 從 GitHub 獲取並下載更新.\n\n注: 版本更新內容暫未提供多語言支持.</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">通過類名重映射, 提供一定程度上的 4.x 版本 Java 類名兼容.\n開啓選項後, 每次啓動腳本將出現不同程度的啓動延遲 (幾十到幾百毫秒不等).\n如無特別需求, 建議始終保持選項關閉.</string>
     <string name="description_documentation_source_preference">本地文檔: AutoJs6 內置文件作為文檔來源, 無需網絡連接, 隨 AutoJs6 應用更新而發生內容變動.\n在線文檔: 使用 GitHub 網頁作為文檔來源, 需網絡連接, 可隨時保持文檔內容為最新.\n\n注: 為最大化在線文檔的閲讀體驗, 建議使用桌面顯示器等寬屏顯示設備閲讀.\n注: 截至 6.2.0 版本, 文檔尚處於初步編寫階段, 大部分內容尚未完成編寫或更新.</string>
     <string name="description_documentation_source_preference_more">文檔頁面的深色主題支持需要滿足以下條件:\n1. AutoJs6 開啓夜間模式\n2. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P] 及以下: 版本不低於 105</string>
     <string name="description_extending_js_build_in_objects">擴展 JavaScript 內置對象可以增加代碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啓後所有腳本均默認啓用內置擴展.\n內置擴展往往是不安全的, 除非明確瞭解內置擴展的原理及風險, 否則不建議啓用.\n選項關閉後, 仍然可以通過 plugins 全局對象啓用內置擴展, 詳見項目文檔.</string>
@@ -249,7 +248,6 @@
     <string name="screen_capturer_foreground_notification_text">此通知用於捕獲屏幕截圖</string>
     <string name="screen_capturer_foreground_notification_title">屏幕捕獲器前台服務</string>
     <string name="summary_about_app_tips">更佳的用户使用體驗</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">提供一定程度上的 4.x 版本 Java 類名兼容</string>
     <string name="summary_enable_a11y_service_with_root_access">自動嘗試使用 root 權限啓用無障礙服務</string>
     <string name="summary_enable_a11y_service_with_secure_settings">自動嘗試使用修改安全設置權限啓用無障礙服務</string>
     <string name="summary_extending_js_build_in_objects">擴展 JavaScript 內置對象以增加代碼靈活性</string>
@@ -375,7 +373,6 @@
     <string name="text_command_already_copied_to_clip">指令已複製到剪貼板</string>
     <string name="text_comment">註釋</string>
     <string name="text_compatibility">兼容性</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">Java 類名 4.x 版本兼容</string>
     <string name="text_config">配置</string>
     <string name="text_confirm_to_delete">是否確定刪除</string>
     <string name="text_confirm_to_remove">確定移除嗎?</string>
