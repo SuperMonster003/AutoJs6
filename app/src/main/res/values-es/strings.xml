@@ -40,7 +40,6 @@
     <string name="description_app_language_preference">Esta preferencia para cambiar el idioma de visualización de AutoJs6, incluyendo los mensajes de excepción de los scripts en ejecución.\n\nNota: puede ser necesario reiniciar la aplicación para que el idioma se aplique como se espera.</string>
     <string name="description_change_working_dir_preference">Cambiar la ruta del directorio que contiene los scripts</string>
     <string name="description_check_for_updates_preference">AutoJs6 obtiene y descarga las actualizaciones de GitHub.\n\nNota: La actualización aún no ofrece soporte multilingüe.</string>
-    <string name="description_compatibility_with_classes_for_ver_4_x">Proporciona un grado de compatibilidad de nombres de clase Java para las versiones 4.x a través de la reasignación de nombres de clase.\nCon esta opción activada, habrá un grado variable de retraso en el inicio (de decenas a cientos de milisegundos) cada vez que se inicie el script.\nSe recomienda mantener la opción desactivada en todo momento si no se requiere específicamente.</string>
     <string name="description_documentation_source_preference">Documentos locales: Utiliza los archivos incorporados de AutoJs6 como fuentes de documentación, sin necesidad de conexión a la red. El contenido cambia a medida que se actualiza AutoJs6.\nDocumentación en línea: Utilizando las páginas de GitHub como fuentes de documentación, se requiere conexión a la red. El contenido está siempre actualizado.\n\nNota: Para maximizar la experiencia de lectura de los documentos en línea, se recomienda utilizar un dispositivo de pantalla ancha, como un monitor de escritorio.\nNota: A partir de la versión 6.2.0, la documentación se encuentra todavía en las fases preliminares de desarrollo, y la mayor parte del contenido aún no ha sido escrito o actualizado.</string>
     <string name="description_documentation_source_preference_more">Para que el tema oscuro sea compatible con las páginas de los documentos, deben cumplirse las siguientes condiciones\n1. AutoJs6 tiene activado el modo nocturno\n2. Sistema Android WebView (o navegadores como Google Chrome):\n- Android API Level 29 (Android 10) [Q] y superior: versión >= 76\n- Android API Level 28 (Android 9) [P] e inferiores: versión >= 105</string>
     <string name="description_extending_js_build_in_objects">La ampliación de los objetos incorporados de JavaScript puede aumentar la flexibilidad del código y permitir una funcionalidad más rica, pero puede causar conflictos e incluso roturas.\nTodos los scripts tienen las extensiones incorporadas habilitadas por defecto cuando la opción está activada.\nLas extensiones incorporadas suelen ser inseguras y no se recomiendan a menos que se comprendan claramente los principios y riesgos de las extensiones incorporadas.\nCuando la opción está desactivada, las extensiones incorporadas aún pueden ser habilitadas a través del objeto global plugins, como se describe en la documentación del proyecto.</string>
@@ -250,7 +249,6 @@
     <string name="screen_capturer_foreground_notification_text">Se está mostrando esta notificación para capturar la pantalla</string>
     <string name="screen_capturer_foreground_notification_title">Servicio de captura de pantalla en primer plano</string>
     <string name="summary_about_app_tips">Mejor experiencia de usuario</string>
-    <string name="summary_compatibility_with_classes_for_ver_4_x">Proporcionar un grado de compatibilidad de nombres de clases Java para las versiones 4.x</string>
     <string name="summary_enable_a11y_service_with_root_access">Habilitar el servicio de accesibilidad con acceso root automáticamente cuando sea necesario</string>
     <string name="summary_enable_a11y_service_with_secure_settings">Habilitar el servicio de accesibilidad con configuración segura automáticamente cuando sea necesario</string>
     <string name="summary_extending_js_build_in_objects">Aumentar la flexibilidad del código y permitir una funcionalidad más rica mediante la ampliación de los objetos incorporados de JavaScript</string>
@@ -376,7 +374,6 @@
     <string name="text_command_already_copied_to_clip">Comando copiado en el portapapeles</string>
     <string name="text_comment">Comente</string>
     <string name="text_compatibility">Compatibilidad</string>
-    <string name="text_compatibility_with_classes_for_ver_4_x">Compatibilidad con las clases de Java para la versión 4.x</string>
     <string name="text_config">Configuración</string>
     <string name="text_confirm_to_delete">¿Seguro que quieres borrar?</string>
     <string name="text_confirm_to_remove">¿Está seguro de eliminar?</string>

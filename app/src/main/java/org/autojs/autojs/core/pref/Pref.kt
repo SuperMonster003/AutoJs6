@@ -61,13 +61,6 @@ object Pref {
     fun get(): SharedPreferences = sPref
 
     @JvmStatic
-    val isCompatibilityWithClassesForVer4xEnabled
-        get() = getBoolean(
-            R.string.key_compatibility_with_classes_for_ver_4_x,
-            resources.getBoolean(R.bool.pref_compatibility_with_classes_for_ver_4_x),
-        )
-
-    @JvmStatic
     val isExtendingJsBuildInObjectsEnabled
         get() = getBoolean(
             R.string.key_extending_js_build_in_objects,

@@ -482,7 +482,6 @@ class ScriptRuntime private constructor(builder: Builder) {
         callFunction(this, js_object_observe_lite_min, topLevelScope, topLevelScope, arrayOf(topLevelScope))
         callFunction(this, js_array_observe_min, topLevelScope, topLevelScope, arrayOf(topLevelScope))
 
-        if (Pref.isCompatibilityWithClassesForVer4xEnabled) rhinoRequire("redirect")
         if (Pref.isExtendingJsBuildInObjectsEnabled) Jsox.extendAllRhinoWithRuntime(this)
 
         // @Hint by Stardust (https://github.com/hyb1996) on Feb 27, 2018
