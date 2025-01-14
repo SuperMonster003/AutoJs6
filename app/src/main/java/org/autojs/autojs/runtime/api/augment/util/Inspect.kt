@@ -5,6 +5,8 @@ import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.extension.AnyExtensions.isJsNonNullObject
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.ArrayExtensions.toNativeObject
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.extension.NumberExtensions.string
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
@@ -16,8 +18,8 @@ import org.autojs.autojs.runtime.api.augment.global.Species.isErrorRhino
 import org.autojs.autojs.runtime.api.augment.global.Species.isJavaObjectRhino
 import org.autojs.autojs.runtime.api.augment.global.Species.isObjectRhino
 import org.autojs.autojs.runtime.api.augment.global.Species.isStringRhino
-import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.callPrototypeFunction
@@ -258,7 +260,7 @@ object Inspect : Augmentable(), Invokable {
 
         if (value is StringReadable) return value.toStringReadable()
 
-        if (value is Scriptable && value !is NativeJavaClass) runCatching {
+        if (value is Scriptable && value !is NativeJavaPackage) runCatching {
             (value.prop(StringReadable.KEY) as? BaseFunction)?.let { f ->
                 return Context.toString(callFunction(f, null, value, arrayOf()))
             }

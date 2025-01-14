@@ -37,6 +37,7 @@ import java.util.List;
  * <p>Structure is described to the parser by providing a class annotated with {@link Asn1Class},
  * containing fields annotated with {@link Asn1Field}.
  */
+@SuppressWarnings("deprecation")
 public final class Asn1BerParser {
     private Asn1BerParser() {}
 

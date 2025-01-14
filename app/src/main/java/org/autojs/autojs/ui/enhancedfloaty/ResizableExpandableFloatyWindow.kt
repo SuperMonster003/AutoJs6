@@ -24,7 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Modified by SuperMonster003 as of Apr 29, 2023.
  * Transformed by SuperMonster003 on Dec 2, 2023.
  */
-class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandableFloaty) : FloatyWindow() {
+open class ResizableExpandableFloatyWindow(private var floaty: ResizableExpandableFloaty) : FloatyWindow() {
 
     private val mViewStack = ViewStack { v -> mViewSwitcher.setSecondView(v) }
 

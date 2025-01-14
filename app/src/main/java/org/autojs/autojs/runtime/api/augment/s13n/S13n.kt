@@ -186,7 +186,6 @@ object S13n : Augmentable() {
                 TimeUnit.MINUTES -> FUNC_NAME_TO_MINUTES
                 TimeUnit.HOURS -> FUNC_NAME_TO_HOURS
                 TimeUnit.DAYS -> FUNC_NAME_TO_DAYS
-                else -> null
             }
             is String -> timeUnitRex.entries.find { it.value.matches(unit) }?.let {
                 when (it.key) {

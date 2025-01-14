@@ -26,6 +26,7 @@ class WrappedRuntimeException(detailMessage: String, private val causeException:
     @Deprecated("Use {@link #getWrappedException()} instead.", ReplaceWith("getWrappedException()"))
     fun unwrap(): Throwable? = getWrappedException()
 
+    @Suppress("DEPRECATION")
     override fun toString() = super.toString().replace(Regex("^${WrappedRuntimeException::class.java.name}: "), "")
 
 }

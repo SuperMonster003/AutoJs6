@@ -12,6 +12,8 @@ import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable

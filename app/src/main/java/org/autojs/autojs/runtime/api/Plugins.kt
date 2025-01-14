@@ -80,7 +80,7 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
         val applicationInfo = context.packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
         val ctx = context.createPackageContext(packageName, Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY)
         Plugin.Package(ctx, applicationInfo, true)
-    } catch (e: PackageManager.NameNotFoundException) {
+    } catch (_: PackageManager.NameNotFoundException) {
         null
     }
 
