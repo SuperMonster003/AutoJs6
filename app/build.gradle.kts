@@ -197,7 +197,7 @@ dependencies /* Unclassified */ {
     implementation("com.github.getActivity:EasyWindow:10.3")
 
     // Pinyin4j
-    implementation("com.belerweb:pinyin4j:2.5.0")
+    implementation("com.belerweb:pinyin4j:2.5.1")
 
     // Jieba Analysis (zh-CN: 结巴分词)
     // implementation("com.huaban:jieba-analysis:1.0.2")

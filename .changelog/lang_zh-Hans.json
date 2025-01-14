@@ -6,7 +6,7 @@
         "plugins.load 方法无法正常加载插件的问题 _[`issue #290`](http://issues.autojs6.com/290)_",
         "dex 文件可能因权限问题无法正常加载的问题 (试修) _[`issue #290`](http://issues.autojs6.com/290)_",
         "dx 库在 Android 7.x 无法正常使用的问题 _[`issue #293`](http://issues.autojs6.com/293)_",
-        "ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修)_[`issue #298`](http://issues.autojs6.com/298)_",
+        "ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修) _[`issue #298`](http://issues.autojs6.com/298)_",
         "notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_",
         "floaty.window/floaty.rawWindow 无法在子线程执行的问题"
       ],

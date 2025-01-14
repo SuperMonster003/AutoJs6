@@ -47,6 +47,7 @@ import java.util.Map;
 /**
  * Dim or Debugger Implementation for Rhino.
  */
+@SuppressWarnings({"unchecked", "deprecation"})
 public class Dim {
 
     // Constants for instructing the debugger what action to perform

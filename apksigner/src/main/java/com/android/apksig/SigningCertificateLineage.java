@@ -69,6 +69,7 @@ import java.util.List;
  *
  * @see <a href="https://source.android.com/security/apksigning/index.html">Application Signing</a>
  */
+@SuppressWarnings("unchecked")
 public class SigningCertificateLineage {
 
     public final static int MAGIC = 0x3eff39d1;
