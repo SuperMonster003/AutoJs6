@@ -13,6 +13,7 @@ import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.BuildConfig
 
 /**
  * Created by Stardust on Jan 23, 2017.
@@ -35,7 +36,9 @@ abstract class BaseActivity : AppCompatActivity() {
             }
         }
 
-        ViewUtils.makeBarsAdaptToNightMode(this)
+        if (!BuildConfig.isInrt) {
+            ViewUtils.makeBarsAdaptToNightMode(this)
+        }
 
         setApplicationLocale(this)
 
@@ -59,8 +62,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (window.decorView.systemUiVisibility and SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN == 0) {
-            ThemeColorManager.addActivityStatusBar(this)
+        if (!BuildConfig.isInrt) {
+            if (window.decorView.systemUiVisibility and SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN == 0) {
+                ThemeColorManager.addActivityStatusBar(this)
+            }
         }
     }
 
