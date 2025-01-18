@@ -7,11 +7,13 @@
         "dx 库在 Android 7.x 无法正常使用的问题 _[`issue #293`](http://issues.autojs6.com/293)_",
         "ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修) _[`issue #298`](http://issues.autojs6.com/298)_",
         "notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_",
-        "floaty.window/floaty.rawWindow 无法在子线程执行的问题"
+        "floaty.window/floaty.rawWindow 无法在子线程执行的问题",
+        "代码编辑器跳转到行尾时可能跳转到下一行起始位置的问题"
       ],
       "improvement": [
         "精简打包应用模板 APK 文件大小",
         "打包页面支持 Pinyin 库选项",
+        "打包应用主活动页面优化状态栏背景及文字颜色",
         "APK 文件类型信息对话框增加文件大小与签名方案信息",
         "APK 文件类型信息对话框增加点击监听器支持文本复制与应用详情跳转",
         "尝试恢复 com.stardust 前缀包以便提升代码兼容性 _[`issue #290`](http://issues.autojs6.com/290)_",

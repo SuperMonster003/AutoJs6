@@ -638,7 +638,7 @@
 
         <activity
             android:name="org.autojs.autojs.inrt.LogActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/AppTheme.LogActivityInrt" />
 
         <activity
             android:name="org.autojs.autojs.inrt.SettingsActivity"

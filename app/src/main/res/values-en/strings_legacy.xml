@@ -78,7 +78,7 @@
     <string name="legacy_text_enable_accessibility_service_by_root_timeout">Start the accessibility service timeout</string>
     <string name="legacy_text_error">Error</string>
     <string name="legacy_text_error_report">Bug Report</string>
-    <string name="legacy_text_execution_finished">\\n------------\\n[%s]Finished，spent %f seconds.</string>
+    <string name="legacy_text_execution_finished" formatted="false">\\n------------\\n[%s]Finished，spent %f seconds.</string>
     <string name="legacy_text_exit">Exit</string>
     <string name="legacy_text_exit_directly">Exit</string>
     <string name="legacy_text_file_exists">The file exists</string>

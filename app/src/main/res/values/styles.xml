@@ -28,8 +28,16 @@
         <item name="popupTheme">@style/PopupMenuTheme</item>
     </style>
 
-    <style name="ToolBarStyleInrt" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+    <style name="ToolBarStyleInrt" parent="ToolBarStyle">
         <item name="colorControlNormal">@color/md_black_1000</item>
+    </style>
+
+    <style name="AppTheme.LogActivityInrt" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/md_blue_grey_600</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="colorPrimary">@color/md_blue_grey_50</item>
+        <item name="colorPrimaryDark">@color/md_blue_grey_50</item>
+        <item name="colorAccent">@color/md_black_1000</item>
     </style>
 
     <style name="EditorTheme" parent="AppTheme">
@@ -63,6 +71,21 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="AppTheme.SevereTransparent" parent="AppTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
@@ -143,8 +166,8 @@
 
     <style name="OverflowMenuInrt" parent="OverflowMenu">
         <item name="android:textColor">@color/md_black_1000</item>
-        <item name="android:popupBackground">@color/md_blue_grey_100</item>
-        <item name="android:itemBackground">@color/md_blue_grey_100</item>
+        <item name="android:popupBackground">@color/md_blue_grey_50</item>
+        <item name="android:itemBackground">@color/md_blue_grey_50</item>
     </style>
 
 </resources>
