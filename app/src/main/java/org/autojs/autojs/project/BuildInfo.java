@@ -6,13 +6,13 @@ import java.util.zip.CRC32;
 
 public class BuildInfo {
 
-    @SerializedName("build_time")
+    @SerializedName(value = "buildTime", alternate = {"build_time"})
     private long mBuildTime;
 
-    @SerializedName("build_id")
+    @SerializedName(value = "buildId", alternate = {"build_id"})
     private String mBuildId;
 
-    @SerializedName("build_number")
+    @SerializedName(value = "buildNumber", alternate = {"build_number"})
     private long mBuildNumber;
 
     public long getBuildNumber() {

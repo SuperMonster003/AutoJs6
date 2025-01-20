@@ -5,7 +5,6 @@ import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES
 import android.content.res.AssetManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
 import com.mcal.apksigner.ApkSigner
@@ -13,7 +12,6 @@ import com.reandroid.arsc.chunk.TableBlock
 import org.apache.commons.io.FileUtils.copyFile
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
-import org.autojs.autojs.apkbuilder.keystore.KeyStore
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
@@ -35,7 +33,6 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.util.concurrent.Callable
 
 /**
  * Created by Stardust on Oct 24, 2017.
@@ -49,7 +46,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private var mInitVector: String? = null
     private var mKey: String? = null
 
-    private lateinit var mAppConfig: AppConfig
+    private lateinit var mProjectConfig: ProjectConfig
 
     private val mApkPackager = ApkPackager(apkInputStream, workspacePath)
 
@@ -58,6 +55,9 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private var mLibsIncludes = Libs.defaultLibsToInclude.toMutableList()
     private var mAssetsFileIncludes = Libs.defaultAssetFilesToInclude.toMutableList()
     private var mAssetsDirExcludes = Libs.defaultAssetDirsToExclude.toMutableList()
+
+    private var mSplashThemeId = 0
+    private var mNoSplashThemeId = 0
 
     private val mManifestFile
         get() = File(workspacePath, "AndroidManifest.xml")
@@ -105,7 +105,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     srcChildFile.copyTo(File(destDirFile, srcChildFile.name), true)
                 }
             } else {
-                if (!mAppConfig.ignoredDirs.contains(srcChildFile)) {
+                if (!mProjectConfig.ignoredDirs.contains(srcChildFile)) {
                     copyDir(srcChildFile, PFiles.join(relativeDestPath, srcChildFile.name + File.separator))
                 }
             }
@@ -141,10 +141,27 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     }
 
     @Throws(IOException::class)
-    fun withConfig(config: AppConfig) = also {
-        config.also { mAppConfig = it }.run {
+    fun withConfig(config: ProjectConfig) = also {
+        config.also { mProjectConfig = it }.run {
+            if (!launchConfig.isSplashVisible) {
+                try {
+                    val tableBlock = TableBlock.load(mResourcesArscFile)
+                    val packageName = "${GlobalAppContext.get().packageName}.inrt"
+                    val packageBlock = tableBlock.getOrCreatePackage(0x7f, packageName).also {
+                        tableBlock.currentPackage = it
+                    }
+                    packageBlock.getEntry("", "style", "AppTheme.Splash")?.let {
+                        mSplashThemeId = it.resourceId
+                    }
+                    packageBlock.getEntry("", "style", "AppTheme.SevereTransparent")?.let {
+                        mNoSplashThemeId = it.resourceId
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
             mManifestEditor = editManifest()
-                .setAppName(appName)
+                .setAppName(name)
                 .setVersionName(versionName)
                 .setVersionCode(versionCode)
                 .setPackageName(packageName)
@@ -160,32 +177,32 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     @Throws(FileNotFoundException::class)
     fun editManifest(): ManifestEditor = ManifestEditorWithAuthorities(FileInputStream(mManifestFile)).also { mManifestEditor = it }
 
-    private fun updateProjectConfig(appConfig: AppConfig) {
+    private fun updateProjectConfig(config: ProjectConfig) {
         val projectConfig = when {
-            !PFiles.isDir(appConfig.sourcePath) -> null
-            else -> ProjectConfig.fromProjectDir(appConfig.sourcePath)?.also {
+            !PFiles.isDir(config.sourcePath) -> null
+            else -> ProjectConfig.fromProjectDir(config.sourcePath)?.also {
                 val buildNumber = it.buildInfo.buildNumber
                 it.buildInfo = BuildInfo.generate(buildNumber + 1)
-                PFiles.write(ProjectConfig.configFileOfDir(appConfig.sourcePath), it.toJson())
+                PFiles.write(ProjectConfig.configFileOfDir(config.sourcePath), it.toJson())
             }
         } ?: ProjectConfig()
             .setMainScriptFile("main.js")
-            .setName(appConfig.appName)
-            .setPackageName(appConfig.packageName)
-            .setVersionName(appConfig.versionName)
-            .setVersionCode(appConfig.versionCode)
-            .also { config ->
-                config.buildInfo = BuildInfo.generate(appConfig.versionCode.toLong())
+            .setName(config.name)
+            .setPackageName(config.packageName)
+            .setVersionName(config.versionName)
+            .setVersionCode(config.versionCode)
+            .also { newProjectConfig ->
+                newProjectConfig.buildInfo = BuildInfo.generate(newProjectConfig.versionCode.toLong())
                 File(workspacePath, "assets/project/${ProjectConfig.CONFIG_FILE_NAME}").also { file ->
                     file.parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
-                }.writeText(config.toJson())
+                }.writeText(newProjectConfig.toJson())
             }
 
         projectConfig.run {
             mKey = MD5Utils.md5(packageName + versionName + mainScriptFile)
             mInitVector = MD5Utils.md5(buildInfo.buildId + name).substring(0, 16)
             Libs.entries.forEach { entry ->
-                if (appConfig.libs.contains(entry.label)) {
+                if (config.libs.contains(entry.label)) {
                     mLibsIncludes += entry.libsToInclude.toSet()
                     mAssetsFileIncludes += entry.assetFilesToInclude.toSet()
                     mAssetsDirExcludes -= entry.assetDirsToExclude.toSet()
@@ -197,7 +214,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     @Throws(Exception::class)
     fun build() = also {
         mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onBuild(this) } }
-        mAppConfig.icon?.let { callable ->
+        mProjectConfig.iconBitmapGetter?.let { callable ->
             runCatching {
                 val tableBlock = TableBlock.load(mResourcesArscFile)
                 val packageName = "${GlobalAppContext.get().packageName}.inrt"
@@ -264,17 +281,17 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         val signer = ApkSigner(outApkFile, tmpOutputApk)
         signer.useDefaultSignatureVersion = false
-        signer.v1SigningEnabled = mAppConfig.signatureSchemes.contains("V1")
-        signer.v2SigningEnabled = mAppConfig.signatureSchemes.contains("V2")
-        signer.v3SigningEnabled = mAppConfig.signatureSchemes.contains("V3")
-        signer.v4SigningEnabled = mAppConfig.signatureSchemes.contains("V4")
+        signer.v1SigningEnabled = mProjectConfig.signatureSchemes.contains("V1")
+        signer.v2SigningEnabled = mProjectConfig.signatureSchemes.contains("V2")
+        signer.v3SigningEnabled = mProjectConfig.signatureSchemes.contains("V3")
+        signer.v4SigningEnabled = mProjectConfig.signatureSchemes.contains("V4")
 
         var keyStoreFile = defaultKeyStoreFile
         var password = "AutoJs6"
         var alias = "AutoJs6"
         var aliasPassword = "AutoJs6"
 
-        mAppConfig.keyStore?.let {
+        mProjectConfig.keyStore?.let {
             keyStoreFile = File(it.absolutePath)
             password = AESUtils.decrypt(it.password)
             alias = it.alias
@@ -324,76 +341,14 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     }
 
-    class AppConfig {
-
-        var appName: String? = null
-            private set
-        var versionName: String? = null
-            private set
-        var versionCode = 0
-            private set
-        var sourcePath: String? = null
-            private set
-        var packageName: String? = null
-            private set
-        var ignoredDirs = ArrayList<File>()
-        var icon: Callable<Bitmap>? = null
-            private set
-        var abis: List<String> = emptyList()
-            private set
-        var libs: List<String> = emptyList()
-            private set
-        var keyStore: KeyStore? = null
-            private set
-        var signatureSchemes: String = "V1 + V2"
-            private set
-        var permissions: List<String> = emptyList()
-            private set
-
-        fun ignoreDir(dir: File) = also { ignoredDirs.add(dir) }
-
-        fun setAppName(appName: String?) = also { appName?.let { this.appName = it } }
-
-        fun setVersionName(versionName: String?) = also { versionName?.let { this.versionName = it } }
-
-        fun setVersionCode(versionCode: Int?) = also { versionCode?.let { this.versionCode = it } }
-
-        fun setSourcePath(sourcePath: String?) = also { sourcePath?.let { this.sourcePath = it } }
-
-        fun setPackageName(packageName: String?) = also { packageName?.let { this.packageName = it } }
-
-        fun setIcon(icon: Callable<Bitmap>?) = also { icon?.let { this.icon = it } }
-
-        fun setIcon(iconPath: String?) = also { iconPath?.let { this.icon = Callable { BitmapFactory.decodeFile(it) } } }
-
-        fun setAbis(abis: List<String>) = also { this.abis = abis }
-
-        fun setLibs(libs: List<String>) = also { this.libs = libs }
-
-        fun setKeyStore(keyStore: KeyStore?) = also { this.keyStore = keyStore }
-
-        fun setSignatureSchemes(signatureSchemes: String) = also { this.signatureSchemes = signatureSchemes }
-
-        fun setPermissions(permissions: List<String>) = also { this.permissions = permissions }
-
-        companion object {
-            @JvmStatic
-            fun fromProjectConfig(projectDir: String?, projectConfig: ProjectConfig) = AppConfig()
-                .setAppName(projectConfig.name)
-                .setPackageName(projectConfig.packageName)
-                .ignoreDir(File(projectDir, projectConfig.buildDir))
-                .setVersionCode(projectConfig.versionCode)
-                .setVersionName(projectConfig.versionName)
-                .setSourcePath(projectDir)
-                .setIcon(projectConfig.icon?.let { File(projectDir, it).path })
-        }
-    }
-
     private inner class ManifestEditorWithAuthorities(manifestInputStream: InputStream?) : ManifestEditor(manifestInputStream) {
         override fun onAttr(attr: AxmlWriter.Attr) {
             attr.apply {
+                if (!mProjectConfig.launchConfig.isSplashVisible && mSplashThemeId != 0 && value == mSplashThemeId) {
+                    value = mNoSplashThemeId
+                }
                 if (name.data == "authorities" && value is StringItem) {
-                    (value as StringItem).data = "${mAppConfig.packageName}.fileprovider"
+                    (value as StringItem).data = "${mProjectConfig.packageName}.fileprovider"
                 } else {
                     super.onAttr(this)
                 }
@@ -401,11 +356,11 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
 
         override fun isPermissionRequired(permissionName: String): Boolean {
-            return mAppConfig.permissions.contains(permissionName)
+            return mProjectConfig.permissions.contains(permissionName)
         }
     }
 
-    private fun copyLibrariesByConfig(config: AppConfig) {
+    private fun copyLibrariesByConfig(config: ProjectConfig) {
 
         // @Hint by SuperMonster003 on Dec 11, 2023.
         //  ! The list contains only abi names not matching the canonical name itself.
@@ -461,6 +416,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     }
 
+    @Suppress("SpellCheckingInspection")
     enum class Libs(
         @JvmField val label: String,
         @JvmField val aliases: List<String> = emptyList(),

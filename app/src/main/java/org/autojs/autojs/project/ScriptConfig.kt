@@ -2,17 +2,14 @@ package org.autojs.autojs.project
 
 import com.google.gson.annotations.SerializedName
 
-data class ScriptConfig(
-        @SerializedName("useFeatures") var features: List<String>,
-        @SerializedName("uiMode") var uiMode: Boolean
+data class ScriptConfig @JvmOverloads constructor(
+        @SerializedName("useFeatures") var features: List<String> = emptyList(),
 ) {
-    constructor() : this(emptyList(), false)
 
-    fun hasFeature(feature: String): Boolean {
-        return features.contains(feature)
-    }
+    fun hasFeature(feature: String) = features.contains(feature)
 
     companion object {
         const val FEATURE_CONTINUATION = "continuation"
     }
+
 }
