@@ -23,7 +23,7 @@ public class ProjectLauncher {
     public ProjectLauncher(@NonNull String projectDir) {
         mProjectDir = projectDir;
         mProjectConfig = ProjectConfig.fromProjectDir(projectDir);
-        mMainScriptFile = new File(mProjectDir, mProjectConfig == null ? "main.js" : mProjectConfig.getMainScriptFile());
+        mMainScriptFile = new File(mProjectDir, mProjectConfig == null ? ProjectConfig.DEFAULT_MAIN_SCRIPT_FILE_NAME : mProjectConfig.getMainScriptFileName());
     }
 
     public void launch(ScriptEngineService service) {

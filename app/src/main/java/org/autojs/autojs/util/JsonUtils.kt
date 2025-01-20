@@ -1,7 +1,15 @@
 package org.autojs.autojs.util
 
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.annotations.SerializedName
+import org.autojs.autojs.annotation.SerializedNameCompatible
 import org.json.JSONArray
 import org.json.JSONObject
+import java.lang.reflect.Field
+import java.lang.reflect.Type
 
 /**
  * Created by SuperMonster003 on Nov 20, 2024.
@@ -70,12 +78,75 @@ object JsonUtils {
             closeBraces++
         }
         while (closeBraces > openBraces) {
-            json = '{' + json
+            json = "{$json"
             openBraces++
         }
         return json
     }
 
     fun isValidJson(json: String): Boolean = runCatching { JSONObject(json) }.isSuccess || runCatching { JSONArray(json) }.isSuccess
+
+    class FuzzyDeserializer<T> : JsonDeserializer<T> {
+
+        override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): T {
+            require(typeOfT is Class<*>) {
+                "Expected parameter typeOfT to be of type Class, but got: ${typeOfT?.javaClass?.name}"
+            }
+            @Suppress("UNCHECKED_CAST")
+            val clazz = typeOfT as Class<T>
+            val instance = try {
+                clazz.getDeclaredConstructor().newInstance()
+            } catch (e: Exception) {
+                throw RuntimeException("Failed to create an instance of ${clazz.name}", e)
+            }
+
+            if (json is JsonObject) {
+                clazz.declaredFields.forEach { processField(it, json, instance, context) }
+            }
+            return instance
+        }
+
+        private fun processField(field: Field, json: JsonObject, instance: T, context: JsonDeserializationContext?) {
+            field.isAccessible = true
+
+            val serializedNameAnnotation = field.getAnnotation(SerializedName::class.java)
+            val compatibleAnnotation = field.getAnnotation(SerializedNameCompatible::class.java)
+
+            val sanitizedPrimaryName = sanitizeKey(serializedNameAnnotation?.value ?: field.name)
+            val sanitizedAlternateNames = serializedNameAnnotation?.alternate?.map { sanitizeKey(it) } ?: emptyList()
+            val sanitizedCompatibleNames = compatibleAnnotation?.with?.map { sanitizeKey(it.value) to it.isReversed } ?: emptyList()
+
+            val serializedNames: List<Pair<String, Boolean>> = (sanitizedAlternateNames + sanitizedPrimaryName).map { it to false } + sanitizedCompatibleNames
+
+            for ((jsonKey, jsonValue) in json.entrySet()) {
+                val sanitizedJsonKey = sanitizeKey(jsonKey)
+                for (pair in serializedNames) {
+                    val (serializedKey, isReversed) = pair
+                    if (sanitizedJsonKey == serializedKey) {
+                        when (field.type) {
+                            Boolean::class.javaPrimitiveType, Boolean::class.java -> {
+                                if (jsonValue.isJsonPrimitive && jsonValue.asJsonPrimitive.isBoolean) {
+                                    val value = jsonValue.asBoolean
+                                    field.set(instance, if (isReversed) !value else value)
+                                }
+                            }
+                            else -> {
+                                if (!jsonValue.isJsonNull) {
+                                    val value = context?.deserialize<Any>(jsonValue, field.genericType)
+                                    field.set(instance, value)
+                                }
+                            }
+                        }
+                        return
+                    }
+                }
+            }
+        }
+
+        private fun sanitizeKey(key: String): String {
+            return key.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
+        }
+
+    }
 
 }

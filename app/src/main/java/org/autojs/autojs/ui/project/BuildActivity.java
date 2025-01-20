@@ -798,7 +798,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         ProjectConfig projectConfig;
         if (mProjectConfig != null) {
             projectConfig = mProjectConfig
-                    .ignoredDir(new File(mSource, mProjectConfig.getBuildDir()))
+                    .excludeDir(new File(mSource, mProjectConfig.getBuildDir()))
                     .setSourcePath(mSource)
                     .setIconPath(mProjectConfig.getIconPath() == null ? null : new File(mSource, mProjectConfig.getIconPath()).getPath());
         } else {
@@ -815,7 +815,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .setAbis(abis)
                 .setLibs(libs)
                 .setKeyStore(mVerifiedKeyStores.getSelectedItemPosition() > 0 ? (KeyStore) mVerifiedKeyStores.getSelectedItem() : null)
-                .setSignatureSchemes(mSignatureSchemes.getSelectedItem().toString())
+                .setSignatureScheme(mSignatureSchemes.getSelectedItem().toString())
                 .setPermissions(permissions);
     }
 
