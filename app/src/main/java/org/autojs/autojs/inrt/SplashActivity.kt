@@ -10,10 +10,11 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
+import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.ui.splash.SplashActivity.Companion.INIT_TIMEOUT
-import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivitySplashInrtBinding
 import kotlin.concurrent.thread
 
@@ -24,14 +25,29 @@ import kotlin.concurrent.thread
 class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setContentView(R.layout.activity_splash_inrt)
-        val binding = ActivitySplashInrtBinding.inflate(layoutInflater)
-        binding.slug.typeface = Typeface.createFromAsset(assets, "roboto_medium.ttf")
+        val binding = ActivitySplashInrtBinding.inflate(layoutInflater).apply {
+            setContentView(root)
+        }
+        val handler = Handler(Looper.myLooper()!!)
+        val projectConfig = ProjectConfig.fromAssets(this, ProjectConfig.configFileOfDir("project"))
+        var timeout = INIT_TIMEOUT
+
+        if (!projectConfig.launchConfig.isSplashVisible) {
+            timeout = 0L
+        } else {
+            handler.post {
+                binding.slug.typeface = Typeface.createFromAsset(assets, "roboto_medium.ttf")
+                binding.slug.isVisible = true
+                binding.icon.isVisible = true
+            }
+        }
+
         if (!Pref.isFirstUsing) {
             main()
         } else {
-            Handler(Looper.myLooper()!!).postDelayed({ this@SplashActivity.main() }, INIT_TIMEOUT)
+            handler.postDelayed({ this@SplashActivity.main() }, timeout)
         }
+
         super.onCreate(savedInstanceState)
     }
 

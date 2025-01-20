@@ -36,7 +36,7 @@ open class AssetsProjectLauncher(private val mAssetsProjectDir: String, private 
 
     fun launch(activity: Activity) {
         // 如果需要隐藏日志界面, 则直接运行脚本
-        if (mProjectConfig.launchConfig.shouldHideLogs() || Pref.shouldHideLogs()) {
+        if (!mProjectConfig.launchConfig.isLogsVisible || Pref.shouldHideLogs()) {
             runScript(activity)
         } else {
             // 如果不隐藏日志界面

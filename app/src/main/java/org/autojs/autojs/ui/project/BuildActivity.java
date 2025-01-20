@@ -160,18 +160,18 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         put("moe.shizuku.manager.permission.API_V23", R.string.text_permission_shizuku);
     }};
 
-    EditText mSourcePath;
-    View mSourcePathContainer;
-    EditText mOutputPath;
-    EditText mAppName;
-    EditText mPackageName;
-    TextInputLayout mPackageNameParent;
-    EditText mVersionName;
-    TextInputLayout mVersionNameParent;
-    EditText mVersionCode;
-    TextInputLayout mVersionCodeParent;
-    ImageView mIcon;
-    LinearLayout mAppConfig;
+    EditText mSourcePathView;
+    View mSourcePathContainerView;
+    EditText mOutputPathView;
+    EditText mAppNameView;
+    EditText mPackageNameView;
+    TextInputLayout mPackageNameParentView;
+    EditText mVersionNameView;
+    TextInputLayout mVersionNameParentView;
+    EditText mVersionCodeView;
+    TextInputLayout mVersionCodeParentView;
+    ImageView mIconView;
+    LinearLayout mAppConfigView;
 
     private ProjectConfig mProjectConfig;
     private MaterialDialog mProgressDialog;
@@ -209,24 +209,24 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         ActivityBuildBinding binding = ActivityBuildBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        mSourcePath = binding.sourcePath;
-        mSourcePath.setOnKeyListener((v, keyCode, event) -> {
+        mSourcePathView = binding.sourcePath;
+        mSourcePathView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
                 if (event.getAction() == KeyEvent.ACTION_UP) {
-                    mOutputPath.requestFocus();
+                    mOutputPathView.requestFocus();
                 }
                 return true;
             }
             return false;
         });
 
-        mSourcePathContainer = binding.sourcePathContainer;
+        mSourcePathContainerView = binding.sourcePathContainer;
 
-        mOutputPath = binding.outputPath;
-        mOutputPath.setOnKeyListener((v, keyCode, event) -> {
+        mOutputPathView = binding.outputPath;
+        mOutputPathView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
                 if (event.getAction() == KeyEvent.ACTION_UP) {
-                    TextView nextField = (TextView) mOutputPath.focusSearch(View.FOCUS_DOWN);
+                    TextView nextField = (TextView) mOutputPathView.focusSearch(View.FOCUS_DOWN);
                     if (nextField != null) {
                         nextField.requestFocus();
                     }
@@ -236,30 +236,30 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return false;
         });
 
-        mAppName = binding.appName;
+        mAppNameView = binding.appName;
 
-        mPackageName = binding.packageName;
-        mPackageName.setOnKeyListener((v, keyCode, event) -> {
+        mPackageNameView = binding.packageName;
+        mPackageNameView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
                 if (event.getAction() == KeyEvent.ACTION_UP) {
-                    mVersionName.requestFocus();
+                    mVersionNameView.requestFocus();
                 }
                 return true;
             }
             return false;
         });
-        mPackageNameParent = binding.packageNameParent;
+        mPackageNameParentView = binding.packageNameParent;
 
-        mVersionName = binding.versionName;
-        mVersionNameParent = binding.versionNameParent;
-        mVersionCode = binding.versionCode;
-        mVersionCodeParent = binding.versionCodeParent;
+        mVersionNameView = binding.versionName;
+        mVersionNameParentView = binding.versionNameParent;
+        mVersionCodeView = binding.versionCode;
+        mVersionCodeParentView = binding.versionCodeParent;
 
-        mIcon = binding.appIcon;
-        mIcon.setVisibility(View.INVISIBLE);
-        mIcon.setOnClickListener(v -> selectIcon());
+        mIconView = binding.appIcon;
+        mIconView.setVisibility(View.INVISIBLE);
+        mIconView.setOnClickListener(v -> selectIcon());
 
-        mAppConfig = binding.appConfig;
+        mAppConfigView = binding.appConfig;
 
         mFlexboxAbis = binding.flexboxAbis;
         initAbisChildren();
@@ -515,8 +515,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         if (dir != null && dir.startsWith(getFilesDir().getPath())) {
             dir = WorkingDirectoryUtils.getPath();
         }
-        mOutputPath.setText(dir);
-        mAppName.setText(file.getSimplifiedName());
+        mOutputPathView.setText(dir);
+        mAppNameView.setText(file.getSimplifiedName());
 
         Observable.fromCallable(() -> {
                     String packageNameSuffix = generatePackageNameSuffix(file);
@@ -525,34 +525,34 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(packageName -> {
-                    mPackageName.setText(packageName);
-                    mPackageNameParent.setHint(R.string.text_package_name);
+                    mPackageNameView.setText(packageName);
+                    mPackageNameParentView.setHint(R.string.text_package_name);
 
                     SimpleVersionInfo nextVersionInfo = AppUtils.generateNextVersionInfo(packageName);
                     if (nextVersionInfo != null) {
-                        mVersionName.setText(nextVersionInfo.versionName);
-                        mVersionCode.setText(nextVersionInfo.versionCodeString);
+                        mVersionNameView.setText(nextVersionInfo.versionName);
+                        mVersionCodeView.setText(nextVersionInfo.versionCodeString);
                     } else {
-                        mVersionName.setText(R.string.default_build_apk_version_name);
-                        mVersionCode.setText(R.string.default_build_apk_version_code);
+                        mVersionNameView.setText(R.string.default_build_apk_version_name);
+                        mVersionCodeView.setText(R.string.default_build_apk_version_code);
                     }
-                    mVersionNameParent.setHint(R.string.text_version_name);
-                    mVersionCodeParent.setHint(R.string.text_version_code);
+                    mVersionNameParentView.setHint(R.string.text_version_name);
+                    mVersionCodeParentView.setHint(R.string.text_version_code);
 
                     Drawable iconDrawable = AppUtils.getInstalledAppIcon(packageName);
                     if (iconDrawable != null) {
-                        mIcon.setImageDrawable(iconDrawable);
+                        mIconView.setImageDrawable(iconDrawable);
                         mIsDefaultIcon = false;
                     }
-                    mIcon.setVisibility(View.VISIBLE);
+                    mIconView.setVisibility(View.VISIBLE);
                 }, throwable -> {
-                    mPackageName.setText(getString(R.string.format_default_package_name, file.getSimplifiedName().toLowerCase(Language.getPrefLanguage().getLocale())));
-                    mVersionName.setText(R.string.default_build_apk_version_name);
-                    mVersionCode.setText(R.string.default_build_apk_version_code);
-                    mPackageNameParent.setHint(R.string.text_package_name);
-                    mVersionNameParent.setHint(R.string.text_version_name);
-                    mVersionCodeParent.setHint(R.string.text_version_code);
-                    mIcon.setVisibility(View.VISIBLE);
+                    mPackageNameView.setText(getString(R.string.format_default_package_name, file.getSimplifiedName().toLowerCase(Language.getPrefLanguage().getLocale())));
+                    mVersionNameView.setText(R.string.default_build_apk_version_name);
+                    mVersionCodeView.setText(R.string.default_build_apk_version_code);
+                    mPackageNameParentView.setHint(R.string.text_package_name);
+                    mVersionNameParentView.setHint(R.string.text_version_name);
+                    mVersionCodeParentView.setHint(R.string.text_version_code);
+                    mIconView.setVisibility(View.VISIBLE);
                 });
 
         setSource(file);
@@ -579,7 +579,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     void selectSourceFilePath() {
-        String initialDir = new File(mSourcePath.getText().toString()).getParent();
+        String initialDir = new File(mSourcePathView.getText().toString()).getParent();
         new FileChooserDialogBuilder(this)
                 .title(R.string.text_source_file_path)
                 .dir(EnvironmentUtils.getExternalStoragePath(),
@@ -590,7 +590,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private void setSource(File file) {
         if (!file.isDirectory()) {
-            mSourcePath.setText(file.getPath());
+            mSourcePathView.setText(file.getPath());
             return;
         }
         mProjectConfig = ProjectConfig.fromProjectDir(file.getPath());
@@ -598,20 +598,20 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             return;
         }
         mIsProjectLevelBuilding = true;
-        mOutputPath.setText(new File(mSource, mProjectConfig.getBuildDir()).getPath());
-        mAppConfig.setVisibility(View.GONE);
-        mSourcePathContainer.setVisibility(View.GONE);
+        mOutputPathView.setText(new File(mSource, mProjectConfig.getBuildDir()).getPath());
+        mAppConfigView.setVisibility(View.GONE);
+        mSourcePathContainerView.setVisibility(View.GONE);
     }
 
     void selectOutputDirPath() {
-        String initialDir = new File(mOutputPath.getText().toString()).exists()
-                ? mOutputPath.getText().toString()
+        String initialDir = new File(mOutputPathView.getText().toString()).exists()
+                ? mOutputPathView.getText().toString()
                 : WorkingDirectoryUtils.getPath();
         new FileChooserDialogBuilder(this)
                 .title(R.string.text_output_apk_path)
                 .dir(initialDir)
                 .chooseDir()
-                .singleChoice(dir -> mOutputPath.setText(dir.getPath()))
+                .singleChoice(dir -> mOutputPathView.setText(dir.getPath()))
                 .show();
     }
 
@@ -633,14 +633,14 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private boolean checkInputs() {
         if (mIsProjectLevelBuilding) {
-            return checkNotEmpty(mOutputPath);
+            return checkNotEmpty(mOutputPathView);
         }
-        return checkNotEmpty(mSourcePath)
-               & checkNotEmpty(mOutputPath)
-               & checkNotEmpty(mAppName)
-               & checkNotEmpty(mVersionCode)
-               & checkNotEmpty(mVersionName)
-               & checkPackageNameValid(mPackageName);
+        return checkNotEmpty(mSourcePathView)
+               & checkNotEmpty(mOutputPathView)
+               & checkNotEmpty(mAppNameView)
+               & checkNotEmpty(mVersionCodeView)
+               & checkNotEmpty(mVersionNameView)
+               & checkPackageNameValid(mPackageNameView);
     }
 
     private boolean checkAbis() {
@@ -773,12 +773,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     private void doBuildingApk() {
-        ApkBuilder.AppConfig appConfig = createAppConfig();
+        ProjectConfig projectConfig = determineProjectConfig();
         File tmpDir = new File(getCacheDir(), "build/");
-        File outApk = new File(mOutputPath.getText().toString(),
-                String.format("%s_v%s.apk", appConfig.getAppName(), appConfig.getVersionName()));
+        File outApk = new File(mOutputPathView.getText().toString(),
+                String.format("%s_v%s.apk", projectConfig.getName(), projectConfig.getVersionName()));
         showProgressDialog();
-        Observable.fromCallable(() -> callApkBuilder(tmpDir, outApk, appConfig))
+        Observable.fromCallable(() -> callApkBuilder(tmpDir, outApk, projectConfig))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(apkBuilder -> {
@@ -790,32 +790,33 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 }, this::onBuildFailed);
     }
 
-    private ApkBuilder.AppConfig createAppConfig() {
+    private ProjectConfig determineProjectConfig() {
         ArrayList<String> abis = collectCheckedItems(mFlexboxAbis);
         ArrayList<String> libs = collectCheckedItems(mFlexboxLibs);
         ArrayList<String> permissions = collectCheckedItems(mFlexboxPermissions);
 
-        ApkBuilder.AppConfig appConfig = mProjectConfig != null
-                ? ApkBuilder.AppConfig.fromProjectConfig(mSource, mProjectConfig)
-                : new ApkBuilder.AppConfig()
-                .setAppName(mAppName.getText().toString())
-                .setSourcePath(mSourcePath.getText().toString())
-                .setPackageName(mPackageName.getText().toString())
-                .setVersionName(mVersionName.getText().toString())
-                .setVersionCode(Integer.parseInt(mVersionCode.getText().toString()))
-                .setIcon(mIsDefaultIcon ? null : () -> BitmapUtils.drawableToBitmap(mIcon.getDrawable()));
-
-        appConfig.setAbis(abis);
-        appConfig.setLibs(libs);
-        appConfig.setSignatureSchemes(mSignatureSchemes.getSelectedItem().toString());
-        if (mVerifiedKeyStores.getSelectedItemPosition() > 0) {
-            appConfig.setKeyStore((KeyStore) mVerifiedKeyStores.getSelectedItem());
+        ProjectConfig projectConfig;
+        if (mProjectConfig != null) {
+            projectConfig = mProjectConfig
+                    .ignoredDir(new File(mSource, mProjectConfig.getBuildDir()))
+                    .setSourcePath(mSource)
+                    .setIconPath(mProjectConfig.getIconPath() == null ? null : new File(mSource, mProjectConfig.getIconPath()).getPath());
         } else {
-            appConfig.setKeyStore(null);
+            projectConfig = new ProjectConfig()
+                    .setName(mAppNameView.getText().toString())
+                    .setSourcePath(mSourcePathView.getText().toString())
+                    .setPackageName(mPackageNameView.getText().toString())
+                    .setVersionName(mVersionNameView.getText().toString())
+                    .setVersionCode(Integer.parseInt(mVersionCodeView.getText().toString()))
+                    .setIconGetter(mIsDefaultIcon ? null : () -> BitmapUtils.drawableToBitmap(mIconView.getDrawable()));
         }
-        appConfig.setPermissions(permissions);
 
-        return appConfig;
+        return projectConfig
+                .setAbis(abis)
+                .setLibs(libs)
+                .setKeyStore(mVerifiedKeyStores.getSelectedItemPosition() > 0 ? (KeyStore) mVerifiedKeyStores.getSelectedItem() : null)
+                .setSignatureSchemes(mSignatureSchemes.getSelectedItem().toString())
+                .setPermissions(permissions);
     }
 
     @NotNull
@@ -843,12 +844,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         return libs;
     }
 
-    private ApkBuilder callApkBuilder(File tmpDir, File outApk, ApkBuilder.AppConfig appConfig) throws Exception {
+    private ApkBuilder callApkBuilder(File tmpDir, File outApk, ProjectConfig projectConfig) throws Exception {
         InputStream templateApk = getAssets().open(TEMPLATE_APK_NAME);
         return new ApkBuilder(templateApk, outApk, tmpDir.getPath())
                 .setProgressCallback(BuildActivity.this)
                 .prepare()
-                .withConfig(appConfig)
+                .withConfig(projectConfig)
                 .build()
                 .sign()
                 .cleanWorkspace();
@@ -920,7 +921,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(drawable -> {
-                        mIcon.setImageDrawable(drawable);
+                        mIconView.setImageDrawable(drawable);
                         mIsDefaultIcon = false;
                     }, Throwable::printStackTrace);
         }

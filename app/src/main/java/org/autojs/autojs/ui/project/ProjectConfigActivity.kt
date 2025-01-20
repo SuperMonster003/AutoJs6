@@ -122,12 +122,12 @@ class ProjectConfigActivity : BaseActivity() {
             } else {
                 mAppName.setText(config.name)
                 setToolbarAsBack(config.name)
-                mVersionCode.setText(config.versionCode.toString())
+                mVersionCode.setText(config.versionCode.coerceAtLeast(0).toString())
                 mPackageName.setText(config.packageName)
                 mVersionName.setText(config.versionName)
                 mMainFileName.setText(config.mainScriptFile)
                 mProjectLocationWrapper.visibility = View.GONE
-                config.icon?.let { icon ->
+                config.iconPath?.let { icon ->
                     File(mDirectory, icon).takeIf { it.exists() }?.let { iconFile ->
                         Glide.with(this)
                             .load(iconFile)
@@ -259,7 +259,7 @@ class ProjectConfigActivity : BaseActivity() {
     private fun saveIcon(b: Bitmap): Observable<String> {
         return Observable.just(b)
             .map { bitmap: Bitmap ->
-                var iconPath = mProjectConfig!!.icon
+                var iconPath = mProjectConfig!!.iconPath
                 if (iconPath == null) {
                     iconPath = "res/logo.png"
                 }
@@ -272,7 +272,7 @@ class ProjectConfigActivity : BaseActivity() {
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext { iconPath: String? -> mProjectConfig!!.icon = iconPath }
+            .doOnNext { iconPath: String? -> mProjectConfig!!.iconPath = iconPath }
     }
 
     override fun onDestroy() {

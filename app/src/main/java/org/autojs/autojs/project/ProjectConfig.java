@@ -1,12 +1,15 @@
 package org.autojs.autojs.project;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.util.JsonUtils;
@@ -20,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +34,9 @@ public class ProjectConfig {
 
     public static final String CONFIG_FILE_NAME = "project.json";
 
-    private static final Gson sGson = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson sGson = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
 
     @SerializedName("name")
     private String mName;
@@ -52,13 +58,15 @@ public class ProjectConfig {
     private List<String> mAssets = new ArrayList<>();
 
     @SerializedName("launchConfig")
-    private LaunchConfig mLaunchConfig;
+    private LaunchConfig mLaunchConfig = new LaunchConfig();
 
     @SerializedName("build")
     private BuildInfo mBuildInfo = new BuildInfo();
 
     @SerializedName("icon")
-    private String mIcon;
+    private String mIconPath;
+
+    private transient Callable<Bitmap> mIconBitmapGetter;
 
     @Nullable
     @SerializedName(value = "abis", alternate = {"abi", "abiList"})
@@ -68,11 +76,26 @@ public class ProjectConfig {
     @SerializedName(value = "libs", alternate = {"lib", "libList"})
     private List<String> mLibs = new ArrayList<>();
 
+    @SerializedName("permissions")
+    private List<String> mPermissions = new ArrayList<>();
+
+    @SerializedName("signatureSchemes")
+    private String mSignatureSchemes = "V1 + V2";
+
+    @Nullable
+    private transient KeyStore mKeyStore = null;
+
     @SerializedName("scripts")
     private final Map<String, ScriptConfig> mScriptConfigs = new HashMap<>();
 
     @SerializedName(value = "useFeatures", alternate = {"useFeature", "useFeatureList"})
     private List<String> mFeatures = new ArrayList<>();
+
+    @SerializedName("ignoredDirs")
+    private final List<File> mIgnoredDirs = new ArrayList<>();
+
+    @Nullable
+    private transient String mSourcePath = null;
 
     public static ProjectConfig fromJson(String json) {
         if (json == null) {
@@ -117,7 +140,7 @@ public class ProjectConfig {
             return fromJson(fileContents);
         } catch (Exception e1) {
             if (fileContents == null) return null;
-        try {
+            try {
                 return fromJson(JsonUtils.repairJson(fileContents));
             } catch (Exception e2) {
                 return tryReadCrucialData(fileContents, path);
@@ -126,10 +149,9 @@ public class ProjectConfig {
     }
 
     private static ProjectConfig tryReadCrucialData(String s, String jsonFilePath) {
-        ProjectConfig config = new ProjectConfig();
-        BuildInfo buildInfo = new BuildInfo();
-        ScriptConfig scriptConfig = new ScriptConfig();
+        ProjectConfig projectConfig = new ProjectConfig();
         LaunchConfig launchConfig = new LaunchConfig();
+        BuildInfo buildInfo = new BuildInfo();
 
         Pattern namePattern = Pattern.compile(stringPattern("name"));
         Pattern versionNamePattern = Pattern.compile(stringPattern("versionName"));
@@ -147,40 +169,47 @@ public class ProjectConfig {
         Pattern buildNumberPattern = Pattern.compile(numberPattern("buildNumber"));
         Pattern buildIdPattern = Pattern.compile(stringPattern("buildId"));
 
-        Pattern launchConfigPattern = Pattern.compile(booleanPattern("hideLogs"));
+        Pattern launchConfigHideLogsPattern = Pattern.compile(booleanPattern("hideLogs"));
+        Pattern launchConfigLogsVisiblePattern = Pattern.compile(booleanPattern("logsVisible"));
 
-        Pattern scriptsUiModePattern = Pattern.compile(booleanPattern("uiMode"));
+        Pattern launchConfigDisplaySplashPattern = Pattern.compile(booleanPattern("displaySplash"));
+        Pattern launchConfigSplashVisiblePattern = Pattern.compile(booleanPattern("splashVisible"));
 
-        setFieldIfMatches(namePattern, s, config::setName);
-        setFieldIfMatches(versionNamePattern, s, config::setVersionName);
-        setFieldForIntIfMatches(versionCodePattern, s, config::setVersionCode);
-        setFieldIfMatches(packageNamePattern, s, config::setPackageName);
-        setFieldIfMatches(mainPattern, s, config::setMainScriptFile);
-        setFieldIfMatches(iconPattern, s, config::setIcon);
+        setFieldIfMatches(namePattern, s, projectConfig::setName);
+        setFieldIfMatches(versionNamePattern, s, projectConfig::setVersionName);
+        setFieldForIntIfMatches(versionCodePattern, s, projectConfig::setVersionCode);
+        setFieldIfMatches(packageNamePattern, s, projectConfig::setPackageName);
+        setFieldIfMatches(mainPattern, s, projectConfig::setMainScriptFile);
+        setFieldIfMatches(iconPattern, s, projectConfig::setIconPath);
 
-        setListIfMatches(assetsPattern, s, config::setAssets);
-        setListIfMatches(abisPattern, s, config::setAbis);
-        setListIfMatches(libsPattern, s, config::setLibs);
-        setListIfMatches(useFeaturesPattern, s, config::setFeatures);
+        setListIfMatches(assetsPattern, s, projectConfig::setAssets);
+        setListIfMatches(abisPattern, s, projectConfig::setAbis);
+        setListIfMatches(libsPattern, s, projectConfig::setLibs);
+        setListIfMatches(useFeaturesPattern, s, projectConfig::setFeatures);
 
         setFieldForIntIfMatches(buildTimePattern, s, buildInfo::setBuildTime);
         setFieldForIntIfMatches(buildNumberPattern, s, buildInfo::setBuildNumber);
         setFieldIfMatches(buildIdPattern, s, buildInfo::setBuildId);
 
-        setFieldForBooleanIfMatches(launchConfigPattern, s, launchConfig::setHideLogs);
+        setFieldForBooleanIfMatches(launchConfigHideLogsPattern, s, value -> launchConfig.setLogsVisible(!value));
+        setFieldForBooleanIfMatches(launchConfigLogsVisiblePattern, s, launchConfig::setLogsVisible); /* 优先. */
 
-        setFieldForBooleanIfMatches(scriptsUiModePattern, s, scriptConfig::setUiMode);
+        setFieldForBooleanIfMatches(launchConfigDisplaySplashPattern, s, launchConfig::setSplashVisible);
+        setFieldForBooleanIfMatches(launchConfigSplashVisiblePattern, s, launchConfig::setSplashVisible); /* 优先. */
 
-        if (config.getName() == null || config.getName().isBlank()) {
+        if (projectConfig.getName() == null || projectConfig.getName().isBlank()) {
             if (jsonFilePath.endsWith(CONFIG_FILE_NAME)) {
                 File parentFile = new File(jsonFilePath).getParentFile();
                 if (parentFile != null) {
-                    config.setName(parentFile.getName());
+                    projectConfig.setName(parentFile.getName());
                 }
             }
         }
 
-        return config;
+        projectConfig.setBuildInfo(buildInfo);
+        projectConfig.setLaunchConfig(launchConfig);
+
+        return projectConfig;
     }
 
     @NotNull
@@ -350,13 +379,10 @@ public class ProjectConfig {
     }
 
     public LaunchConfig getLaunchConfig() {
-        if (mLaunchConfig == null) {
-            mLaunchConfig = new LaunchConfig();
-        }
         return mLaunchConfig;
     }
 
-    public void setLaunchConfig(LaunchConfig launchConfig) {
+    public void setLaunchConfig(@NonNull LaunchConfig launchConfig) {
         mLaunchConfig = launchConfig;
     }
 
@@ -364,12 +390,23 @@ public class ProjectConfig {
         return sGson.toJson(this);
     }
 
-    public String getIcon() {
-        return mIcon;
+    public String getIconPath() {
+        return mIconPath;
     }
 
-    public void setIcon(String icon) {
-        mIcon = icon;
+    public ProjectConfig setIconPath(String iconPath) {
+        mIconPath = iconPath;
+        mIconBitmapGetter = () -> BitmapFactory.decodeFile(iconPath);
+        return this;
+    }
+
+    public Callable<Bitmap> getIconBitmapGetter() {
+        return mIconBitmapGetter;
+    }
+
+    public ProjectConfig setIconGetter(@Nullable Callable<Bitmap> getter) {
+        mIconBitmapGetter = getter;
+        return this;
     }
 
     public List<String> getAbis() {
@@ -379,8 +416,9 @@ public class ProjectConfig {
         return mAbis;
     }
 
-    public void setAbis(@Nullable List<String> abis) {
+    public ProjectConfig setAbis(@Nullable List<String> abis) {
         mAbis = abis;
+        return this;
     }
 
     public List<String> getLibs() {
@@ -390,8 +428,9 @@ public class ProjectConfig {
         return mLibs;
     }
 
-    public void setLibs(@Nullable List<String> libs) {
+    public ProjectConfig setLibs(@Nullable List<String> libs) {
         mLibs = libs;
+        return this;
     }
 
     public String getBuildDir() {
@@ -426,5 +465,52 @@ public class ProjectConfig {
         }
         config.setFeatures(features);
         return config;
+    }
+
+    public List<File> getIgnoredDirs() {
+        return mIgnoredDirs;
+    }
+
+    public ProjectConfig ignoredDir(File ignoredDir) {
+        mIgnoredDirs.add(ignoredDir);
+        return this;
+    }
+
+    @Nullable
+    public String getSourcePath() {
+        return mSourcePath;
+    }
+
+    public ProjectConfig setSourcePath(@Nullable String sourcePath) {
+        mSourcePath = sourcePath;
+        return this;
+    }
+
+    public List<String> getPermissions() {
+        return mPermissions;
+    }
+
+    public ProjectConfig setPermissions(List<String> permissions) {
+        mPermissions = permissions;
+        return this;
+    }
+
+    public String getSignatureSchemes() {
+        return mSignatureSchemes;
+    }
+
+    public ProjectConfig setSignatureSchemes(String signatureSchemes) {
+        mSignatureSchemes = signatureSchemes;
+        return this;
+    }
+
+    @Nullable
+    public KeyStore getKeyStore() {
+        return mKeyStore;
+    }
+
+    public ProjectConfig setKeyStore(@Nullable KeyStore keyStore) {
+        mKeyStore = keyStore;
+        return this;
     }
 }
