@@ -125,7 +125,7 @@ class ProjectConfigActivity : BaseActivity() {
                 mVersionCode.setText(config.versionCode.coerceAtLeast(0).toString())
                 mPackageName.setText(config.packageName)
                 mVersionName.setText(config.versionName)
-                mMainFileName.setText(config.mainScriptFile)
+                mMainFileName.setText(config.mainScriptFileName)
                 mProjectLocationWrapper.visibility = View.GONE
                 config.iconPath?.let { icon ->
                     File(mDirectory, icon).takeIf { it.exists() }?.let { iconFile ->
@@ -197,7 +197,7 @@ class ProjectConfigActivity : BaseActivity() {
             it.name = mAppName.text.toString()
             it.versionCode = mVersionCode.text.toString().toInt()
             it.versionName = mVersionName.text.toString()
-            it.mainScriptFile = mMainFileName.text.toString()
+            it.mainScriptFileName = mMainFileName.text.toString()
             it.packageName = mPackageName.text.toString()
         }
         if (mNewProject) {

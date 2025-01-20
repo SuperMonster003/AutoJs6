@@ -17,6 +17,7 @@ import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.BuildInfo
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.project.ProjectConfig.DEFAULT_MAIN_SCRIPT_FILE_NAME
 import org.autojs.autojs.script.EncryptedScriptFileHeader.writeHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT
@@ -105,7 +106,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     srcChildFile.copyTo(File(destDirFile, srcChildFile.name), true)
                 }
             } else {
-                if (!mProjectConfig.ignoredDirs.contains(srcChildFile)) {
+                if (!mProjectConfig.excludedDirs.contains(srcChildFile)) {
                     copyDir(srcChildFile, PFiles.join(relativeDestPath, srcChildFile.name + File.separator))
                 }
             }
@@ -186,7 +187,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 PFiles.write(ProjectConfig.configFileOfDir(config.sourcePath), it.toJson())
             }
         } ?: ProjectConfig()
-            .setMainScriptFile("main.js")
+            .setMainScriptFileName(DEFAULT_MAIN_SCRIPT_FILE_NAME)
             .setName(config.name)
             .setPackageName(config.packageName)
             .setVersionName(config.versionName)
@@ -199,7 +200,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             }
 
         projectConfig.run {
-            mKey = MD5Utils.md5(packageName + versionName + mainScriptFile)
+            mKey = MD5Utils.md5(packageName + versionName + mainScriptFileName)
             mInitVector = MD5Utils.md5(buildInfo.buildId + name).substring(0, 16)
             Libs.entries.forEach { entry ->
                 if (config.libs.contains(entry.label)) {
@@ -281,10 +282,10 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         val signer = ApkSigner(outApkFile, tmpOutputApk)
         signer.useDefaultSignatureVersion = false
-        signer.v1SigningEnabled = mProjectConfig.signatureSchemes.contains("V1")
-        signer.v2SigningEnabled = mProjectConfig.signatureSchemes.contains("V2")
-        signer.v3SigningEnabled = mProjectConfig.signatureSchemes.contains("V3")
-        signer.v4SigningEnabled = mProjectConfig.signatureSchemes.contains("V4")
+        signer.v1SigningEnabled = mProjectConfig.signatureScheme.contains("V1")
+        signer.v2SigningEnabled = mProjectConfig.signatureScheme.contains("V2")
+        signer.v3SigningEnabled = mProjectConfig.signatureScheme.contains("V3")
+        signer.v4SigningEnabled = mProjectConfig.signatureScheme.contains("V4")
 
         var keyStoreFile = defaultKeyStoreFile
         var password = "AutoJs6"

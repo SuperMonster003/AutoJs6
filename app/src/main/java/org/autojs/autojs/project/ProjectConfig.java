@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import org.autojs.autojs.annotation.SerializedNameCompatible;
+import org.autojs.autojs.annotation.SerializedNameCompatible.With;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.pio.PFiles;
@@ -21,8 +23,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,65 +38,123 @@ public class ProjectConfig {
 
     public static final String CONFIG_FILE_NAME = "project.json";
 
+    public static final String DEFAULT_MAIN_SCRIPT_FILE_NAME = "main.js";
+
     private static final Gson sGson = new GsonBuilder()
+            .registerTypeAdapter(ProjectConfig.class, new JsonUtils.FuzzyDeserializer<ProjectConfig>())
+            .registerTypeAdapter(LaunchConfig.class, new JsonUtils.FuzzyDeserializer<LaunchConfig>())
+            .registerTypeAdapter(ScriptConfig.class, new JsonUtils.FuzzyDeserializer<ScriptConfig>())
+            .registerTypeAdapter(BuildInfo.class, new JsonUtils.FuzzyDeserializer<BuildInfo>())
             .setPrettyPrinting()
             .create();
 
     @SerializedName("name")
+    @SerializedNameCompatible(with = {@With(value = "projectName")})
     private String mName;
 
     @SerializedName("versionName")
+    @SerializedNameCompatible(with = {@With(value = "version")})
     private String mVersionName;
 
     @SerializedName("versionCode")
     private int mVersionCode = -1;
 
     @SerializedName("packageName")
+    @SerializedNameCompatible(with = {@With(value = "package")})
     private String mPackageName;
 
     @SerializedName("main")
-    private String mMainScriptFile;
+    @SerializedNameCompatible(with = {
+            @With(value = "mainName"),
+            @With(value = "mainScript"),
+            @With(value = "mainScriptName"),
+            @With(value = "mainScriptFile"),
+            @With(value = "mainScriptFileName"),
+            @With(value = "mainFile"),
+            @With(value = "mainFileName"),
+    })
+    private String mMainScriptFileName;
 
     @Nullable
-    @SerializedName(value = "assets", alternate = {"asset", "assetList"})
+    @SerializedName(value = "assets")
+    @SerializedNameCompatible(with = {
+            @With(value = "asset"),
+            @With(value = "assetList"),
+    })
     private List<String> mAssets = new ArrayList<>();
 
     @SerializedName("launchConfig")
+    @SerializedNameCompatible(with = {@With(value = "launch")})
     private LaunchConfig mLaunchConfig = new LaunchConfig();
 
     @SerializedName("build")
+    @SerializedNameCompatible(with = {@With(value = "buildInfo")})
     private BuildInfo mBuildInfo = new BuildInfo();
 
     @SerializedName("icon")
+    @SerializedNameCompatible(with = {@With(value = "iconPath")})
     private String mIconPath;
 
     private transient Callable<Bitmap> mIconBitmapGetter;
 
     @Nullable
-    @SerializedName(value = "abis", alternate = {"abi", "abiList"})
+    @SerializedName(value = "abis")
+    @SerializedNameCompatible(with = {
+            @With(value = "abi"),
+            @With(value = "abiList"),
+    })
     private List<String> mAbis = new ArrayList<>();
 
     @Nullable
-    @SerializedName(value = "libs", alternate = {"lib", "libList"})
+    @SerializedName(value = "libs")
+    @SerializedNameCompatible(with = {
+            @With(value = "lib"),
+            @With(value = "libList"),
+    })
     private List<String> mLibs = new ArrayList<>();
 
     @SerializedName("permissions")
+    @SerializedNameCompatible(with = {
+            @With(value = "permission"),
+            @With(value = "permissionList"),
+    })
     private List<String> mPermissions = new ArrayList<>();
 
-    @SerializedName("signatureSchemes")
-    private String mSignatureSchemes = "V1 + V2";
+    @SerializedName("signatureScheme")
+    @SerializedNameCompatible(with = {
+            @With(value = "signatureSchemes"),
+            @With(value = "signature"),
+    })
+    private String mSignatureScheme = "V1 + V2";
 
     @Nullable
     private transient KeyStore mKeyStore = null;
 
-    @SerializedName("scripts")
+    @SerializedName("scriptConfigs")
+    @SerializedNameCompatible(with = {
+            @With(value = "scriptsConfigs"),
+            @With(value = "scriptsConfig"),
+            @With(value = "scriptConfig"),
+            @With(value = "scripts", target = {"AutoJs4", "AutoX"}),
+    })
     private final Map<String, ScriptConfig> mScriptConfigs = new HashMap<>();
 
-    @SerializedName(value = "useFeatures", alternate = {"useFeature", "useFeatureList"})
+    @SerializedName(value = "useFeatures")
+    @SerializedNameCompatible(with = {
+            @With(value = "useFeature"),
+            @With(value = "useFeatureList"),
+            @With(value = "features"),
+            @With(value = "feature"),
+            @With(value = "featureList"),
+    })
     private List<String> mFeatures = new ArrayList<>();
 
-    @SerializedName("ignoredDirs")
-    private final List<File> mIgnoredDirs = new ArrayList<>();
+    @SerializedName("excludedDirs")
+    @SerializedNameCompatible(with = {
+            @With(value = "ignoredDirs", target = {"AutoJs4", "AutoX"}),
+            @With(value = "ignore", target = {"Unknown"}),
+    })
+    private final List<File> mExcludedDirs = new ArrayList<>();
 
     @Nullable
     private transient String mSourcePath = null;
@@ -118,7 +180,7 @@ public class ProjectConfig {
         if (TextUtils.isEmpty(config.getVersionName())) {
             return false;
         }
-        if (TextUtils.isEmpty(config.getMainScriptFile())) {
+        if (TextUtils.isEmpty(config.getMainScriptFileName())) {
             return false;
         }
         return config.getVersionCode() != -1;
@@ -179,7 +241,7 @@ public class ProjectConfig {
         setFieldIfMatches(versionNamePattern, s, projectConfig::setVersionName);
         setFieldForIntIfMatches(versionCodePattern, s, projectConfig::setVersionCode);
         setFieldIfMatches(packageNamePattern, s, projectConfig::setPackageName);
-        setFieldIfMatches(mainPattern, s, projectConfig::setMainScriptFile);
+        setFieldIfMatches(mainPattern, s, projectConfig::setMainScriptFileName);
         setFieldIfMatches(iconPattern, s, projectConfig::setIconPath);
 
         setListIfMatches(assetsPattern, s, projectConfig::setAssets);
@@ -340,13 +402,21 @@ public class ProjectConfig {
         return this;
     }
 
-    @NonNull
+    /**
+     * @deprecated This method is deprecated. Use {@link #getMainScriptFileName()} instead.
+     */
+    @Deprecated
     public String getMainScriptFile() {
-        return mMainScriptFile != null ? mMainScriptFile : "main.js";
+        return getMainScriptFileName();
     }
 
-    public ProjectConfig setMainScriptFile(String mainScriptFile) {
-        mMainScriptFile = mainScriptFile;
+    @NonNull
+    public String getMainScriptFileName() {
+        return mMainScriptFileName != null ? mMainScriptFileName : DEFAULT_MAIN_SCRIPT_FILE_NAME;
+    }
+
+    public ProjectConfig setMainScriptFileName(String mainScriptFileName) {
+        mMainScriptFileName = mainScriptFileName;
         return this;
     }
 
@@ -439,40 +509,36 @@ public class ProjectConfig {
 
     @NonNull
     public List<String> getFeatures() {
-        if (mFeatures == null) {
-            mFeatures = Collections.emptyList();
-        }
         return mFeatures;
     }
 
-    public void setFeatures(List<String> features) {
+    public void setFeatures(@NonNull List<String> features) {
         mFeatures = features;
     }
 
     public ScriptConfig getScriptConfig(String path) {
-        ScriptConfig config = mScriptConfigs.get(path);
-        if (config == null) {
-            config = new ScriptConfig();
-        }
-        if (mFeatures.isEmpty()) {
-            return config;
-        }
-        ArrayList<String> features = new ArrayList<>(config.getFeatures());
-        for (String feature : mFeatures) {
-            if (!features.contains(feature)) {
-                features.add(feature);
-            }
-        }
-        config.setFeatures(features);
-        return config;
+        ScriptConfig scriptConfig = Objects.requireNonNull(mScriptConfigs.getOrDefault(path, new ScriptConfig()));
+        List<String> combinedFeatures = getCombinedFeatures(scriptConfig);
+        scriptConfig.setFeatures(combinedFeatures);
+        return scriptConfig;
     }
 
-    public List<File> getIgnoredDirs() {
-        return mIgnoredDirs;
+    @NotNull
+    public ArrayList<String> getCombinedFeatures(ScriptConfig scriptConfig) {
+        return new ArrayList<>(
+                new HashSet<>() {{
+                    addAll(scriptConfig.getFeatures());
+                    addAll(mFeatures);
+                }}
+        );
     }
 
-    public ProjectConfig ignoredDir(File ignoredDir) {
-        mIgnoredDirs.add(ignoredDir);
+    public List<File> getExcludedDirs() {
+        return mExcludedDirs;
+    }
+
+    public ProjectConfig excludeDir(File dirToExclude) {
+        mExcludedDirs.add(dirToExclude);
         return this;
     }
 
@@ -495,12 +561,12 @@ public class ProjectConfig {
         return this;
     }
 
-    public String getSignatureSchemes() {
-        return mSignatureSchemes;
+    public String getSignatureScheme() {
+        return mSignatureScheme;
     }
 
-    public ProjectConfig setSignatureSchemes(String signatureSchemes) {
-        mSignatureSchemes = signatureSchemes;
+    public ProjectConfig setSignatureScheme(String signatureScheme) {
+        mSignatureScheme = signatureScheme;
         return this;
     }
 
@@ -513,4 +579,5 @@ public class ProjectConfig {
         mKeyStore = keyStore;
         return this;
     }
+
 }

@@ -15,6 +15,7 @@
         "打包页面支持 Pinyin 库选项",
         "打包应用主活动页面优化状态栏背景及文字颜色",
         "脚本项目配置文件 project.json 支持更多打包选项 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_",
+        "脚本项目配置文件 project.json 支持选项名称宽松匹配及别名兼容",
         "APK 文件类型信息对话框增加文件大小与签名方案信息",
         "APK 文件类型信息对话框增加点击监听器支持文本复制与应用详情跳转",
         "尝试恢复 com.stardust 前缀包以便提升代码兼容性 _[`issue #290`](http://issues.autojs6.com/290)_",
