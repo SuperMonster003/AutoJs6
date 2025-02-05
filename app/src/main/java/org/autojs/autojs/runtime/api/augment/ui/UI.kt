@@ -14,6 +14,7 @@ import org.autojs.autojs.core.ui.inflater.InflateContext
 import org.autojs.autojs.core.ui.inflater.LayoutInflaterDelegate
 import org.autojs.autojs.core.ui.inflater.inflaters.ViewGroupInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.ViewInflater
+import org.autojs.autojs.core.ui.nativeview.NativeView
 import org.autojs.autojs.core.ui.widget.JsListView
 import org.autojs.autojs.execution.ScriptExecuteActivity
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
@@ -341,14 +342,14 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun inflate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): View = ensureArgumentsLengthInRange(args, 1..3) { argList ->
+        fun inflate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeView = ensureArgumentsLengthInRange(args, 1..3) { argList ->
             val (xml, parent, isAttachedToParent) = argList
             inflateRhinoRuntime(scriptRuntime, xml, parent, isAttachedToParent)
         }
 
         @JvmStatic
         @RhinoFunctionBody
-        fun inflateRhinoRuntime(scriptRuntime: ScriptRuntime, xml: Any?, parent: Any? = null, isAttachedToParent: Any? = false): View {
+        fun inflateRhinoRuntime(scriptRuntime: ScriptRuntime, xml: Any?, parent: Any? = null, isAttachedToParent: Any? = false): NativeView {
             val parentView = parent.jsSanitize()
             require(parentView is ViewGroup?) {
                 "Augment parentView for ui.inflate must be a ViewGroup instead of ${parentView.jsBrief()}"
@@ -359,7 +360,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 activity is ScriptExecuteActivity -> activity
                 else -> throw WrappedIllegalArgumentException("Global activity ${activity.jsBrief()} must be a ScriptExecuteActivity")
             }
-            return scriptRuntime.ui.layoutInflater.inflate(toXMLString(xml), parentView, coerceBoolean(isAttachedToParent, false))
+            val inflatedView = scriptRuntime.ui.layoutInflater.inflate(toXMLString(xml), parentView, coerceBoolean(isAttachedToParent, false))
+            return ViewExtras.getNativeView(scriptRuntime.topLevelScope, inflatedView, inflatedView::class.java, scriptRuntime)
         }
 
         @JvmStatic
@@ -544,9 +546,9 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         @JvmStatic
         @RhinoFunctionBody
-        fun findByIdRhinoWithRuntime(scriptRuntime: ScriptRuntime, id: String?): View? {
+        fun findByIdRhinoWithRuntime(scriptRuntime: ScriptRuntime, id: String?): NativeView? {
             val view = scriptRuntime.ui.view ?: return null
-            return findByStringIdRhino(view, id)
+            return findByStringIdRhinoRuntime(scriptRuntime, view, id)
         }
 
         @JvmStatic
@@ -556,19 +558,20 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             require(view is View) { "Argument view for ui.findByStringId must be a View instead of ${view.jsBrief()}" }
             when {
                 id.isJsNullish() -> {
-                    findByStringIdRhino(view, null)
+                    findByStringIdRhinoRuntime(scriptRuntime, view, null)
                 }
                 else -> {
                     // require(id is String) { "Argument id for ui.findByStringId must be a string instead of ${id.jsBrief()}" }
-                    findByStringIdRhino(view, coerceString(id))
+                    findByStringIdRhinoRuntime(scriptRuntime, view, coerceString(id))
                 }
             }
         }
 
         @JvmStatic
         @RhinoFunctionBody
-        fun findByStringIdRhino(view: View, id: String?): View? {
-            return JsViewHelper.findViewByStringId(view, id)
+        fun findByStringIdRhinoRuntime(scriptRuntime: ScriptRuntime, view: View, id: String?): NativeView? {
+            val foundView = JsViewHelper.findViewByStringId(view, id) ?: return null
+            return ViewExtras.getNativeView(scriptRuntime.topLevelScope, foundView, foundView::class.java, scriptRuntime)
         }
 
         @JvmStatic
