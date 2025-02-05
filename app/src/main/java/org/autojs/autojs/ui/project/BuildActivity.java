@@ -21,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
 import androidx.lifecycle.ViewModelProvider;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.flexbox.FlexboxLayout;
@@ -70,6 +71,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.autojs.autojs.apkbuilder.ApkBuilder.TEMPLATE_APK_NAME;
 import static org.autojs.autojs.util.StringUtils.key;
@@ -77,6 +79,8 @@ import static org.autojs.autojs.util.StringUtils.key;
 /**
  * Created by Stardust on Oct 22, 2017.
  * Modified by SuperMonster003 as of Dec 1, 2023.
+ *
+ * @noinspection ResultOfMethodCallIgnored
  */
 public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCallback {
 
@@ -105,14 +109,14 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private static final Map<String, List<String>> LIB_ALIASES = new HashMap<>();
 
-    private static final ArrayList<String> SIGNATURE_SCHEMES = new ArrayList<>() {{
-        add("V1 + V2");
-        add("V1 + V3");
-        add("V1 + V2 + V3");
-        add("V1");
-        add("V2 + V3 (Android 7.0+)");
-        add("V2 (Android 7.0+)");
-        add("V3 (Android 9.0+)");
+    private static final List<Pair<String, String>> SIGNATURE_SCHEMES = new ArrayList<>() {{
+        add(new Pair<>("V1 + V2", null));
+        add(new Pair<>("V1 + V3", null));
+        add(new Pair<>("V1 + V2 + V3", null));
+        add(new Pair<>("V1", null));
+        add(new Pair<>("V2 + V3", "Android 7.0+"));
+        add(new Pair<>("V2", "Android 7.0+"));
+        add(new Pair<>("V3", "Android 9.0+"));
     }};
 
     private final Map<String, Integer> SUPPORTED_PERMISSIONS = new TreeMap<>() {{
@@ -173,16 +177,19 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     ImageView mIconView;
     LinearLayout mAppConfigView;
 
+    @Nullable
     private ProjectConfig mProjectConfig;
+
     private MaterialDialog mProgressDialog;
     private String mSource;
     private boolean mIsDefaultIcon = true;
     private boolean mIsProjectLevelBuilding;
-    private FlexboxLayout mFlexboxAbis;
-    private FlexboxLayout mFlexboxLibs;
-    private Spinner mSignatureSchemes;
-    private Spinner mVerifiedKeyStores;
-    private FlexboxLayout mFlexboxPermissions;
+
+    private FlexboxLayout mFlexboxAbisView;
+    private FlexboxLayout mFlexboxLibsView;
+    private Spinner mSignatureSchemesView;
+    private Spinner mVerifiedKeyStoresView;
+    private FlexboxLayout mFlexboxPermissionsView;
 
     private final ArrayList<String> mInvalidAbis = new ArrayList<>();
     private final ArrayList<String> mUnavailableAbis = new ArrayList<>();
@@ -261,41 +268,40 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
         mAppConfigView = binding.appConfig;
 
-        mFlexboxAbis = binding.flexboxAbis;
+        mFlexboxAbisView = binding.flexboxAbis;
         initAbisChildren();
 
-        mFlexboxLibs = binding.flexboxLibraries;
+        mFlexboxLibsView = binding.flexboxLibraries;
         initLibsChildren();
 
         mKeyStoreViewModel = new ViewModelProvider(this, new KeyStoreViewModel.Factory(getApplicationContext())).get(KeyStoreViewModel.class);
         mKeyStoreViewModel.updateVerifiedKeyStores();
 
-        mSignatureSchemes = binding.spinnerSignatureSchemes;
-        initSignatureSchemeSpinner();
-
-        mVerifiedKeyStores = binding.spinnerVerifiedKeyStores;
-        initVerifiedKeyStoresSpinner();
-
-        mFlexboxPermissions = binding.flexboxPermissions;
-        initPermissionsChildren();
+        mSignatureSchemesView = binding.spinnerSignatureSchemes;
+        mVerifiedKeyStoresView = binding.spinnerVerifiedKeyStores;
+        mFlexboxPermissionsView = binding.flexboxPermissions;
 
         binding.fab.setOnClickListener(v -> buildApk());
         binding.selectSource.setOnClickListener(v -> selectSourceFilePath());
         binding.selectOutput.setOnClickListener(v -> selectOutputDirPath());
-        binding.textAbis.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxAbis));
+        binding.textAbis.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxAbisView));
         binding.textAbis.setOnLongClickListener(v -> {
             syncAbisCheckedStates();
             return true;
         });
-        binding.textLibs.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxLibs));
+        binding.textLibs.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxLibsView));
         binding.manageKeyStore.setOnClickListener(v -> ManageKeyStoreActivity.Companion.startActivity(this));
-        binding.textPermissions.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxPermissions));
+        binding.textPermissions.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxPermissionsView));
 
         setToolbarAsBack(R.string.text_build_apk);
         mSource = getIntent().getStringExtra(EXTRA_SOURCE);
         if (mSource != null) {
             setupWithSourceFile(new ScriptFile(mSource));
         }
+
+        initSignatureSchemeSpinner();
+        initVerifiedKeyStoresSpinner();
+        initPermissionsChildren();
 
         syncAbisCheckedStates();
         syncLibsCheckedStates();
@@ -354,7 +360,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             child.setChecked(false);
             child.setEnabled(false);
             child.setOnBeingUnavailableListener(this::promptForUnavailability);
-            mFlexboxAbis.addView(child);
+            mFlexboxAbisView.addView(child);
         });
     }
 
@@ -397,8 +403,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     private void syncAbisWithDefaultCheckedFilter(Function<String, Boolean> filterForDefaultChecked) {
         List<String> appSupportedAbiList = AndroidUtils.getAppSupportedAbiList();
-        for (int i = 0; i < mFlexboxAbis.getChildCount(); i += 1) {
-            View child = mFlexboxAbis.getChildAt(i);
+        for (int i = 0; i < mFlexboxAbisView.getChildCount(); i += 1) {
+            View child = mFlexboxAbisView.getChildAt(i);
             if (child instanceof RoundCheckboxWithText) {
                 CharSequence standardAbi = ((RoundCheckboxWithText) child).getText();
                 if (standardAbi != null) {
@@ -419,7 +425,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             RoundCheckboxWithText child = new RoundCheckboxWithText(this, null);
             child.setText(text);
             child.setChecked(false);
-            mFlexboxLibs.addView(child);
+            mFlexboxLibsView.addView(child);
         });
     }
 
@@ -432,8 +438,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         // 创建一个新的副本
         var candidates = new ArrayList<>(configLibs);
 
-        for (int i = 0; i < mFlexboxLibs.getChildCount(); i += 1) {
-            View child = mFlexboxLibs.getChildAt(i);
+        for (int i = 0; i < mFlexboxLibsView.getChildCount(); i += 1) {
+            View child = mFlexboxLibsView.getChildAt(i);
             if (child instanceof RoundCheckboxWithText) {
                 CharSequence standardLib = ((RoundCheckboxWithText) child).getText();
                 if (standardLib != null) {
@@ -447,9 +453,23 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void initSignatureSchemeSpinner() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, SIGNATURE_SCHEMES);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, SIGNATURE_SCHEMES.stream().map(pair -> {
+            if (pair.second == null || pair.second.isEmpty()) {
+                return pair.first;
+            }
+            return pair.first + " (" + pair.second + ")";
+        }).collect(Collectors.toList()));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSignatureSchemes.setAdapter(adapter);
+        mSignatureSchemesView.setAdapter(adapter);
+        if (mProjectConfig != null) {
+            int initialSelection = IntStream.range(0, SIGNATURE_SCHEMES.size())
+                    .filter(i -> SIGNATURE_SCHEMES.get(i).first.equalsIgnoreCase(mProjectConfig.getSignatureScheme()))
+                    .findFirst()
+                    .orElse(-1);
+            if (initialSelection >= 0) {
+                mSignatureSchemesView.setSelection(initialSelection);
+            }
+        }
     }
 
     private void initVerifiedKeyStoresSpinner() {
@@ -460,7 +480,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
         ArrayAdapter<KeyStore> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, verifiedKeyStores);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mVerifiedKeyStores.setAdapter(adapter);
+        mVerifiedKeyStoresView.setAdapter(adapter);
 
         mKeyStoreViewModel.getVerifiedKeyStores().observe(this, keyStores -> {
             // 清空现有的选项，但保留第一个元素，即默认密钥库
@@ -487,7 +507,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             int marginInPixels = (int) (8 * getResources().getDisplayMetrics().density);
             checkBox.setPadding(marginInPixels, 0, 0, 0);
             checkBox.setChecked(false);
-            mFlexboxPermissions.addView(checkBox);
+            mFlexboxPermissionsView.addView(checkBox);
         });
     }
 
@@ -644,8 +664,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private boolean checkAbis() {
-        for (int i = 0; i < mFlexboxAbis.getChildCount(); i += 1) {
-            View child = mFlexboxAbis.getChildAt(i);
+        for (int i = 0; i < mFlexboxAbisView.getChildCount(); i += 1) {
+            View child = mFlexboxAbisView.getChildAt(i);
             if (child instanceof RoundCheckboxWithText) {
                 if (((RoundCheckboxWithText) child).isChecked() && child.isEnabled()) {
                     return true;
@@ -774,11 +794,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     @SuppressLint("CheckResult")
     private void doBuildingApk() {
         ProjectConfig projectConfig = determineProjectConfig();
-        File tmpDir = new File(getCacheDir(), "build/");
+        File buildPath = new File(getCacheDir(), "build/");
         File outApk = new File(mOutputPathView.getText().toString(),
                 String.format("%s_v%s.apk", projectConfig.getName(), projectConfig.getVersionName()));
         showProgressDialog();
-        Observable.fromCallable(() -> callApkBuilder(tmpDir, outApk, projectConfig))
+        Observable.fromCallable(() -> callApkBuilder(buildPath, outApk, projectConfig))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(apkBuilder -> {
@@ -791,9 +811,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private ProjectConfig determineProjectConfig() {
-        ArrayList<String> abis = collectCheckedItems(mFlexboxAbis);
-        ArrayList<String> libs = collectCheckedItems(mFlexboxLibs);
-        ArrayList<String> permissions = collectCheckedItems(mFlexboxPermissions);
+        ArrayList<String> abis = collectCheckedItems(mFlexboxAbisView);
+        ArrayList<String> libs = collectCheckedItems(mFlexboxLibsView);
+        ArrayList<String> permissions = collectCheckedItems(mFlexboxPermissionsView);
 
         ProjectConfig projectConfig;
         if (mProjectConfig != null) {
@@ -814,8 +834,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         return projectConfig
                 .setAbis(abis)
                 .setLibs(libs)
-                .setKeyStore(mVerifiedKeyStores.getSelectedItemPosition() > 0 ? (KeyStore) mVerifiedKeyStores.getSelectedItem() : null)
-                .setSignatureScheme(mSignatureSchemes.getSelectedItem().toString())
+                .setKeyStore(mVerifiedKeyStoresView.getSelectedItemPosition() > 0 ? (KeyStore) mVerifiedKeyStoresView.getSelectedItem() : null)
+                .setSignatureScheme(mSignatureSchemesView.getSelectedItem().toString())
                 .setPermissions(permissions);
     }
 
@@ -844,9 +864,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         return libs;
     }
 
-    private ApkBuilder callApkBuilder(File tmpDir, File outApk, ProjectConfig projectConfig) throws Exception {
+    private ApkBuilder callApkBuilder(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
         InputStream templateApk = getAssets().open(TEMPLATE_APK_NAME);
-        return new ApkBuilder(templateApk, outApk, tmpDir.getPath())
+        return new ApkBuilder(templateApk, outApk, buildPath.getPath())
                 .setProgressCallback(BuildActivity.this)
                 .prepare()
                 .withConfig(projectConfig)

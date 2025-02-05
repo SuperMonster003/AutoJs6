@@ -16,8 +16,9 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.BuildInfo
+import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.project.ProjectConfig
-import org.autojs.autojs.project.ProjectConfig.DEFAULT_MAIN_SCRIPT_FILE_NAME
+import org.autojs.autojs.project.ProjectConfig.CONFIG_FILE_NAME
 import org.autojs.autojs.script.EncryptedScriptFileHeader.writeHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT
@@ -39,7 +40,7 @@ import java.io.InputStream
  * Created by Stardust on Oct 24, 2017.
  * Modified by SuperMonster003 as of Jul 8, 2022.
  */
-open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File, private val workspacePath: String) {
+open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File, private val buildPath: String) {
 
     private var mProgressCallback: ProgressCallback? = null
     private var mArscPackageName: String? = null
@@ -49,7 +50,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     private lateinit var mProjectConfig: ProjectConfig
 
-    private val mApkPackager = ApkPackager(apkInputStream, workspacePath)
+    private val mApkPackager = ApkPackager(apkInputStream, buildPath)
 
     private val mAssetManager: AssetManager by lazy { globalContext.assets }
 
@@ -57,14 +58,14 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private var mAssetsFileIncludes = Libs.defaultAssetFilesToInclude.toMutableList()
     private var mAssetsDirExcludes = Libs.defaultAssetDirsToExclude.toMutableList()
 
-    private var mSplashThemeId = 0
-    private var mNoSplashThemeId = 0
+    private var mSplashThemeId: Int = 0
+    private var mNoSplashThemeId: Int = 0
 
     private val mManifestFile
-        get() = File(workspacePath, "AndroidManifest.xml")
+        get() = File(buildPath, "AndroidManifest.xml")
 
     private val mResourcesArscFile
-        get() = File(workspacePath, "resources.arsc")
+        get() = File(buildPath, "resources.arsc")
 
     init {
         PFiles.ensureDir(outApkFile.path)
@@ -75,7 +76,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     @Throws(IOException::class)
     fun prepare() = also {
         mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onPrepare(this) } }
-        File(workspacePath).mkdirs()
+        File(buildPath).mkdirs()
         mApkPackager.unzip()
     }
 
@@ -97,7 +98,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     @Throws(IOException::class)
     fun copyDir(srcFile: File, relativeDestPath: String) {
-        val destDirFile = File(workspacePath, relativeDestPath).apply { mkdir() }
+        val destDirFile = File(buildPath, relativeDestPath).apply { mkdir() }
         srcFile.listFiles()?.forEach { srcChildFile ->
             if (srcChildFile.isFile) {
                 if (srcChildFile.name.endsWith(JAVASCRIPT.extensionWithDot)) {
@@ -133,7 +134,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     @Throws(IOException::class)
     fun replaceFile(srcFile: File, relativeDestPath: String) = also {
-        val destFile = File(workspacePath, relativeDestPath)
+        val destFile = File(buildPath, relativeDestPath)
         if (destFile.name.endsWith(JAVASCRIPT.extensionWithDot)) {
             encrypt(srcFile, destFile)
         } else {
@@ -144,34 +145,45 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     @Throws(IOException::class)
     fun withConfig(config: ProjectConfig) = also {
         config.also { mProjectConfig = it }.run {
-            if (!launchConfig.isSplashVisible) {
-                try {
-                    val tableBlock = TableBlock.load(mResourcesArscFile)
-                    val packageName = "${GlobalAppContext.get().packageName}.inrt"
-                    val packageBlock = tableBlock.getOrCreatePackage(0x7f, packageName).also {
-                        tableBlock.currentPackage = it
-                    }
-                    packageBlock.getEntry("", "style", "AppTheme.Splash")?.let {
-                        mSplashThemeId = it.resourceId
-                    }
-                    packageBlock.getEntry("", "style", "AppTheme.SevereTransparent")?.let {
-                        mNoSplashThemeId = it.resourceId
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-            mManifestEditor = editManifest()
-                .setAppName(name)
-                .setVersionName(versionName)
-                .setVersionCode(versionCode)
-                .setPackageName(packageName)
-
+            retrieveSplashThemeResources(launchConfig)
+            prepareManifestConfiguration(this)
             setArscPackageName(packageName)
             updateProjectConfig(this)
-            copyAssetsRecursively("", File(workspacePath, "assets"))
+            copyAssetsRecursively("", File(buildDir, "assets"))
             copyLibrariesByConfig(this)
             setScriptFile(sourcePath)
+        }
+    }
+
+    private fun prepareManifestConfiguration(config: ProjectConfig) {
+        mManifestEditor = editManifest()
+            .setAppName(config.name)
+            .setVersionName(config.versionName)
+            .setVersionCode(config.versionCode)
+            .setPackageName(config.packageName)
+    }
+
+    private fun retrieveSplashThemeResources(launchConfig: LaunchConfig) {
+        if (launchConfig.isSplashVisible) {
+            // @Hint by SuperMonster003 on Jan 23, 2024.
+            //   ! Members `mSplashThemeId` and `mNoSplashThemeId` will keep their default values.
+            //   ! zh-CN: 成员变量 `mSplashThemeId` 及 `mNoSplashThemeId` 将保持其默认值.
+            return
+        }
+        try {
+            val tableBlock = TableBlock.load(mResourcesArscFile)
+            val packageName = "${GlobalAppContext.get().packageName}.inrt"
+            val packageBlock = tableBlock.getOrCreatePackage(0x7f, packageName).also {
+                tableBlock.currentPackage = it
+            }
+            packageBlock.getEntry("", "style", "AppTheme.Splash")?.let {
+                mSplashThemeId = it.resourceId
+            }
+            packageBlock.getEntry("", "style", "AppTheme.SevereTransparent")?.let {
+                mNoSplashThemeId = it.resourceId
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -179,35 +191,53 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     fun editManifest(): ManifestEditor = ManifestEditorWithAuthorities(FileInputStream(mManifestFile)).also { mManifestEditor = it }
 
     private fun updateProjectConfig(config: ProjectConfig) {
-        val projectConfig = when {
-            !PFiles.isDir(config.sourcePath) -> null
-            else -> ProjectConfig.fromProjectDir(config.sourcePath)?.also {
-                val buildNumber = it.buildInfo.buildNumber
-                it.buildInfo = BuildInfo.generate(buildNumber + 1)
-                PFiles.write(ProjectConfig.configFileOfDir(config.sourcePath), it.toJson())
+
+        // 这里为什么要有这样的一个方法? (
+        //     会不会是因为有些配置需要写入到文件中, 这些配置包括自增的版本号, 用户的选择或键入值等等
+        // )
+        // 参数 config 只是获取了一部分的字段用于设置新的 projectConfig, 为什么不直接使用全部的字段? (
+        //     因为有些不需要更新. 如果我们需要将所有设置开放到 Activity 页面中, 那么其实所有配置都是需要更新的
+        // )
+        // 像 abis, libs, signatureScheme 等信息就全部丢失了. (
+        //     所以需要添加到这个方法中
+        // )
+
+        val projectConfig = run {
+            if (PFiles.isDir(config.sourcePath)) {
+                // @Hint by SuperMonster003 on Jan 23, 2025.
+                //  ! Project directory packaging.
+                //  ! zh-CN: 打包项目目录.
+                ProjectConfig.fromProjectDir(config.sourcePath)?.let { sourceProjectConfig ->
+                    sourceProjectConfig
+                        .setBuildInfo(BuildInfo.generate(sourceProjectConfig.buildInfo.buildNumber + 1))
+                    File(ProjectConfig.configFileOfDir(config.sourcePath)).writeText(sourceProjectConfig.toJson())
+                    return@run sourceProjectConfig
+                }
             }
-        } ?: ProjectConfig()
-            .setMainScriptFileName(DEFAULT_MAIN_SCRIPT_FILE_NAME)
-            .setName(config.name)
-            .setPackageName(config.packageName)
-            .setVersionName(config.versionName)
-            .setVersionCode(config.versionCode)
-            .also { newProjectConfig ->
-                newProjectConfig.buildInfo = BuildInfo.generate(newProjectConfig.versionCode.toLong())
-                File(workspacePath, "assets/project/${ProjectConfig.CONFIG_FILE_NAME}").also { file ->
+            // @Hint by SuperMonster003 on Jan 23, 2025.
+            //  ! Single file packaging.
+            //  ! zh-CN: 打包单独文件.
+            return@run ProjectConfig().also { newProjectConfig ->
+                newProjectConfig
+                    .setName(config.name)
+                    .setPackageName(config.packageName)
+                    .setVersionName(config.versionName)
+                    .setVersionCode(config.versionCode)
+                    .setBuildInfo(BuildInfo.generate(newProjectConfig.versionCode.toLong()))
+                File(buildPath, "assets/project/$CONFIG_FILE_NAME").also { file ->
                     file.parentFile?.let { parent -> if (!parent.exists()) parent.mkdirs() }
                 }.writeText(newProjectConfig.toJson())
             }
 
-        projectConfig.run {
-            mKey = MD5Utils.md5(packageName + versionName + mainScriptFileName)
-            mInitVector = MD5Utils.md5(buildInfo.buildId + name).substring(0, 16)
-            Libs.entries.forEach { entry ->
-                if (config.libs.contains(entry.label)) {
-                    mLibsIncludes += entry.libsToInclude.toSet()
-                    mAssetsFileIncludes += entry.assetFilesToInclude.toSet()
-                    mAssetsDirExcludes -= entry.assetDirsToExclude.toSet()
-                }
+        }
+
+        mKey = MD5Utils.md5(projectConfig.run { packageName + versionName + mainScriptFileName })
+        mInitVector = MD5Utils.md5(projectConfig.run { buildInfo.buildId + name }).take(16)
+        Libs.entries.forEach { entry ->
+            if (config.libs.contains(entry.label)) {
+                mLibsIncludes += entry.libsToInclude.toSet()
+                mAssetsFileIncludes += entry.assetFilesToInclude.toSet()
+                mAssetsDirExcludes -= entry.assetDirsToExclude.toSet()
             }
         }
     }
@@ -225,7 +255,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                 val appIcon = packageBlock.getOrCreate("", ICON_RES_DIR, ICON_NAME)
                 val appIconPath = appIcon.resValue.decodeValue()
                 Log.d(TAG, "Icon path: $appIconPath")
-                val file = File(workspacePath, appIconPath).also {
+                val file = File(buildPath, appIconPath).also {
                     if (!it.exists()) {
                         File(it.parent!!).mkdirs()
                         it.createNewFile()
@@ -273,19 +303,20 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     fun sign() = also {
         mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onSign(this) } }
         val fos = FileOutputStream(outApkFile)
-        TinySign.sign(File(workspacePath), fos)
+        TinySign.sign(File(buildPath), fos)
         fos.close()
 
-        val defaultKeyStoreFile = File(workspacePath, "default_key_store.bks")
-        val tmpOutputApk = File(workspacePath, "temp.apk")
+        val defaultKeyStoreFile = File(buildPath, "default_key_store.bks")
+        val tmpOutputApk = File(buildPath, "temp.apk")
         copyInputStreamToFile(GlobalAppContext.get().assets.open("default_key_store.bks"), defaultKeyStoreFile)
 
-        val signer = ApkSigner(outApkFile, tmpOutputApk)
-        signer.useDefaultSignatureVersion = false
-        signer.v1SigningEnabled = mProjectConfig.signatureScheme.contains("V1")
-        signer.v2SigningEnabled = mProjectConfig.signatureScheme.contains("V2")
-        signer.v3SigningEnabled = mProjectConfig.signatureScheme.contains("V3")
-        signer.v4SigningEnabled = mProjectConfig.signatureScheme.contains("V4")
+        val signer = ApkSigner(outApkFile, tmpOutputApk).apply {
+            useDefaultSignatureVersion = false
+            v1SigningEnabled = "V1" in mProjectConfig.signatureScheme
+            v2SigningEnabled = "V2" in mProjectConfig.signatureScheme
+            v3SigningEnabled = "V3" in mProjectConfig.signatureScheme
+            v4SigningEnabled = "V4" in mProjectConfig.signatureScheme
+        }
 
         var keyStoreFile = defaultKeyStoreFile
         var password = "AutoJs6"
@@ -313,7 +344,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     fun cleanWorkspace() = also {
         mProgressCallback?.let { callback -> GlobalAppContext.post { callback.onClean(this) } }
-        delete(File(workspacePath))
+        delete(File(buildPath))
     }
 
     @Throws(IOException::class)
@@ -321,8 +352,8 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
     @Throws(IOException::class)
     private fun buildArsc() {
-        val oldArsc = File(workspacePath, "resources.arsc")
-        val newArsc = File(workspacePath, "resources.arsc.new")
+        val oldArsc = File(buildPath, "resources.arsc")
+        val newArsc = File(buildPath, "resources.arsc.new")
         val decoder = ARSCDecoder(BufferedInputStream(FileInputStream(oldArsc)), null, false)
         decoder.CloneArsc(FileOutputStream(newArsc), mArscPackageName, true)
         oldArsc.delete()
@@ -345,9 +376,13 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private inner class ManifestEditorWithAuthorities(manifestInputStream: InputStream?) : ManifestEditor(manifestInputStream) {
         override fun onAttr(attr: AxmlWriter.Attr) {
             attr.apply {
+
+                // @Reference to aiselp (https://github.com/aiselp) by SuperMonster003 on Jan 18, 2025.
+                //  ! https://github.com/aiselp/AutoX/blob/5b3303926082d591a166b1845702357406811aaf/app/src/main/java/org/autojs/autojs/build/ApkBuilder.kt#L175-L188
                 if (!mProjectConfig.launchConfig.isSplashVisible && mSplashThemeId != 0 && value == mSplashThemeId) {
                     value = mNoSplashThemeId
                 }
+
                 if (name.data == "authorities" && value is StringItem) {
                     (value as StringItem).data = "${mProjectConfig.packageName}.fileprovider"
                 } else {
@@ -388,7 +423,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         mLibsIncludes.distinct().forEach { libName ->
             runCatching {
                 File(srcLibDir, "$abiSrcName/$libName").takeIf { it.exists() }?.copyTo(
-                    File(workspacePath, "lib/$abiDestName/$libName"),
+                    File(buildPath, "lib/$abiDestName/$libName"),
                     overwrite = true
                 )
             }.onFailure { it.printStackTrace() }
