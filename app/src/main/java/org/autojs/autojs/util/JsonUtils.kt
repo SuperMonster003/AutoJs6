@@ -5,10 +5,11 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
+import org.autojs.autojs.annotation.DeserializedMethodName
 import org.autojs.autojs.annotation.SerializedNameCompatible
-import org.json.JSONArray
-import org.json.JSONObject
+import org.json.JSONTokener
 import java.lang.reflect.Field
+import java.lang.reflect.Modifier
 import java.lang.reflect.Type
 
 /**
@@ -84,7 +85,34 @@ object JsonUtils {
         return json
     }
 
-    fun isValidJson(json: String): Boolean = runCatching { JSONObject(json) }.isSuccess || runCatching { JSONArray(json) }.isSuccess
+    /**
+     * This method checks whether the given string is a valid JSON format.
+     *
+     * This method supports the following common JSON formats:
+     * - Objects (e.g., `{"key": "value"}`)
+     * - Arrays (e.g., `[1, 2, 3]`)
+     * - Single values (e.g., `"string"`, `123`, `true`, `null`)
+     *
+     * Note:
+     * 1. Empty strings or strings containing only whitespace are considered invalid JSON.
+     * 2. If the JSON contains comments (e.g., `// comment` or `/* multi-line comment */`),
+     *    this method will consider it invalid. Because comments are not allowed in strict JSON standards.
+     *
+     * zh-CN:
+     *
+     * 判断给定的字符串是否是有效的 JSON 格式.
+     *
+     * 支持以下几种常见 JSON 格式:
+     * - 对象 (例如: `{"key": "value"}`)
+     * - 数组 (例如: `[1, 2, 3]`)
+     * - 单一值 (例如: `"string"`, `123`, `true`, `null`)
+     *
+     * 注意:
+     * 1. 空字符串或仅包含空白字符的字符串被视为无效的 JSON.
+     * 2. 如果 JSON 中包含注释 (例如: `// 注释` 或 `/* 多行注释 */`), 此方法会判断为无效. 因为注释不符合严格的 JSON 规范.
+     */
+    @JvmStatic
+    fun isValidJson(json: String) = json.isNotBlank() && runCatching { JSONTokener(json).nextValue() }.isSuccess
 
     class FuzzyDeserializer<T> : JsonDeserializer<T> {
 
@@ -99,7 +127,6 @@ object JsonUtils {
             } catch (e: Exception) {
                 throw RuntimeException("Failed to create an instance of ${clazz.name}", e)
             }
-
             if (json is JsonObject) {
                 clazz.declaredFields.forEach { processField(it, json, instance, context) }
             }
@@ -111,6 +138,7 @@ object JsonUtils {
 
             val serializedNameAnnotation = field.getAnnotation(SerializedName::class.java)
             val compatibleAnnotation = field.getAnnotation(SerializedNameCompatible::class.java)
+            val deserializedAnnotation = field.getAnnotation(DeserializedMethodName::class.java)
 
             val sanitizedPrimaryName = sanitizeKey(serializedNameAnnotation?.value ?: field.name)
             val sanitizedAlternateNames = serializedNameAnnotation?.alternate?.map { sanitizeKey(it) } ?: emptyList()
@@ -118,13 +146,16 @@ object JsonUtils {
 
             val serializedNames: List<Pair<String, Boolean>> = (sanitizedAlternateNames + sanitizedPrimaryName).map { it to false } + sanitizedCompatibleNames
 
-            for ((jsonKey, jsonValue) in json.entrySet()) {
+            json.entrySet().forEach { (jsonKey, jsonValue) ->
                 val sanitizedJsonKey = sanitizeKey(jsonKey)
-                for (pair in serializedNames) {
+                serializedNames.forEach { pair ->
                     val (serializedKey, isReversed) = pair
                     if (sanitizedJsonKey == serializedKey) {
-                        when (field.type) {
-                            Boolean::class.javaPrimitiveType, Boolean::class.java -> {
+                        when {
+                            deserializedAnnotation != null -> {
+                                handleDeserializedMethod(field, instance, jsonValue, deserializedAnnotation)
+                            }
+                            field.type == Boolean::class.javaPrimitiveType || field.type == Boolean::class.java -> {
                                 if (jsonValue.isJsonPrimitive && jsonValue.asJsonPrimitive.isBoolean) {
                                     val value = jsonValue.asBoolean
                                     field.set(instance, if (isReversed) !value else value)
@@ -137,9 +168,30 @@ object JsonUtils {
                                 }
                             }
                         }
-                        return
+                        return@processField
                     }
                 }
+            }
+        }
+
+        private fun handleDeserializedMethod(field: Field, instance: T, jsonValue: JsonElement, annotation: DeserializedMethodName) {
+            require(jsonValue.isJsonPrimitive && jsonValue.asJsonPrimitive.isString) {
+                "Field with @DeserializedMethodName must map to a JSON string."
+            }
+            val methodName = annotation.method
+            val methodInput = jsonValue.asString
+            val parameterTypes = annotation.parameterTypes.map { it.java }.toTypedArray()
+            val method = runCatching {
+                instance!!::class.java.getMethod(methodName, *parameterTypes)
+            }.getOrElse { e ->
+                throw RuntimeException("Method $methodName with parameter types ${parameterTypes.contentToString()} not found in ${instance!!::class.java.name}", e)
+            }
+            try {
+                val isStatic = Modifier.isStatic(method.modifiers)
+                val result = method.invoke(instance.takeUnless { isStatic }, methodInput)
+                field.set(instance, result)
+            } catch (e: Exception) {
+                throw RuntimeException("Failed to invoke method $methodName on ${field.name}", e)
             }
         }
 

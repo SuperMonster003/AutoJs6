@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import org.autojs.autojs.annotation.DeserializedMethodName;
 import org.autojs.autojs.annotation.SerializedNameCompatible;
 import org.autojs.autojs.annotation.SerializedNameCompatible.With;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
@@ -22,14 +23,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by Stardust on Jan 24, 2018.
@@ -49,18 +49,24 @@ public class ProjectConfig {
             .create();
 
     @SerializedName("name")
-    @SerializedNameCompatible(with = {@With(value = "projectName")})
+    @SerializedNameCompatible(with = {
+            @With(value = "projectName"),
+    })
     private String mName;
 
     @SerializedName("versionName")
-    @SerializedNameCompatible(with = {@With(value = "version")})
+    @SerializedNameCompatible(with = {
+            @With(value = "version"),
+    })
     private String mVersionName;
 
     @SerializedName("versionCode")
-    private int mVersionCode = -1;
+    private int mVersionCode = 1;
 
     @SerializedName("packageName")
-    @SerializedNameCompatible(with = {@With(value = "package")})
+    @SerializedNameCompatible(with = {
+            @With(value = "package"),
+    })
     private String mPackageName;
 
     @SerializedName("main")
@@ -73,7 +79,7 @@ public class ProjectConfig {
             @With(value = "mainFile"),
             @With(value = "mainFileName"),
     })
-    private String mMainScriptFileName;
+    private String mMainScriptFileName = DEFAULT_MAIN_SCRIPT_FILE_NAME;
 
     @Nullable
     @SerializedName(value = "assets")
@@ -84,15 +90,21 @@ public class ProjectConfig {
     private List<String> mAssets = new ArrayList<>();
 
     @SerializedName("launchConfig")
-    @SerializedNameCompatible(with = {@With(value = "launch")})
+    @SerializedNameCompatible(with = {
+            @With(value = "launch"),
+    })
     private LaunchConfig mLaunchConfig = new LaunchConfig();
 
     @SerializedName("build")
-    @SerializedNameCompatible(with = {@With(value = "buildInfo")})
+    @SerializedNameCompatible(with = {
+            @With(value = "buildInfo"),
+    })
     private BuildInfo mBuildInfo = new BuildInfo();
 
     @SerializedName("icon")
-    @SerializedNameCompatible(with = {@With(value = "iconPath")})
+    @SerializedNameCompatible(with = {
+            @With(value = "iconPath"),
+    })
     private String mIconPath;
 
     private transient Callable<Bitmap> mIconBitmapGetter;
@@ -125,19 +137,23 @@ public class ProjectConfig {
             @With(value = "signatureSchemes"),
             @With(value = "signature"),
     })
+    @DeserializedMethodName(method = "normalizeSignatureScheme", parameterTypes = {String.class})
     private String mSignatureScheme = "V1 + V2";
 
     @Nullable
     private transient KeyStore mKeyStore = null;
 
-    @SerializedName("scriptConfigs")
-    @SerializedNameCompatible(with = {
-            @With(value = "scriptsConfigs"),
-            @With(value = "scriptsConfig"),
-            @With(value = "scriptConfig"),
-            @With(value = "scripts", target = {"AutoJs4", "AutoX"}),
-    })
-    private final Map<String, ScriptConfig> mScriptConfigs = new HashMap<>();
+    // @Commented by SuperMonster003 on Jan 20, 2025.
+    //  ! Unused config options: "scripts".
+    //  ! zh-CN: 未使用的配置选项: "scripts".
+    //  # @SerializedName("scriptConfigs")
+    //  # @SerializedNameCompatible(with = {
+    //  #         @With(value = "scriptsConfigs"),
+    //  #         @With(value = "scriptsConfig"),
+    //  #         @With(value = "scriptConfig"),
+    //  #         @With(value = "scripts", target = {"AutoJs4", "AutoX"}),
+    //  # })
+    //  # private final Map<String, ScriptConfig> mScriptConfigs = new HashMap<>();
 
     @SerializedName(value = "useFeatures")
     @SerializedNameCompatible(with = {
@@ -362,8 +378,9 @@ public class ProjectConfig {
         return mBuildInfo;
     }
 
-    public void setBuildInfo(BuildInfo buildInfo) {
+    public ProjectConfig setBuildInfo(BuildInfo buildInfo) {
         mBuildInfo = buildInfo;
+        return this;
     }
 
     public String getName() {
@@ -412,7 +429,7 @@ public class ProjectConfig {
 
     @NonNull
     public String getMainScriptFileName() {
-        return mMainScriptFileName != null ? mMainScriptFileName : DEFAULT_MAIN_SCRIPT_FILE_NAME;
+        return mMainScriptFileName;
     }
 
     public ProjectConfig setMainScriptFileName(String mainScriptFileName) {
@@ -420,9 +437,12 @@ public class ProjectConfig {
         return this;
     }
 
-    public Map<String, ScriptConfig> getScriptConfigs() {
-        return mScriptConfigs;
-    }
+    // @Commented by SuperMonster003 on Jan 20, 2025.
+    //  ! Unused config options: "scripts".
+    //  ! zh-CN: 未使用的配置选项: "scripts".
+    //  # public Map<String, ScriptConfig> getScriptConfigs() {
+    //  #     return mScriptConfigs;
+    //  # }
 
     public List<String> getAssets() {
         if (mAssets == null) {
@@ -516,22 +536,20 @@ public class ProjectConfig {
         mFeatures = features;
     }
 
-    public ScriptConfig getScriptConfig(String path) {
-        ScriptConfig scriptConfig = Objects.requireNonNull(mScriptConfigs.getOrDefault(path, new ScriptConfig()));
-        List<String> combinedFeatures = getCombinedFeatures(scriptConfig);
-        scriptConfig.setFeatures(combinedFeatures);
-        return scriptConfig;
-    }
-
-    @NotNull
-    public ArrayList<String> getCombinedFeatures(ScriptConfig scriptConfig) {
-        return new ArrayList<>(
-                new HashSet<>() {{
-                    addAll(scriptConfig.getFeatures());
-                    addAll(mFeatures);
-                }}
-        );
-    }
+    // @Commented by SuperMonster003 on Jan 20, 2025.
+    //  ! Unused config options: "scripts".
+    //  ! zh-CN: 未使用的配置选项: "scripts".
+    //  # public ScriptConfig getScriptConfig(String scriptKeyName) {
+    //  #     ScriptConfig scriptConfig = Objects.requireNonNull(mScriptConfigs.getOrDefault(scriptKeyName, new ScriptConfig()));
+    //  #     List<String> combinedFeatures = new ArrayList<>(
+    //  #             new HashSet<>() {{
+    //  #                 addAll(scriptConfig.getFeatures());
+    //  #                 addAll(mFeatures);
+    //  #             }}
+    //  #     );
+    //  #     scriptConfig.setFeatures(combinedFeatures);
+    //  #     return scriptConfig;
+    //  # }
 
     public List<File> getExcludedDirs() {
         return mExcludedDirs;
@@ -566,9 +584,23 @@ public class ProjectConfig {
     }
 
     public ProjectConfig setSignatureScheme(String signatureScheme) {
-        mSignatureScheme = signatureScheme;
+        mSignatureScheme = normalizeSignatureScheme(signatureScheme);
         return this;
     }
+
+    public static String normalizeSignatureScheme(String input) {
+        Pattern pattern = Pattern.compile("v\\d+", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(input);
+        Set<String> matches = new HashSet<>();
+        while (matcher.find()) {
+            matches.add(matcher.group().toUpperCase());
+        }
+        if (matches.isEmpty()) {
+            return input.trim();
+        }
+        return matches.stream().sorted().collect(Collectors.joining(" + "));
+    }
+
 
     @Nullable
     public KeyStore getKeyStore() {
