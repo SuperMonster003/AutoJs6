@@ -8,6 +8,7 @@
         "ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修) _[`issue #298`](http://issues.autojs6.com/298)_",
         "notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_",
         "floaty.window/floaty.rawWindow 无法在子线程执行的问题",
+        "ui.inflate 返回值丢失 attr/on/click 等原型方法的问题",
         "代码编辑器跳转到行尾时可能跳转到下一行起始位置的问题"
       ],
       "improvement": [
