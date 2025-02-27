@@ -135,7 +135,9 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         }
 
         fun findView(id: String?): View? {
-            return mWindow?.let { JsViewHelper.findViewByStringId(it.contentView, id) }
+            val win = mWindow ?: return null
+            val contentView = win.contentView ?: return null
+            return JsViewHelper.findViewByStringId(contentView, id)
         }
 
         val x: Int

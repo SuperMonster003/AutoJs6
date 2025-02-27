@@ -22,6 +22,7 @@ import org.mozilla.javascript.AbstractEcmaObjectOperations
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Callable
+import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.ImporterTopLevel
@@ -265,8 +266,12 @@ object RhinoUtils {
     }!!
 
     @JvmStatic
-    fun unwrap(o: Any?) = when (o) {
-        is Wrapper -> o.unwrap()
+    fun unwrap(o: Any?): Any? = when (o) {
+        is String -> o
+        is ConsString -> o.toString()
+        is Number -> Context.toNumber(o)
+        is Boolean -> Context.toBoolean(o)
+        is Wrapper -> unwrap(o.unwrap())
         is Unit -> UNDEFINED
         else -> o
     }
