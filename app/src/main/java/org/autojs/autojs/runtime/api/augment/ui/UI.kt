@@ -622,14 +622,15 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         private fun bindValueForApplyingAttribute(scriptRuntime: ScriptRuntime, value: String): String {
             val ctx = scriptRuntime.ui.bindingContext ?: return value
+            val niceCtx = ctx as? Scriptable
+                ?: Context.javaToJS(ctx, scriptRuntime.topLevelScope) as? Scriptable
+                ?: scriptRuntime.topLevelScope
             var tmp = value
             var i = -1
             while (tmp.indexOf("{{", i + 1).also { i = it } >= 0) {
                 val j = tmp.indexOf("}}", i + 1)
-                if (j < 0) {
-                    return tmp
-                }
-                val evaluated = evalInContext(scriptRuntime, tmp.slice(i + 2 until j), ctx)
+                if (j < 0) return tmp
+                val evaluated = evalInContext(tmp.slice(i + 2 until j), niceCtx)
                 tmp = tmp.slice(0 until i) + attrValueConvert(evaluated) + tmp.slice(j + 2 until tmp.length)
             }
             return tmp
@@ -647,38 +648,39 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             else -> xml.toString()
         }
 
-        private fun evalInContext(scriptRuntime: ScriptRuntime, expression: String, ctx: Any): Any {
-            val scope = scriptRuntime.topLevelScope
-            return withRhinoContext { context ->
-
-                // FIXME by SuperMonster003 on Jul 21, 2024.
-                //  ! This code snippet is difficult to convert to Kotlin.
-                //  ! The reason is that it contains JavaScript's "with" statement,
-                //  ! and I haven't found a way to convert it in Rhino for now.
-                //  ! Use the literal JavaScript code to ensure the functionality temporarily.
-                //  ! zh-CN:
-                //  ! 这段代码转换为 Kotlin 有些困难.
-                //  ! 因为它包含了 JavaScript 的 "with" 语句,
-                //  ! 我暂时没有找到对应的 Rhino 转换方式.
-                //  ! 暂时先用 JavaScript 字面量代码的方式保证其功能性.
-
-                // language=JavaScript
-                val script = """
-                // noinspection JSUnusedLocalSymbols
-                function evalInContext(expression, ctx) {
-                    return __exitIfError__(() => {
-                        // noinspection WithStatementJS
-                        with (ctx) {
-                            return (/* @IIFE */ function () {
-                                return eval(expression);
-                            })();
-                        }
-                    });
+        /**
+         * This method is used to execute a given JavaScript expression within a specified context
+         * and return the result of that execution.
+         *
+         * zh-CN: 此方法用于在指定的上下文中执行所给定的 JavaScript 表达式, 并返回执行结果.
+         *
+         * The core logic of this method comes from the following JavaScript code.
+         *
+         * zh-CN: 该方法的核心逻辑来源于以下 JavaScript 代码:
+         *
+         * ```JavaScript
+         * function evalInContext(expression, ctx) {
+         *     return __exitIfError__(() => {
+         *         with (ctx) {
+         *             return (/* @IIFE */ function () {
+         *                 return eval(expression);
+         *             })();
+         *         }
+         *     });
+         * }
+         * ```
+         *
+         * @param expression The JavaScript expression to evaluate as a string. (zh-CN: 用于执行的表达式.)
+         * @param ctx The context (scriptable scope) in which the expression should be evaluated. (zh-CN: 提供给参数 expression 的作用于上下文.)
+         * @return The result of evaluating the expression. (zh-CN: 参数 expression 执行结果.)
+         */
+        private fun evalInContext(expression: String, ctx: Scriptable): Any? {
+            val iife = object : BaseFunction() {
+                override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable, args: Array<out Any?>): Any? {
+                    return cx.evaluateString(scope, expression, "<eval>", 1, null)
                 }
-            """
-                val func = context.evaluateString(scope, script, "evalInContext", 1, null) as BaseFunction
-                func.call(context, scope, scope, arrayOf(expression, ctx))
-            }!!
+            }
+            return callFunction(iife, ctx, ctx, emptyArray())
         }
 
         private fun initListView(scriptRuntime: ScriptRuntime, list: JsListView) {

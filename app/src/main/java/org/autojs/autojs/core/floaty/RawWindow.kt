@@ -22,7 +22,7 @@ class RawWindow(private val supplier: BaseResizableFloatyWindow.ViewSupplier) : 
 
     private val mInflateException = VolatileDispose<RuntimeException>()
 
-    lateinit var contentView: View
+    var contentView: View? = null
 
     override fun onCreate(floatyService: FloatyService, windowManager: WindowManager) {
         try {
