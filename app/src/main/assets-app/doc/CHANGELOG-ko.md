@@ -124,7 +124,7 @@
 * `의존성` Toaster 버전 12.6 추가
 * `의존성` EasyWindow (for Toaster) 버전 10.3 추가
 * `의존성` Gradle 버전 8.5 -> 8.11.1 업그레이드
-* `의존성` Rhino 버전 1.7.15-snapshot에서 1.7.16-snapshot으로 업그레이드
+* `의존성` Rhino 버전 1.7.15-snapshot에서 1.8.0-snapshot으로 업그레이드
 * `의존성` Android Material Lang3 버전 1.10.0에서 1.12.0으로 업그레이드
 * `의존성` Androidx Annotation 버전 1.7.0에서 1.9.1으로 업그레이드
 * `의존성` Androidx AppCompat 버전 1.6.1에서 1.7.0으로 업그레이드

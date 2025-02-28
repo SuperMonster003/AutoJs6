@@ -124,7 +124,7 @@
 * `依存関係` 追加 Toaster バージョン 12.6
 * `依存関係` 追加 EasyWindow (for Toaster) バージョン 10.3
 * `依存関係` Gradle バージョンを 8.5 -> 8.11.1 にアップグレード
-* `依存関係` Rhino バージョン 1.7.15-snapshot -> 1.7.16-snapshot にアップグレード
+* `依存関係` Rhino バージョン 1.7.15-snapshot -> 1.8.0-snapshot にアップグレード
 * `依存関係` Android Material Lang3 バージョン 1.10.0 -> 1.12.0 にアップグレード
 * `依存関係` Androidx Annotation バージョン 1.7.0 -> 1.9.1 にアップグレード
 * `依存関係` Androidx AppCompat バージョン 1.6.1 -> 1.7.0 にアップグレード

@@ -64,7 +64,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 |        <span style="word-break:keep-all;white-space:nowrap">[Auto.js Pro 9](https://pro.autojs.org/)</span>        |                                                                                    <span style="word-break:keep-all;white-space:nowrap">AutoJsPro</span>                                                                                     |          <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span>           |                             <span style="word-break:keep-all;white-space:nowrap">`2021/03/28`</span>                              |                            <span style="word-break:keep-all;white-space:nowrap">`2023/02/09`</span>                             |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span>  |  <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/commit/a8ce1b9acb541e9736c33134be3194c3148a15a3#diff-833a46a97033e77558372a2dce103fd6fee29aaaa899f610022a7aece592ee7bR27)</span>  |  <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span>   |                             <span style="word-break:keep-all;white-space:nowrap">`2021/12/01`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
 |      <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/kkevsekk1/AutoX)</span>       |            <span style="white-space:pre">[Autox.js&#160;v6](https://github.com/kkevsekk1/AutoX/commit/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3#diff-51a0b488f963eb0be6c6599bf5df497313877cf5bdff3950807373912ac1cdc9R130)</span>             |           <span style="word-break:keep-all;white-space:nowrap">[wilinz](https://github.com/wilinz)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2022/05/26`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
-|      <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/kkevsekk1/AutoX)</span>       |            <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/kkevsekk1/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)</span>             |           <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2024/04/21`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
+|        <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span>        |              <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)</span>              |           <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2024/04/21`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
 
 表格中的日期为预估值, 实际可能存在出入.
 
@@ -124,7 +124,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * 多语言适配 [ 西 / 法 / 俄 / 阿 / 日 / 韩 / 英 / 简中 / 繁中 / ... ]
 * 夜间模式适配 [ 设置页面 / 文档页面 / 布局分析页面 / 浮动窗口 / ... ]
 * [VSCode 插件](http://vscext-project.autojs6.com) 支持客户端 (LAN) 及服务端 (LAN/ADB) 连接方式
-* [Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升级至 [v1.7.16-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3)
+* [Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升级至 [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3)
     * Unicode [码位](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 转义支持 [辅助平面](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 字符
        ```javascript
        '\u{1D160}'; /* 表示 "𝅘𝅥𝅮", 传统方式: '\uD834\uDD60'. */
@@ -153,6 +153,30 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 ### 版本历史
 
 ******
+
+# v6.6.2
+
+###### 2025/01/03
+
+* `修复` plugins.load 方法无法正常加载插件的问题 _[`issue #290`](http://issues.autojs6.com/290)_
+* `修复` dx 库在 Android 7.x 无法正常使用的问题 _[`issue #293`](http://issues.autojs6.com/293)_
+* `修复` ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修) _[`issue #298`](http://issues.autojs6.com/298)_
+* `修复` notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_
+* `修复` shizuku/shell 等方法无法接受字符串参数的问题 _[`issue #310`](http://issues.autojs6.com/310)_
+* `修复` engines.execScript/execScriptFile 等方法执行脚本时默认工作路径异常
+* `修复` floaty.window/floaty.rawWindow 无法在子线程执行的问题
+* `修复` ui.inflate 返回值丢失 attr/on/click 等原型方法的问题
+* `修复` 代码编辑器跳转到行尾时可能跳转到下一行起始位置的问题
+* `优化` 精简打包应用模板 APK 文件大小
+* `优化` 打包页面支持 Pinyin 库选项
+* `优化` 打包应用主活动页面优化状态栏背景及文字颜色
+* `优化` 脚本项目配置文件 project.json 支持更多打包选项 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `优化` 脚本项目配置文件 project.json 支持选项名称宽松匹配及别名兼容
+* `优化` APK 文件类型信息对话框增加文件大小与签名方案信息
+* `优化` APK 文件类型信息对话框增加点击监听器支持文本复制与应用详情跳转
+* `优化` 尝试恢复 com.stardust 前缀包以便提升代码兼容性 _[`issue #290`](http://issues.autojs6.com/290)_
+* `优化` floaty.window/floaty.rawWindow 同时支持主线程和子线程执行
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v662)_
 
 # v6.6.1
 
@@ -270,46 +294,6 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` Gradle 构建脚本提升版本自适应能力
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v660)_
 
-# v6.5.0
-
-###### 2023/12/02
-
-* `新增` opencc 模块 (参阅 项目文档 > [中文转换](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
-* `新增` UiSelector 增加 [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) 及 [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) 方法 _[`issue #115`](http://issues.autojs6.com/115)_
-* `新增` 打包应用页面增加 ABI 及库的筛选支持 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
-* `修复` 打包应用文件体积异常庞大的问题 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
-* `修复` 打包应用无法显示并打印部分异常消息的问题
-* `修复` 打包应用页面选择应用图标后可能显示空图标的问题
-* `修复` 打包应用包含 MLKit Google OCR 库时可能出现的上下文未初始化异常
-* `修复` ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u> 方法无效的问题
-* `修复` 部分文本 (如日志页面) 显示语言与应用设置语言可能不相符的问题
-* `修复` 部分语言在主页抽屉开关项可能出现文本溢出的问题
-* `修复` 部分设备无障碍服务开启后立即自动关闭且无任何提示消息的问题 _[`issue #181`](http://issues.autojs6.com/181)_
-* `修复` 部分设备无障碍服务开启后设备物理按键可能导致应用崩溃的问题 (试修) _[`issue #183`](http://issues.autojs6.com/183)_ _[`issue #186`](http://issues.autojs6.com/186#issuecomment-1817307790)_
-* `修复` 使用 auto(true) 重启无障碍服务后 pickup 功能异常的问题 (试修) _[`issue #184`](http://issues.autojs6.com/184)_
-* `修复` floaty 模块创建浮动窗口拖动时可能导致应用崩溃的问题 (试修)
-* `修复` app.startActivity 无法使用简称参数的问题 _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
-* `修复` importClass 导入的类名与全局变量冲突时代码抛出异常的问题 _[`issue #185`](http://issues.autojs6.com/185)_
-* `修复` Android 7.x 无法使用无障碍服务的问题
-* `修复` Android 14+ 可能无法正常使用 runtime.<u>loadJar/loadDex</u> 方法的问题 (试修)
-* `修复` 安卓系统快速设置面板中 "布局范围分析" 和 "布局层次分析" 不可用的问题 _[`issue #193`](http://issues.autojs6.com/193)_
-* `修复` 自动检查更新功能可能导致应用 [ANR](https://developer.android.com/topic/performance/vitals/anr) 的问题 (试修) _[`issue #186`](http://issues.autojs6.com/186)_
-* `修复` 文件管理器示例代码文件夹点击 "向上" 按钮后无法回到工作路径页面的问题 _[`issue #129`](http://issues.autojs6.com/129)_
-* `修复` 代码编辑器使用替换功能时替换按钮无法显示的问题
-* `修复` 代码编辑器长按删除时可能导致应用崩溃的问题 (试修)
-* `修复` 代码编辑器点击 fx 按钮无法显示模块函数快捷面板的问题
-* `修复` 代码编辑器模块函数快捷面板按钮函数名称可能溢出的问题
-* `优化` 代码编辑器模块函数快捷面板适配夜间模式
-* `优化` 打包应用启动页面适配夜间模式并调整应用图标布局
-* `优化` 打包应用页面支持使用软键盘 ENTER 键实现光标跳转
-* `优化` 打包应用页面支持点击 ABI 标题及库标题切换全选状态
-* `优化` 打包应用页面默认 ABI 智能选择并增加不可选择项的引导提示
-* `优化` 文件管理器根据文件及文件夹的类型及特征调整菜单项的显示情况
-* `优化` 文件管理器文件夹右键菜单增加打包应用选项
-* `优化` 无障碍服务启用但功能异常时在 AutoJs6 主页抽屉开关处将体现异常状态
-* `优化` 控制台打印错误消息时附加详细的堆栈信息
-* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
-
 ##### 更多版本历史可参阅
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-zh-Hans.md)
@@ -326,12 +310,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Ladybug Feature Drop | 2024.2.2 RC 2` 版本 (按需选择其一):
+下载 `Android Studio Ladybug Feature Drop | 2024.2.2` 版本 (按需选择其一):
 
-- [android-studio-2024.2.2.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.12/android-studio-2024.2.2.12-windows.exe) (1.14 GB)
-- [android-studio-2024.2.2.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.12/android-studio-2024.2.2.12-windows.zip) (1.15 GB)
+- [android-studio-2024.2.2.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.13/android-studio-2024.2.2.13-windows.exe) (1.14 GB)
+- [android-studio-2024.2.2.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.13/android-studio-2024.2.2.13-windows.zip) (1.15 GB)
 
-> 注: 上述版本发布时间为 2024 年 12 月 16 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2025 年 1 月 9 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -375,7 +359,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2025 年 1 月 1 日, AutoJs6 可支持 JDK 最高版本为 `23`.
+截至 2025 年 2 月 28 日, AutoJs6 可支持 JDK 最高版本为 `23`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

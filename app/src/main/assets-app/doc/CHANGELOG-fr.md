@@ -124,7 +124,7 @@
 * `Dépendance` Inclure la version 12.6 de Toaster
 * `Dépendance` Inclure la version 10.3 de EasyWindow (pour Toaster)
 * `Dépendance` Mettre à niveau la version 8.5 de Gradle -> 8.11.1 
-* `Dépendance` Mettre à niveau la version 1.7.15-snapshot de Rhino -> 1.7.16-snapshot
+* `Dépendance` Mettre à niveau la version 1.7.15-snapshot de Rhino -> 1.8.0-snapshot
 * `Dépendance` Mettre à niveau la version 1.10.0 d'Android Material Lang3 -> 1.12.0
 * `Dépendance` Mettre à niveau la version 1.7.0 d'Androidx Annotation -> 1.9.1
 * `Dépendance` Mettre à niveau la version 1.6.1 d'Androidx AppCompat -> 1.7.0

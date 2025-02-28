@@ -173,7 +173,7 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:markwon-syntax-highlight-4.6.2"))
 
     // Rhino
-    implementation(files("$rootDir/libs/org.mozilla.rhino-1.7.16-snapshot.jar"))
+    implementation(files("$rootDir/libs/org.mozilla.rhino-1.8.1-snapshot.jar"))
 
     // Tasker Plugin
     implementation(project(":libs:android-spackle-9.0.0"))
@@ -400,11 +400,29 @@ android {
 
     defaultConfig {
         applicationId = applicationId
+
         minSdk = versions.sdkVersionMin
         targetSdk = versions.sdkVersionTarget
+
+        versionCode = versions.appVersionCode
+        versionName = versions.appVersionName
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
         multiDexEnabled = true
+
+        buildConfigField("String", "VERSION_DATE", "\"${Utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
+        buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
         buildConfigField("boolean", "is${flavorNameInrt.uppercaseFirstChar()}", "false")
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                mapOf(
+                    "resourcePackageName" to (this@defaultConfig.applicationId ?: globalApplicationId),
+                    "androidManifestFile" to ("$projectDir/src/main/AndroidManifest.xml")
+                ).let { arguments(it) }
+            }
+        }
     }
 
     flavorDimensions.add(dimention)
@@ -653,22 +671,6 @@ android {
         //  # composeOptions {
         //  #     kotlinCompilerExtensionVersion = "1.5.12"
         //  # }
-    }
-
-    defaultConfig {
-        versionCode = versions.appVersionCode
-        versionName = versions.appVersionName
-        multiDexEnabled = true
-        javaCompileOptions {
-            annotationProcessorOptions {
-                mapOf(
-                    "resourcePackageName" to (this@defaultConfig.applicationId ?: globalApplicationId),
-                    "androidManifestFile" to ("$projectDir/src/main/AndroidManifest.xml")
-                ).let { arguments(it) }
-            }
-        }
-        buildConfigField("String", "VERSION_DATE", "\"${Utils.getDateString("MMM d, yyyy", "GMT+08:00")}\"")
-        buildConfigField("String", "VSCODE_EXT_REQUIRED_VERSION", "\"${versions.vscodeExtRequiredVersion}\"")
     }
 
     applicationVariants.all {

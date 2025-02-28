@@ -64,7 +64,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 |        <span style="word-break:keep-all;white-space:nowrap">[Auto.js Pro 9](https://pro.autojs.org/)</span>        |                                                                                    <span style="word-break:keep-all;white-space:nowrap">AutoJsPro</span>                                                                                     |          <span style="word-break:keep-all;white-space:nowrap">[hyb1996](https://github.com/hyb1996)</span>           |                             <span style="word-break:keep-all;white-space:nowrap">`2021/03/28`</span>                              |                            <span style="word-break:keep-all;white-space:nowrap">`2023/02/09`</span>                             |
 | <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6)</span>  |  <span style="word-break:keep-all;white-space:nowrap">[AutoJs6](https://github.com/SuperMonster003/AutoJs6/commit/a8ce1b9acb541e9736c33134be3194c3148a15a3#diff-833a46a97033e77558372a2dce103fd6fee29aaaa899f610022a7aece592ee7bR27)</span>  |  <span style="word-break:keep-all;white-space:nowrap">[SuperMonster003](https://github.com/SuperMonster003)</span>   |                             <span style="word-break:keep-all;white-space:nowrap">`2021/12/01`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
 |      <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/kkevsekk1/AutoX)</span>       |            <span style="white-space:pre">[Autox.js&#160;v6](https://github.com/kkevsekk1/AutoX/commit/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3#diff-51a0b488f963eb0be6c6599bf5df497313877cf5bdff3950807373912ac1cdc9R130)</span>             |           <span style="word-break:keep-all;white-space:nowrap">[wilinz](https://github.com/wilinz)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2022/05/26`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
-|      <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/kkevsekk1/AutoX)</span>       |            <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/kkevsekk1/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)</span>             |           <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2024/04/21`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
+|        <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span>        |              <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)</span>              |           <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2024/04/21`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
 
 表の日付は推定値であり、実際とは異なる場合があります.
 
@@ -124,7 +124,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * 多言語対応 [ 西 / 仏 / 露 / 阿 / 日 / 韓 / 英 / 簡中 / 繁中 / ... ]
 * ナイトモード対応 [ 設定ページ / ドキュメントページ / レイアウト分析ページ / 浮動ウィンドウ / ... ]
 * [VSCodeプラグイン](http://vscext-project.autojs6.com)がクライアント (LAN)とサーバ (LAN/ADB)接続方法をサポート
-* [Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から [v1.7.16-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) にアップグレードされました。
+* [Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) にアップグレードされました。
     * Unicode [コードポイント](https://developer.mozilla.org/ja/docs/Glossary/Code_point)エスケープのサポート [補助平面](https://ja.wikipedia.org/wiki/多言語面#補助平面)文字
        ```javascript
        '\u{1D160}'; /* を表します "𝅘𝅥𝅮", 従来の方法: '\uD834\uDD60'. */
@@ -326,12 +326,12 @@ AutoJs6 オープンソース プロジェクトのデバッグや開発が必�
 
 #### Android Studioの準備
 
-`Android Studio Ladybug Feature Drop | 2024.2.2 RC 2` バージョンをダウンロードしてください (いずれかを選択)。:
+`Android Studio Ladybug Feature Drop | 2024.2.2` バージョンをダウンロードしてください (いずれかを選択)。:
 
-- [android-studio-2024.2.2.12-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.12/android-studio-2024.2.2.12-windows.exe) (1.14 GB)
-- [android-studio-2024.2.2.12-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.12/android-studio-2024.2.2.12-windows.zip) (1.15 GB)
+- [android-studio-2024.2.2.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.13/android-studio-2024.2.2.13-windows.exe) (1.14 GB)
+- [android-studio-2024.2.2.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.13/android-studio-2024.2.2.13-windows.zip) (1.15 GB)
 
-> 注: 上述バージョンのリリース日は 2024 年 12 月 16 日 です。その他のバージョンをダウンロードするか、上記のリンクが失効している場合は、[Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください。.
+> 注: 上述バージョンのリリース日は 2025 年 1 月 9 日 です。その他のバージョンをダウンロードするか、上記のリンクが失効している場合は、[Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください。.
 
 上記のファイルをインストールまたは解凍し、Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -375,7 +375,7 @@ SDK Tools (SDK ツール) (右側のウィンドウにあります)
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で、それ以下のバージョンは推奨されませんが、最低でも `19` の使用を推奨します。.
 
-2025 年 1 月 1 日 現在、AutoJs6がサポートする最大のJDKバージョンは `23` です。.
+2025 年 2 月 28 日 現在、AutoJs6がサポートする最大のJDKバージョンは `23` です。.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合、この節の内容をスキップできます。.
 

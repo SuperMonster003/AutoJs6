@@ -124,7 +124,7 @@
 * `Dependency` Include Toaster version 12.6
 * `Dependency` Include EasyWindow (for Toaster) version 10.3
 * `Dependency` Upgrade Gradle version from 8.5 -> 8.11.1
-* `Dependency` Upgrade Rhino version 1.7.15-snapshot -> 1.7.16-snapshot
+* `Dependency` Upgrade Rhino version 1.7.15-snapshot -> 1.8.0-snapshot
 * `Dependency` Upgrade Android Material Lang3 version 1.10.0 -> 1.12.0
 * `Dependency` Upgrade Androidx Annotation version 1.7.0 -> 1.9.1
 * `Dependency` Upgrade Androidx AppCompat version 1.6.1 -> 1.7.0
