@@ -9,7 +9,6 @@ import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.toRuntimePath
 import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.ScriptableObjectExtensions.acquire
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -23,7 +22,7 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
-@Suppress("unused", "UNUSED_PARAMETER")
+@Suppress("unused")
 class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
     override val selfAssignmentFunctions = listOf(
@@ -108,30 +107,29 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
             scriptRuntime.engines.execAutoFile(coerceString(path), fillConfig(scriptRuntime, config))
         }
 
-        private fun fillConfig(scriptRuntime: ScriptRuntime, config: Any?): ExecutionConfig {
-            val c = ExecutionConfig()
-            when {
-                config.isJsNullish() -> Unit
-                config is ExecutionConfig -> {
-                    c.workingDirectory = config.workingDirectory
-                    c.delay = config.delay
-                    c.interval = config.interval
-                    c.loopTimes = config.loopTimes
-                    config.arguments.entries.forEach { c.setArgument(it.key, it.value) }
+        private fun fillConfig(scriptRuntime: ScriptRuntime, o: Any?): ExecutionConfig {
+            val result = ExecutionConfig()
+            when (val config = if (o.isJsNullish()) newNativeObject() else o) {
+                is ExecutionConfig -> {
+                    result.workingDirectory = config.workingDirectory.takeUnless { it.isEmpty() } ?: scriptRuntime.files.cwd()
+                    result.delay = config.delay.takeUnless { it < 0 } ?: 0L
+                    result.interval = config.interval.takeUnless { it < 0 } ?: 0L
+                    result.loopTimes = config.loopTimes.takeUnless { it < 0 } ?: 1
+                    config.arguments.entries.forEach { result.setArgument(it.key, it.value) }
                 }
-                config is ScriptableObject -> {
-                    c.workingDirectory = config.acquire("path") { it.toRuntimePath(scriptRuntime) }
-                    c.delay = config.inquire("delay", ::coerceLongNumber, 0L)
-                    c.interval = config.inquire("interval", ::coerceLongNumber, 0L)
-                    c.loopTimes = config.inquire("loopTimes", ::coerceIntNumber, 1)
+                is ScriptableObject -> {
+                    result.workingDirectory = config.inquire(listOf("path", "workingDirectory"), { o, _ -> o.toRuntimePath(scriptRuntime) }, scriptRuntime.files.cwd())
+                    result.delay = config.inquire("delay", ::coerceLongNumber, 0L)
+                    result.interval = config.inquire("interval", ::coerceLongNumber, 0L)
+                    result.loopTimes = config.inquire("loopTimes", ::coerceIntNumber, 1)
                     config.inquire("arguments") {
                         require(it is NativeObject) { "Property \"arguments\" of config for Engines#fillConfig must be a JavaScript Object" }
-                        it.entries.forEach { (key, value) -> c.setArgument(coerceString(key), value) }
+                        it.entries.forEach { (key, value) -> result.setArgument(coerceString(key), value) }
                     }
                 }
                 else -> throw WrappedIllegalArgumentException("Argument config ${config.jsBrief()} for Engines#fillConfig is invalid")
             }
-            return c
+            return result
         }
 
     }
