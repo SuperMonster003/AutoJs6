@@ -4,6 +4,29 @@
 
 ******
 
+# v6.6.2
+
+###### 2025/01/03
+
+* `修复` plugins.load 方法无法正常加载插件的问题 _[`issue #290`](http://issues.autojs6.com/290)_
+* `修复` dx 库在 Android 7.x 无法正常使用的问题 _[`issue #293`](http://issues.autojs6.com/293)_
+* `修复` ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修) _[`issue #298`](http://issues.autojs6.com/298)_
+* `修复` notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_
+* `修复` shizuku/shell 等方法无法接受字符串参数的问题 _[`issue #310`](http://issues.autojs6.com/310)_
+* `修复` engines.execScript/execScriptFile 等方法执行脚本时默认工作路径异常
+* `修复` floaty.window/floaty.rawWindow 无法在子线程执行的问题
+* `修复` ui.inflate 返回值丢失 attr/on/click 等原型方法的问题
+* `修复` 代码编辑器跳转到行尾时可能跳转到下一行起始位置的问题
+* `优化` 精简打包应用模板 APK 文件大小
+* `优化` 打包页面支持 Pinyin 库选项
+* `优化` 打包应用主活动页面优化状态栏背景及文字颜色
+* `优化` 脚本项目配置文件 project.json 支持更多打包选项 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `优化` 脚本项目配置文件 project.json 支持选项名称宽松匹配及别名兼容
+* `优化` APK 文件类型信息对话框增加文件大小与签名方案信息
+* `优化` APK 文件类型信息对话框增加点击监听器支持文本复制与应用详情跳转
+* `优化` 尝试恢复 com.stardust 前缀包以便提升代码兼容性 _[`issue #290`](http://issues.autojs6.com/290)_
+* `优化` floaty.window/floaty.rawWindow 同时支持主线程和子线程执行
+
 # v6.6.1
 
 ###### 2025/01/01
@@ -124,7 +147,7 @@
 * `依赖` 附加 Toaster 版本 12.6
 * `依赖` 附加 EasyWindow (for Toaster) 版本 10.3
 * `依赖` 升级 Gradle 版本 8.5 -> 8.11.1
-* `依赖` 升级 Rhino 版本 1.7.15-snapshot -> 1.7.16-snapshot
+* `依赖` 升级 Rhino 版本 1.7.15-snapshot -> 1.8.0-snapshot
 * `依赖` 升级 Android Material Lang3 版本 1.10.0 -> 1.12.0
 * `依赖` 升级 Androidx Annotation 版本 1.7.0 -> 1.9.1
 * `依赖` 升级 Androidx AppCompat 版本 1.6.1 -> 1.7.0

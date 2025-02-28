@@ -134,7 +134,7 @@
         "Incluir la versión 12.6 de Toaster",
         "Incluir la versión 10.3 de EasyWindow (para Toaster)",
         "Actualización de versión de Gradle de 8.5 a 8.11.1",
-        "Actualizar la versión 1.7.15-snapshot de Rhino -> 1.7.16-snapshot",
+        "Actualizar la versión 1.7.15-snapshot de Rhino -> 1.8.0-snapshot",
         "Actualizar la versión 1.10.0 de Android Material Lang3 -> 1.12.0",
         "Actualizar la versión 1.7.0 de Androidx Annotation -> 1.9.1",
         "Actualizar la versión 1.6.1 de Androidx AppCompat -> 1.7.0",

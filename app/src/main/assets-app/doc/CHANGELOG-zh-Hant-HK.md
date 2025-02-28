@@ -124,7 +124,7 @@
 * `依賴` 附加 Toaster 版本 12.6
 * `依賴` 附加 EasyWindow (for Toaster) 版本 10.3
 * `依賴` 升級 Gradle 版本 8.5 -> 8.11.1
-* `依賴` 升級 Rhino 版本 1.7.15-snapshot -> 1.7.16-snapshot
+* `依賴` 升級 Rhino 版本 1.7.15-snapshot -> 1.8.0-snapshot
 * `依賴` 升級 Android Material Lang3 版本 1.10.0 -> 1.12.0
 * `依賴` 升級 Androidx Annotation 版本 1.7.0 -> 1.9.1
 * `依賴` 升級 Androidx AppCompat 版本 1.6.1 -> 1.7.0
