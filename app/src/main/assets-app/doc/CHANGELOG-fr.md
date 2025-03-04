@@ -124,7 +124,7 @@
 * `Dépendance` Inclure la version 12.6 de Toaster
 * `Dépendance` Inclure la version 10.3 de EasyWindow (pour Toaster)
 * `Dépendance` Mettre à niveau la version 8.5 de Gradle -> 8.11.1 
-* `Dépendance` Mettre à niveau la version 1.7.15-snapshot de Rhino -> 1.8.0-snapshot
+* `Dépendance` Mettre à niveau la version 1.7.15-SNAPSHOT de Rhino -> 1.8.0-SNAPSHOT
 * `Dépendance` Mettre à niveau la version 1.10.0 d'Android Material Lang3 -> 1.12.0
 * `Dépendance` Mettre à niveau la version 1.7.0 d'Androidx Annotation -> 1.9.1
 * `Dépendance` Mettre à niveau la version 1.6.1 d'Androidx AppCompat -> 1.7.0
@@ -640,7 +640,7 @@
 * `Dépendance` Mise à jour de Kotlinx Coroutines de la version 1.6.0 à 1.6.1-native-mt
 * `Dépendance` Mise à jour de LeakCanary de la version 2.8.1 à 2.9.1
 * `Dépendance` Mise à jour d'OkHttp3 de la version 5.0.0-alpha.6 à 5.0.0-alpha.7
-* `Dépendance` Mise à jour de Rhino Engine de la version 1.7.14 à 1.7.15-snapshot
+* `Dépendance` Mise à jour de Rhino Engine de la version 1.7.14 à 1.7.15-SNAPSHOT
 * `Dépendance` Mise à jour de Zip4j de la version 2.9.1 à 2.10.0
 * `Dépendance` Suppression de Groovy JSON version 3.0.8
 * `Dépendance` Suppression de Kotlin Stdlib JDK7 version 1.6.21
@@ -692,7 +692,7 @@
 * `Dépendance` Ajout de la version 1.0.2 de Androidx AppCompat (Legacy)
 * `Dépendance` Mise à niveau de la version de Androidx AppCompat de 1.4.0 à 1.4.1
 * `Dépendance` Mise à niveau de la version de Androidx Preference de 1.1.1 à 1.2.0
-* `Dépendance` Mise à niveau de la version du moteur Rhino de 1.7.14-snapshot à 1.7.14
+* `Dépendance` Mise à niveau de la version du moteur Rhino de 1.7.14-SNAPSHOT à 1.7.14
 * `Dépendance` Mise à niveau de la version d'OkHttp3 de 3.10.0 à 5.0.0-alpha.3 puis 5.0.0-alpha.4
 * `Dépendance` Mise à niveau de la version de Android Material de 1.6.0-alpha01 à 1.6.0-alpha02
 * `Dépendance` Mise à niveau de la version des outils de construction Gradle de 7.2.0-alpha06 à 7.2.0-beta01
@@ -729,7 +729,7 @@
 * `Correction` Problème où les plugins de packaging ne sont pas reconnus et l'adresse de téléchargement des plugins de packaging est invalide
 * `Correction` Problème où l'état du commutateur de la permission d'utilisation sur la page d'accueil peut ne pas se synchroniser
 * `Correction` Problème potentiel de fuite de mémoire Mat dans TemplateMatching.fastTemplateMatching
-* `Amélioration` Mise à niveau de la version du moteur Rhino de 1.7.7.2 à 1.7.13 puis 1.7.14-snapshot
+* `Amélioration` Mise à niveau de la version du moteur Rhino de 1.7.7.2 à 1.7.13 puis 1.7.14-SNAPSHOT
 * `Amélioration` Mise à niveau d'OpenCV de 3.4.3 à 4.5.4
 * `Amélioration` Amélioration de la compatibilité de ViewUtil.getStatusBarHeight
 * `Amélioration` Suppression des modules relatifs à la connexion utilisateur et du placement des mises en page dans le tiroir de la page d'accueil

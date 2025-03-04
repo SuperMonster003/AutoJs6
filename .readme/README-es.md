@@ -9,10 +9,10 @@
 
   <p>
     <a href="http://download.autojs6.com"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6"/></a>
-    <a href="http://issues.autojs6.com"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6?color=009688"/></a>
+    <a href="http://issues.autojs6.com"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6?color=A24232"/></a>
     <a href="http://commit.autojs6.com/99a1d8490fac5b6d55f6f183db59ad833a2064ed"><img alt="Created" src="https://img.shields.io/date/1636632233?color=2e7d32&label=created"/></a>
     <br>
-    <a href="https://github.com/mozilla/rhino"><img alt="Rhino" src="https://img.shields.io/badge/rhino-1.7.16--snapshot-A24232"/></a>
+    <a href="https://github.com/mozilla/rhino"><img alt="Rhino" src="https://img.shields.io/badge/rhino-1.8.1--SNAPSHOT-795548"/></a>
     <a href="https://developer.android.com/studio/archive"><img alt="Android Studio" src="https://img.shields.io/badge/android%20studio-2022.1+-B64FC8"/></a>
     <br>
     <a href="https://www.codefactor.io/repository/github/SuperMonster003/AutoJs6"><img alt="CodeFactor Grade" src="https://www.codefactor.io/repository/github/SuperMonster003/AutoJs6/badge"/></a>
@@ -375,7 +375,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `19`.
 
-Hasta el 28 de February de 2025, AutoJs6 soporta hasta la versión `23` de JDK.
+Hasta el 3 de March de 2025, AutoJs6 soporta hasta la versión `23` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

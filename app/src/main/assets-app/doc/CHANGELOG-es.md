@@ -124,7 +124,7 @@
 * `Dependencia` Incluir la versión 12.6 de Toaster
 * `Dependencia` Incluir la versión 10.3 de EasyWindow (para Toaster)
 * `Dependencia` Actualización de versión de Gradle de 8.5 a 8.11.1
-* `Dependencia` Actualizar la versión 1.7.15-snapshot de Rhino -> 1.8.0-snapshot
+* `Dependencia` Actualizar la versión 1.7.15-SNAPSHOT de Rhino -> 1.8.0-SNAPSHOT
 * `Dependencia` Actualizar la versión 1.10.0 de Android Material Lang3 -> 1.12.0
 * `Dependencia` Actualizar la versión 1.7.0 de Androidx Annotation -> 1.9.1
 * `Dependencia` Actualizar la versión 1.6.1 de Androidx AppCompat -> 1.7.0
@@ -639,7 +639,7 @@
 * `Dependencia` Actualización de Kotlinx Coroutines de la versión 1.6.0 a 1.6.1-native-mt
 * `Dependencia` Actualización de LeakCanary de la versión 2.8.1 a 2.9.1
 * `Dependencia` Actualización de OkHttp3 de la versión 5.0.0-alpha.6 a 5.0.0-alpha.7
-* `Dependencia` Actualización del motor Rhino de la versión 1.7.14 a 1.7.15-snapshot
+* `Dependencia` Actualización del motor Rhino de la versión 1.7.14 a 1.7.15-SNAPSHOT
 * `Dependencia` Actualización de Zip4j de la versión 2.9.1 a 2.10.0
 * `Dependencia` Eliminación de Groovy JSON versión 3.0.8
 * `Dependencia` Eliminación de Kotlin Stdlib JDK7 versión 1.6.21
@@ -691,7 +691,7 @@
 * `Dependencia` Añadida compatibilidad con Androidx AppCompat (Legacy) versión 1.0.2
 * `Dependencia` Actualización de Androidx AppCompat de la versión 1.4.0 a 1.4.1
 * `Dependencia` Actualización de Androidx Preference de la versión 1.1.1 a 1.2.0
-* `Dependencia` Actualización del motor Rhino de la versión 1.7.14-snapshot a 1.7.14
+* `Dependencia` Actualización del motor Rhino de la versión 1.7.14-SNAPSHOT a 1.7.14
 * `Dependencia` Actualización de OkHttp3 de la versión 3.10.0 a 5.0.0-alpha.3 y a 5.0.0-alpha.4
 * `Dependencia` Actualización de Android Material de la versión 1.6.0-alpha01 a 1.6.0-alpha02
 * `Dependencia` Actualización de las herramientas de construcción de Gradle de la versión 7.2.0-alpha06 a 7.2.0-beta01
@@ -728,7 +728,7 @@
 * `Corrección` Corrección de problemas de reconocimiento del plugin de empaquetado y la URL de descarga del plugin
 * `Corrección` Corrección del problema de sincronización del estado del interruptor de "ver permisos de uso" en el cajón de la página principal
 * `Corrección` Corrección de fugas de memoria potenciales en TemplateMatching.fastTemplateMatching relacionadas con Mat
-* `Mejora` Actualización de la versión del motor Rhino de 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot
+* `Mejora` Actualización de la versión del motor Rhino de 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
 * `Mejora` Actualización de OpenCV de 3.4.3 -> 4.5.4
 * `Mejora` Mejora de la compatibilidad de ViewUtil.getStatusBarHeight
 * `Mejora` Eliminación del módulo de inicio de sesión de usuario del cajón de la página principal y eliminación del espacio ocupado en el diseño

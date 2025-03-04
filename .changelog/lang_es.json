@@ -134,7 +134,7 @@
         "Incluir la versión 12.6 de Toaster",
         "Incluir la versión 10.3 de EasyWindow (para Toaster)",
         "Actualización de versión de Gradle de 8.5 a 8.11.1",
-        "Actualizar la versión 1.7.15-snapshot de Rhino -> 1.8.0-snapshot",
+        "Actualizar la versión 1.7.15-SNAPSHOT de Rhino -> 1.8.0-SNAPSHOT",
         "Actualizar la versión 1.10.0 de Android Material Lang3 -> 1.12.0",
         "Actualizar la versión 1.7.0 de Androidx Annotation -> 1.9.1",
         "Actualizar la versión 1.6.1 de Androidx AppCompat -> 1.7.0",
@@ -716,7 +716,7 @@
         "Actualización de Kotlinx Coroutines de la versión 1.6.0 a 1.6.1-native-mt",
         "Actualización de LeakCanary de la versión 2.8.1 a 2.9.1",
         "Actualización de OkHttp3 de la versión 5.0.0-alpha.6 a 5.0.0-alpha.7",
-        "Actualización del motor Rhino de la versión 1.7.14 a 1.7.15-snapshot",
+        "Actualización del motor Rhino de la versión 1.7.14 a 1.7.15-SNAPSHOT",
         "Actualización de Zip4j de la versión 2.9.1 a 2.10.0",
         "Eliminación de Groovy JSON versión 3.0.8",
         "Eliminación de Kotlin Stdlib JDK7 versión 1.6.21"
@@ -780,7 +780,7 @@
         "Añadida compatibilidad con Androidx AppCompat (Legacy) versión 1.0.2",
         "Actualización de Androidx AppCompat de la versión 1.4.0 a 1.4.1",
         "Actualización de Androidx Preference de la versión 1.1.1 a 1.2.0",
-        "Actualización del motor Rhino de la versión 1.7.14-snapshot a 1.7.14",
+        "Actualización del motor Rhino de la versión 1.7.14-SNAPSHOT a 1.7.14",
         "Actualización de OkHttp3 de la versión 3.10.0 a 5.0.0-alpha.3 y a 5.0.0-alpha.4",
         "Actualización de Android Material de la versión 1.6.0-alpha01 a 1.6.0-alpha02",
         "Actualización de las herramientas de construcción de Gradle de la versión 7.2.0-alpha06 a 7.2.0-beta01",
@@ -825,7 +825,7 @@
         "Corrección de fugas de memoria potenciales en TemplateMatching.fastTemplateMatching relacionadas con Mat"
       ],
       "improvement": [
-        "Actualización de la versión del motor Rhino de 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot",
+        "Actualización de la versión del motor Rhino de 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT",
         "Actualización de OpenCV de 3.4.3 -> 4.5.4",
         "Mejora de la compatibilidad de ViewUtil.getStatusBarHeight",
         "Eliminación del módulo de inicio de sesión de usuario del cajón de la página principal y eliminación del espacio ocupado en el diseño",

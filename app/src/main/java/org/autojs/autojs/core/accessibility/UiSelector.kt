@@ -1057,18 +1057,20 @@ open class UiSelector : UiObjectActions, StringReadable {
                                                     2 -> types.find { it is Array<*> }?.let { type: Any ->
                                                         val t = type as Array<*>
                                                         when {
-                                                            t[0] == cDouble && t[1] == cDouble -> tmp::class.java
-                                                                .getMethod(key, cDouble, cDouble)
-                                                                .invoke(tmp, *value.map { it.toString().toDouble() }.toTypedArray())
-                                                            t[0] == cBoolean && t[1] == cDouble -> tmp::class.java
-                                                                .getMethod(key, cBoolean, cDouble)
-                                                                .invoke(tmp, *value.mapIndexed { index, any ->
-                                                                    when (index) {
-                                                                        0 -> any.toString().toBoolean()
-                                                                        1 -> any.toString().toDouble()
-                                                                        else -> throw Exception("UiSelector: $key($value)")
-                                                                    }
-                                                                }.toTypedArray())
+                                                            t[0] == cDouble && t[1] == cDouble -> {
+                                                                val doubleArg0 = value[0].toString().toDouble()
+                                                                val doubleArg1 = value[1].toString().toDouble()
+                                                                tmp::class.java
+                                                                    .getMethod(key, cDouble, cDouble)
+                                                                    .invoke(tmp, doubleArg0, doubleArg1)
+                                                            }
+                                                            t[0] == cBoolean && t[1] == cDouble -> {
+                                                                val booleanArg0 = value[0].toString().toBoolean()
+                                                                val doubleArg1 = value[1].toString().toDouble()
+                                                                tmp::class.java
+                                                                    .getMethod(key, cBoolean, cDouble)
+                                                                    .invoke(tmp, booleanArg0, doubleArg1)
+                                                            }
                                                             else -> throw Exception("UiSelector: $key($value)")
                                                         }
                                                     } ?: throw Exception("UiSelector: $key($value)")
