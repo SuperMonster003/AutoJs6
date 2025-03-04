@@ -26,6 +26,11 @@
 * `优化` APK 文件类型信息对话框增加点击监听器支持文本复制与应用详情跳转
 * `优化` 尝试恢复 com.stardust 前缀包以便提升代码兼容性 _[`issue #290`](http://issues.autojs6.com/290)_
 * `优化` floaty.window/floaty.rawWindow 同时支持主线程和子线程执行
+* `依赖` 升级 Gradle Compile 版本 34 -> 35
+* `依赖` 升级 Gradle 版本 8.12 -> 8.13
+* `依赖` 升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
+* `依赖` 升级 Androidx Recyclerview 版本 1.3.2 -> 1.4.0
+* `依赖` 升级 Pinyin4j 版本 2.5.0 -> 2.5.1
 
 # v6.6.1
 
@@ -147,7 +152,7 @@
 * `依赖` 附加 Toaster 版本 12.6
 * `依赖` 附加 EasyWindow (for Toaster) 版本 10.3
 * `依赖` 升级 Gradle 版本 8.5 -> 8.11.1
-* `依赖` 升级 Rhino 版本 1.7.15-snapshot -> 1.8.0-snapshot
+* `依赖` 升级 Rhino 版本 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
 * `依赖` 升级 Android Material Lang3 版本 1.10.0 -> 1.12.0
 * `依赖` 升级 Androidx Annotation 版本 1.7.0 -> 1.9.1
 * `依赖` 升级 Androidx AppCompat 版本 1.6.1 -> 1.7.0
@@ -663,7 +668,7 @@
 * `依赖` 升级 Kotlinx Coroutines 版本 1.6.0 -> 1.6.1-native-mt
 * `依赖` 升级 LeakCanary 版本 2.8.1 -> 2.9.1
 * `依赖` 升级 OkHttp3 版本 5.0.0-alpha.6 -> 5.0.0-alpha.7
-* `依赖` 升级 Rhino 引擎版本 1.7.14 -> 1.7.15-snapshot
+* `依赖` 升级 Rhino 引擎版本 1.7.14 -> 1.7.15-SNAPSHOT
 * `依赖` 升级 Zip4j 版本 2.9.1 -> 2.10.0
 * `依赖` 移除 Groovy JSON 版本 3.0.8
 * `依赖` 移除 Kotlin Stdlib JDK7 版本 1.6.21
@@ -715,7 +720,7 @@
 * `依赖` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
 * `依赖` 升级 Androidx AppCompat 版本 1.4.0 -> 1.4.1
 * `依赖` 升级 Androidx Preference 版本 1.1.1 -> 1.2.0
-* `依赖` 升级 Rhino 引擎版本 1.7.14-snapshot -> 1.7.14
+* `依赖` 升级 Rhino 引擎版本 1.7.14-SNAPSHOT -> 1.7.14
 * `依赖` 升级 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `依赖` 升级 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
 * `依赖` 升级 Gradle 构建工具版本 7.2.0-alpha06 -> 7.2.0-beta01
@@ -752,7 +757,7 @@
 * `修复` 无法识别打包插件及打包插件下载地址无效的问题
 * `修复` 主页抽屉 "查看使用情况权限" 开关状态可能不同步的问题
 * `修复` TemplateMatching.fastTemplateMatching 潜在的 Mat 内存泄漏问题
-* `优化` 升级 Rhino 引擎版本 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot
+* `优化` 升级 Rhino 引擎版本 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
 * `优化` 升级 OpenCV 版本 3.4.3 -> 4.5.4
 * `优化` ViewUtil.getStatusBarHeight 提升兼容性
 * `优化` 主页抽屉移除用户登录相关模块并移除布局占位

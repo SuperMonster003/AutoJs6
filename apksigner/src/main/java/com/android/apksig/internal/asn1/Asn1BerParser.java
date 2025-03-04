@@ -16,6 +16,7 @@
 
 package com.android.apksig.internal.asn1;
 
+import android.os.Build;
 import com.android.apksig.internal.asn1.ber.BerDataValue;
 import com.android.apksig.internal.asn1.ber.BerDataValueFormatException;
 import com.android.apksig.internal.asn1.ber.BerDataValueReader;
@@ -333,7 +334,9 @@ public final class Asn1BerParser {
 
     private static Class<?> getElementType(Field field)
             throws Asn1DecodingException, ClassNotFoundException {
-        String type = field.getGenericType().getTypeName();
+        String type = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                ? field.getGenericType().getTypeName()
+                : field.getGenericType().toString();
         int delimiterIndex =  type.indexOf('<');
         if (delimiterIndex == -1) {
             throw new Asn1DecodingException("Not a container type: " + field.getGenericType());

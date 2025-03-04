@@ -124,7 +124,7 @@
 * `依賴` 附加 Toaster 版本 12.6
 * `依賴` 附加 EasyWindow (for Toaster) 版本 10.3
 * `依賴` 升級 Gradle 版本 8.5 -> 8.11.1
-* `依賴` 升級 Rhino 版本 1.7.15-snapshot -> 1.8.0-snapshot
+* `依賴` 升級 Rhino 版本 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
 * `依賴` 升級 Android Material Lang3 版本 1.10.0 -> 1.12.0
 * `依賴` 升級 Androidx Annotation 版本 1.7.0 -> 1.9.1
 * `依賴` 升級 Androidx AppCompat 版本 1.6.1 -> 1.7.0
@@ -640,7 +640,7 @@
 * `依賴` 升級 Kotlinx Coroutines 版本 1.6.0 -> 1.6.1-native-mt
 * `依賴` 升級 LeakCanary 版本 2.8.1 -> 2.9.1
 * `依賴` 升級 OkHttp3 版本 5.0.0-alpha.6 -> 5.0.0-alpha.7
-* `依賴` 升級 Rhino 引擎版本 1.7.14 -> 1.7.15-snapshot
+* `依賴` 升級 Rhino 引擎版本 1.7.14 -> 1.7.15-SNAPSHOT
 * `依賴` 升級 Zip4j 版本 2.9.1 -> 2.10.0
 * `依賴` 移除 Groovy JSON 版本 3.0.8
 * `依賴` 移除 Kotlin Stdlib JDK7 版本 1.6.21
@@ -692,7 +692,7 @@
 * `依賴` 附加 Androidx AppCompat (Legacy) 版本 1.0.2
 * `依賴` 升級 Androidx AppCompat 版本 1.4.0 -> 1.4.1
 * `依賴` 升級 Androidx Preference 版本 1.1.1 -> 1.2.0
-* `依賴` 升級 Rhino 引擎版本 1.7.14-snapshot -> 1.7.14
+* `依賴` 升級 Rhino 引擎版本 1.7.14-SNAPSHOT -> 1.7.14
 * `依賴` 升級 OkHttp3 版本 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `依賴` 升級 Android Material 版本 1.6.0-alpha01 -> 1.6.0-alpha02
 * `依賴` 升級 Gradle 構建工具版本 7.2.0-alpha06 -> 7.2.0-beta01
@@ -729,7 +729,7 @@
 * `修復` 無法識別打包外掛及打包外掛下載地址無效的問題
 * `修復` 主頁抽屜 "檢視使用情況許可權" 開關狀態可能不同步的問題
 * `修復` TemplateMatching.fastTemplateMatching 潛在的 Mat 記憶體洩漏問題
-* `最佳化` 升級 Rhino 引擎版本 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot
+* `最佳化` 升級 Rhino 引擎版本 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
 * `最佳化` 升級 OpenCV 版本 3.4.3 -> 4.5.4
 * `最佳化` ViewUtil.getStatusBarHeight 提升相容性
 * `最佳化` 主頁抽屜移除使用者登入相關模組並移除佈局佔位

@@ -124,7 +124,7 @@
 * `의존성` Toaster 버전 12.6 추가
 * `의존성` EasyWindow (for Toaster) 버전 10.3 추가
 * `의존성` Gradle 버전 8.5 -> 8.11.1 업그레이드
-* `의존성` Rhino 버전 1.7.15-snapshot에서 1.8.0-snapshot으로 업그레이드
+* `의존성` Rhino 버전 1.7.15-SNAPSHOT에서 1.8.0-SNAPSHOT으로 업그레이드
 * `의존성` Android Material Lang3 버전 1.10.0에서 1.12.0으로 업그레이드
 * `의존성` Androidx Annotation 버전 1.7.0에서 1.9.1으로 업그레이드
 * `의존성` Androidx AppCompat 버전 1.6.1에서 1.7.0으로 업그레이드
@@ -640,7 +640,7 @@
 * `의존성` Kotlinx Coroutines 버전 1.6.0 -> 1.6.1-native-mt 업그레이드
 * `의존성` LeakCanary 버전 2.8.1 -> 2.9.1 업그레이드
 * `의존성` OkHttp3 버전 5.0.0-alpha.6 -> 5.0.0-alpha.7 업그레이드
-* `의존성` Rhino 엔진 버전 1.7.14 -> 1.7.15-snapshot 업그레이드
+* `의존성` Rhino 엔진 버전 1.7.14 -> 1.7.15-SNAPSHOT 업그레이드
 * `의존성` Zip4j 버전 2.9.1 -> 2.10.0 업그레이드
 * `의존성` Groovy JSON 버전 3.0.8 제거
 * `의존성` Kotlin Stdlib JDK7 버전 1.6.21 제거
@@ -692,7 +692,7 @@
 * `의존성` Androidx AppCompat (Legacy) 버전 1.0.2 추가
 * `의존성` Androidx AppCompat 버전 1.4.0 -> 1.4.1 업그레이드
 * `의존성` Androidx Preference 버전 1.1.1 -> 1.2.0 업그레이드
-* `의존성` Rhino 엔진 버전 1.7.14-snapshot -> 1.7.14 업그레이드
+* `의존성` Rhino 엔진 버전 1.7.14-SNAPSHOT -> 1.7.14 업그레이드
 * `의존성` OkHttp3 버전 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4 업그레이드
 * `의존성` Android Material 버전 1.6.0-alpha01 -> 1.6.0-alpha02 업그레이드
 * `의존성` Gradle 빌드 도구 버전 7.2.0-alpha06 -> 7.2.0-beta01 업그레이드
@@ -729,7 +729,7 @@
 * `수정` 패키지 플러그인 및 패키지 플러그인 다운로드 주소 인식 불가 문제
 * `수정` 홈 드로어 "사용 상황 권한 확인" 스위치 상태가 동기화되지 않을 수 있는 문제
 * `수정` TemplateMatching.fastTemplateMatching의 잠재적인 Mat 메모리 누수 문제
-* `개선` Rhino 엔진 버전 업그레이드 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot
+* `개선` Rhino 엔진 버전 업그레이드 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
 * `개선` OpenCV 버전 업그레이드 3.4.3 -> 4.5.4
 * `개선` ViewUtil.getStatusBarHeight 호환성 향상
 * `개선` 홈 드로어 사용자 로그인 관련 모듈 제거 및 레이아웃 자리 비우기

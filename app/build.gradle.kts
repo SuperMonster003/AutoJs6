@@ -173,7 +173,7 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:markwon-syntax-highlight-4.6.2"))
 
     // Rhino
-    implementation(files("$rootDir/libs/org.mozilla.rhino-1.8.1-snapshot.jar"))
+    implementation(files("$rootDir/libs/org.mozilla.rhino-1.8.1-SNAPSHOT.jar"))
 
     // Tasker Plugin
     implementation(project(":libs:android-spackle-9.0.0"))
@@ -360,7 +360,7 @@ dependencies /* Auto.js Extensions */ {
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
     // @Legacy com.jrummyapps:colorpicker:2.1.7
     implementation("com.jaredrummler:colorpicker:1.1.0")
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("com.github.ozodrukh:CircularReveal:2.0.1")
 }
 

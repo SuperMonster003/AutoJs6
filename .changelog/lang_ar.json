@@ -134,7 +134,7 @@
         "إضافة Toaster نسخة 12.6",
         "إضافة EasyWindow (لـ Toaster) نسخة 10.3",
         "ترقية إصدار Gradle من 8.5 إلى 8.11.1",
-        "ترقية النسخة Rhino 1.7.15 إلى 1.8.0-snapshot",
+        "ترقية النسخة Rhino 1.7.15 إلى 1.8.0-SNAPSHOT",
         "ترقية النسخة Android Material Lang3 1.10.0 إلى 1.12.0",
         "ترقية النسخة Androidx Annotation 1.7.0 إلى 1.9.1",
         "ترقية النسخة Androidx AppCompat 1.6.1 إلى 1.7.0",
@@ -717,7 +717,7 @@
         "ترقية Kotlinx Coroutines من الإصدار 1.6.0 إلى 1.6.1-native-mt",
         "ترقية LeakCanary من الإصدار 2.8.1 إلى 2.9.1",
         "ترقية OkHttp3 من الإصدار 5.0.0-alpha.6 إلى 5.0.0-alpha.7",
-        "ترقية محرك Rhino من الإصدار 1.7.14 إلى 1.7.15-snapshot",
+        "ترقية محرك Rhino من الإصدار 1.7.14 إلى 1.7.15-SNAPSHOT",
         "ترقية Zip4j من الإصدار 2.9.1 إلى 2.10.0",
         "إزالة Groovy JSON الإصدار 3.0.8",
         "إزالة Kotlin Stdlib JDK7 الإصدار 1.6.21"
@@ -781,7 +781,7 @@
         "إضافة Androidx AppCompat (النسخة القديمة) الإصدار 1.0.2",
         "ترقية Androidx AppCompat من الإصدار 1.4.0 إلى 1.4.1",
         "ترقية Androidx Preference من الإصدار 1.1.1 إلى 1.2.0",
-        "ترقية محرك Rhino من الإصدار 1.7.14-snapshot إلى 1.7.14",
+        "ترقية محرك Rhino من الإصدار 1.7.14-SNAPSHOT إلى 1.7.14",
         "ترقية OkHttp3 من الإصدار 3.10.0 إلى 5.0.0-alpha.3 وإلى 5.0.0-alpha.4",
         "ترقية Android Material من الإصدار 1.6.0-alpha01 إلى 1.6.0-alpha02",
         "ترقية أداة بناء Gradle من الإصدار 7.2.0-alpha06 إلى 7.2.0-beta01",
@@ -826,7 +826,7 @@
         "إصلاح مشكلة تسريب ذاكرة Mat المحتملة في TemplateMatching.fastTemplateMatching"
       ],
       "improvement": [
-        "ترقية نسخة Rhino من 1.7.7.2 إلى 1.7.13 إلى 1.7.14-snapshot",
+        "ترقية نسخة Rhino من 1.7.7.2 إلى 1.7.13 إلى 1.7.14-SNAPSHOT",
         "ترقية نسخة OpenCV من 3.4.3 إلى 4.5.4",
         "تحسين التوافق لـ ViewUtil.getStatusBarHeight",
         "إزالة وحدة تسجيل الدخول من الدرج الرئيسي وإزالة التخصيصات الخاصة بها",

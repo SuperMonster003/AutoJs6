@@ -34,6 +34,7 @@ sync.ffs_db
 
 /local.properties
 /sign.properties
+/*dependecies_tree.txt
 
 **/assets-app/declarations/
 **/assets-app/sample/declarations/

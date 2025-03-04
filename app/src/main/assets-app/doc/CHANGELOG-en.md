@@ -124,7 +124,7 @@
 * `Dependency` Include Toaster version 12.6
 * `Dependency` Include EasyWindow (for Toaster) version 10.3
 * `Dependency` Upgrade Gradle version from 8.5 -> 8.11.1
-* `Dependency` Upgrade Rhino version 1.7.15-snapshot -> 1.8.0-snapshot
+* `Dependency` Upgrade Rhino version 1.7.15-SNAPSHOT -> 1.8.0-SNAPSHOT
 * `Dependency` Upgrade Android Material Lang3 version 1.10.0 -> 1.12.0
 * `Dependency` Upgrade Androidx Annotation version 1.7.0 -> 1.9.1
 * `Dependency` Upgrade Androidx AppCompat version 1.6.1 -> 1.7.0
@@ -640,7 +640,7 @@
 * `Dependency` Upgraded Kotlinx Coroutines version 1.6.0 -> 1.6.1-native-mt
 * `Dependency` Upgraded LeakCanary version 2.8.1 -> 2.9.1
 * `Dependency` Upgraded OkHttp3 version 5.0.0-alpha.6 -> 5.0.0-alpha.7
-* `Dependency` Upgraded Rhino engine version 1.7.14 -> 1.7.15-snapshot
+* `Dependency` Upgraded Rhino engine version 1.7.14 -> 1.7.15-SNAPSHOT
 * `Dependency` Upgraded Zip4j version 2.9.1 -> 2.10.0
 * `Dependency` Removed Groovy JSON version 3.0.8
 * `Dependency` Removed Kotlin Stdlib JDK7 version 1.6.21
@@ -692,7 +692,7 @@
 * `Dependency` Added Androidx AppCompat (Legacy) version 1.0.2
 * `Dependency` Upgraded Androidx AppCompat version 1.4.0 -> 1.4.1
 * `Dependency` Upgraded Androidx Preference version 1.1.1 -> 1.2.0
-* `Dependency` Upgraded Rhino engine version 1.7.14-snapshot -> 1.7.14
+* `Dependency` Upgraded Rhino engine version 1.7.14-SNAPSHOT -> 1.7.14
 * `Dependency` Upgraded OkHttp3 version 3.10.0 -> 5.0.0-alpha.3 -> 5.0.0-alpha.4
 * `Dependency` Upgraded Android Material version 1.6.0-alpha01 -> 1.6.0-alpha02
 * `Dependency` Upgraded Gradle build tools version 7.2.0-alpha06 -> 7.2.0-beta01
@@ -729,7 +729,7 @@
 * `Fix` Fixed issue where packing plugins could not be detected and invalid plugin download addresses
 * `Fix` Fixed issue where the switch state of 'View Usage Stats Permission' in the home drawer might not sync
 * `Fix` Fixed potential Mat memory leak issue in TemplateMatching.fastTemplateMatching
-* `Improvement` Upgraded Rhino engine version 1.7.7.2 -> 1.7.13 -> 1.7.14-snapshot
+* `Improvement` Upgraded Rhino engine version 1.7.7.2 -> 1.7.13 -> 1.7.14-SNAPSHOT
 * `Improvement` Upgraded OpenCV version 3.4.3 -> 4.5.4
 * `Improvement` Enhanced compatibility of ViewUtil.getStatusBarHeight
 * `Improvement` Removed user login related modules and layout placeholders from the home drawer

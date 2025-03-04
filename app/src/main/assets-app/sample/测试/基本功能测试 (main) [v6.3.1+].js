@@ -49,7 +49,7 @@ assert(isFunc(getClass), 'getClass()');
 assert(isFunc(constructor), 'constructor()');
 assert(isJavaPackage(Packages), 'Packages');
 
-// @Test Rhino 1.7.15+ (snapshot on May 4, 2022)
+// @Test Rhino 1.7.15+ (SNAPSHOT on May 4, 2022)
 
 assert(isFunc(Object.values), 'Object.values()');
 assert(isFunc(Object.entries), 'Object.entries()');

@@ -133,7 +133,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                             checkDualProperty(options) -> startDualActivity(scriptRuntime, args)
                             checkRootProperty(options) && RootUtils.isRootAvailable() -> {
                                 val tmpIntent = configuredIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                Shell.execCommand(scriptRuntime, arrayOf("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
+                                Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
                             }
                             checkShizukuProperty(options) && WrappedShizuku.isOperational() -> {
                                 val tmpIntent = configuredIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -158,7 +158,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         checkDualProperty(opt) -> startDualActivity(scriptRuntime, args)
                         checkRootProperty(opt) && RootUtils.isRootAvailable() -> {
                             val tmpIntent = intentRhinoWithRuntime(scriptRuntime, opt).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-                            Shell.execCommand(scriptRuntime, arrayOf("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
+                            Shell.execCommand(scriptRuntime, arrayOf<Any>("am start ${intentToShellRhino(tmpIntent)}", /* withRoot = */ true)).throwIfError()
                         }
                         checkShizukuProperty(opt) && WrappedShizuku.isOperational() -> {
                             val tmpIntent = intentRhinoWithRuntime(scriptRuntime, opt).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
@@ -376,7 +376,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             when {
                 o is NativeObject && checkRootProperty(o) -> {
                     @Suppress("SpellCheckingInspection")
-                    Shell.execCommand(scriptRuntime, arrayOf(/* cmd = */ "am startservice ${intentToShellRhino(o)}", /* withRoot = */ true))
+                    Shell.execCommand(scriptRuntime, arrayOf<Any>(/* cmd = */ "am startservice ${intentToShellRhino(o)}", /* withRoot = */ true))
                 }
                 else -> globalContext.startService(intentRhinoWithRuntime(scriptRuntime, o))
             }
@@ -435,7 +435,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 }
                 else -> when {
                     o is NativeObject && checkRootProperty(o) -> {
-                        Shell.execCommand(scriptRuntime, arrayOf("am broadcast ${intentToShellRhino(o)}", /* withRoot = */ true))
+                        Shell.execCommand(scriptRuntime, arrayOf<Any>("am broadcast ${intentToShellRhino(o)}", /* withRoot = */ true))
                     }
                     else -> globalContext.sendBroadcast(intentRhinoWithRuntime(scriptRuntime, o))
                 }
@@ -742,9 +742,9 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val packageName = getPackageName(scriptRuntime, argList) ?: return@ensureArgumentsLength false
             val command = "am force-stop $packageName"
             when {
-                RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf(command, /* withRoot = */ true))
+                RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf<Any>(command, /* withRoot = */ true))
                 WrappedShizuku.isOperational() -> WrappedShizuku.execCommand(command)
-                else -> Shell.execCommand(scriptRuntime, arrayOf(command, /* withRoot = */ false))
+                else -> Shell.execCommand(scriptRuntime, arrayOf<Any>(command, /* withRoot = */ false))
             }.code == 0
         }
 
@@ -883,9 +883,9 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 if (currentUserIdentifier != processUserIdentifier) {
                     val niceCommand = "$command --user $currentUserIdentifier"
                     when {
-                        withRoot && RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf(niceCommand, /* withRoot = */ true))
+                        withRoot && RootUtils.isRootAvailable() -> Shell.execCommand(scriptRuntime, arrayOf<Any>(niceCommand, /* withRoot = */ true))
                         withShizuku && WrappedShizuku.isOperational() -> WrappedShizuku.execCommand(niceCommand)
-                        else -> Shell.execCommand(scriptRuntime, arrayOf(niceCommand, /* withRoot = */ false))
+                        else -> Shell.execCommand(scriptRuntime, arrayOf<Any>(niceCommand, /* withRoot = */ false))
                     }.throwIfError()
                 }
             }

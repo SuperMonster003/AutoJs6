@@ -346,7 +346,7 @@ suffix compare logic                          ||
 </tr>
 </tbody>
 </table>
-<pre><code class="lang-js">console.log(new Version(&#39;5.2.3-beta&#39;).isHigherThan(&#39;5.2.3-snapshot&#39;)); // true
+<pre><code class="lang-js">console.log(new Version(&#39;5.2.3-beta&#39;).isHigherThan(&#39;5.2.3-SNAPSHOT&#39;)); // true
 </code></pre>
 <h3>[c] (versionString, throwExceptions)<span><a class="mark" href="#versiontype_c_versionstring_throwexceptions" id="versiontype_c_versionstring_throwexceptions">#</a></span></h3>
 <p><strong><code>6.2.0</code></strong> <strong><code>Global</code></strong> <strong><code>Overload 2/2</code></strong></p>
@@ -541,11 +541,11 @@ console.log(verA.compareTo(&#39;2.0.0&#39;)); /* 抛出异常. */
     new Version(&#39;2.3.5&#39;),
     new Version(&#39;2.3.5-alpha9&#39;),
     new Version(&#39;2.3.5-beta2&#39;),
-    new Version(&#39;2.3.5-snapshot&#39;),
+    new Version(&#39;2.3.5-SNAPSHOT&#39;),
     new Version(&#39;2.3.6&#39;),
     new Version(&#39;2.3&#39;),
 ];
-// [ 2.3, 2.3.5-snapshot, 2.3.5-alpha9, 2.3.5-beta2, 2.3.5, 2.3.6 ]
+// [ 2.3, 2.3.5-SNAPSHOT, 2.3.5-alpha9, 2.3.5-beta2, 2.3.5, 2.3.6 ]
 console.log(verList.sort((a, b) =&gt; a.compareTo(b)));
 </code></pre>
 
