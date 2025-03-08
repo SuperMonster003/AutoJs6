@@ -9,6 +9,7 @@ import android.view.Gravity
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorManagerCompat
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs6.R
@@ -70,6 +71,13 @@ class FirstCharView : TextView {
     fun setIconTextColor(@ColorInt color: Int) = also { setTextColor(color) }
 
     fun setIconTextColorRes(@ColorRes colorRes: Int) = also { setTextColor(convertColorResToInt(colorRes)) }
+
+    fun setIconTextByThemeColorLuminance() = also {
+        when {
+            ThemeColorManager.isThemeColorLuminanceLight() -> setIconTextColorRes(R.color.day)
+            else -> setIconTextColorRes(R.color.night)
+        }
+    }
 
     fun setIconTextThemeColor() = setIconTextColor(ThemeColorManagerCompat.getColorPrimary())
 

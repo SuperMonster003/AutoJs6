@@ -18,6 +18,11 @@
         <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
     </style>
 
+    <style name="ToolBarStyleRaw" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="searchViewStyle">@style/SearchViewActionBar</item>
+        <item name="titleMarginStart">0dp</item>
+    </style>
+
     <style name="ToolBarStyle" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
         <item name="searchViewStyle">@style/SearchViewActionBar</item>
         <item name="android:textColorPrimary">@color/toolbar_text</item>
@@ -48,12 +53,15 @@
     <style name="AppTheme.FullScreen" parent="AppTheme">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <style name="AppTheme.Splash" parent="@android:style/Theme.NoTitleBar.Fullscreen">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:navigationBarColor">@color/window_background</item>
     </style>
 
     <style name="AppTheme.Settings" parent="AppTheme">
@@ -91,7 +99,7 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
-        <item name="android:textColorPrimary">#212121</item>
+        <item name="android:textColorPrimary">@color/day_full</item>
         <item name="android:textColorSecondary">@color/colorAccent</item>
     </style>
 
@@ -105,7 +113,7 @@
     <style name="MtAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
 
     <style name="MtAppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
-        <item name="android:textColorPrimary">#212121</item>
+        <item name="android:textColorPrimary">@color/day_full</item>
     </style>
 
     <style name="ConsoleTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -136,6 +144,16 @@
     <style name="PopupMenuTheme" parent="AppTheme.PopupOverlay">
         <item name="android:textColor">@color/day_night</item>
         <item name="android:tint">@color/day_night</item>
+    </style>
+
+    <style name="PopupMenuThemeLight" parent="AppTheme.PopupOverlay">
+        <item name="android:textColor">@color/day</item>
+        <item name="android:tint">@color/day</item>
+    </style>
+
+    <style name="PopupMenuThemeDark" parent="AppTheme.PopupOverlay">
+        <item name="android:textColor">@color/dusk</item>
+        <item name="android:tint">@color/dusk</item>
     </style>
 
     <style name="SearchViewActionBar" parent="@style/Widget.AppCompat.SearchView.ActionBar" />

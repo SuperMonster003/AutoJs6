@@ -6,14 +6,12 @@
             android:id="@+id/action_log"
             android:icon="@drawable/ic_ali_log"
             android:title="@string/text_log"
-            android:iconTint="@color/toolbar_text"
             app:showAsAction="ifRoom" />
 
     <item
             android:id="@+id/action_search"
             android:icon="@drawable/ic_search_white_36dp"
             android:title="@string/text_search"
-            android:iconTint="@color/toolbar_text"
             android:imeOptions="actionSearch"
             android:inputType="text"
             app:actionViewClass="androidx.appcompat.widget.SearchView"

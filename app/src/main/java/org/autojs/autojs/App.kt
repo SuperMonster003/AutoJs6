@@ -92,7 +92,7 @@ class App : MultiDexApplication() {
         val crashHandler = CrashHandler(ErrorReportActivity::class.java)
 
         val strategy = CrashReport.UserStrategy(applicationContext)
-        strategy.crashHandleCallback = crashHandler
+        strategy.setCrashHandleCallback(crashHandler)
 
         CrashReport.initCrashReport(applicationContext, BUGLY_APP_ID, false, strategy)
 
@@ -115,7 +115,6 @@ class App : MultiDexApplication() {
                         else -> ViewUtils.MODE.DAY
                     }
                 }
-
                 else -> ViewUtils.MODE.NULL
             }
         )
@@ -221,7 +220,7 @@ class App : MultiDexApplication() {
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        ViewUtils.onConfigurationChanged(newConfig)
+        ViewUtils.onConfigurationChangedForNightMode(newConfig)
         EventBus.getDefault().post(newConfig)
         FloatyWindowManger.getCircularMenu()?.savePosition(newConfig)
         super.onConfigurationChanged(newConfig)

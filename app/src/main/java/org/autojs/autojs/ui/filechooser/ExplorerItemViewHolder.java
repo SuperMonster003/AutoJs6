@@ -46,7 +46,7 @@ class ExplorerItemViewHolder extends BindableViewHolder<Object> {
 
         switch (explorerItem.getType()) {
             case JAVASCRIPT, AUTO -> firstCharIconBinding.firstChar
-                    .setIconTextColorNightDay()
+                    .setIconTextByThemeColorLuminance()
                     .setStrokeThemeColor()
                     .setFillColorDayNight();
             default -> firstCharIconBinding.firstChar

@@ -5,10 +5,10 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.view.MenuItem;
 import android.widget.EditText;
-
+import android.widget.ImageView;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.view.MenuItemCompat;
-
+import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs6.R;
 
 /**
@@ -22,8 +22,12 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
 
     private QueryCallback mQueryCallback;
     private final MenuItem mSearchMenuItem;
+    private final Activity mActivity;
+    private EditText mTextview;
+    private ImageView mCloseButtonView;
 
     public SearchViewItem(Activity activity, MenuItem searchMenuItem) {
+        mActivity = activity;
         mSearchMenuItem = searchMenuItem;
         SearchManager searchManager = (SearchManager) activity.getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) searchMenuItem.getActionView();
@@ -31,12 +35,25 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
             return;
         }
         searchView.setSearchableInfo(searchManager.getSearchableInfo(activity.getComponentName()));
-        EditText textview = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-        if (textview != null) {
-            textview.setHintTextColor(activity.getColor(R.color.night_day));
-        }
+        mTextview = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        mCloseButtonView = searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
+        initThemeColors();
         MenuItemCompat.setOnActionExpandListener(searchMenuItem, this);
         searchView.setOnQueryTextListener(this);
+    }
+
+    public void initThemeColors() {
+        boolean isThemeColorLuminanceLight = ThemeColorManager.isThemeColorLuminanceLight();
+        int fullColor = mActivity.getColor(isThemeColorLuminanceLight ? R.color.day_full : R.color.night_full);
+        int hintColor = mActivity.getColor(isThemeColorLuminanceLight ? R.color.day : R.color.night);
+
+        if (mTextview != null) {
+            mTextview.setTextColor(fullColor);
+            mTextview.setHintTextColor(hintColor);
+        }
+        if (mCloseButtonView != null) {
+            mCloseButtonView.setColorFilter(fullColor);
+        }
     }
 
     public void setQueryCallback(QueryCallback queryCallback) {
