@@ -6,7 +6,7 @@
         android:layout_height="match_parent"
         android:background="?android:windowBackground"
         android:clickable="true"
-        android:fitsSystemWindows="false"
+        android:fitsSystemWindows="true"
         android:importantForAccessibility="no"
         android:orientation="vertical"
         android:focusable="true">

@@ -717,7 +717,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mFirstChar.setIcon(ExplorerViewHelper.getIcon(item))
             when (item.type) {
                 FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> mFirstChar
-                    .setIconTextColorNightDay()
+                    .setIconTextByThemeColorLuminance()
                     .setStrokeThemeColor()
                     .setFillThemeColor()
                 else -> mFirstChar

@@ -6,8 +6,7 @@ import android.view.View
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
-import java.util.LinkedList
-import java.util.Vector
+import java.util.*
 
 /**
  * Created by Stardust on May 10, 2016.
@@ -27,6 +26,12 @@ object ThemeColorManager {
     init {
         ThemeColor.fromPreferences()?.let { currentThemeColor = it } ?: setThemeColor(defaultThemeColor)
     }
+
+    @JvmStatic
+    fun isThemeColorLuminanceLight() = currentThemeColor.isLuminanceLight()
+
+    @JvmStatic
+    fun isThemeColorLuminanceDark() = currentThemeColor.isLuminanceDark()
 
     @JvmStatic
     fun add(colorMutable: ThemeColorMutable) = ThemeColorMutableManager.add(colorMutable)

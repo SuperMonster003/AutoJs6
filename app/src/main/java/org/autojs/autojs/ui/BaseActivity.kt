@@ -5,11 +5,15 @@ package org.autojs.autojs.ui
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import org.autojs.autojs.core.accessibility.AccessibilityTool
 import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.ViewUtils
@@ -21,26 +25,21 @@ import org.autojs.autojs6.BuildConfig
  */
 abstract class BaseActivity : AppCompatActivity() {
 
+    open val handleStatusBarThemeColorAutomatically = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (ViewUtils.isAutoNightModeEnabled) {
-            val isNightModeYes = ViewUtils.isNightModeYes(this)
-            if (ViewUtils.isNightModeEnabled != isNightModeYes) {
-                ViewUtils.isNightModeEnabled = isNightModeYes
-                val mode = when (isNightModeYes) {
-                    true -> ViewUtils.MODE.NIGHT
-                    else -> ViewUtils.MODE.DAY
-                }
-                ViewUtils.setDefaultNightMode(mode)
-            }
-        }
+        @Suppress("DEPRECATION")
+        ViewUtils.appendSystemUiVisibility(this, SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
 
-        if (!BuildConfig.isInrt) {
-            ViewUtils.makeBarsAdaptToNightMode(this)
-        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
 
         setApplicationLocale(this)
+
+        ThemeChangeNotifier.themeChanged.observe(this) {
+            initThemeColors()
+        }
 
         // @Dubious by SuperMonster003 on Oct 28, 2024.
         //  ! Is it property to start a11y service automatically here?
@@ -62,11 +61,11 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (!BuildConfig.isInrt) {
-            if (window.decorView.systemUiVisibility and SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN == 0) {
-                ThemeColorManager.addActivityStatusBar(this)
-            }
+        initThemeColors()
+        if (handleStatusBarThemeColorAutomatically && !BuildConfig.isInrt) {
+            ThemeColorManager.addActivityStatusBar(this)
         }
+        setUpStatusBarIconLightByThemeColor()
     }
 
     override fun onResume() {
@@ -74,8 +73,20 @@ abstract class BaseActivity : AppCompatActivity() {
         LocaleUtils.syncPrefWithCurrentStateIfNeeded(this)
     }
 
+    open fun initThemeColors() {
+        /* Empty body. */
+    }
+
     fun setToolbarAsBack(titleRes: Int) = ViewUtils.setToolbarAsBack(this, titleRes)
 
     fun setToolbarAsBack(title: String?) = ViewUtils.setToolbarAsBack(this, title)
+
+    protected fun setUpStatusBarIconLightByNightMode() {
+        ViewUtils.setStatusBarIconLight(this, ViewUtils.isNightModeEnabled)
+    }
+
+    protected fun setUpStatusBarIconLightByThemeColor() {
+        ViewUtils.setStatusBarIconLight(this, ThemeColorManager.isThemeColorLuminanceDark())
+    }
 
 }

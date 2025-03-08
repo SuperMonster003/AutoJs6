@@ -2,13 +2,17 @@
 
 package org.autojs.autojs.util
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.UiModeManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.os.Build
 import android.os.Looper
@@ -26,6 +30,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 
@@ -79,6 +84,7 @@ object ViewUtils {
     //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
     //  ! 在一些设备上无法正常获取结果.
     //  ! 参阅: https://github.com/hyb1996/Auto.js/issues/268
+    @SuppressLint("InternalInsetResource", "DiscouragedApi")
     fun getStatusBarHeightLegacy(context: Context): Int {
         return context.resources.getIdentifier("status_bar_height", "dimen", "android").let { resourceId ->
             when (resourceId > 0) {
@@ -141,6 +147,32 @@ object ViewUtils {
         }
     }
 
+    @JvmStatic
+    fun hasSystemUiVisibility(activity: Activity, flags: Int): Boolean {
+        @Suppress("DEPRECATION")
+        return activity.window.decorView.systemUiVisibility and flags == flags
+    }
+
+    @JvmStatic
+    fun isStatusBarIconLight(activity: Activity): Boolean {
+        return !isStatusBarIconDark(activity)
+    }
+
+    @JvmStatic
+    fun isStatusBarIconDark(activity: Activity): Boolean {
+        @Suppress("DEPRECATION")
+        return hasSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+    }
+
+    @Suppress("DEPRECATION")
+    fun setStatusBarIconLight(activity: Activity, isLight: Boolean) {
+        when {
+            isStatusBarIconLight(activity) == isLight -> return
+            isLight -> removeSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+            else -> appendSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        }
+    }
+
     private fun appendWindowFlags(activity: Activity, flags: Int) {
         activity.window.addFlags(flags)
     }
@@ -161,21 +193,14 @@ object ViewUtils {
         val isConfigTakenAsLight = !isConfigDark
 
         getWindowInsetsController(activity).apply {
-            isAppearanceLightStatusBars = isConfigDark
+            isAppearanceLightStatusBars = isConfigTakenAsLight
             isAppearanceLightNavigationBars = isConfigTakenAsLight
         }
+    }
 
-        activity.window.navigationBarColor = when {
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.O && isConfigTakenAsLight -> {
-                // @Hint by SuperMonster003 on Sep 9, 2022.
-                //  ! On devices running with Android 7.x and with dark theme disabled,
-                //  ! navigation bar would be white background with white buttons.
-                //  ! zh-CN:
-                //  ! 在安卓 7.x 设备, 暗色主题禁用时, 导航栏背景是白色, 上面的按钮也是白色.
-                activity.getColor(R.color.navigation_bar_background_before_android_o)
-            }
-            else -> Color.TRANSPARENT
-        }
+    fun isSystemDarkModeEnabled(context: Context): Boolean {
+        val uiModeManager = context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+        return uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES
     }
 
     @JvmStatic
@@ -197,7 +222,7 @@ object ViewUtils {
         else -> null
     }
 
-    fun onConfigurationChanged(configuration: Configuration) {
+    fun onConfigurationChangedForNightMode(configuration: Configuration) {
         if (isAutoNightModeEnabled) {
             val isNightModeYes = isNightModeYes(configuration)
             if (isNightModeEnabled != isNightModeYes) {
@@ -213,15 +238,19 @@ object ViewUtils {
 
     @JvmStatic
     fun setToolbarAsBack(activity: AppCompatActivity, title: String?) {
-        activity.apply {
-            findViewById<Toolbar>(R.id.toolbar).let { toolbar ->
-                toolbar.title = title
-                setSupportActionBar(toolbar)
-                supportActionBar?.let { actionBar ->
-                    toolbar.setNavigationOnClickListener { finish() }
-                    actionBar.setDisplayHomeAsUpEnabled(true)
-                }
-            }
+        val toolbar = activity.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.title = title
+        activity.setSupportActionBar(toolbar)
+        activity.supportActionBar?.let { actionBar ->
+            toolbar.setNavigationOnClickListener { activity.finish() }
+            actionBar.setDisplayHomeAsUpEnabled(true)
+        }
+        toolbar.navigationIcon?.let { navigationIcon ->
+            val navigationIconColor = when {
+                ThemeColorManager.isThemeColorLuminanceLight() -> R.color.day
+                else -> R.color.night
+            }.let { activity.resources.getColor(it, null) }
+            navigationIcon.colorFilter = PorterDuffColorFilter(navigationIconColor, PorterDuff.Mode.SRC_IN)
         }
     }
 
@@ -295,14 +324,6 @@ object ViewUtils {
     fun setKeepScreenOnWhenInForegroundFromLastEnabledState() {
         Pref.putString(R.string.key_keep_screen_on_when_in_foreground, keepScreenOnWhenInForegroundFromLastEnabledState)
         isKeepScreenOnWhenInForegroundEnabled = true
-    }
-
-    fun registerOnSharedPreferenceChangeListener(activity: Activity) {
-        Pref.registerOnSharedPreferenceChangeListener { _, key ->
-            if (key == key(R.string.key_keep_screen_on_when_in_foreground)) {
-                configKeepScreenOnWhenInForeground(activity)
-            }
-        }
     }
 
     fun configKeepScreenOnWhenInForeground(activity: Activity) {

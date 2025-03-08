@@ -38,7 +38,6 @@ import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.MODE
-import org.autojs.autojs.util.ViewUtils.isNightModeYes
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentDrawerBinding
@@ -273,7 +272,7 @@ open class DrawerFragment : Fragment() {
             object : DrawerMenuItemCustomHelper(mContext) {
                 override fun toggle(): Boolean = runCatching {
                     val isTurningOn = !isActive
-                    val isNightModeYes = isNightModeYes(resources.configuration)
+                    val isNightModeYes = ViewUtils.isNightModeYes(resources.configuration)
                     val mode = when {
                         isTurningOn -> MODE.FOLLOW
                         isNightModeYes -> MODE.NIGHT
@@ -281,7 +280,7 @@ open class DrawerFragment : Fragment() {
                     }
                     ViewUtils.setDefaultNightMode(mode)
                     if (isTurningOn) {
-                        ViewUtils.isNightModeEnabled = isNightModeYes
+                        ViewUtils.isNightModeEnabled = ViewUtils.isSystemDarkModeEnabled(mContext)
                         Pref.putString(R.string.key_night_mode, MODE.FOLLOW.key)
                     } else {
                         when (isNightModeYes) {

@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="day_night">#DE212121</color>
-    <color name="day_night_full">#212121</color>
+    <color name="day">#DE212121</color>
+    <color name="day_full">#212121</color>
+    <color name="night">#DEFBFBFB</color>
+    <color name="night_full">#FBFBFB</color>
+    <color name="dawn">#DE252525</color>
+    <color name="dawn_full">#252525</color>
+    <color name="dusk">#DEBFBFBF</color>
+    <color name="dusk_full">#BFBFBF</color>
+    <color name="day_night">@color/day</color>
+    <color name="day_night_full">@color/day_full</color>
     <color name="day_night_alpha_70">#B3212121</color>
     <color name="day_night_alpha_30">#4D212121</color>
     <color name="day_night_alpha_20">#33212121</color>
-    <color name="night_day">#DEFBFBFB</color>
-    <color name="night_day_full">#FBFBFB</color>
+    <color name="night_day">@color/night</color>
+    <color name="night_day_full">@color/night_full</color>
     <color name="window_background">#FFFFFF</color>
     <color name="window_background_selected">#E5E5E5</color>
     <color name="text_color_primary">@color/day_night</color>
@@ -112,10 +120,18 @@
     <color name="market_button_unselected">#939393</color>
 
     <color name="tab_indicator">#A0FFFFFF</color>
+    <color name="tab_indicator_light">#A0FFFFFF</color>
+    <color name="tab_indicator_dark">#80202020</color>
     <color name="tab_text">#A0FFFFFF</color>
+    <color name="tab_text_light">#A0FFFFFF</color>
+    <color name="tab_text_dark">#A0202020</color>
     <color name="tab_selected_text">#FFFFFF</color>
+    <color name="tab_selected_text_light">#FFFFFF</color>
+    <color name="tab_selected_text_dark">#111214</color>
 
     <color name="toolbar_text">@color/night_day</color>
+    <color name="fab_tint_light">@color/night</color>
+    <color name="fab_tint_dark">@color/day</color>
     <color name="toolbar_disabled">#6EE0E0E0</color>
 
     <color name="prefTextColorPrimary">#282C2F</color>
@@ -135,7 +151,7 @@
     <color name="color_selector_item_text">#DE111214</color>
     <color name="floating_action_menu_label_bg">#CCE0E0E0</color>
     <color name="navigation_bar_background">@color/window_background</color>
-    <color name="navigation_bar_background_before_android_o">#212121</color>
+    <color name="navigation_bar_background_before_android_o">@color/day_full</color>
     <color name="swipe_refresh_background">#F8F8F8</color>
     <color name="circular_menu_icon_red">#ef5350</color>
     <color name="circular_menu_icon_white">#ffffff</color>

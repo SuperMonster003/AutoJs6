@@ -1,11 +1,13 @@
 package org.autojs.autojs.theme.widget;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-
 import org.autojs.autojs.theme.ThemeColor;
 import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.theme.ThemeColorMutable;
@@ -40,7 +42,43 @@ public class ThemeColorToolbar extends Toolbar implements ThemeColorMutable {
 
     @Override
     public void setThemeColor(ThemeColor color) {
-        setBackgroundColor(color.colorPrimary);
+        getViewTreeObserver().addOnGlobalLayoutListener(() -> applyThemeColor(color));
+    }
+
+    private void applyThemeColor(ThemeColor color) {
+        int colorPrimary = color.colorPrimary;
+        setBackgroundColor(colorPrimary);
+
+        int aimColor;
+        int popupTheme;
+        if (ThemeColorManager.isThemeColorLuminanceLight()) {
+            aimColor = getResources().getColor(R.color.day, null);
+            popupTheme = R.style.PopupMenuThemeLight;
+        } else {
+            aimColor = getResources().getColor(R.color.night, null);
+            popupTheme = R.style.PopupMenuThemeDark;
+        }
+
+        setTitleTextColor(aimColor);
+        setSubtitleTextColor(aimColor);
+
+        Drawable navigationIcon = getNavigationIcon();
+        if (navigationIcon != null) {
+            navigationIcon.setColorFilter(new PorterDuffColorFilter(aimColor, PorterDuff.Mode.SRC_IN));
+            setNavigationIcon(navigationIcon);
+        }
+        Drawable collapseIcon = getCollapseIcon();
+        if (collapseIcon != null) {
+            collapseIcon.setColorFilter(new PorterDuffColorFilter(aimColor, PorterDuff.Mode.SRC_IN));
+            setCollapseIcon(collapseIcon);
+        }
+        Drawable overflowIcon = getOverflowIcon();
+        if (overflowIcon != null) {
+            overflowIcon.setColorFilter(new PorterDuffColorFilter(aimColor, PorterDuff.Mode.SRC_IN));
+            setOverflowIcon(overflowIcon);
+        }
+
+        setPopupTheme(popupTheme);
     }
 
 }

@@ -1,72 +1,56 @@
-package org.autojs.autojs.core.image;
+package org.autojs.autojs.core.image
 
-import android.graphics.Color;
-
-import androidx.annotation.ColorInt;
-
-import org.autojs.autojs.util.ColorUtils;
+import androidx.annotation.ColorInt
+import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.util.ColorUtils
 
 /**
  * Created by Stardust on Dec 31, 2017.
+ * Transformed by SuperMonster003 on Mar 8, 2025.
  */
-public class Colors {
+@Suppress("FunctionName")
+class Colors {
 
-    public int rgb(int red, int green, int blue) {
-        return Color.rgb(red, green, blue);
-    }
+    @ScriptInterface
+    fun rgb(red: Int, green: Int, blue: Int) = ColorUtils.rgb(red, green, blue)
 
-    public int argb(int alpha, int red, int green, int blue) {
-        return Color.argb(alpha, red, green, blue);
-    }
+    @ScriptInterface
+    fun argb(alpha: Int, red: Int, green: Int, blue: Int) = ColorUtils.argb(alpha, red, green, blue)
 
     /**
-     * @see <a href="https://www.w3.org/TR/WCAG20/#relativeluminancedef">W3C Recommendation</a>
+     * @see ColorUtils.luminance
      */
-    public double luminance(@ColorInt int color) {
-        // return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-        //         ? Color.luminance(Color.pack(color))
-        //         : Color.luminance(color);
-        return androidx.core.graphics.ColorUtils.calculateLuminance(color);
-    }
+    @ScriptInterface
+    fun luminance(@ColorInt color: Int) = ColorUtils.luminance(color)
 
-    public int parseColor(String colorString) {
-        return Color.parseColor(colorString);
-    }
+    @ScriptInterface
+    fun parseColor(colorString: String?) = ColorUtils.parseColor(colorString)
 
-    public String toString(int color) {
-        return ColorUtils.toString(color);
-    }
+    @ScriptInterface
+    fun toString(color: Int) = ColorUtils.toString(color)
 
-    public void RGBToHSV(int red, int green, int blue, float[] hsv) {
-        Color.RGBToHSV(red, green, blue, hsv);
-    }
+    @ScriptInterface
+    fun RGBToHSV(red: Int, green: Int, blue: Int, hsv: FloatArray?) = ColorUtils.RGBToHSV(red, green, blue, hsv)
 
-    public void colorToHSV(int color, float[] hsv) {
-        Color.colorToHSV(color, hsv);
-    }
+    @ScriptInterface
+    fun colorToHSV(color: Int, hsv: FloatArray?) = ColorUtils.colorToHSV(color, hsv)
 
-    public int HSVToColor(float[] hsv) {
-        return Color.HSVToColor(hsv);
-    }
+    @ScriptInterface
+    fun HSVToColor(hsv: FloatArray?) = ColorUtils.HSVToColor(hsv)
 
-    public int HSVToColor(int alpha, float[] hsv) {
-        return Color.HSVToColor(alpha, hsv);
-    }
+    @ScriptInterface
+    fun HSVToColor(alpha: Int, hsv: FloatArray?) = ColorUtils.HSVToColor(alpha, hsv)
 
-    public boolean equals(int c1, int c2) {
-        return (c1 & 0xffffff) == (c2 & 0xffffff);
-    }
+    @ScriptInterface
+    fun equals(c1: Int, c2: Int) = ColorUtils.equals(c1, c2)
 
-    public boolean equals(int c1, String c2) {
-        return equals(c1, parseColor(c2));
-    }
+    @ScriptInterface
+    fun equals(c1: Int, c2: String?) = ColorUtils.equals(c1, c2)
 
-    public boolean equals(String c1, int c2) {
-        return equals(parseColor(c1), c2);
-    }
+    @ScriptInterface
+    fun equals(c1: String?, c2: Int) = ColorUtils.equals(c1, c2)
 
-    public boolean equals(String c1, String c2) {
-        return equals(parseColor(c1), parseColor(c2));
-    }
+    @ScriptInterface
+    fun equals(c1: String?, c2: String?) = ColorUtils.equals(c1, c2)
 
 }

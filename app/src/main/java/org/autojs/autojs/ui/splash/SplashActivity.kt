@@ -17,12 +17,15 @@ import org.autojs.autojs6.R
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : BaseActivity() {
 
+    override val handleStatusBarThemeColorAutomatically = false
+
     private var mAlreadyEnterNextActivity = false
     private var mPaused = false
 
     private lateinit var mHandler: Handler
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
         @Suppress("DEPRECATION")
@@ -30,7 +33,6 @@ class SplashActivity : BaseActivity() {
         mHandler.postDelayed({ enterNextActivity() }, INIT_TIMEOUT)
 
         FloatyWindowManger.hideCircularMenuIfNeeded()
-        super.onCreate(savedInstanceState)
     }
 
     override fun onPause() {

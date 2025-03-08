@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="day_night">#DEBFBFBF</color>
-    <color name="day_night_full">#BFBFBF</color>
+    <color name="day_night">@color/dusk</color>
+    <color name="day_night_full">@color/dusk_full</color>
     <color name="day_night_alpha_70">#B3BFBFBF</color>
     <color name="day_night_alpha_30">#4DBFBFBF</color>
     <color name="day_night_alpha_20">#33BFBFBF</color>
-    <color name="night_day">#DE252525</color>
-    <color name="night_day_full">#252525</color>
-    <color name="window_background">#212121</color>
+    <color name="night_day">@color/dawn</color>
+    <color name="night_day_full">@color/dawn_full</color>
+    <color name="window_background">@color/day_full</color>
     <color name="window_background_selected">#3B3B3B</color>
     <color name="text_color_primary">@color/day_night</color>
     <color name="text_color_primary_full">@color/day_night_full</color>
@@ -33,7 +33,7 @@
     <color name="dialog_button_failure">@color/dialog_button_error</color>
 
     <color name="item_background">#333333</color>
-    <color name="item_background_dark">#252525</color>
+    <color name="item_background_dark">@color/dawn_full</color>
 
     <color name="divider">#191919</color>
     <color name="divider_functions_keyboard">#303030</color>
@@ -62,7 +62,7 @@
     <color name="project_toolbar_button">#A9AAAB</color>
     <color name="project_toolbar_title">#A9AAAB</color>
 
-    <color name="layout_window_bubble_bg">#DE212121</color>
+    <color name="layout_window_bubble_bg">@color/day</color>
     <color name="layout_hierarchy_window_node_bounds">#FF6659</color>
     <color name="layout_node_info_view_decoration_line">#1BF5F5F5</color>
     <color name="layout_hierarchy_window_background">#CC102027</color>

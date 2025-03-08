@@ -5,7 +5,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.Process
 import android.util.Log
 import android.view.Gravity
@@ -14,11 +19,13 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.forEach
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.tabs.TabLayout
 import com.huaban.analysis.jieba.CharsDictionaryDatabase
 import com.huaban.analysis.jieba.PhrasesDictionaryDatabase
 import com.huaban.analysis.jieba.WordDictionaryDatabase
@@ -40,7 +47,9 @@ import org.autojs.autojs.permission.ManageAllFilesPermission
 import org.autojs.autojs.permission.PostNotificationPermission
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.service.ForegroundService
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorManager.addViewBackground
+import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.doc.DocumentationFragment
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
@@ -54,6 +63,7 @@ import org.autojs.autojs.ui.main.task.TaskManagerFragment
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.widget.DrawerAutoClose
 import org.autojs.autojs.ui.widget.SearchViewItem
+import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils
@@ -67,12 +77,18 @@ import org.greenrobot.eventbus.EventBus
  */
 class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
+    override val handleStatusBarThemeColorAutomatically = false
+
     private var binding: ActivityMainBinding? = null
 
     private lateinit var mViewPager: ViewPager
     private lateinit var mFab: FloatingActionButton
+    private lateinit var mTab: TabLayout
+    private lateinit var mToolbar: ThemeColorToolbar
     private lateinit var mPagerAdapter: StoredFragmentPagerAdapter
     private lateinit var mLogMenuItem: MenuItem
+    private lateinit var mSearchMenuItem: MenuItem
+    private lateinit var mActionBarDrawerToggle: ActionBarDrawerToggle
 
     private val mActivityResultMediator = OnActivityResultDelegate.Mediator()
     private val mRequestPermissionCallbacks = RequestPermissionCallbacks()
@@ -119,14 +135,19 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             setContentView(it.root)
             mViewPager = it.viewpager
             mFab = it.fab
+            mTab = it.tab
+            mToolbar = it.toolbar
             addViewBackground(it.appBar)
-            setUpToolbar(it, drawerLayout)
+            setUpToolbar(drawerLayout)
             setUpTabViewPager(it)
             registerBackPressHandlers(drawerLayout)
         }
-        @Suppress("DEPRECATION")
-        ViewUtils.appendSystemUiVisibility(this, View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-        ViewUtils.registerOnSharedPreferenceChangeListener(this)
+
+        Pref.registerOnSharedPreferenceChangeListener { _, key ->
+            if (key == key(R.string.key_keep_screen_on_when_in_foreground)) {
+                ViewUtils.configKeepScreenOnWhenInForeground(this)
+            }
+        }
 
         WorkingDirectoryUtils.determineIfNeeded()
         ExplorerView.clearViewStates()
@@ -162,27 +183,37 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         mBackPressObserver.registerHandler(DoublePressExit(this, R.string.text_press_again_to_exit))
     }
 
-    private fun setUpToolbar(binding: ActivityMainBinding, drawerLayout: DrawerLayout) {
-        val toolbar = binding.toolbar.also {
+    private fun setUpToolbar(drawerLayout: DrawerLayout) {
+        val toolbar = mToolbar.also {
             setSupportActionBar(it)
             it.setTitle(R.string.app_name)
             it.setOnLongClickListener { true.also { PreferencesActivity.launch(this) } }
         }
 
-        object : ActionBarDrawerToggle(
+        mActionBarDrawerToggle = object : ActionBarDrawerToggle(
             this,
             drawerLayout,
             toolbar,
             R.string.text_drawer_open,
             R.string.text_drawer_close
         ) {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+                super.onDrawerSlide(drawerView, slideOffset)
+                when {
+                    slideOffset > 0.5 -> setUpStatusBarIconLightByNightMode()
+                    else -> setUpStatusBarIconLightByThemeColor()
+                }
+            }
+
             override fun onDrawerOpened(drawerView: View) {
                 super.onDrawerOpened(drawerView)
+                sIsActionBarDrawerOpened = true
                 EventBus.getDefault().post(object : OnDrawerOpened {})
             }
 
             override fun onDrawerClosed(drawerView: View) {
                 super.onDrawerClosed(drawerView)
+                sIsActionBarDrawerOpened = false
                 EventBus.getDefault().post(object : OnDrawerClosed {})
             }
         }.also {
@@ -222,6 +253,67 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
                 }
             })
         }
+    }
+
+    override fun initThemeColors() {
+        super.initThemeColors()
+        setUpToolbarColors()
+        setUpTabLayoutColors()
+        setUpStatusBarIconLight()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            setUpStatusBarIconLight()
+        }
+    }
+
+    private fun setUpToolbarColors() {
+        val aimColor = when {
+            ThemeColorManager.isThemeColorLuminanceLight() -> getColor(R.color.day)
+            else -> getColor(R.color.night)
+        }
+        mToolbar.menu.forEach { menuItem ->
+            menuItem.icon?.colorFilter = PorterDuffColorFilter(aimColor, PorterDuff.Mode.SRC_IN)
+        }
+        mSearchViewItem?.initThemeColors()
+    }
+
+    private fun setUpTabLayoutColors() {
+        val tabNormalColor: Int
+        val tabSelectedColor: Int
+        val tabSelectedIndicatorColor: Int
+        when {
+            ThemeColorManager.isThemeColorLuminanceLight() -> {
+                tabNormalColor = getColor(R.color.tab_text_dark)
+                tabSelectedColor = getColor(R.color.tab_selected_text_dark)
+                tabSelectedIndicatorColor = getColor(R.color.tab_indicator_dark)
+            }
+            else -> {
+                tabNormalColor = getColor(R.color.tab_text_light)
+                tabSelectedColor = getColor(R.color.tab_selected_text_light)
+                tabSelectedIndicatorColor = getColor(R.color.tab_indicator_light)
+            }
+        }
+        mTab.setTabTextColors(tabNormalColor, tabSelectedColor)
+        mTab.setSelectedTabIndicatorColor(tabSelectedIndicatorColor)
+    }
+
+    private fun setUpStatusBarIconLight() {
+        if (shouldChangeStatusBarIconLight()) {
+            Handler(Looper.getMainLooper()).post {
+                if (sIsActionBarDrawerOpened) {
+                    setUpStatusBarIconLightByNightMode()
+                } else {
+                    setUpStatusBarIconLightByThemeColor()
+                }
+            }
+        }
+    }
+
+    private fun shouldChangeStatusBarIconLight(): Boolean {
+        return ViewUtils.isNightModeEnabled == ViewUtils.isStatusBarIconDark(this)
     }
 
     fun rebirth() {
@@ -290,7 +382,9 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         mLogMenuItem = menu.findItem(R.id.action_log)
-        setUpSearchMenuItem(menu.findItem(R.id.action_search))
+        mSearchMenuItem = menu.findItem(R.id.action_search)
+        setUpSearchMenuItem(mSearchMenuItem)
+        setUpToolbarColors()
         return true
     }
 
@@ -309,6 +403,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private fun setUpSearchMenuItem(searchMenuItem: MenuItem) {
         mSearchViewItem = object : SearchViewItem(this, searchMenuItem) {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                setUpToolbarCollapseIconColor()
                 if (isCurrentPageDocs) {
                     mDocsSearchItemExpanded = true
                     mLogMenuItem.setIcon(R.drawable.ic_ali_up)
@@ -340,6 +435,18 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         }
     }
 
+    private fun setUpToolbarCollapseIconColor() {
+        val collapseIcon = mToolbar.collapseIcon
+        if (collapseIcon != null) {
+            val isThemeColorLuminanceLight = ThemeColorManager.isThemeColorLuminanceLight()
+            val fullColor = getColor(if (isThemeColorLuminanceLight) R.color.day_full else R.color.night_full)
+            collapseIcon.setTintList(ColorStateList.valueOf(fullColor))
+            collapseIcon.setTint(fullColor)
+            collapseIcon.colorFilter = PorterDuffColorFilter(fullColor, PorterDuff.Mode.SRC_IN)
+            mToolbar.collapseIcon = collapseIcon
+        }
+    }
+
     private fun submitForwardQuery() {
         val event = QueryEvent.FIND_FORWARD
         EventBus.getDefault().post(event)
@@ -354,12 +461,12 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         super.onDestroy()
         binding = null
         mSearchViewItem = null
-        EventBus.getDefault().unregister(this)
     }
 
     companion object {
 
         private val TAG = MainActivity::class.java.simpleName
+        private var sIsActionBarDrawerOpened = false
 
         var shouldRecreateMainActivity = false
 

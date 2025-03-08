@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import androidx.core.graphics.ColorUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.theme.ThemeColor
@@ -17,6 +18,7 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.text.RegexOption.IGNORE_CASE
 
+@Suppress("FunctionName")
 object ColorUtils {
 
     @JvmField
@@ -514,12 +516,120 @@ object ColorUtils {
         return tmp.toInt()
     }
 
-    fun toColorStateList(color: String): ColorStateList {
-        return ColorStateList.valueOf(toInt(color))
+    fun toColorStateList(color: String) = ColorStateList.valueOf(toInt(color))
+
+    fun toColorStateList(view: View, color: String) = ColorStateList.valueOf(parse(view, color))
+
+    @JvmStatic
+    fun rgb(red: Int, green: Int, blue: Int): Int = Color.rgb(red, green, blue)
+
+    @JvmStatic
+    fun argb(alpha: Int, red: Int, green: Int, blue: Int): Int = Color.argb(alpha, red, green, blue)
+
+    /**
+     * Calculates the relative luminance of a color based on the W3C WCAG 2.0 definition.
+     * This method employs a perceptual brightness calculation, which considers how human eyes perceive light
+     * and visibly similar changes in brightness. It differs from a simple brightness calculation by employing
+     * gamma correction and converting RGB color information to the CIE XYZ color space.
+     *
+     * zh-CN:
+     *
+     * 计算颜色相对亮度 (luminance), 基于 W3C WCAG 2.0 的定义.
+     * 本方法采用了一种符合人眼感知的亮度计算方式, 考虑到人眼对不同颜色的光敏感性的非线性特性以及视网膜对亮度变化的感知效果.
+     * 与简单的线性明度计算不同, 本方法通过加入伽马矫正 (Gamma Correction) 和将 RGB 颜色转化到 CIE XYZ 色彩空间来实现更真实的感官亮度评估.
+     *
+     * Differences from basic brightness calculation:
+     * 1. Gamma Correction: Adjusts the linear RGB color channels to account for human vision's non-linear
+     * response to light intensity. This step improves the representation of perceptual brightness.
+     * 2. CIE XYZ Color Space: To better model human color perception, color information is converted
+     * from RGB to the XYZ color space, which defines brightness, chromaticity, and hue more accurately.
+     *
+     * zh-CN:
+     *
+     * 与基本明度计算的区别:
+     * 1. 伽马矫正 (Gamma Correction): 对 RGB 通道值进行非线性调整, 以匹配人眼对亮度强度的非线性响应. 此步骤可提高感知亮度的准确性.
+     * 2. CIE XYZ 色彩空间: 将颜色从 RGB 转换到 XYZ 色彩空间, 该空间定义了更符合人类视觉感知的 [亮度/色度/色调] 信息.
+     *
+     * Usage:
+     * This method adheres to the W3C Web Content Accessibility Guidelines (WCAG 2.0) definition of relative
+     * luminance, suitable for evaluating color contrast ratios to ensure text readability and accessibility.
+     * For example, it is commonly used in validating color combinations for web accessibility or UI design.
+     *
+     * zh-CN:
+     *
+     * 用法:
+     * 本方法遵循 W3C <<网络内容无障碍指南2.0>> (WCAG 2.0) 中定义的 "相对亮度" 概念,
+     * 适用于评估颜色对比度, 从而确保文本可读性和无障碍性设计.
+     * 例如, 在验证网页颜色组合或 UI 设计中的颜色对比是否满足无障碍标准中, 广泛使用此方法.
+     *
+     * Implementation notes:
+     * Internally, this method uses [androidx.core.graphics.ColorUtils.calculateLuminance], which follows
+     * the WCAG standard. On `Android O` or higher, alternative system solutions such as [Color.luminance]
+     * may also be used.
+     *
+     * zh-CN:
+     *
+     * 实现说明:
+     * 此方法对内调用了 [androidx.core.graphics.ColorUtils.calculateLuminance], 其实现遵循 WCAG 标准.
+     * 对于 `Android O` 及其以上版本, 也可以替代性地使用系统方法如 [Color.luminance].
+     *
+     * @param color The input color, in ARGB format. (zh-CN: 输入颜色, 以 ARGB 格式表示).
+     * @return The relative luminance of the color, following WCAG 2.0 standards. (zh-CN: 返回该颜色的相对亮度, 符合 WCAG 2.0 标准).
+     *
+     * @see <a href="https://www.w3.org/TR/WCAG20/#relativeluminancedef">W3C Recommendation</a>
+     */
+    @JvmStatic
+    fun luminance(@ColorInt color: Int): Double {
+        // @Hint by SuperMonster003 on Jan 21, 2023.
+        //  ! Compatibility solution.
+        //  ! zh-CN: 兼容方案.
+        //  # return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        //  #         ? Color.luminance(Color.pack(color))
+        //  #         : Color.luminance(color);
+        return ColorUtils.calculateLuminance(color)
     }
 
-    fun toColorStateList(view: View, color: String): ColorStateList {
-        return ColorStateList.valueOf(parse(view, color))
+    /**
+     * @see <a href=https://stackoverflow.com/
+     * questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color>
+     * How to decide font color in white or black depending on background color?
+     * </a>
+     */
+    @JvmStatic
+    fun isLuminanceLight(@ColorInt color: Int) = luminance(color) > 0.179
+
+    @JvmStatic
+    fun isLuminanceDark(@ColorInt color: Int) = !isLuminanceLight(color)
+
+    @JvmStatic
+    fun parseColor(colorString: String?): Int = Color.parseColor(colorString)
+
+    @JvmStatic
+    fun RGBToHSV(red: Int, green: Int, blue: Int, hsv: FloatArray?) {
+        Color.RGBToHSV(red, green, blue, hsv)
     }
+
+    @JvmStatic
+    fun colorToHSV(color: Int, hsv: FloatArray?) {
+        Color.colorToHSV(color, hsv)
+    }
+
+    @JvmStatic
+    fun HSVToColor(hsv: FloatArray?) = Color.HSVToColor(hsv)
+
+    @JvmStatic
+    fun HSVToColor(alpha: Int, hsv: FloatArray?) = Color.HSVToColor(alpha, hsv)
+
+    @JvmStatic
+    fun equals(c1: Int, c2: Int) = (c1 and 0xffffff) == (c2 and 0xffffff)
+
+    @JvmStatic
+    fun equals(c1: Int, c2: String?) = equals(c1, parseColor(c2))
+
+    @JvmStatic
+    fun equals(c1: String?, c2: Int) = equals(parseColor(c1), c2)
+
+    @JvmStatic
+    fun equals(c1: String?, c2: String?) = equals(parseColor(c1), parseColor(c2))
 
 }

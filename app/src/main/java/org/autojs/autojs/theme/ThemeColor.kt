@@ -9,6 +9,7 @@ import org.autojs.autojs.core.pref.Pref.getInt
 import org.autojs.autojs.core.pref.Pref.putInt
 import org.autojs.autojs.extension.ArrayExtensions.toHashCode
 import org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor
+import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs6.R
 
 /**
@@ -35,6 +36,10 @@ class ThemeColor {
 
     @ScriptInterface
     fun getColorPrimaryDark() = colorPrimaryDark
+
+    fun isLuminanceLight() = ColorUtils.isLuminanceLight(colorPrimary)
+
+    fun isLuminanceDark() = ColorUtils.isLuminanceDark(colorPrimary)
 
     constructor()
 
