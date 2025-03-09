@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Paint
 import android.view.View
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
 import java.util.*
@@ -47,7 +48,7 @@ object ThemeColorManager {
         ThemeColorWidgetReferenceManager.add(object : ThemeColorMutableReference {
             val weakReference = WeakReference(activity)
             override fun setThemeColor(color: ThemeColor) {
-                activity.window.navigationBarColor = color.colorPrimary
+                ViewUtils.setNavigationBarBackgroundColor(activity, color.colorPrimary)
             }
 
             override fun isNull() = weakReference.get() == null
@@ -97,14 +98,15 @@ object ThemeColorManager {
 
         fun add(activity: Activity) {
             activityRefs.add(WeakReference(activity))
-            activity.window.statusBarColor = currentThemeColor.colorPrimary
+            ViewUtils.setStatusBarBackgroundColor(activity, currentThemeColor.colorPrimary)
         }
 
         fun setColor(color: Int) {
-            activityRefs.iterator().let {
-                while (it.hasNext()) {
-                    it.next().get()?.apply { window.statusBarColor = color } ?: it.remove()
-                }
+            val iterator = activityRefs.iterator()
+            while (iterator.hasNext()) {
+                iterator.next().get()?.also { activity ->
+                    ViewUtils.setStatusBarBackgroundColor(activity, color)
+                } ?: iterator.remove()
             }
         }
     }

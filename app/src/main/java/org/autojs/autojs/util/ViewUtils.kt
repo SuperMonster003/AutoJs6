@@ -10,7 +10,6 @@ import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
@@ -18,9 +17,13 @@ import android.os.Build
 import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.Window
+import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -164,12 +167,60 @@ object ViewUtils {
         return hasSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
     }
 
-    @Suppress("DEPRECATION")
     fun setStatusBarIconLight(activity: Activity, isLight: Boolean) {
+        @Suppress("DEPRECATION")
         when {
             isStatusBarIconLight(activity) == isLight -> return
             isLight -> removeSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
             else -> appendSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        }
+    }
+
+    fun setStatusBarBackgroundColor(activity: Activity, color: Int) {
+        val window = activity.window
+        val decorView = window.decorView
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            decorView.setOnApplyWindowInsetsListener { view, insets ->
+                val statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars())
+                val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
+                val statusBarOverlay = View(activity).apply {
+                    layoutParams = FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        statusBarInsets.top, // 状态栏高度
+                    )
+                    setBackgroundColor(color)
+                }
+                contentView?.addView(statusBarOverlay)
+                view.onApplyWindowInsets(insets)
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window.statusBarColor = color
+        }
+    }
+
+    fun setNavigationBarBackgroundColor(activity: Activity, color: Int) {
+        val window = activity.window
+        val decorView = window.decorView
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            decorView.setOnApplyWindowInsetsListener { view, insets ->
+                val navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars())
+                val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
+                val navBarOverlay = View(activity).apply {
+                    layoutParams = FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        navBarInsets.bottom, // 导航栏高度
+                    ).apply { gravity = Gravity.BOTTOM }
+                    setBackgroundColor(color)
+                }
+                contentView?.addView(navBarOverlay)
+                view.onApplyWindowInsets(insets)
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window.navigationBarColor = color
         }
     }
 

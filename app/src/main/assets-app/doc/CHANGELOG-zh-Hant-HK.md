@@ -63,9 +63,9 @@
 * `新增` floaty.getClip 方法, 用於藉助浮動窗口聚焦間接獲取剪切板內容
 * `修復` Fragment 子類 (如 [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 等) 中存在的 View Binding 內存泄漏
 * `修復` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 等類中存在的實例內存泄漏
-* `修復` Android 14+ 申請截圖權限導致應用崩潰的問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `修復` Android 14+ 開啓前台服務導致應用崩潰的問題
-* `修復` Android 14+ 代碼編輯器運行按鈕點擊後無法正常亮起的問題
+* `修復` Android 14 申請截圖權限導致應用崩潰的問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `修復` Android 14 開啓前台服務導致應用崩潰的問題
+* `修復` Android 14 代碼編輯器運行按鈕點擊後無法正常亮起的問題
 * `修復` 項目打包後應用可能因缺少必要庫文件無法正常運行的問題 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `修復` 編輯項目時可能因指定圖標資源不存在而導致應用崩潰的問題 _[`issue #203`](http://issues.autojs6.com/203)_
 * `修復` 截圖權限申請時無法正常使用參數獲取指定屏幕方向的截圖資源

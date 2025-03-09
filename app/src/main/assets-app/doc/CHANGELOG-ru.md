@@ -63,9 +63,9 @@
 * `Новое` Метод floaty.getClip для получения содержимого буфера обмена через плавающее окно
 * `Исправление` Утечка памяти в View Binding подклассов Fragment (например, [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48))
 * `Исправление` Утечка экземпляра в таких классах, как [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21)
-* `Исправление` Проблема, вызывающая сбой приложения при запросе разрешений на запись экрана на Android 14+ (от [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `Исправление` Проблема, вызывающая сбой приложения при запуске службы на переднем плане на Android 14+
-* `Исправление` Проблема с кнопкой запуска в редакторе кода, которая не загорается правильно на Android 14+
+* `Исправление` Проблема, вызывающая сбой приложения при запросе разрешений на запись экрана на Android 14 (от [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `Исправление` Проблема, вызывающая сбой приложения при запуске службы на переднем плане на Android 14
+* `Исправление` Проблема с кнопкой запуска в редакторе кода, которая не загорается правильно на Android 14
 * `Исправление` Приложение может работать неправильно после упаковки из-за отсутствия необходимых файлов библиотеки _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `Исправление` Сбой приложения при редактировании проекта из-за отсутствия указанных ресурсов значков _[`issue #203`](http://issues.autojs6.com/203)_
 * `Исправление` Невозможность правильно использовать параметры для получения ресурсов захвата экрана указанной ориентации при запросе разрешений на запись экрана

@@ -211,9 +211,9 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `新增` floaty.getClip 方法, 用於藉助浮動視窗聚焦間接獲取剪下板內容
 * `修復` Fragment 子類 (如 [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 等) 中存在的 View Binding 記憶體洩漏
 * `修復` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 等類中存在的例項記憶體洩漏
-* `修復` Android 14+ 申請截圖許可權導致應用崩潰的問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `修復` Android 14+ 開啟前臺服務導致應用崩潰的問題
-* `修復` Android 14+ 程式碼編輯器執行按鈕點選後無法正常亮起的問題
+* `修復` Android 14 申請截圖許可權導致應用崩潰的問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `修復` Android 14 開啟前臺服務導致應用崩潰的問題
+* `修復` Android 14 程式碼編輯器執行按鈕點選後無法正常亮起的問題
 * `修復` 專案打包後應用可能因缺少必要庫檔案無法正常執行的問題 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `修復` 編輯專案時可能因指定圖示資源不存在而導致應用崩潰的問題 _[`issue #203`](http://issues.autojs6.com/203)_
 * `修復` 截圖許可權申請時無法正常使用引數獲取指定螢幕方向的截圖資源

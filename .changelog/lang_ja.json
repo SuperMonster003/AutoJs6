@@ -69,9 +69,9 @@
       "fix": [
         "Fragment のサブクラス (例 [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 等) 内の View Binding のメモリリーク",
         "[ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 等のクラス内のインスタンスのメモリリーク",
-        "Android 14+ でスクリーンキャプチャの許可を求めるとアプリがクラッシュする問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_",
-        "Android 14+ でフォアグラウンドサービスを開始するとアプリがクラッシュする問題",
-        "Android 14+ でコードエディタの実行ボタンをクリックしても点灯しない問題",
+        "Android 14 でスクリーンキャプチャの許可を求めるとアプリがクラッシュする問題 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_",
+        "Android 14 でフォアグラウンドサービスを開始するとアプリがクラッシュする問題",
+        "Android 14 でコードエディタの実行ボタンをクリックしても点灯しない問題",
         "プロジェクトのパッケージ後に必要なライブラリファイルが不足してアプリが正常に動作しない可能性がある問題 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_",
         "プロジェクトの編集時に指定されたアイコンリソースが存在しない場合にアプリがクラッシュする問題 _[`issue #203`](http://issues.autojs6.com/203)_",
         "スクリーンキャプチャの許可を取得時に指定された画面方向のスクリーンショットリソースをパラメータで正常に取得できない場合がある問題",
