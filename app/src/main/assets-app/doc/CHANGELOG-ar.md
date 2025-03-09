@@ -63,9 +63,9 @@
 * `إضافة جديدة` طريقة floaty.getClip، تُستخدم للحصول على محتوى الحافظة بشكل غير مباشر باستخدام نافذة عائمة
 * `تصليح` تسرب الذاكرة في الارتباط العرضي في الفئات الفرعية لFragment (مثل [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) إلخ)
 * `تصليح` تسرب الذاكرة في مثيلات الفئات مثل [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) إلخ
-* `تصليح` مشكلة تسبب تعطل التطبيق عند طلب إذن لقطة الشاشة على Android 14+ (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `تصليح` مشكلة تسبب تعطل التطبيق عند تشغيل الخدمة الأمامية على Android 14+
-* `تصليح` مشكلة بطئ إضاءة زر تشغيل محرر الأكواد على Android 14+
+* `تصليح` مشكلة تسبب تعطل التطبيق عند طلب إذن لقطة الشاشة على Android 14 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `تصليح` مشكلة تسبب تعطل التطبيق عند تشغيل الخدمة الأمامية على Android 14
+* `تصليح` مشكلة بطئ إضاءة زر تشغيل محرر الأكواد على Android 14
 * `تصليح` مشكلة تؤدي إلى عدم القدرة على تشغيل التطبيق نتيجة نقص الملفات الأساسية بعد حزم المشروع _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `تصليح` مشكلة تعطل التطبيق بسبب عدم وجود موارد الأيقونات المخصصة أثناء تحرير المشروع _[`issue #203`](http://issues.autojs6.com/203)_
 * `تصليح` عدم القدرة على استخدام المعلمات للحصول على لقطة الشاشة باتجاه معين أثناء طلب إذن لقطة الشاشة

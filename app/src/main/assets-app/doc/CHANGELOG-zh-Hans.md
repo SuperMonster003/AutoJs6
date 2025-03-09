@@ -91,9 +91,9 @@
 * `新增` floaty.getClip 方法, 用于借助浮动窗口聚焦间接获取剪切板内容
 * `修复` Fragment 子类 (如 [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 等) 中存在的 View Binding 内存泄漏
 * `修复` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 等类中存在的实例内存泄漏
-* `修复` Android 14+ 申请截图权限导致应用崩溃的问题 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `修复` Android 14+ 开启前台服务导致应用崩溃的问题
-* `修复` Android 14+ 代码编辑器运行按钮点击后无法正常亮起的问题
+* `修复` Android 14 申请截图权限导致应用崩溃的问题 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `修复` Android 14 开启前台服务导致应用崩溃的问题
+* `修复` Android 14 代码编辑器运行按钮点击后无法正常亮起的问题
 * `修复` 项目打包后应用可能因缺少必要库文件无法正常运行的问题 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `修复` 编辑项目时可能因指定图标资源不存在而导致应用崩溃的问题 _[`issue #203`](http://issues.autojs6.com/203)_
 * `修复` 截图权限申请时无法正常使用参数获取指定屏幕方向的截图资源
@@ -193,7 +193,7 @@
 * `修复` app.startActivity 无法使用简称参数的问题 _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
 * `修复` importClass 导入的类名与全局变量冲突时代码抛出异常的问题 _[`issue #185`](http://issues.autojs6.com/185)_
 * `修复` Android 7.x 无法使用无障碍服务的问题
-* `修复` Android 14+ 可能无法正常使用 runtime.<u>loadJar/loadDex</u> 方法的问题 (试修)
+* `修复` Android 14 可能无法正常使用 runtime.<u>loadJar/loadDex</u> 方法的问题 (试修)
 * `修复` 安卓系统快速设置面板中 "布局范围分析" 和 "布局层次分析" 不可用的问题 _[`issue #193`](http://issues.autojs6.com/193)_
 * `修复` 自动检查更新功能可能导致应用 [ANR](https://developer.android.com/topic/performance/vitals/anr) 的问题 (试修) _[`issue #186`](http://issues.autojs6.com/186)_
 * `修复` 文件管理器示例代码文件夹点击 "向上" 按钮后无法回到工作路径页面的问题 _[`issue #129`](http://issues.autojs6.com/129)_
@@ -223,7 +223,7 @@
 * `新增` console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_
 * `修复` ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
 * `修复` Android 7.x 发现新版本时无法获取版本详情的问题
-* `修复` Android 14+ 申请截图权限时导致应用崩溃的问题
+* `修复` Android 14 申请截图权限时导致应用崩溃的问题
 * `修复` 主页抽屉快速切换 "浮动按钮" 开关时可能导致应用崩溃的问题
 * `修复` 使用菜单关闭浮动按钮时重启应用后浮动按钮可能依然显示的问题
 * `修复` Android 13+ 设置页面选择并切换 AutoJs6 语言后无法生效的问题

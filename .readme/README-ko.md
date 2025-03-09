@@ -211,9 +211,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 * `추가` floaty.getClip 메소드는 플로팅 창의 포커스를 통해 클립보드 내용을 간접적으로 얻는 데 사용됩니다
 * `수정` Fragment 하위 클래스 (예: [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 등) 내의 View Binding 메모리 누수
 * `수정` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 등의 클래스 내의 인스턴스 메모리 누수
-* `수정` Android 14+에서 스크린 캡처 권한을 요청할 때 앱이 충돌하는 문제 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `수정` Android 14+에서 포어그라운드 서비스를 시작할 때 앱이 충돌하는 문제
-* `수정` Android 14+에서 코드 에디터에서 실행 버튼을 클릭해도 점등되지 않는 문제
+* `수정` Android 14에서 스크린 캡처 권한을 요청할 때 앱이 충돌하는 문제 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `수정` Android 14에서 포어그라운드 서비스를 시작할 때 앱이 충돌하는 문제
+* `수정` Android 14에서 코드 에디터에서 실행 버튼을 클릭해도 점등되지 않는 문제
 * `수정` 프로젝트 패키징 후 필요한 라이브러리 파일이 부족하여 앱이 정상적으로 실행되지 않을 수 있는 문제 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `수정` 프로젝트 편집 시 지정된 아이콘 리소스가 없는 경우 앱이 충돌하는 문제 _[`issue #203`](http://issues.autojs6.com/203)_
 * `수정` 스크린 캡처 권한 획득 시 지정된 화면 방향의 스크린샷 리소스를 매개변수로 얻지 못할 수 있는 문제
