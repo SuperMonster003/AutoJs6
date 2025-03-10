@@ -6,15 +6,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import org.autojs.autojs.AutoJs.Companion.instance
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityLogBinding
-import org.autojs.autojs6.databinding.ConsoleViewBinding
 
 class LogActivity : BaseActivity() {
 
@@ -24,21 +23,20 @@ class LogActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         val activityLogBinding = ActivityLogBinding.inflate(layoutInflater)
-        setContentView(activityLogBinding.root)
 
+        setContentView(activityLogBinding.root)
         setToolbarAsBack(R.string.text_log)
 
-        val mConsoleView = activityLogBinding.console
+        activityLogBinding.console.apply {
+            setConsole(instance.globalConsole.also { mConsoleImpl = it })
+            setLogActivity(this@LogActivity)
+            setPinchToZoomEnabled(true)
+        }
 
-        mConsoleImpl = instance.globalConsole
-        mConsoleView.setConsole(mConsoleImpl)
-        mConsoleView.setLogActivity(this)
-        mConsoleView.setPinchToZoomEnabled(true)
-
-        val consoleViewBinding = ConsoleViewBinding.inflate(layoutInflater)
-        consoleViewBinding.inputContainer.visibility = View.GONE
-
-        activityLogBinding.fab.setOnClickListener { mConsoleImpl.clear() }
+        activityLogBinding.fab.apply {
+            setOnClickListener { mConsoleImpl.clear() }
+            ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

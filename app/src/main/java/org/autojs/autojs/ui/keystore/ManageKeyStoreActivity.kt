@@ -19,11 +19,12 @@ import com.mcal.apksigner.utils.KeyStoreHelper
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.apkbuilder.keystore.KeyStore
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.ActivityManageKeyStoreBinding
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.keystore.NewKeyStoreDialog.NewKeyStoreConfigs
 import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel
+import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivityManageKeyStoreBinding
 import java.io.File
 import java.io.IOException
 
@@ -82,8 +83,11 @@ class ManageKeyStoreActivity : BaseActivity() {
         keyStoreViewModel =
             ViewModelProvider(this, KeyStoreViewModel.Factory(this))[KeyStoreViewModel::class.java]
 
-        binding.fab.setOnClickListener {
-            NewKeyStoreDialog(newKeyStoreDialogCallback).show(supportFragmentManager, null)
+        binding.fab.apply {
+            setOnClickListener {
+                NewKeyStoreDialog(newKeyStoreDialogCallback).show(supportFragmentManager, null)
+            }
+            ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
         }
 
         keyStoreAdapter = KeyStoreAdaptor(keyStoreAdapterCallback)
@@ -91,6 +95,7 @@ class ManageKeyStoreActivity : BaseActivity() {
             adapter = keyStoreAdapter
             layoutManager = LinearLayoutManager(this@ManageKeyStoreActivity)
             itemAnimator = DefaultItemAnimator()
+            ViewUtils.excludePaddingClippableViewFromNavigationBar(this)
         }
         binding.swipeRefreshLayout.setOnRefreshListener {
             loadKeyStores()
@@ -113,6 +118,7 @@ class ManageKeyStoreActivity : BaseActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_manage_key_store, menu)
+        ViewUtils.setToolbarMenuIconsColorByThemeColorLuminance(this)
         return true
     }
 
@@ -126,8 +132,6 @@ class ManageKeyStoreActivity : BaseActivity() {
                         deleteAllKeyStores()
                     }.show()
             }
-
-            else -> {}
         }
         return super.onOptionsItemSelected(item)
     }
@@ -264,4 +268,5 @@ class ManageKeyStoreActivity : BaseActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
 }

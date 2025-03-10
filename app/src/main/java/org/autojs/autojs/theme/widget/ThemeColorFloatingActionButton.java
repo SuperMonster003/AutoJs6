@@ -16,6 +16,7 @@ import org.autojs.autojs6.R;
  * Created by Stardust on Aug 16, 2016.
  */
 public class ThemeColorFloatingActionButton extends FloatingActionButton implements ThemeColorMutable {
+
     public ThemeColorFloatingActionButton(Context context) {
         super(context);
         init();

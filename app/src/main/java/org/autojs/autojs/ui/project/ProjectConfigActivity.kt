@@ -28,6 +28,7 @@ import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityProjectConfigBinding
@@ -85,7 +86,14 @@ class ProjectConfigActivity : BaseActivity() {
             setOnClickListener { selectIcon() }
         }
 
-        binding.fab.setOnClickListener { commit() }
+        binding.fab.apply {
+            setOnClickListener { commit() }
+            ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
+        }
+
+        binding.scrollView.apply {
+            ViewUtils.excludePaddingClippableViewFromNavigationBar(this)
+        }
 
         mNewProject = intent.getBooleanExtra(EXTRA_NEW_PROJECT, false)
 

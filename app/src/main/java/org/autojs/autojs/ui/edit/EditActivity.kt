@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.widget.Toolbar
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -21,10 +22,10 @@ import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.file.TmpScriptFiles
-import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
@@ -36,6 +37,7 @@ import java.io.IOException
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
 
+    private var mToolbar: Toolbar? = null
     private val mMediator = OnActivityResultDelegate.Mediator()
 
     private lateinit var mEditorView: EditorView
@@ -48,20 +50,16 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val binding = ActivityEditBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
+        val binding = ActivityEditBinding.inflate(layoutInflater).also { setContentView(it.root) }
+        mToolbar = findViewById(R.id.toolbar)
         mEditorView = binding.editorView.apply {
             handleIntent(intent)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(Observers.emptyConsumer()) { ex: Throwable -> onLoadFileError(ex.message) }
         }
-
         mEditorMenu = EditorMenu(mEditorView)
-
         mNewTask = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0
         setUpToolbar()
-        window.statusBarColor = ThemeColorManager.colorPrimary
     }
 
     override fun onWindowStartingActionMode(callback: ActionMode.Callback): ActionMode? {
@@ -88,6 +86,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_editor, menu)
+        ViewUtils.setToolbarMenuIconsColorByThemeColorLuminance(this, mToolbar)
         return true
     }
 

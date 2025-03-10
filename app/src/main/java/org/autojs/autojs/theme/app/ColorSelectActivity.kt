@@ -50,6 +50,7 @@ class ColorSelectActivity : BaseActivity() {
         handleIntent()
         binding = MtActivityColorSelectBinding.inflate(layoutInflater).also {
             setUpUI(it)
+            ViewUtils.excludePaddingClippableViewFromNavigationBar(it.colorSettingRecyclerView)
         }
     }
 

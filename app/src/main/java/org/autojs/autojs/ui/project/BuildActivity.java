@@ -282,6 +282,10 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         mFlexboxPermissionsView = binding.flexboxPermissions;
 
         binding.fab.setOnClickListener(v -> buildApk());
+        ViewUtils.excludeFloatingActionButtonFromNavigationBar(binding.fab);
+
+        ViewUtils.excludePaddingClippableViewFromNavigationBar(binding.scrollView);
+
         binding.selectSource.setOnClickListener(v -> selectSourceFilePath());
         binding.selectOutput.setOnClickListener(v -> selectOutputDirPath());
         binding.textAbis.setOnClickListener(v -> toggleAllFlexboxChildren(mFlexboxAbisView));

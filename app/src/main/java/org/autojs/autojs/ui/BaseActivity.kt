@@ -5,8 +5,8 @@ package org.autojs.autojs.ui
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +18,7 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on Jan 23, 2017.
@@ -26,14 +27,21 @@ import org.autojs.autojs6.BuildConfig
 abstract class BaseActivity : AppCompatActivity() {
 
     open val handleStatusBarThemeColorAutomatically = true
+    open val handleNavigationBarContrastEnforcedAutomatically = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        @Suppress("DEPRECATION")
-        ViewUtils.appendSystemUiVisibility(this, SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+        ViewUtils.addWindowFlags(this, WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
 
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        @Suppress("DEPRECATION")
+        ViewUtils.appendSystemUiVisibility(this, SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+
+        if (handleNavigationBarContrastEnforcedAutomatically) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                window.navigationBarColor = getColor(R.color.black_alpha_44)
+            }
+        }
 
         setApplicationLocale(this)
 

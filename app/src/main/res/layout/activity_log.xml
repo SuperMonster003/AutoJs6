@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -21,26 +20,24 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <FrameLayout
+    <org.autojs.autojs.core.console.ConsoleView
+        android:id="@+id/console"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingStart="4dp"
-        android:paddingEnd="2dp">
+        android:paddingEnd="2dp"
+        app:excludeFromNavigationBar="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-        <org.autojs.autojs.core.console.ConsoleView
-            android:id="@+id/console"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:tint="@color/toolbar_text"
+        app:backgroundTint="?attr/colorPrimary"
+        app:layout_behavior="org.autojs.autojs.ui.widget.ScrollAwareFABBehavior"
+        app:srcCompat="@drawable/ic_clear_white_48dp" />
 
-        <org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_clear_white_48dp"
-            app:backgroundTint="?attr/colorPrimary"
-            android:tint="@color/toolbar_text" />
-    </FrameLayout>
-
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

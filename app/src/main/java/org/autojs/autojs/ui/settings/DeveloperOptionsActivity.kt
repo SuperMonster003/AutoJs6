@@ -1,32 +1,38 @@
-package org.autojs.autojs.ui.settings;
+package org.autojs.autojs.ui.settings
 
-import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-
-import org.autojs.autojs.ui.BaseActivity;
-import org.autojs.autojs.util.ViewUtils;
-import org.autojs.autojs6.R;
-import org.autojs.autojs6.databinding.ActivityDeveloperOptionsBinding;
+import android.os.Bundle
+import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.ViewUtils.setToolbarAsBack
+import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivityDeveloperOptionsBinding
 
 /**
  * Created by SuperMonster003 on Jun 2, 2022.
  */
-public class DeveloperOptionsActivity extends BaseActivity {
+class DeveloperOptionsActivity : BaseActivity() {
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    private lateinit var binding: ActivityDeveloperOptionsBinding
 
-        ActivityDeveloperOptionsBinding binding = ActivityDeveloperOptionsBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-        ViewUtils.setToolbarAsBack(this, R.string.text_developer_options);
+        binding = ActivityDeveloperOptionsBinding.inflate(layoutInflater).also { binding ->
+            setContentView(binding.root)
+            binding.toolbar.setNavigationOnClickListener { finish() }
+        }
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_developer_options, new DeveloperOptionsFragment())
-                .disallowAddToBackStack()
-                .commit();
+        setToolbarAsBack(this, R.string.text_developer_options)
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_developer_options, DeveloperOptionsFragment())
+            .disallowAddToBackStack()
+            .commit()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        binding.toolbar.navigationIcon?.setTint(ThemeColorManager.getDayOrNightColorByLuminance(this))
     }
 
 }

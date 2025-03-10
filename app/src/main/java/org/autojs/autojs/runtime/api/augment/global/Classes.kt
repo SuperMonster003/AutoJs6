@@ -60,6 +60,9 @@ class Classes {
     val Settings = android.provider.Settings::class
 
     @JvmField
+    val TextToSpeech = android.speech.tts.TextToSpeech::class
+
+    @JvmField
     val InputType = android.text.InputType::class
 
     @JvmField

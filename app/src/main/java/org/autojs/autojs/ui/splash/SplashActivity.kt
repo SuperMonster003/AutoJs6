@@ -4,10 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.LinearLayout
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.main.MainActivity
-import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivitySplashBinding
 
 /**
  * Created by Stardust on Jul 7, 2017.
@@ -19,6 +20,8 @@ class SplashActivity : BaseActivity() {
 
     override val handleStatusBarThemeColorAutomatically = false
 
+    private var binding: ActivitySplashBinding? = null
+
     private var mAlreadyEnterNextActivity = false
     private var mPaused = false
 
@@ -26,7 +29,9 @@ class SplashActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
+
+        val binding = ActivitySplashBinding.inflate(layoutInflater).also { binding = it }
+        setContentView(binding.root)
 
         @Suppress("DEPRECATION")
         mHandler = Looper.myLooper()?.let { Handler(it) } ?: Handler()
@@ -46,6 +51,11 @@ class SplashActivity : BaseActivity() {
             mPaused = false
             enterNextActivity()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding = null
     }
 
     private fun enterNextActivity() {

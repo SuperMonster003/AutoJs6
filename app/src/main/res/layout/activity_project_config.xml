@@ -26,6 +26,7 @@
         android:paddingTop="6dp">
 
         <ScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

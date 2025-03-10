@@ -5,13 +5,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.widget.Toolbar
 import org.autojs.autojs.core.console.ConsoleImpl
-import org.autojs.autojs.core.console.ConsoleView
 import org.autojs.autojs.inrt.autojs.AutoJs
 import org.autojs.autojs.inrt.launch.GlobalProjectLauncher
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivityMainInrtBinding
 
 class LogActivity : BaseActivity() {
 
@@ -24,12 +23,16 @@ class LogActivity : BaseActivity() {
     }
 
     private fun setupView() {
-        setContentView(R.layout.activity_main_inrt)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        val consoleView = findViewById<ConsoleView>(R.id.console)
-        consoleView.setConsole(AutoJs.instance.globalConsole as ConsoleImpl)
-        consoleView.findViewById<View>(R.id.input_container).visibility = View.GONE
+        ActivityMainInrtBinding.inflate(layoutInflater).also { binding ->
+            setContentView(binding.root)
+            binding.toolbar.apply {
+                setSupportActionBar(this)
+            }
+            binding.console.apply {
+                setConsole(AutoJs.instance.globalConsole as ConsoleImpl)
+                findViewById<View>(R.id.input_container).visibility = View.GONE
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -47,4 +50,5 @@ class LogActivity : BaseActivity() {
         const val EXTRA_LAUNCH_SCRIPT = "launch_script"
 
     }
+
 }

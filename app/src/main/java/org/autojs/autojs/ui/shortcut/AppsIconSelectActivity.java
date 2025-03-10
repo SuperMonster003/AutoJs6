@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.autojs.autojs.groundwork.WrapContentGridLayoutManger;
 import org.autojs.autojs.runtime.api.Mime;
 import org.autojs.autojs.ui.BaseActivity;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ActivityAppsIconSelectBinding;
 
@@ -39,7 +40,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class AppsIconSelectActivity extends BaseActivity {
 
-    private RecyclerView mApps;
+    private RecyclerView mAppsRecyclerView;
 
     public static final String EXTRA_PACKAGE_NAME = "extra_package_name";
     private PackageManager mPackageManager;
@@ -58,12 +59,14 @@ public class AppsIconSelectActivity extends BaseActivity {
 
         setToolbarAsBack(R.string.text_select_icon);
 
-        mApps = binding.apps;
-        mApps.setAdapter(new AppsAdapter());
+        mAppsRecyclerView = binding.apps;
+        mAppsRecyclerView.setAdapter(new AppsAdapter());
+
+        ViewUtils.excludePaddingClippableViewFromNavigationBar(mAppsRecyclerView);
 
         WrapContentGridLayoutManger manager = new WrapContentGridLayoutManger(this, 5);
         manager.setDebugInfo("IconSelectView");
-        mApps.setLayoutManager(manager);
+        mAppsRecyclerView.setLayoutManager(manager);
 
         loadApps();
     }
@@ -80,7 +83,7 @@ public class AppsIconSelectActivity extends BaseActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(icon -> {
                     mAppList.add(icon);
-                    mApps.getAdapter().notifyItemInserted(mAppList.size() - 1);
+                    mAppsRecyclerView.getAdapter().notifyItemInserted(mAppList.size() - 1);
                 });
 
     }

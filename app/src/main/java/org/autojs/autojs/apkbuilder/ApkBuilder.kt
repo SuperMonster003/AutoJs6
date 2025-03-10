@@ -149,7 +149,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
             prepareManifestConfiguration(this)
             setArscPackageName(packageName)
             updateProjectConfig(this)
-            copyAssetsRecursively("", File(buildDir, "assets"))
+            copyAssetsRecursively("", File(buildPath, "assets"))
             copyLibrariesByConfig(this)
             setScriptFile(sourcePath)
         }

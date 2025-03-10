@@ -1,109 +1,108 @@
-package org.autojs.autojs.ui.error;
+package org.autojs.autojs.ui.error
 
-import android.annotation.SuppressLint;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
-
-import androidx.appcompat.widget.Toolbar;
-
-import com.afollestad.materialdialogs.MaterialDialog;
-
-import org.autojs.autojs.ui.BaseActivity;
-import org.autojs.autojs.util.ViewUtils;
-import org.autojs.autojs6.BuildConfig;
-import org.autojs.autojs6.R;
-
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import android.util.Log
+import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.ActivityErrorReportBinding
+import java.util.*
 
 /**
  * Created by Stardust on Feb 2, 2017.
+ * Transformed by SuperMonster003 on Mar 10, 2025.
  */
-public class ErrorReportActivity extends BaseActivity {
+class ErrorReportActivity : BaseActivity() {
 
-    private static final String TAG = ErrorReportActivity.class.getSimpleName();
-
-    private String mTitle;
-
-    protected void onCreate(Bundle savedInstanceState) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         try {
-            super.onCreate(savedInstanceState);
-            mTitle = getString(R.string.text_app_crashed);
-            setUpUI();
-            handleIntent();
-        } catch (Throwable throwable) {
-            Log.e(TAG, "", throwable);
-            exitAfter(3000);
+            super.onCreate(savedInstanceState)
+            ActivityErrorReportBinding.inflate(layoutInflater).also { binding ->
+                setContentView(binding.root)
+                binding.toolbar.apply {
+                    title = getString(R.string.text_error_report)
+                    setSupportActionBar(this)
+                }
+                supportActionBar?.setHomeButtonEnabled(false)
+            }
+        } catch (t: Throwable) {
+            t.message?.let { msg ->
+                copyToClip(msg)
+                ViewUtils.showToast(this, msg)
+            }
+            Log.e(TAG, t.message ?: "", t)
+            exitAfter(3000)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val message = intent.getStringExtra("message")
+        val errorDetail = intent.getStringExtra("error")
+
+        val errorMessage = buildString {
+            appendLine("Version: ${BuildConfig.VERSION_CODE}")
+            appendLine("Android: ${Build.VERSION.SDK_INT}")
+            message?.let { appendLine().appendLine(it) }
+            errorDetail?.let { appendLine().appendLine(it) }
         }
 
-    }
-
-    private void handleIntent() {
-        String message = getIntent().getStringExtra("message");
-        final String errorDetail = getIntent().getStringExtra("error");
-        showErrorMessageByDialog(message, errorDetail);
-    }
-
-    private void showErrorMessageByDialog(String message, final String errorDetail) {
-        new MaterialDialog.Builder(this)
-                .title(mTitle)
-                .content(R.string.crash_feedback)
-                .positiveText(R.string.text_exit)
-                .negativeText(R.string.text_copy_debug_info)
-                .onPositive((dialog, which) -> exit())
-                .onNegative((dialog, which) -> {
-                    copyToClip(getDeviceMessage() + message + "\n" + errorDetail);
-                    exitAfter(1500);
-                })
-                .cancelable(false)
-                .show();
-    }
-
-    private String getDeviceMessage() {
-        return String.format(Locale.getDefault(), "Version: %s\nAndroid: %d\n", BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);
-    }
-
-    private void exitAfter(int delay) {
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                exit();
+        MaterialDialog.Builder(this)
+            .title(R.string.text_app_crashed)
+            .content(R.string.crash_feedback)
+            .positiveText(R.string.text_exit)
+            .negativeText(R.string.text_copy_debug_info)
+            .onPositive { _, _ -> exit() }
+            .onNegative { _, _ ->
+                copyToClip(errorMessage)
+                exitAfter(1500)
             }
-        }, delay);
+            .cancelable(false)
+            .show()
     }
 
-    private void copyToClip(String text) {
-        ((ClipboardManager) getSystemService(CLIPBOARD_SERVICE))
-                .setPrimaryClip(ClipData.newPlainText("Debug", text));
-        ViewUtils.showToast(ErrorReportActivity.this, R.string.text_already_copied_to_clip);
+    private fun exitAfter(delay: Int) {
+        Timer().schedule(object : TimerTask() {
+            override fun run() = exit()
+        }, delay.toLong())
     }
 
-    private void setUpUI() {
-        setContentView(R.layout.activity_error_report);
-        setUpToolbar();
+    private fun copyToClip(text: String) {
+        val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("Debug", text))
+        ViewUtils.showToast(this, R.string.text_already_copied_to_clip)
     }
 
-    private void setUpToolbar() {
-        Toolbar toolbar;
-        toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(getString(R.string.text_error_report));
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setHomeButtonEnabled(false);
-    }
-
+    @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
-    @Override
-    public void onBackPressed() {
-        exit();
-    }
+    override fun onBackPressed() = exit()
 
-    private void exit() {
-        finishAffinity();
+    private fun exit() = finishAffinity()
+
+    companion object {
+
+        private val TAG: String = ErrorReportActivity::class.java.simpleName
+
+        @JvmStatic
+        @JvmOverloads
+        fun test(context: Context = GlobalAppContext.get()) {
+            Intent(context, ErrorReportActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .putExtra("message", "Test message\nSecond line")
+                .putExtra("error", "Test error\nSecond line")
+                .let { context.startActivity(it) }
+        }
+
     }
 
 }

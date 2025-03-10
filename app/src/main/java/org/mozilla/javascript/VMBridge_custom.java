@@ -1,7 +1,6 @@
 package org.mozilla.javascript;
 
 import android.util.Log;
-import org.autojs.autojs.engine.RhinoJavaScriptEngine;
 import org.autojs.autojs.rhino.AutoJsContext;
 import org.mozilla.javascript.jdk18.VMBridge_jdk18;
 

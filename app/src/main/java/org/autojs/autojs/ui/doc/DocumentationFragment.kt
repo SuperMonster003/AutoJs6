@@ -14,6 +14,7 @@ import org.autojs.autojs.ui.main.ViewPagerFragment
 import org.autojs.autojs.ui.main.ViewStatesManageable
 import org.autojs.autojs.ui.widget.NestedWebView
 import org.autojs.autojs.util.DocsUtils.getUrl
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WebViewUtils.Companion.adaptDarkMode
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentOnlineDocsBinding
@@ -51,6 +52,7 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
         super.onViewCreated(view, savedInstanceState)
         webView = binding!!.ewebView.webView.also {
             adaptDarkMode(requireContext(), it)
+            ViewUtils.excludePaddingClippableViewFromNavigationBar(it)
         }
         restoreViewStates()
         (activity as? MainActivity)?.apply {
