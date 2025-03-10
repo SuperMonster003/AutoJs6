@@ -28,4 +28,5 @@ public class PermissionRequestActivity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         finish();
     }
+
 }

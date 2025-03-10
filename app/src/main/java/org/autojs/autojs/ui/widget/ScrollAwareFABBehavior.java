@@ -18,9 +18,10 @@ import android.view.View;
  */
 public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
 
-    private static final long DURATION = 200;
     private static final TimeInterpolator INTERPOLATOR = new FastOutSlowInInterpolator();
     private boolean mHidden = false;
+
+    public static final long DURATION = 200;
 
     public ScrollAwareFABBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -59,7 +60,7 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        mHidden = false;
+                        setHidden(false);
                     }
                 })
                 .start();
@@ -80,10 +81,14 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        mHidden = true;
+                        setHidden(true);
                     }
                 })
                 .start();
+    }
+
+    public void setHidden(boolean b) {
+        mHidden = b;
     }
 
 }

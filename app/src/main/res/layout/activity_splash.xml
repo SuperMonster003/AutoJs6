@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="128dp"
-    android:layout_gravity="center|bottom"
-    android:gravity="center"
+    android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:orientation="horizontal">
+    android:gravity="center|bottom">
 
-    <ImageView
-        android:id="@+id/logo"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_gravity="center"
-        android:src="@drawable/autojs6_material" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:minHeight="128dp"
+        android:orientation="horizontal">
 
-    <ImageView
-        android:layout_width="100dp"
-        android:layout_height="32dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="4dp"
-        android:layout_marginStart="2dp"
-        android:src="@drawable/autojs6" />
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            android:src="@drawable/autojs6_material" />
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="2dp"
+            android:src="@drawable/autojs6" />
+
+    </LinearLayout>
 
 </LinearLayout>

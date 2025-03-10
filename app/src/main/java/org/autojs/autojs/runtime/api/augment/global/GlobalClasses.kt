@@ -1,8 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.global
 
 import org.autojs.autojs.annotation.AugmentableSimpleGetterProxyInterface
-import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
-import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.SimpleGetterProxy
 import org.mozilla.javascript.NativeJavaClass
 import org.mozilla.javascript.Scriptable

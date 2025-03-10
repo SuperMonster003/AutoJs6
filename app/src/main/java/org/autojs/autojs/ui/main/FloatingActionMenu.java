@@ -161,10 +161,10 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
         if (mOnFloatingActionButtonClickListener != null) {
             mOnFloatingActionButtonClickListener.onClick((FloatingActionButton) v, (int) v.getTag());
         }
-
     }
 
     public void setOnFloatingActionButtonClickListener(OnFloatingActionButtonClickListener onFloatingActionButtonClickListener) {
         mOnFloatingActionButtonClickListener = onFloatingActionButtonClickListener;
     }
+
 }

@@ -43,6 +43,7 @@ import org.autojs.autojs.timing.TimedTaskManager.removeTask
 import org.autojs.autojs.timing.TimedTaskManager.updateTask
 import org.autojs.autojs.tool.MapBuilder
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityTimedTaskSettingBinding
@@ -138,6 +139,8 @@ class TimedTaskSettingActivity : BaseActivity() {
         mWeeklyTaskTimePicker.setIs24HourView(true)
         findDayOfWeekCheckBoxes(mWeeklyTaskContainer)
         setUpTaskSettings(this)
+
+        ViewUtils.excludePaddingClippableViewFromNavigationBar(binding.scrollView)
     }
 
     private fun findDayOfWeekCheckBoxes(parent: ViewGroup) {

@@ -29,13 +29,18 @@ import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.forEach
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
+import kotlin.math.roundToInt
 
 /**
  * Created by Stardust on Jan 24, 2017.
@@ -157,6 +162,11 @@ object ViewUtils {
     }
 
     @JvmStatic
+    fun addWindowFlags(activity: Activity, flags: Int) {
+        activity.window.addFlags(flags)
+    }
+
+    @JvmStatic
     fun isStatusBarIconLight(activity: Activity): Boolean {
         return !isStatusBarIconDark(activity)
     }
@@ -180,7 +190,7 @@ object ViewUtils {
         val window = activity.window
         val decorView = window.decorView
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             decorView.setOnApplyWindowInsetsListener { view, insets ->
                 val statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars())
                 val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
@@ -204,7 +214,7 @@ object ViewUtils {
         val window = activity.window
         val decorView = window.decorView
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             decorView.setOnApplyWindowInsetsListener { view, insets ->
                 val navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars())
                 val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
@@ -221,6 +231,30 @@ object ViewUtils {
         } else {
             @Suppress("DEPRECATION")
             window.navigationBarColor = color
+        }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun excludeFloatingActionButtonFromNavigationBar(fab: FloatingActionButton, extraMarginBottomDp: Float = 16F) {
+        ViewCompat.setOnApplyWindowInsetsListener(fab) { view, insets ->
+            val bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+            view.layoutParams.runCatching {
+                javaClass.getField("bottomMargin")
+                    .setInt(this, DisplayUtils.dpToPx(extraMarginBottomDp).roundToInt() + bottomInset)
+            }
+            insets
+        }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun excludePaddingClippableViewFromNavigationBar(view: View, extraPaddingBottomDp: Float = 0F, clipToPadding: Boolean = false) {
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+            val bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+            view.setPadding(0, 0, 0, DisplayUtils.dpToPx(extraPaddingBottomDp).roundToInt() + bottomInset)
+            runCatching { view.javaClass.getMethod("setClipToPadding", Boolean::class.java).invoke(view, clipToPadding) }
+            insets
         }
     }
 
@@ -296,18 +330,33 @@ object ViewUtils {
             toolbar.setNavigationOnClickListener { activity.finish() }
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
-        toolbar.navigationIcon?.let { navigationIcon ->
-            val navigationIconColor = when {
-                ThemeColorManager.isThemeColorLuminanceLight() -> R.color.day
-                else -> R.color.night
-            }.let { activity.resources.getColor(it, null) }
-            navigationIcon.colorFilter = PorterDuffColorFilter(navigationIconColor, PorterDuff.Mode.SRC_IN)
-        }
+        setToolbarMenuIconsColorByThemeColorLuminance(activity, toolbar)
+        setToolbarNavigationIconColorByThemeColorLuminance(activity, toolbar)
     }
 
     @JvmStatic
     fun setToolbarAsBack(activity: AppCompatActivity, titleRes: Int) {
         setToolbarAsBack(activity, activity.getString(titleRes))
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun setToolbarMenuIconsColorByThemeColorLuminance(activity: Activity, toolbar: Toolbar? = null) {
+        val toolbarView = toolbar ?: activity.findViewById(R.id.toolbar) ?: return
+        val aimColor = ThemeColorManager.getDayOrNightColorByLuminance(activity)
+        toolbarView.menu.forEach { menuItem ->
+            menuItem.icon?.colorFilter = PorterDuffColorFilter(aimColor, PorterDuff.Mode.SRC_IN)
+        }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun setToolbarNavigationIconColorByThemeColorLuminance(activity: Activity, toolbar: Toolbar? = null) {
+        val toolbarView = toolbar ?: activity.findViewById(R.id.toolbar) ?: return
+        val aimColor = ThemeColorManager.getDayOrNightColorByLuminance(activity)
+        toolbarView.navigationIcon?.let { navigationIcon ->
+            navigationIcon.colorFilter = PorterDuffColorFilter(aimColor, PorterDuff.Mode.SRC_IN)
+        }
     }
 
     @JvmStatic

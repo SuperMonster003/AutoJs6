@@ -59,6 +59,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
         internalTextView = binding.textView
         internalFabView = binding.fab.apply {
             setOnClickListener { view -> showPopupMenu(view, internalTextView) }
+            ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
         }
 
         val scaleGestureDetector = ScaleGestureDetector(this, ScaleListener(internalTextView))
@@ -107,6 +108,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
                     else -> super.onTouchEvent(event)
                 }
             }
+            ViewUtils.excludePaddingClippableViewFromNavigationBar(it)
         }
 
         // 使用协程加载内容

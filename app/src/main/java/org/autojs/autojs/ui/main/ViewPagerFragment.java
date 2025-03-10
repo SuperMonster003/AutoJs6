@@ -30,6 +30,10 @@ public abstract class ViewPagerFragment extends Fragment implements BackPressedH
         mFab = fab;
     }
 
+    public FloatingActionButton getFab() {
+        return mFab;
+    }
+
     protected abstract void onFabClick(FloatingActionButton fab);
 
     @CallSuper

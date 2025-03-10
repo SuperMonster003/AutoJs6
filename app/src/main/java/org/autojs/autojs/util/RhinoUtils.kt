@@ -30,6 +30,7 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
 import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.RegExpLoader
 import org.mozilla.javascript.ScriptRuntime.emptyArgs
 import org.mozilla.javascript.ScriptRuntime.setBuiltinProtoAndParent
 import org.mozilla.javascript.ScriptRuntime.toObject

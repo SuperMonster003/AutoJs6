@@ -107,7 +107,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     val currentDirectory: ScriptFile
         get() = currentPage.toScriptFile()
 
-    protected var explorerItemListView: RecyclerView? = null
+    var explorerItemListView: RecyclerView? = null
         private set
 
     private lateinit var mProjectToolbar: ExplorerProjectToolbar
@@ -717,7 +717,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             mFirstChar.setIcon(ExplorerViewHelper.getIcon(item))
             when (item.type) {
                 FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> mFirstChar
-                    .setIconTextByThemeColorLuminance()
+                    .setIconTextColorByThemeColorLuminance()
                     .setStrokeThemeColor()
                     .setFillThemeColor()
                 else -> mFirstChar

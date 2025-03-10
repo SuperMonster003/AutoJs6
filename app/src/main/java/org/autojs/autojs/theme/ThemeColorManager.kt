@@ -1,6 +1,7 @@
 package org.autojs.autojs.theme
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Paint
 import android.view.View
 import org.autojs.autojs.util.ColorUtils
@@ -75,6 +76,12 @@ object ThemeColorManager {
     private fun saveThemeColorIfNeeded() {
         currentThemeColor.saveIn()
     }
+
+    @JvmStatic
+    fun getDayOrNightColorByLuminance(context: Context): Int = context.getColor(getDayOrNightColorResByLuminance())
+
+    @JvmStatic
+    fun getDayOrNightColorResByLuminance(): Int = if (isThemeColorLuminanceLight()) R.color.day else R.color.night
 
     private object BackgroundColorManager {
 

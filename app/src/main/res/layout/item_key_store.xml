@@ -4,10 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="6dp"
-    android:layout_marginTop="3dp"
-    android:layout_marginEnd="6dp"
-    android:layout_marginBottom="3dp"
+    android:layout_margin="2dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
@@ -18,7 +15,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -28,20 +26,20 @@
             android:orientation="vertical"
             tools:ignore="RelativeOverlap">
 
-
             <TextView
                 android:id="@+id/filename"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_color_primary"
-                tools:text="filename" />
+                tools:text="File name: foo" />
 
             <TextView
                 android:id="@+id/alias"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_color_primary"
-                tools:text="filename" />
+                tools:text="Alias: bar" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -76,6 +74,9 @@
                 android:padding="4dp"
                 android:src="@drawable/ic_key_store_delete"
                 app:tint="@color/md_red_500" />
+
         </LinearLayout>
+
     </RelativeLayout>
+
 </androidx.cardview.widget.CardView>

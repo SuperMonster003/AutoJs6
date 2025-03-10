@@ -108,12 +108,16 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         //  ! can only accept String type data returned by getText().
         //  ! If CharSequence type data is directly passed in, the shortcut will fail to create properly.
         //  !
+        //  ! Refer to: http://issues.autojs6.com/221
+        //  !
         //  ! zh-CN:
         //  !
         //  ! 此处需要转换为 String 类型, 而不能保留 getText() 方法得到的 CharSequence 类型.
         //  ! 这是因为在一些特殊设备上 [如 MIUI 14 (Android 13)],
         //  ! ShortcutInfoCompat.Builder#setShortLabel 及 setLongLabel 只能接受 getText() 返回的 String 类型数据,
         //  ! 如果直接传入 CharSequence 类型数据, 快捷方式将无法正常创建.
+        //  !
+        //  ! 参阅: http://issues.autojs6.com/221
         //  !
         //  # CharSequence name = mName.getText();
         String name = mName.getText().toString();

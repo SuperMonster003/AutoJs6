@@ -22,6 +22,8 @@
     <color name="text_color_primary_full">@color/day_night_full</color>
     <color name="text_color_primary_alpha_70">@color/day_night_alpha_70</color>
     <color name="text_color_secondly">#9DA0A2</color>
+    <color name="black_alpha_40">#66000000</color>
+    <color name="black_alpha_44">#70000000</color>
 
     <color name="colorAccent">#03A9F4</color>
     <color name="colorPrimary">@color/theme_color_default</color>

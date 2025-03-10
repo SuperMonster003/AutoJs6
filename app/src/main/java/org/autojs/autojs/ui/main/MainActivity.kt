@@ -19,12 +19,10 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.core.view.forEach
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.huaban.analysis.jieba.CharsDictionaryDatabase
 import com.huaban.analysis.jieba.PhrasesDictionaryDatabase
@@ -49,6 +47,7 @@ import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorManager.addViewBackground
+import org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.doc.DocumentationFragment
@@ -82,7 +81,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private var binding: ActivityMainBinding? = null
 
     private lateinit var mViewPager: ViewPager
-    private lateinit var mFab: FloatingActionButton
+    private lateinit var mFab: ThemeColorFloatingActionButton
     private lateinit var mTab: TabLayout
     private lateinit var mToolbar: ThemeColorToolbar
     private lateinit var mPagerAdapter: StoredFragmentPagerAdapter
@@ -104,18 +103,23 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             return pageTitle != null && getString(R.string.text_documentation).contentEquals(pageTitle)
         }
 
+    val filesItemIndex: Int
+        get() = findPageIndexByTitle(R.string.text_file)
+
     val docsItemIndex: Int
-        get() {
-            var i = 0
-            while (i < mPagerAdapter.count) {
-                val pageTitle = mPagerAdapter.getPageTitle(i)
-                if (pageTitle != null && getString(R.string.text_documentation).contentEquals(pageTitle)) {
-                    return i
-                }
-                i += 1
+        get() = findPageIndexByTitle(R.string.text_documentation)
+
+    private fun findPageIndexByTitle(titleRes: Int): Int {
+        var i = 0
+        while (i < mPagerAdapter.count) {
+            val pageTitle = mPagerAdapter.getPageTitle(i)
+            if (pageTitle != null && getString(titleRes).contentEquals(pageTitle)) {
+                return i
             }
-            return -1
+            i += 1
         }
+        return -1
+    }
 
     val requestMultiplePermissionsLauncher = registerForActivityResult(RequestMultiplePermissions()) {
         it.forEach { (key: String, isGranted: Boolean) ->
@@ -134,7 +138,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             binding = it
             setContentView(it.root)
             mViewPager = it.viewpager
-            mFab = it.fab
+            mFab = it.fab.apply { ViewUtils.excludeFloatingActionButtonFromNavigationBar(this) }
             mTab = it.tab
             mToolbar = it.toolbar
             addViewBackground(it.appBar)
@@ -270,13 +274,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     private fun setUpToolbarColors() {
-        val aimColor = when {
-            ThemeColorManager.isThemeColorLuminanceLight() -> getColor(R.color.day)
-            else -> getColor(R.color.night)
-        }
-        mToolbar.menu.forEach { menuItem ->
-            menuItem.icon?.colorFilter = PorterDuffColorFilter(aimColor, PorterDuff.Mode.SRC_IN)
-        }
+        ViewUtils.setToolbarMenuIconsColorByThemeColorLuminance(this, mToolbar)
         mSearchViewItem?.initThemeColors()
     }
 

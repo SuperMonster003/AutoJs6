@@ -72,12 +72,7 @@ class FirstCharView : TextView {
 
     fun setIconTextColorRes(@ColorRes colorRes: Int) = also { setTextColor(convertColorResToInt(colorRes)) }
 
-    fun setIconTextByThemeColorLuminance() = also {
-        when {
-            ThemeColorManager.isThemeColorLuminanceLight() -> setIconTextColorRes(R.color.day)
-            else -> setIconTextColorRes(R.color.night)
-        }
-    }
+    fun setIconTextColorByThemeColorLuminance() = also { setIconTextColorRes(ThemeColorManager.getDayOrNightColorResByLuminance()) }
 
     fun setIconTextThemeColor() = setIconTextColor(ThemeColorManagerCompat.getColorPrimary())
 

@@ -1,7 +1,6 @@
 package org.autojs.autojs.theme.widget;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -49,15 +48,8 @@ public class ThemeColorToolbar extends Toolbar implements ThemeColorMutable {
         int colorPrimary = color.colorPrimary;
         setBackgroundColor(colorPrimary);
 
-        int aimColor;
-        int popupTheme;
-        if (ThemeColorManager.isThemeColorLuminanceLight()) {
-            aimColor = getResources().getColor(R.color.day, null);
-            popupTheme = R.style.PopupMenuThemeLight;
-        } else {
-            aimColor = getResources().getColor(R.color.night, null);
-            popupTheme = R.style.PopupMenuThemeDark;
-        }
+        int aimColor = ThemeColorManager.getDayOrNightColorByLuminance(getContext());
+        int popupTheme = ThemeColorManager.isThemeColorLuminanceLight() ? R.style.PopupMenuThemeLight : R.style.PopupMenuThemeDark;
 
         setTitleTextColor(aimColor);
         setSubtitleTextColor(aimColor);
