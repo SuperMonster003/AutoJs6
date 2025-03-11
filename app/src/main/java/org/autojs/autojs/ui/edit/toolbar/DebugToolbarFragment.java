@@ -274,8 +274,12 @@ public class DebugToolbarFragment extends ToolbarFragment implements DebugCallba
         }
         String variable = findVariableOnCursor(line, ch);
         Log.d(LOG_TAG, "onCursorChange: variable = " + variable + ", ch = " + ch + ", line = " + line);
-        String value = eval(variable);
-        mEditorView.debugBar.updateCurrentVariable(variable, value);
+        try {
+            String value = eval(variable);
+            mEditorView.debugBar.updateCurrentVariable(variable, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private String findVariableOnCursor(String line, int ch) {

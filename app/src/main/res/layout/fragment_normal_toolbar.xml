@@ -11,7 +11,6 @@
             android:layout_width="40dp"
             android:layout_height="match_parent"
             app:icon="@drawable/ic_play_arrow_white_48dp"
-            app:icon_color="@color/toolbar_text"
             app:text="@string/text_run_simplified" />
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
@@ -19,7 +18,6 @@
             android:layout_width="40dp"
             android:layout_height="match_parent"
             app:icon="@drawable/ic_undo_white_48dp"
-            app:icon_color="@color/toolbar_text"
             app:text="@string/text_undo_simplified" />
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
@@ -27,7 +25,6 @@
             android:layout_width="40dp"
             android:layout_height="match_parent"
             app:icon="@drawable/ic_redo_white_48dp"
-            app:icon_color="@color/toolbar_text"
             app:text="@string/text_redo_simplified" />
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
@@ -36,7 +33,6 @@
             android:layout_height="match_parent"
             android:enabled="false"
             app:icon="@drawable/ic_save_white_48dp"
-            app:icon_color="@color/toolbar_text"
             app:text="@string/text_save_simplified" />
 
 </LinearLayout>

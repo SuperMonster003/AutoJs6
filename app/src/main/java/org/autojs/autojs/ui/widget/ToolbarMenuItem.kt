@@ -1,13 +1,14 @@
 package org.autojs.autojs.ui.widget
 
 import android.content.Context
-import android.graphics.Color
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.DrawableUtils
 import org.autojs.autojs6.R
 
@@ -16,8 +17,17 @@ import org.autojs.autojs6.R
  */
 class ToolbarMenuItem : LinearLayout {
 
-    private val mColorDisabled: Int = ContextCompat.getColor(context, R.color.toolbar_disabled)
-    private val mColorEnabled: Int = ContextCompat.getColor(context, R.color.toolbar_text)
+    private val mColorDisabled: Int
+        get() = when (ThemeColorManager.isThemeColorLuminanceLight()) {
+            true -> ContextCompat.getColor(context, R.color.toolbar_menu_item_disabled_dark)
+            else -> ContextCompat.getColor(context, R.color.toolbar_menu_item_disabled_light)
+        }
+    private val mColorEnabled: Int
+        get() = when (ThemeColorManager.isThemeColorLuminanceLight()) {
+            true -> ContextCompat.getColor(context, R.color.toolbar_menu_item_enabled_dark)
+            else -> ContextCompat.getColor(context, R.color.toolbar_menu_item_enabled_light)
+        }
+
     private var mImageView: ImageView
     private var mTextView: TextView
     private var mEnabledDrawable: Drawable? = null
@@ -30,15 +40,12 @@ class ToolbarMenuItem : LinearLayout {
 
         val iconText = a.getString(R.styleable.ToolbarMenuItem_text)
         val iconResId = a.getResourceId(R.styleable.ToolbarMenuItem_icon, 0)
-        val iconColor = a.getColor(R.styleable.ToolbarMenuItem_icon_color, Color.TRANSPARENT)
 
         a.recycle()
 
         mImageView = findViewById<ImageView?>(R.id.icon).apply {
             setImageResource(iconResId)
-            if (iconColor != Color.TRANSPARENT) {
-                setImageDrawable(DrawableUtils.setDrawableColorFilterSrcIn(drawable, iconColor))
-            }
+            imageTintList = ColorStateList.valueOf(mColorEnabled)
         }
 
         mTextView = findViewById<TextView?>(R.id.text).apply {
@@ -57,6 +64,7 @@ class ToolbarMenuItem : LinearLayout {
             ensureEnabledDrawable()
             ensureDisabledDrawable()
             mImageView.setImageDrawable(if (enabled) mEnabledDrawable else mDisabledDrawable)
+            mImageView.imageTintList = ColorStateList.valueOf(if (enabled) mColorEnabled else mColorDisabled)
             mTextView.setTextColor(if (enabled) mColorEnabled else mColorDisabled)
         }
     }

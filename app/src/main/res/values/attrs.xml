@@ -47,7 +47,6 @@
     <declare-styleable name="ToolbarMenuItem">
         <attr name="text" format="string|reference" />
         <attr name="icon" />
-        <attr name="icon_color" format="color|reference" />
     </declare-styleable>
 
     <declare-styleable name="RoundCheckboxWithText">

@@ -54,7 +54,6 @@
     <color name="tab_selected_text">#111214</color>
 
     <color name="toolbar_text">@color/night_day</color>
-    <color name="toolbar_disabled">#6E292929</color>
 
     <color name="prefTextColorPrimary">#9A9A9A</color>
     <color name="prefTextColorSecondary">#808080</color>

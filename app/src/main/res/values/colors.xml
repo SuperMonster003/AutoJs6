@@ -132,9 +132,12 @@
     <color name="tab_selected_text_dark">#111214</color>
 
     <color name="toolbar_text">@color/night_day</color>
+    <color name="toolbar_menu_item_enabled_light">@color/night</color>
+    <color name="toolbar_menu_item_enabled_dark">@color/dawn</color>
+    <color name="toolbar_menu_item_disabled_light">#6EE0E0E0</color>
+    <color name="toolbar_menu_item_disabled_dark">#6E292929</color>
     <color name="fab_tint_light">@color/night</color>
     <color name="fab_tint_dark">@color/day</color>
-    <color name="toolbar_disabled">#6EE0E0E0</color>
 
     <color name="prefTextColorPrimary">#282C2F</color>
     <color name="prefTextColorSecondary">#9DA0A2</color>
