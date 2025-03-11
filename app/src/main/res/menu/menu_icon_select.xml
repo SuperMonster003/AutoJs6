@@ -4,6 +4,12 @@
         app:popupTheme="@style/Widget.AppCompat.PopupMenu">
 
     <item
+        android:id="@+id/action_use_default_icon"
+        android:icon="@mipmap/ic_launcher"
+        android:title="@string/text_use_default_icon"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_select_image"
         android:icon="@drawable/ic_insert_photo_white_48dp"
         android:title="@string/text_select_image"

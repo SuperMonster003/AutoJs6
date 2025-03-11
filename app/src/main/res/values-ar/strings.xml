@@ -731,6 +731,7 @@
     <string name="text_select_file_to_upload">حدد ملف للتحميل</string>
     <string name="text_select_icon">حدد أيقونة</string>
     <string name="text_select_image">حدد صورة</string>
+    <string name="text_use_default_icon">استخدام الرمز الافتراضي</string>
     <string name="text_send">إرسال</string>
     <string name="text_send_shortcut">انشاء اختصار</string>
     <string name="text_server_mode">وضع الخادم</string>

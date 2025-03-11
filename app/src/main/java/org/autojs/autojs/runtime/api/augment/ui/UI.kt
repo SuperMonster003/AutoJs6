@@ -46,6 +46,7 @@ import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.undefined
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
@@ -187,8 +188,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val widgets = scriptRuntime.ui.widgets
             if (widgets.contains(viewName)) {
                 val ctor = widgets.prop(viewName) as NativeFunction
-                val widget = withRhinoContext { ctx ->
-                    ctor.construct(ctx, scriptRuntime.topLevelScope, arrayOf())
+                val widget = withRhinoContext { cx ->
+                    ctor.construct(cx, scriptRuntime.topLevelScope, arrayOf())
                 } as ScriptableObject
                 val f = widget.prop("renderInternal") as BaseFunction
                 return __inflateRhinoRuntime__(scriptRuntime, scriptRuntime.ui.layoutInflater.newInflateContext().also { ctx ->
@@ -509,9 +510,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun statusBarColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { color ->
             ensureActivity(scriptRuntime) { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
-                    Colors.toIntRhino(color).also {
-                        activity.window.statusBarColor = it
-                    }
+                    Colors.toIntRhino(color).also { ViewUtils.setStatusBarBackgroundColor(activity, it) }
                 }, NOT_CONSTRUCTABLE))
             }
             UNDEFINED
@@ -734,8 +733,8 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                             }
                         }
                     }, NOT_CONSTRUCTABLE)
-                    withRhinoContext { context ->
-                        arrayObserveFunc.call(context, global, globalArray, arrayOf(dataSource, handlerFunc))
+                    withRhinoContext { cx ->
+                        arrayObserveFunc.call(cx, global, globalArray, arrayOf(dataSource, handlerFunc))
                     }
                 }
             })
@@ -744,10 +743,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         private fun wrapUiAction(scriptRuntime: ScriptRuntime, action: BaseFunction) = Runnable {
             when {
                 !getActivity(scriptRuntime).isJsNullish() -> callFunction(scriptRuntime, action, scriptRuntime.topLevelScope, arrayOf())
-                else -> withRhinoContext { context ->
+                else -> withRhinoContext { cx ->
                     val scope = scriptRuntime.topLevelScope
                     val func = scope.prop("__exitIfError__") as BaseFunction
-                    func.call(context, scope, scope, arrayOf(newBaseFunction("action", {
+                    func.call(cx, scope, scope, arrayOf(newBaseFunction("action", {
                         callFunction(scriptRuntime, action, arrayOf())
                     }, NOT_CONSTRUCTABLE)))
                 }

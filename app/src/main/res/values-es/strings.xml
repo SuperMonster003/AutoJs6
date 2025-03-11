@@ -730,6 +730,7 @@
     <string name="text_select_file_to_upload">Seleccionar el archivo a cargar</string>
     <string name="text_select_icon">Seleccionar un icono</string>
     <string name="text_select_image">Seleccionar una imagen</string>
+    <string name="text_use_default_icon">Usar icono predeterminado</string>
     <string name="text_send">Enviar</string>
     <string name="text_send_shortcut">Crear acceso directo</string>
     <string name="text_server_mode">Modo servidor</string>

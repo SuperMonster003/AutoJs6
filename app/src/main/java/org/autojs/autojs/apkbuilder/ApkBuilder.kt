@@ -9,8 +9,7 @@ import android.os.Build
 import android.util.Log
 import com.mcal.apksigner.ApkSigner
 import com.reandroid.arsc.chunk.TableBlock
-import org.apache.commons.io.FileUtils.copyFile
-import org.apache.commons.io.FileUtils.copyInputStreamToFile
+import org.apache.commons.io.FileUtils
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
@@ -308,7 +307,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
 
         val defaultKeyStoreFile = File(buildPath, "default_key_store.bks")
         val tmpOutputApk = File(buildPath, "temp.apk")
-        copyInputStreamToFile(GlobalAppContext.get().assets.open("default_key_store.bks"), defaultKeyStoreFile)
+        FileUtils.copyInputStreamToFile(GlobalAppContext.get().assets.open("default_key_store.bks"), defaultKeyStoreFile)
 
         val signer = ApkSigner(outApkFile, tmpOutputApk).apply {
             useDefaultSignatureVersion = false
@@ -336,7 +335,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         }
 
         try {
-            copyFile(tmpOutputApk, outApkFile)
+            FileUtils.copyFile(tmpOutputApk, outApkFile)
         } catch (e: java.lang.Exception) {
             throw java.lang.RuntimeException(e)
         }

@@ -45,8 +45,8 @@ class RootAutomatorNativeObject(scriptRuntime: ScriptRuntime, waitForReady: Any?
         //  #     'touchDown', 'touchUp', 'touchMove', 'getDefaultId', 'setDefaultId', 'exit',
         //  # ]
         return when (val o = mRootAutomatorObject.prop(name)) {
-            is BaseFunction -> withRhinoContext { ctx ->
-                BoundFunction(ctx, mRootAutomatorObject, o, mRootAutomatorObject, arrayOf())
+            is BaseFunction -> withRhinoContext { cx ->
+                BoundFunction(cx, mRootAutomatorObject, o, mRootAutomatorObject, arrayOf())
             }
             else -> super.get(name, start)
         }

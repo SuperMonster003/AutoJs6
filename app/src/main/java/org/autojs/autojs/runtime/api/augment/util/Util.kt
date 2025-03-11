@@ -274,13 +274,13 @@ object Util : Augmentable() {
 
         val bPrototype: Scriptable? = when {
             niceB == null -> js_object_create(null)
-            else -> withRhinoContext { context ->
+            else -> withRhinoContext { cx ->
                 val tmp = object : BaseFunction() {
                     override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable?, args: Array<out Any?>) = newNativeObject().also {
                         it.defineProperty("constructor", d, READONLY or DONTENUM or PERMANENT)
                     }
                 }
-                tmp.construct(context, ImporterTopLevel(context), arrayOf()).also { instance ->
+                tmp.construct(cx, ImporterTopLevel(cx), arrayOf()).also { instance ->
                     // FIXME by SuperMonster003 on Jul 13, 2024.
                     //  ! I'm not sure if there is a better way
                     //  ! to implement JavaScript snippet `tmp.prototype = b.prototype;`,
@@ -739,7 +739,7 @@ object Util : Augmentable() {
     private fun getClassInternal(o: Any): Scriptable = when (o) {
         is Class<*> -> o
         else -> o.javaClass
-    }.let { cls -> withRhinoContext { cx -> cx.wrapFactory.wrapJavaClass(cx, ImporterTopLevel(cx), cls) }!! }
+    }.let { cls -> withRhinoContext { cx -> cx.wrapFactory.wrapJavaClass(cx, ImporterTopLevel(cx), cls) } }
 
     internal class RegularFunction(private val func: BaseFunction) : BaseFunction() {
 

@@ -730,6 +730,7 @@
     <string name="text_select_file_to_upload">アップロードするファイルを選択します</string>
     <string name="text_select_icon">アイコンを選択する</string>
     <string name="text_select_image">画像を選択する</string>
+    <string name="text_use_default_icon">デフォルトのアイコンを使用する</string>
     <string name="text_send">送信する</string>
     <string name="text_send_shortcut">ショートカットの作成</string>
     <string name="text_server_mode">サーバーモード</string>

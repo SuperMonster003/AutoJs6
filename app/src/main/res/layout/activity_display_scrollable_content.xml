@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:fitsSystemWindows="true">
 
     <org.autojs.autojs.ui.common.NestedOuterScrollView
         android:id="@+id/outerScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingVertical="2sp"
         android:scrollbars="vertical">
 
         <HorizontalScrollView
             android:id="@+id/innerScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingHorizontal="8sp"
             android:scrollbars="horizontal">
 
             <org.autojs.autojs.ui.widget.SelectableTextView
@@ -23,7 +26,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:padding="16dp"
                 android:scrollbars="vertical"
                 android:fontFamily="monospace" />
 

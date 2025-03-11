@@ -729,6 +729,7 @@
     <string name="text_select_file_to_upload">選擇要上傳的文件</string>
     <string name="text_select_icon">選擇圖標</string>
     <string name="text_select_image">選擇圖片</string>
+    <string name="text_use_default_icon">使用默認圖標</string>
     <string name="text_send">發送</string>
     <string name="text_send_shortcut">創建快捷方式</string>
     <string name="text_server_mode">服務端模式</string>

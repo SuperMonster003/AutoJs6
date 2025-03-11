@@ -30,7 +30,6 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeDate
 import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.NativeObject
-import org.mozilla.javascript.RegExpLoader
 import org.mozilla.javascript.ScriptRuntime.emptyArgs
 import org.mozilla.javascript.ScriptRuntime.setBuiltinProtoAndParent
 import org.mozilla.javascript.ScriptRuntime.toObject
@@ -97,8 +96,8 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    fun callGlobalFunction(scriptRuntime: ScriptRuntime?, name: String, paramsToFunction: Array<Any?>) = withRhinoContext { context ->
-        val topLevel = ImporterTopLevel(context)
+    fun callGlobalFunction(scriptRuntime: ScriptRuntime?, name: String, paramsToFunction: Array<Any?>) = withRhinoContext { cx ->
+        val topLevel = ImporterTopLevel(cx)
         callFunction(scriptRuntime, topLevel, name, paramsToFunction)
     }
 
@@ -159,7 +158,7 @@ object RhinoUtils {
     @Throws(NoSuchMethodException::class, InvocationTargetException::class, IllegalAccessException::class)
     fun callFunction(scriptRuntime: ScriptRuntime?, func: BaseFunction, scope: Scriptable?, thisObj: Scriptable?, args: Array<Any?>): Any? = withRhinoContext { cx ->
         try {
-            val niceScope = scope ?: ImporterTopLevel(cx)
+            val niceScope = scope ?: cx.initStandardObjects()
             when {
                 RhinoScriptRuntime.hasTopCall(cx) -> func.call(cx, niceScope, thisObj, args)
                 else -> RhinoScriptRuntime.doTopCall(func, cx, niceScope, thisObj, args, false)
@@ -182,7 +181,7 @@ object RhinoUtils {
     @JvmStatic
     fun constructFunction(ctor: BaseFunction, scope: TopLevelScope, args: Array<Any?>): Scriptable = withRhinoContext { cx ->
         ctor.construct(cx, scope, args)
-    }!!
+    }
 
     @JvmStatic
     fun newBaseFunction(
@@ -262,9 +261,9 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    fun wrap(o: Any?): Any = withRhinoContext { context ->
-        context.wrapFactory.wrap(context, ImporterTopLevel(context), o, o?.let { it::class.java })
-    }!!
+    fun wrap(o: Any?): Any = withRhinoContext { cx ->
+        cx.wrapFactory.wrap(cx, ImporterTopLevel(cx), o, o?.let { it::class.java })
+    }
 
     @JvmStatic
     fun unwrap(o: Any?): Any? = when (o) {
@@ -370,8 +369,8 @@ object RhinoUtils {
     fun toFunctionName(cls: KClass<*>, func: KFunction<*>, paramName: String): String = "${cls.simpleName}.${func.name}($paramName)"
 
     @JvmStatic
-    fun runJavaScript(code: String): Any? = withRhinoContext { context, standardObjects ->
-        context.evaluateString(standardObjects, code, null, 1, null)
+    fun runJavaScript(code: String): Any? = withRhinoContext { cx ->
+        cx.evaluateString(standardObjects, code, null, 1, null)
     }
 
     @JvmStatic
@@ -492,28 +491,28 @@ object RhinoUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun callPrototypeFunction(builtins: TopLevel.Builtins, funcName: String, thisObj: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { context ->
-        callPrototypeFunction(builtins, funcName, thisObj, ImporterTopLevel(context), args)
+    fun callPrototypeFunction(builtins: TopLevel.Builtins, funcName: String, thisObj: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
+        callPrototypeFunction(builtins, funcName, thisObj, ImporterTopLevel(cx), args)
     }
 
     @JvmStatic
     @JvmOverloads
-    fun callPrototypeFunction(className: String, funcName: String, thisObj: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { context ->
-        callPrototypeFunction(className, funcName, thisObj, ImporterTopLevel(context), args)
+    fun callPrototypeFunction(className: String, funcName: String, thisObj: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
+        callPrototypeFunction(className, funcName, thisObj, ImporterTopLevel(cx), args)
     }
 
     @JvmStatic
     @JvmOverloads
-    fun callPrototypeFunction(builtins: TopLevel.Builtins, funcName: String, thisObj: Scriptable, scope: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { context ->
+    fun callPrototypeFunction(builtins: TopLevel.Builtins, funcName: String, thisObj: Scriptable, scope: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
         val prototypeFunction = getPrototypeFunction(scope, builtins, funcName)
-        prototypeFunction.call(context, scope, thisObj, args)
+        prototypeFunction.call(cx, scope, thisObj, args)
     }
 
     @JvmStatic
     @JvmOverloads
-    fun callPrototypeFunction(className: String, funcName: String, thisObj: Scriptable, scope: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { context ->
+    fun callPrototypeFunction(className: String, funcName: String, thisObj: Scriptable, scope: Scriptable, args: Array<Any?> = arrayOf()): Any? = withRhinoContext { cx ->
         val prototypeFunction = getPrototypeFunction(scope, className, funcName)
-        prototypeFunction.call(context, scope, thisObj, args)
+        prototypeFunction.call(cx, scope, thisObj, args)
     }
 
     @JvmStatic
@@ -551,48 +550,48 @@ object RhinoUtils {
 
     @Suppress("UnnecessaryVariable")
     @JvmStatic
-    fun js_object_assign(tar: Scriptable?, src: Scriptable?): Scriptable = withRhinoContext { context ->
-        val topeLevelScope = ImporterTopLevel(context)
+    fun js_object_assign(tar: Scriptable?, src: Scriptable?): Scriptable = withRhinoContext { cx ->
+        val topeLevelScope = ImporterTopLevel(cx)
         val targetObj = when (tar != null) {
-            true -> toObject(context, topeLevelScope, tar)
-            else -> toObject(context, topeLevelScope, UNDEFINED)
+            true -> toObject(cx, topeLevelScope, tar)
+            else -> toObject(cx, topeLevelScope, UNDEFINED)
         }
         if (src.isJsNullish()) {
             return@withRhinoContext targetObj
         }
-        val sourceObj = toObject(context, topeLevelScope, src)
+        val sourceObj = toObject(cx, topeLevelScope, src)
         for (key in sourceObj.ids) {
             when (key) {
                 is Int -> {
                     val intId = key
                     if (sourceObj.has(intId, sourceObj)) {
-                        AbstractEcmaObjectOperations.put(context, targetObj, intId, sourceObj[intId, sourceObj], true)
+                        AbstractEcmaObjectOperations.put(cx, targetObj, intId, sourceObj[intId, sourceObj], true)
                     }
                 }
                 else -> {
                     val stringId = toString(key)
                     if (sourceObj.has(stringId, sourceObj)) {
-                        AbstractEcmaObjectOperations.put(context, targetObj, stringId, sourceObj.prop(stringId), true)
+                        AbstractEcmaObjectOperations.put(cx, targetObj, stringId, sourceObj.prop(stringId), true)
                     }
                 }
             }
         }
         return@withRhinoContext targetObj
-    }!!
+    }
 
     @JvmStatic
-    fun js_object_keys(arg: ScriptableObject): NativeArray = withRhinoContext { context ->
-        val topLevel = ImporterTopLevel(context)
-        val obj = toObject(context, topLevel, arg)
+    fun js_object_keys(arg: ScriptableObject): NativeArray = withRhinoContext { cx ->
+        val topLevel = ImporterTopLevel(cx)
+        val obj = toObject(cx, topLevel, arg)
         val ids = obj.ids
         ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
-        context.newArray(topLevel, ids) as NativeArray
-    }!!
+        cx.newArray(topLevel, ids) as NativeArray
+    }
 
     @JvmStatic
-    fun js_object_values(arg: ScriptableObject): NativeArray = withRhinoContext { context ->
-        val topLevel = ImporterTopLevel(context)
-        val obj = toObject(context, topLevel, arg)
+    fun js_object_values(arg: ScriptableObject): NativeArray = withRhinoContext { cx ->
+        val topLevel = ImporterTopLevel(cx)
+        val obj = toObject(cx, topLevel, arg)
         var ids = obj.ids
         var j = 0
         for (i in ids.indices) {
@@ -612,13 +611,13 @@ object RhinoUtils {
         if (j != ids.size) {
             ids = ids.copyOf(j)
         }
-        context.newArray(topLevel, ids) as NativeArray
-    }!!
+        cx.newArray(topLevel, ids) as NativeArray
+    }
 
     @JvmStatic
     @JvmOverloads
-    fun js_object_create(o: Scriptable? = null, properties: ScriptableObject? = null): NativeObject = withRhinoContext { context ->
-        val topLevel = ImporterTopLevel(context)
+    fun js_object_create(o: Scriptable? = null, properties: ScriptableObject? = null): NativeObject = withRhinoContext { cx ->
+        val topLevel = ImporterTopLevel(cx)
         newNativeObject().also {
             it.parentScope = topLevel
             it.prototype = when (o) {
@@ -626,15 +625,15 @@ object RhinoUtils {
                 else -> ensureScriptable(o)
             }
             if (!properties.isJsNullish()) {
-                it.defineOwnProperties(context, ensureScriptableObject(Context.toObject(properties, topLevel)))
+                it.defineOwnProperties(cx, ensureScriptableObject(Context.toObject(properties, topLevel)))
             }
         }
-    }!!
+    }
 
     @JvmStatic
-    fun js_object_getPrototypeOf(o: Scriptable?): Scriptable? = withRhinoContext { context ->
-        val topLevel = ImporterTopLevel(context)
-        NativeObject.getCompatibleObject(context, topLevel, o).prototype
+    fun js_object_getPrototypeOf(o: Scriptable?): Scriptable? = withRhinoContext { cx ->
+        val topLevel = ImporterTopLevel(cx)
+        NativeObject.getCompatibleObject(cx, topLevel, o).prototype
     }
 
     @JvmStatic
@@ -662,36 +661,36 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    fun js_object_hasOwnProperty(o: Scriptable, property: String): Boolean = withRhinoContext { context ->
+    fun js_object_hasOwnProperty(o: Scriptable, property: String): Boolean = withRhinoContext { cx ->
         // Context.toBoolean(callPrototypeFunction(TopLevel.Builtins.Object, "hasOwnProperty", o, arrayOf(property)))
-        AbstractEcmaObjectOperations.hasOwnProperty(context, o, property)
-    }!!
-
-    @JvmStatic
-    fun js_object_getOwnPropertyNames(o: Scriptable): NativeArray = withRhinoContext { context ->
-        val topLevel = ImporterTopLevel(context)
-        val obj = ensureScriptableObject(toObject(context, topLevel, o))
-        val ids = obj.getIds(true, false)
-        ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
-        context.newArray(topLevel, ids) as NativeArray
-    }!!
-
-    @JvmStatic
-    fun js_object_getOwnPropertyDescriptor(value: ScriptableObject, key: Any): ScriptableObject? = withRhinoContext { context ->
-        val topLevel = ImporterTopLevel(context)
-        val obj = ensureScriptableObject(toObject(context, topLevel, value))
-        obj.getOwnPropertyDescriptor(context, key)
+        AbstractEcmaObjectOperations.hasOwnProperty(cx, o, property)
     }
 
     @JvmStatic
-    fun js_function_bind(scope: Scriptable? = null, targetFunction: Callable, vararg args: Scriptable): BoundFunction = withRhinoContext { context ->
-        val topLevel = scope ?: ImporterTopLevel(context)
+    fun js_object_getOwnPropertyNames(o: Scriptable): NativeArray = withRhinoContext { cx ->
+        val topLevel = ImporterTopLevel(cx)
+        val obj = ensureScriptableObject(toObject(cx, topLevel, o))
+        val ids = obj.getIds(true, false)
+        ids.indices.forEach { i -> ids[i] = toString(ids[i]) }
+        cx.newArray(topLevel, ids) as NativeArray
+    }
+
+    @JvmStatic
+    fun js_object_getOwnPropertyDescriptor(value: ScriptableObject, key: Any): ScriptableObject? = withRhinoContext { cx ->
+        val topLevel = ImporterTopLevel(cx)
+        val obj = ensureScriptableObject(toObject(cx, topLevel, value))
+        obj.getOwnPropertyDescriptor(cx, key)
+    }
+
+    @JvmStatic
+    fun js_function_bind(scope: Scriptable? = null, targetFunction: Callable, vararg args: Scriptable): BoundFunction = withRhinoContext { cx ->
+        val topLevel = scope ?: ImporterTopLevel(cx)
         val argc: Int = args.size
         val boundThis: Scriptable?
         val boundArgs: Array<Any?>
         when {
             argc > 0 -> {
-                boundThis = RhinoScriptRuntime.toObjectOrNull(context, args[0], topLevel)
+                boundThis = RhinoScriptRuntime.toObjectOrNull(cx, args[0], topLevel)
                 boundArgs = arrayOfNulls(argc - 1)
                 System.arraycopy(args, 1, boundArgs, 0, argc - 1)
             }
@@ -700,21 +699,21 @@ object RhinoUtils {
                 boundArgs = emptyArgs
             }
         }
-        BoundFunction(context, topLevel, targetFunction, boundThis, boundArgs)
-    }!!
+        BoundFunction(cx, topLevel, targetFunction, boundThis, boundArgs)
+    }
 
     @JvmStatic
-    fun js_json_parse(text: String): Any? = withRhinoContext { context ->
-        val topLevel = ImporterTopLevel(context)
-        JsonParser(context, topLevel).parseValue(text)
+    fun js_json_parse(text: String): Any? = withRhinoContext { cx ->
+        val topLevel = ImporterTopLevel(cx)
+        JsonParser(cx, topLevel).parseValue(text)
     }
 
     @JvmStatic
     @JvmOverloads
-    fun js_json_stringify(value: Any?, replacer: Any? = null, space: Any? = null): Any = withRhinoContext { context ->
-        val topLevel = ImporterTopLevel(context)
-        NativeJSON.stringify(context, topLevel, value, replacer, space)
-    }!!
+    fun js_json_stringify(value: Any?, replacer: Any? = null, space: Any? = null): Any = withRhinoContext { cx ->
+        val topLevel = ImporterTopLevel(cx)
+        NativeJSON.stringify(cx, topLevel, value, replacer, space)
+    }
 
     @JvmStatic
     fun js_typeof(value: Any?): String = `typeof`(value)
@@ -725,29 +724,31 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    fun js_date_parseString(s: String): Double = withRhinoContext { context ->
-        NativeDate.date_parseString(context, s)
-    }!!
+    fun js_date_parseString(s: String): Double = withRhinoContext { cx ->
+        NativeDate.date_parseString(cx, s)
+    }
 
     @JvmStatic
-    fun js_eval(scope: Scriptable, s: String): Any? = withRhinoContext { context ->
+    fun js_eval(scope: Scriptable, s: String): Any? = withRhinoContext { cx ->
         val global = ScriptableObject.getTopLevelScope(scope)
-        RhinoScriptRuntime.evalSpecial(context, global, global, arrayOf(s), "eval code", 1)
+        RhinoScriptRuntime.evalSpecial(cx, global, global, arrayOf(s), "eval code", 1)
     }
 
-    fun <R> withRhinoContext(function: (context: Context) -> R?): R? {
-        try {
-            return function.invoke(Context.enter().apply { initStandardObjects() })
+    fun <R> withRhinoContext(function: (context: Context) -> R): R {
+        var cxRhino: Context? = null
+        return try {
+            val cx = Context.getCurrentContext()
+                ?: Context.enter().also {
+                    it.initStandardObjects()
+                    cxRhino = it
+                }
+            @Suppress("DEPRECATION")
+            cx.optimizationLevel = -1
+            cx.languageVersion = Context.VERSION_ES6
+            cx.isInterpretedMode = true
+            function.invoke(cx)
         } finally {
-            Context.exit()
-        }
-    }
-
-    fun <R> withRhinoContext(function: (context: Context, standardObjects: ScriptableObject) -> R?): R? {
-        try {
-            return Context.enter().let { cx -> function.invoke(cx, cx.initStandardObjects()) }
-        } finally {
-            Context.exit()
+            cxRhino?.let { Context.exit() }
         }
     }
 

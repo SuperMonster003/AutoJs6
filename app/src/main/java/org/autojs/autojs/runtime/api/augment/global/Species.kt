@@ -61,7 +61,7 @@ object Species : Augmentable(), Invokable {
         when {
             o == null -> "Null"
             Undefined.isUndefined(o) -> "Undefined"
-            else -> when (val obj = withRhinoContext { _, standardObjects -> Context.javaToJS(o, standardObjects) }) {
+            else -> when (val obj = withRhinoContext { cx -> Context.javaToJS(o, cx.initStandardObjects()) }) {
                 is Boolean -> "Boolean"
                 is String -> "String"
                 is BigInteger -> "BigInt"
