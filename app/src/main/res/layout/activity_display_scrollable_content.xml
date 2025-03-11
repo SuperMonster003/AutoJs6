@@ -33,7 +33,7 @@
 
     </org.autojs.autojs.ui.common.NestedOuterScrollView>
 
-    <org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -41,8 +41,6 @@
         android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
         android:contentDescription="@string/content_description_fab_for_display_manifest"
-        app:backgroundTint="?attr/colorPrimary"
-        android:tint="@color/toolbar_text"
         android:src="@android:drawable/ic_menu_more" />
 
 </RelativeLayout>

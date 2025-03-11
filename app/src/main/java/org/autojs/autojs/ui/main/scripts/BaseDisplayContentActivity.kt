@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.main.scripts
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.util.TypedValue
@@ -10,16 +11,20 @@ import android.view.KeyEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.TextView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.noties.markwon.syntax.Prism4jThemeBase
 import io.noties.markwon.syntax.Prism4jThemeDarkula
 import io.noties.markwon.syntax.Prism4jThemeDefault
 import io.noties.prism4j.GrammarLocator
 import io.noties.prism4j.Prism4j
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.autojs.autojs.theme.widget.ThemeColorFloatingActionButton
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -28,14 +33,18 @@ import kotlin.math.floor
 
 abstract class BaseDisplayContentActivity : BaseActivity() {
 
+    override val handleStatusBarThemeColorAutomatically = false
+
     abstract var internalMenuResource: Int
 
     abstract var highlightGrammarLocator: GrammarLocator
     abstract var highlightGrammarName: String
     abstract var highlightThemeLanguage: String
 
+    open var themeColorDayNight = R.color.md_blue_grey_50 to R.color.md_blue_grey_900
+
     private lateinit var internalTextView: TextView
-    private lateinit var internalFabView: ThemeColorFloatingActionButton
+    private lateinit var internalFabView: FloatingActionButton
 
     protected val popMenuActionMap = mutableMapOf<Int, () -> Unit>()
 
@@ -123,6 +132,27 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
             }
             loadAndDisplayContent()
             mIsContentLoaded = true
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        val (themeColorDayRes, themeColorNightRes) = themeColorDayNight
+
+        val themeColorDay = getColor(themeColorDayRes)
+        val themeColorNight = getColor(themeColorNightRes)
+
+        if (ViewUtils.isNightModeYes(this)) {
+            internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorNight)
+            internalFabView.imageTintList = ColorStateList.valueOf(if (ColorUtils.isLuminanceDark(themeColorNight)) getColor(R.color.night) else getColor(R.color.day))
+            ViewUtils.setStatusBarBackgroundColor(this, themeColorNight)
+            ViewUtils.setStatusBarIconLight(this, ColorUtils.isLuminanceDark(themeColorNight))
+        } else {
+            internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorDay)
+            internalFabView.imageTintList = ColorStateList.valueOf(if (ColorUtils.isLuminanceDark(themeColorDay)) getColor(R.color.night) else getColor(R.color.day))
+            ViewUtils.setStatusBarBackgroundColor(this, themeColorDay)
+            ViewUtils.setStatusBarIconLight(this, ColorUtils.isLuminanceDark(themeColorDay))
         }
     }
 

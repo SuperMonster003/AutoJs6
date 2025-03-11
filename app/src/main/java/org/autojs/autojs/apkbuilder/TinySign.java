@@ -146,10 +146,16 @@ public class TinySign {
     //  ! Rhino 1.8.1-SNAPSHOT requires dynamically loading services during initialization (e.g., org.mozilla.javascript.RegExpLoader).
     //  ! When loading these services, it needs to read the service provider configuration files located in the META-INF/services/ directory.
     //  ! During signing, these configuration files need to be written into the ZipOutputStream.
+    //  !
+    //  ! Refer to: https://stackoverflow.com/questions/4544899/java-meta-inf-services
+    //  !
     //  ! zh-CN:
+    //  !
     //  ! Rhino 1.8.1-SNAPSHOT 在初始化时需要动态加载服务 (如 org.mozilla.javascript.RegExpLoader),
     //  ! 这些服务加载时, 需要读取位于 META-INF/services/ 目录下的服务提供者配置文件 (Service Provider Configuration Files).
     //  ! 签名时, 需要将这些配置文件写入 ZipOutputStream 中.
+    //  !
+    //  ! 参阅: https://stackoverflow.com/questions/4544899/java-meta-inf-services
     private static void writeServices(File dir, ZipOutputStream zos) throws IOException {
         File servicesDir = new File(dir, "META-INF/services");
         if (!servicesDir.isDirectory()) {
