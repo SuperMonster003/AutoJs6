@@ -48,7 +48,6 @@ public class TinySign {
                 }
             }
         }
-
     }
 
     private static void doFile(String name, File f, ZipOutputStream zos, DigestOutputStream dos, Manifest m) throws IOException {
@@ -119,6 +118,7 @@ public class TinySign {
         Manifest sf = generateSF(manifest);
         byte[] sign = writeSF(zos, sf, sha1Manifest);
         writeRSA(zos, sign);
+        writeServices(dir, zos);
         zos.close();
     }
 
@@ -140,6 +140,32 @@ public class TinySign {
         zos.write(dBase64(Constants.sigPrefix));
         zos.write(sign);
         zos.closeEntry();
+    }
+
+    // @Hint by SuperMonster003 on Mar 11, 2025.
+    //  ! Rhino 1.8.1-SNAPSHOT requires dynamically loading services during initialization (e.g., org.mozilla.javascript.RegExpLoader).
+    //  ! When loading these services, it needs to read the service provider configuration files located in the META-INF/services/ directory.
+    //  ! During signing, these configuration files need to be written into the ZipOutputStream.
+    //  ! zh-CN:
+    //  ! Rhino 1.8.1-SNAPSHOT 在初始化时需要动态加载服务 (如 org.mozilla.javascript.RegExpLoader),
+    //  ! 这些服务加载时, 需要读取位于 META-INF/services/ 目录下的服务提供者配置文件 (Service Provider Configuration Files).
+    //  ! 签名时, 需要将这些配置文件写入 ZipOutputStream 中.
+    private static void writeServices(File dir, ZipOutputStream zos) throws IOException {
+        File servicesDir = new File(dir, "META-INF/services");
+        if (!servicesDir.isDirectory()) {
+            return;
+        }
+        File[] files = servicesDir.listFiles(File::isFile);
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            try (FileInputStream fis = new FileInputStream(file)) {
+                zos.putNextEntry(new ZipEntry("META-INF/services/" + file.getName()));
+                StreamUtils.write(fis, zos);
+                zos.closeEntry();
+            }
+        }
     }
 
     private static byte[] writeSF(ZipOutputStream zos, Manifest sf, String sha1Manifest) throws Exception {

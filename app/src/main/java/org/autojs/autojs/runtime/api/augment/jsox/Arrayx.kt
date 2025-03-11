@@ -161,13 +161,13 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoFunctionBody
-        fun distinctByRhino(it: Array<Any?>): NativeArray = withRhinoContext { context ->
+        fun distinctByRhino(it: Array<Any?>): NativeArray = withRhinoContext { cx ->
             val (arr, selector) = it
             coerceArray(arr).distinctBy { ele ->
                 require(arr is NativeArray)
-                coerceFunction(selector).call(context, arr, arr, arrayOf(ele))
+                coerceFunction(selector).call(cx, arr, arr, arrayOf(ele))
             }.toNativeArray()
-        }!!
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -206,18 +206,18 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoFunctionBody
-        fun sortByRhino(arr: Any?, selector: Any?): NativeArray = withRhinoContext { context ->
+        fun sortByRhino(arr: Any?, selector: Any?): NativeArray = withRhinoContext { cx ->
             require(arr is NativeArray) { "Argument arr for Arrayx.sortBy must be a JavaScript Array" }
             require(selector is BaseFunction) { "Argument selector for Arrayx.sortBy must be a JavaScript Function" }
             when {
                 arr.length < 2 -> arr
                 else -> {
                     // In-place sorting (zh-CN: 原地排序)
-                    NativeArray.js_sort(context, arr, arr, arrayOf(toCompareFunctionAsc(selector)))
+                    NativeArray.js_sort(cx, arr, arr, arrayOf(toCompareFunctionAsc(selector)))
                     arr
                 }
             }
-        }!!
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -228,18 +228,18 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoFunctionBody
-        fun sortByDescendingRhino(arr: Any?, selector: Any?): NativeArray = withRhinoContext { context ->
+        fun sortByDescendingRhino(arr: Any?, selector: Any?): NativeArray = withRhinoContext { cx ->
             require(arr is NativeArray) { "Argument arr for Arrayx.sortByDescending must be a JavaScript Array" }
             require(selector is BaseFunction) { "Argument selector for Arrayx.sortByDescending must be a JavaScript Function" }
             when {
                 arr.length < 2 -> arr
                 else -> {
                     // In-place sorting (zh-CN: 原地排序)
-                    NativeArray.js_sort(context, arr, arr, arrayOf(toCompareFunctionDesc(selector)))
+                    NativeArray.js_sort(cx, arr, arr, arrayOf(toCompareFunctionDesc(selector)))
                     arr
                 }
             }
-        }!!
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -249,11 +249,11 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoFunctionBody
-        fun sortDescendingRhino(arr: Any?): NativeArray = withRhinoContext { context ->
+        fun sortDescendingRhino(arr: Any?): NativeArray = withRhinoContext { cx ->
             require(arr is NativeArray) { "Argument arr for Arrayx.sortDescending must be a JavaScript Array" }
-            NativeArray.js_sort(context, arr, arr, arrayOf(toCompareFunctionDesc()))
+            NativeArray.js_sort(cx, arr, arr, arrayOf(toCompareFunctionDesc()))
             arr
-        }!!
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -263,12 +263,12 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoFunctionBody
-        fun sortedRhino(it: Any?): NativeArray = withRhinoContext { context ->
+        fun sortedRhino(it: Any?): NativeArray = withRhinoContext { cx ->
             require(it is NativeArray) { "Argument arr for Arrayx.sorted must be a JavaScript Array" }
             val copied = it.slice(it.indices).toNativeArray()
-            NativeArray.js_sort(context, it, copied, arrayOf(toCompareFunctionAsc()))
+            NativeArray.js_sort(cx, it, copied, arrayOf(toCompareFunctionAsc()))
             copied
-        }!!
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -278,12 +278,12 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoFunctionBody
-        fun sortedDescendingRhino(it: Any?): NativeArray = withRhinoContext { context ->
+        fun sortedDescendingRhino(it: Any?): NativeArray = withRhinoContext { cx ->
             require(it is NativeArray) { "Argument arr for Arrayx.sortedDescending must be a JavaScript Array" }
             val copied = it.slice(it.indices).toNativeArray()
-            NativeArray.js_sort(context, it, copied, arrayOf(toCompareFunctionDesc()))
+            NativeArray.js_sort(cx, it, copied, arrayOf(toCompareFunctionDesc()))
             copied
-        }!!
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -294,18 +294,18 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoFunctionBody
-        fun sortedByRhino(arr: Any?, selector: Any?): NativeArray = withRhinoContext { context ->
+        fun sortedByRhino(arr: Any?, selector: Any?): NativeArray = withRhinoContext { cx ->
             require(arr is NativeArray) { "Argument arr for Arrayx.sortedBy must be a JavaScript Array" }
             require(selector is BaseFunction) { "Argument selector for Arrayx.sortedBy must be a JavaScript Function" }
             val copied = arr.slice(arr.indices).toNativeArray()
             when {
                 arr.length < 2 -> copied
                 else -> {
-                    NativeArray.js_sort(context, arr, copied, arrayOf(toCompareFunctionAsc(selector)))
+                    NativeArray.js_sort(cx, arr, copied, arrayOf(toCompareFunctionAsc(selector)))
                     copied
                 }
             }
-        }!!
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -316,18 +316,18 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoFunctionBody
-        fun sortedByDescendingRhino(arr: Any?, selector: Any?): NativeArray = withRhinoContext { context ->
+        fun sortedByDescendingRhino(arr: Any?, selector: Any?): NativeArray = withRhinoContext { cx ->
             require(arr is NativeArray) { "Argument arr for Arrayx.sortedByDescending must be a JavaScript Array" }
             require(selector is BaseFunction) { "Argument selector for Arrayx.sortedByDescending must be a JavaScript Function" }
             val copied = arr.slice(arr.indices).toNativeArray()
             when {
                 arr.length < 2 -> copied
                 else -> {
-                    NativeArray.js_sort(context, arr, copied, arrayOf(toCompareFunctionDesc(selector)))
+                    NativeArray.js_sort(cx, arr, copied, arrayOf(toCompareFunctionDesc(selector)))
                     copied
                 }
             }
-        }!!
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -337,11 +337,11 @@ class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
 
         @JvmStatic
         @RhinoFunctionBody
-        fun shuffleRhino(it: Any?): NativeArray = withRhinoContext { context ->
+        fun shuffleRhino(it: Any?): NativeArray = withRhinoContext { cx ->
             require(it is NativeArray) { "Argument arr for Arrayx.shuffle must be a JavaScript Array" }
-            NativeArray.js_sort(context, it, it, arrayOf(toCompareFunctionRandom()))
+            NativeArray.js_sort(cx, it, it, arrayOf(toCompareFunctionRandom()))
             it
-        }!!
+        }
 
         private fun toCompareFunctionAsc(selector: BaseFunction) = object : BaseFunction() {
             override fun call(cx: Context, scope: Scriptable, thisObj: Scriptable?, args: Array<out Any>): Int {

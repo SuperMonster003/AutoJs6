@@ -727,6 +727,7 @@
     <string name="text_select_file_to_upload">Select file to upload</string>
     <string name="text_select_icon">Select icon</string>
     <string name="text_select_image">Select an image</string>
+    <string name="text_use_default_icon">Use default icon</string>
     <string name="text_send">Send</string>
     <string name="text_send_shortcut">Create shortcut</string>
     <string name="text_server_mode">Server mode</string>

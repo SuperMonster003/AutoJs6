@@ -129,11 +129,11 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         ::launch.name to "launchConsole",
     )
 
-    private fun getStackTrace() = withRhinoContext { context ->
+    private fun getStackTrace() = withRhinoContext { cx ->
         newNativeObject().also { o ->
             val globalErrorObject = mTopLevelScope.prop(NativeError.ERROR_TAG) as ScriptableObject
             NativeError.js_captureStackTrace(
-                context,
+                cx,
                 mCaptureStack,
                 globalErrorObject,
                 arrayOf(o, mCaptureStack),

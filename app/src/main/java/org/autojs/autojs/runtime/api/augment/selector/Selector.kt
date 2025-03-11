@@ -6,20 +6,19 @@ import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
+import org.autojs.autojs.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
-import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.BaseFunction
-import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import java.lang.reflect.Method
@@ -57,7 +56,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             // @Hint by SuperMonster003 on Jul 25, 2024.
             //  ! For scope binding.
             //  ! zh-CN: 用于绑定作用域.
-            withRhinoContext { context ->
+            withRhinoContext { cx ->
                 global.defineProp(methodName, newBaseFunction(null, { argList ->
                     val methodKey = coerceString(argList[0])
                     newBaseFunction(methodKey, { arguments ->
@@ -101,7 +100,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
                             throw e
                         }
                     }, NOT_CONSTRUCTABLE)
-                }, NOT_CONSTRUCTABLE).call(context, global, global, arrayOf(methodName)))
+                }, NOT_CONSTRUCTABLE).call(cx, global, global, arrayOf(methodName)))
             }
         }
     }

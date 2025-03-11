@@ -43,6 +43,7 @@ public class AppsIconSelectActivity extends BaseActivity {
     private RecyclerView mAppsRecyclerView;
 
     public static final String EXTRA_PACKAGE_NAME = "extra_package_name";
+    public static final String EXTRA_USE_DEFAULT_ICON = "use_default_icon";
     private PackageManager mPackageManager;
     private final List<AppItem> mAppList = new ArrayList<>();
 
@@ -101,8 +102,13 @@ public class AppsIconSelectActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT)
-                .setType(Mime.IMAGE_WILDCARD), 11234);
+        if (item.getItemId() == R.id.action_select_image) {
+            startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT)
+                    .setType(Mime.IMAGE_WILDCARD), 11234);
+        } else if (item.getItemId() == R.id.action_use_default_icon) {
+            setResult(RESULT_OK, new Intent().putExtra(EXTRA_USE_DEFAULT_ICON, true));
+            finish();
+        }
         return true;
     }
 
@@ -116,6 +122,10 @@ public class AppsIconSelectActivity extends BaseActivity {
     }
 
     public static Observable<Drawable> getDrawableFromIntent(Context context, Intent data) {
+        boolean useDefaultIcon = data.getBooleanExtra(EXTRA_USE_DEFAULT_ICON, false);
+        if (useDefaultIcon) {
+            return Observable.fromCallable(() -> context.getResources().getDrawable(R.mipmap.ic_launcher, context.getTheme()));
+        }
         String packageName = data.getStringExtra(EXTRA_PACKAGE_NAME);
         if (packageName != null) {
             return Observable.fromCallable(() -> context.getPackageManager().getApplicationIcon(packageName));

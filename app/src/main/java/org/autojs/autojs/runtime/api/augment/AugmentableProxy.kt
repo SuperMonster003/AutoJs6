@@ -78,7 +78,7 @@ open class AugmentableProxy(private val scriptRuntime: ScriptRuntime) : Augmenta
                 //  ! but defined in a certain object in its prototype chain.
                 //  ! zh-CN: 表示 `key` 未定义在 `augmented` 上, 但定义在其原型链对象上.
                 !augmented.has(key) && ScriptableObject.hasProperty(augmented, key) -> {
-                    withRhinoContext { ctx -> BoundFunction(ctx, augmented, value, augmented, arrayOf()) }
+                    withRhinoContext { cx -> BoundFunction(cx, augmented, value, augmented, arrayOf()) }
                 }
                 else -> value
             }

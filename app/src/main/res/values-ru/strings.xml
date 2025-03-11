@@ -730,6 +730,7 @@
     <string name="text_select_file_to_upload">Выберите файл для загрузки</string>
     <string name="text_select_icon">Выбрать значок</string>
     <string name="text_select_image">Выбрать изображение</string>
+    <string name="text_use_default_icon">Использовать значок по умолчанию</string>
     <string name="text_send">Отправить</string>
     <string name="text_send_shortcut">Создать ярлык</string>
     <string name="text_server_mode">Режим сервера</string>

@@ -731,6 +731,7 @@
     <string name="text_select_file_to_upload">업로드 할 파일을 선택하십시오</string>
     <string name="text_select_icon">아이콘을 선택하십시오</string>
     <string name="text_select_image">이미지를 선택하십시오</string>
+    <string name="text_use_default_icon">기본 아이콘 사용</string>
     <string name="text_send">보내다</string>
     <string name="text_send_shortcut">바로 가기를 만듭니다</string>
     <string name="text_server_mode">서버 모드</string>

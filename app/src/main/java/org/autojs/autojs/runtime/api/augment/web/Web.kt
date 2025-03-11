@@ -35,7 +35,7 @@ class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoFunctionBody
-        fun newInjectableWebViewRhinoWithRuntime(scriptRuntime: ScriptRuntime, vararg args: Any?): InjectableWebView = withRhinoContext { jsCtx ->
+        fun newInjectableWebViewRhinoWithRuntime(scriptRuntime: ScriptRuntime, vararg args: Any?): InjectableWebView = withRhinoContext { cx ->
             when (args.size) {
                 2 -> {
                     val (androidContext, url) = args
@@ -44,7 +44,7 @@ class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         else -> Context.toString(url)
                     }
                     val contextForWebView = androidContext.jsUnwrapped() as? AndroidContext ?: globalContext
-                    InjectableWebView(contextForWebView, jsCtx, scriptRuntime.topLevelScope, niceUrl)
+                    InjectableWebView(contextForWebView, cx, scriptRuntime.topLevelScope, niceUrl)
                 }
                 1 -> when {
                     args[0] is String -> {
@@ -55,12 +55,12 @@ class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 0 -> newInjectableWebViewRhinoWithRuntime(scriptRuntime, scriptRuntime.topLevelScope.prop("activity"))
                 else -> throw WrappedIllegalArgumentException("Invalid arguments length ${args.size} for web.newInjectableWebView")
             }
-        }!!
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun newInjectableWebClient(scriptRuntime: ScriptRuntime, args: Array<out Any?>): InjectableWebClient = ensureArgumentsIsEmpty(args) {
-            withRhinoContext { context -> InjectableWebClient(context, scriptRuntime.topLevelScope) }!!
+            withRhinoContext { cx -> InjectableWebClient(cx, scriptRuntime.topLevelScope) }
         }
 
         @JvmStatic

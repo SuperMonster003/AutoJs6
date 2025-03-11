@@ -667,12 +667,12 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             return object : AccessibilityService.GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription) {
                     when (callback) {
-                        is BaseFunction -> withRhinoContext { context ->
-                            callback.call(context, ImporterTopLevel(context), callback, arrayOf(true))
+                        is BaseFunction -> withRhinoContext { cx ->
+                            callback.call(cx, ImporterTopLevel(cx), callback, arrayOf(true))
                         }
                         is NativeObject -> callback.prop("onCompleted")?.let {
-                            if (it is BaseFunction) withRhinoContext { context ->
-                                it.call(context, ImporterTopLevel(context), callback, arrayOf(gestureDescription))
+                            if (it is BaseFunction) withRhinoContext { cx ->
+                                it.call(cx, ImporterTopLevel(cx), callback, arrayOf(gestureDescription))
                             }
                         }
                     }
@@ -680,12 +680,12 @@ class Automator(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
                 override fun onCancelled(gestureDescription: GestureDescription) {
                     when (callback) {
-                        is BaseFunction -> withRhinoContext { context ->
-                            callback.call(context, ImporterTopLevel(context), callback, arrayOf(false))
+                        is BaseFunction -> withRhinoContext { cx ->
+                            callback.call(cx, ImporterTopLevel(cx), callback, arrayOf(false))
                         }
                         is NativeObject -> callback.prop("onCancelled")?.let {
-                            if (it is BaseFunction) withRhinoContext { context ->
-                                it.call(context, ImporterTopLevel(context), callback, arrayOf(gestureDescription))
+                            if (it is BaseFunction) withRhinoContext { cx ->
+                                it.call(cx, ImporterTopLevel(cx), callback, arrayOf(gestureDescription))
                             }
                         }
                     }

@@ -730,6 +730,7 @@
     <string name="text_select_file_to_upload">Sélectionnez le fichier à télécharger</string>
     <string name="text_select_icon">Sélectionner l\'icône</string>
     <string name="text_select_image">Sélectionner une image</string>
+    <string name="text_use_default_icon">Utiliser l\'icône par défaut</string>
     <string name="text_send">Envoyer</string>
     <string name="text_send_shortcut">Créer un raccourci</string>
     <string name="text_server_mode">Mode serveur</string>
