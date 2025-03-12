@@ -29,7 +29,7 @@ class ColorSelectActivity : BaseActivity() {
 
     override val handleStatusBarThemeColorAutomatically = false
 
-    private var binding: MtActivityColorSelectBinding? = null
+    private lateinit var binding: MtActivityColorSelectBinding
 
     private lateinit var mAppBarLayout: AppBarLayout
     private lateinit var mTitle: String
@@ -48,15 +48,11 @@ class ColorSelectActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         handleIntent()
-        binding = MtActivityColorSelectBinding.inflate(layoutInflater).also {
+        MtActivityColorSelectBinding.inflate(layoutInflater).also {
+            binding = it
             setUpUI(it)
             ViewUtils.excludePaddingClippableViewFromNavigationBar(it.colorSettingRecyclerView)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding = null
     }
 
     private fun handleIntent() {
@@ -104,7 +100,7 @@ class ColorSelectActivity : BaseActivity() {
     }
 
     private fun setUpToolbarColors() {
-        val toolbar = binding!!.toolbar
+        val toolbar = binding.toolbar
         val aimColor = when {
             ColorUtils.isLuminanceLight(mCurrentColor) -> getColor(R.color.day)
             else -> getColor(R.color.night)
@@ -121,7 +117,7 @@ class ColorSelectActivity : BaseActivity() {
     }
 
     private fun setColorWithAnimation(view: View, colorTo: Int) {
-        binding!!.appBarContainer.setBackgroundColor(mCurrentColor)
+        binding.appBarContainer.setBackgroundColor(mCurrentColor)
         view.setBackgroundColor(colorTo)
         mCurrentColor = colorTo
 

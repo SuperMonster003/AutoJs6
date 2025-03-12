@@ -253,7 +253,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun setMenuItemStatus(id: Int, enabled: Boolean) {
         mMenuItemStatus.put(id, enabled)
         val supportManager = activity.supportFragmentManager
-        val fragment = supportManager.findFragmentById(R.id.toolbar_menu) as ToolbarFragment?
+        val fragment = supportManager.findFragmentById(R.id.toolbar_menu) as ToolbarFragment<*>?
         if (fragment == null) {
             mNormalToolbar.setMenuItemStatus(id, enabled)
         } else {

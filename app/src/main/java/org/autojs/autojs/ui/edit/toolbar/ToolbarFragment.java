@@ -1,19 +1,17 @@
 package org.autojs.autojs.ui.edit.toolbar;
 
 import android.os.Bundle;
-
+import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-import android.view.View;
-
+import androidx.viewbinding.ViewBinding;
 import org.autojs.autojs.ui.edit.EditorView;
+import org.autojs.autojs.ui.fragment.BaseViewBindingFragment;
 import org.autojs.autojs6.R;
 
 import java.util.List;
 
-public abstract class ToolbarFragment extends Fragment implements View.OnClickListener, View.OnLongClickListener {
+public abstract class ToolbarFragment<T extends ViewBinding> extends BaseViewBindingFragment<T> implements View.OnClickListener, View.OnLongClickListener {
 
     public interface OnMenuItemClickListener {
         void onToolbarMenuItemClick(int id);
@@ -79,7 +77,7 @@ public abstract class ToolbarFragment extends Fragment implements View.OnClickLi
     @Override
     public boolean onLongClick(View v) {
         return mOnMenuItemLongClickListener != null &&
-                mOnMenuItemLongClickListener.onToolbarMenuItemLongClick(v.getId());
+               mOnMenuItemLongClickListener.onToolbarMenuItemLongClick(v.getId());
     }
 
     public void setMenuItemStatus(int id, boolean enabled) {
