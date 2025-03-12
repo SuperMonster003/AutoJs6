@@ -5,28 +5,38 @@ import android.os.Bundle
 import android.webkit.WebView
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.DocsUtils.getUrl
+import org.autojs.autojs.util.WebViewUtils
 import org.autojs.autojs6.databinding.ActivityDocumentationBinding
 
 /**
  * Created by Stardust on Oct 24, 2017.
+ * Modified by SuperMonster003 as of May 26, 2022.
+ * Transformed by SuperMonster003 on May 26, 2023.
  */
 class DocumentationActivity : BaseActivity() {
 
-    private var binding: ActivityDocumentationBinding? = null
+    override val handleStatusBarThemeColorAutomatically = false
 
     private lateinit var mWebView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityDocumentationBinding.inflate(layoutInflater)
-        setContentView(binding!!.root)
-        setupViews()
+        ActivityDocumentationBinding.inflate(layoutInflater).also { binding ->
+            setContentView(binding.root)
+            binding.ewebView.also { ewebView ->
+                ewebView.webView.also { webView ->
+                    mWebView = webView
+                    WebViewUtils.adaptDarkMode(this@DocumentationActivity, webView)
+                    WebViewUtils.excludeWebViewFromStatusBarAndNavigationBar(ewebView)
+                    webView.loadUrl(intent.getStringExtra(EXTRA_URL) ?: getUrl("index.html"))
+                }
+            }
+        }
     }
 
-    private fun setupViews() {
-        mWebView = binding!!.ewebView.webView.also {
-            it.loadUrl(intent.getStringExtra(EXTRA_URL) ?: getUrl("index.html"))
-        }
+    override fun onStart() {
+        super.onStart()
+        setUpStatusBarIconLightByNightMode()
     }
 
     @SuppressLint("MissingSuperCall")
@@ -35,14 +45,8 @@ class DocumentationActivity : BaseActivity() {
         if (mWebView.canGoBack()) {
             mWebView.goBack()
         } else {
-            // super.onBackPressed()
             onBackPressedDispatcher.onBackPressed()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding = null
     }
 
     companion object {

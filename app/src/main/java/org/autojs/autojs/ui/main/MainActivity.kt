@@ -78,8 +78,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     override val handleStatusBarThemeColorAutomatically = false
 
-    private var binding: ActivityMainBinding? = null
-
     private lateinit var mViewPager: ViewPager
     private lateinit var mFab: ThemeColorFloatingActionButton
     private lateinit var mTab: TabLayout
@@ -135,7 +133,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
         ActivityMainBinding.inflate(layoutInflater).also {
             val drawerLayout = it.drawerLayout
-            binding = it
             setContentView(it.root)
             mViewPager = it.viewpager
             mFab = it.fab.apply { ViewUtils.excludeFloatingActionButtonFromNavigationBar(this) }
@@ -235,7 +232,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             .apply {
                 setOnFragmentInstantiateListener { pos: Int, fragment: Fragment ->
                     val viewPagerFragment = fragment as ViewPagerFragment
-                    viewPagerFragment.setFab(mFab)
+                    viewPagerFragment.fab = mFab
                     if (pos == mViewPager.currentItem) {
                         viewPagerFragment.onPageShow()
                     }
@@ -299,19 +296,13 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     private fun setUpStatusBarIconLight() {
-        if (shouldChangeStatusBarIconLight()) {
-            Handler(Looper.getMainLooper()).post {
-                if (sIsActionBarDrawerOpened) {
-                    setUpStatusBarIconLightByNightMode()
-                } else {
-                    setUpStatusBarIconLightByThemeColor()
-                }
+        Handler(Looper.getMainLooper()).post {
+            if (sIsActionBarDrawerOpened) {
+                setUpStatusBarIconLightByNightMode()
+            } else {
+                setUpStatusBarIconLightByThemeColor()
             }
         }
-    }
-
-    private fun shouldChangeStatusBarIconLight(): Boolean {
-        return ViewUtils.isNightModeEnabled == ViewUtils.isStatusBarIconDark(this)
     }
 
     fun rebirth() {
@@ -364,7 +355,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     override fun getOnActivityResultDelegateMediator() = mActivityResultMediator
 
     @Deprecated("Deprecated in Java")
-    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         val fragment = mPagerAdapter.getStoredFragment(mViewPager.currentItem)
         if ((fragment as? BackPressedHandler)?.onBackPressed(this) == true) {
@@ -457,7 +447,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding = null
         mSearchViewItem = null
     }
 
