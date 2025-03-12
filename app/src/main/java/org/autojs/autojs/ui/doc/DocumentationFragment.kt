@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import org.autojs.autojs.event.BackPressedHandler
@@ -12,10 +13,8 @@ import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.QueryEvent
 import org.autojs.autojs.ui.main.ViewPagerFragment
 import org.autojs.autojs.ui.main.ViewStatesManageable
-import org.autojs.autojs.ui.widget.NestedWebView
 import org.autojs.autojs.util.DocsUtils.getUrl
-import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs.util.WebViewUtils.Companion.adaptDarkMode
+import org.autojs.autojs.util.WebViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentOnlineDocsBinding
 import org.greenrobot.eventbus.EventBus
@@ -29,11 +28,12 @@ import org.greenrobot.eventbus.Subscribe
 open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandler, ViewStatesManageable {
 
     private var binding: FragmentOnlineDocsBinding? = null
-    private var webView: NestedWebView? = null
 
     private var mIndexUrl: String? = null
     private var mPreviousQuery: String? = null
     private var mIsCurrentPageDocs = false
+
+    private lateinit var mWebView: WebView
 
     init {
         arguments = Bundle()
@@ -50,9 +50,12 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        webView = binding!!.ewebView.webView.also {
-            adaptDarkMode(requireContext(), it)
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(it)
+        binding!!.ewebView.also { ewebView ->
+            ewebView.webView.also { webView ->
+                mWebView = webView
+                WebViewUtils.adaptDarkMode(requireContext(), webView)
+                WebViewUtils.excludeWebViewFromNavigationBar(ewebView)
+            }
         }
         restoreViewStates()
         (activity as? MainActivity)?.apply {
@@ -64,7 +67,7 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
 
     private fun loadMainPage() {
         arguments?.let { mIndexUrl = it.getString(ARGUMENT_URL, getUrl("index.html")) }
-        mIndexUrl?.let { webView?.loadUrl(it) }
+        mIndexUrl?.let { mWebView.loadUrl(it) }
     }
 
     override fun onPause() {
@@ -73,8 +76,8 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
     }
 
     override fun onBackPressed(activity: Activity): Boolean {
-        webView.let {
-            if (it?.canGoBack() == true) {
+        mWebView.let {
+            if (it.canGoBack()) {
                 it.goBack()
                 return true
             }
@@ -88,13 +91,13 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
     fun onQuerySummit(event: QueryEvent) = when {
         !isShown -> {}
         event === QueryEvent.CLEAR -> {
-            webView?.clearMatches()
+            mWebView.clearMatches()
             mPreviousQuery = null
         }
-        event.isFindForward -> webView?.findNext(false)
-        event.query == mPreviousQuery -> webView?.findNext(true)
+        event.isFindForward -> mWebView.findNext(false)
+        event.query == mPreviousQuery -> mWebView.findNext(true)
         else -> {
-            webView?.findAllAsync(event.query)
+            mWebView.findAllAsync(event.query)
             mPreviousQuery = event.query
         }
     }
@@ -107,7 +110,6 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
-        webView = null
     }
 
     override fun onPageShow() {
@@ -122,17 +124,17 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
 
     override fun saveViewStates() {
         Bundle().let {
-            webView?.saveState(it)
+            mWebView.saveState(it)
             arguments?.putBundle("savedWebViewState", it)
         }
     }
 
     override fun restoreViewStates() {
-        arguments?.getBundle("savedWebViewState")?.let { webView?.restoreState(it) } ?: loadMainPage()
+        arguments?.getBundle("savedWebViewState")?.let { mWebView.restoreState(it) } ?: loadMainPage()
     }
 
     private fun setTabViewClickListeners(tabView: TabLayout.TabView) {
-        tabView.setOnClickListener { if (mIsCurrentPageDocs) webView?.scrollTo(0, 0) }
+        tabView.setOnClickListener { if (mIsCurrentPageDocs) mWebView.scrollTo(0, 0) }
         tabView.setOnLongClickListener { if (mIsCurrentPageDocs) true.also { loadMainPage() } else false }
     }
 
