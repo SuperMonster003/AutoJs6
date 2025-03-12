@@ -14,6 +14,7 @@ import org.autojs.autojs.app.tool.FloatingButtonTool
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.app.tool.JsonSocketServerTool
 import org.autojs.autojs.core.accessibility.AccessibilityTool
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.permission.MediaProjectionPermission
@@ -25,13 +26,13 @@ import org.autojs.autojs.permission.WriteSystemSettingsPermission
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.pluginclient.JsonSocketServer
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.service.AccessibilityService
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
 import org.autojs.autojs.theme.app.ColorSelectActivity
 import org.autojs.autojs.ui.floating.CircularMenu
 import org.autojs.autojs.ui.floating.FloatyWindowManger
+import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
@@ -52,7 +53,7 @@ import java.lang.ref.WeakReference
  */
 open class DrawerFragment : Fragment() {
 
-    private var binding: FragmentDrawerBinding? = null
+    private val binding by viewBinding(FragmentDrawerBinding::bind)
 
     private var privateDrawerMenu: RecyclerView? = null
     private var privateContext: WeakReference<Context?>? = null
@@ -373,26 +374,26 @@ open class DrawerFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return FragmentDrawerBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentDrawerBinding.inflate(inflater, container, false).root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mDrawerMenu = binding!!.drawerMenu
+        mDrawerMenu = binding.drawerMenu
         initMenuItems()
         initMenuItemStates()
         setupListeners()
     }
 
     private fun setupListeners() {
-        binding!!.settings.setOnClickListener { view ->
+        binding.settings.setOnClickListener { view ->
             startActivity(
                 Intent(view.context, PreferencesActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
         }
-        binding!!.restart.setOnClickListener { mActivity.rebirth() }
-        binding!!.exit.setOnClickListener { mActivity.exitCompletely() }
+        binding.restart.setOnClickListener { mActivity.rebirth() }
+        binding.exit.setOnClickListener { mActivity.exitCompletely() }
     }
 
     override fun onResume() {
@@ -410,7 +411,6 @@ open class DrawerFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding = null
         privateDrawerMenu = null
         privateContext = null
         privateActivity = null

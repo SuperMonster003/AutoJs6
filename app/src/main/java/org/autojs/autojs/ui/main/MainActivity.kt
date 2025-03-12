@@ -361,6 +361,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             return
         }
         if (!mBackPressObserver.onBackPressed(this)) {
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }

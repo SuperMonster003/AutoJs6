@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -823,25 +822,19 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     internal inner class ExplorerPageViewHolder(itemView: View) : BindableViewHolder<Any>(itemView) {
-        var mName: TextView
-        var mDirDate: TextView
-        var mOptions: View
-        var mIcon: ImageView
+
+        private val binding = ExplorerDirectoryBinding.bind(itemView).also {
+            it.item.setOnClickListener { withItemSelected { onItemClick() } }
+        }
+
+        private var mName = binding.name
+        private var mDirDate = binding.scriptDirDate
+        private var mIcon = binding.icon
+        private var mOptions = binding.more.also {
+            it.setOnClickListener { withItemSelected { showOptionsMenu() } }
+        }
 
         private var mExplorerPage: ExplorerPage? = null
-
-        init {
-            val binding = ExplorerDirectoryBinding.bind(itemView)
-
-            mName = binding.name
-            mDirDate = binding.scriptDirDate
-            mIcon = binding.icon
-
-            mOptions = binding.more
-            mOptions.setOnClickListener { withItemSelected { showOptionsMenu() } }
-
-            binding.item.setOnClickListener { withItemSelected { onItemClick() } }
-        }
 
         override fun bind(data: Any, position: Int) {
             if (data !is ExplorerPage) return
@@ -903,7 +896,8 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
     }
 
     internal inner class ExplorerCategoryViewHolder(itemView: View) : BindableViewHolder<Any>(itemView) {
-        val binding: ExplorerCategoryBinding = ExplorerCategoryBinding.bind(itemView)
+
+        private val binding = ExplorerCategoryBinding.bind(itemView)
 
         private var mIsDir = false
 

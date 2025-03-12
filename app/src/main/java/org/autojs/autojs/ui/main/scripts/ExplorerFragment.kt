@@ -21,6 +21,7 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.tool.SimpleObserver
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.explorer.ExplorerView
+import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.FloatingActionMenu
 import org.autojs.autojs.ui.main.FloatingActionMenu.OnFloatingActionButtonClickListener
 import org.autojs.autojs.ui.main.MainActivity
@@ -44,7 +45,7 @@ import org.greenrobot.eventbus.Subscribe
 open class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener, ViewStatesManageable {
 
     private var mBottomInset: Int = 0
-    private var binding: FragmentExplorerBinding? = null
+    private val binding by viewBinding(FragmentExplorerBinding::bind)
 
     private var mExplorerView: ExplorerView? = null
     private var mFloatingActionMenu: FloatingActionMenu? = null
@@ -56,7 +57,7 @@ open class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickL
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return FragmentExplorerBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentExplorerBinding.inflate(inflater, container, false).root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,7 +66,7 @@ open class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickL
             mBottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
             insets
         }
-        mExplorerView = binding!!.itemList.also { explorerView ->
+        mExplorerView = binding.itemList.also { explorerView ->
             explorerView.setOnItemClickListener(object : ExplorerView.OnItemClickListener {
                 override fun onItemClick(view: View?, item: ExplorerItem) {
                     when {
@@ -190,7 +191,6 @@ open class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickL
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding = null
         mExplorerView = null
         mFloatingActionMenu = null
     }

@@ -9,6 +9,7 @@ import android.webkit.WebView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import org.autojs.autojs.event.BackPressedHandler
+import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.QueryEvent
 import org.autojs.autojs.ui.main.ViewPagerFragment
@@ -27,7 +28,7 @@ import org.greenrobot.eventbus.Subscribe
  */
 open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandler, ViewStatesManageable {
 
-    private var binding: FragmentOnlineDocsBinding? = null
+    private val binding by viewBinding(FragmentOnlineDocsBinding::bind)
 
     private var mIndexUrl: String? = null
     private var mPreviousQuery: String? = null
@@ -45,12 +46,12 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return FragmentOnlineDocsBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentOnlineDocsBinding.inflate(inflater, container, false).root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding!!.ewebView.also { ewebView ->
+        binding.ewebView.also { ewebView ->
             ewebView.webView.also { webView ->
                 mWebView = webView
                 WebViewUtils.adaptDarkMode(requireContext(), webView)
@@ -105,11 +106,6 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding = null
     }
 
     override fun onPageShow() {
