@@ -42,21 +42,22 @@ import org.greenrobot.eventbus.Subscribe
  * Modified by SuperMonster003 as of Mar 20, 2022.
  * Transformed by SuperMonster003 on Mar 31, 2023.
  */
-open class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener, ViewStatesManageable {
+class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListener, ViewStatesManageable {
 
-    private var mBottomInset: Int = 0
     private val binding by viewBinding(FragmentExplorerBinding::bind)
 
     private var mExplorerView: ExplorerView? = null
     private var mFloatingActionMenu: FloatingActionMenu? = null
     private var mIsCurrentPageFiles = false
+    
+    private var mBottomInset: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         EventBus.getDefault().register(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentExplorerBinding.inflate(inflater, container, false).root
     }
 
