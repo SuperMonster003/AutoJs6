@@ -1,22 +1,32 @@
 package org.autojs.autojs.ui.fragment
 
-import androidx.fragment.app.Fragment
 import android.view.View
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.viewbinding.ViewBinding
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 object BindingDelegates {
 
-    fun <T> Fragment.viewBinding(bindView: (View) -> T) = object : ReadOnlyProperty<Fragment, T> {
+    // @Created by JetBrains AI Assistant on Mar 12, 2025.
+    // @Modified by JetBrains AI Assistant as of Mar 13, 2025.
+    inline fun <reified T : ViewBinding> Fragment.viewBinding(crossinline bindView: (View) -> T) = object : ReadOnlyProperty<Fragment, T> {
 
         private var binding: T? = null
 
         override fun getValue(thisRef: Fragment, property: KProperty<*>): T {
-            return binding ?: bindView(thisRef.requireView()).also { binding = it }
+            return binding ?: bindView(requireView()).also {
+                binding = it
+
+                viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        binding = null
+                    }
+                })
+            }
         }
-
-        override fun toString() = "Binding for ${this@viewBinding.javaClass.name}: $binding"
-
     }
 
 }
