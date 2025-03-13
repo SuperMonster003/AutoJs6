@@ -767,7 +767,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         private fun attrValueConvert(o: Any?): Any? = when (o) {
             is String -> o
             is ColorNativeObject -> Colors.toHexRhino(o)
-            is ThemeColor -> o.getColorPrimary()
+            is ThemeColor -> o.colorPrimary
             is NativeWith -> attrValueConvert(o.prototype)
             else -> o
         }

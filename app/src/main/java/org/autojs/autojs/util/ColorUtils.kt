@@ -632,4 +632,105 @@ object ColorUtils {
     @JvmStatic
     fun equals(c1: String?, c2: String?) = equals(parseColor(c1), parseColor(c2))
 
+    /**
+     * Adjust the reference color to achieve better contrast on the background color, while remaining as close as possible to the reference color.
+     *
+     * zh-CN: 调整参考色, 使其在背景色上具有更好的对比度, 同时尽量接近参考色.
+     *
+     * @param background The background color. (zh-CN: 背景颜色.)
+     * @param reference The reference color. (zh-CN: 参考颜色.)
+     * @param minimumContrast The minimum contrast ratio, typically between 1.0 and 21.0 (1 being the lowest contrast, 21 being the highest contrast).
+     * (zh-CN: 最小对比度, 通常值为 1.0 - 21.0 (1 为最低对比度, 21 为最高对比度).)
+     * - 4.5: Minimum contrast ratio for normal use cases (Standard AA)
+     * - 7.0: High contrast ratio for better readability (Standard AAA)
+     * - < 4.5 (e.g. 3.0): Lower contrast ratio (< 4.5, e.g., 3.0) is acceptable for decorative or less significant elements
+     * - zh-CN:
+     * - 4.5: 普通场景的最低对比度标准 (AA 标准)
+     * - 7.0: 高对比度场景标准 (AAA 标准)
+     * - < 4.5 (如 3.0): 装饰性或次要元素可用的较低标准
+     * @return The adjusted color. (zh-CN: 调整后的颜色.)
+     */
+    @JvmStatic
+    fun adjustColorForContrast(
+        @ColorInt background: Int,
+        @ColorInt reference: Int,
+        minimumContrast: Double = 4.5,
+    ): Int {
+        // 如果已经满足对比度要求, 直接返回参考色
+        if (calculateContrast(background, reference) >= minimumContrast) {
+            return reference
+        }
+
+        // 转为 HSL 以便调整亮度
+        val hsl = FloatArray(3)
+        ColorUtils.colorToHSL(reference, hsl)
+
+        // 提高亮度, 尝试达到目标对比度
+        val lighterColor = findAdjustableHSLColor(hsl, background, minimumContrast, lighten = true)
+        if (lighterColor != null) {
+            return lighterColor
+        }
+
+        // 降低亮度, 尝试达到目标对比度
+        val darkerColor = findAdjustableHSLColor(hsl, background, minimumContrast, lighten = false)
+        if (darkerColor != null) {
+            return darkerColor
+        }
+
+        // 如果两种情况下都无法满足, 返回原始颜色 (极端情况)
+        return reference
+    }
+
+    /**
+     * Calculate the contrast ratio between two colors using the W3C WCAG formula.
+     *
+     * zh-CN: 计算两种颜色的对比度, 使用 W3C WCAG 公式.
+     */
+    private fun calculateContrast(color1: Int, color2: Int): Double {
+        return ColorUtils.calculateContrast(color1, color2)
+    }
+
+    /**
+     * Adjust the lightness of a color in HSL format to meet the minimum contrast ratio.
+     *
+     * zh-CN: 调整颜色的亮度, 尝试找到满足最小对比度的颜色.
+     *
+     * @param hsl The color value in HSL format, including Hue, Saturation, and Lightness.
+     * (zh-CN: HSL 格式颜色值, 包括色相 (Hue), 饱和度 (Saturation), 亮度 (Lightness).)
+     * @param background The background color. (zh-CN: 背景颜色.)
+     * @param minimumContrast minimum contrast ratio. (zh-CN: 最小对比度值.)
+     * @param lighten Whether to increase brightness (true) or decrease brightness (false).
+     * (zh-CN: 是否提高亮度 (true 为提高亮度, false 为降低亮度).)
+     * @return The adjusted color, or null if no suitable color can be found.
+     * (zh-CN: 调整后的颜色, 若无法找到满足条件的颜色, 返回 null.)
+     */
+    @ColorInt
+    private fun findAdjustableHSLColor(
+        hsl: FloatArray,
+        @ColorInt background: Int,
+        minimumContrast: Double,
+        lighten: Boolean,
+    ): Int? {
+        val step = 0.02f // 每次调整亮度的步长
+        val maxSteps = 50 // 最大调整次数 (防止死循环)
+
+        val adjustedHSL = hsl.copyOf()
+        for (i in 0 until maxSteps) {
+            // 根据 lighten 参数, 增加或减少亮度
+            adjustedHSL[2] = (adjustedHSL[2] + (if (lighten) step else -step))
+                .coerceIn(0f, 1f) // 防止超出合法范围 [0, 1]
+
+            // 将调整后的 HSL 转回 RGB
+            val adjustedColor = ColorUtils.HSLToColor(adjustedHSL)
+
+            // 重新计算对比度, 如果满足条件即可返回
+            if (calculateContrast(background, adjustedColor) >= minimumContrast) {
+                return adjustedColor
+            }
+        }
+
+        // 无法找到合适的亮度调整
+        return null
+    }
+
 }

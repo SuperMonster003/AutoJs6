@@ -11,6 +11,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorManagerCompat
+import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs6.R
 import kotlin.math.roundToInt
@@ -50,8 +51,6 @@ class FirstCharView : TextView {
         return privateBackground!!
     }
 
-    private fun convertColorResToInt(@ColorRes colorRes: Int) = context.getColor(colorRes)
-
     fun setIconText(text: CharSequence?) = also { setText(text) }
 
     fun setIcon(icon: FileUtils.TYPE.Icon): FirstCharView {
@@ -70,7 +69,7 @@ class FirstCharView : TextView {
 
     fun setIconTextColor(@ColorInt color: Int) = also { setTextColor(color) }
 
-    fun setIconTextColorRes(@ColorRes colorRes: Int) = also { setTextColor(convertColorResToInt(colorRes)) }
+    fun setIconTextColorRes(@ColorRes colorRes: Int) = also { setTextColor(context.getColor(colorRes)) }
 
     fun setIconTextColorByThemeColorLuminance() = also { setIconTextColorRes(ThemeColorManager.getDayOrNightColorResByLuminance()) }
 
@@ -82,7 +81,7 @@ class FirstCharView : TextView {
 
     fun setStrokeColor(@ColorInt color: Int) = also { background().setStroke(strokeWidth, color) }
 
-    fun setStrokeColorRes(@ColorRes colorRes: Int): FirstCharView = setStrokeColor(convertColorResToInt(colorRes))
+    fun setStrokeColorRes(@ColorRes colorRes: Int): FirstCharView = setStrokeColor(context.getColor(colorRes))
 
     fun setStrokeThemeColor() = setStrokeColor(ThemeColorManagerCompat.getColorPrimary())
 
@@ -92,7 +91,7 @@ class FirstCharView : TextView {
 
     fun setFillColor(@ColorInt color: Int) = also { background().setColor(color) }
 
-    fun setFillColorRes(@ColorRes colorRes: Int) = setFillColor(convertColorResToInt(colorRes))
+    fun setFillColorRes(@ColorRes colorRes: Int) = setFillColor(context.getColor(colorRes))
 
     fun setFillThemeColor() = setFillColor(ThemeColorManagerCompat.getColorPrimary())
 

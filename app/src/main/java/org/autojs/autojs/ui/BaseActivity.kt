@@ -72,8 +72,8 @@ abstract class BaseActivity : AppCompatActivity() {
         initThemeColors()
         if (handleStatusBarThemeColorAutomatically && !BuildConfig.isInrt) {
             ThemeColorManager.addActivityStatusBar(this)
+            setUpStatusBarIconLightByThemeColor()
         }
-        setUpStatusBarIconLightByThemeColor()
     }
 
     override fun onResume() {

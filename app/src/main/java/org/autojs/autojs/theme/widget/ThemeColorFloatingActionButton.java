@@ -39,8 +39,9 @@ public class ThemeColorFloatingActionButton extends FloatingActionButton impleme
     @Override
     public void setThemeColor(ThemeColor color) {
         int colorAccent = color.colorAccent;
-        setBackgroundTintList(ColorStateList.valueOf(colorAccent));
-        var tintColorRes = ColorUtils.isLuminanceLight(colorAccent)
+        int colorForContrast = ColorUtils.adjustColorForContrast(getContext().getColor(R.color.window_background), colorAccent, 1.15);
+        setBackgroundTintList(ColorStateList.valueOf(colorForContrast));
+        var tintColorRes = ColorUtils.isLuminanceLight(colorForContrast)
                 ? R.color.fab_tint_dark
                 : R.color.fab_tint_light;
         var tintColor = getResources().getColor(tintColorRes, null);

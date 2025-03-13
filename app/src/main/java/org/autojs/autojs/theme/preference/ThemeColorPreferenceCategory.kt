@@ -10,6 +10,8 @@ import androidx.preference.PreferenceViewHolder
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorMutable
+import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on Aug 8, 2016.
@@ -35,9 +37,9 @@ class ThemeColorPreferenceCategory : PreferenceCategory, ThemeColorMutable {
     fun setTitleTextColor(titleTextColor: Int) = setThemeColor(ThemeColor(titleTextColor))
 
     override fun setThemeColor(color: ThemeColor) {
-        color.colorPrimary.let {
-            mColor = it
-            mTitleTextView?.setTextColor(it)
+        ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), color.colorPrimary, 3.2).let { contrastColor ->
+            mColor = contrastColor
+            mTitleTextView?.setTextColor(contrastColor)
         }
     }
 

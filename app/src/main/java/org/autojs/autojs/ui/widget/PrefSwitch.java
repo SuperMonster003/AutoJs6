@@ -55,7 +55,7 @@ public class PrefSwitch extends JsSwitch implements SharedPreferences.OnSharedPr
 
     @Override
     public void setThemeColor(ThemeColor color) {
-        ThemeColorHelper.setColorPrimary(this, color.colorPrimary);
+        ThemeColorHelper.setColorPrimary(this, color.colorPrimary, true);
     }
 
     private void readInitialState() {
