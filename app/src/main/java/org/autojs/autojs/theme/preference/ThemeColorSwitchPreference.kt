@@ -1,5 +1,6 @@
 package org.autojs.autojs.theme.preference
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.TypedArray
@@ -32,26 +33,33 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
     override var longClickPromptMore: CharSequence? = null
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+        init(context, attrs, defStyleAttr, defStyleRes)
+    }
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        init(context, attrs, defStyleAttr, 0)
+    }
+
+    @SuppressLint("RestrictedApi")
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        init(context, attrs, 0, 0)
+    }
+
+    constructor(context: Context) : super(context) {
+        init(context, null, 0, 0)
+    }
+
+    init {
+        ThemeColorManager.add(this)
+    }
+
+    private fun init(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
         obtainStyledAttrs(context, attrs, R.styleable.MaterialPreference, defStyleAttr, defStyleRes)
             .let { a ->
                 getAttrString(a, R.styleable.MaterialPreference_longClickPrompt)?.also { longClickPrompt = it }
                 getAttrString(a, R.styleable.MaterialPreference_longClickPromptMore)?.also { longClickPromptMore = it }
                 a.recycle()
             }
-    }
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-
-    constructor(context: Context, attrs: AttributeSet?) : this(
-        context, attrs, TypedArrayUtils.getAttr(
-            context, androidx.preference.R.attr.switchPreferenceStyle, android.R.attr.switchPreferenceStyle
-        )
-    )
-
-    constructor(context: Context) : this(context, null)
-
-    init {
-        ThemeColorManager.add(this)
     }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
@@ -70,10 +78,10 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
 
     private fun applyColor() {
         if (mCheckableView is Switch) {
-            ThemeColorHelper.setColorPrimary(mCheckableView as Switch?, mColor)
+            ThemeColorHelper.setColorPrimary(mCheckableView as Switch, mColor, true)
         }
         if (mCheckableView is SwitchCompat) {
-            ThemeColorHelper.setColorPrimary(mCheckableView as SwitchCompat?, mColor)
+            ThemeColorHelper.setColorPrimary(mCheckableView as SwitchCompat, mColor, true)
         }
     }
 
@@ -81,6 +89,7 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
         return context.obtainStyledAttributes(set, styleableRes, defStyleAttr, defStyleRes)
     }
 
+    @SuppressLint("RestrictedApi")
     private fun getAttrString(a: TypedArray, index: Int): String? = TypedArrayUtils.getString(a, index, index)
 
 }

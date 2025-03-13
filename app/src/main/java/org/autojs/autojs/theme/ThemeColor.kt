@@ -17,16 +17,10 @@ import org.autojs.autojs6.R
  * Modified by SuperMonster003 as of Mar 30, 2023.
  * Transformed by SuperMonster003 on Mar 30, 2023.
  */
-class ThemeColor {
+class ThemeColor(@JvmField var colorPrimary: Int, @JvmField var colorPrimaryDark: Int, @JvmField var colorAccent: Int) {
 
-    @JvmField
-    var colorPrimary = 0
-
-    @JvmField
-    var colorAccent = 0
-
-    @JvmField
-    var colorPrimaryDark = 0
+    @JvmOverloads
+    constructor(color: Int = 0) : this(color, color, color)
 
     @ScriptInterface
     fun getColorPrimary() = colorPrimary
@@ -40,16 +34,6 @@ class ThemeColor {
     fun isLuminanceLight() = ColorUtils.isLuminanceLight(colorPrimary)
 
     fun isLuminanceDark() = ColorUtils.isLuminanceDark(colorPrimary)
-
-    constructor()
-
-    constructor(color: Int) : this(color, color, color)
-
-    constructor(colorPrimary: Int, colorPrimaryDark: Int, colorAccent: Int) {
-        this.colorPrimary = colorPrimary
-        this.colorPrimaryDark = colorPrimaryDark
-        this.colorAccent = colorAccent
-    }
 
     fun colorPrimary(colorPrimary: Int) = also { this.colorPrimary = colorPrimary }
 

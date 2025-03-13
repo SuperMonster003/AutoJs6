@@ -25,9 +25,12 @@ import org.autojs.autojs.execution.ScriptExecutionListener;
 import org.autojs.autojs.execution.SimpleScriptExecutionListener;
 import org.autojs.autojs.groundwork.WrapContentLinearLayoutManager;
 import org.autojs.autojs.script.AutoFileSource;
+import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.storage.database.ModelChange;
+import org.autojs.autojs.theme.ThemeColorManagerCompat;
 import org.autojs.autojs.timing.TimedTaskManager;
 import org.autojs.autojs.ui.timing.TimedTaskSettingActivity;
+import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.FileUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ExplorerFirstCharIconBinding;
@@ -232,10 +235,19 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
 
         public void bind(Task task) {
             mTask = task;
+            int itemIconThemeColorForContrast = ColorUtils.adjustColorForContrast(getContext().getColor(R.color.window_background), ThemeColorManagerCompat.getColorPrimary(), 2.3);
+            FileUtils.TYPE.Icon icon;
+            if (JavaScriptFileSource.ENGINE.equals(mTask.getEngineName())) {
+                icon = FileUtils.TYPE.JAVASCRIPT.icon;
+            } else if (AutoFileSource.ENGINE.equals(mTask.getEngineName())) {
+                icon = FileUtils.TYPE.AUTO.icon;
+            } else {
+                icon = FileUtils.TYPE.UNKNOWN.icon;
+            }
             firstCharIconBinding.firstChar
-                    .setIcon(AutoFileSource.ENGINE.equals(mTask.getEngineName()) ? FileUtils.TYPE.AUTO.icon : FileUtils.TYPE.JAVASCRIPT.icon)
-                    .setIconTextThemeColor()
-                    .setStrokeThemeColor()
+                    .setIcon(icon)
+                    .setIconTextColor(itemIconThemeColorForContrast)
+                    .setStrokeColor(itemIconThemeColorForContrast)
                     .setFillTransparent();
             itemBinding.name.setText(task.getName());
             itemBinding.taskListFilePath.setText(task.getDesc());

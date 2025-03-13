@@ -44,6 +44,7 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.theme.ThemeColorManagerCompat
 import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
 import org.autojs.autojs.ui.common.ScriptLoopDialog
 import org.autojs.autojs.ui.common.ScriptOperations
@@ -54,6 +55,7 @@ import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.viewmodel.ExplorerItemManager
 import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.ui.widget.FirstCharView
+import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.util.IntentUtils
@@ -715,14 +717,19 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private fun setFirstChar(item: ExplorerItem) {
             mFirstChar.setIcon(ExplorerViewHelper.getIcon(item))
             when (item.type) {
-                FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> mFirstChar
-                    .setIconTextColorByThemeColorLuminance()
-                    .setStrokeThemeColor()
-                    .setFillThemeColor()
-                else -> mFirstChar
-                    .setIconTextColorDayNight()
-                    .setStrokeColorDayNight()
-                    .setFillTransparent()
+                FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> {
+                    val themeColorForContrast = ColorUtils.adjustColorForContrast(context.getColor(R.color.item_background_dark), ThemeColorManagerCompat.getColorPrimary(), 1.15)
+                    mFirstChar
+                        .setIconTextColorByThemeColorLuminance()
+                        .setStrokeColor(themeColorForContrast)
+                        .setFillColor(themeColorForContrast)
+                }
+                else -> {
+                    mFirstChar
+                        .setIconTextColorDayNight()
+                        .setStrokeColorDayNight()
+                        .setFillTransparent()
+                }
             }
         }
 

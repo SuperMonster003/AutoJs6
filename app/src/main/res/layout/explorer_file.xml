@@ -17,13 +17,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/item_background_dark"
+        android:baselineAligned="false"
         android:clickable="true"
+        android:focusable="true"
         android:foreground="?selectableItemBackground"
         android:orientation="horizontal"
         android:paddingVertical="9dp"
-        android:paddingStart="8dp"
-        android:baselineAligned="false"
-        android:focusable="true">
+        android:paddingStart="8dp">
 
         <include
             layout="@layout/explorer_first_char_icon"
