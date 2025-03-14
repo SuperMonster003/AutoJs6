@@ -89,7 +89,7 @@ dependencies /* Unclassified */ {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Webkit
-    implementation("androidx.webkit:webkit:1.12.1")
+    implementation("androidx.webkit:webkit:1.13.0")
 
     // Gson
     implementation("com.google.code.gson:gson:2.11.0")
@@ -216,6 +216,9 @@ dependencies /* Unclassified */ {
 
     // ApkSigner
     implementation(project(":modules:apksigner"))
+
+    // Spongy Castle
+    implementation("com.madgag.spongycastle:prov:1.58.0.0")
 }
 
 dependencies /* MIME */ {
@@ -639,7 +642,7 @@ android {
     }
 
     buildTypes {
-        val proguardFiles = arrayOf(
+        val proguardFiles = arrayOf<Any>(
             getDefaultProguardFile("proguard-android.txt"),
             "proguard-rules.pro",
         )

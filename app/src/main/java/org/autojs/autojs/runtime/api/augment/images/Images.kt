@@ -184,7 +184,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun copy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsOnlyOne(args) { o ->
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.copy must be a ImageWrapper" }
             scriptRuntime.images.copy(image)
         }
@@ -201,13 +201,13 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             when (it.size) {
                 5 -> {
                     val (o, x, y, w, h) = it
-                    val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+                    val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
                     require(image is ImageWrapper) { "Argument image for images.clip must be a ImageWrapper" }
                     scriptRuntime.images.clip(image, coerceIntNumber(x), coerceIntNumber(y), coerceIntNumber(w), coerceIntNumber(h))
                 }
                 2 -> {
                     val (o, region) = it
-                    val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+                    val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
                     require(image is ImageWrapper) { "Argument image for images.clip must be a ImageWrapper" }
                     when {
                         region.isJsNullish() -> image.apply { shoot() }
@@ -228,7 +228,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun pixel(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsLength(args, 3) {
             val (o, x, y) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.pixel must be a ImageWrapper" }
             ApiImages.pixel(image, coerceIntNumber(x), coerceIntNumber(y))
         }
@@ -297,7 +297,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun save(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 2..4) {
             val (o, path, format, quality) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.save must be a ImageWrapper" }
             require(!path.isJsNullish()) { "Argument path for images.save must be non-nullish" }
             scriptRuntime.images.save(image, scriptRuntime.files.path(coerceString(path)), parseImageFormat(format), parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY))
@@ -307,7 +307,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun saveImage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 2..4) {
             val (o, path, format, quality) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.saveImage must be a ImageWrapper" }
             require(!path.isJsNullish()) { "Argument path for images.saveImage must be non-nullish" }
             scriptRuntime.images.save(image, scriptRuntime.files.path(coerceString(path)), parseImageFormat(format), parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY))
@@ -316,7 +316,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun invert(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsOnlyOne(args) { o ->
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.invert must be a ImageWrapper" }
             scriptRuntime.images.invert(image)
         }
@@ -325,7 +325,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun grayscale(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 1..2) {
             val (o, dstCn) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.grayscale must be a ImageWrapper" }
             cvtColor(scriptRuntime, arrayOf(image, "BGR2GRAY", dstCn))
         }
@@ -333,7 +333,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun isGrayscale(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             val mat = when (image) {
                 is OpencvMat -> image
                 is ImageWrapper -> image.mat
@@ -359,7 +359,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun threshold(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 3..4) {
             val (o, threshold, maxVal, type) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.threshold must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val mat = AutoJsMat()
@@ -372,7 +372,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun inRange(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLength(args, 3) {
             val (o, lowerBound, upperBound) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.inRange must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val dst = AutoJsMat()
@@ -385,7 +385,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun interval(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLength(args, 3) {
             val (o, color, threshold) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.interval must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val (lowerBound, upperBound) = parseScalars(Colors.toIntRhino(color), coerceNumber(threshold))
@@ -400,7 +400,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun adaptiveThreshold(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLength(args, 6) {
             val (o, maxValue, adaptiveMethod, thresholdType, blockSize, C) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.adaptiveThreshold must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val mat = AutoJsMat()
@@ -415,7 +415,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun blur(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 2..4) {
             val (o, ksize, anchor, type) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.blur must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val mat = AutoJsMat()
@@ -433,7 +433,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun medianBlur(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLength(args, 2) {
             val (o, size) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.medianBlur must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val ksize = when (size) {
@@ -467,7 +467,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun gaussianBlur(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 2..5) {
             val (o, size, sigmaX, sigmaY, type) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.gaussianBlur must be a ImageWrapper" }
             /* 按需初始化 OpenCV. */
             initOpenCvIfNeeded()
@@ -489,7 +489,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun bilateralFilter(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 1..5) {
             val (o, d, sigmaColor, sigmaSpace, borderType) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.bilateralFilter must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val mat = AutoJsMat()
@@ -505,7 +505,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun cvtColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 2..3) {
             val (o, code, dstCn) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.cvtColor must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val mat = AutoJsMat()
@@ -522,7 +522,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findCircles(scriptRuntime: ScriptRuntime, args: Array<out Any?>): List<HoughCirclesResult> = ensureArgumentsLengthInRange(args, 1..2) {
             val (o, optionsArg) = it
-            val rawImage = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val rawImage = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(rawImage is ImageWrapper) { "Argument grayImage for images.findCircles must be a ImageWrapper" }
             val grayImage = if (isGrayscale(scriptRuntime, arrayOf(rawImage))) rawImage else grayscale(scriptRuntime, arrayOf(rawImage))
             initOpenCvIfNeeded()
@@ -564,7 +564,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun resize(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 2..3) {
             val (o, size, interpolation) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.resize must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val mat = AutoJsMat()
@@ -577,7 +577,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun scale(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 3..4) {
             val (o, fx, fy, interpolation) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.scale must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val mat = AutoJsMat()
@@ -590,7 +590,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun rotate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 2..4) {
             val (o, degree, centerXArg, centerYArg) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.rotate must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val centerX = parseNumber(centerXArg) { image.width / 2 }.toFloat()
@@ -602,9 +602,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun concat(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 2..3) {
             val (oA, oB, direction) = it
-            val imageA = if (oA is String) read(scriptRuntime, arrayOf(oA, true)) else oA
+            val imageA = if (oA is String) read(scriptRuntime, arrayOf<Any>(oA, true)) else oA
             require(imageA is ImageWrapper) { "Argument imageA for images.concat must be a ImageWrapper" }
-            val imageB = if (oB is String) read(scriptRuntime, arrayOf(oB, true)) else oB
+            val imageB = if (oB is String) read(scriptRuntime, arrayOf<Any>(oB, true)) else oB
             require(imageB is ImageWrapper) { "Argument imageB for images.concat must be a ImageWrapper" }
             initOpenCvIfNeeded()
             ApiImages.concat(imageA, imageB, directionToGravityToConcat(direction))
@@ -614,7 +614,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun detectColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 4..6) {
             val (o, color, x, y, threshold, algorithm) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.detectColor must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val pixel = pixel(scriptRuntime, arrayOf(image, coerceIntNumber(x), coerceIntNumber(y)))
@@ -628,7 +628,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun detectsColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 4..6) {
             val (o) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.detectsColor must be a ImageWrapper" }
             detectColor(scriptRuntime, it)
         }
@@ -647,7 +647,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun detectsMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 5..6) {
             val (o, _, _, _, paths) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.detectMultiColors must be a ImageWrapper" }
             require(paths is NativeArray) { "Argument paths for images.detectMultiColors must be a JavaScript Array" }
             detectMultiColors(scriptRuntime, it)
@@ -657,7 +657,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findPointByColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) { argList ->
             val (o, color, xOrOptions, y, width, height, threshold) = argList
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findPointByColor must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val opt = when {
@@ -681,7 +681,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..3) {
             val (o, color, options) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findColor must be a ImageWrapper" }
             findPointByColor(scriptRuntime, arrayOf(image, color, options))
         }
@@ -691,7 +691,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findColorInRegion(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) {
             val (o) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findColorInRegion must be a ImageWrapper" }
             findPointByColor(scriptRuntime, it)
         }
@@ -700,7 +700,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findPointByColorExactly(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..6) {
             val (o) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findPointByColorExactly must be a ImageWrapper" }
             findPointByColor(scriptRuntime, it + /* threshold = */ 0)
         }
@@ -710,7 +710,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findColorEquals(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..6) {
             val (o) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findColorEquals must be a ImageWrapper" }
             findPointByColorExactly(scriptRuntime, it)
         }
@@ -719,7 +719,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findPointsByColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 2..3) {
             val (o, color, options) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findPointsByColor must be a ImageWrapper" }
             initOpenCvIfNeeded()
             val opt = options as? NativeObject ?: newNativeObject()
@@ -736,7 +736,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findAllPointsForColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 2..3) {
             val (o) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findAllPointsForColor must be a ImageWrapper" }
             findPointsByColor(scriptRuntime, it)
         }
@@ -745,7 +745,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findPointByColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 3..4) {
             val (o, firstColor, paths, options) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findPointByColors must be a ImageWrapper" }
             require(paths is NativeArray) { "Argument paths for images.findPointByColors must be a JavaScript Array" }
             initOpenCvIfNeeded()
@@ -767,7 +767,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 3..4) {
             val (o, _, paths) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findMultiColors must be a ImageWrapper" }
             require(paths is NativeArray) { "Argument paths for images.findMultiColors must be a JavaScript Array" }
             findPointByColors(scriptRuntime, it)
@@ -777,7 +777,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findPointsByColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 3..4) {
             val (o, firstColor, paths, options) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findPointsByColors must be a ImageWrapper" }
             require(paths is NativeArray) { "Argument paths for images.findPointsByColors must be a JavaScript Array" }
             initOpenCvIfNeeded()
@@ -798,7 +798,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findPointByImage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) { argList ->
             val (o, template, xOrOptions, y, width, height, thresholdArg) = argList
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findPointByImage must be a ImageWrapper" }
             require(template is ImageWrapper) { "Argument template for images.findPointByImage must be a ImageWrapper" }
             initOpenCvIfNeeded()
@@ -829,7 +829,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findImage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..3) {
             val (o, template) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findImage must be a ImageWrapper" }
             require(template is ImageWrapper) { "Argument template for images.findImage must be a ImageWrapper" }
             findPointByImage(scriptRuntime, it)
@@ -840,7 +840,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun findImageInRegion(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvPoint? = ensureArgumentsLengthInRange(args, 2..7) {
             val (o, template) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.findImageInRegion must be a ImageWrapper" }
             require(template is ImageWrapper) { "Argument template for images.findImageInRegion must be a ImageWrapper" }
             findPointByImage(scriptRuntime, it)
@@ -850,7 +850,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun matchTemplate(scriptRuntime: ScriptRuntime, args: Array<out Any?>): MatchingResult = ensureArgumentsLengthInRange(args, 2..3) {
             val (o, template, options) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.matchTemplate must be a ImageWrapper" }
             require(template is ImageWrapper) { "Argument template for images.matchTemplate must be a ImageWrapper" }
             initOpenCvIfNeeded()
@@ -878,7 +878,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun toBase64(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..3) {
             val (o, format, quality) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.toBase64 must be a ImageWrapper" }
             scriptRuntime.images.toBase64(image, parseImageFormat(format), parseQuality(quality, DEFAULT_IMAGE_TO_BASE64_QUALITY))
         }
@@ -897,7 +897,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun toBytes(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ByteArray = ensureArgumentsLengthInRange(args, 1..3) {
             val (o, format, quality) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.toBytes must be a ImageWrapper" }
             scriptRuntime.images.toBytes(image, parseImageFormat(format), parseQuality(quality, DEFAULT_IMAGE_TO_BYTES_QUALITY))
         }
@@ -933,7 +933,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun detectAndComputeFeatures(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageFeatures = ensureArgumentsLengthInRange(args, 1..2) {
             val (o, options) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.detectAndComputeFeatures must be a ImageWrapper instead of ${image.jsBrief()}" }
             val opt = fillDetectAndComputeFeaturesOptions(image.height, image.width, options as? NativeObject ?: newNativeObject())
             val rect = buildRegionInternal(image, opt.region)
@@ -1005,7 +1005,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun compress(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLength(args, 2) {
             val (o, compressLevelArg) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.compress must be a ImageWrapper" }
             val compressLevel = coerceNumber(compressLevelArg, 1.0)
             val level = 2.0.pow(floor(ln(compressLevel.coerceAtLeast(1.0)) / ln(2.0))).toInt()
@@ -1063,7 +1063,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun buildRegion(scriptRuntime: ScriptRuntime, args: Array<out Any?>): OpencvRect = ensureArgumentsLength(args, 2) {
             val (o, region) = it
-            val image = if (o is String) read(scriptRuntime, arrayOf(o, true)) else o
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.buildRegion must be a ImageWrapper" }
             require(region.isJsNullish() || region.isJsArray() || region is OpencvRect || region is AndroidRect) {
                 "Argument region ${region.jsSpecies()} is invalid for images.buildRegion"
@@ -1111,9 +1111,9 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @RhinoRuntimeFunctionInterface
         fun isEqual(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLength(args, 2) { argList ->
             val (oA, oB) = argList
-            val imageA = if (oA is String) read(scriptRuntime, arrayOf(oA, true)) else oA
+            val imageA = if (oA is String) read(scriptRuntime, arrayOf<Any>(oA, true)) else oA
             require(imageA is ImageWrapper) { throw WrappedIllegalArgumentException("The first image argument for images.isEqual must be a ImageWrapper instead of ${imageA.jsBrief()}") }
-            val imageB = if (oB is String) read(scriptRuntime, arrayOf(oB, true)) else oB
+            val imageB = if (oB is String) read(scriptRuntime, arrayOf<Any>(oB, true)) else oB
             require(imageB is ImageWrapper) { throw WrappedIllegalArgumentException("The second image argument for images.isEqual must be a ImageWrapper instead of ${imageA.jsBrief()}") }
             ImageSimilarity.isEqual(imageA.mat, imageB.mat)
         }
@@ -1399,13 +1399,13 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val matA = when (imageA) {
                 is ImageWrapper -> imageA.bgrMat
                 is OpencvMat -> imageA
-                is String -> read(scriptRuntime, arrayOf(imageA, true))!!.bgrMat
+                is String -> read(scriptRuntime, arrayOf<Any>(imageA, true))!!.bgrMat
                 else -> throw WrappedIllegalArgumentException("The first image argument for images.$funcName must be a ImageWrapper or a Mat instead of ${imageA.jsBrief()}")
             }
             val matB = when (imageB) {
                 is ImageWrapper -> imageB.bgrMat
                 is OpencvMat -> imageB
-                is String -> read(scriptRuntime, arrayOf(imageB, true))!!.bgrMat
+                is String -> read(scriptRuntime, arrayOf<Any>(imageB, true))!!.bgrMat
                 else -> throw WrappedIllegalArgumentException("The second image argument for images.$funcName must be a ImageWrapper or a Mat instead of ${imageB.jsBrief()}")
             }
             return matA to matB
