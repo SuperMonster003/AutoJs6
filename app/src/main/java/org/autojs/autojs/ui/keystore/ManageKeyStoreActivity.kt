@@ -226,25 +226,17 @@ class ManageKeyStoreActivity : BaseActivity() {
         configs: VerifyKeyStoreDialog.VerifyKeyStoreConfigs, keyStore: KeyStore,
     ) {
         // 验证密钥库密码
-        val tmpKeyStore = try {
+        val tmpKeyStore = runCatching {
             KeyStoreHelper.loadKeyStore(File(keyStore.absolutePath), configs.password.toCharArray())
-        } catch (e: Exception) {
-            null
-        }
-
-        if (tmpKeyStore == null) {
+        }.getOrElse {
             showToast(R.string.text_verify_failed)
             return
         }
 
         // 验证别名和别名密码
-        val tmpKey = try {
+        runCatching {
             tmpKeyStore.getKey(configs.alias, configs.aliasPassword.toCharArray())
-        } catch (e: Exception) {
-            null
-        }
-
-        if (tmpKey == null) {
+        }.getOrElse {
             showToast(R.string.text_verify_failed)
             return
         }

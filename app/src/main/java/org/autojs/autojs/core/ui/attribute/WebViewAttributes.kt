@@ -19,6 +19,7 @@ open class WebViewAttributes(scriptRuntime: ScriptRuntime, resourceParser: Resou
         registerAttr("blockNetworkImage") { view.settings.blockNetworkImage = it.toBoolean() }
         registerAttr("blockNetworkLoads") { view.settings.blockNetworkLoads = it.toBoolean() }
         registerAttrs(arrayOf("enableBuiltInZoomControls", "builtInZoomControls")) { view.settings.builtInZoomControls = it.toBoolean() }
+        @Suppress("DEPRECATION")
         registerAttrs(arrayOf("enableDatabase", "databaseEnabled", "isDatabaseEnabled")) { view.settings.databaseEnabled = it.toBoolean() }
         registerAttrs(arrayOf("fontSize", "defaultFontSize")) { view.settings.defaultFontSize = it.toInt() }
         registerAttrs(arrayOf("fixedFontSize", "defaultFixedFontSize")) { view.settings.defaultFixedFontSize = it.toInt() }

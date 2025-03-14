@@ -35,6 +35,7 @@
         "升级 Gradle 版本 8.12 -> 8.13",
         "升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT",
         "升级 Androidx Recyclerview 版本 1.3.2 -> 1.4.0",
+        "升级 Androidx WebKit 版本 1.12.1 -> 1.13.0",
         "升级 Pinyin4j 版本 2.5.0 -> 2.5.1"
       ]
     },
