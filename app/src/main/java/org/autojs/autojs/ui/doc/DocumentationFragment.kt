@@ -15,6 +15,7 @@ import org.autojs.autojs.ui.main.QueryEvent
 import org.autojs.autojs.ui.main.ViewPagerFragment
 import org.autojs.autojs.ui.main.ViewStatesManageable
 import org.autojs.autojs.util.DocsUtils.getUrl
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WebViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentOnlineDocsBinding
@@ -54,7 +55,10 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
         binding.ewebView.also { ewebView ->
             ewebView.webView.also { webView ->
                 mWebView = webView
-                WebViewUtils.adaptDarkMode(requireContext(), webView)
+                webView.settings.setSupportMultipleWindows(true)
+                if (ViewUtils.isNightModeYes(requireContext())) {
+                    WebViewUtils.adaptDarkMode(webView)
+                }
                 WebViewUtils.excludeWebViewFromNavigationBar(ewebView)
             }
         }

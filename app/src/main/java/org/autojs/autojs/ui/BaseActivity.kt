@@ -39,6 +39,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
         if (handleNavigationBarContrastEnforcedAutomatically) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                @Suppress("DEPRECATION")
                 window.navigationBarColor = getColor(R.color.black_alpha_44)
             }
         }
@@ -72,7 +73,7 @@ abstract class BaseActivity : AppCompatActivity() {
         initThemeColors()
         if (handleStatusBarThemeColorAutomatically && !BuildConfig.isInrt) {
             ThemeColorManager.addActivityStatusBar(this)
-            setUpStatusBarIconLightByThemeColor()
+            setUpStatusBarAppearanceLightByThemeColor()
         }
     }
 
@@ -89,12 +90,12 @@ abstract class BaseActivity : AppCompatActivity() {
 
     fun setToolbarAsBack(title: String?) = ViewUtils.setToolbarAsBack(this, title)
 
-    protected fun setUpStatusBarIconLightByNightMode() {
-        ViewUtils.setStatusBarIconLight(this, ViewUtils.isNightModeEnabled)
+    protected fun setUpStatusBarAppearanceLightByNightMode() {
+        ViewUtils.setStatusBarAppearanceLight(this, ViewUtils.isNightModeEnabled)
     }
 
-    protected fun setUpStatusBarIconLightByThemeColor() {
-        ViewUtils.setStatusBarIconLight(this, ThemeColorManager.isThemeColorLuminanceDark())
+    protected fun setUpStatusBarAppearanceLightByThemeColor() {
+        ViewUtils.setStatusBarAppearanceLight(this, ThemeColorManager.isThemeColorLuminanceDark())
     }
 
 }

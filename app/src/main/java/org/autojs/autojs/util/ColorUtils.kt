@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import androidx.annotation.FloatRange
 import androidx.core.graphics.ColorUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.image.ColorTable
@@ -579,6 +580,7 @@ object ColorUtils {
      * @see <a href="https://www.w3.org/TR/WCAG20/#relativeluminancedef">W3C Recommendation</a>
      */
     @JvmStatic
+    @FloatRange(0.0, 1.0)
     fun luminance(@ColorInt color: Int): Double {
         // @Hint by SuperMonster003 on Jan 21, 2023.
         //  ! Compatibility solution.

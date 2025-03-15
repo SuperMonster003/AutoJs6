@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.webkit.WebView
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.DocsUtils.getUrl
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WebViewUtils
 import org.autojs.autojs6.databinding.ActivityDocumentationBinding
 
@@ -26,7 +27,10 @@ class DocumentationActivity : BaseActivity() {
             binding.ewebView.also { ewebView ->
                 ewebView.webView.also { webView ->
                     mWebView = webView
-                    WebViewUtils.adaptDarkMode(this@DocumentationActivity, webView)
+                    webView.settings.setSupportMultipleWindows(true)
+                    if (ViewUtils.isNightModeYes(this)) {
+                        WebViewUtils.adaptDarkMode(webView)
+                    }
                     WebViewUtils.excludeWebViewFromStatusBarAndNavigationBar(ewebView)
                     webView.loadUrl(intent.getStringExtra(EXTRA_URL) ?: getUrl("index.html"))
                 }
@@ -36,7 +40,7 @@ class DocumentationActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        setUpStatusBarIconLightByNightMode()
+        setUpStatusBarAppearanceLightByNightMode()
     }
 
     @SuppressLint("MissingSuperCall")

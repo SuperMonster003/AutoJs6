@@ -26,6 +26,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.IdRes
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
@@ -167,20 +168,20 @@ object ViewUtils {
     }
 
     @JvmStatic
-    fun isStatusBarIconLight(activity: Activity): Boolean {
-        return !isStatusBarIconDark(activity)
+    fun isStatusBarAppearanceLight(activity: Activity): Boolean {
+        return !isStatusBarAppearanceDark(activity)
     }
 
     @JvmStatic
-    fun isStatusBarIconDark(activity: Activity): Boolean {
+    fun isStatusBarAppearanceDark(activity: Activity): Boolean {
         @Suppress("DEPRECATION")
         return hasSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
     }
 
-    fun setStatusBarIconLight(activity: Activity, isLight: Boolean) {
+    fun setStatusBarAppearanceLight(activity: Activity, isLight: Boolean) {
         @Suppress("DEPRECATION")
         when {
-            isStatusBarIconLight(activity) == isLight -> return
+            isStatusBarAppearanceLight(activity) == isLight -> return
             isLight -> removeSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
             else -> appendSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
         }
@@ -207,6 +208,29 @@ object ViewUtils {
         } else {
             @Suppress("DEPRECATION")
             window.statusBarColor = color
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @JvmStatic
+    fun isNavigationBarAppearanceLight(activity: Activity): Boolean {
+        return !isNavigationBarAppearanceDark(activity)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @JvmStatic
+    fun isNavigationBarAppearanceDark(activity: Activity): Boolean {
+        @Suppress("DEPRECATION")
+        return hasSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun setNavigationBarAppearanceLight(activity: Activity, isLight: Boolean) {
+        @Suppress("DEPRECATION")
+        when {
+            isNavigationBarAppearanceLight(activity) == isLight -> return
+            isLight -> removeSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+            else -> appendSystemUiVisibility(activity, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
     }
 
