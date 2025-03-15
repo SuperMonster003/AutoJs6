@@ -2,6 +2,9 @@
   "$data": {
     "v6.6.2": {
       "released_date": "2025/01/03",
+      "feature": [
+        "ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法"
+      ],
       "fix": [
         "Android 15 状态栏背景颜色与主题色不一致的问题",
         "plugins.load 方法无法正常加载插件的问题 _[`issue #290`](http://issues.autojs6.com/290)_",

@@ -17,6 +17,8 @@
     <color name="night_day">@color/night</color>
     <color name="night_day_full">@color/night_full</color>
     <color name="window_background">#FFFFFF</color>
+    <color name="window_background_light">#FFFFFF</color>
+    <color name="window_background_night">@color/day_full</color>
     <color name="window_background_selected">#E5E5E5</color>
     <color name="text_color_primary">@color/day_night</color>
     <color name="text_color_primary_full">@color/day_night_full</color>

@@ -1,8 +1,5 @@
 package org.autojs.autojs.util
 
-import android.content.Context
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.TIRAMISU
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.core.graphics.Insets
@@ -37,23 +34,37 @@ class WebViewUtils {
         //  !   - 安卓系统 WebView（或类似 Google Chrome 浏览器）版本 >= 105
         //  ! 参阅: https://stackoverflow.com/questions/57449900/letting-webview-on-android-work-with-prefers-color-scheme-dark
         @JvmStatic
-        fun adaptDarkMode(context: Context, webView: WebView) {
-            if (isFeatureSupported(FORCE_DARK) && SDK_INT < TIRAMISU) {
-                webView.settings.let { webSettings ->
-                    webSettings.setSupportMultipleWindows(true)
-                    // @Comment by SuperMonster003 on Aug 14, 2023.
-                    //  # @Suppress("DEPRECATION")
-                    //  # WebSettingsCompat.setForceDark(
-                    //  #     webSettings, when (ViewUtils.isNightModeYes(context)) {
-                    //  #         true -> FORCE_DARK_ON
-                    //  #         else -> FORCE_DARK_OFF
-                    //  #     }
-                    //  # )
-                    if (isFeatureSupported(ALGORITHMIC_DARKENING)) {
-                        WebSettingsCompat.setAlgorithmicDarkeningAllowed(webSettings, ViewUtils.isNightModeYes(context))
-                    }
+        fun adaptDarkMode(webView: WebView) {
+            val settings = webView.settings
+            when {
+                isFeatureSupported(ALGORITHMIC_DARKENING) -> {
+                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
                 }
+                isFeatureSupported(FORCE_DARK) -> {
+                    @Suppress("DEPRECATION")
+                    WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON)
+                }
+                // FIXME by SuperMonster003 on Mar 14, 2025.
+                //  ! Not working.
+                //  ! zh-CN: 不起作用.
+                // else -> injectDarkModeCSS(webView)
             }
+        }
+
+        private fun injectDarkModeCSS(webView: WebView) {
+            val darkModeCSS = """
+             (function() {
+                 let style = document.createElement('style');
+                 style.type = 'text/css';
+                 style.innerHTML = `
+                     html { filter: invert(1) hue-rotate(180deg); }
+                     img, video { filter: invert(1) hue-rotate(180deg); }
+                 `;
+                 document.head.appendChild(style);
+             })();
+         """.trimIndent()
+
+            webView.evaluateJavascript(darkModeCSS, null)
         }
 
         fun excludeWebViewFromNavigationBar(ewebView: EWebView) {

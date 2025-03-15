@@ -18,6 +18,7 @@ import org.autojs.autojs6.databinding.ActivitySplashBinding
 class SplashActivity : BaseActivity() {
 
     override val handleStatusBarThemeColorAutomatically = false
+    override val handleNavigationBarContrastEnforcedAutomatically = false
 
     private var mAlreadyEnterNextActivity = false
     private var mPaused = false

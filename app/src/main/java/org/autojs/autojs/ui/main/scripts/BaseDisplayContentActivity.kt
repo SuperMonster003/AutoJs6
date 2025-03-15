@@ -147,12 +147,12 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
             internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorNight)
             internalFabView.imageTintList = ColorStateList.valueOf(if (ColorUtils.isLuminanceDark(themeColorNight)) getColor(R.color.night) else getColor(R.color.day))
             ViewUtils.setStatusBarBackgroundColor(this, themeColorNight)
-            ViewUtils.setStatusBarIconLight(this, ColorUtils.isLuminanceDark(themeColorNight))
+            ViewUtils.setStatusBarAppearanceLight(this, ColorUtils.isLuminanceDark(themeColorNight))
         } else {
             internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorDay)
             internalFabView.imageTintList = ColorStateList.valueOf(if (ColorUtils.isLuminanceDark(themeColorDay)) getColor(R.color.night) else getColor(R.color.day))
             ViewUtils.setStatusBarBackgroundColor(this, themeColorDay)
-            ViewUtils.setStatusBarIconLight(this, ColorUtils.isLuminanceDark(themeColorDay))
+            ViewUtils.setStatusBarAppearanceLight(this, ColorUtils.isLuminanceDark(themeColorDay))
         }
     }
 

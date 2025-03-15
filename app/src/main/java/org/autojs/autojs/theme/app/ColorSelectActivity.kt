@@ -96,7 +96,7 @@ class ColorSelectActivity : BaseActivity() {
     override fun initThemeColors() {
         super.initThemeColors()
         setUpToolbarColors()
-        setUpStatusBarIconLight()
+        setUpStatusBarAppearanceLight()
     }
 
     private fun setUpToolbarColors() {
@@ -112,8 +112,8 @@ class ColorSelectActivity : BaseActivity() {
         }
     }
 
-    private fun setUpStatusBarIconLight() {
-        ViewUtils.setStatusBarIconLight(this, ColorUtils.isLuminanceDark(mCurrentColor))
+    private fun setUpStatusBarAppearanceLight() {
+        ViewUtils.setStatusBarAppearanceLight(this, ColorUtils.isLuminanceDark(mCurrentColor))
     }
 
     private fun setColorWithAnimation(view: View, colorTo: Int) {

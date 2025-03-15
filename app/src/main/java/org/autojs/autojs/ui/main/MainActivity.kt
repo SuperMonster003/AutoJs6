@@ -201,8 +201,8 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
                 super.onDrawerSlide(drawerView, slideOffset)
                 when {
-                    slideOffset > 0.5 -> setUpStatusBarIconLightByNightMode()
-                    else -> setUpStatusBarIconLightByThemeColor()
+                    slideOffset > 0.5 -> setUpStatusBarAppearanceLightByNightMode()
+                    else -> setUpStatusBarAppearanceLightByThemeColor()
                 }
             }
 
@@ -260,13 +260,13 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         super.initThemeColors()
         setUpToolbarColors()
         setUpTabLayoutColors()
-        setUpStatusBarIconLight()
+        setUpStatusBarAppearanceLight()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
-            setUpStatusBarIconLight()
+            setUpStatusBarAppearanceLight()
         }
     }
 
@@ -295,12 +295,12 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         mTab.setSelectedTabIndicatorColor(tabSelectedIndicatorColor)
     }
 
-    private fun setUpStatusBarIconLight() {
+    private fun setUpStatusBarAppearanceLight() {
         Handler(Looper.getMainLooper()).post {
             if (sIsActionBarDrawerOpened) {
-                setUpStatusBarIconLightByNightMode()
+                setUpStatusBarAppearanceLightByNightMode()
             } else {
-                setUpStatusBarIconLightByThemeColor()
+                setUpStatusBarAppearanceLightByThemeColor()
             }
         }
     }
