@@ -3,12 +3,16 @@ package org.autojs.autojs.execution
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.eventloop.EventEmitter
@@ -23,7 +27,10 @@ import org.autojs.autojs.execution.ScriptExecution.AbstractScriptExecution
 import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.ScriptSource
+import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs6.R
 import org.mozilla.javascript.ContinuationPending
 
 /**
@@ -31,12 +38,18 @@ import org.mozilla.javascript.ContinuationPending
  * Modified by SuperMonster003 as of Nov 15, 2023.
  */
 class ScriptExecuteActivity : AppCompatActivity() {
-    private var mResult: Any? = null
-    private lateinit var mScriptEngine: ScriptEngine<*>
+
+    private var mRuntime: ScriptRuntime? = null
     private var mExecutionListener: ScriptExecutionListener? = null
     private var mScriptSource: ScriptSource? = null
+    private var mResult: Any? = null
+
+    private lateinit var mScriptEngine: ScriptEngine<*>
     private lateinit var mScriptExecution: ActivityScriptExecution
-    private var mRuntime: ScriptRuntime? = null
+
+    @ScriptInterface
+    lateinit var eventEmitter: EventEmitter
+        private set
 
     @ScriptInterface
     val emitter: EventEmitter?
@@ -45,16 +58,28 @@ class ScriptExecuteActivity : AppCompatActivity() {
             else -> null
         }
 
-    @ScriptInterface
-    lateinit var eventEmitter: EventEmitter
-        private set
-
     // FIXME by Stardust on Mar 16, 2018.
     //  ! 如果 Activity 被回收则得不到改进.
     //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
     //  ! No improvements would be obtained if Activity was destroyed.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val windowBackground: Drawable = window.decorView.background
+            ?: ColorDrawable(getColor(R.color.md_grey_50)).also { window.setBackgroundDrawable(it) }
+
+        if (windowBackground is ColorDrawable) windowBackground.color.let { backgroundColor ->
+            val isLightColor = ColorUtils.isLuminanceDark(backgroundColor)
+            ViewUtils.setStatusBarBackgroundColor(this, backgroundColor)
+            ViewUtils.setStatusBarAppearanceLight(this, isLightColor)
+            ViewUtils.setNavigationBarBackgroundColor(this, backgroundColor)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ViewUtils.setNavigationBarAppearanceLight(this, isLightColor)
+            }
+        }
+
+        ViewUtils.addWindowFlags(this, WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+
         val executionId = intent.getIntExtra(EXTRA_EXECUTION_ID, ScriptExecution.NO_ID)
         if (executionId == ScriptExecution.NO_ID) {
             super.finish()
