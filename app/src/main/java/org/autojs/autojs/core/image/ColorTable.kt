@@ -741,7 +741,7 @@ class ColorTable {
 
         @JvmStatic
         @JvmOverloads
-        fun getColorByName(colorName: String, suppressException: Boolean = false): Int? {
+        fun getColorByName(colorName: String, suppressExceptions: Boolean = false): Int? {
             val name = colorName.replace("-", "_").uppercase()
             arrayOf(
                 Android::class.java,
@@ -755,7 +755,7 @@ class ColorTable {
                     }
                 }
             }
-            if (!suppressException) {
+            if (!suppressExceptions) {
                 throw NotFoundException(globalAppContext.getString(R.string.error_unknown_color_name, colorName))
             }
             return null
