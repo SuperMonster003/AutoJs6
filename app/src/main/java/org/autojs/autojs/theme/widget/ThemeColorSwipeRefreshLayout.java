@@ -8,6 +8,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import org.autojs.autojs.theme.ThemeColor;
 import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.theme.ThemeColorMutable;
+import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs6.R;
 
 /**
@@ -32,7 +33,9 @@ public class ThemeColorSwipeRefreshLayout extends SwipeRefreshLayout implements 
 
     @Override
     public void setThemeColor(ThemeColor themeColor) {
-        setColorSchemeColors(themeColor.colorPrimary);
+        int backgroundColor = getContext().getColor(R.color.swipe_refresh_background);
+        int adjustedColor = ColorUtils.adjustColorForContrast(backgroundColor, themeColor.colorPrimary, 2.3);
+        setColorSchemeColors(adjustedColor);
     }
 
 }

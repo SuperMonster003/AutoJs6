@@ -14,6 +14,7 @@ import org.autojs.autojs.theme.ThemeColorMutable;
  * Created by Stardust on Aug 7, 2016.
  */
 public class ThemeColorSwitch extends SwitchCompat implements ThemeColorMutable {
+
     public ThemeColorSwitch(Context context) {
         super(context);
         init();
@@ -35,6 +36,7 @@ public class ThemeColorSwitch extends SwitchCompat implements ThemeColorMutable 
 
     @Override
     public void setThemeColor(ThemeColor color) {
-        ThemeColorHelper.setColorPrimary(this, color.colorPrimary);
+        ThemeColorHelper.setColorPrimary(this, color.colorPrimary, true);
     }
+
 }
