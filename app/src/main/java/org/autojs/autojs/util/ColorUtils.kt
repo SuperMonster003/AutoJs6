@@ -653,6 +653,7 @@ object ColorUtils {
      * @return The adjusted color. (zh-CN: 调整后的颜色.)
      */
     @JvmStatic
+    @JvmOverloads
     fun adjustColorForContrast(
         @ColorInt background: Int,
         @ColorInt reference: Int,
