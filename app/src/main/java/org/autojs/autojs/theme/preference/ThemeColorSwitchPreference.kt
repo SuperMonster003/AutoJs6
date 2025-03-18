@@ -9,7 +9,6 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.Switch
 import androidx.appcompat.widget.SwitchCompat
-import androidx.core.content.res.TypedArrayUtils
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.SwitchPreference
 import org.autojs.autojs.app.DialogUtils
@@ -54,12 +53,11 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
     }
 
     private fun init(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
-        obtainStyledAttrs(context, attrs, R.styleable.MaterialPreference, defStyleAttr, defStyleRes)
-            .let { a ->
-                getAttrString(a, R.styleable.MaterialPreference_longClickPrompt)?.also { longClickPrompt = it }
-                getAttrString(a, R.styleable.MaterialPreference_longClickPromptMore)?.also { longClickPromptMore = it }
-                a.recycle()
-            }
+        obtainStyledAttrs(context, attrs, R.styleable.MaterialPreference, defStyleAttr, defStyleRes).let { a ->
+            getAttrString(a, R.styleable.MaterialPreference_longClickPrompt)?.also { longClickPrompt = it }
+            getAttrString(a, R.styleable.MaterialPreference_longClickPromptMore)?.also { longClickPromptMore = it }
+            a.recycle()
+        }
     }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
@@ -90,6 +88,6 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
     }
 
     @SuppressLint("RestrictedApi")
-    private fun getAttrString(a: TypedArray, index: Int): String? = TypedArrayUtils.getString(a, index, index)
+    private fun getAttrString(a: TypedArray, index: Int): String? = a.getString(index)
 
 }

@@ -3,7 +3,6 @@ package org.autojs.autojs.theme.preference
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
-import androidx.core.content.res.TypedArrayUtils
 import androidx.preference.PreferenceViewHolder
 import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs6.R
@@ -16,23 +15,28 @@ open class MaterialPreference : androidx.preference.Preference, LongClickablePre
     override var longClickPromptMore: CharSequence? = null
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
-        obtainStyledAttrs(context, attrs, R.styleable.MaterialPreference, defStyleAttr, defStyleRes)
-            .let { a ->
-                getAttrString(a, R.styleable.MaterialPreference_longClickPrompt)?.also { longClickPrompt = it }
-                getAttrString(a, R.styleable.MaterialPreference_longClickPromptMore)?.also { longClickPromptMore = it }
-                a.recycle()
-            }
+        init(context, attrs, defStyleAttr, defStyleRes)
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        init(context, attrs, defStyleAttr, 0)
+    }
 
-    constructor(context: Context, attrs: AttributeSet?) : this(
-        context, attrs, TypedArrayUtils.getAttr(
-            context, androidx.preference.R.attr.preferenceStyle, android.R.attr.preferenceStyle
-        )
-    )
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        init(context, attrs, 0, 0)
+    }
 
-    constructor(context: Context) : this(context, null)
+    constructor(context: Context) : super(context) {
+        init(context, null, 0, 0)
+    }
+
+    private fun init(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
+        obtainStyledAttrs(context, attrs, R.styleable.MaterialPreference, defStyleAttr, defStyleRes).let { a ->
+            getAttrString(a, R.styleable.MaterialPreference_longClickPrompt)?.also { longClickPrompt = it }
+            getAttrString(a, R.styleable.MaterialPreference_longClickPromptMore)?.also { longClickPromptMore = it }
+            a.recycle()
+        }
+    }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
@@ -43,8 +47,8 @@ open class MaterialPreference : androidx.preference.Preference, LongClickablePre
         return context.obtainStyledAttributes(set, styleableRes, defStyleAttr, defStyleRes)
     }
 
-    protected fun getAttrString(a: TypedArray, index: Int): String? = TypedArrayUtils.getString(a, index, index)
+    protected fun getAttrString(a: TypedArray, index: Int): String? = a.getString(index)
 
-    protected fun getAttrTextArray(a: TypedArray, index: Int): Array<CharSequence>? = TypedArrayUtils.getTextArray(a, index, index)
+    protected fun getAttrTextArray(a: TypedArray, index: Int): Array<CharSequence>? = a.getTextArray(index)
 
 }

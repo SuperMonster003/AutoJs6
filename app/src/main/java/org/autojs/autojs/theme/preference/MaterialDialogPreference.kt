@@ -2,25 +2,40 @@ package org.autojs.autojs.theme.preference
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.core.content.res.TypedArrayUtils
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs6.R
 
 open class MaterialDialogPreference : MaterialPreference {
 
-    private val mBuilder: MaterialDialog.Builder
-    private val mContext: Context
+    private var mBuilder: MaterialDialog.Builder? = null
+    private var mContext: Context? = null
 
     private lateinit var mDialog: MaterialDialog
 
-    protected var dialogTitle: CharSequence?
-    protected var dialogContent: CharSequence?
-    protected var neutralText: CharSequence?
-    protected var negativeText: CharSequence?
-    protected var neutralTextShort: CharSequence?
-    protected var positiveText: CharSequence?
+    protected var dialogTitle: CharSequence? = null
+    protected var dialogContent: CharSequence? = null
+    protected var neutralText: CharSequence? = null
+    protected var negativeText: CharSequence? = null
+    protected var neutralTextShort: CharSequence? = null
+    protected var positiveText: CharSequence? = null
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+        init(context, attrs, defStyleAttr, defStyleRes)
+    }
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        init(context, attrs, defStyleAttr, 0)
+    }
+
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        init(context, attrs, 0, 0)
+    }
+
+    constructor(context: Context) : super(context) {
+        init(context, null, 0, 0)
+    }
+
+    private fun init(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
         mContext = context
         mBuilder = MaterialDialog.Builder(context)
 
@@ -36,17 +51,6 @@ open class MaterialDialogPreference : MaterialPreference {
             }
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-
-    constructor(context: Context, attrs: AttributeSet?) : this(
-        context, attrs, TypedArrayUtils.getAttr(
-            context, android.R.attr.dialogPreferenceStyle,
-            android.R.attr.dialogPreferenceStyle,
-        )
-    )
-
-    constructor(context: Context) : this(context, null)
-
     override fun onClick() {
         getBuilder().build().also { mDialog = it }.show()
         super.onClick()
@@ -54,7 +58,7 @@ open class MaterialDialogPreference : MaterialPreference {
 
     protected fun getDialog() = mDialog
 
-    protected open fun getBuilder(): MaterialDialog.Builder = mBuilder
+    protected open fun getBuilder(): MaterialDialog.Builder = mBuilder!!
         .neutralColorRes(R.color.dialog_button_hint)
         .dismissListener { mDialog.recyclerView?.layoutManager = null }
         .onNeutral { _, _ -> onNeutral() }
