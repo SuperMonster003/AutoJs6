@@ -201,8 +201,15 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
                 super.onDrawerSlide(drawerView, slideOffset)
                 when {
-                    slideOffset > 0.5 -> setUpStatusBarAppearanceLightByNightMode()
-                    else -> setUpStatusBarAppearanceLightByThemeColor()
+                    // @Hint by SuperMonster003 on Mar 18, 2025.
+                    //  ! Changing this to a middle value (e.g., `slideOffset < 0.5`) would provide
+                    //  ! a better visual experience for the light/dark status bar transition,
+                    //  ! but it may cause slight stuttering during the drawer view sliding.
+                    //  ! zh-CN:
+                    //  ! 此处改为中间值 (如 `slideOffset < 0.5`) 会带来更好的通知栏亮暗色转换视觉体验,
+                    //  ! 但会造成抽屉视图滑动时出现些微卡顿.
+                    slideOffset < 1 -> setUpStatusBarAppearanceLightByThemeColor()
+                    else -> setUpStatusBarAppearanceLightByNightMode()
                 }
             }
 

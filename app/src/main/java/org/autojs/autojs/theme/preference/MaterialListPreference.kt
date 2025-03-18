@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.AttributeSet
-import androidx.core.content.res.TypedArrayUtils
 import androidx.preference.Preference.SummaryProvider
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
@@ -34,6 +33,22 @@ open class MaterialListPreference : MaterialDialogPreference {
         get() = mItemValues.takeIf { it.isNotEmpty() }?.toList()?.get(itemPrefIndex ?: mItemDefaultIndex)
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int, bundle: Bundle) : super(context, attrs, defStyleAttr, defStyleRes) {
+        init(context, attrs, defStyleAttr, defStyleRes, bundle)
+    }
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+        init(context, attrs, defStyleAttr, defStyleRes, Bundle())
+    }
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        init(context, attrs, defStyleAttr, 0, Bundle())
+    }
+
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        init(context, attrs, 0, 0, Bundle())
+    }
+
+    private fun init(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int, bundle: Bundle) {
         obtainStyledAttrs(context, attrs, R.styleable.MaterialListPreference, defStyleAttr, defStyleRes)
             .let { a ->
                 getAttrString(a, R.styleable.MaterialListPreference_dialogTitle)?.also { dialogTitle = it }
@@ -55,17 +70,6 @@ open class MaterialListPreference : MaterialDialogPreference {
             preference.entry?.takeUnless { TextUtils.isEmpty(it) }
         }
     }
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : this(context, attrs, defStyleAttr, defStyleRes, Bundle())
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-
-    constructor(context: Context, attrs: AttributeSet?) : this(
-        context, attrs, TypedArrayUtils.getAttr(
-            context, android.R.attr.dialogPreferenceStyle,
-            android.R.attr.dialogPreferenceStyle,
-        )
-    )
 
     constructor(context: Context) : this(context, null)
 
