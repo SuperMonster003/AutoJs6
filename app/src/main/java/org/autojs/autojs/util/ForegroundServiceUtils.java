@@ -50,7 +50,7 @@ public class ForegroundServiceUtils {
                 .setContentTitle(title)
                 .setContentText(content)
                 .setContentIntent(contentIntent)
-                .setSmallIcon(R.drawable.autojs6_material)
+                .setSmallIcon(R.drawable.autojs6_status_bar_icon)
                 .setAutoCancel(true)
                 .setOngoing(false)
                 .setSilent(true)
