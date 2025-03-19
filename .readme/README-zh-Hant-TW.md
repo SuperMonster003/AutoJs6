@@ -326,12 +326,12 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 
 #### Android Studio 準備
 
-下載 `Android Studio Ladybug Feature Drop | 2024.2.2` 版本 (按需選擇其一):
+下載 `Android Studio Meerkat | 2024.3.1` 版本 (按需選擇其一):
 
-- [android-studio-2024.2.2.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.13/android-studio-2024.2.2.13-windows.exe) (1.14 GB)
-- [android-studio-2024.2.2.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.13/android-studio-2024.2.2.13-windows.zip) (1.15 GB)
+- [android-studio-2024.3.1.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.13/android-studio-2024.3.1.13-windows.exe) (1.22 GB)
+- [android-studio-2024.3.1.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-windows.zip) (1.23 GB)
 
-> 注: 上述版本釋出時間為 2025 年 1 月 9 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
+> 注: 上述版本釋出時間為 2025 年 3 月 4 日. 如需下載其他版本, 或上述連結已失效, 可訪問 [Android Studio 發行版本歸檔](https://developer.android.com/studio/archive?hl=en) 頁面.
 
 安裝或解壓上述檔案, 執行 Android Studio 軟體 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -375,7 +375,7 @@ SDK Tools (SDK 工具) (位於右側視窗)
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `19`.
 
-截至 2025 年 3 月 3 日, AutoJs6 可支援 JDK 最高版本為 `23`.
+截至 2025 年 3 月 19 日, AutoJs6 可支援 JDK 最高版本為 `24`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

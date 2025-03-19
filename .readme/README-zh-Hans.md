@@ -158,6 +158,8 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 ###### 2025/01/03
 
+* `新增` ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法
+* `修复` Android 15 状态栏背景颜色与主题色不一致的问题
 * `修复` plugins.load 方法无法正常加载插件的问题 _[`issue #290`](http://issues.autojs6.com/290)_
 * `修复` dx 库在 Android 7.x 无法正常使用的问题 _[`issue #293`](http://issues.autojs6.com/293)_
 * `修复` ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修) _[`issue #298`](http://issues.autojs6.com/298)_
@@ -170,6 +172,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 精简打包应用模板 APK 文件大小
 * `优化` 打包页面支持 Pinyin 库选项
 * `优化` 打包应用主活动页面优化状态栏背景及文字颜色
+* `优化` 控件的文字及图标根据主题色亮度值自动切换合适的颜色
+* `优化` 部分控件主题色与背景色对比度过低时的视觉体验
+* `优化` 应用内页面导航栏设置为透明或半透明以增强视觉体验
+* `优化` UI 模式状态栏及导航栏默认为 `md_grey_50` 色值且设置为亮色模式
+* `优化` 长按应用主页 "文件" 标签可切换浮动按钮可见状态
+* `优化` 日志页面浮动按钮可见状态与列表滚动操作联动
 * `优化` 脚本项目配置文件 project.json 支持更多打包选项 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
 * `优化` 脚本项目配置文件 project.json 支持选项名称宽松匹配及别名兼容
 * `优化` APK 文件类型信息对话框增加文件大小与签名方案信息
@@ -310,12 +318,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Ladybug Feature Drop | 2024.2.2` 版本 (按需选择其一):
+下载 `Android Studio Meerkat | 2024.3.1` 版本 (按需选择其一):
 
-- [android-studio-2024.2.2.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.13/android-studio-2024.2.2.13-windows.exe) (1.14 GB)
-- [android-studio-2024.2.2.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.13/android-studio-2024.2.2.13-windows.zip) (1.15 GB)
+- [android-studio-2024.3.1.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.13/android-studio-2024.3.1.13-windows.exe) (1.22 GB)
+- [android-studio-2024.3.1.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-windows.zip) (1.23 GB)
 
-> 注: 上述版本发布时间为 2025 年 1 月 9 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2025 年 3 月 4 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -359,7 +367,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2025 年 3 月 3 日, AutoJs6 可支持 JDK 最高版本为 `23`.
+截至 2025 年 3 月 19 日, AutoJs6 可支持 JDK 最高版本为 `24`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

@@ -326,12 +326,12 @@
 
 #### تحضير Android Studio
 
-قم بتنزيل إصدار `Android Studio Ladybug Feature Drop | 2024.2.2` (حدد أحدها حسب الحاجة):
+قم بتنزيل إصدار `Android Studio Meerkat | 2024.3.1` (حدد أحدها حسب الحاجة):
 
-- [android-studio-2024.2.2.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.13/android-studio-2024.2.2.13-windows.exe) (1.14 GB)
-- [android-studio-2024.2.2.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.13/android-studio-2024.2.2.13-windows.zip) (1.15 GB)
+- [android-studio-2024.3.1.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.13/android-studio-2024.3.1.13-windows.exe) (1.22 GB)
+- [android-studio-2024.3.1.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-windows.zip) (1.23 GB)
 
-> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 9 January 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
+> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 4 March 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 قم بتثبيت أو فك ضغط الملف المذكور سابقًا، ثم قم بتشغيل برنامج Android Studio (مثل `"D:\android-studio\bin\studio64.exe"`).
 
@@ -375,7 +375,7 @@ SDK Tools  (أدوات SDK) (في النافذة اليمنى)
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `19`.
 
-اعتبارًا من 3 March 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `23`.
+اعتبارًا من 19 March 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 
