@@ -8,6 +8,8 @@
 
 ###### 2025/01/03
 
+* `新增` ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法
+* `修复` Android 15 状态栏背景颜色与主题色不一致的问题
 * `修复` plugins.load 方法无法正常加载插件的问题 _[`issue #290`](http://issues.autojs6.com/290)_
 * `修复` dx 库在 Android 7.x 无法正常使用的问题 _[`issue #293`](http://issues.autojs6.com/293)_
 * `修复` ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修) _[`issue #298`](http://issues.autojs6.com/298)_
@@ -20,6 +22,12 @@
 * `优化` 精简打包应用模板 APK 文件大小
 * `优化` 打包页面支持 Pinyin 库选项
 * `优化` 打包应用主活动页面优化状态栏背景及文字颜色
+* `优化` 控件的文字及图标根据主题色亮度值自动切换合适的颜色
+* `优化` 部分控件主题色与背景色对比度过低时的视觉体验
+* `优化` 应用内页面导航栏设置为透明或半透明以增强视觉体验
+* `优化` UI 模式状态栏及导航栏默认为 `md_grey_50` 色值且设置为亮色模式
+* `优化` 长按应用主页 "文件" 标签可切换浮动按钮可见状态
+* `优化` 日志页面浮动按钮可见状态与列表滚动操作联动
 * `优化` 脚本项目配置文件 project.json 支持更多打包选项 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
 * `优化` 脚本项目配置文件 project.json 支持选项名称宽松匹配及别名兼容
 * `优化` APK 文件类型信息对话框增加文件大小与签名方案信息
@@ -30,6 +38,7 @@
 * `依赖` 升级 Gradle 版本 8.12 -> 8.13
 * `依赖` 升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
 * `依赖` 升级 Androidx Recyclerview 版本 1.3.2 -> 1.4.0
+* `依赖` 升级 Androidx WebKit 版本 1.12.1 -> 1.13.0
 * `依赖` 升级 Pinyin4j 版本 2.5.0 -> 2.5.1
 
 # v6.6.1

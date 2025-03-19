@@ -147,7 +147,7 @@ pluginManagement {
             val androidStudio = object : Platform(
                 name = "AndroidStudio", vendor = "Google",
                 androidVersionMap = mapOf(
-                    "2024.3" to "8.9.0-alpha09", /* Jan 13, 2025. */
+                    "2024.3" to "8.9.0", /* Mar 19, 2025. */
                     "2024.2" to "8.8.0", /* Jan 13, 2025. */
                     "2024.1" to "8.6.0", /* Aug 30, 2024. */
                     "2023.3" to "8.5.0-alpha02", /* Mar 28, 2024. */
@@ -176,7 +176,7 @@ pluginManagement {
                     "2022.1" to "E", /* May 3, 2023. */
                 ),
                 codenameMap = mapOf(
-                    "M" to "Meercat", /* Born on Nov 12, 2024. */
+                    "M" to "Meerkat", /* Born on Nov 12, 2024. */
                     "L" to "Ladybug", /* Born on Jul 15, 2024. */
                     "K" to "Koala", /* Born on Mar 19, 2024. */
                     "J" to "Jellyfish", /* Born on Dec 28, 2023. */
@@ -305,6 +305,8 @@ pluginManagement {
         )
 
         val kspVersionMap = mapOf(
+            "2.1.20-RC3" to "1.0.31", /* Mar 15, 2025. */
+            "2.1.20-RC2" to "1.0.31", /* Mar 7, 2025. */
             "2.1.20-RC" to "1.0.31", /* Feb 28, 2025. */
             "2.1.20-Beta2" to "1.0.30", /* Feb 15, 2025. */
             "2.1.20-Beta1" to "1.0.29", /* Dec 25, 2024. */

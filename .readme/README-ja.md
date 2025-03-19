@@ -326,12 +326,12 @@ AutoJs6 オープンソース プロジェクトのデバッグや開発が必�
 
 #### Android Studioの準備
 
-`Android Studio Ladybug Feature Drop | 2024.2.2` バージョンをダウンロードしてください (いずれかを選択)。:
+`Android Studio Meerkat | 2024.3.1` バージョンをダウンロードしてください (いずれかを選択)。:
 
-- [android-studio-2024.2.2.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.2.2.13/android-studio-2024.2.2.13-windows.exe) (1.14 GB)
-- [android-studio-2024.2.2.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.2.2.13/android-studio-2024.2.2.13-windows.zip) (1.15 GB)
+- [android-studio-2024.3.1.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.13/android-studio-2024.3.1.13-windows.exe) (1.22 GB)
+- [android-studio-2024.3.1.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-windows.zip) (1.23 GB)
 
-> 注: 上述バージョンのリリース日は 2025 年 1 月 9 日 です。その他のバージョンをダウンロードするか、上記のリンクが失効している場合は、[Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください。.
+> 注: 上述バージョンのリリース日は 2025 年 3 月 4 日 です。その他のバージョンをダウンロードするか、上記のリンクが失効している場合は、[Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください。.
 
 上記のファイルをインストールまたは解凍し、Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -375,7 +375,7 @@ SDK Tools (SDK ツール) (右側のウィンドウにあります)
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で、それ以下のバージョンは推奨されませんが、最低でも `19` の使用を推奨します。.
 
-2025 年 3 月 3 日 現在、AutoJs6がサポートする最大のJDKバージョンは `23` です。.
+2025 年 3 月 19 日 現在、AutoJs6がサポートする最大のJDKバージョンは `24` です。.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合、この節の内容をスキップできます。.
 

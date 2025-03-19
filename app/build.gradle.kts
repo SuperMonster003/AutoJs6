@@ -954,6 +954,7 @@ class Versions(filePath: String) {
             21 to "8.5",
             22 to "8.8",
             23 to "8.10",
+            24 to "8.11", /* Unofficial as of Mar 19, 2025. */
         )
 
         fun parseVersion(version: String) = version.split(Regex("[.-]")).map { it.toIntOrNull() ?: 0 }
