@@ -82,6 +82,12 @@
             app:itemDefaultKey="@string/key_root_mode_auto_detect"
             app:longClickPrompt="@string/description_root_mode_preference" />
 
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_file_explorer">
+
         <org.autojs.autojs.ui.settings.HiddenFilesPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_hidden_files"
@@ -90,6 +96,15 @@
             app:itemKeys="@array/keys_hidden_files"
             app:itemDefaultKey="@string/default_key_hidden_files"
             app:longClickPrompt="@string/description_hidden_files_preference" />
+
+        <org.autojs.autojs.ui.settings.FileExtensionsPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_file_extensions"
+            app:title="@string/text_file_extensions_title"
+            app:itemValues="@array/values_file_extensions"
+            app:itemKeys="@array/keys_file_extensions"
+            app:itemDefaultKey="@string/default_key_file_extensions"
+            app:longClickPrompt="@string/description_file_extensions_preference" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

@@ -69,7 +69,7 @@
     <string name="legacy_text_download_failed">Download failed</string>
     <string name="legacy_text_download_url">Download</string>
     <string name="legacy_text_do_not_ask_again_for_this_version">Do not ask again for this version</string>
-    <string name="legacy_text_do_not_remind_again">Don\'t show again</string>
+    <string name="legacy_text_do_not_remind_again">Do not show again</string>
     <string name="legacy_text_drawer_close">Close drawer</string>
     <string name="legacy_text_drawer_open">Open drawer</string>
     <string name="legacy_text_edit">Edit</string>

@@ -142,8 +142,20 @@ object Pref {
         )
 
     @JvmStatic
-    val isHiddenFilesShow
+    val isHiddenFilesShown
         get() = getString(R.string.key_hidden_files, key(R.string.default_key_hidden_files)) == key(R.string.key_hidden_files_show)
+
+    @JvmStatic
+    val isFileExtensionsShownForAll
+        get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_show_all)
+
+    @JvmStatic
+    val isFileExtensionsShownForAllButExecutable
+        get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_show_all_but_executable)
+
+    @JvmStatic
+    val isFileExtensionsHidden
+        get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_not_show)
 
     @JvmStatic
     val isRecordToastEnabled

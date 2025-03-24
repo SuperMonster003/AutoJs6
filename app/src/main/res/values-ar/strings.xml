@@ -487,6 +487,7 @@
     <string name="text_failed_to_write_file">فشل في كتابة الملف</string>
     <string name="text_file">ملف</string>
     <string name="text_file_exists">ملف موجود بالفعل</string>
+    <string name="text_file_explorer">مستكشف الملفات</string>
     <string name="text_file_name">اسم الملف</string>
     <string name="text_file_not_exists">ملف غير موجود</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">الملف \"%1$s\" ليس برنامجًا نصيًا قابلًا للتنفيذ</string>
@@ -895,5 +896,13 @@
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">اسم الحزمة (جارٍ الحساب...)</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">اسم الإصدار (جارٍ الحساب...)</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">رمز الإصدار (جارٍ الحساب...)</string>
+    <string name="text_file_extensions_title">File extensions</string>
+    <string name="entry_file_extensions_not_show">Hide all file extensions</string>
+    <string name="entry_file_extensions_show_all">Show all file extensions</string>
+    <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
+    <string name="text_switch_to_new_layout">Switch to new layout</string>
+    <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
+    <string name="text_search_color">Search color</string>
+    <string name="text_locate_current_color">Locate current color</string>
 
 </resources>

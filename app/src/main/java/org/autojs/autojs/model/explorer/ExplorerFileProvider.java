@@ -41,7 +41,7 @@ public class ExplorerFileProvider implements ExplorerProvider {
     }
 
     protected Observable<PFile> listFiles(PFile directory) {
-        boolean isShowHidden = Pref.isHiddenFilesShow();
+        boolean isShowHidden = Pref.isHiddenFilesShown();
         return Observable.just(directory)
                 .flatMap(dir -> {
                     PFile[] files;

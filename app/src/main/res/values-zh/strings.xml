@@ -38,6 +38,7 @@
     <string name="description_documentation_source_preference">本地文档: AutoJs6 内置文件作为文档来源, 无需网络连接, 随 AutoJs6 应用更新而发生内容变动.\n在线文档: 使用 GitHub 网页作为文档来源, 需网络连接, 可随时保持文档内容为最新.\n\n注: 为最大化在线文档的阅读体验, 建议使用桌面显示器等宽屏显示设备阅读.\n注: 截至 6.2.0 版本, 文档尚处于初步编写阶段, 大部分内容尚未完成编写或更新.</string>
     <string name="description_documentation_source_preference_more">文档页面的深色主题支持需要满足以下条件:\n1. AutoJs6 开启夜间模式\n2. WebView (或 Google Chrome 等浏览器) 版本要求:\n- API 级别 29 (安卓 10) [Q] 及以上: 版本不低于 76\n- API 级别 28 (安卓 9) [P] 及以下: 版本不低于 105</string>
     <string name="description_extending_js_build_in_objects">扩展 JavaScript 内置对象可以增加代码灵活性并实现更丰富的功能, 但可能造成冲突甚至破坏.\n选项开启后所有脚本均默认启用内置扩展.\n内置扩展往往是不安全的, 除非明确了解内置扩展的原理及风险, 否则不建议启用.\n选项关闭后, 仍然可以通过 plugins 全局对象启用内置扩展, 详见项目文档.</string>
+    <string name="description_file_extensions_preference">用于设置是否在 AutoJs6 文件管理器中显示文件扩展名.</string>
     <string name="description_hidden_files_preference">用于设置是否在 AutoJs6 文件管理器中显示隐藏文件和文件夹 (通常以 \".\" 开头).</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">用于当 AutoJs6 位于前台时使设备屏幕保持常亮.\n如需在 AutoJs6 应用的所有页面中, 仅在主页时保持设备屏幕常亮, 可选择 \"仅限主页\" 选项.</string>
     <string name="description_launcher_shortcuts">快捷方式可以在 AutoJs6 中执行特定操作, 用户可以在启动器中显示这些快捷方式, 并快速开始某些任务或启动某个活动, 如阅读 AutoJs6 应用文档, 启动 AutoJs6 设置页面等.</string>
@@ -481,6 +482,7 @@
     <string name="text_failed_to_write_file">文件写入失败</string>
     <string name="text_file">文件</string>
     <string name="text_file_exists">文件已存在</string>
+    <string name="text_file_explorer">文件管理器</string>
     <string name="text_file_name">文件名</string>
     <string name="text_file_not_exists">文件不存在</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">文件 \"%1$s\" 非可执行脚本</string>
@@ -892,5 +894,13 @@
     <string name="apk_info_file_size">文件大小</string>
     <string name="apk_info_signature_scheme">签名方案</string>
     <string name="dialog_button_file_information">文件信息</string>
+    <string name="text_file_extensions_title">文件扩展名</string>
+    <string name="entry_file_extensions_not_show">隐藏所有文件扩展名</string>
+    <string name="entry_file_extensions_show_all">显示所有文件扩展名</string>
+    <string name="entry_file_extensions_show_all_but_executable">显示文件扩展名 (*.js / *.auto 除外)</string>
+    <string name="text_switch_to_new_layout">切换至新布局</string>
+    <string name="text_switch_to_legacy_layout">切换至传统布局</string>
+    <string name="text_search_color">搜索颜色</string>
+    <string name="text_locate_current_color">定位当前颜色</string>
 
 </resources>

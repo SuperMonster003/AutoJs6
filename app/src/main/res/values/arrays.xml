@@ -94,6 +94,18 @@
         <item>@string/entry_hidden_files_show</item>
     </string-array>
 
+    <string-array name="keys_file_extensions">
+        <item>@string/key_file_extensions_not_show</item>
+        <item>@string/key_file_extensions_show_all</item>
+        <item>@string/key_file_extensions_show_all_but_executable</item>
+    </string-array>
+
+    <string-array name="values_file_extensions">
+        <item>@string/entry_file_extensions_not_show</item>
+        <item>@string/entry_file_extensions_show_all</item>
+        <item>@string/entry_file_extensions_show_all_but_executable</item>
+    </string-array>
+
     <string-array name="keys_editor_pinch_to_zoom_strategy">
         <item>@string/key_editor_pinch_to_zoom_change_text_size</item>
         <item>@string/key_editor_pinch_to_zoom_scale_view</item>

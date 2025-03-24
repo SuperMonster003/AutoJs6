@@ -485,6 +485,7 @@
     <string name="text_failed_to_write_file">檔案寫入失敗</string>
     <string name="text_file">檔案</string>
     <string name="text_file_exists">檔案已存在</string>
+    <string name="text_file_explorer">檔案管理器</string>
     <string name="text_file_name">檔名</string>
     <string name="text_file_not_exists">檔案不存在</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">檔案 \"%1$s\" 非可執行指令碼</string>
@@ -893,5 +894,13 @@
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">包名 (計算中...)</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">版本名稱 (計算中...)</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">版本號 (計算中...)</string>
+    <string name="text_file_extensions_title">File extensions</string>
+    <string name="entry_file_extensions_not_show">Hide all file extensions</string>
+    <string name="entry_file_extensions_show_all">Show all file extensions</string>
+    <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
+    <string name="text_switch_to_new_layout">Switch to new layout</string>
+    <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
+    <string name="text_search_color">Search color</string>
+    <string name="text_locate_current_color">Locate current color</string>
 
 </resources>
