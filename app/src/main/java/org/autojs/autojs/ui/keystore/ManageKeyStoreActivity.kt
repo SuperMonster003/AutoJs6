@@ -23,6 +23,7 @@ import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.keystore.NewKeyStoreDialog.NewKeyStoreConfigs
 import org.autojs.autojs.ui.viewmodel.KeyStoreViewModel
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityManageKeyStoreBinding
 import java.io.File
@@ -118,7 +119,7 @@ class ManageKeyStoreActivity : BaseActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_manage_key_store, menu)
-        ViewUtils.setToolbarMenuIconsColorByThemeColorLuminance(this)
+        binding.toolbar.setMenuIconsColorByThemeColorLuminance(this)
         return true
     }
 

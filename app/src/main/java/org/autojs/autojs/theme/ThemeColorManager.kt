@@ -78,10 +78,10 @@ object ThemeColorManager {
     }
 
     @JvmStatic
-    fun getDayOrNightColorByLuminance(context: Context): Int = context.getColor(getDayOrNightColorResByLuminance())
+    fun getDayOrNightColorByLuminance(context: Context): Int = ViewUtils.getDayOrNightColorByLuminance(context, colorPrimary)
 
     @JvmStatic
-    fun getDayOrNightColorResByLuminance(): Int = if (isThemeColorLuminanceLight()) R.color.day else R.color.night
+    fun getDayOrNightColorResByLuminance(): Int = ViewUtils.getDayOrNightColorResByLuminance(colorPrimary)
 
     private object BackgroundColorManager {
 

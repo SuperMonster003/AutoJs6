@@ -4,18 +4,18 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.MtActivityColorSelectBinding
+import org.autojs.autojs6.databinding.MtActivityColorSelectLegacyBinding
 
 /**
  * Created by SuperMonster003 on Mar 20, 2025.
  */
-class ColorSelectActivity : ColorSelectBaseActivity() {
+class ColorSelectLegacyActivity : ColorSelectBaseActivity() {
 
-    private lateinit var binding: MtActivityColorSelectBinding
+    private lateinit var binding: MtActivityColorSelectLegacyBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MtActivityColorSelectBinding.inflate(layoutInflater).also {
+        MtActivityColorSelectLegacyBinding.inflate(layoutInflater).also {
             binding = it
             setContentView(it.root)
             setUpToolbar(it.toolbar)
@@ -25,21 +25,15 @@ class ColorSelectActivity : ColorSelectBaseActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_color_select, menu)
+        menuInflater.inflate(R.menu.menu_color_select_legacy, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_toggle_color_select_layout -> {
-                isLegacyLayout = true
+                isLegacyLayout = false
                 startActivity(this)
-            }
-            R.id.action_locate_current_color -> {
-
-            }
-            R.id.action_search_color -> {
-
             }
         }
         return true

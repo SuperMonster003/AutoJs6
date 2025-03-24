@@ -18,7 +18,7 @@ import org.autojs.autojs6.databinding.ToolbarMenuItemBinding
  */
 class ToolbarMenuItem : LinearLayout {
 
-    private lateinit var mImageView: ImageView
+    private var mImageView: ImageView
     private var mTextView: TextView
 
     private val enabledDrawable by lazy {

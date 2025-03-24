@@ -1,6 +1,5 @@
 package org.autojs.autojs.theme.preference
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.TypedArray
@@ -39,7 +38,6 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
         init(context, attrs, defStyleAttr, 0)
     }
 
-    @SuppressLint("RestrictedApi")
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         init(context, attrs, 0, 0)
     }
@@ -87,7 +85,6 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
         return context.obtainStyledAttributes(set, styleableRes, defStyleAttr, defStyleRes)
     }
 
-    @SuppressLint("RestrictedApi")
     private fun getAttrString(a: TypedArray, index: Int): String? = a.getString(index)
 
 }

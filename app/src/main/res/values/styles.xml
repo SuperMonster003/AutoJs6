@@ -97,11 +97,14 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
+    </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
         <item name="android:textColorPrimary">@color/day_full</item>
         <item name="android:textColorSecondary">@color/colorAccent</item>
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
     </style>
 
     <style name="MtAppTheme.FullScreen" parent="Theme.AppCompat.DayNight.NoActionBar">
@@ -112,9 +115,11 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="MtAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
+    <style name="MtAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
+    </style>
 
-    <style name="MtAppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+    <style name="MtAppTheme.PopupOverlay" parent="OverflowMenu">
         <item name="android:textColorPrimary">@color/day_full</item>
     </style>
 
@@ -144,18 +149,18 @@
     </style>
 
     <style name="PopupMenuTheme" parent="AppTheme.PopupOverlay">
-        <item name="android:textColor">@color/day_night</item>
-        <item name="android:tint">@color/day_night</item>
+        <item name="android:textColor">@color/day_night_full</item>
+        <item name="android:tint">@color/day_night_full</item>
     </style>
 
     <style name="PopupMenuThemeLight" parent="AppTheme.PopupOverlay">
-        <item name="android:textColor">@color/day</item>
-        <item name="android:tint">@color/day</item>
+        <item name="android:textColor">@color/day_full</item>
+        <item name="android:tint">@color/day_full</item>
     </style>
 
     <style name="PopupMenuThemeDark" parent="AppTheme.PopupOverlay">
-        <item name="android:textColor">@color/dusk</item>
-        <item name="android:tint">@color/dusk</item>
+        <item name="android:textColor">@color/night_full</item>
+        <item name="android:tint">@color/night_full</item>
     </style>
 
     <style name="SearchViewActionBar" parent="@style/Widget.AppCompat.SearchView.ActionBar" />
@@ -164,8 +169,8 @@
 
     <style name="TextAppearanceEditorTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">@dimen/editor_title_text_size</item>
-        <item name="android:maxLines">2</item>
-        <item name="android:ellipsize">middle</item>
+        <item name="maxLines">2</item>
+        <item name="paddingStart">0dp</item>
     </style>
 
     <style name="TextAppearanceMainTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
@@ -179,6 +184,8 @@
     </style>
 
     <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:textColor">@color/day_night_full</item>
+        <item name="android:itemBackground">@color/item_background</item>
         <item name="android:windowDisablePreview">true</item>
         <item name="overlapAnchor">false</item>
         <item name="android:dropDownVerticalOffset">5.0dp</item>

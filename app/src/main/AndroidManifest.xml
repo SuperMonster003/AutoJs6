@@ -258,8 +258,7 @@
 
         <activity android:name="org.autojs.autojs.ui.project.ProjectConfigActivity" />
 
-        <activity
-            android:name="org.autojs.autojs.ui.keystore.ManageKeyStoreActivity" />
+        <activity android:name="org.autojs.autojs.ui.keystore.ManageKeyStoreActivity" />
 
         <activity
             android:name="org.autojs.autojs.ui.log.LogActivity"
@@ -573,6 +572,10 @@
         <!--        <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />-->
         <!--    </intent-filter>-->
         <!--</receiver>-->
+
+        <activity
+            android:name="org.autojs.autojs.theme.app.ColorSelectLegacyActivity"
+            android:theme="@style/MtAppTheme.FullScreen" />
 
         <activity
             android:name="org.autojs.autojs.theme.app.ColorSelectActivity"
