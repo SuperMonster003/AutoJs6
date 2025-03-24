@@ -486,6 +486,7 @@
     <string name="text_failed_to_write_file">Не удалось записать файл</string>
     <string name="text_file">Файл</string>
     <string name="text_file_exists">Файл уже существует</string>
+    <string name="text_file_explorer">Проводник файлов</string>
     <string name="text_file_name">Имя файла</string>
     <string name="text_file_not_exists">Файл не существует</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">Файл \"%1$s\" не является исполняемым скриптом</string>
@@ -894,5 +895,13 @@
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Имя пакета (Вычисление...)</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Название версии (Вычисление...)</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Код версии (Вычисление...)</string>
+    <string name="text_file_extensions_title">File extensions</string>
+    <string name="entry_file_extensions_not_show">Hide all file extensions</string>
+    <string name="entry_file_extensions_show_all">Show all file extensions</string>
+    <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
+    <string name="text_switch_to_new_layout">Switch to new layout</string>
+    <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
+    <string name="text_search_color">Search color</string>
+    <string name="text_locate_current_color">Locate current color</string>
 
 </resources>

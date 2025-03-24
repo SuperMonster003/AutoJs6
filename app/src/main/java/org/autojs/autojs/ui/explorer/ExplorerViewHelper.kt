@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.explorer
 
 import android.content.Context
+import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
@@ -22,11 +23,20 @@ object ExplorerViewHelper {
             item is ExplorerSamplePage && item.isRoot -> context.getString(R.string.text_sample)
             item is ExplorerPage -> item.getName()
             else -> when (item.type) {
-                FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> when (item) {
-                    is ExplorerFileItem -> item.file.simplifiedName
-                    else -> getNameWithoutExtension(item.name)
+                FileUtils.TYPE.JAVASCRIPT, FileUtils.TYPE.AUTO -> when {
+                    Pref.isFileExtensionsShownForAll -> when (item) {
+                        is ExplorerFileItem -> item.file.name
+                        else -> item.name
+                    }
+                    else -> when (item) {
+                        is ExplorerFileItem -> item.file.simplifiedName
+                        else -> getNameWithoutExtension(item.name)
+                    }
                 }
-                else -> item.name
+                else -> when {
+                    Pref.isFileExtensionsHidden -> getNameWithoutExtension(item.name)
+                    else -> item.name
+                }
             }
         }
     }

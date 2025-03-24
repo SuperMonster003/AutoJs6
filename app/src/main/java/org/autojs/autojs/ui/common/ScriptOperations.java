@@ -382,10 +382,7 @@ public class ScriptOperations {
                 .negativeText(R.string.text_cancel)
                 .positiveText(R.string.text_ok)
                 .positiveColorRes(R.color.dialog_button_caution)
-                .onPositive((dialog, which) -> {
-                    deleteWithoutConfirm(scriptFile);
-                    Explorers.workspace().refreshAll();
-                })
+                .onPositive((dialog, which) -> deleteWithoutConfirm(scriptFile))
                 .build()
                 .show();
     }

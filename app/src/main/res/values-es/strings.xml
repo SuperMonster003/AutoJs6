@@ -486,6 +486,7 @@
     <string name="text_failed_to_write_file">Fallo al escribir el archivo</string>
     <string name="text_file">Archivo</string>
     <string name="text_file_exists">El archivo ya existe</string>
+    <string name="text_file_explorer">Explorador de archivos</string>
     <string name="text_file_name">Nombre del archivo</string>
     <string name="text_file_not_exists">El archivo no existe</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">El archivo \"%1$s\" no es un script ejecutable</string>
@@ -894,5 +895,13 @@
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Nombre del paquete (Calculando...)</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Nombre de la versión (Calculando...)</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Código de la versión (Calculando...)</string>
+    <string name="text_file_extensions_title">File extensions</string>
+    <string name="entry_file_extensions_not_show">Hide all file extensions</string>
+    <string name="entry_file_extensions_show_all">Show all file extensions</string>
+    <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
+    <string name="text_switch_to_new_layout">Switch to new layout</string>
+    <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
+    <string name="text_search_color">Search color</string>
+    <string name="text_locate_current_color">Locate current color</string>
 
 </resources>

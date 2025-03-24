@@ -60,6 +60,7 @@
     <string name="current_available_abi_options">Current available \"abi\" options</string>
     <string name="default_key_editor_pinch_to_zoom_strategy" translatable="false">@string/key_editor_pinch_to_zoom_change_text_size</string>
     <string name="default_key_hidden_files" translatable="false">@string/key_hidden_files_not_show</string>
+    <string name="default_key_file_extensions" translatable="false">@string/key_file_extensions_show_all_but_executable</string>
     <string name="default_key_keep_screen_on_when_in_foreground" translatable="false">@string/key_keep_screen_on_when_in_foreground_disabled</string>
     <string name="default_key_root_record_out_file_type" translatable="false">@string/key_root_record_out_file_type_binary</string>
     <string name="default_main_file_name" translatable="false">main.js</string>
@@ -79,7 +80,7 @@
     <string name="description_documentation_source_preference">Local docs: Using AutoJs6 build-in files as documentation sources, no network connection required. The content changes as AutoJs6 is updated.\nOnline docs: Using GitHub pages as documentation sources, requiring network connection. The content is always up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
     <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
     <string name="description_extending_js_build_in_objects">Extending JavaScript built-in objects can increase code flexibility and enable richer functionality, but can cause conflicts and even breakage.\nAll scripts have built-in extensions enabled by default when the option is turned on.\nBuilt-in extensions are often insecure, and are not recommended unless the principles and risks of built-in extensions are clearly understood.\nWhen the option is turned off, built-in extensions can still be enabled through the plugins global object, as described in the project documentation.</string>
-    <string name="description_hidden_files_preference">Used to set whether or not to show hidden files and folders (usually starting with \".\") in AutoJs6 file explorer.</string>
+    <string name="description_hidden_files_preference">Used to set whether to show hidden files and folders (usually starting with \".\") in AutoJs6 file explorer.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Preference for keeping the device\'s screen turned on and bright when AutoJs6 is in the foreground.\nTo make it happen only on the homepage among all pages of the AutoJs6 application, choose \"homepage only\" option.</string>
     <string name="description_launcher_shortcuts">Shortcuts can perform specific actions in AutoJs6. Users can display these shortcuts in a supported launcher and quickly start some tasks or launch an activity, such as reading AutoJs6 application documentation, launching AutoJs6 settings page, and so on.</string>
     <string name="description_manage_ignored_updates_preference">Click to view or manage list items.\nLong press to remove the list item.</string>
@@ -135,7 +136,7 @@
     <string name="entry_editor_pinch_to_zoom_change_text_size">Change text size</string>
     <string name="entry_editor_pinch_to_zoom_disable">Disable</string>
     <string name="entry_editor_pinch_to_zoom_scale_view">Scale view</string>
-    <string name="entry_hidden_files_not_show">Don\'t show hidden files or folders</string>
+    <string name="entry_hidden_files_not_show">Do not show hidden files or folders</string>
     <string name="entry_hidden_files_show">Show hidden files and folders</string>
     <string name="entry_keep_screen_on_when_in_foreground_all_pages">All pages</string>
     <string name="entry_keep_screen_on_when_in_foreground_disabled">Disabled</string>
@@ -303,6 +304,7 @@
     <string name="key_change_working_dir" translatable="false">key_$_change_working_dir</string>
     <string name="key_check_for_updates" translatable="false">key_$_check_for_updates</string>
     <string name="key_client_socket_normally_closed" translatable="false">key_$_client_socket_normally_closed</string>
+    <string name="key_color_select_activity_legacy_layout" translatable="false">key_$_color_select_activity_legacy_layout</string>
     <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
     <string name="key_dialog_foreground_svc" translatable="false">key_$_dialog_foreground_svc</string>
     <string name="key_dialog_log_entries_exported" translatable="false">key_$_dialog_log_entries_exported</string>
@@ -322,6 +324,10 @@
     <string name="key_enable_a11y_service_with_secure_settings" translatable="false">key_$_enable_a11y_service_with_secure_settings</string>
     <string name="key_enable_observe_key" translatable="false">key_$_enable_observe_key</string>
     <string name="key_extending_js_build_in_objects" translatable="false">key_$_extending_js_build_in_objects</string>
+    <string name="key_file_extensions" translatable="false">key_$_file_extensions</string>
+    <string name="key_file_extensions_not_show" translatable="false">key_$_file_extensions_not_show</string>
+    <string name="key_file_extensions_show_all" translatable="false">key_$_file_extensions_show_all</string>
+    <string name="key_file_extensions_show_all_but_executable" translatable="false">key_$_file_extensions_show_all_but_executable</string>
     <string name="key_floating_menu_shown" translatable="false">key_$_floating_menu_shown</string>
     <string name="key_foreground_service" translatable="false">key_$_foreground_service</string>
     <string name="key_gesture_observing" translatable="false">key_$_gesture_observing</string>
@@ -619,7 +625,7 @@
     <string name="text_disposable_task">Disposable task</string>
     <string name="text_disposable_task_time_before_now">Time should be later than now</string>
     <string name="text_do_not_ask_again_for_this_version">Don’t ask again for this version</string>
-    <string name="text_do_not_show_again">Don\'t show again</string>
+    <string name="text_do_not_show_again">Do not show again</string>
     <string name="text_documentation">Documents</string>
     <string name="text_documentation_source">Documentation source</string>
     <string name="text_done">Done</string>
@@ -682,6 +688,7 @@
     <string name="text_failed_to_write_file">Failed to write file</string>
     <string name="text_file">File</string>
     <string name="text_file_exists">File already exists</string>
+    <string name="text_file_explorer">File explorer</string>
     <string name="text_file_name">File name</string>
     <string name="text_file_not_exists">File doesn\'t exist</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">File \"%1$s\" is not an executable script</string>
@@ -1121,8 +1128,18 @@
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Version code (computing...)</string>
     <string name="default_build_apk_version_name" translatable="false">1.0.0</string>
     <string name="default_build_apk_version_code" translatable="false">1</string>
+
     <string name="apk_info_file_size">File size</string>
     <string name="apk_info_signature_scheme">Signature</string>
     <string name="dialog_button_file_information">File info</string>
+    <string name="text_file_extensions_title">File extensions</string>
+    <string name="entry_file_extensions_not_show">Hide all file extensions</string>
+    <string name="entry_file_extensions_show_all">Show all file extensions</string>
+    <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
+    <string name="description_file_extensions_preference">Used to set whether to show file extensions in AutoJs6 file explorer.</string>
+    <string name="text_switch_to_new_layout">Switch to new layout</string>
+    <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
+    <string name="text_search_color">Search color</string>
+    <string name="text_locate_current_color">Locate current color</string>
 
 </resources>

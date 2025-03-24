@@ -3,7 +3,8 @@
     "v6.6.2": {
       "released_date": "2025/01/03",
       "feature": [
-        "ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法"
+        "ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法",
+        "设置页面增加 \"文件扩展名\" 设置选项"
       ],
       "fix": [
         "Android 15 状态栏背景颜色与主题色不一致的问题",

@@ -487,6 +487,7 @@
     <string name="text_failed_to_write_file">파일을 쓰지 못했습니다</string>
     <string name="text_file">파일</string>
     <string name="text_file_exists">존재하는 파일입니다</string>
+    <string name="text_file_explorer">파일 탐색기</string>
     <string name="text_file_name">파일 이름</string>
     <string name="text_file_not_exists">파일이 존재하지 않는다</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">\"%1$s\" 파일은 실행 가능한 스크립트가 아닙니다</string>
@@ -895,5 +896,13 @@
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">패키지 이름 (계산 중...)</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">버전 이름 (계산 중...)</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">버전 코드 (계산 중...)</string>
+    <string name="text_file_extensions_title">File extensions</string>
+    <string name="entry_file_extensions_not_show">Hide all file extensions</string>
+    <string name="entry_file_extensions_show_all">Show all file extensions</string>
+    <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
+    <string name="text_switch_to_new_layout">Switch to new layout</string>
+    <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
+    <string name="text_search_color">Search color</string>
+    <string name="text_locate_current_color">Locate current color</string>
 
 </resources>
