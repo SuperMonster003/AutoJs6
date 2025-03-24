@@ -6,10 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.util.Log
+import android.util.TypedValue
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
+import android.view.ViewTreeObserver
+import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
@@ -22,10 +28,11 @@ import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.file.TmpScriptFiles
+import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.Observers
-import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
@@ -37,7 +44,7 @@ import java.io.IOException
  */
 open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyActivity {
 
-    private var mToolbar: Toolbar? = null
+    private var mToolbar: ThemeColorToolbar? = null
     private val mMediator = OnActivityResultDelegate.Mediator()
 
     private lateinit var mEditorView: EditorView
@@ -51,7 +58,9 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         super.onCreate(savedInstanceState)
 
         val binding = ActivityEditBinding.inflate(layoutInflater).also { setContentView(it.root) }
-        mToolbar = findViewById(R.id.toolbar)
+        mToolbar = findViewById<ThemeColorToolbar>(R.id.toolbar).apply {
+            setTitleTextAppearance(this@EditActivity, R.style.TextAppearanceEditorTitle)
+        }
         mEditorView = binding.editorView.apply {
             handleIntent(intent)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -62,12 +71,97 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         setUpToolbar()
     }
 
-    override fun onWindowStartingActionMode(callback: ActionMode.Callback): ActionMode? {
-        return super.onWindowStartingActionMode(callback)
-    }
+    // @Created by JetBrains AI Assistant on Mar 24, 2025.
+    private fun adjustTitleTextView(textView: TextView) {
+        textView.post {
+            // 可用宽度, 排除内边距
+            val availableWidth = textView.width - textView.paddingLeft - textView.paddingRight
+            if (availableWidth <= 0) return@post
 
-    override fun onWindowStartingActionMode(callback: ActionMode.Callback, type: Int): ActionMode? {
-        return super.onWindowStartingActionMode(callback, type)
+            val textStr = textView.text.toString()
+            val isNonAscii = textStr.any { it.code >= 0x80 }
+            val paint: TextPaint = textView.paint
+            val originTextSizePx = textView.textSize
+            val step = resources.getDimension(R.dimen.editor_title_text_size_step)
+
+            /* ---------- 尝试一行显示 (单行) ---------- */
+
+            textView.isSingleLine = true
+            textView.maxLines = 1
+
+            var oneLineTextSizePx = originTextSizePx
+            val minOneLineSizePx = resources.getDimension(R.dimen.editor_title_min_text_size_single_line)
+
+            // 测量一行文字宽度
+            paint.textSize = oneLineTextSizePx
+            var measuredWidth = paint.measureText(textStr)
+            // 当文字宽度超出可用宽度并且字号还高于下限的时候逐步降低字号
+            while (measuredWidth > availableWidth && oneLineTextSizePx > minOneLineSizePx) {
+                oneLineTextSizePx -= step
+                paint.textSize = oneLineTextSizePx
+                measuredWidth = paint.measureText(textStr)
+            }
+
+            // 如果一行能够显示文字, 则直接应用修改
+            if (measuredWidth <= availableWidth) {
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, oneLineTextSizePx)
+                return@post
+            }
+
+            /* ---------- 切换为两行显示 ---------- */
+
+            textView.isSingleLine = false
+            textView.maxLines = 2
+
+            // 重置字号
+            var twoLineTextSize = when (isNonAscii) {
+                true -> resources.getDimension(R.dimen.editor_title_text_size_double_line_non_ascii)
+                else -> resources.getDimension(R.dimen.editor_title_text_size_double_line_ascii)
+            }
+
+            val minTwoLineSize = resources.getDimension(R.dimen.editor_title_min_text_size_double_line)
+            paint.textSize = twoLineTextSize
+
+            // 检查两行显示是否足够: 利用 StaticLayout 测量文字显示效果
+            fun createStaticLayout(textSize: Float): StaticLayout {
+                paint.textSize = textSize
+                return StaticLayout.Builder
+                    .obtain(textStr, 0, textStr.length, paint, availableWidth)
+                    .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                    .setLineSpacing(0f, 1f)
+                    .build()
+            }
+
+            var layout = createStaticLayout(twoLineTextSize)
+            // 当行数超出了两行且字号尚未到达最低要求, 则逐步降低字号
+            while (layout.lineCount > 2 && twoLineTextSize > minTwoLineSize) {
+                twoLineTextSize -= step
+                layout = createStaticLayout(twoLineTextSize)
+            }
+            if (layout.lineCount <= 2) {
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, twoLineTextSize)
+                return@post
+            }
+
+            /* ---------- 切换为三行显示 ---------- */
+
+            textView.maxLines = 3
+
+            var threeLineSize = when (isNonAscii) {
+                true -> resources.getDimension(R.dimen.editor_title_text_size_triple_line_non_ascii)
+                else -> resources.getDimension(R.dimen.editor_title_text_size_triple_line_ascii)
+            }
+
+            val minThreeLineSize = resources.getDimension(R.dimen.editor_title_min_text_size_triple_line)
+
+            paint.textSize = threeLineSize
+            layout = createStaticLayout(threeLineSize)
+            while (layout.lineCount > 3 && threeLineSize > minThreeLineSize) {
+                threeLineSize -= step
+                layout = createStaticLayout(threeLineSize)
+            }
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, threeLineSize)
+        }
     }
 
     private fun onLoadFileError(message: String?) {
@@ -86,22 +180,23 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_editor, menu)
-        ViewUtils.setToolbarMenuIconsColorByThemeColorLuminance(this, mToolbar)
+        mToolbar?.let { toolbar ->
+            toolbar.setMenuIconsColorByThemeColorLuminance(this)
+            toolbar.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    val titleView = toolbar.findViewById(com.google.android.material.R.id.action_bar_title) ?: run {
+                        Toolbar::class.java.getDeclaredField("mTitleTextView").apply { isAccessible = true }.get(toolbar) as TextView?
+                    }
+                    titleView?.let { adjustTitleTextView(it) }
+                    toolbar.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            })
+        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return mEditorMenu.onOptionsItemSelected(item)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        Log.d(LOG_TAG, "onPrepareOptionsMenu: $menu")
-
-        // val isScriptRunning = mEditorView.scriptExecutionId != ScriptExecution.NO_ID
-        // val forceStopItem = menu.findItem(R.id.action_force_stop)
-        // forceStopItem.isEnabled = isScriptRunning
-
-        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onActionModeStarted(mode: ActionMode) {

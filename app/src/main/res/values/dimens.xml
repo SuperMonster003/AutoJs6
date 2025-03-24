@@ -23,7 +23,15 @@
     <dimen name="snackbar_padding_horizontal">12dp</dimen>
     <dimen name="snackbar_padding_vertical">14dp</dimen>
     <dimen name="snackbar_text_size">14sp</dimen>
-    <dimen name="editor_title_text_size">18sp</dimen>
+    <dimen name="editor_title_text_size">19sp</dimen>
+    <dimen name="editor_title_text_size_double_line_ascii">19sp</dimen>
+    <dimen name="editor_title_text_size_double_line_non_ascii">16sp</dimen>
+    <dimen name="editor_title_text_size_triple_line_ascii">13sp</dimen>
+    <dimen name="editor_title_text_size_triple_line_non_ascii">11sp</dimen>
+    <dimen name="editor_title_min_text_size_single_line">16sp</dimen>
+    <dimen name="editor_title_min_text_size_double_line">13sp</dimen>
+    <dimen name="editor_title_min_text_size_triple_line">11sp</dimen>
+    <dimen name="editor_title_text_size_step">1sp</dimen>
     <dimen name="main_title_text_size">20sp</dimen>
     <dimen name="textSize_item_property">14sp</dimen>
     <dimen name="first_char_view_stroke_width">2dp</dimen>
@@ -51,5 +59,6 @@
     <dimen name="ref_md_listitem_vertical_margin">12dp</dimen>
     <dimen name="ref_md_listitem_textsize">16sp</dimen>
     <dimen name="ref_md_listitem_height">48dp</dimen>
+    <dimen name="toolbar_menu_item_width">40dp</dimen>
 
 </resources>
