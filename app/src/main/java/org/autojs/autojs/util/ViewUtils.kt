@@ -10,9 +10,11 @@ import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Looper
 import android.util.DisplayMetrics
@@ -187,6 +189,11 @@ object ViewUtils {
         }
     }
 
+    fun setStatusBarAppearanceLightByColorLuminance(activity: Activity, aimColor: Int) {
+        val shouldBeLight = ColorUtils.isLuminanceDark(aimColor)
+        setStatusBarAppearanceLight(activity, shouldBeLight)
+    }
+
     fun setStatusBarBackgroundColor(activity: Activity, color: Int) {
         val window = activity.window
         val decorView = window.decorView
@@ -347,15 +354,16 @@ object ViewUtils {
 
     @JvmStatic
     fun setToolbarAsBack(activity: AppCompatActivity, title: String?) {
-        val toolbar = activity.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.title = title
+        val toolbar = activity.findViewById<Toolbar>(R.id.toolbar)?.apply {
+            this.title = title
+        } ?: return
         activity.setSupportActionBar(toolbar)
         activity.supportActionBar?.let { actionBar ->
             toolbar.setNavigationOnClickListener { activity.finish() }
             actionBar.setDisplayHomeAsUpEnabled(true)
         }
-        setToolbarMenuIconsColorByThemeColorLuminance(activity, toolbar)
-        setToolbarNavigationIconColorByThemeColorLuminance(activity, toolbar)
+        toolbar.setMenuIconsColorByThemeColorLuminance(activity)
+        toolbar.setNavigationIconColorByThemeColorLuminance(activity)
     }
 
     @JvmStatic
@@ -363,24 +371,73 @@ object ViewUtils {
         setToolbarAsBack(activity, activity.getString(titleRes))
     }
 
-    @JvmStatic
-    @JvmOverloads
-    fun setToolbarMenuIconsColorByThemeColorLuminance(activity: Activity, toolbar: Toolbar? = null) {
-        val toolbarView = toolbar ?: activity.findViewById(R.id.toolbar) ?: return
-        val aimColor = ThemeColorManager.getDayOrNightColorByLuminance(activity)
-        toolbarView.menu.forEach { menuItem ->
-            menuItem.icon?.colorFilter = PorterDuffColorFilter(aimColor, PorterDuff.Mode.SRC_IN)
-        }
+    fun Toolbar.setMenuIconsColorByThemeColorLuminance(context: Context) {
+        this.setMenuIconsColorByColorLuminance(context, ThemeColorManager.colorPrimary)
     }
 
     @JvmStatic
-    @JvmOverloads
-    fun setToolbarNavigationIconColorByThemeColorLuminance(activity: Activity, toolbar: Toolbar? = null) {
-        val toolbarView = toolbar ?: activity.findViewById(R.id.toolbar) ?: return
-        val aimColor = ThemeColorManager.getDayOrNightColorByLuminance(activity)
-        toolbarView.navigationIcon?.let { navigationIcon ->
-            navigationIcon.colorFilter = PorterDuffColorFilter(aimColor, PorterDuff.Mode.SRC_IN)
+    fun setToolbarMenuIconsColorByThemeColorLuminance(context: Context, toolbar: Toolbar) {
+        toolbar.setMenuIconsColorByThemeColorLuminance(context)
+    }
+
+    fun Toolbar.setMenuIconsColorByColorLuminance(context: Context, aimColor: Int) {
+        val color = getDayOrNightColorByLuminance(context, aimColor)
+        this.menu.forEach { menu ->
+            menu.icon?.let { ic -> menu.icon = ic.applyColorFilterWith(color) }
         }
+        this.collapseIcon?.let { this.collapseIcon = it.applyColorFilterWith(color) }
+        this.overflowIcon?.let { this.overflowIcon = it.applyColorFilterWith(color) }
+    }
+
+    @JvmStatic
+    fun setToolbarMenuIconsColorByColorLuminance(context: Context, toolbar: Toolbar, aimColor: Int) {
+        toolbar.setMenuIconsColorByColorLuminance(context, aimColor)
+    }
+
+    fun Toolbar.setNavigationIconColorByThemeColorLuminance(context: Context) {
+        this.setNavigationIconColorByColorLuminance(context, ThemeColorManager.colorPrimary)
+    }
+
+    @JvmStatic
+    fun setToolbarNavigationIconColorByThemeColorLuminance(context: Context, toolbar: Toolbar) {
+        toolbar.setNavigationIconColorByThemeColorLuminance(context)
+    }
+
+    fun Toolbar.setNavigationIconColorByColorLuminance(context: Context, aimColor: Int) {
+        val color = getDayOrNightColorByLuminance(context, aimColor)
+        this.navigationIcon?.let { this.navigationIcon = it.applyColorFilterWith(color) }
+    }
+
+    fun Drawable.applyColorFilterWith(color: Int): Drawable {
+        return this.applyColorFilterWith(PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN))
+    }
+
+    fun Drawable.applyColorFilterWith(colorFilter: ColorFilter): Drawable {
+        return this.also { this.colorFilter = colorFilter }
+    }
+
+    @JvmStatic
+    fun setToolbarNavigationIconColorByColorLuminance(context: Context, toolbar: Toolbar, aimColor: Int) {
+        toolbar.setNavigationIconColorByColorLuminance(context, aimColor)
+    }
+
+    fun Toolbar.setTitlesTextColorByColorLuminance(context: Context, aimColor: Int) {
+        val color = getDayOrNightColorByLuminance(context, aimColor)
+        setTitleTextColor(color)
+        setSubtitleTextColor(color)
+    }
+
+    @JvmStatic
+    fun setToolbarTitlesTextColorByColorLuminance(context: Context, toolbar: Toolbar, aimColor: Int) {
+        toolbar.setTitlesTextColorByColorLuminance(context, aimColor)
+    }
+
+    @JvmStatic
+    fun getDayOrNightColorByLuminance(context: Context, aimColor: Int): Int = context.getColor(getDayOrNightColorResByLuminance(aimColor))
+
+    @JvmStatic
+    fun getDayOrNightColorResByLuminance(aimColor: Int): Int {
+        return if (ColorUtils.isLuminanceLight(aimColor)) R.color.day else R.color.night
     }
 
     @JvmStatic

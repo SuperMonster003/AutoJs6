@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_locate_current_color"
+        android:title="@string/text_locate_current_color"
+        android:icon="@drawable/ic_locate"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_search_color"
+        android:title="@string/text_search_color"
+        android:icon="@drawable/ic_search_white_36dp"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_toggle_color_select_layout"
+        android:title="@string/text_switch_to_legacy_layout"
+        android:icon="@drawable/ic_swap_horiz_black_48dp"
+        app:showAsAction="never" />
+
+</menu>

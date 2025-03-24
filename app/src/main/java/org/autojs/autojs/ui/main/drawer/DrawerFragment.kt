@@ -29,7 +29,7 @@ import org.autojs.autojs.pluginclient.JsonSocketServer
 import org.autojs.autojs.service.AccessibilityService
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
-import org.autojs.autojs.theme.app.ColorSelectActivity
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity
 import org.autojs.autojs.ui.floating.CircularMenu
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
@@ -366,7 +366,7 @@ open class DrawerFragment : Fragment() {
         )
 
         mThemeColorItem = DrawerMenuShortcutItem(R.drawable.ic_personalize, R.string.text_theme_color)
-            .setAction(Runnable { ColorSelectActivity.startActivity(mContext) })
+            .setAction(Runnable { ColorSelectBaseActivity.startActivity(mContext) })
 
         mAboutAppAndDevItem = DrawerMenuShortcutItem(R.drawable.ic_about, R.string.text_about_app_and_developer)
             .setAction(Runnable { AboutActivity.startActivity(mContext) })

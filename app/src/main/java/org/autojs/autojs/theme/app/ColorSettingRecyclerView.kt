@@ -6,7 +6,6 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -32,20 +31,20 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
 
     constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
-    private var mOnItemClickListener: ColorSelectActivity.OnItemClickListener? = null
+    private var mOnItemClickListener: ColorSelectBaseActivity.OnItemClickListener? = null
 
-    private var mSelectedPosition = ColorSelectActivity.SELECT_NONE
+    private var mSelectedPosition = ColorSelectBaseActivity.SELECT_NONE
 
     val selectedThemeColor: ThemeColor?
-        get() = ColorSelectActivity.getColorItems(context)[mSelectedPosition].themeColor.takeUnless { mSelectedPosition < 0 }
+        get() = ColorSelectBaseActivity.getColorItems(context)[mSelectedPosition].themeColor.takeUnless { mSelectedPosition < 0 }
 
     private val customColor: Int
-        get() = Pref.getInt(ColorSelectActivity.KEY_CUSTOM_COLOR, context.getColor(R.color.md_blue_grey_800))
+        get() = Pref.getInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, context.getColor(R.color.md_blue_grey_800))
 
     private val mActualOnItemClickListener = OnClickListener { v ->
         getChildViewHolder(v)?.let { holder ->
             val pos = holder.bindingAdapterPosition
-            if (pos == ColorSelectActivity.customColorPosition) {
+            if (pos == ColorSelectBaseActivity.customColorPosition) {
                 showColorPicker(v)
             } else {
                 setSelectedPosition(pos)
@@ -62,7 +61,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
 
     @SuppressLint("NotifyDataSetChanged")
     fun setSelectedPosition(currentPosition: Int) {
-        if (mSelectedPosition != ColorSelectActivity.SELECT_NONE) {
+        if (mSelectedPosition != ColorSelectBaseActivity.SELECT_NONE) {
             adapter!!.notifyItemChanged(mSelectedPosition)
             mSelectedPosition = currentPosition
             adapter!!.notifyItemChanged(currentPosition)
@@ -70,21 +69,21 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             mSelectedPosition = currentPosition
             adapter!!.notifyDataSetChanged()
         }
-        Pref.putInt(ColorSelectActivity.KEY_SELECTED_COLOR_INDEX, mSelectedPosition)
+        Pref.putInt(ColorSelectBaseActivity.KEY_SELECTED_COLOR_INDEX, mSelectedPosition)
     }
 
     fun setSelectedColor(colorPrimary: Int) {
-        for ((i, colorItem) in ColorSelectActivity.getColorItems(context).withIndex()) {
+        for ((i, colorItem) in ColorSelectBaseActivity.getColorItems(context).withIndex()) {
             if (colorItem.themeColor.colorPrimary == colorPrimary) {
                 setSelectedPosition(i)
                 return
             }
         }
-        mSelectedPosition = ColorSelectActivity.SELECT_NONE
+        mSelectedPosition = ColorSelectBaseActivity.SELECT_NONE
     }
 
     private fun setCustomColor(color: Int) {
-        ColorSelectActivity.getColorItems(context)[ColorSelectActivity.customColorPosition].themeColor.colorPrimary = color
+        ColorSelectBaseActivity.getColorItems(context)[ColorSelectBaseActivity.customColorPosition].themeColor.colorPrimary = color
     }
 
     fun setCustomColor() {
@@ -104,10 +103,10 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
                 setColorPickerDialogListener(object : ColorPickerDialogListener {
                     override fun onColorSelected(dialogId: Int, @ColorInt color: Int) {
                         val c = color or -0x1000000
-                        Pref.putInt(ColorSelectActivity.KEY_CUSTOM_COLOR, c)
+                        Pref.putInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, c)
                         setCustomColor(c)
-                        setSelectedPosition(ColorSelectActivity.customColorPosition)
-                        mOnItemClickListener?.onItemClick(v, ColorSelectActivity.customColorPosition)
+                        setSelectedPosition(ColorSelectBaseActivity.customColorPosition)
+                        mOnItemClickListener?.onItemClick(v, ColorSelectBaseActivity.customColorPosition)
                     }
 
                     override fun onDialogDismissed(dialogId: Int) {}
@@ -116,7 +115,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             .show((context as FragmentActivity).supportFragmentManager, "Tag")
     }
 
-    fun setOnItemClickListener(onItemClickListener: ColorSelectActivity.OnItemClickListener?) {
+    fun setOnItemClickListener(onItemClickListener: ColorSelectBaseActivity.OnItemClickListener?) {
         mOnItemClickListener = onItemClickListener
     }
 
@@ -127,7 +126,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = ColorSelectActivity.getColorItems(context)[position]
+            val item = ColorSelectBaseActivity.getColorItems(context)[position]
             holder.apply {
                 setColor(item.themeColor.colorPrimary)
                 nameView.text = item.name
@@ -136,7 +135,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             }
         }
 
-        override fun getItemCount() = ColorSelectActivity.getColorItems(context).size
+        override fun getItemCount() = ColorSelectBaseActivity.getColorItems(context).size
 
     }
 

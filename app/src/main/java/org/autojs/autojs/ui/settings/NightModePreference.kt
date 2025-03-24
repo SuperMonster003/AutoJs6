@@ -31,7 +31,7 @@ class NightModePreference : MaterialListPreference {
             prefContext.getString(R.string.entry_night_mode_follow_system) -> {
                 ViewUtils.setDefaultNightMode(ViewUtils.MODE.FOLLOW)
                 Pref.putBoolean(R.string.key_auto_night_mode_enabled, true)
-                Pref.putBoolean(R.string.key_night_mode_enabled, ViewUtils.isNightModeYes(prefContext))
+                Pref.putBoolean(R.string.key_night_mode_enabled, ViewUtils.isSystemDarkModeEnabled(prefContext))
             }
             prefContext.getString(R.string.entry_night_mode_always_on) -> {
                 ViewUtils.setDefaultNightMode(ViewUtils.MODE.NIGHT)

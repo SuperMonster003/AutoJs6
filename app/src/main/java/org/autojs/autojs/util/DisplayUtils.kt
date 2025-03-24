@@ -29,6 +29,9 @@ object DisplayUtils {
     @JvmStatic
     fun dpToPx(dp: Float) = TypedValue.applyDimension(COMPLEX_UNIT_DIP, dp, displayMetrics)
 
+    @JvmStatic
+    fun spToPx(sp: Float) = TypedValue.applyDimension(COMPLEX_UNIT_SP, sp, displayMetrics)
+
     /**
      * This method converts device-specific pixels to density independent pixels.
      *
