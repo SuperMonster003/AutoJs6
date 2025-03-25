@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="android_black">Black</string>
+    <string name="android_blue">Blue</string>
+    <string name="android_cyan">Cyan</string>
+    <string name="android_aqua">Aqua</string>
+    <string name="android_dark_gray">Dark gray</string>
+    <string name="android_dark_grey">Dark grey</string>
+    <string name="android_gray">Gray</string>
+    <string name="android_grey">Grey</string>
+    <string name="android_green">Green</string>
+    <string name="android_lime">Lime</string>
+    <string name="android_light_gray">Light gray</string>
+    <string name="android_light_grey">Light grey</string>
+    <string name="android_magenta">Magenta</string>
+    <string name="android_fuchsia">Fuchsia</string>
+    <string name="android_maroon">Maroon</string>
+    <string name="android_navy">Navy</string>
+    <string name="android_olive">Olive</string>
+    <string name="android_purple">Purple</string>
+    <string name="android_red">Red</string>
+    <string name="android_silver">Silver</string>
+    <string name="android_teal">Teal</string>
+    <string name="android_white">White</string>
+    <string name="android_yellow">Yellow</string>
+
+</resources>

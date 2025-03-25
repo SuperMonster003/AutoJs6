@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.edit
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
@@ -14,7 +15,6 @@ import android.util.TypedValue
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
-import android.view.ViewTreeObserver
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import com.afollestad.materialdialogs.MaterialDialog
@@ -32,6 +32,7 @@ import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
@@ -71,99 +72,6 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         setUpToolbar()
     }
 
-    // @Created by JetBrains AI Assistant on Mar 24, 2025.
-    private fun adjustTitleTextView(textView: TextView) {
-        textView.post {
-            // 可用宽度, 排除内边距
-            val availableWidth = textView.width - textView.paddingLeft - textView.paddingRight
-            if (availableWidth <= 0) return@post
-
-            val textStr = textView.text.toString()
-            val isNonAscii = textStr.any { it.code >= 0x80 }
-            val paint: TextPaint = textView.paint
-            val originTextSizePx = textView.textSize
-            val step = resources.getDimension(R.dimen.editor_title_text_size_step)
-
-            /* ---------- 尝试一行显示 (单行) ---------- */
-
-            textView.isSingleLine = true
-            textView.maxLines = 1
-
-            var oneLineTextSizePx = originTextSizePx
-            val minOneLineSizePx = resources.getDimension(R.dimen.editor_title_min_text_size_single_line)
-
-            // 测量一行文字宽度
-            paint.textSize = oneLineTextSizePx
-            var measuredWidth = paint.measureText(textStr)
-            // 当文字宽度超出可用宽度并且字号还高于下限的时候逐步降低字号
-            while (measuredWidth > availableWidth && oneLineTextSizePx > minOneLineSizePx) {
-                oneLineTextSizePx -= step
-                paint.textSize = oneLineTextSizePx
-                measuredWidth = paint.measureText(textStr)
-            }
-
-            // 如果一行能够显示文字, 则直接应用修改
-            if (measuredWidth <= availableWidth) {
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, oneLineTextSizePx)
-                return@post
-            }
-
-            /* ---------- 切换为两行显示 ---------- */
-
-            textView.isSingleLine = false
-            textView.maxLines = 2
-
-            // 重置字号
-            var twoLineTextSize = when (isNonAscii) {
-                true -> resources.getDimension(R.dimen.editor_title_text_size_double_line_non_ascii)
-                else -> resources.getDimension(R.dimen.editor_title_text_size_double_line_ascii)
-            }
-
-            val minTwoLineSize = resources.getDimension(R.dimen.editor_title_min_text_size_double_line)
-            paint.textSize = twoLineTextSize
-
-            // 检查两行显示是否足够: 利用 StaticLayout 测量文字显示效果
-            fun createStaticLayout(textSize: Float): StaticLayout {
-                paint.textSize = textSize
-                return StaticLayout.Builder
-                    .obtain(textStr, 0, textStr.length, paint, availableWidth)
-                    .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-                    .setLineSpacing(0f, 1f)
-                    .build()
-            }
-
-            var layout = createStaticLayout(twoLineTextSize)
-            // 当行数超出了两行且字号尚未到达最低要求, 则逐步降低字号
-            while (layout.lineCount > 2 && twoLineTextSize > minTwoLineSize) {
-                twoLineTextSize -= step
-                layout = createStaticLayout(twoLineTextSize)
-            }
-            if (layout.lineCount <= 2) {
-                textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, twoLineTextSize)
-                return@post
-            }
-
-            /* ---------- 切换为三行显示 ---------- */
-
-            textView.maxLines = 3
-
-            var threeLineSize = when (isNonAscii) {
-                true -> resources.getDimension(R.dimen.editor_title_text_size_triple_line_non_ascii)
-                else -> resources.getDimension(R.dimen.editor_title_text_size_triple_line_ascii)
-            }
-
-            val minThreeLineSize = resources.getDimension(R.dimen.editor_title_min_text_size_triple_line)
-
-            paint.textSize = threeLineSize
-            layout = createStaticLayout(threeLineSize)
-            while (layout.lineCount > 3 && threeLineSize > minThreeLineSize) {
-                threeLineSize -= step
-                layout = createStaticLayout(threeLineSize)
-            }
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, threeLineSize)
-        }
-    }
-
     private fun onLoadFileError(message: String?) {
         MaterialDialog.Builder(this)
             .title(getString(R.string.text_cannot_read_file))
@@ -182,17 +90,110 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         menuInflater.inflate(R.menu.menu_editor, menu)
         mToolbar?.let { toolbar ->
             toolbar.setMenuIconsColorByThemeColorLuminance(this)
-            toolbar.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    val titleView = toolbar.findViewById(com.google.android.material.R.id.action_bar_title) ?: run {
-                        Toolbar::class.java.getDeclaredField("mTitleTextView").apply { isAccessible = true }.get(toolbar) as TextView?
-                    }
-                    titleView?.let { adjustTitleTextView(it) }
-                    toolbar.viewTreeObserver.removeOnGlobalLayoutListener(this)
+            toolbar.onceGlobalLayout {
+                val titleView = toolbar.findViewById(com.google.android.material.R.id.action_bar_title) ?: run {
+                    Toolbar::class.java.getDeclaredField("mTitleTextView").apply { isAccessible = true }.get(toolbar) as TextView?
                 }
-            })
+                titleView?.adjustTitleTextView()
+            }
         }
         return true
+    }
+
+    private fun TextView.adjustTitleTextView() = this.post {
+        ValueAnimator.ofFloat(this.textSize, calculatedTextSize(this) ?: return@post).let {
+            it.duration = 120L
+            it.addUpdateListener { this.setTextSize(TypedValue.COMPLEX_UNIT_PX, it.animatedValue as Float) }
+            it.start()
+        }
+    }
+
+    // @Created by JetBrains AI Assistant on Mar 24, 2025.
+    private fun calculatedTextSize(textView: TextView): Float? {
+        // 可用宽度, 排除内边距
+        val availableWidth = textView.width - textView.paddingLeft - textView.paddingRight
+        if (availableWidth <= 0) return null
+
+        val textStr = textView.text.toString()
+        val isNonAscii = textStr.any { it.code >= 0x80 }
+        val paint: TextPaint = textView.paint
+        val step = resources.getDimension(R.dimen.editor_title_text_size_step)
+
+        /* ---------- 尝试一行显示 (单行) ---------- */
+
+        textView.isSingleLine = true
+        textView.maxLines = 1
+
+        var oneLineTextSizePx = textView.textSize
+        val minOneLineSizePx = resources.getDimension(R.dimen.editor_title_min_text_size_single_line)
+
+        // 测量一行文字宽度
+        paint.textSize = oneLineTextSizePx
+        var measuredWidth = paint.measureText(textStr)
+        // 当文字宽度超出可用宽度并且字号还高于下限的时候逐步降低字号
+        while (measuredWidth > availableWidth && oneLineTextSizePx > minOneLineSizePx) {
+            oneLineTextSizePx -= step
+            paint.textSize = oneLineTextSizePx
+            measuredWidth = paint.measureText(textStr)
+        }
+
+        // 如果一行能够显示文字, 则直接应用修改
+        if (measuredWidth <= availableWidth) {
+            return oneLineTextSizePx
+        }
+
+        /* ---------- 切换为两行显示 ---------- */
+
+        textView.isSingleLine = false
+        textView.maxLines = 2
+
+        // 重置字号
+        var twoLineTextSize = when (isNonAscii) {
+            true -> resources.getDimension(R.dimen.editor_title_text_size_double_line_non_ascii)
+            else -> resources.getDimension(R.dimen.editor_title_text_size_double_line_ascii)
+        }
+
+        val minTwoLineSize = resources.getDimension(R.dimen.editor_title_min_text_size_double_line)
+        paint.textSize = twoLineTextSize
+
+        // 检查两行显示是否足够: 利用 StaticLayout 测量文字显示效果
+        fun createStaticLayout(textSize: Float): StaticLayout {
+            paint.textSize = textSize
+            return StaticLayout.Builder
+                .obtain(textStr, 0, textStr.length, paint, availableWidth)
+                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                .setLineSpacing(0f, 1f)
+                .build()
+        }
+
+        var layout = createStaticLayout(twoLineTextSize)
+        // 当行数超出了两行且字号尚未到达最低要求, 则逐步降低字号
+        while (layout.lineCount > 2 && twoLineTextSize > minTwoLineSize) {
+            twoLineTextSize -= step
+            layout = createStaticLayout(twoLineTextSize)
+        }
+        if (layout.lineCount <= 2) {
+            return twoLineTextSize
+        }
+
+        /* ---------- 切换为三行显示 ---------- */
+
+        textView.maxLines = 3
+
+        var threeLineSize = when (isNonAscii) {
+            true -> resources.getDimension(R.dimen.editor_title_text_size_triple_line_non_ascii)
+            else -> resources.getDimension(R.dimen.editor_title_text_size_triple_line_ascii)
+        }
+
+        val minThreeLineSize = resources.getDimension(R.dimen.editor_title_min_text_size_triple_line)
+
+        paint.textSize = threeLineSize
+        layout = createStaticLayout(threeLineSize)
+        while (layout.lineCount > 3 && threeLineSize > minThreeLineSize) {
+            threeLineSize -= step
+            layout = createStaticLayout(threeLineSize)
+        }
+        return threeLineSize
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

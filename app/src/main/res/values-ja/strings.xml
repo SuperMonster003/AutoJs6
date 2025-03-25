@@ -903,5 +903,7 @@
     <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
     <string name="text_search_color">Search color</string>
     <string name="text_locate_current_color">Locate current color</string>
+    <string name="text_new_color_library">New color library</string>
+    <string name="text_color_palette">Color palette</string>
 
 </resources>

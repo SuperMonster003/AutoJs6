@@ -367,6 +367,7 @@ open class DrawerFragment : Fragment() {
 
         mThemeColorItem = DrawerMenuShortcutItem(R.drawable.ic_personalize, R.string.text_theme_color)
             .setAction(Runnable { ColorSelectBaseActivity.startActivity(mContext) })
+            .apply { subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext) }
 
         mAboutAppAndDevItem = DrawerMenuShortcutItem(R.drawable.ic_about, R.string.text_about_app_and_developer)
             .setAction(Runnable { AboutActivity.startActivity(mContext) })

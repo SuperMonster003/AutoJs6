@@ -902,5 +902,7 @@
     <string name="text_switch_to_legacy_layout">切换至传统布局</string>
     <string name="text_search_color">搜索颜色</string>
     <string name="text_locate_current_color">定位当前颜色</string>
+    <string name="text_new_color_library">新建颜色库</string>
+    <string name="text_color_palette">调色盘</string>
 
 </resources>

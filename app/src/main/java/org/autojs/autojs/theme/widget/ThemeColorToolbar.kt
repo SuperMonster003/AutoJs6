@@ -2,7 +2,6 @@ package org.autojs.autojs.theme.widget
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.appcompat.widget.Toolbar
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorManager.add
@@ -10,6 +9,7 @@ import org.autojs.autojs.theme.ThemeColorManager.getDayOrNightColorByLuminance
 import org.autojs.autojs.theme.ThemeColorManager.isThemeColorLuminanceLight
 import org.autojs.autojs.theme.ThemeColorMutable
 import org.autojs.autojs.util.ViewUtils.applyColorFilterWith
+import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs6.R
 
 /**
@@ -37,7 +37,7 @@ open class ThemeColorToolbar : Toolbar, ThemeColorMutable {
     }
 
     override fun setThemeColor(color: ThemeColor) {
-        viewTreeObserver.addOnGlobalLayoutListener(OnGlobalLayoutListener { applyThemeColor(color) })
+        onceGlobalLayout { applyThemeColor(color) }
     }
 
     private fun applyThemeColor(color: ThemeColor) {

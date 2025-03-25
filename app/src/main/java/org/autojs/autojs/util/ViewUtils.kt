@@ -22,6 +22,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.Window
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -194,6 +195,7 @@ object ViewUtils {
         setStatusBarAppearanceLight(activity, shouldBeLight)
     }
 
+    @JvmStatic
     fun setStatusBarBackgroundColor(activity: Activity, color: Int) {
         val window = activity.window
         val decorView = window.decorView
@@ -406,6 +408,44 @@ object ViewUtils {
     fun Toolbar.setNavigationIconColorByColorLuminance(context: Context, aimColor: Int) {
         val color = getDayOrNightColorByLuminance(context, aimColor)
         this.navigationIcon?.let { this.navigationIcon = it.applyColorFilterWith(color) }
+    }
+
+    @JvmStatic
+    fun onceViewGlobalLayout(view: View, listener: () -> Unit) {
+        view.onceGlobalLayout(listener)
+    }
+
+    fun View.onceGlobalLayout(listener: () -> Unit) {
+        val view = this
+        val viewTreeObserver = view.viewTreeObserver
+        if (viewTreeObserver.isAlive) {
+            viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    listener.invoke()
+                    val viewTreeObserver = view.viewTreeObserver
+                    if (viewTreeObserver.isAlive) {
+                        viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    }
+                }
+            })
+        }
+    }
+
+    @JvmStatic
+    fun onViewGlobalLayout(view: View, listener: () -> Unit) {
+        view.onGlobalLayout(listener)
+    }
+
+    fun View.onGlobalLayout(listener: () -> Unit) {
+        val view = this
+        val viewTreeObserver = view.viewTreeObserver
+        if (viewTreeObserver.isAlive) {
+            viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    listener.invoke()
+                }
+            })
+        }
     }
 
     fun Drawable.applyColorFilterWith(color: Int): Drawable {

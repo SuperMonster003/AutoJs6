@@ -78,7 +78,6 @@ object MediaInfoDialogManager {
             launch(Dispatchers.IO) {
                 mediaInfo(filePath, AUDIO, "BitRate/String").let { binding.bitRateForAudioValue.bindWith(it) }
             }
-
             launch(Dispatchers.IO) {
                 mediaInfo(filePath, VIDEO, "BitRate/String").let { binding.bitRateForVideoValue.bindWith(it) }
             }

@@ -9,13 +9,12 @@ import android.view.ViewAnimationUtils
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.appbar.AppBarLayout
 import io.codetail.widget.RevealFrameLayout
+import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.ColorUtils
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByColorLuminance
@@ -36,58 +35,35 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
     private lateinit var mToolbar: Toolbar
     private lateinit var mAppBarLayout: AppBarLayout
     private lateinit var mAppBarContainer: RevealFrameLayout
-    private lateinit var mColorSettingRecyclerView: ColorSettingRecyclerView
 
     private lateinit var mTitle: String
 
-    private val mOnItemClickListener = object : OnItemClickListener {
-        override fun onItemClick(v: View?, position: Int) {
-            mColorSettingRecyclerView.selectedThemeColor?.let {
-                setColorWithAnimation(mAppBarLayout, it.colorPrimary)
-            }
-        }
-    }
-
-    private var currentColor by Delegates.notNull<Int>()
+    protected var currentColor by Delegates.notNull<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mTitle = this.intent.getStringExtra("title") ?: this.getString(R.string.mt_color_picker_title)
-        currentColor = this.intent.getIntExtra("currentColor", ThemeColorManager.colorPrimary)
+        mTitle = intent.getStringExtra("title") ?: getString(R.string.text_theme_color)
+        currentColor = intent.getIntExtra("currentColor", ThemeColorManager.colorPrimary)
     }
 
     protected fun setUpToolbar(toolbar: Toolbar) {
         toolbar.apply {
             title = mTitle
+            subtitle = this@ColorSelectBaseActivity.getSubtitle()
             setSupportActionBar(this)
             setNavigationOnClickListener { finish() }
             setTitleTextAppearance(this@ColorSelectBaseActivity, R.style.TextAppearanceMainTitle)
+            setSubtitleTextAppearance(this@ColorSelectBaseActivity, R.style.TextAppearanceMainSubtitle)
             mToolbar = this
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    protected fun setUpColorSettingRecyclerView(colorSettingRecyclerView: ColorSettingRecyclerView) {
-        mColorSettingRecyclerView = colorSettingRecyclerView.apply {
-            setCustomColor()
-            setSelectedColor(currentColor)
-            setOnItemClickListener(mOnItemClickListener)
-            ViewUtils.excludePaddingClippableViewFromNavigationBar(this)
-        }
-    }
-
-    override fun finish() {
-        mColorSettingRecyclerView.selectedThemeColor?.let {
-            ThemeColorManager.setThemeColor(it.colorPrimary)
-            Pref.putString(key(R.string.key_theme_color), getColorString(this))
-            ThemeChangeNotifier.notifyThemeChanged()
-        }
-        super.finish()
-    }
-
     protected fun finishWithoutSaving() {
         super.finish()
     }
+
+    protected open fun getSubtitle(): String? = null
 
     override fun initThemeColors() {
         super.initThemeColors()
@@ -105,20 +81,22 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         mToolbar.setMenuIconsColorByColorLuminance(this, currentColor)
     }
 
-    private fun setColorWithAnimation(view: View, colorTo: Int) {
+    protected fun setColorWithAnimation(colorTo: Int) {
+        val view = mAppBarLayout
         mAppBarContainer.setBackgroundColor(currentColor)
         view.setBackgroundColor(colorTo)
         currentColor = colorTo
 
         initThemeColors()
         updateToolbarIconsColor()
+        mToolbar.subtitle = getSubtitle()
 
         ViewAnimationUtils.createCircularReveal(
             /* view = */ view,
             /* centerX = */ view.left,
             /* centerY = */ view.bottom,
             /* startRadius = */ 0f,
-            /* endRadius = */ hypot(view.width.toDouble(), view.height.toDouble()).toFloat()
+            /* endRadius = */ hypot(view.width.toDouble(), view.height.toDouble()).toFloat(),
         ).apply {
             duration = 500L
             start()
@@ -155,14 +133,26 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             get() = Pref.getBoolean(R.string.key_color_select_activity_legacy_layout, false)
             set(value) = Pref.putBoolean(R.string.key_color_select_activity_legacy_layout, value)
 
+        val colorItems by lazy {
+            mutableListOf<Pair</* colorRes */ Int, /* nameRes */ Int>>().apply {
+                add(customColorPosition, 0 to R.string.mt_custom)
+                add(defaultColorPosition, R.color.theme_color_default to R.string.theme_color_default)
+                addAll(ColorItems.MATERIAL_COLORS)
+            }
+        }
+
         @JvmStatic
         fun startActivity(context: Context) {
             val cls = when (isLegacyLayout) {
                 true -> ColorSelectLegacyActivity::class.java
                 else -> ColorSelectActivity::class.java
             }
+            val titleRes = when (isLegacyLayout) {
+                true -> R.string.mt_color_picker_title
+                else -> R.string.text_theme_color
+            }
             val intent = Intent(context, cls).apply {
-                putExtra("title", context.getString(R.string.mt_color_picker_title))
+                putExtra("title", context.getString(titleRes))
             }
             if (context is ColorSelectBaseActivity) {
                 intent.putExtra("currentColor", context.currentColor)
@@ -171,19 +161,18 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             context.startActivity(intent)
         }
 
-        fun getColorString(context: Context): String {
+        @JvmStatic
+        fun getCurrentColorSummary(context: Context): String {
             val index = Pref.getInt(KEY_SELECTED_COLOR_INDEX, defaultColorPosition)
-            val colorItem = getColorItems(context)[index]
-            return "${colorItem.name} [${ColorUtils.toString(colorItem.themeColor.colorPrimary).uppercase()}]"
-        }
-
-        internal fun getColorItems(context: Context): List<ColorItem> = ArrayList<Pair</* nameRes */ Int, /* colorInt */ Int>>()
-            .apply {
-                add(customColorPosition, Pair(Pref.getInt(KEY_CUSTOM_COLOR, context.getColor(R.color.md_blue_grey_800)), R.string.mt_custom))
-                add(defaultColorPosition, Pair(context.getColor(R.color.theme_color_default), R.string.theme_color_default))
-                addAll(ColorUtils.MATERIAL_COLOR_ITEMS.map { pair -> Pair(context.getColor(pair.first), pair.second) })
+            val colorItem = colorItems[index]
+            val (colorRes, nameRes) = colorItem
+            val name = context.getString(nameRes)
+            val colorInt = when (index) {
+                customColorPosition -> Pref.getInt(KEY_CUSTOM_COLOR, context.getColor(R.color.md_blue_grey_800))
+                else -> context.getColor(colorRes)
             }
-            .map { (colorInt, nameRes) -> ColorItem(context.getString(nameRes), colorInt) }
+            return "$name [${ColorUtils.toString(colorInt).uppercase()}]"
+        }
 
     }
 

@@ -1,0 +1,38 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ResourceName">
+
+  <declare-styleable name="ColorPanelView">
+    <attr format="boolean" name="cpv_showOldColor"/>
+    <attr format="enum" name="cpv_colorShape">
+      <enum name="square" value="0"/>
+      <enum name="circle" value="1"/>
+    </attr>
+    <attr format="color|reference" name="cpv_borderColor"/>
+  </declare-styleable>
+
+  <declare-styleable name="ColorPickerView" parent="ColorPanelView">
+    <attr format="boolean|reference" name="cpv_alphaChannelVisible"/>
+    <attr format="string|reference" name="cpv_alphaChannelText"/>
+    <attr format="color|reference" name="cpv_sliderColor"/>
+    <attr name="cpv_borderColor"/>
+  </declare-styleable>
+
+  <declare-styleable name="ColorPreference" parent="ColorPickerDialog">
+    <attr format="boolean|reference" name="cpv_showAlphaSlider"/>
+    <attr format="enum" name="cpv_previewSize">
+      <enum name="regular" value="0"/>
+      <enum name="large" value="1"/>
+    </attr>
+    <attr name="cpv_colorShape"/>
+    <attr format="reference" name="cpv_dialogTitle"/>
+    <attr format="reference" name="cpv_colorPresets"/>
+    <attr format="enum" name="cpv_dialogType">
+      <enum name="custom" value="0"/>
+      <enum name="preset" value="1"/>
+    </attr>
+    <attr format="boolean|reference" name="cpv_showColorShades"/>
+    <attr format="boolean|reference" name="cpv_allowPresets"/>
+    <attr format="boolean|reference" name="cpv_allowCustom"/>
+    <attr format="boolean|reference" name="cpv_showDialog"/>
+  </declare-styleable>
+
+</resources>

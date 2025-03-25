@@ -1,0 +1,8 @@
+<com.jaredrummler.android.colorpicker.ColorPanelView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@id/cpv_preference_preview_color_panel"
+    android:layout_width="@dimen/cpv_color_preference_large"
+    android:layout_height="@dimen/cpv_color_preference_large"
+    app:cpv_colorShape="square"
+    />

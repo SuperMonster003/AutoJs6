@@ -7,12 +7,11 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.ViewTreeObserver;
 import android.view.Window;
-
 import androidx.annotation.Nullable;
-
 import com.google.android.material.appbar.AppBarLayout;
+import kotlin.Unit;
+import org.autojs.autojs.util.ViewUtils;
 
 /**
  * Created by Stardust on Aug 22, 2017.
@@ -42,12 +41,9 @@ public class AppWithStatusBarLayout extends AppBarLayout {
     }
 
     private void setPadding() {
-        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                setPadding(getPaddingLeft(), getStatusBarHeight(), getPaddingRight(), getPaddingBottom());
-                getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            }
+        ViewUtils.onceViewGlobalLayout(this, () -> {
+            setPadding(getPaddingLeft(), getStatusBarHeight(), getPaddingRight(), getPaddingBottom());
+            return Unit.INSTANCE;
         });
     }
 
