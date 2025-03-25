@@ -102,8 +102,6 @@ open class DrawerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        EventBus.getDefault().register(this)
-
         mContext = requireContext()
 
         mActivity = requireActivity() as MainActivity
@@ -178,14 +176,15 @@ open class DrawerFragment : Fragment() {
             mClientModeItem = DrawerMenuDisposableItem(this, R.drawable.ic_computer_black_48dp, R.string.text_client_mode).also {
                 setClientModeItem(it)
             }
-            setStateDisposable(JsonSocketClient.cxnState
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    if (it.state == DevPluginService.State.DISCONNECTED) {
-                        mClientModeItem.subtitle = null
-                    }
-                    consumeJsonSocketItemState(mClientModeItem, it)
-                })
+            setStateDisposable(
+                JsonSocketClient.cxnState
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        if (it.state == DevPluginService.State.DISCONNECTED) {
+                            mClientModeItem.subtitle = null
+                        }
+                        consumeJsonSocketItemState(mClientModeItem, it)
+                    })
             setOnConnectionException { e: Throwable ->
                 mClientModeItem.setCheckedIfNeeded(false)
                 ViewUtils.showToast(context, getString(R.string.error_connect_to_remote, e.message), true)
@@ -195,14 +194,15 @@ open class DrawerFragment : Fragment() {
         }
 
         JsonSocketServerTool(mContext).apply {
-            setStateDisposable(JsonSocketServer.cxnState
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { state: DevPluginService.State ->
-                    mServerModeItem.subtitle = takeIf { state.state == DevPluginService.State.CONNECTED }?.let {
-                        NetworkUtils.getIpAddress()
-                    }
-                    consumeJsonSocketItemState(mServerModeItem, state)
-                })
+            setStateDisposable(
+                JsonSocketServer.cxnState
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { state: DevPluginService.State ->
+                        mServerModeItem.subtitle = takeIf { state.state == DevPluginService.State.CONNECTED }?.let {
+                            NetworkUtils.getIpAddress()
+                        }
+                        consumeJsonSocketItemState(mServerModeItem, state)
+                    })
             setOnConnectionException { e: Throwable ->
                 mServerModeItem.setCheckedIfNeeded(false)
                 ViewUtils.showToast(context, getString(R.string.error_enable_server, e.message), true)
@@ -396,16 +396,25 @@ open class DrawerFragment : Fragment() {
         binding.exit.setOnClickListener { mActivity.exitCompletely() }
     }
 
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
+
     override fun onResume() {
         super.onResume()
         syncMenuItemStates()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mClientModeItem.dispose()
         mServerModeItem.dispose()
-        EventBus.getDefault().unregister(this)
         // mActivity.unregisterReceiver(mReceiver)
     }
 
@@ -433,6 +442,12 @@ open class DrawerFragment : Fragment() {
     @Suppress("unused", "UNUSED_PARAMETER")
     fun onDrawerClosed(event: Event.OnDrawerClosed) {
         // ViewCompat.getWindowInsetsController(mActivity.window.decorView)?.show(WindowInsets.Type.systemBars())
+    }
+
+    @Subscribe
+    @Suppress("unused", "UNUSED_PARAMETER")
+    fun onAccessibilityServiceStateChanged(event: Event.AccessibilityServiceStateChangedEvent) {
+        mAccessibilityServiceItem.sync()
     }
 
     private fun initMenuItems() {
@@ -510,6 +525,7 @@ open class DrawerFragment : Fragment() {
         class Event {
             interface OnDrawerOpened
             interface OnDrawerClosed
+            interface AccessibilityServiceStateChangedEvent
         }
 
     }

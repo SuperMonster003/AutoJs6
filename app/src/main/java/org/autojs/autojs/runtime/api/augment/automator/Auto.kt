@@ -36,6 +36,8 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
     override val selfAssignmentFunctions = listOf(
         ::start.name,
         ::stop.name,
+        ::enable.name,
+        ::disable.name,
         ::isRunning.name,
         ::exists.name,
         ::stateListener.name,
@@ -119,8 +121,20 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun enable(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
+            start(scriptRuntime, args)
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun stop(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
             accessibilityTool.stopService()
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun disable(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
+            stop(scriptRuntime, args)
         }
 
         @JvmStatic

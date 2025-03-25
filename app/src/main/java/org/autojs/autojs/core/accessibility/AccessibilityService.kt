@@ -11,6 +11,8 @@ import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.Acce
 import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.event.EventDispatcher
 import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.AccessibilityServiceStateChangedEvent
+import org.greenrobot.eventbus.EventBus
 import java.util.TreeMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -114,6 +116,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
         mEventExecutor?.shutdownNow()
         callback?.onDisconnected()
+        EventBus.getDefault().post(object : AccessibilityServiceStateChangedEvent {})
 
         super.onDestroy()
     }
@@ -123,6 +126,7 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
         Log.d(TAG, "onServiceConnected: $serviceInfo")
         instance = this
         callback?.onConnected()
+        EventBus.getDefault().post(object : AccessibilityServiceStateChangedEvent {})
         LOCK.lock()
         ENABLED.signalAll()
         LOCK.unlock()
