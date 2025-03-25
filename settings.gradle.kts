@@ -27,7 +27,8 @@
 
 private val modules = listOf(
     "jieba-analysis",
-    "apksigner",
+    "apk-signer",
+    "color-picker",
 )
 
 private val libs = listOf(
@@ -58,7 +59,7 @@ include(
 )
 
 modules.forEach {
-    project(":modules:$it").projectDir = file(it)
+    project(":modules:$it").projectDir = File("modules", it)
 }
 
 pluginManagement {

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
+  <LinearLayout
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      >
+
+    <com.jaredrummler.android.colorpicker.ColorPickerView
+        android:id="@id/cpv_color_picker_view"
+        android:padding="16dp"
+        style="@style/cpv_ColorPickerViewStyle"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        >
+
+      <com.jaredrummler.android.colorpicker.ColorPanelView
+          android:id="@id/cpv_color_panel_old"
+          android:layout_width="@dimen/cpv_dialog_preview_width"
+          android:layout_height="@dimen/cpv_dialog_preview_height"
+          app:cpv_colorShape="square"
+          />
+
+      <ImageView
+          android:id="@+id/cpv_arrow_right"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_vertical"
+          android:paddingLeft="4dp"
+          android:paddingRight="4dp"
+          android:src="@drawable/cpv_ic_arrow_right_black_24dp"
+          tools:ignore="ContentDescription"
+          />
+
+      <com.jaredrummler.android.colorpicker.ColorPanelView
+          android:id="@id/cpv_color_panel_new"
+          android:layout_width="@dimen/cpv_dialog_preview_width"
+          android:layout_height="@dimen/cpv_dialog_preview_height"
+          app:cpv_colorShape="square"
+          />
+
+      <Space
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          android:layout_weight="1"
+          />
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginLeft="16dp"
+          android:descendantFocusability="beforeDescendants"
+          android:focusableInTouchMode="true"
+          android:gravity="right"
+          android:orientation="horizontal"
+          tools:ignore="RtlHardcoded"
+          >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="#"
+            android:typeface="monospace"
+            tools:ignore="HardcodedText"
+            />
+
+        <EditText
+            android:id="@+id/cpv_hex"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:digits="0123456789ABCDEFabcdef"
+            android:focusable="true"
+            android:imeOptions="actionGo"
+            android:inputType="textNoSuggestions"
+            android:maxLength="8"
+            android:maxLines="1"
+            android:typeface="monospace"
+            />
+
+      </LinearLayout>
+
+    </LinearLayout>
+
+  </LinearLayout>
+</ScrollView>

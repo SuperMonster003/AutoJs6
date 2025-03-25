@@ -34,7 +34,7 @@
 
     <view
         android:id="@+id/color_setting_recycler_view"
-        class="org.autojs.autojs.theme.app.ColorSettingRecyclerView"
+        class="org.autojs.autojs.theme.app.ColorSettingRecyclerViewLegacy"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

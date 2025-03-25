@@ -215,7 +215,7 @@ dependencies /* Unclassified */ {
     // implementation("com.android.tools.build:apksig:8.7.3")
 
     // ApkSigner
-    implementation(project(":modules:apksigner"))
+    implementation(project(":modules:apk-signer"))
 
     // Spongy Castle
     implementation("com.madgag.spongycastle:prov:1.58.0.0")
@@ -361,10 +361,12 @@ dependencies /* Auto.js Extensions */ {
     //  # implementation(project(":libs:Auto.js-ApkBuilder-1.0.3"))
 
     // Extracted from com.github.hyb1996:MutableTheme:1.0.0
-    // @Legacy com.jrummyapps:colorpicker:2.1.7
-    implementation("com.jaredrummler:colorpicker:1.1.0")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("com.github.ozodrukh:CircularReveal:2.0.1")
+    // @Legacy com.jrummyapps:colorpicker:2.1.7
+    // @Integrated by SuperMonster003 on Mar 25, 2025.
+    //  # implementation("com.jaredrummler:colorpicker:1.1.0")
+    implementation(project(":modules:color-picker"))
 }
 
 dependencies /* Archived */ {

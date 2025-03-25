@@ -19,7 +19,7 @@ class ThemeColorPreference : MaterialPreference, SharedPreferences.OnSharedPrefe
 
     init {
         Pref.registerOnSharedPreferenceChangeListener(this)
-        summaryProvider = SummaryProvider<ThemeColorPreference> { ColorSelectBaseActivity.getColorString(prefContext) }
+        summaryProvider = SummaryProvider<ThemeColorPreference> { ColorSelectBaseActivity.getCurrentColorSummary(prefContext) }
     }
 
     override fun onClick() {

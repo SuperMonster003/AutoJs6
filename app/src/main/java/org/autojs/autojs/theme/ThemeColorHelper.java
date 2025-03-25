@@ -20,6 +20,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 
 import org.autojs.autojs.theme.internal.ScrollingViewEdgeGlowColorHelper;
 import org.autojs.autojs.util.ColorUtils;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 /**
@@ -116,7 +117,7 @@ public class ThemeColorHelper {
     public static void setStatusBarColor(Activity activity, int color) {
         Window window = activity.getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(color);
+        ViewUtils.setStatusBarBackgroundColor(activity, color);
     }
 
     public static void setBackgroundColor(View view, int color) {

@@ -179,6 +179,10 @@
         <item name="android:ellipsize">end</item>
     </style>
 
+    <style name="TextAppearanceMainSubtitle" parent="TextAppearanceMainTitle">
+        <item name="android:textSize">@dimen/main_subtitle_text_size</item>
+    </style>
+
     <style name="OverflowIconDarkTheme" parent="@style/Widget.AppCompat.ActionButton.Overflow" >
         <item name="android:tint">@color/md_white_1000</item>
     </style>
