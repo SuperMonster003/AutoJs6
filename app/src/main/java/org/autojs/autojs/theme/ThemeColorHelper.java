@@ -14,10 +14,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.Switch;
-
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
-
 import org.autojs.autojs.theme.internal.ScrollingViewEdgeGlowColorHelper;
 import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.ViewUtils;
@@ -90,8 +88,8 @@ public class ThemeColorHelper {
     }
 
     private static void setThumbDrawableTintList(Drawable drawable, int color) {
-        int unselectedColor = ColorUtils.isLuminanceLight(color)
-                ? Color.parseColor("#616161") // R.color.md_grey_700
+        int unselectedColor = ViewUtils.isLuminanceLight(color)
+                ? Color.parseColor("#616161") // R.color.md_gray_700
                 : Color.DKGRAY;
         int[] thumbColors = new int[]{
                 color,

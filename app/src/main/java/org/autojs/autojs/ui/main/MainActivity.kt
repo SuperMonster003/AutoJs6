@@ -5,9 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -65,6 +62,9 @@ import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
+import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
+import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByThemeColorLuminance
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityMainBinding
@@ -278,7 +278,8 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     private fun setUpToolbarColors() {
-        ViewUtils.setToolbarMenuIconsColorByThemeColorLuminance(this, mToolbar)
+        mToolbar.setMenuIconsColorByThemeColorLuminance(this)
+        mToolbar.setNavigationIconColorByThemeColorLuminance(this)
         mSearchViewItem?.initThemeColors()
     }
 
@@ -287,7 +288,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         val tabSelectedColor: Int
         val tabSelectedIndicatorColor: Int
         when {
-            ThemeColorManager.isThemeColorLuminanceLight() -> {
+            ThemeColorManager.isLuminanceLight() -> {
                 tabNormalColor = getColor(R.color.tab_text_dark)
                 tabSelectedColor = getColor(R.color.tab_selected_text_dark)
                 tabSelectedIndicatorColor = getColor(R.color.tab_indicator_dark)
@@ -399,11 +400,11 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private fun setUpSearchMenuItem(searchMenuItem: MenuItem) {
         mSearchViewItem = object : SearchViewItem(this, searchMenuItem) {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                setUpToolbarCollapseIconColor()
                 if (isCurrentPageDocs) {
                     mDocsSearchItemExpanded = true
                     mLogMenuItem.setIcon(R.drawable.ic_ali_up)
                 }
+                mToolbar.onceGlobalLayout { setUpToolbarColors() }
                 return super.onMenuItemActionExpand(item)
             }
 
@@ -428,18 +429,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         EventBus.getDefault().post(event)
         if (event.shouldCollapseSearchView()) {
             mSearchViewItem!!.collapse()
-        }
-    }
-
-    private fun setUpToolbarCollapseIconColor() {
-        val collapseIcon = mToolbar.collapseIcon
-        if (collapseIcon != null) {
-            val isThemeColorLuminanceLight = ThemeColorManager.isThemeColorLuminanceLight()
-            val fullColor = getColor(if (isThemeColorLuminanceLight) R.color.day_full else R.color.night_full)
-            collapseIcon.setTintList(ColorStateList.valueOf(fullColor))
-            collapseIcon.setTint(fullColor)
-            collapseIcon.colorFilter = PorterDuffColorFilter(fullColor, PorterDuff.Mode.SRC_IN)
-            mToolbar.collapseIcon = collapseIcon
         }
     }
 

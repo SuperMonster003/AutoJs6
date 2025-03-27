@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.main.drawer
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -29,6 +30,7 @@ import org.autojs.autojs.pluginclient.JsonSocketServer
 import org.autojs.autojs.service.AccessibilityService
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
+import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
 import org.autojs.autojs.ui.floating.CircularMenu
 import org.autojs.autojs.ui.floating.FloatyWindowManger
@@ -101,6 +103,12 @@ open class DrawerFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        @SuppressLint("NotifyDataSetChanged")
+        ThemeChangeNotifier.themeChanged.observe(this) {
+            mThemeColorItem.subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext)
+            mDrawerMenu.adapter?.notifyDataSetChanged()
+        }
 
         mContext = requireContext()
 

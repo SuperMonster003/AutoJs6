@@ -4,17 +4,11 @@
     <color name="android_black">#000000</color>
     <color name="android_blue">#0000FF</color>
     <color name="android_cyan">#00FFFF</color>
-    <color name="android_aqua">#00FFFF</color>
     <color name="android_dark_gray">#444444</color>
-    <color name="android_dark_grey">#444444</color>
     <color name="android_gray">#888888</color>
-    <color name="android_grey">#888888</color>
     <color name="android_green">#00FF00</color>
-    <color name="android_lime">#00FF00</color>
     <color name="android_light_gray">#CCCCCC</color>
-    <color name="android_light_grey">#CCCCCC</color>
     <color name="android_magenta">#FF00FF</color>
-    <color name="android_fuchsia">#FF00FF</color>
     <color name="android_maroon">#800000</color>
     <color name="android_navy">#000080</color>
     <color name="android_olive">#808000</color>

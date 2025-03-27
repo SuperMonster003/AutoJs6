@@ -30,12 +30,6 @@ object ThemeColorManager {
     }
 
     @JvmStatic
-    fun isThemeColorLuminanceLight() = currentThemeColor.isLuminanceLight()
-
-    @JvmStatic
-    fun isThemeColorLuminanceDark() = currentThemeColor.isLuminanceDark()
-
-    @JvmStatic
     fun add(colorMutable: ThemeColorMutable) = ThemeColorMutableManager.add(colorMutable)
 
     @JvmStatic
@@ -67,10 +61,6 @@ object ThemeColorManager {
         ThemeColorWidgetReferenceManager.setColor(themeColor)
     }
 
-    /**
-     * 设置主题色并为记录的状态栏和标题栏改变颜色
-     * @param color 主题色RGB值
-     */
     fun setThemeColor(color: Int) = setThemeColor(ThemeColor(color))
 
     private fun saveThemeColorIfNeeded() {
@@ -78,10 +68,31 @@ object ThemeColorManager {
     }
 
     @JvmStatic
-    fun getDayOrNightColorByLuminance(context: Context): Int = ViewUtils.getDayOrNightColorByLuminance(context, colorPrimary)
+    @JvmOverloads
+    fun isLuminanceLight(backgroundColorMatters: Boolean = true): Boolean {
+        return ViewUtils.isLuminanceLight(colorPrimary, backgroundColorMatters)
+    }
 
     @JvmStatic
-    fun getDayOrNightColorResByLuminance(): Int = ViewUtils.getDayOrNightColorResByLuminance(colorPrimary)
+    @JvmOverloads
+    fun isLuminanceDark(backgroundColorMatters: Boolean = true): Boolean {
+        return ViewUtils.isLuminanceDark(colorPrimary, backgroundColorMatters)
+    }
+
+    @JvmStatic
+    fun getDayOrNightColorByLuminance(context: Context): Int {
+        return ViewUtils.getDayOrNightColorByLuminance(context, colorPrimary)
+    }
+
+    @JvmStatic
+    fun getDayOrNightColorResByLuminance(): Int {
+        return ViewUtils.getDayOrNightColorResByLuminance(colorPrimary)
+    }
+
+    @JvmStatic
+    fun setStatusBarBackgroundColor(activity: Activity) {
+        ViewUtils.setStatusBarBackgroundColor(activity, colorPrimary)
+    }
 
     private object BackgroundColorManager {
 
@@ -105,7 +116,7 @@ object ThemeColorManager {
 
         fun add(activity: Activity) {
             activityRefs.add(WeakReference(activity))
-            ViewUtils.setStatusBarBackgroundColor(activity, currentThemeColor.colorPrimary)
+            setStatusBarBackgroundColor(activity)
         }
 
         fun setColor(color: Int) {

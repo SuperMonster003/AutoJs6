@@ -5,9 +5,8 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.Toolbar
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorManager.add
-import org.autojs.autojs.theme.ThemeColorManager.getDayOrNightColorByLuminance
-import org.autojs.autojs.theme.ThemeColorManager.isThemeColorLuminanceLight
 import org.autojs.autojs.theme.ThemeColorMutable
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.applyColorFilterWith
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs6.R
@@ -36,21 +35,22 @@ open class ThemeColorToolbar : Toolbar, ThemeColorMutable {
         setTitleTextAppearance(context, R.style.TextAppearanceMainTitle)
     }
 
-    override fun setThemeColor(color: ThemeColor) {
-        onceGlobalLayout { applyThemeColor(color) }
+    override fun setThemeColor(themeColor: ThemeColor) {
+        onceGlobalLayout { applyThemeColor(themeColor) }
     }
 
-    private fun applyThemeColor(color: ThemeColor) {
-        val aimColor = getDayOrNightColorByLuminance(context)
+    private fun applyThemeColor(themeColor: ThemeColor) {
+        val currentThemeColor = themeColor.colorPrimary
+        val tintColor = ViewUtils.getDayOrNightColorByLuminance(context, currentThemeColor)
 
-        setBackgroundColor(color.colorPrimary)
-        setTitleTextColor(aimColor)
-        setSubtitleTextColor(aimColor)
+        setBackgroundColor(currentThemeColor)
+        setTitleTextColor(tintColor)
+        setSubtitleTextColor(tintColor)
 
-        navigationIcon?.let { navigationIcon = it.applyColorFilterWith(aimColor) }
-        collapseIcon?.let { collapseIcon = it.applyColorFilterWith(aimColor) }
-        overflowIcon?.let { overflowIcon = it.applyColorFilterWith(aimColor) }
+        navigationIcon?.let { navigationIcon = it.applyColorFilterWith(tintColor) }
+        collapseIcon?.let { collapseIcon = it.applyColorFilterWith(tintColor) }
+        overflowIcon?.let { overflowIcon = it.applyColorFilterWith(tintColor) }
 
-        popupTheme = if (isThemeColorLuminanceLight()) R.style.PopupMenuThemeLight else R.style.PopupMenuThemeDark
+        popupTheme = if (ViewUtils.isLuminanceLight(currentThemeColor)) R.style.PopupMenuThemeLight else R.style.PopupMenuThemeDark
     }
 }

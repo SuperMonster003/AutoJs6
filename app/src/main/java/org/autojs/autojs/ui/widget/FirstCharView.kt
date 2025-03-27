@@ -11,7 +11,6 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorManagerCompat
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs6.R
 import kotlin.math.roundToInt

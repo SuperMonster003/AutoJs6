@@ -24,7 +24,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.ui.BaseActivity
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -41,7 +40,7 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
     abstract var highlightGrammarName: String
     abstract var highlightThemeLanguage: String
 
-    open var themeColorDayNight = R.color.md_blue_grey_50 to R.color.md_blue_grey_900
+    open var themeColorDayNight = R.color.md_blue_gray_50 to R.color.md_blue_gray_900
 
     private lateinit var internalTextView: TextView
     private lateinit var internalFabView: FloatingActionButton
@@ -145,14 +144,14 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
 
         if (ViewUtils.isNightModeYes(this)) {
             internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorNight)
-            internalFabView.imageTintList = ColorStateList.valueOf(if (ColorUtils.isLuminanceDark(themeColorNight)) getColor(R.color.night) else getColor(R.color.day))
+            internalFabView.imageTintList = ColorStateList.valueOf(if (ViewUtils.isLuminanceDark(themeColorNight)) getColor(R.color.night) else getColor(R.color.day))
             ViewUtils.setStatusBarBackgroundColor(this, themeColorNight)
-            ViewUtils.setStatusBarAppearanceLight(this, ColorUtils.isLuminanceDark(themeColorNight))
+            ViewUtils.setStatusBarAppearanceLight(this, ViewUtils.isLuminanceDark(themeColorNight))
         } else {
             internalFabView.backgroundTintList = ColorStateList.valueOf(themeColorDay)
-            internalFabView.imageTintList = ColorStateList.valueOf(if (ColorUtils.isLuminanceDark(themeColorDay)) getColor(R.color.night) else getColor(R.color.day))
+            internalFabView.imageTintList = ColorStateList.valueOf(if (ViewUtils.isLuminanceDark(themeColorDay)) getColor(R.color.night) else getColor(R.color.day))
             ViewUtils.setStatusBarBackgroundColor(this, themeColorDay)
-            ViewUtils.setStatusBarAppearanceLight(this, ColorUtils.isLuminanceDark(themeColorDay))
+            ViewUtils.setStatusBarAppearanceLight(this, ViewUtils.isLuminanceDark(themeColorDay))
         }
     }
 

@@ -2,7 +2,7 @@
 <resources>
 
     <color name="day">#DE212121</color>
-    <color name="day_full">#212121</color>
+    <color name="day_full">@color/md_gray_900</color>
     <color name="night">#DEFBFBFB</color>
     <color name="night_full">#FBFBFB</color>
     <color name="dawn">#DE252525</color>
@@ -12,13 +12,14 @@
     <color name="day_night">@color/day</color>
     <color name="day_night_full">@color/day_full</color>
     <color name="day_night_alpha_70">#B3212121</color>
+    <color name="day_night_alpha_60">#9A212121</color>
     <color name="day_night_alpha_30">#4D212121</color>
     <color name="day_night_alpha_20">#33212121</color>
     <color name="night_day">@color/night</color>
     <color name="night_day_full">@color/night_full</color>
-    <color name="window_background">#FFFFFF</color>
-    <color name="window_background_light">#FFFFFF</color>
-    <color name="window_background_night">@color/day_full</color>
+    <color name="window_background">@color/md_gray_50</color>
+    <color name="window_background_light">@color/md_gray_50</color>
+    <color name="window_background_night">@color/md_gray_900</color>
     <color name="window_background_selected">#E5E5E5</color>
     <color name="text_color_primary">@color/day_night</color>
     <color name="text_color_primary_full">@color/day_night_full</color>
@@ -33,13 +34,14 @@
 
     <color name="theme_color_black">#111214</color>
     <color name="theme_color_default">@color/md_teal_800</color>
+    <color name="custom_color_default">@color/md_blue_gray_800</color>
 
-    <color name="console_view_verbose">#DFC0C0C0</color>
-    <color name="console_view_debug">#CC000000</color>
-    <color name="console_view_info">#FF43A047</color>
-    <color name="console_view_warn">#FF1976D2</color>
-    <color name="console_view_error">#FFC62828</color>
-    <color name="console_view_assert">#FFE254FF</color>
+    <color name="console_view_verbose">#BDBDBD</color>
+    <color name="console_view_debug">#111214</color>
+    <color name="console_view_info">#43A047</color>
+    <color name="console_view_warn">#1976D2</color>
+    <color name="console_view_error">#C62828</color>
+    <color name="console_view_assert">#E254FF</color>
 
     <!--<color name="floating_console_view_debug">#FFFFFF</color>-->
     <!--<color name="floating_console_view_verbose">#ECEFF1</color>-->
@@ -48,7 +50,7 @@
     <!--<color name="floating_console_view_error">#FFEBEE</color>-->
     <!--<color name="floating_console_view_assert">#FCE4EC</color>-->
 
-    <color name="floating_console_view_debug">#FFFFFF</color>
+    <color name="floating_console_view_debug">#FAFAFA</color>
     <color name="floating_console_view_verbose">#E0E0E0</color>
     <color name="floating_console_view_info">#DCEDC8</color>
     <color name="floating_console_view_warn">#B3E5FC</color>
@@ -100,8 +102,8 @@
     <color name="dialog_progress_success_bg_tint">#DCEDC8</color>
     <color name="dialog_progress_success_tint">#00C853</color>
 
-    <color name="item_background">#FFFFFF</color>
-    <color name="item_background_dark">#FFFFFF</color>
+    <color name="item_background">#FAFAFA</color>
+    <color name="item_background_dark">#FAFAFA</color>
 
     <color name="divider">#F2F3F5</color>
     <color name="divider_functions_keyboard">#F0F0F0</color>
@@ -161,8 +163,8 @@
     <color name="navigation_bar_background_before_android_o">@color/day_full</color>
     <color name="swipe_refresh_background">#F8F8F8</color>
     <color name="circular_menu_icon_red">#ef5350</color>
-    <color name="circular_menu_icon_white">#ffffff</color>
-    <color name="drawer_item_subtitle_color">#616161</color>
+    <color name="circular_menu_icon_white">@color/md_white_1000</color>
+    <color name="drawer_item_subtitle_color">@color/md_gray_700</color>
     <color name="floating_console_content_bg">#99262626</color>
     <color name="floating_console_title_bar_bg">#cc181818</color>
 

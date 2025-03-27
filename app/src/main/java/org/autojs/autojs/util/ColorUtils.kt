@@ -14,7 +14,6 @@ import androidx.core.graphics.ColorUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.theme.ThemeColor
-import org.autojs.autojs6.R
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.text.RegexOption.IGNORE_CASE
@@ -281,7 +280,7 @@ object ColorUtils {
      * </a>
      */
     @JvmStatic
-    fun isLuminanceLight(@ColorInt color: Int) = luminance(color) > 0.179
+    fun isLuminanceLight(@ColorInt color: Int) = luminance(color) >= 0.179
 
     @JvmStatic
     fun isLuminanceDark(@ColorInt color: Int) = !isLuminanceLight(color)

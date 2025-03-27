@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
-  <string name="cpv_default_title">Selecionar uma cor</string>
-  <string name="cpv_presets">Predefinidos</string>
-  <string name="cpv_custom">Personalizar</string>
-  <string name="cpv_select">Selecionar</string>
-  <string name="cpv_transparency">Transparência</string>
-</resources>

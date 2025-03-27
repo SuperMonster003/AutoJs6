@@ -15,9 +15,9 @@
 -->
 <resources>
   <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
-  <string name="cpv_default_title">Vyberte farbu</string>
-  <string name="cpv_presets">Prednastavené</string>
-  <string name="cpv_custom">Vlastné</string>
-  <string name="cpv_select">Vybrať</string>
-  <string name="cpv_transparency">Priehľadnosť</string>
+  <string name="cpv_default_title">색상 선택</string>
+  <string name="cpv_presets">프리셋</string>
+  <string name="cpv_custom">커스텀</string>
+  <string name="cpv_select">선택</string>
+  <string name="cpv_transparency">투명도</string>
 </resources>

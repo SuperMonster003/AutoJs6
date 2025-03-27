@@ -27,7 +27,6 @@ import org.autojs.autojs.execution.ScriptExecution.AbstractScriptExecution
 import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.ScriptSource
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -66,10 +65,10 @@ class ScriptExecuteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val windowBackground: Drawable = window.decorView.background
-            ?: ColorDrawable(getColor(R.color.md_grey_50)).also { window.setBackgroundDrawable(it) }
+            ?: ColorDrawable(getColor(R.color.md_gray_50)).also { window.setBackgroundDrawable(it) }
 
         if (windowBackground is ColorDrawable) windowBackground.color.let { backgroundColor ->
-            val isLightColor = ColorUtils.isLuminanceDark(backgroundColor)
+            val isLightColor = ViewUtils.isLuminanceDark(backgroundColor)
             ViewUtils.setStatusBarBackgroundColor(this, backgroundColor)
             ViewUtils.setStatusBarAppearanceLight(this, isLightColor)
             ViewUtils.setNavigationBarBackgroundColor(this, backgroundColor)

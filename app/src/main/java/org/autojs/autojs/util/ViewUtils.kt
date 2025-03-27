@@ -44,6 +44,8 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
+import org.autojs.autojs6.R.color.day
+import org.autojs.autojs6.R.color.night
 import kotlin.math.roundToInt
 
 /**
@@ -171,6 +173,28 @@ object ViewUtils {
     }
 
     @JvmStatic
+    @JvmOverloads
+    fun isLuminanceLight(color: Int, backgroundColorMatters: Boolean = true) = when {
+        !backgroundColorMatters -> ColorUtils.isLuminanceLight(color)
+        !isNightModeEnabled -> ColorUtils.luminance(color) >= 0.224
+        else -> ColorUtils.luminance(color) >= 0.141
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun isLuminanceDark(color: Int, backgroundColorMatters: Boolean = true) = !isLuminanceLight(color, backgroundColorMatters)
+
+    @JvmStatic
+    fun getDayOrNightColorByLuminance(context: Context, color: Int): Int {
+        return context.getColor(if (isLuminanceLight(color)) day else night)
+    }
+
+    @JvmStatic
+    fun getDayOrNightColorResByLuminance(color: Int): Int {
+        return if (isLuminanceLight(color)) day else night
+    }
+
+    @JvmStatic
     fun isStatusBarAppearanceLight(activity: Activity): Boolean {
         return !isStatusBarAppearanceDark(activity)
     }
@@ -191,7 +215,7 @@ object ViewUtils {
     }
 
     fun setStatusBarAppearanceLightByColorLuminance(activity: Activity, aimColor: Int) {
-        val shouldBeLight = ColorUtils.isLuminanceDark(aimColor)
+        val shouldBeLight = isLuminanceDark(aimColor)
         setStatusBarAppearanceLight(activity, shouldBeLight)
     }
 
@@ -470,14 +494,6 @@ object ViewUtils {
     @JvmStatic
     fun setToolbarTitlesTextColorByColorLuminance(context: Context, toolbar: Toolbar, aimColor: Int) {
         toolbar.setTitlesTextColorByColorLuminance(context, aimColor)
-    }
-
-    @JvmStatic
-    fun getDayOrNightColorByLuminance(context: Context, aimColor: Int): Int = context.getColor(getDayOrNightColorResByLuminance(aimColor))
-
-    @JvmStatic
-    fun getDayOrNightColorResByLuminance(aimColor: Int): Int {
-        return if (ColorUtils.isLuminanceLight(aimColor)) R.color.day else R.color.night
     }
 
     @JvmStatic

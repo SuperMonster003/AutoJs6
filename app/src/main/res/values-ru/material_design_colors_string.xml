@@ -272,30 +272,30 @@
     <string name="md_brown_800">Коричневый (800)</string>
     <string name="md_brown_900">Коричневый (900)</string>
 
-    <!-- grey -->
-    <string name="md_grey_50">Серый (50)</string>
-    <string name="md_grey_100">Серый (100)</string>
-    <string name="md_grey_200">Серый (200)</string>
-    <string name="md_grey_300">Серый (300)</string>
-    <string name="md_grey_400">Серый (400)</string>
-    <string name="md_grey_500">Серый (500)</string>
-    <string name="md_grey_600">Серый (600)</string>
-    <string name="md_grey_700">Серый (700)</string>
-    <string name="md_grey_800">Серый (800)</string>
-    <string name="md_grey_900">Серый (900)</string>
+    <!-- gray -->
+    <string name="md_gray_50">Серый (50)</string>
+    <string name="md_gray_100">Серый (100)</string>
+    <string name="md_gray_200">Серый (200)</string>
+    <string name="md_gray_300">Серый (300)</string>
+    <string name="md_gray_400">Серый (400)</string>
+    <string name="md_gray_500">Серый (500)</string>
+    <string name="md_gray_600">Серый (600)</string>
+    <string name="md_gray_700">Серый (700)</string>
+    <string name="md_gray_800">Серый (800)</string>
+    <string name="md_gray_900">Серый (900)</string>
     <string name="md_black_1000">Черный (1000)</string>
     <string name="md_white_1000">Белый (1000)</string>
 
-    <!--blue grey-->
-    <string name="md_blue_grey_50">Синий серый (50)</string>
-    <string name="md_blue_grey_100">Синий серый (100)</string>
-    <string name="md_blue_grey_200">Синий серый (200)</string>
-    <string name="md_blue_grey_300">Синий серый (300)</string>
-    <string name="md_blue_grey_400">Синий серый (400)</string>
-    <string name="md_blue_grey_500">Синий серый (500)</string>
-    <string name="md_blue_grey_600">Синий серый (600)</string>
-    <string name="md_blue_grey_700">Синий серый (700)</string>
-    <string name="md_blue_grey_800">Синий серый (800)</string>
-    <string name="md_blue_grey_900">Синий серый (900)</string>
+    <!--blue gray-->
+    <string name="md_blue_gray_50">Синий серый (50)</string>
+    <string name="md_blue_gray_100">Синий серый (100)</string>
+    <string name="md_blue_gray_200">Синий серый (200)</string>
+    <string name="md_blue_gray_300">Синий серый (300)</string>
+    <string name="md_blue_gray_400">Синий серый (400)</string>
+    <string name="md_blue_gray_500">Синий серый (500)</string>
+    <string name="md_blue_gray_600">Синий серый (600)</string>
+    <string name="md_blue_gray_700">Синий серый (700)</string>
+    <string name="md_blue_gray_800">Синий серый (800)</string>
+    <string name="md_blue_gray_900">Синий серый (900)</string>
 
 </resources>

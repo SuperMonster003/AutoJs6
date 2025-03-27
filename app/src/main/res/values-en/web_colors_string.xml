@@ -85,7 +85,7 @@
     <string name="web_fuchsia">Fuchsia</string>
     <string name="web_gainsboro">Gainsboro</string>
     <string name="web_ghost_white">Ghost white</string>
-    <string name="web_golden">Golden</string>
+    <string name="web_golden">Golden / Gold</string>
     <string name="web_goldenrod">Goldenrod</string>
     <string name="web_grass_green">Grass green</string>
     <string name="web_gray">Gray</string>
@@ -107,7 +107,7 @@
     <string name="web_khaki">Khaki</string>
     <string name="web_lapis_lazuli">Lapis lazuli</string>
     <string name="web_lavender">Lavender</string>
-    <string name="web_lavender_blue">Lavender blue</string>
+    <string name="web_lavender_blue">Lavender blue / Periwinkle</string>
     <string name="web_lavender_blush">Lavender blush</string>
     <string name="web_lavender_magenta">Lavender magenta</string>
     <string name="web_lavender_mist">Lavender mist</string>
@@ -129,7 +129,7 @@
     <string name="web_light_violet">Light violet</string>
     <string name="web_light_yellow">Light yellow</string>
     <string name="web_lilac">Lilac</string>
-    <string name="web_lime">Lime</string>
+    <string name="web_lime">Lime / Light lime</string>
     <string name="web_lime_green">Lime green</string>
     <string name="web_linen">Linen</string>
     <string name="web_magenta">Magenta</string>
@@ -162,7 +162,7 @@
     <string name="web_moss_green">Moss green</string>
     <string name="web_mustard">Mustard</string>
     <string name="web_navajo_white">Navajo white</string>
-    <string name="web_navy">Navy</string>
+    <string name="web_navy">Navy / Navy blue</string>
     <string name="web_ocher">Ocher</string>
     <string name="web_old_lace">Old lace</string>
     <string name="web_old_rose">Old rose</string>

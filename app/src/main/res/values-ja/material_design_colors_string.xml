@@ -272,30 +272,30 @@
     <string name="md_brown_800">ブラウン (800)</string>
     <string name="md_brown_900">ブラウン (900)</string>
 
-    <!-- grey -->
-    <string name="md_grey_50">グレー (50)</string>
-    <string name="md_grey_100">グレー (100)</string>
-    <string name="md_grey_200">グレー (200)</string>
-    <string name="md_grey_300">グレー (300)</string>
-    <string name="md_grey_400">グレー (400)</string>
-    <string name="md_grey_500">グレー (500)</string>
-    <string name="md_grey_600">グレー (600)</string>
-    <string name="md_grey_700">グレー (700)</string>
-    <string name="md_grey_800">グレー (800)</string>
-    <string name="md_grey_900">グレー (900)</string>
+    <!-- gray -->
+    <string name="md_gray_50">グレー (50)</string>
+    <string name="md_gray_100">グレー (100)</string>
+    <string name="md_gray_200">グレー (200)</string>
+    <string name="md_gray_300">グレー (300)</string>
+    <string name="md_gray_400">グレー (400)</string>
+    <string name="md_gray_500">グレー (500)</string>
+    <string name="md_gray_600">グレー (600)</string>
+    <string name="md_gray_700">グレー (700)</string>
+    <string name="md_gray_800">グレー (800)</string>
+    <string name="md_gray_900">グレー (900)</string>
     <string name="md_black_1000">ブラック (1000)</string>
     <string name="md_white_1000">ホワイト (1000)</string>
 
-    <!--blue grey-->
-    <string name="md_blue_grey_50">ブルーグレー (50)</string>
-    <string name="md_blue_grey_100">ブルーグレー (100)</string>
-    <string name="md_blue_grey_200">ブルーグレー (200)</string>
-    <string name="md_blue_grey_300">ブルーグレー (300)</string>
-    <string name="md_blue_grey_400">ブルーグレー (400)</string>
-    <string name="md_blue_grey_500">ブルーグレー (500)</string>
-    <string name="md_blue_grey_600">ブルーグレー (600)</string>
-    <string name="md_blue_grey_700">ブルーグレー (700)</string>
-    <string name="md_blue_grey_800">ブルーグレー (800)</string>
-    <string name="md_blue_grey_900">ブルーグレー (900)</string>
+    <!--blue gray-->
+    <string name="md_blue_gray_50">ブルーグレー (50)</string>
+    <string name="md_blue_gray_100">ブルーグレー (100)</string>
+    <string name="md_blue_gray_200">ブルーグレー (200)</string>
+    <string name="md_blue_gray_300">ブルーグレー (300)</string>
+    <string name="md_blue_gray_400">ブルーグレー (400)</string>
+    <string name="md_blue_gray_500">ブルーグレー (500)</string>
+    <string name="md_blue_gray_600">ブルーグレー (600)</string>
+    <string name="md_blue_gray_700">ブルーグレー (700)</string>
+    <string name="md_blue_gray_800">ブルーグレー (800)</string>
+    <string name="md_blue_gray_900">ブルーグレー (900)</string>
 
 </resources>

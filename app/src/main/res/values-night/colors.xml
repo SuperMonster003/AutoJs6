@@ -4,11 +4,12 @@
     <color name="day_night">@color/dusk</color>
     <color name="day_night_full">@color/dusk_full</color>
     <color name="day_night_alpha_70">#B3BFBFBF</color>
+    <color name="day_night_alpha_60">#9ABFBFBF</color>
     <color name="day_night_alpha_30">#4DBFBFBF</color>
     <color name="day_night_alpha_20">#33BFBFBF</color>
     <color name="night_day">@color/dawn</color>
     <color name="night_day_full">@color/dawn_full</color>
-    <color name="window_background">@color/day_full</color>
+    <color name="window_background">@color/md_gray_900</color>
     <color name="window_background_selected">#3B3B3B</color>
     <color name="text_color_primary">@color/day_night</color>
     <color name="text_color_primary_full">@color/day_night_full</color>
@@ -26,7 +27,7 @@
     <color name="dialog_button_attraction">#C7A4FF</color>
     <color name="dialog_button_hint">#0DA798</color>
     <color name="dialog_button_reset">#BCAAA4</color>
-    <color name="dialog_button_unavailable">#616161</color>
+    <color name="dialog_button_unavailable">@color/md_gray_700</color>
     <color name="dialog_button_finish">#009624</color>
     <color name="dialog_button_success">@color/dialog_button_finish</color>
     <color name="dialog_button_error">#4FC3F7</color>
@@ -68,6 +69,7 @@
     <color name="layout_hierarchy_window_clicked_background">#BF546E7A</color>
 
     <color name="color_selector_item_text">#DEFEFEFE</color>
+    <color name="drawer_item_subtitle_color">@color/md_gray_600</color>
     <color name="floating_action_menu_label_bg">#CC424347</color>
     <color name="navigation_bar_background">@color/window_background</color>
     <color name="navigation_bar_background_before_android_o">@color/window_background</color>

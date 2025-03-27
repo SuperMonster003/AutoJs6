@@ -43,7 +43,7 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
     }
 
     public void initThemeColors() {
-        boolean isThemeColorLuminanceLight = ThemeColorManager.isThemeColorLuminanceLight();
+        boolean isThemeColorLuminanceLight = ThemeColorManager.isLuminanceLight();
         int fullColor = mActivity.getColor(isThemeColorLuminanceLight ? R.color.day_full : R.color.night_full);
         int hintColor = mActivity.getColor(isThemeColorLuminanceLight ? R.color.day : R.color.night);
 

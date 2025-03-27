@@ -902,8 +902,25 @@
     <string name="text_switch_to_new_layout">Switch to new layout</string>
     <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
     <string name="text_search_color">Search color</string>
-    <string name="text_locate_current_color">Locate current color</string>
+    <string name="text_locate_current_theme_color">Locate current theme color</string>
     <string name="text_new_color_library">New color library</string>
     <string name="text_color_palette">Color palette</string>
+    <string name="color_library_web_colors">WEB color library</string>
+    <string name="color_library_css_colors">CSS color library</string>
+    <string name="color_library_android_colors">Android color library</string>
+    <string name="color_library_material_design_colors">Material design color library</string>
+    <string name="color_library_default_colors">Default color library</string>
+    <string name="window_background_light">Backgournd light</string>
+    <string name="window_background_night">Background night</string>
+    <string name="text_color_library">Color library</string>
+    <string name="color_library_title_default_colors">Default colors</string>
+    <string name="color_library_title_material_design_colors">Material colors</string>
+    <string name="color_library_title_android_colors">Android colors</string>
+    <string name="color_library_title_css_colors">CSS colors</string>
+    <string name="color_library_title_web_colors">WEB colors</string>
+    <string name="color_library_identifier_material_design_colors">Material</string>
+    <string name="color_library_identifier_default_colors">Default</string>
+    <string name="color_library_identifier_custom">Custom</string>
+    <string name="dialog_title_color_palette">Color palette</string>
 
 </resources>

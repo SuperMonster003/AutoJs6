@@ -272,30 +272,30 @@
     <string name="md_brown_800">브라운 (800)</string>
     <string name="md_brown_900">브라운 (900)</string>
 
-    <!-- grey -->
-    <string name="md_grey_50">회색 (50)</string>
-    <string name="md_grey_100">회색 (100)</string>
-    <string name="md_grey_200">회색 (200)</string>
-    <string name="md_grey_300">회색 (300)</string>
-    <string name="md_grey_400">회색 (400)</string>
-    <string name="md_grey_500">회색 (500)</string>
-    <string name="md_grey_600">회색 (600)</string>
-    <string name="md_grey_700">회색 (700)</string>
-    <string name="md_grey_800">회색 (800)</string>
-    <string name="md_grey_900">회색 (900)</string>
+    <!-- gray -->
+    <string name="md_gray_50">회색 (50)</string>
+    <string name="md_gray_100">회색 (100)</string>
+    <string name="md_gray_200">회색 (200)</string>
+    <string name="md_gray_300">회색 (300)</string>
+    <string name="md_gray_400">회색 (400)</string>
+    <string name="md_gray_500">회색 (500)</string>
+    <string name="md_gray_600">회색 (600)</string>
+    <string name="md_gray_700">회색 (700)</string>
+    <string name="md_gray_800">회색 (800)</string>
+    <string name="md_gray_900">회색 (900)</string>
     <string name="md_black_1000">블랙 (1000)</string>
     <string name="md_white_1000">흰색 (1000)</string>
 
-    <!--blue grey-->
-    <string name="md_blue_grey_50">블루 그레이 (50)</string>
-    <string name="md_blue_grey_100">블루 그레이 (100)</string>
-    <string name="md_blue_grey_200">블루 그레이 (200)</string>
-    <string name="md_blue_grey_300">블루 그레이 (300)</string>
-    <string name="md_blue_grey_400">블루 그레이 (400)</string>
-    <string name="md_blue_grey_500">블루 그레이 (500)</string>
-    <string name="md_blue_grey_600">블루 그레이 (600)</string>
-    <string name="md_blue_grey_700">블루 그레이 (700)</string>
-    <string name="md_blue_grey_800">블루 그레이 (800)</string>
-    <string name="md_blue_grey_900">블루 그레이 (900)</string>
+    <!--blue gray-->
+    <string name="md_blue_gray_50">블루 그레이 (50)</string>
+    <string name="md_blue_gray_100">블루 그레이 (100)</string>
+    <string name="md_blue_gray_200">블루 그레이 (200)</string>
+    <string name="md_blue_gray_300">블루 그레이 (300)</string>
+    <string name="md_blue_gray_400">블루 그레이 (400)</string>
+    <string name="md_blue_gray_500">블루 그레이 (500)</string>
+    <string name="md_blue_gray_600">블루 그레이 (600)</string>
+    <string name="md_blue_gray_700">블루 그레이 (700)</string>
+    <string name="md_blue_gray_800">블루 그레이 (800)</string>
+    <string name="md_blue_gray_900">블루 그레이 (900)</string>
 
 </resources>

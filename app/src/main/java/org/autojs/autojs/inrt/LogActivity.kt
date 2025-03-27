@@ -14,6 +14,8 @@ import org.autojs.autojs6.databinding.ActivityMainInrtBinding
 
 class LogActivity : BaseActivity() {
 
+    override val handleStatusBarThemeColorAutomatically = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupView()

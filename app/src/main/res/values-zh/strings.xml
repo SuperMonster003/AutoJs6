@@ -901,8 +901,25 @@
     <string name="text_switch_to_new_layout">切换至新布局</string>
     <string name="text_switch_to_legacy_layout">切换至传统布局</string>
     <string name="text_search_color">搜索颜色</string>
-    <string name="text_locate_current_color">定位当前颜色</string>
+    <string name="text_locate_current_theme_color">定位当前主题色</string>
     <string name="text_new_color_library">新建颜色库</string>
     <string name="text_color_palette">调色盘</string>
+    <string name="color_library_web_colors">WEB 颜色库</string>
+    <string name="color_library_css_colors">CSS 颜色库</string>
+    <string name="color_library_android_colors">Android 颜色库</string>
+    <string name="color_library_material_design_colors">材料设计 (Material Design) 颜色库</string>
+    <string name="color_library_default_colors">默认颜色库</string>
+    <string name="window_background_light">背景亮色</string>
+    <string name="window_background_night">背景暗色</string>
+    <string name="text_color_library">颜色库</string>
+    <string name="color_library_title_default_colors">默认颜色</string>
+    <string name="color_library_title_material_design_colors">材料设计颜色</string>
+    <string name="color_library_title_android_colors">Android 颜色</string>
+    <string name="color_library_title_css_colors">CSS 颜色</string>
+    <string name="color_library_title_web_colors">WEB 颜色</string>
+    <string name="color_library_identifier_material_design_colors">材料设计</string>
+    <string name="color_library_identifier_default_colors">默认</string>
+    <string name="color_library_identifier_custom">自定义</string>
+    <string name="dialog_title_color_palette">调色盘</string>
 
 </resources>

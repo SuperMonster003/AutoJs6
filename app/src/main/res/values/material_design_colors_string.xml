@@ -272,30 +272,30 @@
     <string name="md_brown_800">Brown (800)</string>
     <string name="md_brown_900">Brown (900)</string>
 
-    <!-- grey -->
-    <string name="md_grey_50">Grey (50)</string>
-    <string name="md_grey_100">Grey (100)</string>
-    <string name="md_grey_200">Grey (200)</string>
-    <string name="md_grey_300">Grey (300)</string>
-    <string name="md_grey_400">Grey (400)</string>
-    <string name="md_grey_500">Grey (500)</string>
-    <string name="md_grey_600">Grey (600)</string>
-    <string name="md_grey_700">Grey (700)</string>
-    <string name="md_grey_800">Grey (800)</string>
-    <string name="md_grey_900">Grey (900)</string>
+    <!-- gray -->
+    <string name="md_gray_50">Gray (50)</string>
+    <string name="md_gray_100">Gray (100)</string>
+    <string name="md_gray_200">Gray (200)</string>
+    <string name="md_gray_300">Gray (300)</string>
+    <string name="md_gray_400">Gray (400)</string>
+    <string name="md_gray_500">Gray (500)</string>
+    <string name="md_gray_600">Gray (600)</string>
+    <string name="md_gray_700">Gray (700)</string>
+    <string name="md_gray_800">Gray (800)</string>
+    <string name="md_gray_900">Gray (900)</string>
     <string name="md_black_1000">Black (1000)</string>
     <string name="md_white_1000">White (1000)</string>
 
-    <!--blue grey-->
-    <string name="md_blue_grey_50">Blue grey (50)</string>
-    <string name="md_blue_grey_100">Blue grey (100)</string>
-    <string name="md_blue_grey_200">Blue grey (200)</string>
-    <string name="md_blue_grey_300">Blue grey (300)</string>
-    <string name="md_blue_grey_400">Blue grey (400)</string>
-    <string name="md_blue_grey_500">Blue grey (500)</string>
-    <string name="md_blue_grey_600">Blue grey (600)</string>
-    <string name="md_blue_grey_700">Blue grey (700)</string>
-    <string name="md_blue_grey_800">Blue grey (800)</string>
-    <string name="md_blue_grey_900">Blue grey (900)</string>
+    <!--blue gray-->
+    <string name="md_blue_gray_50">Blue gray (50)</string>
+    <string name="md_blue_gray_100">Blue gray (100)</string>
+    <string name="md_blue_gray_200">Blue gray (200)</string>
+    <string name="md_blue_gray_300">Blue gray (300)</string>
+    <string name="md_blue_gray_400">Blue gray (400)</string>
+    <string name="md_blue_gray_500">Blue gray (500)</string>
+    <string name="md_blue_gray_600">Blue gray (600)</string>
+    <string name="md_blue_gray_700">Blue gray (700)</string>
+    <string name="md_blue_gray_800">Blue gray (800)</string>
+    <string name="md_blue_gray_900">Blue gray (900)</string>
 
 </resources>
