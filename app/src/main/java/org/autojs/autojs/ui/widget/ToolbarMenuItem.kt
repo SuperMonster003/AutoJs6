@@ -30,13 +30,13 @@ class ToolbarMenuItem : LinearLayout {
     }
 
     private val colorEnabled: Int
-        get() = when (ThemeColorManager.isThemeColorLuminanceLight()) {
+        get() = when (ThemeColorManager.isLuminanceLight()) {
             true -> ContextCompat.getColor(context, R.color.toolbar_menu_item_enabled_dark)
             else -> ContextCompat.getColor(context, R.color.toolbar_menu_item_enabled_light)
         }
 
     private val colorDisabled: Int
-        get() = when (ThemeColorManager.isThemeColorLuminanceLight()) {
+        get() = when (ThemeColorManager.isLuminanceLight()) {
             true -> ContextCompat.getColor(context, R.color.toolbar_menu_item_disabled_dark)
             else -> ContextCompat.getColor(context, R.color.toolbar_menu_item_disabled_light)
         }

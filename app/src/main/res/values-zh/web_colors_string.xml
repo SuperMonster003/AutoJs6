@@ -85,7 +85,7 @@
     <string name="web_fuchsia">紫红</string>
     <string name="web_gainsboro">庚斯博罗灰</string>
     <string name="web_ghost_white">幽灵白</string>
-    <string name="web_golden">/ GOLD	金</string>
+    <string name="web_golden">金</string>
     <string name="web_goldenrod">金菊</string>
     <string name="web_grass_green">草绿</string>
     <string name="web_gray">灰</string>
@@ -107,7 +107,7 @@
     <string name="web_khaki">卡其</string>
     <string name="web_lapis_lazuli">天青石蓝</string>
     <string name="web_lavender">薰衣草紫</string>
-    <string name="web_lavender_blue">/ PERIWINKLE	薰衣草蓝 / 长春花</string>
+    <string name="web_lavender_blue">薰衣草蓝 / 长春花</string>
     <string name="web_lavender_blush">薰衣草紫红</string>
     <string name="web_lavender_magenta">亮紫</string>
     <string name="web_lavender_mist">薰衣草雾</string>
@@ -129,7 +129,7 @@
     <string name="web_light_violet">亮紫</string>
     <string name="web_light_yellow">亮黄</string>
     <string name="web_lilac">紫丁香</string>
-    <string name="web_lime">/ LIGHT_LIME	柠檬绿 / 亮柠檬绿</string>
+    <string name="web_lime">柠檬绿 / 亮柠檬绿</string>
     <string name="web_lime_green">柠檬绿</string>
     <string name="web_linen">亚麻</string>
     <string name="web_magenta">洋红 / 品红</string>
@@ -162,7 +162,7 @@
     <string name="web_moss_green">苔藓绿</string>
     <string name="web_mustard">芥末黄</string>
     <string name="web_navajo_white">那瓦霍白</string>
-    <string name="web_navy">/ NAVY_BLUE	海军蓝 / 藏青</string>
+    <string name="web_navy">海军蓝 / 藏青</string>
     <string name="web_ocher">赭</string>
     <string name="web_old_lace">旧蕾丝</string>
     <string name="web_old_rose">陈玫红</string>

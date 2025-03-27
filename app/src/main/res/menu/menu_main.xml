@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-            android:id="@+id/action_log"
-            android:icon="@drawable/ic_ali_log"
-            android:title="@string/text_log"
-            app:showAsAction="ifRoom" />
+        android:id="@+id/action_log"
+        android:icon="@drawable/ic_ali_log"
+        android:title="@string/text_log"
+        app:showAsAction="ifRoom" />
 
     <item
-            android:id="@+id/action_search"
-            android:icon="@drawable/ic_search_black_48dp"
-            android:title="@string/text_search"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            app:actionViewClass="androidx.appcompat.widget.SearchView"
-            app:showAsAction="ifRoom|collapseActionView" />
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_black_48dp"
+        android:title="@string/text_search"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
 
 </menu>

@@ -17,7 +17,6 @@ import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 
 /**
@@ -48,6 +47,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
         ThemeChangeNotifier.themeChanged.observe(this) {
             initThemeColors()
+            if (handleStatusBarThemeColorAutomatically) {
+                ThemeColorManager.setStatusBarBackgroundColor(this)
+                setUpStatusBarAppearanceLightByThemeColor()
+            }
         }
 
         // @Dubious by SuperMonster003 on Oct 28, 2024.
@@ -71,7 +74,7 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         initThemeColors()
-        if (handleStatusBarThemeColorAutomatically && !BuildConfig.isInrt) {
+        if (handleStatusBarThemeColorAutomatically) {
             ThemeColorManager.addActivityStatusBar(this)
             setUpStatusBarAppearanceLightByThemeColor()
         }
@@ -95,7 +98,7 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     protected fun setUpStatusBarAppearanceLightByThemeColor() {
-        ViewUtils.setStatusBarAppearanceLight(this, ThemeColorManager.isThemeColorLuminanceDark())
+        ViewUtils.setStatusBarAppearanceLight(this, ThemeColorManager.isLuminanceDark())
     }
 
 }

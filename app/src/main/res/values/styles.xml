@@ -39,10 +39,10 @@
     </style>
 
     <style name="AppTheme.LogActivityInrt" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/md_blue_grey_600</item>
+        <item name="android:statusBarColor">@color/md_blue_gray_600</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="colorPrimary">@color/md_blue_grey_50</item>
-        <item name="colorPrimaryDark">@color/md_blue_grey_50</item>
+        <item name="colorPrimary">@color/md_blue_gray_50</item>
+        <item name="colorPrimaryDark">@color/md_blue_gray_50</item>
         <item name="colorAccent">@color/md_black_1000</item>
     </style>
 
@@ -110,6 +110,7 @@
     <style name="MtAppTheme.FullScreen" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
+        <item name="android:windowBackground">@color/window_background</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
@@ -197,8 +198,8 @@
 
     <style name="OverflowMenuInrt" parent="OverflowMenu">
         <item name="android:textColor">@color/md_black_1000</item>
-        <item name="android:popupBackground">@color/md_blue_grey_50</item>
-        <item name="android:itemBackground">@color/md_blue_grey_50</item>
+        <item name="android:popupBackground">@color/md_blue_gray_50</item>
+        <item name="android:itemBackground">@color/md_blue_gray_50</item>
     </style>
 
 </resources>

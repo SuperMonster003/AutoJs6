@@ -9,7 +9,7 @@ import org.autojs.autojs.core.pref.Pref.getInt
 import org.autojs.autojs.core.pref.Pref.putInt
 import org.autojs.autojs.extension.ArrayExtensions.toHashCode
 import org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor
-import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 /**
@@ -31,9 +31,11 @@ class ThemeColor(@JvmField var colorPrimary: Int, @JvmField var colorPrimaryDark
     @ScriptInterface
     fun getColorPrimaryDark() = colorPrimaryDark
 
-    fun isLuminanceLight() = ColorUtils.isLuminanceLight(colorPrimary)
+    @JvmOverloads
+    fun isLuminanceLight(backgroundColorMatters: Boolean = true) = ThemeColorManager.isLuminanceLight(backgroundColorMatters)
 
-    fun isLuminanceDark() = ColorUtils.isLuminanceDark(colorPrimary)
+    @JvmOverloads
+    fun isLuminanceDark(backgroundColorMatters: Boolean = true) = !isLuminanceLight(backgroundColorMatters)
 
     fun colorPrimary(colorPrimary: Int) = also { this.colorPrimary = colorPrimary }
 

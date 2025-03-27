@@ -574,11 +574,15 @@
         <!--</receiver>-->
 
         <activity
-            android:name="org.autojs.autojs.theme.app.ColorSelectLegacyActivity"
+            android:name="org.autojs.autojs.theme.app.ColorSelectActivity"
             android:theme="@style/MtAppTheme.FullScreen" />
 
         <activity
-            android:name="org.autojs.autojs.theme.app.ColorSelectActivity"
+            android:name="org.autojs.autojs.theme.app.ColorLibrariesActivity"
+            android:theme="@style/MtAppTheme.FullScreen" />
+
+        <activity
+            android:name="org.autojs.autojs.theme.app.ColorLibraryActivity"
             android:theme="@style/MtAppTheme.FullScreen" />
 
         <activity

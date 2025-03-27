@@ -273,29 +273,29 @@
     <string name="md_brown_900">Brun (900)</string>
 
     <!-- gris -->
-    <string name="md_grey_50">Gris (50)</string>
-    <string name="md_grey_100">Gris (100)</string>
-    <string name="md_grey_200">Gris (200)</string>
-    <string name="md_grey_300">Gris (300)</string>
-    <string name="md_grey_400">Gris (400)</string>
-    <string name="md_grey_500">Gris (500)</string>
-    <string name="md_grey_600">Gris (600)</string>
-    <string name="md_grey_700">Gris (700)</string>
-    <string name="md_grey_800">Gris (800)</string>
-    <string name="md_grey_900">Gris (900)</string>
+    <string name="md_gray_50">Gris (50)</string>
+    <string name="md_gray_100">Gris (100)</string>
+    <string name="md_gray_200">Gris (200)</string>
+    <string name="md_gray_300">Gris (300)</string>
+    <string name="md_gray_400">Gris (400)</string>
+    <string name="md_gray_500">Gris (500)</string>
+    <string name="md_gray_600">Gris (600)</string>
+    <string name="md_gray_700">Gris (700)</string>
+    <string name="md_gray_800">Gris (800)</string>
+    <string name="md_gray_900">Gris (900)</string>
     <string name="md_black_1000">Noir (1000)</string>
     <string name="md_white_1000">Blanc (1000)</string>
 
     <!-- gris bleu-->
-    <string name="md_blue_grey_50">Gris bleu (50)</string>
-    <string name="md_blue_grey_100">Gris bleu (100)</string>
-    <string name="md_blue_grey_200">Gris bleu (200)</string>
-    <string name="md_blue_grey_300">Gris bleu (300)</string>
-    <string name="md_blue_grey_400">Gris bleu (400)</string>
-    <string name="md_blue_grey_500">Gris bleu (500)</string>
-    <string name="md_blue_grey_600">Gris bleu (600)</string>
-    <string name="md_blue_grey_700">Gris bleu (700)</string>
-    <string name="md_blue_grey_800">Gris bleu (800)</string>
-    <string name="md_blue_grey_900">Gris bleu (900)</string>
+    <string name="md_blue_gray_50">Gris bleu (50)</string>
+    <string name="md_blue_gray_100">Gris bleu (100)</string>
+    <string name="md_blue_gray_200">Gris bleu (200)</string>
+    <string name="md_blue_gray_300">Gris bleu (300)</string>
+    <string name="md_blue_gray_400">Gris bleu (400)</string>
+    <string name="md_blue_gray_500">Gris bleu (500)</string>
+    <string name="md_blue_gray_600">Gris bleu (600)</string>
+    <string name="md_blue_gray_700">Gris bleu (700)</string>
+    <string name="md_blue_gray_800">Gris bleu (800)</string>
+    <string name="md_blue_gray_900">Gris bleu (900)</string>
 
 </resources>

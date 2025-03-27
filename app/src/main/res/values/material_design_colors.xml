@@ -272,30 +272,30 @@
     <color name="md_brown_800">#4E342E</color>
     <color name="md_brown_900">#3E2723</color>
 
-    <!-- grey -->
-    <color name="md_grey_50">#FAFAFA</color>
-    <color name="md_grey_100">#F5F5F5</color>
-    <color name="md_grey_200">#EEEEEE</color>
-    <color name="md_grey_300">#E0E0E0</color>
-    <color name="md_grey_400">#BDBDBD</color>
-    <color name="md_grey_500">#9E9E9E</color>
-    <color name="md_grey_600">#757575</color>
-    <color name="md_grey_700">#616161</color>
-    <color name="md_grey_800">#424242</color>
-    <color name="md_grey_900">#212121</color>
+    <!-- gray -->
+    <color name="md_gray_50">#FAFAFA</color>
+    <color name="md_gray_100">#F5F5F5</color>
+    <color name="md_gray_200">#EEEEEE</color>
+    <color name="md_gray_300">#E0E0E0</color>
+    <color name="md_gray_400">#BDBDBD</color>
+    <color name="md_gray_500">#9E9E9E</color>
+    <color name="md_gray_600">#757575</color>
+    <color name="md_gray_700">#616161</color>
+    <color name="md_gray_800">#424242</color>
+    <color name="md_gray_900">#212121</color>
     <color name="md_black_1000">#000000</color>
     <color name="md_white_1000">#FFFFFF</color>
 
-    <!--blue grey-->
-    <color name="md_blue_grey_50">#ECEFF1</color>
-    <color name="md_blue_grey_100">#CFD8DC</color>
-    <color name="md_blue_grey_200">#B0BBC5</color>
-    <color name="md_blue_grey_300">#90A4AE</color>
-    <color name="md_blue_grey_400">#78909C</color>
-    <color name="md_blue_grey_500">#607D8B</color>
-    <color name="md_blue_grey_600">#546E7A</color>
-    <color name="md_blue_grey_700">#455A64</color>
-    <color name="md_blue_grey_800">#37474F</color>
-    <color name="md_blue_grey_900">#263238</color>
+    <!--blue gray-->
+    <color name="md_blue_gray_50">#ECEFF1</color>
+    <color name="md_blue_gray_100">#CFD8DC</color>
+    <color name="md_blue_gray_200">#B0BBC5</color>
+    <color name="md_blue_gray_300">#90A4AE</color>
+    <color name="md_blue_gray_400">#78909C</color>
+    <color name="md_blue_gray_500">#607D8B</color>
+    <color name="md_blue_gray_600">#546E7A</color>
+    <color name="md_blue_gray_700">#455A64</color>
+    <color name="md_blue_gray_800">#37474F</color>
+    <color name="md_blue_gray_900">#263238</color>
 
 </resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_color_palette"
+        android:title="@string/text_color_palette"
+        android:icon="@drawable/ic_color_palette_vector"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_search_color"
+        android:title="@string/text_search_color"
+        android:icon="@drawable/ic_search_black_48dp"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_new_color_library"
+        android:title="@string/text_new_color_library"
+        android:icon="@drawable/ic_add_box_black_48dp"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_locate_current_theme_color"
+        android:title="@string/text_locate_current_theme_color"
+        android:icon="@drawable/ic_locate"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_toggle_color_select_layout"
+        android:title="@string/text_switch_to_legacy_layout"
+        android:icon="@drawable/ic_swap_horiz_black_48dp"
+        app:showAsAction="never" />
+
+</menu>

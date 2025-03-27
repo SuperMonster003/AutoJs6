@@ -272,30 +272,30 @@
     <string name="md_brown_800">棕 (800)</string>
     <string name="md_brown_900">棕 (900)</string>
 
-    <!-- grey -->
-    <string name="md_grey_50">灰 (50)</string>
-    <string name="md_grey_100">灰 (100)</string>
-    <string name="md_grey_200">灰 (200)</string>
-    <string name="md_grey_300">灰 (300)</string>
-    <string name="md_grey_400">灰 (400)</string>
-    <string name="md_grey_500">灰 (500)</string>
-    <string name="md_grey_600">灰 (600)</string>
-    <string name="md_grey_700">灰 (700)</string>
-    <string name="md_grey_800">灰 (800)</string>
-    <string name="md_grey_900">灰 (900)</string>
+    <!-- gray -->
+    <string name="md_gray_50">灰 (50)</string>
+    <string name="md_gray_100">灰 (100)</string>
+    <string name="md_gray_200">灰 (200)</string>
+    <string name="md_gray_300">灰 (300)</string>
+    <string name="md_gray_400">灰 (400)</string>
+    <string name="md_gray_500">灰 (500)</string>
+    <string name="md_gray_600">灰 (600)</string>
+    <string name="md_gray_700">灰 (700)</string>
+    <string name="md_gray_800">灰 (800)</string>
+    <string name="md_gray_900">灰 (900)</string>
     <string name="md_black_1000">黑 (1000)</string>
     <string name="md_white_1000">白 (1000)</string>
 
-    <!--blue grey-->
-    <string name="md_blue_grey_50">蓝灰 (50)</string>
-    <string name="md_blue_grey_100">蓝灰 (100)</string>
-    <string name="md_blue_grey_200">蓝灰 (200)</string>
-    <string name="md_blue_grey_300">蓝灰 (300)</string>
-    <string name="md_blue_grey_400">蓝灰 (400)</string>
-    <string name="md_blue_grey_500">蓝灰 (500)</string>
-    <string name="md_blue_grey_600">蓝灰 (600)</string>
-    <string name="md_blue_grey_700">蓝灰 (700)</string>
-    <string name="md_blue_grey_800">蓝灰 (800)</string>
-    <string name="md_blue_grey_900">蓝灰 (900)</string>
+    <!--blue gray-->
+    <string name="md_blue_gray_50">蓝灰 (50)</string>
+    <string name="md_blue_gray_100">蓝灰 (100)</string>
+    <string name="md_blue_gray_200">蓝灰 (200)</string>
+    <string name="md_blue_gray_300">蓝灰 (300)</string>
+    <string name="md_blue_gray_400">蓝灰 (400)</string>
+    <string name="md_blue_gray_500">蓝灰 (500)</string>
+    <string name="md_blue_gray_600">蓝灰 (600)</string>
+    <string name="md_blue_gray_700">蓝灰 (700)</string>
+    <string name="md_blue_gray_800">蓝灰 (800)</string>
+    <string name="md_blue_gray_900">蓝灰 (900)</string>
 
 </resources>

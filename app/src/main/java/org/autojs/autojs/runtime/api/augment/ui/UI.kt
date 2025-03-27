@@ -22,6 +22,10 @@ import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.jsSanitize
 import org.autojs.autojs.extension.AnyExtensions.jsUnwrapped
+import org.autojs.autojs.extension.FlexibleArray.Companion.component1
+import org.autojs.autojs.extension.FlexibleArray.Companion.component2
+import org.autojs.autojs.extension.FlexibleArray.Companion.component3
+import org.autojs.autojs.extension.FlexibleArray.Companion.component4
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
@@ -34,7 +38,6 @@ import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.runtime.api.augment.jsox.Numberx
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.theme.ThemeColor
-import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -540,7 +543,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         fun statusBarAppearanceLightBy(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { refColor ->
             ensureActivity(scriptRuntime) { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
-                    Colors.toIntRhino(refColor).also { ViewUtils.setStatusBarAppearanceLight(activity, ColorUtils.isLuminanceDark(it)) }
+                    Colors.toIntRhino(refColor).also { ViewUtils.setStatusBarAppearanceLight(activity, ViewUtils.isLuminanceDark(it)) }
                 }, NOT_CONSTRUCTABLE))
             }
             UNDEFINED
@@ -595,7 +598,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                             ScriptRuntime.requiresApi(Build.VERSION_CODES.O)
                         } else {
-                            ViewUtils.setNavigationBarAppearanceLight(activity, ColorUtils.isLuminanceDark(it))
+                            ViewUtils.setNavigationBarAppearanceLight(activity, ViewUtils.isLuminanceDark(it))
                         }
                     }
                 }, NOT_CONSTRUCTABLE))

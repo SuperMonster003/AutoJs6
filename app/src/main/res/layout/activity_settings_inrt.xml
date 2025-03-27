@@ -20,7 +20,7 @@
                 app:titleTextColor="@color/day_full"
                 app:subtitleTextColor="@color/day_full"
                 android:theme="@style/ToolBarStyleInrt"
-                android:background="@color/md_blue_grey_50"
+                android:background="@color/md_blue_gray_50"
                 app:contentInsetStartWithNavigation="0dp"
                 app:contentInsetEndWithActions="2dp"
                 app:titleTextAppearance="@style/TextAppearanceEditorTitle"

@@ -36,12 +36,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:excludeFromNavigationBar="true"
-            app:color_verbose="#DFC0C0C0"
-            app:color_debug="#CC000000"
-            app:color_info="#FF43A047"
-            app:color_warn="#FF1976D2"
-            app:color_error="#FFC62828"
-            app:color_assert="#FFE254FF" />
+            app:color_verbose="#BDBDBD"
+            app:color_debug="#111214"
+            app:color_info="#43A047"
+            app:color_warn="#1976D2"
+            app:color_error="#C62828"
+            app:color_assert="#E254FF" />
 
     </FrameLayout>
 

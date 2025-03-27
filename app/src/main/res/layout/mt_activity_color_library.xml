@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <io.codetail.widget.RevealFrameLayout
+        android:id="@+id/appBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/MtAppTheme.AppBarOverlay"
+            android:fitsSystemWindows="true">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:contentInsetStartWithNavigation="@dimen/toolbar_content_inset_start_with_navigation"
+                android:theme="@style/ToolBarStyle"
+                app:popupTheme="@style/MtAppTheme.PopupOverlay"
+                tools:title="@string/text_sample_string" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+    </io.codetail.widget.RevealFrameLayout>
+
+    <androidx.recyclerview.widget.ThemeColorRecyclerView
+        android:id="@+id/color_library_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" />
+
+</LinearLayout>

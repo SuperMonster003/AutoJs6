@@ -3,13 +3,12 @@ package org.autojs.autojs.theme.widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.util.AttributeSet;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import org.autojs.autojs.theme.ThemeColor;
 import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.theme.ThemeColorMutable;
 import org.autojs.autojs.util.ColorUtils;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
 /**
@@ -41,7 +40,7 @@ public class ThemeColorFloatingActionButton extends FloatingActionButton impleme
         int colorAccent = color.colorAccent;
         int colorForContrast = ColorUtils.adjustColorForContrast(getContext().getColor(R.color.window_background), colorAccent, 1.15);
         setBackgroundTintList(ColorStateList.valueOf(colorForContrast));
-        var tintColorRes = ColorUtils.isLuminanceLight(colorForContrast)
+        var tintColorRes = ViewUtils.isLuminanceLight(colorForContrast)
                 ? R.color.fab_tint_dark
                 : R.color.fab_tint_light;
         var tintColor = getResources().getColor(tintColorRes, null);

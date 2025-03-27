@@ -272,30 +272,30 @@
     <string name="md_brown_800">براون (800)</string>
     <string name="md_brown_900">براون (900)</string>
 
-    <!-- grey -->
-    <string name="md_grey_50">غراي (50)</string>
-    <string name="md_grey_100">غراي (100)</string>
-    <string name="md_grey_200">غراي (200)</string>
-    <string name="md_grey_300">غراي (300)</string>
-    <string name="md_grey_400">غراي (400)</string>
-    <string name="md_grey_500">غراي (500)</string>
-    <string name="md_grey_600">غراي (600)</string>
-    <string name="md_grey_700">غراي (700)</string>
-    <string name="md_grey_800">غراي (800)</string>
-    <string name="md_grey_900">غراي (900)</string>
+    <!-- gray -->
+    <string name="md_gray_50">غراي (50)</string>
+    <string name="md_gray_100">غراي (100)</string>
+    <string name="md_gray_200">غراي (200)</string>
+    <string name="md_gray_300">غراي (300)</string>
+    <string name="md_gray_400">غراي (400)</string>
+    <string name="md_gray_500">غراي (500)</string>
+    <string name="md_gray_600">غراي (600)</string>
+    <string name="md_gray_700">غراي (700)</string>
+    <string name="md_gray_800">غراي (800)</string>
+    <string name="md_gray_900">غراي (900)</string>
     <string name="md_black_1000">أسود (1000)</string>
     <string name="md_white_1000">وايت (1000)</string>
 
-    <!--blue grey-->
-    <string name="md_blue_grey_50">ازرق رمادي (50)</string>
-    <string name="md_blue_grey_100">ازرق رمادي (100)</string>
-    <string name="md_blue_grey_200">ازرق رمادي (200)</string>
-    <string name="md_blue_grey_300">ازرق رمادي (300)</string>
-    <string name="md_blue_grey_400">ازرق رمادي (400)</string>
-    <string name="md_blue_grey_500">ازرق رمادي (500)</string>
-    <string name="md_blue_grey_600">ازرق رمادي (600)</string>
-    <string name="md_blue_grey_700">ازرق رمادي (700)</string>
-    <string name="md_blue_grey_800">ازرق رمادي (800)</string>
-    <string name="md_blue_grey_900">ازرق رمادي (900)</string>
+    <!--blue gray-->
+    <string name="md_blue_gray_50">ازرق رمادي (50)</string>
+    <string name="md_blue_gray_100">ازرق رمادي (100)</string>
+    <string name="md_blue_gray_200">ازرق رمادي (200)</string>
+    <string name="md_blue_gray_300">ازرق رمادي (300)</string>
+    <string name="md_blue_gray_400">ازرق رمادي (400)</string>
+    <string name="md_blue_gray_500">ازرق رمادي (500)</string>
+    <string name="md_blue_gray_600">ازرق رمادي (600)</string>
+    <string name="md_blue_gray_700">ازرق رمادي (700)</string>
+    <string name="md_blue_gray_800">ازرق رمادي (800)</string>
+    <string name="md_blue_gray_900">ازرق رمادي (900)</string>
 
 </resources>

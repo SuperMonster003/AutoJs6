@@ -15,9 +15,9 @@
 -->
 <resources>
   <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
-  <string name="cpv_default_title">Farbe auswählen</string>
-  <string name="cpv_presets">Voreinstellungen</string>
-  <string name="cpv_custom">Benutzerdefiniert</string>
-  <string name="cpv_select">Auswählen</string>
-  <string name="cpv_transparency">Transparenz</string>
+  <string name="cpv_default_title">Select a Color</string>
+  <string name="cpv_presets">Presets</string>
+  <string name="cpv_custom">Custom</string>
+  <string name="cpv_select">Select</string>
+  <string name="cpv_transparency">Transparency</string>
 </resources>

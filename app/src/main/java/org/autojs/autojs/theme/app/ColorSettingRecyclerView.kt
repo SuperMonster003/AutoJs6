@@ -9,16 +9,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.ThemeColorRecyclerView
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorHelper
+import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_CUSTOM_COLOR_ID
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_DEFAULT_COLORS_ID
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_MATERIAL_COLORS_ID
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.colorLibraries
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_INDEX
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ID
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ITEM_ID
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.SELECT_NONE
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.colorItems
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.customColorPosition
-import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.defaultColorPosition
+import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
 class ColorSettingRecyclerView : ThemeColorRecyclerView {
@@ -31,17 +44,17 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
 
     private var mOnItemClickListener: ColorSelectBaseActivity.OnItemClickListener? = null
 
-    private var mSelectedPosition = ColorSelectBaseActivity.SELECT_NONE
+    private var mSelectedPosition = SELECT_NONE
 
     val selectedThemeColor: ThemeColor?
         get() = when {
             mSelectedPosition < 0 -> null
             mSelectedPosition == customColorPosition -> customColor
-            else -> context.getColor(ColorSelectBaseActivity.colorItems[mSelectedPosition].first)
+            else -> context.getColor(colorItems[mSelectedPosition].first)
         }?.let { ThemeColor(it) }
 
     private val customColor: Int
-        get() = Pref.getInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, context.getColor(R.color.md_blue_grey_800))
+        get() = Pref.getInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, context.getColor(R.color.custom_color_default))
 
     private val mActualOnItemClickListener = OnClickListener { v ->
         getChildViewHolder(v)?.let { holder ->
@@ -63,7 +76,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
 
     @SuppressLint("NotifyDataSetChanged")
     fun setSelectedPosition(currentPosition: Int) {
-        if (mSelectedPosition != ColorSelectBaseActivity.SELECT_NONE) {
+        if (mSelectedPosition != SELECT_NONE) {
             adapter!!.notifyItemChanged(mSelectedPosition)
             mSelectedPosition = currentPosition
             adapter!!.notifyItemChanged(currentPosition)
@@ -71,21 +84,53 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             mSelectedPosition = currentPosition
             adapter!!.notifyDataSetChanged()
         }
-        Pref.putInt(ColorSelectBaseActivity.KEY_SELECTED_COLOR_INDEX, mSelectedPosition)
+        savePrefsForLegacy()
+        savePrefsForLibraries()
+        selectedThemeColor?.let {
+            ThemeColorManager.setThemeColor(it.colorPrimary)
+            ThemeChangeNotifier.notifyThemeChanged()
+        }
     }
 
-    fun setSelectedColor(colorPrimary: Int) {
-        for ((i, colorItem) in ColorSelectBaseActivity.colorItems.withIndex()) {
-            val color = when (i) {
-                customColorPosition -> customColor
-                else -> context.getColor(colorItem.first)
+    private fun savePrefsForLegacy() {
+        Pref.putInt(KEY_SELECTED_COLOR_INDEX, mSelectedPosition)
+    }
+
+    private fun savePrefsForLibraries() {
+        when (mSelectedPosition) {
+            0 -> {
+                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_CUSTOM_COLOR_ID)
+                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, 0)
             }
-            if (color == colorPrimary) {
-                setSelectedPosition(i)
-                return
+            1 -> {
+                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_DEFAULT_COLORS_ID)
+                colorLibraries.find { it.id == COLOR_LIBRARY_DEFAULT_COLORS_ID }!!.colors.find { colorItem ->
+                    context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)
+                }?.let { Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, it.id) }
+            }
+            else -> {
+                selectedThemeColor?.colorPrimary?.let { c ->
+                    colorLibraries.find { it.id == COLOR_LIBRARY_MATERIAL_COLORS_ID }!!.colors.find { colorItem ->
+                        context.getColor(colorItem.colorRes) == c
+                    }?.let {
+                        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_MATERIAL_COLORS_ID)
+                        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, it.id)
+                    }
+                }
             }
         }
-        mSelectedPosition = ColorSelectBaseActivity.SELECT_NONE
+    }
+
+    fun setUpSelectedPosition(currentColor: Int) {
+        val selectedIndex = Pref.getInt(KEY_SELECTED_COLOR_INDEX, SELECT_NONE)
+        colorItems.getOrNull(selectedIndex)?.let {
+            setSelectedPosition(selectedIndex)
+        } ?: when (currentColor) {
+            context.getColor(R.color.theme_color_default) -> {
+                setSelectedPosition(defaultColorPosition)
+            }
+            else -> mSelectedPosition = SELECT_NONE
+        }
     }
 
     private fun showColorPicker(v: View) {
@@ -97,13 +142,13 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             .setDialogTitle(R.string.mt_color_picker_title)
             .setColor(customColor)
             .create()
-            .setColorPickerDialogListener { _: Int, color: Int ->
-                val customColor = color or -0x1000000
-                Pref.putInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, customColor)
+            .setColorPickerDialogListener { dialogId: Int, color: Int ->
+                val c = color or -0x1000000
+                Pref.putInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, c)
                 setSelectedPosition(customColorPosition)
                 mOnItemClickListener?.onItemClick(v, customColorPosition)
             }
-            .show((context as ColorSelectBaseActivity).supportFragmentManager, "ColorPickerTag")
+            .show((context as FragmentActivity).supportFragmentManager, "ColorPickerTagForColorSelect")
     }
 
     fun setOnItemClickListener(onItemClickListener: ColorSelectBaseActivity.OnItemClickListener?) {
@@ -117,7 +162,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val colorItem = ColorSelectBaseActivity.colorItems[position]
+            val colorItem = colorItems[position]
             val (colorRes, nameRes) = colorItem
             val color = when (position) {
                 customColorPosition -> customColor
@@ -131,7 +176,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             }
         }
 
-        override fun getItemCount() = ColorSelectBaseActivity.colorItems.size
+        override fun getItemCount() = colorItems.size
 
     }
 
@@ -150,7 +195,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             if (checked) {
                 colorView.setImageResource(R.drawable.mt_ic_check_white_36dp)
                 val selectedThemeColorRes = selectedThemeColor?.colorPrimary?.let {
-                    if (ColorUtils.isLuminanceLight(it)) R.color.day else R.color.night
+                    if (ViewUtils.isLuminanceLight(it)) R.color.day else R.color.night
                 } ?: R.color.night_day
                 colorView.imageTintList = ColorStateList.valueOf(context.getColor(selectedThemeColorRes))
             } else {

@@ -32,10 +32,10 @@
 
     </io.codetail.widget.RevealFrameLayout>
 
-    <view
-        android:id="@+id/color_setting_recycler_view"
-        class="org.autojs.autojs.theme.app.ColorSettingRecyclerViewLegacy"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/color_libraries_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" />
 
 </LinearLayout>
