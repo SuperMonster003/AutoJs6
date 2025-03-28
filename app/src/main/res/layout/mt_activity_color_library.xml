@@ -36,6 +36,9 @@
         android:id="@+id/color_library_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fadeScrollbars="true"
+        android:scrollbarDefaultDelayBeforeFade="600"
+        android:scrollbarFadeDuration="500"
         android:scrollbars="vertical" />
 
 </LinearLayout>

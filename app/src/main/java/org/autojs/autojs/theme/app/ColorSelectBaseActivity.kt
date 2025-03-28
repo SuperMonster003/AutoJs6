@@ -9,6 +9,7 @@ import android.view.ViewAnimationUtils
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.appbar.AppBarLayout
 import io.codetail.widget.RevealFrameLayout
+import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeColorManager
@@ -107,18 +108,67 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         mAppBarContainer = appBarContainer
     }
 
+    protected fun checkAndGetTargetInfoForThemeColorLocate(): TargetInfoForLocate? {
+        val targetLibraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, -1)
+        if (targetLibraryId == COLOR_LIBRARY_CUSTOM_COLOR_ID) {
+            ViewUtils.showToast(this, "当前主题色为自定义颜色", true)
+            // 提示
+            // 当前主题色为自定义颜色
+            //
+            // HEX: #FF3300
+            // RGB: 255, 0, 0
+            // HSL: 0, 0, 0.14
+            //
+            // 使用调色盘可查看或修改自定义主题颜色
+            // 调色盘 关闭
+            return null
+        }
+        val targetLibrary = colorLibraries.find { it.id == targetLibraryId }
+        if (targetLibrary == null) {
+            ViewUtils.showToast(this, "主题色库定位失败", true)
+            // 定位失败
+            // 无法定位主题色所在颜色库
+            //
+            // Target lib ID: targetLibraryId
+            // Color libs IDs: [ colorLibraries.sorted().joinToString(", ") { "${it.id}" } ]
+            // 复制信息 关闭
+            return null
+        }
+        val targetIndex = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, -1)
+        if (targetIndex !in targetLibrary.colors.indices) {
+            ViewUtils.showToast(this, "主题色条目定位失败", true)
+            // 定位失败
+            // 无法确定主题色条目的索引值
+            //
+            // Target index: targetLibraryId
+            // Color indicies: [ 0..90 ] (注意 90 为 size - 1)
+            // 复制信息 关闭
+            return null
+        }
+        return TargetInfoForLocate(targetLibraryId, targetIndex)
+    }
+
     interface OnItemClickListener {
         fun onItemClick(v: View?, position: Int)
     }
+
+    data class TargetInfoForLocate(val libraryId: Int, val libraryItemId: Int)
 
     companion object {
 
         const val SELECT_NONE = -1
 
-        val KEY_CUSTOM_COLOR = "${ColorSettingRecyclerView::class.java.name}.COLOR_SETTING_CUSTOM_COLOR"
-        val KEY_SELECTED_COLOR_INDEX = "${ColorSettingRecyclerView::class.java.name}.SELECTED_COLOR_INDEX"
-        val KEY_SELECTED_COLOR_LIBRARY_ID = "${ColorSettingRecyclerView::class.java.name}.SELECTED_COLOR_LIBRARY_ID"
-        val KEY_SELECTED_COLOR_LIBRARY_ITEM_ID = "${ColorSettingRecyclerView::class.java.name}.SELECTED_COLOR_LIBRARY_ITEM_ID"
+        @ReservedForCompatibility
+        const val KEY_CUSTOM_COLOR = "org.autojs.autojs.theme.app.ColorSettingRecyclerView.COLOR_SETTING_CUSTOM_COLOR"
+
+        @ReservedForCompatibility
+        const val KEY_LEGACY_SELECTED_COLOR_INDEX = "org.autojs.autojs.theme.app.ColorSettingRecyclerView.SELECTED_COLOR_INDEX"
+
+        const val KEY_SELECTED_COLOR_LIBRARY_ID = "SELECTED_COLOR_LIBRARY_ID"
+        const val KEY_SELECTED_COLOR_LIBRARY_ITEM_ID = "SELECTED_COLOR_LIBRARY_ITEM_ID"
+
+        const val INTENT_IDENTIFIER_LIBRARY_ID = "LIBRARY_ID"
+        const val INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO = "INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO"
 
         val customColorPosition: Int
             get() = /* return mColors.size() - 1; */ 0
@@ -130,7 +180,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             get() = Pref.getBoolean(R.string.key_color_select_activity_legacy_layout, false)
             set(value) = Pref.putBoolean(R.string.key_color_select_activity_legacy_layout, value)
 
-        val colorItems by lazy {
+        val colorItemsLegacy by lazy {
             mutableListOf<Pair</* colorRes */ Int, /* nameRes */ Int>>().apply {
                 add(customColorPosition, R.color.custom_color_default to R.string.mt_custom)
                 add(defaultColorPosition, R.color.theme_color_default to R.string.theme_color_default)
@@ -160,13 +210,13 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
         @JvmStatic
         fun getCurrentColorSummary(context: Context, isBrief: Boolean = false): String = when {
-            isLegacyLayout -> when (val index = Pref.getInt(KEY_SELECTED_COLOR_INDEX, defaultColorPosition)) {
+            isLegacyLayout -> when (val index = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, defaultColorPosition)) {
                 SELECT_NONE -> {
                     val colorInt = ThemeColorManager.colorPrimary
                     ColorUtils.toString(colorInt).uppercase()
                 }
                 else -> {
-                    val colorItem = colorItems[index]
+                    val colorItem = colorItemsLegacy[index]
                     val (colorRes, nameRes) = colorItem
                     val name = context.getString(nameRes)
                     val colorInt = when (index) {
@@ -187,7 +237,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         identifier = context.getString(R.string.mt_custom)
                     }
                     SELECT_NONE -> {
-                        val legacyIndex = Pref.getInt(KEY_SELECTED_COLOR_INDEX, SELECT_NONE)
+                        val legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
                         when (legacyIndex) {
                             customColorPosition -> identifier = context.getString(R.string.color_library_identifier_custom)
                             SELECT_NONE, defaultColorPosition -> identifier = context.getString(R.string.color_library_identifier_default_colors)

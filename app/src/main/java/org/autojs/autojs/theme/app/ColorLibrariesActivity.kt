@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -57,7 +56,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             it.layoutManager = LinearLayoutManager(this)
             it.adapter = ColorLibraryAdapter(colorLibraries) { library ->
                 val intent = Intent(this, ColorLibraryActivity::class.java)
-                intent.putExtra("LIBRARY_ID", library.id)
+                intent.putExtra(INTENT_IDENTIFIER_LIBRARY_ID, library.id)
                 startActivity(intent)
             }.also { mAdapter = it }
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
@@ -97,10 +96,6 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         }
         mAdapter.updateData(filteredLibraries)
     }
-
-    // 定位功能可以通过工具栏中的 "action_locate_current_theme_color" 按钮实现，
-    // 按钮点击后找到包含当前主题色的颜色库在列表中的位置，
-    // 然后调用 RecyclerView 的 scrollToPosition() 方法跳转到该项
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_color_palette -> {
@@ -157,24 +152,15 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
     private fun savePrefsForLegacy(color: Int) {
         Pref.putInt(KEY_CUSTOM_COLOR, color or -0x1000000)
-        Pref.putInt(KEY_SELECTED_COLOR_INDEX, customColorPosition)
+        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, customColorPosition)
     }
 
-
     private fun locateCurrentThemeColor() {
-        // 假设当前主题颜色保存在 ThemeColorManager 中，可以通过它查找对应颜色库
-        val currentColor = ThemeColorManager.colorPrimary
-        // 简单示例：遍历 colorLibraries，找到第一个包含该颜色的库
-        val targetIndex = colorLibraries.indexOfFirst { library ->
-            library.colors.any { colorItem ->
-                getColor(colorItem.colorRes) == currentColor
-            }
-        }
-        if (targetIndex >= 0) {
-            val recyclerView: RecyclerView = findViewById(R.id.color_libraries_recycler_view)
-            recyclerView.smoothScrollToPosition(targetIndex)
-        } else {
-            Toast.makeText(this, "未找到当前颜色所在的颜色库", Toast.LENGTH_SHORT).show()
+        checkAndGetTargetInfoForThemeColorLocate()?.let { target ->
+            Intent(this, ColorLibraryActivity::class.java).apply {
+                putExtra(INTENT_IDENTIFIER_LIBRARY_ID, target.libraryId)
+                putExtra(INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO, target.libraryItemId)
+            }.let { startActivity(it) }
         }
     }
 

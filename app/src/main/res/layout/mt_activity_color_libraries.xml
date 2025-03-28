@@ -32,10 +32,13 @@
 
     </io.codetail.widget.RevealFrameLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.recyclerview.widget.ThemeColorRecyclerView
         android:id="@+id/color_libraries_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fadeScrollbars="true"
+        android:scrollbarDefaultDelayBeforeFade="600"
+        android:scrollbarFadeDuration="500"
         android:scrollbars="vertical" />
 
 </LinearLayout>
