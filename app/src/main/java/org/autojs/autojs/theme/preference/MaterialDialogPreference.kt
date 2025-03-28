@@ -52,6 +52,15 @@ open class MaterialDialogPreference : MaterialPreference {
     }
 
     override fun onClick() {
+
+        // @Hint by SuperMonster003 on Mar 27, 2025.
+        //  ! Avoid rapid consecutive clicks to prevent the app from crashing.
+        //  ! zh-CN: 避免连续快速点击可能导致应用崩溃.
+        //  # java.lang.IllegalArgumentException:
+        //  # LayoutManager androidx.recyclerview.widget.LinearLayoutManager@xxx
+        //  # is already attached to a RecyclerView: androidx.recyclerview.widget.RecyclerView{...}
+        if (::mDialog.isInitialized && mDialog.isShowing) return
+
         getBuilder().build().also { mDialog = it }.show()
         super.onClick()
     }

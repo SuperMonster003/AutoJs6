@@ -416,7 +416,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
     private fun copyLibrariesByAbi(abiSrcName: String, abiDestName: String) {
 
         // @Reference to LZX284 (https://github.com/LZX284) by SuperMonster003 on Dec 11, 2023.
-        //  ! https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61
+        //  ! http://pr.autojs6.com/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61
         val srcLibDir = File(appApkFile.parent, LIBRARY_DIR).path
 
         mLibsIncludes.distinct().forEach { libName ->
