@@ -533,7 +533,12 @@ open class UiObject(
         if (this === other) return true
         if (other !is UiObject) return false
 
-        return packageName() == other.packageName() &&
+        // @Reference to Hunter1023 (https://github.com/Hunter1023) by SuperMonster003 on Mar 28, 2025.
+        //  ! http://issues.autojs6.com/288#issuecomment-2692248348
+        val info = unwrap() ?: return false
+
+        return info == other.unwrap() &&
+                packageName() == other.packageName() &&
                 parent == other.parent &&
                 id() == other.id() &&
                 fullId() == other.fullId() &&
@@ -730,7 +735,7 @@ open class UiObject(
                     }
 
                     in RESULT_GROUP_EXISTENCE -> when (compass) {
-                        null, COMPASS_PASS_ON -> selector?.exists() ?: false
+                        null, COMPASS_PASS_ON -> selector?.exists() == true
                         else -> getUiObject() != null
                     }
 
@@ -863,7 +868,7 @@ open class UiObject(
                 private val cString = String::class.java
                 private val cBoolean = Boolean::class.java
 
-                internal val interceptedMap: Map<String, Intercepted> by lazy {
+                val interceptedMap: Map<String, Intercepted> by lazy {
                     val numberClassMap: Map<Array<out Class<*>>, Array<String>> = mapOf(
                         arrayOf(cIntPrim) to arrayOf(
                             "child", "getChild", "performAction", "setDrawingOrder", "setInputType",
@@ -918,7 +923,7 @@ open class UiObject(
                     }.flatten().associateBy { it.name }
                 }
 
-                internal fun has(name: String) = interceptedMap.containsKey(name)
+                fun has(name: String) = interceptedMap.containsKey(name)
 
             }
 
