@@ -24,11 +24,11 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRAR
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_DEFAULT_COLORS_ID
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_MATERIAL_COLORS_ID
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.colorLibraries
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_INDEX
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_LEGACY_SELECTED_COLOR_INDEX
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ID
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ITEM_ID
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.SELECT_NONE
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.colorItems
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.colorItemsLegacy
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.customColorPosition
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.defaultColorPosition
 import org.autojs.autojs.util.ViewUtils
@@ -50,7 +50,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
         get() = when {
             mSelectedPosition < 0 -> null
             mSelectedPosition == customColorPosition -> customColor
-            else -> context.getColor(colorItems[mSelectedPosition].first)
+            else -> context.getColor(colorItemsLegacy[mSelectedPosition].first)
         }?.let { ThemeColor(it) }
 
     private val customColor: Int
@@ -93,7 +93,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
     }
 
     private fun savePrefsForLegacy() {
-        Pref.putInt(KEY_SELECTED_COLOR_INDEX, mSelectedPosition)
+        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, mSelectedPosition)
     }
 
     private fun savePrefsForLibraries() {
@@ -122,8 +122,8 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
     }
 
     fun setUpSelectedPosition(currentColor: Int) {
-        val selectedIndex = Pref.getInt(KEY_SELECTED_COLOR_INDEX, SELECT_NONE)
-        colorItems.getOrNull(selectedIndex)?.let {
+        val selectedIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+        colorItemsLegacy.getOrNull(selectedIndex)?.let {
             setSelectedPosition(selectedIndex)
         } ?: when (currentColor) {
             context.getColor(R.color.theme_color_default) -> {
@@ -162,7 +162,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val colorItem = colorItems[position]
+            val colorItem = colorItemsLegacy[position]
             val (colorRes, nameRes) = colorItem
             val color = when (position) {
                 customColorPosition -> customColor
@@ -176,7 +176,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             }
         }
 
-        override fun getItemCount() = colorItems.size
+        override fun getItemCount() = colorItemsLegacy.size
 
     }
 

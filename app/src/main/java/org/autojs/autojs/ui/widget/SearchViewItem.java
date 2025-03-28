@@ -25,6 +25,7 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
     private final Activity mActivity;
     private EditText mTextview;
     private ImageView mCloseButtonView;
+    private ImageView mSearchGoButtonView;
 
     public SearchViewItem(Activity activity, MenuItem searchMenuItem) {
         mActivity = activity;
@@ -34,9 +35,11 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
         if (searchView == null) {
             return;
         }
+        searchView.setSubmitButtonEnabled(true);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(activity.getComponentName()));
         mTextview = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         mCloseButtonView = searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
+        mSearchGoButtonView = searchView.findViewById(androidx.appcompat.R.id.search_go_btn);
         initThemeColors();
         MenuItemCompat.setOnActionExpandListener(searchMenuItem, this);
         searchView.setOnQueryTextListener(this);
@@ -53,6 +56,9 @@ public class SearchViewItem implements MenuItemCompat.OnActionExpandListener, Se
         }
         if (mCloseButtonView != null) {
             mCloseButtonView.setColorFilter(fullColor);
+        }
+        if (mSearchGoButtonView != null) {
+            mSearchGoButtonView.setColorFilter(fullColor);
         }
     }
 
