@@ -98,7 +98,7 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     protected fun setUpStatusBarAppearanceLightByThemeColor() {
-        ViewUtils.setStatusBarAppearanceLight(this, ThemeColorManager.isLuminanceDark())
+        ThemeColorManager.setStatusBarAppearanceLight(this)
     }
 
 }

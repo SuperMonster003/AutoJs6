@@ -14,7 +14,6 @@ import androidx.core.graphics.ColorUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.theme.ThemeColor
-import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.text.RegexOption.IGNORE_CASE
 
@@ -57,7 +56,7 @@ object ColorUtils {
     }
 
     @JvmStatic
-    fun toInt(num: Long) = toInt(toHex(num))
+    fun toInt(num: Number) = toInt(toHex(num))
 
     @JvmStatic
     fun toInt(themeColor: ThemeColor) = toInt(toHex(themeColor))
@@ -72,17 +71,17 @@ object ColorUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun toHex(num: Long, alpha: String = "auto"): String {
+    fun toHex(num: Number, alpha: String = "auto"): String {
         return toHex(toString(toJavaIntegerRange(num)), alpha)
     }
 
     @JvmStatic
-    fun toHex(num: Long, hasAlpha: Boolean): String {
+    fun toHex(num: Number, hasAlpha: Boolean): String {
         return toHex(toString(toJavaIntegerRange(num)), hasAlpha)
     }
 
     @JvmStatic
-    fun toHex(num: Long, resultLength: Int): String {
+    fun toHex(num: Number, resultLength: Int): String {
         return toHex(toString(toJavaIntegerRange(num)), resultLength)
     }
 
@@ -163,7 +162,7 @@ object ColorUtils {
     }
 
     @JvmStatic
-    fun toFullHex(num: Long) = toHex(num, 8)
+    fun toFullHex(num: Number) = toHex(num, 8)
 
     @JvmStatic
     fun toFullHex(themeColor: ThemeColor) = toHex(themeColor, 8)
@@ -189,14 +188,16 @@ object ColorUtils {
         else -> toInt(color)
     }
 
-    private fun toJavaIntegerRange(x: Long): Int {
-        val t = 2f.pow(32).toLong()
-        val min = (-2f).pow(31).toLong()
-        val max = 2f.pow(31 - 1).toLong()
-        var tmp = x
-        while (tmp < min) tmp += t
-        while (tmp > max) tmp -= t
-        return tmp.toInt()
+    private fun toJavaIntegerRange(x: Number): Int {
+        // @Commented by SuperMonster003 on Apr 1, 2025.
+        //  # val t = 2f.pow(32).toLong()
+        //  # val min = (-2f).pow(31).toLong()
+        //  # val max = 2f.pow(31 - 1).toLong()
+        //  # var tmp = x.toLong()
+        //  # while (tmp < min) tmp += t
+        //  # while (tmp > max) tmp -= t
+        //  # return tmp.toInt()
+        return x.toLong().toInt()
     }
 
     fun toColorStateList(color: String) = ColorStateList.valueOf(toInt(color))

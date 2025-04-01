@@ -6,7 +6,7 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.extension.NumberExtensions.string
+import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
@@ -500,7 +500,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                                 "指定的 AutoJs6 应用版本号需大于 461"
                             }
                             require(BuildConfig.VERSION_CODE >= num.toInt()) {
-                                "AutoJs6 应用版本号需不低于 ${num.string}"
+                                "AutoJs6 应用版本号需不低于 ${num.jsString}"
                             }
                         }
                     }

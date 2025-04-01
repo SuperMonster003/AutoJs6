@@ -2,8 +2,16 @@
 <resources>
 
     <color name="day">#DE212121</color>
+    <color name="day_alpha_70">#B3212121</color>
+    <color name="day_alpha_60">#9A212121</color>
+    <color name="day_alpha_30">#4D212121</color>
+    <color name="day_alpha_20">#33212121</color>
     <color name="day_full">@color/md_gray_900</color>
     <color name="night">#DEFBFBFB</color>
+    <color name="night_alpha_70">#B3FBFBFB</color>
+    <color name="night_alpha_60">#9AFBFBFB</color>
+    <color name="night_alpha_30">#4DFBFBFB</color>
+    <color name="night_alpha_20">#33FBFBFB</color>
     <color name="night_full">#FBFBFB</color>
     <color name="dawn">#DE252525</color>
     <color name="dawn_full">#252525</color>

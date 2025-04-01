@@ -5,7 +5,7 @@ import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.NumberExtensions.string
+import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -81,7 +81,7 @@ object VersionCodes : Augmentable() {
         val releaseDate: String,
     ) {
         private val releaseTimestampLong = parseTimestamp(releaseDate)
-        val releaseTimestamp = releaseTimestampLong.string
+        val releaseTimestamp = releaseTimestampLong.jsString
 
         fun toNativeObject() = newNativeObject().also {
             it.put("versionCode", it, versionCode)
@@ -171,7 +171,7 @@ object VersionCodes : Augmentable() {
 
         private fun normalizeSearcherSource(o: Any) = when (o) {
             is NativeDate -> wrapNumber(o.date).toString()
-            is Number -> o.string
+            is Number -> o.jsString
             is String -> o
             else -> throw WrappedIllegalArgumentException("Invalid argument type: $o for versionCodes.search")
         }

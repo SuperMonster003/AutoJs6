@@ -20,7 +20,7 @@ import org.autojs.autojs.extension.AnyExtensions.isJsSymbol
 import org.autojs.autojs.extension.AnyExtensions.isJsUndefined
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.NumberExtensions.string
+import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -352,7 +352,7 @@ object Util : Augmentable() {
 
             when (matchResult.value) {
                 "%s" -> Context.toString(args[index++])
-                "%d" -> Context.toNumber(args[index++]).string
+                "%d" -> Context.toNumber(args[index++]).jsString
                 "%j" -> try {
                     Context.toString(js_json_stringify(args[index++]))
                 } catch (e: Exception) {

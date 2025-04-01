@@ -94,6 +94,11 @@ object ThemeColorManager {
         ViewUtils.setStatusBarBackgroundColor(activity, colorPrimary)
     }
 
+    @JvmStatic
+    fun setStatusBarAppearanceLight(activity: Activity) {
+        ViewUtils.setStatusBarAppearanceLight(activity, isLuminanceDark())
+    }
+
     private object BackgroundColorManager {
 
         private val views: MutableList<WeakReference<View>> = LinkedList()

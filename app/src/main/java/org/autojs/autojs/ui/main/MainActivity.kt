@@ -16,6 +16,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.widget.SearchView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
@@ -280,7 +281,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private fun setUpToolbarColors() {
         mToolbar.setMenuIconsColorByThemeColorLuminance(this)
         mToolbar.setNavigationIconColorByThemeColorLuminance(this)
-        mSearchViewItem?.initThemeColors()
+        mSearchViewItem?.setColorsByThemeColorLuminance()
     }
 
     private fun setUpTabLayoutColors() {
@@ -416,7 +417,10 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
                 return super.onMenuItemActionCollapse(item)
             }
         }.apply {
-            setQueryCallback { query: String? -> submitQuery(query) }
+            setQueryCallback(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?) = true.also { submitQuery(query) }
+                override fun onQueryTextChange(newText: String?) = true.also { submitQuery(newText) }
+            })
         }
     }
 

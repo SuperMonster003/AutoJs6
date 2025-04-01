@@ -8,7 +8,7 @@ import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.ArrayExtensions.unshiftWith
 import org.autojs.autojs.extension.FlexibleArray
-import org.autojs.autojs.extension.NumberExtensions.string
+import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.StringExtensions.padEnd
 import org.autojs.autojs.extension.StringExtensions.padStart
 import org.autojs.autojs.extension.StringExtensions.toDoubleOrNaN
@@ -276,10 +276,10 @@ class Numberx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
             require(!niceTargetLength.isNaN() && niceTargetLength.isFinite()) { "Argument \"targetLength\" for Numberx.padStart must be a number" }
             val nicePad: String = when {
                 pad.isJsNullish() -> DEFAULT_PADDING_STRING
-                pad is Number -> pad.toDouble().string
+                pad is Number -> pad.toDouble().jsString
                 else -> pad.toString()
             }
-            return parseAnyRhino(num).string.padStart(niceTargetLength.roundToInt(), nicePad)
+            return parseAnyRhino(num).jsString.padStart(niceTargetLength.roundToInt(), nicePad)
         }
 
         @JvmStatic
@@ -297,10 +297,10 @@ class Numberx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
             require(!niceTargetLength.isNaN() && niceTargetLength.isFinite()) { "Argument \"targetLength\" for Numberx.padEnd must be a number" }
             val nicePad: String = when {
                 pad.isJsNullish() -> DEFAULT_PADDING_STRING
-                pad is Number -> pad.toDouble().string
+                pad is Number -> pad.toDouble().jsString
                 else -> pad.toString()
             }
-            return parseAnyRhino(num).string.padEnd(niceTargetLength.roundToInt(), nicePad)
+            return parseAnyRhino(num).jsString.padEnd(niceTargetLength.roundToInt(), nicePad)
         }
 
         @JvmStatic

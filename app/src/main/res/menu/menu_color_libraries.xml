@@ -7,19 +7,41 @@
         android:id="@+id/action_color_palette"
         android:title="@string/text_color_palette"
         android:icon="@drawable/ic_color_palette_vector"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_search_color"
         android:title="@string/text_search_color"
         android:icon="@drawable/ic_search_black_48dp"
-        app:showAsAction="ifRoom" />
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
 
     <item
-        android:id="@+id/action_new_color_library"
-        android:title="@string/text_new_color_library"
-        android:icon="@drawable/ic_add_box_black_48dp"
-        app:showAsAction="never" />
+        android:id="@+id/action_add_color_library"
+        android:title="@string/text_add_color_library">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_new_color_library"
+                android:title="@string/text_new_color_library"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_import_color_library"
+                android:title="@string/text_import_color_library"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_clone_color_library"
+                android:title="@string/text_clone_color_library"
+                app:showAsAction="never" />
+
+        </menu>
+
+    </item>
 
     <item
         android:id="@+id/action_locate_current_theme_color"
@@ -27,10 +49,17 @@
         android:icon="@drawable/ic_locate"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_toggle_color_select_layout"
-        android:title="@string/text_switch_to_legacy_layout"
-        android:icon="@drawable/ic_swap_horiz_black_48dp"
-        app:showAsAction="never" />
+    <item android:title="@string/text_more">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_toggle_color_select_layout"
+                android:title="@string/text_switch_to_legacy_layout"
+                app:showAsAction="never" />
+
+        </menu>
+
+    </item>
 
 </menu>

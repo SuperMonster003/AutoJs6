@@ -20,23 +20,26 @@ import android.os.Looper
 import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.Window
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.forEach
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
@@ -44,8 +47,6 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
-import org.autojs.autojs6.R.color.day
-import org.autojs.autojs6.R.color.night
 import kotlin.math.roundToInt
 
 /**
@@ -186,12 +187,12 @@ object ViewUtils {
 
     @JvmStatic
     fun getDayOrNightColorByLuminance(context: Context, color: Int): Int {
-        return context.getColor(if (isLuminanceLight(color)) day else night)
+        return context.getColor(if (isLuminanceLight(color)) R.color.day else R.color.night)
     }
 
     @JvmStatic
     fun getDayOrNightColorResByLuminance(color: Int): Int {
-        return if (isLuminanceLight(color)) day else night
+        return if (isLuminanceLight(color)) R.color.day else R.color.night
     }
 
     @JvmStatic
@@ -408,11 +409,17 @@ object ViewUtils {
 
     fun Toolbar.setMenuIconsColorByColorLuminance(context: Context, aimColor: Int) {
         val color = getDayOrNightColorByLuminance(context, aimColor)
-        this.menu.forEach { menu ->
-            menu.icon?.let { ic -> menu.icon = ic.applyColorFilterWith(color) }
-        }
+        this.menu.setItemsColor(color)
         this.collapseIcon?.let { this.collapseIcon = it.applyColorFilterWith(color) }
         this.overflowIcon?.let { this.overflowIcon = it.applyColorFilterWith(color) }
+    }
+
+    fun Menu.setItemsColor(color: Int) {
+        for (i in 0 until size()) {
+            val menuItem = getItem(i)
+            menuItem.icon = menuItem.icon?.applyColorFilterWith(color)
+            menuItem.subMenu?.setItemsColor(color)
+        }
     }
 
     @JvmStatic
@@ -494,6 +501,41 @@ object ViewUtils {
     @JvmStatic
     fun setToolbarTitlesTextColorByColorLuminance(context: Context, toolbar: Toolbar, aimColor: Int) {
         toolbar.setTitlesTextColorByColorLuminance(context, aimColor)
+    }
+
+    fun SearchView.setColorsByColorLuminance(context: Context, aimColor: Int) {
+        val isAimColorLight = isLuminanceLight(aimColor)
+        val fullColor = context.getColor(if (isAimColorLight) R.color.day_full else R.color.night_full)
+        val hintColor = context.getColor(if (isAimColorLight) R.color.day_alpha_70 else R.color.night_alpha_70)
+
+        findViewById<EditText?>(androidx.appcompat.R.id.search_src_text).apply {
+            setTextColor(fullColor)
+            setHintTextColor(hintColor)
+            setLinkTextColor(fullColor)
+        }
+        findViewById<ImageView?>(androidx.appcompat.R.id.search_close_btn)?.apply {
+            setColorFilter(fullColor)
+        }
+        findViewById<ImageView?>(androidx.appcompat.R.id.search_mag_icon)?.apply {
+            setColorFilter(fullColor)
+        }
+        findViewById<ImageView?>(androidx.appcompat.R.id.search_go_btn)?.apply {
+            setColorFilter(fullColor)
+        }
+    }
+
+    fun SearchView.setColorsByThemeColorLuminance(context: Context) {
+        this.setColorsByColorLuminance(context, ThemeColorManager.colorPrimary)
+    }
+
+    @JvmStatic
+    fun setSearchViewColorsByColorLuminance(context: Context, searchView: SearchView, aimColor: Int) {
+        searchView.setColorsByColorLuminance(context, aimColor)
+    }
+
+    @JvmStatic
+    fun setSearchViewColorsByThemeColorLuminance(context: Context, searchView: SearchView) {
+        setSearchViewColorsByColorLuminance(context, searchView, ThemeColorManager.colorPrimary)
     }
 
     @JvmStatic

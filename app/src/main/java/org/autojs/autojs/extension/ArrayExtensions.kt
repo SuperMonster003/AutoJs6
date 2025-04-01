@@ -1,5 +1,6 @@
 package org.autojs.autojs.extension
 
+import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
@@ -82,6 +83,11 @@ object ArrayExtensions {
                 else -> o.put(key, o, Context.javaToJS(value, o))
             }
         }
+    }
+
+    fun <T> Array<T>.jsArrayBrief(separator: String = ", ", appendPaddingSpace: Boolean = true) = when (appendPaddingSpace) {
+        true -> "[ ${this.joinToString(separator) { it.jsBrief() }} ]"
+        else -> "[${this.joinToString(separator) { it.jsBrief() }}]"
     }
 
 }

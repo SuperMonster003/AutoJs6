@@ -121,7 +121,8 @@
     </style>
 
     <style name="MtAppTheme.PopupOverlay" parent="OverflowMenu">
-        <item name="android:textColorPrimary">@color/day_full</item>
+        <item name="android:textColor">@color/day_night_full</item>
+        <item name="android:tint">@color/day_night_full</item>
     </style>
 
     <style name="ConsoleTheme" parent="Theme.AppCompat.Light.DarkActionBar">

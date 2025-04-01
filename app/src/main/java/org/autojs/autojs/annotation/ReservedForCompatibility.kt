@@ -1,4 +1,3 @@
-package org.autojs.autojs.annotation;
+package org.autojs.autojs.annotation
 
-public @interface ReservedForCompatibility {
-}
+annotation class ReservedForCompatibility 

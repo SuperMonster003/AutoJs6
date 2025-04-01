@@ -3,6 +3,7 @@ package org.autojs.autojs.theme.app
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -20,10 +21,10 @@ import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManager
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_CUSTOM_COLOR_ID
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_DEFAULT_COLORS_ID
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_MATERIAL_COLORS_ID
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.colorLibraries
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_PALETTE
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_MATERIAL
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_LEGACY_SELECTED_COLOR_INDEX
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ID
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ITEM_ID
@@ -99,22 +100,22 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
     private fun savePrefsForLibraries() {
         when (mSelectedPosition) {
             0 -> {
-                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_CUSTOM_COLOR_ID)
+                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_PALETTE)
                 Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, 0)
             }
             1 -> {
-                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_DEFAULT_COLORS_ID)
-                colorLibraries.find { it.id == COLOR_LIBRARY_DEFAULT_COLORS_ID }!!.colors.find { colorItem ->
+                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_DEFAULT)
+                presetColorLibraries.find { it.isDefault }!!.colors.find { colorItem ->
                     context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)
-                }?.let { Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, it.id) }
+                }?.let { Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, it.itemId) }
             }
             else -> {
                 selectedThemeColor?.colorPrimary?.let { c ->
-                    colorLibraries.find { it.id == COLOR_LIBRARY_MATERIAL_COLORS_ID }!!.colors.find { colorItem ->
+                    presetColorLibraries.find { it.isMaterial }!!.colors.find { colorItem ->
                         context.getColor(colorItem.colorRes) == c
                     }?.let {
-                        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_MATERIAL_COLORS_ID)
-                        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, it.id)
+                        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_MATERIAL)
+                        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, it.itemId)
                     }
                 }
             }
@@ -143,8 +144,8 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             .setColor(customColor)
             .create()
             .setColorPickerDialogListener { dialogId: Int, color: Int ->
-                val c = color or -0x1000000
-                Pref.putInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, c)
+                val colorWithFullAlpha = color or Color.BLACK
+                Pref.putInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, colorWithFullAlpha)
                 setSelectedPosition(customColorPosition)
                 mOnItemClickListener?.onItemClick(v, customColorPosition)
             }

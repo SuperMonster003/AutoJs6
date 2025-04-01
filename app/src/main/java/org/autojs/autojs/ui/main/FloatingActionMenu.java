@@ -33,7 +33,7 @@ public class FloatingActionMenu extends FrameLayout implements View.OnClickListe
     private static final int[] ICONS = {
             R.drawable.ic_floating_action_menu_dir,
             R.drawable.ic_floating_action_menu_file,
-            R.drawable.ic_import_thick,
+            R.drawable.ic_file_download_white_cropped,
             R.drawable.ic_project_white};
 
     private static final int[] LABELS = {

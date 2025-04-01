@@ -23,7 +23,7 @@ class ColorSelectActivity : ColorSelectBaseActivity() {
         override fun onItemClick(v: View?, position: Int) {
             mColorSettingRecyclerView.selectedThemeColor?.let {
                 mSelectedPosition = position
-                setColorWithAnimation(it.colorPrimary)
+                updateAppBarColorContent(it.colorPrimary)
             }
         }
     }

@@ -50,7 +50,5 @@ open class ThemeColorToolbar : Toolbar, ThemeColorMutable {
         navigationIcon?.let { navigationIcon = it.applyColorFilterWith(tintColor) }
         collapseIcon?.let { collapseIcon = it.applyColorFilterWith(tintColor) }
         overflowIcon?.let { overflowIcon = it.applyColorFilterWith(tintColor) }
-
-        popupTheme = if (ViewUtils.isLuminanceLight(currentThemeColor)) R.style.PopupMenuThemeLight else R.style.PopupMenuThemeDark
     }
 }
