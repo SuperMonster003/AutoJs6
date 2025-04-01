@@ -7,7 +7,10 @@
         android:id="@+id/action_search_color"
         android:title="@string/text_search_color"
         android:icon="@drawable/ic_search_black_48dp"
-        app:showAsAction="ifRoom" />
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView" />
 
     <item
         android:id="@+id/action_locate_current_theme_color"

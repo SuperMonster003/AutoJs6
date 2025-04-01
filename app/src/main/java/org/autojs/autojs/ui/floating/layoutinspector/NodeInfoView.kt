@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration
 import org.autojs.autojs.core.accessibility.NodeInfo
-import org.autojs.autojs.extension.NumberExtensions.string
+import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -68,7 +68,7 @@ class NodeInfoView : RecyclerView {
                     else -> {
                         when (FIELDS[i].name) {
                             "bounds" -> (value as? Rect)?.let { "[ ${it.left}, ${it.top}, ${it.right}, ${it.bottom} ]" } ?: value?.toString() ?: ""
-                            "center" -> (value as? Point)?.let { "[ ${it.x.string}, ${it.y.string} ]" } ?: value?.toString() ?: ""
+                            "center" -> (value as? Point)?.let { "[ ${it.x.jsString}, ${it.y.jsString} ]" } ?: value?.toString() ?: ""
                             else -> value?.toString() ?: ""
                         }
                     }
@@ -158,13 +158,13 @@ class NodeInfoView : RecyclerView {
                 result = if (x == x.toLong().toDouble()) {
                     result.replace("%X%", x.toLong().toString())
                 } else {
-                    result.replace("%X%", "${floor(x).string}, ${ceil(x).string}")
+                    result.replace("%X%", "${floor(x).jsString}, ${ceil(x).jsString}")
                 }
 
                 result = if (y == y.toLong().toDouble()) {
                     result.replace("%Y%", y.toLong().toString())
                 } else {
-                    result.replace("%Y%", "${floor(y).string}, ${ceil(y).string}")
+                    result.replace("%Y%", "${floor(y).jsString}, ${ceil(y).jsString}")
                 }
 
                 return result

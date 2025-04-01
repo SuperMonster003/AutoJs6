@@ -2,26 +2,43 @@ package org.autojs.autojs.theme.app
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewAnimationUtils
+import androidx.annotation.StringRes
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
+import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.appbar.AppBarLayout
+import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import io.codetail.widget.RevealFrameLayout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_CUSTOM_COLOR_ID
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.colorLibraries
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_PALETTE
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorLibrary
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
+import org.autojs.autojs.util.ViewUtils.setColorsByColorLuminance
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByColorLuminance
 import org.autojs.autojs.util.ViewUtils.setTitlesTextColorByColorLuminance
 import org.autojs.autojs6.R
+import java.util.*
 import kotlin.math.hypot
 import kotlin.properties.Delegates
 
@@ -39,6 +56,12 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
     private lateinit var mAppBarContainer: RevealFrameLayout
 
     private lateinit var mTitle: String
+
+    private var mSearchJob: Job? = null
+    private var mSearchView: SearchView? = null
+
+    private val customColor: Int
+        get() = Pref.getInt(KEY_CUSTOM_COLOR, getColor(R.color.custom_color_default))
 
     protected var currentColor by Delegates.notNull<Int>()
 
@@ -61,27 +84,76 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
+    protected fun setUpSearchMenu(menu: Menu, onQueryTextSimpleListener: (text: String?) -> Unit, onMenuItemActionExpand: (item: MenuItem) -> Unit = {}, onMenuItemActionCollapse: (item: MenuItem) -> Unit = {}): SearchView? {
+        val menuItem = menu.findItem(R.id.action_search_color) ?: return null
+        menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem) = true.also {
+                mToolbar.onceGlobalLayout { updateToolbarColors() }
+                onMenuItemActionExpand(item)
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem) = true.also {
+                onQueryTextSimpleListener(null)
+                onMenuItemActionCollapse(item)
+            }
+        })
+        return setUpSearchMenu(menuItem.actionView, onQueryTextSimpleListener)
+    }
+
+    private fun setUpSearchMenu(searchView: View?, onQueryTextSimpleListener: (text: String?) -> Unit): SearchView? {
+        return setUpSearchMenu(searchView, object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?) = true.also { onQueryTextSimpleListener(query) }
+            override fun onQueryTextChange(newText: String?) = true.also { onQueryTextSimpleListener(newText) }
+        })
+    }
+
+    protected fun setUpSearchMenu(menu: Menu, onQueryTextListener: SearchView.OnQueryTextListener? = null, onMenuItemActionExpand: (item: MenuItem) -> Unit = {}, onMenuItemActionCollapse: (item: MenuItem) -> Unit = {}): SearchView? {
+        val menuItem = menu.findItem(R.id.action_search_color) ?: return null
+        menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem) = true.also { onMenuItemActionExpand(item) }
+            override fun onMenuItemActionCollapse(item: MenuItem) = true.also { onMenuItemActionCollapse(item) }
+        })
+        return setUpSearchMenu(menuItem.actionView, onQueryTextListener)
+    }
+
+    private fun setUpSearchMenu(searchView: View?, onQueryTextListener: SearchView.OnQueryTextListener? = null): SearchView? {
+        if (searchView !is SearchView) return null
+        return searchView.apply {
+            mSearchView = this
+            queryHint = context.getString(R.string.text_search_color)
+            setOnQueryTextListener(onQueryTextListener)
+        }
+    }
+
     protected open fun getSubtitle(): String? = null
 
     override fun initThemeColors() {
         super.initThemeColors()
-        mToolbar.setTitlesTextColorByColorLuminance(this, currentColor)
-        mToolbar.setNavigationIconColorByColorLuminance(this, currentColor)
+        updateToolbarColors()
+        updateSearchViewColors()
         ViewUtils.setStatusBarAppearanceLightByColorLuminance(this, currentColor)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        updateToolbarIconsColor()
+        updateToolbarColors()
+        updateSearchViewColors()
         return super.onCreateOptionsMenu(menu)
     }
 
-    private fun updateToolbarIconsColor() {
+    private fun updateToolbarColors() {
         mToolbar.setMenuIconsColorByColorLuminance(this, currentColor)
+        mToolbar.setNavigationIconColorByColorLuminance(this, currentColor)
+        mToolbar.setTitlesTextColorByColorLuminance(this, currentColor)
     }
 
-    protected fun setColorWithAnimation(colorTo: Int) {
-        setColor(colorTo)
-        ViewAnimationUtils.createCircularReveal(
+    private fun updateSearchViewColors() {
+        mSearchView?.setColorsByColorLuminance(this, currentColor)
+    }
+
+    protected fun updateAppBarColorContent(colorTo: Int) {
+        setColors(colorTo)
+        updateSubtitle()
+        if (hasWindowFocus()) ViewAnimationUtils.createCircularReveal(
             /* view = */ mAppBarLayout,
             /* centerX = */ mAppBarLayout.left,
             /* centerY = */ mAppBarLayout.bottom,
@@ -93,14 +165,15 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
     }
 
-    protected fun setColor(colorTo: Int) {
+    protected fun updateSubtitle() {
+        mToolbar.post { mToolbar.subtitle = getSubtitle() }
+    }
+
+    private fun setColors(colorTo: Int) {
         mAppBarContainer.setBackgroundColor(currentColor)
         mAppBarLayout.setBackgroundColor(colorTo)
         currentColor = colorTo
-
         initThemeColors()
-        updateToolbarIconsColor()
-        mToolbar.subtitle = getSubtitle()
     }
 
     protected fun setUpAppBar(appBar: AppBarLayout, appBarContainer: RevealFrameLayout) {
@@ -110,42 +183,135 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
     protected fun checkAndGetTargetInfoForThemeColorLocate(): TargetInfoForLocate? {
         val targetLibraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, -1)
-        if (targetLibraryId == COLOR_LIBRARY_CUSTOM_COLOR_ID) {
-            ViewUtils.showToast(this, "当前主题色为自定义颜色", true)
-            // 提示
-            // 当前主题色为自定义颜色
-            //
-            // HEX: #FF3300
-            // RGB: 255, 0, 0
-            // HSL: 0, 0, 0.14
-            //
-            // 使用调色盘可查看或修改自定义主题颜色
-            // 调色盘 关闭
+        if (targetLibraryId == COLOR_LIBRARY_ID_PALETTE) {
+            MaterialDialog.Builder(this)
+                .title(R.string.text_prompt)
+                .content(R.string.content_current_theme_color_configured_by_palette, ColorUtils.toHex(currentColor, 6))
+                .neutralText(R.string.dialog_button_open_color_palette)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .onNeutral { _, _ -> showColorPicker() }
+                .negativeText(R.string.dialog_button_dismiss)
+                .negativeColorRes(R.color.dialog_button_default)
+                .show()
             return null
         }
-        val targetLibrary = colorLibraries.find { it.id == targetLibraryId }
+        val targetLibrary = presetColorLibraries.find { it.id == targetLibraryId }
         if (targetLibrary == null) {
-            ViewUtils.showToast(this, "主题色库定位失败", true)
-            // 定位失败
-            // 无法定位主题色所在颜色库
-            //
-            // Target lib ID: targetLibraryId
-            // Color libs IDs: [ colorLibraries.sorted().joinToString(", ") { "${it.id}" } ]
-            // 复制信息 关闭
+            MaterialDialog.Builder(this)
+                .title(R.string.text_failed_to_locate)
+                .content(
+                    getString(R.string.content_failed_to_locate_library_for_theme_color) + "\n" +
+                            "\n" +
+                            "Target library ID: 0x${targetLibraryId.toString(16)}" + "\n" +
+                            "Color library IDs: [ ${presetColorLibraries.sortedBy { it.id }.joinToString(", ") { "0x${it.id.toString(16)}" }} ]"
+                )
+                .negativeText(R.string.dialog_button_dismiss)
+                .negativeColorRes(R.color.dialog_button_default)
+                .show()
             return null
         }
-        val targetIndex = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, -1)
-        if (targetIndex !in targetLibrary.colors.indices) {
-            ViewUtils.showToast(this, "主题色条目定位失败", true)
-            // 定位失败
-            // 无法确定主题色条目的索引值
-            //
-            // Target index: targetLibraryId
-            // Color indicies: [ 0..90 ] (注意 90 为 size - 1)
-            // 复制信息 关闭
+        val targetItemIndex = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, -1)
+        if (targetItemIndex !in targetLibrary.colors.indices) {
+            MaterialDialog.Builder(this)
+                .title(R.string.text_failed_to_locate)
+                .content(
+                    getString(R.string.content_failed_to_determine_index_of_theme_color_item) + "\n" +
+                            "\n" +
+                            "Target item index: $targetItemIndex" + "\n" +
+                            "Item indicies: [ 0..${targetLibrary.colors.size - 1} ]"
+                )
+                .negativeText(R.string.dialog_button_dismiss)
+                .negativeColorRes(R.color.dialog_button_default)
+                .show()
             return null
         }
-        return TargetInfoForLocate(targetLibraryId, targetIndex)
+        return TargetInfoForLocate(targetLibraryId, targetItemIndex)
+    }
+
+    protected fun showColorPicker() {
+        ColorPickerDialog.newBuilder()
+            .setAllowCustom(true)
+            .setAllowPresets(true)
+            .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
+            .setShowAlphaSlider(false)
+            .setDialogTitle(R.string.dialog_title_color_palette)
+            .setColor(customColor)
+            .create()
+            .setColorPickerDialogListener { dialogId: Int, color: Int ->
+                savePrefsForLibraries()
+                savePrefsForLegacy(color)
+
+                updateAppBarColorContent(color)
+
+                ThemeColorManager.setThemeColor(color)
+                ThemeChangeNotifier.notifyThemeChanged()
+            }
+            .show(supportFragmentManager, "ColorPickerTagForColorLibraries")
+    }
+
+    private fun savePrefsForLibraries() {
+        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_PALETTE)
+        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, 0)
+    }
+
+    private fun savePrefsForLegacy(color: Int) {
+        Pref.putInt(KEY_CUSTOM_COLOR, color or -0x1000000)
+        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, customColorPosition)
+    }
+
+    protected fun filterColorsFromColorItems(query: String?, colorItems: List<PresetColorItem>, colorItemAdapter: ColorItemAdapter) {
+        mSearchJob?.cancel()
+        mSearchJob = lifecycleScope.launch {
+            withContext(Dispatchers.Default) {
+                if (query.isNullOrBlank()) return@withContext colorItems
+                val normalizedQuery = normalizeForMatching(query)
+                colorItems.filter { colorItem ->
+                    val colorHex = String.format("#%06X", 0xFFFFFF and getColor(colorItem.colorRes))
+                    if (query.startsWith("#")) {
+                        if (isRegexSearch(query.drop(1))) {
+                            val regex = compileRegexOrNull(extractPatternFromQuery(query.drop(1))) ?: return@filter false
+                            return@filter regex.containsMatchIn(colorHex)
+                        }
+                        return@filter colorHex.contains(query, ignoreCase = true)
+                    }
+                    val localName = getString(colorItem.nameRes)
+                    val enName = getLocalizedString(this@ColorSelectBaseActivity, colorItem.nameRes, Locale("en"))
+                    if (isRegexSearch(query)) {
+                        val regex = compileRegexOrNull(extractPatternFromQuery(query)) ?: return@filter false
+                        return@filter regex.containsMatchIn(localName) || regex.containsMatchIn(enName)
+                    }
+                    return@filter normalizeForMatching(localName).contains(normalizedQuery, ignoreCase = true)
+                            || normalizeForMatching(enName).contains(normalizedQuery, ignoreCase = true)
+                }
+            }.let { filteredResult -> colorItemAdapter.updateData(filteredResult) }
+        }
+    }
+
+    private fun normalizeForMatching(input: String): String {
+        // 去掉所有非字母或数字字符 (例如空格/括号/斜线等).
+        // \p{L} 表示任何语言的字母字符, \p{N} 表示数字.
+        return input.replace("[^\\p{L}\\p{N}]+".toRegex(), "")
+    }
+
+    private fun getLocalizedString(context: Context, @StringRes resId: Int, locale: Locale): String {
+        val config = Configuration(context.resources.configuration).apply { setLocale(locale) }
+        val localizedContext = context.createConfigurationContext(config)
+        return localizedContext.getString(resId)
+    }
+
+    private fun isRegexSearch(query: String?): Boolean {
+        if (query.isNullOrBlank()) return false
+        return query.length > 2 && query.startsWith("/") && query.endsWith("/")
+    }
+
+    private fun extractPatternFromQuery(query: String): String {
+        // 假设已检查过 isRegexSearch() == true
+        // 去掉最前和最后的斜杠
+        return query.substring(1, query.length - 1)
+    }
+
+    private fun compileRegexOrNull(pattern: String): Regex? {
+        return runCatching { Regex(pattern, RegexOption.IGNORE_CASE) }.getOrNull()
     }
 
     interface OnItemClickListener {
@@ -233,13 +399,13 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 val libraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)
                 val libraryItemId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, SELECT_NONE)
                 when (libraryId) {
-                    COLOR_LIBRARY_CUSTOM_COLOR_ID -> {
-                        identifier = context.getString(R.string.mt_custom)
+                    COLOR_LIBRARY_ID_PALETTE -> {
+                        identifier = context.getString(R.string.color_library_identifier_palette)
                     }
                     SELECT_NONE -> {
                         val legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
                         when (legacyIndex) {
-                            customColorPosition -> identifier = context.getString(R.string.color_library_identifier_custom)
+                            customColorPosition -> identifier = context.getString(R.string.color_library_identifier_palette)
                             SELECT_NONE, defaultColorPosition -> identifier = context.getString(R.string.color_library_identifier_default_colors)
                             else -> {
                                 val calculatedIndex = legacyIndex - maxOf(customColorPosition, defaultColorPosition) - 1
@@ -251,17 +417,43 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                             }
                         }
                     }
-                    else -> colorLibraries.find { it.id == libraryId }?.let { lib ->
+                    else -> presetColorLibraries.find { it.id == libraryId }?.let { lib: PresetColorLibrary ->
                         identifier = when {
-                            lib.isUserDefined -> context.getString(R.string.color_library_identifier_custom)
-                            else -> lib.identifierRes?.let { resId -> context.getString(resId) }
+                            lib.isCreated -> {
+                                // lib.identifierString?.let { idStr ->
+                                //     when {
+                                //         idStr.estimateVisualWidth <= 10 -> idStr
+                                //         else -> {
+                                //             var newStr = idStr
+                                //             while (newStr.estimateVisualWidth > 8) {
+                                //                 newStr = newStr.dropLast(1)
+                                //             }
+                                //             "$newStr..."
+                                //         }
+                                //     }
+                                // } ?: lib.titleString?.let { titleStr ->
+                                //     when {
+                                //         titleStr.estimateVisualWidth <= 10 -> titleStr
+                                //         else -> {
+                                //             var newStr = titleStr
+                                //             while (newStr.estimateVisualWidth > 8) {
+                                //                 newStr = newStr.dropLast(1)
+                                //             }
+                                //             "$newStr..."
+                                //         }
+                                //     }
+                                // } ?: context.getString(R.string.color_library_identifier_created)
+                                context.getString(R.string.color_library_identifier_created)
+                            }
+                            else -> context.getString(lib.identifierRes)
                         }
                         if (libraryItemId != -1) {
-                            lib.colors.find { it.id == libraryItemId }?.let { item ->
-                                colorName = item.nameString
-                                    ?: item.nameRes.takeUnless {
-                                        it == R.string.text_unknown
-                                    }?.let { context.getString(it) }
+                            lib.colors.find { it.itemId == libraryItemId }?.let { item ->
+                                // colorName = item.nameString
+                                //     ?: item.nameRes.takeUnless {
+                                //         it == R.string.text_unknown
+                                //     }?.let { context.getString(it) }
+                                colorName = context.getString(item.nameRes)
                             }
                         }
                     }

@@ -919,5 +919,20 @@
     <string name="color_library_identifier_default_colors">Default</string>
     <string name="color_library_identifier_custom">Custom</string>
     <string name="dialog_title_color_palette">Color palette</string>
+    <string name="text_add_color_library">Add a color library</string>
+    <string name="text_import_color_library">Import a color library</string>
+    <string name="text_new_intelligent_color_library">New intelligent color library</string>
+    <string name="text_clone_color_library">Clone a color library</string>
+    <string name="color_library_intelligent_colors">Intelligent color library</string>
+    <string name="color_library_title_intelligent_colors">Intelligent colors</string>
+    <string name="color_library_identifier_intelligent_colors">Intell.</string>
+    <string name="color_library_identifier_palette">Palette</string>
+    <string name="color_library_identifier_created">Created</string>
+    <string name="text_search_all_colors">Search all colors</string>
+    <string name="dialog_button_open_color_palette">Palette</string>
+    <string name="content_current_theme_color_configured_by_palette">Current theme color %1$s is configured by the color palette</string>
+    <string name="text_failed_to_locate">Failed to locate</string>
+    <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
+    <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
 
 </resources>

@@ -7,7 +7,7 @@ import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.ArrayExtensions.toNativeObject
 import org.autojs.autojs.extension.FlexibleArray.Companion.component1
 import org.autojs.autojs.extension.FlexibleArray.Companion.component2
-import org.autojs.autojs.extension.NumberExtensions.string
+import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_SETTER_KEY
@@ -542,7 +542,7 @@ object Inspect : Augmentable(), Invokable {
             ctx.stylize(content, "string")
         }
         value is Number -> {
-            ctx.stylize(value.string, "number")
+            ctx.stylize(value.jsString, "number")
         }
         value is Boolean -> {
             ctx.stylize(Context.toString(value), "boolean")

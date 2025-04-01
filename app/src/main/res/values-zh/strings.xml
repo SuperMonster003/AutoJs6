@@ -921,5 +921,20 @@
     <string name="color_library_identifier_default_colors">默认</string>
     <string name="color_library_identifier_custom">自定义</string>
     <string name="dialog_title_color_palette">调色盘</string>
+    <string name="text_add_color_library">添加颜色库</string>
+    <string name="text_import_color_library">导入颜色库</string>
+    <string name="text_new_intelligent_color_library">新建智能颜色库</string>
+    <string name="text_clone_color_library">克隆颜色库</string>
+    <string name="color_library_intelligent_colors">智能颜色库</string>
+    <string name="color_library_title_intelligent_colors">智能颜色</string>
+    <string name="color_library_identifier_intelligent_colors">智能</string>
+    <string name="color_library_identifier_palette">调色盘</string>
+    <string name="color_library_identifier_created">自建</string>
+    <string name="text_search_all_colors">搜索全部颜色</string>
+    <string name="dialog_button_open_color_palette">打开调色盘</string>
+    <string name="content_current_theme_color_configured_by_palette">当前主题色 %1$s 由调色盘配置</string>
+    <string name="text_failed_to_locate">定位失败</string>
+    <string name="content_failed_to_locate_library_for_theme_color">无法定位主题色所在颜色库</string>
+    <string name="content_failed_to_determine_index_of_theme_color_item">无法确定主题色条目的索引值</string>
 
 </resources>

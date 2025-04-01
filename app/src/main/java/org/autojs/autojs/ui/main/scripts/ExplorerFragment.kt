@@ -173,7 +173,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
             mExplorerView?.setFilter(null)
             return
         }
-        mExplorerView?.setFilter { item: ExplorerItem -> item.name.contains(event.query) }
+        mExplorerView?.setFilter { item: ExplorerItem -> item.name.contains(event.query, true) }
     }
 
     override fun onStop() {
