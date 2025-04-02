@@ -249,6 +249,14 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             .show(supportFragmentManager, "ColorPickerTagForColorLibraries")
     }
 
+    protected fun showColorDetails(color: Int, titleRes: Int = R.string.dialog_title_color_details) {
+        ColorInfoDialogManager.showColorInfoDialog(this, color, titleRes)
+    }
+
+    protected fun showThemeColorDetails() {
+        showColorDetails(ThemeColorManager.colorPrimary, R.string.dialog_title_theme_color_details)
+    }
+
     private fun savePrefsForLibraries() {
         Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_PALETTE)
         Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, 0)

@@ -249,7 +249,7 @@ public class EditorMenu {
         builder.itemsDisabledIndices(i);
         MaterialDialog built = builder.build();
         assert built.getItems() != null;
-        built.getItems().set(i, built.getItems().get(i) + " (" + builder.getContext().getString(R.string.text_under_development_title).toLowerCase(Language.getPrefLanguage().getLocale()) + ")");
+        built.getItems().set(i, built.getItems().get(i) + " (" + builder.getContext().getString(R.string.text_under_development).toLowerCase(Language.getPrefLanguage().getLocale()) + ")");
         built.show();
     }
 

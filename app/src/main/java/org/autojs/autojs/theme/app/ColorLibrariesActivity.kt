@@ -50,8 +50,11 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         MtActivityColorLibrariesBinding.inflate(layoutInflater).let {
             binding = it
             setContentView(it.root)
-            setUpToolbar(it.toolbar)
             setUpAppBar(it.appBar, it.appBarContainer)
+            it.toolbar.let { toolbar ->
+                setUpToolbar(toolbar)
+                toolbar.setOnLongClickListener { true.also { showThemeColorDetails() } }
+            }
         }
 
         binding.colorLibrariesRecyclerView.let {
@@ -120,15 +123,15 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             true
         }
         R.id.action_new_color_library -> {
-            ViewUtils.showToast(this, R.string.text_under_development_title)
+            ViewUtils.showToast(this, R.string.text_under_development)
             true
         }
         R.id.action_import_color_library -> {
-            ViewUtils.showToast(this, R.string.text_under_development_title)
+            ViewUtils.showToast(this, R.string.text_under_development)
             true
         }
         R.id.action_clone_color_library -> {
-            ViewUtils.showToast(this, R.string.text_under_development_title)
+            ViewUtils.showToast(this, R.string.text_under_development)
             true
         }
         R.id.action_locate_current_theme_color -> {

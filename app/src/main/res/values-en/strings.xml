@@ -855,7 +855,8 @@
     <string name="text_unavailable">Unavailable</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" is unavailable</string>
     <string name="text_under_development_content">The feature will be ready to use in the next few updates</string>
-    <string name="text_under_development_title">Under development</string>
+    <string name="text_under_development_title">@string/text_under_development</string>
+    <string name="text_under_development">Under development</string>
     <string name="text_undo">Undo</string>
     <string name="text_undo_simplified">Undo</string>
     <string name="text_unknown">Unknown</string>
@@ -934,5 +935,7 @@
     <string name="text_failed_to_locate">Failed to locate</string>
     <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
+    <string name="dialog_title_color_details">Color details</string>
+    <string name="dialog_title_theme_color_details">Theme color details</string>
 
 </resources>

@@ -858,7 +858,8 @@
     <string name="text_unavailable">Недоступно</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" недоступен</string>
     <string name="text_under_development_content">Функция будет готова к использованию в ближайших обновлениях</string>
-    <string name="text_under_development_title">В стадии разработки</string>
+    <string name="text_under_development_title">@string/text_under_development</string>
+    <string name="text_under_development">В стадии разработки</string>
     <string name="text_undo">Отозвать</string>
     <string name="text_undo_simplified">Верни</string>
     <string name="text_unknown">Неизвестно</string>
@@ -937,5 +938,7 @@
     <string name="text_failed_to_locate">Failed to locate</string>
     <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
+    <string name="dialog_title_color_details">Color details</string>
+    <string name="dialog_title_theme_color_details">Theme color details</string>
 
 </resources>

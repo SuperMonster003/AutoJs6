@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View.MeasureSpec.UNSPECIFIED
-import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
@@ -16,6 +15,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
+import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableText
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -33,11 +34,10 @@ object MediaInfoDialogManager {
     @SuppressLint("SetTextI18n")
     fun showMediaInfoDialog(context: Context, explorerItem: ExplorerItem) {
         val binding = MediaFileInfoDialogListItemBinding.inflate(LayoutInflater.from(context))
-        val root = binding.root as ViewGroup
 
         val dialog = MaterialDialog.Builder(context)
             .title(explorerItem.name)
-            .customView(root, false)
+            .customView(binding.root, false)
             .autoDismiss(false)
             .iconRes(R.drawable.transparent)
             .limitIconToDefaultSize()
@@ -60,38 +60,38 @@ object MediaInfoDialogManager {
 
             launch(Dispatchers.IO) {
                 mediaInfo(filePath, GENERAL, "FileSize/String").let {
-                    binding.fileSizeValue.bindWith(it)
+                    binding.fileSizeValue.bindWith(dialog, it)
                 }
             }
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, GENERAL, "Duration/String").let { binding.durationValue.bindWith(it) }
+                mediaInfo(filePath, GENERAL, "Duration/String").let { binding.durationValue.bindWith(dialog, it) }
             }
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, GENERAL, "Album").let { binding.albumValue.bindWith(it) }
+                mediaInfo(filePath, GENERAL, "Album").let { binding.albumValue.bindWith(dialog, it) }
             }
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, GENERAL, "Track").let { binding.trackNameValue.bindWith(it) }
+                mediaInfo(filePath, GENERAL, "Track").let { binding.trackNameValue.bindWith(dialog, it) }
             }
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, GENERAL, "Performer").let { binding.performerValue.bindWith(it) }
+                mediaInfo(filePath, GENERAL, "Performer").let { binding.performerValue.bindWith(dialog, it) }
             }
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, AUDIO, "BitRate/String").let { binding.bitRateForAudioValue.bindWith(it) }
+                mediaInfo(filePath, AUDIO, "BitRate/String").let { binding.bitRateForAudioValue.bindWith(dialog, it) }
             }
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, VIDEO, "BitRate/String").let { binding.bitRateForVideoValue.bindWith(it) }
+                mediaInfo(filePath, VIDEO, "BitRate/String").let { binding.bitRateForVideoValue.bindWith(dialog, it) }
             }
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, VIDEO, "DisplayAspectRatio/String").let { binding.aspectRatioValue.bindWith(it) }
+                mediaInfo(filePath, VIDEO, "DisplayAspectRatio/String").let { binding.aspectRatioValue.bindWith(dialog, it) }
             }
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, VIDEO, "FrameRate").let { binding.frameRateValue.bindWith(it) }
+                mediaInfo(filePath, VIDEO, "FrameRate").let { binding.frameRateValue.bindWith(dialog, it) }
             }
             launch(Dispatchers.IO) {
                 val deferredVideoWidth = async(Dispatchers.IO) { mediaInfo(filePath, VIDEO, "Width") }
                 val deferredVideoHeight = async(Dispatchers.IO) { mediaInfo(filePath, VIDEO, "Height") }
                 val (width, height) = awaitAll(deferredVideoWidth, deferredVideoHeight)
-                binding.resolutionValue.bindWith(if (width.isNotEmpty() && height.isNotEmpty()) "$width × $height" else "")
+                binding.resolutionValue.bindWith(dialog, if (width.isNotEmpty() && height.isNotEmpty()) "$width × $height" else "")
             }
 
             when {
@@ -123,6 +123,7 @@ object MediaInfoDialogManager {
                 restoreEssentialViews(binding, context)
                 updateGuidelines(binding)
                 updateSplitLineVisibility(binding)
+                dialog.makeTextCopyable { it.titleView }
             }
 
             when (val containerFormat = deferredContainerFormat.await()) {
@@ -134,9 +135,9 @@ object MediaInfoDialogManager {
                     }
                 }
                 else -> {
-                    containerFormat.let { binding.containerFormatValue.bindWith(it) }
-                    deferredAudioFormat.await().let { binding.audioFormatValue.bindWith(it) }
-                    deferredVideoFormat.await().let { binding.videoFormatValue.bindWith(it) }
+                    containerFormat.let { binding.containerFormatValue.bindWith(dialog, it) }
+                    deferredAudioFormat.await().let { binding.audioFormatValue.bindWith(dialog, it) }
+                    deferredVideoFormat.await().let { binding.videoFormatValue.bindWith(dialog, it) }
                 }
             }
 
@@ -182,12 +183,12 @@ object MediaInfoDialogManager {
         binding.performerParent.isVisible = true
     }
 
-    @Suppress("UNUSED_PARAMETER")
+    @Suppress("UNUSED_PARAMETER", "unused")
     private fun setViewsAsMediaMenuPlaceholder(binding: MediaFileInfoDialogListItemBinding) {
         /* Nothing to do yet. */
     }
 
-    @Suppress("UNUSED_PARAMETER")
+    @Suppress("UNUSED_PARAMETER", "unused")
     private fun setViewsAsLeastPlaceholder(binding: MediaFileInfoDialogListItemBinding) {
         /* Nothing to do yet. */
     }
@@ -252,8 +253,10 @@ object MediaInfoDialogManager {
         ).any { it.isVisible }
     }
 
-    private suspend fun TextView.bindWith(text: String) {
-        withContext(Dispatchers.Main) { this@bindWith.text = text.takeUnless { text.isEmpty() } ?: context.getString(R.string.text_unknown) }
+    private suspend fun TextView.bindWith(dialog: MaterialDialog, text: String) {
+        withContext(Dispatchers.Main) {
+            this@bindWith.setCopyableText(dialog) { text }
+        }
     }
 
     private operator fun MediaInfo.invoke(filePath: String, streamKind: MediaInfo.StreamKind, parameter: String): String {

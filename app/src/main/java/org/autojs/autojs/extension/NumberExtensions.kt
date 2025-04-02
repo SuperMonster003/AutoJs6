@@ -26,14 +26,4 @@ object NumberExtensions {
             .toPlainString()
     }
 
-    @JvmStatic
-    @JvmOverloads
-    fun Double.roundToAlphaString(scale: Int = 2, keepTrailingZeroForFullAlpha: Boolean = true): String {
-        return toBigDecimal()
-            .setScale(scale, RoundingMode.HALF_UP)
-            .stripTrailingZeros()
-            .toPlainString()
-            .let { if (keepTrailingZeroForFullAlpha && it == "1") "1.0" else it }
-    }
-
 }

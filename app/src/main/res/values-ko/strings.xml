@@ -859,7 +859,8 @@
     <string name="text_unavailable">사용할 수 없음</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" 를 사용할 수 없습니다</string>
     <string name="text_under_development_content">기능은 다음 몇 가지 업데이트에서 사용할 준비가됩니다.</string>
-    <string name="text_under_development_title">개발중인</string>
+    <string name="text_under_development_title">@string/text_under_development</string>
+    <string name="text_under_development">개발중인</string>
     <string name="text_undo">실행 취소</string>
     <string name="text_undo_simplified">뒤</string>
     <string name="text_unknown">알 수 없음</string>
@@ -938,5 +939,7 @@
     <string name="text_failed_to_locate">Failed to locate</string>
     <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
+    <string name="dialog_title_color_details">Color details</string>
+    <string name="dialog_title_theme_color_details">Theme color details</string>
 
 </resources>

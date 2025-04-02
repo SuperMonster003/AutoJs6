@@ -858,7 +858,8 @@
     <string name="text_unavailable">使用できません</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" は使用できません</string>
     <string name="text_under_development_content">この機能は, 次の数回のアップデートで使用できるようになる予定です</string>
-    <string name="text_under_development_title">開発中</string>
+    <string name="text_under_development_title">@string/text_under_development</string>
+    <string name="text_under_development">開発中</string>
     <string name="text_undo">元に戻す</string>
     <string name="text_undo_simplified">戻る</string>
     <string name="text_unknown">不明</string>
@@ -937,5 +938,7 @@
     <string name="text_failed_to_locate">Failed to locate</string>
     <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
+    <string name="dialog_title_color_details">Color details</string>
+    <string name="dialog_title_theme_color_details">Theme color details</string>
 
 </resources>
