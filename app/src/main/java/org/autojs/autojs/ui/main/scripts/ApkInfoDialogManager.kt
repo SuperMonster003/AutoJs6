@@ -5,10 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager.GET_META_DATA
 import android.os.Build
 import android.view.LayoutInflater
-import android.view.View
 import android.view.View.MeasureSpec.UNSPECIFIED
-import android.view.ViewGroup
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
@@ -19,11 +16,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.extension.MaterialDialogExtensions.makeSettingsLaunchable
+import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
+import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableTextIfAbsent
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.AppUtils
-import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.IntentUtils
-import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ApkFileInfoDialogListItemBinding
 import java.io.File
@@ -36,13 +34,13 @@ object ApkInfoDialogManager {
     @SuppressLint("SetTextI18n")
     fun showApkInfoDialog(context: Context, apkFile: File) {
         val binding = ApkFileInfoDialogListItemBinding.inflate(LayoutInflater.from(context))
-        val root = binding.root as ViewGroup
 
         val apkFilePath = apkFile.absolutePath
+        val packageManager = context.packageManager
 
         val dialog = MaterialDialog.Builder(context)
             .title(apkFile.name)
-            .customView(root, false)
+            .customView(binding.root, false)
             .autoDismiss(false)
             .iconRes(R.drawable.ic_three_dots_outline_small)
             .limitIconToDefaultSize()
@@ -57,8 +55,6 @@ object ApkInfoDialogManager {
             .neutralColorRes(R.color.dialog_button_hint)
             .onNegative { materialDialog, _ -> materialDialog.dismiss() }
             .show()
-
-        val packageManager = context.packageManager
 
         CoroutineScope(Dispatchers.Main).launch {
             val packageInfo = withContext(Dispatchers.IO) {
@@ -91,7 +87,7 @@ object ApkInfoDialogManager {
                 val installedPackageName: String? = packageName?.let { pkg ->
                     AppUtils.getInstalledVersionInfo(pkg)?.let { versionInfo ->
                         binding.installedVersionParent.isVisible = true
-                        binding.installedVersionValue.setTextIfAbsent(dialog) { context.getString(R.string.text_full_version_info, versionInfo.versionName, versionInfo.versionCode) }
+                        binding.installedVersionValue.setCopyableTextIfAbsent(dialog) { context.getString(R.string.text_full_version_info, versionInfo.versionName, versionInfo.versionCode) }
                         pkg /* returns as installedPackageName */
                     }
                 }
@@ -102,19 +98,19 @@ object ApkInfoDialogManager {
                 when {
                     versionName != null -> {
                         binding.versionPlaceholderLabel.text = context.getString(R.string.text_version)
-                        binding.versionPlaceholderValue.setTextIfAbsent(dialog) { context.getString(R.string.text_full_version_info, versionName, versionCode) }
+                        binding.versionPlaceholderValue.setCopyableTextIfAbsent(dialog) { context.getString(R.string.text_full_version_info, versionName, versionCode) }
                     }
                     versionCode != null -> {
                         binding.versionPlaceholderLabel.text = context.getString(R.string.text_version_code)
-                        binding.versionPlaceholderValue.setTextIfAbsent(dialog) { "$versionCode" }
+                        binding.versionPlaceholderValue.setCopyableTextIfAbsent(dialog) { "$versionCode" }
                     }
-                    else -> binding.versionPlaceholderValue.setTextIfAbsent(dialog) { null }
+                    else -> binding.versionPlaceholderValue.setCopyableTextIfAbsent(dialog) { null }
                 }
 
-                binding.packageNameValue.setTextIfAbsent(dialog) { packageName }
-                binding.deviceSdkValue.setTextIfAbsent(dialog) { "${Build.VERSION.SDK_INT}" }
-                binding.fileSizeValue.setTextIfAbsent(dialog) { fileSize }
-                binding.signatureSchemeValue.setTextIfAbsent(dialog) { signatureScheme }
+                binding.packageNameValue.setCopyableTextIfAbsent(dialog) { packageName }
+                binding.deviceSdkValue.setCopyableTextIfAbsent(dialog) { "${Build.VERSION.SDK_INT}" }
+                binding.fileSizeValue.setCopyableTextIfAbsent(dialog) { fileSize }
+                binding.signatureSchemeValue.setCopyableTextIfAbsent(dialog) { signatureScheme }
 
                 dialog.setIcon(applicationInfo?.apply {
                     sourceDir = apkFilePath
@@ -126,10 +122,10 @@ object ApkInfoDialogManager {
 
                 val apkInfo = getApkInfo(apkFile)
 
-                binding.labelNameValue.setTextIfAbsent(dialog) { apkInfo?.label }
-                binding.packageNameValue.setTextIfAbsent(dialog) { apkInfo?.packageName }
-                binding.minSdkValue.setTextIfAbsent(dialog) { apkInfo?.minSdkVersion?.toString() }
-                binding.targetSdkValue.setTextIfAbsent(dialog) { apkInfo?.targetSdkVersion?.toString() }
+                binding.labelNameValue.setCopyableTextIfAbsent(dialog) { apkInfo?.label }
+                binding.packageNameValue.setCopyableTextIfAbsent(dialog) { apkInfo?.packageName }
+                binding.minSdkValue.setCopyableTextIfAbsent(dialog) { apkInfo?.minSdkVersion?.toString() }
+                binding.targetSdkValue.setCopyableTextIfAbsent(dialog) { apkInfo?.targetSdkVersion?.toString() }
 
                 if (apkInfo != null) dialog.getActionButton(DialogAction.NEUTRAL).let { neutralButton ->
                     neutralButton.isVisible = true
@@ -153,37 +149,6 @@ object ApkInfoDialogManager {
                 ApkInfo(label, packageName, minSdkVersion, targetSdkVersion, usesPermissions, manifestXml)
             }
         }.getOrNull()
-    }
-
-    private fun MaterialDialog.makeSettingsLaunchable(viewGetter: (dialog: MaterialDialog) -> View?, packageName: String?) {
-        viewGetter(this)?.setOnClickListener {
-            packageName?.let { pkg ->
-                IntentUtils.goToAppDetailSettings(this.context, pkg)
-            } ?: ViewUtils.showSnack(this.view, R.string.error_app_not_installed)
-        }
-    }
-
-    private fun MaterialDialog.makeTextCopyable(textViewGetter: (dialog: MaterialDialog) -> TextView?) {
-        makeTextCopyable(textViewGetter(this))
-    }
-
-    private fun MaterialDialog.makeTextCopyable(textView: TextView?, textValue: String? = textView?.text?.toString()) {
-        if (textValue != null) {
-            val context = this.context
-            textView?.setOnClickListener {
-                ClipboardUtils.setClip(context, textValue)
-                ViewUtils.showSnack(this.view, "${context.getString(R.string.text_already_copied_to_clip)}: $textValue")
-            }
-        }
-    }
-
-    private fun TextView.setTextIfAbsent(dialog: MaterialDialog, f: () -> String?) {
-        val textView = this
-        val textValue = f.invoke()
-        if (textView.text == context.getString(R.string.ellipsis_six)) {
-            textView.text = textValue ?: context.getString(R.string.text_unknown)
-        }
-        dialog.makeTextCopyable(textView, textValue)
     }
 
     private fun restoreEssentialViews(binding: ApkFileInfoDialogListItemBinding, context: Context) {

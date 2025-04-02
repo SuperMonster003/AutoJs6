@@ -19,8 +19,6 @@ import org.autojs.autojs.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.extension.ArrayExtensions.toNativeObject
 import org.autojs.autojs.extension.FlexibleArray.Companion.component1
 import org.autojs.autojs.extension.FlexibleArray.Companion.component2
-import org.autojs.autojs.extension.NumberExtensions.jsString
-import org.autojs.autojs.extension.NumberExtensions.roundToAlphaString
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.Augmentable
@@ -30,6 +28,10 @@ import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs.util.ColorUtils.roundToAlphaString
+import org.autojs.autojs.util.ColorUtils.roundToHueString
+import org.autojs.autojs.util.ColorUtils.roundToSaturationString
+import org.autojs.autojs.util.ColorUtils.roundToValueString
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.ensureNativeArrayLength
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
@@ -129,11 +131,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
         ::toHsla.name,
         ::toRgbString.name,
         ::toRgbaString.name,
-        // ::toArgbString.name,
-        // ::toHsvString.name,
-        // ::toHsvaString.name,
-        // ::toHslString.name,
-        // ::toHslaString.name,
+        ::toArgbString.name,
+        ::toHsvString.name,
+        ::toHsvaString.name,
+        ::toHslString.name,
+        ::toHslaString.name,
         ::isSimilar.name,
         ::isEqual.name,
         ::toColorStateList.name,
@@ -626,10 +628,10 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - red: ColorComponent <br>
-     * - green: ColorComponent <br>
-     * - blue: ColorComponent <br>
+     * Parameters
+     * * red: `ColorComponent`
+     * * green: `ColorComponent`
+     * * blue: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -639,9 +641,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - o <1> rgbComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - o <2> color: OmniColor <br>
+     * Parameters
+     * * o <1> rgbComponents: `[ColorComponent, ColorComponent, ColorComponent]`
+     * * o <2> color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -664,11 +666,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - alpha: ColorComponent <br>
-     * - red: ColorComponent <br>
-     * - green: ColorComponent <br>
-     * - blue: ColorComponent <br>
+     * Parameters
+     * * alpha: `ColorComponent`
+     * * red: `ColorComponent`
+     * * green: `ColorComponent`
+     * * blue: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -678,9 +680,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - o <1> argbComponents: &#91;ColorComponent, ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - o <2> colorHex: String (#AARRGGBB) <br>
+     * Parameters
+     * * o <1> argbComponents: `[ColorComponent, ColorComponent, ColorComponent, ColorComponent]`
+     * * o <2> colorHex: `String` (#AARRGGBB)
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -704,11 +706,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - red: ColorComponent <br>
-     * - green: ColorComponent <br>
-     * - blue: ColorComponent <br>
-     * - alpha: ColorComponent <br>
+     * Parameters
+     * * red: `ColorComponent`
+     * * green: `ColorComponent`
+     * * blue: `ColorComponent`
+     * * alpha: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -718,9 +720,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - rgbComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - alpha: ColorComponent <br>
+     * Parameters
+     * * rgbComponents: `[ColorComponent, ColorComponent, ColorComponent]`
+     * * alpha: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -731,9 +733,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - o <1> rgbaComponents: &#91;ColorComponent, ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - o <2> colorHex: String (#RRGGBBAA) <br>
+     * Parameters
+     * * o <1> rgbaComponents: `[ColorComponent, ColorComponent, ColorComponent, ColorComponent]`
+     * * o <2> colorHex: `String` (#RRGGBBAA)
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -761,10 +763,10 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - h: ColorComponent <br>
-     * - s: ColorComponent <br>
-     * - v: ColorComponent <br>
+     * Parameters
+     * * h: `ColorComponent`
+     * * s: `ColorComponent`
+     * * v: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -774,8 +776,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hsvComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
+     * Parameters
+     * * hsvComponents: `[ColorComponent, ColorComponent, ColorComponent]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -797,11 +799,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - h: ColorComponent <br>
-     * - s: ColorComponent <br>
-     * - v: ColorComponent <br>
-     * - a: ColorComponent <br>
+     * Parameters
+     * * h: `ColorComponent`
+     * * s: `ColorComponent`
+     * * v: `ColorComponent`
+     * * a: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -811,9 +813,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hsvComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - alpha: ColorComponent <br>
+     * Parameters
+     * * hsvComponents: `[ColorComponent, ColorComponent, ColorComponent]`
+     * * alpha: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -824,8 +826,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hsvaComponents: &#91;ColorComponent, ColorComponent, ColorComponent, ColorComponent&#93; <br>
+     * Parameters
+     * * hsvaComponents: `[ColorComponent, ColorComponent, ColorComponent, ColorComponent]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -846,10 +848,10 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - h: ColorComponent <br>
-     * - s: ColorComponent <br>
-     * - l: ColorComponent <br>
+     * Parameters
+     * * h: `ColorComponent`
+     * * s: `ColorComponent`
+     * * l: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -859,8 +861,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hslComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
+     * Parameters
+     * * hslComponents: `[ColorComponent, ColorComponent, ColorComponent]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -882,11 +884,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - h: ColorComponent <br>
-     * - s: ColorComponent <br>
-     * - l: ColorComponent <br>
-     * - a: ColorComponent <br>
+     * Parameters
+     * * h: `ColorComponent`
+     * * s: `ColorComponent`
+     * * l: `ColorComponent`
+     * * a: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -896,9 +898,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hslComponents: &#91;ColorComponent, ColorComponent, ColorComponent&#93; <br>
-     * - alpha: ColorComponent <br>
+     * Parameters
+     * * hslComponents: `[ColorComponent, ColorComponent, ColorComponent]`
+     * * alpha: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -909,8 +911,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - hslaComponents: &#91;ColorComponent, ColorComponent, ColorComponent, ColorComponent&#93; <br>
+     * Parameters
+     * * hslaComponents: `[ColorComponent, ColorComponent, ColorComponent, ColorComponent]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -987,8 +989,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
+     * Parameters
+     * * color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -997,9 +999,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
-     * - hsvResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * color: `OmniColor`
+     * * hsvResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1015,10 +1017,10 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1027,11 +1029,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - hsvResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * hsvResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1053,24 +1055,24 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
+     * Parameters
+     * * color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
     fun toHsvaRhino(color: Any?): List<Double> {
-        return toHsvaRhino(color, FloatArray(3))
+        return toHsvaRhino(color, FloatArray(4))
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
-     * - hsvaResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * color: `OmniColor`
+     * * hsvaResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
     fun toHsvaRhino(color: Any?, hsvaResultContainer: Any?): List<Double> {
-        require(hsvaResultContainer is FloatArray) { "Container argument \"hsvaResultContainer\" must be a Java Float Array for colors.toHsva(r, g, b, a, hsvResultContainer)" }
+        require(hsvaResultContainer is FloatArray) { "Container argument \"hsvaResultContainer\" must be a Java Float Array for colors.toHsva(color, hsvResultContainer)" }
         val r = redRhino(color)
         val g = greenRhino(color)
         val b = blueRhino(color)
@@ -1083,11 +1085,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - a: ColorComponent <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * a: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1096,12 +1098,12 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - a: ColorComponent <br>
-     * - hsvaResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * a: `ColorComponent`
+     * * hsvaResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1123,8 +1125,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
+     * Parameters
+     * * color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1133,9 +1135,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
-     * - hslResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * color: `OmniColor`
+     * * hslResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1151,10 +1153,10 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1163,11 +1165,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - hslResultContainer: java.lang.Float[] <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * hslResultContainer: `java.lang.Float[]`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1187,8 +1189,8 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - color: OmniColor <br>
+     * Parameters
+     * * color: `OmniColor`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1197,11 +1199,11 @@ object Colors : Augmentable(), SimpleGetterProxy {
     }
 
     /**
-     * Parameters <br>
-     * - r: ColorComponent <br>
-     * - g: ColorComponent <br>
-     * - b: ColorComponent <br>
-     * - a: ColorComponent <br>
+     * Parameters
+     * * r: `ColorComponent`
+     * * g: `ColorComponent`
+     * * b: `ColorComponent`
+     * * a: `ColorComponent`
      */
     @JvmStatic
     @RhinoFunctionBody
@@ -1353,12 +1355,9 @@ object Colors : Augmentable(), SimpleGetterProxy {
 
     @JvmStatic
     @RhinoFunctionBody
-    fun summaryRhino(color: Any?): String {
-        var (r, g, b, a) = toRgbaRhino(color)
-        return when (val doubleA = toDoubleComponent(a)) {
-            1.0 -> "Color { ${toHexRhino(color)} | rgb(${r.jsString}, ${g.jsString}, ${b.jsString}) | int(${toIntRhino(color)}) }"
-            else -> "Color { ${toHexRhino(color)} | rgba(${r.jsString}, ${g.jsString}, ${b.jsString}, ${doubleA.roundToAlphaString()}) | int(${toIntRhino(color)}) }"
-        }
+    fun summaryRhino(color: Any?): String = when (alphaDoubleRhino(color)) {
+        1.0 -> "Color { ${toHexRhino(color)} | ${toRgbStringRhino(color)} | ${toHslStringRhino(color)} | ${toHsvStringRhino(color)} | int(${toIntRhino(color)}) }"
+        else -> "Color { ${toHexRhino(color)} | ${toRgbaString(arrayOf(color))} | ${toHslaString(arrayOf(color))} | ${toHsvaString(arrayOf(color))} | int(${toIntRhino(color)}) }"
     }
 
     internal fun parseRelativePercentage(percentage: Any?): Double {
@@ -1474,75 +1473,135 @@ object Colors : Augmentable(), SimpleGetterProxy {
     fun toRgbaString(args: Array<out Any?>): String = ensureArgumentsAtMost(args, 2) { argList ->
         val (color, options) = argList
 
-        var keepTrailingZeroForFullAlpha = true
-
-        when (options) {
-            is NativeObject -> {
-                options.inquire<Boolean>("keepTrailingZeroForFullAlpha", ::coerceBoolean)?.let {
-                    keepTrailingZeroForFullAlpha = it
-                }
-            }
-            is Boolean -> {
-                keepTrailingZeroForFullAlpha = options
-            }
+        val keepTrailingZeroForFullAlpha = when (options) {
+            is NativeObject -> options.inquire<Boolean>("keepTrailingZeroForFullAlpha", ::coerceBoolean) != false
+            is Boolean -> options
+            else -> true
         }
 
         val list = listOf(redRhino(color), greenRhino(color), blueRhino(color)).map {
             it.roundToInt().coerceIn(0..255).toString()
-        } + alphaDoubleRhino(color).roundToAlphaString(2, keepTrailingZeroForFullAlpha)
+        } + alphaDoubleRhino(color).roundToAlphaString(keepTrailingZeroForFullAlpha = keepTrailingZeroForFullAlpha)
+
         list.joinToString(", ", prefix = "rgba(", postfix = ")")
     }
 
-    // // 格式化 argb 格式为 "argb(a, r, g, b)"
-    // fun toArgbString(color: Int): String {
-    //     val arr = rawToArgb(color)
-    //     return "argb(${arr[0]}, ${arr[1]}, ${arr[2]}, ${arr[3]})"
-    // }
-    //
-    // // 格式化 hsv 格式为 "hsv(h, s%, v%)"，其中 h 取整，s 和 v 转换为百分比(整数)
-    // fun toHsvString(color: Int): String {
-    //     val arr = rawToHsv(color)
-    //     val h = arr[0].roundToInt()
-    //     val s = (arr[1] * 100).roundToInt()
-    //     val v = (arr[2] * 100).roundToInt()
-    //     return "hsv($h, ${s}%, ${v}%)"
-    // }
-    //
-    // // 格式化 hsva 格式为 "hsva(h, s%, v%, a)"，其中 a 保留两位小数（或整数）
-    // fun toHsvaString(color: Int): String {
-    //     val arr = rawToHsva(color)
-    //     val h = arr[0].roundToInt()
-    //     val s = (arr[1] * 100).roundToInt()
-    //     val v = (arr[2] * 100).roundToInt()
-    //     val a = arr[3]
-    //     val aStr = if (a % 1.0 == 0.0)
-    //         a.roundToInt().toString()
-    //     else
-    //         String.format("%.2f", a)
-    //     return "hsva($h, ${s}%, ${v}%, $aStr)"
-    // }
-    //
-    // // 格式化 hsl 格式为 "hsl(h, s%, l%)"
-    // fun toHslString(color: Int): String {
-    //     val arr = rawToHsl(color)
-    //     val h = arr[0].roundToInt()
-    //     val s = (arr[1] * 100).roundToInt()
-    //     val l = (arr[2] * 100).roundToInt()
-    //     return "hsl($h, ${s}%, ${l}%)"
-    // }
-    //
-    // // 格式化 hsla 格式为 "hsla(h, s%, l%, a)"
-    // fun toHslaString(color: Int): String {
-    //     val arr = rawToHsla(color)
-    //     val h = arr[0].roundToInt()
-    //     val s = (arr[1] * 100).roundToInt()
-    //     val l = (arr[2] * 100).roundToInt()
-    //     val a = arr[3]
-    //     val aStr = if (a % 1.0 == 0.0)
-    //         a.roundToInt().toString()
-    //     else
-    //         String.format("%.2f", a)
-    //     return "hsla($h, ${s}%, ${l}%, $aStr)"
-    // }
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toArgbString(args: Array<out Any?>): String = ensureArgumentsAtMost(args, 2) { argList ->
+        val (color, options) = argList
+
+        val keepTrailingZeroForFullAlpha = when (options) {
+            is NativeObject -> options.inquire<Boolean>("keepTrailingZeroForFullAlpha", ::coerceBoolean) != false
+            is Boolean -> options
+            else -> true
+        }
+
+        val list = listOf(
+            alphaDoubleRhino(color).roundToAlphaString(keepTrailingZeroForFullAlpha = keepTrailingZeroForFullAlpha)
+        ) + listOf(redRhino(color), greenRhino(color), blueRhino(color)).map {
+            it.roundToInt().coerceIn(0..255).toString()
+        }
+
+        list.joinToString(", ", prefix = "argb(", postfix = ")")
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toHsvString(args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..3) {
+        when (it.size) {
+            1 -> toHsvStringRhino(it[0])
+            3 -> toHsvStringRhino(it[0], it[1], it[2])
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.toHsvString")
+        }
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toHsvStringRhino(color: Any?): String {
+        val (r, g, b) = toRgbRhino(color)
+        return toHsvStringRhino(r, g, b)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toHsvStringRhino(r: Any?, g: Any?, b: Any?): String {
+        val (hue, saturation, value) = toHsvRhino(r, g, b)
+        return listOf(
+            hue.roundToHueString(),
+            saturation.roundToSaturationString(),
+            value.roundToValueString(),
+        ).joinToString(", ", prefix = "hsv(", postfix = ")")
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toHsvaString(args: Array<out Any?>): String = ensureArgumentsAtMost(args, 2) { argList ->
+        val (color, options) = argList
+        val (hue, saturation, value) = toHsvRhino(color)
+
+        val keepTrailingZeroForFullAlpha = when (options) {
+            is NativeObject -> options.inquire<Boolean>("keepTrailingZeroForFullAlpha", ::coerceBoolean) != false
+            is Boolean -> options
+            else -> true
+        }
+
+        val list = listOf(
+            hue.roundToHueString(),
+            saturation.roundToSaturationString(),
+            value.roundToValueString(),
+        ) + alphaDoubleRhino(color).roundToAlphaString(keepTrailingZeroForFullAlpha = keepTrailingZeroForFullAlpha)
+
+        list.joinToString(", ", prefix = "hsva(", postfix = ")")
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toHslString(args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..3) {
+        when (it.size) {
+            1 -> toHslStringRhino(it[0])
+            3 -> toHslStringRhino(it[0], it[1], it[2])
+            else -> throw WrappedIllegalArgumentException("Invalid arguments ${it.jsArrayBrief()} for colors.toHslString")
+        }
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toHslStringRhino(color: Any?): String {
+        val (r, g, b) = toRgbRhino(color)
+        return toHslStringRhino(r, g, b)
+    }
+
+    @JvmStatic
+    @RhinoFunctionBody
+    fun toHslStringRhino(r: Any?, g: Any?, b: Any?): String {
+        val (hue, saturation, lightness) = toHslRhino(r, g, b)
+        return listOf(
+            hue.roundToHueString(),
+            saturation.roundToSaturationString(),
+            lightness.roundToValueString(),
+        ).joinToString(", ", prefix = "hsl(", postfix = ")")
+    }
+
+    @JvmStatic
+    @RhinoSingletonFunctionInterface
+    fun toHslaString(args: Array<out Any?>): String = ensureArgumentsAtMost(args, 2) { argList ->
+        val (color, options) = argList
+        val (hue, saturation, lightness) = toHslRhino(color)
+
+        val keepTrailingZeroForFullAlpha = when (options) {
+            is NativeObject -> options.inquire<Boolean>("keepTrailingZeroForFullAlpha", ::coerceBoolean) != false
+            is Boolean -> options
+            else -> true
+        }
+
+        val list = listOf(
+            hue.roundToHueString(),
+            saturation.roundToSaturationString(),
+            lightness.roundToValueString(),
+        ) + alphaDoubleRhino(color).roundToAlphaString(keepTrailingZeroForFullAlpha = keepTrailingZeroForFullAlpha)
+
+        list.joinToString(", ", prefix = "hsla(", postfix = ")")
+    }
 
 }

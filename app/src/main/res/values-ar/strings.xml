@@ -859,7 +859,8 @@
     <string name="text_unavailable">غير متوفره</string>
     <string name="text_unavailable_abi_for">واجهة برمجة التطبيقات \"%s\" غير متوفرة</string>
     <string name="text_under_development_content">ستكون الميزة جاهزة للاستخدام في التحديثات القليلة التالية</string>
-    <string name="text_under_development_title">تحت التطوير</string>
+    <string name="text_under_development_title">@string/text_under_development</string>
+    <string name="text_under_development">تحت التطوير</string>
     <string name="text_undo">الغاء التحميل</string>
     <string name="text_undo_simplified">ينسحب</string>
     <string name="text_unknown">غير معروف</string>
@@ -938,5 +939,7 @@
     <string name="text_failed_to_locate">Failed to locate</string>
     <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
+    <string name="dialog_title_color_details">Color details</string>
+    <string name="dialog_title_theme_color_details">Theme color details</string>
 
 </resources>

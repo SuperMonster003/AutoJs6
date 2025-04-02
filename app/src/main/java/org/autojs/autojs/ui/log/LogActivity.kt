@@ -69,7 +69,7 @@ class LogActivity : BaseActivity() {
             }
             R.id.action_settings -> {
                 // TODO by SuperMonster003 on Jul 3, 2023.
-                showToast(this, R.string.text_under_development_title)
+                showToast(this, R.string.text_under_development)
             }
         }
         return true

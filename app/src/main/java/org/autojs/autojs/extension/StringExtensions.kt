@@ -59,5 +59,4 @@ object StringExtensions {
         else -> false
     }
 
-
 }

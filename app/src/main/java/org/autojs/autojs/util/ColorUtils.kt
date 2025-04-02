@@ -14,6 +14,7 @@ import androidx.core.graphics.ColorUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.theme.ThemeColor
+import java.math.RoundingMode
 import kotlin.math.roundToInt
 import kotlin.text.RegexOption.IGNORE_CASE
 
@@ -417,6 +418,43 @@ object ColorUtils {
 
         // 无法找到合适的亮度调整
         return null
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun Double.roundToAlphaString(scale: Int = 1, keepTrailingZeroForFullAlpha: Boolean = true): String {
+        return toBigDecimal()
+            .setScale(scale, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString()
+            .let { if (keepTrailingZeroForFullAlpha && it == "1") "1.0" else it }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun Double.roundToHueString(scale: Int = 0): String {
+        return toBigDecimal()
+            .setScale(scale, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString()
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun Double.roundToSaturationString(scale: Int = 1): String {
+        return (this * 100.0).toBigDecimal()
+            .setScale(scale, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString() + "%"
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun Double.roundToValueString(scale: Int = 1): String {
+        return (this * 100.0).toBigDecimal()
+            .setScale(scale, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString() + "%"
     }
 
 }

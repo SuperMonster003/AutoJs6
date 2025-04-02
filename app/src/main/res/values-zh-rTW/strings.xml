@@ -857,7 +857,8 @@
     <string name="text_unavailable">不可用</string>
     <string name="text_unavailable_abi_for">ABI \"%s\" 不可用</string>
     <string name="text_under_development_content">將在後續版本實現當前功能</string>
-    <string name="text_under_development_title">開發中</string>
+    <string name="text_under_development_title">@string/text_under_development</string>
+    <string name="text_under_development">開發中</string>
     <string name="text_undo">撤銷</string>
     <string name="text_undo_simplified">撤銷</string>
     <string name="text_unknown">未知</string>
@@ -936,5 +937,7 @@
     <string name="text_failed_to_locate">Failed to locate</string>
     <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
+    <string name="dialog_title_color_details">Color details</string>
+    <string name="dialog_title_theme_color_details">Theme color details</string>
 
 </resources>
