@@ -53,7 +53,8 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             setUpAppBar(it.appBar, it.appBarContainer)
             it.toolbar.let { toolbar ->
                 setUpToolbar(toolbar)
-                toolbar.setOnLongClickListener { true.also { showThemeColorDetails() } }
+                toolbar.setOnClickListener { true.also { showThemeColorDetails() } }
+                toolbar.setOnLongClickListener { true.also { /* toggleFabVisibility() */ } }
             }
         }
 
@@ -140,7 +141,11 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         }
         R.id.action_toggle_color_select_layout -> {
             isLegacyLayout = true
-            startActivity(this)
+            startActivity(this, isToggled = true)
+            true
+        }
+        R.id.action_color_search_help -> {
+            showColorSearchHelp()
             true
         }
         else -> super.onOptionsItemSelected(item)
@@ -155,7 +160,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         }
     }
 
-    override fun getSubtitle() = getCurrentColorSummary(this)
+    override fun getSubtitle(withHexSuffix: Boolean) = getCurrentColorSummary(this, withHexSuffix = withHexSuffix)
 
     companion object {
 

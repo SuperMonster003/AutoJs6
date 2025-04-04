@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="android_black">Noir</string>
+    <string name="android_blue">Bleu</string>
+    <string name="android_cyan">Cyan / Aigue-marine</string>
+    <string name="android_dark_gray">Gris foncé</string>
+    <string name="android_gray">Gris</string>
+    <string name="android_green">Vert / Citron vert</string>
+    <string name="android_light_gray">Gris clair</string>
+    <string name="android_magenta">Magenta / Fuchsia</string>
+    <string name="android_maroon">Marron</string>
+    <string name="android_navy">Bleu marine</string>
+    <string name="android_olive">Olive</string>
+    <string name="android_purple">Violet</string>
+    <string name="android_red">Rouge</string>
+    <string name="android_silver">Argenté</string>
+    <string name="android_teal">Sarcelle</string>
+    <string name="android_white">Blanc</string>
+    <string name="android_yellow">Jaune</string>
+
+</resources>

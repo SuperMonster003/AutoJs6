@@ -22,7 +22,8 @@ import kotlin.text.RegexOption.IGNORE_CASE
 object ColorUtils {
 
     @JvmStatic
-    fun toString(color: Int): String {
+    @JvmOverloads
+    fun toString(color: Int, uppercase: Boolean = true): String {
 
         // @Comment by SuperMonster003 on Dec 23, 2022.
         //  ! When alpha is 0, code below returns #RRGGBB without alpha info,
@@ -37,12 +38,13 @@ object ColorUtils {
         //  # }
 
         val c = String.format("%08X", 0xFFFFFFFF and color.toLong())
-        return when {
+        val hex = when {
             c.length == 8 && c.startsWith("FF", true) -> {
                 "#${c.substring(2)}"
             }
             else -> "#$c"
         }
+        return if (uppercase) hex.uppercase() else hex.lowercase()
     }
 
     @ColorInt

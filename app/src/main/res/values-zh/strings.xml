@@ -939,5 +939,7 @@
     <string name="content_failed_to_determine_index_of_theme_color_item">无法确定主题色条目的索引值</string>
     <string name="dialog_title_color_details">颜色详情</string>
     <string name="dialog_title_theme_color_details">主题色详情</string>
+    <string name="text_search_help">搜索帮助</string>
+    <string name="error_failed_to_render_content">内容渲染失败</string>
 
 </resources>

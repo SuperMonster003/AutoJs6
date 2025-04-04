@@ -18,4 +18,10 @@
         android:icon="@drawable/ic_locate"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_color_search_help"
+        android:title="@string/text_search_help"
+        android:visible="false"
+        app:showAsAction="never" />
+
 </menu>

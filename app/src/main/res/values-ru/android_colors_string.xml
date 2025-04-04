@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="android_black">Черный</string>
+    <string name="android_blue">Синий</string>
+    <string name="android_cyan">Циан / Аква</string>
+    <string name="android_dark_gray">Темно-серый</string>
+    <string name="android_gray">Серый</string>
+    <string name="android_green">Зеленый / Лайм</string>
+    <string name="android_light_gray">Светло-серый</string>
+    <string name="android_magenta">Маджента / Фуксия</string>
+    <string name="android_maroon">Бордовый</string>
+    <string name="android_navy">Темно-синий</string>
+    <string name="android_olive">Оливковый</string>
+    <string name="android_purple">Фиолетовый</string>
+    <string name="android_red">Красный</string>
+    <string name="android_silver">Серебряный</string>
+    <string name="android_teal">Бирюзовый</string>
+    <string name="android_white">Белый</string>
+    <string name="android_yellow">Желтый</string>
+
+</resources>

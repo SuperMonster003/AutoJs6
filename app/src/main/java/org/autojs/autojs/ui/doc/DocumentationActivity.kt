@@ -31,7 +31,7 @@ class DocumentationActivity : BaseActivity() {
                     if (ViewUtils.isNightModeYes(this)) {
                         WebViewUtils.adaptDarkMode(webView)
                     }
-                    WebViewUtils.excludeWebViewFromStatusBarAndNavigationBar(ewebView)
+                    WebViewUtils.excludeWebViewFromStatusBarAndNavigationBar(ewebView, webView)
                     webView.loadUrl(intent.getStringExtra(EXTRA_URL) ?: getUrl("index.html"))
                 }
             }

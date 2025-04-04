@@ -276,6 +276,10 @@
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.FullScreen" />
 
+        <activity
+            android:name="org.autojs.autojs.theme.app.ColorSearchHelpActivity"
+            android:theme="@style/AppTheme.FullScreen" />
+
         <activity android:name="org.autojs.autojs.ui.shortcut.AppsIconSelectActivity" />
 
         <activity android:name="org.autojs.autojs.ui.timing.TimedTaskSettingActivity" />

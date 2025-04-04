@@ -59,7 +59,7 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
                 if (ViewUtils.isNightModeYes(requireContext())) {
                     WebViewUtils.adaptDarkMode(webView)
                 }
-                WebViewUtils.excludeWebViewFromNavigationBar(ewebView)
+                WebViewUtils.excludeWebViewFromNavigationBar(ewebView, webView)
             }
         }
         restoreViewStates()

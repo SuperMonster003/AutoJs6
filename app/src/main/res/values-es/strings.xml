@@ -896,10 +896,14 @@
     <string name="text_package_name_with_computing" tools:ignore="TypographyEllipsis">Nombre del paquete (Calculando...)</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Nombre de la versión (Calculando...)</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Código de la versión (Calculando...)</string>
+    <string name="apk_info_file_size">File size</string>
+    <string name="apk_info_signature_scheme">Signature</string>
+    <string name="dialog_button_file_information">File info</string>
     <string name="text_file_extensions_title">File extensions</string>
     <string name="entry_file_extensions_not_show">Hide all file extensions</string>
     <string name="entry_file_extensions_show_all">Show all file extensions</string>
     <string name="entry_file_extensions_show_all_but_executable">Show file extensions (exclude *.js / *.auto)</string>
+    <string name="description_file_extensions_preference">Used to set whether to show file extensions in AutoJs6 file explorer.</string>
     <string name="text_switch_to_new_layout">Switch to new layout</string>
     <string name="text_switch_to_legacy_layout">Switch to legacy layout</string>
     <string name="text_search_color">Search color</string>
@@ -911,7 +915,7 @@
     <string name="color_library_android_colors">Android color library</string>
     <string name="color_library_material_design_colors">Material design color library</string>
     <string name="color_library_default_colors">Default color library</string>
-    <string name="window_background_light">Backgournd light</string>
+    <string name="window_background_light">Background light</string>
     <string name="window_background_night">Background night</string>
     <string name="text_color_library">Color library</string>
     <string name="color_library_title_default_colors">Default colors</string>
@@ -940,5 +944,7 @@
     <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
     <string name="dialog_title_color_details">Color details</string>
     <string name="dialog_title_theme_color_details">Theme color details</string>
+    <string name="text_search_help">Search help</string>
+    <string name="error_failed_to_render_content">Failed to render content</string>
 
 </resources>
