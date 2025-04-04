@@ -11,6 +11,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.OnClickListener
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
 import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.theme.ThemeChangeNotifier
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_MATERIAL
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
@@ -47,6 +51,10 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        ThemeChangeNotifier.themeChanged.observe(this) {
+            updateClickListener(binding.toolbar)
+        }
+
         val libraryId = intent.getIntExtra(INTENT_IDENTIFIER_LIBRARY_ID, -1)
         val library = presetColorLibraries.find { it.id == libraryId }?.also { lib ->
             mLibrary = lib
@@ -57,10 +65,13 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
         MtActivityColorLibraryBinding.inflate(layoutInflater).let {
             binding = it
             setContentView(it.root)
-            setUpToolbar(it.toolbar)
             setUpAppBar(it.appBar, it.appBarContainer)
-            it.toolbar.title = getString(library.titleRes)
-            updateSubtitle()
+            it.toolbar.let { toolbar ->
+                setUpToolbar(toolbar)
+                toolbar.title = getString(library.titleRes)
+                updateSubtitle(toolbar)
+                updateClickListener(toolbar)
+            }
         }
 
         binding.colorLibraryRecyclerView.let { it ->
@@ -80,13 +91,24 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
         }
     }
 
-    override fun getSubtitle(): String? = when (mLibrary.id) {
+    private fun updateClickListener(toolbar: Toolbar) {
+        when (mLibrary.id) {
+            Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE) -> object : OnClickListener {
+                override fun onClick(v: View?) {
+                    showColorDetails(ThemeColorManager.colorPrimary, getSubtitle(false))
+                }
+            }
+            else -> null
+        }.let { toolbar.setOnClickListener(it) }
+    }
+
+    override fun getSubtitle(withHexSuffix: Boolean): String? = when (mLibrary.id) {
         Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE) -> {
-            getCurrentColorSummary(this, true)
+            getCurrentColorSummary(this, withIdentifierPrefix = false, withHexSuffix = withHexSuffix)
         }
         else -> null
     }
-    
+
     private fun setUpSelectedPosition(adapter: ColorItemAdapter) {
         when (Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)) {
             SELECT_NONE -> when (val legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)) {
@@ -215,6 +237,10 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_locate_current_theme_color -> {
             locateCurrentThemeColor()
+            true
+        }
+        R.id.action_color_search_help -> {
+            showColorSearchHelp()
             true
         }
         else -> super.onOptionsItemSelected(item)

@@ -169,7 +169,7 @@
     <string name="error_cannot_rename">Failed to rename</string>
     <string name="error_cannot_retrieve_battery_state">Cannot retrieve the battery state</string>
     <string name="error_change_password_error_length">Use more characters for the password</string>
-    <string name="error_change_password_error_match">Those passwords didn\'t match</string>
+    <string name="error_change_password_error_match">Those passwords did not match</string>
     <string name="error_check_for_update">Failed to check for updates</string>
     <string name="error_colon_must_follow_a_valid_ip_address">Colon must follow a valid IP address</string>
     <string name="error_compass_cannot_be_null">Compass cannot be null</string>
@@ -265,7 +265,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Unknown result type {name: %s, params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">Unknown selector {name: %s, type: %s}</string>
     <string name="error_unknown_type">Unknown type: %s</string>
-    <string name="file_not_exist_or_readable">File doesn\'t exist or readable: %s</string>
+    <string name="file_not_exist_or_readable">File does not exist or readable: %s</string>
     <string name="foreground_notification_channel_name">AutoJs6 foreground service</string>
     <string name="foreground_notification_text">Click to launch AutoJs6</string>
     <string name="foreground_notification_title">AutoJs6 foreground service</string>
@@ -690,7 +690,7 @@
     <string name="text_file_exists">File already exists</string>
     <string name="text_file_explorer">File explorer</string>
     <string name="text_file_name">File name</string>
-    <string name="text_file_not_exists">File doesn\'t exist</string>
+    <string name="text_file_not_exists">File does not exist</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">File \"%1$s\" is not an executable script</string>
     <string name="text_files_transfer">Files transfer</string>
     <string name="text_find">Find</string>
@@ -1149,7 +1149,7 @@
     <string name="color_library_android_colors">Android color library</string>
     <string name="color_library_material_design_colors">Material design color library</string>
     <string name="color_library_default_colors">Default color library</string>
-    <string name="window_background_light">Backgournd light</string>
+    <string name="window_background_light">Background light</string>
     <string name="window_background_night">Background night</string>
     <string name="text_color_library">Color library</string>
     <string name="color_library_title_default_colors">Default colors</string>
@@ -1186,5 +1186,7 @@
     <string name="literal_hsl_uppercase" translatable="false">HSL</string>
     <string name="literal_rgb_uppercase" translatable="false">RGB</string>
     <string name="literal_hex_uppercase" translatable="false">HEX</string>
+    <string name="text_search_help">Search help</string>
+    <string name="error_failed_to_render_content">Failed to render content</string>
 
 </resources>

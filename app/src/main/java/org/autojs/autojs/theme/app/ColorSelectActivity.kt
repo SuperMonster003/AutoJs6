@@ -56,10 +56,11 @@ class ColorSelectActivity : ColorSelectBaseActivity() {
         when (item.itemId) {
             R.id.action_toggle_color_select_layout -> {
                 isLegacyLayout = false
-                startActivity(this)
+                startActivity(this, isToggled = true)
+                true
             }
         }
-        return true
+        return super.onOptionsItemSelected(item)
     }
 
 }

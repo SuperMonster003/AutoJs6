@@ -30,6 +30,7 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorI
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorLibrary
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.ThemeColorLayoutSwitchedEvent
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
@@ -38,6 +39,8 @@ import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByColorLuminance
 import org.autojs.autojs.util.ViewUtils.setNavigationIconColorByColorLuminance
 import org.autojs.autojs.util.ViewUtils.setTitlesTextColorByColorLuminance
 import org.autojs.autojs6.R
+import org.autojs.autojs6.R.string.text_search_color
+import org.greenrobot.eventbus.EventBus
 import java.util.*
 import kotlin.math.hypot
 import kotlin.properties.Delegates
@@ -67,8 +70,13 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         mTitle = intent.getStringExtra("title") ?: getString(R.string.text_theme_color)
         currentColor = intent.getIntExtra("currentColor", ThemeColorManager.colorPrimary)
+
+        if (intent.getBooleanExtra("isToggled", false)) {
+            EventBus.getDefault().post(object : ThemeColorLayoutSwitchedEvent {})
+        }
     }
 
     protected fun setUpToolbar(toolbar: Toolbar) {
@@ -100,32 +108,19 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         return setUpSearchMenu(menuItem.actionView, onQueryTextSimpleListener)
     }
 
-    private fun setUpSearchMenu(searchView: View?, onQueryTextSimpleListener: (text: String?) -> Unit): SearchView? {
-        return setUpSearchMenu(searchView, object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?) = true.also { onQueryTextSimpleListener(query) }
-            override fun onQueryTextChange(newText: String?) = true.also { onQueryTextSimpleListener(newText) }
-        })
-    }
-
-    protected fun setUpSearchMenu(menu: Menu, onQueryTextListener: SearchView.OnQueryTextListener? = null, onMenuItemActionExpand: (item: MenuItem) -> Unit = {}, onMenuItemActionCollapse: (item: MenuItem) -> Unit = {}): SearchView? {
-        val menuItem = menu.findItem(R.id.action_search_color) ?: return null
-        menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem) = true.also { onMenuItemActionExpand(item) }
-            override fun onMenuItemActionCollapse(item: MenuItem) = true.also { onMenuItemActionCollapse(item) }
-        })
-        return setUpSearchMenu(menuItem.actionView, onQueryTextListener)
-    }
-
-    private fun setUpSearchMenu(searchView: View?, onQueryTextListener: SearchView.OnQueryTextListener? = null): SearchView? {
-        if (searchView !is SearchView) return null
-        return searchView.apply {
-            mSearchView = this
-            queryHint = context.getString(R.string.text_search_color)
-            setOnQueryTextListener(onQueryTextListener)
+    private fun setUpSearchMenu(searchView: View?, onQueryTextSimpleListener: (text: String?) -> Unit): SearchView? = when (searchView) {
+        !is SearchView -> null
+        else -> searchView.also {
+            mSearchView = it
+            it.queryHint = it.context.getString(text_search_color)
+            it.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?) = true.also { onQueryTextSimpleListener(query) }
+                override fun onQueryTextChange(newText: String?) = true.also { onQueryTextSimpleListener(newText) }
+            })
         }
     }
 
-    protected open fun getSubtitle(): String? = null
+    protected open fun getSubtitle(withHexSuffix: Boolean = true): String? = null
 
     override fun initThemeColors() {
         super.initThemeColors()
@@ -152,7 +147,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
     protected fun updateAppBarColorContent(colorTo: Int) {
         setColors(colorTo)
-        updateSubtitle()
+        updateSubtitle(mToolbar)
         if (hasWindowFocus()) ViewAnimationUtils.createCircularReveal(
             /* view = */ mAppBarLayout,
             /* centerX = */ mAppBarLayout.left,
@@ -165,8 +160,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
     }
 
-    protected fun updateSubtitle() {
-        mToolbar.post { mToolbar.subtitle = getSubtitle() }
+    protected fun updateSubtitle(toolbar: Toolbar) {
+        toolbar.post { toolbar.subtitle = getSubtitle() }
     }
 
     private fun setColors(colorTo: Int) {
@@ -249,12 +244,18 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             .show(supportFragmentManager, "ColorPickerTagForColorLibraries")
     }
 
-    protected fun showColorDetails(color: Int, titleRes: Int = R.string.dialog_title_color_details) {
-        ColorInfoDialogManager.showColorInfoDialog(this, color, titleRes)
+    protected fun showColorDetails(color: Int, title: String? = null) {
+        ColorInfoDialogManager.showColorInfoDialog(this, color, title)
     }
 
     protected fun showThemeColorDetails() {
-        showColorDetails(ThemeColorManager.colorPrimary, R.string.dialog_title_theme_color_details)
+        showColorDetails(ThemeColorManager.colorPrimary, getSubtitle(false))
+    }
+
+    protected fun showColorSearchHelp() {
+        Intent(this, ColorSearchHelpActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .let { startActivity(it) }
     }
 
     private fun savePrefsForLibraries() {
@@ -363,7 +364,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
 
         @JvmStatic
-        fun startActivity(context: Context) {
+        fun startActivity(context: Context, isToggled: Boolean = false) {
             val cls = when (isLegacyLayout) {
                 true -> ColorSelectActivity::class.java
                 else -> ColorLibrariesActivity::class.java
@@ -374,6 +375,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             }
             val intent = Intent(context, cls).apply {
                 putExtra("title", context.getString(titleRes))
+                putExtra("isToggled", isToggled)
             }
             if (context is ColorSelectBaseActivity) {
                 intent.putExtra("currentColor", context.currentColor)
@@ -383,21 +385,26 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
 
         @JvmStatic
-        fun getCurrentColorSummary(context: Context, isBrief: Boolean = false): String = when {
+        fun getCurrentColorSummary(context: Context, withIdentifierPrefix: Boolean = true, withHexSuffix: Boolean = true): String = when {
             isLegacyLayout -> when (val index = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, defaultColorPosition)) {
                 SELECT_NONE -> {
                     val colorInt = ThemeColorManager.colorPrimary
-                    ColorUtils.toString(colorInt).uppercase()
+                    ColorUtils.toString(colorInt)
                 }
                 else -> {
                     val colorItem = colorItemsLegacy[index]
                     val (colorRes, nameRes) = colorItem
                     val name = context.getString(nameRes)
-                    val colorInt = when (index) {
-                        customColorPosition -> Pref.getInt(KEY_CUSTOM_COLOR, context.getColor(R.color.custom_color_default))
-                        else -> context.getColor(colorRes)
+                    when {
+                        !withHexSuffix -> name
+                        else -> {
+                            val colorInt = when (index) {
+                                customColorPosition -> Pref.getInt(KEY_CUSTOM_COLOR, context.getColor(R.color.custom_color_default))
+                                else -> context.getColor(colorRes)
+                            }
+                            "$name [${ColorUtils.toString(colorInt)}]"
+                        }
                     }
-                    "$name [${ColorUtils.toString(colorInt).uppercase()}]"
                 }
             }
             else -> {
@@ -466,14 +473,26 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         }
                     }
                 }
-                val colorString = ColorUtils.toString(colorInt).uppercase()
+                val colorString = ColorUtils.toString(colorInt)
                 when {
                     identifier != null && colorName != null -> when {
-                        isBrief -> "$colorName [$colorString]"
-                        else -> "$identifier | $colorName [$colorString]"
+                        withIdentifierPrefix -> when {
+                            withHexSuffix -> "$identifier | $colorName [$colorString]"
+                            else -> "$identifier | $colorName"
+                        }
+                        else -> when {
+                            withHexSuffix -> "$colorName [$colorString]"
+                            else -> colorName
+                        }
                     }
-                    identifier != null -> "$identifier | $colorString"
-                    colorName != null -> "$colorName [$colorString]"
+                    identifier != null -> when {
+                        withIdentifierPrefix -> "$identifier | $colorString"
+                        else -> colorString
+                    }
+                    colorName != null -> when {
+                        withHexSuffix -> "$colorName [$colorString]"
+                        else -> colorName
+                    }
                     else -> colorString
                 }
             }

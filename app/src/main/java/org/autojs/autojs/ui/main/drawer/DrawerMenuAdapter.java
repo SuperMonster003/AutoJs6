@@ -37,7 +37,6 @@ public class DrawerMenuAdapter extends RecyclerView.Adapter<BindableViewHolder<D
         } else {
             return new DrawerMenuItemViewHolder(LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.drawer_menu_item, parent, false));
-
         }
     }
 

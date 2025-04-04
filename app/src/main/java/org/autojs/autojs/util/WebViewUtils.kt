@@ -1,14 +1,15 @@
 package org.autojs.autojs.util
 
+import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature.ALGORITHMIC_DARKENING
 import androidx.webkit.WebViewFeature.FORCE_DARK
 import androidx.webkit.WebViewFeature.isFeatureSupported
-import org.autojs.autojs.ui.widget.EWebView
 import org.intellij.lang.annotations.Language
 
 /**
@@ -67,21 +68,19 @@ class WebViewUtils {
             webView.evaluateJavascript(darkModeCSS, null)
         }
 
-        fun excludeWebViewFromNavigationBar(ewebView: EWebView) {
-            excludeWebViewFromSystemBars(ewebView, excludeStatusBar = false, excludeNavigationBar = true)
+        fun excludeWebViewFromNavigationBar(webViewWrapper: View, webView: WebView) {
+            excludeWebViewFromSystemBars(webViewWrapper, webView, excludeStatusBar = false, excludeNavigationBar = true)
         }
 
-        fun excludeWebViewFromStatusBarAndNavigationBar(ewebView: EWebView) {
-            excludeWebViewFromSystemBars(ewebView, excludeStatusBar = true, excludeNavigationBar = true)
+        fun excludeWebViewFromStatusBarAndNavigationBar(webViewWrapper: View, webView: WebView) {
+            excludeWebViewFromSystemBars(webViewWrapper, webView, excludeStatusBar = true, excludeNavigationBar = true)
         }
 
         @Suppress("SameParameterValue")
-        private fun excludeWebViewFromSystemBars(ewebView: EWebView, excludeStatusBar: Boolean, excludeNavigationBar: Boolean) {
-            val webView = ewebView.webView
+        private fun excludeWebViewFromSystemBars(webViewWrapper: View, webView: WebView, excludeStatusBar: Boolean, excludeNavigationBar: Boolean) {
             var mSystemBarInsets: Insets? = null
-            ewebView.setOnApplyWindowInsetsListener { v, insets ->
-                @Suppress("DEPRECATION")
-                val systemBarInsets = WindowInsetsCompat.toWindowInsetsCompat(insets).systemWindowInsets.also {
+            ViewCompat.setOnApplyWindowInsetsListener(webViewWrapper) { v, insets ->
+                val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars()).also {
                     mSystemBarInsets = it
                 }
                 if (excludeStatusBar) {
@@ -97,16 +96,21 @@ class WebViewUtils {
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
                         val systemBarInsets = mSystemBarInsets ?: return
-                        // @Hint by SuperMonster003 on Mar 12, 2025.
-                        //  ! Inject JavaScript code for document body with adding a bottom padding
-                        //  ! to ensure that content won't be covered by nav bar when scrolling to the end.
-                        //  ! zh-CN: 注入 JavaScript, 为 body 添加底部 padding, 确保滚动到底部时导航栏不遮挡内容.
-                        @Language("JavaScript")
-                        val jsCode = """document.body.style.paddingBottom = "${systemBarInsets.bottom}px";"""
-                        webView.evaluateJavascript(jsCode, null)
+                        val webView = view ?: return
+                        adjustBodyPaddingToAvoidNavOverlay(webView, systemBarInsets)
                     }
                 }
             }
+        }
+
+        private fun adjustBodyPaddingToAvoidNavOverlay(webView: WebView, systemBarInsets: Insets) {
+            // @Hint by SuperMonster003 on Mar 12, 2025.
+            //  ! Inject JavaScript code for document body with adding a bottom padding
+            //  ! to ensure that content won't be covered by nav bar when scrolling to the end.
+            //  ! zh-CN: 注入 JavaScript, 为 body 添加底部 padding, 确保滚动到底部时导航栏不遮挡内容.
+            @Language("JavaScript")
+            val jsCode = """document.body.style.paddingBottom = "${systemBarInsets.bottom}px";"""
+            webView.evaluateJavascript(jsCode, null)
         }
 
     }

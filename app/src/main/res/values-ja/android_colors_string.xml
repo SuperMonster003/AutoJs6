@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="android_black">ブラック</string>
+    <string name="android_blue">ブルー</string>
+    <string name="android_cyan">シアン / アクア</string>
+    <string name="android_dark_gray">ダークグレー</string>
+    <string name="android_gray">グレー</string>
+    <string name="android_green">グリーン / ライム</string>
+    <string name="android_light_gray">ライトグレー</string>
+    <string name="android_magenta">マゼンタ / フューシャ</string>
+    <string name="android_maroon">マルーン</string>
+    <string name="android_navy">ネイビー</string>
+    <string name="android_olive">オリーブ</string>
+    <string name="android_purple">パープル</string>
+    <string name="android_red">レッド</string>
+    <string name="android_silver">シルバー</string>
+    <string name="android_teal">ティール</string>
+    <string name="android_white">ホワイト</string>
+    <string name="android_yellow">イエロー</string>
+
+</resources>

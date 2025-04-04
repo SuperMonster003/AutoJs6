@@ -21,13 +21,13 @@ import org.autojs.autojs6.databinding.ColorInfoDialogListItemBinding
 object ColorInfoDialogManager {
 
     @JvmStatic
-    fun showColorInfoDialog(context: Context, @ColorInt color: Int, titleRes: Int = R.string.dialog_title_color_details) {
+    fun showColorInfoDialog(context: Context, @ColorInt color: Int, title: String? = null) {
         val binding = ColorInfoDialogListItemBinding.inflate(LayoutInflater.from(context))
 
         val colorWithoutAlpha = color or -0x1000000
 
         val dialog = MaterialDialog.Builder(context)
-            .title(titleRes)
+            .title(title ?: context.getString(R.string.dialog_title_color_details))
             .customView(binding.root, false)
             .positiveText(R.string.dialog_button_dismiss)
             .positiveColorRes(R.color.dialog_button_default)

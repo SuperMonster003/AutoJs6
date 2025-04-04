@@ -104,10 +104,11 @@ open class DrawerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        EventBus.getDefault().register(this)
+
         @SuppressLint("NotifyDataSetChanged")
         ThemeChangeNotifier.themeChanged.observe(this) {
-            mThemeColorItem.subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext)
-            mDrawerMenu.adapter?.notifyDataSetChanged()
+            updateThemeColorSubtitle()
         }
 
         mContext = requireContext()
@@ -405,19 +406,9 @@ open class DrawerFragment : Fragment() {
         binding.exit.setOnClickListener { mActivity.exitCompletely() }
     }
 
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
-    }
-
     override fun onResume() {
         super.onResume()
         syncMenuItemStates()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        EventBus.getDefault().unregister(this)
     }
 
     override fun onDestroy() {
@@ -425,6 +416,7 @@ open class DrawerFragment : Fragment() {
         mClientModeItem.dispose()
         mServerModeItem.dispose()
         // mActivity.unregisterReceiver(mReceiver)
+        EventBus.getDefault().unregister(this)
     }
 
     override fun onDestroyView() {
@@ -457,6 +449,17 @@ open class DrawerFragment : Fragment() {
     @Suppress("unused", "UNUSED_PARAMETER")
     fun onAccessibilityServiceStateChanged(event: Event.AccessibilityServiceStateChangedEvent) {
         mAccessibilityServiceItem.sync()
+    }
+
+    @Subscribe
+    @Suppress("unused", "UNUSED_PARAMETER")
+    fun onThemeColorLayoutSwitched(event: Event.ThemeColorLayoutSwitchedEvent) {
+        updateThemeColorSubtitle()
+    }
+
+    private fun updateThemeColorSubtitle() {
+        mThemeColorItem.subtitle = ColorSelectBaseActivity.getCurrentColorSummary(mContext)
+        (mDrawerMenu.adapter as? DrawerMenuAdapter)?.notifyItemChanged(mThemeColorItem)
     }
 
     private fun initMenuItems() {
@@ -535,6 +538,7 @@ open class DrawerFragment : Fragment() {
             interface OnDrawerOpened
             interface OnDrawerClosed
             interface AccessibilityServiceStateChangedEvent
+            interface ThemeColorLayoutSwitchedEvent
         }
 
     }

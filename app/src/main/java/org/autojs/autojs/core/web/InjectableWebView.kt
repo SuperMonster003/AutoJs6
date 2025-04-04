@@ -15,7 +15,7 @@ import org.mozilla.javascript.Scriptable
  * Transformed by SuperMonster003 on Apr 18, 2023.
  */
 @ScriptClass
-@SuppressLint("ViewConstructor", "SetJavaScriptEnabled")
+@SuppressLint("ViewConstructor")
 class InjectableWebView(context: Context, jsCtx: org.mozilla.javascript.Context, scriptable: Scriptable, url: String?) : WebView(context) {
 
     private var mInjectableWebClient: InjectableWebClient
@@ -25,6 +25,7 @@ class InjectableWebView(context: Context, jsCtx: org.mozilla.javascript.Context,
             useWideViewPort = true
             builtInZoomControls = true
             loadWithOverviewMode = true
+            @SuppressLint("SetJavaScriptEnabled")
             javaScriptEnabled = true
             javaScriptCanOpenWindowsAutomatically = true
             domStorageEnabled = true

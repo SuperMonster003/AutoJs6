@@ -19,6 +19,12 @@
         app:showAsAction="always|collapseActionView" />
 
     <item
+        android:id="@+id/action_locate_current_theme_color"
+        android:title="@string/text_locate_current_theme_color"
+        android:icon="@drawable/ic_locate"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_add_color_library"
         android:title="@string/text_add_color_library">
 
@@ -43,12 +49,6 @@
 
     </item>
 
-    <item
-        android:id="@+id/action_locate_current_theme_color"
-        android:title="@string/text_locate_current_theme_color"
-        android:icon="@drawable/ic_locate"
-        app:showAsAction="never" />
-
     <item android:title="@string/text_more">
 
         <menu>
@@ -61,5 +61,11 @@
         </menu>
 
     </item>
+
+    <item
+        android:id="@+id/action_color_search_help"
+        android:title="@string/text_search_help"
+        android:visible="false"
+        app:showAsAction="never" />
 
 </menu>
