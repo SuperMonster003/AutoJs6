@@ -33,7 +33,7 @@
     </io.codetail.widget.RevealFrameLayout>
 
     <androidx.recyclerview.widget.ThemeColorRecyclerView
-        android:id="@+id/color_library_recycler_view"
+        android:id="@+id/color_items_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fadeScrollbars="true"

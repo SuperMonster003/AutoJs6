@@ -132,7 +132,7 @@ object UpdateUtils {
                     .autoDismiss(false)
                     .show()
             }
-            .positiveText(R.string.dialog_button_cancel)
+            .positiveText(R.string.dialog_button_dismiss)
             .onPositive { dialog, _ -> dialog.dismiss() }
             .autoDismiss(false)
             .build()

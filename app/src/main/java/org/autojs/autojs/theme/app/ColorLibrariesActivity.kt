@@ -28,14 +28,14 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
     private val libraryAdapter: ColorLibraryAdapter by lazy {
         ColorLibraryAdapter(presetColorLibraries) { library ->
-            val intent = Intent(this, ColorLibraryActivity::class.java)
+            val intent = Intent(this, ColorItemsActivity::class.java)
             intent.putExtra(INTENT_IDENTIFIER_LIBRARY_ID, library.id)
             startActivity(intent)
         }
     }
 
     private val colorItemAdapter: ColorItemAdapter by lazy {
-        ColorItemAdapter(presetColorItems, isLibraryIdentifierAppendedToDesc = true)
+        ColorItemAdapter(presetColorItems, isShowLibraryIdentifier = true)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,7 +97,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                 customColorPosition -> Unit
                 SELECT_NONE, defaultColorPosition -> {
                     adapter.selectedLibraryId = COLOR_LIBRARY_ID_DEFAULT
-                    adapter.selectedItemId = adapter.items.firstOrNull {
+                    adapter.selectedItemId = adapter.items().firstOrNull {
                         it.libraryId == COLOR_LIBRARY_ID_DEFAULT && getColor(it.colorRes) == getColor(R.color.theme_color_default)
                     }?.itemId ?: SELECT_NONE
                 }
@@ -105,7 +105,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                     in ColorItems.MATERIAL_COLORS.indices -> {
                         val (colorRes, _) = ColorItems.MATERIAL_COLORS[calculatedIndex]
                         adapter.selectedLibraryId = COLOR_LIBRARY_ID_MATERIAL
-                        adapter.selectedItemId = adapter.items.firstOrNull {
+                        adapter.selectedItemId = adapter.items().firstOrNull {
                             it.libraryId == COLOR_LIBRARY_ID_MATERIAL && it.colorRes == colorRes
                         }?.itemId ?: SELECT_NONE
                     }
@@ -113,7 +113,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             }
             else -> {
                 adapter.selectedLibraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)
-                adapter.selectedItemId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, SELECT_NONE)
+                adapter.selectedItemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, SELECT_NONE)
             }
         }
     }
@@ -121,6 +121,36 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_color_palette -> {
             showColorPicker()
+            true
+        }
+        R.id.action_show_all_histories -> {
+            showColorHistories { selectedHistoryItem ->
+                val identifier = selectedHistoryItem.colorLibraryIdentifier ?: run {
+                    ViewUtils.showToast(this@ColorLibrariesActivity, R.string.error_failed_to_apply_current_color_history, true)
+                    return@showColorHistories
+                }
+                if (identifier == getString(R.string.color_library_identifier_palette)) {
+                    onColorPickerConfirmed(selectedHistoryItem.colorInt)
+                    return@showColorHistories
+                }
+                presetColorLibraries.find { getString(it.identifierRes) == identifier }?.let { library ->
+                    library.colors.firstOrNull { getColor(it.colorRes) == selectedHistoryItem.colorInt }?.let { item ->
+                        savePrefsForLibraries(item)
+                        savePrefsForLegacy(this, item)
+
+                        saveDatabaseForColorHistories(
+                            applicationContext = applicationContext,
+                            libraryId = item.libraryId,
+                            itemId = item.itemId,
+                        )
+
+                        isForciblyEnableAppBarColorTransition = true
+
+                        ThemeColorManager.setThemeColor(getColor(item.colorRes))
+                        ThemeChangeNotifier.notifyThemeChanged()
+                    }
+                } ?: ViewUtils.showToast(this@ColorLibrariesActivity, R.string.error_failed_to_apply_current_color_history, true)
+            }
             true
         }
         R.id.action_new_color_library -> {
@@ -153,7 +183,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
     private fun locateCurrentThemeColor() {
         checkAndGetTargetInfoForThemeColorLocate()?.let { target ->
-            Intent(this, ColorLibraryActivity::class.java).apply {
+            Intent(this, ColorItemsActivity::class.java).apply {
                 putExtra(INTENT_IDENTIFIER_LIBRARY_ID, target.libraryId)
                 putExtra(INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO, target.libraryItemId)
             }.let { startActivity(it) }
@@ -164,17 +194,18 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
 
     companion object {
 
-        const val COLOR_LIBRARY_ID_PALETTE = 0x10001
-        const val COLOR_LIBRARY_ID_INTELLIGENT = 0x10002
-        const val COLOR_LIBRARY_ID_CREATED = 0x10003
-        const val COLOR_LIBRARY_ID_IMPORTED = 0x10004
-        const val COLOR_LIBRARY_ID_CLONED = 0x10005
+        const val COLOR_LIBRARY_ID_DEFAULT = 0x01
+        const val COLOR_LIBRARY_ID_MATERIAL = 0x02
+        const val COLOR_LIBRARY_ID_ANDROID = 0x03
+        const val COLOR_LIBRARY_ID_CSS = 0x04
+        const val COLOR_LIBRARY_ID_WEB = 0x05
 
-        const val COLOR_LIBRARY_ID_DEFAULT = 0x20001
-        const val COLOR_LIBRARY_ID_MATERIAL = 0x20002
-        const val COLOR_LIBRARY_ID_ANDROID = 0x20003
-        const val COLOR_LIBRARY_ID_CSS = 0x20004
-        const val COLOR_LIBRARY_ID_WEB = 0x20005
+        const val COLOR_LIBRARY_ID_PALETTE = 0x21
+        const val COLOR_LIBRARY_ID_INTELLIGENT = 0x22
+
+        const val COLOR_LIBRARY_FROM_IMPORTED = 0x01
+        const val COLOR_LIBRARY_FROM_CLONED = 0x02
+        const val COLOR_LIBRARY_FROM_CREATED = 0x03
 
         val presetColorLibraries by lazy {
             listOf(
@@ -186,8 +217,8 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
                     colors = listOf(
                         R.color.md_teal_800 to R.string.md_teal_800,
                         R.color.md_blue_gray_800 to R.string.md_blue_gray_800,
-                        R.color.window_background_light to R.string.window_background_light,
-                        R.color.window_background_night to R.string.window_background_night,
+                        R.color.window_background_light to R.string.color_name_window_background_light,
+                        R.color.window_background_night to R.string.color_name_window_background_night,
                     ).mapIndexed { index, (colorRes, nameRes) ->
                         PresetColorItem(index, COLOR_LIBRARY_ID_DEFAULT, colorRes, nameRes)
                     },
@@ -257,9 +288,6 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             val colors: List<PresetColorItem> = emptyList(),
         ) {
             val isIntelligent get() = id == COLOR_LIBRARY_ID_INTELLIGENT
-            val isCreated get() = id == COLOR_LIBRARY_ID_CREATED
-            val isImported get() = id == COLOR_LIBRARY_ID_IMPORTED
-            val isCloned get() = id == COLOR_LIBRARY_ID_CLONED
             val isDefault get() = id == COLOR_LIBRARY_ID_DEFAULT
             val isMaterial get() = id == COLOR_LIBRARY_ID_MATERIAL
         }

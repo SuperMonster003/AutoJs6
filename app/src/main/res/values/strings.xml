@@ -1114,7 +1114,7 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
-    <string name="theme_color_default">Default</string>
+    <string name="text_default">Default</string>
     <string name="uri_autojs6_download_link" translatable="false">http://download.autojs6.com</string>
     <string name="url_github_autojs6" translatable="false">&url_github_autojs6;</string>
     <string name="url_github_autojs6_issues" translatable="false">&url_github_autojs6;/issues</string>
@@ -1149,20 +1149,20 @@
     <string name="color_library_android_colors">Android color library</string>
     <string name="color_library_material_design_colors">Material design color library</string>
     <string name="color_library_default_colors">Default color library</string>
-    <string name="window_background_light">Background light</string>
-    <string name="window_background_night">Background night</string>
+    <string name="color_name_window_background_light">Background light</string>
+    <string name="color_name_window_background_night">Background night</string>
     <string name="text_color_library">Color library</string>
     <string name="color_library_title_default_colors">Default colors</string>
     <string name="color_library_title_material_design_colors">Material colors</string>
     <string name="color_library_title_android_colors">Android colors</string>
     <string name="color_library_title_css_colors">CSS colors</string>
     <string name="color_library_title_web_colors">WEB colors</string>
-    <string name="color_library_identifier_default_colors">Default</string>
+    <string name="color_library_identifier_default_colors">@string/text_default</string>
     <string name="color_library_identifier_material_design_colors">Material</string>
     <string name="color_library_identifier_android_colors" translatable="false">Android</string>
     <string name="color_library_identifier_css_colors" translatable="false">CSS</string>
     <string name="color_library_identifier_web_colors" translatable="false">WEB</string>
-    <string name="color_library_identifier_custom">Custom</string>
+    <string name="color_library_identifier_custom">@string/mt_custom</string>
     <string name="dialog_title_color_palette">Color palette</string>
     <string name="text_add_color_library">Add a color library</string>
     <string name="text_import_color_library">Import a color library</string>
@@ -1188,5 +1188,14 @@
     <string name="literal_hex_uppercase" translatable="false">HEX</string>
     <string name="text_search_help">Search help</string>
     <string name="error_failed_to_render_content">Failed to render content</string>
+    <string name="label_latest_used_time">Latest used: %1$s</string>
+    <string name="dialog_button_clear_items">Clear</string>
+    <string name="text_confirm_to_clear_all_histories">Are you sure to clear all histories?</string>
+    <string name="text_all_histories_cleared">All histories have been cleared</string>
+    <string name="error_invalid_color">Invalied color</string>
+    <string name="error_failed_to_apply_current_color_history">Failed to apply current color history</string>
+    <string name="text_confirm_to_clear_histories_of">All histories below will be cleared\n\n[ %1$s ]\n\nAre you sure to clear them all?</string>
+    <string name="text_confirm_to_clear_histories_of_all_color_libraries">All histories below will be cleared\n\n[ All color libraries ]\n\nAre you sure to clear them all?</string>
+    <string name="text_all_histories">All histories</string>
 
 </resources>

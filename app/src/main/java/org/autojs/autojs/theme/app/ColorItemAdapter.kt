@@ -4,45 +4,31 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import org.autojs.autojs.core.image.ColorItems
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
-import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_MATERIAL
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_LEGACY_SELECTED_COLOR_INDEX
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ID
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ITEM_ID
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.SELECT_NONE
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.customColorPosition
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.defaultColorPosition
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForColorHistories
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.savePrefsForLegacy
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.savePrefsForLibraries
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.MtColorLibraryRecyclerViewItemBinding
 
 @SuppressLint("NotifyDataSetChanged")
 class ColorItemAdapter(
-    var items: List<PresetColorItem>,
-    var isLibraryIdentifierAppendedToDesc: Boolean = false,
-    private val onItemClick: ((PresetColorItem, View) -> Unit)? = null,
+    internal var items: List<PresetColorItem>,
+    private var isShowLibraryIdentifier: Boolean = false,
+    private val onItemClick: ((positionOfCurrentSelection: Int) -> Unit)? = null,
 ) : RecyclerView.Adapter<ColorItemViewHolder>() {
 
     var selectedItemId = SELECT_NONE
     var selectedLibraryId = SELECT_NONE
 
-    fun updateData(newItems: List<PresetColorItem>) {
-        items = newItems
-        notifyDataSetChanged()
-    }
-
-    fun items() = items
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorItemViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.mt_color_library_recycler_view_item, parent, false)
-        return ColorItemViewHolder(view)
+        val binding = MtColorLibraryRecyclerViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ColorItemViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ColorItemViewHolder, position: Int) {
@@ -58,71 +44,64 @@ class ColorItemAdapter(
             }
         }
 
-        holder.bind(item, selectedLibraryId, selectedItemId, isLibraryIdentifierAppendedToDesc)
+        holder.bind(item, selectedLibraryId, selectedItemId, isShowLibraryIdentifier)
 
         itemView.setOnClickListener {
-            savePrefsForLibraries(item)
-            savePrefsForLegacy(context, item)
-
-            when (selectedItemId) {
-                SELECT_NONE -> {
-                    selectedLibraryId = item.libraryId
-                    selectedItemId = item.itemId
-                    notifyItemChanged(holder.bindingAdapterPosition)
-                }
-                else -> {
-                    val positionBeforeSelection = items().indexOfFirst {
-                        it.libraryId == selectedLibraryId && it.itemId == selectedItemId
-                    }
-                    val positionOfCurrentSelection = holder.bindingAdapterPosition
-                    if (positionBeforeSelection != positionOfCurrentSelection && positionBeforeSelection >= 0) {
-                        notifyItemChanged(positionBeforeSelection)
-                    }
-                    selectedLibraryId = item.libraryId
-                    selectedItemId = item.itemId
-                    notifyItemChanged(positionOfCurrentSelection)
-                }
-            }
-
-            ThemeColorManager.setThemeColor(context.getColor(item.colorRes))
-            ThemeChangeNotifier.notifyThemeChanged()
-
-            onItemClick?.let { it(item, itemView) }
+            onItemConfirmed(context, holder.bindingAdapterPosition)
         }
+    }
+
+    private fun updateSelectedPosition(item: PresetColorItem, positionOfCurrentSelection: Int) {
+        when (selectedItemId) {
+            SELECT_NONE -> {
+                selectedLibraryId = item.libraryId
+                selectedItemId = item.itemId
+                notifyItemChanged(positionOfCurrentSelection)
+            }
+            else -> {
+                val positionBeforeSelection = items.indexOfFirst {
+                    it.libraryId == selectedLibraryId && it.itemId == selectedItemId
+                }
+                if (positionBeforeSelection != positionOfCurrentSelection && positionBeforeSelection >= 0) {
+                    notifyItemChanged(positionBeforeSelection)
+                }
+                selectedLibraryId = item.libraryId
+                selectedItemId = item.itemId
+                notifyItemChanged(positionOfCurrentSelection)
+            }
+        }
+    }
+
+    private fun savePrefsAndDatabase(context: Context, item: PresetColorItem) {
+        savePrefsForLibraries(item)
+        savePrefsForLegacy(context, item)
+        saveDatabaseForColorHistories(
+            applicationContext = context.applicationContext,
+            libraryId = item.libraryId,
+            itemId = item.itemId,
+        )
+    }
+
+    private fun applyThemeColor(context: Context, item: PresetColorItem) {
+        ThemeColorManager.setThemeColor(context.getColor(item.colorRes))
+        ThemeChangeNotifier.notifyThemeChanged()
+    }
+
+    fun onItemConfirmed(context: Context, position: Int) {
+        val item: PresetColorItem = items[position]
+        savePrefsAndDatabase(context, item)
+        updateSelectedPosition(item, position)
+        applyThemeColor(context, item)
+        onItemClick?.invoke(position)
     }
 
     override fun getItemCount() = items.size
 
-    private fun savePrefsForLibraries(colorItem: PresetColorItem) {
-        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, colorItem.libraryId)
-        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, colorItem.itemId)
-    }
+    fun items() = items
 
-    private fun savePrefsForLegacy(context: Context, colorItem: PresetColorItem) {
-        when (colorItem.libraryId) {
-            COLOR_LIBRARY_ID_DEFAULT -> {
-                if (context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)) {
-                    Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, defaultColorPosition)
-                } else {
-                    Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
-                }
-            }
-            COLOR_LIBRARY_ID_MATERIAL -> {
-                val index = colorItem.itemId
-                if (index !in ColorItems.MATERIAL_COLORS.indices) {
-                    Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
-                } else {
-                    val fixedIndex = maxOf(
-                        defaultColorPosition,
-                        customColorPosition,
-                    ) + 1 + index
-                    Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, fixedIndex)
-                }
-            }
-            else -> {
-                Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
-            }
-        }
+    fun updateData(newItems: List<PresetColorItem>) {
+        items = newItems
+        notifyDataSetChanged()
     }
 
 }

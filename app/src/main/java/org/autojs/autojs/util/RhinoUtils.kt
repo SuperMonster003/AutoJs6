@@ -753,6 +753,11 @@ object RhinoUtils {
     }
 
     fun <T, R> T.withTimeConsuming(name: String, function: (thisArg: T) -> R?): R? {
+
+        // @Hint by SuperMonster003 on Apr 5, 2025.
+        //  ! Kotlin's measureTimeMillis also could be used to calculate the execution time of a function.
+        //  ! zh-CN: 也可以使用 kotlin 的 measureTimeMillis 计算函数执行耗时.
+
         val start = System.currentTimeMillis()
         val result = function.invoke(this)
         if (BuildConfig.DEBUG) {

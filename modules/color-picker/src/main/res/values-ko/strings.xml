@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,10 +13,12 @@
      limitations under the License.
 -->
 <resources>
-  <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
-  <string name="cpv_default_title">색상 선택</string>
-  <string name="cpv_presets">프리셋</string>
-  <string name="cpv_custom">커스텀</string>
-  <string name="cpv_select">선택</string>
-  <string name="cpv_transparency">투명도</string>
+    <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
+    <string name="cpv_default_title">색상 선택</string>
+    <string name="cpv_presets">프리셋</string>
+    <string name="cpv_custom">커스텀</string>
+    <string name="cpv_select">선택</string>
+    <string name="cpv_transparency">투명도</string>
+    <string name="cpv_menu_item_histories">역사</string>
+    <string name="cpv_menu_item_reset_color_palette">팔레트 초기화</string>
 </resources>

@@ -33,6 +33,25 @@ public class DeveloperUtils {
 
     private static final Regex SIGNATURE_REX = new Regex("CbKua77m59vis|N7YkpKxKjsPWe");
     private static final ExecutorService sExecutor = UnderUseExecutors.getExecutor();
+
+    // @Hint by JetBrains AI Assistant on Apr 4, 2025.
+    //  ! SALT is used in cryptography to enhance the randomness and complexity of the hash algorithm.
+    //  ! During the hashing or encryption process, simply processing the data might result in
+    //  ! identical hash outputs for identical inputs, leaving it vulnerable to attacks, such as rainbow table attacks.
+    //  ! By incorporating a predetermined SALT, even identical inputs will produce different hash outputs, thereby enhancing security.
+    //  ! In simple terms, SALT is like adding a special seasoning to the data to create an extra layer of protection during hash computation.
+    //  ! zh-CN:
+    //  ! SALT 在密码学中用于增加散列 (Hash) 算法的随机性和复杂度.
+    //  ! 在散列或加密过程中, 仅仅对数据进行处理可能会使得相同的数据产生相同的散列结果, 这样就容易受到如彩虹表攻击等威胁.
+    //  ! 通过加入一个预先设定的 SALT, 能使得即使输入的数据相同, 最终的散列结果也会不同, 从而提升安全性.
+    //  ! 简单来说, SALT 就像是在数据中 "加入了一点特殊调料", 使得在计算散列值时增加了一道额外的防护层.
+    //  !
+    // @Hint by SuperMonster003 on Apr 4, 2025.
+    //  ! let life be beautiful like summer flowers and death like autumn leaves.
+    //  ! Derived from Rabindranath Tagore's "Stray Birds", section 82.
+    //  ! zh-CN:
+    //  ! 使生如夏花之绚烂, 死如秋叶之静美. -- 郑振铎译
+    //  ! 出自拉宾德拉纳特·泰戈尔的 <<飞鸟集>> 第 82 首.
     private static final String SALT = "let\nlife\nbe\nbeautiful\nlike\nsummer\nflowers\nand\ndeath\nlike\nautumn\nleaves\n.";
 
     public static boolean isSelfPackage(@Nullable String runningPackage) {

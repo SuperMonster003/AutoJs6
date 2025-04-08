@@ -27,13 +27,16 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRAR
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_LEGACY_SELECTED_COLOR_INDEX
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ID
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ITEM_ID
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_ITEM_ID
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.SELECT_NONE
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.colorItemsLegacy
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.customColorPosition
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.defaultColorPosition
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForColorHistories
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.saveDatabaseForPaletteHistories
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.MtColorSettingRecyclerViewItemBinding
 
 class ColorSettingRecyclerView : ThemeColorRecyclerView {
 
@@ -61,9 +64,36 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
         getChildViewHolder(v)?.let { holder ->
             when (val pos = holder.bindingAdapterPosition) {
                 customColorPosition -> showColorPicker(v)
+                defaultColorPosition -> {
+                    setSelectedPosition(pos)
+                    mOnItemClickListener?.onItemClick(v, pos)
+
+                    presetColorLibraries.find { it.isDefault }!!.colors.find { colorItem ->
+                        context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)
+                    }?.let {
+                        saveDatabaseForColorHistories(
+                            applicationContext = context.applicationContext,
+                            libraryId = COLOR_LIBRARY_ID_DEFAULT,
+                            itemId = it.itemId,
+                        )
+                    }
+
+                }
                 else -> {
                     setSelectedPosition(pos)
                     mOnItemClickListener?.onItemClick(v, pos)
+
+                    selectedThemeColor?.colorPrimary?.let { c ->
+                        presetColorLibraries.find { it.isMaterial }!!.colors.find { colorItem ->
+                            context.getColor(colorItem.colorRes) == c
+                        }?.let {
+                            saveDatabaseForColorHistories(
+                                applicationContext = context.applicationContext,
+                                libraryId = COLOR_LIBRARY_ID_MATERIAL,
+                                itemId = it.itemId,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -99,24 +129,22 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
 
     private fun savePrefsForLibraries() {
         when (mSelectedPosition) {
-            0 -> {
+            customColorPosition -> {
                 Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_PALETTE)
-                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, 0)
+                Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, 0)
             }
-            1 -> {
+            defaultColorPosition -> {
                 Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_DEFAULT)
                 presetColorLibraries.find { it.isDefault }!!.colors.find { colorItem ->
                     context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)
-                }?.let { Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, it.itemId) }
+                }?.let { Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, it.itemId) }
             }
-            else -> {
-                selectedThemeColor?.colorPrimary?.let { c ->
-                    presetColorLibraries.find { it.isMaterial }!!.colors.find { colorItem ->
-                        context.getColor(colorItem.colorRes) == c
-                    }?.let {
-                        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_MATERIAL)
-                        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, it.itemId)
-                    }
+            else -> selectedThemeColor?.colorPrimary?.let { c ->
+                presetColorLibraries.find { it.isMaterial }!!.colors.find { colorItem ->
+                    context.getColor(colorItem.colorRes) == c
+                }?.let {
+                    Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_MATERIAL)
+                    Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, it.itemId)
                 }
             }
         }
@@ -136,6 +164,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
 
     private fun showColorPicker(v: View) {
         ColorPickerDialog.newBuilder()
+            .setUseLegacyMode(true)
             .setAllowCustom(true)
             .setAllowPresets(false)
             .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
@@ -147,6 +176,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
                 val colorWithFullAlpha = color or Color.BLACK
                 Pref.putInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, colorWithFullAlpha)
                 setSelectedPosition(customColorPosition)
+                saveDatabaseForPaletteHistories(applicationContext = context.applicationContext, color = colorWithFullAlpha)
                 mOnItemClickListener?.onItemClick(v, customColorPosition)
             }
             .show((context as FragmentActivity).supportFragmentManager, "ColorPickerTagForColorSelect")
@@ -159,7 +189,8 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
     private inner class Adapter : RecyclerView.Adapter<ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            return ViewHolder(LayoutInflater.from(context).inflate(R.layout.mt_color_setting_recycler_view_item, parent, false))
+            val binding = MtColorSettingRecyclerViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            return ViewHolder(binding)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -181,15 +212,13 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
 
     }
 
-    private inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private inner class ViewHolder(itemViewBinding: MtColorSettingRecyclerViewItemBinding) : RecyclerView.ViewHolder(itemViewBinding.root) {
 
-        var colorView: ImageView
-        var nameView: TextView
+        val colorView: ImageView = itemViewBinding.color
+        val nameView: TextView = itemViewBinding.name
 
         init {
-            itemView.setOnClickListener(mActualOnItemClickListener)
-            colorView = itemView.findViewById(R.id.color)
-            nameView = itemView.findViewById(R.id.name)
+            itemViewBinding.root.apply { setOnClickListener(mActualOnItemClickListener) }
         }
 
         fun setChecked(checked: Boolean) {

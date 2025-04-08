@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="50.4dp"
+    android:background="?selectableItemBackground"
+    android:baselineAligned="false"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="7.2dp"
+    android:paddingEnd="?android:attr/scrollbarSize">
+
+    <ImageView
+        android:id="@+id/color"
+        android:layout_width="32.4dp"
+        android:layout_height="32.4dp"
+        android:layout_marginTop="0.9dp"
+        android:background="@drawable/mt_circle"
+        android:padding="8dp" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="2dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/color_hex"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:fadingEdge="horizontal"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:textColor="@color/day_night_full"
+                android:textSize="13.5sp"
+                tools:text="#FFDEAD" />
+
+            <TextView
+                android:id="@+id/title_split_line"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="0.5sp"
+                android:fadingEdge="horizontal"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:text=" | "
+                android:textColor="@color/day_night"
+                android:textSize="13.5sp" />
+
+            <TextView
+                android:id="@+id/color_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:fadingEdge="horizontal"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:textColor="@color/day_night_full"
+                android:textSize="13.5sp"
+                tools:text="@string/css_navajo_white" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/last_used_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0.9dp"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:textColor="@color/day_night_alpha_60"
+                android:textSize="11sp"
+                tools:text="2025/04/07 14:11" />
+
+            <TextView
+                android:id="@+id/subtitle_split_line"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="0.5sp"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:text=" | "
+                android:textColor="@color/day_night_alpha_50"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/color_library_identifier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0.9dp"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:textColor="@color/day_night_alpha_60"
+                android:textSize="11sp"
+                tools:text="@string/color_library_identifier_material_design_colors" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

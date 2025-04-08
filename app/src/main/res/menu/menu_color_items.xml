@@ -19,6 +19,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_show_histories"
+        android:title="@string/text_histories"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_color_search_help"
         android:title="@string/text_search_help"
         android:visible="false"

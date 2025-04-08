@@ -1,40 +1,42 @@
 package org.autojs.autojs.theme.app
 
 import android.content.res.ColorStateList
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.MtColorLibraryRecyclerViewItemBinding
 
-class ColorItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class ColorItemViewHolder(itemViewBinding: MtColorLibraryRecyclerViewItemBinding) : RecyclerView.ViewHolder(itemViewBinding.root) {
 
-    private val context = itemView.context
+    private val context = itemViewBinding.root.context
 
-    private val colorView: ImageView = itemView.findViewById(R.id.color)
-    private val nameView: TextView = itemView.findViewById(R.id.name)
-    private val descView: TextView = itemView.findViewById(R.id.description)
+    private val colorView: ImageView = itemViewBinding.color
+    private val nameView: TextView = itemViewBinding.name
+    private val descView: TextView = itemViewBinding.description
+    private val subtitleSplitLineView: TextView = itemViewBinding.subtitleSplitLine
+    private val colorLibraryIdentifierView: TextView = itemViewBinding.colorLibraryIdentifier
 
-    fun bind(item: PresetColorItem, selectedLibraryId: Int, selectedItemId: Int, isLibraryIdentifierAppendedToDesc: Boolean) {
+    fun bind(item: PresetColorItem, selectedLibraryId: Int, selectedItemId: Int, isShowLibraryIdentifier: Boolean) {
         val color = context.getColor(item.colorRes)
         val colorName = context.getString(item.nameRes)
         val colorDesc = String.format("#%06X", 0xFFFFFF and color)
 
         ThemeColorHelper.setBackgroundColor(colorView, color)
         nameView.text = colorName
-        descView.text = when {
-            isLibraryIdentifierAppendedToDesc -> {
-                presetColorLibraries.find { it.id == item.libraryId }?.let {
-                    "${context.getString(it.identifierRes)} | $colorDesc"
-                } ?: colorDesc
+        descView.text = colorDesc
+        if (isShowLibraryIdentifier) {
+            presetColorLibraries.find { it.id == item.libraryId }?.let {
+                colorLibraryIdentifierView.text = context.getString(it.identifierRes)
             }
-            else -> colorDesc
         }
+        subtitleSplitLineView.isVisible = !colorLibraryIdentifierView.text.isNullOrBlank()
         setChecked(color, selectedLibraryId == item.libraryId && selectedItemId == item.itemId)
     }
 

@@ -12,10 +12,15 @@ import androidx.annotation.StringRes
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.VERTICAL
+import androidx.recyclerview.widget.ThemeColorRecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.appbar.AppBarLayout
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import io.codetail.widget.RevealFrameLayout
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -25,6 +30,12 @@ import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.theme.app.ColorEntities.ColorHistory
+import org.autojs.autojs.theme.app.ColorEntities.ColorInfo
+import org.autojs.autojs.theme.app.ColorEntities.PaletteHistory
+import org.autojs.autojs.theme.app.ColorHistoryItemViewHolder.Companion.ColorHistoryItem
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
+import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_MATERIAL
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_PALETTE
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorLibrary
@@ -67,6 +78,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         get() = Pref.getInt(KEY_CUSTOM_COLOR, getColor(R.color.custom_color_default))
 
     protected var currentColor by Delegates.notNull<Int>()
+    protected var isForciblyEnableAppBarColorTransition = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -148,15 +160,18 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
     protected fun updateAppBarColorContent(colorTo: Int) {
         setColors(colorTo)
         updateSubtitle(mToolbar)
-        if (hasWindowFocus()) ViewAnimationUtils.createCircularReveal(
-            /* view = */ mAppBarLayout,
-            /* centerX = */ mAppBarLayout.left,
-            /* centerY = */ mAppBarLayout.bottom,
-            /* startRadius = */ 0f,
-            /* endRadius = */ hypot(mAppBarLayout.width.toDouble(), mAppBarLayout.height.toDouble()).toFloat(),
-        ).apply {
-            duration = 500L
-            start()
+        if (isForciblyEnableAppBarColorTransition || hasWindowFocus()) {
+            isForciblyEnableAppBarColorTransition = false
+            ViewAnimationUtils.createCircularReveal(
+                /* view = */ mAppBarLayout,
+                /* centerX = */ mAppBarLayout.left,
+                /* centerY = */ mAppBarLayout.bottom,
+                /* startRadius = */ 0f,
+                /* endRadius = */ hypot(mAppBarLayout.width.toDouble(), mAppBarLayout.height.toDouble()).toFloat(),
+            ).apply {
+                duration = 500L
+                start()
+            }
         }
     }
 
@@ -205,7 +220,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 .show()
             return null
         }
-        val targetItemIndex = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, -1)
+        val targetItemIndex = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, -1)
         if (targetItemIndex !in targetLibrary.colors.indices) {
             MaterialDialog.Builder(this)
                 .title(R.string.text_failed_to_locate)
@@ -225,26 +240,255 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
     protected fun showColorPicker() {
         ColorPickerDialog.newBuilder()
+            .setUseLegacyMode(isLegacyLayout)
             .setAllowCustom(true)
-            .setAllowPresets(true)
+            .setAllowPresets(!isLegacyLayout)
             .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
             .setShowAlphaSlider(false)
             .setDialogTitle(R.string.dialog_title_color_palette)
             .setColor(customColor)
+            .setOldColorPanelOnClickListener { showColorDetails(it.tag as? Int) }
+            .setNewColorPanelOnClickListener { showColorDetails(it.tag as? Int) }
+            .setColorHistoriesHandler { showColorPickerHistories(it) }
             .create()
-            .setColorPickerDialogListener { dialogId: Int, color: Int ->
-                savePrefsForLibraries()
-                savePrefsForLegacy(color)
-
-                updateAppBarColorContent(color)
-
-                ThemeColorManager.setThemeColor(color)
-                ThemeChangeNotifier.notifyThemeChanged()
+            .setColorPickerDialogListener { _, color: Int ->
+                onColorPickerConfirmed(color)
             }
             .show(supportFragmentManager, "ColorPickerTagForColorLibraries")
     }
 
-    protected fun showColorDetails(color: Int, title: String? = null) {
+    protected fun onColorPickerConfirmed(color: Int) {
+        savePrefsForLegacyPalette(color)
+        savePrefsForLibraries(COLOR_LIBRARY_ID_PALETTE, 0)
+
+        saveDatabaseForPaletteHistories(lifecycleScope, applicationContext, color)
+
+        isForciblyEnableAppBarColorTransition = true
+
+        ThemeColorManager.setThemeColor(color)
+        ThemeChangeNotifier.notifyThemeChanged()
+    }
+
+    private fun showColorPickerHistories(colorPickerDialog: ColorPickerDialog) {
+        lifecycleScope.launch {
+            var historiesDialog: MaterialDialog? = null
+            val dao = withContext(Dispatchers.IO) {
+                ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
+            }
+            when {
+                withContext(Dispatchers.IO) { dao.hasData() } -> {
+                    val adapter = PaletteHistoryItemAdapter(emptyList()) { selectedColor ->
+                        historiesDialog?.dismiss()
+                        colorPickerDialog.onHistorySelected(selectedColor)
+                    }
+                    launch(Dispatchers.Main) {
+                        val context = this@ColorSelectBaseActivity
+                        val recyclerView = ThemeColorRecyclerView(context).also {
+                            it.adapter = adapter
+                            it.layoutManager = LinearLayoutManager(context)
+                            it.addItemDecoration(DividerItemDecoration(context, VERTICAL))
+                        }
+                        historiesDialog = MaterialDialog.Builder(context)
+                            .title(R.string.text_histories)
+                            .customView(recyclerView, false)
+                            .neutralText(R.string.dialog_button_clear_items)
+                            .neutralColorRes(R.color.dialog_button_warn)
+                            .onNeutral { parentDialog, _ ->
+                                MaterialDialog.Builder(context)
+                                    .title(R.string.text_prompt)
+                                    .content(getString(R.string.text_confirm_to_clear_histories_of, getString(R.string.text_color_palette)))
+                                    .negativeText(R.string.dialog_button_cancel)
+                                    .negativeColorRes(R.color.dialog_button_default)
+                                    .positiveText(R.string.dialog_button_confirm)
+                                    .positiveColorRes(R.color.dialog_button_caution)
+                                    .onPositive { _, _ ->
+                                        lifecycleScope.launch(Dispatchers.IO) {
+                                            dao.deleteAll()
+                                            withContext(Dispatchers.Main) {
+                                                adapter.updateData(emptyList())
+                                                parentDialog.dismiss()
+                                                ViewUtils.showToast(context, R.string.text_all_histories_cleared, true)
+                                            }
+                                        }
+                                    }
+                                    .show()
+                            }
+                            .positiveText(R.string.dialog_button_dismiss)
+                            .positiveColorRes(R.color.dialog_button_default)
+                            .onPositive { dialog, _ -> dialog.dismiss() }
+                            .autoDismiss(false)
+                            .show()
+                    }
+                    val histories = withContext(Dispatchers.IO) {
+                        dao.getAll().sortedByDescending { it.lastUsedTime }
+                    }
+                    launch(Dispatchers.Main) {
+                        adapter.updateData(histories)
+                    }
+                }
+                else -> withContext(Dispatchers.Main) {
+                    MaterialDialog.Builder(this@ColorSelectBaseActivity)
+                        .title(R.string.text_histories)
+                        .content(R.string.text_no_histories)
+                        .positiveText(R.string.dialog_button_dismiss)
+                        .positiveColorRes(R.color.dialog_button_default)
+                        .show()
+                }
+            }
+        }
+    }
+
+    protected fun showColorHistories(libraryId: Int? = null, onHistorySelected: (selectedHistoryItem: ColorHistoryItem) -> Unit) {
+
+        val isShowAllHistories = libraryId == null
+
+        lifecycleScope.launch {
+            var historiesDialog: MaterialDialog? = null
+            var paletteHistoryDao: PaletteHistoryDao? = null
+            val colorHistoryDao = withContext(Dispatchers.IO) {
+                ColorHistoryDatabase.getInstance(applicationContext).colorHistoryDao()
+            }
+            val hasData = withContext(Dispatchers.IO) {
+                when {
+                    libraryId != null -> colorHistoryDao.hasDataByLibraryId(libraryId.toLong())
+                    else -> colorHistoryDao.hasData()
+                }
+            }
+            if (!hasData) {
+                withContext(Dispatchers.Main) {
+                    MaterialDialog.Builder(this@ColorSelectBaseActivity)
+                        .title(R.string.text_histories)
+                        .content(R.string.text_no_histories)
+                        .positiveText(R.string.dialog_button_dismiss)
+                        .positiveColorRes(R.color.dialog_button_default)
+                        .show()
+                }
+                return@launch
+            }
+            val adapter = ColorHistoryItemAdapter(emptyList()) { selectedHistoryItem ->
+                historiesDialog?.dismiss()
+                onHistorySelected(selectedHistoryItem)
+            }
+            launch(Dispatchers.Main) {
+                val context = this@ColorSelectBaseActivity
+                val recyclerView = ThemeColorRecyclerView(context).also {
+                    it.adapter = adapter
+                    it.layoutManager = LinearLayoutManager(context)
+                    it.addItemDecoration(DividerItemDecoration(context, VERTICAL))
+                }
+                historiesDialog = MaterialDialog.Builder(context)
+                    .title(R.string.text_histories)
+                    .customView(recyclerView, false)
+                    .neutralText(R.string.dialog_button_clear_items)
+                    .neutralColorRes(R.color.dialog_button_warn)
+                    .onNeutral { parentDialog, _ ->
+                        MaterialDialog.Builder(context)
+                            .title(R.string.text_prompt)
+                            .apply {
+                                when {
+                                    isShowAllHistories -> {
+                                        content(getString(R.string.text_confirm_to_clear_histories_of_all_color_libraries))
+                                    }
+                                    else -> presetColorLibraries.find { it.id == libraryId }?.let {
+                                        content(getString(R.string.text_confirm_to_clear_histories_of, getString(it.nameRes)))
+                                    } ?: content(getString(R.string.text_confirm_to_clear_all_histories))
+                                }
+                            }
+                            .negativeText(R.string.dialog_button_cancel)
+                            .negativeColorRes(R.color.dialog_button_default)
+                            .positiveText(R.string.dialog_button_confirm)
+                            .positiveColorRes(R.color.dialog_button_caution)
+                            .onPositive { _, _ ->
+                                lifecycleScope.launch(Dispatchers.IO) {
+                                    if (isShowAllHistories) {
+                                        if (paletteHistoryDao == null) {
+                                            paletteHistoryDao = withContext(Dispatchers.IO) {
+                                                ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
+                                            }
+                                        }
+                                        paletteHistoryDao!!.deleteAll()
+                                        colorHistoryDao.deleteAll()
+                                    } else {
+                                        colorHistoryDao.deleteAllByLibraryId(libraryId.toLong())
+                                    }
+                                    withContext(Dispatchers.Main) {
+                                        adapter.updateData(emptyList())
+                                        parentDialog.dismiss()
+                                        ViewUtils.showToast(context, R.string.text_all_histories_cleared, true)
+                                    }
+                                }
+                            }
+                            .show()
+                    }
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
+                    .onPositive { dialog, _ -> dialog.dismiss() }
+                    .autoDismiss(false)
+                    .show()
+            }
+
+            val colorHistories = withContext(Dispatchers.IO) {
+                when {
+                    isShowAllHistories -> colorHistoryDao.getAll()
+                    else -> colorHistoryDao.getAllByLibraryId(libraryId.toLong())
+                }
+            }
+
+            val historyItems = colorHistories.mapNotNull { history ->
+                var colorInt: Int? = null
+                var colorName: String? = null
+                var colorLibraryIdentifier: String? = null
+
+                val presetColorLibrary = presetColorLibraries.find { it.id == history.libraryId }
+
+                if (presetColorLibrary != null) {
+                    presetColorLibrary.colors.find { it.itemId == history.itemId }?.let { item ->
+                        colorInt = getColor(item.colorRes)
+                        colorName = getString(item.nameRes)
+                        if (isShowAllHistories) {
+                            colorLibraryIdentifier = getString(presetColorLibrary.identifierRes)
+                        }
+                    }
+                } else {
+                    // TODO by SuperMonster003 on Apr 8, 2025.
+                    //  ! Check out new color lib data (imported/created/cloned).
+                    //  ! zh-CN: 检查新建颜色库数据 (导入/创建/克隆).
+                }
+
+                if (colorInt != null) {
+                    return@mapNotNull ColorHistoryItem(history.lastUsedTime, colorInt!!, colorName, colorLibraryIdentifier)
+                }
+                // TODO by SuperMonster003 on Apr 8 ,2025.
+                //  ! Obsolete data should be removed from database.
+                //  ! Data will not be removed so far as color lib creation has not been completed yet.
+                //  ! zh-CN: 孤立数据应从数据库中移除, 但目前暂未完成颜色库建立相关功能, 此处暂时不做数据移除处理.
+                return@mapNotNull null
+            }.toMutableList()
+
+            if (isShowAllHistories) {
+                val paletteIdentifier = getString(R.string.color_library_identifier_palette)
+                if (paletteHistoryDao == null) {
+                    paletteHistoryDao = withContext(Dispatchers.IO) {
+                        ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
+                    }
+                }
+                historyItems += paletteHistoryDao.getAll().map { history ->
+                    ColorHistoryItem(
+                        lastUsedTime = history.lastUsedTime,
+                        colorInt = history.colorInfo.colorInt,
+                        colorName = null,
+                        colorLibraryIdentifier = paletteIdentifier
+                    )
+                }
+            }
+
+            launch(Dispatchers.Main) {
+                adapter.updateData(historyItems.sortedByDescending { it.lastUsedTime })
+            }
+        }
+    }
+
+    protected fun showColorDetails(color: Int?, title: String? = null) {
         ColorInfoDialogManager.showColorInfoDialog(this, color, title)
     }
 
@@ -256,16 +500,6 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         Intent(this, ColorSearchHelpActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .let { startActivity(it) }
-    }
-
-    private fun savePrefsForLibraries() {
-        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_PALETTE)
-        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, 0)
-    }
-
-    private fun savePrefsForLegacy(color: Int) {
-        Pref.putInt(KEY_CUSTOM_COLOR, color or -0x1000000)
-        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, customColorPosition)
     }
 
     protected fun filterColorsFromColorItems(query: String?, colorItems: List<PresetColorItem>, colorItemAdapter: ColorItemAdapter) {
@@ -340,7 +574,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         const val KEY_LEGACY_SELECTED_COLOR_INDEX = "org.autojs.autojs.theme.app.ColorSettingRecyclerView.SELECTED_COLOR_INDEX"
 
         const val KEY_SELECTED_COLOR_LIBRARY_ID = "SELECTED_COLOR_LIBRARY_ID"
-        const val KEY_SELECTED_COLOR_LIBRARY_ITEM_ID = "SELECTED_COLOR_LIBRARY_ITEM_ID"
+        const val KEY_SELECTED_COLOR_ITEM_ID = "SELECTED_COLOR_LIBRARY_ITEM_ID"
 
         const val INTENT_IDENTIFIER_LIBRARY_ID = "LIBRARY_ID"
         const val INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO = "INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO"
@@ -357,8 +591,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
         val colorItemsLegacy by lazy {
             mutableListOf<Pair</* colorRes */ Int, /* nameRes */ Int>>().apply {
-                add(customColorPosition, R.color.custom_color_default to R.string.mt_custom)
-                add(defaultColorPosition, R.color.theme_color_default to R.string.theme_color_default)
+                add(customColorPosition, R.color.custom_color_default to R.string.color_library_identifier_custom)
+                add(defaultColorPosition, R.color.theme_color_default to R.string.color_library_identifier_default_colors)
                 addAll(ColorItems.MATERIAL_COLORS)
             }
         }
@@ -412,7 +646,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 var colorName: String? = null
                 val colorInt = ThemeColorManager.colorPrimary
                 val libraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)
-                val libraryItemId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, SELECT_NONE)
+                val libraryItemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, SELECT_NONE)
                 when (libraryId) {
                     COLOR_LIBRARY_ID_PALETTE -> {
                         identifier = context.getString(R.string.color_library_identifier_palette)
@@ -433,35 +667,36 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         }
                     }
                     else -> presetColorLibraries.find { it.id == libraryId }?.let { lib: PresetColorLibrary ->
-                        identifier = when {
-                            lib.isCreated -> {
-                                // lib.identifierString?.let { idStr ->
-                                //     when {
-                                //         idStr.estimateVisualWidth <= 10 -> idStr
-                                //         else -> {
-                                //             var newStr = idStr
-                                //             while (newStr.estimateVisualWidth > 8) {
-                                //                 newStr = newStr.dropLast(1)
-                                //             }
-                                //             "$newStr..."
-                                //         }
-                                //     }
-                                // } ?: lib.titleString?.let { titleStr ->
-                                //     when {
-                                //         titleStr.estimateVisualWidth <= 10 -> titleStr
-                                //         else -> {
-                                //             var newStr = titleStr
-                                //             while (newStr.estimateVisualWidth > 8) {
-                                //                 newStr = newStr.dropLast(1)
-                                //             }
-                                //             "$newStr..."
-                                //         }
-                                //     }
-                                // } ?: context.getString(R.string.color_library_identifier_created)
-                                context.getString(R.string.color_library_identifier_created)
-                            }
-                            else -> context.getString(lib.identifierRes)
-                        }
+                        // identifier = when {
+                        //     lib.isCreated -> {
+                        //         lib.identifierString?.let { idStr ->
+                        //             when {
+                        //                 idStr.estimateVisualWidth <= 10 -> idStr
+                        //                 else -> {
+                        //                     var newStr = idStr
+                        //                     while (newStr.estimateVisualWidth > 8) {
+                        //                         newStr = newStr.dropLast(1)
+                        //                     }
+                        //                     "$newStr..."
+                        //                 }
+                        //             }
+                        //         } ?: lib.titleString?.let { titleStr ->
+                        //             when {
+                        //                 titleStr.estimateVisualWidth <= 10 -> titleStr
+                        //                 else -> {
+                        //                     var newStr = titleStr
+                        //                     while (newStr.estimateVisualWidth > 8) {
+                        //                         newStr = newStr.dropLast(1)
+                        //                     }
+                        //                     "$newStr..."
+                        //                 }
+                        //             }
+                        //         } ?: context.getString(R.string.color_library_identifier_created)
+                        //         context.getString(R.string.color_library_identifier_created)
+                        //     }
+                        //     else -> context.getString(lib.identifierRes)
+                        // }
+                        identifier = context.getString(lib.identifierRes)
                         if (libraryItemId != -1) {
                             lib.colors.find { it.itemId == libraryItemId }?.let { item ->
                                 // colorName = item.nameString
@@ -496,6 +731,84 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     else -> colorString
                 }
             }
+        }
+
+        @JvmStatic
+        fun saveDatabaseForPaletteHistories(dispatcherScope: CoroutineScope? = null, applicationContext: Context, color: Int) {
+            saveHistories(dispatcherScope) {
+                var itemId by Delegates.notNull<Int>()
+                savePaletteHistories(applicationContext, color).also { itemId = it }
+                saveColorHistories(applicationContext, COLOR_LIBRARY_ID_PALETTE, itemId)
+            }
+        }
+
+        @JvmStatic
+        fun saveDatabaseForColorHistories(dispatcherScope: CoroutineScope? = null, applicationContext: Context, libraryId: Int, itemId: Int) {
+            saveHistories(dispatcherScope) {
+                saveColorHistories(applicationContext, libraryId, itemId)
+            }
+        }
+
+        private fun saveHistories(
+            dispatcherScope: CoroutineScope? = null,
+            saveJob: suspend CoroutineScope.() -> Unit,
+        ) {
+            when (dispatcherScope) {
+                null -> CoroutineScope(Dispatchers.IO).launch(block = saveJob)
+                else -> dispatcherScope.launch(context = Dispatchers.IO, block = saveJob)
+            }
+        }
+
+        private suspend fun savePaletteHistories(applicationContext: Context, color: Int): Int {
+            val dao = ColorHistoryDatabase.getInstance(applicationContext).paletteHistoryDao()
+            val colorInfo = ColorInfo(ColorUtils.toHex(color, 6))
+            return dao.upsert(PaletteHistory(colorInfo = colorInfo).apply { setLastUsedTimeCurrent() }).toInt()
+        }
+
+        private suspend fun saveColorHistories(applicationContext: Context, libraryId: Int, itemId: Int) {
+            val dao = ColorHistoryDatabase.getInstance(applicationContext).colorHistoryDao()
+            dao.upsert(ColorHistory(libraryId = libraryId, itemId = itemId).apply { setLastUsedTimeCurrent() })
+        }
+
+        protected fun savePrefsForLegacyPalette(color: Int) {
+            Pref.putInt(KEY_CUSTOM_COLOR, color or -0x1000000)
+            Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, customColorPosition)
+        }
+
+        fun savePrefsForLegacy(context: Context, colorItem: PresetColorItem) {
+            when (colorItem.libraryId) {
+                COLOR_LIBRARY_ID_DEFAULT -> {
+                    if (context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)) {
+                        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, defaultColorPosition)
+                    } else {
+                        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+                    }
+                }
+                COLOR_LIBRARY_ID_MATERIAL -> {
+                    val index = colorItem.itemId
+                    if (index !in ColorItems.MATERIAL_COLORS.indices) {
+                        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+                    } else {
+                        val fixedIndex = maxOf(
+                            defaultColorPosition,
+                            customColorPosition,
+                        ) + 1 + index
+                        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, fixedIndex)
+                    }
+                }
+                else -> {
+                    Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+                }
+            }
+        }
+
+        fun savePrefsForLibraries(colorItem: PresetColorItem) {
+            savePrefsForLibraries(colorItem.libraryId, colorItem.itemId)
+        }
+
+        fun savePrefsForLibraries(libraryId: Int, itemId: Int) {
+            Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, libraryId)
+            Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, itemId)
         }
 
     }

@@ -329,9 +329,9 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
         AutoJs.instance.scriptEngineService.stopAll()
 
-        WordDictionaryDatabase.getInstance(this).close()
-        CharsDictionaryDatabase.getInstance(this).close()
-        PhrasesDictionaryDatabase.getInstance(this).close()
+        WordDictionaryDatabase.getInstance(applicationContext).close()
+        CharsDictionaryDatabase.getInstance(applicationContext).close()
+        PhrasesDictionaryDatabase.getInstance(applicationContext).close()
 
         mA11yTool.stopService(false)
         mForeGroundService.stopIfNeeded()

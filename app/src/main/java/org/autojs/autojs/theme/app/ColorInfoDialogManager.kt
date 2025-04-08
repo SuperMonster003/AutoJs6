@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
 import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableText
 import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.util.ColorUtils
@@ -21,7 +22,16 @@ import org.autojs.autojs6.databinding.ColorInfoDialogListItemBinding
 object ColorInfoDialogManager {
 
     @JvmStatic
-    fun showColorInfoDialog(context: Context, @ColorInt color: Int, title: String? = null) {
+    fun showColorInfoDialog(context: Context, @ColorInt color: Int?, title: String? = null) {
+        if (color == null) {
+            MaterialDialog.Builder(context)
+                .title(R.string.text_prompt)
+                .content(R.string.error_invalid_color)
+                .positiveColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_dismiss)
+                .show()
+            return
+        }
         val binding = ColorInfoDialogListItemBinding.inflate(LayoutInflater.from(context))
 
         val colorWithoutAlpha = color or -0x1000000
@@ -32,6 +42,8 @@ object ColorInfoDialogManager {
             .positiveText(R.string.dialog_button_dismiss)
             .positiveColorRes(R.color.dialog_button_default)
             .show()
+
+        dialog.makeTextCopyable { it.titleView }
 
         CoroutineScope(Dispatchers.Main).launch {
             launch(Dispatchers.IO) {
