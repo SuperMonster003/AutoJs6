@@ -30,8 +30,8 @@ import org.mozilla.javascript.ScriptableObject.READONLY
 
 object Pinyin : Augmentable(), Invokable {
 
-    private val charsDictDatabase by lazy { CharsDictionaryDatabase.getInstance(globalContext).database }
-    private val phrasesDictDatabase by lazy { PhrasesDictionaryDatabase.getInstance(globalContext).database }
+    private val charsDictDatabase by lazy { CharsDictionaryDatabase.getInstance(globalContext.applicationContext).database }
+    private val phrasesDictDatabase by lazy { PhrasesDictionaryDatabase.getInstance(globalContext.applicationContext).database }
 
     @Suppress("SpellCheckingInspection")
     override val selfAssignmentProperties = listOf(

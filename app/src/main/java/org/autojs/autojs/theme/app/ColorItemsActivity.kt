@@ -34,14 +34,14 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByColorLuminance
 import org.autojs.autojs6.R
-import org.autojs.autojs6.databinding.MtActivityColorLibraryBinding
+import org.autojs.autojs6.databinding.MtActivityColorItemsBinding
 import kotlin.properties.Delegates
 import androidx.core.graphics.ColorUtils as AndroidColorUtils
 
 @SuppressLint("NotifyDataSetChanged")
-class ColorLibraryActivity : ColorSelectBaseActivity() {
+class ColorItemsActivity : ColorSelectBaseActivity() {
 
-    private lateinit var binding: MtActivityColorLibraryBinding
+    private lateinit var binding: MtActivityColorItemsBinding
 
     private lateinit var mAdapter: ColorItemAdapter
     private lateinit var mLibrary: PresetColorLibrary
@@ -62,7 +62,7 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
 
         mInitiallyItemIdScrollTo = intent.getIntExtra(INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO, -1)
 
-        MtActivityColorLibraryBinding.inflate(layoutInflater).let {
+        MtActivityColorItemsBinding.inflate(layoutInflater).let {
             binding = it
             setContentView(it.root)
             setUpAppBar(it.appBar, it.appBarContainer)
@@ -74,10 +74,10 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
             }
         }
 
-        binding.colorLibraryRecyclerView.let { it ->
+        binding.colorItemsRecyclerView.let { it ->
             it.layoutManager = LinearLayoutManager(this)
-            it.adapter = ColorItemAdapter(library.colors) { colorItem, itemView ->
-                updateAppBarColorContent(getColor(colorItem.colorRes))
+            it.adapter = ColorItemAdapter(library.colors) {
+                updateAppBarColorContent(ThemeColorManager.colorPrimary)
             }.also { mAdapter = it }
 
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
@@ -129,7 +129,7 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
             }
             mLibrary.id -> {
                 adapter.selectedLibraryId = mLibrary.id
-                adapter.selectedItemId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ITEM_ID, SELECT_NONE)
+                adapter.selectedItemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, SELECT_NONE)
             }
         }
     }
@@ -220,7 +220,7 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_color_library, menu)
+        menuInflater.inflate(R.menu.menu_color_items, menu)
 
         binding.toolbar.setMenuIconsColorByColorLuminance(this, currentColor)
 
@@ -239,6 +239,18 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
             locateCurrentThemeColor()
             true
         }
+        R.id.action_show_histories -> {
+            showColorHistories(mLibrary.id) { selectedHistoryItem ->
+                when (val targetIndex = mAdapter.items.indexOfFirst { getColor(it.colorRes) == selectedHistoryItem.colorInt }) {
+                    -1 -> ViewUtils.showToast(this, R.string.error_failed_to_apply_current_color_history, true)
+                    else -> {
+                        isForciblyEnableAppBarColorTransition = true
+                        mAdapter.onItemConfirmed(this, targetIndex)
+                    }
+                }
+            }
+            true
+        }
         R.id.action_color_search_help -> {
             showColorSearchHelp()
             true
@@ -252,7 +264,7 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
         val targetIndex = target.libraryItemId
         when (targetLibraryId) {
             mLibrary.id -> {
-                val recyclerView = binding.colorLibraryRecyclerView
+                val recyclerView = binding.colorItemsRecyclerView
                 val viewHolder = recyclerView.findViewHolderForAdapterPosition(targetIndex)
 
                 viewHolder?.itemView?.let { itemView ->
@@ -264,7 +276,7 @@ class ColorLibraryActivity : ColorSelectBaseActivity() {
                 scrollToPositionOnceIfNeeded(recyclerView)
             }
             else -> {
-                val intent = Intent(this, ColorLibraryActivity::class.java).apply {
+                val intent = Intent(this, ColorItemsActivity::class.java).apply {
                     putExtra(INTENT_IDENTIFIER_LIBRARY_ID, targetLibraryId)
                     putExtra(INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO, targetIndex)
                 }

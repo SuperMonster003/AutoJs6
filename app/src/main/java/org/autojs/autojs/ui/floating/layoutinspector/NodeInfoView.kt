@@ -5,17 +5,19 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.extension.NumberExtensions.jsString
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.NodeInfoViewHeaderBinding
+import org.autojs.autojs6.databinding.NodeInfoViewItemBinding
 import org.opencv.core.Point
 import java.lang.reflect.Field
 import kotlin.math.ceil
@@ -106,9 +108,9 @@ class NodeInfoView : RecyclerView {
         val mViewTypeItem = 1
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = when (viewType) {
-            mViewTypeHeader -> R.layout.node_info_view_header
-            else -> R.layout.node_info_view_item
-        }.let { ViewHolder(LayoutInflater.from(parent.context).inflate(it, parent, false)) }
+            mViewTypeHeader -> NodeInfoViewHeaderBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            else -> NodeInfoViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        }.let { ViewHolder(it) }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.apply {
@@ -126,17 +128,28 @@ class NodeInfoView : RecyclerView {
 
     }
 
-    internal inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // val attrChecked: CheckBox = itemView.findViewById(R.id.generate)
-        val attrName: TextView = itemView.findViewById(R.id.name)
-        val attrValue: TextView = itemView.findViewById(R.id.value)
+    private inner class ViewHolder(itemViewBinding: ViewBinding) : RecyclerView.ViewHolder(itemViewBinding.root) {
+
+        val attrName: TextView
+        val attrValue: TextView
 
         init {
-            itemView.setOnClickListener {
+            itemViewBinding.root.setOnClickListener {
                 bindingAdapterPosition.takeIf { it in 1.until(data.size) }?.let { i ->
                     ClipboardUtils.setClip(context, dataToFx(this@NodeInfoView.data[i]))
                     ViewUtils.showSnack(this@NodeInfoView, R.string.text_already_copied_to_clip)
                 }
+            }
+            when (itemViewBinding) {
+                is NodeInfoViewHeaderBinding -> {
+                    attrName = itemViewBinding.name
+                    attrValue = itemViewBinding.value
+                }
+                is NodeInfoViewItemBinding -> {
+                    attrName = itemViewBinding.name
+                    attrValue = itemViewBinding.value
+                }
+                else -> throw IllegalArgumentException("Unknown binding: $itemViewBinding")
             }
         }
 

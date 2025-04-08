@@ -11,8 +11,8 @@ open class WordDictionaryDatabase private constructor(context: Context): Diction
         @Volatile
         private var instance: WordDictionaryDatabase? = null
 
-        fun getInstance(context: Context): WordDictionaryDatabase = instance ?: synchronized(this) {
-            instance ?: WordDictionaryDatabase(context.applicationContext).also { instance = it }
+        fun getInstance(applicationContext: Context): WordDictionaryDatabase = instance ?: synchronized(this) {
+            instance ?: WordDictionaryDatabase(applicationContext).also { instance = it }
         }
 
     }

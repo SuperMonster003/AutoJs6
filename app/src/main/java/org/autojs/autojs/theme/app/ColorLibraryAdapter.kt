@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorLibrary
 import org.autojs.autojs6.R
+import org.autojs.autojs6.databinding.MtColorLibrariesRecyclerViewItemBinding
 
 @SuppressLint("NotifyDataSetChanged")
 class ColorLibraryAdapter(
@@ -14,15 +15,9 @@ class ColorLibraryAdapter(
     private val onItemClick: (PresetColorLibrary) -> Unit,
 ) : RecyclerView.Adapter<ColorLibraryViewHolder>() {
 
-    fun updateData(newLibraries: List<PresetColorLibrary>) {
-        libraries = newLibraries
-        notifyDataSetChanged()
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorLibraryViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.mt_color_libraries_recycler_view_item, parent, false)
-        return ColorLibraryViewHolder(view)
+        val binding = MtColorLibrariesRecyclerViewItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ColorLibraryViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ColorLibraryViewHolder, position: Int) {
@@ -42,5 +37,10 @@ class ColorLibraryAdapter(
     }
 
     override fun getItemCount() = libraries.size
+
+    fun updateData(newLibraries: List<PresetColorLibrary>) {
+        libraries = newLibraries
+        notifyDataSetChanged()
+    }
 
 }

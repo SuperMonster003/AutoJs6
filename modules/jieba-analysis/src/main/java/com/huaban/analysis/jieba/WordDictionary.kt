@@ -11,7 +11,7 @@ import kotlin.properties.Delegates
 
 class WordDictionary(context: Context) {
 
-    private val db: SQLiteDatabase by lazy { WordDictionaryDatabase.getInstance(context).database }
+    private val db: SQLiteDatabase by lazy { WordDictionaryDatabase.getInstance(context.applicationContext).database }
     private var minFreq by Delegates.notNull<Double>()
 
     internal var trie = DictSegment(0.toChar())

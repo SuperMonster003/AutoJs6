@@ -30,6 +30,7 @@ import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -49,6 +50,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
@@ -56,6 +58,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * <p>A dialog to pick a color.</p>
@@ -120,7 +123,12 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     private static final String ARG_USE_LEGACY_MODE = "useLegacyMode";
 
     ColorPickerDialogListener colorPickerDialogListener;
+    View.OnClickListener oldColorPanelOnClickListener;
+    View.OnClickListener newColorPanelOnClickListener;
+    Consumer<ColorPickerDialog> colorHistoriesHandler;
+
     FrameLayout rootView;
+    ImageView customTitleOptions;
     int[] presets;
     @ColorInt
     int color;
@@ -128,6 +136,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     int dialogId;
     boolean showColorShades;
     int colorShape;
+    boolean useLegacyMode;
 
     // -- PRESETS --------------------------
     ColorPaletteAdapter adapter;
@@ -137,11 +146,13 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
 
     // -- CUSTOM ---------------------------
     ColorPickerView colorPicker;
+    ColorPanelView oldColorPanel;
     ColorPanelView newColorPanel;
     EditText hexEditText;
     boolean showAlphaSlider;
     private int presetsButtonStringRes;
     private boolean fromEditText;
+    private boolean fromOldColorPanel;
     private int customButtonStringRes;
 
     private final OnTouchListener onPickerTouchListener = new OnTouchListener() {
@@ -175,6 +186,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         showAlphaSlider = requireArguments().getBoolean(ARG_ALPHA);
         showColorShades = requireArguments().getBoolean(ARG_SHOW_COLOR_SHADES);
         colorShape = requireArguments().getInt(ARG_COLOR_SHAPE);
+        useLegacyMode = requireArguments().getBoolean(ARG_USE_LEGACY_MODE, false);
         if (savedInstanceState == null) {
             color = requireArguments().getInt(ARG_COLOR);
             dialogType = requireArguments().getInt(ARG_TYPE);
@@ -198,9 +210,37 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity()).setView(rootView)
                 .setPositiveButton(selectedButtonStringRes, (dialog, which) -> onColorSelected(color));
 
+        View customTitleRoot = View.inflate(requireContext(), R.layout.cpv_dialog_custom_title, null);
+        builder.setCustomTitle(customTitleRoot);
+
+        customTitleOptions = customTitleRoot.findViewById(R.id.more_options);
+
         int dialogTitleStringRes = requireArguments().getInt(ARG_DIALOG_TITLE);
         if (dialogTitleStringRes != 0) {
-            builder.setTitle(dialogTitleStringRes);
+            // builder.setTitle(dialogTitleStringRes);
+            TextView customTitleTitle = customTitleRoot.findViewById(R.id.title);
+            customTitleTitle.setText(dialogTitleStringRes);
+        }
+
+        if (useLegacyMode) {
+            customTitleOptions.setVisibility(View.GONE);
+        } else {
+            customTitleOptions.setOnClickListener(v -> {
+                var popupMenu = new PopupMenu(requireContext(), v, Gravity.END);
+                popupMenu.getMenuInflater().inflate(R.menu.cpv_dialog_more_options, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(menuItem -> {
+                    if (menuItem.getItemId() == R.id.action_reset_color_palette) {
+                        resetColorPanel();
+                        return true;
+                    }
+                    if (menuItem.getItemId() == R.id.action_show_histories) {
+                        showHistories(this);
+                        return true;
+                    }
+                    return false;
+                });
+                popupMenu.show();
+            });
         }
 
         presetsButtonStringRes = requireArguments().getInt(ARG_PRESETS_BUTTON_TEXT);
@@ -241,11 +281,17 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
                 switch (dialogType) {
                     case TYPE_CUSTOM:
                         dialogType = TYPE_PRESETS;
+                        if (!useLegacyMode && customTitleOptions != null) {
+                            customTitleOptions.setVisibility(View.GONE);
+                        }
                         ((Button) v).setText(customButtonStringRes != 0 ? customButtonStringRes : R.string.cpv_custom);
                         rootView.addView(createPresetsView());
                         break;
                     case TYPE_PRESETS:
                         dialogType = TYPE_CUSTOM;
+                        if (!useLegacyMode && customTitleOptions != null) {
+                            customTitleOptions.setVisibility(View.VISIBLE);
+                        }
                         ((Button) v).setText(presetsButtonStringRes != 0 ? presetsButtonStringRes : R.string.cpv_presets);
                         rootView.addView(createPickerView());
                 }
@@ -284,12 +330,10 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     View createPickerView() {
         View contentView = View.inflate(getActivity(), R.layout.cpv_dialog_color_picker, null);
         colorPicker = contentView.findViewById(R.id.cpv_color_picker_view);
-        ColorPanelView oldColorPanel = contentView.findViewById(R.id.cpv_color_panel_old);
+        oldColorPanel = contentView.findViewById(R.id.cpv_color_panel_old);
         newColorPanel = contentView.findViewById(R.id.cpv_color_panel_new);
         ImageView arrowRight = contentView.findViewById(R.id.cpv_arrow_right);
         hexEditText = contentView.findViewById(R.id.cpv_hex);
-
-        boolean useLegacyMode = requireArguments().getBoolean(ARG_USE_LEGACY_MODE, false);
 
         try {
             final TypedValue value = new TypedValue();
@@ -304,6 +348,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         colorPicker.setAlphaSliderVisible(showAlphaSlider);
         oldColorPanel.setColor(requireArguments().getInt(ARG_COLOR));
         colorPicker.setColor(color, true);
+        colorPicker.lastColor = color;
         newColorPanel.setColor(color);
         setHex(color);
 
@@ -313,10 +358,22 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
 
         if (!useLegacyMode) {
             oldColorPanel.setOnClickListener(v -> {
-
+                v.setTag(oldColorPanel.getColor());
+                oldColorPanelOnClickListener.onClick(v);
+            });
+            oldColorPanel.setOnLongClickListener(v -> {
+                resetColorPanel();
+                return true;
             });
             newColorPanel.setOnClickListener(v -> {
-
+                v.setTag(newColorPanel.getColor());
+                newColorPanelOnClickListener.onClick(v);
+            });
+            newColorPanel.setOnLongClickListener(v -> {
+                int aimColor = colorPicker.lastColor;
+                newColorPanel.setColor(aimColor);
+                colorPicker.setColor(aimColor, true);
+                return true;
             });
         } else {
             newColorPanel.setOnClickListener(v -> {
@@ -341,9 +398,30 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         return contentView;
     }
 
+    private void resetColorPanel() {
+        if (oldColorPanel == null) return;
+        int aimColor = oldColorPanel.getColor();
+        fromOldColorPanel = true;
+        newColorPanel.setColor(aimColor);
+        colorPicker.setColor(aimColor, true);
+    }
+
+    private void showHistories(ColorPickerDialog colorPickerDialog) {
+        if (colorHistoriesHandler == null) return;
+        colorHistoriesHandler.accept(colorPickerDialog);
+    }
+
+    public void onHistorySelected(@ColorInt int color) {
+        colorPicker.setColor(color, true);
+        colorPicker.lastColor = color;
+    }
+
     @Override
     public void onColorChanged(int newColor) {
         color = newColor;
+        if (!fromOldColorPanel) {
+            colorPicker.lastColor = newColor;
+        }
         if (newColorPanel != null) {
             newColorPanel.setColor(newColor);
         }
@@ -356,6 +434,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
             }
         }
         fromEditText = false;
+        fromOldColorPanel = false;
     }
 
     @Override
@@ -375,6 +454,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
             if (color != colorPicker.getColor()) {
                 fromEditText = true;
                 colorPicker.setColor(color, true);
+                colorPicker.lastColor = color;
             }
         }
     }
@@ -778,6 +858,10 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         int colorShape = ColorShape.CIRCLE;
         boolean useLegacyMode = false;
 
+        View.OnClickListener oldColorPanelOnClickListener;
+        View.OnClickListener newColorPanelOnClickListener;
+        Consumer<ColorPickerDialog> colorHistoriesHandler;
+
         /*package*/ Builder() {
 
         }
@@ -931,6 +1015,21 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
             return this;
         }
 
+        public Builder setOldColorPanelOnClickListener(View.OnClickListener onClickListener) {
+            this.oldColorPanelOnClickListener = onClickListener;
+            return this;
+        }
+
+        public Builder setNewColorPanelOnClickListener(View.OnClickListener onClickListener) {
+            this.newColorPanelOnClickListener = onClickListener;
+            return this;
+        }
+
+        public Builder setColorHistoriesHandler(Consumer<ColorPickerDialog> colorHistoriesHandler) {
+            this.colorHistoriesHandler = colorHistoriesHandler;
+            return this;
+        }
+
         /**
          * Create the {@link ColorPickerDialog} instance.
          *
@@ -954,6 +1053,9 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
             args.putInt(ARG_CUSTOM_BUTTON_TEXT, customButtonText);
             args.putInt(ARG_SELECTED_BUTTON_TEXT, selectedButtonText);
             args.putBoolean(ARG_USE_LEGACY_MODE, useLegacyMode);
+            dialog.oldColorPanelOnClickListener = oldColorPanelOnClickListener;
+            dialog.newColorPanelOnClickListener = newColorPanelOnClickListener;
+            dialog.colorHistoriesHandler = colorHistoriesHandler;
             dialog.setArguments(args);
             return dialog;
         }

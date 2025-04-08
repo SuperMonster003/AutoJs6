@@ -586,7 +586,7 @@
             android:theme="@style/MtAppTheme.FullScreen" />
 
         <activity
-            android:name="org.autojs.autojs.theme.app.ColorLibraryActivity"
+            android:name="org.autojs.autojs.theme.app.ColorItemsActivity"
             android:theme="@style/MtAppTheme.FullScreen" />
 
         <activity

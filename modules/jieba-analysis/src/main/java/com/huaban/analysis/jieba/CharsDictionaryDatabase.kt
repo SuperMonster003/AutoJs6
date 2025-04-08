@@ -11,8 +11,8 @@ open class CharsDictionaryDatabase private constructor(context: Context) : Dicti
         @Volatile
         private var instance: CharsDictionaryDatabase? = null
 
-        fun getInstance(context: Context): CharsDictionaryDatabase = instance ?: synchronized(this) {
-            instance ?: CharsDictionaryDatabase(context.applicationContext).also { instance = it }
+        fun getInstance(applicationContext: Context): CharsDictionaryDatabase = instance ?: synchronized(this) {
+            instance ?: CharsDictionaryDatabase(applicationContext).also { instance = it }
         }
     }
 

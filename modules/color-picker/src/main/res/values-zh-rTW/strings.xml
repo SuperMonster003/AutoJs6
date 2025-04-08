@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,10 +13,12 @@
      limitations under the License.
 -->
 <resources>
-  <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
-  <string name="cpv_default_title">選擇顏色</string>
-  <string name="cpv_presets">預置顏色</string>
-  <string name="cpv_custom">自定義顏色</string>
-  <string name="cpv_select">確認</string>
-  <string name="cpv_transparency">透明度</string>
+    <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
+    <string name="cpv_default_title">選擇顏色</string>
+    <string name="cpv_presets">預置顏色</string>
+    <string name="cpv_custom">自定義顏色</string>
+    <string name="cpv_select">確認</string>
+    <string name="cpv_transparency">透明度</string>
+    <string name="cpv_menu_item_histories">歷史記錄</string>
+    <string name="cpv_menu_item_reset_color_palette">重置調色盤</string>
 </resources>

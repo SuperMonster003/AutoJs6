@@ -63,7 +63,9 @@ public class ColorPickerView extends View {
    */
   private final static int BORDER_WIDTH_PX = 1;
 
-  /**
+  public int lastColor;
+
+    /**
    * The width in px of the hue panel.
    */
   private int huePanelWidthPx;
