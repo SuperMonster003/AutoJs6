@@ -507,27 +507,40 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         mSearchJob = lifecycleScope.launch {
             withContext(Dispatchers.Default) {
                 if (query.isNullOrBlank()) return@withContext colorItems
-                val normalizedQuery = normalizeForMatching(query)
+                val searchTerm = query.trimStart()
+                val cleanedSearchTerm = searchTerm.drop(1)
+                val normalizedQuery = normalizeForMatching(searchTerm)
                 colorItems.filter { colorItem ->
                     val colorHex = String.format("#%06X", 0xFFFFFF and getColor(colorItem.colorRes))
-                    if (query.startsWith("#")) {
-                        if (isRegexSearch(query.drop(1))) {
-                            val regex = compileRegexOrNull(extractPatternFromQuery(query.drop(1))) ?: return@filter false
-                            return@filter regex.containsMatchIn(colorHex)
+                    val enName by lazy { getLocalizedString(this@ColorSelectBaseActivity, colorItem.nameRes, Locale("en")) }
+                    val localizedName by lazy { getString(colorItem.nameRes) }
+                    when {
+                        searchTerm.startsWith("#") -> {
+                            searchMatch(cleanedSearchTerm, colorHex) {
+                                colorHex.contains(searchTerm, ignoreCase = true)
+                            }
                         }
-                        return@filter colorHex.contains(query, ignoreCase = true)
+                        searchTerm.startsWith("$") -> {
+                            searchMatch(cleanedSearchTerm, enName) {
+                                normalizeForMatching(enName).contains(normalizedQuery, ignoreCase = true)
+                            }
+                        }
+                        else -> {
+                            searchMatch(searchTerm, localizedName) {
+                                normalizeForMatching(localizedName).contains(normalizedQuery, ignoreCase = true)
+                            }
+                        }
                     }
-                    val localName = getString(colorItem.nameRes)
-                    val enName = getLocalizedString(this@ColorSelectBaseActivity, colorItem.nameRes, Locale("en"))
-                    if (isRegexSearch(query)) {
-                        val regex = compileRegexOrNull(extractPatternFromQuery(query)) ?: return@filter false
-                        return@filter regex.containsMatchIn(localName) || regex.containsMatchIn(enName)
-                    }
-                    return@filter normalizeForMatching(localName).contains(normalizedQuery, ignoreCase = true)
-                            || normalizeForMatching(enName).contains(normalizedQuery, ignoreCase = true)
                 }
             }.let { filteredResult -> colorItemAdapter.updateData(filteredResult) }
         }
+    }
+
+    fun searchMatch(search: String, text: String, nonRegexMatch: () -> Boolean) = when {
+        isRegexSearch(search) -> {
+            compileRegexOrNull(extractPatternFromQuery(search))?.containsMatchIn(text) == true
+        }
+        else -> nonRegexMatch()
     }
 
     private fun normalizeForMatching(input: String): String {

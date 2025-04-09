@@ -16,13 +16,13 @@ Correspond à tous les noms de couleur contenant « bleu50 ». Lors de la corres
 
 ### 2. Nom de couleur (anglais)
 
-Utilisez le nom de couleur en anglais comme mot-clé de recherche.
+Commencez par "$" pour activer le mode de recherche par nom de couleur en anglais.
 
-#### Exemple 2.1 : red
+#### Exemple 2.1 : $red
 
 Correspond à tous les noms de couleur en anglais contenant « red », tels que « Rouge », « Rouge orangé », « Rouge foncé », etc. Même si la langue d'affichage n'est pas l'anglais, vous pouvez toujours rechercher la couleur correspondante à l'aide d'un mot-clé en anglais.
 
-#### Exemple 2.2 : blue50
+#### Exemple 2.2 : $blue50
 
 Comme dans l'exemple 1.2, il peut correspondre à « Bleu (50) », « Bleu (500) » et « Bleu clair (50) ».
 

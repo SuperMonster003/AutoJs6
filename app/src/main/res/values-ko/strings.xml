@@ -89,7 +89,7 @@
     <string name="dialog_button_copy">@string/text_copy</string>
     <string name="dialog_button_default_prefix">기본 접두사</string>
     <string name="dialog_button_details">세부</string>
-    <string name="dialog_button_dismiss">Dismiss</string>
+    <string name="dialog_button_dismiss">닫기</string>
     <string name="dialog_button_download_with_browser">브라우저</string>
     <string name="dialog_button_file_information">파일 정보</string>
     <string name="dialog_button_history">역사</string>

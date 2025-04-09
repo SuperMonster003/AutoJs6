@@ -16,13 +16,13 @@ Coincide con todos los nombres de color que incluyan "azul50". Durante la coinci
 
 ### 2. Nombre de color (inglés)
 
-Usa el nombre de color en inglés como palabra clave de búsqueda.
+Comience con "$" para activar el modo de búsqueda por nombre de color en inglés.
 
-#### Ejemplo 2.1: red
+#### Ejemplo 2.1: $red
 
 Coincide con todos los nombres de color en inglés que contengan "red", como "Rojo", "Rojo anaranjado", "Rojo oscuro", etc. Incluso si el idioma de la interfaz no es inglés, puedes buscar el color correspondiente usando una palabra clave en inglés.
 
-#### Ejemplo 2.2: blue50
+#### Ejemplo 2.2: $blue50
 
 Igual que en el Ejemplo 1.2, puede coincidir con "Azul (50)", "Azul (500)" y "Azul claro (50)".
 
