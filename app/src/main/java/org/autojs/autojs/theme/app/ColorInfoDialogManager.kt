@@ -43,7 +43,7 @@ object ColorInfoDialogManager {
             .positiveColorRes(R.color.dialog_button_default)
             .show()
 
-        dialog.makeTextCopyable { it.titleView }
+        title?.run { dialog.makeTextCopyable { it.titleView } }
 
         CoroutineScope(Dispatchers.Main).launch {
             launch(Dispatchers.IO) {
