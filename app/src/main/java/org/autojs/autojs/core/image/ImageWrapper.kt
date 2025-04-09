@@ -194,8 +194,45 @@ open class ImageWrapper : Recyclable, MonitorResource {
             //  ! 注意 `org.opencv.core.Mat.get(row, col)` 方法参数, "row" 对应 "y", "col" 对应 "x".
             val pixelList = oMat.get(/* row = */ y, /* col = */ x) ?: throw Exception("Channel list is null at ($x, $y) of $this")
 
-            val (r, g, b, a) = pixelList.map { pixelValue -> pixelValue.toInt() }
-            return Color.argb(a, r, g, b)
+            // @Hint by SuperMonster003 on Apr 9, 2025.
+            //  ! Here we assume that pixelList contains ARGB channels.
+            //  ! If mMat does not have these channels, an IndexOutOfBoundsException will be triggered:
+            //  # java.lang.IndexOutOfBoundsException: Index: 1, Size: 1
+            //  ! Therefore, it is necessary to consider cases with different numbers of channels.
+            //  !
+            //  ! Refer to: http://issues.autojs6.com/350
+            //  !
+            //  ! zh-CN:
+            //  ! 此处默认 pixelList 为 ARGB 通道, 当 mMat 不是上述通道时, 将触发索引越界异常:
+            //  # java.lang.IndexOutOfBoundsException: Index: 1, Size: 1
+            //  ! 因此需要考虑不同通道数量的情况.
+            //  !
+            //  ! 参阅: http://issues.autojs6.com/350
+            //  !
+            //  # val (r, g, b, a) = pixelList.map { pixelValue -> pixelValue.toInt() }
+            //  # return Color.argb(a, r, g, b)
+
+            return when (pixelList.size) {
+                1 -> {
+                    // Single-channel image (grayscale/binary/...)
+                    // zh-CN: 单通道图像 (灰度图/二值图/...)
+                    val value = pixelList[0].toInt()
+                    Color.argb(255, value, value, value)
+                }
+                3 -> {
+                    // RGB
+                    val (r, g, b) = pixelList.map { it.toInt() }
+                    Color.argb(255, r, g, b)
+                }
+                in 4..Int.MAX_VALUE -> {
+                    // RGBA
+                    val (r, g, b, a) = pixelList.map { it.toInt() }
+                    Color.argb(a, r, g, b)
+                }
+                else -> {
+                    throw Exception("Unsupported pixel channel count (${pixelList.size}) at ($x, $y) of $this")
+                }
+            }
         }
         plane?.let { oPlane ->
             val buffer = oPlane.buffer.apply { position(0) }
