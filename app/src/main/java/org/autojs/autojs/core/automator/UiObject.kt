@@ -436,56 +436,75 @@ open class UiObject(
         }
     }
 
-    fun summary() = listOf("{").asSequence().plus(
-        /* Common */ arrayOf(
-            "packageName='${packageName()}'",
-            "parent='${parent?.className}'",
-            "id='${id()}'",
-            "fullId='${fullId()}'",
-            "idHex='${idHex()}'",
-            "desc='${desc()}'",
-            "text='${text()}'",
-            "bounds='${bounds()}'",
-            "center='${center()}'",
-            "className='${className()}'",
-            "clickable=${clickable()}",
-            "longClickable=${longClickable()}",
-            "scrollable=${scrollable()}",
-            "indexInParent=${indexInParent()}",
-            "childCount=${childCount()}",
-            "depth=${depth()}"
-        ).joinToString("\n")
-    ).plus(
-        /* Regular */ arrayOf(
-            "checked=${checked()}",
-            "enabled=${enabled()}",
-            "editable=${editable()}",
-            "focusable=${focusable()}",
-            "checkable=${checkable()}",
-            "selected=${selected()}",
-            "dismissable=$isDismissable",
-            "visibleToUser=${visibleToUser()}"
-        ).joinToString("\n")
-    ).plus(
-        /* Rare */ arrayOf(
-            "contextClickable=$isContextClickable",
-            "focused=${focused()}",
-            "accessibilityFocused=${isAccessibilityFocused}",
-            "rowCount=${rowCount()}",
-            "columnCount=${columnCount()}",
-            "row=${row()}",
-            "column=${column()}",
-            "rowSpan=${rowSpan()}",
-            "columnSpan=${columnSpan()}",
-            "drawingOrder=$drawingOrder"
-        ).joinToString("\n")
-    ).plus(
-        /* Arrays */ arrayOf(
-            "actions=${actionNames()}"
-        ).joinToString("\n")
-    ).plus("}").joinToString("\n")
+    fun summary(): String {
+        val separatorLv0 = "\n"
+        val separatorLv1 = "$separatorLv0  "
+        val separatorLv2 = "$separatorLv1  "
+        
+        val dataList = listOf<Pair<String, () -> Any?>>(
 
-    override fun toString() = "[${UiObject::class.java.simpleName}] $className ${summary()}"
+            /* Common */
+
+            "packageName" to { packageName() },
+            "parent" to { parent?.className },
+            "id" to { id() },
+            "fullId" to { fullId() },
+            "idHex" to { idHex() },
+            "desc" to { desc() },
+            "text" to { text() },
+            "bounds" to { bounds() },
+            "center" to { center() },
+            "className" to { className() },
+            "clickable" to { clickable() },
+            "longClickable" to { longClickable() },
+            "scrollable" to { scrollable() },
+            "indexInParent" to { indexInParent() },
+            "childCount" to { childCount() },
+            "depth" to { depth() },
+
+            /* Regular */
+
+            "checked" to { checked() },
+            "enabled" to { enabled() },
+            "editable" to { editable() },
+            "focusable" to { focusable() },
+            "checkable" to { checkable() },
+            "selected" to { selected() },
+            "dismissable" to { isDismissable },
+            "visibleToUser" to { visibleToUser() },
+
+            /* Rare */
+
+            "contextClickable" to { isContextClickable },
+            "focused" to { focused() },
+            "accessibilityFocused" to { isAccessibilityFocused },
+            "rowCount" to { rowCount() },
+            "columnCount" to { columnCount() },
+            "row" to { row() },
+            "column" to { column() },
+            "rowSpan" to { rowSpan() },
+            "columnSpan" to { columnSpan() },
+            "drawingOrder" to { drawingOrder },
+
+            /* List */
+
+            "actions" to { actionNames() },
+        )
+        return dataList.joinToString(prefix = "{$separatorLv1", separator = separatorLv1, postfix = "$separatorLv0}") { (name, action) ->
+            val value = when (val actionResult = action()) {
+                is CharSequence -> "\"$actionResult\""
+                is Iterable<*> -> actionResult.joinToString(prefix = "[$separatorLv2", separator = separatorLv2, postfix = "$separatorLv1]")
+                is Array<*> -> actionResult.joinToString(prefix = "[$separatorLv2", separator = separatorLv2, postfix = "$separatorLv1]")
+                else -> actionResult
+            }
+            "$name=$value"
+        }
+    }
+
+    override fun toString(): String {
+        val simpledClassName = "$className".substringAfterLast(".")
+        return "[${UiObject::class.java.simpleName}] $simpledClassName ${summary()}"
+    }
 
     override fun hashCode() = listOf(
         "${packageName()}",
