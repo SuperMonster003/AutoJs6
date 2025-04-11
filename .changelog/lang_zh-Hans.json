@@ -5,7 +5,7 @@
       "feature": [
         "ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法",
         "设置页面增加 \"文件扩展名\" 设置选项",
-        "主题色设置页面增加新布局支持 (颜色库分组/主题色定位/颜色搜索)"
+        "主题色设置页面增加新布局支持 (颜色库分组/主题色定位/颜色搜索/历史记录/调色盘增强等)"
       ],
       "fix": [
         "Android 15 状态栏背景颜色与主题色不一致的问题",
@@ -14,7 +14,7 @@
         "ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修) _[`issue #298`](http://issues.autojs6.com/298)_",
         "notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_",
         "shizuku/shell 等方法无法接受字符串参数的问题 _[`issue #310`](http://issues.autojs6.com/310)_",
-        "colors.pixel 无法接受单通道图像参数的问题 _[`issue #350`](http://issues.autojs6.com/350)_",
+        "colors.pixel 方法无法接受单通道图像参数的问题 _[`issue #350`](http://issues.autojs6.com/350)_",
         "engines.execScript/execScriptFile 等方法执行脚本时默认工作路径异常",
         "floaty.window/floaty.rawWindow 无法在子线程执行的问题",
         "ui.inflate 返回值丢失 attr/on/click 等原型方法的问题",

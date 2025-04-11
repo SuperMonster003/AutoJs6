@@ -247,9 +247,28 @@ Gradle
 
 > {{ bq_annotation_autojs6_project_cloning_retry_clone }}.
 
-{{ p_autojs6_project_cloning_build_successful }}.
+{{ p_autojs6_project_building_if_failed }}:
 
-{{ p_autojs6_project_cloning_debug_version_apk }}:
+- {{ li_project_build_step_toolbar }}
+- {{ li_project_build_step_click_build_project }}
+- {{ li_project_build_step_wait_build_success }}
+
+{{ p_autojs6_project_building_failed }}.
+
+> {{ bq_annotation_autojs6_project_building_reference }}
+
+#### {{ h4_autojs6_project_deploy_run }}
+
+{{ p_autojs6_project_deploy_run_overview }}.
+
+- {{ li_deploy_run_step_select_app }}
+- {{ li_deploy_run_step_select_device }}
+- {{ li_deploy_run_step_click_run }}
+- {{ li_deploy_run_step_wait_install }}
+
+#### {{ h4_autojs6_project_deploy_apk }}
+
+{{ p_autojs6_project_deploy_apk_overview }}:
 
 - {{ step_debug_version_path }}
     - {{ step_generate_debug_apk }} {{ symbol_arrow }} `Build Bundle(s) / APK(s)` {{ symbol_arrow }} `Build APK(s)`
@@ -260,6 +279,47 @@ Gradle
     - {{ step_select_apk_option }}
     - {{ step_prepare_signing_file }}
     - {{ step_example_release_path }}
+
+> {{ bq_annotation_autojs6_project_deploy_apk }}
+
+#### {{ h4_autojs6_gradle_tasks }}
+
+{{ p_autojs6_gradle_tasks_intro }}.
+
+{{ p_autojs6_gradle_tasks_overview }}.
+
+- AutoJs6 [inrt:assemble]
+
+{{ p_gradle_task_inrt_summary }}.
+
+{{ p_gradle_task_inrt_description }}.
+
+{{ p_gradle_task_inrt_exception }}:
+
+> java.io.FileNotFoundException: template.apk
+
+{{ p_gradle_task_inrt_exception_explanation }}.
+
+> {{ bq_annotation_gradle_task_inrt_rebuild_if_needed }}
+
+- AutoJs6 [app:bundle]
+
+{{ p_gradle_task_app_bundle_summary }}.
+
+{{ p_gradle_task_app_bundle_description }}.
+
+- AutoJs6 [app:digest]
+
+{{ p_gradle_task_app_digest_summary }}.
+
+{{ p_gradle_task_app_digest_filename_comparison }}:
+
+```text
+{{ label_before }}:
+autojs6-v6.6.2-arm64-v8a.apk
+{{ label_after }}:
+autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
+```
 
 > {{ text_reference }}: [Android Docs](https://developer.android.com/studio/run?hl=zh-cn)
 

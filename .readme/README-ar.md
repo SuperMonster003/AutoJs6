@@ -326,12 +326,12 @@
 
 #### تحضير Android Studio
 
-قم بتنزيل إصدار `Android Studio Meerkat | 2024.3.1` (حدد أحدها حسب الحاجة):
+قم بتنزيل إصدار `Android Studio Meerkat | 2024.3.1 Patch 1` (حدد أحدها حسب الحاجة):
 
-- [android-studio-2024.3.1.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.13/android-studio-2024.3.1.13-windows.exe) (1.22 GB)
-- [android-studio-2024.3.1.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-windows.zip) (1.23 GB)
+- [android-studio-2024.3.1.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.14/android-studio-2024.3.1.14-windows.exe) (1.22 GB)
+- [android-studio-2024.3.1.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.14/android-studio-2024.3.1.14-windows.zip) (1.23 GB)
 
-> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 4 March 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
+> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 24 March 2025. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 قم بتثبيت أو فك ضغط الملف المذكور سابقًا، ثم قم بتشغيل برنامج Android Studio (مثل `"D:\android-studio\bin\studio64.exe"`).
 
@@ -375,7 +375,7 @@ SDK Tools  (أدوات SDK) (في النافذة اليمنى)
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `19`.
 
-اعتبارًا من 19 March 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
+اعتبارًا من 11 April 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 
@@ -410,9 +410,28 @@ Gradle
 
 > ملاحظة: قد تستغرق العملية المذكورة أعلاه وقتًا طويلًا. إذا كانت حالة الشبكة غير جيدة، قد تحتاج إلى المحاولة عدة مرات (بالنقر على زر Retry).
 
-عند اكتمال البناء، ستظهر رسالة مشابهة لـ `BUILD SUCCESSFUL in 1h 17m 34s` في علامة التبويب `Build` في برنامج Android Studio.
+إذا لم يتمكن البناء من المتابعة تلقائيًا أو إذا كنت بحاجة إلى إعادة بناء المشروع، فاتبع الخطوات التالية:
 
-حزمة المشروع وتوليد ملف APK يمكن تثبيته على أجهزة Android:
+- من قائمة `Run/Debug Configurations` في شريط الأدوات، اختر `app`، وهو التطبيق الرئيسي لـ AutoJs6
+- انقر على زر `Build Project` (رمز المطرقة) على اليسار لبدء بناء المشروع. الاختصار الافتراضي هو CTRL + F9
+- انتظر انتهاء البناء. ستظهر رسالة في تبويب `Builder Output` مثل "BUILD SUCCESSFUL in 1h 17m 34s"
+
+إذا فشل البناء، يمكنك الإبلاغ عن رسالة الخطأ في صفحة [Issues](http://issues.autojs6.com) لمشروع AutoJs6.
+
+> ملحوظة: لمزيد من التفاصيل حول كيفية بناء وتشغيل التطبيق، يرجى الرجوع إلى [Android Docs](https://developer.android.com/studio/run?hl=en)
+
+#### نشر مشروع AutoJs6 (تشغيل التطبيق)
+
+بمجرد بناء المشروع بنجاح، يمكن نشره كتطبيق (App) على جهاز فعلي (مثل الهاتف/اللوحي) أو جهاز افتراضي (مثل محاكي Android).
+
+- في شريط الأدوات، اختر `app` من قائمة `Run/Debug Configurations`، وهو التطبيق الرئيسي لـ AutoJs6
+- في القائمة المنسدلة `Available Devices` على اليمين، اختر الجهاز الذي يجب تشغيل تطبيق المشروع عليه (جهاز فعلي أو افتراضي)
+- انقر على زر `Run` (رمز المثلث) على اليمين لتشغيل التطبيق. الاختصار الافتراضي هو `F10`
+- انتظر انتهاء النشر؛ سيقوم الجهاز المحدد بتثبيت وتشغيل التطبيق تلقائيًا
+
+#### نشر مشروع AutoJs6 (إنشاء APK)
+
+حزم المشروع وإنشاء ملف APK يمكن تثبيته على أجهزة Android:
 
 - نسخة تجريبية (Debug Version)
     - `Build (بناء)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
@@ -423,6 +442,47 @@ Gradle
     - اختيار خيار `APK`
     - قم بإعداد ملف التوقيع (تكوين جديد أو اختيار موجود)، وتوليد حزمة تثبيت الإصدار المطروح
     - مثال على المسار: `"D:\AutoJs6\app\release\"`
+
+> ملحوظة: لمزيد من المعلومات حول كيفية بناء التطبيق لإصداره للمستخدمين، يرجى الرجوع إلى [Android Docs](https://developer.android.com/build/build-for-release?hl=en)
+
+#### مهام بناء Gradle المحددة مسبقًا لـ AutoJs6
+
+بالإضافة إلى بناء التطبيق، يدعم AutoJs6 عدة مهام بناء Gradle المحددة مسبقًا التي تساعد المطورين في تنفيذ العمليات المتعلقة بالمشروع بسهولة.
+
+ضمن قائمة `Run/Debug Configurations` في شريط الأدوات، يمكنك العثور على المهام المحددة مسبقًا لـ Gradle، حيث تظهر أيقونة الفيل على اليسار لكل مهمة.
+
+- AutoJs6 [inrt:assemble]
+
+تجميع نسخة البناء "inrt"، التي تخدم بشكل أساسي ميزة تغليف نصوص AutoJs6.
+
+يمتلك مشروع AutoJs6 نسخ بناء مختلفة. النسخة "inrt" تُستخدم لتغليف النصوص، حيث تقوم بإنشاء ملف النموذج "template.apk" المطلوب للتغليف.
+
+عند استخدام ميزة التغليف، قد تواجه رسالة الخطأ التالية:
+
+> java.io.FileNotFoundException: template.apk
+
+هذا يشير إلى أن ملف النموذج غير موجود. يجب تشغيل مهمة `inrt:assemble` يدويًا لإنشاء ملف النموذج، ثم إعادة البناء والنشر مرة أخرى.
+
+> ملحوظة: ملف النموذج مفقود؛ قم بتشغيل مهمة `inrt:assemble` يدويًا لإنشائه قبل إعادة البناء والنشر مرة أخرى
+
+- AutoJs6 [app:bundle]
+
+حزم مخرجات عملية البناء بوضع التصحيح، وتستخدم بشكل رئيسي لمشروع [تعريفات AutoJs6](http://dts-project.autojs6.com).
+
+بعد تشغيل المهمة، يتم إنتاج أحدث ملف JAR لمشروع AutoJs6. باستخدام أداة [Android d.ts Generator](https://github.com/NativeScript/android-dts-generator) (من [NativeScript](https://github.com/NativeScript)) يمكنك إنشاء تعريفات الأنواع (بتنسيق d.ts) للتطبيق الرئيسي لـ AutoJs6.
+
+- AutoJs6 [app:digest]
+
+إلحاق معلومات الملخص بملف APK الذي تم إنتاجه من بناء الإصدار، وذلك لتحديد الاسم النهائي للملف قبل نشر أحدث نسخة من AutoJs6 على GitHub.
+
+فيما يلي مقارنة بين أسماء الملفات قبل وبعد إلحاق معلومات الملخص:
+
+```text
+قبل:
+autojs6-v6.6.2-arm64-v8a.apk
+بعد:
+autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
+```
 
 > مرجع: [Android Docs](https://developer.android.com/studio/run?hl=zh-cn)
 

@@ -420,7 +420,7 @@
     <string name="text_display_over_other_app_is_recommended">\"Display over other apps\" permission is recommended to make all widgets displayed properly</string>
     <string name="text_disposable_task">Disposable task</string>
     <string name="text_disposable_task_time_before_now">Time should be later than now</string>
-    <string name="text_do_not_ask_again_for_this_version">Don’t ask again for this version</string>
+    <string name="text_do_not_ask_again_for_this_version">Don\'t ask again for this version</string>
     <string name="text_do_not_show_again">Do not show again</string>
     <string name="text_documentation">Documents</string>
     <string name="text_documentation_source">Documentation source</string>
