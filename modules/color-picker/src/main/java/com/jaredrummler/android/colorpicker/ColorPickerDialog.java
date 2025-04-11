@@ -56,6 +56,8 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -829,6 +831,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     // region Builder
 
     @IntDef({TYPE_CUSTOM, TYPE_PRESETS})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface DialogType {
 
     }

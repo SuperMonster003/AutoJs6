@@ -18,12 +18,17 @@ package com.jaredrummler.android.colorpicker;
 
 import androidx.annotation.IntDef;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * The shape of the color preview
  */
-@IntDef({ ColorShape.SQUARE, ColorShape.CIRCLE }) public @interface ColorShape {
+@IntDef({ColorShape.SQUARE, ColorShape.CIRCLE})
+@Retention(RetentionPolicy.SOURCE)
+public @interface ColorShape {
 
-  int SQUARE = 0;
+    int SQUARE = 0;
 
-  int CIRCLE = 1;
+    int CIRCLE = 1;
 }

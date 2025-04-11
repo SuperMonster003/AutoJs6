@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.augment.automator
 
 import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.BoundFunction
@@ -23,7 +24,7 @@ class RootAutomatorNativeObject(scriptRuntime: ScriptRuntime, waitForReady: Any?
     }
 
     init {
-        super.exportAsJSClass(MAX_PROTOTYPE_ID, this, false)
+        RhinoUtils.initNativeObjectPrototype(this)
         defineProperty("__ra__", mRootAutomatorObject, READONLY or DONTENUM or PERMANENT)
     }
 

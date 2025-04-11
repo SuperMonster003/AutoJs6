@@ -1310,7 +1310,7 @@ object FileUtils {
         /** Matroska Video, known for supporting multiple video, audio, subtitle tracks. */
         MKV("mkv", TypeDataHolder.VIDEO),
 
-        /** QuickTime Movie format, native to Apple’s QuickTime player. */
+        /** QuickTime Movie format, native to Apple's QuickTime player. */
         MOV("mov", TypeDataHolder.VIDEO),
 
         /** Windows Media Video, a series of video codecs and their corresponding video coding formats. */
@@ -1526,7 +1526,7 @@ object FileUtils {
         /** TMPGEnc Video Editor project. */
         TPR("tpr", TypeDataHolder.VIDEO),
 
-        /** Windows Media, another format for Microsoft’s video system. */
+        /** Windows Media, another format for Microsoft's video system. */
         WM("wm", TypeDataHolder.VIDEO),
 
         /** Windows Media Player format. */
