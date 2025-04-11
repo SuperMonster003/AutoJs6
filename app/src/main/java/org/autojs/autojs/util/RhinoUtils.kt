@@ -84,6 +84,11 @@ object RhinoUtils {
     }
 
     @JvmStatic
+    val arrayPrototype: Scriptable by lazy {
+        ScriptableObject.getArrayPrototype(standardObjects)
+    }
+
+    @JvmStatic
     val functionPrototype: Scriptable by lazy {
         standardObjects["Function"].let {
             if (it is Scriptable) it["prototype"] as? Scriptable else null
@@ -816,17 +821,32 @@ object RhinoUtils {
     }
 
     @JvmStatic
-    fun newNativeObject() = NativeObject().also {
-        it.prototype = objectPrototype
+    fun initNativeObjectPrototype(o: NativeObject): NativeObject {
+        // val cx = ContextWrapper.getCurrentContext()
+        // try {
+        //     val tmpScope: Scriptable = cx.initStandardObjects()
+        //     NativeObject.init(tmpScope, false)
+        //     o.prototype = tmpScope.get("Object", tmpScope) as Scriptable
+        // } finally {
+        //     Context.exit()
+        // }
+        return o.apply { prototype = objectPrototype }
     }
 
     @JvmStatic
-    @JvmOverloads
-    fun newNativeArray(lengthArg: Long = 0) = NativeArray(lengthArg).also { it.exportAsJSClass(NativeArray.MAX_PROTOTYPE_ID, it, false) }
+    fun initNativeArrayPrototype(a: NativeArray): NativeArray {
+        return a.apply { prototype = arrayPrototype }
+    }
 
     @JvmStatic
-    fun newNativeArray(array: Array<Any?>) = NativeArray(array).also { it.exportAsJSClass(NativeArray.MAX_PROTOTYPE_ID, it, false) }
+    fun newNativeObject() = initNativeObjectPrototype(NativeObject())
 
+    @JvmStatic
+    @JvmOverloads
+    fun newNativeArray(lengthArg: Long = 0) = initNativeArrayPrototype(NativeArray(lengthArg))
+
+    @JvmStatic
+    fun newNativeArray(array: Array<Any?>) = initNativeArrayPrototype(NativeArray(array))
     @JvmStatic
     fun hashCodeOfScriptable(other: Any?): Int? {
         if (other !is Scriptable) return null
