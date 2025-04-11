@@ -310,7 +310,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 * `개선` 콘솔에는 오류 메시지를 인쇄할 때 상세한 스택 정보가 포함됩니다.
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
 
-##### 더 많은 버전 기록은 참조하십시오.
+##### 더 많은 버전 기록은 참조하십시오
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ko.md)
 
@@ -326,20 +326,20 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 
 #### Android Studio 준비
 
-`Android Studio Meerkat | 2024.3.1` 버전을 다운로드하십시오 (필요에 따라 선택):
+`Android Studio Meerkat | 2024.3.1 Patch 1` 버전을 다운로드하십시오 (필요에 따라 선택):
 
-- [android-studio-2024.3.1.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.13/android-studio-2024.3.1.13-windows.exe) (1.22 GB)
-- [android-studio-2024.3.1.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-windows.zip) (1.23 GB)
+- [android-studio-2024.3.1.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.14/android-studio-2024.3.1.14-windows.exe) (1.22 GB)
+- [android-studio-2024.3.1.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.14/android-studio-2024.3.1.14-windows.zip) (1.23 GB)
 
-> 메모: 상기 버전 출시 날짜는 2025 년 3 월 4 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오..
+> 메모: 상기 버전 출시 날짜는 2025 년 3 월 24 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
 #### Android SDK 준비
 
-> 메모: 시스템에 이미 Android SDK(안드로이드 소프트웨어 개발 키트)가 설치되어 있는 경우, 이 섹션을 건너뛸 수 있습니다..
+> 메모: 시스템에 이미 Android SDK(안드로이드 소프트웨어 개발 키트)가 설치되어 있는 경우, 이 섹션을 건너뛸 수 있습니다.
 
-Android Studio 소프트웨어에서 `CTRL + ALT + S` 단축키를 사용하여 설정 페이지를 엽니다.:
+Android Studio 소프트웨어에서 `CTRL + ALT + S` 단축키를 사용하여 설정 페이지를 엽니다:
 
 ```text
 Appearance & Behavior (외관 및 행동) -> 
@@ -347,20 +347,20 @@ System Settings (시스템 설정) ->
 Android SDK (안드로이드 소프트웨어 개발 키트)
 ```
 
-`Android SDK Location`(안드로이드 소프트웨어 개발 키트 위치) 필드가 비어 있는 경우, 오른쪽의 `Edit`(편집) 버튼을 클릭하고, 팝업 창에서 여러 번 `Next`(다음)를 클릭합니다..
+`Android SDK Location`(안드로이드 소프트웨어 개발 키트 위치) 필드가 비어 있는 경우, 오른쪽의 `Edit`(편집) 버튼을 클릭하고, 팝업 창에서 여러 번 `Next`(다음)를 클릭합니다.
 
-> 메모: 과정 중 하나 이상의 관련 계약을 동의해야 계속 진행할 수 있습니다..
+> 메모: 과정 중 하나 이상의 관련 계약을 동의해야 계속 진행할 수 있습니다.
 
-관련 리소스가 다운로드 및 설치를 완료하면, `Finish`(완료) 버튼을 클릭합니다..  
-위의 `Android SDK Location`(안드로이드 소프트웨어 개발 키트 위치) 필드에 경로가 자동으로 작성되고, SDK 준비 작업이 완료됩니다..
+관련 리소스가 다운로드 및 설치를 완료하면, `Finish`(완료) 버튼을 클릭합니다.  
+위의 `Android SDK Location`(안드로이드 소프트웨어 개발 키트 위치) 필드에 경로가 자동으로 작성되고, SDK 준비 작업이 완료됩니다.
 
 #### Android SDK 도구 준비
 
-AutoJs6은 일부 SDK 도구 (예: NDK 및 CMake)를 사용해야 합니다..
+AutoJs6은 일부 SDK 도구 (예: NDK 및 CMake)를 사용해야 합니다.
 
-> 메모: 시스템에 AutoJs6이 필요한 모든 Android SDK 도구가 설치되어 있는 경우, 이 섹션을 건너뛸 수 있습니다..
+> 메모: 시스템에 AutoJs6이 필요한 모든 Android SDK 도구가 설치되어 있는 경우, 이 섹션을 건너뛸 수 있습니다.
 
-Android Studio 소프트웨어에서 `CTRL + ALT + S` 단축키를 사용하여 설정 페이지를 엽니다.:
+Android Studio 소프트웨어에서 `CTRL + ALT + S` 단축키를 사용하여 설정 페이지를 엽니다:
 
 ```text
 Appearance & Behavior (외관 및 행동) -> 
@@ -369,15 +369,15 @@ Android SDK (안드로이드 소프트웨어 개발 키트) ->
 SDK Tools (SDK 도구) (오른쪽 창에 위치)
 ```
 
-`Show Package Details` (패키지 세부사항 표시)를 선택하고, NDK와 CMake를 차례로 클릭하여 해당 버전의 도구가 선택되었는지 확인하십시오, SDK 도구 버전 정보는 AutoJs6 프로젝트 루트 디렉터리에 있는 `version.properties` 파일에 있습니다..
+`Show Package Details` (패키지 세부사항 표시)를 선택하고, NDK와 CMake를 차례로 클릭하여 해당 버전의 도구가 선택되었는지 확인하십시오, SDK 도구 버전 정보는 AutoJs6 프로젝트 루트 디렉터리에 있는 `version.properties` 파일에 있습니다.
 
 #### JDK 준비
 
-AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다..
+AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다.
 
-2025 년 3 월 19 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24`입니다..
+2025 년 4 월 11 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24`입니다.
 
-> 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다..
+> 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
 JDK는 IDE에서 직접 다운로드하거나 [Oracle 웹사이트](https://www.oracle.com/java/technologies/downloads/) 에서 다운로드할 수 있습니다.
 
@@ -391,7 +391,7 @@ Gradle
 
 `Gradle JDK` 에서 다양한 버전의 JDK를 선택하거나 추가할 수 있습니다.
 
-목록에 적합한 버전의 JDK(>= `17`)가 있는 경우, 직접 선택하십시오..  
+목록에 적합한 버전의 JDK(>= `17`)가 있는 경우, 직접 선택하십시오.  
 그렇지 않으면 `Download JDK (JDK 다운로드)`를 선택하여 적절한 JDK를 다운로드하고, `Download (다운로드)` 버튼을 클릭하여 완료될 때까지 기다립니다.  
 `Add JDK (JDK 추가)`를 선택하여 이미 존재하는 로컬 JDK를 추가하고 디렉토리를 지정하여 JDK 추가를 완료할 수 있습니다.
 
@@ -402,17 +402,36 @@ Android Studio 메인 화면에서 `Get from VCS (버전 관리 시스템에서 
 `Directory (디렉토리)`에서 필요한 경우 특정 경로로 수정할 수 있습니다.  
 `Clone (복제)` 버튼을 클릭하고 AutoJs6 프로젝트 리소스를 장치에 로컬로 복제될 때까지 기다립니다.
 
-> 메모: 과정 중 [Git (분산 버전 관리 시스템)](https://git-scm.com/download)을 설치해야 할 수도 있습니다..
+> 메모: 과정 중 [Git (분산 버전 관리 시스템)](https://git-scm.com/download)을 설치해야 할 수도 있습니다.
 
 #### AutoJs6 프로젝트 빌드
 
 복제가 완료된 후, Android Studio가 AutoJs6 프로젝트 창을 열고 초기 `Dependencies(의존성)` 다운로드 및 Gradle 빌드를 자동으로 완료합니다.
 
-> 메모: 상기 과정은 시간이 많이 소요될 수 있습니다. 네트워크 상태가 좋지 않으면 여러 번 재시도해야 할 수 있습니다 (Retry 버튼을 클릭)..
+> 메모: 상기 과정은 시간이 많이 소요될 수 있습니다. 네트워크 상태가 좋지 않으면 여러 번 재시도해야 할 수 있습니다 (Retry 버튼을 클릭).
 
-빌드가 완료되면 Android Studio의 `Build` 탭에 `BUILD SUCCESSFUL in 1h 17m 34s` 와 같은 메시지가 나타납니다.
+빌드가 자동으로 진행되지 않거나 프로젝트를 다시 빌드해야 하는 경우, 다음 단계를 따르십시오:
 
-프로젝트를 패키징하고 설치 가능한 APK 파일을 안드로이드 장치에서 생성합니다:
+- 툴바의 `Run/Debug Configurations` 메뉴에서 `app`을 선택합니다. 이는 AutoJs6의 메인 앱입니다
+- 좌측의 `Build Project` (망치 아이콘) 버튼을 클릭하여 프로젝트 빌드를 시작합니다. 기본 단축키는 CTRL + F9입니다
+- 빌드가 완료될 때까지 기다립니다. `Builder Output` 탭에 "BUILD SUCCESSFUL in 1h 17m 34s"와 같은 메시지가 표시됩니다
+
+빌드에 실패하면, 에러 메시지를 AutoJs6 프로젝트의 [Issues](http://issues.autojs6.com) 페이지에 보고할 수 있습니다.
+
+> 참고: 앱 빌드 및 실행에 대한 자세한 내용은 [Android Docs](https://developer.android.com/studio/run?hl=en)를 참조하십시오
+
+#### AutoJs6 프로젝트 배포 (앱 실행)
+
+프로젝트가 성공적으로 빌드된 후, 이를 실제 디바이스(예: 휴대폰/태블릿)나 가상 디바이스(예: Android 에뮬레이터)에 앱으로 배포할 수 있습니다.
+
+- 툴바에서 `Run/Debug Configurations` 메뉴의 `app`을 선택합니다. 이는 AutoJs6의 메인 앱입니다
+- 우측의 `Available Devices` 드롭다운 목록에서 프로젝트 앱을 실행할 디바이스(실제 또는 가상)를 선택합니다
+- 우측의 `Run` (삼각형 아이콘) 버튼을 클릭하여 앱을 실행합니다. 기본 단축키는 `F10`입니다
+- 배포가 완료될 때까지 기다리면 선택된 디바이스가 자동으로 앱을 설치하고 실행합니다
+
+#### AutoJs6 프로젝트 배포 (APK 생성)
+
+프로젝트를 패키징하여 Android 디바이스에 설치할 수 있는 APK 파일을 생성합니다:
 
 - 디버그 버전 (Debug Version)
     - `Build (구축)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
@@ -424,6 +443,47 @@ Android Studio 메인 화면에서 `Get from VCS (버전 관리 시스템에서 
     - 서명 파일을 준비하고 (새로 만들거나 선택) 서명된 릴리즈 버전 설치 패키지를 생성합니다
     - 경로 예시: `"D:\AutoJs6\app\release\"`
 
+> 참고: 사용자에게 릴리스할 앱 빌드 방법에 대한 자세한 내용은 [Android Docs](https://developer.android.com/build/build-for-release?hl=en)를 참조하십시오
+
+#### AutoJs6용 미리 정의된 Gradle 빌드 작업
+
+프로젝트 앱 빌드 외에도 AutoJs6는 개발자가 프로젝트 관련 편리한 작업을 수행하는 데 도움이 되는 여러 미리 정의된 Gradle 빌드 작업을 지원합니다.
+
+툴바의 `Run/Debug Configurations` 메뉴에서, 좌측에 코끼리 아이콘이 표시된 다양한 미리 정의된 Gradle 작업들을 확인할 수 있습니다.
+
+- AutoJs6 [inrt:assemble]
+
+"inrt" 빌드 변형을 어셈블합니다. 이는 주로 AutoJs6 스크립트 패키징 기능을 위한 것입니다.
+
+AutoJs6 프로젝트에는 다양한 빌드 변형이 있습니다. 그 중 "inrt" 변형은 스크립트 패키징 기능을 위해 사용되며, 패키징에 필요한 템플릿 파일 "template.apk"를 생성합니다.
+
+패키징 기능 사용 시 다음과 같은 오류 메시지가 나타날 수 있습니다:
+
+> java.io.FileNotFoundException: template.apk
+
+이는 템플릿 파일이 존재하지 않음을 나타냅니다. 템플릿 파일을 생성하기 위해 `inrt:assemble` 작업을 수동으로 실행한 후, 앱을 다시 빌드하고 배포하십시오.
+
+> 참고: 템플릿 파일이 없으므로, 이를 생성하기 위해 `inrt:assemble` 작업을 수동으로 실행한 후에 앱을 다시 빌드하고 배포하십시오
+
+- AutoJs6 [app:bundle]
+
+디버그 빌드 과정의 산출물을 패키징합니다. 이는 주로 [AutoJs6 타입 정의](http://dts-project.autojs6.com) 프로젝트를 위한 것입니다.
+
+작업 실행 후, AutoJs6 프로젝트의 최신 JAR 파일이 생성됩니다. [Android d.ts Generator](https://github.com/NativeScript/android-dts-generator) (by [NativeScript](https://github.com/NativeScript)) 도구를 이용하여 AutoJs6 메인 앱의 타입 정의(d.ts 형식)를 생성할 수 있습니다.
+
+- AutoJs6 [app:digest]
+
+릴리즈 빌드로 생성된 APK 파일에 다이제스트 정보를 추가합니다. 이는 GitHub에 최신 버전의 AutoJs6를 게시하기 전에 최종 파일 이름을 결정하는 데 사용됩니다.
+
+다음은 다이제스트 정보 추가 전후의 파일 이름 비교입니다:
+
+```text
+전:
+autojs6-v6.6.2-arm64-v8a.apk
+후:
+autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
+```
+
 > 참조: [Android Docs](https://developer.android.com/studio/run?hl=zh-cn)
 
 ******
@@ -432,23 +492,23 @@ Android Studio 메인 화면에서 `Get from VCS (버전 관리 시스템에서 
 
 ******
 
-AutoJs6에서 실행 가능한 스크립트를 개발하려면 적합한 개발 도구를 사용하십시오.:
+AutoJs6에서 실행 가능한 스크립트를 개발하려면 적합한 개발 도구를 사용하십시오:
 
 - [VSCode](https://code.visualstudio.com/download) / [WebStorm](https://www.jetbrains.com/webstorm/download/) / [HBuilderX](https://www.dcloud.io/hbuilderx.html) ...
 
-PC에서 스크립트를 작성하고 디버깅하려면 VSCode 플러그인을 사용하여 PC와 휴대폰을 연결할 수 있습니다.:
+PC에서 스크립트를 작성하고 디버깅하려면 VSCode 플러그인을 사용하여 PC와 휴대폰을 연결할 수 있습니다:
 
 - [AutoJs6-VSCode-Extension](http://vscext-project.autojs6.com) - AutoJs6 디버거 (VSCode 플랫폼 플러그인)
 
-개발 도구를 사용하여 코드를 작성할 때, 코드 자동 완성 기능은 개발자를 더 잘 도울 수 있습니다.:
+개발 도구를 사용하여 코드를 작성할 때, 코드 자동 완성 기능은 개발자를 더 잘 도울 수 있습니다:
 
 - [AutoJs6-TypeScript-Declarations](http://dts-project.autojs6.com) - AutoJs6 선언 파일 (코드 자동 완성)
 
-코드를 작성할 때, AutoJs6 관련 API 및 사용 방법을 문서에서 조회할 수 있습니다.:
+코드를 작성할 때, AutoJs6 관련 API 및 사용 방법을 문서에서 조회할 수 있습니다:
 
 - [AutoJs6-Documentation](http://docs-project.autojs6.com) - AutoJs6 문서
 
-기존의 스크립트 개발 프로젝트는 개인 스크립트 프로젝트 창작에 영감을 줄 수 있습니다.:
+기존의 스크립트 개발 프로젝트는 개인 스크립트 프로젝트 창작에 영감을 줄 수 있습니다:
 
 - [Ant-Forest](https://github.com/TonyJiangWJ/Ant-Forest) - ant forest 에너지 자동 수집 스크립트 by [TonyJiangWJ](https://github.com/TonyJiangWJ)
 - [Ant-Forest](https://github.com/SuperMonster003/Ant-Forest) - ant forest 에너지 자동 수집 스크립트 by [SuperMonster003](https://github.com/SuperMonster003)

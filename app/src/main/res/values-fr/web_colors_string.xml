@@ -54,7 +54,7 @@
     <string name="web_cyan_blue">Bleu cyan</string>
     <string name="web_dark_blue">Bleu foncé</string>
     <string name="web_dark_cyan">Cyan foncé</string>
-    <string name="web_dark_goldenrod">Verge d’or foncée</string>
+    <string name="web_dark_goldenrod">Verge d\'or foncée</string>
     <string name="web_dark_gray">Gris foncé</string>
     <string name="web_dark_green">Vert foncé</string>
     <string name="web_dark_khaki">Kaki foncé</string>
@@ -86,7 +86,7 @@
     <string name="web_gainsboro">Gris Gainsboro</string>
     <string name="web_ghost_white">Blanc fantôme</string>
     <string name="web_golden">Doré / Or</string>
-    <string name="web_goldenrod">Verge d’or</string>
+    <string name="web_goldenrod">Verge d\'or</string>
     <string name="web_grass_green">Vert gazon</string>
     <string name="web_gray">Gris</string>
     <string name="web_grayish_purple">Violet grisâtre</string>
@@ -175,7 +175,7 @@
     <string name="web_pail_lilac">Lilas pâle</string>
     <string name="web_pale_blue">Bleu pâle</string>
     <string name="web_pale_denim">Denim pâle</string>
-    <string name="web_pale_goldenrod">Verge d’or pâle</string>
+    <string name="web_pale_goldenrod">Verge d\'or pâle</string>
     <string name="web_pale_green">Vert pâle</string>
     <string name="web_pale_ochre">Ocre pâle</string>
     <string name="web_pale_turquoise">Turquoise pâle</string>

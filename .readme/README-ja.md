@@ -48,11 +48,11 @@
 
 [Auto.js](https://github.com/hyb1996/Auto.js) は Android プラットフォーム用の [アクセシビリティサービス](https://developer.android.com/guide/topics/ui/accessibility/service?hl=zh-cn) をサポートする JavaScript 自動化ツールです.
 
-Auto.js は [hyb1996](https://github.com/hyb1996) によって `2017/01/27` に初めてリリースされ、`2020/03/13` にメンテナンスを停止しました。最終バージョンの名前は `4.1.1 Alpha2` で、ビルドバージョンは `461` です.
+Auto.js は [hyb1996](https://github.com/hyb1996) によって `2017/01/27` に初めてリリースされ, `2020/03/13` にメンテナンスを停止しました. 最終バージョンの名前は `4.1.1 Alpha2` で, ビルドバージョンは `461` です.
 
-AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開発され、引き続きオープンソースとして無料で提供されています.
+AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開発され, 引き続きオープンソースとして無料で提供されています.
 
-以下の表には、Auto.js に関連するプロジェクトの一部が記載されています (開発日順に並べ替えられています):
+以下の表には, Auto.js に関連するプロジェクトの一部が記載されています (開発日順に並べ替えられています):
 
 | <span style="word-break:keep-all;white-space:nowrap">プロジェクト</span> |                                                             <span style="word-break:keep-all;white-space:nowrap">アプリ名</span>                                                              | <span style="word-break:keep-all;white-space:nowrap">開発者</span> | <span style="word-break:keep-all;white-space:nowrap">開発開始日</span> | <span style="word-break:keep-all;white-space:nowrap">開発終了日</span> |
 |:------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------:|
@@ -66,9 +66,9 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 |      <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/kkevsekk1/AutoX)</span>       |            <span style="white-space:pre">[Autox.js&#160;v6](https://github.com/kkevsekk1/AutoX/commit/8b6776cff8b0fca4be4a52719b7d7d07c0a058f3#diff-51a0b488f963eb0be6c6599bf5df497313877cf5bdff3950807373912ac1cdc9R130)</span>             |           <span style="word-break:keep-all;white-space:nowrap">[wilinz](https://github.com/wilinz)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2022/05/26`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
 |        <span style="word-break:keep-all;white-space:nowrap">[AutoX](https://github.com/aiselp/AutoX)</span>        |              <span style="white-space:pre">[Autox.js&#160;v7](https://github.com/aiselp/AutoX/commit/484491fd5fe12b8203d0b09c181eb0f471c0ea9f#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R120)</span>              |           <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>            |                             <span style="word-break:keep-all;white-space:nowrap">`2024/04/21`</span>                              |                                  <span style="word-break:keep-all;white-space:nowrap">-</span>                                  |
 
-表の日付は推定値であり、実際とは異なる場合があります.
+表の日付は推定値であり, 実際とは異なる場合があります.
 
-表の Auto.js Pro 7/8/9 は有料バージョンです。その他は無料のオープンソースバージョンです.
+表の Auto.js Pro 7/8/9 は有料バージョンです. その他は無料のオープンソースバージョンです.
 
 ******
 
@@ -79,7 +79,7 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 * JavaScript IDEとして使用可能 (コード補完/変数リネーム/コードフォーマッティング)
 * 無障害サービスに基づく自動化操作をサポート ([AccessibilityService](https://developer.android.com/reference/android/accessibilityservice/AccessibilityService))
 * 浮動ボタンのクイックアクションをサポート (スクリプトの録画および再生/パッケージの表示/レイアウト分析)
-* セレクタAPIをサポートし、コントロールのトラバース/情報の取得/コントロール操作を提供 (UiAutomatorに類似: [UiAutomator](https://developer.android.com/training/testing/ui-automator))
+* セレクタAPIをサポートし, コントロールのトラバース/情報の取得/コントロール操作を提供 (UiAutomatorに類似: [UiAutomator](https://developer.android.com/training/testing/ui-automator))
 * レイアウトインターフェイスの分析をサポート (Android StudioのLayoutInspectorに類似)
 * 録画機能および録画再生機能をサポート
 * スクリーンショット/スクリーン保存/画像検索/画像マッチングをサポート
@@ -116,15 +116,15 @@ AutoJs6 は `2021/12/01` に Auto.js 最終プロジェクトを基に二次開�
 
 ******
 
-Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較して、AutoJs6 は以下のアップグレードまたは変更を行いました:
+Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較して, AutoJs6 は以下のアップグレードまたは変更を行いました:
 
-* [Shizuku](https://shizuku.rikka.app/introduction/)経由でADB特権を取得し、システムAPIを使用可能
-* [WebSocket](https://docs.autojs6.com/#/webSocketType)インスタンスの作成、および[WebSocketプロトコル](https://ja.wikipedia.org/wiki/WebSocket)に基づくネットワークリクエストの処理をサポート
+* [Shizuku](https://shizuku.rikka.app/introduction/)経由でADB特権を取得し, システムAPIを使用可能
+* [WebSocket](https://docs.autojs6.com/#/webSocketType)インスタンスの作成, および[WebSocketプロトコル](https://ja.wikipedia.org/wiki/WebSocket)に基づくネットワークリクエストの処理をサポート
 * 新モジュール [ [base64](https://docs.autojs6.com/#/base64) / [crypto](https://docs.autojs6.com/#/crypto) / [sqlite](https://docs.autojs6.com/#/sqlite) / [i18n](https://docs.autojs6.com/#/i18n) / [notice](https://docs.autojs6.com/#/notice) / [ocr](https://docs.autojs6.com/#/ocr) / [opencc](https://docs.autojs6.com/#/opencc) / [qrcode](https://docs.autojs6.com/#/qrcode) / [shizuku](https://docs.autojs6.com/#/shizuku) / ... ]
 * 多言語対応 [ 西 / 仏 / 露 / 阿 / 日 / 韓 / 英 / 簡中 / 繁中 / ... ]
 * ナイトモード対応 [ 設定ページ / ドキュメントページ / レイアウト分析ページ / 浮動ウィンドウ / ... ]
 * [VSCodeプラグイン](http://vscext-project.autojs6.com)がクライアント (LAN)とサーバ (LAN/ADB)接続方法をサポート
-* [Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) にアップグレードされました。
+* [Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) にアップグレードされました
     * Unicode [コードポイント](https://developer.mozilla.org/ja/docs/Glossary/Code_point)エスケープのサポート [補助平面](https://ja.wikipedia.org/wiki/多言語面#補助平面)文字
        ```javascript
        '\u{1D160}'; /* を表します "𝅘𝅥𝅮", 従来の方法: '\uD834\uDD60'. */
@@ -310,7 +310,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` コンソールはエラーメッセージを印刷するときに詳細なスタック情報を含みます
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
 
-##### 他のバージョン履歴については以下を参照してください。
+##### 他のバージョン履歴については以下を参照してください
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ja.md)
 
@@ -320,24 +320,24 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 ******
 
-AutoJs6 オープンソース プロジェクトのデバッグや開発が必要な場合は、[Android Studio](https://pro.autojs.org/) ([Google](https://www.google.com/) 社製品) または [IntelliJ IDEA](https://www.jetbrains.com/idea/) ([Jetbrains](https://www.jetbrains.com/) 社製品) を使用できます.
+AutoJs6 オープンソース プロジェクトのデバッグや開発が必要な場合は, [Android Studio](https://pro.autojs.org/) ([Google](https://www.google.com/) 社製品) または [IntelliJ IDEA](https://www.jetbrains.com/idea/) ([Jetbrains](https://www.jetbrains.com/) 社製品) を使用できます.
 
-このセクションでは、AutoJs6 オープンソース プロジェクトのコンパイルとビルド方法を Android Studio を例に説明します。IntelliJ IDEA も同様です.
+このセクションでは, AutoJs6 オープンソース プロジェクトのコンパイルとビルド方法を Android Studio を例に説明します. IntelliJ IDEA も同様です.
 
 #### Android Studioの準備
 
-`Android Studio Meerkat | 2024.3.1` バージョンをダウンロードしてください (いずれかを選択)。:
+`Android Studio Meerkat | 2024.3.1 Patch 1` バージョンをダウンロードしてください (いずれかを選択):
 
-- [android-studio-2024.3.1.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.13/android-studio-2024.3.1.13-windows.exe) (1.22 GB)
-- [android-studio-2024.3.1.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-windows.zip) (1.23 GB)
+- [android-studio-2024.3.1.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.14/android-studio-2024.3.1.14-windows.exe) (1.22 GB)
+- [android-studio-2024.3.1.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.14/android-studio-2024.3.1.14-windows.zip) (1.23 GB)
 
-> 注: 上述バージョンのリリース日は 2025 年 3 月 4 日 です。その他のバージョンをダウンロードするか、上記のリンクが失効している場合は、[Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください。.
+> 注: 上述バージョンのリリース日は 2025 年 3 月 24 日 です. その他のバージョンをダウンロードするか, 上記のリンクが失効している場合は, [Android Studioリリースアーカイブ](https://developer.android.com/studio/archive?hl=en)のページをご覧ください.
 
-上記のファイルをインストールまたは解凍し、Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
+上記のファイルをインストールまたは解凍し, Android Studio ソフトウェアを実行します (例: `"D:\android-studio\bin\studio64.exe"`).
 
 #### Android SDK の準備
 
-> 注: コンピュータシステムに既にAndroid SDK (Androidソフトウェア開発キット)がインストールされている場合、この節の内容をスキップできます。.
+> 注: コンピュータシステムに既にAndroid SDK (Androidソフトウェア開発キット)がインストールされている場合, この節の内容をスキップできます.
 
 Android Studioソフトウェアで`CTRL + ALT + S`のショートカットキーを使用して設定ページを開く:
 
@@ -347,18 +347,18 @@ System Settings (システム設定) ->
 Android SDK (Android ソフトウェア開発キット)
 ```
 
-`Android SDK場所` の欄が空白の場合は、右側の `編集` ボタンをクリックし、表示されるウィンドウで `次へ` ボタンを数回クリックします。.
+`Android SDK場所` の欄が空白の場合は, 右側の `編集` ボタンをクリックし, 表示されるウィンドウで `次へ` ボタンを数回クリックします.
 
-> 注: プロセス中に1つまたは複数の関連契約に同意する必要がある場合があります。.
+> 注: プロセス中に1つまたは複数の関連契約に同意する必要がある場合があります.
 
-関連するリソースのダウンロードとインストールが完了したら、 `完了` ボタンをクリックします。.  
-上記の `Android SDK場所` の欄が自動的に入力され、SDKの準備が完了します。.
+関連するリソースのダウンロードとインストールが完了したら,  `完了` ボタンをクリックします.  
+上記の `Android SDK場所` の欄が自動的に入力され, SDKの準備が完了します.
 
 #### Android SDKツールの準備
 
-AutoJs6では一部のSDKツール(NDKやCMakeなど)が必要です。.
+AutoJs6では一部のSDKツール(NDKやCMakeなど)が必要です.
 
-> 注: コンピュータシステムにAutoJs6ですべて必要なAndroid SDKツールがインストールされている場合、この節の内容をスキップできます。.
+> 注: コンピュータシステムにAutoJs6ですべて必要なAndroid SDKツールがインストールされている場合, この節の内容をスキップできます.
 
 Android Studioソフトウェアで`CTRL + ALT + S`のショートカットキーを使用して設定ページを開く:
 
@@ -369,50 +369,69 @@ Android SDK (Android ソフトウェア開発キット) ->
 SDK Tools (SDK ツール) (右側のウィンドウにあります)
 ```
 
-`パッケージの詳細を表示`を選択し、NDKおよびCMakeをそれぞれクリックして、対応するバージョンのツールが選択されていることを確認してください, SDKツールのバージョン情報は、AutoJs6プロジェクトのルートディレクトリにある`version.properties`ファイルに記載されています。.
+`パッケージの詳細を表示`を選択し, NDKおよびCMakeをそれぞれクリックして, 対応するバージョンのツールが選択されていることを確認してください, SDKツールのバージョン情報は, AutoJs6プロジェクトのルートディレクトリにある`version.properties`ファイルに記載されています.
 
 #### JDKの準備
 
-AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で、それ以下のバージョンは推奨されませんが、最低でも `19` の使用を推奨します。.
+AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `19` の使用を推奨します.
 
-2025 年 3 月 19 日 現在、AutoJs6がサポートする最大のJDKバージョンは `24` です。.
+2025 年 4 月 11 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
 
-> 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合、この節の内容をスキップできます。.
+> 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 
-JDK は IDE から直接ダウンロードするか、[Oracle サイト](https://www.oracle.com/java/technologies/downloads/) にアクセスしてダウンロードできます.
+JDK は IDE から直接ダウンロードするか, [Oracle サイト](https://www.oracle.com/java/technologies/downloads/) にアクセスしてダウンロードできます.
 
 Android Studio ソフトウェアでショートカットキー `CTRL + ALT + S` を使用して設定ページを開きます:
 
 ```text
-Build, Execution, Deployment (ビルド、実行、展開) -> 
+Build, Execution, Deployment (ビルド, 実行, 展開) -> 
 Build Tools (ビルドツール) -> 
 Gradle
 ```
 
 `Gradle JDK` で異なるバージョンの JDK を選択または追加できます.
 
-リストに適切なバージョンのJDKが存在する場合(>= `17`)、それを選択してください。.  
-または、`Download JDK (JDK をダウンロード)` を選択して適切な JDK をダウンロードし、`Download (ダウンロード)` ボタンをクリックしてダウンロードが完了するのを待ちます.  
-`Add JDK (JDK を追加)` を選択して既存のローカル JDK を追加し、そのディレクトリを指定して JDK を追加することも可能です.
+リストに適切なバージョンのJDKが存在する場合(>= `17`), それを選択してください.  
+または, `Download JDK (JDK をダウンロード)` を選択して適切な JDK をダウンロードし, `Download (ダウンロード)` ボタンをクリックしてダウンロードが完了するのを待ちます.  
+`Add JDK (JDK を追加)` を選択して既存のローカル JDK を追加し, そのディレクトリを指定して JDK を追加することも可能です.
 
 #### AutoJs6リソースのクローン
 
 Android Studio のメインページで `Get from VCS (バージョン管理システムから取得)` ボタンをクリックします.  
 `URL (統一リソースロケーターロケーション)` の欄に `https://github.com/SuperMonster003/AutoJs6.git` を入力します,  
 `Directory (ディレクトリ)` の欄を必要に応じて特定のパスに変更できます.  
-`Clone (クローン)` ボタンをクリックし、AutoJs6 プロジェクト リソースがデバイスにローカルにクローンされるのを待ちます.
+`Clone (クローン)` ボタンをクリックし, AutoJs6 プロジェクト リソースがデバイスにローカルにクローンされるのを待ちます.
 
-> 注: 上記プロセスには[Git (バージョン管理システム)](https://git-scm.com/download)をインストールする必要がある場合があります。.
+> 注: 上記プロセスには[Git (バージョン管理システム)](https://git-scm.com/download)をインストールする必要がある場合があります.
 
 #### AutoJs6プロジェクトのビルド
 
-クローンが完了すると、Android Studio は AutoJs6 のプロジェクト ウィンドウを開き、`Dependencies (依存関係)` の初期ダウンロードおよび Gradle の構築作業を自動的に完了します.
+クローンが完了すると, Android Studio は AutoJs6 のプロジェクト ウィンドウを開き, `Dependencies (依存関係)` の初期ダウンロードおよび Gradle の構築作業を自動的に完了します.
 
-> 注: 上記のプロセスは非常に時間がかかる可能性があります。ネットワーク条件が悪い場合、異なるボタンをクリックして再試行する必要がある場合があります。.
+> 注: 上記のプロセスは非常に時間がかかる可能性があります. ネットワーク条件が悪い場合, 異なるボタンをクリックして再試行する必要がある場合があります.
 
-ビルドが完了すると、Android Studio の `Build` タブに `BUILD SUCCESSFUL in 1h 17m 34s` のようなメッセージが表示されます.
+ビルドが自動的に進行しなかった場合, またはプロジェクトを再ビルドする必要がある場合は, 次の手順に従ってください:
 
-プロジェクトをパッケージ化して、Android デバイスにインストール可能な APK ファイルを生成します:
+- ツールバーの `Run/Debug Configurations` メニューから `app` を選択します. これは AutoJs6 のメインアプリです
+- `Build Project`（ハンマーアイコン）のボタンを左側でクリックして, プロジェクトのビルドを開始します. デフォルトのショートカットは CTRL + F9 です
+- ビルドが完了するのを待ちます. `Builder Output` タブに "BUILD SUCCESSFUL in 1h 17m 34s" のようなメッセージが表示されます
+
+ビルドに失敗した場合は, エラーメッセージを AutoJs6 プロジェクトの [Issues](http://issues.autojs6.com) ページに報告できます.
+
+> 注: アプリのビルドおよび実行方法の詳細については, [Android Docs](https://developer.android.com/studio/run?hl=en) を参照してください
+
+#### AutoJs6 プロジェクトのデプロイ（アプリの実行）
+
+プロジェクトが正常にビルドされた後, 実機（例: スマートフォン/タブレット）や仮想デバイス（例: Android エミュレーター）にアプリとしてデプロイできます.
+
+- ツールバーで `Run/Debug Configurations` メニューから `app` を選択します. これが AutoJs6 のメインアプリです
+- 右側の `Available Devices` ドロップダウンから, プロジェクトアプリを実行するデバイス（実機または仮想デバイス）を選択します
+- 右側の `Run`（三角形アイコン）のボタンをクリックして, アプリを起動します. デフォルトのショートカットは `F10` です
+- デプロイが完了するのを待ちます. 選択したデバイスが自動的にアプリをインストールして実行します
+
+#### AutoJs6 プロジェクトのデプロイ（APKの生成）
+
+プロジェクトをパッケージして, Android デバイスにインストール可能な APK ファイルを生成します:
 
 - デバッグ版 (デバッグバージョン)
     - `Build (ビルド)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
@@ -424,6 +443,47 @@ Android Studio のメインページで `Get from VCS (バージョン管理シ�
     - 署名ファイル (新規または選択) を準備して署名付きのリリース版インストールパッケージを生成します
     - パスの例: `"D:\AutoJs6\app\release\"`
 
+> 注: ユーザー向けにリリースするアプリのビルド方法の詳細については, [Android Docs](https://developer.android.com/build/build-for-release?hl=en) を参照してください
+
+#### AutoJs6 用の定義済み Gradle ビルドタスク
+
+プロジェクトのアプリをビルドする以外にも, AutoJs6 はいくつかの定義済み Gradle ビルドタスクをサポートしており, これらは開発者がプロジェクト関連の便利な操作を行うのに役立ちます.
+
+ツールバーの `Run/Debug Configurations` メニューには, 各タスクの左側に象のアイコンが表示される様々な定義済み Gradle タスクがあります.
+
+- AutoJs6 [inrt:assemble]
+
+"inrt" ビルドバリアントをアセンブルします. これは主に AutoJs6 のスクリプトパッケージ機能のためのものです.
+
+AutoJs6 プロジェクトにはさまざまなビルドバリアントがあります. その中で "inrt" バリアントは, スクリプトパッケージ機能のために使用され, パッケージ用のテンプレートファイル "template.apk" を生成します.
+
+パッケージ機能を使用する際に, 次のエラーメッセージが表示される場合があります:
+
+> java.io.FileNotFoundException: template.apk
+
+これはテンプレートファイルが存在しないことを示しています. テンプレートファイルを生成するために, 手動で `inrt:assemble` タスクを実行し, その後に再度ビルドしてデプロイしてください.
+
+> 注: テンプレートファイルが存在しません. `inrt:assemble` タスクを手動で実行してテンプレートファイルを生成し, その後に再度ビルドしてデプロイしてください
+
+- AutoJs6 [app:bundle]
+
+デバッグビルドプロセスの成果物をパッケージします. これは主に [AutoJs6 型定義](http://dts-project.autojs6.com) プロジェクトに使用されます.
+
+タスク実行後, AutoJs6 プロジェクトの最新の JAR ファイルが生成されます. [Android d.ts Generator](https://github.com/NativeScript/android-dts-generator)（[NativeScript](https://github.com/NativeScript) 作）のツールを使用して, AutoJs6 メインアプリの型定義（d.ts 形式のファイル）を生成できます.
+
+- AutoJs6 [app:digest]
+
+リリースビルドで生成された APK ファイルにダイジェスト情報を付加します. これは, GitHub に最新バージョンの AutoJs6 を公開する前に, 最終的なファイル名を確定するためのものです.
+
+以下は, ダイジェスト情報を付加する前後のファイル名の比較です:
+
+```text
+前:
+autojs6-v6.6.2-arm64-v8a.apk
+後:
+autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
+```
+
 > 参照: [Android Docs](https://developer.android.com/studio/run?hl=zh-cn)
 
 ******
@@ -432,23 +492,23 @@ Android Studio のメインページで `Get from VCS (バージョン管理シ�
 
 ******
 
-AutoJs6に対応するスクリプトを開発するには、適切な開発ツールを使用する必要があります。:
+AutoJs6に対応するスクリプトを開発するには, 適切な開発ツールを使用する必要があります:
 
 - [VSCode](https://code.visualstudio.com/download) / [WebStorm](https://www.jetbrains.com/webstorm/download/) / [HBuilderX](https://www.dcloud.io/hbuilderx.html) ...
 
-PCでスクリプトを作成してデバッグする場合、VSCodeプラグインを使用してPCと携帯電話を接続できます。:
+PCでスクリプトを作成してデバッグする場合, VSCodeプラグインを使用してPCと携帯電話を接続できます:
 
 - [AutoJs6-VSCode-Extension](http://vscext-project.autojs6.com) - AutoJs6 デバッガ (VSCode プラットフォーム エクステンション)
 
-開発ツールを使用してコードを記述する際、コードのインテリセンス機能が開発者のコード記述を支援します。:
+開発ツールを使用してコードを記述する際, コードのインテリセンス機能が開発者のコード記述を支援します:
 
 - [AutoJs6-TypeScript-Declarations](http://dts-project.autojs6.com) - AutoJs6型宣言ファイル (コード補完機能)
 
-AutoJs6に関するAPIおよび使用方法については、常にアプリケーションドキュメントを参照できます。:
+AutoJs6に関するAPIおよび使用方法については, 常にアプリケーションドキュメントを参照できます:
 
 - [AutoJs6-Documentation](http://docs-project.autojs6.com) - AutoJs6アプリケーションドキュメント
 
-既存のスクリプト開発プロジェクトを参考にして、個人のスクリプトプロジェクトのインスピレーションを得ることができます。:
+既存のスクリプト開発プロジェクトを参考にして, 個人のスクリプトプロジェクトのインスピレーションを得ることができます:
 
 - [Ant-Forest](https://github.com/TonyJiangWJ/Ant-Forest) - 蚂蚁森林のエネルギー自動収集スクリプト by [TonyJiangWJ](https://github.com/TonyJiangWJ)
 - [Ant-Forest](https://github.com/SuperMonster003/Ant-Forest) - 蚂蚁森林のエネルギー自動収集スクリプト by [SuperMonster003](https://github.com/SuperMonster003)
@@ -475,13 +535,13 @@ AutoJs6 プロジェクト開発に参加したすべての貢献者に感謝し
 |         <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>          |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86)</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-データは 2025 年 1 月 1 日 に更新されました。.
+データは 2025 年 1 月 1 日 に更新されました.
 
 データ項目は `最近の提出` の降順で並べ替えられます.
 
-新たに発行された未処理のプルリクエストは、マージされた後にデータ統計に含まれます.
+新たに発行された未処理のプルリクエストは, マージされた後にデータ統計に含まれます.
 
-一部の貢献者は [GitHub Contributors](https://github.com/SuperMonster003/AutoJs6/graphs/contributors) に正常に表示されず、コミット記録が空のままです。貢献履歴は [プルリクエスト](https://github.com/SuperMonster003/AutoJs6/pulls) から確認できます.
+一部の貢献者は [GitHub Contributors](https://github.com/SuperMonster003/AutoJs6/graphs/contributors) に正常に表示されず, コミット記録が空のままです. 貢献履歴は [プルリクエスト](https://github.com/SuperMonster003/AutoJs6/pulls) から確認できます.
 
 [//]: # (
     # --------------------------------------------------------------#

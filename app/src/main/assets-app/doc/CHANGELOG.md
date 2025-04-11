@@ -9,16 +9,21 @@
 ###### 2025/01/03
 
 * `新增` ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法
+* `新增` 设置页面增加 "文件扩展名" 设置选项
+* `新增` 主题色设置页面增加新布局支持 (颜色库分组/主题色定位/颜色搜索/历史记录/调色盘增强等)
 * `修复` Android 15 状态栏背景颜色与主题色不一致的问题
 * `修复` plugins.load 方法无法正常加载插件的问题 _[`issue #290`](http://issues.autojs6.com/290)_
 * `修复` dx 库在 Android 7.x 无法正常使用的问题 _[`issue #293`](http://issues.autojs6.com/293)_
 * `修复` ScriptRuntime 使用 require 引用内置模块时可能出现的同步状态异常 (试修) _[`issue #298`](http://issues.autojs6.com/298)_
 * `修复` notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_
 * `修复` shizuku/shell 等方法无法接受字符串参数的问题 _[`issue #310`](http://issues.autojs6.com/310)_
+* `修复` colors.pixel 方法无法接受单通道图像参数的问题 _[`issue #350`](http://issues.autojs6.com/350)_
 * `修复` engines.execScript/execScriptFile 等方法执行脚本时默认工作路径异常
 * `修复` floaty.window/floaty.rawWindow 无法在子线程执行的问题
 * `修复` ui.inflate 返回值丢失 attr/on/click 等原型方法的问题
+* `修复` 布局分析页面生成代码时可能导致应用崩溃的问题 _[`issue #288`](http://issues.autojs6.com/288)_
 * `修复` 代码编辑器跳转到行尾时可能跳转到下一行起始位置的问题
+* `修复` 设置页面连续快速点击对话框类型项目时可能导致应用崩溃的问题
 * `优化` 精简打包应用模板 APK 文件大小
 * `优化` 打包页面支持 Pinyin 库选项
 * `优化` 打包应用主活动页面优化状态栏背景及文字颜色
@@ -26,7 +31,9 @@
 * `优化` 部分控件主题色与背景色对比度过低时的视觉体验
 * `优化` 应用内页面导航栏设置为透明或半透明以增强视觉体验
 * `优化` UI 模式状态栏及导航栏默认为 `md_grey_50` 色值且设置为亮色模式
-* `优化` 长按应用主页 "文件" 标签可切换浮动按钮可见状态
+* `优化` 应用主页 "文件" 标签支持通过长按切换浮动按钮可见状态
+* `优化` 应用主页抽屉无障碍服务开关支持与脚本代码同步
+* `优化` 代码编辑器标题文字支持字体大小自适应
 * `优化` 日志页面浮动按钮可见状态与列表滚动操作联动
 * `优化` 脚本项目配置文件 project.json 支持更多打包选项 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
 * `优化` 脚本项目配置文件 project.json 支持选项名称宽松匹配及别名兼容

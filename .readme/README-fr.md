@@ -326,12 +326,12 @@ Cette section présente la méthode de compilation et de construction du projet 
 
 #### Préparation de Android Studio
 
-Téléchargez la version `Android Studio Meerkat | 2024.3.1` (choisissez-en une selon vos besoins):
+Téléchargez la version `Android Studio Meerkat | 2024.3.1 Patch 1` (choisissez-en une selon vos besoins):
 
-- [android-studio-2024.3.1.13-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.13/android-studio-2024.3.1.13-windows.exe) (1.22 GB)
-- [android-studio-2024.3.1.13-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.13/android-studio-2024.3.1.13-windows.zip) (1.23 GB)
+- [android-studio-2024.3.1.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.14/android-studio-2024.3.1.14-windows.exe) (1.22 GB)
+- [android-studio-2024.3.1.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.14/android-studio-2024.3.1.14-windows.zip) (1.23 GB)
 
-> Note : La version mentionnée ci-dessus a été publiée le 4 March 2025. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Note : La version mentionnée ci-dessus a été publiée le 24 March 2025. Pour télécharger d'autres versions ou si le lien ci-dessus n'est plus valide, visitez la page [archive des versions de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Installez ou extrayez le fichier ci-dessus, exécutez Android Studio (par exemple `"D:\android-studio\bin\studio64.exe"`).
 
@@ -375,7 +375,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `19`.
 
-À partir du 19 March 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
+À partir du 11 April 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
@@ -410,9 +410,28 @@ Une fois cloné, Android Studio ouvrira la fenêtre de projet AutoJs6 et complé
 
 > Note : Ce processus peut être très long. En cas de mauvaises conditions réseau, plusieurs tentatives peuvent être nécessaires (cliquez sur le bouton Retry).
 
-Une fois la construction terminée, l'onglet `Build` d'Android Studio affichera un message du type `BUILD SUCCESSFUL in 1h 17m 34s`.
+Si la construction ne peut pas se faire automatiquement ou si vous devez reconstruire le projet, suivez ces étapes :
 
-Emballez le projet et générez un fichier APK installable sur les appareils Android:
+- Dans le menu `Run/Debug Configurations` de la barre d'outils, sélectionnez `app`, qui est l'application principale d'AutoJs6
+- Cliquez sur le bouton `Build Project` (icône de marteau) à gauche pour lancer la construction du projet. Le raccourci par défaut est CTRL + F9
+- Attendez que la construction se termine. L'onglet `Builder Output` affichera un message comme "BUILD SUCCESSFUL in 1h 17m 34s"
+
+Si la construction échoue, vous pouvez signaler le message d'erreur sur la page [Issues](http://issues.autojs6.com) du projet AutoJs6.
+
+> Note : Pour plus de détails sur la manière de construire et d'exécuter l'application, veuillez consulter [Android Docs](https://developer.android.com/studio/run?hl=en)
+
+#### Déploiement du Projet AutoJs6 (Exécuter l'App)
+
+Une fois le projet construit avec succès, il peut être déployé en tant qu'application (App) sur un appareil physique (par ex. téléphone/tablette) ou sur un appareil virtuel (par ex. émulateur Android).
+
+- Dans la barre d'outils, sélectionnez `app` dans le menu `Run/Debug Configurations`, qui est l'application principale d'AutoJs6
+- Dans le menu déroulant `Available Devices` à droite, choisissez l'appareil sur lequel l'application du projet doit s'exécuter (physique ou virtuel)
+- Cliquez sur le bouton `Run` (icône de triangle) à droite pour lancer l'application. Le raccourci par défaut est `F10`
+- Attendez que le déploiement se termine ; l'appareil sélectionné installera et exécutera automatiquement l'application du projet
+
+#### Déploiement du Projet AutoJs6 (Générer l'APK)
+
+Emballer le projet et générer un fichier APK qui peut être installé sur les appareils Android:
 
 - Version de débogage (Debug Version)
     - `Construire (Build)` -> `Build Bundle(s) / APK(s)` -> `Build APK(s)`
@@ -423,6 +442,47 @@ Emballez le projet et générez un fichier APK installable sur les appareils And
     - Sélectionnez l'option `APK`
     - Préparer le fichier de signature (nouveau ou existant), et générer un package d'installation de version publiée signée
     - Exemple de chemin : `"D:\AutoJs6\app\release\"`
+
+> Note : Pour plus d'informations sur la manière de construire une application pour sa publication, veuillez consulter [Android Docs](https://developer.android.com/build/build-for-release?hl=en)
+
+#### Tâches de build Gradle prédéfinies pour AutoJs6
+
+En plus de construire l'application du projet, AutoJs6 prend en charge plusieurs tâches de build Gradle prédéfinies qui aident les développeurs à effectuer directement des opérations liées au projet.
+
+Dans le menu `Run/Debug Configurations` de la barre d'outils, vous pouvez voir diverses tâches Gradle prédéfinies, chacune indiquée par une icône d'éléphant à gauche.
+
+- AutoJs6 [inrt:assemble]
+
+Assembler la variante de build "inrt", qui sert principalement à la fonction de packaging des scripts d'AutoJs6.
+
+Le projet AutoJs6 dispose de différentes variantes de construction. La variante "inrt" est utilisée pour le packaging des scripts, générant le fichier modèle "template.apk" nécessaire au packaging.
+
+Lors de l'utilisation de la fonction de packaging, vous pourriez rencontrer le message d'erreur suivant :
+
+> java.io.FileNotFoundException: template.apk
+
+Cela indique que le fichier modèle n'existe pas. Vous devez exécuter manuellement la tâche `inrt:assemble` pour générer le fichier modèle, puis reconstruire et redéployer l'application.
+
+> Note : Le fichier modèle est manquant ; exécutez manuellement la tâche `inrt:assemble` pour le générer avant de reconstruire et redéployer l'application
+
+- AutoJs6 [app:bundle]
+
+Emballer les produits du processus de build en mode debug, principalement pour le projet [définitions AutoJs6](http://dts-project.autojs6.com).
+
+Après l'exécution de la tâche, le fichier JAR le plus récent du projet AutoJs6 est généré. À l'aide de l'outil [Android d.ts Generator](https://github.com/NativeScript/android-dts-generator) (par [NativeScript](https://github.com/NativeScript)), vous pouvez générer les définitions de types (format d.ts) pour l'application principale d'AutoJs6.
+
+- AutoJs6 [app:digest]
+
+Ajoutez des informations de résumé au fichier APK généré par le build en mode release, principalement pour déterminer le nom final du fichier avant de publier la dernière version d'AutoJs6 sur GitHub.
+
+Voici une comparaison des noms de fichiers avant et après l'ajout des informations de résumé :
+
+```text
+Avant:
+autojs6-v6.6.2-arm64-v8a.apk
+Après:
+autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
+```
 
 > Voir aussi: [Android Docs](https://developer.android.com/studio/run?hl=zh-cn)
 
