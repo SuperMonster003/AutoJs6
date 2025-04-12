@@ -382,10 +382,13 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
                     value = mNoSplashThemeId
                 }
 
-                if (name.data == "authorities" && value is StringItem) {
-                    (value as StringItem).data = "${mProjectConfig.packageName}.fileprovider"
-                } else {
-                    super.onAttr(this)
+                when {
+                    name.data == "authorities" -> (value as? StringItem)?.apply {
+                        // @Reference to aiselp (https://github.com/aiselp) by SuperMonster003 on Apr 12, 2025.
+                        //  ! https://github.com/aiselp/AutoX/commit/d085ccd41aafcf74d503bdf5ac08d021567945b2#diff-97c191813b60e8f000917ca5fe93dced97e688bdd48b25d212d03152d5f1678cR432
+                        data = data.replace(INRT_APP_ID, mProjectConfig.packageName)
+                    }
+                    else -> super.onAttr(this)
                 }
             }
         }
@@ -436,6 +439,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         const val LIBRARY_DIR = "lib"
 
         const val TEMPLATE_APK_NAME = "template.apk"
+        const val INRT_APP_ID = "org.autojs.autojs6.inrt"
 
         private val TAG = ApkBuilder::class.java.simpleName
 

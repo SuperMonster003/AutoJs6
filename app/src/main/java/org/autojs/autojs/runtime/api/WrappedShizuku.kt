@@ -52,9 +52,12 @@ object WrappedShizuku {
         }
     }
 
-    private val mUserServiceArgs = Shizuku.UserServiceArgs(ComponentName(BuildConfig.APPLICATION_ID, UserService::class.java.name))
-        .processNameSuffix("shizuku-service-for-${BuildConfig.APPLICATION_ID.substringAfterLast(".")}")
-        .daemon(false)
+    private val mUserServiceArgs by lazy {
+        val pkg = GlobalAppContext.get().packageName
+        Shizuku.UserServiceArgs(ComponentName(pkg, UserService::class.java.name))
+            .processNameSuffix("shizuku-service-for-${pkg.substringAfterLast(".")}")
+            .daemon(false)
+    }
 
     private val mBinderReceivedListener = Shizuku.OnBinderReceivedListener {
         if (Shizuku.isPreV11()) {
