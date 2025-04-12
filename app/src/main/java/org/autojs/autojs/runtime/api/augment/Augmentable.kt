@@ -147,7 +147,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                 val message = e.message?.let {
                     globalContext.getString(R.string.error_failed_to_call_method_with_cause, key, it)
                 } ?: globalContext.getString(R.string.error_failed_to_call_method, key)
-                throw RuntimeException(message, e)
+                throw WrappedRuntimeException(message, e)
             }
         }
 
