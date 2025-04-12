@@ -5,8 +5,10 @@ import android.content.Intent
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import kotlinx.coroutines.Runnable
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.concurrent.VolatileDispose
 import org.autojs.autojs.core.floaty.BaseResizableFloatyWindow
 import org.autojs.autojs.core.floaty.RawWindow
 import org.autojs.autojs.core.ui.JsViewHelper
@@ -18,14 +20,12 @@ import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
+import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.ViewUtils.setViewMeasure
 import org.autojs.autojs6.R
 import java.util.concurrent.CopyOnWriteArraySet
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.math.max
 
 /**
  * Created by Stardust on Dec 5, 2017.
@@ -47,7 +47,7 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         return JsResizableWindow(supplier).also { addWindow(it) }
     }
 
-    fun window(view: View): JsResizableWindow = window(object : BaseResizableFloatyWindow.ViewSupplier {
+    fun window(view: View) = window(object : BaseResizableFloatyWindow.ViewSupplier {
         override fun inflate(context: Context, parent: ViewGroup?) = view
     })
 
@@ -60,7 +60,7 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
         return JsRawWindow(supplier).also { addWindow(it) }
     }
 
-    fun rawWindow(view: View) = JsRawWindow(object : BaseResizableFloatyWindow.ViewSupplier {
+    fun rawWindow(view: View) = rawWindow(object : BaseResizableFloatyWindow.ViewSupplier {
         override fun inflate(context: Context, parent: ViewGroup?) = view
     })
 
@@ -96,18 +96,37 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
     }
 
     @ScriptInterface
-    fun getClip(delay: Long = 0L): String {
+    fun getClip(maxDelayAfterWindowReady: Long = 500L): String {
         val start = System.currentTimeMillis()
-        val timeoutForAttachedToWindowManager: Long = 2_000
-        val latch = CountDownLatch(1)
-        val win = window(View(mContext).apply { visibility = View.INVISIBLE })
-        UI.postRhinoRuntime(scriptRuntime, newBaseFunction("action", {
+        val timeoutForAttachedToWindowManager = 1000L
+        val view = FrameLayout(mContext)
+        val win = rawWindow(view)
+        UI.runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
             while (System.currentTimeMillis() - start < timeoutForAttachedToWindowManager) {
                 if (runCatching { win.requestFocus() }.isSuccess) break
             }
         }, NOT_CONSTRUCTABLE))
-        latch.await(max(0, delay - (System.currentTimeMillis() - start)), TimeUnit.MILLISECONDS)
-        return scriptRuntime.clip.also { win.close() }
+        val getClipboardData = {
+            val getter = { scriptRuntime.clip.also { win.close() } }
+            val startTime = System.currentTimeMillis()
+            var result = getter()
+            while (System.currentTimeMillis() - startTime < maxDelayAfterWindowReady) {
+                if (result.isNotBlank()) break
+                Thread.sleep(10)
+                result = getter()
+            }
+            result
+        }
+        return when {
+            isMainThread() -> {
+                getClipboardData()
+            }
+            else -> {
+                val result = VolatileDispose<String>()
+                scriptRuntime.uiHandler.post { result.setAndNotify(getClipboardData()) }
+                result.blockedGetOrThrow(ScriptInterruptedException::class.java)
+            }
+        }
     }
 
     interface JsWindow {

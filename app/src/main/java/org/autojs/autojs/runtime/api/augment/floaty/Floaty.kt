@@ -85,10 +85,10 @@ class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun getClip(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsAtMost(args, 1) { argList ->
-            val (delay) = argList
+            val (maxDelayAfterWindowReady) = argList
             when {
-                delay.isJsNullish() -> scriptRuntime.floaty.getClip()
-                else -> scriptRuntime.floaty.getClip(coerceLongNumber(delay!!, 0L))
+                maxDelayAfterWindowReady.isJsNullish() -> scriptRuntime.floaty.getClip()
+                else -> scriptRuntime.floaty.getClip(coerceLongNumber(maxDelayAfterWindowReady!!, 0L))
             }
         }
 
@@ -133,7 +133,7 @@ class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
         }
 
-        private fun toXMLString(xml: Any) = when (xml) {
+        fun toXMLString(xml: Any): String = when (xml) {
             is XML -> xml.toXMLString()
             else -> xml.toString()
         }

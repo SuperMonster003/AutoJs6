@@ -172,6 +172,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` colors.pixel 方法无法接受单通道图像参数的问题 _[`issue #350`](http://issues.autojs6.com/350)_
 * `修复` engines.execScript/execScriptFile 等方法执行脚本时默认工作路径异常
 * `修复` floaty.window/floaty.rawWindow 无法在子线程执行的问题
+* `修复` floaty.getClip 可能无法正常获取剪切板内容的问题
 * `修复` ui.inflate 返回值丢失 attr/on/click 等原型方法的问题
 * `修复` 布局分析页面生成代码时可能导致应用崩溃的问题 _[`issue #288`](http://issues.autojs6.com/288)_
 * `修复` 打包应用无法正常使用 shizuku 模块的问题 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
@@ -194,6 +195,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` APK 文件类型信息对话框增加点击监听器支持文本复制与应用详情跳转
 * `优化` 尝试恢复 com.stardust 前缀包以便提升代码兼容性 _[`issue #290`](http://issues.autojs6.com/290)_
 * `优化` floaty.window/floaty.rawWindow 同时支持主线程和子线程执行
+* `优化` getClip 全局方法适时借助 floaty.getClip 方法以提升兼容性
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v662)_
 
 # v6.6.1

@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.global
 
+import android.os.Build
 import io.github.g00fy2.versioncompare.Version
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
@@ -295,7 +296,14 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun getClip(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
-            scriptRuntime.clip
+            val legacyResult = scriptRuntime.clip
+            when {
+                legacyResult.isNotEmpty() -> legacyResult
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && scriptRuntime.floaty.hasPermission() -> {
+                    scriptRuntime.floaty.getClip()
+                }
+                else -> legacyResult
+            }
         }
 
         @JvmStatic
