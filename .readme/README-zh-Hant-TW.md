@@ -122,6 +122,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * 支援構建 [WebSocket](https://docs.autojs6.com/#/webSocketType) 例項以完成基於 [WebSocket 協議](https://zh.wikipedia.org/wiki/WebSocket) 的網路請求
 * 新增模組 [ [base64](https://docs.autojs6.com/#/base64) / [crypto](https://docs.autojs6.com/#/crypto) / [sqlite](https://docs.autojs6.com/#/sqlite) / [i18n](https://docs.autojs6.com/#/i18n) / [notice](https://docs.autojs6.com/#/notice) / [ocr](https://docs.autojs6.com/#/ocr) / [opencc](https://docs.autojs6.com/#/opencc) / [qrcode](https://docs.autojs6.com/#/qrcode) / [shizuku](https://docs.autojs6.com/#/shizuku) / ... ]
 * 多語言適配 [ 西 / 法 / 俄 / 阿 / 日 / 韓 / 英 / 簡中 / 繁中 / ... ]
+* 主題色適配 [ 分組 / 定位 / 搜尋 / 歷史記錄 / 亮度及對比度自動適配 / ... ]
 * 夜間模式適配 [ 設定頁面 / 文件頁面 / 佈局分析頁面 / 浮動視窗 / ... ]
 * [VSCode 外掛](http://vscext-project.autojs6.com) 支援客戶端 (LAN) 及服務端 (LAN/ADB) 連線方式
 * [Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升級至 [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3)
@@ -375,7 +376,7 @@ SDK Tools (SDK 工具) (位於右側視窗)
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `19`.
 
-截至 2025 年 4 月 11 日, AutoJs6 可支援 JDK 最高版本為 `24`.
+截至 2025 年 4 月 12 日, AutoJs6 可支援 JDK 最高版本為 `24`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

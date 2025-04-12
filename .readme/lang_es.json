@@ -68,6 +68,7 @@
   "li_major_changes_night_mode_support": "Soporte para modo nocturno en varias páginas [ página de configuración / página de documentación / página de análisis de diseño / ventana flotante / ... ]",
   "li_major_changes_rhino_engine_upgrade": "El motor [Rhino](https://github.com/mozilla/rhino/) se ha actualizado de [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) a {{ latest_rhino_engine_name_with_github_lineno_address }}",
   "li_major_changes_shizuku_adb_privileges_support": "Soporte para obtener privilegios ADB usando [Shizuku](https://shizuku.rikka.app/introduction/) y usar las API del sistema",
+  "li_major_changes_theme_color_support": "Adaptation des couleurs du thème [ Groupement / Localisation / Recherche / Historique / Adaptation automatique de la luminosité et du contraste / ... ]",
   "li_major_changes_vscode_plugin_support": "El [complemento de VSCode](http://vscext-project.autojs6.com) soporta conexiones cliente (LAN) y servidor (LAN/ADB)",
   "li_major_changes_websocket_support": "Soporte para construir instancias de [WebSocket](https://docs.autojs6.com/#/webSocketType) para realizar solicitudes de red basadas en el [protocolo WebSocket](https://zh.wikipedia.org/wiki/WebSocket)",
   "li_manual_documentation": "Documentación de la aplicación",

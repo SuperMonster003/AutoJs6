@@ -122,6 +122,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * Prise en charge de la construction d'instances [WebSocket](https://docs.autojs6.com/#/webSocketType) pour effectuer des requêtes réseau basées sur le [protocole WebSocket](https://zh.wikipedia.org/wiki/WebSocket)
 * Nouveaux modules ajoutés [ [base64](https://docs.autojs6.com/#/base64) / [crypto](https://docs.autojs6.com/#/crypto) / [sqlite](https://docs.autojs6.com/#/sqlite) / [i18n](https://docs.autojs6.com/#/i18n) / [notice](https://docs.autojs6.com/#/notice) / [ocr](https://docs.autojs6.com/#/ocr) / [opencc](https://docs.autojs6.com/#/opencc) / [qrcode](https://docs.autojs6.com/#/qrcode) / [shizuku](https://docs.autojs6.com/#/shizuku) / ... ]
 * Adaptation multilingue [ Espagnol / Français / Russe / Arabe / Japonais / Coréen / Anglais / Chinois Simplifié / Chinois Traditionnel / ... ]
+* Adaptación del color del tema [ Agrupación / Ubicación / Búsqueda / Historial / Adaptación automática de brillo y contraste / ... ]
 * Adaptation du mode nuit [ Paramètres / Documentation / Analyse de la disposition / Fenêtre flottante / ... ]
 * Prise en charge de l'extension [VSCode](http://vscext-project.autojs6.com) pour la connexion client (LAN) et serveur (LAN/ADB)
 * Le moteur [Rhino](https://github.com/mozilla/rhino/) a été mis à niveau de [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) à [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3)
@@ -375,7 +376,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `19`.
 
-À partir du 11 April 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
+À partir du 12 April 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

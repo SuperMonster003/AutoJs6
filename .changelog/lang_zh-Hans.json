@@ -1,11 +1,11 @@
 {
   "$data": {
     "v6.6.2": {
-      "released_date": "2025/01/03",
+      "released_date": "2025/04/12",
       "feature": [
         "ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法",
         "设置页面增加 \"文件扩展名\" 设置选项",
-        "主题色设置页面增加新布局支持 (颜色库分组/主题色定位/颜色搜索/历史记录/调色盘增强等)"
+        "主题色设置页面增加新布局支持 (分组/定位/搜索/历史记录/调色盘增强等)"
       ],
       "fix": [
         "Android 15 状态栏背景颜色与主题色不一致的问题",
@@ -43,9 +43,10 @@
       ],
       "dependency": [
         "升级 Gradle Compile 版本 34 -> 35",
-        "升级 Gradle 版本 8.12 -> 8.13",
+        "升级 Gradle 版本 8.12 -> 8.14-rc-1",
         "升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT",
         "升级 Androidx Recyclerview 版本 1.3.2 -> 1.4.0",
+        "升级 Androidx Room 版本 2.6.1 -> 2.7.0",
         "升级 Androidx WebKit 版本 1.12.1 -> 1.13.0",
         "升级 Pinyin4j 版本 2.5.0 -> 2.5.1"
       ]

@@ -113,6 +113,7 @@
 * {{ li_major_changes_websocket_support }}
 * {{ li_major_changes_new_modules }}
 * {{ li_major_changes_multilingual_support }}
+* {{ li_major_changes_theme_color_support }}
 * {{ li_major_changes_night_mode_support }}
 * {{ li_major_changes_vscode_plugin_support }}
 * {{ li_major_changes_rhino_engine_upgrade }}

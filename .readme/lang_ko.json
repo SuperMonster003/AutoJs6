@@ -68,6 +68,7 @@
   "li_major_changes_night_mode_support": "야경 모드 지원 [ 설정 페이지 / 문서 페이지 / 레이아웃 분석 페이지 / 플로팅 창 / ... ]",
   "li_major_changes_rhino_engine_upgrade": "[Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release)에서 {{ latest_rhino_engine_name_with_github_lineno_address }}로 업그레이드",
   "li_major_changes_shizuku_adb_privileges_support": "[Shizuku](https://shizuku.rikka.app/introduction/)를 통해 ADB 특권을 얻고 시스템 API 사용 지원",
+  "li_major_changes_theme_color_support": "테마 색상 적응 [ 그룹화 / 위치 / 검색 / 기록 / 밝기 및 대비 자동 적응 / ...]",
   "li_major_changes_vscode_plugin_support": "[VSCode 플러그인](http://vscext-project.autojs6.com) 지원 클라이언트 (LAN) 및 서버 (LAN/ADB) 연결 방식",
   "li_major_changes_websocket_support": "[WebSocket](https://docs.autojs6.com/#/webSocketType) 인스턴스를 생성하여 [WebSocket 프로토콜](https://zh.wikipedia.org/wiki/WebSocket)에 기반한 네트워크 요청 지원",
   "li_manual_documentation": "문서",

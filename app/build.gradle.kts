@@ -207,9 +207,9 @@ dependencies /* Unclassified */ {
     implementation(files("$rootDir/libs/tiny-sign-0.9.jar"))
 
     // Room
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-runtime:2.7.0")
+    implementation("androidx.room:room-ktx:2.7.0")
+    ksp("androidx.room:room-compiler:2.7.0")
 
     // ApkSig
     // implementation("com.android.tools.build:apksig:8.7.3")
