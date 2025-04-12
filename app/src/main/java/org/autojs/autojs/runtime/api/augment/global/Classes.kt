@@ -18,6 +18,9 @@ class Classes {
     val PendingIntent = android.app.PendingIntent::class
 
     @JvmField
+    val ComponentName = android.content.ComponentName::class
+
+    @JvmField
     val Context = android.content.Context::class
 
     @JvmField

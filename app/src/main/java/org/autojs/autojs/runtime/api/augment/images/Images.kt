@@ -99,6 +99,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         ::resizeInternal.name,
         ::scale.name,
         ::rotate.name,
+        ::flip.name,
         ::concat.name,
         ::detectColor.name,
         ::detectsColor.name,
@@ -596,6 +597,49 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val centerX = parseNumber(centerXArg) { image.width / 2 }.toFloat()
             val centerY = parseNumber(centerYArg) { image.height / 2 }.toFloat()
             scriptRuntime.images.rotate(image, centerX, centerY, coerceFloatNumber(degree))
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun flip(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageWrapper = ensureArgumentsLengthInRange(args, 1..3) { argList ->
+            val image = if (argList[0] is String) read(scriptRuntime, arrayOf(argList[0], true)) else argList[0]
+            require(image is ImageWrapper) { "Argument image for images.flip must be a ImageWrapper" }
+            val (horizontal, vertical) = when (argList.size) {
+                1 -> true to false
+                2 -> parseFlipOrientations(argList[1])
+                3 -> coerceBoolean(argList[1], false) to coerceBoolean(argList[2], false)
+                else -> throw WrappedIllegalArgumentException("Arguments length (${args.size}) is unacceptable for images.flip")
+            }
+            initOpenCvIfNeeded()
+            scriptRuntime.images.flip(image, horizontal, vertical)
+        }
+        
+        private fun parseFlipOrientations(o: Any?): Pair<Boolean, Boolean> = when {
+            o.isJsNullish() -> false to false
+            o is Boolean -> o to false
+            o is String -> {
+                val lower = o.lowercase().trim()
+                val bothPattern = Regex("^(both|all|h\\|v|v\\|h|xy|yx|x\\|y|y\\|x)$")
+                val hPattern = Regex("^(h|horizontal|x)$")
+                val vPattern = Regex("^(v|vertical|y)$")
+                when {
+                    bothPattern.matches(lower) -> true to true
+                    hPattern.matches(lower) -> true to false
+                    vPattern.matches(lower) -> false to true
+                    else -> coerceBoolean(o, false) to false
+                }
+            }
+            o is NativeArray -> when (o.size) {
+                0 -> false to false
+                1 -> coerceBoolean(o[0], false) to false
+                else -> coerceBoolean(o[0], false) to coerceBoolean(o[1], false)
+            }
+            o is NativeObject -> {
+                val h = o.inquire(listOf("x", "h", "horizontal"), ::coerceBoolean, false)
+                val v = o.inquire(listOf("y", "v", "vertical"), ::coerceBoolean, false)
+                h to v
+            }
+            else -> false to false
         }
 
         @JvmStatic

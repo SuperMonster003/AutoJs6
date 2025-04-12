@@ -280,6 +280,26 @@ public class Images {
         return imageWrapper;
     }
 
+    @ScriptInterface
+    public ImageWrapper flip(@NonNull ImageWrapper img, boolean horizontal, boolean vertical) {
+        Bitmap original = img.getBitmap();
+        Matrix matrix = new Matrix();
+
+        // 根据传入参数设置缩放比例
+        float sx = horizontal ? -1.0f : 1.0f;
+        float sy = vertical ? -1.0f : 1.0f;
+        matrix.preScale(sx, sy);
+
+        // 水平方向翻转后, 平移到图像宽度的位置
+        if (horizontal) matrix.postTranslate(original.getWidth(), 0);
+        // 垂直方向翻转后, 平移到图像高度的位置
+        if (vertical) matrix.postTranslate(0, original.getHeight());
+
+        Bitmap flipped = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
+        img.shoot();
+        return ImageWrapper.ofBitmap(flipped);
+    }
+
     public ImageWrapper clip(@NonNull ImageWrapper img, int x, int y, int w, int h) {
         ImageWrapper imageWrapper = ImageWrapper.ofBitmap(Bitmap.createBitmap(img.getBitmap(), x, y, w, h));
         img.shoot();

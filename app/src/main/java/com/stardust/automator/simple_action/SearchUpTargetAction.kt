@@ -10,17 +10,17 @@ import com.stardust.automator.UiObject
 class SearchUpTargetAction(action: Int, filter: FilterAction.Filter) : SearchTargetAction(action, filter) {
     private val mAble: Able = Able.ABLE_MAP.get(action)
 
-    override fun searchTarget(n: UiObject?): UiObject? {
-        var node = n
+    override fun searchTarget(node: UiObject?): UiObject? {
+        var targetNode = node
         var i = 0
-        while (node != null && !mAble.isAble(node)) {
+        while (targetNode != null && !mAble.isAble(targetNode)) {
             i++
             if (i > LOOP_MAX) {
                 return null
             }
-            node = node.parent()
+            targetNode = targetNode.parent()
         }
-        return node
+        return targetNode
     }
 
     override fun toString(): String {
