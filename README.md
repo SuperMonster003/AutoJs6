@@ -160,6 +160,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 ###### 2025/04/12
 
 * `新增` ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法
+* `新增` images.flip 方法, 用于图像翻转 _[`issue #349`](http://issues.autojs6.com/349)_
 * `新增` 设置页面增加 "文件扩展名" 设置选项
 * `新增` 主题色设置页面增加新布局支持 (分组/定位/搜索/历史记录/调色盘增强等)
 * `修复` Android 15 状态栏背景颜色与主题色不一致的问题
