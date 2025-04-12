@@ -68,6 +68,7 @@
   "li_major_changes_night_mode_support": "夜間模式適配 [ 設置頁面 / 文檔頁面 / 佈局分析頁面 / 浮動窗口 / ... ]",
   "li_major_changes_rhino_engine_upgrade": "[Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升級至 {{ latest_rhino_engine_name_with_github_lineno_address }}",
   "li_major_changes_shizuku_adb_privileges_support": "支持通過 [Shizuku](https://shizuku.rikka.app/introduction/) 獲得 ADB 特權並使用系統 API",
+  "li_major_changes_theme_color_support": "主題色適配 [ 分組 / 定位 / 搜索 / 歷史記錄 / 亮度及對比度自動適配 / ... ]",
   "li_major_changes_vscode_plugin_support": "[VSCode 插件](http://vscext-project.autojs6.com) 支持客户端 (LAN) 及服務端 (LAN/ADB) 連接方式",
   "li_major_changes_websocket_support": "支持構建 [WebSocket](https://docs.autojs6.com/#/webSocketType) 實例以完成基於 [WebSocket 協議](https://zh.wikipedia.org/wiki/WebSocket) 的網絡請求",
   "li_manual_documentation": "應用文檔",

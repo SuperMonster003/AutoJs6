@@ -68,6 +68,7 @@
   "li_major_changes_night_mode_support": "دعم وضع الليل [ صفحة الإعدادات / صفحة الوثائق / صفحة تحليل التخطيط / النافذة العائمة / ... ]",
   "li_major_changes_rhino_engine_upgrade": "تم ترقية محرك [Rhino](https://github.com/mozilla/rhino/) من [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) إلى {{ latest_rhino_engine_name_with_github_lineno_address }}",
   "li_major_changes_shizuku_adb_privileges_support": "دعم امتيازات ADB باستخدام [Shizuku](https://shizuku.rikka.app/introduction/) واستخدام واجهة برمجة التطبيقات للنظام",
+  "li_major_changes_theme_color_support": "تكييف ألوان الموضوع [ التجميع / الموقع / البحث / السجل / التكييف التلقائي للسطوع والتباين / ... ]",
   "li_major_changes_vscode_plugin_support": "دعم الاتصال بـ [المكون الإضافي لـ VSCode](http://vscext-project.autojs6.com) بطرق الاتصال عبر الشبكة المحلية (LAN) و ADB",
   "li_major_changes_websocket_support": "دعم بناء مثيلات [WebSocket](https://docs.autojs6.com/#/webSocketType) لإرسال طلبات الشبكة استنادًا إلى [بروتوكول WebSocket](https://zh.wikipedia.org/wiki/WebSocket)",
   "li_manual_documentation": "وثائق التطبيق",

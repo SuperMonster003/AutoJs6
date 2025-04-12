@@ -122,6 +122,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * [WebSocket](https://docs.autojs6.com/#/webSocketType)インスタンスの作成, および[WebSocketプロトコル](https://ja.wikipedia.org/wiki/WebSocket)に基づくネットワークリクエストの処理をサポート
 * 新モジュール [ [base64](https://docs.autojs6.com/#/base64) / [crypto](https://docs.autojs6.com/#/crypto) / [sqlite](https://docs.autojs6.com/#/sqlite) / [i18n](https://docs.autojs6.com/#/i18n) / [notice](https://docs.autojs6.com/#/notice) / [ocr](https://docs.autojs6.com/#/ocr) / [opencc](https://docs.autojs6.com/#/opencc) / [qrcode](https://docs.autojs6.com/#/qrcode) / [shizuku](https://docs.autojs6.com/#/shizuku) / ... ]
 * 多言語対応 [ 西 / 仏 / 露 / 阿 / 日 / 韓 / 英 / 簡中 / 繁中 / ... ]
+* テーマカラーの適応 [ グループ化 / ロケーション / 検索 / 履歴 / 明るさとコントラストの自動適応 / ... ]
 * ナイトモード対応 [ 設定ページ / ドキュメントページ / レイアウト分析ページ / 浮動ウィンドウ / ... ]
 * [VSCodeプラグイン](http://vscext-project.autojs6.com)がクライアント (LAN)とサーバ (LAN/ADB)接続方法をサポート
 * [Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) にアップグレードされました
@@ -375,7 +376,7 @@ SDK Tools (SDK ツール) (右側のウィンドウにあります)
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `19` の使用を推奨します.
 
-2025 年 4 月 11 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
+2025 年 4 月 12 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

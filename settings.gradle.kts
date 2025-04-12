@@ -148,7 +148,8 @@ pluginManagement {
             val androidStudio = object : Platform(
                 name = "AndroidStudio", vendor = "Google",
                 androidVersionMap = mapOf(
-                    "2024.3" to "8.9.0", /* Mar 19, 2025. */
+                    "2025.1" to "8.10.0-rc02", /* Apr 11, 2025. */
+                    "2024.3" to "8.9.1", /* Apr 11, 2025. */
                     "2024.2" to "8.8.0", /* Jan 13, 2025. */
                     "2024.1" to "8.6.0", /* Aug 30, 2024. */
                     "2023.3" to "8.5.0-alpha02", /* Mar 28, 2024. */
@@ -160,12 +161,14 @@ pluginManagement {
                     consts.IDENTIFIER_FALLBACK to fallbackGradleVersion,
                 ),
                 kotlinVersionMap = mapOf(
-                    "2024.3" to "2.1.0", /* Nov 29, 2024. */
+                    "2025.1" to "2.1.20", /* Apr 11, 2025. */
+                    "2024.3" to "2.1.20", /* Apr 11, 2024. */
                     "2024.2" to "2.1.0", /* Nov 29, 2024. */
                     "2024.1" to "2.0.0", /* Aug 13, 2024. */
                     consts.IDENTIFIER_FALLBACK to fallbackKotlinVersion,
                 ),
                 codenameVersionMap = mapOf(
+                    "2025.1" to "N", /* Apr 11, 2025. */
                     "2024.3" to "M", /* Nov 29, 2024. */
                     "2024.2" to "L", /* Aug 13, 2024. */
                     "2024.1" to "K|L", /* May 14, 2024. */
@@ -177,6 +180,7 @@ pluginManagement {
                     "2022.1" to "E", /* May 3, 2023. */
                 ),
                 codenameMap = mapOf(
+                    "N" to "Narwhal", /* Born on Mar 19, 2025. */
                     "M" to "Meerkat", /* Born on Nov 12, 2024. */
                     "L" to "Ladybug", /* Born on Jul 15, 2024. */
                     "K" to "Koala", /* Born on Mar 19, 2024. */
@@ -193,26 +197,28 @@ pluginManagement {
 
                     /* Codenames below were predicted on Oct 18, 2023. */
 
-                    "N" to "Newt", "O" to "Ostrich",
-                    "P" to "Penguin", "Q" to "Quail", "R" to "Rhino",
-                    "S" to "Snail", "T" to "Tiger", "U" to "Unicorn",
-                    "V" to "Vicuna", "W" to "Walrus", "X" to "Xiphias",
-                    "Y" to "Yeti", "Z" to "Zebra",
+                    "O" to "Ostrich", "P" to "Penguin", "Q" to "Quail",
+                    "R" to "Rhino", "S" to "Snail", "T" to "Tiger",
+                    "U" to "Unicorn", "V" to "Vicuna", "W" to "Walrus",
+                    "X" to "Xiphias", "Y" to "Yeti", "Z" to "Zebra",
                 ),
             ) {
                 override val weight = Int.MAX_VALUE
                 override val gradleSettingsName = "Gradle JDK"
-                override val fullName = "Android Studio${
-                    codenameVersionMap?.get(version)
+                override val fullName by lazy {
+                    val suffix = codenameVersionMap?.get(version)
                         ?.split("|")
-                        ?.mapNotNull { codenameMap?.get(it.trim()) }
-                        ?.joinToString(" / ", prefix = " ") ?: ""
-                }"
+                        ?.joinToString(" / ", prefix = " ") { key ->
+                            codenameMap?.get(key.trim()) ?: key
+                        } ?: ""
+                    return@lazy "Android Studio$suffix"
+                }
             }
 
             val intelliJIdea = object : Platform(
                 name = "IntelliJIdea", vendor = "Jetbrains",
                 androidVersionMap = mapOf(
+                    "2025.1" to "8.9.1", /* Apr 12, 2025. */
                     "2024.3.1" to "8.7.3", /* Dec 10, 2024. */
                     "2024.3" to "8.7.0-rc01", /* Nov 15, 2024. */
                     "2024.2" to "8.5.2", /* Aug 13, 2024. */
@@ -223,6 +229,7 @@ pluginManagement {
                     consts.IDENTIFIER_FALLBACK to fallbackGradleVersion,
                 ),
                 kotlinVersionMap = mapOf(
+                    "2025.1" to "2.1.20", /* Apr 12, 2025. */
                     "2024.3.4" to "2.1.10", /* Feb 28, 2025. */
                     "2024.2.3" to "2.0.21", /* Oct 17, 2024. */
                     "2024.2" to "2.0.21-RC", /* Sep 27, 2024. */
@@ -306,6 +313,7 @@ pluginManagement {
         )
 
         val kspVersionMap = mapOf(
+            "2.1.20" to "2.0.0", /* Apr 9, 2025. */
             "2.1.20-RC3" to "1.0.31", /* Mar 15, 2025. */
             "2.1.20-RC2" to "1.0.31", /* Mar 7, 2025. */
             "2.1.20-RC" to "1.0.31", /* Feb 28, 2025. */
@@ -492,7 +500,7 @@ pluginManagement {
 
         val classpath = config.libs.filterIsInstance<Classpath>().map {
             var suffix = ""
-            val version = when {
+            val version: String = when {
                 it.version.startsWith("${identifier.auto}:") -> {
                     val mapType = it.version.substring("${identifier.auto}:".length)
                     val map = when (mapType) {
@@ -506,7 +514,7 @@ pluginManagement {
                         ver.bestMatchingValue
                     } ?: map[identifier.fallback]?.also {
                         suffix += identifier.fallbackSuffix
-                    }
+                    } ?: consts.DEFAULT_VERSION
                 }
                 else -> it.version.also {
                     suffix += identifier.specifiedSuffix

@@ -122,6 +122,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 * [WebSocket](https://docs.autojs6.com/#/webSocketType) 인스턴스를 생성하여 [WebSocket 프로토콜](https://zh.wikipedia.org/wiki/WebSocket)에 기반한 네트워크 요청 지원
 * 새로운 모듈 추가 [ [base64](https://docs.autojs6.com/#/base64) / [crypto](https://docs.autojs6.com/#/crypto) / [sqlite](https://docs.autojs6.com/#/sqlite) / [i18n](https://docs.autojs6.com/#/i18n) / [notice](https://docs.autojs6.com/#/notice) / [ocr](https://docs.autojs6.com/#/ocr) / [opencc](https://docs.autojs6.com/#/opencc) / [qrcode](https://docs.autojs6.com/#/qrcode) / [shizuku](https://docs.autojs6.com/#/shizuku) / ... ]
 * 다국어 지원 [ 서 / 프 / 러 / 아 / 일 / 한 / 영어 / 중국어 / 번체 중 ... ]
+* 테마 색상 적응 [ 그룹화 / 위치 / 검색 / 기록 / 밝기 및 대비 자동 적응 / ...]
 * 야경 모드 지원 [ 설정 페이지 / 문서 페이지 / 레이아웃 분석 페이지 / 플로팅 창 / ... ]
 * [VSCode 플러그인](http://vscext-project.autojs6.com) 지원 클라이언트 (LAN) 및 서버 (LAN/ADB) 연결 방식
 * [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release)에서 [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3)로 업그레이드
@@ -375,7 +376,7 @@ SDK Tools (SDK 도구) (오른쪽 창에 위치)
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다.
 
-2025 년 4 월 11 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24`입니다.
+2025 년 4 월 12 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24`입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 

@@ -122,6 +122,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * Soporte para construir instancias de [WebSocket](https://docs.autojs6.com/#/webSocketType) para realizar solicitudes de red basadas en el [protocolo WebSocket](https://zh.wikipedia.org/wiki/WebSocket)
 * Nuevos módulos [ [base64](https://docs.autojs6.com/#/base64) / [crypto](https://docs.autojs6.com/#/crypto) / [sqlite](https://docs.autojs6.com/#/sqlite) / [i18n](https://docs.autojs6.com/#/i18n) / [notice](https://docs.autojs6.com/#/notice) / [ocr](https://docs.autojs6.com/#/ocr) / [opencc](https://docs.autojs6.com/#/opencc) / [qrcode](https://docs.autojs6.com/#/qrcode) / [shizuku](https://docs.autojs6.com/#/shizuku) / ... ]
 * Soporte multilingüe [Español / Francés / Ruso / Árabe / Japonés / Coreano / Inglés / Chino Simplificado / Chino Tradicional / ...]
+* Adaptation des couleurs du thème [ Groupement / Localisation / Recherche / Historique / Adaptation automatique de la luminosité et du contraste / ... ]
 * Soporte para modo nocturno en varias páginas [ página de configuración / página de documentación / página de análisis de diseño / ventana flotante / ... ]
 * El [complemento de VSCode](http://vscext-project.autojs6.com) soporta conexiones cliente (LAN) y servidor (LAN/ADB)
 * El motor [Rhino](https://github.com/mozilla/rhino/) se ha actualizado de [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) a [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3)
@@ -375,7 +376,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `19`.
 
-Hasta el 11 de April de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
+Hasta el 12 de April de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 

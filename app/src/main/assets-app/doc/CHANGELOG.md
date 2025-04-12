@@ -6,11 +6,11 @@
 
 # v6.6.2
 
-###### 2025/01/03
+###### 2025/04/12
 
 * `新增` ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法
 * `新增` 设置页面增加 "文件扩展名" 设置选项
-* `新增` 主题色设置页面增加新布局支持 (颜色库分组/主题色定位/颜色搜索/历史记录/调色盘增强等)
+* `新增` 主题色设置页面增加新布局支持 (分组/定位/搜索/历史记录/调色盘增强等)
 * `修复` Android 15 状态栏背景颜色与主题色不一致的问题
 * `修复` plugins.load 方法无法正常加载插件的问题 _[`issue #290`](http://issues.autojs6.com/290)_
 * `修复` dx 库在 Android 7.x 无法正常使用的问题 _[`issue #293`](http://issues.autojs6.com/293)_
@@ -42,9 +42,10 @@
 * `优化` 尝试恢复 com.stardust 前缀包以便提升代码兼容性 _[`issue #290`](http://issues.autojs6.com/290)_
 * `优化` floaty.window/floaty.rawWindow 同时支持主线程和子线程执行
 * `依赖` 升级 Gradle Compile 版本 34 -> 35
-* `依赖` 升级 Gradle 版本 8.12 -> 8.13
+* `依赖` 升级 Gradle 版本 8.12 -> 8.14-rc-1
 * `依赖` 升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
 * `依赖` 升级 Androidx Recyclerview 版本 1.3.2 -> 1.4.0
+* `依赖` 升级 Androidx Room 版本 2.6.1 -> 2.7.0
 * `依赖` 升级 Androidx WebKit 版本 1.12.1 -> 1.13.0
 * `依赖` 升级 Pinyin4j 版本 2.5.0 -> 2.5.1
 

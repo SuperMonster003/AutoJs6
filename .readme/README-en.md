@@ -122,6 +122,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * Supports building [WebSocket](https://docs.autojs6.com/#/webSocketType) instances to perform network requests based on the [WebSocket protocol](https://en.wikipedia.org/wiki/WebSocket)
 * New modules [ [base64](https://docs.autojs6.com/#/base64) / [crypto](https://docs.autojs6.com/#/crypto) / [sqlite](https://docs.autojs6.com/#/sqlite) / [i18n](https://docs.autojs6.com/#/i18n) / [notice](https://docs.autojs6.com/#/notice) / [ocr](https://docs.autojs6.com/#/ocr) / [opencc](https://docs.autojs6.com/#/opencc) / [qrcode](https://docs.autojs6.com/#/qrcode) / [shizuku](https://docs.autojs6.com/#/shizuku) / ... ]
 * Multilingual support [ Spanish / French / Russian / Arabic / Japanese / Korean / English / Simplified Chinese / Traditional Chinese / ... ]
+* Theme color adaptation [ Grouping / Location / Search / History / Automatic Adaptation of Brightness and Contrast / ... ]
 * Night mode adaptation [ Settings page / Documentation page / Layout analysis page / Floating window / ... ]
 * [VSCode plugin](http://vscext-project.autojs6.com) supports both client (LAN) and server (LAN/ADB) connection methods
 * [Rhino](https://github.com/mozilla/rhino/) engine upgraded from [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) to [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3)
@@ -375,7 +376,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of Apr 11 , 2025, AutoJs6 supports up to version `24` of the JDK.
+As of Apr 12 , 2025, AutoJs6 supports up to version `24` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

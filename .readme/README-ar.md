@@ -122,6 +122,7 @@
 * دعم بناء مثيلات [WebSocket](https://docs.autojs6.com/#/webSocketType) لإرسال طلبات الشبكة استنادًا إلى [بروتوكول WebSocket](https://zh.wikipedia.org/wiki/WebSocket)
 * وحدات جديدة [ [base64](https://docs.autojs6.com/#/base64) / [crypto](https://docs.autojs6.com/#/crypto) / [sqlite](https://docs.autojs6.com/#/sqlite) / [i18n](https://docs.autojs6.com/#/i18n) / [notice](https://docs.autojs6.com/#/notice) / [ocr](https://docs.autojs6.com/#/ocr) / [opencc](https://docs.autojs6.com/#/opencc) / [qrcode](https://docs.autojs6.com/#/qrcode) / [shizuku](https://docs.autojs6.com/#/shizuku) / ... ]
 * دعم التكيف متعدد اللغات [ الإسبانية / الفرنسية / الروسية / العربية / اليابانية / الكورية / الإنجليزية / الصينية المبسطة / الصينية التقليدية / ... ]
+* تكييف ألوان الموضوع [ التجميع / الموقع / البحث / السجل / التكييف التلقائي للسطوع والتباين / ... ]
 * دعم وضع الليل [ صفحة الإعدادات / صفحة الوثائق / صفحة تحليل التخطيط / النافذة العائمة / ... ]
 * دعم الاتصال بـ [المكون الإضافي لـ VSCode](http://vscext-project.autojs6.com) بطرق الاتصال عبر الشبكة المحلية (LAN) و ADB
 * تم ترقية محرك [Rhino](https://github.com/mozilla/rhino/) من [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) إلى [v1.8.1-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3)
@@ -375,7 +376,7 @@ SDK Tools  (أدوات SDK) (في النافذة اليمنى)
 
 يعتمد مشروع AutoJs6 على إصدار `JDK (مجموعة تطوير جافا)` بإصدار لا يقل عن `17`، ولكن يفضل الإصدار الذي لا يقل عن `19`.
 
-اعتبارًا من 11 April 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
+اعتبارًا من 12 April 2025، الإصدار الأقصى المدعوم من JDK لمشروع AutoJs6 هو `24`.
 
 > ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم.
 
