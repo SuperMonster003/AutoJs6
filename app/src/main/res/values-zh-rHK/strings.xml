@@ -960,5 +960,6 @@
     <string name="summary_all_files_access_inrt">允許應用訪問所有文件, 包括外部存儲</string>
     <string name="summary_display_over_other_apps_inrt">允許應用在其他應用之上顯示內容</string>
     <string name="summary_post_notifications_permission_inrt">允許應用創建併發送通知</string>
+    <string name="dialog_button_use_palette">使用調色盤</string>
 
 </resources>

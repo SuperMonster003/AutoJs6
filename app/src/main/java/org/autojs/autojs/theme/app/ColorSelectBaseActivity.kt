@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
+import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.appbar.AppBarLayout
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
@@ -34,6 +35,7 @@ import org.autojs.autojs.theme.app.ColorEntities.ColorHistory
 import org.autojs.autojs.theme.app.ColorEntities.ColorInfo
 import org.autojs.autojs.theme.app.ColorEntities.PaletteHistory
 import org.autojs.autojs.theme.app.ColorHistoryItemViewHolder.Companion.ColorHistoryItem
+import org.autojs.autojs.theme.app.ColorInfoDialogManager.CustomColorInfoDialogNeutral.NeutralButtonCallback
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_MATERIAL
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_PALETTE
@@ -82,6 +84,10 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        ThemeChangeNotifier.themeChanged.observe(this) {
+            updateAppBarColorContent(ThemeColorManager.colorPrimary)
+        }
 
         mTitle = intent.getStringExtra("title") ?: getString(R.string.text_theme_color)
         currentColor = intent.getIntExtra("currentColor", ThemeColorManager.colorPrimary)
@@ -238,7 +244,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         return TargetInfoForLocate(targetLibraryId, targetItemIndex)
     }
 
-    protected fun showColorPicker() {
+    protected fun showColorPicker(initialColor: Int? = null) {
         ColorPickerDialog.newBuilder()
             .setUseLegacyMode(isLegacyLayout)
             .setAllowCustom(true)
@@ -246,7 +252,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
             .setShowAlphaSlider(false)
             .setDialogTitle(R.string.dialog_title_color_palette)
-            .setColor(customColor)
+            .setColor(initialColor ?: customColor)
             .setOldColorPanelOnClickListener { showColorDetails(it.tag as? Int) }
             .setNewColorPanelOnClickListener { showColorDetails(it.tag as? Int) }
             .setColorHistoriesHandler { showColorPickerHistories(it) }
@@ -489,7 +495,17 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
     }
 
     protected fun showColorDetails(color: Int?, title: String? = null) {
-        ColorInfoDialogManager.showColorInfoDialog(this, color, title)
+        val customNeutral = ColorInfoDialogManager.CustomColorInfoDialogNeutral(
+            textRes = R.string.dialog_button_use_palette,
+            colorRes = R.color.dialog_button_hint,
+            onNeutralCallback = object: NeutralButtonCallback{
+                override fun onClick(dialog: MaterialDialog, which: DialogAction, color: Int) {
+                    dialog.dismiss()
+                    showColorPicker(color)
+                }
+            }
+        )
+        ColorInfoDialogManager.showColorInfoDialog(this, color, title, customNeutral)
     }
 
     protected fun showThemeColorDetails() {

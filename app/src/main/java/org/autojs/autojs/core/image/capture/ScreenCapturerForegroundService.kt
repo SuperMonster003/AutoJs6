@@ -28,6 +28,7 @@ class ScreenCapturerForegroundService : Service() {
     override fun onBind(intent: Intent): IBinder = Binder()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        instance = this
         mForegroundServiceCreator = ForegroundServiceCreator.Builder(this)
             .setClassName(ScreenCapturerForegroundService::class.java)
             .setIntent(
@@ -51,11 +52,20 @@ class ScreenCapturerForegroundService : Service() {
 
     override fun onDestroy() {
         mForegroundServiceCreator?.stopForeground(STOP_FOREGROUND_REMOVE)
+        instance = null
         super.onDestroy()
     }
 
     companion object {
+
         const val NOTIFICATION_ID = 0xCF
+
+        var instance: ScreenCapturerForegroundService? = null
+
+        fun stopService() {
+            instance?.stopSelf()
+        }
+
     }
 
 }

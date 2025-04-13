@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.ThemeColorRecyclerView
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.theme.ThemeChangeNotifier
-import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_PALETTE
@@ -46,16 +45,16 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
 
     constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
+    private val mAdapter: Adapter
     private var mOnItemClickListener: ColorSelectBaseActivity.OnItemClickListener? = null
-
     private var mSelectedPosition = SELECT_NONE
 
-    val selectedThemeColor: ThemeColor?
+    val selectedColor: Int?
         get() = when {
             mSelectedPosition < 0 -> null
             mSelectedPosition == customColorPosition -> customColor
             else -> context.getColor(colorItemsLegacy[mSelectedPosition].first)
-        }?.let { ThemeColor(it) }
+        }
 
     private val customColor: Int
         get() = Pref.getInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, context.getColor(R.color.custom_color_default))
@@ -77,13 +76,12 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
                             itemId = it.itemId,
                         )
                     }
-
                 }
                 else -> {
                     setSelectedPosition(pos)
                     mOnItemClickListener?.onItemClick(v, pos)
 
-                    selectedThemeColor?.colorPrimary?.let { c ->
+                    selectedColor?.let { c ->
                         presetColorLibraries.find { it.isMaterial }!!.colors.find { colorItem ->
                             context.getColor(colorItem.colorRes) == c
                         }?.let {
@@ -100,25 +98,25 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
     }
 
     init {
-        adapter = Adapter()
+        adapter = Adapter().also { mAdapter = it }
         layoutManager = LinearLayoutManager(context)
         addItemDecoration(DividerItemDecoration(context, VERTICAL))
     }
 
     @SuppressLint("NotifyDataSetChanged")
     fun setSelectedPosition(currentPosition: Int) {
-        if (mSelectedPosition != SELECT_NONE) {
-            adapter!!.notifyItemChanged(mSelectedPosition)
+        if (mSelectedPosition == SELECT_NONE) {
             mSelectedPosition = currentPosition
-            adapter!!.notifyItemChanged(currentPosition)
+            mAdapter.notifyDataSetChanged()
         } else {
+            mAdapter.notifyItemChanged(mSelectedPosition)
             mSelectedPosition = currentPosition
-            adapter!!.notifyDataSetChanged()
+            mAdapter.notifyItemChanged(currentPosition)
         }
         savePrefsForLegacy()
         savePrefsForLibraries()
-        selectedThemeColor?.let {
-            ThemeColorManager.setThemeColor(it.colorPrimary)
+        selectedColor?.let {
+            ThemeColorManager.setThemeColor(it)
             ThemeChangeNotifier.notifyThemeChanged()
         }
     }
@@ -139,7 +137,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
                     context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)
                 }?.let { Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, it.itemId) }
             }
-            else -> selectedThemeColor?.colorPrimary?.let { c ->
+            else -> selectedColor?.let { c ->
                 presetColorLibraries.find { it.isMaterial }!!.colors.find { colorItem ->
                     context.getColor(colorItem.colorRes) == c
                 }?.let {
@@ -224,7 +222,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
         fun setChecked(checked: Boolean) {
             if (checked) {
                 colorView.setImageResource(R.drawable.mt_ic_check_white_36dp)
-                val selectedThemeColorRes = selectedThemeColor?.colorPrimary?.let {
+                val selectedThemeColorRes = selectedColor?.let {
                     if (ViewUtils.isLuminanceLight(it)) R.color.day else R.color.night
                 } ?: R.color.night_day
                 colorView.imageTintList = ColorStateList.valueOf(context.getColor(selectedThemeColorRes))

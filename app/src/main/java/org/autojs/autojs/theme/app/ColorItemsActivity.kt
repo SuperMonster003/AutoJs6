@@ -52,15 +52,24 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
         super.onCreate(savedInstanceState)
 
         ThemeChangeNotifier.themeChanged.observe(this) {
+            mAdapter.apply {
+                val positionBeforeSelection = items.indexOfFirst {
+                    it.libraryId == selectedLibraryId && it.itemId == selectedItemId
+                }
+                setUpSelectedPosition(this)
+                if (positionBeforeSelection in items.indices) {
+                    notifyItemChanged(positionBeforeSelection)
+                }
+            }
             updateClickListener(binding.toolbar)
         }
 
-        val libraryId = intent.getIntExtra(INTENT_IDENTIFIER_LIBRARY_ID, -1)
+        val libraryId = intent.getIntExtra(INTENT_IDENTIFIER_LIBRARY_ID, SELECT_NONE)
         val library = presetColorLibraries.find { it.id == libraryId }?.also { lib ->
             mLibrary = lib
         } ?: throw RuntimeException("Unknown library id: $libraryId")
 
-        mInitiallyItemIdScrollTo = intent.getIntExtra(INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO, -1)
+        mInitiallyItemIdScrollTo = intent.getIntExtra(INTENT_IDENTIFIER_COLOR_ITEM_ID_SCROLL_TO, SELECT_NONE)
 
         MtActivityColorItemsBinding.inflate(layoutInflater).let {
             binding = it
@@ -76,9 +85,7 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
 
         binding.colorItemsRecyclerView.let { it ->
             it.layoutManager = LinearLayoutManager(this)
-            it.adapter = ColorItemAdapter(library.colors) {
-                updateAppBarColorContent(ThemeColorManager.colorPrimary)
-            }.also { mAdapter = it }
+            it.adapter = ColorItemAdapter(library.colors).also { mAdapter = it }
 
             it.addItemDecoration(DividerItemDecoration(this, VERTICAL))
             ViewUtils.excludePaddingClippableViewFromNavigationBar(it)
@@ -110,7 +117,7 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
     }
 
     private fun setUpSelectedPosition(adapter: ColorItemAdapter) {
-        when (Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)) {
+        when (val prefLibraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE)) {
             SELECT_NONE -> when (val legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)) {
                 customColorPosition -> Unit
                 SELECT_NONE, defaultColorPosition -> when (mLibrary.id) {
@@ -130,6 +137,10 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
             mLibrary.id -> {
                 adapter.selectedLibraryId = mLibrary.id
                 adapter.selectedItemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, SELECT_NONE)
+            }
+            else -> {
+                adapter.selectedLibraryId = prefLibraryId
+                adapter.selectedItemId = SELECT_NONE
             }
         }
     }

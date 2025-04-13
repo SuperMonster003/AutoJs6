@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +23,12 @@ import org.autojs.autojs6.databinding.ColorInfoDialogListItemBinding
 object ColorInfoDialogManager {
 
     @JvmStatic
-    fun showColorInfoDialog(context: Context, @ColorInt color: Int?, title: String? = null) {
+    fun showColorInfoDialog(
+        context: Context,
+        @ColorInt color: Int?,
+        title: String? = null,
+        customNeutral: CustomColorInfoDialogNeutral? = null,
+    ) {
         if (color == null) {
             MaterialDialog.Builder(context)
                 .title(R.string.text_prompt)
@@ -36,12 +42,21 @@ object ColorInfoDialogManager {
 
         val colorWithoutAlpha = color or -0x1000000
 
-        val dialog = MaterialDialog.Builder(context)
-            .title(title ?: context.getString(R.string.dialog_title_color_details))
-            .customView(binding.root, false)
-            .positiveText(R.string.dialog_button_dismiss)
-            .positiveColorRes(R.color.dialog_button_default)
-            .show()
+        val dialog = MaterialDialog.Builder(context).apply {
+            title(title ?: context.getString(R.string.dialog_title_color_details))
+            customView(binding.root, false)
+            customNeutral?.let { neutral ->
+                neutral.textRes?.let(::neutralText)
+                neutral.colorRes?.let(::neutralColorRes)
+                neutral.onNeutralCallback?.let {
+                    onNeutral { dialog, which ->
+                        it.onClick(dialog, which, colorWithoutAlpha)
+                    }
+                }
+            }
+            positiveText(R.string.dialog_button_dismiss)
+            positiveColorRes(R.color.dialog_button_default)
+        }.show()
 
         title?.run { dialog.makeTextCopyable { it.titleView } }
 
@@ -95,6 +110,16 @@ object ColorInfoDialogManager {
     private suspend fun TextView.bindWith(dialog: MaterialDialog, text: String) {
         withContext(Dispatchers.Main) {
             this@bindWith.setCopyableText(dialog) { text }
+        }
+    }
+
+    data class CustomColorInfoDialogNeutral(
+        val textRes: Int? = null,
+        val colorRes: Int? = null,
+        val onNeutralCallback: NeutralButtonCallback? = null,
+    ) {
+        interface NeutralButtonCallback {
+            fun onClick(dialog: MaterialDialog, which: DialogAction, @ColorInt color: Int)
         }
     }
 

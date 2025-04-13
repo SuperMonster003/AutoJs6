@@ -962,5 +962,6 @@
     <string name="summary_all_files_access_inrt">Autoriser l\'application à accéder à tous les fichiers, y compris le stockage externe</string>
     <string name="summary_display_over_other_apps_inrt">Autoriser l\'application à afficher du contenu par-dessus d\'autres applications</string>
     <string name="summary_post_notifications_permission_inrt">Autoriser l\'application à créer et envoyer des notifications</string>
+    <string name="dialog_button_use_palette">Utiliser la palette</string>
 
 </resources>

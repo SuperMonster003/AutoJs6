@@ -52,24 +52,17 @@ class ColorItemAdapter(
     }
 
     private fun updateSelectedPosition(item: PresetColorItem, positionOfCurrentSelection: Int) {
-        when (selectedItemId) {
-            SELECT_NONE -> {
-                selectedLibraryId = item.libraryId
-                selectedItemId = item.itemId
-                notifyItemChanged(positionOfCurrentSelection)
+        if (selectedItemId != SELECT_NONE) {
+            val positionBeforeSelection = items.indexOfFirst {
+                it.libraryId == selectedLibraryId && it.itemId == selectedItemId
             }
-            else -> {
-                val positionBeforeSelection = items.indexOfFirst {
-                    it.libraryId == selectedLibraryId && it.itemId == selectedItemId
-                }
-                if (positionBeforeSelection != positionOfCurrentSelection && positionBeforeSelection >= 0) {
-                    notifyItemChanged(positionBeforeSelection)
-                }
-                selectedLibraryId = item.libraryId
-                selectedItemId = item.itemId
-                notifyItemChanged(positionOfCurrentSelection)
+            if (positionBeforeSelection != positionOfCurrentSelection && positionBeforeSelection >= 0) {
+                notifyItemChanged(positionBeforeSelection)
             }
         }
+        selectedLibraryId = item.libraryId
+        selectedItemId = item.itemId
+        notifyItemChanged(positionOfCurrentSelection)
     }
 
     private fun savePrefsAndDatabase(context: Context, item: PresetColorItem) {

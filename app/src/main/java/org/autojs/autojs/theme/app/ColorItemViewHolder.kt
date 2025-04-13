@@ -7,6 +7,7 @@ import androidx.annotation.ColorInt
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import org.autojs.autojs.theme.ThemeColorHelper
+import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.PresetColorItem
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
 import org.autojs.autojs.util.ViewUtils
@@ -37,13 +38,17 @@ class ColorItemViewHolder(itemViewBinding: MtColorLibraryRecyclerViewItemBinding
             }
         }
         subtitleSplitLineView.isVisible = !colorLibraryIdentifierView.text.isNullOrBlank()
-        setChecked(color, selectedLibraryId == item.libraryId && selectedItemId == item.itemId)
+        setChecked(selectedLibraryId == item.libraryId && selectedItemId == item.itemId, color)
     }
 
-    fun setChecked(@ColorInt color: Int, checked: Boolean) {
+    fun setChecked(checked: Boolean, @ColorInt refColor: Int? = null) {
         if (checked) {
+            val niceRefColor = refColor ?: ThemeColorManager.colorPrimary
+            val tintRes = when (ViewUtils.isLuminanceLight(niceRefColor)) {
+                true -> R.color.day
+                else -> R.color.night
+            }
             colorView.setImageResource(R.drawable.mt_ic_check_white_36dp)
-            val tintRes = if (ViewUtils.isLuminanceLight(color)) R.color.day else R.color.night
             colorView.imageTintList = ColorStateList.valueOf(context.getColor(tintRes))
         } else {
             colorView.setImageDrawable(null)

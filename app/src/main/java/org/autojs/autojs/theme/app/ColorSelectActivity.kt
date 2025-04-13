@@ -21,9 +21,11 @@ class ColorSelectActivity : ColorSelectBaseActivity() {
 
     private val mOnItemClickListener = object : OnItemClickListener {
         override fun onItemClick(v: View?, position: Int) {
-            mColorSettingRecyclerView.selectedThemeColor?.let {
+            mColorSettingRecyclerView.selectedColor?.let {
                 mSelectedPosition = position
-                updateAppBarColorContent(it.colorPrimary)
+                if (position == customColorPosition) {
+                    isForciblyEnableAppBarColorTransition = true
+                }
             }
         }
     }

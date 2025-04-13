@@ -1207,5 +1207,6 @@
     <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
     <string name="summary_display_over_other_apps_inrt">Allow the application to display content over other apps</string>
     <string name="summary_post_notifications_permission_inrt">Allow the application to create and send notifications</string>
+    <string name="dialog_button_use_palette">Use palette</string>
 
 </resources>

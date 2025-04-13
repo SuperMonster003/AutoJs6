@@ -69,4 +69,10 @@ public class FloatyService extends Service {
         }
     }
 
+    public static void stopService() {
+        if (instance != null) {
+            instance.stopSelf();
+        }
+    }
+
 }

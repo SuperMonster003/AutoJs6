@@ -963,5 +963,6 @@
     <string name="summary_all_files_access_inrt">앱이 외부 저장소를 포함한 모든 파일에 접근할 수 있도록 허용합니다</string>
     <string name="summary_display_over_other_apps_inrt">앱이 다른 애플리케이션 위에 콘텐츠를 표시할 수 있도록 허용합니다</string>
     <string name="summary_post_notifications_permission_inrt">앱이 알림을 생성하고 보낼 수 있도록 허용합니다</string>
+    <string name="dialog_button_use_palette">팔레트 사용</string>
 
 </resources>

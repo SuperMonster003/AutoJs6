@@ -42,7 +42,6 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
         super.onCreate(savedInstanceState)
 
         ThemeChangeNotifier.themeChanged.observe(this) {
-            updateAppBarColorContent(ThemeColorManager.colorPrimary)
             libraryAdapter.notifyDataSetChanged()
             colorItemAdapter.notifyDataSetChanged()
         }
