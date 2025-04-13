@@ -7,7 +7,7 @@
         android:id="@+id/action_log"
         android:icon="@drawable/ic_ali_log"
         android:title="@string/text_log"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_search"
@@ -16,6 +16,20 @@
         android:imeOptions="actionSearch"
         android:inputType="text"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="ifRoom|collapseActionView" />
+        app:showAsAction="always|collapseActionView" />
+
+    <item
+        android:id="@+id/action_search_prev"
+        android:icon="@drawable/ic_ali_up"
+        android:title="@string/text_find_prev_simplified"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_search_next"
+        android:icon="@drawable/ic_ali_down"
+        android:title="@string/text_find_next_simplified"
+        android:visible="false"
+        app:showAsAction="always" />
 
 </menu>

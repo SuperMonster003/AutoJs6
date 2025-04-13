@@ -27,7 +27,7 @@ import org.greenrobot.eventbus.Subscribe
  * Modified by SuperMonster003 as of Mar 26, 2022.
  * Transformed by SuperMonster003 on Mar 31, 2023.
  */
-open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandler, ViewStatesManageable {
+class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandler, ViewStatesManageable {
 
     private val binding by viewBinding(FragmentOnlineDocsBinding::bind)
 
@@ -99,7 +99,8 @@ open class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressed
             mWebView.clearMatches()
             mPreviousQuery = null
         }
-        event.isFindForward -> mWebView.findNext(false)
+        event === QueryEvent.FIND_FORWARD -> mWebView.findNext(true)
+        event.isFindBackward -> mWebView.findNext(false)
         event.query == mPreviousQuery -> mWebView.findNext(true)
         else -> {
             mWebView.findAllAsync(event.query)
