@@ -355,7 +355,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         setHex(color);
 
         if (!showAlphaSlider) {
-            hexEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(6)});
+            hexEditText.setFilters(new InputFilter[]{new HexMaxLengthInputFilter(6)});
         }
 
         if (!useLegacyMode) {
