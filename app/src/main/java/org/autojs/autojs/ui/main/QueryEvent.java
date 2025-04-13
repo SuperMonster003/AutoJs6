@@ -6,15 +6,16 @@ package org.autojs.autojs.ui.main;
 public class QueryEvent {
 
     public static final QueryEvent CLEAR = new QueryEvent(null);
-    public static final QueryEvent FIND_FORWARD = new QueryEvent("", true);
+    public static final QueryEvent FIND_FORWARD = new QueryEvent(null);
+    public static final QueryEvent FIND_BACKWARD = new QueryEvent("", true);
 
     private boolean mShouldCollapseSearchView = false;
     private final String mQuery;
-    private final boolean mFindForward;
+    private final boolean mFindBackward;
 
-    public QueryEvent(String query, boolean b) {
+    public QueryEvent(String query, boolean findBackward) {
         mQuery = query;
-        mFindForward = b;
+        mFindBackward = findBackward;
     }
 
     public QueryEvent(String query) {
@@ -33,8 +34,8 @@ public class QueryEvent {
         return mShouldCollapseSearchView;
     }
 
-    public boolean isFindForward() {
-        return mFindForward;
+    public boolean isFindBackward() {
+        return mFindBackward;
     }
 }
 

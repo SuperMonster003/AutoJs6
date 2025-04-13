@@ -15,6 +15,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.forEach
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
@@ -91,7 +92,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private val mBackPressObserver = BackPressedHandler.Observer()
     private val mForeGroundService = ForegroundService(this)
     private var mSearchViewItem: SearchViewItem? = null
-    private var mDocsSearchItemExpanded = false
     private val mA11yTool = AccessibilityTool(this)
 
     private val isCurrentPageDocs: Boolean
@@ -369,40 +369,53 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         mLogMenuItem = menu.findItem(R.id.action_log)
-        mSearchMenuItem = menu.findItem(R.id.action_search)
-        setUpSearchMenuItem(mSearchMenuItem)
+        setUpSearchMenuItem(menu)
         setUpToolbarColors()
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_log) {
-            if (mDocsSearchItemExpanded) {
-                submitForwardQuery()
-            } else {
-                LogActivity.launch(this)
-            }
+            LogActivity.launch(this)
+            return true
+        }
+        if (item.itemId == R.id.action_search_next) {
+            submitForwardQuery()
+            return true
+        }
+        if (item.itemId == R.id.action_search_prev) {
+            submitBackwardQuery()
             return true
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun setUpSearchMenuItem(searchMenuItem: MenuItem) {
-        mSearchViewItem = object : SearchViewItem(this, searchMenuItem) {
+    private fun setUpSearchMenuItem(menu: Menu) {
+        mSearchMenuItem = menu.findItem(R.id.action_search)
+        mSearchViewItem = object : SearchViewItem(this, mSearchMenuItem) {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                if (isCurrentPageDocs) {
-                    mDocsSearchItemExpanded = true
-                    mLogMenuItem.setIcon(R.drawable.ic_ali_up)
+                menu.forEach {
+                    when (it.itemId) {
+                        R.id.action_search_next, R.id.action_search_prev -> {
+                            it.isVisible = isCurrentPageDocs
+                        }
+                        else -> it.isVisible = false
+                    }
                 }
                 mToolbar.onceGlobalLayout { setUpToolbarColors() }
                 return super.onMenuItemActionExpand(item)
             }
 
             override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                if (mDocsSearchItemExpanded) {
-                    mDocsSearchItemExpanded = false
-                    mLogMenuItem.setIcon(R.drawable.ic_ali_log)
+                menu.forEach {
+                    when (it.itemId) {
+                        R.id.action_search_next, R.id.action_search_prev -> {
+                            it.isVisible = false
+                        }
+                        else -> it.isVisible = true
+                    }
                 }
+                mToolbar.onceGlobalLayout { setUpToolbarColors() }
                 return super.onMenuItemActionCollapse(item)
             }
         }.apply {
@@ -427,6 +440,11 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     private fun submitForwardQuery() {
         val event = QueryEvent.FIND_FORWARD
+        EventBus.getDefault().post(event)
+    }
+
+    private fun submitBackwardQuery() {
+        val event = QueryEvent.FIND_BACKWARD
         EventBus.getDefault().post(event)
     }
 

@@ -49,7 +49,7 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     private var mExplorerView: ExplorerView? = null
     private var mFloatingActionMenu: FloatingActionMenu? = null
     private var mIsCurrentPageFiles = false
-    
+
     private var mBottomInset: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -171,6 +171,12 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
         }
         if (event === QueryEvent.CLEAR) {
             mExplorerView?.setFilter(null)
+            return
+        }
+        if (event === QueryEvent.FIND_FORWARD) {
+            return
+        }
+        if (event === QueryEvent.FIND_BACKWARD) {
             return
         }
         mExplorerView?.setFilter { item: ExplorerItem -> item.name.contains(event.query, true) }
