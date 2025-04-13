@@ -963,5 +963,6 @@
     <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
     <string name="summary_display_over_other_apps_inrt">السماح للتطبيق بعرض المحتوى فوق التطبيقات الأخرى</string>
     <string name="summary_post_notifications_permission_inrt">السماح للتطبيق بإنشاء وإرسال الإشعارات</string>
+    <string name="dialog_button_use_palette">ستخدام اللوحة</string>
 
 </resources>

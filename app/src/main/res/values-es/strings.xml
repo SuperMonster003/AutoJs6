@@ -962,5 +962,6 @@
     <string name="summary_all_files_access_inrt">Permitir que la aplicación acceda a todos los archivos, incluido el almacenamiento externo</string>
     <string name="summary_display_over_other_apps_inrt">Permitir que la aplicación muestre contenido sobre otras aplicaciones</string>
     <string name="summary_post_notifications_permission_inrt">Permitir que la aplicación cree y envíe notificaciones</string>
+    <string name="dialog_button_use_palette">Usar paleta</string>
 
 </resources>

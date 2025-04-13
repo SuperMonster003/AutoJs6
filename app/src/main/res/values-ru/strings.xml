@@ -962,5 +962,6 @@
     <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
     <string name="summary_display_over_other_apps_inrt">Разрешить приложению отображать контент поверх других приложений</string>
     <string name="summary_post_notifications_permission_inrt">Разрешить приложению создавать и отправлять уведомления</string>
+    <string name="dialog_button_use_palette">Использовать палитру</string>
 
 </resources>

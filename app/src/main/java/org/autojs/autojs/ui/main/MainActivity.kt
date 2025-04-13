@@ -313,8 +313,8 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     fun exitCompletely() {
         FloatyWindowManger.hideCircularMenuAndSaveState()
 
-        stopService(Intent(this, FloatyService::class.java))
-        stopService(Intent(this, ScreenCapturerForegroundService::class.java))
+        FloatyService.stopService()
+        ScreenCapturerForegroundService.stopService()
 
         AutoJs.instance.scriptEngineService.stopAll()
 
