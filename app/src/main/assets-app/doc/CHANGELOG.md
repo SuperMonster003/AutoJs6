@@ -6,7 +6,7 @@
 
 # v6.6.2
 
-###### 2025/04/12
+###### 2025/04/13
 
 * `新增` ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法
 * `新增` images.flip 方法, 用于图像翻转 _[`issue #349`](http://issues.autojs6.com/349)_
@@ -31,6 +31,7 @@
 * `优化` 精简打包应用模板 APK 文件大小
 * `优化` 打包页面支持 Pinyin 库选项
 * `优化` 打包应用主活动页面优化状态栏背景及文字颜色
+* `优化` 打包应用设置页面增加访问所有文件和发送通知等特殊权限开关 _[`issue #354`](http://issues.autojs6.com/354)_
 * `优化` 控件的文字及图标根据主题色亮度值自动切换合适的颜色
 * `优化` 部分控件主题色与背景色对比度过低时的视觉体验
 * `优化` 应用内页面导航栏设置为透明或半透明以增强视觉体验

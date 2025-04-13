@@ -38,9 +38,9 @@
         <item name="colorControlNormal">@color/md_black_1000</item>
     </style>
 
-    <style name="AppTheme.LogActivityInrt" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/md_blue_gray_600</item>
-        <item name="android:windowLightStatusBar">false</item>
+    <style name="AppTheme.NoActionBarInrt" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/md_blue_gray_50</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="colorPrimary">@color/md_blue_gray_50</item>
         <item name="colorPrimaryDark">@color/md_blue_gray_50</item>
         <item name="colorAccent">@color/md_black_1000</item>

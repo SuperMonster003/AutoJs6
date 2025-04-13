@@ -955,5 +955,12 @@
     <string name="text_write_secure_settings">Escribir la configuración de seguridad</string>
     <string name="text_write_secure_settings_description">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
+    <string name="text_special_permissions">Permisos especiales</string>
+    <string name="summary_all_files_access">Permite que AutoJs6 acceda a todos los archivos, incluidos los del almacenamiento externo</string>
+    <string name="summary_display_over_other_apps">Permite que AutoJs6 muestre contenido encima de otras aplicaciones</string>
+    <string name="summary_post_notifications_permission">Permite que AutoJs6 cree y envíe notificaciones</string>
+    <string name="summary_all_files_access_inrt">Permitir que la aplicación acceda a todos los archivos, incluido el almacenamiento externo</string>
+    <string name="summary_display_over_other_apps_inrt">Permitir que la aplicación muestre contenido sobre otras aplicaciones</string>
+    <string name="summary_post_notifications_permission_inrt">Permitir que la aplicación cree y envíe notificaciones</string>
 
 </resources>

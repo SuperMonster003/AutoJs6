@@ -953,5 +953,12 @@
     <string name="text_write_secure_settings">修改安全設定</string>
     <string name="text_write_secure_settings_description">安全設定包含應用程式可讀但不可寫入的設定選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設定許可權\" 後, 普通應用可直接修改上述安全設定 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設定</string>
+    <string name="text_special_permissions">特殊許可權</string>
+    <string name="summary_all_files_access">允許 AutoJs6 訪問所有檔案, 包括外部儲存</string>
+    <string name="summary_display_over_other_apps">允許 AutoJs6 在其他應用之上顯示內容</string>
+    <string name="summary_post_notifications_permission">允許 AutoJs6 建立併發送通知</string>
+    <string name="summary_all_files_access_inrt">允許應用訪問所有檔案, 包括外部儲存</string>
+    <string name="summary_display_over_other_apps_inrt">允許應用在其他應用之上顯示內容</string>
+    <string name="summary_post_notifications_permission_inrt">允許應用建立併發送通知</string>
 
 </resources>

@@ -20,7 +20,7 @@ import org.autojs.autojs6.R
 /**
  * Created by Stardust on Mar 5, 2017.
  */
-class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClickablePreferenceLike {
+open class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClickablePreferenceLike {
 
     private var mCheckableView: View? = null
     private var mColor = Color.TRANSPARENT
@@ -81,10 +81,10 @@ class ThemeColorSwitchPreference : SwitchPreference, ThemeColorMutable, LongClic
         }
     }
 
-    private fun obtainStyledAttrs(context: Context, set: AttributeSet?, styleableRes: IntArray, defStyleAttr: Int, defStyleRes: Int): TypedArray {
+    protected fun obtainStyledAttrs(context: Context, set: AttributeSet?, styleableRes: IntArray, defStyleAttr: Int, defStyleRes: Int): TypedArray {
         return context.obtainStyledAttributes(set, styleableRes, defStyleAttr, defStyleRes)
     }
 
-    private fun getAttrString(a: TypedArray, index: Int): String? = a.getString(index)
+    protected fun getAttrString(a: TypedArray, index: Int): String? = a.getString(index)
 
 }

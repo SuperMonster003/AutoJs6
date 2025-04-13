@@ -1,5 +1,6 @@
 package org.autojs.autojs.execution;
 
+import org.autojs.autojs.AbstractAutoJs;
 import org.autojs.autojs.core.looper.Loopers;
 import org.autojs.autojs.engine.LoopBasedJavaScriptEngine;
 import org.autojs.autojs.engine.ScriptEngine;
@@ -7,7 +8,6 @@ import org.autojs.autojs.engine.ScriptEngineManager;
 import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.ScriptSource;
-import org.autojs.autojs6.BuildConfig;
 
 /**
  * Created by Stardust on Oct 27, 2017.
@@ -25,7 +25,7 @@ public class LoopedBasedJavaScriptExecution extends RunnableScriptExecution {
         sleep(delay);
         long interval = getConfig().getInterval();
 
-        var javaScriptEngine = BuildConfig.isInrt
+        var javaScriptEngine = AbstractAutoJs.isInrt()
                 ? (LoopBasedJavaScriptEngineWithDecryption) engine
                 : (LoopBasedJavaScriptEngine) engine;
         javaScriptEngine.getRuntime().loopers.setMainLooperQuitHandler(new Loopers.LooperQuitHandler() {

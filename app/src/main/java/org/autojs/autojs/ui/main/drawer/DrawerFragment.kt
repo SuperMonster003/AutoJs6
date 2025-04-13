@@ -19,7 +19,7 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.IgnoreBatteryOptimizationsPermission
 import org.autojs.autojs.permission.MediaProjectionPermission
-import org.autojs.autojs.permission.PostNotificationPermission
+import org.autojs.autojs.permission.PostNotificationsPermission
 import org.autojs.autojs.permission.ShizukuPermission
 import org.autojs.autojs.permission.UsageStatsPermission
 import org.autojs.autojs.permission.WriteSecureSettingsPermission
@@ -221,7 +221,7 @@ open class DrawerFragment : Fragment() {
         }
 
         mNotificationPostItem = DrawerMenuToggleableItem(
-            PostNotificationPermission(mContext),
+            PostNotificationsPermission(mContext),
             R.drawable.ic_ali_notification,
             R.string.text_post_notifications_permission,
         )

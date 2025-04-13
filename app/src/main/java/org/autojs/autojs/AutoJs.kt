@@ -23,7 +23,6 @@ import org.autojs.autojs.ui.floating.FullScreenFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
-import org.autojs.autojs6.BuildConfig
 import java.util.concurrent.Executors
 import org.autojs.autojs.inrt.autojs.AutoJs as AutoJsInrt
 
@@ -146,7 +145,7 @@ open class AutoJs(appContext: Application) : AbstractAutoJs(appContext) {
         fun initInstance(application: Application) {
             Log.d(TAG, "AutoJs isInitialized: $isInitialized")
             if (!isInitialized) {
-                instance = when (BuildConfig.isInrt) {
+                instance = when (isInrt) {
                     true -> AutoJsInrt(application)
                     else -> AutoJs(application)
                 }

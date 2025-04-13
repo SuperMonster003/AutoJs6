@@ -1,38 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="@string/text_script_running">
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory android:title="@string/text_script_running">
 
-        <SwitchPreference
-                android:defaultValue="true"
-                android:key="@string/key_use_volume_control_running"
-                android:title="@string/text_use_volume_key_to_control_script_running" />
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            android:defaultValue="true"
+            android:key="@string/key_use_volume_control_running"
+            android:title="@string/text_use_volume_key_to_control_script_running" />
 
-        <SwitchPreference
-                android:defaultValue="false"
-                android:key="@string/key_not_showing_main_activity"
-                android:summary="@string/summary_not_showing_main_activity"
-                android:title="@string/text_not_showing_main_activity" />
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_not_showing_main_activity"
+            android:summary="@string/summary_not_showing_main_activity"
+            android:title="@string/text_not_showing_main_activity" />
 
-    </PreferenceCategory>
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
-    <PreferenceCategory android:title="@string/text_a11y_service">
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory android:title="@string/text_a11y_service">
 
-        <SwitchPreference
-                android:defaultValue="false"
-                android:key="@string/key_enable_a11y_service_with_root_access"
-                android:summary="@string/summary_enable_a11y_service_with_root_access"
-                android:title="@string/text_enable_a11y_service_with_root_access_automatically" />
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_enable_a11y_service_with_root_access"
+            android:summary="@string/summary_enable_a11y_service_with_root_access"
+            android:title="@string/text_enable_a11y_service_with_root_access_automatically" />
 
-        <SwitchPreference
-                android:defaultValue="false"
-                android:key="@string/key_stable_mode"
-                android:summary="@string/summary_stable_mode"
-                android:title="@string/text_stable_mode" />
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_stable_mode"
+            android:summary="@string/summary_stable_mode"
+            android:title="@string/text_stable_mode" />
 
-    </PreferenceCategory>
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
-    <PreferenceCategory android:title="@string/text_others" />
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory android:title="@string/text_special_permissions">
+
+        <org.autojs.autojs.inrt.theme.preference.ManageAllFilesPermissionSwitchPreference
+            android:key="@string/key_all_files_access"
+            android:summary="@string/summary_all_files_access_inrt"
+            android:title="@string/text_all_files_access" />
+
+        <org.autojs.autojs.inrt.theme.preference.DisplayOverOtherAppsPermissionSwitchPreference
+            android:key="@string/key_display_over_other_apps"
+            android:summary="@string/summary_display_over_other_apps_inrt"
+            android:title="@string/text_display_over_other_app" />
+
+        <org.autojs.autojs.inrt.theme.preference.PostNotificationsPermissionSwitchPreference
+            android:key="@string/key_post_notifications_permission"
+            android:summary="@string/summary_post_notifications_permission_inrt"
+            android:title="@string/text_post_notifications_permission" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
 </PreferenceScreen>

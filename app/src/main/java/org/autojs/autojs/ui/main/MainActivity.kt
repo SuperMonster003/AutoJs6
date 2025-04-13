@@ -9,12 +9,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Process
-import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
 import androidx.drawerlayout.widget.DrawerLayout
@@ -40,7 +38,7 @@ import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.ManageAllFilesPermission
-import org.autojs.autojs.permission.PostNotificationPermission
+import org.autojs.autojs.permission.PostNotificationsPermission
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.theme.ThemeColorManager
@@ -120,15 +118,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         return -1
     }
 
-    val requestMultiplePermissionsLauncher = registerForActivityResult(RequestMultiplePermissions()) {
-        it.forEach { (key: String, isGranted: Boolean) ->
-            Log.d(TAG, "$key: $isGranted")
-            if (key == Manifest.permission.POST_NOTIFICATIONS) {
-                Pref.putBoolean(R.string.key_post_notification_permission_requested, true)
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -156,7 +145,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
         FloatyWindowManger.refreshCircularMenuIfNeeded(this)
 
-        PostNotificationPermission(this).urgeIfNeeded()
+        PostNotificationsPermission(this).urgeIfNeeded()
         ManageAllFilesPermission(this).urgeIfNeeded()
         DisplayOverOtherAppsPermission(this).urgeIfNeeded()
     }
@@ -453,7 +442,6 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
 
     companion object {
 
-        private val TAG = MainActivity::class.java.simpleName
         private var sIsActionBarDrawerOpened = false
 
         var shouldRecreateMainActivity = false

@@ -1197,5 +1197,15 @@
     <string name="text_confirm_to_clear_histories_of">All histories below will be cleared\n\n[ %1$s ]\n\nAre you sure to clear them all?</string>
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">All histories below will be cleared\n\n[ All color libraries ]\n\nAre you sure to clear them all?</string>
     <string name="text_all_histories">All histories</string>
+    <string name="text_special_permissions">Special permissions</string>
+    <string name="key_post_notifications_permission" translatable="false">key_$_post_notifications_permission</string>
+    <string name="key_display_over_other_apps" translatable="false">key_$_display_over_other_apps</string>
+    <string name="key_all_files_access" translatable="false">key_$_all_files_access</string>
+    <string name="summary_all_files_access">Allows AutoJs6 to access all files, including those in external storage</string>
+    <string name="summary_display_over_other_apps">Allows AutoJs6 to display content over other apps</string>
+    <string name="summary_post_notifications_permission">Allows AutoJs6 to create and post notifications</string>
+    <string name="summary_all_files_access_inrt">Allow the application to access all files, including external storage</string>
+    <string name="summary_display_over_other_apps_inrt">Allow the application to display content over other apps</string>
+    <string name="summary_post_notifications_permission_inrt">Allow the application to create and send notifications</string>
 
 </resources>

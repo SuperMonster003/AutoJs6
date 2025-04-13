@@ -955,5 +955,12 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
+    <string name="text_special_permissions">Специальные разрешения</string>
+    <string name="summary_all_files_access">Позволяет AutoJs6 получать доступ ко всем файлам, включая файлы на внешнем хранилище</string>
+    <string name="summary_display_over_other_apps">Позволяет AutoJs6 отображать контент поверх других приложений</string>
+    <string name="summary_post_notifications_permission">Позволяет AutoJs6 создавать и отправлять уведомления</string>
+    <string name="summary_all_files_access_inrt">Разрешить приложению доступ ко всем файлам, включая внешнее хранилище</string>
+    <string name="summary_display_over_other_apps_inrt">Разрешить приложению отображать контент поверх других приложений</string>
+    <string name="summary_post_notifications_permission_inrt">Разрешить приложению создавать и отправлять уведомления</string>
 
 </resources>

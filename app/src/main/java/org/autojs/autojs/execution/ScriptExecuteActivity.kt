@@ -14,6 +14,7 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.eventloop.SimpleEvent
@@ -28,7 +29,6 @@ import org.autojs.autojs.inrt.autojs.LoopBasedJavaScriptEngineWithDecryption
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.mozilla.javascript.ContinuationPending
 
@@ -138,7 +138,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
         mScriptEngine.setTag(ScriptEngine.TAG_SOURCE, mScriptSource)
         mExecutionListener!!.onStart(mScriptExecution)
 
-        if (BuildConfig.isInrt) {
+        if (isInrt) {
             (mScriptEngine as LoopBasedJavaScriptEngineWithDecryption).execute(mScriptSource, executeCallback)
         } else {
             (mScriptEngine as LoopBasedJavaScriptEngine).execute(mScriptSource, executeCallback)

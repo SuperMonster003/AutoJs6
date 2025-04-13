@@ -950,5 +950,12 @@
     <string name="text_write_secure_settings">修改安全设置</string>
     <string name="text_write_secure_settings_description">安全设置包含应用程序可读但不可写入的设置选项, 这些选项只能由 UI 或系统级别应用修改.\n被授予 \"修改安全设置权限\" 后, 普通应用可直接修改上述安全设置 (例如无障碍服务).</string>
     <string name="text_write_system_settings">修改系统设置</string>
+    <string name="text_special_permissions">特殊权限</string>
+    <string name="summary_all_files_access">允许 AutoJs6 访问所有文件, 包括外部存储</string>
+    <string name="summary_display_over_other_apps">允许 AutoJs6 在其他应用之上显示内容</string>
+    <string name="summary_post_notifications_permission">允许 AutoJs6 创建并发送通知</string>
+    <string name="summary_all_files_access_inrt">允许应用访问所有文件, 包括外部存储</string>
+    <string name="summary_display_over_other_apps_inrt">允许应用在其他应用之上显示内容</string>
+    <string name="summary_post_notifications_permission_inrt">允许应用创建并发送通知</string>
 
 </resources>

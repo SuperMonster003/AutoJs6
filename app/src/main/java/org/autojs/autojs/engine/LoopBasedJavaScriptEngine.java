@@ -5,11 +5,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import org.autojs.autojs.AbstractAutoJs;
 import org.autojs.autojs.core.looper.LooperHelper;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.ScriptSource;
-import org.autojs.autojs6.BuildConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mozilla.javascript.ContinuationPending;
@@ -74,7 +74,7 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
                     continue;
                 } catch (Throwable t) {
                     mLooping = false;
-                    if (BuildConfig.isInrt && t.getMessage() != null) {
+                    if (AbstractAutoJs.isInrt() && t.getMessage() != null) {
                         ScriptRuntime.popException(t.getMessage());
                     }
                     throw t;

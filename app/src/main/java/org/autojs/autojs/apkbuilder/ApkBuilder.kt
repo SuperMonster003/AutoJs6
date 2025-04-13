@@ -10,6 +10,7 @@ import android.util.Log
 import com.mcal.apksigner.ApkSigner
 import com.reandroid.arsc.chunk.TableBlock
 import org.apache.commons.io.FileUtils
+import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.apkbuilder.keystore.AESUtils
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
@@ -22,7 +23,6 @@ import org.autojs.autojs.script.EncryptedScriptFileHeader.writeHeader
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.util.FileUtils.TYPE.JAVASCRIPT
 import org.autojs.autojs.util.MD5Utils
-import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import pxb.android.StringItem
 import pxb.android.axml.AxmlWriter
@@ -552,7 +552,7 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         );
 
         fun ensureLibFiles(moduleName: String = label) {
-            if (!BuildConfig.isInrt) return
+            if (!isInrt) return
             val nativeLibraryDir = File(globalContext.applicationInfo.nativeLibraryDir)
             val primaryNativeLibraries = nativeLibraryDir.list()?.toList() ?: emptyList()
             if (!primaryNativeLibraries.containsAll(libsToInclude)) {
