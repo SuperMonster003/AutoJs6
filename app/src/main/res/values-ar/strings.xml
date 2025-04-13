@@ -956,5 +956,12 @@
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
+    <string name="text_special_permissions">أذونات خاصة</string>
+    <string name="summary_all_files_access">يسمح لـ AutoJs6 بالوصول إلى جميع الملفات، بما في ذلك الملفات الموجودة على التخزين الخارجي</string>
+    <string name="summary_display_over_other_apps">يسمح لـ AutoJs6 بعرض المحتوى فوق التطبيقات الأخرى</string>
+    <string name="summary_post_notifications_permission">يسمح لـ AutoJs6 بإنشاء وإرسال الإشعارات</string>
+    <string name="summary_all_files_access_inrt">السماح للتطبيق بالوصول إلى جميع الملفات، بما في ذلك التخزين الخارجي</string>
+    <string name="summary_display_over_other_apps_inrt">السماح للتطبيق بعرض المحتوى فوق التطبيقات الأخرى</string>
+    <string name="summary_post_notifications_permission_inrt">السماح للتطبيق بإنشاء وإرسال الإشعارات</string>
 
 </resources>

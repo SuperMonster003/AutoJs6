@@ -649,11 +649,11 @@
 
         <activity
             android:name="org.autojs.autojs.inrt.LogActivity"
-            android:theme="@style/AppTheme.LogActivityInrt" />
+            android:theme="@style/AppTheme.NoActionBarInrt" />
 
         <activity
             android:name="org.autojs.autojs.inrt.SettingsActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBarInrt" />
 
         <!-- This provider is required by Shizuku, remove this if your app only supports Sui -->
         <provider

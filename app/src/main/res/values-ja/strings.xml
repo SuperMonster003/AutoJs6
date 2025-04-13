@@ -955,5 +955,12 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
+    <string name="text_special_permissions">特殊な権限</string>
+    <string name="summary_all_files_access">AutoJs6 が外部ストレージを含むすべてのファイルにアクセスすることを許可します</string>
+    <string name="summary_display_over_other_apps">AutoJs6 が他のアプリの上にコンテンツを表示することを許可します</string>
+    <string name="summary_post_notifications_permission">AutoJs6 が通知を作成して送信することを許可します</string>
+    <string name="summary_all_files_access_inrt">アプリが外部ストレージを含むすべてのファイルにアクセスすることを許可する</string>
+    <string name="summary_display_over_other_apps_inrt">アプリが他のアプリの上にコンテンツを表示することを許可する</string>
+    <string name="summary_post_notifications_permission_inrt">アプリが通知を作成して送信することを許可する</string>
 
 </resources>

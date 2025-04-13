@@ -3,7 +3,6 @@ package org.autojs.autojs
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.WindowManager
 import com.benjaminwan.ocrlibrary.OcrEngine
@@ -59,7 +58,7 @@ abstract class AbstractAutoJs protected constructor(val application: Application
         val scriptEngineManager = ScriptEngineManager(applicationContext)
         scriptEngineManager.registerEngine(JavaScriptSource.ENGINE) {
             val rt = createRuntime()
-            when (BuildConfig.isInrt) {
+            when (isInrt) {
                 true -> LoopBasedJavaScriptEngineWithDecryption(rt, applicationContext)
                 else -> LoopBasedJavaScriptEngine(rt, applicationContext)
             }.also { it.runtime = rt }
@@ -110,11 +109,11 @@ abstract class AbstractAutoJs protected constructor(val application: Application
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 ScreenMetrics.init(activity)
                 appUtils.setCurrentActivity(activity)
-                registerOnSharedPreferenceChangeListener(SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                registerOnSharedPreferenceChangeListener { _, key ->
                     if (key == StringUtils.key(R.string.key_keep_screen_on_when_in_foreground)) {
                         configKeepScreenOnWhenInForeground(activity)
                     }
-                })
+                }
             }
 
             override fun onActivityPaused(activity: Activity) = appUtils.setCurrentActivity(null)
@@ -137,5 +136,13 @@ abstract class AbstractAutoJs protected constructor(val application: Application
     open fun createAppUtils(context: Context) = AppUtils(context)
 
     open fun createGlobalConsole() = GlobalConsole(uiHandler)
+
+    companion object {
+
+        @JvmStatic
+        @Suppress("KotlinConstantConditions")
+        val isInrt get() = BuildConfig.isInrt
+
+    }
 
 }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Paint
 import android.view.View
+import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -16,7 +17,10 @@ import java.util.*
 object ThemeColorManager {
 
     @JvmField
-    var defaultThemeColor = ThemeColor(ColorUtils.fromResources(R.color.theme_color_default))
+    var defaultThemeColor = when {
+        isInrt -> R.color.md_blue_gray_900
+        else -> R.color.theme_color_default
+    }.let { ThemeColor(ColorUtils.fromResources(it)) }
 
     @JvmStatic
     lateinit var currentThemeColor: ThemeColor

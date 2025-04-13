@@ -955,5 +955,12 @@
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité</string>.
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
+    <string name="text_special_permissions">Autorisations spéciales</string>
+    <string name="summary_all_files_access">Permet à AutoJs6 d\'accéder à tous les fichiers, y compris ceux du stockage externe</string>
+    <string name="summary_display_over_other_apps">Permet à AutoJs6 d\'afficher du contenu au-dessus d\'autres applications</string>
+    <string name="summary_post_notifications_permission">Permet à AutoJs6 de créer et d\'envoyer des notifications</string>
+    <string name="summary_all_files_access_inrt">Autoriser l\'application à accéder à tous les fichiers, y compris le stockage externe</string>
+    <string name="summary_display_over_other_apps_inrt">Autoriser l\'application à afficher du contenu par-dessus d\'autres applications</string>
+    <string name="summary_post_notifications_permission_inrt">Autoriser l\'application à créer et envoyer des notifications</string>
 
 </resources>
