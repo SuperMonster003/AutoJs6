@@ -255,7 +255,12 @@
         <activity
             android:name="org.autojs.autojs.ui.project.BuildActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale" />
-
+        
+        <activity
+            android:name="org.autojs.autojs.ui.error.ErrorDialogActivity"
+            android:theme="@style/AppTheme.Transparent"
+            android:exported="false" />
+        
         <activity android:name="org.autojs.autojs.ui.project.ProjectConfigActivity" />
 
         <activity android:name="org.autojs.autojs.ui.keystore.ManageKeyStoreActivity" />

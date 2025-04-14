@@ -3,7 +3,6 @@ package org.autojs.autojs.pluginclient;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -18,12 +17,17 @@ import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.project.ProjectLauncher;
 import org.autojs.autojs.script.StringScriptSource;
+import org.autojs.autojs.ui.error.ErrorDialogActivity;
 import org.autojs.autojs.util.MD5Utils;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.HashMap;
 
 /**
@@ -124,7 +128,19 @@ public class DevPluginResponseHandler implements Handler {
             new ProjectLauncher(dir).launch(AutoJs.getInstance().getScriptEngineService());
         } catch (Exception e) {
             e.printStackTrace();
-            ViewUtils.showToast(mContext, R.string.text_invalid_project, true);
+            String message = e.getMessage();
+            if (message == null) {
+                ViewUtils.showToast(mContext, R.string.text_invalid_project, true);
+            } else {
+                // 使用 ErrorDialogActivity 代替直接显示 MaterialDialog
+                // 这样可以避免在非UI线程或Activity不可见状态下调用对话框的问题
+                ErrorDialogActivity.showErrorDialog(
+                        mContext.getApplicationContext(),
+                        R.string.text_invalid_project,
+                        message,
+                        R.string.dialog_button_dismiss
+                );
+            }
         }
     }
 
@@ -191,11 +207,12 @@ public class DevPluginResponseHandler implements Handler {
                             var e = err.getMessage();
                             if (e != null) msg += "\n" + e;
 
-                            new MaterialDialog.Builder(mContext)
-                                    .title(R.string.text_failed)
-                                    .content(msg)
-                                    .positiveText(R.string.dialog_button_confirm)
-                                    .show();
+                            ErrorDialogActivity.showErrorDialog(
+                                    mContext.getApplicationContext(),
+                                    R.string.text_failed,
+                                    msg,
+                                    R.string.dialog_button_confirm
+                            );
                         }
                 );
     }
