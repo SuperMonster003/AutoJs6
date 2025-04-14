@@ -6,7 +6,10 @@ import org.mozilla.javascript.EvaluatorException
 // @Hint by SuperMonster003 on Oct 31, 2024.
 //  ! This class include the exception's code line number when printing the error stack trace.
 //  ! zh-CN: 当前类可在打印错误堆栈信息时包含异常所在的 code line number (代码行号).
-class WrappedRuntimeException(detailMessage: String, private val causeException: Throwable? = null) : EvaluatorException(detailMessage) {
+class WrappedRuntimeException @JvmOverloads constructor(
+    detailMessage: String,
+    private val causeException: Throwable? = null,
+) : EvaluatorException(detailMessage) {
 
     constructor(causeException: Throwable) : this(causeException.message ?: "", causeException)
 

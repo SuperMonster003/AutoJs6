@@ -16,7 +16,7 @@
         "notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_",
         "shizuku/shell 等方法无法接受字符串参数的问题 _[`issue #310`](http://issues.autojs6.com/310)_",
         "colors.pixel 方法无法接受单通道图像参数的问题 _[`issue #350`](http://issues.autojs6.com/350)_",
-        "engines.execScript/execScriptFile 等方法执行脚本时默认工作路径异常",
+        "engines.execScript/execScriptFile 等方法执行脚本时默认工作路径异常 _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_",
         "floaty.window/floaty.rawWindow 无法在子线程执行的问题",
         "floaty.getClip 可能无法正常获取剪切板内容的问题 _[`issue #341`](http://issues.autojs6.com/341)_",
         "ui.inflate 返回值丢失 attr/on/click 等原型方法的问题",
@@ -272,7 +272,7 @@
         "console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_"
       ],
       "fix": [
-        "ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_",
+        "ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_ _[`issue #175`](http://issues.autojs6.com/175)_",
         "Android 7.x 发现新版本时无法获取版本详情的问题",
         "Android 14 申请截图权限时导致应用崩溃的问题",
         "主页抽屉快速切换 \"浮动按钮\" 开关时可能导致应用崩溃的问题",
