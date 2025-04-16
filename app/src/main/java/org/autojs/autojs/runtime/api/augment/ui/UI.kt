@@ -1,10 +1,10 @@
 package org.autojs.autojs.runtime.api.augment.ui
 
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.drawable.toDrawable
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.ui.JsViewHelper
@@ -131,6 +131,9 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val activity = getActivity(scriptRuntime)
             (activity as? ScriptExecuteActivity)?.eventEmitter
         },
+        "statusBarHeight" to Supplier {
+            ViewUtils.getStatusBarHeightByDimen(globalContext)
+        }
     )
 
     init {
@@ -555,7 +558,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             ensureActivity(scriptRuntime) { activity ->
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
                     Colors.toIntRhino(Colors.setAlphaRhino(color, 1.0)).also {
-                        activity.window.setBackgroundDrawable(ColorDrawable(it))
+                        activity.window.setBackgroundDrawable(it.toDrawable())
                     }
                 }, NOT_CONSTRUCTABLE))
             }

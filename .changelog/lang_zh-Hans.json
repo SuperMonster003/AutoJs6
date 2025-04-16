@@ -4,6 +4,7 @@
       "released_date": "2025/04/16",
       "feature": [
         "ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法",
+        "ui.statusBarHeight 属性 (getter), 用于获取状态栏高度 _[`issue #357`](http://issues.autojs6.com/357)_",
         "images.flip 方法, 用于图像翻转 _[`issue #349`](http://issues.autojs6.com/349)_",
         "设置页面增加 \"文件扩展名\" 设置选项",
         "主题色设置页面增加新布局支持 (分组/定位/搜索/历史记录/调色盘增强等)"
@@ -148,7 +149,7 @@
         "text/button/input 元素的文本内容包含半角双引号时无法正常解析的问题",
         "text/textswitcher 元素的 autoLink 属性功能失效的问题",
         "不同脚本可能错误地共享同一个 ScriptRuntime 对象的问题",
-        "全局变量 HEIGHT 及 WIDTH 丢失 Getter 动态属性的问题",
+        "全局变量 HEIGHT 及 WIDTH 丢失 getter 动态属性的问题",
         "脚本启动时 RootShell 随即加载可能导致启动高延迟的问题",
         "控制台浮动窗口设置背景颜色导致矩形圆角样式丢失的问题",
         "无障碍服务自动启动可能出现的服务异常问题 (试修)",

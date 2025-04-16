@@ -48,6 +48,8 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 import kotlin.math.roundToInt
+import androidx.core.view.size
+import androidx.core.view.get
 
 /**
  * Created by Stardust on Jan 24, 2017.
@@ -100,29 +102,40 @@ object ViewUtils {
     //  ! 在一些设备上无法正常获取结果.
     //  ! 参阅: https://github.com/hyb1996/Auto.js/issues/268
     @SuppressLint("InternalInsetResource", "DiscouragedApi")
-    fun getStatusBarHeightLegacy(context: Context): Int {
-        return context.resources.getIdentifier("status_bar_height", "dimen", "android").let { resourceId ->
-            when (resourceId > 0) {
-                true -> context.resources.getDimensionPixelSize(resourceId)
-                else -> 0
-            }
+    @JvmStatic
+    @JvmOverloads
+    fun getStatusBarHeightByDimen(context: Context, withFallback: Boolean = true): Int {
+        val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
+        val dimenStatusBarHeight = when (resourceId > 0) {
+            true -> context.resources.getDimensionPixelSize(resourceId)
+            else -> 0
+        }
+        return when {
+            dimenStatusBarHeight > 0 -> dimenStatusBarHeight
+            withFallback -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, context.resources.displayMetrics).toInt()
+            else -> 0
         }
     }
 
     @JvmStatic
-    fun getStatusBarHeight(context: Context): Int {
-        return getWindowForContext(context)?.let { window ->
-            Rect().let { rect ->
-                window.decorView.getWindowVisibleDisplayFrame(rect)
-                rect.top.takeIf { it >= 0 }
-            }
-        } ?: TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, context.resources.displayMetrics).toInt()
+    @JvmOverloads
+    fun getStatusBarHeightByWindow(context: Context, withFallback: Boolean = true): Int {
+        val windowStatusBarHeight = getWindowForContext(context)?.decorView?.let { decorView ->
+            Rect().also { rect ->
+                decorView.getWindowVisibleDisplayFrame(rect)
+            }.top
+        } ?: 0
+        return when {
+            windowStatusBarHeight > 0 -> windowStatusBarHeight
+            withFallback -> TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, context.resources.displayMetrics).toInt()
+            else -> 0
+        }
     }
 
     fun getTitleBarHeight(context: Context): Int {
         val window = getWindowForContext(context)
         val contentViewTop = window?.findViewById<View>(Window.ID_ANDROID_CONTENT)?.top ?: 0
-        return contentViewTop - getStatusBarHeight(context)
+        return contentViewTop - getStatusBarHeightByWindow(context)
     }
 
     fun getScreenHeight(activity: Activity) = DisplayMetrics().let { metrics ->
@@ -415,8 +428,8 @@ object ViewUtils {
     }
 
     fun Menu.setItemsColor(color: Int) {
-        for (i in 0 until size()) {
-            val menuItem = getItem(i)
+        for (i in 0 until size) {
+            val menuItem = this[i]
             menuItem.icon = menuItem.icon?.applyColorFilterWith(color)
             menuItem.subMenu?.setItemsColor(color)
         }
@@ -471,11 +484,7 @@ object ViewUtils {
         val view = this
         val viewTreeObserver = view.viewTreeObserver
         if (viewTreeObserver.isAlive) {
-            viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    listener.invoke()
-                }
-            })
+            viewTreeObserver.addOnGlobalLayoutListener { listener.invoke() }
         }
     }
 
@@ -508,7 +517,7 @@ object ViewUtils {
         val fullColor = context.getColor(if (isAimColorLight) R.color.day_full else R.color.night_full)
         val hintColor = context.getColor(if (isAimColorLight) R.color.day_alpha_70 else R.color.night_alpha_70)
 
-        findViewById<EditText?>(androidx.appcompat.R.id.search_src_text).apply {
+        findViewById<EditText?>(androidx.appcompat.R.id.search_src_text)?.apply {
             setTextColor(fullColor)
             setHintTextColor(hintColor)
             setLinkTextColor(fullColor)

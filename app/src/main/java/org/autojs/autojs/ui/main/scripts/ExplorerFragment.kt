@@ -9,8 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.marginBottom
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
@@ -50,8 +48,6 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     private var mFloatingActionMenu: FloatingActionMenu? = null
     private var mIsCurrentPageFiles = false
 
-    private var mBottomInset: Int = 0
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         EventBus.getDefault().register(this)
@@ -63,10 +59,6 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            mBottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
-            insets
-        }
         mExplorerView = binding.itemList.also { explorerView ->
             explorerView.setOnItemClickListener(object : ExplorerView.OnItemClickListener {
                 override fun onItemClick(view: View?, item: ExplorerItem) {
