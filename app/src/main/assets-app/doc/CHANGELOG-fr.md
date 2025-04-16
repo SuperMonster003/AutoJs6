@@ -4,6 +4,65 @@
 
 ******
 
+# v6.6.2
+
+###### 2025/04/16
+
+* `Fonctionnalité` Méthodes telles que ui.statusBarAppearanceLight, statusBarAppearanceLightBy et navigationBarColor, etc.
+* `Fonctionnalité` Attribut ui.statusBarHeight (getter) servant à obtenir la hauteur de la barre d'état _[`issue #357`](http://issues.autojs6.com/357)_
+* `Fonctionnalité` Méthode images.flip pour retourner une image _[`issue #349`](http://issues.autojs6.com/349)_
+* `Fonctionnalité` Ajout de l'option « extension de fichier » dans la page des paramètres
+* `Fonctionnalité` La page de configuration du thème prend désormais en charge une nouvelle mise en page (regroupement, positionnement, recherche, historique, amélioration de la palette de couleurs, etc.)
+* `Correction` Problème où la couleur de fond de la barre d'état sur Android 15 ne correspond pas à celle du thème
+* `Correction` Problème où la méthode plugins.load ne charge pas correctement les plugins _[`issue #290`](http://issues.autojs6.com/290)_
+* `Correction` Problème où la bibliothèque dx ne fonctionne pas correctement sur Android 7.x _[`issue #293`](http://issues.autojs6.com/293)_
+* `Correction` Problème où ScriptRuntime peut présenter un état de synchronisation anormal lors de l'utilisation de require pour importer des modules intégrés (solution provisoire) _[`issue #298`](http://issues.autojs6.com/298)_
+* `Correction` Problème où le module notice ne dispose pas des méthodes d'extension telles que getBuilder _[`issue #301`](http://issues.autojs6.com/301)_
+* `Correction` Problème où les méthodes shizuku/shell n'acceptent pas les paramètres de type chaîne _[`issue #310`](http://issues.autojs6.com/310)_
+* `Correction` Problème où la méthode colors.pixel n'accepte pas les paramètres d'images à canal unique _[`issue #350`](http://issues.autojs6.com/350)_
+* `Correction` Problème où les méthodes engines.execScript/execScriptFile utilisent un répertoire de travail par défaut incorrect lors de l'exécution des scripts _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `Correction` Problème où floaty.window/floaty.rawWindow ne peut pas être exécuté dans un thread secondaire
+* `Correction` Problème où floaty.getClip risque de ne pas récupérer correctement le contenu du presse-papiers _[`issue #341`](http://issues.autojs6.com/341)_
+* `Correction` Problème où ui.inflate renvoie un résultat auquel il manque les méthodes de prototype telles que attr, on et click
+* `Correction` Problème où certaines exceptions générées lors de l'appel de méthodes ne sont pas capturées par un bloc try..catch _[`issue #345`](http://issues.autojs6.com/345)_
+* `Correction` Problème où la génération de code dans la page d'analyse de la mise en page peut provoquer un crash de l'application _[`issue #288`](http://issues.autojs6.com/288)_
+* `Correction` Problème où les applications packagées ne peuvent pas utiliser correctement le module shizuku _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `Correction` Problème dans l'éditeur de code où le passage à la fin d'une ligne peut positionner le curseur au début de la ligne suivante
+* `Correction` Problème où des clics rapides consécutifs sur des éléments de type dialogue dans la page des paramètres peuvent provoquer un crash de l'application
+* `Amélioration` Optimisation de la taille du fichier APK pour le modèle d'application packagée
+* `Amélioration` L'application (et les applications packagées) prend désormais en charge davantage de permissions _[`issue #338`](http://issues.autojs6.com/338)_
+* `Amélioration` Ajout de l'option pour la bibliothèque Pinyin dans la page de packaging
+* `Amélioration` Optimisation du fond de la barre d'état et de la couleur du texte dans la page principale des applications packagées
+* `Amélioration` Ajout d'interrupteurs pour les permissions spéciales (accès à tous les fichiers et envoi de notifications) dans la page des paramètres des applications packagées _[`issue #354`](http://issues.autojs6.com/354)_
+* `Amélioration` Les textes et icônes des contrôles s'ajustent automatiquement selon la luminosité du thème
+* `Amélioration` Amélioration de l'expérience visuelle lorsque le contraste entre la couleur du contrôle et le fond est faible
+* `Amélioration` Amélioration de la compatibilité du contrôle d'entrée HEX dans la palette de couleurs lors du collage de valeurs depuis le presse-papiers
+* `Amélioration` La barre de navigation de l'application est désormais configurée pour être transparente ou semi-transparente afin d'améliorer l'expérience visuelle
+* `Amélioration` Le mode UI par défaut de la barre d'état et de la barre de navigation est défini sur la couleur `md_grey_50` en mode clair
+* `Amélioration` L'interrupteur du service d'accessibilité dans le tiroir de la page d'accueil se synchronise désormais avec le code du script
+* `Amélioration` La page de documentation de l'accueil prend désormais en charge des boutons de recherche bidirectionnels
+* `Amélioration` L'onglet « Fichiers » de la page d'accueil permet de changer la visibilité du bouton flottant par un appui long
+* `Amélioration` Le titre de l'éditeur de code supporte désormais l'ajustement automatique de la taille de la police
+* `Amélioration` La visibilité du bouton flottant dans la page des journaux est liée aux actions de défilement de la liste
+* `Amélioration` Le fichier de configuration project.json du projet de script prend désormais en charge davantage d'options de packaging _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `Amélioration` Le fichier project.json prend désormais en charge une correspondance plus souple des noms d'option ainsi qu'une compatibilité avec les alias
+* `Amélioration` La boîte de dialogue d'information sur le type de fichier APK inclut désormais la taille du fichier et des informations sur le schéma de signature
+* `Amélioration` La boîte de dialogue d'information sur le type de fichier APK prend désormais en charge des écouteurs de clic pour copier le texte et accéder aux détails de l'application
+* `Amélioration` Tentative de restauration des packages préfixés par com.stardust afin d'améliorer la compatibilité du code _[`issue #290`](http://issues.autojs6.com/290)_
+* `Amélioration` Les méthodes floaty.window/floaty.rawWindow supportent désormais l'exécution sur le thread principal ainsi que sur des threads secondaires
+* `Amélioration` La méthode globale getClip utilise désormais floaty.getClip au besoin pour améliorer la compatibilité
+* `Amélioration` Amélioration de la compatibilité de files.path et des méthodes associées lorsqu'une valeur nulle est fournie pour le chemin
+* `Amélioration` Synchronisation avec la dernière version officielle du moteur Rhino et adaptations nécessaires du code
+* `Amélioration` Amélioration du README.md pour mieux documenter la construction et l'exécution du projet _[`issue #344`](http://issues.autojs6.com/344)_
+* `Dépendance` Ajout d'Eclipse Paho Client Mqttv3 version 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
+* `Dépendance` Mise à jour de la version de Gradle Compile de 34 à 35
+* `Dépendance` Mise à jour de Gradle de 8.12 à 8.14-rc-1
+* `Dépendance` Mise à jour de Rhino de 1.8.0-SNAPSHOT à 1.8.1-SNAPSHOT
+* `Dépendance` Mise à jour d'Androidx Recyclerview de 1.3.2 à 1.4.0
+* `Dépendance` Mise à jour d'Androidx Room de 2.6.1 à 2.7.0
+* `Dépendance` Mise à jour d'Androidx WebKit de 1.12.1 à 1.13.0
+* `Dépendance` Mise à jour de Pinyin4j de 2.5.0 à 2.5.1
+
 # v6.6.1
 
 ###### 2025/01/01

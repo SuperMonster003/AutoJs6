@@ -4,6 +4,65 @@
 
 ******
 
+# v6.6.2
+
+###### 2025/04/16
+
+* `新增` ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法
+* `新增` ui.statusBarHeight 屬性 (getter), 用於獲取狀態欄高度 _[`issue #357`](http://issues.autojs6.com/357)_
+* `新增` images.flip 方法, 用於圖像翻轉 _[`issue #349`](http://issues.autojs6.com/349)_
+* `新增` 設置頁面增加 "文件擴展名" 設置選項
+* `新增` 主題色設置頁面增加新佈局支持 (分組/定位/搜索/歷史記錄/調色盤增強等)
+* `修復` Android 15 狀態欄背景顏色與主題色不一致的問題
+* `修復` plugins.load 方法無法正常加載插件的問題 _[`issue #290`](http://issues.autojs6.com/290)_
+* `修復` dx 庫在 Android 7.x 無法正常使用的問題 _[`issue #293`](http://issues.autojs6.com/293)_
+* `修復` ScriptRuntime 使用 require 引用內置模塊時可能出現的同步狀態異常 (試修) _[`issue #298`](http://issues.autojs6.com/298)_
+* `修復` notice 模塊缺失 getBuilder 等擴展方法的問題 _[`issue #301`](http://issues.autojs6.com/301)_
+* `修復` shizuku/shell 等方法無法接受字符串參數的問題 _[`issue #310`](http://issues.autojs6.com/310)_
+* `修復` colors.pixel 方法無法接受單通道圖像參數的問題 _[`issue #350`](http://issues.autojs6.com/350)_
+* `修復` engines.execScript/execScriptFile 等方法執行腳本時默認工作路徑異常 _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `修復` floaty.window/floaty.rawWindow 無法在子線程執行的問題
+* `修復` floaty.getClip 可能無法正常獲取剪切板內容的問題 _[`issue #341`](http://issues.autojs6.com/341)_
+* `修復` ui.inflate 返回值丟失 attr/on/click 等原型方法的問題
+* `修復` 部分方法調用出現異常時無法被 try..catch 塊捕獲的問題 _[`issue #345`](http://issues.autojs6.com/345)_
+* `修復` 佈局分析頁面生成代碼時可能導致應用崩潰的問題 _[`issue #288`](http://issues.autojs6.com/288)_
+* `修復` 打包應用無法正常使用 shizuku 模塊的問題 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `修復` 代碼編輯器跳轉到行尾時可能跳轉到下一行起始位置的問題
+* `修復` 設置頁面連續快速點擊對話框類型項目時可能導致應用崩潰的問題
+* `優化` 精簡打包應用模板 APK 文件大小
+* `優化` 應用 (以及打包應用) 支持更多權限 _[`issue #338`](http://issues.autojs6.com/338)_
+* `優化` 打包頁面支持 Pinyin 庫選項
+* `優化` 打包應用主活動頁面優化狀態欄背景及文字顏色
+* `優化` 打包應用設置頁面增加訪問所有文件和發送通知等特殊權限開關 _[`issue #354`](http://issues.autojs6.com/354)_
+* `優化` 控件的文字及圖標根據主題色亮度值自動切換合適的顏色
+* `優化` 部分控件主題色與背景色對比度過低時的視覺體驗
+* `優化` 調色盤 HEX 輸入控件增強剪貼板粘貼色值時的兼容性
+* `優化` 應用內頁面導航欄設置為透明或半透明以增強視覺體驗
+* `優化` UI 模式狀態欄及導航欄默認為 `md_grey_50` 色值且設置為亮色模式
+* `優化` 主頁抽屜無障礙服務開關支持與腳本代碼同步
+* `優化` 主頁文檔頁面搜索時支持雙向查找按鈕
+* `優化` 主頁 "文件" 標籤支持通過長按切換浮動按鈕可見狀態
+* `優化` 代碼編輯器標題文字支持字體大小自適應
+* `優化` 日誌頁面浮動按鈕可見狀態與列表滾動操作聯動
+* `優化` 腳本項目配置文件 project.json 支持更多打包選項 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `優化` 腳本項目配置文件 project.json 支持選項名稱寬鬆匹配及別名兼容
+* `優化` APK 文件類型信息對話框增加文件大小與簽名方案信息
+* `優化` APK 文件類型信息對話框增加點擊監聽器支持文本複製與應用詳情跳轉
+* `優化` 嘗試恢復 com.stardust 前綴包以便提升代碼兼容性 _[`issue #290`](http://issues.autojs6.com/290)_
+* `優化` floaty.window/floaty.rawWindow 同時支持主線程和子線程執行
+* `優化` getClip 全局方法適時藉助 floaty.getClip 方法以提升兼容性
+* `優化` files.path 及相關方法傳入空值路徑參數時的兼容性
+* `優化` 同步最新的 Rhino 引擎官方上游代碼並進行必要的代碼適配
+* `優化` README.md 完善項目構建與運行相關內容 _[`issue #344`](http://issues.autojs6.com/344)_
+* `依賴` 附加 Eclipse Paho Client Mqttv3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
+* `依賴` 升級 Gradle Compile 版本 34 -> 35
+* `依賴` 升級 Gradle 版本 8.12 -> 8.14-rc-1
+* `依賴` 升級 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
+* `依賴` 升級 Androidx Recyclerview 版本 1.3.2 -> 1.4.0
+* `依賴` 升級 Androidx Room 版本 2.6.1 -> 2.7.0
+* `依賴` 升級 Androidx WebKit 版本 1.12.1 -> 1.13.0
+* `依賴` 升級 Pinyin4j 版本 2.5.0 -> 2.5.1
+
 # v6.6.1
 
 ###### 2025/01/01

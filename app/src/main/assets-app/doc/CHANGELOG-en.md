@@ -4,6 +4,65 @@
 
 ******
 
+# v6.6.2
+
+###### 2025/04/16
+
+* `Feature` Methods such as ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor, etc.
+* `Feature` ui.statusBarHeight attribute (getter) for obtaining the status bar height _[`issue #357`](http://issues.autojs6.com/357)_
+* `Feature` images.flip method for image flipping _[`issue #349`](http://issues.autojs6.com/349)_
+* `Feature` Added "file extension" option in the settings page
+* `Feature` New layout support in the theme color settings page (grouping, positioning, search, history, enhanced color palette, etc.)
+* `Fix` Issue where Android 15's status bar background color did not match the theme color
+* `Fix` Issue where the plugins.load method failed to properly load plugins _[`issue #290`](http://issues.autojs6.com/290)_
+* `Fix` Issue where the dx library could not be used properly on Android 7.x _[`issue #293`](http://issues.autojs6.com/293)_
+* `Fix` Potential synchronization issues in ScriptRuntime when using require to import built-in modules (tentative fix) _[`issue #298`](http://issues.autojs6.com/298)_
+* `Fix` Issue where the notice module was missing extension methods such as getBuilder _[`issue #301`](http://issues.autojs6.com/301)_
+* `Fix` Issue where methods like shizuku/shell could not accept string parameters _[`issue #310`](http://issues.autojs6.com/310)_
+* `Fix` Issue where the colors.pixel method could not accept single-channel image parameters _[`issue #350`](http://issues.autojs6.com/350)_
+* `Fix` Issue where methods such as engines.execScript/execScriptFile had abnormal default working directories when executing scripts _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `Fix` Issue where floaty.window/floaty.rawWindow could not be executed on background threads
+* `Fix` Issue where floaty.getClip might not correctly retrieve clipboard content _[`issue #341`](http://issues.autojs6.com/341)_
+* `Fix` Issue where ui.inflate returned values were missing prototype methods such as attr/on/click
+* `Fix` Issue where exceptions in some method calls could not be caught by try..catch blocks _[`issue #345`](http://issues.autojs6.com/345)_
+* `Fix` Issue where generating code on the layout analysis page could cause the app to crash _[`issue #288`](http://issues.autojs6.com/288)_
+* `Fix` Issue where packaged applications could not properly use the shizuku module _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `Fix` Issue in the code editor where jumping to the end of a line might actually move the cursor to the beginning of the next line
+* `Fix` Issue where rapid consecutive clicks on dialog-type items in the settings page could cause the app to crash
+* `Improvement` Streamlined the APK file size for the packaged application template
+* `Improvement` Enhanced app (and packaged apps) support for more permissions _[`issue #338`](http://issues.autojs6.com/338)_
+* `Improvement` Added support for the Pinyin library option on the packaging page
+* `Improvement` Optimized the status bar background and text color on the main activity page of packaged apps
+* `Improvement` Added special permission toggles (such as access all files and send notifications) to the packaged app settings page _[`issue #354`](http://issues.autojs6.com/354)_
+* `Improvement` Automatically switched control text and icon colors based on the brightness of the theme color
+* `Improvement` Improved visual experience when contrast between control theme color and background is too low
+* `Improvement` Enhanced HEX input control in the color palette for better compatibility when pasting color values from the clipboard
+* `Improvement` Set in-app navigation bar to be transparent or semi-transparent to enhance visual experience
+* `Improvement` Default UI mode for status bar and navigation bar set to `md_grey_50` color in light mode
+* `Improvement` Homepage drawer's accessibility service toggle now syncs with script code
+* `Improvement` Homepage document page search now supports bidirectional find buttons
+* `Improvement` Homepage "Files" tab now supports toggling floating button visibility via long press
+* `Improvement` Code editor title text now supports auto-adjusting font size
+* `Improvement` Log page floating button visibility now linked with list scrolling actions
+* `Improvement` Script project configuration file project.json now supports more packaging options _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `Improvement` Improved project.json to support lenient matching of option names and alias compatibility
+* `Improvement` APK file type info dialog now includes file size and signature scheme information
+* `Improvement` APK file type info dialog now supports click listeners for copying text and navigating to app details
+* `Improvement` Attempted to restore com.stardust prefixed packages to improve code compatibility _[`issue #290`](http://issues.autojs6.com/290)_
+* `Improvement` Enhanced floaty.window/floaty.rawWindow to support execution on both main and background threads
+* `Improvement` Global getClip method now leverages floaty.getClip as needed to improve compatibility
+* `Improvement` Improved compatibility when passing null paths to files.path and related methods
+* `Improvement` Synchronized with the latest official upstream code of the Rhino engine and performed necessary code adaptations
+* `Improvement` Enhanced README.md to better document project build and run instructions _[`issue #344`](http://issues.autojs6.com/344)_
+* `Dependency` Added Eclipse Paho Client Mqttv3 version 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
+* `Dependency` Upgraded Gradle Compile version from 34 to 35
+* `Dependency` Upgraded Gradle from 8.12 to 8.14-rc-1
+* `Dependency` Upgraded Rhino from 1.8.0-SNAPSHOT to 1.8.1-SNAPSHOT
+* `Dependency` Upgraded Androidx Recyclerview from 1.3.2 to 1.4.0
+* `Dependency` Upgraded Androidx Room from 2.6.1 to 2.7.0
+* `Dependency` Upgraded Androidx WebKit from 1.12.1 to 1.13.0
+* `Dependency` Upgraded Pinyin4j from 2.5.0 to 2.5.1
+
 # v6.6.1
 
 ###### 2025/01/01
