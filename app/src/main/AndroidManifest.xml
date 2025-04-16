@@ -639,6 +639,8 @@
                 android:value="true" />
         </service>
 
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
+
         <activity
             android:name="org.autojs.autojs.inrt.SplashActivity"
             android:exported="true"
