@@ -25,7 +25,7 @@ class WebViewUtils {
         //  ! - For Android API Level >= 29 (10) [Q]:
         //  !   - Android System WebView (or browsers like Google Chrome) version >= 76
         //  ! - For Android API Level <= 28 (9) [P]:
-        //  !   - Android System WebView (or browsers like Google Chrome) version >= 105
+        //  !   - Android System WebView (or similar Google Chrome browsers) version >= 105
         //  ! Reference: https://stackoverflow.com/questions/57449900/letting-webview-on-android-work-with-prefers-color-scheme-dark
         //  ! zh-CN:
         //  ! 当前特性需满足如下要求：
@@ -109,7 +109,21 @@ class WebViewUtils {
             //  ! to ensure that content won't be covered by nav bar when scrolling to the end.
             //  ! zh-CN: 注入 JavaScript, 为 body 添加底部 padding, 确保滚动到底部时导航栏不遮挡内容.
             @Language("JavaScript")
-            val jsCode = """document.body.style.paddingBottom = "${systemBarInsets.bottom}px";"""
+            val jsCode = """
+                (function() {
+                    let mainElements = document.querySelectorAll('main > *');
+                    if (mainElements.length > 0) {
+                        const additionalPadding = ${systemBarInsets.bottom};
+                        mainElements.forEach(ele => {
+                            const computedStyle = window.getComputedStyle(ele);
+                            const currentPadding = parseFloat(computedStyle.paddingBottom) || 0;
+                            ele.style.paddingBottom = (currentPadding + additionalPadding) / window.devicePixelRatio + 'px';
+                        });
+                    } else {
+                        document.body.style.paddingBottom = '${systemBarInsets.bottom}px';
+                    }
+                })();
+            """.trimIndent()
             webView.evaluateJavascript(jsCode, null)
         }
 
