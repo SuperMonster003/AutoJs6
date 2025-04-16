@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.2": {
-      "released_date": "2025/04/13",
+      "released_date": "2025/04/16",
       "feature": [
         "ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法",
         "images.flip 方法, 用于图像翻转 _[`issue #349`](http://issues.autojs6.com/349)_",
@@ -52,6 +52,7 @@
         "README.md 完善项目构建与运行相关内容 _[`issue #344`](http://issues.autojs6.com/344)_"
       ],
       "dependency": [
+        "附加 Eclipse Paho Client Mqttv3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_",
         "升级 Gradle Compile 版本 34 -> 35",
         "升级 Gradle 版本 8.12 -> 8.14-rc-1",
         "升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT",

@@ -219,6 +219,10 @@ dependencies /* Unclassified */ {
 
     // Spongy Castle
     implementation("com.madgag.spongycastle:prov:1.58.0.0")
+
+    // MQTT
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0")
+    implementation("org.eclipse.paho:org.eclipse.paho.android.service:1.1.1")
 }
 
 dependencies /* MIME */ {
