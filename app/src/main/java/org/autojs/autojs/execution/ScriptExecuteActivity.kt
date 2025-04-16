@@ -14,6 +14,8 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.isNotEmpty
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.eventloop.EventEmitter
@@ -65,7 +67,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val windowBackground: Drawable = window.decorView.background
-            ?: ColorDrawable(getColor(R.color.md_gray_50)).also { window.setBackgroundDrawable(it) }
+            ?: getColor(R.color.md_gray_50).toDrawable().also { window.setBackgroundDrawable(it) }
 
         if (windowBackground is ColorDrawable) windowBackground.color.let { backgroundColor ->
             val isLightColor = ViewUtils.isLuminanceDark(backgroundColor)
@@ -220,7 +222,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         emit("create_options_menu", menu)
-        return menu.size() > 0
+        return menu.isNotEmpty()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
