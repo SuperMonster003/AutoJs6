@@ -111,14 +111,14 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
             val result = ExecutionConfig()
             when (val config = if (o.isJsNullish()) newNativeObject() else o) {
                 is ExecutionConfig -> {
-                    result.workingDirectory = config.workingDirectory.takeUnless { it.isEmpty() } ?: scriptRuntime.files.cwd()
+                    result.workingDirectory = config.workingDirectory.takeUnless { it.isBlank() } ?: scriptRuntime.files.cwd() ?: ""
                     result.delay = config.delay.takeUnless { it < 0 } ?: 0L
                     result.interval = config.interval.takeUnless { it < 0 } ?: 0L
                     result.loopTimes = config.loopTimes.takeUnless { it < 0 } ?: 1
                     config.arguments.entries.forEach { result.setArgument(it.key, it.value) }
                 }
                 is ScriptableObject -> {
-                    result.workingDirectory = config.inquire(listOf("path", "workingDirectory"), { o, _ -> o.toRuntimePath(scriptRuntime) }, scriptRuntime.files.cwd())
+                    result.workingDirectory = config.inquire(listOf("path", "workingDirectory"), { o, _ -> o.toRuntimePath(scriptRuntime) }, scriptRuntime.files.cwd() ?: "")
                     result.delay = config.inquire("delay", ::coerceLongNumber, 0L)
                     result.interval = config.inquire("interval", ::coerceLongNumber, 0L)
                     result.loopTimes = config.inquire("loopTimes", ::coerceIntNumber, 1)

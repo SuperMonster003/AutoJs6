@@ -19,7 +19,7 @@ public class AutoFileSource extends ScriptSource {
         mFile = file;
     }
 
-    public AutoFileSource(String path) {
+    public AutoFileSource(@NonNull String path) {
         this(new File(path));
     }
 

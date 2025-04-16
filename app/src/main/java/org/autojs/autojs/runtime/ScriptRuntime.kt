@@ -616,7 +616,7 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     private fun doLoad(filter: FileFilter, vararg paths: String) {
         for (path in paths) {
-            val file = File(files.path(path))
+            val file = File(files.nonNullPath(path))
             if (file.isDirectory) {
                 val filtered = file.listFiles(filter)
                 if (filtered != null) {
@@ -636,7 +636,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         try {
             val classLoader = sClassLoader
             for (path in paths) {
-                val file = File(files.path(path))
+                val file = File(files.nonNullPath(path))
                 if (file.isDirectory) {
                     val filtered = file.listFiles(filter)
                     if (filtered != null) {
@@ -657,7 +657,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         try {
             val classLoader = sClassLoader
             for (path in paths) {
-                val file = File(files.path(path))
+                val file = File(files.nonNullPath(path))
                 if (file.isDirectory) {
                     val filtered = file.listFiles(filter)
                     if (filtered != null) {

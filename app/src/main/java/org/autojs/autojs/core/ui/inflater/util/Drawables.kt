@@ -23,6 +23,7 @@ import java.io.File
 import java.net.URL
 import java.util.concurrent.Executors
 import java.util.regex.Pattern
+import androidx.core.graphics.drawable.toDrawable
 
 /**
  * Created by Stardust on Nov 3, 2017.
@@ -83,7 +84,7 @@ open class Drawables {
     }
 
     open fun decodeImage(context: Context, path: String?): Drawable? {
-        return BitmapDrawable(context.resources, BitmapFactory.decodeFile(path))
+        return BitmapFactory.decodeFile(path)?.toDrawable(context.resources)
     }
 
     fun parse(view: View, name: String) = parse(view.context, name)
