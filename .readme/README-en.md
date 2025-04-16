@@ -155,6 +155,58 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 ******
 
+# v6.6.2
+
+###### 2025/04/16
+
+* `Feature` Methods such as ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor, etc.
+* `Feature` ui.statusBarHeight attribute (getter) for obtaining the status bar height _[`issue #357`](http://issues.autojs6.com/357)_
+* `Feature` images.flip method for image flipping _[`issue #349`](http://issues.autojs6.com/349)_
+* `Feature` Added "file extension" option in the settings page
+* `Feature` New layout support in the theme color settings page (grouping, positioning, search, history, enhanced color palette, etc.)
+* `Fix` Issue where Android 15's status bar background color did not match the theme color
+* `Fix` Issue where the plugins.load method failed to properly load plugins _[`issue #290`](http://issues.autojs6.com/290)_
+* `Fix` Issue where the dx library could not be used properly on Android 7.x _[`issue #293`](http://issues.autojs6.com/293)_
+* `Fix` Potential synchronization issues in ScriptRuntime when using require to import built-in modules (tentative fix) _[`issue #298`](http://issues.autojs6.com/298)_
+* `Fix` Issue where the notice module was missing extension methods such as getBuilder _[`issue #301`](http://issues.autojs6.com/301)_
+* `Fix` Issue where methods like shizuku/shell could not accept string parameters _[`issue #310`](http://issues.autojs6.com/310)_
+* `Fix` Issue where the colors.pixel method could not accept single-channel image parameters _[`issue #350`](http://issues.autojs6.com/350)_
+* `Fix` Issue where methods such as engines.execScript/execScriptFile had abnormal default working directories when executing scripts _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `Fix` Issue where floaty.window/floaty.rawWindow could not be executed on background threads
+* `Fix` Issue where floaty.getClip might not correctly retrieve clipboard content _[`issue #341`](http://issues.autojs6.com/341)_
+* `Fix` Issue where ui.inflate returned values were missing prototype methods such as attr/on/click
+* `Fix` Issue where exceptions in some method calls could not be caught by try..catch blocks _[`issue #345`](http://issues.autojs6.com/345)_
+* `Fix` Issue where generating code on the layout analysis page could cause the app to crash _[`issue #288`](http://issues.autojs6.com/288)_
+* `Fix` Issue where packaged applications could not properly use the shizuku module _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `Fix` Issue in the code editor where jumping to the end of a line might actually move the cursor to the beginning of the next line
+* `Fix` Issue where rapid consecutive clicks on dialog-type items in the settings page could cause the app to crash
+* `Improvement` Streamlined the APK file size for the packaged application template
+* `Improvement` Enhanced app (and packaged apps) support for more permissions _[`issue #338`](http://issues.autojs6.com/338)_
+* `Improvement` Added support for the Pinyin library option on the packaging page
+* `Improvement` Optimized the status bar background and text color on the main activity page of packaged apps
+* `Improvement` Added special permission toggles (such as access all files and send notifications) to the packaged app settings page _[`issue #354`](http://issues.autojs6.com/354)_
+* `Improvement` Automatically switched control text and icon colors based on the brightness of the theme color
+* `Improvement` Improved visual experience when contrast between control theme color and background is too low
+* `Improvement` Enhanced HEX input control in the color palette for better compatibility when pasting color values from the clipboard
+* `Improvement` Set in-app navigation bar to be transparent or semi-transparent to enhance visual experience
+* `Improvement` Default UI mode for status bar and navigation bar set to `md_grey_50` color in light mode
+* `Improvement` Homepage drawer's accessibility service toggle now syncs with script code
+* `Improvement` Homepage document page search now supports bidirectional find buttons
+* `Improvement` Homepage "Files" tab now supports toggling floating button visibility via long press
+* `Improvement` Code editor title text now supports auto-adjusting font size
+* `Improvement` Log page floating button visibility now linked with list scrolling actions
+* `Improvement` Script project configuration file project.json now supports more packaging options _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `Improvement` Improved project.json to support lenient matching of option names and alias compatibility
+* `Improvement` APK file type info dialog now includes file size and signature scheme information
+* `Improvement` APK file type info dialog now supports click listeners for copying text and navigating to app details
+* `Improvement` Attempted to restore com.stardust prefixed packages to improve code compatibility _[`issue #290`](http://issues.autojs6.com/290)_
+* `Improvement` Enhanced floaty.window/floaty.rawWindow to support execution on both main and background threads
+* `Improvement` Global getClip method now leverages floaty.getClip as needed to improve compatibility
+* `Improvement` Improved compatibility when passing null paths to files.path and related methods
+* `Improvement` Synchronized with the latest official upstream code of the Rhino engine and performed necessary code adaptations
+* `Improvement` Enhanced README.md to better document project build and run instructions _[`issue #344`](http://issues.autojs6.com/344)_
+* `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v662)_
+
 # v6.6.1
 
 ###### 2025/01/01
@@ -271,46 +323,6 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Enhance Gradle build script's version adaptability
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v660)_
 
-# v6.5.0
-
-###### 2023/12/02
-
-* `Feature` opencc module (Refer to Project Documentation > [Chinese Conversion](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
-* `Feature` UiSelector adds [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) and [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) methods _[`issue #115`](http://issues.autojs6.com/115)_
-* `Feature` Packaging application page adds support for filtering ABIs and libraries (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
-* `Fix` Abnormally large file size issue in packaged applications (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
-* `Fix` Issue where packaged applications cannot display and print some exception messages
-* `Fix` Issue where selecting application icon on packaging application page might show empty icon
-* `Fix` Context not initialized exception when packaging application includes MLKit Google OCR library
-* `Fix` ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u> methods not working
-* `Fix` Mismatch between displayed language and application setting language for some texts (such as log page)
-* `Fix` Text overflow issue in home page drawer switch items for some languages
-* `Fix` Issue where accessibility service automatically closes immediately after being enabled on some devices without any prompt messages _[`issue #181`](http://issues.autojs6.com/181)_
-* `Fix` Issue where enabling accessibility service on some devices might cause application crash due to physical keys (attempted fix) _[`issue #183`](http://issues.autojs6.com/183)_ _[`issue #186`](http://issues.autojs6.com/186#issuecomment-1817307790)_
-* `Fix` Issue with pickup functionality after restarting accessibility service using auto(true) (attempted fix) _[`issue #184`](http://issues.autojs6.com/184)_
-* `Fix` Issue where creating floating window in floaty module might cause application crash when dragging (attempted fix)
-* `Fix` Issue where app.startActivity cannot use shorthand parameters _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
-* `Fix` Issue where code throws exception when imported class name conflicts with global variable using importClass _[`issue #185`](http://issues.autojs6.com/185)_
-* `Fix` Issue where accessibility service cannot be used on Android 7.x
-* `Fix` Issue where runtime.<u>loadJar/loadDex</u> methods might not work properly on Android 14 (attempted fix)
-* `Fix` Issue where 'Layout Bounds Analysis' and 'Layout Hierarchy Analysis' are unavailable in Android system quick settings panel _[`issue #193`](http://issues.autojs6.com/193)_
-* `Fix` Issue where auto-update check might cause application [ANR](https://developer.android.com/topic/performance/vitals/anr) (attempted fix) _[`issue #186`](http://issues.autojs6.com/186)_
-* `Fix` Issue where file manager cannot return to workspace path page after clicking 'Up' button in example code folder _[`issue #129`](http://issues.autojs6.com/129)_
-* `Fix` Issue where replace button is not shown when using replace function in code editor
-* `Fix` Issue where long-press delete in code editor might cause application crash (attempted fix)
-* `Fix` Issue where fx button in code editor cannot show module function quick panel
-* `Fix` Issue where module function quick panel button function name might overflow in code editor
-* `Improvement` The code editor module's quick function panel adapts to night mode.
-* `Improvement` The startup page of the packaged application is adapted to night mode, and the layout of application icons is adjusted.
-* `Improvement` The packaged application page supports cursor navigation using the ENTER key on the software keyboard.
-* `Improvement` The packaged application page supports toggling select-all state by clicking on ABI and library titles.
-* `Improvement` The default ABI selection is made intelligent on the packaged application page with added guide prompts for unselectable items.
-* `Improvement` The file manager adjusts the display of menu items based on the type and characteristics of files and folders.
-* `Improvement` The file manager's folder right-click menu adds a packaging application option.
-* `Improvement` When accessibility services are enabled but malfunction, an abnormal state is reflected in the drawer switch of the AutoJs6 homepage.
-* `Improvement` The console includes detailed stack information when printing error messages.
-* `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
-
 ##### For more version history, refer to
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-en.md)
@@ -376,7 +388,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of Apr 13 , 2025, AutoJs6 supports up to version `24` of the JDK.
+As of Apr 16 , 2025, AutoJs6 supports up to version `24` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 
@@ -565,6 +577,7 @@ Some contributors do not appear correctly in the [GitHub Contributors](https://g
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field
     - Run Gradle task "app:appendDigestToReleasedFiles"
+    - Check VERSION_BUILD in version.properties with released apks
     - Commit and push to GitHub
     - Publish the latest release with signed APKs
 )

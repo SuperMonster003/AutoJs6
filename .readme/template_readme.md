@@ -402,6 +402,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field
     - Run Gradle task "app:appendDigestToReleasedFiles"
+    - Check VERSION_BUILD in version.properties with released apks
     - Commit and push to GitHub
     - Publish the latest release with signed APKs
 )

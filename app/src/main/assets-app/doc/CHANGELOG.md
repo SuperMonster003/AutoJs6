@@ -6,9 +6,10 @@
 
 # v6.6.2
 
-###### 2025/04/13
+###### 2025/04/16
 
 * `新增` ui.statusBarAppearanceLight/statusBarAppearanceLightBy/navigationBarColor 等方法
+* `新增` ui.statusBarHeight 属性 (getter), 用于获取状态栏高度 _[`issue #357`](http://issues.autojs6.com/357)_
 * `新增` images.flip 方法, 用于图像翻转 _[`issue #349`](http://issues.autojs6.com/349)_
 * `新增` 设置页面增加 "文件扩展名" 设置选项
 * `新增` 主题色设置页面增加新布局支持 (分组/定位/搜索/历史记录/调色盘增强等)
@@ -19,7 +20,7 @@
 * `修复` notice 模块缺失 getBuilder 等扩展方法的问题 _[`issue #301`](http://issues.autojs6.com/301)_
 * `修复` shizuku/shell 等方法无法接受字符串参数的问题 _[`issue #310`](http://issues.autojs6.com/310)_
 * `修复` colors.pixel 方法无法接受单通道图像参数的问题 _[`issue #350`](http://issues.autojs6.com/350)_
-* `修复` engines.execScript/execScriptFile 等方法执行脚本时默认工作路径异常
+* `修复` engines.execScript/execScriptFile 等方法执行脚本时默认工作路径异常 _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
 * `修复` floaty.window/floaty.rawWindow 无法在子线程执行的问题
 * `修复` floaty.getClip 可能无法正常获取剪切板内容的问题 _[`issue #341`](http://issues.autojs6.com/341)_
 * `修复` ui.inflate 返回值丢失 attr/on/click 等原型方法的问题
@@ -29,6 +30,7 @@
 * `修复` 代码编辑器跳转到行尾时可能跳转到下一行起始位置的问题
 * `修复` 设置页面连续快速点击对话框类型项目时可能导致应用崩溃的问题
 * `优化` 精简打包应用模板 APK 文件大小
+* `优化` 应用 (以及打包应用) 支持更多权限 _[`issue #338`](http://issues.autojs6.com/338)_
 * `优化` 打包页面支持 Pinyin 库选项
 * `优化` 打包应用主活动页面优化状态栏背景及文字颜色
 * `优化` 打包应用设置页面增加访问所有文件和发送通知等特殊权限开关 _[`issue #354`](http://issues.autojs6.com/354)_
@@ -49,8 +51,10 @@
 * `优化` 尝试恢复 com.stardust 前缀包以便提升代码兼容性 _[`issue #290`](http://issues.autojs6.com/290)_
 * `优化` floaty.window/floaty.rawWindow 同时支持主线程和子线程执行
 * `优化` getClip 全局方法适时借助 floaty.getClip 方法以提升兼容性
+* `优化` files.path 及相关方法传入空值路径参数时的兼容性
 * `优化` 同步最新的 Rhino 引擎官方上游代码并进行必要的代码适配
 * `优化` README.md 完善项目构建与运行相关内容 _[`issue #344`](http://issues.autojs6.com/344)_
+* `依赖` 附加 Eclipse Paho Client Mqttv3 版本 1.1.0 _[`issue #330`](http://issues.autojs6.com/330)_
 * `依赖` 升级 Gradle Compile 版本 34 -> 35
 * `依赖` 升级 Gradle 版本 8.12 -> 8.14-rc-1
 * `依赖` 升级 Rhino 版本 1.8.0-SNAPSHOT -> 1.8.1-SNAPSHOT
@@ -133,7 +137,7 @@
 * `修复` text/button/input 元素的文本内容包含半角双引号时无法正常解析的问题
 * `修复` text/textswitcher 元素的 autoLink 属性功能失效的问题
 * `修复` 不同脚本可能错误地共享同一个 ScriptRuntime 对象的问题
-* `修复` 全局变量 HEIGHT 及 WIDTH 丢失 Getter 动态属性的问题
+* `修复` 全局变量 HEIGHT 及 WIDTH 丢失 getter 动态属性的问题
 * `修复` 脚本启动时 RootShell 随即加载可能导致启动高延迟的问题
 * `修复` 控制台浮动窗口设置背景颜色导致矩形圆角样式丢失的问题
 * `修复` 无障碍服务自动启动可能出现的服务异常问题 (试修)
@@ -248,7 +252,7 @@
 
 * `新增` dialogs.build() 选项参数属性 inputSingleLine
 * `新增` console.setTouchable 方法 _[`issue #122`](http://issues.autojs6.com/122)_
-* `修复` ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_  _[`issue #175`](http://issues.autojs6.com/175)_
+* `修复` ocr 模块部分方法无法识别区域参数的问题 _[`issue #162`](http://issues.autojs6.com/162)_ _[`issue #175`](http://issues.autojs6.com/175)_
 * `修复` Android 7.x 发现新版本时无法获取版本详情的问题
 * `修复` Android 14 申请截图权限时导致应用崩溃的问题
 * `修复` 主页抽屉快速切换 "浮动按钮" 开关时可能导致应用崩溃的问题

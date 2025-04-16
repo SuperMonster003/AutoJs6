@@ -155,6 +155,58 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 
 ******
 
+# v6.6.2
+
+###### 2025/04/16
+
+* `추가` ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor 등의 메서드
+* `추가` ui.statusBarHeight 속성 (getter) 을 사용하여 상태 표시줄의 높이를 가져옴 _[`issue #357`](http://issues.autojs6.com/357)_
+* `추가` images.flip 메서드를 통해 이미지를 반전 _[`issue #349`](http://issues.autojs6.com/349)_
+* `추가` 설정 페이지에 '파일 확장자' 옵션 추가
+* `추가` 테마 설정 페이지가 그룹화, 정렬, 검색, 기록, 컬러 피커 개선 등 새로운 레이아웃을 지원
+* `수정` Android 15 에서 상태 표시줄 배경색이 테마 색상과 일치하지 않는 문제를 수정
+* `수정` plugins.load 메서드가 플러그인을 올바르게 로드하지 못하는 문제를 수정 _[`issue #290`](http://issues.autojs6.com/290)_
+* `수정` Android 7.x 에서 dx 라이브러리가 올바르게 동작하지 않는 문제를 수정 _[`issue #293`](http://issues.autojs6.com/293)_
+* `수정` require 를 사용해 내장 모듈을 가져올 때 ScriptRuntime 의 동기화 상태에 문제가 발생하는 (임시 해결) 문제를 수정 _[`issue #298`](http://issues.autojs6.com/298)_
+* `수정` notice 모듈에 getBuilder 등의 확장 메서드가 없는 문제를 수정 _[`issue #301`](http://issues.autojs6.com/301)_
+* `수정` shizuku/shell 메서드가 문자열 파라미터를 받지 않는 문제를 수정 _[`issue #310`](http://issues.autojs6.com/310)_
+* `수정` colors.pixel 메서드가 단일 채널 이미지 파라미터를 받지 않는 문제를 수정 _[`issue #350`](http://issues.autojs6.com/350)_
+* `수정` engines.execScript / execScriptFile 메서드가 스크립트 실행 시 기본 작업 디렉토리를 잘못 설정하는 문제를 수정 _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `수정` floaty.window / floaty.rawWindow 가 서브 스레드에서 실행되지 않는 문제를 수정
+* `수정` floaty.getClip 이 클립보드 내용을 올바르게 가져오지 못하는 문제를 수정 _[`issue #341`](http://issues.autojs6.com/341)_
+* `수정` ui.inflate 의 반환 값에서 attr, on, click 등의 프로토타입 메서드가 누락되는 문제를 수정
+* `수정` 일부 메서드 호출 시 발생하는 예외가 try..catch 로 처리되지 않는 문제를 수정 _[`issue #345`](http://issues.autojs6.com/345)_
+* `수정` 레이아웃 분석 페이지에서 코드 생성 중 앱이 종료되는 문제를 수정 _[`issue #288`](http://issues.autojs6.com/288)_
+* `수정` 패키지화된 앱에서 shizuku 모듈을 제대로 사용할 수 없는 문제를 수정 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `수정` 코드 에디터에서 줄 끝으로 이동할 때 커서가 다음 줄 맨 앞으로 이동하는 문제를 수정
+* `수정` 설정 페이지의 다이얼로그 요소를 연속해서 빠르게 탭할 경우 앱이 종료되는 문제를 수정
+* `개선` 패키지 앱 템플릿의 APK 파일 크기 최적화
+* `개선` 앱 (및 패키지 앱) 이 더 많은 권한을 지원하도록 개선 _[`issue #338`](http://issues.autojs6.com/338)_
+* `개선` 패키징 페이지에 Pinyin 라이브러리 옵션 추가
+* `개선` 패키지 앱 메인 페이지에서 상태 표시줄 배경과 텍스트 색상을 최적화
+* `개선` 패키지 앱 설정 페이지에 전체 파일 접근 및 알림 전송과 같은 특수 권한용 스위치 추가 _[`issue #354`](http://issues.autojs6.com/354)_
+* `개선` 컨트롤의 텍스트와 아이콘 색상이 테마의 밝기에 따라 자동으로 조정되도록 개선
+* `개선` 컨트롤 색상과 배경 간의 대비가 낮을 때 시각적 경험 개선
+* `개선` 컬러 피커의 HEX 입력란에서 클립보드에서 붙여넣기 시 호환성 개선
+* `개선` 앱 내비게이션 바를 시각적 경험을 위해 투명 또는 반투명으로 설정
+* `개선` 라이트 모드에서 상태 표시줄과 내비게이션 바의 기본 UI 모드가 `md_grey_50` 색상으로 설정되도록 개선
+* `개선` 홈 드로어의 접근성 서비스 스위치가 스크립트 코드와 동기화되도록 개선
+* `개선` 메인 페이지의 문서 페이지에 양방향 검색 버튼 추가
+* `개선` 메인 페이지 '파일' 탭에서 길게 눌러 플로팅 버튼의 표시 상태를 전환할 수 있도록 개선
+* `개선` 코드 에디터 타이틀이 폰트 크기를 자동으로 조절하도록 개선
+* `개선` 로그 페이지의 플로팅 버튼 표시가 리스트 스크롤 동작과 연동되도록 개선
+* `개선` 스크립트 프로젝트의 project.json 설정 파일이 더 많은 패키징 옵션을 지원하도록 개선 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `개선` project.json 설정 파일이 옵션 이름의 유연한 매칭과 별칭 호환을 지원하도록 개선
+* `개선` APK 파일 정보 대화상자에 파일 크기와 서명 스킴 정보를 추가
+* `개선` APK 파일 정보 대화상자가 텍스트 복사 및 앱 상세 정보로 이동하기 위한 클릭 리스너를 지원하도록 개선
+* `개선` com.stardust 접두어를 가진 패키지를 복원하여 코드 호환성을 개선 _[`issue #290`](http://issues.autojs6.com/290)_
+* `개선` floaty.window / floaty.rawWindow 메서드가 메인 스레드와 서브 스레드 모두에서 실행되도록 개선
+* `개선` 글로벌 메서드 getClip 이 필요에 따라 floaty.getClip 을 사용하도록 하여 호환성을 개선
+* `개선` files.path 및 관련 메서드가 null 경로일 경우에도 적절하게 처리되도록 개선
+* `개선` 최신 공식 Rhino 엔진과의 동기화 및 코드 조정
+* `개선` README.md 를 개선하여 프로젝트 빌드 및 실행 방법에 대한 문서를 보강 _[`issue #344`](http://issues.autojs6.com/344)_
+* `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v662)_
+
 # v6.6.1
 
 ###### 2025/01/01
@@ -171,7 +223,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 * `수정` UiObjectCollection 인스턴스에서 메서드 및 속성이 누락된 문제
 * `개선` 패키징 페이지에서 서명 구성, 키 저장소 관리 및 권한 설정을 지원합니다. ([luckyloogn]()) _[`pr #286`]()_
 * `개선` 플로팅 윈도우의 현재 패키지 이름 및 현재 활동 이름의 인식 정확도가 향상되었습니다 (우선 순위: Shizuku > Root > A11Y)
-* `개선` currentPackage 및 currentActivity의 인식 정확도가 향상되었습니다 (우선 순위: Shizuku > Root > A11Y)
+* `개선` currentPackage 및 currentActivity 의 인식 정확도가 향상되었습니다 (우선 순위: Shizuku > Root > A11Y)
 * `개선` 로그 활동 창의 개별 항목 텍스트 내용을 더블 클릭 또는 길게 눌러 선택하는 기능 복원 _[`issue #280`](http://issues.autojs6.com/280)_
 * `개선` project.json 파일이 손상된 경우에도 가능한 한 중요한 정보를 복원
 * `개선` 단일 파일을 패키징할 때 자동 생성된 패키지 이름 접미사를 간체자로부터 병음으로 변환 (다음 음도 지원)
@@ -185,7 +237,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 
 ###### 2024/12/02 - 내장 모듈 재작성, 신중한 업그레이드 필요
 
-* `힌트` 기존 모듈이 스크립트 실행 효율성을 높이기 위해 Kotlin으로 재작성되었으나, 개선을 위한 몇 가지 반복이 필요합니다
+* `힌트` 기존 모듈이 스크립트 실행 효율성을 높이기 위해 Kotlin 으로 재작성되었으나, 개선을 위한 몇 가지 반복이 필요합니다
 * `힌트` 내장된 init.js 파일은 기본적으로 비어 있지만, 개발자가 사용자 정의를 위해 모듈을 마운트할 수 있습니다
 * `추가` axios 모듈 / cheerio 모듈 ([AutoX](https://github.com/kkevsekk1/AutoX) 참조)
 * `추가` sqlite 모듈, SQLite 데이터베이스 간단 조작에 사용됩니다 ([Auto.js Pro](https://g.pro.autojs.org/) 참조) (프로젝트 문서 > [SQLite](https://docs.autojs6.com/#/sqlite) 참조)
@@ -212,53 +264,53 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 * `추가` floaty.getClip 메소드는 플로팅 창의 포커스를 통해 클립보드 내용을 간접적으로 얻는 데 사용됩니다
 * `수정` Fragment 하위 클래스 (예: [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 등) 내의 View Binding 메모리 누수
 * `수정` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 등의 클래스 내의 인스턴스 메모리 누수
-* `수정` Android 14에서 스크린 캡처 권한을 요청할 때 앱이 충돌하는 문제 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `수정` Android 14에서 포어그라운드 서비스를 시작할 때 앱이 충돌하는 문제
-* `수정` Android 14에서 코드 에디터에서 실행 버튼을 클릭해도 점등되지 않는 문제
+* `수정` Android 14 에서 스크린 캡처 권한을 요청할 때 앱이 충돌하는 문제 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
+* `수정` Android 14 에서 포어그라운드 서비스를 시작할 때 앱이 충돌하는 문제
+* `수정` Android 14 에서 코드 에디터에서 실행 버튼을 클릭해도 점등되지 않는 문제
 * `수정` 프로젝트 패키징 후 필요한 라이브러리 파일이 부족하여 앱이 정상적으로 실행되지 않을 수 있는 문제 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
 * `수정` 프로젝트 편집 시 지정된 아이콘 리소스가 없는 경우 앱이 충돌하는 문제 _[`issue #203`](http://issues.autojs6.com/203)_
 * `수정` 스크린 캡처 권한 획득 시 지정된 화면 방향의 스크린샷 리소스를 매개변수로 얻지 못할 수 있는 문제
 * `수정` 일부 기기에서 스크립트 바로가기를 정상적으로 추가할 수 없는 문제 (시도 수정) _[`issue #221`](http://issues.autojs6.com/221)_
 * `수정` http 모듈 및 관련 메소드를 호출할 때 축적된 요청으로 인해 전송 지연이 발생하는 문제 _[`issue #192`](http://issues.autojs6.com/192)_
-* `수정` AutoJs6가 메인 액티비티 페이지에 들어가기 전에 Shizuku 서비스가 정상적으로 사용할 수 없는 문제 (시도 수정) _[`issue #255`](http://issues.autojs6.com/255)_
+* `수정` AutoJs6 가 메인 액티비티 페이지에 들어가기 전에 Shizuku 서비스가 정상적으로 사용할 수 없는 문제 (시도 수정) _[`issue #255`](http://issues.autojs6.com/255)_
 * `수정` random(min, max) 메소드에서 결과가 오버플로우할 가능성이 있는 문제
 * `수정` pickup 메소드의 결과형 매개변수가 빈 배열을 올바르게 전달할 수 없는 문제
-* `수정` UiObject#bounds()에서 얻은 컨트롤 경계가 의도와 다르게 변경될 수 있는 문제
+* `수정` UiObject#bounds() 에서 얻은 컨트롤 경계가 의도와 다르게 변경될 수 있는 문제
 * `수정` text/button/input 요소의 텍스트 내용에 하프 사이즈의 이중 따옴표가 포함된 경우 올바르게 구문 분석되지 않는 문제
 * `수정` text/textswitcher 요소의 autoLink 속성이 작동하지 않는 문제
 * `수정` 다른 스크립트가 동일한 ScriptRuntime 객체를 잘못 공유할 가능성이 있는 문제
-* `수정` 전역 변수 HEIGHT 및 WIDTH가 Getter 동적 속성을 잃는 문제
-* `수정` 스크립트 시작 시 RootShell이 즉시 로드되어 시작이 느려지는 문제
+* `수정` 전역 변수 HEIGHT 및 WIDTH 가 Getter 동적 속성을 잃는 문제
+* `수정` 스크립트 시작 시 RootShell 이 즉시 로드되어 시작이 느려지는 문제
 * `수정` 콘솔 플로팅 창에서 배경색을 설정하면 사각형의 모서리가 사라지는 문제
 * `수정` 서비스 이상 문제를 일으킬 수 있는 접근성 서비스의 자동 시작 (시도 수정)
 * `수정` 홈페이지의 문서 페이지에서 왼쪽 또는 오른쪽으로 이동할 때 WebView 컨트롤이 ViewPager 전환을 유발할 수 있는 문제
 * `수정` 파일 확장명이 대문자를 포함하는 경우 파일 관리자에서 인식하지 않는 문제
 * `수정` 파일 관리자가 프로젝트 디렉토리에 처음 들어갔을 때 프로젝트를 자동으로 인식하지 못할 수 있는 문제
 * `수정` 파일 관리자에서 폴더를 삭제 후 페이지가 자동 갱신되지 않는 문제
-* `수정` 파일 관리자에서 파일 및 폴더를 정렬할 때 ASCII의 선행 문자명을 멀리 두는 문제
+* `수정` 파일 관리자에서 파일 및 폴더를 정렬할 때 ASCII 의 선행 문자명을 멀리 두는 문제
 * `수정` 코드 편집기의 디버그 기능에서 FAILED ASSERTION 예외 발생
 * `수정` 코드 편집기에서 디버그 중 편집기를 닫은 후 다시 정상적으로 디버그할 수 없는 문제
 * `수정` 코드 편집기에서 행의 끝으로 이동할 때 끝 문자 누락 가능성 있는 문제
 * `수정` 메인 액티비티 페이지에서 로그 액티비티 페이지를 실행할 때 플래시 스크린 문제 발생 가능성
 * `수정` 앱 패키지가 opencc 모듈을 정상적으로 사용할 수 없는 문제
 * `개선` 패키지 페이지 내 '사용 불가 ABI' 컨트롤의 클릭 힌트 사용자 경험
-* `개선` Shizuku를 사용하여 '포인터 위치' 디스플레이 스위치를 제어하는 것을 지원
-* `개선` Shizuku를 사용하여 '미디어 프로젝션' 및 '보안 설정 수정' 권한 스위치를 제어하는 것을 지원
-* `개선` automator.gestureAsync/gesturesAsync가 콜백 함수 매개변수를 지원
+* `개선` Shizuku 를 사용하여 '포인터 위치' 디스플레이 스위치를 제어하는 것을 지원
+* `개선` Shizuku 를 사용하여 '미디어 프로젝션' 및 '보안 설정 수정' 권한 스위치를 제어하는 것을 지원
+* `개선` automator.gestureAsync/gesturesAsync 가 콜백 함수 매개변수를 지원
 * `개선` tasks 모듈이 동기화 방식으로 데이터베이스 작업을 수행하는 것을 지원, 데이터 액세스의 불일치 문제 방지
-* `개선` 스크립트 실행 모드가 파이프 기호로 구분된 모드 매개변수 (예: 'ui|auto';처럼 시작)를 지원
+* `개선` 스크립트 실행 모드가 파이프 기호로 구분된 모드 매개변수 (예: 'ui|auto';처럼 시작) 를 지원
 * `개선` 스크립트 실행 모드가 싱글 쿼테이션 및 백틱을 지원하여 세미콜론 생략 (예: 'ui'; 또는 'ui'처럼 시작) 가능
 * `개선` 스크립트 실행 모드가 axios, cheerio, dayjs 등의 모드 매개변수로 내장 확장 모듈의 빠른 가져오기를 지원 (예: 'axios';처럼 시작)
 * `개선` 스크립트 실행 모드가 x 또는 jsox 모드 매개변수로 JavaScript 내장 객체 확장 모듈의 빠른 활성화를 지원 (예: 'x';처럼 시작)
 * `개선` img 요소의 src 및 path 속성이 로컬 상대 경로를 지원 (예: '<img src="a.png" />'처럼)
 * `개선` 코드 편집기에서 Java 클래스나 패키지명을 가져오는 위치의 지능형 판단을 지원
 * `개선` images 모듈이 이미지 매개변수로 경로의 직접 사용을 지원
-* `개선` importPackage가 문자열 매개변수를 지원
+* `개선` importPackage 가 문자열 매개변수를 지원
 * `개선` 서버 모드의 IP 주소가 클립보드 가져오기를 스마트하게 인식하고, 스페이스 키 스마트 변환을 지원
 * `개선` 파일 관리자가 새 파일을 생성할 때 기본 접두사 선택 및 적절한 숫자 접미사의 자동 생성을 지원
 * `개선` 파일 관리 프로젝트 실행 시 예외 메시지 구체화 _[`issue #268`](http://issues.autojs6.com/268)_
 * `개선` 파일 관리자가 더 많은 유형을 지원하고, 해당 아이콘 심볼을 표시 (800 이상의 파일 타입 지원)
-* `개선` 파일 관리자에서 편집 가능한 파일 타입(jpg/doc/pdf...)에 편집 버튼 추가
+* `개선` 파일 관리자에서 편집 가능한 파일 타입 (jpg/doc/pdf...) 에 편집 버튼 추가
 * `개선` 파일 관리자가 APK 파일의 기본 정보, Manifest 정보 및 권한 목록을 표시하는 것을 지원
 * `개선` 파일 관리자가 오디오 및 비디오 같은 미디어 파일의 기본 정보 및 MediaInfo 정보를 표시하는 것을 지원
 * `개선` 단일 파일 패키징 시 적절한 정규화 이름 패키지를 자동 입력하며, 유효하지 않은 문자 필터링을 권장
@@ -267,49 +319,9 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 �
 * `개선` 패키지 프로젝트 설정 파일의 abis/libs 옵션이 무효하거나 사용할 수 없을 때 관련 메시지를 지원
 * `개선` 불필요한 증가 방지를 위해 릭 캐너리를 릴리스 버전에서 제외
 * `개선` 프로젝트 소스 코드 내 모든 영어 주석에 한국어 번역 추가하여 읽기 쉬운 주석 개선
-* `개선` README 및 CHANGELOG에 여러 언어 지원 (스크립트를 통한 자동 생성)
+* `개선` README 및 CHANGELOG 에 여러 언어 지원 (스크립트를 통한 자동 생성)
 * `개선` Gradle 빌드 스크립트의 버전 적응 능력을 개선
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v660)_
-
-# v6.5.0
-
-###### 2023/12/02
-
-* `추가` opencc 모듈 (프로젝트 문서 > [중국어 변환](https://docs.autojs6.com/#/opencc)) (참조 [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
-* `추가` UiSelector에 [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) 및 [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) 메소드 추가 _[`issue #115`](http://issues.autojs6.com/115)_
-* `추가` 번들 앱 페이지에 ABI 및 라이브러리 필터링 지원 추가 (참조 [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
-* `수정` 번들 앱 파일 크기 비정상적으로 큰 문제 (참조 [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
-* `수정` 번들 앱이 일부 예외 메시지를 표시하지 못하고 인쇄하지 않는 문제
-* `수정` 번들 앱 페이지에서 앱 아이콘을 선택한 후 빈 아이콘이 표시될 수 있는 문제
-* `수정` 번들 앱이 MLKit Google OCR 라이브러리를 포함할 때 발생할 수 있는 초기화되지 않은 컨텍스트 예외
-* `수정` ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u> 메소드가 작동하지 않는 문제
-* `수정` 일부 텍스트 (로그 페이지 등)의 언어가 앱 설정 언어와 일치하지 않는 문제
-* `수정` 홈페이지 드로워 스위치 항목에서 일부 언어가 글자 넘침 현상이 발생할 수 있는 문제
-* `수정` 일부 장치에서 접근성 서비스가 켜진 후 즉시 자동으로 꺼지고 아무 메시지도 표시되지 않는 문제 _[`issue #181`](http://issues.autojs6.com/181)_
-* `수정` 일부 장치에서 접근성 서비스가 켜진 후 물리 버튼이 앱 충돌을 유발하는 문제 (시도됨) _[`issue #183`](http://issues.autojs6.com/183)_ _[`issue #186`](http://issues.autojs6.com/186#issuecomment-1817307790)_
-* `수정` auto(true)로 접근성 서비스를 다시 시작한 후 발생하는 pickup 기능 오류 문제 (시도됨) _[`issue #184`](http://issues.autojs6.com/184)_
-* `수정` floaty 모듈에서 떠있는 창을 만들 때 발생할 수 있는 앱 충돌 문제 (시도됨)
-* `수정` app.startActivity에서 약칭 매개변수를 사용할 수 없는 문제 _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
-* `수정` importClass를 사용할 때 클래스 이름이 전역 변수와 충돌하면 코드가 예외를 발생시키는 문제 _[`issue #185`](http://issues.autojs6.com/185)_
-* `수정` Android 7.x에서 접근성 서비스를 사용할 수 없는 문제
-* `수정` Android 14에서 runtime.<u>loadJar/loadDex</u> 메소드가 정상적으로 작동하지 않는 문제 (시도됨)
-* `수정` 안드로이드 시스템의 빠른 설정 패널에서 "레이아웃 범위 분석" 및 "레이아웃 계층 분석"을 사용할 수 없는 문제 _[`issue #193`](http://issues.autojs6.com/193)_
-* `수정` 자동 업데이트 검사가 앱 [ANR](https://developer.android.com/topic/performance/vitals/anr)을 유발할 수 있는 문제 (시도됨) _[`issue #186`](http://issues.autojs6.com/186)_
-* `수정` 파일 관리자에서 샘플 코드 폴더 클릭 후 '위로' 버튼을 클릭 시 작업 디렉터리 페이지로 돌아가지 않는 문제 _[`issue #129`](http://issues.autojs6.com/129)_
-* `수정` 코드 편집기의 바꾸기 기능 사용 시 바꾸기 버튼이 표시되지 않는 문제
-* `수정` 코드 편집기에서 길게 눌러 삭제 시 앱 충돌 문제가 발생할 수 있는 문제 (시도됨)
-* `수정` 코드 편집기에서 fx 버튼 클릭 시 모듈 함수 빠른 선택 패널이 표시되지 않는 문제
-* `수정` 코드 편집기 모듈 함수 빠른 선택 패널에 표시되는 함수 이름이 넘칠 수 있는 문제
-* `개선` 코드 편집기 모듈의 빠른 기능 패널이 야간 모드에 적응합니다.
-* `개선` 포장된 애플리케이션의 시작 페이지가 야간 모드에 적응하고 애플리케이션 아이콘의 레이아웃이 조정됩니다.
-* `개선` 포장된 애플리케이션 페이지는 소프트웨어 키보드의 ENTER 키를 사용하여 커서 내비게이션을 지원합니다.
-* `개선` 포장된 애플리케이션 페이지는 ABI 및 라이브러리 제목을 클릭하여 전체 선택 상태를 토글할 수 있습니다.
-* `개선` 포장된 애플리케이션 페이지의 기본 ABI 선택은 비선택 항목에 대한 가이드 프롬프트가 추가된 지능형 방식으로 이루어집니다.
-* `개선` 파일 관리자에서는 파일 및 폴더의 유형 및 특성에 따라 메뉴 항목의 표시가 조정됩니다.
-* `개선` 파일 관리자의 폴더 마우스 오른쪽 클릭 메뉴에 애플리케이션 포장 옵션이 추가됩니다.
-* `개선` 접근성 서비스가 활성화되었지만 제대로 작동하지 않는 경우, AutoJs6 홈페이지의 드로어 스위치에 비정상적인 상태가 반영됩니다.
-* `개선` 콘솔에는 오류 메시지를 인쇄할 때 상세한 스택 정보가 포함됩니다.
-* `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
 
 ##### 더 많은 버전 기록은 참조하십시오
 
@@ -376,7 +388,7 @@ SDK Tools (SDK 도구) (오른쪽 창에 위치)
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다.
 
-2025 년 4 월 13 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24`입니다.
+2025 년 4 월 16 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24`입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
@@ -565,6 +577,7 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field
     - Run Gradle task "app:appendDigestToReleasedFiles"
+    - Check VERSION_BUILD in version.properties with released apks
     - Commit and push to GitHub
     - Publish the latest release with signed APKs
 )

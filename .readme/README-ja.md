@@ -155,6 +155,58 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 
 ******
 
+# v6.6.2
+
+###### 2025/04/16
+
+* `新機能` ui.statusBarAppearanceLight, statusBarAppearanceLightBy, navigationBarColor などのメソッド
+* `新機能` ui.statusBarHeight 属性 (getter) により, ステータスバーの高さを取得可能 _[`issue #357`](http://issues.autojs6.com/357)_
+* `新機能` images.flip メソッドで画像を反転 _[`issue #349`](http://issues.autojs6.com/349)_
+* `新機能` 設定ページに『ファイル拡張子』オプションを追加
+* `新機能` テーマ設定ページが新しいレイアウト（グルーピング, 配置, 検索, 履歴, カラーピッカーの改善など）に対応
+* `修正` Android 15 において, ステータスバーの背景色がテーマカラーと一致しない問題を修正
+* `修正` plugins.load メソッドでプラグインが正しくロードされない問題を修正 _[`issue #290`](http://issues.autojs6.com/290)_
+* `修正` Android 7.x で dx ライブラリが正しく動作しない問題を修正 _[`issue #293`](http://issues.autojs6.com/293)_
+* `修正` require を使用して組み込みモジュールをインポートする際, ScriptRuntime の同期状態に問題が生じる（暫定対応） _[`issue #298`](http://issues.autojs6.com/298)_
+* `修正` notice モジュールに getBuilder などの拡張メソッドが欠如している問題を修正 _[`issue #301`](http://issues.autojs6.com/301)_
+* `修正` shizuku/shell メソッドが文字列パラメータを受け付けない問題を修正 _[`issue #310`](http://issues.autojs6.com/310)_
+* `修正` colors.pixel メソッドがシングルチャンネル画像のパラメータを受け付けない問題を修正 _[`issue #350`](http://issues.autojs6.com/350)_
+* `修正` engines.execScript / execScriptFile メソッドが, スクリプト実行時にワーキングディレクトリを誤って設定する問題を修正 _[`issue #358`](http://issues.autojs6.com/358)_ _[`issue #340`](http://issues.autojs6.com/340)_ _[`issue #339`](http://issues.autojs6.com/339)_
+* `修正` floaty.window / floaty.rawWindow がサブスレッドで実行できない問題を修正
+* `修正` floaty.getClip がクリップボードの内容を正しく取得できない場合がある問題を修正 _[`issue #341`](http://issues.autojs6.com/341)_
+* `修正` ui.inflate の返り値から attr, on, click などのプロトタイプメソッドが欠落する問題を修正
+* `修正` 一部メソッドで発生する例外が try..catch によって捕捉されない問題を修正 _[`issue #345`](http://issues.autojs6.com/345)_
+* `修正` レイアウト解析ページでコード生成時にアプリがクラッシュする可能性がある問題を修正 _[`issue #288`](http://issues.autojs6.com/288)_
+* `修正` パッケージ化されたアプリが shizuku モジュールを正しく利用できない問題を修正 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
+* `修正` コードエディタで行末へ移動すると, カーソルが次の行の先頭に位置してしまう問題を修正
+* `修正` 設定ページのダイアログ要素を連続して高速にタップすると, アプリがクラッシュする問題を修正
+* `改善` パッケージアプリのテンプレートにおける APK ファイルサイズの最適化
+* `改善` アプリ（およびパッケージアプリ）がより多くの権限に対応 _[`issue #338`](http://issues.autojs6.com/338)_
+* `改善` パッケージングページに Pinyin ライブラリのオプションを追加
+* `改善` パッケージアプリのメインページにおいて, ステータスバーの背景とテキスト色を最適化
+* `改善` パッケージアプリの設定ページに, 特別な権限（全ファイルアクセスや通知送信）用のトグルスイッチを追加 _[`issue #354`](http://issues.autojs6.com/354)_
+* `改善` コントロールのテキストとアイコンが, テーマの明るさに合わせて自動で調整されるよう改善
+* `改善` コントロールの色と背景とのコントラストが低い場合の視認性を向上
+* `改善` カラーピッカー内の HEX 入力欄に, クリップボードからの貼り付け時の互換性を向上
+* `改善` アプリのナビゲーションバーを, より良いビジュアル体験のために透明または半透明に設定
+* `改善` ライトモード時, ステータスバーとナビゲーションバーのデフォルト UI モードをカラー `md_grey_50` に設定
+* `改善` ホームドロワー内のアクセシビリティサービスのスイッチを, スクリプトコードと同期するよう改善
+* `改善` ホームページのドキュメントページに双方向検索ボタンを追加
+* `改善` ホームページの『ファイル』タブで, 長押しによりフローティングボタンの表示状態を切り替え可能に
+* `改善` コードエディタのタイトルがフォントサイズを自動調整するよう改善
+* `改善` ログページのフローティングボタンの表示が, リストのスクロール動作と連動するよう改善
+* `改善` スクリプトプロジェクトの project.json 設定ファイルが, より多くのパッケージオプションに対応 _[`issue #305`](http://issues.autojs6.com/305)_ _[`issue #306`](http://issues.autojs6.com/306)_
+* `改善` project.json 設定ファイルが, オプション名の柔軟なマッチングとエイリアスに対応するよう改善
+* `改善` APK ファイル情報ダイアログに, ファイルサイズと署名スキームの情報を追加
+* `改善` APK ファイル情報ダイアログで, テキストコピーやアプリ詳細への遷移用クリックリスナーに対応
+* `改善` com.stardust 接頭辞のパッケージを復元し, コード互換性を向上 _[`issue #290`](http://issues.autojs6.com/290)_
+* `改善` floaty.window / floaty.rawWindow メソッドを, メインスレッドおよびサブスレッドの両方で実行可能に改善
+* `改善` グローバルメソッド getClip が, 必要に応じて floaty.getClip を利用するよう改善し, 互換性を向上
+* `改善` files.path および関連メソッドが, null のパス指定時にも適切に動作するよう改善
+* `改善` 最新の公式 Rhino エンジンへの同期およびコードの調整
+* `改善` README.md を改善し, プロジェクトのビルドおよび実行方法のドキュメントを充実 _[`issue #344`](http://issues.autojs6.com/344)_
+* `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v662)_
+
 # v6.6.1
 
 ###### 2025/01/01
@@ -162,14 +214,14 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `新機能` 中国語のピンイン変換用の Pinyin モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin))
 * `新機能` 中国語のピンイン変換用の Pinyin4j モジュール (プロジェクトドキュメントを参照 > [中国語ピンイン](https://docs.autojs6.com/#/pinyin4j))
 * `新機能` コントロールまたはコントロールコレクションが類似しているかを判定する UiObject#isSimilar と UiObjectCollection#isSimilar メソッド
-* `新機能` グローバルメソッド「currentComponent」、現在アクティブなコンポーネントの名前情報を取得するために使用されます
+* `新機能` グローバルメソッド "currentComponent", 現在アクティブなコンポーネントの名前情報を取得するために使用されます
 * `修正` 一部の環境でバージョンを低く戻すことでプロジェクトが正常にコンパイルできなくなる問題
 * `修正` 存在しないメソッドを呼び出す際に発生する可能性がある「非プリミティブ型の値」エラー
 * `修正` 一部のデバイスでスクリプトショートカットが正常に追加できない問題 (暫定修正) _[`issue #221`](http://issues.autojs6.com/221)_
 * `修正` automator.click/longClick メソッドのパラメーター型制限の誤り _[`issue #275`](http://issues.autojs6.com/275)_
 * `修正` セレクターが ConsString 型のパラメーターをサポートしない問題 _[`issue #277`](http://issues.autojs6.com/277)_
 * `修正` UiObjectCollection インスタンスにメソッドおよびプロパティが欠如している問題
-* `改善` パッケージ化ページで署名設定、キーストア管理、権限設定をサポートします（[luckyloogn]() による） _[`pr #286`]()_
+* `改善` パッケージ化ページで署名設定, キーストア管理, 権限設定をサポートします（[luckyloogn]() による） _[`pr #286`]()_
 * `改善` フローティングウィンドウの現在のパッケージ名および現在のアクティビティ名の認識精度を向上 (優先順位: Shizuku > Root > A11Y)
 * `改善` currentPackage と currentActivity の認識精度を向上 (優先順位: Shizuku > Root > A11Y)
 * `改善` ログアクティビティウィンドウの個別エントリのテキスト内容をダブルクリックまたは長押しで選択する機能を復元 _[`issue #280`](http://issues.autojs6.com/280)_
@@ -177,7 +229,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` 単一ファイルをパッケージ化する際に, 自動生成されるパッケージ名のサフィックスを簡体字中国語からピンインに変換 (多音字対応)
 * `改善` UiSelector#findOnce と UiSelector#find メソッドで負の引数をサポート
 * `改善` app.startActivity/startDualActivity メソッドの適応性が向上しました
-* `改善` UI要素や className に関連するセレクターが RecyclerView や Snackbar などのパッケージ名プレフィックス省略形式にさらに対応
+* `改善` UI 要素や className に関連するセレクターが RecyclerView や Snackbar などのパッケージ名プレフィックス省略形式にさらに対応
 * `改善` Rhino エンジンの最新の上流コードを同期し, 既存のプロジェクトに適応させる
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
@@ -271,46 +323,6 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `改善` Gradle のビルドスクリプトのバージョン適応能力を向上
 * `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v660)_
 
-# v6.5.0
-
-###### 2023/12/02
-
-* `新機能` opencc モジュール (参照 プロジェクトドキュメント > [中文変換](https://docs.autojs6.com/#/opencc)) (Ref to [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-8cff73265af19c059547b76aca8882cbaa3209291406f52df1dafbbc78e80c46R268))
-* `新機能` UiSelector に [plus](https://docs.autojs6.com/#/uiObjectType?id=m-plus) 及び [append](https://docs.autojs6.com/#/uiObjectType?id=m-append) メソッドを追加 _[`issue #115`](http://issues.autojs6.com/115)_
-* `新機能` パッケージ化アプリページに ABI およびライブラリのフィルタリングを追加 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX)) _[`issue #189`](http://issues.autojs6.com/189)_
-* `修正` パッケージ化アプリのファイルサイズが異常に大きい問題 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX) / [LZX284](https://github.com/SuperMonster003/AutoJs6/pull/187/files#diff-d932ac49867d4610f8eeb21b59306e8e923d016cbca192b254caebd829198856R61)) _[`issue #176`](http://issues.autojs6.com/176)_
-* `修正` パッケージ化アプリで一部の例外メッセージが表示されないおよび印刷されない問題
-* `修正` パッケージ化ページでアプリアイコンを選択すると空のアイコンが表示される可能性のある問題
-* `修正` パッケージ化アプリに MLKit Google OCR ライブラリを含むと初期化コンテキスト例外が発生する可能性がある
-* `修正` ocr.<u>mlkit/ocr</u>.<u>recognizeText/detect</u> メソッドが無効である問題
-* `修正` 一部のテキスト (例:ログページ) 表示言語がアプリ設定言語と一致しない可能性のある問題
-* `修正` 一部の言語でホームページドロワースイッチ項目にテキストが溢れる可能性のある問題
-* `修正` 一部のデバイスでアクセシビリティサービスが有効化直後に自動的に無効化され, 通知メッセージが表示されない問題 _[`issue #181`](http://issues.autojs6.com/181)_
-* `修正` 一部のデバイスでアクセシビリティサービスが有効化後に物理的なボタンでアプリがクラッシュする問題 (試修) _[`issue #183`](http://issues.autojs6.com/183)_ _[`issue #186`](http://issues.autojs6.com/186#issuecomment-1817307790)_
-* `修正` auto(true) メソッドでアクセシビリティサービスを再起動後, pickup 関数が異常を起こす問題 (試修) _[`issue #184`](http://issues.autojs6.com/184)_
-* `修正` floaty モジュールでフローティングウィンドウを作成するとアプリがクラッシュする可能性のある問題 (試修)
-* `修正` app.startActivity メソッドが略語パラメータを使用できない問題 _[`issue #182`](http://issues.autojs6.com/182)_ _[`issue #188`](http://issues.autojs6.com/188)_
-* `修正` importClass でインポートしたクラス名とグローバル変数が衝突するとコードが例外をスローする問題 _[`issue #185`](http://issues.autojs6.com/185)_
-* `修正` Android 7.x でアクセシビリティサービスが使用できない問題
-* `修正` Android 14 で runtime.<u>loadJar/loadDex</u> メソッドが正常に使用できない可能性がある問題 (試修)
-* `修正` Android システムのクイック設定パネルに「レイアウト範囲分析」と「レイアウト階層分析」が表示されない問題 _[`issue #193`](http://issues.autojs6.com/193)_
-* `修正` 自動更新チェック機能がアプリの [ANR](https://developer.android.com/topic/performance/vitals/anr) を引き起こす可能性がある問題 (試修) _[`issue #186`](http://issues.autojs6.com/186)_
-* `修正` ファイルマネージャーでサンプルコードフォルダーをクリックして「上へ」ボタンを押すとワーキングパスページに戻れない問題 _[`issue #129`](http://issues.autojs6.com/129)_
-* `修正` コードエディターで置換機能を使用時に置換ボタンが表示されない問題
-* `修正` コードエディターで長押し削除するとアプリがクラッシュする可能性のある問題 (試修)
-* `修正` コードエディターで fx ボタンをクリックしてモジュール関数クイックパネルが表示されない問題
-* `修正` コードエディターのモジュール関数クイックパネルのボタン名が溢れる可能性のある問題
-* `改善` コードエディターのモジュール関数クイックパネルがナイトモードに適応します
-* `改善` パッケージ化されたアプリケーションの起動画面がナイトモードに適応し, アプリアイコンのレイアウトが調整されます
-* `改善` パッケージ化されたアプリのページは, ソフトウェアキーボードのENTERキーを使用してカーソルナビゲーションをサポートします
-* `改善` パッケージ化されたアプリのページでは, ABIおよびライブラリのタイトルをクリックして全選択状態を切り替えることができます
-* `改善` パッケージ化されたアプリのページでは, デフォルトのABI選択がインテリジェントになり, 選択不可の項目にガイドプロンプトが追加されます
-* `改善` ファイルマネージャーは, ファイルとフォルダの種類と特性に基づいてメニュー項目の表示を調整します
-* `改善` ファイルマネージャーのフォルダ右クリックメニューには, パッケージ化アプリのオプションが追加されます
-* `改善` アクセシビリティサービスが有効になっているが機能していない場合, 異常状態はAutoJs6ホームページのドロワースイッチに反映されます
-* `改善` コンソールはエラーメッセージを印刷するときに詳細なスタック情報を含みます
-* `改善` 一部の依存関係またはローカルライブラリのバージョン調整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v650)_
-
 ##### 他のバージョン履歴については以下を参照してください
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ja.md)
@@ -376,7 +388,7 @@ SDK Tools (SDK ツール) (右側のウィンドウにあります)
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `19` の使用を推奨します.
 
-2025 年 4 月 13 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
+2025 年 4 月 16 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 
@@ -565,6 +577,7 @@ AutoJs6 プロジェクト開発に参加したすべての貢献者に感謝し
     - Run Gradle task "app:assembleInrtRelease"
     - Build APK to determine the final VERSION_BUILD field
     - Run Gradle task "app:appendDigestToReleasedFiles"
+    - Check VERSION_BUILD in version.properties with released apks
     - Commit and push to GitHub
     - Publish the latest release with signed APKs
 )
