@@ -24,11 +24,11 @@ public class JavaScriptFileSource extends JavaScriptSource {
         mFile = file;
     }
 
-    public JavaScriptFileSource(String path) {
+    public JavaScriptFileSource(@NonNull String path) {
         this(new File(path));
     }
 
-    public JavaScriptFileSource(String name, File file) {
+    public JavaScriptFileSource(@NonNull String name, File file) {
         super(name);
         mCustomsName = true;
         mFile = file;

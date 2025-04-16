@@ -35,12 +35,12 @@ class Engines(private val mScriptRuntime: ScriptRuntime) {
         return execScriptInternal(name, script, config)
     }
 
-    fun execScriptFile(path: String?, config: ExecutionConfig?): ScriptExecution {
-        return AutoJs.instance.scriptEngineService.execute(JavaScriptFileSource(mScriptRuntime.files.path(path)), config)
+    fun execScriptFile(path: String, config: ExecutionConfig?): ScriptExecution {
+        return AutoJs.instance.scriptEngineService.execute(JavaScriptFileSource(mScriptRuntime.files.nonNullPath(path)), config)
     }
 
-    fun execAutoFile(path: String?, config: ExecutionConfig?): ScriptExecution {
-        return AutoJs.instance.scriptEngineService.execute(AutoFileSource(mScriptRuntime.files.path(path)), config)
+    fun execAutoFile(path: String, config: ExecutionConfig?): ScriptExecution {
+        return AutoJs.instance.scriptEngineService.execute(AutoFileSource(mScriptRuntime.files.nonNullPath(path)), config)
     }
 
     fun all(): NativeArray = engines.toNativeArray()

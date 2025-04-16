@@ -26,7 +26,7 @@ public class Database extends SQLiteOpenHelper implements Closeable {
     private final TypeAdapter mTypeAdapter;
 
     public Database(@NonNull Context context, @NonNull ScriptRuntime scriptRuntime, @NonNull String name, int version, boolean readable, @Nullable DatabaseCallback databaseCallback, @NonNull TypeAdapter typeAdapter) {
-        super(context, scriptRuntime.files.path(name), null, version, databaseCallback == null ? null : new DatabaseErrorHandlerWrapper(databaseCallback));
+        super(context, scriptRuntime.files.nonNullPath(name), null, version, databaseCallback == null ? null : new DatabaseErrorHandlerWrapper(databaseCallback));
         mTypeAdapter = typeAdapter;
         mCallback = databaseCallback;
         mScriptRuntime = scriptRuntime;

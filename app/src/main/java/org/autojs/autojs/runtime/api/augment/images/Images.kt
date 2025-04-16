@@ -179,7 +179,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun imread(scriptRuntime: ScriptRuntime, args: Array<out Any?>): AutoJsMat = ensureArgumentsOnlyOne(args) { path ->
-            ApiImages.imread(scriptRuntime.files.path(coerceString(path)))
+            ApiImages.imread(scriptRuntime.files.nonNullPath(coerceString(path)))
         }
 
         @JvmStatic
@@ -244,7 +244,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             }
             when {
                 path.isJsNullish() -> rtImages.captureScreen() as ImageWrapper
-                else -> rtImages.captureScreen(scriptRuntime.files.path(coerceString(path)))
+                else -> rtImages.captureScreen(scriptRuntime.files.nonNullPath(coerceString(path)))
             }
         }
 
@@ -301,7 +301,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.save must be a ImageWrapper" }
             require(!path.isJsNullish()) { "Argument path for images.save must be non-nullish" }
-            scriptRuntime.images.save(image, scriptRuntime.files.path(coerceString(path)), parseImageFormat(format), parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY))
+            scriptRuntime.images.save(image, scriptRuntime.files.nonNullPath(coerceString(path)), parseImageFormat(format), parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY))
         }
 
         @JvmStatic
@@ -311,7 +311,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
             require(image is ImageWrapper) { "Argument image for images.saveImage must be a ImageWrapper" }
             require(!path.isJsNullish()) { "Argument path for images.saveImage must be non-nullish" }
-            scriptRuntime.images.save(image, scriptRuntime.files.path(coerceString(path)), parseImageFormat(format), parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY))
+            scriptRuntime.images.save(image, scriptRuntime.files.nonNullPath(coerceString(path)), parseImageFormat(format), parseQuality(quality, DEFAULT_IMAGE_SAVE_QUALITY))
         }
 
         @JvmStatic
@@ -1002,7 +1002,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val matcher = opt.inquire("matcher") {
                 coerceIntNumber(DescriptorMatcher::class.java.getField(coerceString(it)).get(null))
             } ?: DescriptorMatcher.FLANNBASED
-            val drawMatches = opt.inquire("drawMatches") { scriptRuntime.files.path(coerceString(it)) }
+            val drawMatches = opt.inquire("drawMatches") { scriptRuntime.files.nonNullPath(coerceString(it)) }
             val threshold = opt.inquire("threshold", ::coerceFloatNumber, 0.7f)
 
             val result = ImageFeatureMatching.featureMatching(sceneFeatures.javaObject, objectFeatures.javaObject, matcher, drawMatches, threshold) ?: return@ensureArgumentsLengthInRange null
@@ -1070,7 +1070,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
                 is OpencvMat, is Bitmap -> OpencvSize(getWidth(scriptRuntime, argList), getHeight(scriptRuntime, argList))
                 is String -> BitmapFactory.Options().apply { inJustDecodeBounds = true }.let { opt ->
                     require(scriptRuntime.files.exists(o)) { "Image source ($o) doesn't exist" }
-                    BitmapFactory.decodeFile(scriptRuntime.files.path(o), opt)
+                    BitmapFactory.decodeFile(scriptRuntime.files.nonNullPath(o), opt)
                     OpencvSize(opt.outWidth.toDouble(), opt.outHeight.toDouble())
                 }
                 else -> throw WrappedIllegalArgumentException("Unknown source to parse its size: $o")

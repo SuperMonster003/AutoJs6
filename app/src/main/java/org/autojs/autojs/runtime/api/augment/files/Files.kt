@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.augment.files
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.FlexibleArray
 import org.autojs.autojs.pio.PFileInterface
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -16,6 +17,7 @@ class Files(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
     override val selfAssignmentFunctions = listOf(
         ::open.name to AS_GLOBAL,
+        ::path.name,
         ::join.name,
         ::toFile.name,
     )
@@ -36,6 +38,16 @@ class Files(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
+        fun path(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String? = ensureArgumentsAtMost(args, 1) { argList ->
+            val (o) = argList
+            when {
+                o.isJsNullish() -> scriptRuntime.files.path(null)
+                else -> scriptRuntime.files.path(Context.toString(o))
+            }
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
         fun join(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsAtLeast(args, 1) {
             ApiFiles.join(Context.toString(it[0]), *it.drop(1).map { arg -> Context.toString(arg) }.toTypedArray())
         }
@@ -43,7 +55,7 @@ class Files(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun toFile(scriptRuntime: ScriptRuntime, args: Array<out Any?>): File = ensureArgumentsOnlyOne(args) {
-            File(scriptRuntime.files.path(Context.toString(it)))
+            File(scriptRuntime.files.nonNullPath(Context.toString(it)))
         }
 
     }

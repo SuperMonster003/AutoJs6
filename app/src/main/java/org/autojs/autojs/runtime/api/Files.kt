@@ -1,211 +1,229 @@
-package org.autojs.autojs.runtime.api;
+package org.autojs.autojs.runtime.api
 
-import org.autojs.autojs.pio.PFileInterface;
-import org.autojs.autojs.pio.PFiles;
-import org.autojs.autojs.pio.UncheckedIOException;
-import org.autojs.autojs.runtime.ScriptRuntime;
-import org.autojs.autojs.tool.Func1;
-import org.autojs.autojs.util.EnvironmentUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.regex.Pattern;
+import android.content.Context
+import org.autojs.autojs.pio.PFileInterface
+import org.autojs.autojs.pio.PFiles
+import org.autojs.autojs.pio.PFiles.getElegantPath
+import org.autojs.autojs.pio.PFiles.read
+import org.autojs.autojs.pio.UncheckedIOException
+import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.tool.Func1
+import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
+import org.autojs.autojs6.R
+import java.io.File
+import java.io.File.separator
+import java.io.IOException
+import java.lang.IllegalArgumentException
 
 /**
  * Created by Stardust on Jan 23, 2018.
  * Modified by SuperMonster003 as of May 26, 2022.
+ * Transformed by SuperMonster003 on Apr 15, 2025.
  */
-public class Files {
+class Files(private val scriptRuntime: ScriptRuntime) {
 
-    private final ScriptRuntime mRuntime;
+    val context: Context
+        get() = scriptRuntime.uiHandler.applicationContext
 
-    public Files(ScriptRuntime runtime) {
-        mRuntime = runtime;
-    }
+    val sdcardPath: String
+        get() = externalStoragePath
 
     // FIXME by Stardust on Oct 16, 2018.
     //  ! Is not correct in sub-directory?
     //  ! zh-CN (translated by SuperMonster003 on Jul 29, 2024):
     //  ! 子目录的处理不够准确吗?
-    public String path(String relativePath) {
-        String cwd = cwd();
-        if (cwd == null || relativePath == null || relativePath.startsWith(File.separator)) {
-            return relativePath;
+    fun path(relativePath: String?): String? {
+        relativePath ?: return null
+        val cwd = cwd() ?: return null
+        if (relativePath.startsWith(separator)) {
+            return relativePath
         }
-        File f = new File(cwd);
-        String[] paths = relativePath.split(Pattern.quote(File.separator));
-        for (String path : paths) {
-            if (path.equals(".")) {
-                continue;
+        var file = File(cwd)
+        relativePath.split(separator).forEach { path ->
+            when {
+                path == ".." -> {
+                    file = file.getParentFile() ?: return null
+                }
+                path != "." && path.isNotBlank() -> {
+                    file = File(file, path)
+                }
             }
-            if (path.equals("..")) {
-                f = f.getParentFile();
-                continue;
-            }
-            f = new File(f, path);
         }
-        String path = f.getPath();
-        return relativePath.endsWith(File.separator) ? path + File.separator : path;
+        return when (relativePath.endsWith(separator)) {
+            true -> file.path + separator
+            else -> file.path
+        }
     }
 
-    public String cwd() {
-        return mRuntime.engines.myEngine().cwd();
+    @Throws(IllegalArgumentException::class)
+    fun nonNullPath(relativePath: String): String {
+        return path(relativePath) ?: throw IllegalArgumentException(context.getString(R.string.error_resolved_path_for_a_relative_path_cannot_be_null))
     }
 
-    public PFileInterface open(String path, String mode, String encoding, int bufferSize) {
-        return PFiles.open(path(path), mode, encoding, bufferSize);
+    fun cwd(): String? = scriptRuntime.engines.myEngine().cwd()
+
+    @JvmOverloads
+    fun open(path: String? = null, mode: String? = null, encoding: String? = null, bufferSize: Int? = null): PFileInterface {
+        return PFiles.open(path(path), mode, encoding, bufferSize)
     }
 
-    public PFileInterface open(String path, String mode, String encoding) {
-        return PFiles.open(path(path), mode, encoding);
+    fun create(path: String?): Boolean {
+        return PFiles.create(path(path) ?: return false)
     }
 
-    public PFileInterface open(String path, String mode) {
-        return PFiles.open(path(path), mode);
+    fun createIfNotExists(path: String?): Boolean {
+        return PFiles.createIfNotExists(path(path) ?: return false)
     }
 
-    public PFileInterface open(String path) {
-        return PFiles.open(path(path));
+    fun createWithDirs(path: String?): Boolean {
+        return PFiles.createWithDirs(path(path) ?: return false)
     }
 
-    public boolean create(String path) {
-        return PFiles.create(path(path));
+    fun exists(path: String?): Boolean {
+        return PFiles.exists(path(path))
     }
 
-    public boolean createIfNotExists(String path) {
-        return PFiles.createIfNotExists(path(path));
+    fun ensureDir(path: String?): Boolean {
+        return PFiles.ensureDir(path(path) ?: return false)
     }
 
-    public boolean createWithDirs(String path) {
-        return PFiles.createWithDirs(path(path));
+    @JvmOverloads
+    fun read(path: String?, encoding: String? = PFiles.DEFAULT_ENCODING): String {
+        return PFiles.read(path(path), encoding)
     }
 
-    public boolean exists(String path) {
-        return PFiles.exists(path(path));
-    }
-
-    public boolean ensureDir(String path) {
-        return PFiles.ensureDir(path(path));
-    }
-
-    public String read(String path, String encoding) {
-        return PFiles.read(path(path), encoding);
-    }
-
-    public String read(String path) {
-        return PFiles.read(path(path));
-    }
-
-    public String readAssets(String path, String encoding) {
+    @JvmOverloads
+    fun readAssets(fileName: String?, encoding: String? = PFiles.DEFAULT_ENCODING): String {
+        val niceFileName = ensureFileNameNotNull(fileName, ::readAssets.name)
         try {
-            return PFiles.read(mRuntime.getUiHandler().getApplicationContext().getAssets().open(path), encoding);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            return read(context.assets.open(niceFileName), encoding)
+        } catch (e: IOException) {
+            throw UncheckedIOException(e)
         }
     }
 
-    public String readAssets(String path) {
-        return readAssets(path, "UTF-8");
+    fun readBytes(path: String?): ByteArray {
+        return PFiles.readBytes(path(path))
     }
 
-    public byte[] readBytes(String path) {
-        return PFiles.readBytes(path(path));
+    @JvmOverloads
+    fun write(path: String?, text: String, encoding: String? = PFiles.DEFAULT_ENCODING) {
+        PFiles.write(path(path), text, encoding)
     }
 
-    public void write(String path, String text) {
-        PFiles.write(path(path), text);
+    @JvmOverloads
+    fun append(path: String?, text: String, encoding: String? = PFiles.DEFAULT_ENCODING) {
+        PFiles.append(ensurePathNotNull(path, ::append.name), text, encoding)
     }
 
-    public void write(String path, String text, String encoding) {
-        PFiles.write(path(path), text, encoding);
+    fun appendBytes(path: String?, bytes: ByteArray?) {
+        PFiles.appendBytes(ensurePathNotNull(path, ::appendBytes.name), bytes)
     }
 
-    public void append(String path, String text) {
-        PFiles.append(path(path), text);
+    fun writeBytes(path: String?, bytes: ByteArray?) {
+        PFiles.writeBytes(ensurePathNotNull(path, ::writeBytes.name), bytes)
     }
 
-    public void append(String path, String text, String encoding) {
-        PFiles.append(path(path), text, encoding);
+    fun copy(pathFrom: String?, pathTo: String?): Boolean = PFiles.copy(
+        ensurePathNotNull(pathFrom, ::copy.name, "pathFrom"),
+        ensurePathNotNull(pathTo, ::copy.name, "pathTo"),
+    )
+
+    fun renameWithoutExtension(path: String?, newName: String): Boolean {
+        return PFiles.renameWithoutExtension(ensurePathNotNull(path, ::renameWithoutExtension.name), newName)
     }
 
-    public void appendBytes(String path, byte[] bytes) {
-        PFiles.appendBytes(path(path), bytes);
+    fun rename(path: String?, newName: String): Boolean {
+        return PFiles.rename(ensurePathNotNull(path, ::rename.name), newName)
     }
 
-    public void writeBytes(String path, byte[] bytes) {
-        PFiles.writeBytes(path(path), bytes);
+    fun move(path: String?, newPath: String): Boolean {
+        return PFiles.move(ensurePathNotNull(path, ::move.name), newPath)
     }
 
-    public boolean copy(String pathFrom, String pathTo) {
-        return PFiles.copy(path(pathFrom), path(pathTo));
+    fun getExtension(fileName: String?): String {
+        return PFiles.getExtension(ensureFileNameNotNull(fileName, ::getExtension.name))
     }
 
-    public boolean renameWithoutExtension(String path, String newName) {
-        return PFiles.renameWithoutExtension(path(path), newName);
+    fun getName(filePath: String?): String {
+        return PFiles.getName(ensurePathNotNull(
+            pathToCheck = filePath,
+            funcName = ::getName.name,
+            pathArgName = "filePath",
+            shouldWrapWithPathMethod = false,
+        ))
     }
 
-    public boolean rename(String path, String newName) {
-        return PFiles.rename(path(path), newName);
+    fun getNameWithoutExtension(filePath: String?): String {
+        return PFiles.getNameWithoutExtension(ensurePathNotNull(
+            pathToCheck = filePath,
+            funcName = ::getNameWithoutExtension.name,
+            pathArgName = "filePath",
+            shouldWrapWithPathMethod = false,
+        ))
     }
 
-    public boolean move(String path, String newPath) {
-        return PFiles.move(path(path), newPath);
+    fun remove(path: String?): Boolean {
+        return PFiles.remove(path(path))
     }
 
-    public String getExtension(String fileName) {
-        return PFiles.getExtension(fileName);
+    fun removeDir(path: String?): Boolean {
+        return PFiles.removeDir(path(path))
     }
 
-    public String getName(String filePath) {
-        return PFiles.getName(filePath);
+    fun listDir(path: String?): Array<String> {
+        return PFiles.listDir(path(path))
     }
 
-    public String getNameWithoutExtension(String filePath) {
-        return PFiles.getNameWithoutExtension(filePath);
+    fun listDir(path: String?, filter: Func1<String, Boolean?>): Array<String> {
+        return PFiles.listDir(path(path), filter)
     }
 
-    public boolean remove(String path) {
-        return PFiles.remove(path(path));
+    fun isFile(path: String?): Boolean {
+        return PFiles.isFile(path(path))
     }
 
-    public boolean removeDir(String path) {
-        return PFiles.removeDir(path(path));
+    fun isDir(path: String?): Boolean {
+        return PFiles.isDir(path(path))
     }
 
-    public String getSdcardPath() {
-        return EnvironmentUtils.getExternalStoragePath();
+    fun isEmptyDir(path: String?): Boolean {
+        return PFiles.isEmptyDir(path(path))
     }
 
-    public String[] listDir(String path) {
-        return PFiles.listDir(path(path));
+    fun getHumanReadableSize(bytes: Long): String {
+        return PFiles.getHumanReadableSize(bytes)
     }
 
-    public String[] listDir(String path, Func1<String, Boolean> filter) {
-        return PFiles.listDir(path(path), filter);
+    fun getSimplifiedPath(path: String?): String {
+        return getElegantPath(ensurePathNotNull(path, ::getSimplifiedPath.name, shouldWrapWithPathMethod = false))
     }
 
-    public boolean isFile(String path) {
-        return PFiles.isFile(path(path));
+    private fun ensureFileNameNotNull(fileNameToCheck: String?, funcName: String, fileNameArgName: String = "fileName"): String {
+        fileNameToCheck ?: throw WrappedIllegalArgumentException(
+            context.getString(
+                R.string.error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish,
+                fileNameArgName, Files::class.java.simpleName, funcName,
+            )
+        )
+        return fileNameToCheck
     }
 
-    public boolean isDir(String path) {
-        return PFiles.isDir(path(path));
+    private fun ensurePathNotNull(pathToCheck: String?, funcName: String, pathArgName: String = "path", shouldWrapWithPathMethod: Boolean = true): String {
+        val path = if (shouldWrapWithPathMethod) path(pathToCheck) else pathToCheck
+        path ?: throw WrappedIllegalArgumentException(
+            context.getString(
+                R.string.error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish,
+                pathArgName, Files::class.java.simpleName, funcName,
+            )
+        )
+        return path
     }
 
-    public boolean isEmptyDir(String path) {
-        return PFiles.isEmptyDir(path(path));
+    companion object {
+        fun join(parent: String?, vararg child: String?): String {
+            return PFiles.join(parent, *child)
+        }
     }
-
-    public static String join(String parent, String... child) {
-        return PFiles.join(parent, child);
-    }
-
-    public String getHumanReadableSize(long bytes) {
-        return PFiles.getHumanReadableSize(bytes);
-    }
-
-    public String getSimplifiedPath(String path) {
-        return PFiles.getElegantPath(path);
-    }
-
 }

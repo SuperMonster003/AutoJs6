@@ -109,7 +109,7 @@ object PFiles {
 
     @JvmOverloads
     @JvmStatic
-    fun read(file: File?, encoding: String? = "utf-8"): String {
+    fun read(file: File?, encoding: String? = DEFAULT_ENCODING): String {
         return try {
             read(FileInputStream(file), encoding)
         } catch (e: FileNotFoundException) {
@@ -118,20 +118,18 @@ object PFiles {
     }
 
     @JvmStatic
-    fun read(stream: InputStream, encoding: String?): String {
+    @JvmOverloads
+    fun read(inputStream: InputStream, encoding: String? = DEFAULT_ENCODING): String {
         return try {
-            val bytes = ByteArray(stream.available())
-            stream.read(bytes)
+            val bytes = ByteArray(inputStream.available())
+            inputStream.read(bytes)
             String(bytes, Charset.forName(encoding))
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         } finally {
-            closeSilently(stream)
+            closeSilently(inputStream)
         }
     }
-
-    @JvmStatic
-    fun read(inputStream: InputStream) = read(inputStream, "utf-8")
 
     fun readBytes(stream: InputStream): ByteArray {
         return try {
@@ -203,7 +201,7 @@ object PFiles {
     }
 
     @JvmStatic
-    fun write(fileOutputStream: OutputStream, text: String) = write(fileOutputStream, text, "utf-8")
+    fun write(fileOutputStream: OutputStream, text: String) = write(fileOutputStream, text, DEFAULT_ENCODING)
 
     fun write(outputStream: OutputStream, text: String, encoding: String?) {
         try {

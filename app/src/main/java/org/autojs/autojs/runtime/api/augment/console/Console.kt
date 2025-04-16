@@ -511,7 +511,7 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         fun setGlobalLogConfig(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { config ->
             require(config is NativeObject) { "Argument for console.${::setGlobalLogConfig.name} must be a JavaScript Object" }
             LogConfigurator().apply {
-                fileName = scriptRuntime.files.path(config.inquire("file", ::coerceString, "android-log4j.log"))
+                fileName = scriptRuntime.files.nonNullPath(config.inquire("file", ::coerceString, "android-log4j.log"))
                 filePattern = config.inquire("filePattern", ::coerceString, "%m%n")
                 maxFileSize = config.inquire("maxFileSize", ::coerceLongNumber, 512 * 1024)
                 maxBackupSize = config.inquire("maxBackupSize", ::coerceIntNumber, 5)

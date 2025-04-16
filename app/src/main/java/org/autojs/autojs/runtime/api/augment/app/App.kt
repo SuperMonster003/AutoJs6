@@ -37,6 +37,7 @@ import org.mozilla.javascript.Undefined
 import java.io.File
 import java.net.URI
 import org.autojs.autojs.util.App as PresetApp
+import androidx.core.net.toUri
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
@@ -471,7 +472,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun parseUriRhinoWithRuntime(scriptRuntime: ScriptRuntime, uri: Any?): Uri? = when (uri) {
             is String -> when {
                 uri.startsWith(PROTOCOL_FILE) -> getUriForFileRhinoWithRuntime(scriptRuntime, uri)
-                else -> Uri.parse(uri)
+                else -> uri.toUri()
             }
             is Uri -> parseUriRhinoWithRuntime(scriptRuntime, uri.host)
             else -> null
@@ -501,7 +502,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun openUrlInternal(url: String) {
             val prefix = "http://".takeUnless { url.contains("://") } ?: ""
             Intent(Intent.ACTION_VIEW)
-                .setData(Uri.parse(prefix + url))
+                .setData((prefix + url).toUri())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .let { globalContext.startActivity(it) }
         }
@@ -510,7 +511,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         private fun openDualUrlInternal(scriptRuntime: ScriptRuntime, url: String) {
             val prefix = "http://".takeUnless { url.contains("://") } ?: ""
             Intent(Intent.ACTION_VIEW)
-                .setData(Uri.parse(prefix + url))
+                .setData((prefix + url).toUri())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .let { startActivityForDualUser(scriptRuntime, it) }
         }
@@ -523,16 +524,15 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         @JvmStatic
         @RhinoFunctionBody
-        fun getUriForFileRhinoWithRuntime(scriptRuntime: ScriptRuntime, uri: String): Uri? = Uri.fromFile(
-            File(
-                scriptRuntime.files.path(
-                    when {
-                        uri.startsWith(PROTOCOL_FILE) -> uri.substring(PROTOCOL_FILE.length)
-                        else -> uri
-                    }
-                )
-            )
-        )
+        fun getUriForFileRhinoWithRuntime(scriptRuntime: ScriptRuntime, uri: String): Uri? {
+            val path = scriptRuntime.files.path(
+                when {
+                    uri.startsWith(PROTOCOL_FILE) -> uri.substring(PROTOCOL_FILE.length)
+                    else -> uri
+                }
+            ) ?: return null
+            return Uri.fromFile(File(path))
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -702,7 +702,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 path.isJsNullish() -> false
                 path !is String -> throw RuntimeException("Cannot view $path as it isn't a string")
                 else -> {
-                    val nicePath = scriptRuntime.files.path(path)
+                    val nicePath = scriptRuntime.files.nonNullPath(path)
                     if (!scriptRuntime.files.exists(nicePath)) {
                         throw Error("Cannot view $path as it doesn't exist")
                     }
@@ -724,7 +724,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 path.isJsNullish() -> false
                 path !is String -> throw RuntimeException("Cannot edit $path as it isn't a string")
                 else -> {
-                    val nicePath = scriptRuntime.files.path(path)
+                    val nicePath = scriptRuntime.files.nonNullPath(path)
                     if (!scriptRuntime.files.exists(nicePath)) {
                         throw Error("Cannot edit $path as it doesn't exist")
                     }
@@ -908,13 +908,13 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         private fun launchDualSettingsInternal(scriptRuntime: ScriptRuntime, packageName: String) {
             startActivityForDualUser(scriptRuntime, Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.parse("package:$packageName")
+                data = "package:$packageName".toUri()
             })
         }
 
         private fun uninstallDualInternal(scriptRuntime: ScriptRuntime, packageName: String) {
             startActivityForDualUser(scriptRuntime, Intent(Intent.ACTION_DELETE).apply {
-                data = Uri.parse("package:$packageName")
+                data = "package:$packageName".toUri()
             })
         }
 
@@ -995,7 +995,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 }
             } else {
                 if (!o.prop("data").isJsNullish()) {
-                    intent.setData(Uri.parse(Context.toString(o.prop("data"))))
+                    intent.setData(Context.toString(o.prop("data")).toUri())
                 }
             }
 

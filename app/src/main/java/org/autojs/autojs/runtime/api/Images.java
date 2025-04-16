@@ -244,7 +244,7 @@ public class Images {
 
     public boolean captureScreen(String path) {
         ImageWrapper image = captureScreen();
-        return image != null && image.saveTo(mScriptRuntime.files.path(path));
+        return image != null && image.saveTo(mScriptRuntime.files.nonNullPath(path));
     }
 
     public ImageWrapper copy(@NonNull ImageWrapper image) {

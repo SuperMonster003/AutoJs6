@@ -26,7 +26,7 @@ public class Media implements MediaScannerConnection.MediaScannerConnectionClien
 
     public void scanFile(String path) {
         String mimeType = Mime.fromFileOrWildcard(path);
-        mScannerConnection.scanFile(mRuntime.files.path(path), mimeType);
+        mScannerConnection.scanFile(mRuntime.files.nonNullPath(path), mimeType);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class Media implements MediaScannerConnection.MediaScannerConnectionClien
     }
 
     public void playMusic(String path, float volume, boolean looping) {
-        path = mRuntime.files.path(path);
+        path = mRuntime.files.nonNullPath(path);
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayerWrapper();
         }
