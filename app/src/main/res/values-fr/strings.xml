@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- Translator: [ DeepL (https://www.deepl.com/translator) ] -->
-<!-- Proofreader: [ Bastien ] -->
-<!-- Proofreader: [ JetBrains AI Assistant ] -->
+<!-- Translator : [ DeepL (https://www.deepl.com/translator) ] -->
+<!-- Proofreader : [ Bastien ] -->
+<!-- Proofreader : [ JetBrains AI Assistant ] -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
 
@@ -62,23 +62,23 @@
     <string name="default_value_working_directory">/Scripts</string>
     <string name="description_about_app_and_developer_preference">AutoJs6 est un outil JavaScript automatisé pour Android, qui est open-source et cloné de \"hyb1996/Auto.js\".\n\nPour demander de l\'aide ou des commentaires, allez sur GitHub issues ou rejoignez le groupe Tencent QQ 690946137.</string>
     <string name="description_about_app_tips_preference">1. Maintenez enfoncée l\'icône de l\'application sur la page \"À propos de l\'application et du développeur\" pour accéder à la page des options de développement d\'AutoJs6.</string>
-    <string name="description_app_language_preference">Cette préférence permet de modifier la langue d\'affichage d\'AutoJs6, y compris les messages d\'exception des scripts en cours d\'exécution.\n\nNote: un redémarrage de l\'application peut être nécessaire pour que la langue s\'applique comme prévu.</string>
+    <string name="description_app_language_preference">Cette préférence permet de modifier la langue d\'affichage d\'AutoJs6, y compris les messages d\'exception des scripts en cours d\'exécution.\n\nNote : un redémarrage de l\'application peut être nécessaire pour que la langue s\'applique comme prévu.</string>
     <string name="description_change_working_dir_preference">Changer le chemin du répertoire contenant les scripts</string>.
-    <string name="description_check_for_updates_preference">AutoJs6 obtient et télécharge les mises à jour depuis GitHub.\n\nNote: La mise à jour ne fournit pas encore de support multilingue.</string>
-    <string name="description_documentation_source_preference">Documentation locale: Utilisation des fichiers intégrés d\'AutoJs6 comme sources de documentation, aucune connexion réseau n\'est nécessaire. Le contenu change au fur et à mesure que AutoJs6 est mis à jour.\nDocumentation en ligne: Utilisation des pages GitHub comme sources de documentation, nécessitant une connexion réseau. Le contenu est toujours à jour.\n\nRemarque: pour optimiser l\'expérience de lecture des documents en ligne, il est recommandé d\'utiliser un dispositif d\'affichage grand écran tel qu\'un moniteur de bureau.\nRemarque: à partir de la version 6.2.0, la documentation est encore dans les phases préliminaires de développement, et la plupart du contenu n\'a pas encore été écrit ou mis à jour.</string>
-    <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur: version >= 76\n- Android API Niveau 28 (Android 9) [P] et inférieur: version >= 105</string>
+    <string name="description_check_for_updates_preference">AutoJs6 obtient et télécharge les mises à jour depuis GitHub.\n\nNote : La mise à jour ne fournit pas encore de support multilingue.</string>
+    <string name="description_documentation_source_preference">Documentation locale : Utilisation des fichiers intégrés d\'AutoJs6 comme sources de documentation, aucune connexion réseau n\'est nécessaire. Le contenu change au fur et à mesure que AutoJs6 est mis à jour.\nDocumentation en ligne : Utilisation des pages GitHub comme sources de documentation, nécessitant une connexion réseau. Le contenu est toujours à jour.\n\nRemarque : pour optimiser l\'expérience de lecture des documents en ligne, il est recommandé d\'utiliser un dispositif d\'affichage grand écran tel qu\'un moniteur de bureau.\nRemarque : à partir de la version 6.2.0, la documentation est encore dans les phases préliminaires de développement, et la plupart du contenu n\'a pas encore été écrit ou mis à jour.</string>
+    <string name="description_documentation_source_preference_more">Les conditions suivantes doivent être remplies pour la prise en charge du thème sombre sur les pages de la documentation :\n1. Le mode nuit d\'AutoJs6 est activé\n2. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et supérieur : version >= 76\n- Android API Niveau 28 (Android 9) [P] et inférieur : version >= 105</string>
     <string name="description_extending_js_build_in_objects">L\'extension des objets JavaScript intégrés peut augmenter la flexibilité du code et permettre des fonctionnalités plus riches, mais elle peut provoquer des conflits et même des pannes.\nTous les scripts ont des extensions intégrées activées par défaut lorsque l\'option est activée.\nLes extensions intégrées sont souvent peu sûres et ne sont pas recommandées, sauf si les principes et les risques des extensions intégrées sont clairement compris.\nLorsque l\'option est désactivée, les extensions intégrées peuvent toujours être activées via l\'objet global plugins, comme décrit dans la documentation du projet.</string>
     <string name="description_file_extensions_preference">Permet de définir l\'affichage des extensions de fichier dans l\'explorateur AutoJs6.</string>
     <string name="description_hidden_files_preference">Permet d\'afficher ou non les fichiers et dossiers cachés (commençant généralement par \".\") dans l\'explorateur de fichiers d\'AutoJs6.</string>
     <string name="description_keep_screen_on_when_in_foreground_preference">Préférence pour que l\'écran de l\'appareil reste allumé et lumineux lorsque AutoJs6 est au premier plan.\nPour que cela se produise uniquement sur la page d\'accueil parmi toutes les pages de l\'application AutoJs6, choisissez l\'option \"page d\'accueil uniquement\".</string>
     <string name="description_launcher_shortcuts">Les raccourcis permettent d\'effectuer des actions spécifiques dans AutoJs6. Les utilisateurs peuvent afficher ces raccourcis dans un lanceur pris en charge et démarrer rapidement certaines tâches ou lancer une activité, comme la lecture de la documentation de l\'application AutoJs6, le lancement de la page de configuration d\'AutoJs6, etc.</string>
     <string name="description_manage_ignored_updates_preference">Cliquez pour afficher ou gérer les éléments de la liste.\nAppuyez longuement pour supprimer l\'élément de la liste.</string>
-    <string name="description_night_mode_preference">Le mode nuit (également connu sous le nom de thème sombre) s\'applique à la fois à l\'interface utilisateur du système Android et aux applications exécutées sur l\'appareil, ce qui améliore la visibilité pour les utilisateurs malvoyants et ceux qui sont sensibles à la lumière vive, et facilite l\'utilisation d\'un appareil par quiconque dans un environnement à faible luminosité.\n\nSystème de suivi: AutoJs6 possède des paramètres de mode nuit identiques à ceux du système Android\nToujours activé: AutoJs6 maintient le mode Nuit activé (indépendamment des paramètres du système Android).\nToujours désactivé: AutoJs6 désactive le mode Nuit (indépendamment des paramètres du système Android).\n\nRemarque: l\'option Suivre le système n\'est disponible qu\'à partir du niveau 28 de l\'API Android (Android 9) [P].</string>
-    <string name="description_night_mode_preference_more">Pour activer le mode Nuit dans le système Android :\n- Niveau 29 de l\'API Android (Android 10) [Q] et supérieur: Paramètres -> Affichage -> Thème.\n- Niveau 28 de l\'API Android (Android 9) [P]: Options du développeur -> Mode nuit.\n\nLes conditions suivantes doivent être remplies pour appliquer un mode nuit (thème sombre) à un contenu Web à l\'aide d\'un composant WebView (comme la page de documentation AutoJs6) :\n1. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et plus: version >= 76\n- API Android Niveau 28 (Android 9) [P]: version >= 105\n2. Le contenu Web du composant WebView est adapté au thème sombre (par des ressources CSS ou Android XML, etc.).</string>
+    <string name="description_night_mode_preference">Le mode nuit (également connu sous le nom de thème sombre) s\'applique à la fois à l\'interface utilisateur du système Android et aux applications exécutées sur l\'appareil, ce qui améliore la visibilité pour les utilisateurs malvoyants et ceux qui sont sensibles à la lumière vive, et facilite l\'utilisation d\'un appareil par quiconque dans un environnement à faible luminosité.\n\nSystème de suivi : AutoJs6 possède des paramètres de mode nuit identiques à ceux du système Android\nToujours activé: AutoJs6 maintient le mode Nuit activé (indépendamment des paramètres du système Android).\nToujours désactivé: AutoJs6 désactive le mode Nuit (indépendamment des paramètres du système Android).\n\nRemarque : l\'option Suivre le système n\'est disponible qu\'à partir du niveau 28 de l\'API Android (Android 9) [P].</string>
+    <string name="description_night_mode_preference_more">Pour activer le mode Nuit dans le système Android :\n- Niveau 29 de l\'API Android (Android 10) [Q] et supérieur : Paramètres -> Affichage -> Thème.\n- Niveau 28 de l\'API Android (Android 9) [P]: Options du développeur -> Mode nuit.\n\nLes conditions suivantes doivent être remplies pour appliquer un mode nuit (thème sombre) à un contenu Web à l\'aide d\'un composant WebView (comme la page de documentation AutoJs6) :\n1. WebView du système Android (ou des navigateurs comme Google Chrome) :\n- Android API Level 29 (Android 10) [Q] et plus : version >= 76\n- API Android Niveau 28 (Android 9) [P]: version >= 105\n2. Le contenu Web du composant WebView est adapté au thème sombre (par des ressources CSS ou Android XML, etc.).</string>
     <string name="description_root_mode_preference">Si vous avez un accès exotique à la racine ou un état anormal pour l\'accès à la racine, vous pouvez forcer le réglage de la racine sur racine ou non-racine.</string>
-    <string name="description_root_record_out_file_type_preference">Type binaire: non modifiable, avec l\'extension de fichier \"auto\".\nType JavaScript: peut être édité ou copié directement, avec l\'extension de fichier \"js\".</string>
+    <string name="description_root_record_out_file_type_preference">Type binaire : non modifiable, avec l\'extension de fichier \"auto\".\nType JavaScript : peut être édité ou copié directement, avec l\'extension de fichier \"js\".</string>
     <string name="description_stable_mode">Le mode stable le rend plus stable lors de l\'obtention des limites de mise en page, mais certains résultats peuvent être ignorés.\nA11y service\'s restart required.</string>
-    <string name="description_theme_color_preference">La couleur du thème est appliquée aux widgets, y compris, mais sans s\'y limiter, aux widgets suivants :\nBarre d\'état\nBarre d\'applications\nIcône de fichier\nIcône d\'élément de tâche\nFab\nTitre de la catégorie Paramètres\nBouton de commutation\n\nRemarque: Depuis la version 6.2.0 d\'AutoJs6, il n\'y a pas encore de différence entre la couleur primaire, la couleur primaire foncée et la couleur d\'accentuation.</string>
+    <string name="description_theme_color_preference">La couleur du thème est appliquée aux widgets, y compris, mais sans s\'y limiter, aux widgets suivants :\nBarre d\'état\nBarre d\'applications\nIcône de fichier\nIcône d\'élément de tâche\nFab\nTitre de la catégorie Paramètres\nBouton de commutation\n\nRemarque : Depuis la version 6.2.0 d\'AutoJs6, il n\'y a pas encore de différence entre la couleur primaire, la couleur primaire foncée et la couleur d\'accentuation.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Annulation</string>
@@ -104,6 +104,7 @@
     <string name="dialog_button_system_settings_simplified">Système</string>
     <string name="dialog_button_update_now">Mise à jour</string>
     <string name="dialog_button_use_default">Par défaut</string>
+    <string name="dialog_button_use_palette">Utiliser la palette</string>
     <string name="dialog_button_view_file">Voir le fichier</string>
     <string name="dialog_title_color_details">Détails de la couleur</string>
     <string name="dialog_title_color_palette">Palette de couleurs</string>
@@ -138,7 +139,7 @@
     <string name="error_activity_is_required_for_ui_exec_mode">Une activité est requise, qui pourrait être fournie en exécutant en mode d\'exécution \"ui\"</string>
     <string name="error_an_operation_is_not_implemented">Une opération n\'est pas mise en œuvre</string>
     <string name="error_app_not_installed">L\'application n\'est pas installée</string>
-    <string name="error_app_not_installed_with_name">L\'application n\'est pas installée: \"%s\"</string>
+    <string name="error_app_not_installed_with_name">L\'application n\'est pas installée : \"%s\"</string>
     <string name="error_argument_name_for_class_name_and_member_func_name_cannot_be_nullish">L\'argument %1$s pour %2$s#%3$s ne peut pas être nul</string>
     <string name="error_arguments_cannot_be_empty">Les arguments ne peuvent pas être vides</string>
     <string name="error_arguments_must_be_empty">Les arguments doivent être vides</string>
@@ -147,7 +148,7 @@
     <string name="error_cannot_be_null">%s cannot be null</string>
     <string name="error_cannot_connect_to_github">Impossible de se connecter à GitHub</string>
     <string name="error_cannot_convert_value_into_a_script_runtime_path">Impossible de convertir %s en chemin d\'exécution de script</string>
-    <string name="error_cannot_find_editor_view_from_child_view">Impossible de trouver l\'EditorView depuis la vue enfant: %s</string>
+    <string name="error_cannot_find_editor_view_from_child_view">Impossible de trouver l\'EditorView depuis la vue enfant : %s</string>
     <string name="error_cannot_get_download_url">Cannot get downloading URL</string>
     <string name="error_cannot_rename">Failed to rename</string>
     <string name="error_cannot_retrieve_battery_state">Impossible de récupérer l\'état de la batterie</string>
@@ -156,7 +157,7 @@
     <string name="error_check_for_update">Fail to check for updates</string>
     <string name="error_colon_must_follow_a_valid_ip_address">Les deux points doivent suivre une adresse IP valide</string>
     <string name="error_compass_cannot_be_null">Compass ne peut pas être null</string>
-    <string name="error_connect_to_remote">Impossible de se connecter au serveur distant: %s</string>
+    <string name="error_connect_to_remote">Impossible de se connecter au serveur distant : %s</string>
     <string name="error_continuation_resume_called_without_suspend">La méthode resume() doit être appelée après suspend()</string>.
     <string name="error_continuation_suspend_called_more_than_once">La méthode suspend() ne devrait être appelée qu\'une seule fois</string>.
     <string name="error_corresponding_github_release_may_not_published">La version GitHub correspondante n\'a peut-être pas encore été publiée</string>.
@@ -166,7 +167,7 @@
     <string name="error_empty_broadcast_selection">Il faut sélectionner au moins une diffusion</string>.
     <string name="error_empty_github_release_assets">Aucun actif de la version GitHub à télécharger</string>.
     <string name="error_empty_shell_command">Command est vide</string>
-    <string name="error_enable_server">Cannot enable AutoJs6 server: %s</string>
+    <string name="error_enable_server">Cannot enable AutoJs6 server : %s</string>
     <string name="error_excessive_height_for_template_n_region">Hauteur excessive : modèle [%1$d] > région [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">Largeur excessive : modèle [%1$d] > région [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">Échec de l\'application de l\'historique de la couleur actuelle</string>
@@ -185,7 +186,7 @@
     <string name="error_function_called_more_than_once">%s() appelé plus d\'une fois</string>
     <string name="error_get_github_latest_release">Cannot get latest GitHub release</string>
     <string name="error_handshake_timed_out">Handshake timed out after %d ms</string>
-    <string name="error_illegal_argument" formatted="false">Argument illégal %s: %s</string>
+    <string name="error_illegal_argument" formatted="false">Argument illégal %s : %s</string>
     <string name="error_illegal_relative_url_argument_without_base">L\'URL relative ne peut pas être utilisée sans URL de base</string>
     <string name="error_illegal_ui_object_result_type" formatted="false">Le type de résultat \"%s\" n\'est pas pris en charge pour UiObject</string>
     <string name="error_illegal_url_argument" formatted="false">L\'URL doit commencer par un protocole comme \"https://\" et ainsi de suite</string>
@@ -195,16 +196,16 @@
     <string name="error_images_must_have_the_same_size_and_type">Les images doivent avoir la même taille et le même type</string>
     <string name="error_input_fields_check_failed">Échec de la vérification du champ de saisie</string>
     <string name="error_invalid_color">Couleur invalide</string>
-    <string name="error_invalid_compass">Compas non valide: %s</string>
-    <string name="error_invalid_github_repo">Invalide le dépôt GitHub: %s</string>
+    <string name="error_invalid_compass">Compas non valide : %s</string>
+    <string name="error_invalid_github_repo">Invalide le dépôt GitHub : %s</string>
     <string name="error_invalid_ip_address">Adresse IP invalide</string>
     <string name="error_invalid_login_credentials">Crédentiels de connexion invalides</string>
-    <string name="error_invalid_rest_compass">Invalid rest compass: %s</string>
-    <string name="error_invalid_selector_map_element" formatted="false">Elément de carte de sélecteur non valide: { %s: %s (%s) }</string>
+    <string name="error_invalid_rest_compass">Invalid rest compass : %s</string>
+    <string name="error_invalid_selector_map_element" formatted="false">Elément de carte de sélecteur non valide : { %s : %s (%s) }</string>
     <string name="error_ip_address_should_not_be_empty">L\'adresse IP ne peut pas être vide</string>
-    <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
+    <string name="error_max_listeners_exceeded">Max listeners exceeded : %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 peut ne pas avoir l\'accès root pour exécuter le fichier \"auto\"</string>.
-    <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
+    <string name="error_method_called_with_null_argument" formatted="false">%s() appelé avec un argument nul : %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">La méthode n\'accepte qu\'un nombre d\'arguments dans la plage [%1$d..%2$d]</string>
     <string name="error_module_does_not_work_due_to_the_lack_of_necessary_library_files">Le module \"%s\" ne fonctionne pas en raison de l\'absence des fichiers de bibliothèque nécessaires</string>
     <string name="error_no_accessibility_permission">Le service d\'accessibilité est désactivé et le script s\'est arrêté</string>.
@@ -216,7 +217,7 @@
     <string name="error_no_read_phone_state_permission">Aucune autorisation de \"lire l\'état du téléphone\"</string>
     <string name="error_no_screen_capture_permission">Aucune autorisation de capture d\'écran</string>
     <string name="error_no_storage_rw_permission">Aucune autorisation \"storage r/w\"</string>
-    <string name="error_no_such_selector_method" formatted="false">No such selector method %s(%s: %s)</string>
+    <string name="error_no_such_selector_method" formatted="false">No such selector method %s(%s : %s)</string>
     <string name="error_no_usage_stats_permission">Aucune autorisation de type \"usage stats\"</string>
     <string name="error_no_write_settings_permission">Non \"write settings\" permission</string>
     <string name="error_only_one_child_for_scroll_view">ScrollView ne peut accueillir qu\'un seul enfant direct</string>.
@@ -231,7 +232,7 @@
     <string name="error_repeated_dot_symbol">Symbole point répété</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">La propriété requise \"%1$s\" est nulle ou n\'existe pas</string>
     <string name="error_script_is_on_exiting">Le script est en train de sortir</string>
-    <string name="error_selector_method_without_calling">La méthode du sélecteur doit être appelée plutôt que passée en paramètre: %s</string>.
+    <string name="error_selector_method_without_calling">La méthode du sélecteur doit être appelée plutôt que passée en paramètre : %s</string>.
     <string name="error_selector_result_type_with_compass">Cannot use a compass when result type is selector</string>
     <string name="error_set_both_icon_res_and_icon">Cannot set both iconRes and icon</string>
     <string name="error_shizuku_is_not_installed">Shizuku n\'est pas installé</string>
@@ -242,22 +243,22 @@
     <string name="error_unable_to_use_shizuku_service">Impossible d\'utiliser le service Shizuku</string>
     <string name="error_unacceptable_character">Caractère inacceptable</string>
     <string name="error_unknown">Erreur inconnue</string>
-    <string name="error_unknown_algorithm_selector_param">Param inconnu du sélecteur d\'algorithme: %s</string>
-    <string name="error_unknown_color_name">Nom de couleur inconnu: %s</string>
-    <string name="error_unknown_element_name">Nom d\'élément inconnu: %1$s</string>
+    <string name="error_unknown_algorithm_selector_param">Param inconnu du sélecteur d\'algorithme : %s</string>
+    <string name="error_unknown_color_name">Nom de couleur inconnu : %s</string>
+    <string name="error_unknown_element_name">Nom d\'élément inconnu : %1$s</string>
     <string name="error_unknown_gravity_for">Gravité inconnue : %s</string>
     <string name="error_unknown_operation">Opération inconnue</string>
-    <string name="error_unknown_picker_result_type">Unknown result type {name: %s}</string>
-    <string name="error_unknown_picker_result_type_with_params" formatted="false">Type de résultat inconnu {nom: %s, params: %s}</string>
-    <string name="error_unknown_picker_selector_type" formatted="false">Sélecteur inconnu {nom: %s, type: %s}</string>
-    <string name="error_unknown_type">Type inconnu: %s</string>
-    <string name="file_not_exist_or_readable">Le fichier n\'existe pas ou n\'est pas lisible: %s</string>
+    <string name="error_unknown_picker_result_type">Unknown result type {name : %s}</string>
+    <string name="error_unknown_picker_result_type_with_params" formatted="false">Type de résultat inconnu {nom : %s, params : %s}</string>
+    <string name="error_unknown_picker_selector_type" formatted="false">Sélecteur inconnu {nom : %s, type : %s}</string>
+    <string name="error_unknown_type">Type inconnu : %s</string>
+    <string name="file_not_exist_or_readable">Le fichier n\'existe pas ou n\'est pas lisible : %s</string>
     <string name="foreground_notification_channel_name">Service d\'avant-plan AutoJs6</string>
     <string name="foreground_notification_text">Cliquez pour lancer AutoJs6</string>
     <string name="foreground_notification_title">Service AutoJs6 au premier plan</string>
-    <string name="format_build_succeeded" formatted="true">Construction réussie.\nPlateau du fichier: %s</string>
+    <string name="format_build_succeeded" formatted="true">Construction réussie.\nPlateau du fichier : %s</string>
     <string name="format_debug_bar_title"><![CDATA[Debug [ %s ]]]></string>
-    <string name="format_editor_info" formatted="false">Chars: %d\nLines: %d\nSize: %s</string>
+    <string name="format_editor_info" formatted="false">Chars : %d\nLines : %d\nSize : %s</string>
     <string name="format_file_downloaded" formatted="true">Fichier téléchargé sur %s</string>
     <string name="go_to_accessibility_settings"><![CDATA[[Go to] Settings -> Accessibility Services -> AutoJs6 [Enable]]]></string>
     <string name="hint_find_with_regex">La fonction Regex est prise en charge. Utilisez \"$1\" - \"$9\" pour les groupes capturés.</string>
@@ -288,11 +289,17 @@
     <string name="screen_capturer_foreground_notification_text">Cette notification s\'affiche pour la capture d\'écran</string>.
     <string name="screen_capturer_foreground_notification_title">Service de capture d\'écran en avant-plan</string>
     <string name="summary_about_app_tips">Meilleure expérience utilisateur</string>
+    <string name="summary_all_files_access">Permet à AutoJs6 d\'accéder à tous les fichiers, y compris ceux du stockage externe</string>
+    <string name="summary_all_files_access_inrt">Autoriser l\'application à accéder à tous les fichiers, y compris le stockage externe</string>
+    <string name="summary_display_over_other_apps">Permet à AutoJs6 d\'afficher du contenu au-dessus d\'autres applications</string>
+    <string name="summary_display_over_other_apps_inrt">Autoriser l\'application à afficher du contenu par-dessus d\'autres applications</string>
     <string name="summary_enable_a11y_service_with_root_access">Activer le service d\'accessibilité avec accès root automatiquement lorsque cela est nécessaire</string>.
     <string name="summary_enable_a11y_service_with_secure_settings">Activer le service d\'accessibilité avec des paramètres sécurisés automatiquement lorsque cela est nécessaire</string>.
     <string name="summary_extending_js_build_in_objects">Augmenter la flexibilité du code et permettre une fonctionnalité plus riche en étendant les objets intégrés JavaScript.</string>
     <string name="summary_guard_mode">Prévenir les actions d\'automatisation des scripts lorsque AutoJs6 est au premier plan</string>.
     <string name="summary_not_showing_main_activity">Exécutez directement le script sans afficher l\'activité principale</string>.
+    <string name="summary_post_notifications_permission">Permet à AutoJs6 de créer et d\'envoyer des notifications</string>
+    <string name="summary_post_notifications_permission_inrt">Autoriser l\'application à créer et envoyer des notifications</string>
     <string name="summary_pre_execute_script">Exécuter avant le fichier script</string>
     <string name="summary_record_prompt">Afficher un message lors du démarrage ou de l\'arrêt de l\'enregistrement d\'un script</string>
     <string name="summary_stable_mode">Analyse de la mise en page plus stable mais moins bonne compatibilité du code (redémarrage du service a11y nécessaire)</string>.
@@ -509,7 +516,7 @@
     <string name="text_enable_a11y_service_with_secure_settings_automatically">Activer le service d\'accessibilité avec des paramètres sécurisés automatiquement</string>.
     <string name="text_enable_a11y_service_with_secure_settings_timeout">Activer le service d\'accessibilité avec des paramètres sécurisés temporairement</string>.
     <string name="text_error">Erreur</string>
-    <string name="text_error_copy_file" formatted="true">Failed to copy file: %s</string>
+    <string name="text_error_copy_file" formatted="true">Failed to copy file : %s</string>
     <string name="text_error_report">Rapport de bug</string>
     <string name="text_execute">Exécuter</string>
     <string name="text_execute_code">Exécuter le code</string>
@@ -617,7 +624,7 @@
     <string name="text_key_store_has_not_been_verified">Le magasin de clés n\'a pas été vérifié</string>
     <string name="text_key_store_password">Mot de passe du magasin de clés</string>
     <string name="text_label_name">Étiquette</string>
-    <string name="text_last_updates_checked_time">Dernière vérification: %s</string>
+    <string name="text_last_updates_checked_time">Dernière vérification : %s</string>
     <string name="text_latest_activity">Dernière activité</string>
     <string name="text_latest_package">Dernier paquet</string>
     <string name="text_launch_config">Launch config</string>
@@ -702,59 +709,86 @@
     <string name="text_paste">Coller</string>
     <string name="text_path_is_empty">Le chemin est vide</string>
     <string name="text_pc_server_address">Adresse du serveur du PC</string>
-    <string name="text_permission_access_coarse_location">Autoriser l\'application à accéder à une localisation approximative via le réseau</string>
-    <string name="text_permission_access_fine_location">Autoriser l\'application à accéder à une localisation précise via le GPS</string>
-    <string name="text_permission_access_network_state">Autoriser l\'application à consulter l\'état de la connexion réseau</string>
-    <string name="text_permission_access_wifi_state">Autoriser l\'application à accéder à l\'état du Wi-Fi</string>
-    <string name="text_permission_broadcast_close_system_dialogs">Autoriser l\'application à envoyer une intention pour fermer les boîtes de dialogue système</string>
-    <string name="text_permission_capture_video_output">Autoriser l\'application à capturer la sortie vidéo</string>
-    <string name="text_permission_dump">Autoriser l\'application à vider les informations système</string>
-    <string name="text_permission_foreground_service">Autoriser l\'application à exécuter des services en premier plan</string>
-    <string name="text_permission_foreground_service_media_projection">Autoriser l\'application à utiliser l\'enregistrement d\'écran et la projection multimédia dans des services en premier plan</string>
-    <string name="text_permission_foreground_service_special_use">Autoriser l\'application à effectuer des opérations spéciales dans des services en premier plan</string>
+    <string name="text_permission_desc_access_coarse_location">Autoriser l\'application à accéder à une localisation approximative via le réseau</string>
+    <string name="text_permission_desc_access_fine_location">Autoriser l\'application à accéder à une localisation précise via le GPS</string>
+    <string name="text_permission_desc_access_location_extra_commands">Autoriser l\'application à accéder aux commandes supplémentaires du fournisseur de localisation</string>
+    <string name="text_permission_desc_access_network_state">Autoriser l\'application à consulter l\'état de la connexion réseau</string>
+    <string name="text_permission_desc_access_wifi_state">Autoriser l\'application à accéder à l\'état du Wi-Fi</string>
+    <string name="text_permission_desc_billing">Autoriser l\'application à effectuer des achats intégrés</string>
+    <string name="text_permission_desc_bluetooth">Autoriser l\'application à accéder aux périphériques Bluetooth</string>
+    <string name="text_permission_desc_bluetooth_admin">Autoriser l\'application à configurer les périphériques Bluetooth</string>
+    <string name="text_permission_desc_broadcast_close_system_dialogs">Autoriser l\'application à envoyer une intention pour fermer les boîtes de dialogue système</string>
+    <string name="text_permission_desc_call_phone">Autoriser l\'application à passer des appels téléphoniques</string>
+    <string name="text_permission_desc_camera">Autoriser l\'application à accéder à la caméra</string>
+    <string name="text_permission_desc_capture_video_output">Autoriser l\'application à capturer la sortie vidéo</string>
+    <string name="text_permission_desc_change_network_state">Autoriser l\'application à modifier l\'état du réseau</string>
+    <string name="text_permission_desc_change_wifi_multicast_state">Autoriser l\'application à modifier l\'état de multidiffusion Wi-Fi</string>
+    <string name="text_permission_desc_change_wifi_state">Autoriser l\'application à modifier l\'état du Wi-Fi</string>
+    <string name="text_permission_desc_disable_keyguard">Autoriser l\'application à désactiver le verrouillage de l\'écran</string>
+    <string name="text_permission_desc_dump">Autoriser l\'application à extraire les informations système</string>
+    <string name="text_permission_desc_expand_status_bar">Autoriser l\'application à développer/réduire la barre d\'état</string>
+    <string name="text_permission_desc_flashlight">Autoriser l\'application à contrôler la lampe de poche</string>
+    <string name="text_permission_desc_foreground_service">Autoriser l\'application à exécuter des services au premier plan</string>
+    <string name="text_permission_desc_foreground_service_media_projection">Autoriser l\'application à utiliser l\'enregistrement d\'écran et la projection multimédia dans un service au premier plan</string>
+    <string name="text_permission_desc_foreground_service_special_use">Autoriser l\'application à effectuer des opérations spéciales dans un service au premier plan</string>
+    <string name="text_permission_desc_get_accounts">Autoriser l\'application à accéder aux comptes sur l\'appareil</string>
+    <string name="text_permission_desc_install_shortcut">Autoriser l\'application à installer des raccourcis</string>
+    <string name="text_permission_desc_interact_across_users_full">Autoriser l\'application à interagir entre utilisateurs</string>
+    <string name="text_permission_desc_internet">Autoriser l\'application à accéder à Internet</string>
+    <string name="text_permission_desc_kill_background_processes">Autoriser l\'application à terminer les processus en arrière-plan</string>
+    <string name="text_permission_desc_manage_external_storage">Autoriser l\'application à gérer tous les fichiers dans le stockage externe</string>
+    <string name="text_permission_desc_manage_users">Autoriser l\'application à gérer les utilisateurs</string>
+    <string name="text_permission_desc_modify_audio_settings">Autoriser l\'application à modifier les paramètres audio</string>
+    <string name="text_permission_desc_mount_format_filesystems">Autoriser l\'application à formater le stockage externe</string>
+    <string name="text_permission_desc_mount_unmount_filesystems">Autoriser l\'application à monter/démonter les systèmes de fichiers</string>
+    <string name="text_permission_desc_nfc">Autoriser l\'application à communiquer avec les appareils NFC</string>
+    <string name="text_permission_desc_post_notifications">Autoriser l\'application à afficher des notifications</string>
+    <string name="text_permission_desc_query_all_packages">Autoriser l\'application à interroger tous les packages</string>
+    <string name="text_permission_desc_read_calendar">Autoriser l\'application à lire les événements du calendrier</string>
+    <string name="text_permission_desc_read_contacts">Autoriser l\'application à lire les contacts</string>
+    <string name="text_permission_desc_read_external_storage">Autoriser l\'application à lire le stockage externe</string>
+    <string name="text_permission_desc_read_media_audio">Autoriser l\'application à lire les fichiers audio dans le stockage partagé</string>
+    <string name="text_permission_desc_read_media_images">Autoriser l\'application à lire les fichiers image dans le stockage partagé</string>
+    <string name="text_permission_desc_read_media_video">Autoriser l\'application à lire les fichiers vidéo dans le stockage partagé</string>
+    <string name="text_permission_desc_read_phone_state">Autoriser l\'application à lire l\'état du téléphone et l\'identité</string>
+    <string name="text_permission_desc_read_privileged_phone_state">Autoriser l\'application à accéder à toutes les informations d\'état du téléphone</string>
+    <string name="text_permission_desc_read_sms">Autoriser l\'application à lire les SMS</string>
+    <string name="text_permission_desc_receive_boot_completed">Autoriser l\'application à recevoir des diffusions au démarrage de l\'appareil</string>
+    <string name="text_permission_desc_receive_sms">Autoriser l\'application à recevoir des SMS</string>
+    <string name="text_permission_desc_record_audio">Autoriser l\'application à enregistrer de l\'audio</string>
+    <string name="text_permission_desc_reorder_tasks">Autoriser l\'application à réorganiser les applications en cours d\'exécution</string>
+    <string name="text_permission_desc_request_delete_packages">Autoriser l\'application à demander la suppression de packages</string>
+    <string name="text_permission_desc_request_ignore_battery_optimizations">Autoriser l\'application à demander d\'ignorer les optimisations de batterie</string>
+    <string name="text_permission_desc_request_install_packages">Autoriser l\'application à demander l\'installation d\'autres applications</string>
+    <string name="text_permission_desc_schedule_exact_alarm">Autoriser l\'application à programmer des opérations précises dans le temps</string>
+    <string name="text_permission_desc_send_sms">Autoriser l\'application à envoyer des SMS</string>
+    <string name="text_permission_desc_set_wallpaper">Autoriser l\'application à définir le fond d\'écran</string>
+    <string name="text_permission_desc_set_wallpaper_hints">Autoriser l\'application à définir les indices de taille du fond d\'écran</string>
+    <string name="text_permission_desc_shizuku">Autoriser l\'application à interagir avec le système via le service Shizuku avec des privilèges élevés</string>
+    <string name="text_permission_desc_system_alert_window">Autoriser l\'application à s\'afficher au-dessus d\'autres applications</string>
+    <string name="text_permission_desc_termux_run_command">Autoriser l\'exécution de commandes (spécifique à l\'application Termux)</string>
+    <string name="text_permission_desc_uninstall_shortcut">Autoriser l\'application à désinstaller des raccourcis</string>
+    <string name="text_permission_desc_unlimited_toasts">Autoriser l\'application à afficher un nombre illimité de notifications Toast</string>
+    <string name="text_permission_desc_use_exact_alarm">Autoriser l\'application à programmer des alarmes précises ou des rappels d\'événements</string>
+    <string name="text_permission_desc_vibrate">Autoriser l\'application à contrôler la vibration de l\'appareil</string>
+    <string name="text_permission_desc_wake_lock">Autoriser l\'application à empêcher l\'appareil d\'entrer en mode veille</string>
+    <string name="text_permission_desc_write_calendar">Autoriser l\'application à ajouter ou modifier des événements du calendrier</string>
+    <string name="text_permission_desc_write_contacts">Autoriser l\'application à modifier les contacts</string>
+    <string name="text_permission_desc_write_external_storage">Autoriser l\'application à écrire dans le stockage externe</string>
+    <string name="text_permission_desc_write_secure_settings">Autoriser l\'application à lire/écrire les paramètres sécurisés du système</string>
+    <string name="text_permission_desc_write_settings">Autoriser l\'application à modifier les paramètres système</string>
     <string name="text_permission_granted">Permission accordée</string>
     <string name="text_permission_granted_failed_with_root">Fail to grant permission (with root)</string>
     <string name="text_permission_granted_failed_with_shizuku">L\'autorisation n\'a pas été accordée (avec Shizuku)</string>
     <string name="text_permission_granted_with_root">Permission accordée (avec root)</string>
     <string name="text_permission_granted_with_shizuku">Permission accordée (avec Shizuku)</string>
-    <string name="text_permission_install_shortcut">Autoriser l\'application à installer des raccourcis</string>
-    <string name="text_permission_interact_across_users_full">Autoriser l\'application à interagir entre utilisateurs</string>
-    <string name="text_permission_internet">Autoriser l\'application à accéder à Internet</string>
-    <string name="text_permission_manage_external_storage">Autoriser l\'application à gérer tous les fichiers dans le stockage externe</string>
-    <string name="text_permission_manage_users">Autoriser l\'application à gérer les utilisateurs</string>
     <string name="text_permission_package_usage_stats">Autoriser l\'application à accéder aux statistiques d\'utilisation d\'autres applications</string>
-    <string name="text_permission_post_notifications">Autoriser l\'application à afficher des notifications</string>
-    <string name="text_permission_query_all_packages">Autoriser l\'application à interroger tous les packages</string>
-    <string name="text_permission_read_external_storage">Autoriser l\'application à lire à partir du stockage externe</string>
-    <string name="text_permission_read_media_audio">Autoriser l\'application à lire les fichiers audio depuis le stockage partagé</string>
-    <string name="text_permission_read_media_images">Autoriser l\'application à lire les fichiers image depuis le stockage partagé</string>
-    <string name="text_permission_read_media_video">Autoriser l\'application à lire les fichiers vidéo depuis le stockage partagé</string>
-    <string name="text_permission_read_phone_state">Autoriser l\'application à lire l\'état du téléphone et l\'identité</string>
-    <string name="text_permission_read_privileged_phone_state">Autoriser l\'application à accéder à toutes les informations de l\'état du téléphone</string>
-    <string name="text_permission_read_sms">Autoriser l\'application à lire les SMS</string>
-    <string name="text_permission_receive_boot_completed">Autoriser l\'application à recevoir une notification lorsque le démarrage du périphérique est terminé</string>
-    <string name="text_permission_record_audio">Autoriser l\'application à enregistrer de l\'audio</string>
-    <string name="text_permission_reorder_tasks">Autoriser l\'application à réorganiser les tâches en cours d\'exécution</string>
-    <string name="text_permission_request_ignore_battery_optimizations">Autoriser l\'application à demander l\'ignorance des optimisations de la batterie</string>
-    <string name="text_permission_request_install_packages">Autoriser l\'application à demander l\'installation d\'autres applications</string>
     <string name="text_permission_revoked">Permission révoquée</string>
     <string name="text_permission_revoked_failed_with_root">Fail to revoked permission (with root)</string>.
     <string name="text_permission_revoked_failed_with_shizuku">Échec de la révocation de la permission (avec Shizuku)</string>
     <string name="text_permission_revoked_with_root">Permission révoquée (avec root)</string>
     <string name="text_permission_revoked_with_shizuku">Permission révoquée (avec Shizuku)</string>
-    <string name="text_permission_run_command">Spécifique à l\'application Termux, autoriser l\'exécution de commandes</string>
-    <string name="text_permission_schedule_exact_alarm">Autoriser l\'application à programmer des opérations précises dans le temps</string>
-    <string name="text_permission_shizuku">Autoriser l\'application à interagir avec le système via le service Shizuku pour obtenir des autorisations élevées</string>
-    <string name="text_permission_system_alert_window">Autoriser l\'application à s\'afficher au-dessus d\'autres applications</string>
     <string name="text_permission_test">Test de permission</string>
-    <string name="text_permission_uninstall_shortcut">Autoriser l\'application à désinstaller des raccourcis</string>
-    <string name="text_permission_unlimited_toasts">Autoriser l\'application à afficher un nombre illimité de notifications Toast</string>
-    <string name="text_permission_use_exact_alarm">Autoriser l\'application à programmer des alarmes exactes ou des rappels d\'événements</string>
-    <string name="text_permission_vibrate">Autoriser l\'application à contrôler la vibration du téléphone</string>
-    <string name="text_permission_wake_lock">Empêcher le téléphone de passer en mode veille</string>
-    <string name="text_permission_write_external_storage">Autoriser l\'application à écrire dans le stockage externe</string>
-    <string name="text_permission_write_secure_settings">Autoriser l\'application à lire/écrire les paramètres sécurisés du système</string>
-    <string name="text_permission_write_settings">Autoriser l\'application à modifier les paramètres système</string>
     <string name="text_permissions">Permissions</string>
     <string name="text_permissions_list">Permissions</string>
     <string name="text_pin_shortcut_not_unsupported">L\'épinglage de raccourcis dans le lanceur n\'est pas pris en charge</string>
@@ -876,6 +910,7 @@
     <string name="text_size">Taille</string>
     <string name="text_some_items_exported">%d items exported</string>
     <string name="text_source_file_path">Chemin du code source</string>
+    <string name="text_special_permissions">Autorisations spéciales</string>
     <string name="text_stable_mode">Mode stable</string>
     <string name="text_star">Star</string>
     <string name="text_start_record">Démarrer l\'enregistrement</string>
@@ -896,7 +931,7 @@
     <string name="text_tailor_made_developer">Développeur sur mesure</string>
     <string name="text_task">Task</string>
     <string name="text_text_size">Taille du texte</string>
-    <string name="text_text_size_current_value" formatted="true">Taille du texte: %d</string>
+    <string name="text_text_size_current_value" formatted="true">Taille du texte : %d</string>
     <string name="text_the_following_solutions_can_be_referred_to">Les solutions suivantes peuvent être utilisées</string>
     <string name="text_theme_color">Couleur du thème</string>
     <string name="text_time">Heure</string>
@@ -955,13 +990,6 @@
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité</string>.
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
-    <string name="text_special_permissions">Autorisations spéciales</string>
-    <string name="summary_all_files_access">Permet à AutoJs6 d\'accéder à tous les fichiers, y compris ceux du stockage externe</string>
-    <string name="summary_display_over_other_apps">Permet à AutoJs6 d\'afficher du contenu au-dessus d\'autres applications</string>
-    <string name="summary_post_notifications_permission">Permet à AutoJs6 de créer et d\'envoyer des notifications</string>
-    <string name="summary_all_files_access_inrt">Autoriser l\'application à accéder à tous les fichiers, y compris le stockage externe</string>
-    <string name="summary_display_over_other_apps_inrt">Autoriser l\'application à afficher du contenu par-dessus d\'autres applications</string>
-    <string name="summary_post_notifications_permission_inrt">Autoriser l\'application à créer et envoyer des notifications</string>
-    <string name="dialog_button_use_palette">Utiliser la palette</string>
+    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Le chemin résolu pour \"%1$s\" ne peut pas être nul</string>
 
 </resources>
