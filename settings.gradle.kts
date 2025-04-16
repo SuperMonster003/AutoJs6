@@ -246,10 +246,12 @@ pluginManagement {
             val temurin = object : Platform(
                 name = "Temurin", vendor = "temurin",  /* More common as "Eclipse Adoptium". */
                 androidVersionMap = mapOf(
+                    "21.0.6+7" to "8.7.3", /* Apr 16, 2025. */
                     "20.0.2+9" to "8.2.2", /* Dec 2, 2024. */
                     consts.IDENTIFIER_FALLBACK to recommendedMinGradleVersion,
                 ),
                 kotlinVersionMap = mapOf(
+                    "21.0.6+7" to "2.1.10", /* Apr 16, 2025. */
                     "20.0.2+9" to "1.9.24", /* Dec 2, 2024. */
                     consts.IDENTIFIER_FALLBACK to recommendedMinKotlinVersion,
                 ),
