@@ -1,5 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <string name="css_style_license_dialog_notices" translatable="false">
+        p.license {
+            background: grey;
+        }
+        body {
+            font-family: sans-serif;
+            overflow-wrap: break-word;
+        }
+        body a:link {
+            color: #00838F;
+        }
+        pre {
+            background-color: #F2F2F2;
+            padding: 1em;
+            white-space: pre-wrap;
+        }
+    </string>
+
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:actionMenuTextColor">@color/day_night</item>
         <item name="android:divider">@color/divider</item>
