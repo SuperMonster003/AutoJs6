@@ -8,7 +8,7 @@
   "bq_annotation_autojs6_project_cloning_retry_clone": "注: 上述過程可能非常耗時. 若網絡條件欠佳, 可能需要重試多次 (點擊 Retry 按鈕)",
   "bq_annotation_autojs6_project_deploy_apk": "注: 關於如何構建應用以向用户發佈的更多內容, 可參閲 [Android Docs](https://developer.android.com/build/build-for-release?hl=zh-cn)",
   "bq_annotation_autojs6_resources_cloning_install_git_note": "注: 上述過程可能需要安裝 [Git (分佈式版本控制系統)](https://git-scm.com/download)",
-  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "這表明模板文件不存在, 需要手動運行一次 `inrt:assemble` 任務, 生成模板文件, 然後再次構建並部署 App",
+  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "注: 當主項目代碼發生變更, 且希望將變更同步到打包應用時, 需要重新運行 `inrt:assemble` 任務生成模板文件並再次部署 App",
   "bq_annotation_jdk_preparation_skip_if_jdk_installed": "注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容",
   "h3_contribution": "貢獻參與",
   "h3_environment": "環境",

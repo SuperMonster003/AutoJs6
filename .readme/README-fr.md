@@ -388,7 +388,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `19`.
 
-À partir du 16 April 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
+À partir du 17 April 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 
@@ -476,7 +476,7 @@ Lors de l'utilisation de la fonction de packaging, vous pourriez rencontrer le m
 
 Cela indique que le fichier modèle n'existe pas. Vous devez exécuter manuellement la tâche `inrt:assemble` pour générer le fichier modèle, puis reconstruire et redéployer l'application.
 
-> Note : Le fichier modèle est manquant ; exécutez manuellement la tâche `inrt:assemble` pour le générer avant de reconstruire et redéployer l'application
+> Note : Lorsque le code du projet principal est modifié et que vous souhaitez synchroniser ces changements avec l'application packagée, il est nécessaire de relancer la tâche `inrt:assemble` afin de générer les fichiers de modèle et de redéployer l'application
 
 - AutoJs6 [app:bundle]
 

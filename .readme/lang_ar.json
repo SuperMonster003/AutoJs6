@@ -8,7 +8,7 @@
   "bq_annotation_autojs6_project_cloning_retry_clone": "ملاحظة: قد تستغرق العملية المذكورة أعلاه وقتًا طويلًا. إذا كانت حالة الشبكة غير جيدة، قد تحتاج إلى المحاولة عدة مرات (بالنقر على زر Retry)",
   "bq_annotation_autojs6_project_deploy_apk": "ملحوظة: لمزيد من المعلومات حول كيفية بناء التطبيق لإصداره للمستخدمين، يرجى الرجوع إلى [Android Docs](https://developer.android.com/build/build-for-release?hl=en)",
   "bq_annotation_autojs6_resources_cloning_install_git_note": "ملاحظة: قد تتطلب العملية المذكورة أعلاه تثبيت [Git (نظام التحكم في الإصدار الموزع)](https://git-scm.com/download)",
-  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "ملحوظة: ملف النموذج مفقود؛ قم بتشغيل مهمة `inrt:assemble` يدويًا لإنشائه قبل إعادة البناء والنشر مرة أخرى",
+  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "ملحوظة: عند حدوث تغييرات في كود المشروع الرئيسي ورغبتك في مزامنة هذه التغييرات مع التطبيق المعبأ، يتعين عليك إعادة تشغيل مهمة `inrt:assemble` لتوليد ملفات القالب وإعادة نشر التطبيق",
   "bq_annotation_jdk_preparation_skip_if_jdk_installed": "ملاحظة: إذا كان نظام الكمبيوتر يحتوي على JDK والإصدار يفي بالمتطلبات المذكورة أعلاه، فيمكنك تخطي هذا القسم",
   "h3_contribution": "المشاركة بالإسهام",
   "h3_environment": "البيئة",

@@ -8,7 +8,7 @@
   "bq_annotation_autojs6_project_cloning_retry_clone": "Note: The above process may take a long time. If network conditions are poor, it may need to be retried multiple times (click the Retry button)",
   "bq_annotation_autojs6_project_deploy_apk": "Note: For more information on building an app for user release, please refer to [Android Docs](https://developer.android.com/build/build-for-release?hl=en)",
   "bq_annotation_autojs6_resources_cloning_install_git_note": "Note: The above process may require the installation of [Git](https://git-scm.com/download)",
-  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "Note: The template file is missing; run the `inrt:assemble` task manually to generate it before rebuilding and redeploying the app",
+  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "Note: When the main project code changes and you want to synchronize these changes with the packaged app, you need to rerun the `inrt:assemble` task to generate the template files and redeploy the app",
   "bq_annotation_jdk_preparation_skip_if_jdk_installed": "Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped",
   "h3_contribution": "Contribution",
   "h3_environment": "Environment",

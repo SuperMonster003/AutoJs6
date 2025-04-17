@@ -32,11 +32,11 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.Layout
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.widget.TextViewHelper
 import androidx.appcompat.widget.AppCompatEditText
+import androidx.core.graphics.withTranslation
 import org.autojs.autojs.ui.edit.editor.CodeEditor.BreakpointChangeListener
 import org.autojs.autojs.ui.edit.editor.CodeEditor.CursorChangeCallback
 import org.autojs.autojs.ui.edit.editor.JavaScriptHighlighter.HighlightTokens
@@ -110,46 +110,71 @@ class CodeEditText : AppCompatEditText {
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (mParentScrollView == null) {
-            mParentScrollView = parent as HVScrollView
-        }
-        if (layout == null) {
+        try {
+            mParentScrollView = parent as? HVScrollView ?: return super.onDraw(canvas)
+
+            layout ?: return super.onDraw(canvas).also { postInvalidate() }
+
+            updatePaddingForGutter()
+            updateLineRangeForDraw(canvas)
+
+            // 检查行范围是否有效
+            if (mFirstLineForDraw < 0 || mFirstLineForDraw > mLastLineForDraw) {
+                return super.onDraw(canvas)
+            }
+
+            // 绘制行高亮需要在绘制光标之前
+            drawLineHighlights(canvas)
+
+            // 调用 super.onDraw 绘制光标和选择高亮
+            // 因为字体颜色被设置为透明
+            // 因此 super.onDraw 绘制的字体不显示
+            // TODO by Stardust on Feb 24, 2018.
+            //  ! 优化效率.
+            //  ! 不绘制透明字体.
+            //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
+            //  ! Optimize efficiency.
+            //  ! Don't draw transparent fonts.
             super.onDraw(canvas)
-            invalidate()
-            return
+
+            runCatching {
+                // canvas.save()
+                // canvas.translate(0f, extendedPaddingTop.toFloat())
+                // drawText(canvas)
+                // canvas.restore()
+                canvas.withTranslation(0f, extendedPaddingTop.toFloat()) {
+                    drawText(this)
+                }
+            }.onFailure { it.printStackTrace() }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            runCatching {
+                super.onDraw(canvas)
+            }.onFailure { it.printStackTrace() }
         }
-        updatePaddingForGutter()
-        updateLineRangeForDraw(canvas)
-
-        // 绘制行高亮需要在绘制光标之前
-        drawLineHighlights(canvas)
-
-        // 调用 super.onDraw 绘制光标和选择高亮
-        // 因为字体颜色被设置为透明
-        // 因此 super.onDraw 绘制的字体不显示
-        // TODO by Stardust on Feb 24, 2018.
-        //  ! 优化效率.
-        //  ! 不绘制透明字体.
-        //  ! en-US (translated by SuperMonster003 on Jul 29, 2024):
-        //  ! Optimize efficiency.
-        //  ! Don't draw transparent fonts.
-        super.onDraw(canvas)
-        canvas.save()
-        canvas.translate(0f, extendedPaddingTop.toFloat())
-        drawText(canvas)
-        canvas.restore()
     }
 
     private fun drawLineHighlights(canvas: Canvas) {
-        val debugHighlightLine = mDebuggingLine
-        if (debugHighlightLine != currentLine) {
-            // 绘制当前行高亮
-            mLineHighlightPaint.color = mTheme.lineHighlightBackgroundColor
-            drawLineHighlight(canvas, mLineHighlightPaint, this.currentLine)
-        }
-        if (debugHighlightLine != -1) {
-            mLineHighlightPaint.color = mTheme.debuggingLineBackgroundColor
-            drawLineHighlight(canvas, mLineHighlightPaint, debugHighlightLine)
+        try {
+            if (lineCount <= 0) return
+
+            val debugHighlightLine = mDebuggingLine
+            val curLine = currentLine
+
+            // 确保当前行在有效范围内
+            if (curLine >= 0 && curLine < lineCount && debugHighlightLine != curLine) {
+                // 绘制当前行高亮
+                mLineHighlightPaint.color = mTheme.lineHighlightBackgroundColor
+                drawLineHighlight(canvas, mLineHighlightPaint, curLine)
+            }
+
+            // 确保调试行在有效范围内
+            if (debugHighlightLine >= 0 && debugHighlightLine < lineCount) {
+                mLineHighlightPaint.color = mTheme.debuggingLineBackgroundColor
+                drawLineHighlight(canvas, mLineHighlightPaint, debugHighlightLine)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -162,7 +187,7 @@ class CodeEditText : AppCompatEditText {
     }
 
     private fun updatePaddingForGutter() {
-        // 根据行号计算左边距padding 留出绘制行号的空间
+        // 根据行号计算左边距 padding 留出绘制行号的空间
         val max = lineCount.toString()
         val gutterWidth = paint.measureText(max) + 20
         if (paddingLeft.toFloat() != gutterWidth) {
@@ -170,83 +195,129 @@ class CodeEditText : AppCompatEditText {
         }
     }
 
-    // 该方法中内联了很多函数来提高效率 但是 这是必要的吗？？？
+    // 该方法中内联了很多函数来提高效率, 但这是必要的吗?
     // 绘制文本着色
     private fun drawText(canvas: Canvas) {
-        var line = mFirstLineForDraw
-        if (line < 0) {
-            return
-        }
+        if (mFirstLineForDraw < 0) return
+
         val textLength = mHighlightTokens?.text?.length ?: 0
         val scrollX = (mParentScrollView!!.scrollX + scrollX - paddingLeft).coerceAtLeast(0)
-        while (line <= mLastLineForDraw && line < lineCount) {
-            val lineBottom = layout.getLineTop(line + 1)
+
+        for (line in mFirstLineForDraw..lineCount.coerceAtMost(mLastLineForDraw)) {
+            if (line >= lineCount) continue
+
+            val lineNumber = line + 1
+            val lineNumberText = "$lineNumber"
+            val lineBottom = layout.getLineTop(lineNumber)
             val lineTop = layout.getLineTop(line)
             val lineBaseline = lineBottom - layout.getLineDescent(line)
             val highlightTokens = mHighlightTokens
 
-            // drawLineNumber
-            val lineNumberText = (line + 1).toString()
-
-            // if there is a breakpoint at this line, draw highlight background for line number
+            // if there is a breakpoint at this line, draw a highlight background for line number
             if (breakpoints.containsKey(line)) {
-                canvas.drawRect(0f, lineTop.toFloat(), (paddingLeft - 10).toFloat(), lineBottom.toFloat(), paint.apply { color = mTheme.breakpointColor })
+                canvas.drawRect(
+                    /* left = */ 0f,
+                    /* top = */ lineTop.toFloat(),
+                    /* right = */ (paddingLeft - 10).toFloat(),
+                    /* bottom = */ lineBottom.toFloat(),
+                    /* paint = */ paint.apply { color = mTheme.breakpointColor },
+                )
             }
-            canvas.drawText(lineNumberText, 0, lineNumberText.length, 10f, lineBaseline.toFloat(), paint.apply { color = mTheme.lineNumberColor })
-            if (highlightTokens == null) {
-                line++
-                continue
-            }
+            canvas.drawText(
+                /* text = */ lineNumberText,
+                /* start = */ 0,
+                /* end = */ lineNumberText.length,
+                /* x = */ 10f,
+                /* y = */ lineBaseline.toFloat(),
+                /* paint = */ paint.apply { color = mTheme.lineNumberColor },
+            )
 
-            // drawCode
+            if (highlightTokens == null) continue
+
+            // Draw code
+
             val lineStart = layout.getLineStart(line)
-            if (lineStart >= textLength) {
-                return
-            }
-            val lineEnd = layout.getLineVisibleEnd(line).coerceAtMost(highlightTokens.colors.size)
+            val lineVisibleEnd = layout.getLineVisibleEnd(line)
+
+            if (lineStart >= textLength) continue
+            if (lineVisibleEnd > textLength) continue
+
+            // @Reference to LYS86 (https://github.com/LYS86) by SuperMonster003 on Apr 17, 2025.
+            //  ! https://github.com/LYS86/AutoJs/blob/05a7e48a8d5b0c6207b3d2974f762c050156298c/app/src/main/java/org/autojs/autojs/ui/edit/editor/CodeEditText.java#L232
+            if (lineStart == lineVisibleEnd) continue
+
+            val lineEnd = lineVisibleEnd.coerceAtMost(highlightTokens.colors.size)
+
             val visibleCharStart = getVisibleCharIndex(paint, scrollX, lineStart, lineEnd)
-            val visibleCharEnd = getVisibleCharIndex(paint, scrollX + mParentScrollView!!.width, lineStart, lineEnd) + 1
-            var previousColorPos = visibleCharStart.coerceAtMost(highlightTokens.colors.size - 1)
+            var visibleCharEnd = getVisibleCharIndex(paint, scrollX + mParentScrollView!!.width, lineStart, lineEnd) + 1
+
+            val safeText = text ?: continue
+            val localColors = highlightTokens.colors
+
+            if (visibleCharStart >= visibleCharEnd) continue
+            if (visibleCharStart >= safeText.length) continue
+            if (visibleCharStart < 0) continue
+
+            var previousColorPos = visibleCharStart.coerceIn(0, minOf(localColors.size, safeText.length) - 1)
             var previousColor = when (previousColorPos) {
                 mUnmatchedBracket -> mTheme.getColorForToken(Token.ERROR)
                 mMatchingBrackets[0], mMatchingBrackets[1] -> mTheme.getColorForToken(TokenMapping.TOKEN_MATCHED_BRACKET)
-                else -> highlightTokens.colors[previousColorPos]
+                else -> localColors[previousColorPos.coerceAtMost(localColors.size - 1)]
             }
+
+            val safeVisibleCharEnd = minOf(visibleCharEnd, safeText.length, lineEnd)
+            if (previousColorPos >= safeVisibleCharEnd) continue
+
             var i = previousColorPos
-            while (i < visibleCharEnd) {
+            while (i < safeVisibleCharEnd) {
                 val color = when (i) {
                     mUnmatchedBracket -> mTheme.getColorForToken(Token.ERROR)
                     mMatchingBrackets[0], mMatchingBrackets[1] -> mTheme.getColorForToken(TokenMapping.TOKEN_MATCHED_BRACKET)
-                    else -> highlightTokens.colors[i.coerceAtMost(highlightTokens.colors.size - 1)]
+                    in 0 until localColors.size -> localColors[i]
+                    else -> previousColor
                 }
+
                 if (previousColor != color) {
                     paint.color = previousColor
-                    val offsetX = paint.measureText(text, lineStart, previousColorPos)
-                    canvas.drawText(text!!, previousColorPos, i, paddingLeft + offsetX, lineBaseline.toFloat(), paint)
+                    runCatching {
+                        val offsetX = paint.measureText(safeText, lineStart, previousColorPos)
+                        canvas.drawText(safeText, previousColorPos, i, paddingLeft + offsetX, lineBaseline.toFloat(), paint)
+                    }
                     previousColor = color
                     previousColorPos = i
                 }
                 i++
             }
             paint.color = previousColor
-            try {
-                if (previousColorPos < 0) {
-                    throw IndexOutOfBoundsException("Proactively throw a local exception as \"previousColorPos < 0\"")
-                }
-                if (visibleCharEnd > textLength) {
-                    throw IndexOutOfBoundsException("Proactively throw a local exception as \"visibleCharEnd > textLength\"")
-                }
-                if (previousColorPos >= visibleCharEnd) {
-                    throw IndexOutOfBoundsException("Proactively throw a local exception as \"previousColorPos >= visibleCharEnd\"")
-                }
-                val offsetX = paint.measureText(text, lineStart, previousColorPos)
-                canvas.drawText(text!!, previousColorPos, visibleCharEnd, paddingLeft + offsetX, lineBaseline.toFloat(), paint)
-            } catch (ex: IndexOutOfBoundsException) {
-                Log.e(TAG, "IndexOutOfBounds: previousColorPos = $previousColorPos, visibleCharEnd = $visibleCharEnd, textLength = $textLength")
-                ex.printStackTrace()
-                return
+
+            visibleCharEnd = visibleCharEnd.coerceAtMost(textLength)
+            if (previousColorPos >= visibleCharEnd) continue
+
+            val currentText = text ?: continue
+
+            if (previousColorPos >= currentText.length || visibleCharEnd > currentText.length) {
+                previousColorPos = previousColorPos.coerceIn(0, currentText.length - 1)
+                visibleCharEnd = visibleCharEnd.coerceAtMost(currentText.length)
+                if (previousColorPos >= visibleCharEnd) continue
             }
-            line++
+
+            runCatching {
+                val offsetX = paint.measureText(currentText, lineStart, previousColorPos)
+                canvas.drawText(currentText, previousColorPos, visibleCharEnd, paddingLeft + offsetX, lineBaseline.toFloat(), paint)
+            }.onFailure {
+                it.printStackTrace()
+                runCatching {
+                    paint.color = mTheme.lineNumberColor
+                    canvas.drawText(
+                        /* text = */ lineNumberText,
+                        /* start = */ 0,
+                        /* end = */ lineNumberText.length,
+                        /* x = */ paddingLeft.toFloat(),
+                        /* y = */ lineBaseline.toFloat(),
+                        /* paint = */ paint,
+                    )
+                }
+            }
         }
     }
 
@@ -260,7 +331,7 @@ class CodeEditText : AppCompatEditText {
     }
 
     private fun getVisibleCharIndex(paint: Paint, x: Int, lineStart: Int, lineEnd: Int): Int {
-        if (x == 0) {
+        if (x <= 0 || lineStart >= lineEnd || lineStart >= text!!.length || lineEnd <= 0) {
             return lineStart
         }
         var low = lineStart
