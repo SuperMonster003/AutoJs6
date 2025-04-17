@@ -8,7 +8,7 @@
   "bq_annotation_autojs6_project_cloning_retry_clone": "Примечание: Процесс может занять много времени. При плохом состоянии сети возможно потребуется несколько попыток (нажмите кнопку Retry)",
   "bq_annotation_autojs6_project_deploy_apk": "Примечание: Для получения дополнительной информации о том, как собрать приложение для выпуска, смотрите [Android Docs](https://developer.android.com/build/build-for-release?hl=en)",
   "bq_annotation_autojs6_resources_cloning_install_git_note": "Примечание: В процессе может потребоваться установка [Git (система управления версиями)](https://git-scm.com/download)",
-  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "Примечание: Шаблонный файл отсутствует; выполните вручную задачу `inrt:assemble`, чтобы создать его, прежде чем пересобирать и развертывать приложение",
+  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "Примечание: Если изменяется код основного проекта и необходимо синхронизировать эти изменения с упакованным приложением, требуется повторно запустить задачу `inrt:assemble` для генерации шаблонных файлов и повторного развёртывания приложения",
   "bq_annotation_jdk_preparation_skip_if_jdk_installed": "Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить",
   "h3_contribution": "Вклад участников",
   "h3_environment": "Окружение",

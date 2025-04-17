@@ -155,6 +155,13 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 ******
 
+# v6.6.3
+
+###### 2025/04/16
+
+* `修复` 主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题
+* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
+
 # v6.6.2
 
 ###### 2025/04/16
@@ -233,96 +240,6 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `优化` 同步最新的 Rhino 引擎官方上游代码并进行必要的代码适配
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
-# v6.6.0
-
-###### 2024/12/02 - 内置模块重写, 谨慎升级
-
-* `提示` 内置模块使用 Kotlin 重新编写以提升脚本运行效率但可能需要多次迭代逐步完善
-* `提示` 内置 init.js 文件默认为空但支持开发者自行扩展内置模块或挂载外部模块
-* `新增` axios 模块 / cheerio 模块 (Ref to [AutoX](https://github.com/kkevsekk1/AutoX))
-* `新增` sqlite 模块, 用于 SQLite 数据库简单操作 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [SQLite](https://docs.autojs6.com/#/sqlite))
-* `新增` mime 模块, 用于处理和解析 MIME 类型字符串 (参阅 项目文档 > [MIME](https://docs.autojs6.com/#/mime))
-* `新增` nanoid 模块, 可作为字符串 ID 生成器 (Ref to [ai/nanoid](https://github.com/ai/nanoid))
-* `新增` sysprops 模块, 用于获取运行时环境配置数据 (参阅 项目文档 > [系统属性](https://docs.autojs6.com/#/sysprops))
-* `新增` ocr 模块支持 [Rapid OCR](https://github.com/RapidAI/RapidOCR) 引擎
-* `新增` 布局分析支持切换窗口 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` auto.clearCache 方法, 支持清除控件缓存 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` threads.pool 方法, 支持线程池简单应用 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.matchTemplate 方法增加 useTransparentMask 选项参数, 支持透明找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.requestScreenCaptureAsync 方法, 用于 UI 模式异步方式申请截图权限 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.requestScreenCapture 方法增加 isAsync 选项参数, 支持异步方式获取屏幕截图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.on('screen_capture', callback) 等事件监听方法, 支持监听屏幕截图可用事件 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.stopScreenCapture 方法, 支持主动释放截图申请的相关资源 (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `新增` images.psnr/mse/ssim/mssim/hist/ncc 及 images.getSimilarity 方法, 用于获取图像相似性度量值
-* `新增` images.isGrayscale 方法, 用于判断图像是否为灰度图像
-* `新增` images.invert 方法, 用于反色图像转换
-* `新增` s13n.point/time 方法, 用于标准化点对象及时长对象 (参阅 项目文档 > [标准化](https://docs.autojs6.com/#/s13n))
-* `新增` console 模块 gravity (重力), touchThrough (穿透点击), backgroundTint (背景着色) 等相关方法 (参阅 项目文档 > [控制台](https://docs.autojs6.com/#/console))
-* `新增` Mathx.randomInt/Mathx.randomFloat 方法, 用于返回指定范围内的随机整数或随机浮点数
-* `新增` app.launchDual/startDualActivity 等方法, 用于处理双开应用 (需要 Shizuku 或 Root 权限) (实验性)
-* `新增` app.kill 方法, 用于强制停止应用 (需要 Shizuku 或 Root 权限)
-* `新增` floaty.getClip 方法, 用于借助浮动窗口聚焦间接获取剪切板内容
-* `修复` Fragment 子类 (如 [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 等) 中存在的 View Binding 内存泄漏
-* `修复` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 等类中存在的实例内存泄漏
-* `修复` Android 14 申请截图权限导致应用崩溃的问题 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `修复` Android 14 开启前台服务导致应用崩溃的问题
-* `修复` Android 14 代码编辑器运行按钮点击后无法正常亮起的问题
-* `修复` 项目打包后应用可能因缺少必要库文件无法正常运行的问题 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
-* `修复` 编辑项目时可能因指定图标资源不存在而导致应用崩溃的问题 _[`issue #203`](http://issues.autojs6.com/203)_
-* `修复` 截图权限申请时无法正常使用参数获取指定屏幕方向的截图资源
-* `修复` 部分设备无法正常添加脚本快捷方式的问题 (试修) _[`issue #221`](http://issues.autojs6.com/221)_
-* `修复` 调用 http 模块与发送请求相关的方法将出现累积性请求发送延迟的问题 _[`issue #192`](http://issues.autojs6.com/192)_
-* `修复` Shizuku 服务在 AutoJs6 进入主活动页面之前可能无法正常使用的问题 (试修) _[`issue #255`](http://issues.autojs6.com/255)_
-* `修复` random(min, max) 方法可能出现结果越界的问题
-* `修复` pickup 方法结果类型参数无法正常传入空数组的问题
-* `修复` UiObject#bounds() 得到的控件矩形可能被意外修改而破坏其不变性的问题
-* `修复` text/button/input 元素的文本内容包含半角双引号时无法正常解析的问题
-* `修复` text/textswitcher 元素的 autoLink 属性功能失效的问题
-* `修复` 不同脚本可能错误地共享同一个 ScriptRuntime 对象的问题
-* `修复` 全局变量 HEIGHT 及 WIDTH 丢失 getter 动态属性的问题
-* `修复` 脚本启动时 RootShell 随即加载可能导致启动高延迟的问题
-* `修复` 控制台浮动窗口设置背景颜色导致矩形圆角样式丢失的问题
-* `修复` 无障碍服务自动启动可能出现的服务异常问题 (试修)
-* `修复` 主页文档页面左右滑动 WebView 控件时可能触发 ViewPager 切换的问题
-* `修复` 文件管理器无法识别包含大写字母文件扩展名的问题
-* `修复` 文件管理器首次进入项目目录时可能无法自动识别项目的问题
-* `修复` 文件管理器删除文件夹后页面无法自动刷新的问题
-* `修复` 文件管理器排序文件及文件夹时可能出现 ASCII 首字母名称置后的问题
-* `修复` 代码编辑器调试功能的 FAILED ASSERTION 异常
-* `修复` 代码编辑器调试过程中关闭编辑器后无法再次正常调试的问题
-* `修复` 代码编辑器跳转到行尾时可能遗漏末尾字符的问题
-* `修复` 主活动页面启动日志活动页面时可能出现闪屏的问题
-* `修复` 打包应用无法正常使用 opencc 模块的问题
-* `优化` 打包页面中 "不可用 ABI" 控件的点击提示体验
-* `优化` 支持使用 Shizuku 控制 "指针位置" 显示开关
-* `优化` 支持使用 Shizuku 控制 "投影媒体" 及 "修改安全设置" 权限开关
-* `优化` automator.gestureAsync/gesturesAsync 支持回调函数参数
-* `优化` tasks 模块使用同步方式进行数据库操作避免可能的数据访问不一致问题
-* `优化` 脚本执行模式支持管道符号分隔模式参数 (如 `"ui|auto";` 开头)
-* `优化` 脚本执行模式支持单引号及反引号且支持省略分号 (如 `'ui';` 或 `'ui'` 开头)
-* `优化` 脚本执行模式支持 axios, cheerio, dayjs 等模式参数快捷导入内置扩展模块 (如 `"axios";` 开头)
-* `优化` 脚本执行模式支持 x 或 jsox 模式参数快捷启用 JavaScript 内置对象扩展模块 (如 `"x";` 开头)
-* `优化` img 元素 src 及 path 属性支持本地相对路径 (如 `<img src="a.png"` />)
-* `优化` 代码编辑器导入 Java 类和包名时支持智能判断插入位置
-* `优化` images 模块支持直接使用路径作为图像参数
-* `优化` importPackage 支持字符串参数
-* `优化` 服务端模式 IP 地址支持剪切板导入智能识别且支持空格按键智能转换
-* `优化` 文件管理器新建文件时支持默认前缀选择并自动生成合适的数字后缀
-* `优化` 文件管理器运行项目时具体化异常消息提示 _[`issue #268`](http://issues.autojs6.com/268)_
-* `优化` 文件管理器支持更多类型并支持显示对应的图标符号 (支持 800 多种文件类型)
-* `优化` 文件管理器可编辑的文件类型 (jpg/doc/pdf...) 增加编辑按钮
-* `优化` 文件管理器 APK 文件支持查看基础信息, Manifest 信息及权限列表
-* `优化` 文件管理器音视频等媒体文件支持查看基础信息及 MediaInfo 信息
-* `优化` 打包单文件时支持自动填入合适的标准化名包并支持无效字符过滤提示
-* `优化` 打包单文件时支持根据已安装同包名应用自动设置图标并自增版本号及版本名称
-* `优化` 打包项目配置文件支持 abis/libs 选项指定默认包含的 ABI 架构及扩展库
-* `优化` 打包项目配置文件 abis/libs 选项无效或无可用时支持相关消息提示
-* `优化` LeakCanary 在正式发行版本中被排除以避免增加不必要性
-* `优化` 项目源代码所有英文注释增加简体中文翻译以增强注释可读性
-* `优化` README 及 CHANGELOG 支持多语言 (由脚本自动生成)
-* `优化` Gradle 构建脚本提升版本自适应能力
-* `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v660)_
-
 ##### 更多版本历史可参阅
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-zh-Hans.md)
@@ -388,7 +305,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2025 年 4 月 16 日, AutoJs6 可支持 JDK 最高版本为 `24`.
+截至 2025 年 4 月 17 日, AutoJs6 可支持 JDK 最高版本为 `24`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
@@ -476,7 +393,7 @@ AutoJs6 项目拥有不同的构建变体, 其中 "inrt" 变体用于实现 Auto
 
 这表明模板文件不存在, 需要手动运行一次 `inrt:assemble` 任务, 生成模板文件, 然后再次构建并部署 App.
 
-> 这表明模板文件不存在, 需要手动运行一次 `inrt:assemble` 任务, 生成模板文件, 然后再次构建并部署 App
+> 注: 当主项目代码发生变更, 且希望将变更同步到打包应用时, 需要重新运行 `inrt:assemble` 任务生成模板文件并再次部署 App
 
 - AutoJs6 [app:bundle]
 

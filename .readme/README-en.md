@@ -388,7 +388,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of Apr 16 , 2025, AutoJs6 supports up to version `24` of the JDK.
+As of Apr 17 , 2025, AutoJs6 supports up to version `24` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 
@@ -476,7 +476,7 @@ When using the packaging feature, you might encounter the following error messag
 
 This indicates that the template file does not exist. You need to manually run the `inrt:assemble` task to generate the template file, then rebuild and redeploy the app.
 
-> Note: The template file is missing; run the `inrt:assemble` task manually to generate it before rebuilding and redeploying the app
+> Note: When the main project code changes and you want to synchronize these changes with the packaged app, you need to rerun the `inrt:assemble` task to generate the template files and redeploy the app
 
 - AutoJs6 [app:bundle]
 

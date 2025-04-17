@@ -8,7 +8,7 @@
   "bq_annotation_autojs6_project_cloning_retry_clone": "注: 上記のプロセスは非常に時間がかかる可能性があります. ネットワーク条件が悪い場合, 異なるボタンをクリックして再試行する必要がある場合があります",
   "bq_annotation_autojs6_project_deploy_apk": "注: ユーザー向けにリリースするアプリのビルド方法の詳細については, [Android Docs](https://developer.android.com/build/build-for-release?hl=en) を参照してください",
   "bq_annotation_autojs6_resources_cloning_install_git_note": "注: 上記プロセスには[Git (バージョン管理システム)](https://git-scm.com/download)をインストールする必要がある場合があります",
-  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "注: テンプレートファイルが存在しません. `inrt:assemble` タスクを手動で実行してテンプレートファイルを生成し, その後に再度ビルドしてデプロイしてください",
+  "bq_annotation_gradle_task_inrt_rebuild_if_needed": "注: メインプロジェクトのコードに変更があり, パッケージ化されたアプリに変更を反映させたい場合は, `inrt:assemble` タスクを再実行してテンプレートファイルを生成し, アプリを再デプロイする必要があります",
   "bq_annotation_jdk_preparation_skip_if_jdk_installed": "注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます",
   "h3_contribution": "貢献の参加",
   "h3_environment": "環境",

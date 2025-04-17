@@ -388,7 +388,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `19`.
 
-Hasta el 16 de April de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
+Hasta el 17 de April de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 
@@ -431,7 +431,7 @@ If the build couldn't proceed automatically or you need to rebuild the project, 
 
 If the build fails, you can report the error message to the AutoJs6 project's [Issues](http://issues.autojs6.com) page..
 
-> Note: For more details on building and running the app, please refer to [Android Docs](https://developer.android.com/studio/run?hl=en).
+> Nota: For more details on building and running the app, please refer to [Android Docs](https://developer.android.com/studio/run?hl=en).
 
 #### AutoJs6 Project Deployment (Run App)
 
@@ -456,7 +456,7 @@ Package the project and generate an APK file that can be installed on Android de
     - Prepara el archivo de firma (crear o seleccionar uno nuevo) para generar un paquete de instalación de versión de lanzamiento firmado
     - Ruta de ejemplo: `"D:\AutoJs6\app\release\"`
 
-> Note: For more information on building an app for user release, please refer to [Android Docs](https://developer.android.com/build/build-for-release?hl=en).
+> Nota: For more information on building an app for user release, please refer to [Android Docs](https://developer.android.com/build/build-for-release?hl=en).
 
 #### Predefined Gradle Build Tasks for AutoJs6
 
@@ -476,7 +476,7 @@ When using the packaging feature, you might encounter the following error messag
 
 This indicates that the template file does not exist. You need to manually run the `inrt:assemble` task to generate the template file, then rebuild and redeploy the app..
 
-> Note: The template file is missing; run the `inrt:assemble` task manually to generate it before rebuilding and redeploying the app.
+> Nota: Si el código del proyecto principal cambia y se desea sincronizar dichos cambios con la aplicación empaquetada, es necesario volver a ejecutar la tarea `inrt:assemble` para generar los archivos de plantilla y redeplegar la aplicación
 
 - AutoJs6 [app:bundle]
 
