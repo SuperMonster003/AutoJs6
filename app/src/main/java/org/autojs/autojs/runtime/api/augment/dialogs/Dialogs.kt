@@ -8,6 +8,7 @@ import com.afollestad.materialdialogs.Theme
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.ui.dialog.JsDialog
 import org.autojs.autojs.core.ui.dialog.JsDialogBuilder
+import org.autojs.autojs.core.ui.nativeview.NativeView
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.isJsString
 import org.autojs.autojs.extension.AnyExtensions.isJsXml
@@ -546,6 +547,9 @@ class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     customView = UI.runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
                         UI.inflateRhinoRuntime(scriptRuntime, customView)
                     }, NOT_CONSTRUCTABLE))
+                }
+                if (customView is NativeView) {
+                    customView = customView.unwrap()
                 }
                 require(customView is View) {
                     "Property customView ${customView.jsBrief()} of argument properties for dialogs.build is invalid"
