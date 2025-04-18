@@ -163,6 +163,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` 部分设备代码编辑器空行显示方框字符的问题
 * `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
 * `优化` 打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_
+* `优化` 使用异步加载方式一定程度提升文件管理器列表滑动流畅性
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
 
 # v6.6.2

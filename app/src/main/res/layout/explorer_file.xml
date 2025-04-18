@@ -23,13 +23,14 @@
         android:foreground="?selectableItemBackground"
         android:orientation="horizontal"
         android:paddingVertical="9dp"
-        android:paddingStart="8dp">
+        android:paddingStart="8dp"
+        android:paddingEnd="0dp">
 
         <include
             layout="@layout/explorer_first_char_icon"
-            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content" />
+            android:layout_gravity="center_vertical" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -59,8 +60,6 @@
                     android:id="@+id/script_file_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textColor="?android:textColorSecondary"
@@ -82,8 +81,6 @@
                     android:id="@+id/script_file_size"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textColor="?android:textColorSecondary"
@@ -95,70 +92,77 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/action_icon_container"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="36dp"
             android:layout_gravity="center_vertical"
             android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/install"
-                android:visibility="gone"
-                tools:visibility="visible"
                 android:layout_width="36dp"
                 android:layout_height="match_parent"
                 android:background="?selectableItemBackgroundBorderless"
                 android:clickable="true"
-                android:paddingVertical="11dp"
-                android:src="@drawable/ic_install"
-                app:tint="#A9AAAB" />
+                android:contentDescription="@string/text_install"
+                android:focusable="true"
+                android:src="@drawable/ic_install_explorer_btn"
+                android:visibility="gone"
+                app:tint="#A9AAAB"
+                tools:visibility="visible" />
 
             <ImageView
                 android:id="@+id/run"
-                android:visibility="gone"
-                tools:visibility="visible"
                 android:layout_width="36dp"
                 android:layout_height="match_parent"
                 android:background="?selectableItemBackgroundBorderless"
                 android:clickable="true"
-                android:paddingVertical="9dp"
-                android:src="@drawable/ic_run_gray"
-                app:tint="#A9AAAB" />
+                android:contentDescription="@string/text_run"
+                android:focusable="true"
+                android:src="@drawable/ic_run_explorer_btn"
+                android:visibility="gone"
+                app:tint="#A9AAAB"
+                tools:visibility="visible" />
 
             <ImageView
                 android:id="@+id/edit"
-                android:visibility="gone"
-                tools:visibility="visible"
                 android:layout_width="36dp"
                 android:layout_height="match_parent"
                 android:background="?selectableItemBackgroundBorderless"
                 android:clickable="true"
-                android:paddingVertical="9dp"
-                android:src="@drawable/ic_mode_edit_black_24dp"
-                app:tint="#A9AAAB" />
+                android:contentDescription="@string/text_edit"
+                android:focusable="true"
+                android:src="@drawable/ic_edit_explorer_btn"
+                android:visibility="gone"
+                app:tint="#A9AAAB"
+                tools:visibility="visible" />
 
             <ImageView
                 android:id="@+id/info"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/text_info"
+                android:focusable="true"
+                android:src="@drawable/ic_info_explorer_btn"
                 android:visibility="gone"
-                tools:visibility="visible"
-                android:layout_width="36dp"
-                android:layout_height="match_parent"
-                android:background="?selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:paddingVertical="8.5dp"
-                android:src="@drawable/ic_info_outline_black_48dp"
-                app:tint="#A9AAAB" />
-
-            <ImageView
-                android:id="@+id/more"
-                android:layout_width="36dp"
-                android:layout_height="match_parent"
-                android:background="?selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:paddingVertical="9dp"
-                android:src="@drawable/ic_more_vert_black_24dp"
-                app:tint="#A9AAAB" />
+                app:tint="#A9AAAB"
+                tools:visibility="visible" />
 
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/more"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center_vertical"
+            android:background="?selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/text_more"
+            android:focusable="true"
+            android:src="@drawable/ic_more_explorer_btn"
+            app:tint="#A9AAAB" />
 
     </LinearLayout>
 

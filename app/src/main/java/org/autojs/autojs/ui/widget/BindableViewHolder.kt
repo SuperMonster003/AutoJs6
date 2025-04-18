@@ -11,4 +11,8 @@ abstract class BindableViewHolder<DataType>(itemView: View) : RecyclerView.ViewH
 
     abstract fun bind(data: DataType, position: Int)
 
+    open fun onViewRecycled() {
+        /* Nothing to do by default. */
+    }
+
 }
