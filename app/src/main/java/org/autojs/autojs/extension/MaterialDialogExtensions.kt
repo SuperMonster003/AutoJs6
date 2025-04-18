@@ -18,10 +18,13 @@ object MaterialDialogExtensions {
         }
     }
 
+    @JvmStatic
     fun MaterialDialog.makeTextCopyable(textViewGetter: (dialog: MaterialDialog) -> TextView?) {
         makeTextCopyable(textViewGetter(this))
     }
 
+    @JvmStatic
+    @JvmOverloads
     fun MaterialDialog.makeTextCopyable(textView: TextView?, textValue: String? = textView?.text?.toString()) {
         if (textValue != null) {
             val context = this.context

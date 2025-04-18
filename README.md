@@ -157,9 +157,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.6.3
 
-###### 2025/04/16
+###### 2025/04/18
 
 * `修复` 主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题
+* `修复` 部分设备代码编辑器空行显示方框字符的问题
+* `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
+* `优化` 打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
 
 # v6.6.2
@@ -182,6 +185,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` floaty.window/floaty.rawWindow 无法在子线程执行的问题
 * `修复` floaty.getClip 可能无法正常获取剪切板内容的问题 _[`issue #341`](http://issues.autojs6.com/341)_
 * `修复` ui.inflate 返回值丢失 attr/on/click 等原型方法的问题
+* `修复` 使用 XML 语法将 JavaScript 表达式作为属性值时, 其作用域上下文绑定错误的问题 _[`issue #319`](http://issues.autojs6.com/319)_
 * `修复` 部分方法调用出现异常时无法被 try..catch 块捕获的问题 _[`issue #345`](http://issues.autojs6.com/345)_
 * `修复` 布局分析页面生成代码时可能导致应用崩溃的问题 _[`issue #288`](http://issues.autojs6.com/288)_
 * `修复` 打包应用无法正常使用 shizuku 模块的问题 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
@@ -305,7 +309,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2025 年 4 月 17 日, AutoJs6 可支持 JDK 最高版本为 `24`.
+截至 2025 年 4 月 18 日, AutoJs6 可支持 JDK 最高版本为 `24`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

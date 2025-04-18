@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Window;
 import com.afollestad.materialdialogs.MaterialDialog;
+import org.autojs.autojs.extension.MaterialDialogExtensions;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs6.R;
 
@@ -34,7 +35,7 @@ public class ErrorDialogActivity extends BaseActivity {
         }
 
         // Show dialog
-        new MaterialDialog.Builder(this)
+        var materialDialog = new MaterialDialog.Builder(this)
                 .title(title)
                 .content(message)
                 .positiveText(positiveButtonText)
@@ -44,6 +45,8 @@ public class ErrorDialogActivity extends BaseActivity {
                 .onPositive((dialog, which) -> finish())
                 .dismissListener(dialog -> finish())
                 .show();
+
+        MaterialDialogExtensions.makeTextCopyable(materialDialog, materialDialog.getContentView());
     }
 
     /**

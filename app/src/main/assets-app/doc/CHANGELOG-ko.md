@@ -24,6 +24,7 @@
 * `수정` floaty.window / floaty.rawWindow 가 서브 스레드에서 실행되지 않는 문제를 수정
 * `수정` floaty.getClip 이 클립보드 내용을 올바르게 가져오지 못하는 문제를 수정 _[`issue #341`](http://issues.autojs6.com/341)_
 * `수정` ui.inflate 의 반환 값에서 attr, on, click 등의 프로토타입 메서드가 누락되는 문제를 수정
+* `수정` XML 구문을 사용하여 JavaScript 표현식을 속성 값으로 사용할 때, 스코프 컨텍스트가 올바르게 바인딩되지 않는 문제 _[`issue #319`](http://issues.autojs6.com/319)_
 * `수정` 일부 메서드 호출 시 발생하는 예외가 try..catch 로 처리되지 않는 문제를 수정 _[`issue #345`](http://issues.autojs6.com/345)_
 * `수정` 레이아웃 분석 페이지에서 코드 생성 중 앱이 종료되는 문제를 수정 _[`issue #288`](http://issues.autojs6.com/288)_
 * `수정` 패키지화된 앱에서 shizuku 모듈을 제대로 사용할 수 없는 문제를 수정 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_

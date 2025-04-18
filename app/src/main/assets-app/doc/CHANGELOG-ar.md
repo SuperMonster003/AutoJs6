@@ -24,6 +24,7 @@
 * `تصليح` المشكلة التي كان فيها floaty.window/floaty.rawWindow لا يمكن تنفيذها في الخيوط الثانوية
 * `تصليح` المشكلة التي كان فيها floaty.getClip قد لا يسترجع محتوى الحافظة بشكل صحيح _[`issue #341`](http://issues.autojs6.com/341)_
 * `تصليح` المشكلة التي كان فيها ناتج ui.inflate يفتقد إلى طرق البروتوتايب مثل attr و on و click
+* `تصليح` مشكلة يتم فيها ربط سياق النطاق بشكل غير صحيح عند استخدام صياغة XML لاستخدام تعبير JavaScript كقيمة لخاصية _[`issue #319`](http://issues.autojs6.com/319)_
 * `تصليح` المشكلة التي كانت فيها استثناءات بعض الطرق لا يتم التقاطها بواسطة كتلة try..catch _[`issue #345`](http://issues.autojs6.com/345)_
 * `تصليح` المشكلة التي كان فيها توليد الكود في صفحة تحليل التخطيطات قد يؤدي إلى تعطل التطبيق _[`issue #288`](http://issues.autojs6.com/288)_
 * `تصليح` المشكلة التي كان فيها التطبيقات المعبأة لا يمكنها استخدام وحدة shizuku بشكل صحيح _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_

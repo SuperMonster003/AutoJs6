@@ -750,7 +750,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
          * ```
          *
          * @param expression The JavaScript expression to evaluate as a string. (zh-CN: 用于执行的表达式.)
-         * @param ctx The context (scriptable scope) in which the expression should be evaluated. (zh-CN: 提供给参数 expression 的作用于上下文.)
+         * @param ctx The context (scriptable scope) in which the expression should be evaluated. (zh-CN: 提供给参数 expression 的作用域上下文.)
          * @return The result of evaluating the expression. (zh-CN: 参数 expression 执行结果.)
          */
         private fun evalInContext(expression: String, ctx: Scriptable): Any? {
