@@ -6,16 +6,17 @@ import android.content.pm.PackageManager.GET_META_DATA
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View.MeasureSpec.UNSPECIFIED
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.android.apksig.ApkVerifier
-import com.jaredrummler.apkparser.ApkParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.dongliu.apk.parser.ApkFile
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeSettingsLaunchable
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
 import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableTextIfAbsent
@@ -115,7 +116,7 @@ object ApkInfoDialogManager {
                 dialog.setIcon(applicationInfo?.apply {
                     sourceDir = apkFilePath
                     publicSourceDir = apkFilePath
-                }?.loadIcon(packageManager) ?: context.getDrawable(R.drawable.ic_packaging))
+                }?.loadIcon(packageManager) ?: AppCompatResources.getDrawable(context, R.drawable.ic_packaging))
 
                 dialog.makeSettingsLaunchable({ it.iconView }, installedPackageName)
                 dialog.makeTextCopyable { it.titleView }
@@ -138,7 +139,7 @@ object ApkInfoDialogManager {
 
     private suspend fun getApkInfo(apkFile: File): ApkInfo? = withContext(Dispatchers.IO) {
         runCatching {
-            ApkParser.create(apkFile).use { parser ->
+            ApkFile(apkFile).use { parser ->
                 val meta = runCatching { parser.apkMeta }.getOrNull()
                 val label = meta?.label
                 val packageName = meta?.packageName

@@ -163,8 +163,10 @@ dependencies /* Unclassified */ {
     // Android Job
     implementation(project(":libs:android-job-simplified-1.4.3"))
 
-    // APK Parser (https://github.com/jaredrummler/APKParser)
-    implementation(project(":libs:apk-parser-1.0.2"))
+    // APK Parser
+    // implementation("com.jaredrummler:apk-parser:1.0.2")
+    // implementation("com.github.AndroidDeveloperLB:apk-parser:6")
+    implementation(project(":modules:apk-parser"))
 
     // Prism4j
     implementation(files("$rootDir/libs/prism4j-2.0.0.jar"))
