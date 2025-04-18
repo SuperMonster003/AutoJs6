@@ -27,11 +27,11 @@ import androidx.lifecycle.ViewModelProvider;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.textfield.TextInputLayout;
-import com.jaredrummler.apkparser.ApkParser;
-import com.jaredrummler.apkparser.model.ApkMeta;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import net.dongliu.apk.parser.ApkFile;
+import net.dongliu.apk.parser.bean.ApkMeta;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.core.pref.Language;
@@ -63,6 +63,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -614,16 +615,16 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
     }
 
     private void updatePermissionsCheckboxes(String packageName) {
-        ApkParser parser;
+        ApkFile apkFile;
         try {
-            parser = ApkParser.create(getPackageManager(), packageName);
-        } catch (PackageManager.NameNotFoundException e) {
+            apkFile = new ApkFile(new File(getPackageManager().getApplicationInfo(packageName, 0).sourceDir));
+        } catch (PackageManager.NameNotFoundException | IOException e) {
             return;
         }
 
         try {
-            ApkMeta meta = parser.getApkMeta();
-            if (meta == null || meta.usesPermissions == null) {
+            ApkMeta meta = apkFile.getApkMeta();
+            if (meta == null) {
                 return;
             }
             var initialPermissions = meta.usesPermissions;
@@ -649,7 +650,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         } catch (Exception ignored) {
             /* Ignored. */
         } finally {
-            parser.close();
+            try {
+                apkFile.close();
+            } catch (IOException e) {
+                /* Ignored. */
+            }
         }
     }
 

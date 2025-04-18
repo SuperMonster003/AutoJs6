@@ -28,6 +28,7 @@
 private val modules = listOf(
     "jieba-analysis",
     "apk-signer",
+    "apk-parser",
     "color-picker",
 )
 
