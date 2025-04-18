@@ -175,6 +175,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` floaty.window / floaty.rawWindow がサブスレッドで実行できない問題を修正
 * `修正` floaty.getClip がクリップボードの内容を正しく取得できない場合がある問題を修正 _[`issue #341`](http://issues.autojs6.com/341)_
 * `修正` ui.inflate の返り値から attr, on, click などのプロトタイプメソッドが欠落する問題を修正
+* `修正` XML 構文を用いて JavaScript の式を属性値として使用する際, スコープのコンテキストが不正にバインドされる問題 _[`issue #319`](http://issues.autojs6.com/319)_
 * `修正` 一部メソッドで発生する例外が try..catch によって捕捉されない問題を修正 _[`issue #345`](http://issues.autojs6.com/345)_
 * `修正` レイアウト解析ページでコード生成時にアプリがクラッシュする可能性がある問題を修正 _[`issue #288`](http://issues.autojs6.com/288)_
 * `修正` パッケージ化されたアプリが shizuku モジュールを正しく利用できない問題を修正 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
@@ -388,7 +389,7 @@ SDK Tools (SDK ツール) (右側のウィンドウにあります)
 
 AutoJs6プロジェクトが依存する `JDK (Java開発キット)` のリリースバージョンは少なくとも `17` で, それ以下のバージョンは推奨されませんが, 最低でも `19` の使用を推奨します.
 
-2025 年 4 月 17 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
+2025 年 4 月 18 日 現在, AutoJs6がサポートする最大のJDKバージョンは `24` です.
 
 > 注: コンピュータシステムに適切なバージョンのJDKがインストールされている場合, この節の内容をスキップできます.
 

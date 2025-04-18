@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.project;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -26,6 +27,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.textfield.TextInputLayout;
+import com.jaredrummler.apkparser.ApkParser;
+import com.jaredrummler.apkparser.model.ApkMeta;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -35,12 +38,12 @@ import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.project.ProjectConfig;
-import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.AppUtils;
 import org.autojs.autojs.runtime.api.AppUtils.Companion.SimpleVersionInfo;
 import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
+import org.autojs.autojs.ui.error.ErrorDialogActivity;
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder;
 import org.autojs.autojs.ui.keystore.ManageKeyStoreActivity;
 import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager;
@@ -595,6 +598,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                         mIsDefaultIcon = false;
                     }
                     mIconView.setVisibility(View.VISIBLE);
+
+                    updatePermissionsCheckboxes(packageName);
                 }, throwable -> {
                     mPackageNameView.setText(getString(R.string.format_default_package_name, file.getSimplifiedName().toLowerCase(Language.getPrefLanguage().getLocale())));
                     mVersionNameView.setText(R.string.default_build_apk_version_name);
@@ -606,6 +611,46 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 });
 
         setSource(file);
+    }
+
+    private void updatePermissionsCheckboxes(String packageName) {
+        ApkParser parser;
+        try {
+            parser = ApkParser.create(getPackageManager(), packageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            return;
+        }
+
+        try {
+            ApkMeta meta = parser.getApkMeta();
+            if (meta == null || meta.usesPermissions == null) {
+                return;
+            }
+            var initialPermissions = meta.usesPermissions;
+            IntStream.range(0, mFlexboxPermissionsView.getChildCount())
+                    .mapToObj(i -> mFlexboxPermissionsView.getChildAt(i))
+                    .forEach(child -> {
+                        CharSequence viewCharSequence = child instanceof RoundCheckboxWithText
+                                ? ((RoundCheckboxWithText) child).getText()
+                                : child instanceof CheckBox ? ((CheckBox) child).getText() : null;
+                        if (viewCharSequence == null) {
+                            return;
+                        }
+                        String viewText = viewCharSequence.toString().split("\n")[0].trim();
+                        if (!initialPermissions.contains(viewText)) {
+                            return;
+                        }
+                        if (child instanceof RoundCheckboxWithText) {
+                            ((RoundCheckboxWithText) child).setChecked(true);
+                        } else {
+                            ((CheckBox) child).setChecked(true);
+                        }
+                    });
+        } catch (Exception ignored) {
+            /* Ignored. */
+        } finally {
+            parser.close();
+        }
     }
 
     private static String generatePackageNameSuffix(ScriptFile file) {
@@ -871,7 +916,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
 
     @NotNull
     private ArrayList<String> collectCheckedItems(FlexboxLayout flexboxLayout) {
-        ArrayList<String> libs = new ArrayList<>();
+        ArrayList<String> result = new ArrayList<>();
 
         for (int i = 0; i < flexboxLayout.getChildCount(); i += 1) {
             View child = flexboxLayout.getChildAt(i);
@@ -879,19 +924,19 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 if (((RoundCheckboxWithText) child).isChecked()) {
                     CharSequence charSequence = ((RoundCheckboxWithText) child).getText();
                     if (charSequence != null) {
-                        libs.add(charSequence.toString());
+                        result.add(charSequence.toString());
                     }
                 }
             } else if (child instanceof CheckBox) {
                 if (((CheckBox) child).isChecked()) {
                     CharSequence charSequence = ((CheckBox) child).getText();
                     if (charSequence != null) {
-                        libs.add(charSequence.toString().split("\n")[0]);
+                        result.add(charSequence.toString().split("\n")[0]);
                     }
                 }
             }
         }
-        return libs;
+        return result;
     }
 
     private ApkBuilder callApkBuilder(File buildPath, File outApk, ProjectConfig projectConfig) throws Exception {
@@ -918,9 +963,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             mProgressDialog.dismiss();
             mProgressDialog = null;
         }
-        String message = getString(R.string.text_failed_to_build) + "\n" + error.getMessage();
-        ViewUtils.showToast(this, message, true);
-        ScriptRuntime.popException(message);
+        ErrorDialogActivity.showErrorDialog(this, R.string.text_failed_to_build, error.getMessage());
         Log.e(LOG_TAG, "Failed to build", error);
     }
 

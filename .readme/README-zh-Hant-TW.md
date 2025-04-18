@@ -175,6 +175,7 @@ AutoJs6 在 Auto.js 最終專案的基礎上, 於 `2021/12/01` 進行二次開�
 * `修復` floaty.window/floaty.rawWindow 無法在子執行緒執行的問題
 * `修復` floaty.getClip 可能無法正常獲取剪下板內容的問題 _[`issue #341`](http://issues.autojs6.com/341)_
 * `修復` ui.inflate 返回值丟失 attr/on/click 等原型方法的問題
+* `修復` 使用 XML 語法將 JavaScript 表示式作為屬性值時, 其作用域上下文繫結錯誤的問題 _[`issue #319`](http://issues.autojs6.com/319)_
 * `修復` 部分方法調用出現異常時無法被 try..catch 塊捕獲的問題 _[`issue #345`](http://issues.autojs6.com/345)_
 * `修復` 佈局分析頁面生成程式碼時可能導致應用崩潰的問題 _[`issue #288`](http://issues.autojs6.com/288)_
 * `修復` 打包應用無法正常使用 shizuku 模組的問題 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
@@ -388,7 +389,7 @@ SDK Tools (SDK 工具) (位於右側視窗)
 
 AutoJs6 專案依賴的 `JDK (Java 開發工具包)` 發行版本不低於 `17`, 但建議不低於 `19`.
 
-截至 2025 年 4 月 17 日, AutoJs6 可支援 JDK 最高版本為 `24`.
+截至 2025 年 4 月 18 日, AutoJs6 可支援 JDK 最高版本為 `24`.
 
 > 注: 如果計算機系統已安裝 JDK 且版本滿足上述要求, 則可跳過此小節內容.
 

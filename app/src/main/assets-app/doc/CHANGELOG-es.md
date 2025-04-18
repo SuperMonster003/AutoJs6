@@ -24,6 +24,7 @@
 * `Corrección` Problema en el que floaty.window / floaty.rawWindow no puede ejecutarse en subprocesos
 * `Corrección` Problema en el que floaty.getClip puede no obtener correctamente el contenido del portapapeles _[`issue #341`](http://issues.autojs6.com/341)_
 * `Corrección` Problema en el que el retorno de ui.inflate pierde métodos de prototipo como attr, on y click
+* `Corrección` Problema en el que se produce un enlace incorrecto del contexto de ámbito al utilizar la sintaxis XML para usar una expresión JavaScript como valor de atributo _[`issue #319`](http://issues.autojs6.com/319)_
 * `Corrección` Problema en el que algunas llamadas a métodos, al producir excepciones, no son capturadas por bloques try..catch _[`issue #345`](http://issues.autojs6.com/345)_
 * `Corrección` Problema en el que la generación de código en la página de análisis de layouts puede provocar que la aplicación se bloquee _[`issue #288`](http://issues.autojs6.com/288)_
 * `Corrección` Problema en el que las aplicaciones empaquetadas no pueden utilizar correctamente el módulo shizuku _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_

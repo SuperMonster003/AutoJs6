@@ -24,6 +24,7 @@
 * `修復` floaty.window/floaty.rawWindow 無法在子線程執行的問題
 * `修復` floaty.getClip 可能無法正常獲取剪切板內容的問題 _[`issue #341`](http://issues.autojs6.com/341)_
 * `修復` ui.inflate 返回值丟失 attr/on/click 等原型方法的問題
+* `修復` 使用 XML 語法將 JavaScript 表達式作為屬性值時, 其作用域上下文綁定錯誤的問題 _[`issue #319`](http://issues.autojs6.com/319)_
 * `修復` 部分方法調用出現異常時無法被 try..catch 塊捕獲的問題 _[`issue #345`](http://issues.autojs6.com/345)_
 * `修復` 佈局分析頁面生成代碼時可能導致應用崩潰的問題 _[`issue #288`](http://issues.autojs6.com/288)_
 * `修復` 打包應用無法正常使用 shizuku 模塊的問題 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_

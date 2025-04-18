@@ -6,9 +6,13 @@
 
 # v6.6.3
 
-###### 2025/04/16
+###### 2025/04/18
 
 * `修复` 主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题
+* `修复` 部分设备代码编辑器空行显示方框字符的问题
+* `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
+* `优化` 打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_
+* `依赖` 升级 Gradle 版本 8.14-rc-1 -> 8.14-rc-2
 
 # v6.6.2
 
@@ -30,6 +34,7 @@
 * `修复` floaty.window/floaty.rawWindow 无法在子线程执行的问题
 * `修复` floaty.getClip 可能无法正常获取剪切板内容的问题 _[`issue #341`](http://issues.autojs6.com/341)_
 * `修复` ui.inflate 返回值丢失 attr/on/click 等原型方法的问题
+* `修复` 使用 XML 语法将 JavaScript 表达式作为属性值时, 其作用域上下文绑定错误的问题 _[`issue #319`](http://issues.autojs6.com/319)_
 * `修复` 部分方法调用出现异常时无法被 try..catch 块捕获的问题 _[`issue #345`](http://issues.autojs6.com/345)_
 * `修复` 布局分析页面生成代码时可能导致应用崩溃的问题 _[`issue #288`](http://issues.autojs6.com/288)_
 * `修复` 打包应用无法正常使用 shizuku 模块的问题 _[`issue #227`](http://issues.autojs6.com/227)_ _[`issue #231`](http://issues.autojs6.com/231)_ _[`issue #284`](http://issues.autojs6.com/284)_ _[`issue #287`](http://issues.autojs6.com/287)_ _[`issue #304`](http://issues.autojs6.com/304)_
