@@ -217,7 +217,9 @@ public class ScriptEngineService {
     }
 
     public Set<ScriptEngine<? extends ScriptSource>> getEngines() {
-        return mScriptEngineManager.getEngines();
+        synchronized (mScriptEngineManager) {
+            return new LinkedHashSet<>(mScriptEngineManager.getEngines());
+        }
     }
 
     public Collection<ScriptExecution> getScriptExecutions() {

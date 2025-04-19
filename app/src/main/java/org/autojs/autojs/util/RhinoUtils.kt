@@ -17,6 +17,7 @@ import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.runtime.exception.WrappedRuntimeException
 import org.autojs.autojs6.BuildConfig
 import org.mozilla.javascript.AbstractEcmaObjectOperations
 import org.mozilla.javascript.BaseFunction
@@ -176,9 +177,9 @@ object RhinoUtils {
             e.printStackTrace()
             when {
                 isMainThread() -> {
-                    scriptRuntime?.exit(e) ?: throw RuntimeException(e)
+                    scriptRuntime?.exit(e) ?: throw WrappedRuntimeException(e)
                 }
-                else -> throw RuntimeException(e)
+                else -> throw WrappedRuntimeException(e)
             }
         }
     }

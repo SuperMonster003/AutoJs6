@@ -3,7 +3,8 @@
     "v6.6.3": {
       "released_date": "2025/04/19",
       "feature": [
-        "timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态"
+        "timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态",
+        "engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件"
       ],
       "fix": [
         "主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题",

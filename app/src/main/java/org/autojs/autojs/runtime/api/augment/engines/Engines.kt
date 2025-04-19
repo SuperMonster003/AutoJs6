@@ -9,21 +9,25 @@ import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.extension.AnyExtensions.toRuntimePath
 import org.autojs.autojs.extension.FlexibleArray
+import org.autojs.autojs.extension.ScriptableExtensions.prop
 import org.autojs.autojs.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.augment.AsEmitter
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.script.ScriptSource
+import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
 @Suppress("unused")
-class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
+class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitter {
 
     override val selfAssignmentFunctions = listOf(
         ::all.name,
@@ -55,6 +59,13 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
     }
 
     companion object : FlexibleArray() {
+
+        @JvmStatic
+        fun emit(scriptRuntime: ScriptRuntime, eventName: String, vararg args: Any?) {
+            val engines = scriptRuntime.topLevelScope.prop("engines") as? ScriptableObject ?: return
+            val emitFunc = engines.prop("emit") as BaseFunction
+            callFunction(scriptRuntime, emitFunc, arrayOf(eventName, *args))
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
