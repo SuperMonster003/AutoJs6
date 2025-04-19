@@ -345,7 +345,7 @@ AutoJs6 разработан на основе финальной версии �
 - [android-studio-2024.3.1.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.14/android-studio-2024.3.1.14-windows.exe) (1.22 GB)
 - [android-studio-2024.3.1.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.14/android-studio-2024.3.1.14-windows.zip) (1.23 GB)
 
-> Примечание: Указанная версия была выпущена 24 March 2025 г.. Для загрузки других версий или если указанная ссылка недействительна, посетите страницу [архива версий Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Примечание: Указанная версия была выпущена 24 March 2025 года. Для загрузки других версий или если указанная ссылка недействительна, посетите страницу [архива версий Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Установите или распакуйте указанные файлы, запустите программное обеспечение Android Studio (например, `"D:\android-studio\bin\studio64.exe"`).
 
@@ -389,7 +389,7 @@ SDK Tools (SDK Инструменты) (находится в правом ок�
 
 Для проекта AutoJs6 требуется версия `JDK (Java Development Kit)` не ниже `17`, но рекомендуется не ниже `19`.
 
-По состоянию на 19 April 2025 г. AutoJs6 поддерживает JDK максимальной версии `24`.
+По состоянию на 19 April 2025 года AutoJs6 поддерживает JDK максимальной версии `24`.
 
 > Примечание: Если на компьютере уже установлен JDK и версия соответствует указанным требованиям, этот раздел можно пропустить.
 
@@ -549,7 +549,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 |              <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>              |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86) `(Lin)`</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-Данные обновлены на 1 January 2025 г..
+Данные обновлены на 1 January 2025 года.
 
 Данные отсортированы по `последним отправкам` в порядке убывания.
 
