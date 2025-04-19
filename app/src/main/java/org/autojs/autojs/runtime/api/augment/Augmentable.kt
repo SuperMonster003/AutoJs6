@@ -29,7 +29,6 @@ import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.ScriptableObject.UNINITIALIZED_CONST
-import org.mozilla.javascript.WrappedException
 import java.lang.reflect.InvocationTargetException
 import java.util.function.Consumer
 import java.util.function.Supplier
@@ -158,7 +157,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                 val message = e.message?.let {
                     globalContext.getString(R.string.error_failed_to_instantiate_with_cause, key, it)
                 } ?: globalContext.getString(R.string.error_failed_to_instantiate, key)
-                throw RuntimeException(message, e)
+                throw WrappedRuntimeException(message, e)
             }
         }
 
@@ -429,7 +428,7 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                         else -> t
                     }
                     if (ScriptInterruptedException.causedByInterrupt(e)) {
-                        throw WrappedException(e)
+                        throw e
                     }
                     val funcNameSuffix = if (funcName != funcNameAlias) " (${globalContext.getString(R.string.text_alias)}: $funcNameAlias)" else ""
                     val methodDescription = "$key.$funcName$funcNameSuffix"
