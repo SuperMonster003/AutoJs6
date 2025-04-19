@@ -125,8 +125,8 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     private static final String ARG_USE_LEGACY_MODE = "useLegacyMode";
 
     ColorPickerDialogListener colorPickerDialogListener;
-    View.OnClickListener oldColorPanelOnClickListener;
-    View.OnClickListener newColorPanelOnClickListener;
+    OnClickListener oldColorPanelOnClickListener;
+    OnClickListener newColorPanelOnClickListener;
     Consumer<ColorPickerDialog> colorHistoriesHandler;
 
     FrameLayout rootView;
@@ -361,7 +361,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         if (!useLegacyMode) {
             oldColorPanel.setOnClickListener(v -> {
                 v.setTag(oldColorPanel.getColor());
-                oldColorPanelOnClickListener.onClick(v);
+                oldColorPanelOnClickListener.onClick(v, this);
             });
             oldColorPanel.setOnLongClickListener(v -> {
                 resetColorPanel();
@@ -369,7 +369,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
             });
             newColorPanel.setOnClickListener(v -> {
                 v.setTag(newColorPanel.getColor());
-                newColorPanelOnClickListener.onClick(v);
+                newColorPanelOnClickListener.onClick(v, this);
             });
             newColorPanel.setOnLongClickListener(v -> {
                 int aimColor = colorPicker.lastColor;
@@ -861,8 +861,8 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         int colorShape = ColorShape.CIRCLE;
         boolean useLegacyMode = false;
 
-        View.OnClickListener oldColorPanelOnClickListener;
-        View.OnClickListener newColorPanelOnClickListener;
+        OnClickListener oldColorPanelOnClickListener;
+        OnClickListener newColorPanelOnClickListener;
         Consumer<ColorPickerDialog> colorHistoriesHandler;
 
         /*package*/ Builder() {
@@ -1018,12 +1018,12 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
             return this;
         }
 
-        public Builder setOldColorPanelOnClickListener(View.OnClickListener onClickListener) {
+        public Builder setOldColorPanelOnClickListener(OnClickListener onClickListener) {
             this.oldColorPanelOnClickListener = onClickListener;
             return this;
         }
 
-        public Builder setNewColorPanelOnClickListener(View.OnClickListener onClickListener) {
+        public Builder setNewColorPanelOnClickListener(OnClickListener onClickListener) {
             this.newColorPanelOnClickListener = onClickListener;
             return this;
         }
@@ -1074,4 +1074,8 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     }
 
     // endregion
+
+    public static interface OnClickListener {
+        void onClick(View view, ColorPickerDialog dialog);
+    }
 }
