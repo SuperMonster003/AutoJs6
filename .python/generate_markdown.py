@@ -32,7 +32,7 @@ date_formats = {
     "es": "%d de %B de %Y",  # 西班牙文
     "ja": "%Y 年 %m 月 %d 日",  # 日文
     "ko": "%Y 년 %m 월 %d 일",  # 韩文
-    "ru": "%d %B %Y г.",  # 俄文
+    "ru": "%d %B %Y года",  # 俄文
     "ar": "%d %B %Y"  # 阿拉伯文
 }
 
@@ -85,6 +85,8 @@ def format_date(date_str, lang_code):
 
             # 在 formatted_date 中每个非字母和非数字字符前后增加空格（如果没有空格）
             formatted_date_with_spaces = re.sub(r'(\d+)', r' \1 ', formatted_date).strip()
+            # 将数字与逗号之间的空格去除
+            formatted_date_with_spaces = re.sub(r'(\d)\s+,', r'\1,', formatted_date_with_spaces)
             formatted_date_with_spaces = re.sub(r'\s+', ' ', formatted_date_with_spaces)
 
             # 去掉前导零

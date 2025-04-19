@@ -159,8 +159,11 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 ###### 2025/04/19
 
+* `新增` timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态
+* `新增` engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件
 * `修复` 主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题
 * `修复` 部分设备代码编辑器空行显示方框字符的问题
+* `修复` 主题色设置页面调色盘对话框可能无限叠加的问题
 * `修复` APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题
 * `修复` dialogs 模块无法正常使用 customView 属性的问题 _[`issue #364`](http://issues.autojs6.com/364)_
 * `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
