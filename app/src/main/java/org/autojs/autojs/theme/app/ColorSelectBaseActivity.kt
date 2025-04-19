@@ -11,6 +11,7 @@ import android.view.ViewAnimationUtils
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -253,8 +254,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             .setShowAlphaSlider(false)
             .setDialogTitle(R.string.dialog_title_color_palette)
             .setColor(initialColor ?: customColor)
-            .setOldColorPanelOnClickListener { showColorDetails(it.tag as? Int) }
-            .setNewColorPanelOnClickListener { showColorDetails(it.tag as? Int) }
+            .setOldColorPanelOnClickListener { v, dialog -> showColorDetails(v.tag as? Int, parentDialog = dialog) }
+            .setNewColorPanelOnClickListener { v, dialog -> showColorDetails(v.tag as? Int, parentDialog = dialog) }
             .setColorHistoriesHandler { showColorPickerHistories(it) }
             .create()
             .setColorPickerDialogListener { _, color: Int ->
@@ -494,12 +495,13 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
     }
 
-    protected fun showColorDetails(color: Int?, title: String? = null) {
+    protected fun showColorDetails(color: Int?, title: String? = null, parentDialog: DialogFragment? = null) {
         val customNeutral = ColorInfoDialogManager.CustomColorInfoDialogNeutral(
             textRes = R.string.dialog_button_use_palette,
             colorRes = R.color.dialog_button_hint,
             onNeutralCallback = object: NeutralButtonCallback{
                 override fun onClick(dialog: MaterialDialog, which: DialogAction, color: Int) {
+                    parentDialog?.dismiss()
                     dialog.dismiss()
                     showColorPicker(color)
                 }
