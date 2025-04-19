@@ -698,6 +698,16 @@ class ColorTable {
         const val GREY_700 = -0x9e9e9f
         const val GREY_800 = -0xbdbdbe
         const val GREY_900 = -0xdededf
+        const val GRAY_50 = -0x50506
+        const val GRAY_100 = -0xa0a0b
+        const val GRAY_200 = -0x111112
+        const val GRAY_300 = -0x1f1f20
+        const val GRAY_400 = -0x424243
+        const val GRAY_500 = -0x616162
+        const val GRAY_600 = -0x8a8a8b
+        const val GRAY_700 = -0x9e9e9f
+        const val GRAY_800 = -0xbdbdbe
+        const val GRAY_900 = -0xdededf
         const val BLACK_1000 = -0x1000000
         const val WHITE_1000 = -0x1
         const val BLUE_GREY_50 = -0x13100f
@@ -710,6 +720,16 @@ class ColorTable {
         const val BLUE_GREY_700 = -0xbaa59c
         const val BLUE_GREY_800 = -0xc8b8b1
         const val BLUE_GREY_900 = -0xd9cdc8
+        const val BLUE_GRAY_50 = -0x13100f
+        const val BLUE_GRAY_100 = -0x302724
+        const val BLUE_GRAY_200 = -0x4f443b
+        const val BLUE_GRAY_300 = -0x6f5b52
+        const val BLUE_GRAY_400 = -0x876f64
+        const val BLUE_GRAY_500 = -0x9f8275
+        const val BLUE_GRAY_600 = -0xab9186
+        const val BLUE_GRAY_700 = -0xbaa59c
+        const val BLUE_GRAY_800 = -0xc8b8b1
+        const val BLUE_GRAY_900 = -0xd9cdc8
 
         const val RED = RED_500
         const val PINK = PINK_500
@@ -729,7 +749,9 @@ class ColorTable {
         const val DEEP_ORANGE = DEEP_ORANGE_500
         const val BROWN = BROWN_500
         const val GREY = GREY_500
+        const val GRAY = GREY_500
         const val BLUE_GREY = BLUE_GREY_500
+        const val BLUE_GRAY = BLUE_GREY_500
         const val BLACK = BLACK_1000
         const val WHITE = WHITE_1000
 
