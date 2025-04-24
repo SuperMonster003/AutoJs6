@@ -988,5 +988,7 @@
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
+    <string name="text_hide_node">Hide this node</string>
+    <string name="text_hide_same_frame_nodes">Hide same frame nodes</string>
 
 </resources>

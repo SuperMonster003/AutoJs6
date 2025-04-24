@@ -991,5 +991,7 @@
     <string name="text_write_secure_settings_description">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">La ruta resuelta para \"%1$s\" no puede ser nula</string>
+    <string name="text_hide_node">Ocultar este nodo</string>
+    <string name="text_hide_same_frame_nodes">Ocultar nodo del mismo marco</string>
 
 </resources>
