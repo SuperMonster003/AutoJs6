@@ -993,5 +993,15 @@
     <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" 에 대한 해결된 경로는 null 일 수 없습니다</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">업데이트 확인 (로컬 버전 무시)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">업데이트 확인 시 최신 원격 버전을 직접 가져옵니다</string>
+    <string name="error_failed_to_retrieve_released_notes">버전 정보를 가져오지 못했습니다</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">현재 표시 언어에 해당하는 버전 정보를 가져오지 못했습니다. 나중에 다시 시도해 주세요.\n\n현재 임시로 \"简体中文 (zh-Hans)\" 언어의 버전 정보가 표시되고 있습니다.</string>
+    <string name="changelog_label_hint">힌트</string>
+    <string name="changelog_label_feature">추가</string>
+    <string name="changelog_label_fix">수정</string>
+    <string name="changelog_label_improvement">개선</string>
+    <string name="changelog_label_dependency">의존성</string>
+    <string name="text_changelog_item_dependency">일부 의존성 또는 로컬 라이브러리 버전 조정</string>
 
 </resources>

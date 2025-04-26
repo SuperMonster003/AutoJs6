@@ -389,7 +389,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of Apr 19, 2025, AutoJs6 supports up to version `24` of the JDK.
+As of Apr 24, 2025, AutoJs6 supports up to version `24` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 

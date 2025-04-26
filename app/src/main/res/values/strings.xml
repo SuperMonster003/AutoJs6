@@ -71,6 +71,7 @@
     <string name="key_auto_night_mode_enabled" translatable="false">key_$_auto_night_mode_enabled</string>
     <string name="key_change_working_dir" translatable="false">key_$_change_working_dir</string>
     <string name="key_check_for_updates" translatable="false">key_$_check_for_updates</string>
+    <string name="key_check_for_updates_while_ignoring_the_local_version" translatable="false">key_$_check_for_updates_while_ignoring_the_local_version</string>
     <string name="key_client_socket_normally_closed" translatable="false">key_$_client_socket_normally_closed</string>
     <string name="key_color_select_activity_legacy_layout" translatable="false">key_$_color_select_activity_legacy_layout</string>
     <string name="key_dialog_check_display_over_other_apps" translatable="false">key_$_dialog_check_display_over_other_apps</string>
@@ -1218,5 +1219,15 @@
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">Check for updates (ignore the local version)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">Fetch the latest remote version directly when checking for updates</string>
+    <string name="error_failed_to_retrieve_released_notes">Failed to retrieve release notes</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Failed to retrieve the release notes for the currently displayed language. Please try again later.\n\nCurrently, the release notes for \"简体中文 (zh-Hans)\" are temporarily displayed.</string>
+    <string name="changelog_label_hint">Hint</string>
+    <string name="changelog_label_feature">Feature</string>
+    <string name="changelog_label_fix">Fix</string>
+    <string name="changelog_label_improvement">Improvement</string>
+    <string name="changelog_label_dependency">Dependency</string>
+    <string name="text_changelog_item_dependency">Some dependency or local library version adjustments</string>
 
 </resources>

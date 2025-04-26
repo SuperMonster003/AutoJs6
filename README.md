@@ -157,7 +157,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.6.3
 
-###### 2025/04/19
+###### 2025/04/24
 
 * `新增` timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态
 * `新增` engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件
@@ -167,6 +167,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题
 * `修复` dialogs 模块无法正常使用 customView 属性的问题 _[`issue #364`](http://issues.autojs6.com/364)_
 * `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
+* `修复` README.md 中部分语言日期格式不正确的问题
 * `优化` 打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_
 * `优化` 使用异步加载方式一定程度提升文件管理器列表滑动流畅性
 * `优化` 部分依赖或本地库版本调整 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
@@ -315,7 +316,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2025 年 4 月 19 日, AutoJs6 可支持 JDK 最高版本为 `24`.
+截至 2025 年 4 月 24 日, AutoJs6 可支持 JDK 最高版本为 `24`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

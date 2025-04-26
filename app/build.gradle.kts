@@ -225,6 +225,9 @@ dependencies /* Unclassified */ {
     // MQTT
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0")
     implementation("org.eclipse.paho:org.eclipse.paho.android.service:1.1.1")
+
+    // Jsoup
+    implementation("org.jsoup:jsoup:1.19.1")
 }
 
 dependencies /* MIME */ {
