@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import androidx.core.graphics.createBitmap
 
 /**
  * Created by Stardust on Apr 22, 2017.
@@ -29,7 +30,7 @@ object BitmapUtils {
     @JvmStatic
     fun drawableToBitmap(drawable: Drawable): Bitmap = when (drawable) {
         is BitmapDrawable -> drawable.bitmap
-        else -> Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        else -> createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight)
             .also { drawable.draw(Canvas(it)) }
     }
 

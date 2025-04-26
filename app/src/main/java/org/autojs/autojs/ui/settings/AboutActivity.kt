@@ -11,11 +11,12 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.jaredrummler.android.widget.AnimatedSvgView
 import de.psdev.licensesdialog.LicenseResolver
 import de.psdev.licensesdialog.LicensesDialog
+import org.autojs.autojs.network.UpdateChecker
+import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DeviceUtils
-import org.autojs.autojs.util.UpdateUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -159,7 +160,9 @@ open class AboutActivity : BaseActivity() {
     }
 
     private fun checkForUpdates() {
-        UpdateUtils.getDialogChecker(this).checkNow()
+        UpdateChecker.Builder(this)
+            .setPromptMode(PromptMode.DIALOG)
+            .build().checkNow()
     }
 
     private fun startFeedbackActivity() {

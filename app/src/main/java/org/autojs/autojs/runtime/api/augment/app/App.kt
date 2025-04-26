@@ -38,6 +38,7 @@ import java.io.File
 import java.net.URI
 import org.autojs.autojs.util.App as PresetApp
 import androidx.core.net.toUri
+import org.autojs.autojs.extension.ScriptableExtensions.deleteProp
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
@@ -50,13 +51,13 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
     @Suppress("DEPRECATION")
     override val selfAssignmentFunctions = listOf(
         ::intent.name,
-        ::startActivity.name,
-        ::startDualActivity.name,
+        ::startActivity.name to AS_GLOBAL,
+        ::startDualActivity.name to AS_GLOBAL,
         ::intentToShell.name,
-        ::startService.name,
-        ::sendEmail.name,
-        ::sendBroadcast.name,
-        ::sendLocalBroadcastSync.name,
+        ::startService.name to AS_GLOBAL,
+        ::sendEmail.name to AS_GLOBAL,
+        ::sendBroadcast.name to AS_GLOBAL,
+        ::sendLocalBroadcastSync.name to AS_GLOBAL,
         ::parseUri.name,
         ::openUrl.name,
         ::openDualUrl.name,
@@ -74,8 +75,8 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         ::launchDualSettings.name to AS_GLOBAL,
         ::openAppSetting.name to AS_GLOBAL,
         ::openDualAppSetting.name to AS_GLOBAL,
-        ::uninstall.name,
-        ::uninstallDual.name,
+        ::uninstall.name to AS_GLOBAL,
+        ::uninstallDual.name to AS_GLOBAL,
         ::viewFile.name,
         ::editFile.name,
         ::kill.name to AS_GLOBAL,
@@ -927,27 +928,45 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         private fun Intent.configure(scriptRuntime: ScriptRuntime, o: NativeObject): Intent {
             val intent = this
 
-            if (!o.prop("url").isJsNullish()) {
-                o.put("data", o, parseIntentUrl(scriptRuntime, o))
+            val urlRaw = o.prop("url")
+            val packageRaw = o.prop("package")
+            var packageNameRaw = o.prop("packageName")
+            val classNameRaw = o.prop("className")
+            val extrasRaw = o.prop("extras")
+            val categoryRaw = o.prop("category")
+            val actionRaw = o.prop("action")
+            val flagsRaw = o.prop("flags")
+            val typeRaw = o.prop("type")
+            val dataRaw = o.prop("data")
+
+            if (!urlRaw.isJsNullish()) {
+                o.defineProp("data", parseIntentUrl(scriptRuntime, o))
             }
 
-            if (!o.prop("package").isJsNullish()) {
-                if (o.prop("packageName").isJsNullish()) {
-                    o.put("packageName", o, o.prop("package"))
-                }
-            } else {
-                if (!o.prop("packageName").isJsNullish()) {
-                    o.put("package", o, o.prop("packageName"))
+            if (!packageRaw.isJsNullish()) {
+                if (packageNameRaw.isJsNullish()) {
+                    o.defineProp("packageName", packageRaw).also {
+                        packageNameRaw = packageRaw
+                    }
                 }
             }
+            o.deleteProp("package")
 
-            if (!o.prop("packageName").isJsNullish()) {
-                val k = Context.toString(o.prop("packageName"))
-                if (k in presetPackageNames) {
-                    o.defineProp("packageName", presetPackageNames[k])
+            if (!packageNameRaw.isJsNullish()) {
+                val packageName = when (packageNameRaw) {
+                    is PresetApp -> packageNameRaw.packageName
+                    else -> when (val packageNameStr = coerceString(packageNameRaw)) {
+                        in presetPackageNames -> presetPackageNames[packageNameStr]!!
+                        else -> packageNameStr
+                    }
                 }
-                if (!o.prop("className").isJsNullish()) {
-                    intent.setClassName(coerceString(o.prop("packageName")), parseClassName(o))
+                if (packageName != packageNameRaw) {
+                    o.defineProp("packageName", packageName).also {
+                        packageNameRaw = packageName
+                    }
+                }
+                if (!classNameRaw.isJsNullish()) {
+                    intent.setClassName(packageName, parseClassName(o))
                 } else {
                     // @Hint by SuperMonster003 on Jun 23, 2020.
                     //  ! the Intent can only match the components
@@ -958,44 +977,43 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     //  ! Intent 只能匹配通过 setPackage() 设置的给定应用包中的组件.
                     //  ! 否则, 如果有多个应用可以处理该 Intent,
                     //  ! 系统会向用户展示一个对话框, 让用户选择要使用哪个应用.
-                    intent.setPackage(coerceString(o.prop("packageName")))
+                    intent.setPackage(packageName)
                 }
             }
 
-            if (o.prop("extras") is NativeObject) {
-                (o.prop("extras") as NativeObject).entries.forEach { entry ->
+            if (extrasRaw is NativeObject) {
+                extrasRaw.entries.forEach { entry ->
                     val (key, value) = entry
                     RhinoUtils.putExtraForIntent(intent, key, value)
                 }
             }
 
-            if (!o.prop("category").isJsNullish()) {
-                if (o.prop("category") is Iterable<*>) {
-                    (o.prop("category") as Iterable<*>).forEach { cat ->
+            if (!categoryRaw.isJsNullish()) {
+                when (categoryRaw) {
+                    is Iterable<*> -> categoryRaw.forEach { cat ->
                         intent.addCategory(Context.toString(cat))
                     }
-                } else {
-                    intent.addCategory(Context.toString(o.prop("category")))
+                    else -> intent.addCategory(Context.toString(categoryRaw))
                 }
             }
 
-            if (!o.prop("action").isJsNullish()) {
-                intent.setAction(parseIntentAction(o.prop("action")))
+            if (!actionRaw.isJsNullish()) {
+                intent.setAction(parseIntentAction(actionRaw))
             }
 
-            if (!o.prop("flags").isJsNullish()) {
-                intent.setFlags(parseIntentFlags(o.prop("flags")))
+            if (!flagsRaw.isJsNullish()) {
+                intent.setFlags(parseIntentFlags(flagsRaw))
             }
 
-            if (!o.prop("type").isJsNullish()) {
-                if (!o.prop("data").isJsNullish()) {
-                    intent.setDataAndType(parseUriRhinoWithRuntime(scriptRuntime, o.prop("data")), Context.toString(o.prop("type")))
+            if (!typeRaw.isJsNullish()) {
+                if (!dataRaw.isJsNullish()) {
+                    intent.setDataAndType(parseUriRhinoWithRuntime(scriptRuntime, dataRaw), Context.toString(typeRaw))
                 } else {
-                    intent.setType(Context.toString(o.prop("type")))
+                    intent.setType(Context.toString(typeRaw))
                 }
             } else {
-                if (!o.prop("data").isJsNullish()) {
-                    intent.setData(Context.toString(o.prop("data")).toUri())
+                if (!dataRaw.isJsNullish()) {
+                    intent.setData(Context.toString(dataRaw).toUri())
                 }
             }
 

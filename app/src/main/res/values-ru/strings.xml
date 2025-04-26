@@ -991,5 +991,15 @@
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Разрешённый путь для \"%1$s\" не может быть равен null</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">Проверить обновления (игнорировать локальную версию)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">При проверке обновлений напрямую получать последнюю удалённую версию</string>
+    <string name="error_failed_to_retrieve_released_notes">Не удалось получить информацию о версии</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Не удалось получить информацию о версии для текущего выбранного языка, повторите попытку позже.\n\nВ данный момент временно отображается информация о версии для языка \"简体中文 (zh-Hans)\".</string>
+    <string name="changelog_label_hint">Подсказка</string>
+    <string name="changelog_label_feature">Новое</string>
+    <string name="changelog_label_fix">Исправление</string>
+    <string name="changelog_label_improvement">Улучшение</string>
+    <string name="changelog_label_dependency">Зависимость</string>
+    <string name="text_changelog_item_dependency">Изменения версий некоторых зависимостей или локальных библиотек</string>
 
 </resources>

@@ -6,7 +6,7 @@
 
 # v6.6.3
 
-###### 2025/04/19
+###### 2025/04/24
 
 * `新增` timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态
 * `新增` engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件
@@ -16,8 +16,10 @@
 * `修复` APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题
 * `修复` dialogs 模块无法正常使用 customView 属性的问题 _[`issue #364`](http://issues.autojs6.com/364)_
 * `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
+* `修复` README.md 中部分语言日期格式不正确的问题
 * `优化` 打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_
 * `优化` 使用异步加载方式一定程度提升文件管理器列表滑动流畅性
+* `依赖` 附加 Jsoup 版本 1.19.1
 * `依赖` 升级 Gradle 版本 8.14-rc-1 -> 8.14-rc-2
 
 # v6.6.2

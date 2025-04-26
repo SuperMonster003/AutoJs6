@@ -219,7 +219,7 @@ pluginManagement {
             val intelliJIdea = object : Platform(
                 name = "IntelliJIdea", vendor = "Jetbrains",
                 androidVersionMap = mapOf(
-                    "2025.1" to "8.9.1", /* Apr 12, 2025. */
+                    "2025.1" to "8.9.2", /* Apr 23, 2025. */
                     "2024.3.1" to "8.7.3", /* Dec 10, 2024. */
                     "2024.3" to "8.7.0-rc01", /* Nov 15, 2024. */
                     "2024.2" to "8.5.2", /* Aug 13, 2024. */

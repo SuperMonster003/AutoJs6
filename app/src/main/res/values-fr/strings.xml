@@ -409,7 +409,7 @@
     <string name="text_captured_window_info_type_unknown">Type inconnu</string>
     <string name="text_change_working_dir">Changer de répertoire de travail</string>
     <string name="text_check_for_updates">Vérifier les mises à jour</string>
-    <string name="text_checking_update" tools:ignore="TypographyEllipsis">Checking for updates...</string>
+    <string name="text_checking_update" tools:ignore="TypographyEllipsis">Recherche de mises à jour...</string>
     <string name="text_city_or_locality">Ville ou localité</string>
     <string name="text_class_or_package_name">Nom de la classe ou du paquet</string>
     <string name="text_clear">Clear</string>
@@ -991,5 +991,15 @@
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Le chemin résolu pour \"%1$s\" ne peut pas être nul</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">Vérifier les mises à jour (ignorer la version locale)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">Récupérer directement la dernière version distante lors de la vérification des mises à jour</string>
+    <string name="error_failed_to_retrieve_released_notes">Échec de la récupération des informations de version</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Échec de la récupération des informations de version correspondant à la langue actuellement affichée, veuillez réessayer ultérieurement.\n\nPour l\'instant, les informations de version en \"简体中文 (zh-Hans)\" seront affichées temporairement.</string>
+    <string name="changelog_label_hint">Astuce</string>
+    <string name="changelog_label_feature">Fonctionnalité</string>
+    <string name="changelog_label_fix">Correction</string>
+    <string name="changelog_label_improvement">Amélioration</string>
+    <string name="changelog_label_dependency">Dépendance</string>
+    <string name="text_changelog_item_dependency">Certaines dépendances ou versions de bibliothèques locales ont été ajustées</string>
 
 </resources>

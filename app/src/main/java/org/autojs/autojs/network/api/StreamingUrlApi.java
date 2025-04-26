@@ -11,11 +11,11 @@ import retrofit2.http.Url;
  * Created by Stardust on Sep 20, 2017.
  * Modified by SuperMonster003 as of Feb 28, 2022.
  */
-public interface UpdateCheckerApi {
+public interface StreamingUrlApi {
 
     @Streaming
     @GET()
     @Headers("Cache-Control: no-cache")
-    Observable<ResponseBody> checkForUpdates(@Url String url);
+    Observable<ResponseBody> streamingUrl(@Url String url);
 
 }

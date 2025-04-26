@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.3": {
-      "released_date": "2025/04/19",
+      "released_date": "2025/04/26",
       "feature": [
         "timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态",
         "engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件"
@@ -17,9 +17,11 @@
       ],
       "improvement": [
         "打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_",
+        "版本更新信息支持多语言显示 (与当前显示语言同步)",
         "使用异步加载方式一定程度提升文件管理器列表滑动流畅性"
       ],
       "dependency": [
+        "附加 Jsoup 版本 1.19.1",
         "升级 Gradle 版本 8.14-rc-1 -> 8.14-rc-2"
       ]
     },
