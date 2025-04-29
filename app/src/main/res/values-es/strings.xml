@@ -1001,5 +1001,7 @@
     <string name="changelog_label_improvement">Mejora</string>
     <string name="changelog_label_dependency">Dependencia</string>
     <string name="text_changelog_item_dependency">Ajustes en algunas dependencias o versiones de bibliotecas locales</string>
+    <string name="text_about_functions_version_histories">Version histories</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>

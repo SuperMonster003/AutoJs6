@@ -1,6 +1,7 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="about_item_avatar_side_length">50dp</dimen>
+    <dimen name="about_item_avatar_side_length_land">60dp</dimen>
     <dimen name="content_inset">16dp</dimen>
     <dimen name="divider_drawer_menu_group">6dp</dimen>
     <dimen name="fab_margin">16dp</dimen>

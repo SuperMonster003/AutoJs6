@@ -64,7 +64,7 @@ class App : MultiDexApplication() {
         setUpLeakCanary()
 
         AutoJs.initInstance(this)
-        GlobalKeyObserver.initIfNeeded()
+        GlobalKeyObserver.initIfNeeded(applicationContext)
         setupDrawableImageLoader()
         TimedTaskScheduler.init(this)
         initDynamicBroadcastReceivers()

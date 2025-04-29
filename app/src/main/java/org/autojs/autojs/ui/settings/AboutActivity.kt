@@ -22,7 +22,6 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityAboutBinding
 import org.autojs.autojs6.databinding.ActivityAboutFunctionButtonsBinding
-import org.autojs.autojs6.databinding.ActivityAboutItemsBinding
 
 /**
  * Created by Stardust on Feb 2, 2017.
@@ -31,7 +30,6 @@ import org.autojs.autojs6.databinding.ActivityAboutItemsBinding
 open class AboutActivity : BaseActivity() {
 
     private lateinit var activityBinding: ActivityAboutBinding
-    private lateinit var itemsBinding: ActivityAboutItemsBinding
     private lateinit var functionsButtonsBinding: ActivityAboutFunctionButtonsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +38,6 @@ open class AboutActivity : BaseActivity() {
             setContentView(it.root)
             it.version.text = BuildConfig.VERSION_NAME
             it.since.text = BuildConfig.VERSION_DATE
-            itemsBinding = it.activityAboutItems
             functionsButtonsBinding = it.activityAboutFunctionButtons
         }
         setToolbarAsBack(R.string.text_about)
@@ -48,14 +45,14 @@ open class AboutActivity : BaseActivity() {
     }
 
     private fun setupBindingListeners() {
-        itemsBinding.avatarOriginalDeveloper.setOnClickListener { toastForUnderDevelopment() }
-        itemsBinding.avatarDeveloper.setOnClickListener { toastForUnderDevelopment() }
+        activityBinding.avatarOriginalDeveloper.setOnClickListener { toastForUnderDevelopment() }
+        activityBinding.avatarDeveloper.setOnClickListener { toastForUnderDevelopment() }
 
-        itemsBinding.avatarOriginalDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
-        itemsBinding.avatarDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
+        activityBinding.avatarOriginalDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
+        activityBinding.avatarDeveloperUserContents.setOnClickListener { toastForUnderDevelopment() }
 
-        itemsBinding.icon1stDeveloperIdentifier.setOnClickListener { toastForFirstDeveloperIdentifier() }
-        itemsBinding.icon2ndDeveloperIdentifier.setOnClickListener { toastForSecondDeveloperIdentifier() }
+        activityBinding.icon1stDeveloperIdentifier.setOnClickListener { toastForFirstDeveloperIdentifier() }
+        activityBinding.icon2ndDeveloperIdentifier.setOnClickListener { toastForSecondDeveloperIdentifier() }
 
         activityBinding.iconAboutAppSvgView.setOnClickListener { showDeviceInfo() }
         activityBinding.iconAboutAppSvgView.setOnLongClickListener { true.also { launchDeveloperOptions() } }

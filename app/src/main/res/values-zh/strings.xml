@@ -999,5 +999,7 @@
     <string name="changelog_label_improvement">优化</string>
     <string name="changelog_label_dependency">依赖</string>
     <string name="text_changelog_item_dependency">部分依赖或本地库版本调整</string>
+    <string name="text_about_functions_version_histories">版本历史</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">获取 version.properties 失败, 无法解析版本信息</string>
 
 </resources>
