@@ -1003,5 +1003,7 @@
     <string name="changelog_label_improvement">개선</string>
     <string name="changelog_label_dependency">의존성</string>
     <string name="text_changelog_item_dependency">일부 의존성 또는 로컬 라이브러리 버전 조정</string>
+    <string name="text_about_functions_version_histories">Version histories</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>

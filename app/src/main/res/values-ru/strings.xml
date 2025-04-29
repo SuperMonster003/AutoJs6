@@ -1001,5 +1001,7 @@
     <string name="changelog_label_improvement">Улучшение</string>
     <string name="changelog_label_dependency">Зависимость</string>
     <string name="text_changelog_item_dependency">Изменения версий некоторых зависимостей или локальных библиотек</string>
+    <string name="text_about_functions_version_histories">Version histories</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>

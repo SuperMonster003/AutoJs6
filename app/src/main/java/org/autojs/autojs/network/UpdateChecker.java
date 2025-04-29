@@ -63,6 +63,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -114,11 +115,15 @@ public class UpdateChecker {
             mPendingDialog.show();
         }
 
+        AtomicReference<String> errorBlob = new AtomicReference<>();
+        AtomicReference<String> errorRaw = new AtomicReference<>();
+
         Observable<ResponseBody> obsBlobSafe = getStreamingApi()
                 .streamingUrl(URL_VERSION_PROPS_BLOB)
                 .subscribeOn(Schedulers.io())
                 .onErrorResumeNext(e -> {
                     Log.d(TAG, "Error from obsBlobSafe while parsing version.properties");
+                    errorBlob.set(e.getMessage());
                     e.printStackTrace();
                     return Observable.empty();
                 });
@@ -128,13 +133,14 @@ public class UpdateChecker {
                 .subscribeOn(Schedulers.io())
                 .onErrorResumeNext(e -> {
                     Log.d(TAG, "Error from obsRawSafe while parsing version.properties");
+                    errorRaw.set(e.getMessage());
                     e.printStackTrace();
                     return Observable.empty();
                 });
 
         Observable.amb(Arrays.asList(obsBlobSafe, obsRawSafe))
                 .observeOn(AndroidSchedulers.mainThread())
-                .switchIfEmpty(Observable.error(new Exception("To trigger onError")))
+                .switchIfEmpty(Observable.error(new ObservableEmptyException()))
                 .subscribe(new SimpleObserver<>() {
                     @Override
                     public void onNext(@NotNull ResponseBody responseBody) {
@@ -188,9 +194,32 @@ public class UpdateChecker {
                         }
 
                         if (mPromptMode == PromptMode.DIALOG) {
-                            new Dialog.Builder.Prompt(mContext, R.string.error_check_for_update, e.getMessage())
-                                    .positiveText(R.string.text_cancel)
-                                    .build().show();
+                            if (!(e instanceof ObservableEmptyException)) {
+                                new Dialog.Builder.Prompt(mContext, R.string.error_check_for_update, e.getMessage())
+                                        .positiveText(R.string.dialog_button_dismiss)
+                                        .build().show();
+                                return;
+                            }
+                            if (errorBlob.get() != null || errorRaw.get() != null) {
+                                StringBuilder message = new StringBuilder();
+                                if (errorBlob.get() != null) {
+                                    message.append("Error message of blob:\n\n").append(errorBlob.get());
+                                }
+                                if (errorRaw.get() != null) {
+                                    if (message.length() > 0) {
+                                        message.append("\n\n");
+                                    }
+                                    message.append("Error message of raw:\n\n").append(errorRaw.get());
+                                }
+                                new Dialog.Builder.Prompt(mContext, R.string.error_check_for_update, message.toString())
+                                        .positiveText(R.string.dialog_button_dismiss)
+                                        .build().show();
+                            } else {
+                                new Dialog.Builder.Prompt(mContext, R.string.error_check_for_update,
+                                        R.string.error_failed_to_retrieve_version_properties_file_to_parse_version_information)
+                                        .positiveText(R.string.dialog_button_dismiss)
+                                        .build().show();
+                            }
                         }
                     }
                 });
@@ -885,6 +914,10 @@ public class UpdateChecker {
 
         }
 
+    }
+
+    private static class ObservableEmptyException extends RuntimeException {
+        /* Empty body. */
     }
 
 }

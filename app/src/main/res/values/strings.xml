@@ -27,9 +27,6 @@
     <string name="default_key_keep_screen_on_when_in_foreground" translatable="false">@string/key_keep_screen_on_when_in_foreground_disabled</string>
     <string name="default_key_root_record_out_file_type" translatable="false">@string/key_root_record_out_file_type_binary</string>
     <string name="default_main_file_name" translatable="false">main.js</string>
-    <string name="desc_about_functions_button_feedback" translatable="false">about_functions_button_feedback</string>
-    <string name="desc_about_functions_button_licenses" translatable="false">about_functions_button_licenses</string>
-    <string name="desc_about_functions_button_update" translatable="false">about_functions_button_update</string>
     <string name="developer_full_name" translatable="false">SuperMonster003</string>
     <string name="developer_nickname" translatable="false">SuperMonster003</string>
     <string name="ellipsis_six" translatable="false" tools:ignore="TypographyEllipsis">... ...</string>
@@ -1229,5 +1226,7 @@
     <string name="changelog_label_improvement">Improvement</string>
     <string name="changelog_label_dependency">Dependency</string>
     <string name="text_changelog_item_dependency">Some dependency or local library version adjustments</string>
+    <string name="text_about_functions_version_histories">Version histories</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>

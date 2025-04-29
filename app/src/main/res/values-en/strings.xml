@@ -998,5 +998,7 @@
     <string name="changelog_label_improvement">Improvement</string>
     <string name="changelog_label_dependency">Dependency</string>
     <string name="text_changelog_item_dependency">Some dependency or local library version adjustments</string>
+    <string name="text_about_functions_version_histories">Version histories</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>
