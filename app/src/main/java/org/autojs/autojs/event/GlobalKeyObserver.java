@@ -1,10 +1,12 @@
 package org.autojs.autojs.event;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.KeyEvent;
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.core.accessibility.AccessibilityService;
 import org.autojs.autojs.core.accessibility.OnKeyListener;
+import org.autojs.autojs.core.inputevent.InputEventObserver;
 import org.autojs.autojs.core.inputevent.ShellKeyObserver;
 import org.autojs.autojs.core.pref.Pref;
 
@@ -24,30 +26,30 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
     private boolean mVolumeDownFromShell, mVolumeDownFromAccessibility;
     private boolean mVolumeUpFromShell, mVolumeUpFromAccessibility;
 
-    private GlobalKeyObserver() {
+    private GlobalKeyObserver(Context applicationContext) {
         mVolumeDownEventDispatcher = new EventDispatcher<>();
         AccessibilityService.Companion.getStickOnKeyObserver().addListener(this);
-        // ShellKeyObserver observer = new ShellKeyObserver();
-        // observer.setKeyListener(this);
-        // InputEventObserver.getGlobal(GlobalAppContext.get()).addListener(observer);
+        ShellKeyObserver observer = new ShellKeyObserver();
+        observer.setKeyListener(this);
+        InputEventObserver.getGlobal(applicationContext).addListener(observer);
     }
 
-    public static void initIfNeeded() {
-        if (Pref.isUseVolumeControlRunningEnabled()) makeSureSingletonInitialized();
+    public static void initIfNeeded(Context applicationContext) {
+        if (Pref.isUseVolumeControlRunningEnabled()) makeSureSingletonInitialized(applicationContext);
     }
 
-    public static void init() {
-        makeSureSingletonInitialized();
+    public static void init(Context applicationContext) {
+        makeSureSingletonInitialized(applicationContext);
     }
 
-    public static GlobalKeyObserver getSingleton() {
-        makeSureSingletonInitialized();
+    public static GlobalKeyObserver getSingleton(Context applicationContext) {
+        makeSureSingletonInitialized(applicationContext);
         return sSingleton;
     }
 
-    private static void makeSureSingletonInitialized() {
+    private static void makeSureSingletonInitialized(Context applicationContext) {
         if (sSingleton == null) {
-            sSingleton = new GlobalKeyObserver();
+            sSingleton = new GlobalKeyObserver(applicationContext);
         }
     }
 
