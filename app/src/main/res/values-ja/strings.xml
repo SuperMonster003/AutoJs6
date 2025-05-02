@@ -22,6 +22,11 @@
     <string name="apk_info_target_sdk">ターゲット SDK</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">UI スレッドでブロック操作は実行できません. `waitForActivity` をサブスレッドやサブスクリプトで実行するか, または `setInterval` を使用してチェックを繰り返してください</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">UI スレッドでブロック操作は実行できません. `waitForPackage` をサブスレッドやサブスクリプトで実行するか, または `setInterval` を使用してチェックを繰り返してください</string>
+    <string name="changelog_label_dependency">依存関係</string>
+    <string name="changelog_label_feature">新機能</string>
+    <string name="changelog_label_fix">修正</string>
+    <string name="changelog_label_hint">ヒント</string>
+    <string name="changelog_label_improvement">改善</string>
     <string name="color_library_android_colors">Androidカラーパレット</string>
     <string name="color_library_css_colors">CSSカラーパレット</string>
     <string name="color_library_default_colors">デフォルトカラーパレット</string>
@@ -52,6 +57,7 @@
     <string name="content_description_fab_for_display_manifest">マニフェストを表示するためのフローティング操作ボタン部品</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">テーマカラーアイテムのインデックスを特定できません</string>
     <string name="content_failed_to_locate_library_for_theme_color">テーマカラーのカラーパレットが見つかりません</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">現在表示中の言語に対応するバージョン情報の取得に失敗しました. しばらくしてから再度お試しください.\n\n現在, 一時的に \"简体中文 (zh-Hans)\" のバージョン情報を表示しています.</string>
     <string name="content_github_feedback">問題を報告するためのウェブページが起動します.\nGitHub のアカウントが必要な場合があります</string>
     <string name="content_way_of_output_for_recorded_script">回収したスクリプトの出力方法を選択する</string>
     <string name="crash_feedback">デバッグログをコピーするか, 直接終了する</string>
@@ -65,7 +71,7 @@
     <string name="description_about_app_tips_preference">1. アプリと開発者について」ページでアプリのアイコンを長押しすると, AutoJs6 の開発者向けオプションページにジャンプします</string>
     <string name="description_app_language_preference">この環境設定は, 実行中のスクリプトからの例外メッセージを含む, AutoJs6 の表示言語を変更するためのものです.\n\n注: 言語を期待通りに適用するには, アプリの再起動が必要な場合があります</string>
     <string name="description_change_working_dir_preference">スクリプトを含むディレクトリのパスを変更する</string>
-    <string name="description_check_for_updates_preference">AutoJs6 は, GitHub からアップデートを取得し, ダウンロードします.\n\n注: このアップデートでは, まだ多言語サポートは提供されていません</string>
+    <string name="description_check_for_updates_preference">AutoJs6 は, GitHub からアップデートを取得し, ダウンロードします.</string>
     <string name="description_documentation_source_preference">ローカルドキュメント AutoJs6 に組み込まれたファイルをドキュメントソースとして使用するため, ネットワーク接続は必要ありません. AutoJs6 が更新されると内容も変わります.\nオンライン・ドキュメント. GitHub のページをドキュメントソースとして使用し, ネットワーク接続が必要です. コンテンツは常に最新の状態に保たれます.\n\n注: オンラインドキュメントを最大限に活用するために, デスクトップモニターなどのワイドスクリーンディスプレイを使用することをお勧めします.\n注意: バージョン 6.2.0 時点では, ドキュメントはまだ開発の初期段階にあり, ほとんどのコンテンツはまだ執筆・更新されていません</string>
     <string name="description_documentation_source_preference_more">ドキュメントページでダークテーマをサポートするには, 以下の条件を満たす必要があります.\n1. AutoJs6 でナイトモードが有効になっている\n2. Android System WebView (または Google Chrome などのブラウザ) .\n- Android API Level 29 (Android 10) [Q] 以上: バージョン >= 76\n- Android API Level 28 (Android 9) [P] 以下: バージョン >= 105</string>
     <string name="description_extending_js_build_in_objects">JavaScript の組み込みオブジェクトを拡張すると, コードの柔軟性が増し, より豊かな機能を実現できますが, 衝突や破損を引き起こす可能性もあります.\nこのオプションをオンにすると, すべてのスクリプトはデフォルトで組み込みの拡張機能を有効にします.\n組み込みの拡張機能は安全でないことが多いので, 組み込みの拡張機能の原理とリスクが明確に理解されていない限り, 推奨されません.\nこのオプションをオフにした場合でも, プロジェクトのドキュメントで説明されているように, plugins グローバルオブジェクトを使用して組み込み拡張機能を有効にすることができます</string>
@@ -80,6 +86,7 @@
     <string name="description_root_record_out_file_type_preference">バイナリタイプ: 編集不可, ファイル拡張子は \"auto\"\nJavaScript タイプ: 直接編集またはコピー可能, ファイル拡張子は \"js\"</string>
     <string name="description_stable_mode">安定モードにするとレイアウト境界を取得する際に安定しますが, 一部の結果が無視されることがあります.\nアクセシビリティサービスの再起動が必要です</string>
     <string name="description_theme_color_preference">テーマカラーは, 以下のウィジェットに適用されますが, これに限定されるものではありません.\nステータスバー\nアプリバー\nファイルアイコン\nタスクアイテムアイコン\nファブ\n設定カテゴリのタイトル\nスイッチボタン\n\n注: AutoJs6 バージョン 6.2.0 では, 原色, 原色暗色, アクセントカラーの区別はまだありません</string>
+    <string name="description_version_histories_preference">GitHub 上の AutoJs6 のリリース版変更履歴と主要カテゴリの統計データを確認する.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消</string>
@@ -180,6 +187,9 @@
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[インスタンス化 \"%1$s\" に失敗しました: [ %2$s ]]]></string>
     <string name="error_failed_to_invoke_method_with_description">メソッド %1$s の呼び出しに失敗しました</string>
     <string name="error_failed_to_render_content">コンテンツの表示に失敗しました</string>
+    <string name="error_failed_to_retrieve_released_notes">バージョン情報の取得に失敗しました</string>
+    <string name="error_failed_to_retrieve_version_histories">バージョン履歴を取得できません</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">version.properties を取得できず, バージョン情報を解析できません</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 権限の取り消しに失敗しました</string>
     <string name="error_failed_to_run_script">スクリプトの実行に失敗しました</string>
     <string name="error_file_in_path_does_not_exist">パス \"%1$s\" にファイルが存在しません</string>
@@ -232,6 +242,7 @@
     <string name="error_repeated_colon_symbol">繰り返されるコロン記号</string>
     <string name="error_repeated_dot_symbol">ドット記号の繰り返し</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">必要なプロパティ \"%1$s\" が null か存在しません</string>
+    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" の解決済みパスは null にできません</string>
     <string name="error_script_is_on_exiting">スクリプトが終了してしまう</string>
     <string name="error_selector_method_without_calling">セレクタ・メソッドはパラメータとして渡されるのではなく, 呼び出される必要があります: %s</string>
     <string name="error_selector_result_type_with_compass">結果タイプがセレクタの場合, コンパスを使用できません</string>
@@ -307,6 +318,7 @@
     <string name="summary_text_launcher_shortcuts">ランチャーへのショートカットの追加</string>
     <string name="summary_use_volume_control_record">フローティングボタンが表示されているときに, \"Volume Down\" キーで録画の開始/停止を制御できるようになりました</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">\"Volume Up\" キーを押すと, 実行中のスクリプトをすべて停止します</string>
+    <string name="summary_version_histories_preference">リリース版の変更履歴と統計データを確認する</string>
     <string name="text_a11y_service">アクセシビリティサービス</string>
     <string name="text_a11y_service_description">スクリプトの自動操作 (クリック, 長押し, スライドなど) で必要です</string>
     <string name="text_a11y_service_enabled_but_not_running">アクセシビリティサービスが有効だが, 実行されていない (デバイスを再有効化または再起動する)</string>
@@ -319,6 +331,7 @@
     <string name="text_about_functions_feedback">フィードバック</string>
     <string name="text_about_functions_licenses">ライセンスについて</string>
     <string name="text_about_functions_update">更新情報</string>
+    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">アクセス権が付与されました</string>
     <string name="text_act_by_click">クリック (click)</string>
     <string name="text_act_by_long_click">ロングクリック (longClick)</string>
@@ -379,7 +392,7 @@
     <string name="text_app_version_code">アプリバージョンコード</string>
     <string name="text_app_version_name">アプリのバージョン名</string>
     <string name="text_appearance">外観</string>
-    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">「氏名、組織名、組織単位、国コード、州または省、市区町村、街」のいずれかの項目を入力する必要があります</string>
+    <string name="text_at_least_one_certificate_issuer_field_is_not_empty">「氏名, 組織名, 組織単位, 国コード, 州または省, 市区町村, 街」のいずれかの項目を入力する必要があります</string>
     <string name="text_attribute">属性</string>
     <string name="text_auto_check_for_updates">更新の自動チェック</string>
     <string name="text_auto_check_for_updates_and_show_snackbar">自動的に更新をチェックし, ホームページにスナックバーを表示します</string>
@@ -409,7 +422,10 @@
     <string name="text_captured_window_info_type_of_system">システム</string>
     <string name="text_captured_window_info_type_unknown">不明なタイプ</string>
     <string name="text_change_working_dir">作業ディレクトリの変更</string>
+    <string name="text_changelog_item_dependency">一部の依存関係またはローカルライブラリのバージョン調整</string>
     <string name="text_check_for_updates">アップデートの確認</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">アップデートの確認 (ローカルバージョンを無視する)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">アップデートを確認する際に, 最新のリモートバージョンを直接取得する</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">アップデートを確認中...</string>
     <string name="text_city_or_locality">市区町村</string>
     <string name="text_class_or_package_name">クラス名/パッケージ名</string>
@@ -426,6 +442,7 @@
     <string name="text_close_floating_button">フローティングボタンを閉じる</string>
     <string name="text_code">コード</string>
     <string name="text_code_beautify">コードの美化</string>
+    <string name="text_collapse_all">すべて折りたたむ</string>
     <string name="text_color_library">カラーライブラリ</string>
     <string name="text_color_palette">カラーパレット</string>
     <string name="text_command_already_copied_to_clip">クリップボードにコピーされたコマンド</string>
@@ -524,6 +541,7 @@
     <string name="text_execution_finished" formatted="false">[%s] は %s 秒で終了しました</string>
     <string name="text_exit">終了</string>
     <string name="text_exit_directly">終了</string>
+    <string name="text_expand_all">すべて展開する</string>
     <string name="text_export">輸出</string>
     <string name="text_exported">エクスポートされました</string>
     <string name="text_extending_js_build_in_objects">JavaScript 組み込みオブジェクトの拡張</string>
@@ -633,6 +651,7 @@
     <string name="text_launcher_shortcuts">ランチャーショートカット</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">レイアウトの検査中...</string>
     <string name="text_licenses">オープンソースライセンス</string>
+    <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">バックアップ策を試しています...</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">読み込み中...</string>
     <string name="text_locate_current_theme_color">現在のテーマカラーを特定</string>
     <string name="text_log">ログ</string>
@@ -979,6 +998,7 @@
     <string name="text_version">バージョン</string>
     <string name="text_version_code">バージョンコード</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">バージョンコード (計算中...)</string>
+    <string name="text_version_histories">バージョン履歴</string>
     <string name="text_version_info">バージョン情報</string>
     <string name="text_version_name">バージョン名</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">バージョン名 (計算中...)</string>
@@ -991,18 +1011,5 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
-    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" の解決済みパスは null にできません</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version">アップデートの確認 (ローカルバージョンを無視する)</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version_description">アップデートを確認する際に, 最新のリモートバージョンを直接取得する</string>
-    <string name="error_failed_to_retrieve_released_notes">バージョン情報の取得に失敗しました</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">現在表示中の言語に対応するバージョン情報の取得に失敗しました. しばらくしてから再度お試しください.\n\n現在, 一時的に \"简体中文 (zh-Hans)\" のバージョン情報を表示しています.</string>
-    <string name="changelog_label_hint">ヒント</string>
-    <string name="changelog_label_feature">新機能</string>
-    <string name="changelog_label_fix">修正</string>
-    <string name="changelog_label_improvement">改善</string>
-    <string name="changelog_label_dependency">依存関係</string>
-    <string name="text_changelog_item_dependency">一部の依存関係またはローカルライブラリのバージョン調整</string>
-    <string name="text_about_functions_version_histories">Version histories</string>
-    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>

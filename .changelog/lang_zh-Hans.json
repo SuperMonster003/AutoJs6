@@ -1,8 +1,9 @@
 {
   "$data": {
     "v6.6.3": {
-      "released_date": "2025/04/29",
+      "released_date": "2025/05/02",
       "feature": [
+        "版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据",
         "timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态",
         "engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件"
       ],
@@ -24,6 +25,7 @@
       ],
       "dependency": [
         "附加 Jsoup 版本 1.19.1",
+        "附加 Flexmark Java HTML to Markdown 版本 0.64.8",
         "升级 Gradle 版本 8.14-rc-1 -> 8.14-rc-2"
       ]
     },

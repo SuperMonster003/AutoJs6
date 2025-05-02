@@ -34,12 +34,11 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
 
     override val handleStatusBarThemeColorAutomatically = false
 
-    abstract var internalMenuResource: Int
-
     abstract var highlightGrammarLocator: GrammarLocator
     abstract var highlightGrammarName: String
     abstract var highlightThemeLanguage: String
 
+    open var internalMenuResource: Int = 0
     open var themeColorDayNight = R.color.md_blue_gray_50 to R.color.md_blue_gray_900
 
     private lateinit var internalTextView: TextView
@@ -65,9 +64,13 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
         }
 
         internalTextView = binding.textView
+
         internalFabView = binding.fab.apply {
-            setOnClickListener { view -> showPopupMenu(view, internalTextView) }
-            ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
+            if (internalMenuResource > 0) {
+                setOnClickListener { view -> showPopupMenu(view, internalTextView) }
+                ViewUtils.excludeFloatingActionButtonFromNavigationBar(this)
+                visibility = View.VISIBLE
+            }
         }
 
         val scaleGestureDetector = ScaleGestureDetector(this, ScaleListener(internalTextView))
@@ -221,10 +224,6 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
     }
 
     private fun showPopupMenu(view: View, textView: TextView) {
-        if (internalMenuResource == 0) {
-            ViewUtils.showToast(view.context, "Menu resource is not set a valid resource id", true)
-            return
-        }
         val popupMenu = android.widget.PopupMenu(this, view).also {
             it.inflate(internalMenuResource)
         }

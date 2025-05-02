@@ -241,6 +241,10 @@
             android:theme="@style/AppTheme.Settings" />
 
         <activity
+            android:name="org.autojs.autojs.ui.settings.DisplayVersionHistoriesActivity"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
             android:name="org.autojs.autojs.external.shortcut.ShortcutActivity"
             android:exported="true"
             android:taskAffinity="org.autojs.autojs.external.shortcut.ShortcutActivity"

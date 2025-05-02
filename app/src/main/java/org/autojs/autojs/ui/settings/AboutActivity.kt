@@ -62,6 +62,7 @@ open class AboutActivity : BaseActivity() {
 
         functionsButtonsBinding.aboutFunctionsButtonLicenses.setOnClickListener { showLicensesDialog() }
         functionsButtonsBinding.aboutFunctionsButtonUpdate.setOnClickListener { checkForUpdates() }
+        functionsButtonsBinding.aboutFunctionsButtonVersionHistories.setOnClickListener { showVersionHistories() }
         functionsButtonsBinding.aboutFunctionsButtonFeedback.setOnClickListener { startFeedbackActivity() }
     }
 
@@ -160,6 +161,10 @@ open class AboutActivity : BaseActivity() {
         UpdateChecker.Builder(this)
             .setPromptMode(PromptMode.DIALOG)
             .build().checkNow()
+    }
+
+    private fun showVersionHistories() {
+        DisplayVersionHistoriesActivity.launch(this)
     }
 
     private fun startFeedbackActivity() {

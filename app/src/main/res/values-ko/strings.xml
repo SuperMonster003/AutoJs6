@@ -23,6 +23,11 @@
     <string name="apk_info_target_sdk">대상 SDK</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">UI 스레드에서 블로킹 작업을 수행할 수 없습니다. `waitForActivity` 를 하위 스레드나 하위 스크립트에서 실행하거나, `setInterval` 를 사용하여 활동을 확인하기 위해 루프를 사용해 보세요</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">UI 스레드에서 블로킹 작업을 수행할 수 없습니다. `waitForPackage` 를 하위 스레드나 하위 스크립트에서 실행하거나, `setInterval` 를 사용하여 패키지를 확인하기 위해 루프를 사용해 보세요</string>
+    <string name="changelog_label_dependency">의존성</string>
+    <string name="changelog_label_feature">추가</string>
+    <string name="changelog_label_fix">수정</string>
+    <string name="changelog_label_hint">힌트</string>
+    <string name="changelog_label_improvement">개선</string>
     <string name="color_library_android_colors">Android 색상 라이브러리</string>
     <string name="color_library_css_colors">CSS 색상 라이브러리</string>
     <string name="color_library_default_colors">기본 색상 라이브러리</string>
@@ -53,6 +58,7 @@
     <string name="content_description_fab_for_display_manifest">매니페스트를 표시하기 위한 플로팅 액션 버튼 위젯</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">테마 색상 아이템의 인덱스를 확인할 수 없습니다</string>
     <string name="content_failed_to_locate_library_for_theme_color">테마 색상에 대한 색상 라이브러리를 찾을 수 없습니다</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">현재 표시 언어에 해당하는 버전 정보를 가져오지 못했습니다. 나중에 다시 시도해 주세요.\n\n현재 임시로 \"简体中文 (zh-Hans)\" 언어의 버전 정보가 표시되고 있습니다.</string>
     <string name="content_github_feedback">문제를보고하기 위해 웹 페이지가 시작됩니다.\nGitHub 에 대한 계정이 필요할 수 있습니다.</string>
     <string name="content_way_of_output_for_recorded_script">재설계된 스크립트의 출력 방법 선택</string>
     <string name="crash_feedback">디버깅 로그를 복사하거나 직접 종료하십시오</string>
@@ -66,7 +72,7 @@
     <string name="description_about_app_tips_preference">1. \"앱 및 개발자 정보\" 페이지에서 앱 아이콘을 길게 눌러 AutoJs6 개발자 옵션 페이지로 이동합니다.</string>
     <string name="description_app_language_preference">실행 스크립트의 예외 메시지를 포함하여 AutoJs6 의 디스플레이 언어를 변경하는이 선호도.\n\n참고: 예상대로 언어를 적용하려면 앱 재시작이 필요할 수 있습니다.</string>
     <string name="description_change_working_dir_preference">스크립트가 포함 된 디렉토리의 경로를 변경하십시오</string>
-    <string name="description_check_for_updates_preference">AutoJs6 은 GitHub 에서 업데이트를 가져오고 다운로드합니다.\n\n참고: 업데이트는 아직 다국어 지원을 제공하지 않습니다.</string>
+    <string name="description_check_for_updates_preference">AutoJs6 은 GitHub 에서 업데이트를 가져오고 다운로드합니다.</string>
     <string name="description_documentation_source_preference">로컬 문서: AutoJs6 내장 파일을 문서 소스로 사용, 네트워크 연결이 필요하지 않습니다. 내용은 AutoJs6 이 업데이트됨에 따라 변경됩니다.\n온라인 문서: GitHub 페이지를 문서 소스로 사용, 네트워크 연결 필요. 콘텐츠는 항상 최신 상태입니다.\n\n참고: 온라인 문서의 읽기 환경을 최대화하려면 데스크탑 모니터와 같은 와이드 스크린 디스플레이 장치를 사용하는 것이 좋습니다.\n참고: 버전 6.2.0 현재 문서는 아직 개발 초기 단계이며 대부분의 콘텐츠가 아직 작성되거나 업데이트되지 않았습니다.</string>
     <string name="description_documentation_source_preference_more">문서 페이지에서 어두운 테마를 지원하려면 다음 조건이 충족되어야 합니다.\n1. AutoJs6 에는 야간 모드가 활성화되어 있습니다.\n2. Android 시스템 WebView (또는 Google Chrome 과 같은 브라우저):\n- Android API 레벨 29 (Android 10) [Q] 이상: 버전 >= 76\n- Android API 레벨 28 (Android 9) [P] 이하: 버전 >= 105</string>
     <string name="description_extending_js_build_in_objects">JavaScript 내장 개체를 확장하면 코드 유연성이 향상되고 더 풍부한 기능을 사용할 수 있지만 충돌이 발생하고 파손될 수도 있습니다.\n옵션이 켜져 있을 때 모든 스크립트에는 기본적으로 활성화된 내장 확장이 있습니다.\n기본 제공 확장은 종종 안전하지 않으며 기본 제공 확장의 원칙과 위험을 명확하게 이해하지 않는 한 권장되지 않습니다.\n옵션이 꺼져 있어도 프로젝트 문서에 설명된 대로 플러그인 전역 개체를 통해 내장 확장을 계속 활성화할 수 있습니다.</string>
@@ -81,6 +87,7 @@
     <string name="description_root_record_out_file_type_preference">바이너리 유형: 편집 불가능, 파일 확장자는 \"auto\"\nJavaScript 유형: 파일 확장자가 \"js\"인 경우 직접 편집하거나 복사할 수 있습니다.</string>
     <string name="description_stable_mode">안정 모드는 레이아웃 경계를 얻을 때 더 안정적이지만 일부 결과는 무시할 수 있습니다.\n접근성 서비스의 재시작이 필요합니다.</string>
     <string name="description_theme_color_preference">테마 색상은 다음을 포함하되 이에 국한되지 않는 위젯에 적용됩니다.\n상태 표시 줄\n앱바\n파일 아이콘\n작업 항목 아이콘\n팹\n설정 카테고리 제목\n스위치 버튼\n\n참고: AutoJs6 버전 6.2.0 현재 기본 색상, 기본 어두운 색상 및 강조 색상 사이에는 아직 차이가 없습니다.</string>
+    <string name="description_version_histories_preference">GitHub 에서 AutoJs6 릴리스 버전의 변경 기록과 주요 분류 통계 데이터를 확인하기.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">취소</string>
     <string name="dialog_button_cancel_download">취소</string>
@@ -181,6 +188,9 @@
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[인스턴스 생성 \"%1$s\" 에 실패했습니다: [ %2$s ]]]></string>
     <string name="error_failed_to_invoke_method_with_description">메소드 %1$s 호출에 실패했습니다</string>
     <string name="error_failed_to_render_content">콘텐츠 렌더링에 실패했습니다</string>
+    <string name="error_failed_to_retrieve_released_notes">버전 정보를 가져오지 못했습니다</string>
+    <string name="error_failed_to_retrieve_version_histories">버전 기록을 가져올 수 없습니다</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">version.properties 를 가져올 수 없어 버전 정보를 분석할 수 없습니다</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 권한 해지에 실패했습니다</string>
     <string name="error_failed_to_run_script">스크립트 실행 실패</string>
     <string name="error_file_in_path_does_not_exist">경로 \"%1$s\" 에 파일이 존재하지 않습니다</string>
@@ -233,6 +243,7 @@
     <string name="error_repeated_colon_symbol">반복 콜론 기호</string>
     <string name="error_repeated_dot_symbol">반복되는 점 기호</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">필수 속성 \"%1$s\" 가 null 이거나 존재하지 않습니다</string>
+    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" 에 대한 해결된 경로는 null 일 수 없습니다</string>
     <string name="error_script_is_on_exiting">스크립트가 종료 중입니다</string>
     <string name="error_selector_method_without_calling">셀렉터 메소드는 매개 변수로 전달되지 않고 호출되어야합니다: %s</string>
     <string name="error_selector_result_type_with_compass">결과 유형이 선택기 일 때 나침반을 사용할 수 없습니다</string>
@@ -308,6 +319,7 @@
     <string name="summary_text_launcher_shortcuts">런처에 바로 가기 추가</string>
     <string name="summary_use_volume_control_record">부동 버튼이 표시 될 때 볼륨 다운 키로 제어 된 녹음 시작 또는 중지</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">실행 중인 모든 스크립트를 중지하려면 \"볼륨 크게\" 키를 누르십시오.</string>
+    <string name="summary_version_histories_preference">릴리스 버전의 변경 기록 및 통계 데이터를 확인하기</string>
     <string name="text_a11y_service">접근성 서비스</string>
     <string name="text_a11y_service_description">스크립트 자동 작동에 필요합니다 (클릭, 긴 프레스, 슬라이드 등).</string>
     <string name="text_a11y_service_enabled_but_not_running">접근성 서비스가 활성화되었지만 실행되지 않음 (장치를 다시 활성화 또는 재부팅)</string>
@@ -320,6 +332,7 @@
     <string name="text_about_functions_feedback">피드백</string>
     <string name="text_about_functions_licenses">라이센스</string>
     <string name="text_about_functions_update">업데이트</string>
+    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">액세스가 승인되었습니다</string>
     <string name="text_act_by_click">클릭 (click)</string>
     <string name="text_act_by_long_click">긴 클릭 (longClick)</string>
@@ -410,7 +423,10 @@
     <string name="text_captured_window_info_type_of_system">시스템</string>
     <string name="text_captured_window_info_type_unknown">알 수 없음</string>
     <string name="text_change_working_dir">작업 디렉토리를 변경하십시오</string>
+    <string name="text_changelog_item_dependency">일부 의존성 또는 로컬 라이브러리 버전 조정</string>
     <string name="text_check_for_updates">업데이트 확인</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">업데이트 확인 (로컬 버전 무시)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">업데이트 확인 시 최신 원격 버전을 직접 가져옵니다</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">업데이트 확인 ...</string>
     <string name="text_city_or_locality">시 또는 지역</string>
     <string name="text_class_or_package_name">클래스 / 패키지 이름</string>
@@ -427,6 +443,7 @@
     <string name="text_close_floating_button">플로팅 버튼 닫기</string>
     <string name="text_code">암호</string>
     <string name="text_code_beautify">코드를 아름답게하십시오</string>
+    <string name="text_collapse_all">모두 접기</string>
     <string name="text_color_library">색상 라이브러리</string>
     <string name="text_color_palette">색상 팔레트</string>
     <string name="text_command_already_copied_to_clip">클립 보드에 복사 된 명령</string>
@@ -525,6 +542,7 @@
     <string name="text_execution_finished" formatted="false">[%s] 는 %s 초 만에 완료되었습니다.\n</string>
     <string name="text_exit">출구</string>
     <string name="text_exit_directly">출구</string>
+    <string name="text_expand_all">모두 펼치기</string>
     <string name="text_export">내보내다</string>
     <string name="text_exported">내보낸</string>
     <string name="text_extending_js_build_in_objects">JavaScript 내장 개체 확장</string>
@@ -634,6 +652,7 @@
     <string name="text_launcher_shortcuts">런처 바로 가기</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">레이아웃 검사 ...</string>
     <string name="text_licenses">오픈 소스 라이센스</string>
+    <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">대체 솔루션을 시도하는 중...</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">로딩 중...</string>
     <string name="text_locate_current_theme_color">현재 테마 색상 찾기</string>
     <string name="text_log">통나무</string>
@@ -980,6 +999,7 @@
     <string name="text_version">버전</string>
     <string name="text_version_code">버전 코드</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">버전 코드 (계산 중...)</string>
+    <string name="text_version_histories">버전 기록</string>
     <string name="text_version_info">버전 정보</string>
     <string name="text_version_name">버전 이름</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">버전 이름 (계산 중...)</string>
@@ -992,18 +1012,5 @@
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
-    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" 에 대한 해결된 경로는 null 일 수 없습니다</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version">업데이트 확인 (로컬 버전 무시)</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version_description">업데이트 확인 시 최신 원격 버전을 직접 가져옵니다</string>
-    <string name="error_failed_to_retrieve_released_notes">버전 정보를 가져오지 못했습니다</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">현재 표시 언어에 해당하는 버전 정보를 가져오지 못했습니다. 나중에 다시 시도해 주세요.\n\n현재 임시로 \"简体中文 (zh-Hans)\" 언어의 버전 정보가 표시되고 있습니다.</string>
-    <string name="changelog_label_hint">힌트</string>
-    <string name="changelog_label_feature">추가</string>
-    <string name="changelog_label_fix">수정</string>
-    <string name="changelog_label_improvement">개선</string>
-    <string name="changelog_label_dependency">의존성</string>
-    <string name="text_changelog_item_dependency">일부 의존성 또는 로컬 라이브러리 버전 조정</string>
-    <string name="text_about_functions_version_histories">Version histories</string>
-    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>

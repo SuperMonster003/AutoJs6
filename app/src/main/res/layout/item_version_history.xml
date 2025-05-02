@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginHorizontal="10dp"
+    android:layout_marginVertical="6dp"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="12dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/title_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="0dp">
+
+                    <ImageView
+                        android:id="@+id/chevron"
+                        android:layout_width="18dp"
+                        android:layout_height="12dp"
+                        android:layout_gravity="start|bottom"
+                        android:layout_marginEnd="3dp"
+                        android:layout_marginBottom="3dp"
+                        android:paddingVertical="2.5dp"
+                        android:src="@drawable/ic_chevron_top_borderless"
+                        app:tint="?android:attr/textColorSecondary" />
+
+                    <TextView
+                        android:id="@+id/tvTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:paddingStart="6dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="0dp"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/summary_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center_vertical|end"
+                android:gravity="end">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/changelog_label_feature" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="2dp"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/symbol_colon" />
+
+                    <TextView
+                        android:id="@+id/tvFeatureCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="1"
+                        android:gravity="end"
+                        android:maxEms="2"
+                        android:maxLines="1"
+                        android:minEms="1"
+                        android:text="@string/num_zero"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/changelog_label_fix" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="2dp"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/symbol_colon" />
+
+                    <TextView
+                        android:id="@+id/tvFixCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="1"
+                        android:gravity="end"
+                        android:maxEms="2"
+                        android:maxLines="1"
+                        android:minEms="1"
+                        android:text="@string/num_zero"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/changelog_label_improvement" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="2dp"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/symbol_colon" />
+
+                    <TextView
+                        android:id="@+id/tvImprovementCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="1"
+                        android:gravity="end"
+                        android:maxEms="2"
+                        android:maxLines="1"
+                        android:minEms="1"
+                        android:text="@string/num_zero"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingMultiplier="1.2"
+            android:paddingStart="1.5dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="0dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

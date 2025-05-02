@@ -14,8 +14,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.internal.MDButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.google.gson.GsonBuilder;
-import com.google.gson.Strictness;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
@@ -50,7 +48,6 @@ import org.kohsuke.github.MarkdownMode;
 import org.kohsuke.github.PagedIterable;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -303,7 +300,6 @@ public class UpdateChecker {
     private StreamingUrlApi getStreamingApi(String baseUrl) {
         return new Retrofit.Builder()
                 .baseUrl(baseUrl)
-                .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().setStrictness(Strictness.LENIENT).create()))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
                 .create(StreamingUrlApi.class);
@@ -444,7 +440,7 @@ public class UpdateChecker {
                         String markdown = parseLatestReleaseNotesFromMarkdown(content, releaseTag);
                         if (markdown != null && !markdown.isBlank()) {
                             String assembledMarkdown = assembleRawDependenciesForSingleVersion(markdown, versionInfo.getVersionName(), urlRaw);
-                            String assembledHtml = TextUtils.renderMarkdown(assembledMarkdown);
+                            String assembledHtml = TextUtils.markdownToHtml(assembledMarkdown);
                             return Observable.just(Html.fromHtml(assembledHtml, Html.FROM_HTML_MODE_COMPACT));
                         }
                     } catch (Exception e) {

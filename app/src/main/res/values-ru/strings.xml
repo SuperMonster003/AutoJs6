@@ -21,6 +21,11 @@
     <string name="apk_info_target_sdk">Целевой SDK</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">Блокирующие операции не могут выполняться в потоке UI. Попробуйте выполнить `waitForActivity` в подпотоке или подскрипте, или используйте `setInterval` для повторения и проверки активности</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">Блокирующие операции не могут выполняться в потоке UI. Попробуйте выполнить `waitForPackage` в подпотоке или подскрипте, или используйте `setInterval` для повторения и проверки пакета</string>
+    <string name="changelog_label_dependency">Зависимость</string>
+    <string name="changelog_label_feature">Новое</string>
+    <string name="changelog_label_fix">Исправление</string>
+    <string name="changelog_label_hint">Подсказка</string>
+    <string name="changelog_label_improvement">Улучшение</string>
     <string name="color_library_android_colors">Цветовая библиотека Android</string>
     <string name="color_library_css_colors">Цветовая библиотека CSS</string>
     <string name="color_library_default_colors">Стандартная цветовая библиотека</string>
@@ -51,6 +56,7 @@
     <string name="content_description_fab_for_display_manifest">Плавающая кнопка действий для отображения манифеста</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Не удалось определить индекс элемента цвета темы</string>
     <string name="content_failed_to_locate_library_for_theme_color">Не удалось найти цветовую библиотеку для темы</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Не удалось получить информацию о версии для текущего выбранного языка, повторите попытку позже.\n\nВ данный момент временно отображается информация о версии для языка \"简体中文 (zh-Hans)\".</string>
     <string name="content_github_feedback">Для сообщения о проблеме будет открыта веб-страница.\nМожет потребоваться учетная запись на GitHub.</string>
     <string name="content_way_of_output_for_recorded_script">Выберите способ вывода для переработанных сценариев</string>
     <string name="crash_feedback">Скопируйте журнал отладки или выйдите напрямую</string>
@@ -64,7 +70,7 @@
     <string name="description_about_app_tips_preference">1. Нажмите и удерживайте значок приложения на странице \"О приложении и разработчике\", чтобы перейти на страницу параметров разработчика AutoJs6.</string>
     <string name="description_app_language_preference">Это предпочтение для изменения языка отображения AutoJs6, включая сообщения исключений от запущенных скриптов.\n\nПримечание: может потребоваться перезапуск приложения, чтобы язык был применен так, как ожидается.</string>
     <string name="description_change_working_dir_preference">Измените путь к директории, содержащей скрипты</string>
-    <string name="description_check_for_updates_preference">AutoJs6 получает и загружает обновления с GitHub.\n\nПримечание: обновление пока не обеспечивает многоязыковую поддержку.</string>
+    <string name="description_check_for_updates_preference">AutoJs6 получает и загружает обновления с GitHub.</string>
     <string name="description_documentation_source_preference">Локальная документация: Использование встроенных файлов AutoJs6 в качестве источников документации, подключение к сети не требуется. Содержание меняется по мере обновления AutoJs6.\nОнлайн-документы: Использование страниц GitHub в качестве источников документации, требуется подключение к сети. Содержимое всегда обновляется.\n\nПримечание: Чтобы максимально улучшить качество чтения онлайн-документов, рекомендуется использовать широкоформатное устройство отображения, например настольный монитор.\nПримечание: Начиная с версии 6.2.0, документация находится на предварительной стадии разработки, и большая часть содержимого еще не была написана или обновлена.</string>
     <string name="description_documentation_source_preference_more">Для поддержки темной темы на страницах документов должны быть выполнены следующие условия:\n1. В AutoJs6 включен ночной режим\n2. Android System WebView (или браузеры типа Google Chrome):\n- Android API Level 29 (Android 10) [Q] и выше: версия >= 76\n- Android API Level 28 (Android 9) [P] и ниже: версия >= 105</string>
     <string name="description_extending_js_build_in_objects">Расширение встроенных объектов JavaScript может повысить гибкость кода и обеспечить более богатую функциональность, но может привести к конфликтам и даже поломкам.\nВсе сценарии имеют встроенные расширения, включенные по умолчанию, когда опция включена.\nВстроенные расширения часто небезопасны, и их не рекомендуется использовать, пока принципы и риски встроенных расширений не будут четко поняты.\nКогда опция выключена, встроенные расширения все еще можно включить через глобальный объект plugins, как описано в документации проекта.</string>
@@ -79,6 +85,7 @@
     <string name="description_root_record_out_file_type_preference">Бинарный тип: не редактируемый, с расширением файла \"auto\"\nТип JavaScript: может быть отредактирован или скопирован напрямую, с расширением файла \"js\".</string>
     <string name="description_stable_mode">Стабильный режим повышает стабильность при получении границ макета, но некоторые результаты могут быть проигнорированы.\nТребуется перезапуск службы доступности.</string>
     <string name="description_theme_color_preference">Цвет темы применяется к виджетам, включая следующие, но не ограничиваясь ими:\nСтрока состояния\nПанель приложений\nЗначок файла\nЗначок элемента задачи\nFab\nЗаголовок каталога настроек\nКнопка переключения\n\nПримечание: Начиная с версии AutoJs6 6.2.0, пока не существует различий между основным цветом, основным темным цветом и цветом акцента.</string>
+    <string name="description_version_histories_preference">Просмотреть историю выпусков AutoJs6 на GitHub и статистику по основным категориям.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Отменить</string>
     <string name="dialog_button_cancel_download">Отменить</string>
@@ -179,6 +186,9 @@
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Ошибка создания экземпляра \"%1$s\": [ %2$s ]]]></string>
     <string name="error_failed_to_invoke_method_with_description">Ошибка вызова метода %1$s</string>
     <string name="error_failed_to_render_content">Не удалось отобразить содержимое</string>
+    <string name="error_failed_to_retrieve_released_notes">Не удалось получить информацию о версии</string>
+    <string name="error_failed_to_retrieve_version_histories">Не удалось получить историю версий</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Не удалось получить файл version.properties для анализа информации о версии</string>
     <string name="error_failed_to_revoke_shizuku_access">Не удалось отозвать права на Shizuku</string>
     <string name="error_failed_to_run_script">Ошибка выполнения скрипта</string>
     <string name="error_file_in_path_does_not_exist">Файл в пути \"%1$s\" не существует</string>
@@ -231,6 +241,7 @@
     <string name="error_repeated_colon_symbol">Повторяющийся символ двоеточия</string>
     <string name="error_repeated_dot_symbol">Повторяющийся символ точки</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">Требуемое свойство \"%1$s\" пусто или не существует</string>
+    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Разрешённый путь для \"%1$s\" не может быть равен null</string>
     <string name="error_script_is_on_exiting">Скрипт завершается</string>
     <string name="error_selector_method_without_calling">Метод селектора должен быть вызван, а не передан в качестве параметра: %s</string>
     <string name="error_selector_result_type_with_compass">Невозможно использовать компас, когда тип результата - селектор</string>
@@ -306,6 +317,7 @@
     <string name="summary_text_launcher_shortcuts">Добавление ярлыков в пусковую установку</string>
     <string name="summary_use_volume_control_record">Запуск или остановка записи, управляемая клавишей уменьшения громкости, когда отображается плавающая кнопка</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Нажмите клавишу \"Громкость вверх\", чтобы остановить все запущенные скрипты</string>
+    <string name="summary_version_histories_preference">Просмотреть историю выпусков и статистические данные</string>
     <string name="text_a11y_service">Служба доступности</string>
     <string name="text_a11y_service_description">Требуется для автоматической работы сценария (щелчок, длительное нажатие, скольжение и т.д.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Служба доступности включена, но не работает (Включите или перезагрузите устройство)</string>
@@ -318,6 +330,7 @@
     <string name="text_about_functions_feedback">Обратная связь</string>
     <string name="text_about_functions_licenses">Лицензии</string>
     <string name="text_about_functions_update">Обновить</string>
+    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">Доступ был предоставлен</string>
     <string name="text_act_by_click">Щелчок (click)</string>
     <string name="text_act_by_long_click">Длинный щелчок (longClick)</string>
@@ -408,7 +421,10 @@
     <string name="text_captured_window_info_type_of_system">Система</string>
     <string name="text_captured_window_info_type_unknown">Неизвестный тип</string>
     <string name="text_change_working_dir">Изменить рабочий каталог</string>
+    <string name="text_changelog_item_dependency">Изменения версий некоторых зависимостей или локальных библиотек</string>
     <string name="text_check_for_updates">Проверка наличия обновлений</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">Проверить обновления (игнорировать локальную версию)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">При проверке обновлений напрямую получать последнюю удалённую версию</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Проверка обновлений...</string>
     <string name="text_city_or_locality">Город или населенный пункт</string>
     <string name="text_class_or_package_name">Имя класса / пакета</string>
@@ -425,6 +441,7 @@
     <string name="text_close_floating_button">Закрыть плавающую кнопку</string>
     <string name="text_code">Код</string>
     <string name="text_code_beautify">Улучшить код</string>
+    <string name="text_collapse_all">Свернуть всё</string>
     <string name="text_color_library">Цветовая библиотека</string>
     <string name="text_color_palette">Цветовая палитра</string>
     <string name="text_command_already_copied_to_clip">Команда скопирована в буфер обмена</string>
@@ -523,6 +540,7 @@
     <string name="text_execution_finished" formatted="false">[%s] завершилось через %s секунд.\n</string>
     <string name="text_exit">Выход</string>
     <string name="text_exit_directly">Выйти</string>
+    <string name="text_expand_all">Развернуть всё</string>
     <string name="text_export">Экспорт</string>
     <string name="text_exported">Экспортировано</string>
     <string name="text_extending_js_build_in_objects">Расширение встроенных объектов JavaScript</string>
@@ -632,6 +650,7 @@
     <string name="text_launcher_shortcuts">Ярлыки лаунчера</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Проверка макета...</string>
     <string name="text_licenses">Лицензии на открытые источники</string>
+    <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Пробуем запасное решение...</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Загрузка...</string>
     <string name="text_locate_current_theme_color">Найти текущий цвет темы</string>
     <string name="text_log">Журнал</string>
@@ -732,11 +751,6 @@
     <string name="text_permission_desc_foreground_service_media_projection">Разрешить приложению использовать запись экрана и функции медиапроекции в службе переднего плана</string>
     <string name="text_permission_desc_foreground_service_special_use">Разрешить приложению выполнять некоторые специальные операции в службе переднего плана</string>
     <string name="text_permission_desc_get_accounts">Разрешить приложению доступ к учетным записям на устройстве</string>
-    <string name="text_permission_granted">Разрешение предоставлено</string>
-    <string name="text_permission_granted_failed_with_root">Не удалось предоставить разрешение (с правами root)</string>
-    <string name="text_permission_granted_failed_with_shizuku">Не удалось предоставить разрешение (с Shizuku)</string>
-    <string name="text_permission_granted_with_root">Разрешение предоставлено (с root)</string>
-    <string name="text_permission_granted_with_shizuku">Разрешение получено (с Shizuku)</string>
     <string name="text_permission_desc_install_shortcut">Разрешить приложению устанавливать ярлыки</string>
     <string name="text_permission_desc_interact_across_users_full">Разрешить приложению взаимодействовать между пользователями</string>
     <string name="text_permission_desc_internet">Разрешить приложению доступ в Интернет</string>
@@ -747,7 +761,6 @@
     <string name="text_permission_desc_mount_format_filesystems">Разрешить приложению форматировать внешнее хранилище</string>
     <string name="text_permission_desc_mount_unmount_filesystems">Разрешить приложению монтировать/размонтировать файловые системы</string>
     <string name="text_permission_desc_nfc">Разрешить приложению взаимодействовать с устройствами NFC</string>
-    <string name="text_permission_package_usage_stats">Разрешить приложению доступ к статистике использования других приложений</string>
     <string name="text_permission_desc_post_notifications">Разрешить приложению показывать уведомления</string>
     <string name="text_permission_desc_query_all_packages">Разрешить приложению запрашивать все пакеты</string>
     <string name="text_permission_desc_read_calendar">Разрешить приложению читать события календаря</string>
@@ -766,18 +779,12 @@
     <string name="text_permission_desc_request_delete_packages">Разрешить приложению запрашивать удаление пакетов</string>
     <string name="text_permission_desc_request_ignore_battery_optimizations">Разрешить приложению запрашивать игнорирование оптимизации батареи</string>
     <string name="text_permission_desc_request_install_packages">Разрешить приложению запрашивать установку других приложений</string>
-    <string name="text_permission_revoked">Разрешение отозвано</string>
-    <string name="text_permission_revoked_failed_with_root">Не удалось отозвать разрешение (с root)</string>
-    <string name="text_permission_revoked_failed_with_shizuku">Не удалось отозвать разрешение (с помощью Shizuku)</string>
-    <string name="text_permission_revoked_with_root">Разрешение отозвано (с root)</string>
-    <string name="text_permission_revoked_with_shizuku">Разрешение отозвано (с помощью Shizuku)</string>
     <string name="text_permission_desc_schedule_exact_alarm">Разрешить приложению планировать точные по времени операции</string>
     <string name="text_permission_desc_send_sms">Разрешить приложению отправлять SMS</string>
     <string name="text_permission_desc_set_wallpaper">Разрешить приложению устанавливать обои</string>
     <string name="text_permission_desc_set_wallpaper_hints">Разрешить приложению устанавливать подсказки размера обоев</string>
     <string name="text_permission_desc_shizuku">Разрешить приложению взаимодействовать с системой через службу Shizuku с более высокими привилегиями</string>
     <string name="text_permission_desc_system_alert_window">Разрешить приложению отображаться поверх других приложений</string>
-    <string name="text_permission_test">Проверка разрешения</string>
     <string name="text_permission_desc_termux_run_command">Разрешить запускать команды (специфично для приложения Termux)</string>
     <string name="text_permission_desc_uninstall_shortcut">Разрешить приложению удалять ярлыки</string>
     <string name="text_permission_desc_unlimited_toasts">Разрешить приложению показывать неограниченное количество уведомлений Toast</string>
@@ -789,6 +796,18 @@
     <string name="text_permission_desc_write_external_storage">Разрешить приложению записывать на внешнее хранилище</string>
     <string name="text_permission_desc_write_secure_settings">Разрешить приложению читать и записывать системные защищенные настройки</string>
     <string name="text_permission_desc_write_settings">Разрешить приложению изменять системные настройки</string>
+    <string name="text_permission_granted">Разрешение предоставлено</string>
+    <string name="text_permission_granted_failed_with_root">Не удалось предоставить разрешение (с правами root)</string>
+    <string name="text_permission_granted_failed_with_shizuku">Не удалось предоставить разрешение (с Shizuku)</string>
+    <string name="text_permission_granted_with_root">Разрешение предоставлено (с root)</string>
+    <string name="text_permission_granted_with_shizuku">Разрешение получено (с Shizuku)</string>
+    <string name="text_permission_package_usage_stats">Разрешить приложению доступ к статистике использования других приложений</string>
+    <string name="text_permission_revoked">Разрешение отозвано</string>
+    <string name="text_permission_revoked_failed_with_root">Не удалось отозвать разрешение (с root)</string>
+    <string name="text_permission_revoked_failed_with_shizuku">Не удалось отозвать разрешение (с помощью Shizuku)</string>
+    <string name="text_permission_revoked_with_root">Разрешение отозвано (с root)</string>
+    <string name="text_permission_revoked_with_shizuku">Разрешение отозвано (с помощью Shizuku)</string>
+    <string name="text_permission_test">Проверка разрешения</string>
     <string name="text_permissions">Разрешения</string>
     <string name="text_permissions_list">Разрешения</string>
     <string name="text_pin_shortcut_not_unsupported">Закрепление ярлыков в пусковой установке не поддерживается</string>
@@ -978,6 +997,7 @@
     <string name="text_version">Версия</string>
     <string name="text_version_code">Код версии</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Код версии (Вычисление...)</string>
+    <string name="text_version_histories">История версий</string>
     <string name="text_version_info">Информация о версии</string>
     <string name="text_version_name">Название версии</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Название версии (Вычисление...)</string>
@@ -990,18 +1010,5 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
-    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Разрешённый путь для \"%1$s\" не может быть равен null</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version">Проверить обновления (игнорировать локальную версию)</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version_description">При проверке обновлений напрямую получать последнюю удалённую версию</string>
-    <string name="error_failed_to_retrieve_released_notes">Не удалось получить информацию о версии</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Не удалось получить информацию о версии для текущего выбранного языка, повторите попытку позже.\n\nВ данный момент временно отображается информация о версии для языка \"简体中文 (zh-Hans)\".</string>
-    <string name="changelog_label_hint">Подсказка</string>
-    <string name="changelog_label_feature">Новое</string>
-    <string name="changelog_label_fix">Исправление</string>
-    <string name="changelog_label_improvement">Улучшение</string>
-    <string name="changelog_label_dependency">Зависимость</string>
-    <string name="text_changelog_item_dependency">Изменения версий некоторых зависимостей или локальных библиотек</string>
-    <string name="text_about_functions_version_histories">Version histories</string>
-    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>

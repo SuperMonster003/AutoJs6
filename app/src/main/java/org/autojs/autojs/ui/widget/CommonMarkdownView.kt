@@ -10,7 +10,7 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.runtime.api.Mime
-import org.autojs.autojs.util.TextUtils.renderMarkdown
+import org.autojs.autojs.util.TextUtils.markdownToHtml
 
 /**
  * Created by Stardust on Mar 5, 2017.
@@ -59,7 +59,7 @@ class CommonMarkdownView : WebView {
     }
 
     fun loadMarkdown(markdown: String) {
-        mMarkdownHtml = renderMarkdown(markdown).also { loadHtml(it) }
+        mMarkdownHtml = markdownToHtml(markdown).also { loadHtml(it) }
     }
 
     fun setOnPageFinishedListener(onPageFinishedListener: OnPageFinishedListener?) {
