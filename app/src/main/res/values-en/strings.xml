@@ -18,6 +18,11 @@
     <string name="apk_info_target_sdk">Target SDK</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">Blocking operations cannot be performed on the UI thread. Try executing waitForActivity in a sub-thread or sub-script, or use setInterval to loop and check the activity</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">Blocking operations cannot be performed on the UI thread. Try executing waitForPackage in a sub-thread or sub-script, or use setInterval to loop and check the package</string>
+    <string name="changelog_label_dependency">Dependency</string>
+    <string name="changelog_label_feature">Feature</string>
+    <string name="changelog_label_fix">Fix</string>
+    <string name="changelog_label_hint">Hint</string>
+    <string name="changelog_label_improvement">Improvement</string>
     <string name="color_library_android_colors">Android color library</string>
     <string name="color_library_css_colors">CSS color library</string>
     <string name="color_library_default_colors">Default color library</string>
@@ -48,6 +53,7 @@
     <string name="content_description_fab_for_display_manifest">A Floating Action Button widget for displaying the manifest</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">Failed to determine the index of the theme color item</string>
     <string name="content_failed_to_locate_library_for_theme_color">Failed to locate the color library for the theme color</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Failed to retrieve the release notes for the currently displayed language. Please try again later.\n\nCurrently, the release notes for \"简体中文 (zh-Hans)\" are temporarily displayed.</string>
     <string name="content_github_feedback">A web page will be launched to report an issue.\nAn account for GitHub may be needed.</string>
     <string name="content_way_of_output_for_recorded_script">Select a way of output for recorded script</string>
     <string name="crash_feedback">Copy debugging log or exit directly</string>
@@ -61,7 +67,7 @@
     <string name="description_about_app_tips_preference">1. Press and hold the app icon on the \"About app and developer\" page to jump to AutoJs6 developer options page</string>
     <string name="description_app_language_preference">Preference for changing the display language of AutoJs6, including exception messages from running scripts.\n\nNote: an app restart may be needed to make language applied as expected.</string>
     <string name="description_change_working_dir_preference">Change the path of the directory containing scripts</string>
-    <string name="description_check_for_updates_preference">AutoJs6 gets and downloads updates from GitHub.\n\nNote: The update does not provide multilingual support yet.</string>
+    <string name="description_check_for_updates_preference">AutoJs6 gets and downloads updates from GitHub.</string>
     <string name="description_documentation_source_preference">Local docs: Using AutoJs6 build-in files as documentation sources, no network connection required. The content changes as AutoJs6 is updated.\nOnline docs: Using GitHub pages as documentation sources, requiring network connection. The content is always up to date.\n\nNote: To maximize the reading experience of online documents, it is recommended to use a widescreen display device such as a desktop monitor.\nNote: As of version 6.2.0, the documentation is still in the preliminary stages of development, and most of the content has not yet been written or updated.</string>
     <string name="description_documentation_source_preference_more">The following conditions must be met for dark theme support on document pages:\n1. AutoJs6 has night mode enabled\n2. Android System WebView (or browsers like Google Chrome):\n- Android API Level 29 (Android 10) [Q] and above: version >= 76\n- Android API Level 28 (Android 9) [P] and below: version >= 105</string>
     <string name="description_extending_js_build_in_objects">Extending JavaScript built-in objects can increase code flexibility and enable richer functionality, but can cause conflicts and even breakage.\nAll scripts have built-in extensions enabled by default when the option is turned on.\nBuilt-in extensions are often insecure, and are not recommended unless the principles and risks of built-in extensions are clearly understood.\nWhen the option is turned off, built-in extensions can still be enabled through the plugins global object, as described in the project documentation.</string>
@@ -76,6 +82,7 @@
     <string name="description_root_record_out_file_type_preference">Binary type: non-editable, with the file extension \"auto\"\nJavaScript type: can be edited or copied directly, with the file extension \"js\"</string>
     <string name="description_stable_mode">Stable mode makes it more stable when getting layout bounds, but some results may be ignored.\nA11y service\'s restart required.</string>
     <string name="description_theme_color_preference">Theme color is applied to widgets including but not limited to the following ones:\nStatus bar\nAppbar\nFile icon\nTask item icon\nFab\nSettings category title\nSwitch button\n\nNote: As of AutoJs6 version 6.2.0, there has been no difference between primary color, primary dark color and accent color yet.</string>
+    <string name="description_version_histories_preference">View the release version history and key category statistics of AutoJs6 on GitHub.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_cancel_download">Cancel</string>
@@ -176,6 +183,9 @@
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Failed to instantiate "%1$s": [ %2$s ]]]></string>
     <string name="error_failed_to_invoke_method_with_description">Failed to invoke method %1$s</string>
     <string name="error_failed_to_render_content">Failed to render content</string>
+    <string name="error_failed_to_retrieve_released_notes">Failed to retrieve release notes</string>
+    <string name="error_failed_to_retrieve_version_histories">Failed to retrieve version histories</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
     <string name="error_failed_to_revoke_shizuku_access">Failed to revoke Shizuku access</string>
     <string name="error_failed_to_run_script">Failed to run script</string>
     <string name="error_file_in_path_does_not_exist">File in path \"%1$s\" does not exist</string>
@@ -228,6 +238,7 @@
     <string name="error_repeated_colon_symbol">Repeated colon symbol</string>
     <string name="error_repeated_dot_symbol">Repeated dot symbol</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">Required property \"%1$s\" is nullish or does not exist</string>
+    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
     <string name="error_script_is_on_exiting">Script is on exiting</string>
     <string name="error_selector_method_without_calling">Selector method should be called rather than passed as a parameter: %s</string>
     <string name="error_selector_result_type_with_compass">Cannot use a compass when result type is selector</string>
@@ -303,6 +314,7 @@
     <string name="summary_text_launcher_shortcuts">Add shortcuts to launcher</string>
     <string name="summary_use_volume_control_record">Start or stop recording controlled by “Volume Down” key when floating button is showing</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">Press \"Volume Up\" key to stop all running scripts</string>
+    <string name="summary_version_histories_preference">View release version history and statistics</string>
     <string name="text_a11y_service">Accessibility service</string>
     <string name="text_a11y_service_description">Required by the script automatic operation (click, long press, slide, etc.).</string>
     <string name="text_a11y_service_enabled_but_not_running">Accessibility service enabled but not running (Re-enable or reboot the device)</string>
@@ -315,6 +327,7 @@
     <string name="text_about_functions_feedback">Feedback</string>
     <string name="text_about_functions_licenses">Licenses</string>
     <string name="text_about_functions_update">Update</string>
+    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">Access has been granted</string>
     <string name="text_act_by_click">Click (click)</string>
     <string name="text_act_by_long_click">Long click (longClick)</string>
@@ -405,7 +418,10 @@
     <string name="text_captured_window_info_type_of_system">System</string>
     <string name="text_captured_window_info_type_unknown">Unknown type</string>
     <string name="text_change_working_dir">Change working directory</string>
+    <string name="text_changelog_item_dependency">Some dependency or local library version adjustments</string>
     <string name="text_check_for_updates">Check for updates</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">Check for updates (ignore the local version)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">Fetch the latest remote version directly when checking for updates</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">Checking for updates...</string>
     <string name="text_city_or_locality">City or Locality</string>
     <string name="text_class_or_package_name">Class / Package name</string>
@@ -422,6 +438,7 @@
     <string name="text_close_floating_button">Close floating button</string>
     <string name="text_code">Code</string>
     <string name="text_code_beautify">Beautify code</string>
+    <string name="text_collapse_all">Collapse all</string>
     <string name="text_color_library">Color library</string>
     <string name="text_color_palette">Color palette</string>
     <string name="text_command_already_copied_to_clip">Command copied to clipboard</string>
@@ -520,6 +537,7 @@
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
     <string name="text_exit">Exit</string>
     <string name="text_exit_directly">Exit</string>
+    <string name="text_expand_all">Expand all</string>
     <string name="text_export">Export</string>
     <string name="text_exported">Exported</string>
     <string name="text_extending_js_build_in_objects">Extending JavaScript build-in objects</string>
@@ -629,6 +647,7 @@
     <string name="text_launcher_shortcuts">Launcher shortcuts</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">Inspecting layout...</string>
     <string name="text_licenses">Open Sources Licenses</string>
+    <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">Trying a fallback solution...</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">Loading...</string>
     <string name="text_locate_current_theme_color">Locate current theme color</string>
     <string name="text_log">Log</string>
@@ -975,6 +994,7 @@
     <string name="text_version">Version</string>
     <string name="text_version_code">Version code</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">Version code (computing...)</string>
+    <string name="text_version_histories">Version histories</string>
     <string name="text_version_info">Version info</string>
     <string name="text_version_name">Version name</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">Version name (computing...)</string>
@@ -987,18 +1007,5 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
-    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version">Check for updates (ignore the local version)</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version_description">Fetch the latest remote version directly when checking for updates</string>
-    <string name="error_failed_to_retrieve_released_notes">Failed to retrieve release notes</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">Failed to retrieve the release notes for the currently displayed language. Please try again later.\n\nCurrently, the release notes for \"简体中文 (zh-Hans)\" are temporarily displayed.</string>
-    <string name="changelog_label_hint">Hint</string>
-    <string name="changelog_label_feature">Feature</string>
-    <string name="changelog_label_fix">Fix</string>
-    <string name="changelog_label_improvement">Improvement</string>
-    <string name="changelog_label_dependency">Dependency</string>
-    <string name="text_changelog_item_dependency">Some dependency or local library version adjustments</string>
-    <string name="text_about_functions_version_histories">Version histories</string>
-    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>

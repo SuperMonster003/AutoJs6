@@ -20,6 +20,11 @@
     <string name="apk_info_target_sdk">目標 SDK</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">UI 線程內無法執行阻塞操作. 可嘗試在子線程或子腳本中執行 waitForActivity 或使用 setInterval 循環檢測 activity</string>
     <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">UI 線程內無法執行阻塞操作. 可嘗試在子線程或子腳本中執行 waitForPackage 或使用 setInterval 循環檢測 package</string>
+    <string name="changelog_label_dependency">依賴</string>
+    <string name="changelog_label_feature">新增</string>
+    <string name="changelog_label_fix">修復</string>
+    <string name="changelog_label_hint">提示</string>
+    <string name="changelog_label_improvement">優化</string>
     <string name="color_library_android_colors">Android 顏色庫</string>
     <string name="color_library_css_colors">CSS 顏色庫</string>
     <string name="color_library_default_colors">默認顏色庫</string>
@@ -50,6 +55,7 @@
     <string name="content_description_fab_for_display_manifest">用於顯示清單內容的浮動操作按鈕控件</string>
     <string name="content_failed_to_determine_index_of_theme_color_item">無法確定主題色條目的索引值</string>
     <string name="content_failed_to_locate_library_for_theme_color">無法定位主題色所在顏色庫</string>
+    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">獲取當前顯示語言對應的版本信息失敗, 可稍後再次嘗試.\n\n目前將臨時顯示 \"简体中文 (zh-Hans)\" 語言的版本信息.</string>
     <string name="content_github_feedback">即將跳轉到項目議題反饋 WEB 頁面.\n可能需要 GitHub 賬户以完成問題反饋.</string>
     <string name="content_way_of_output_for_recorded_script">選擇一個已錄製腳本的輸出方式</string>
     <string name="crash_feedback">可複製調試信息到剪貼板或直接退出應用</string>
@@ -63,7 +69,7 @@
     <string name="description_about_app_tips_preference">1. 在 \"關於應用與開發者\" 頁面長按應用圖標可跳轉至 AutoJs6 開發者選項頁面</string>
     <string name="description_app_language_preference">設置選項用於修改 AutoJs6 應用的文本內容顯示語言, 同時包括腳本運行產生的錯誤消息等.\n\n注: 部分內容可能需要重啓應用才能完成語言切換.</string>
     <string name="description_change_working_dir_preference">更改包含腳本的文件夾路徑</string>
-    <string name="description_check_for_updates_preference">AutoJs6 從 GitHub 獲取並下載更新.\n\n注: 版本更新內容暫未提供多語言支持.</string>
+    <string name="description_check_for_updates_preference">AutoJs6 從 GitHub 獲取並下載更新.</string>
     <string name="description_documentation_source_preference">本地文檔: AutoJs6 內置文件作為文檔來源, 無需網絡連接, 隨 AutoJs6 應用更新而發生內容變動.\n在線文檔: 使用 GitHub 網頁作為文檔來源, 需網絡連接, 可隨時保持文檔內容為最新.\n\n注: 為最大化在線文檔的閲讀體驗, 建議使用桌面顯示器等寬屏顯示設備閲讀.\n注: 截至 6.2.0 版本, 文檔尚處於初步編寫階段, 大部分內容尚未完成編寫或更新.</string>
     <string name="description_documentation_source_preference_more">文檔頁面的深色主題支持需要滿足以下條件:\n1. AutoJs6 開啓夜間模式\n2. WebView (或 Google Chrome 等瀏覽器) 版本要求:\n- API 級別 29 (安卓 10) [Q] 及以上: 版本不低於 76\n- API 級別 28 (安卓 9) [P] 及以下: 版本不低於 105</string>
     <string name="description_extending_js_build_in_objects">擴展 JavaScript 內置對象可以增加代碼靈活性並實現更豐富的功能, 但可能造成衝突甚至破壞.\n選項開啓後所有腳本均默認啓用內置擴展.\n內置擴展往往是不安全的, 除非明確瞭解內置擴展的原理及風險, 否則不建議啓用.\n選項關閉後, 仍然可以通過 plugins 全局對象啓用內置擴展, 詳見項目文檔.</string>
@@ -77,6 +83,7 @@
     <string name="description_root_record_out_file_type_preference">二進制文件: 不可編輯, 文件擴展名為 \"auto\"\nJavaScript 文件: 可編輯或直接複製, 文件擴展名為 \"js\"</string>
     <string name="description_stable_mode">穩定模式省略佈局細節, 腳本分析佈局時更穩定, 但可能影響獲取的控件總量.\n需重啓無障礙服務.</string>
     <string name="description_theme_color_preference">主題色的應用範圍包括但不限於以下部件:\n系統通知欄\n應用欄 (AppBar)\n文件圖標\n任務項圖標\n浮動操作按鈕 (Fab)\n設置頁面類別標題\n按鈕開關\n\n注: 截至 6.2.0 版本, AutoJs6 主題色暫未對 [ 主要色 (Primary Color) / 主要暗色 (Primary Dark Color) / 強調色 (Accent Color) ] 作出區分.</string>
+    <string name="description_version_histories_preference">查看 AutoJs6 在 GitHub 發行版本的歷史更新記錄及重要分類的統計數據.</string>
     <string name="dialog_button_back">@string/text_back</string>
     <string name="dialog_button_cancel">取消</string>
     <string name="dialog_button_cancel_download">取消下載</string>
@@ -177,6 +184,9 @@
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[創建實例 \"%1$s\" 失敗: [ %2$s ]]]></string>
     <string name="error_failed_to_invoke_method_with_description">方法 %1$s 調用失敗</string>
     <string name="error_failed_to_render_content">內容渲染失敗</string>
+    <string name="error_failed_to_retrieve_released_notes">獲取版本信息失敗</string>
+    <string name="error_failed_to_retrieve_version_histories">獲取版本歷史失敗</string>
+    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">獲取 version.properties 失敗, 無法解析版本信息</string>
     <string name="error_failed_to_revoke_shizuku_access">Shizuku 權限撤銷失敗</string>
     <string name="error_failed_to_run_script">腳本運行失敗</string>
     <string name="error_file_in_path_does_not_exist">路徑 \"%1$s\" 對應文件不存在</string>
@@ -229,6 +239,7 @@
     <string name="error_repeated_colon_symbol">重複的分號符號</string>
     <string name="error_repeated_dot_symbol">重複的句點符號</string>
     <string name="error_required_property_is_nullish_or_does_not_exist">必需屬性 "%1$s" 為空或不存在</string>
+    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析後的路徑 \"%1$s\" 不可為 null</string>
     <string name="error_script_is_on_exiting">腳本正在退出中</string>
     <string name="error_selector_method_without_calling">選擇器方法需調用而不可作為參數直接傳入: %s</string>
     <string name="error_selector_result_type_with_compass">結果類型為 selector 時, 無法同時使用羅盤參數</string>
@@ -304,6 +315,7 @@
     <string name="summary_text_launcher_shortcuts">添加快捷方式到啓動器</string>
     <string name="summary_use_volume_control_record">按 \"音量減\" 鍵開始或停止腳本錄製 (需開啓浮動按鈕)</string>
     <string name="summary_use_volume_key_to_stop_running_scripts">按 \"音量加\" 鍵停止所有正在運行的腳本</string>
+    <string name="summary_version_histories_preference">查看發行版本歷史更新記錄與統計數據</string>
     <string name="text_a11y_service">無障礙服務</string>
     <string name="text_a11y_service_description">腳本自動操作 (點擊/長按/滑動等) 所需</string>
     <string name="text_a11y_service_enabled_but_not_running">無障礙服務已啓用但未運行 (嘗試重新啓用或重啓設備)</string>
@@ -316,6 +328,7 @@
     <string name="text_about_functions_feedback">問題反饋</string>
     <string name="text_about_functions_licenses">許可信息</string>
     <string name="text_about_functions_update">檢查更新</string>
+    <string name="text_about_functions_version_histories">@string/text_version_histories</string>
     <string name="text_access_has_been_granted">授權成功</string>
     <string name="text_act_by_click">點擊 (click)</string>
     <string name="text_act_by_long_click">長按 (longClick)</string>
@@ -406,7 +419,10 @@
     <string name="text_captured_window_info_type_of_system">系統</string>
     <string name="text_captured_window_info_type_unknown">未知類型</string>
     <string name="text_change_working_dir">更改工作路徑</string>
+    <string name="text_changelog_item_dependency">部分依賴或本地庫版本調整</string>
     <string name="text_check_for_updates">檢查更新</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version">檢查更新 (忽略本地版本)</string>
+    <string name="text_check_for_updates_while_ignoring_the_local_version_description">檢查更新時, 直接從遠程獲取最新版本</string>
     <string name="text_checking_update" tools:ignore="TypographyEllipsis">正在檢查更新...</string>
     <string name="text_city_or_locality">城市或區域</string>
     <string name="text_class_or_package_name">類/包名</string>
@@ -423,6 +439,7 @@
     <string name="text_close_floating_button">關閉浮動按鈕</string>
     <string name="text_code">代碼</string>
     <string name="text_code_beautify">格式化代碼</string>
+    <string name="text_collapse_all">收起全部</string>
     <string name="text_color_library">顏色庫</string>
     <string name="text_color_palette">調色盤</string>
     <string name="text_command_already_copied_to_clip">指令已複製到剪貼板</string>
@@ -521,6 +538,7 @@
     <string name="text_execution_finished" formatted="false">[%s] 運行結束 (用時 %s 秒)\n</string>
     <string name="text_exit">退出</string>
     <string name="text_exit_directly">直接退出</string>
+    <string name="text_expand_all">展開全部</string>
     <string name="text_export">導出</string>
     <string name="text_exported">已導出</string>
     <string name="text_extending_js_build_in_objects">JavaScript 內置對象擴展</string>
@@ -630,6 +648,7 @@
     <string name="text_launcher_shortcuts">啓動器快捷方式</string>
     <string name="text_layout_inspector_is_dumping" tools:ignore="TypographyEllipsis">佈局分析中...</string>
     <string name="text_licenses">開源許可信息</string>
+    <string name="text_loading_a_fallback_solution_with_dots" tools:ignore="TypographyEllipsis">正在嘗試備選方案...</string>
     <string name="text_loading_with_dots" tools:ignore="TypographyEllipsis">加載中...</string>
     <string name="text_locate_current_theme_color">定位當前主題色</string>
     <string name="text_log">日誌</string>
@@ -976,6 +995,7 @@
     <string name="text_version">版本</string>
     <string name="text_version_code">版本號</string>
     <string name="text_version_code_with_computing" tools:ignore="TypographyEllipsis">版本號 (計算中...)</string>
+    <string name="text_version_histories">版本歷史</string>
     <string name="text_version_info">版本信息</string>
     <string name="text_version_name">版本名稱</string>
     <string name="text_version_name_with_computing" tools:ignore="TypographyEllipsis">版本名稱 (計算中...)</string>
@@ -988,18 +1008,5 @@
     <string name="text_write_secure_settings">修改安全設置</string>
     <string name="text_write_secure_settings_description">安全設置包含應用程序可讀但不可寫入的設置選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設置權限\" 後, 普通應用可直接修改上述安全設置 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設置</string>
-    <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析後的路徑 \"%1$s\" 不可為 null</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version">檢查更新 (忽略本地版本)</string>
-    <string name="text_check_for_updates_while_ignoring_the_local_version_description">檢查更新時, 直接從遠程獲取最新版本</string>
-    <string name="error_failed_to_retrieve_released_notes">獲取版本信息失敗</string>
-    <string name="content_failed_to_retrieve_released_notes_of_current_language_with_zh_hans_fallback">獲取當前顯示語言對應的版本信息失敗, 可稍後再次嘗試.\n\n目前將臨時顯示 \"简体中文 (zh-Hans)\" 語言的版本信息.</string>
-    <string name="changelog_label_hint">提示</string>
-    <string name="changelog_label_feature">新增</string>
-    <string name="changelog_label_fix">修復</string>
-    <string name="changelog_label_improvement">優化</string>
-    <string name="changelog_label_dependency">依賴</string>
-    <string name="text_changelog_item_dependency">部分依賴或本地庫版本調整</string>
-    <string name="text_about_functions_version_histories">Version histories</string>
-    <string name="error_failed_to_retrieve_version_properties_file_to_parse_version_information">Failed to retrieve version.properties to parse version information</string>
 
 </resources>

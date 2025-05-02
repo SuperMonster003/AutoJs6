@@ -27,24 +27,41 @@ enum class Language(@JvmField val languageTag: String, @KeyRes private val keyRe
         else -> Locale.forLanguageTag(languageTag)
     }
 
+    val compatibleLanguageTagMap by lazy {
+        listOf(
+            "zh" to ZH_HANS,
+            "zh-CN" to ZH_HANS,
+        )
+    }
+
     fun getLocalCompatibleLanguageTag(): String {
         if (!languageTag.isBlank()) {
             return languageTag
         }
 
-        val availableTags = values().map { it.languageTag }
         val systemTag = LocaleUtils.getSystemLocale().toLanguageTag()
+        val availableTags = values().map { it.languageTag }
 
-        return when {
-            systemTag in availableTags -> systemTag
-            systemTag.contains("-") -> {
-                val primaryLanguage = systemTag.substringBefore("-")
-                if (primaryLanguage in availableTags) primaryLanguage
-                else EN.languageTag
-            }
-            else -> EN.languageTag
+        if (systemTag in availableTags) {
+            return systemTag
         }
+        for (pair in compatibleLanguageTagMap) {
+            if (systemTag == pair.first) {
+                return pair.second.languageTag
+            }
+        }
+        if (systemTag.contains("-")) {
+            val primaryLanguage = systemTag.substringBefore("-")
+            if (primaryLanguage in availableTags) {
+                return primaryLanguage
+            }
+        }
+        return availableTags
+            .filter { it.contains("-") }
+            .firstOrNull { it.substringBefore("-") == systemTag }
+            ?: EN.languageTag
     }
+
     fun getEntryName(context: Context) = context.getString(entryNameRes)
 
     fun getKey() = key(keyRes)

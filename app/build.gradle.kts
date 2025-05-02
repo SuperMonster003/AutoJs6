@@ -59,6 +59,9 @@ dependencies /* Unclassified */ {
     // Common Markdown
     implementation("com.github.atlassian:commonmark-java:commonmark-parent-0.9.0")
 
+    // Flexmark Java HTML to Markdown Extensible Converter
+    implementation("com.vladsch.flexmark:flexmark-html2md-converter:0.64.8")
+
     // Licenses Dialog
     implementation("de.psdev.licensesdialog:licensesdialog:2.2.0")
 
