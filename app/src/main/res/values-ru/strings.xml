@@ -277,6 +277,25 @@
     <string name="hint_loop_delay">Задержка перед циклом</string>
     <string name="hint_loop_times">0 для бесконечного цикла</string>
     <string name="label_latest_used_time">Последнее использование: %1$s</string>
+    <string name="logger_ver_history_blob_thread_failure">Поток \"blob\" неудачен</string>
+    <string name="logger_ver_history_blob_thread_success">Поток \"blob\" успешен, запись офлайн-кеша</string>
+    <string name="logger_ver_history_data_loaded">Данные загружены</string>
+    <string name="logger_ver_history_initial_content_chosen">Выбран исходный контент</string>
+    <string name="logger_ver_history_insert_new_entries">Вставка новых записей</string>
+    <string name="logger_ver_history_load_local_data">Загрузка локальных данных</string>
+    <string name="logger_ver_history_local_asset_file">Локальный файл ресурсов</string>
+    <string name="logger_ver_history_local_asset_latest">Локальный файл ресурсов актуален</string>
+    <string name="logger_ver_history_local_data_empty">Локальные данные пусты</string>
+    <string name="logger_ver_history_local_data_newer_stop_online">Локальные данные новее, анализ онлайн-данных остановлен</string>
+    <string name="logger_ver_history_no_processing_needed">Обработка не требуется</string>
+    <string name="logger_ver_history_offline_cache_file">Файл офлайн-кеша</string>
+    <string name="logger_ver_history_offline_cache_latest">Файл офлайн-кеша актуален</string>
+    <string name="logger_ver_history_overwrite_date">Перезапись содержимого даты</string>
+    <string name="logger_ver_history_overwrite_update_record">Перезапись записи обновления</string>
+    <string name="logger_ver_history_raw_thread_failure">Поток \"raw\" неудачен</string>
+    <string name="logger_ver_history_raw_thread_success">Поток \"raw\" успешен, запись офлайн-кеша</string>
+    <string name="logger_ver_history_start_blob_thread">Запуск резервного потока \"blob\"</string>
+    <string name="logger_ver_history_start_raw_thread">Запуск потока запроса \"raw\"</string>
     <string name="media_info_album_label">Альбом</string>
     <string name="media_info_aspect_ratio_label">Соотношение сторон</string>
     <string name="media_info_audio_format_label">Аудио</string>
@@ -420,6 +439,7 @@
     <string name="text_captured_window_info_type_of_split_screen_divider">Разделитель экрана</string>
     <string name="text_captured_window_info_type_of_system">Система</string>
     <string name="text_captured_window_info_type_unknown">Неизвестный тип</string>
+    <string name="text_category_filter">Фильтр категории</string>
     <string name="text_change_working_dir">Изменить рабочий каталог</string>
     <string name="text_changelog_item_dependency">Изменения версий некоторых зависимостей или локальных библиотек</string>
     <string name="text_check_for_updates">Проверка наличия обновлений</string>
@@ -816,6 +836,7 @@
     <string name="text_please_choose">Пожалуйста, выберите</string>
     <string name="text_please_choose_a_script">Выберите сценарий</string>
     <string name="text_please_input_name">Имя ввода</string>
+    <string name="text_please_wait" tools:ignore="TypographyEllipsis">Пожалуйста, подождите...</string>
     <string name="text_pointer_location">Расположение указателя</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Переключение \"Расположение указателя\" не удалось.\nТребуется корневой доступ.</string>
     <string name="text_post_notifications_permission">почтовые уведомления</string>
@@ -827,6 +848,7 @@
     <string name="text_press_again_to_exit">Нажмите еще раз, чтобы выйти</string>
     <string name="text_press_back_or_vol_down_to_close_window">Чтобы закрыть, нажмите \"Назад\" или \"Уменьшение громкости\"</string>
     <string name="text_preview">Предварительный просмотр</string>
+    <string name="text_process_log">Журнал процесса</string>
     <string name="text_processing">Обработка</string>
     <string name="text_project">Проект</string>
     <string name="text_project_location">Расположение проекта</string>
@@ -1004,6 +1026,7 @@
     <string name="text_view">Просмотр</string>
     <string name="text_view_docs">Просмотр документов</string>
     <string name="text_vsc_ext_version_not_meet_requirement">Версия расширения VSCode не соответствует требованиям</string>
+    <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Ожидание завершения обработки всех данных...</string>
     <string name="text_weekly_task">Недельное задание</string>
     <string name="text_weekly_task_should_check_day_of_week">Должен быть выбран хотя бы один день</string>
     <string name="text_working_dir_path">Путь к рабочему каталогу</string>

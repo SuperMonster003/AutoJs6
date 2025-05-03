@@ -31,7 +31,7 @@ class ColorLibraryViewHolder(itemViewBinding: MtColorLibrariesRecyclerViewItemBi
             }
             else -> {
                 val size = library.colors.size
-                resources.getQuantityString(R.plurals.text_items_total_sum, size, size)
+                resources.getQuantityString(R.plurals.text_items_total_sum_with_colon, size, size)
             }
         }
 

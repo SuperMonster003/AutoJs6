@@ -278,6 +278,25 @@
     <string name="hint_loop_delay">ループ前の遅延時間</string>
     <string name="hint_loop_times">無限ループの場合は 0</string>
     <string name="label_latest_used_time">最終使用時: %1$s</string>
+    <string name="logger_ver_history_blob_thread_failure">\"Blob\" スレッドが失敗</string>
+    <string name="logger_ver_history_blob_thread_success">\"Blob\" スレッドが成功、オフラインキャッシュを書き込み</string>
+    <string name="logger_ver_history_data_loaded">データ読み込み完了</string>
+    <string name="logger_ver_history_initial_content_chosen">初期コンテンツを選択</string>
+    <string name="logger_ver_history_insert_new_entries">新しい項目を挿入中</string>
+    <string name="logger_ver_history_load_local_data">ローカルデータを読み込み中</string>
+    <string name="logger_ver_history_local_asset_file">ローカルアセットファイル</string>
+    <string name="logger_ver_history_local_asset_latest">ローカルアセットファイルは最新です</string>
+    <string name="logger_ver_history_local_data_empty">ローカルデータが空です</string>
+    <string name="logger_ver_history_local_data_newer_stop_online">ローカルデータの方が新しいためオンライン解析を停止</string>
+    <string name="logger_ver_history_no_processing_needed">処理は不要</string>
+    <string name="logger_ver_history_offline_cache_file">オフラインキャッシュファイル</string>
+    <string name="logger_ver_history_offline_cache_latest">オフラインキャッシュファイルは最新です</string>
+    <string name="logger_ver_history_overwrite_date">日付内容を上書き中</string>
+    <string name="logger_ver_history_overwrite_update_record">更新履歴を上書き中</string>
+    <string name="logger_ver_history_raw_thread_failure">\"Raw\" スレッドが失敗</string>
+    <string name="logger_ver_history_raw_thread_success">\"Raw\" スレッドが成功、オフラインキャッシュを書き込み</string>
+    <string name="logger_ver_history_start_blob_thread">\"Blob\" 予備リクエストスレッドを開始</string>
+    <string name="logger_ver_history_start_raw_thread">\"Raw\" リクエストスレッドを開始</string>
     <string name="media_info_album_label">アルバム</string>
     <string name="media_info_aspect_ratio_label">アスペクト比</string>
     <string name="media_info_audio_format_label">オーディオ</string>
@@ -421,6 +440,7 @@
     <string name="text_captured_window_info_type_of_split_screen_divider">画面区切り</string>
     <string name="text_captured_window_info_type_of_system">システム</string>
     <string name="text_captured_window_info_type_unknown">不明なタイプ</string>
+    <string name="text_category_filter">カテゴリフィルター</string>
     <string name="text_change_working_dir">作業ディレクトリの変更</string>
     <string name="text_changelog_item_dependency">一部の依存関係またはローカルライブラリのバージョン調整</string>
     <string name="text_check_for_updates">アップデートの確認</string>
@@ -817,6 +837,7 @@
     <string name="text_please_choose">選択してください</string>
     <string name="text_please_choose_a_script">スクリプトを選択してください</string>
     <string name="text_please_input_name">入力名</string>
+    <string name="text_please_wait" tools:ignore="TypographyEllipsis">しばらくお待ちください...</string>
     <string name="text_pointer_location">ポインターの位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">トグル「ポインターの位置」に失敗しました.\nroot 権限が必要です</string>
     <string name="text_post_notifications_permission">ゆうびんけいほう</string>
@@ -828,6 +849,7 @@
     <string name="text_press_again_to_exit">もう一度押すと終了します</string>
     <string name="text_press_back_or_vol_down_to_close_window">閉じるには \"戻る\" または \"音量を下げる\" を押してください</string>
     <string name="text_preview">プレビュー</string>
+    <string name="text_process_log">プロセスログ</string>
     <string name="text_processing">処理中</string>
     <string name="text_project">プロジェクト</string>
     <string name="text_project_location">プロジェクトの場所</string>
@@ -1005,6 +1027,7 @@
     <string name="text_view">表示</string>
     <string name="text_view_docs">ドキュメントを見る</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 拡張機能のバージョンが要件を満たしていない</string>
+    <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">すべてのデータ処理が完了するのを待機しています...</string>
     <string name="text_weekly_task">週次タスク</string>
     <string name="text_weekly_task_should_check_day_of_week">最低 1 日選択する必要があります</string>
     <string name="text_working_dir_path">作業ディレクトリのパス</string>

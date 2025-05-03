@@ -1,6 +1,10 @@
 <resources>
 
     <plurals name="text_items_total_sum">
+        <item quantity="other">共计 %d 项</item>
+    </plurals>
+
+    <plurals name="text_items_total_sum_with_colon">
         <item quantity="other">共计: %d 项</item>
     </plurals>
 

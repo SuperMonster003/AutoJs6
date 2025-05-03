@@ -1,17 +1,47 @@
 <resources>
 
+    <!-- Русский имеет категории one / few / many / other -->
+
     <plurals name="text_items_total_sum">
-        <item quantity="one">Всего: %d элемент</item>
-        <item quantity="few">Всего: %d элемента</item>
-        <item quantity="many">Всего: %d элементов</item>
-        <item quantity="other">Всего: %d элементов</item>
+        <item quantity="one">Итого %d элемент</item>
+        <item quantity="few">Итого %d элемента</item>
+        <item quantity="many">Итого %d элементов</item>
+        <item quantity="other">Итого %d элемента</item>
+    </plurals>
+
+    <plurals name="text_items_total_sum_with_colon">
+        <item quantity="one">Итого: %d элемент</item>
+        <item quantity="few">Итого: %d элемента</item>
+        <item quantity="many">Итого: %d элементов</item>
+        <item quantity="other">Итого: %d элемента</item>
     </plurals>
 
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d скрипт остановлен</item>
-        <item quantity="few">%d скрипта остановлены</item>
-        <item quantity="many">%d скриптов остановлены</item>
-        <item quantity="other">%d скриптов остановлены</item>
+        <item quantity="few">%d скрипта остановлено</item>
+        <item quantity="many">%d скриптов остановлено</item>
+        <item quantity="other">%d скрипта остановлено</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_n_arguments">
+        <item quantity="one">Метод принимает только %d аргумент</item>
+        <item quantity="few">Метод принимает только %d аргумента</item>
+        <item quantity="many">Метод принимает только %d аргументов</item>
+        <item quantity="other">Метод принимает только %d аргумента</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_more_than_n_arguments">
+        <item quantity="one">Метод принимает не более %d аргумента</item>
+        <item quantity="few">Метод принимает не более %d аргументов</item>
+        <item quantity="many">Метод принимает не более %d аргументов</item>
+        <item quantity="other">Метод принимает не более %d аргумента</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_less_than_n_arguments">
+        <item quantity="one">Метод принимает не менее %d аргумента</item>
+        <item quantity="few">Метод принимает не менее %d аргументов</item>
+        <item quantity="many">Метод принимает не менее %d аргументов</item>
+        <item quantity="other">Метод принимает не менее %d аргумента</item>
     </plurals>
 
 </resources>

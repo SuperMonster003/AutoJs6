@@ -279,6 +279,25 @@
     <string name="hint_loop_delay">تأخير قبل الحلقة</string>
     <string name="hint_loop_times">0 للحلقة اللانهائية</string>
     <string name="label_latest_used_time">آخر استخدام: %1$s</string>
+    <string name="logger_ver_history_blob_thread_failure">فشل خيط \"blob"\</string>
+    <string name="logger_ver_history_blob_thread_success">نجح خيط \"blob"\ وجرى حفظ التخزين المؤقت دون اتصال</string>
+    <string name="logger_ver_history_data_loaded">تم تحميل البيانات</string>
+    <string name="logger_ver_history_initial_content_chosen">تم اختيار المحتوى الابتدائي</string>
+    <string name="logger_ver_history_insert_new_entries">جارٍ إدراج عناصر جديدة</string>
+    <string name="logger_ver_history_load_local_data">جارٍ تحميل البيانات المحلية</string>
+    <string name="logger_ver_history_local_asset_file">ملف الأصول المحلي</string>
+    <string name="logger_ver_history_local_asset_latest">ملف الأصول المحلي هو أحدث إصدار</string>
+    <string name="logger_ver_history_local_data_empty">البيانات المحلية فارغة</string>
+    <string name="logger_ver_history_local_data_newer_stop_online">البيانات المحلية أحدث، إيقاف تحليل البيانات المتصلة</string>
+    <string name="logger_ver_history_no_processing_needed">لا حاجة للمعالجة</string>
+    <string name="logger_ver_history_offline_cache_file">ملف التخزين المؤقت دون اتصال</string>
+    <string name="logger_ver_history_offline_cache_latest">ملف التخزين المؤقت دون اتصال هو أحدث إصدار</string>
+    <string name="logger_ver_history_overwrite_date">جارٍ استبدال محتوى التاريخ</string>
+    <string name="logger_ver_history_overwrite_update_record">جارٍ استبدال سجل التحديث</string>
+    <string name="logger_ver_history_raw_thread_failure">فشل خيط \"raw"\</string>
+    <string name="logger_ver_history_raw_thread_success">نجح خيط \"raw"\ وجرى حفظ التخزين المؤقت دون اتصال</string>
+    <string name="logger_ver_history_start_blob_thread">بدء خيط طلب احتياطي \"blob"\</string>
+    <string name="logger_ver_history_start_raw_thread">بدء خيط طلب \"raw"\</string>
     <string name="media_info_album_label">الألبوم</string>
     <string name="media_info_aspect_ratio_label">نسبة العرض إلى الارتفاع</string>
     <string name="media_info_audio_format_label">الصوت</string>
@@ -422,6 +441,7 @@
     <string name="text_captured_window_info_type_of_split_screen_divider">مقسم الشاشة</string>
     <string name="text_captured_window_info_type_of_system">النظام</string>
     <string name="text_captured_window_info_type_unknown">نوع غير معروف</string>
+    <string name="text_category_filter">فلتر الفئة</string>
     <string name="text_change_working_dir">تغيير دليل العمل</string>
     <string name="text_changelog_item_dependency">تعديلات على إصدارات بعض التبعيات أو المكتبات المحلية</string>
     <string name="text_check_for_updates">تحقق من وجود تحديثات</string>
@@ -818,6 +838,7 @@
     <string name="text_please_choose">اختر من فضلك</string>
     <string name="text_please_choose_a_script">اختر نصًا</string>
     <string name="text_please_input_name">اسم الإدخال</string>
+    <string name="text_please_wait" tools:ignore="TypographyEllipsis">الرجاء الانتظار...</string>
     <string name="text_pointer_location">موقع المؤشر</string>
     <string name="text_pointer_location_toggle_failed_with_hint">فشل تبديل \"موقع المؤشر\".\nالوصول إلى الجذر مطلوب.</string>
     <string name="text_post_notifications_permission">نشر الإخطارات</string>
@@ -829,6 +850,7 @@
     <string name="text_press_again_to_exit">اضغط مرة أخرى للخروج</string>
     <string name="text_press_back_or_vol_down_to_close_window">لإغلاق، اضغط على \"رجوع\" أو \"خفض الصوت\"</string>
     <string name="text_preview">معاينة</string>
+    <string name="text_process_log">سجل العملية</string>
     <string name="text_processing">يعالج</string>
     <string name="text_project">مشروع</string>
     <string name="text_project_location">موقع المشروع</string>
@@ -1006,6 +1028,7 @@
     <string name="text_view">عرض</string>
     <string name="text_view_docs">عرض المستندات</string>
     <string name="text_vsc_ext_version_not_meet_requirement">إصدار امتداد VSCode لا يفي بالمتطلبات</string>
+    <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">بانتظار اكتمال معالجة جميع البيانات...</string>
     <string name="text_weekly_task">مهمة أسبوعية</string>
     <string name="text_weekly_task_should_check_day_of_week">يجب اختيار يوم واحد على الأقل</string>
     <string name="text_working_dir_path">مسار دليل العمل</string>

@@ -221,7 +221,7 @@
             app:title="@string/text_manage_ignored_updates"
             app:longClickPrompt="@string/description_manage_ignored_updates_preference" />
 
-        <org.autojs.autojs.ui.settings.VersionHistoriesPreference
+        <org.autojs.autojs.ui.settings.VersionHistoryPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_version_histories"
             app:title="@string/text_version_histories"

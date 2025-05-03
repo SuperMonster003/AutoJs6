@@ -1,11 +1,27 @@
 <resources>
 
     <plurals name="text_items_total_sum">
+        <item quantity="other">合計 %d 件</item>
+    </plurals>
+
+    <plurals name="text_items_total_sum_with_colon">
         <item quantity="other">合計: %d 件</item>
     </plurals>
 
     <plurals name="text_already_stop_n_scripts">
-        <item quantity="other">%d つのスクリプトが停止している</item>
+        <item quantity="other">%d 個のスクリプトを停止しました</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_n_arguments">
+        <item quantity="other">メソッドは %d 個の引数のみ受け付けます</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_more_than_n_arguments">
+        <item quantity="other">メソッドが受け付ける引数は最大 %d 個までです</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_less_than_n_arguments">
+        <item quantity="other">メソッドが受け付ける引数は最小 %d 個からです</item>
     </plurals>
 
 </resources>

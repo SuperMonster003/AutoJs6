@@ -277,6 +277,25 @@
     <string name="hint_loop_delay">Délai avant boucle</string>
     <string name="hint_loop_times">0 pour une boucle infinie</string>
     <string name="label_latest_used_time">Dernière utilisation : %1$s</string>
+    <string name="logger_ver_history_blob_thread_failure">Échec du thread \"blob\"</string>
+    <string name="logger_ver_history_blob_thread_success">Thread \"blob\" réussi, écriture du cache hors ligne</string>
+    <string name="logger_ver_history_data_loaded">Données chargées</string>
+    <string name="logger_ver_history_initial_content_chosen">Contenu initial choisi</string>
+    <string name="logger_ver_history_insert_new_entries">Insertion de nouvelles entrées</string>
+    <string name="logger_ver_history_load_local_data">Chargement des données locales</string>
+    <string name="logger_ver_history_local_asset_file">Fichier d\'actifs local</string>
+    <string name="logger_ver_history_local_asset_latest">Le fichier d\'actifs local est à jour</string>
+    <string name="logger_ver_history_local_data_empty">Les données locales sont vides</string>
+    <string name="logger_ver_history_local_data_newer_stop_online">Les données locales sont plus récentes, arrêt de l\'analyse en ligne</string>
+    <string name="logger_ver_history_no_processing_needed">Aucun traitement nécessaire</string>
+    <string name="logger_ver_history_offline_cache_file">Fichier de cache hors ligne</string>
+    <string name="logger_ver_history_offline_cache_latest">Le fichier de cache hors ligne est à jour</string>
+    <string name="logger_ver_history_overwrite_date">Remplacement du contenu de date</string>
+    <string name="logger_ver_history_overwrite_update_record">Remplacement de l\'enregistrement de mise à jour</string>
+    <string name="logger_ver_history_raw_thread_failure">Échec du thread \"raw\"</string>
+    <string name="logger_ver_history_raw_thread_success">Thread \"raw\" réussi, écriture du cache hors ligne</string>
+    <string name="logger_ver_history_start_blob_thread">Démarrage du thread de requête de secours \"blob\"</string>
+    <string name="logger_ver_history_start_raw_thread">Démarrage du thread de requête \"raw\"</string>
     <string name="media_info_album_label">Album</string>
     <string name="media_info_aspect_ratio_label">Ratio d\'aspect</string>
     <string name="media_info_audio_format_label">Audio</string>
@@ -420,6 +439,7 @@
     <string name="text_captured_window_info_type_of_split_screen_divider">Séparateur d\'écran partagé</string>
     <string name="text_captured_window_info_type_of_system">Système</string>
     <string name="text_captured_window_info_type_unknown">Type inconnu</string>
+    <string name="text_category_filter">Filtre de catégorie</string>
     <string name="text_change_working_dir">Changer de répertoire de travail</string>
     <string name="text_changelog_item_dependency">Certaines dépendances ou versions de bibliothèques locales ont été ajustées</string>
     <string name="text_check_for_updates">Vérifier les mises à jour</string>
@@ -816,6 +836,7 @@
     <string name="text_please_choose">Veuillez choisir</string>
     <string name="text_please_choose_a_script">Choisissez un script</string>
     <string name="text_please_input_name">Nom de l\'entrée</string>
+    <string name="text_please_wait" tools:ignore="TypographyEllipsis">Veuillez patienter...</string>
     <string name="text_pointer_location">L\'emplacement du pointeur</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nL\'accès à la racine est nécessaire.</string>
     <string name="text_post_notifications_permission">Notifications postales</string>
@@ -827,6 +848,7 @@
     <string name="text_press_again_to_exit">Appuyez à nouveau pour quitter</string>
     <string name="text_press_back_or_vol_down_to_close_window">Pour fermer, appuyez sur \"Retour\" ou \"Volume bas\"</string>
     <string name="text_preview">Préview</string>
+    <string name="text_process_log">Journal de processus</string>
     <string name="text_processing">Traitement</string>
     <string name="text_project">Projet</string>
     <string name="text_project_location">Localisation du projet</string>
@@ -1004,6 +1026,7 @@
     <string name="text_view">Voir</string>
     <string name="text_view_docs">Voir les documents</string>
     <string name="text_vsc_ext_version_not_meet_requirement">La version de l\'extension VSCode ne répond pas aux exigences</string>
+    <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">En attente de la fin du traitement de toutes les données...</string>
     <string name="text_weekly_task">Tâche hebdomadaire</string>
     <string name="text_weekly_task_should_check_day_of_week">Au moins un jour doit être sélectionné</string>
     <string name="text_working_dir_path">Chemin du répertoire de travail</string>.

@@ -275,6 +275,25 @@
     <string name="hint_loop_delay">開始循環前的延遲</string>
     <string name="hint_loop_times">0 表示無限循環</string>
     <string name="label_latest_used_time">最近使用: %1$s</string>
+    <string name="logger_ver_history_blob_thread_failure">線程 "blob" 請求失敗</string>
+    <string name="logger_ver_history_blob_thread_success">線程 "blob" 請求成功, 寫入離線緩存</string>
+    <string name="logger_ver_history_data_loaded">數據加載完畢</string>
+    <string name="logger_ver_history_initial_content_chosen">初始內容選用</string>
+    <string name="logger_ver_history_insert_new_entries">插入新條目</string>
+    <string name="logger_ver_history_load_local_data">加載本地數據</string>
+    <string name="logger_ver_history_local_asset_file">本地資產文件</string>
+    <string name="logger_ver_history_local_asset_latest">本地資產文件最新版本</string>
+    <string name="logger_ver_history_local_data_empty">本地數據為空</string>
+    <string name="logger_ver_history_local_data_newer_stop_online">本地數據較新, 停止繼續分析在線數據</string>
+    <string name="logger_ver_history_no_processing_needed">無需處理</string>
+    <string name="logger_ver_history_offline_cache_file">離線緩存文件</string>
+    <string name="logger_ver_history_offline_cache_latest">離線緩存文件最新版本</string>
+    <string name="logger_ver_history_overwrite_date">覆寫日期內容</string>
+    <string name="logger_ver_history_overwrite_update_record">覆寫更新記錄</string>
+    <string name="logger_ver_history_raw_thread_failure">線程 "raw" 請求失敗</string>
+    <string name="logger_ver_history_raw_thread_success">線程 "raw" 請求成功, 寫入離線緩存</string>
+    <string name="logger_ver_history_start_blob_thread">啓動 "blob" 備用請求線程</string>
+    <string name="logger_ver_history_start_raw_thread">啓動 "raw" 請求線程</string>
     <string name="media_info_album_label">專輯</string>
     <string name="media_info_aspect_ratio_label">縱橫比</string>
     <string name="media_info_audio_format_label">音頻</string>
@@ -418,6 +437,7 @@
     <string name="text_captured_window_info_type_of_split_screen_divider">分割屏幕分隔線</string>
     <string name="text_captured_window_info_type_of_system">系統</string>
     <string name="text_captured_window_info_type_unknown">未知類型</string>
+    <string name="text_category_filter">類別篩選</string>
     <string name="text_change_working_dir">更改工作路徑</string>
     <string name="text_changelog_item_dependency">部分依賴或本地庫版本調整</string>
     <string name="text_check_for_updates">檢查更新</string>
@@ -814,6 +834,7 @@
     <string name="text_please_choose">請選擇</string>
     <string name="text_please_choose_a_script">請選擇腳本</string>
     <string name="text_please_input_name">請輸入名稱</string>
+    <string name="text_please_wait" tools:ignore="TypographyEllipsis">請稍候...</string>
     <string name="text_pointer_location">指針位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">切換 \"指針位置\" 顯示狀態失敗\n可能缺少 root 權限</string>
     <string name="text_post_notifications_permission">發佈通知權限</string>
@@ -825,6 +846,7 @@
     <string name="text_press_again_to_exit">再按一次退出應用</string>
     <string name="text_press_back_or_vol_down_to_close_window">如需關閉窗口, 可按 \"返回鍵\" 或 \"音量減鍵\"</string>
     <string name="text_preview">預覽</string>
+    <string name="text_process_log">流程日誌</string>
     <string name="text_processing">處理中</string>
     <string name="text_project">項目</string>
     <string name="text_project_location">項目位置</string>
@@ -1002,6 +1024,7 @@
     <string name="text_view">查看</string>
     <string name="text_view_docs">查看文檔</string>
     <string name="text_vsc_ext_version_not_meet_requirement">VSCode 插件版本不符合要求</string>
+    <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">正在等待全部數據處理完畢...</string>
     <string name="text_weekly_task">每週任務</string>
     <string name="text_weekly_task_should_check_day_of_week">需至少選擇一天</string>
     <string name="text_working_dir_path">工作路徑</string>

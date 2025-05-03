@@ -504,6 +504,25 @@
     <string name="hint_loop_delay">Delay before loop</string>
     <string name="hint_loop_times">0 for infinite loop</string>
     <string name="label_latest_used_time">Latest used: %1$s</string>
+    <string name="logger_ver_history_blob_thread_failure">\"Blob\" thread request failed</string>
+    <string name="logger_ver_history_blob_thread_success">\"Blob\" thread request successful, writing offline cache</string>
+    <string name="logger_ver_history_data_loaded">Data loaded</string>
+    <string name="logger_ver_history_initial_content_chosen">Chosen initial content</string>
+    <string name="logger_ver_history_insert_new_entries">Inserting new entries</string>
+    <string name="logger_ver_history_load_local_data">Loading local data</string>
+    <string name="logger_ver_history_local_asset_file">Local asset file</string>
+    <string name="logger_ver_history_local_asset_latest">Local asset file is latest version</string>
+    <string name="logger_ver_history_local_data_empty">Local data is empty</string>
+    <string name="logger_ver_history_local_data_newer_stop_online">Local data is newer, stop analyzing online data</string>
+    <string name="logger_ver_history_no_processing_needed">No processing needed</string>
+    <string name="logger_ver_history_offline_cache_file">Offline cache file</string>
+    <string name="logger_ver_history_offline_cache_latest">Offline cache file is latest version</string>
+    <string name="logger_ver_history_overwrite_date">Overwriting date content</string>
+    <string name="logger_ver_history_overwrite_update_record">Overwriting update record</string>
+    <string name="logger_ver_history_raw_thread_failure">\"Raw\" thread request failed</string>
+    <string name="logger_ver_history_raw_thread_success">\"Raw\" thread request successful, writing offline cache</string>
+    <string name="logger_ver_history_start_blob_thread">Starting \"blob\" fallback request thread</string>
+    <string name="logger_ver_history_start_raw_thread">Starting \"raw\" request thread</string>
     <string name="media_info_album_label">Album</string>
     <string name="media_info_aspect_ratio_label">Aspect ratio</string>
     <string name="media_info_audio_format_label">Audio</string>
@@ -647,6 +666,7 @@
     <string name="text_captured_window_info_type_of_split_screen_divider">Split Screen Divider</string>
     <string name="text_captured_window_info_type_of_system">System</string>
     <string name="text_captured_window_info_type_unknown">Unknown type</string>
+    <string name="text_category_filter">Category filter</string>
     <string name="text_change_working_dir">Change working directory</string>
     <string name="text_changelog_item_dependency">Some dependency or local library version adjustments</string>
     <string name="text_check_for_updates">Check for updates</string>
@@ -1043,6 +1063,7 @@
     <string name="text_please_choose">Please choose</string>
     <string name="text_please_choose_a_script">Choose a script</string>
     <string name="text_please_input_name">Input name</string>
+    <string name="text_please_wait" tools:ignore="TypographyEllipsis">Please wait...</string>
     <string name="text_pointer_location">Pointer location</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nRoot access is required.</string>
     <string name="text_post_notifications_permission">Post notifications</string>
@@ -1054,6 +1075,7 @@
     <string name="text_press_again_to_exit">Press again to exit</string>
     <string name="text_press_back_or_vol_down_to_close_window">To close, press \"Back\" or \"Volume Down\"</string>
     <string name="text_preview">Preview</string>
+    <string name="text_process_log">Process log</string>
     <string name="text_processing">Processing</string>
     <string name="text_project">Project</string>
     <string name="text_project_location">Project location</string>
@@ -1231,6 +1253,7 @@
     <string name="text_view">View</string>
     <string name="text_view_docs">View documents</string>
     <string name="text_vsc_ext_version_not_meet_requirement">The version of the VSCode extension does not meet the requirements</string>
+    <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Waiting for all data processing to complete...</string>
     <string name="text_weekly_task">Weekly task</string>
     <string name="text_weekly_task_should_check_day_of_week">At least one day must be selected</string>
     <string name="text_working_dir_path">Working directory path</string>

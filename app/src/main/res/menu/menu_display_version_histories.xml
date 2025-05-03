@@ -15,4 +15,14 @@
         android:icon="@drawable/ic_collapse_all"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/action_filter_category"
+        android:title="@string/text_category_filter"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_show_logs"
+        android:title="@string/text_process_log"
+        app:showAsAction="never" />
+
 </menu>

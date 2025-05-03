@@ -1,15 +1,39 @@
 <resources>
 
     <plurals name="text_items_total_sum">
-        <item quantity="one">Total: %d artículo</item>
-        <item quantity="many">Total: %d artículos</item>
-        <item quantity="other">Total: %d artículos</item>
+        <item quantity="one">Total %d elemento</item>
+        <item quantity="many">Total %d elementos</item>
+        <item quantity="other">Total %d elementos</item>
+    </plurals>
+
+    <plurals name="text_items_total_sum_with_colon">
+        <item quantity="one">Total: %d elemento</item>
+        <item quantity="many">Total: %d elementos</item>
+        <item quantity="other">Total: %d elementos</item>
     </plurals>
 
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d script detenido</item>
         <item quantity="many">%d scripts detenidos</item>
         <item quantity="other">%d scripts detenidos</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_n_arguments">
+        <item quantity="one">El método solo acepta %d argumento</item>
+        <item quantity="many">El método solo acepta %d argumentos</item>
+        <item quantity="other">El método solo acepta %d argumentos</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_more_than_n_arguments">
+        <item quantity="one">El método solo acepta como máximo %d argumento</item>
+        <item quantity="many">El método solo acepta como máximo %d argumentos</item>
+        <item quantity="other">El método solo acepta como máximo %d argumentos</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_less_than_n_arguments">
+        <item quantity="one">El método solo acepta al menos %d argumento</item>
+        <item quantity="many">El método solo acepta al menos %d argumentos</item>
+        <item quantity="other">El método solo acepta al menos %d argumentos</item>
     </plurals>
 
 </resources>
