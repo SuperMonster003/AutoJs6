@@ -31,6 +31,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -65,6 +66,8 @@ object ViewUtils {
         NULL(key(R.string.key_night_mode_null)),
         ;
     }
+
+    private const val TAG_STATUS_BAR_SCRIM = "status_bar_scrim"
 
     @JvmStatic
     var isKeepScreenOnWhenInForegroundEnabled
@@ -234,28 +237,61 @@ object ViewUtils {
     }
 
     @JvmStatic
-    fun setStatusBarBackgroundColor(activity: Activity, color: Int) {
+    fun setStatusBarBackgroundColor(activity: Activity, @ColorInt color: Int) {
         val window = activity.window
-        val decorView = window.decorView
+        val decorView = window.decorView as ViewGroup
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            decorView.setOnApplyWindowInsetsListener { view, insets ->
-                val statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars())
-                val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
-                val statusBarOverlay = View(activity).apply {
-                    layoutParams = FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        statusBarInsets.top, // 状态栏高度
-                    )
-                    setBackgroundColor(color)
-                }
-                contentView?.addView(statusBarOverlay)
-                view.onApplyWindowInsets(insets)
-            }
-        } else {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             @Suppress("DEPRECATION")
             window.statusBarColor = color
+            return
         }
+
+        // @Hint by JetBrains AI Assistant on May 3, 2025.
+        //  ! `View.setOnApplyWindowInsetsListener { ... }` is invoked repeatedly only in these cases:
+        //  !   - The root view explicitly calls `requestApplyInsets()`
+        //  !   - A configuration change occurs (rotation, navigation-mode switch, etc.)
+        //  !   - WindowInsets change dynamically (IME/keyboard, gesture bar showing or hiding)
+        //  ! Hence, only the first WindowInsets dispatch that happens during Activity startup
+        //  ! actually paints the correct status-bar color. Subsequent calls to
+        //  ! `setStatusBarBackgroundColor()` merely cache the new color but do NOT trigger
+        //  ! another inset callback, so the visual change on the status bar is never observed.
+        //  !
+        //  ! zh-CN:
+        //  !
+        //  ! `View.setOnApplyWindowInsetsListener { ... }` 只在下列场景被重复触发:
+        //  !   - 根视图调用 `requestApplyInsets()`
+        //  !   - Configuration 变化 (旋转, 手势导航显示方式切换等)
+        //  !   - WindowInsets 动态变化 (键盘, 手势指示条出现或隐藏)
+        //  ! 因此, 仅在 Activity 启动时触发的一次 WindowInsets 分发可以正确设置背景色,
+        //  ! 之后重复调用 `setStatusBarBackgroundColor()`, 代码只是把新颜色暂存,
+        //  ! 并不会重新触发 Inset 回调, 导致无法观测到状态栏的颜色变化.
+        //  !
+        //  # decorView.setOnApplyWindowInsetsListener { view, insets ->
+        //  #     val statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars())
+        //  #     val contentView: ViewGroup? = activity.findViewById(android.R.id.content)
+        //  #     val statusBarOverlay = View(activity).apply {
+        //  #         layoutParams = FrameLayout.LayoutParams(
+        //  #             FrameLayout.LayoutParams.MATCH_PARENT,
+        //  #             statusBarInsets.top, // 状态栏高度
+        //  #         )
+        //  #         setBackgroundColor(color)
+        //  #     }
+        //  #     contentView?.addView(statusBarOverlay)
+        //  #     view.onApplyWindowInsets(insets)
+        //  # }
+
+        val scrim = decorView.findViewWithTag(TAG_STATUS_BAR_SCRIM) ?: run {
+            View(activity).apply {
+                tag = TAG_STATUS_BAR_SCRIM
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    getStatusBarHeightByWindow(activity)
+                )
+                decorView.addView(this)
+            }
+        }
+        scrim.setBackgroundColor(color)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
