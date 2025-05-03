@@ -77,6 +77,7 @@
                 android:gravity="end">
 
                 <LinearLayout
+                    android:id="@+id/tvFeatureCountContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
 
@@ -111,6 +112,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/tvFixCountContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
 
@@ -145,6 +147,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/tvImprovementCountContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
 
@@ -183,7 +186,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tvBody"
+            android:id="@+id/tvLines"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:lineSpacingMultiplier="1.2"

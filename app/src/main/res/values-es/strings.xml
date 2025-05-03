@@ -277,6 +277,25 @@
     <string name="hint_loop_delay">Retraso antes del bucle</string>
     <string name="hint_loop_times">0 para bucle infinito</string>
     <string name="label_latest_used_time">Último uso: %1$s</string>
+    <string name="logger_ver_history_blob_thread_failure">Hilo \"blob\" fallido</string>
+    <string name="logger_ver_history_blob_thread_success">Hilo \"blob\" exitoso, escribiendo caché sin conexión</string>
+    <string name="logger_ver_history_data_loaded">Datos cargados</string>
+    <string name="logger_ver_history_initial_content_chosen">Contenido inicial seleccionado</string>
+    <string name="logger_ver_history_insert_new_entries">Insertando nuevas entradas</string>
+    <string name="logger_ver_history_load_local_data">Cargando datos locales</string>
+    <string name="logger_ver_history_local_asset_file">Archivo de recursos local</string>
+    <string name="logger_ver_history_local_asset_latest">El archivo de recursos local está en la última versión</string>
+    <string name="logger_ver_history_local_data_empty">Los datos locales están vacíos</string>
+    <string name="logger_ver_history_local_data_newer_stop_online">Los datos locales son más recientes, se detiene el análisis en línea</string>
+    <string name="logger_ver_history_no_processing_needed">No se necesita procesamiento</string>
+    <string name="logger_ver_history_offline_cache_file">Archivo de caché sin conexión</string>
+    <string name="logger_ver_history_offline_cache_latest">El archivo de caché sin conexión está en la última versión</string>
+    <string name="logger_ver_history_overwrite_date">Sobrescribiendo contenido de fecha</string>
+    <string name="logger_ver_history_overwrite_update_record">Sobrescribiendo registro de actualización</string>
+    <string name="logger_ver_history_raw_thread_failure">Hilo \"raw\" fallido</string>
+    <string name="logger_ver_history_raw_thread_success">Hilo \"raw\" exitoso, escribiendo caché sin conexión</string>
+    <string name="logger_ver_history_start_blob_thread">Iniciando hilo de solicitud alterna \"blob\"</string>
+    <string name="logger_ver_history_start_raw_thread">Iniciando hilo de solicitud \"raw\"</string>
     <string name="media_info_album_label">Álbum</string>
     <string name="media_info_aspect_ratio_label">Relación de aspecto</string>
     <string name="media_info_audio_format_label">Audio</string>
@@ -420,6 +439,7 @@
     <string name="text_captured_window_info_type_of_split_screen_divider">Divisor de pantalla dividida</string>
     <string name="text_captured_window_info_type_of_system">Sistema</string>
     <string name="text_captured_window_info_type_unknown">Tipo desconocido</string>
+    <string name="text_category_filter">Filtro de categoría</string>
     <string name="text_change_working_dir">Cambiar el directorio de trabajo</string>
     <string name="text_changelog_item_dependency">Ajustes en algunas dependencias o versiones de bibliotecas locales</string>
     <string name="text_check_for_updates">Comprobar si hay actualizaciones</string>
@@ -816,6 +836,7 @@
     <string name="text_please_choose">Elija</string>
     <string name="text_please_choose_a_script">Elija un script</string>
     <string name="text_please_input_name">Nombre de entrada</string>
+    <string name="text_please_wait" tools:ignore="TypographyEllipsis">Por favor, espere...</string>
     <string name="text_pointer_location">Ubicación del puntero</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Falló la conmutación de la \"ubicación del puntero\".\nSe requiere acceso a la raíz.</string>
     <string name="text_post_notifications_permission">Notificaciones postales</string>
@@ -827,6 +848,7 @@
     <string name="text_press_again_to_exit">Pulse de nuevo para salir</string>
     <string name="text_press_back_or_vol_down_to_close_window">Para cerrar, presiona \"Atrás\" o \"Bajar volumen\"</string>
     <string name="text_preview">Vista previa</string>
+    <string name="text_process_log">Registro de proceso</string>
     <string name="text_processing">Procesando</string>
     <string name="text_project">Proyecto</string>
     <string name="text_project_location">Ubicación del proyecto</string>
@@ -1004,6 +1026,7 @@
     <string name="text_view">Ver</string>
     <string name="text_view_docs">Ver documentos</string>
     <string name="text_vsc_ext_version_not_meet_requirement">La versión de la extensión VSCode no cumple los requisitos</string>
+    <string name="text_waiting_for_all_data_processing_to_complete" tools:ignore="TypographyEllipsis">Esperando a que se complete el procesamiento de todos los datos...</string>
     <string name="text_weekly_task">Tarea semanal</string>
     <string name="text_weekly_task_should_check_day_of_week">Debe seleccionarse al menos un día</string>
     <string name="text_working_dir_path">Ruta del directorio de trabajo</string>

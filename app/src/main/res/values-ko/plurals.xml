@@ -1,11 +1,27 @@
 <resources>
 
     <plurals name="text_items_total_sum">
-        <item quantity="other">총: %d 개 항목</item>
+        <item quantity="other">총 %d개 항목</item>
+    </plurals>
+
+    <plurals name="text_items_total_sum_with_colon">
+        <item quantity="other">총: %d개 항목</item>
     </plurals>
 
     <plurals name="text_already_stop_n_scripts">
-        <item quantity="other">%d 개의 스크립트가 중지되었습니다</item>
+        <item quantity="other">%d개의 스크립트가 중지되었습니다</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_n_arguments">
+        <item quantity="other">메서드는 %d개의 인자만 허용합니다</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_more_than_n_arguments">
+        <item quantity="other">메서드는 최대 %d개의 인자만 허용합니다</item>
+    </plurals>
+
+    <plurals name="error_method_only_accepts_no_less_than_n_arguments">
+        <item quantity="other">메서드는 최소 %d개의 인자를 허용합니다</item>
     </plurals>
 
 </resources>

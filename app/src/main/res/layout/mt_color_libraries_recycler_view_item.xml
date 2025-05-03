@@ -49,7 +49,7 @@
             android:maxLines="4"
             android:textColor="@color/day_night_alpha_60"
             android:textSize="12sp"
-            tools:text="@plurals/text_items_total_sum" />
+            tools:text="@plurals/text_items_total_sum_with_colon" />
 
     </LinearLayout>
 

@@ -22,6 +22,7 @@ import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityAboutBinding
 import org.autojs.autojs6.databinding.ActivityAboutFunctionButtonsBinding
+import androidx.core.net.toUri
 
 /**
  * Created by Stardust on Feb 2, 2017.
@@ -176,13 +177,13 @@ open class AboutActivity : BaseActivity() {
             .positiveText(R.string.dialog_button_continue)
             .onNegative { d, _ -> d.dismiss() }
             .onPositive { _, _ -> launchGithubIssuesPage() }
-            .cancelable(false)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .show() ?: launchGithubIssuesPage()
     }
 
     private fun launchGithubIssuesPage() {
         Intent(Intent.ACTION_VIEW)
-            .setData(Uri.parse(getString(R.string.url_github_autojs6_issues)))
+            .setData(getString(R.string.url_github_autojs6_issues).toUri())
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .let { startActivity(it) }
     }

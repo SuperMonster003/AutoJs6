@@ -55,7 +55,7 @@
                 android:maxLines="1"
                 android:textColor="@color/day_night_alpha_60"
                 android:textSize="12sp"
-                tools:text="@plurals/text_items_total_sum" />
+                tools:text="@plurals/text_items_total_sum_with_colon" />
 
             <TextView
                 android:id="@+id/subtitle_split_line"

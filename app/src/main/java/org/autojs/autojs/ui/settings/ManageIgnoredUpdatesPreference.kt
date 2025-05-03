@@ -26,7 +26,7 @@ class ManageIgnoredUpdatesPreference : MaterialPreference, SharedPreferences.OnS
         Pref.registerOnSharedPreferenceChangeListener(this)
         summaryProvider = SummaryProvider<ManageIgnoredUpdatesPreference> {
             Pref.getLinkedHashSet(R.string.key_ignored_updates).let {
-                prefContext.resources.getQuantityString(R.plurals.text_items_total_sum, it.size, it.size)
+                prefContext.resources.getQuantityString(R.plurals.text_items_total_sum_with_colon, it.size, it.size)
             }
         }
     }

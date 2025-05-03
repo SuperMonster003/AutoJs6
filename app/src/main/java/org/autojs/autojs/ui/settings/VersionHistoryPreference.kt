@@ -7,7 +7,7 @@ import org.autojs.autojs.theme.preference.MaterialPreference
 /**
  * Created by SuperMonster003 on May 1, 2025.
  */
-class VersionHistoriesPreference : MaterialPreference {
+class VersionHistoryPreference : MaterialPreference {
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 

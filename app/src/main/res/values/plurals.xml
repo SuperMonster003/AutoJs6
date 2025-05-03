@@ -1,6 +1,11 @@
 <resources>
 
     <plurals name="text_items_total_sum">
+        <item quantity="one">Total %d item</item>
+        <item quantity="other">Total %d items</item>
+    </plurals>
+
+    <plurals name="text_items_total_sum_with_colon">
         <item quantity="one">Total: %d item</item>
         <item quantity="other">Total: %d items</item>
     </plurals>

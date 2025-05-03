@@ -1,6 +1,7 @@
 package org.autojs.autojs.theme;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
+import android.widget.CheckBox;
 import android.widget.Switch;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -71,6 +73,16 @@ public class ThemeColorHelper {
         setTrackDrawableTintList(switchCompat.getTrackDrawable(), adjustedTrackColor, true);
     }
 
+    public static void setColorPrimary(CheckBox checkBox, int color, boolean contrastMatters) {
+        int checkedColor = contrastMatters
+                ? ColorUtils.adjustColorForContrast(checkBox.getContext().getColor(R.color.window_background), color, 3.6)
+                : color;
+        int uncheckedColor = contrastMatters
+                ? ColorUtils.adjustColorForContrast(checkBox.getContext().getColor(R.color.window_background), color, 2.3)
+                : color;
+        DrawableCompat.setTintList(DrawableCompat.wrap(checkBox.getButtonDrawable()), new ColorStateList(SWITCH_STATES, new int[]{checkedColor, uncheckedColor}));
+    }
+
     public static void setColorPrimary(Switch sw, int color) {
         setColorPrimary(sw, color, false);
     }
@@ -96,7 +108,6 @@ public class ThemeColorHelper {
                 unselectedColor,
         };
         DrawableCompat.setTintList(DrawableCompat.wrap(drawable), new ColorStateList(SWITCH_STATES, thumbColors));
-
     }
 
     private static void setTrackDrawableTintList(Drawable drawable, int color, boolean isCompat) {
@@ -110,6 +121,17 @@ public class ThemeColorHelper {
 
     private static int makeAlpha(int alpha, int color) {
         return (color & 0xffffff) | (alpha << 24);
+    }
+    
+    public static ColorStateList getThemeColorStateList(Context context) {
+        return getColorPrimaryStateList(context, ThemeColorManager.getColorPrimary());
+    }
+
+    public static ColorStateList getColorPrimaryStateList(Context context, int color) {
+        int background = context.getColor(R.color.window_background);
+        int checkedColor = ColorUtils.adjustColorForContrast(background, color, 3.6);
+        int uncheckedColor = ColorUtils.adjustColorForContrast(background, color, 2.3);
+        return new ColorStateList(SWITCH_STATES, new int[]{checkedColor, uncheckedColor});
     }
 
     public static void setStatusBarColor(Activity activity, int color) {
