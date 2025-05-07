@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    namespace = 'com.afollestad.materialdialogs'
+
+    compileSdk = project.ext.compileSdk
+
+    defaultConfig {
+        minSdk = project.ext.minSdk
+        targetSdk = project.ext.targetSdk
+
+        versionName '0.9.6.0'
+        versionCode 179
+
+        consumerProguardFiles 'progress-proguard.txt'
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
+        targetCompatibility = JavaVersion.toVersion(project.ext.javaVersion)
+    }
+
+    kotlinOptions {
+        jvmTarget = project.ext.javaVersion
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:support-annotations:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'me.zhanghai.android.materialprogressbar:library:1.4.2'
+}
