@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="menu_options_item_index_0" type="id"/>
+    <item name="menu_options_item_index_1" type="id"/>
+    <item name="menu_options_item_index_2" type="id"/>
+    <item name="menu_options_item_index_3" type="id"/>
+    <item name="menu_options_item_index_4" type="id"/>
+    <item name="menu_options_item_index_5" type="id"/>
+    <item name="menu_options_item_index_6" type="id"/>
+    <item name="menu_options_item_index_7" type="id"/>
+    <item name="menu_options_item_index_8" type="id"/>
+    <item name="menu_options_item_index_9" type="id"/>
+</resources>

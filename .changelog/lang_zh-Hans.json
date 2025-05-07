@@ -25,6 +25,7 @@
         "使用异步加载方式一定程度提升文件管理器列表滑动流畅性"
       ],
       "dependency": [
+        "本地化 Material Dialogs 版本 0.9.6.0",
         "本地化 Material Date Time Picker 版本 4.2.3",
         "附加 Jsoup 版本 1.19.1",
         "附加 Material Progressbar 版本 1.4.2",

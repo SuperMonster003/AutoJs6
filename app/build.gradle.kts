@@ -287,16 +287,18 @@ dependencies /* Material Dialogs */ {
     // TODO by SuperMonster003 on Feb 5, 2022.
     //  ! Upgrade to 3.3.0 (more difficult than expected).
     //  ! zh-CN: 升级至 3.3.0 (实际难度超出预期较多).
-    val configuration: (ExternalModuleDependency).() -> Unit = {
-        version {
-            prefer("0.9.6.0")
-            because("Not ready to update to version 3.3.0 yet")
-        }
-    }
-    configuration.let { cfg ->
-        implementation("com.afollestad.material-dialogs:core", cfg)
-        implementation("com.afollestad.material-dialogs:commons", cfg)
-    }
+    //  # val configuration: (ExternalModuleDependency).() -> Unit = {
+    //  #     version {
+    //  #         prefer("0.9.6.0")
+    //  #         because("Not ready to update to version 3.3.0 yet")
+    //  #     }
+    //  # }
+    //  # configuration.let { cfg ->
+    //  #     implementation("com.afollestad.material-dialogs:core", cfg)
+    //  #     implementation("com.afollestad.material-dialogs:commons", cfg)
+    //  # }
+    implementation(project(":modules:material-dialogs"))
+    implementation("me.zhanghai.android.materialprogressbar:library:1.4.2")
 }
 
 dependencies /* Layout */ {
