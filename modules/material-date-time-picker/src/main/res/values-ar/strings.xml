@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+     Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="mdtp_done_label" msgid="7007948707597430919">"تم"</string>
+    <string name="mdtp_hour_picker_description" msgid="7586639618712934060">"شريط التمرير الدائري للساعات"</string>
+    <string name="mdtp_minute_picker_description" msgid="6024811202872705251">"شريط التمرير الدائري للدقائق"</string>
+    <string name="mdtp_select_hours" msgid="7651068754188418859">"تحديد الساعات"</string>
+    <string name="mdtp_select_minutes" msgid="8327182090226828481">"تحديد الدقائق"</string>
+    <string name="mdtp_day_picker_description" msgid="3968620852217927702">"شبكة الشهر مكونة من الأيام"</string>
+    <string name="mdtp_year_picker_description" msgid="6963340404644587098">"قائمة الأعوام"</string>
+    <string name="mdtp_select_day" msgid="3973338219107019769">"تحديد الشهر واليوم"</string>
+    <string name="mdtp_select_year" msgid="2603330600102539372">"تحديد العام"</string>
+    <string name="mdtp_item_is_selected" msgid="2674929164900463786">"تم تحديد <xliff:g id="ITEM">%1$s</xliff:g>"</string>
+    <string name="mdtp_deleted_key" msgid="6908431551612331381">"تم حذف <xliff:g id="KEY">%1$s</xliff:g>"</string>
+    <string name="mdtp_date_v1_monthyear">MMMM yyyy</string>
+    <string name="mdtp_date_v2_daymonthyear">EEE، dd MMM</string>
+</resources>

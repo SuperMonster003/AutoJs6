@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mdtp_date_picker_component_width">270dp</dimen>
+    <dimen name="mdtp_picker_dimen">270dip</dimen>
+    <dimen name="mdtp_left_side_width">270dip</dimen>
+</resources>
