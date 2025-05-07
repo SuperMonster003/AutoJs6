@@ -212,9 +212,9 @@ dependencies /* Unclassified */ {
     implementation(files("$rootDir/libs/tiny-sign-0.9.jar"))
 
     // Room
-    implementation("androidx.room:room-runtime:2.7.0")
-    implementation("androidx.room:room-ktx:2.7.0")
-    ksp("androidx.room:room-compiler:2.7.0")
+    implementation("androidx.room:room-runtime:2.7.1")
+    implementation("androidx.room:room-ktx:2.7.1")
+    ksp("androidx.room:room-compiler:2.7.1")
 
     // ApkSig
     // implementation("com.android.tools.build:apksig:8.7.3")
@@ -231,6 +231,9 @@ dependencies /* Unclassified */ {
 
     // Jsoup
     implementation("org.jsoup:jsoup:1.19.1")
+
+    // Material Date Time Picker
+    implementation(project(":modules:material-date-time-picker"))
 }
 
 dependencies /* MIME */ {

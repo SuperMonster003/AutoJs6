@@ -30,6 +30,7 @@ private val modules = listOf(
     "apk-signer",
     "apk-parser",
     "color-picker",
+    "material-date-time-picker",
 )
 
 private val libs = listOf(
@@ -453,7 +454,7 @@ pluginManagement {
 
     val console = object {
 
-        val versionInfo = mutableListOf<String>()
+        var versionInfo = mutableListOf<String>()
 
         fun printConcernedSystemPropertiesIfNeeded() {
             if (config.isShowConcernedSystemProperties && !systemProperties.isConcernsAlreadyPrinted) {
