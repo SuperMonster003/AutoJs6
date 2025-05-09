@@ -87,6 +87,7 @@ object UpdateUtils {
                         showRemoveIgnoredVersionPrompt(context, dialog, dVersionInfo, text)
                     }
                     .positiveText(R.string.dialog_button_back)
+                    .positiveColorRes(R.color.dialog_button_default)
                     .onPositive { dVersionInfo, _ -> dVersionInfo.dismiss() }
                     .autoDismiss(false)
                     .show()

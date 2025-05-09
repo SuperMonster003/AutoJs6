@@ -112,6 +112,7 @@
     <string name="dialog_button_update_now">Обновить</string>
     <string name="dialog_button_use_default">Использовать по умолчанию</string>
     <string name="dialog_button_use_palette">Использовать палитру</string>
+    <string name="dialog_button_version_histories">История</string>
     <string name="dialog_button_view_file">Просмотр файла</string>
     <string name="dialog_title_color_details">Детали цвета</string>
     <string name="dialog_title_color_palette">Цветовая палитра</string>
@@ -367,6 +368,7 @@
     <string name="text_all_files_access_is_needed">\"Доступ ко всем файлам\" необходим для доступа к файлам сценариев на телефоне</string>
     <string name="text_all_histories">Вся история</string>
     <string name="text_all_histories_cleared">Вся история очищена</string>
+    <string name="text_all_items_cleared">Все элементы удалены</string>
     <string name="text_already_copied_to_clip">Скопировано в буфер обмена</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Уже скопировано в буфер обмена (только последние %d элементов)</string>
     <string name="text_already_created">Создано</string>
@@ -469,6 +471,7 @@
     <string name="text_compatibility">Совместимость</string>
     <string name="text_config">Конфигурация</string>
     <string name="text_confirm_to_clear_all_histories">Вы уверены, что хотите очистить всю историю?</string>
+    <string name="text_confirm_to_clear_all_items">Вы уверены, что хотите удалить все элементы?</string>
     <string name="text_confirm_to_clear_histories_of">Будут очищены следующие элементы истории\n\n[ %1$s ]\n\nВы уверены, что хотите очистить их?</string>
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">Будут очищены следующие элементы истории\n\n[ Все цветовые библиотеки ]\n\nВы уверены, что хотите их очистить?</string>
     <string name="text_confirm_to_delete">Вы уверены, что хотите удалить?</string>
@@ -518,6 +521,7 @@
     <string name="text_device_model">Модель устройства</string>
     <string name="text_device_name">Название устройства</string>
     <string name="text_device_product_name">Название продукта устройства</string>
+    <string name="text_device_screen_resolution">Разрешение экрана устройства</string>
     <string name="text_directly_download">Загрузить сейчас</string>
     <string name="text_directory">Каталог</string>
     <string name="text_display_over_other_app">Отображать поверх других приложений</string>
@@ -837,6 +841,7 @@
     <string name="text_please_choose_a_script">Выберите сценарий</string>
     <string name="text_please_input_name">Имя ввода</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">Пожалуйста, подождите...</string>
+    <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Пожалуйста, повторите попытку позже...</string>
     <string name="text_pointer_location">Расположение указателя</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Переключение \"Расположение указателя\" не удалось.\nТребуется корневой доступ.</string>
     <string name="text_post_notifications_permission">почтовые уведомления</string>

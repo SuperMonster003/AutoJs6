@@ -112,6 +112,7 @@
     <string name="dialog_button_update_now">Actualizar</string>
     <string name="dialog_button_use_default">Usar por defecto</string>
     <string name="dialog_button_use_palette">Usar paleta</string>
+    <string name="dialog_button_version_histories">Historial</string>
     <string name="dialog_button_view_file">Ver archivo</string>
     <string name="dialog_title_color_details">Detalles del color</string>
     <string name="dialog_title_color_palette">Paleta de colores</string>
@@ -367,6 +368,7 @@
     <string name="text_all_files_access_is_needed">Se necesita \"All files access\" para acceder a los archivos de script en el teléfono</string>
     <string name="text_all_histories">Todos los historiales</string>
     <string name="text_all_histories_cleared">Todos los historiales han sido borrados</string>
+    <string name="text_all_items_cleared">Todos los elementos han sido borrados</string>
     <string name="text_already_copied_to_clip">Copiado en el portapapeles</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Ya se ha copiado en el portapapeles (sólo los últimos %d elementos)</string>
     <string name="text_already_created">Creado</string>
@@ -469,6 +471,7 @@
     <string name="text_compatibility">Compatibilidad</string>
     <string name="text_config">Configuración</string>
     <string name="text_confirm_to_clear_all_histories">¿Está seguro de borrar todos los historiales?</string>
+    <string name="text_confirm_to_clear_all_items">¿Seguro que desea borrar todos los elementos?</string>
     <string name="text_confirm_to_clear_histories_of">Se borrarán los siguientes historiales\n\n[ %1$s ]\n\n¿Está seguro de borrarlos?</string>
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">Se borrarán los historiales siguientes\n\n[ Todas las bibliotecas de colores ]\n\n¿Está seguro de borrarlos?</string>
     <string name="text_confirm_to_delete">¿Seguro que quieres borrar?</string>
@@ -518,6 +521,7 @@
     <string name="text_device_model">Modelo del dispositivo</string>
     <string name="text_device_name">Nombre del dispositivo</string>
     <string name="text_device_product_name">Nombre del producto del dispositivo</string>
+    <string name="text_device_screen_resolution">Resolución de pantalla del dispositivo</string>
     <string name="text_directly_download">Descargar ahora</string>
     <string name="text_directory">Directorio</string>
     <string name="text_display_over_other_app">Mostrar sobre otras aplicaciones</string>
@@ -837,6 +841,7 @@
     <string name="text_please_choose_a_script">Elija un script</string>
     <string name="text_please_input_name">Nombre de entrada</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">Por favor, espere...</string>
+    <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Por favor, inténtalo de nuevo más tarde...</string>
     <string name="text_pointer_location">Ubicación del puntero</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Falló la conmutación de la \"ubicación del puntero\".\nSe requiere acceso a la raíz.</string>
     <string name="text_post_notifications_permission">Notificaciones postales</string>

@@ -5,9 +5,7 @@ import android.view.LayoutInflater;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
 import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.model.script.Scripts;
@@ -40,7 +38,10 @@ public class ScriptLoopDialog {
         mDialog = new MaterialDialog.Builder(context)
                 .title(R.string.text_run_repeatedly)
                 .customView(view, true)
-                .positiveText(R.string.text_ok)
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive((dialog, which) -> startScriptRunningLoop())
                 .build();
     }

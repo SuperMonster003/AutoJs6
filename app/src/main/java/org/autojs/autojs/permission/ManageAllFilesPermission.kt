@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.permission.Base.getPermissionsToRequest
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.main.MainActivity
@@ -78,8 +79,11 @@ class ManageAllFilesPermission(override val context: Context) : PermissionItemHe
                     context.getString(R.string.text_click_ok_to_go_to_access_settings),
                 )
             )
+            .widgetThemeColor()
             .negativeText(R.string.text_cancel)
-            .positiveText(R.string.text_ok)
+            .negativeColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .onNegative { dialog, _ -> dialog.dismiss() }
             .onPositive { dialog, _ ->
                 request()

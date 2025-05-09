@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -54,7 +55,9 @@
                     android:text="@string/text_unverified"
                     android:textColor="@color/text_color_primary"
                     android:textSize="12sp" />
+
             </LinearLayout>
+
         </RelativeLayout>
 
         <LinearLayout
@@ -79,6 +82,7 @@
                 android:layout_marginStart="4dp"
                 android:textSize="16sp"
                 tools:text="/storage/emulated/0/脚本/.KeyStore/default_key_store.jks" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -87,7 +91,7 @@
             android:layout_marginVertical="16dp"
             android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputLayout
+            <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                 android:id="@+id/password_text_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -100,9 +104,10 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:textColor="@color/text_color_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+            <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                 android:id="@+id/alias_text_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -114,9 +119,10 @@
                     android:layout_height="wrap_content"
                     android:text="@string/text_default_alias"
                     android:textColor="@color/text_color_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+            <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                 android:id="@+id/alias_password_text_input_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -129,7 +135,9 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:textColor="@color/text_color_primary" />
-            </com.google.android.material.textfield.TextInputLayout>
+
+            </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -141,23 +149,27 @@
 
             <Button
                 android:id="@+id/cancel"
-                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/MD_ActionButton.Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
                 android:elegantTextHeight="true"
-                android:text="@string/text_cancel" />
+                android:text="@string/text_cancel"
+                android:textColor="@color/dialog_button_default"/>
 
             <Button
                 android:id="@+id/verify"
-                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/MD_ActionButton.Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
                 android:elegantTextHeight="true"
-                android:text="@string/text_verify" />
+                android:text="@string/text_verify"
+                android:textColor="@color/dialog_button_attraction"/>
+
         </LinearLayout>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -255,7 +255,7 @@ object MediaInfoDialogManager {
 
     private suspend fun TextView.bindWith(dialog: MaterialDialog, text: String) {
         withContext(Dispatchers.Main) {
-            this@bindWith.setCopyableText(dialog) { text }
+            dialog.setCopyableText(this@bindWith) { text }
         }
     }
 

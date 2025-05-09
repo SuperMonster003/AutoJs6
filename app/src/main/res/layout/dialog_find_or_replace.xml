@@ -1,59 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="16dp">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="16dp">
 
-    <com.google.android.material.textfield.TextInputLayout
+    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/text_find">
+        android:hint="@string/text_find"
+        app:expandedHintEnabled="false">
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/keywords"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_height="wrap_content" />
 
-    <CheckBox
+    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
         android:id="@+id/checkbox_regex"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/text_regex"/>
+        android:text="@string/text_regex" />
 
-    <com.google.android.material.textfield.TextInputLayout
+    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/text_replace">
+        android:hint="@string/text_replace"
+        app:expandedHintEnabled="false">
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/replacement"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_height="wrap_content" />
+
+    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <CheckBox
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
             android:id="@+id/checkbox_replace"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/text_replace"/>
+            android:text="@string/text_replace" />
 
-        <CheckBox
+        <org.autojs.autojs.theme.widget.ThemeColorCheckBox
             android:id="@+id/checkbox_replace_all"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/text_replace_all"/>
+            android:text="@string/text_replace_all" />
 
     </LinearLayout>
 
@@ -63,6 +68,6 @@
         android:padding="4dp"
         android:text="@string/hint_find_with_regex"
         android:textColor="#929397"
-        android:textSize="12sp"/>
+        android:textSize="12sp" />
 
 </LinearLayout>

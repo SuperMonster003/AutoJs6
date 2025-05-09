@@ -8,12 +8,11 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
 import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
 import androidx.annotation.FloatRange
 import androidx.core.graphics.ColorUtils
-import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.theme.ThemeColor
+import org.autojs.autojs.theme.ThemeColorManager
 import java.math.RoundingMode
 import kotlin.math.roundToInt
 import kotlin.text.RegexOption.IGNORE_CASE
@@ -46,9 +45,6 @@ object ColorUtils {
         }
         return if (uppercase) hex.uppercase() else hex.lowercase()
     }
-
-    @ColorInt
-    fun fromResources(@ColorRes colorRes: Int) = GlobalAppContext.get().getColor(colorRes)
 
     @JvmStatic
     @JvmOverloads
@@ -344,30 +340,45 @@ object ColorUtils {
         @ColorInt background: Int,
         @ColorInt reference: Int,
         minimumContrast: Double = 4.5,
+        alpha: Double = 1.0,
     ): Int {
-        // 如果已经满足对比度要求, 直接返回参考色
+
+        /* 原色已满足要求, 直接返回. */
         if (calculateContrast(background, reference) >= minimumContrast) {
-            return reference
+            return applyAlpha(reference, alpha)
         }
 
-        // 转为 HSL 以便调整亮度
-        val hsl = FloatArray(3)
-        ColorUtils.colorToHSL(reference, hsl)
+        /* 把参考色转成 HSL, 方便按亮度通道调整. */
+        val hsl = FloatArray(3).also { ColorUtils.colorToHSL(reference, it) }
 
-        // 提高亮度, 尝试达到目标对比度
-        val lighterColor = findAdjustableHSLColor(hsl, background, minimumContrast, lighten = true)
-        if (lighterColor != null) {
-            return lighterColor
+        /* 先尝试变亮, 再尝试变暗, 找到即可返回. */
+        listOf(true, false).forEach { lighten ->
+            findAdjustableHSLColor(hsl, background, minimumContrast, lighten)?.let {
+                return applyAlpha(it, alpha)
+            }
         }
 
-        // 降低亮度, 尝试达到目标对比度
-        val darkerColor = findAdjustableHSLColor(hsl, background, minimumContrast, lighten = false)
-        if (darkerColor != null) {
-            return darkerColor
-        }
+        /* 极端情况下两次尝试都失败, 退回原色. */
+        return applyAlpha(reference, alpha)
+    }
 
-        // 如果两种情况下都无法满足, 返回原始颜色 (极端情况)
-        return reference
+    @JvmStatic
+    @JvmOverloads
+    fun adjustThemeColorForContrast(
+        @ColorInt background: Int,
+        minimumContrast: Double = 4.5,
+        alpha: Double = 1.0,
+    ): Int = adjustColorForContrast(
+        background,
+        ThemeColorManager.colorPrimary,
+        minimumContrast,
+        alpha,
+    )
+
+    @JvmStatic
+    fun applyAlpha(@ColorInt color: Int, alpha: Double): Int = when (alpha) {
+        1.0 -> color
+        else -> ColorUtils.setAlphaComponent(color, (alpha * 255).roundToInt())
     }
 
     /**

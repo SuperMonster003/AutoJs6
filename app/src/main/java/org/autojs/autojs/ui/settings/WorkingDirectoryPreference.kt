@@ -12,13 +12,13 @@ import android.widget.ImageView
 import android.widget.RadioGroup
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.appcompat.widget.SwitchCompat
-import androidx.preference.Preference.SummaryProvider
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs.storage.file.FileObservable
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.tool.SimpleObserver
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
@@ -118,11 +118,11 @@ class WorkingDirectoryPreference : MaterialPreference {
                                         mContentView.setText(text)
                                     }
                                 }
-                                .negativeText(R.string.dialog_button_cancel)
+                                .negativeText(R.string.dialog_button_back)
                                 .show()
                         }
                     }
-                    .negativeText(R.string.dialog_button_cancel)
+                    .negativeText(R.string.dialog_button_back)
                     .negativeColorRes(R.color.dialog_button_default)
                     .onNegative { dHistories, _ -> dHistories.dismiss() }
                     .autoDismiss(false)
@@ -132,6 +132,7 @@ class WorkingDirectoryPreference : MaterialPreference {
             .negativeText(R.string.dialog_button_cancel)
             .onNegative { dialog, _ -> dialog.dismiss() }
             .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .onPositive { dialog, _ ->
                 val inputPath = mContentView.text.toString()
                 WorkingDirectoryUtils.addIntoHistories(inputPath)
@@ -151,7 +152,7 @@ class WorkingDirectoryPreference : MaterialPreference {
                 customView!!.let {
                     mRadioGroupView = it.findViewById(R.id.md_contentRadioGroup)
                     mFileTransferView = it.findViewById(R.id.md_contentFileTransfer)
-                    mFileChooserIconView = it.findViewById<ImageView?>(R.id.md_FileChooserIcon).apply {
+                    mFileChooserIconView = it.findViewById<ImageView>(R.id.md_FileChooserIcon).apply {
                         setOnClickListener {
                             val initialDir: String? = try {
                                 File(toFullPath(mContentView.text.toString())).path
@@ -166,8 +167,9 @@ class WorkingDirectoryPreference : MaterialPreference {
                                 .show()
                         }
                     }
-                    mContentView = it.findViewById<EditText?>(R.id.md_contentPath).apply {
+                    mContentView = it.findViewById<EditText>(R.id.md_contentPath).apply {
                         setText(WorkingDirectoryUtils.relativePath)
+                        ThemeColorHelper.setThemeColorPrimary(this, true)
                         addTextChangedListener(object : TextWatcher {
                             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
                                 /* Ignored. */
@@ -185,7 +187,7 @@ class WorkingDirectoryPreference : MaterialPreference {
                             }
                         })
                     }
-                    mSwitchView = it.findViewById<SwitchCompat?>(R.id.md_contentSwitch).apply {
+                    mSwitchView = it.findViewById<SwitchCompat>(R.id.md_contentSwitch).apply {
                         setOnCheckedChangeListener { _, isChecked ->
                             mRadioGroupView.visibility = when (isChecked) {
                                 true -> View.VISIBLE

@@ -88,7 +88,7 @@ object ApkInfoDialogManager {
                 val installedPackageName: String? = packageName?.let { pkg ->
                     AppUtils.getInstalledVersionInfo(pkg)?.let { versionInfo ->
                         binding.installedVersionParent.isVisible = true
-                        binding.installedVersionValue.setCopyableTextIfAbsent(dialog) { context.getString(R.string.text_full_version_info, versionInfo.versionName, versionInfo.versionCode) }
+                        dialog.setCopyableTextIfAbsent(binding.installedVersionValue) { context.getString(R.string.text_full_version_info, versionInfo.versionName, versionInfo.versionCode) }
                         pkg /* returns as installedPackageName */
                     }
                 }
@@ -99,19 +99,19 @@ object ApkInfoDialogManager {
                 when {
                     versionName != null -> {
                         binding.versionPlaceholderLabel.text = context.getString(R.string.text_version)
-                        binding.versionPlaceholderValue.setCopyableTextIfAbsent(dialog) { context.getString(R.string.text_full_version_info, versionName, versionCode) }
+                        dialog.setCopyableTextIfAbsent(binding.versionPlaceholderValue) { context.getString(R.string.text_full_version_info, versionName, versionCode) }
                     }
                     versionCode != null -> {
                         binding.versionPlaceholderLabel.text = context.getString(R.string.text_version_code)
-                        binding.versionPlaceholderValue.setCopyableTextIfAbsent(dialog) { "$versionCode" }
+                        dialog.setCopyableTextIfAbsent(binding.versionPlaceholderValue) { "$versionCode" }
                     }
-                    else -> binding.versionPlaceholderValue.setCopyableTextIfAbsent(dialog) { null }
+                    else -> dialog.setCopyableTextIfAbsent(binding.versionPlaceholderValue) { null }
                 }
 
-                binding.packageNameValue.setCopyableTextIfAbsent(dialog) { packageName }
-                binding.deviceSdkValue.setCopyableTextIfAbsent(dialog) { "${Build.VERSION.SDK_INT}" }
-                binding.fileSizeValue.setCopyableTextIfAbsent(dialog) { fileSize }
-                binding.signatureSchemeValue.setCopyableTextIfAbsent(dialog) { signatureScheme }
+                dialog.setCopyableTextIfAbsent(binding.packageNameValue) { packageName }
+                dialog.setCopyableTextIfAbsent(binding.deviceSdkValue) { "${Build.VERSION.SDK_INT}" }
+                dialog.setCopyableTextIfAbsent(binding.fileSizeValue) { fileSize }
+                dialog.setCopyableTextIfAbsent(binding.signatureSchemeValue) { signatureScheme }
 
                 dialog.setIcon(applicationInfo?.apply {
                     sourceDir = apkFilePath
@@ -123,10 +123,10 @@ object ApkInfoDialogManager {
 
                 val apkInfo = getApkInfo(apkFile)
 
-                binding.labelNameValue.setCopyableTextIfAbsent(dialog) { apkInfo?.label }
-                binding.packageNameValue.setCopyableTextIfAbsent(dialog) { apkInfo?.packageName }
-                binding.minSdkValue.setCopyableTextIfAbsent(dialog) { apkInfo?.minSdkVersion?.toString() }
-                binding.targetSdkValue.setCopyableTextIfAbsent(dialog) { apkInfo?.targetSdkVersion?.toString() }
+                dialog.setCopyableTextIfAbsent(binding.labelNameValue) { apkInfo?.label }
+                dialog.setCopyableTextIfAbsent(binding.packageNameValue) { apkInfo?.packageName }
+                dialog.setCopyableTextIfAbsent(binding.minSdkValue) { apkInfo?.minSdkVersion?.toString() }
+                dialog.setCopyableTextIfAbsent(binding.targetSdkValue) { apkInfo?.targetSdkVersion?.toString() }
 
                 if (apkInfo != null) dialog.getActionButton(DialogAction.NEUTRAL).let { neutralButton ->
                     neutralButton.isVisible = true

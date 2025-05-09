@@ -1,82 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
-
-    <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="12dp"
-            android:textColorHint="#91000000"
-            android:hint="@string/text_loop_times">
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="12dp"
+        android:hint="@string/text_loop_times"
+        app:expandedHintEnabled="false">
 
         <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/loop_times"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:inputType="number"
-                android:text="0"
-                android:textColor="#ff000000"
-                tools:ignore="HardcodedText"
-                android:height="48dp" />
+            android:id="@+id/loop_times"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:height="48dp"
+            android:inputType="number"
+            android:text="0"
+            tools:ignore="HardcodedText" />
 
         <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:textColor="#80000000"
-                android:text="@string/hint_loop_times"
-                android:textSize="12sp" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="12dp"
-            android:textColorHint="#91000000"
-            android:hint="@string/text_loop_interval">
+            android:layout_marginStart="4dp"
+            android:text="@string/hint_loop_times"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp" />
+
+    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="12dp"
+        android:hint="@string/text_loop_interval"
+        app:expandedHintEnabled="false">
 
         <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/loop_interval"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:inputType="numberDecimal"
-                android:text="1.0"
-                tools:ignore="HardcodedText"
-                android:height="48dp" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/loop_interval"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="12dp"
-            android:textColorHint="#91000000"
-            android:hint="@string/text_loop_delay">
+            android:layout_height="48dp"
+            android:height="48dp"
+            android:inputType="numberDecimal"
+            android:text="1.0"
+            tools:ignore="HardcodedText" />
+
+    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
+    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="12dp"
+        android:hint="@string/text_loop_delay"
+        app:expandedHintEnabled="false">
 
         <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/loop_delay"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:inputType="numberDecimal"
-                android:textColor="#ff000000"
-                android:text="0.0"
-                tools:ignore="HardcodedText" />
+            android:id="@+id/loop_delay"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:inputType="numberDecimal"
+            android:text="0.0"
+            tools:ignore="HardcodedText" />
 
         <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginBottom="8dp"
-                android:textColor="#80000000"
-                android:text="@string/hint_loop_delay"
-                android:textSize="12sp" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:text="@string/hint_loop_delay"
+            android:textSize="12sp" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
 </LinearLayout>

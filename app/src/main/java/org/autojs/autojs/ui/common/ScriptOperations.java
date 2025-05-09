@@ -21,6 +21,8 @@ import io.reactivex.internal.functions.ObjectHelper;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import org.autojs.autojs.app.GlobalAppContext;
+import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.extension.MaterialDialogExtensions;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
@@ -73,6 +75,8 @@ public class ScriptOperations {
     private final View mView;
     private final ScriptFile mCurrentDirectory;
     private final Explorer mExplorer;
+
+    private final List<String> availablePrefixes = List.of("test", "untitled", "unnamed", "script");
 
     public ScriptOperations(Context context, View view, ScriptFile currentDirectory) {
         mContext = context;
@@ -139,11 +143,12 @@ public class ScriptOperations {
 
     public void newFile() {
         final AtomicReference<MaterialDialog> dialogRef = new AtomicReference<>();
-        MaterialDialog dialog = new MaterialDialog.Builder(mContext)
+        String presetFileNamePrefix = getNewFileNamePresetPrefill(availablePrefixes.get(Pref.getInt(R.string.key_explorer_file_default_prefix, 0)));
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                 .title(R.string.text_name)
                 .inputType(InputType.TYPE_CLASS_TEXT)
                 .alwaysCallInputCallback()
-                .input(getString(R.string.text_please_input_name), getNewFileNamePresetPrefill("test"), false, (d, input) -> {
+                .input(getString(R.string.text_please_input_name), presetFileNamePrefix, false, (d, input) -> {
                     validateInput(d, d.isPromptCheckBoxChecked() ? JAVASCRIPT.extensionWithDot : null);
                 })
                 .checkBoxPromptRes(R.string.text_js_file, true, (buttonView, isChecked) -> {
@@ -153,6 +158,7 @@ public class ScriptOperations {
                     }
                 })
                 .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive((d, which) -> {
                     assert d.getInputEditText() != null;
                     boolean createJs = d.isPromptCheckBoxChecked() || d.getInputEditText().getText().toString().endsWith(JAVASCRIPT.extensionWithDot);
@@ -169,14 +175,15 @@ public class ScriptOperations {
                     //  ! [Aa] 大小写切换图标支持点击循环切换
                     //  ! [A/文] 语言图标支持点击循环切换
                     //  ! [+] 添加图标支持添加自定义项目 (max 限制)
-                    MaterialDialog dialogDefaultPrefix = new MaterialDialog.Builder(mContext)
+                    MaterialDialog.Builder builderDefaultPrefix = new MaterialDialog.Builder(mContext)
                             .title(R.string.text_default_prefix)
                             // TODO 多语言支持? 英文+当前
                             // TODO 大小写支持? FirstCharUpperCase/UpperCase/LowerCase
                             // TODO 自定义前缀
                             // TODO 添加 "无/禁用"
-                            .items(List.of("test", "untitled", "unnamed", "script"))
-                            .itemsCallbackSingleChoice(0, (dDefaultPrefix, view, i, text) -> {
+                            .items(availablePrefixes)
+                            .itemsCallbackSingleChoice(Pref.getInt(R.string.key_explorer_file_default_prefix, 0), (dDefaultPrefix, view, i, text) -> {
+                                Pref.putInt(R.string.key_explorer_file_default_prefix, i);
                                 EditText editText = dialogRef.get().getInputEditText();
                                 if (editText != null) {
                                     editText.setText(getNewFileNamePresetPrefill(text));
@@ -185,12 +192,15 @@ public class ScriptOperations {
                                 return true;
                             })
                             .positiveText(R.string.dialog_button_confirm)
-                            .negativeText(R.string.dialog_button_back)
-                            .build();
+                            .positiveColorRes(R.color.dialog_button_attraction)
+                            .negativeText(R.string.dialog_button_back);
+                    MaterialDialogExtensions.choiceWidgetThemeColor(builderDefaultPrefix);
+                    MaterialDialog dialogDefaultPrefix = builderDefaultPrefix.build();
                     showDialog(dialogDefaultPrefix);
                 })
-                .autoDismiss(false)
-                .build();
+                .autoDismiss(false);
+        MaterialDialogExtensions.widgetThemeColor(builder);
+        MaterialDialog dialog = builder.build();
         dialogRef.set(dialog);
 
         showDialog(fixCheckBoxGravity(dialog));
@@ -313,19 +323,21 @@ public class ScriptOperations {
 
     private Observable<String> showNameInputDialog(String prefix, MaterialDialog.InputCallback textWatcher) {
         final PublishSubject<String> input = PublishSubject.create();
-        showDialog(new MaterialDialog.Builder(mContext)
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                 .title(R.string.text_name)
                 .inputType(InputType.TYPE_CLASS_TEXT)
                 .alwaysCallInputCallback()
                 .input(getString(R.string.text_please_input_name), prefix, false, textWatcher)
                 .negativeText(R.string.dialog_button_cancel)
                 .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive((dialog, which) -> {
                     input.onNext(Objects.requireNonNull(dialog.getInputEditText()).getText().toString());
                     input.onComplete();
                 })
-                .canceledOnTouchOutside(false)
-                .build());
+                .canceledOnTouchOutside(false);
+        MaterialDialogExtensions.widgetThemeColor(builder);
+        showDialog(builder.build());
         return input;
     }
 
@@ -395,12 +407,14 @@ public class ScriptOperations {
             return;
         }
         String content = mContext.getString(R.string.text_old_path) + ": " + oldPath + "\n"
-                + mContext.getString(R.string.text_new_path) + ": " + newPath;
+                         + mContext.getString(R.string.text_new_path) + ": " + newPath;
         new MaterialDialog.Builder(mContext)
                 .title(mContext.getString(R.string.text_prompt))
                 .content(content)
                 .negativeText(R.string.text_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
                 .positiveText(R.string.text_ok)
+                .positiveColorRes(R.color.dialog_button_warn)
                 .onPositive((dialog, which) -> setAsWorkingDirNow(scriptFile))
                 .build()
                 .show();
@@ -448,7 +462,7 @@ public class ScriptOperations {
                     if (!new File(savePath).exists()) {
                         return Observable.just(savePath);
                     }
-                    return RxDialogs.confirm(mContext, R.string.confirm_overwrite_file)
+                    return RxDialogs.confirm(mContext, R.string.confirm_overwrite_file, R.color.dialog_button_caution)
                             .flatMap(yes -> {
                                 if (yes) {
                                     if (!new File(savePath).delete()) {
@@ -478,6 +492,7 @@ public class ScriptOperations {
                 .singleChoice(file -> importFile(file.getPath()).subscribe())
                 .title(R.string.text_select_file_to_import)
                 .positiveText(R.string.text_ok)
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .show();
     }
 

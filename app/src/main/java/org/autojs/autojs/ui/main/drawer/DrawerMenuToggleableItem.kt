@@ -6,6 +6,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs6.R
 
@@ -66,8 +67,11 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
             NotAskAgainDialog.Builder(mItemHelper.context, key)
                 .title(title)
                 .content(it)
+                .widgetThemeColor()
                 .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
                 .positiveText(R.string.dialog_button_continue)
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive { _, _ ->
                     isPositiveButtonPressed = true
                     toggle(aimState)

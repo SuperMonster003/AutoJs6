@@ -9,7 +9,7 @@
     <string name="apk_builder_build" tools:ignore="TypographyEllipsis">Construire...</string>
     <string name="apk_builder_clean" tools:ignore="TypographyEllipsis">Nettoyage...</string>
     <string name="apk_builder_package" tools:ignore="TypographyEllipsis">Emballage...</string>
-    <string name="apk_builder_plugin_version_incompatible">Version incompatible de \"apk builder\".\nTéléchargez-la maintenant?</string>
+    <string name="apk_builder_plugin_version_incompatible">Version incompatible de \"apk builder\".\nTéléchargez-la maintenant ?</string>
     <string name="apk_builder_prepare" tools:ignore="TypographyEllipsis">Préparation...</string>
     <string name="apk_info_device_sdk">SDK de l\'appareil</string>
     <string name="apk_info_file_size">Taille du fichier</string>
@@ -50,7 +50,7 @@
     <string name="config_abi_options_contains_unavailable">La configuration \"abi\" contient des options non disponibles</string>
     <string name="config_lib_options_contains_invalid">La configuration \"lib\" contient des options invalides</string>
     <string name="config_lib_options_contains_unavailable">La configuration \"lib\" contient des options non disponibles</string>
-    <string name="confirm_overwrite_file">Fichier déjà existant.>Surécrire?</string>
+    <string name="confirm_overwrite_file">Fichier déjà existant.>Surécrire ?</string>
     <string name="content_about_app_tips">1. Appuyez et maintenez le nom de l\'application (AutoJs6) sur la page d\'accueil pour accéder à la page des paramètres.\n2. Appuyez et maintenez une certaine option de paramètres sur la page de paramètres pour afficher des informations détaillées.</string>
     <string name="content_current_theme_color_configured_by_palette">La couleur du thème actuel %1$s est configurée par la palette de couleurs</string>
     <string name="content_description_fab_for_display_manifest">Un bouton d\'action flottant pour afficher le manifeste</string>
@@ -112,12 +112,13 @@
     <string name="dialog_button_update_now">Mise à jour</string>
     <string name="dialog_button_use_default">Par défaut</string>
     <string name="dialog_button_use_palette">Utiliser la palette</string>
+    <string name="dialog_button_version_histories">Historique</string>
     <string name="dialog_button_view_file">Voir le fichier</string>
     <string name="dialog_title_color_details">Détails de la couleur</string>
     <string name="dialog_title_color_palette">Palette de couleurs</string>
     <string name="dialog_title_theme_color_details">Détails de la couleur du thème</string>
     <string name="edit_and_run_handle_intent_error">Cannot process file</string>
-    <string name="edit_exit_without_save_warn">Le contenu n\'a pas été enregistré, êtes-vous sûr de vouloir quitter?</string>
+    <string name="edit_exit_without_save_warn">Le contenu n\'a pas été enregistré, êtes-vous sûr de vouloir quitter ?</string>
     <string name="entry_app_language_auto">Suivre le système</string>
     <string name="entry_documentation_source_local">Documents locaux</string>
     <string name="entry_documentation_source_online">Documents en ligne</string>
@@ -367,6 +368,7 @@
     <string name="text_all_files_access_is_needed">L\'option \"Accès à tous les fichiers\" est nécessaire pour accéder aux fichiers de script sur le téléphone.</string>
     <string name="text_all_histories">Tous les historiques</string>
     <string name="text_all_histories_cleared">Tous les historiques ont été effacés</string>
+    <string name="text_all_items_cleared">Tous les éléments ont été effacés</string>
     <string name="text_already_copied_to_clip">Copié dans le presse-papiers</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Déjà copié dans le presse-papiers (seulement les derniers %d éléments)</string>
     <string name="text_already_created">Créé</string>
@@ -469,10 +471,11 @@
     <string name="text_compatibility">Compatibilité</string>
     <string name="text_config">Configuration</string>
     <string name="text_confirm_to_clear_all_histories">Êtes-vous sûr de vouloir effacer tous les historiques ?</string>
+    <string name="text_confirm_to_clear_all_items">Voulez-vous vraiment effacer tous les éléments ?</string>
     <string name="text_confirm_to_clear_histories_of">Tous les historiques ci-dessous seront effacés\n\n[ %1$s ]\n\nÊtes-vous sûr de vouloir les effacer ?</string>
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">Tous les historiques ci-dessous seront effacés\n\n[ Toutes les bibliothèques de couleurs ]\n\nÊtes-vous sûr de vouloir les effacer ?</string>
-    <string name="text_confirm_to_delete">Vous êtes sûr de vouloir supprimer?</string>
-    <string name="text_confirm_to_remove">Etes-vous sûr de supprimer?</string>
+    <string name="text_confirm_to_delete">Vous êtes sûr de vouloir supprimer ?</string>
+    <string name="text_confirm_to_remove">Etes-vous sûr de supprimer ?</string>
     <string name="text_connect_to_pc">Connexion au PC</string>
     <string name="text_connection_cannot_be_established">La connexion ne peut pas être établie</string>
     <string name="text_console">Console</string>
@@ -518,6 +521,7 @@
     <string name="text_device_model">Modèle de l\'appareil</string>
     <string name="text_device_name">Nom de l\'appareil</string>
     <string name="text_device_product_name">Nom du produit de l\'appareil</string>
+    <string name="text_device_screen_resolution">Résolution d\'écran de l\'appareil</string>
     <string name="text_directly_download">Téléchargement immédiat</string>
     <string name="text_directory">Directory</string>
     <string name="text_display_over_other_app">Affichage sur les autres apps</string>
@@ -837,6 +841,7 @@
     <string name="text_please_choose_a_script">Choisissez un script</string>
     <string name="text_please_input_name">Nom de l\'entrée</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">Veuillez patienter...</string>
+    <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Veuillez réessayer cette opération plus tard...</string>
     <string name="text_pointer_location">L\'emplacement du pointeur</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nL\'accès à la racine est nécessaire.</string>
     <string name="text_post_notifications_permission">Notifications postales</string>

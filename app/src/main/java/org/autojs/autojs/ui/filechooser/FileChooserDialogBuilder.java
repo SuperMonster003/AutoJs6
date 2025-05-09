@@ -1,12 +1,12 @@
 package org.autojs.autojs.ui.filechooser;
 
 import android.content.Context;
-
+import android.widget.CheckBox;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 import org.autojs.autojs.app.DialogUtils;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
@@ -14,15 +14,13 @@ import org.autojs.autojs.model.explorer.ExplorerFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.pio.PFile;
+import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs6.R;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Collections;
 import java.util.List;
-
-import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
 
 /**
  * Created by Stardust on Oct 19, 2017.
@@ -50,9 +48,14 @@ public class FileChooserDialogBuilder extends MaterialDialog.Builder {
         super(context);
         mFileChooseListView = new FileChooseListView(context);
         mFileChooseListView.isProjectRecognitionEnabled = false;
+        if (mFileChooseListView.findViewById(R.id.checkbox) instanceof CheckBox checkbox) {
+            ThemeColorHelper.setThemeColorPrimary(checkbox, backgroundColor);
+        }
         customView(mFileChooseListView, false);
-        positiveText(R.string.text_ok);
-        negativeText(R.string.text_cancel);
+        negativeText(R.string.dialog_button_cancel);
+        negativeColorRes(R.color.dialog_button_default);
+        positiveText(R.string.dialog_button_confirm);
+        positiveColorRes(R.color.dialog_button_attraction);
         onPositive((dialog, which) -> notifySelected());
         cancelable(false);
     }

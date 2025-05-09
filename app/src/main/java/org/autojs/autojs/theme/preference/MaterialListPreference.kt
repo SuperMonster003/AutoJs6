@@ -6,6 +6,8 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.extension.MaterialDialogExtensions.choiceWidgetThemeColor
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs6.R
 
@@ -89,6 +91,7 @@ open class MaterialListPreference : MaterialDialogPreference {
             builder.autoDismiss(false)
             builder.onNegative { d, _ -> d.dismiss() }
             builder.items(it)
+            builder.choiceWidgetThemeColor()
             builder.takeIf { mItemDisables.isNotEmpty() }?.itemsDisabledIndices(*mItemDisables)
             builder.itemsCallbackSingleChoice(itemPrefIndex ?: mItemDefaultIndex) { d, _, which, _ ->
                 if (itemPrefIndex != which) {
@@ -119,7 +122,9 @@ open class MaterialListPreference : MaterialDialogPreference {
         NotAskAgainDialog.Builder(prefContext, "prompt_\$_${key}")
             .title(R.string.text_prompt)
             .content(content)
-            .positiveText(R.string.text_ok)
+            .widgetThemeColor()
+            .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_default)
             .dismissListener { onChangeConfirmed(getDialog()) }
             .show()
     }

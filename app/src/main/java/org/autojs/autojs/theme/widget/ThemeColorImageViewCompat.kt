@@ -5,8 +5,11 @@ import android.graphics.PorterDuff
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
 import org.autojs.autojs.theme.ThemeColor
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManager.add
 import org.autojs.autojs.theme.ThemeColorMutable
+import org.autojs.autojs.util.ColorUtils
+import org.autojs.autojs6.R
 
 /**
  * Created by Stardust on May 10, 2017.
@@ -35,20 +38,15 @@ class ThemeColorImageViewCompat : AppCompatImageView, ThemeColorMutable {
     override fun setThemeColor(color: ThemeColor) {
         if (mColor != color.colorPrimary) {
             mColor = color.colorPrimary
-            setColor(color.colorPrimary)
+            ThemeColorHelper.setThemeColorPrimary(this, true)
         }
     }
 
     override fun setImageResource(resId: Int) {
         super.setImageResource(resId)
         if (mColor != 0) {
-            setColor(mColor)
+            ThemeColorHelper.setThemeColorPrimary(this, true)
         }
-    }
-
-    private fun setColor(color: Int) {
-        @Suppress("DEPRECATION")
-        drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
     }
 
 }

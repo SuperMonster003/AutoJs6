@@ -60,13 +60,15 @@ class ErrorReportActivity : BaseActivity() {
         MaterialDialog.Builder(this)
             .title(R.string.text_app_crashed)
             .content(R.string.crash_feedback)
-            .positiveText(R.string.text_exit)
-            .negativeText(R.string.text_copy_debug_info)
-            .onPositive { _, _ -> exit() }
+            .neutralText(R.string.text_copy_debug_info)
+            .neutralColorRes(R.color.dialog_button_hint)
             .onNegative { _, _ ->
                 copyToClip(errorMessage)
                 exitAfter(1500)
             }
+            .positiveText(R.string.text_exit)
+            .positiveColorRes(R.color.dialog_button_failure)
+            .onPositive { _, _ -> exit() }
             .cancelable(false)
             .show()
     }

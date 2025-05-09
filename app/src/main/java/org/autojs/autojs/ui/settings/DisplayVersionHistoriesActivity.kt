@@ -189,7 +189,7 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
             .neutralColorRes(R.color.dialog_button_default)
             .onNegative { dialog, _ -> dialog.dismiss() }
             .neutralText(R.string.dialog_button_use_default)
-            .neutralColorRes(R.color.dialog_button_hint)
+            .neutralColorRes(R.color.dialog_button_reset)
             .choiceWidgetColor(ThemeColorHelper.getThemeColorStateList(this))
             .onNeutral { dialog, _ ->
                 dialog.setSelectedIndices(categories.indices.filter { categories[it] in DEFAULT_FILTER }.toTypedArray())
@@ -215,6 +215,7 @@ class DisplayVersionHistoriesActivity : BaseActivity() {
             .title(R.string.text_process_log)
             .content(ProcessLogger.dump())
             .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_default)
             .show()
 
         val tv = dialog.contentView?.apply {

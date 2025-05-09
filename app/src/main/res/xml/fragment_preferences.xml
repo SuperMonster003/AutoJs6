@@ -241,6 +241,7 @@
             app:summary="@string/summary_about_app_tips"
             app:dialogContent="@string/content_about_app_tips"
             app:positiveText="@string/dialog_button_dismiss"
+            app:positiveColor="@color/dialog_button_default"
             app:longClickPrompt="@string/description_about_app_tips_preference" />
 
         <org.autojs.autojs.ui.settings.AboutAppAndDeveloperPreference

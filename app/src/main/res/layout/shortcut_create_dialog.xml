@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,30 +17,33 @@
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_marginHorizontal="8dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/shortcut_create_dialog_icon_bg"
-            android:padding="12dp"
-            android:src="@drawable/ic_add_white_48dp"/>
+            android:padding="8dp"
+            android:src="@drawable/ic_add_smaller_48dp" />
 
-        <com.google.android.material.textfield.TextInputLayout
+        <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:hint="@string/text_name">
+            android:hint="@string/text_name"
+            app:expandedHintEnabled="false">
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/name"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+        </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
+
     </LinearLayout>
 
-    <CheckBox
+    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
         android:id="@+id/use_android_n_shortcut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="4dp"
-        android:text="@string/text_use_android_n_shortcut"/>
+        android:text="@string/text_use_android_n_shortcut" />
 
 </LinearLayout>

@@ -27,6 +27,7 @@ import android.view.ViewTreeObserver
 import android.view.Window
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -658,6 +659,40 @@ object ViewUtils {
                 activity.window.clearFlags(flags)
             }
         }
+    }
+
+    /**
+     * 显示软键盘.
+     *
+     * @param target 需要获取输入的视图 (如 EditText)
+     * @param useForced 是否使用 SHOW_FORCED 方式强制弹出, 默认 false, 代表由系统自行判断
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun showSoftInput(target: View, useForced: Boolean = false) {
+        val imm = target.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager ?: return
+        if (!target.hasFocus()) {
+            target.requestFocus()
+        }
+        target.post {
+            @Suppress("DEPRECATION")
+            val flag = when (useForced) {
+                true -> InputMethodManager.SHOW_FORCED
+                else -> InputMethodManager.SHOW_IMPLICIT
+            }
+            imm.showSoftInput(target, flag)
+        }
+    }
+
+    /**
+     * 隐藏软键盘.
+     *
+     * @param target 当前持有输入焦点的视图, 也可以是任意位于同一窗口的 View
+     */
+    @JvmStatic
+    fun hideSoftInput(target: View) {
+        val imm = target.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager ?: return
+        imm.hideSoftInputFromWindow(target.windowToken, 0)
     }
 
     class AutoNightMode {

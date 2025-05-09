@@ -113,6 +113,7 @@
     <string name="dialog_button_update_now">更新</string>
     <string name="dialog_button_use_default">デフォルトを使用</string>
     <string name="dialog_button_use_palette">パレットを使う</string>
+    <string name="dialog_button_version_histories">更新履歴</string>
     <string name="dialog_button_view_file">ファイルの表示</string>
     <string name="dialog_title_color_details">カラー詳細</string>
     <string name="dialog_title_color_palette">カラーパレット</string>
@@ -368,6 +369,7 @@
     <string name="text_all_files_access_is_needed">携帯電話上のスクリプトファイルにアクセスするために, \"すべてのファイルへのアクセス\" が必要です</string>
     <string name="text_all_histories">すべての履歴</string>
     <string name="text_all_histories_cleared">すべての履歴がクリアされました</string>
+    <string name="text_all_items_cleared">すべての項目を削除しました</string>
     <string name="text_already_copied_to_clip">クリップボードにコピーされる</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">既にクリップボードにコピーされました (最新の %d アイテムのみ)</string>
     <string name="text_already_created">作成</string>
@@ -470,6 +472,7 @@
     <string name="text_compatibility">互換性</string>
     <string name="text_config">設定</string>
     <string name="text_confirm_to_clear_all_histories">すべての履歴をクリアしてもよろしいですか?</string>
+    <string name="text_confirm_to_clear_all_items">すべての項目を削除しますか?</string>
     <string name="text_confirm_to_clear_histories_of">以下の履歴がクリアされます\n\n[ %1$s ]\n\n本当にクリアしてもよろしいですか?</string>
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">以下の履歴がクリアされます\n\n[ すべてのカラーライブラリ ]\n\n本当にクリアしてもよろしいですか?</string>
     <string name="text_confirm_to_delete">本当に削除しますか?</string>
@@ -519,6 +522,7 @@
     <string name="text_device_model">デバイスのモデル</string>
     <string name="text_device_name">デバイス名</string>
     <string name="text_device_product_name">デバイスの製品名</string>
+    <string name="text_device_screen_resolution">デバイスの画面解像度</string>
     <string name="text_directly_download">今すぐダウンロード</string>
     <string name="text_directory">ディレクトリ</string>
     <string name="text_display_over_other_app">他のアプリの上に表示する</string>
@@ -838,6 +842,7 @@
     <string name="text_please_choose_a_script">スクリプトを選択してください</string>
     <string name="text_please_input_name">入力名</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">しばらくお待ちください...</string>
+    <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">しばらくしてからもう一度お試しください...</string>
     <string name="text_pointer_location">ポインターの位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">トグル「ポインターの位置」に失敗しました.\nroot 権限が必要です</string>
     <string name="text_post_notifications_permission">ゆうびんけいほう</string>

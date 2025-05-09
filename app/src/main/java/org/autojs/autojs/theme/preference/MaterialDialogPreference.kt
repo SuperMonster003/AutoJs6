@@ -16,8 +16,10 @@ open class MaterialDialogPreference : MaterialPreference {
     protected var dialogContent: CharSequence? = null
     protected var neutralText: CharSequence? = null
     protected var negativeText: CharSequence? = null
+    protected var negativeColor: Int? = null
     protected var neutralTextShort: CharSequence? = null
     protected var positiveText: CharSequence? = null
+    protected var positiveColor: Int? = null
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         init(context, attrs, defStyleAttr, defStyleRes)
@@ -46,7 +48,13 @@ open class MaterialDialogPreference : MaterialPreference {
                 neutralText = getAttrString(a, R.styleable.MaterialDialogPreference_neutralText)
                 neutralTextShort = getAttrString(a, R.styleable.MaterialDialogPreference_neutralTextShort)
                 negativeText = getAttrString(a, R.styleable.MaterialDialogPreference_negativeText)
+                getAttrColor(a, R.styleable.MaterialDialogPreference_negativeColor)?.takeIf { it != -1 }?.let {
+                    negativeColor = it
+                }
                 positiveText = getAttrString(a, R.styleable.MaterialDialogPreference_positiveText)
+                getAttrColor(a, R.styleable.MaterialDialogPreference_positiveColor)?.takeIf { it != -1 }?.let {
+                    positiveColor = it
+                }
                 a.recycle()
             }
     }
@@ -75,8 +83,18 @@ open class MaterialDialogPreference : MaterialPreference {
             dialogTitle?.let { builder.title(it) }
             dialogContent?.let { builder.content(it) }
             setNeutralTextIfNeeded(builder)
-            negativeText?.let { builder.negativeText(it) }
-            positiveText?.let { builder.positiveText(it) }
+            negativeText?.let {
+                builder.negativeText(it)
+                negativeColor?.let { color -> builder.negativeColor(color) } ?: run {
+                    builder.negativeColorRes(R.color.dialog_button_default)
+                }
+            }
+            positiveText?.let {
+                builder.positiveText(it)
+                positiveColor?.let { color -> builder.positiveColor(color) } ?: run {
+                    builder.positiveColorRes(R.color.dialog_button_attraction)
+                }
+            }
         }
 
     private fun setNeutralTextIfNeeded(builder: MaterialDialog.Builder) {

@@ -73,6 +73,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             .input(context.getString(R.string.text_pc_server_address), host) { dialog, _ ->
                 connectToRemoteServer(dialog)
             }
+            .widgetThemeColor()
             .neutralText(R.string.dialog_button_history)
             .neutralColorRes(R.color.dialog_button_hint)
             .onNeutral { dialog, _ ->
@@ -91,6 +92,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                                 .title(R.string.text_prompt)
                                 .content(R.string.text_confirm_to_delete)
                                 .negativeText(R.string.dialog_button_cancel)
+                                .neutralColorRes(R.color.dialog_button_default)
                                 .positiveText(R.string.dialog_button_confirm)
                                 .positiveColorRes(R.color.dialog_button_caution)
                                 .onPositive { ds, _ ->
@@ -139,8 +141,10 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                     }
             }
             .negativeText(R.string.text_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
             .onNegative { dialog, _ -> dialog.dismiss() }
             .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .autoDismiss(false)
             .dismissListener(onConnectionDialogDismissed)
             .show()

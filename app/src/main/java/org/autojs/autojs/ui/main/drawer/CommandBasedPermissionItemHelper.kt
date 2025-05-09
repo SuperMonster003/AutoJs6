@@ -137,8 +137,10 @@ interface CommandBasedPermissionItemHelper : PermissionItemHelper, IPermissionRo
                     }
                 }
                 .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
                 .onNegative { dialog, _ -> dialog.dismiss() }
                 .positiveText(R.string.text_copy_command)
+                .positiveColorRes(R.color.dialog_button_hint)
                 .onPositive { dialog, _ ->
                     ClipboardUtils.setClip(context, mCommand)
                     val view = dialog.view

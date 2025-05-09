@@ -49,7 +49,7 @@
                         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                         android:textColor="?android:textColorSecondary" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/text_app_name"
@@ -61,9 +61,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
@@ -81,7 +81,7 @@
                             android:inputType="text"
                             android:imeOptions="actionNext" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -95,7 +95,7 @@
                             android:layout_weight="1"
                             android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputLayout
+                            <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -109,9 +109,9 @@
                                     android:inputType="text"
                                     android:text="1.0.0" />
 
-                            </com.google.android.material.textfield.TextInputLayout>
+                            </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
-                            <com.google.android.material.textfield.TextInputLayout
+                            <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -125,7 +125,7 @@
                                     android:inputType="number"
                                     android:text="1" />
 
-                            </com.google.android.material.textfield.TextInputLayout>
+                            </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                         </LinearLayout>
 
@@ -159,7 +159,7 @@
 
                     </LinearLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:id="@+id/project_location_wrapper"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -175,7 +175,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                 </LinearLayout>
 
@@ -194,7 +194,7 @@
                         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                         android:textColor="?android:textColorSecondary" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/text_main_file_name"
@@ -207,7 +207,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/default_main_file_name" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                    </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                     <org.autojs.autojs.core.ui.widget.JsCheckBox
                         android:id="@+id/default_stable_mode"

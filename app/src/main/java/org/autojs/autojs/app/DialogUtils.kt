@@ -107,6 +107,7 @@ object DialogUtils {
                                     .title(context.getString(R.string.dialog_button_more))
                                     .content(contentMore)
                                     .positiveText(R.string.dialog_button_dismiss)
+                                    .positiveColorRes(R.color.dialog_button_default)
                                     .build()
                                     .also { preference.longClickPromptMoreDialogHandler(it) }
                                     .show()
@@ -114,6 +115,7 @@ object DialogUtils {
                         }
                     }
                     .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default)
                     .onPositive { dialog, _ -> dialog.dismiss() }
                     .autoDismiss(false)
                     .build()

@@ -79,6 +79,7 @@ object ShortcutUtils {
             .title(R.string.text_prompt)
             .content(R.string.text_pin_shortcut_not_unsupported)
             .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_failure)
             .build().also { it.show() }
     }
 

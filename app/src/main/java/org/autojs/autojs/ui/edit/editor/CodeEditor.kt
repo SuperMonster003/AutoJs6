@@ -14,6 +14,7 @@ import org.autojs.autojs.core.pref.Pref.getEditorTextSize
 import org.autojs.autojs.core.pref.Pref.getString
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.script.JsBeautifier
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ClipboardUtils.setClip
 import org.autojs.autojs.util.DisplayUtils.pxToSp
@@ -60,6 +61,7 @@ class CodeEditor : HVScrollView {
     val codeEditText: CodeEditText = binding.codeEditText.also {
         it.addTextChangedListener(AutoIndent(it))
         lastTextSize = getEditorTextSize(pxToSp(it.textSize).toInt())
+        ThemeColorHelper.setThemeColorPrimary(it, true)
     }
 
     val lineCount
