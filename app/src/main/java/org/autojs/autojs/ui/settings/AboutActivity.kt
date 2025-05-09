@@ -23,6 +23,7 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityAboutBinding
 import org.autojs.autojs6.databinding.ActivityAboutFunctionButtonsBinding
 import androidx.core.net.toUri
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 
 /**
  * Created by Stardust on Feb 2, 2017.
@@ -173,11 +174,13 @@ open class AboutActivity : BaseActivity() {
         NotAskAgainDialog.Builder(this, key)
             .title(R.string.text_prompt)
             .content(R.string.content_github_feedback)
+            .widgetThemeColor()
             .negativeText(R.string.dialog_button_cancel)
-            .positiveText(R.string.dialog_button_continue)
+            .negativeColorRes(R.color.dialog_button_default)
             .onNegative { d, _ -> d.dismiss() }
-            .onPositive { _, _ -> launchGithubIssuesPage() }
+            .positiveText(R.string.dialog_button_continue)
             .positiveColorRes(R.color.dialog_button_attraction)
+            .onPositive { _, _ -> launchGithubIssuesPage() }
             .show() ?: launchGithubIssuesPage()
     }
 

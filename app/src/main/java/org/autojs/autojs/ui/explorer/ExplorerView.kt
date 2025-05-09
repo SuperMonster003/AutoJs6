@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -28,6 +29,7 @@ import org.autojs.autojs.core.pref.Pref.putInt
 import org.autojs.autojs.core.pref.Pref.putLinkedList
 import org.autojs.autojs.core.pref.Pref.putString
 import org.autojs.autojs.core.pref.Pref.remove
+import org.autojs.autojs.extension.ViewExtensions.setForceShowIconCompat
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.groundwork.WrapContentGridLayoutManger
 import org.autojs.autojs.model.explorer.Explorer
@@ -44,6 +46,7 @@ import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.pio.PFile
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorManagerCompat
 import org.autojs.autojs.theme.widget.ThemeColorSwipeRefreshLayout
 import org.autojs.autojs.ui.common.ScriptLoopDialog
@@ -53,6 +56,10 @@ import org.autojs.autojs.ui.main.scripts.ApkInfoDialogManager
 import org.autojs.autojs.ui.main.scripts.MediaInfoDialogManager
 import org.autojs.autojs.ui.project.BuildActivity
 import org.autojs.autojs.ui.viewmodel.ExplorerItemManager
+import org.autojs.autojs.ui.viewmodel.ExplorerItemManager.Companion.SORT_TYPE_DATE
+import org.autojs.autojs.ui.viewmodel.ExplorerItemManager.Companion.SORT_TYPE_NAME
+import org.autojs.autojs.ui.viewmodel.ExplorerItemManager.Companion.SORT_TYPE_SIZE
+import org.autojs.autojs.ui.viewmodel.ExplorerItemManager.Companion.SORT_TYPE_TYPE
 import org.autojs.autojs.ui.widget.BindableViewHolder
 import org.autojs.autojs.ui.widget.FirstCharView
 import org.autojs.autojs.util.ColorUtils
@@ -548,22 +555,42 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 explorerItemManager = newManager
                 notifyDataSetChanged()
                 isRefreshing = false
-                post { scrollToPositionSmoothly() }
+                post { scrollToPositionImmediately() }
             }
     }
 
     private fun scrollToPositionSmoothly() {
-        val layoutManager = explorerItemListView!!.layoutManager
+        val recyclerView = explorerItemListView ?: return
+        val layoutManager = recyclerView.layoutManager
         val position = currentPageState.scrollY
 
         val smoothScroller: RecyclerView.SmoothScroller = object : LinearSmoothScroller(context) {
             override fun getVerticalSnapPreference(): Int {
                 return SNAP_TO_START
             }
+        }.apply { targetPosition = position }
+
+        when (layoutManager) {
+            null -> recyclerView.smoothScrollToPosition(position)
+            is GridLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
+            is LinearLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
+            else -> layoutManager.startSmoothScroll(smoothScroller)
         }
-        smoothScroller.targetPosition = position
-        layoutManager?.startSmoothScroll(smoothScroller)
     }
+
+    private fun scrollToPositionImmediately() {
+        val recyclerView = explorerItemListView ?: return
+        val layoutManager = recyclerView.layoutManager
+        val position = currentPageState.scrollY
+
+        when (layoutManager) {
+            null -> recyclerView.scrollToPosition(position)
+            is GridLayoutManager -> layoutManager.scrollToPositionWithOffset(position, 0)
+            is LinearLayoutManager -> layoutManager.scrollToPositionWithOffset(position, 0)
+            else -> layoutManager.scrollToPosition(position)
+        }
+    }
+
 
     private inner class ExplorerAdapter : RecyclerView.Adapter<BindableViewHolder<Any>>() {
 
@@ -760,7 +787,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                                 ColorUtils.adjustColorForContrast(
                                     context.getColor(R.color.item_background_dark),
                                     ThemeColorManagerCompat.getColorPrimary(),
-                                    1.15
+                                    1.15,
                                 )
                             }.map { themeColorForContrast ->
                                 listOf(
@@ -990,36 +1017,34 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 }
             }
             binding.sortType.setOnClickListener {
-                val popupMenu = PopupMenu(context, binding.sortType)
-                popupMenu.inflate(R.menu.menu_sort_options)
+                val themedCtx = ContextThemeWrapper(context, R.style.PopupMenu_HideIndicator)
+                val popupMenu = PopupMenu(themedCtx, binding.sortType).apply {
+                    inflate(R.menu.menu_sort_options)
+                    setForceShowIconCompat()
+                }
 
                 isDirSortMenuShowing = mIsDir
 
                 val currentSortType = if (mIsDir) explorerItemManager.dirSortType else explorerItemManager.fileSortType
-                when (currentSortType) {
-                    ExplorerItemManager.SORT_TYPE_DATE -> popupMenu.menu.findItem(R.id.action_sort_by_date).isChecked = true
-                    ExplorerItemManager.SORT_TYPE_SIZE -> popupMenu.menu.findItem(R.id.action_sort_by_size).isChecked = true
-                    ExplorerItemManager.SORT_TYPE_TYPE -> popupMenu.menu.findItem(R.id.action_sort_by_type).isChecked = true
-                    else -> popupMenu.menu.findItem(R.id.action_sort_by_name).isChecked = true
+                val initItemId = when (currentSortType) {
+                    SORT_TYPE_DATE -> R.id.action_sort_by_date
+                    SORT_TYPE_SIZE -> R.id.action_sort_by_size
+                    SORT_TYPE_TYPE -> R.id.action_sort_by_type
+                    else -> R.id.action_sort_by_name
                 }
+                popupMenu.menu.findItem(initItemId).isChecked = true
+                ThemeColorHelper.setThemeColorPrimary(popupMenu.menu, themedCtx, context.getColor(R.color.item_background), initItemId)
 
                 popupMenu.setOnMenuItemClickListener { item: MenuItem ->
                     item.isChecked = true
                     when (item.itemId) {
-                        R.id.action_sort_by_name -> {
-                            sort(ExplorerItemManager.SORT_TYPE_NAME, isDirSortMenuShowing, true)
-                        }
-                        R.id.action_sort_by_date -> {
-                            sort(ExplorerItemManager.SORT_TYPE_DATE, isDirSortMenuShowing, false)
-                        }
-                        R.id.action_sort_by_size -> {
-                            sort(ExplorerItemManager.SORT_TYPE_SIZE, isDirSortMenuShowing, false)
-                        }
-                        R.id.action_sort_by_type -> {
-                            sort(ExplorerItemManager.SORT_TYPE_TYPE, isDirSortMenuShowing, true)
-                        }
-                        else -> null
-                    } != null
+                        R.id.action_sort_by_name -> sort(SORT_TYPE_NAME, isDirSortMenuShowing, true)
+                        R.id.action_sort_by_date -> sort(SORT_TYPE_DATE, isDirSortMenuShowing, false)
+                        R.id.action_sort_by_size -> sort(SORT_TYPE_SIZE, isDirSortMenuShowing, false)
+                        R.id.action_sort_by_type -> sort(SORT_TYPE_TYPE, isDirSortMenuShowing, true)
+                    }
+                    ThemeColorHelper.setThemeColorPrimary(popupMenu.menu, themedCtx, true, item.itemId)
+                    true
                 }
                 popupMenu.show()
             }

@@ -28,6 +28,7 @@ import org.autojs.autojs.network.download.DownloadManager;
 import org.autojs.autojs.network.entity.ExtendedVersionInfo;
 import org.autojs.autojs.network.entity.VersionInfo;
 import org.autojs.autojs.tool.SimpleObserver;
+import org.autojs.autojs.ui.settings.DisplayVersionHistoriesActivity;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.TextUtils;
@@ -194,6 +195,7 @@ public class UpdateChecker {
                             if (!(e instanceof ObservableEmptyException)) {
                                 new Dialog.Builder.Prompt(mContext, R.string.error_check_for_update, e.getMessage())
                                         .positiveText(R.string.dialog_button_dismiss)
+                                        .positiveColorRes(R.color.dialog_button_default)
                                         .build().show();
                                 return;
                             }
@@ -210,11 +212,13 @@ public class UpdateChecker {
                                 }
                                 new Dialog.Builder.Prompt(mContext, R.string.error_check_for_update, message.toString())
                                         .positiveText(R.string.dialog_button_dismiss)
+                                        .positiveColorRes(R.color.dialog_button_default)
                                         .build().show();
                             } else {
                                 new Dialog.Builder.Prompt(mContext, R.string.error_check_for_update,
                                         R.string.error_failed_to_retrieve_version_properties_file_to_parse_version_information)
                                         .positiveText(R.string.dialog_button_dismiss)
+                                        .positiveColorRes(R.color.dialog_button_default)
                                         .build().show();
                             }
                         }
@@ -328,10 +332,15 @@ public class UpdateChecker {
             return;
         }
 
-        mUpdateDialog = new Dialog.Builder.Update(context, propVersion).build();
+        mUpdateDialog = new Dialog.Builder.Update(context, versionInfo).build();
         mPendingDialog = new Dialog.Builder.Pending(context, R.string.text_preparing).build();
 
-        setupDialogButtons(versionInfo, context);
+        MDButton negativeButton = mUpdateDialog.getActionButton(DialogAction.NEGATIVE);
+        negativeButton.setOnClickListener(v -> mUpdateDialog.dismiss());
+
+        MDButton positiveButton = mUpdateDialog.getActionButton(DialogAction.POSITIVE);
+        positiveButton.setOnClickListener(null);
+
         mUpdateDialog.show();
 
         mGitHubExecutor.execute(() -> {
@@ -371,28 +380,6 @@ public class UpdateChecker {
             }
             mHandler.post(() -> setDialogUpdateButton(context, assets, versionInfo));
         });
-    }
-
-    private void setupDialogButtons(@NonNull VersionInfo versionInfo, Context context) {
-        MDButton neutralButton = mUpdateDialog.getActionButton(DialogAction.NEUTRAL);
-        neutralButton.setOnClickListener(v -> new MaterialDialog.Builder(context)
-                .title(R.string.text_prompt)
-                .content(R.string.prompt_add_ignored_version)
-                .negativeText(R.string.dialog_button_cancel)
-                .positiveText(R.string.dialog_button_confirm)
-                .positiveColorRes(R.color.dialog_button_warn)
-                .onPositive((dialog, which) -> {
-                    UpdateUtils.addIgnoredVersion(versionInfo);
-                    ViewUtils.showToast(context, R.string.text_done);
-                    mUpdateDialog.dismiss();
-                })
-                .show());
-
-        MDButton negativeButton = mUpdateDialog.getActionButton(DialogAction.NEGATIVE);
-        negativeButton.setOnClickListener(v -> mUpdateDialog.dismiss());
-
-        MDButton positiveButton = mUpdateDialog.getActionButton(DialogAction.POSITIVE);
-        positiveButton.setOnClickListener(null);
     }
 
     private void fetchLatestReleaseNotes(Context context, VersionInfo versionInfo, GHRepository repo, GHRelease release, String releaseTag) {
@@ -636,7 +623,8 @@ public class UpdateChecker {
                 if (targetAsset == null) {
                     mHandler.post(() -> new Dialog.Builder
                             .Prompt(ctx, R.string.error_parse_github_release_assets)
-                            .positiveText(R.string.text_cancel)
+                            .positiveText(R.string.dialog_button_dismiss)
+                            .positiveColorRes(R.color.dialog_button_default)
                             .build().show());
                     return;
                 }
@@ -736,6 +724,7 @@ public class UpdateChecker {
                             .title(title)
                             .content(content)
                             .positiveText(R.string.dialog_button_dismiss)
+                            .positiveColorRes(R.color.dialog_button_default)
                             .cancelable(false);
                 }
 
@@ -743,13 +732,30 @@ public class UpdateChecker {
 
             public static class Update extends MaterialDialog.Builder {
 
-                public Update(Context context, String title) {
+                public Update(Context context, VersionInfo versionInfo) {
                     super(context);
                     this
-                            .title(title)
+                            .title(versionInfo.getVersionName())
+                            .options(List.of(new MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_ignore_current_update), parentDialog -> {
+                                new MaterialDialog.Builder(context)
+                                        .title(R.string.text_prompt)
+                                        .content(R.string.prompt_add_ignored_version)
+                                        .negativeText(R.string.dialog_button_cancel)
+                                        .positiveText(R.string.dialog_button_confirm)
+                                        .positiveColorRes(R.color.dialog_button_warn)
+                                        .onPositive((tmpDialog, which) -> {
+                                            UpdateUtils.addIgnoredVersion(versionInfo);
+                                            ViewUtils.showToast(context, R.string.text_done);
+                                            parentDialog.dismiss();
+                                        })
+                                        .show();
+                            })))
                             .content(R.string.text_getting_release_notes)
-                            .neutralText(R.string.dialog_button_ignore_current_update)
-                            .neutralColor(context.getColor(R.color.dialog_button_warn))
+                            .neutralText(R.string.dialog_button_version_histories)
+                            .neutralColor(context.getColor(R.color.dialog_button_hint))
+                            .onNeutral((dialog, which) -> {
+                                DisplayVersionHistoriesActivity.launch(context);
+                            })
                             .negativeText(R.string.dialog_button_cancel)
                             .negativeColor(context.getColor(R.color.dialog_button_default))
                             .positiveText(R.string.dialog_button_update_now)

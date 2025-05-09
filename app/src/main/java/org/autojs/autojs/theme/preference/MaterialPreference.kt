@@ -51,4 +51,6 @@ open class MaterialPreference : androidx.preference.Preference, LongClickablePre
 
     protected fun getAttrTextArray(a: TypedArray, index: Int): Array<CharSequence>? = a.getTextArray(index)
 
+    protected fun getAttrColor(a: TypedArray, index: Int): Int? = a.getColor(index, -1)
+
 }

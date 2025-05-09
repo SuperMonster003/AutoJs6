@@ -3,6 +3,7 @@ package org.autojs.autojs.extension
 import android.view.View
 import android.widget.TextView
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.ViewUtils
@@ -35,20 +36,28 @@ object MaterialDialogExtensions {
         }
     }
 
-    fun TextView.setCopyableTextIfAbsent(dialog: MaterialDialog, f: () -> String?) {
-        val textView = this
+    fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, f: () -> String?) {
         val textValue = f.invoke()
         if (textView.text == context.getString(R.string.ellipsis_six)) {
             textView.text = textValue.takeUnless { it.isNullOrBlank() } ?: context.getString(R.string.text_unknown)
         }
-        dialog.makeTextCopyable(textView, textValue)
+        this.makeTextCopyable(textView, textValue)
     }
 
-    fun TextView.setCopyableText(dialog: MaterialDialog, f: () -> String?) {
-        val textView = this
+    fun MaterialDialog.setCopyableText(textView: TextView, f: () -> String?) {
         val textValue = f.invoke()
         textView.text = textValue.takeUnless { it.isNullOrBlank() } ?: context.getString(R.string.text_unknown)
-        dialog.makeTextCopyable(textView, textValue)
+        this.makeTextCopyable(textView, textValue)
+    }
+
+    @JvmStatic
+    fun MaterialDialog.Builder.choiceWidgetThemeColor() = also {
+        it.choiceWidgetColor(ThemeColorHelper.getThemeColorStateList(context))
+    }
+
+    @JvmStatic
+    fun MaterialDialog.Builder.widgetThemeColor() = also {
+        it.widgetColor(ThemeColorHelper.getThemeColorStateList(context))
     }
 
 }

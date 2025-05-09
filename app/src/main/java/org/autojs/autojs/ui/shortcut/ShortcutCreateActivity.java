@@ -3,9 +3,10 @@ package org.autojs.autojs.ui.shortcut;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Icon;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import com.afollestad.materialdialogs.MaterialDialog;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -25,8 +27,11 @@ import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.external.shortcut.Shortcut;
 import org.autojs.autojs.external.shortcut.ShortcutActivity;
 import org.autojs.autojs.model.script.ScriptFile;
+import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.util.BitmapUtils;
+import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.ShortcutUtils;
+import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 import org.autojs.autojs6.databinding.ShortcutCreateDialogBinding;
 
@@ -44,6 +49,9 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     ImageView mIcon;
     CheckBox mUseAndroidNShortcut;
 
+    private int mAdjustedContrastColor;
+    private int mAdjustedContrastColorConsiderable;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,8 +61,17 @@ public class ShortcutCreateActivity extends AppCompatActivity {
 
         mName = binding.name;
         mIcon = binding.icon;
+
         mUseAndroidNShortcut = binding.useAndroidNShortcut;
 
+        mAdjustedContrastColor = ColorUtils.adjustColorForContrast(mIcon.getContext().getColor(R.color.window_background), ThemeColorManager.getColorPrimary(), 1.15);
+        mAdjustedContrastColorConsiderable = ColorUtils.adjustColorForContrast(mIcon.getContext().getColor(R.color.window_background), ThemeColorManager.getColorPrimary(), 2.3);
+        Drawable background = mIcon.getBackground();
+        if (background != null) {
+            background.setTint(mAdjustedContrastColor);
+        }
+        mIcon.setBackground(background);
+        mIcon.setImageTintList(ColorStateList.valueOf(ViewUtils.getDayOrNightColorByLuminance(this, mAdjustedContrastColor)));
         mIcon.setOnClickListener(v -> AppsIconSelectActivity.launchForResult(this, 21209));
 
         mScriptFile = (ScriptFile) getIntent().getSerializableExtra(EXTRA_FILE);
@@ -62,13 +79,19 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     }
 
     private void showDialog(View view) {
-        mUseAndroidNShortcut.setVisibility(Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1
-                ? View.VISIBLE : View.GONE);
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1) {
+            mUseAndroidNShortcut.setVisibility(View.VISIBLE);
+        } else {
+            mUseAndroidNShortcut.setVisibility(View.GONE);
+        }
         mName.setText(mScriptFile.getSimplifiedName());
         new MaterialDialog.Builder(this)
                 .customView(view, false)
                 .title(R.string.text_send_shortcut)
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
                 .positiveText(R.string.text_ok)
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive((dialog, which) -> {
                     createShortcut();
                     finish();
@@ -78,9 +101,11 @@ public class ShortcutCreateActivity extends AppCompatActivity {
     }
 
     private void createShortcut() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ||
-            Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1 && mUseAndroidNShortcut.isChecked()
-        ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createShortcutByShortcutManager();
+            return;
+        }
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N_MR1 && mUseAndroidNShortcut.isChecked()) {
             createShortcutByShortcutManager();
             return;
         }
@@ -145,6 +170,12 @@ public class ShortcutCreateActivity extends AppCompatActivity {
         if (packageName != null) {
             try {
                 mIcon.setImageDrawable(getPackageManager().getApplicationIcon(packageName));
+                mIcon.setImageTintList(null);
+                Drawable background = AppCompatResources.getDrawable(this, R.drawable.shortcut_create_dialog_icon_border);
+                if (background != null) {
+                    background.setTint(mAdjustedContrastColorConsiderable);
+                }
+                mIcon.setBackground(background);
                 mIsDefaultIcon = false;
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();

@@ -114,6 +114,7 @@
     <string name="dialog_button_update_now">업데이트</string>
     <string name="dialog_button_use_default">기본값을 사용하십시오</string>
     <string name="dialog_button_use_palette">팔레트 사용</string>
+    <string name="dialog_button_version_histories">변경내역</string>
     <string name="dialog_button_view_file">파일 보기</string>
     <string name="dialog_title_color_details">색상 세부정보</string>
     <string name="dialog_title_color_palette">색상 팔레트</string>
@@ -369,6 +370,7 @@
     <string name="text_all_files_access_is_needed">\"모든 파일 액세스\"는 전화기의 스크립트 파일에 액세스하려면 필요합니다.</string>
     <string name="text_all_histories">모든 기록</string>
     <string name="text_all_histories_cleared">모든 기록이 삭제되었습니다</string>
+    <string name="text_all_items_cleared">모든 항목이 삭제되었습니다</string>
     <string name="text_already_copied_to_clip">클립 보드에 복사</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">클립보드에 이미 복사되었습니다(최신 %d 항목만)</string>
     <string name="text_already_created">만들어진</string>
@@ -471,6 +473,7 @@
     <string name="text_compatibility">호환성</string>
     <string name="text_config">구성</string>
     <string name="text_confirm_to_clear_all_histories">모든 기록을 삭제하시겠습니까?</string>
+    <string name="text_confirm_to_clear_all_items">모든 항목을 삭제하시겠습니까?</string>
     <string name="text_confirm_to_clear_histories_of">다음 기록들이 삭제됩니다\n\n[ %1$s ]\n\n정말 삭제하시겠습니까?</string>
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">다음 기록들이 삭제됩니다\n\n[ 모든 색상 라이브러리 ]\n\n정말 삭제하시겠습니까?</string>
     <string name="text_confirm_to_delete">삭제 하시겠습니까?</string>
@@ -520,6 +523,7 @@
     <string name="text_device_model">기기 모델</string>
     <string name="text_device_name">장치 이름</string>
     <string name="text_device_product_name">장치 제품 이름</string>
+    <string name="text_device_screen_resolution">기기 화면 해상도</string>
     <string name="text_directly_download">지금 다운로드하십시오</string>
     <string name="text_directory">예배 규칙서</string>
     <string name="text_display_over_other_app">다른 앱에 표시됩니다</string>
@@ -839,6 +843,7 @@
     <string name="text_please_choose_a_script">스크립트를 선택하십시오</string>
     <string name="text_please_input_name">입력 이름</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">잠시만 기다려주세요...</string>
+    <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">잠시 후 다시 시도해 주세요...</string>
     <string name="text_pointer_location">포인터 위치</string>
     <string name="text_pointer_location_toggle_failed_with_hint">\"포인터 위치\"토글이 실패했습니다.\n루트 액세스가 필요합니다.</string>
     <string name="text_post_notifications_permission">게시물 알림</string>

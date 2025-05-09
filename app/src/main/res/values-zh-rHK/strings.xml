@@ -110,6 +110,7 @@
     <string name="dialog_button_update_now">立即更新</string>
     <string name="dialog_button_use_default">使用默認值</string>
     <string name="dialog_button_use_palette">使用調色盤</string>
+    <string name="dialog_button_version_histories">版本歷史</string>
     <string name="dialog_button_view_file">查看文件</string>
     <string name="dialog_title_color_details">顏色詳情</string>
     <string name="dialog_title_color_palette">調色盤</string>
@@ -365,6 +366,7 @@
     <string name="text_all_files_access_is_needed">需要授予 \"所有文件管理權限\" 才能正常讀寫腳本文件</string>
     <string name="text_all_histories">全部歷史記錄</string>
     <string name="text_all_histories_cleared">歷史記錄已清空</string>
+    <string name="text_all_items_cleared">全部記錄已清空</string>
     <string name="text_already_copied_to_clip">已複製到剪貼板</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">已複製到剪貼板 (僅最新的 %d 個條目)</string>
     <string name="text_already_created">已創建</string>
@@ -467,6 +469,7 @@
     <string name="text_compatibility">兼容性</string>
     <string name="text_config">配置</string>
     <string name="text_confirm_to_clear_all_histories">是否確定清空歷史記錄</string>
+    <string name="text_confirm_to_clear_all_items">是否確定清空全部記錄</string>
     <string name="text_confirm_to_clear_histories_of">以下歷史記錄將被清空\n\n[ %1$s ]\n\n是否確定清空</string>
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">以下歷史記錄將被清空\n\n[ 全部顏色庫 ]\n\n是否確定清空</string>
     <string name="text_confirm_to_delete">是否確定刪除</string>
@@ -516,6 +519,7 @@
     <string name="text_device_model">設備型號</string>
     <string name="text_device_name">設備名稱</string>
     <string name="text_device_product_name">設備產品名稱</string>
+    <string name="text_device_screen_resolution">設備屏幕分辨率</string>
     <string name="text_directly_download">直接下載</string>
     <string name="text_directory">文件夾</string>
     <string name="text_display_over_other_app">顯示在其他應用上層</string>
@@ -835,6 +839,7 @@
     <string name="text_please_choose_a_script">請選擇腳本</string>
     <string name="text_please_input_name">請輸入名稱</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">請稍候...</string>
+    <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">請稍後再嘗試此操作...</string>
     <string name="text_pointer_location">指針位置</string>
     <string name="text_pointer_location_toggle_failed_with_hint">切換 \"指針位置\" 顯示狀態失敗\n可能缺少 root 權限</string>
     <string name="text_post_notifications_permission">發佈通知權限</string>

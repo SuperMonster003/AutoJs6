@@ -48,6 +48,7 @@ import org.autojs.autojs.pio.PFiles.read
 import org.autojs.autojs.pio.PFiles.write
 import org.autojs.autojs.core.pref.Pref.getEditorTextSize
 import org.autojs.autojs.core.pref.Pref.setEditorTextSize
+import org.autojs.autojs.extension.MaterialDialogExtensions.choiceWidgetThemeColor
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
@@ -509,6 +510,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         MaterialDialog.Builder(context)
             .title(R.string.text_editor_theme)
             .items(themes)
+            .choiceWidgetThemeColor()
             .itemsCallbackSingleChoice(i) { _, _, which, _ ->
                 themes[which]?.let {
                     setTheme(it)
@@ -516,6 +518,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                 }
                 true
             }
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
             .show()
     }
 

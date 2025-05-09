@@ -10,6 +10,7 @@ import org.autojs.autojs.core.ui.widget.JsCheckBox;
 import org.autojs.autojs.model.explorer.ExplorerItem;
 import org.autojs.autojs.pio.PFile;
 import org.autojs.autojs.pio.PFiles;
+import org.autojs.autojs.theme.ThemeColorHelper;
 import org.autojs.autojs.theme.ThemeColorManagerCompat;
 import org.autojs.autojs.ui.explorer.ExplorerViewHelper;
 import org.autojs.autojs.ui.widget.BindableViewHolder;
@@ -45,16 +46,9 @@ class ExplorerItemViewHolder extends BindableViewHolder<Object> {
         JsCheckBox checkbox = listFileBinding.checkbox;
 
         int itemBackgroundDarkColor = context.getColor(R.color.item_background_dark);
-        int themePrimaryColor = ThemeColorManagerCompat.getColorPrimary();
+        int itemIconThemeColorForContrast = ColorUtils.adjustThemeColorForContrast(itemBackgroundDarkColor, 1.15);
 
-        int checkBoxCheckedThemeColorForContrast = ColorUtils.adjustColorForContrast(itemBackgroundDarkColor, themePrimaryColor, 1.9);
-        int checkBoxUncheckedCheckedThemeColorForContrast = ColorUtils.adjustColorForContrast(itemBackgroundDarkColor, themePrimaryColor, 1.4);
-        int itemIconThemeColorForContrast = ColorUtils.adjustColorForContrast(itemBackgroundDarkColor, themePrimaryColor, 1.15);
-
-        checkbox.setButtonTintList(new ColorStateList(
-                new int[][]{new int[]{android.R.attr.state_checked}, new int[]{}},
-                new int[]{checkBoxCheckedThemeColorForContrast, checkBoxUncheckedCheckedThemeColorForContrast}
-        ));
+        ThemeColorHelper.setThemeColorPrimary(checkbox, itemBackgroundDarkColor);
 
         listFileBinding.name.setText(ExplorerViewHelper.getDisplayName(context, explorerItem));
         listFileBinding.item.setOnClickListener(view -> checkbox.toggle());

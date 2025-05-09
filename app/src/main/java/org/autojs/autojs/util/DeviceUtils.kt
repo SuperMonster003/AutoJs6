@@ -11,6 +11,7 @@ import android.os.BatteryManager
 import android.os.Build
 import android.telephony.TelephonyManager
 import androidx.annotation.IntRange
+import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs6.R
 import java.util.Arrays
@@ -66,6 +67,7 @@ object DeviceUtils {
             ${context.getString(R.string.text_android_release_version)}: $releaseVersion
             ${context.getString(R.string.text_android_sdk_version)}: $sdkVersion
             ${context.getString(R.string.text_android_build_id)}: $buildID
+            ${context.getString(R.string.text_device_screen_resolution)}: ${ScreenMetrics.deviceScreenWidth} × ${ScreenMetrics.deviceScreenHeight}
             ${context.getString(R.string.text_device_brand)}: $brand
             ${context.getString(R.string.text_device_manufacturer)}: $manufacturer
             ${context.getString(R.string.text_device_name)}: $device

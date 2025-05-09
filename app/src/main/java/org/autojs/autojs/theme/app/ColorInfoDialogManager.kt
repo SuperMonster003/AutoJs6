@@ -33,8 +33,8 @@ object ColorInfoDialogManager {
             MaterialDialog.Builder(context)
                 .title(R.string.text_prompt)
                 .content(R.string.error_invalid_color)
-                .positiveColorRes(R.color.dialog_button_default)
                 .positiveText(R.string.dialog_button_dismiss)
+                .positiveColorRes(R.color.dialog_button_default)
                 .show()
             return
         }
@@ -109,7 +109,7 @@ object ColorInfoDialogManager {
 
     private suspend fun TextView.bindWith(dialog: MaterialDialog, text: String) {
         withContext(Dispatchers.Main) {
-            this@bindWith.setCopyableText(dialog) { text }
+            dialog.setCopyableText(this@bindWith) { text }
         }
     }
 

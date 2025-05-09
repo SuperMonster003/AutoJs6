@@ -35,6 +35,7 @@ import net.dongliu.apk.parser.bean.ApkMeta;
 import org.autojs.autojs.apkbuilder.ApkBuilder;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.core.pref.Language;
+import org.autojs.autojs.extension.MaterialDialogExtensions;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.project.ProjectConfig;
@@ -410,7 +411,9 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                         "- " + getString(R.string.text_download_and_install_autojs6_including_all_abis) + " [" + getString(R.string.text_recommended) + "]\n\n" +
                         getString(R.string.text_download_link_for_autojs6) + ":\n" +
                         getString(R.string.uri_autojs6_download_link));
-        builder.positiveText(R.string.dialog_button_dismiss);
+        builder.positiveText(R.string.text_ok);
+        builder.positiveColorRes(R.color.dialog_button_hint);
+        MaterialDialogExtensions.widgetThemeColor(builder);
         MaterialDialog dialog = builder.show();
         if (dialog != null) {
             TextView contentView = dialog.getContentView();
@@ -712,6 +715,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .dir(initialDir)
                 .chooseDir()
                 .singleChoice(dir -> mOutputPathView.setText(dir.getPath()))
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .show();
     }
 
@@ -848,6 +852,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .title(R.string.text_prompt)
                 .content(content)
                 .positiveText(R.string.dialog_button_dismiss)
+                .positiveColorRes(R.color.dialog_button_failure)
                 .cancelable(false)
                 .show();
     }

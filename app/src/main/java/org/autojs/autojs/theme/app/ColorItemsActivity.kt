@@ -15,6 +15,7 @@ import android.view.View.OnClickListener
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -100,10 +101,8 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
 
     private fun updateClickListener(toolbar: Toolbar) {
         when (mLibrary.id) {
-            Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE) -> object : OnClickListener {
-                override fun onClick(v: View?) {
-                    showColorDetails(ThemeColorManager.colorPrimary, getSubtitle(false))
-                }
+            Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE) -> OnClickListener {
+                showColorDetails(ThemeColorManager.colorPrimary, getSubtitle(false))
             }
             else -> null
         }.let { toolbar.setOnClickListener(it) }
@@ -167,13 +166,18 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
             })
         }
 
-        val layoutManager = recyclerView.layoutManager as? LinearLayoutManager
-        layoutManager?.let { manager ->
-            val smoothScroller = object : LinearSmoothScroller(this) {
-                override fun getVerticalSnapPreference() = SNAP_TO_START
-            }.apply { this.targetPosition = targetPosition }
-            manager.startSmoothScroll(smoothScroller)
-        } ?: recyclerView.smoothScrollToPosition(targetPosition)
+        val layoutManager = recyclerView.layoutManager
+
+        val smoothScroller = object : LinearSmoothScroller(this) {
+            override fun getVerticalSnapPreference() = SNAP_TO_START
+        }.apply { this.targetPosition = targetPosition }
+
+        when (layoutManager) {
+            null -> recyclerView.smoothScrollToPosition(targetPosition)
+            is GridLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
+            is LinearLayoutManager -> layoutManager.startSmoothScroll(smoothScroller)
+            else -> layoutManager.startSmoothScroll(smoothScroller)
+        }
 
         mInitiallyItemIdScrollTo = -1
     }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -61,7 +62,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                        <RadioButton
+                        <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                             android:id="@+id/daily_task_radio"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -86,7 +87,7 @@
 
                         </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
 
-                        <RadioButton
+                        <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                             android:id="@+id/disposable_task_radio"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -129,6 +130,7 @@
                                     android:gravity="center_vertical"
                                     android:textColor="?android:textColorPrimary"
                                     android:textSize="16sp" />
+
                             </LinearLayout>
 
                             <LinearLayout
@@ -158,11 +160,12 @@
                                     android:gravity="center_vertical"
                                     android:textColor="?android:textColorPrimary"
                                     android:textSize="16sp" />
+
                             </LinearLayout>
 
                         </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
 
-                        <RadioButton
+                        <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                             android:id="@+id/weekly_task_radio"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -197,26 +200,26 @@
                                     android:orientation="horizontal"
                                     android:weightSum="4">
 
-                                    <CheckBox
+                                    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
                                         android:layout_weight="1"
                                         android:text="@string/text_day1"
                                         tools:ignore="TooDeepLayout" />
 
-                                    <CheckBox
+                                    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
                                         android:layout_weight="1"
                                         android:text="@string/text_day2" />
 
-                                    <CheckBox
+                                    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
                                         android:layout_weight="1"
                                         android:text="@string/text_day3" />
 
-                                    <CheckBox
+                                    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
                                         android:layout_weight="1"
@@ -230,19 +233,19 @@
                                     android:orientation="horizontal"
                                     android:weightSum="4">
 
-                                    <CheckBox
+                                    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
                                         android:layout_weight="1"
                                         android:text="@string/text_day5" />
 
-                                    <CheckBox
+                                    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
                                         android:layout_weight="1"
                                         android:text="@string/text_day6" />
 
-                                    <CheckBox
+                                    <org.autojs.autojs.theme.widget.ThemeColorCheckBox
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
                                         android:layout_weight="1"
@@ -254,7 +257,7 @@
 
                         </com.github.aakira.expandablelayout.ExpandableRelativeLayout>
 
-                        <RadioButton
+                        <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                             android:id="@+id/run_on_broadcast"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -282,7 +285,7 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="vertical">
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_startup"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -291,7 +294,7 @@
                                         android:text="@string/text_run_on_startup"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_boot"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -300,7 +303,7 @@
                                         android:text="@string/text_run_on_boot"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_screen_on"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -309,7 +312,7 @@
                                         android:text="@string/text_run_on_screen_on"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_screen_off"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -318,7 +321,7 @@
                                         android:text="@string/text_run_on_screen_off"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_screen_unlock"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -327,7 +330,7 @@
                                         android:text="@string/text_run_on_screen_unlock"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_battery_change"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -336,7 +339,7 @@
                                         android:text="@string/text_run_on_battery_change"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_power_connect"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -345,7 +348,7 @@
                                         android:text="@string/text_run_on_power_connect"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_power_disconnect"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -354,7 +357,7 @@
                                         android:text="@string/text_run_on_power_disconnect"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_conn_change"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -363,7 +366,7 @@
                                         android:text="@string/text_run_on_conn_change"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_package_install"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -372,7 +375,7 @@
                                         android:text="@string/text_run_on_package_install"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_package_uninstall"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -381,7 +384,7 @@
                                         android:text="@string/text_run_on_package_uninstall"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_package_update"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -390,7 +393,7 @@
                                         android:text="@string/text_run_on_package_update"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_headset_plug"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -399,7 +402,7 @@
                                         android:text="@string/text_run_on_headset_plug"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_config_change"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -408,7 +411,7 @@
                                         android:text="@string/text_run_on_config_change"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
                                         android:id="@+id/run_on_time_tick"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
@@ -417,8 +420,8 @@
                                         android:text="@string/text_run_on_time_tick"
                                         tools:ignore="RtlSymmetry" />
 
-                                    <RadioButton
-                                        android:id="@+id/run_on_other_broadcast"
+                                    <org.autojs.autojs.theme.widget.ThemeColorRadioButton
+                                        android:id="@+id/run_on_custom_broadcast"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:layout_marginTop="16dp"
@@ -428,12 +431,13 @@
 
                                 </RadioGroup>
 
-                                <com.google.android.material.textfield.TextInputLayout
+                                <org.autojs.autojs.theme.widget.ThemeColorTextInputLayout
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="36dp"
-                                    android:layout_marginTop="2dp"
-                                    android:hint="@string/text_broadcast_action">
+                                    android:layout_marginTop="6dp"
+                                    android:hint="@string/text_broadcast_action"
+                                    app:expandedHintEnabled="false">
 
                                     <androidx.appcompat.widget.AppCompatEditText
                                         android:id="@+id/action"
@@ -442,7 +446,7 @@
                                         android:maxLines="2"
                                         android:text="@string/text_broadcast_action_prefix" />
 
-                                </com.google.android.material.textfield.TextInputLayout>
+                                </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
                             </LinearLayout>
 

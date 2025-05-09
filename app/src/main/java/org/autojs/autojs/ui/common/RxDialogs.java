@@ -14,20 +14,32 @@ import io.reactivex.subjects.PublishSubject;
  */
 public class RxDialogs {
 
-    public static Observable<Boolean> confirm(Context context, String text) {
+    public static Observable<Boolean> confirm(Context context, String content) {
+        return confirm(context, content, 0);
+    }
+    
+    public static Observable<Boolean> confirm(Context context, String content, int positiveColorRes) {
         PublishSubject<Boolean> subject = PublishSubject.create();
-        new MaterialDialog.Builder(context)
-                .positiveText(R.string.text_ok)
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(context)
+                .content(content)
                 .negativeText(R.string.text_cancel)
-                .onPositive((dialog, which) -> subject.onNext(true))
+                .negativeColorRes(R.color.dialog_button_default)
                 .onNegative((dialog, which) -> subject.onNext(false))
-                .content(text)
-                .show();
+                .positiveText(R.string.text_ok)
+                .onPositive((dialog, which) -> subject.onNext(true));
+        if (positiveColorRes != 0) {
+            builder.positiveColorRes(positiveColorRes);
+        }
+        builder.show();
         return subject;
     }
 
-    public static Observable<Boolean> confirm(Context context, int res) {
-        return confirm(context, context.getString(res));
+    public static Observable<Boolean> confirm(Context context, int contentRes) {
+        return confirm(context, context.getString(contentRes));
+    }
+
+    public static Observable<Boolean> confirm(Context context, int contentRes, int positiveColorRes) {
+        return confirm(context, context.getString(contentRes), positiveColorRes);
     }
 
 }

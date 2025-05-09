@@ -12,6 +12,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.extension.MaterialDialogExtensions;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.pio.PFiles;
@@ -57,9 +58,9 @@ public class EditorMenu {
             return tryDoing(mEditorView::forceStop);
         }
         return onEditOptionsSelected(item)
-                || onJumpOptionsSelected(item)
-                || onMoreOptionsSelected(item)
-                || onDebugOptionsSelected(item);
+               || onJumpOptionsSelected(item)
+               || onMoreOptionsSelected(item)
+               || onDebugOptionsSelected(item);
     }
 
     private boolean onDebugOptionsSelected(MenuItem item) {
@@ -69,11 +70,13 @@ public class EditorMenu {
             return true;
         }
         if (itemId == R.id.action_launch_debugger) {
-            new NotAskAgainDialog.Builder(mEditorView.getContext(), "editor.debug.long_click_hint")
+            var builder = new NotAskAgainDialog.Builder(mEditorView.getContext(), "editor.debug.long_click_hint")
                     .title(R.string.text_prompt)
                     .content(R.string.hint_long_click_run_to_debug)
-                    .positiveText(R.string.text_ok)
-                    .show();
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_default);
+            MaterialDialogExtensions.widgetThemeColor(builder);
+            builder.show();
             return tryDoing(mEditorView::debug);
         }
         if (itemId == R.id.action_remove_all_breakpoints) {
@@ -169,9 +172,12 @@ public class EditorMenu {
         new MaterialDialog.Builder(mContext)
                 .title(title)
                 .content(desc)
-                .positiveText(R.string.text_copy)
-                .negativeText(R.string.text_en_import)
                 .neutralText(R.string.text_view_docs)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .negativeText(R.string.text_en_import)
+                .negativeColorRes(R.color.dialog_button_hint)
+                .positiveText(R.string.text_copy)
+                .positiveColorRes(R.color.dialog_button_hint)
                 .onPositive((ignored, which) -> {
                     ClipboardUtils.setClip(mContext, desc);
                     ViewUtils.showToast(mContext, R.string.text_already_copied_to_clip);
@@ -234,10 +240,14 @@ public class EditorMenu {
                 //     // Hint dialog.
                 // })
                 .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
                 .onNegative((dialog, which) -> dialog.dismiss())
                 .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive((dialog, which) -> dialog.dismiss())
                 .autoDismiss(false);
+
+        MaterialDialogExtensions.choiceWidgetThemeColor(builder);
 
         // TODO by SuperMonster003 on Oct 17, 2022.
         //  ! Implementation for "scale view".
@@ -302,7 +312,7 @@ public class EditorMenu {
 
     private void showJumpDialog(final int lineCount) {
         String hint = "1 - " + lineCount;
-        new MaterialDialog.Builder(mContext)
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                 .title(R.string.text_jump_to_line)
                 .input(hint, "", (dialog, input) -> {
                     if (TextUtils.isEmpty(input)) {
@@ -315,8 +325,12 @@ public class EditorMenu {
                         /* Ignored. */
                     }
                 })
-                .inputType(InputType.TYPE_CLASS_NUMBER)
-                .show();
+                .inputType(InputType.TYPE_CLASS_NUMBER);
+        builder.positiveColorRes(R.color.dialog_button_attraction);
+        builder.negativeText(R.string.dialog_button_cancel);
+        builder.negativeColorRes(R.color.dialog_button_default);
+        MaterialDialogExtensions.widgetThemeColor(builder);
+        builder.show();
     }
 
     @SuppressLint("StringFormatMatches")
@@ -364,9 +378,12 @@ public class EditorMenu {
     private void findOrReplace() {
         mEditor.getSelection()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s -> new FindOrReplaceDialogBuilder(mContext, mEditorView)
-                        .setQueryIfNotEmpty(s)
-                        .show());
+                .subscribe(s -> {
+                    FindOrReplaceDialogBuilder builder = new FindOrReplaceDialogBuilder(mContext, mEditorView)
+                            .setQueryIfNotEmpty(s);
+                    builder.positiveColorRes(R.color.dialog_button_attraction);
+                    builder.show();
+                });
     }
 
     private void copyAll() {

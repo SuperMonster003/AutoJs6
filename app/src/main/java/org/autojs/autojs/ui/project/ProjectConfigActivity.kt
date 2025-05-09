@@ -25,6 +25,7 @@ import org.autojs.autojs.model.project.ProjectTemplate
 import org.autojs.autojs.pio.PFiles.ensureDir
 import org.autojs.autojs.pio.PFiles.write
 import org.autojs.autojs.project.ProjectConfig
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.shortcut.AppsIconSelectActivity
 import org.autojs.autojs.ui.widget.SimpleTextWatcher
@@ -82,6 +83,10 @@ class ProjectConfigActivity : BaseActivity() {
         mVersionCode = binding.versionCode
         mMainFileName = binding.mainFileName
 
+        binding.defaultStableMode.apply {
+            ThemeColorHelper.setThemeColorPrimary(this, true)
+        }
+
         mIcon = binding.appIcon.apply {
             setOnClickListener { selectIcon() }
         }
@@ -118,7 +123,8 @@ class ProjectConfigActivity : BaseActivity() {
             if (mProjectConfig == null) {
                 MaterialDialog.Builder(this)
                     .title(R.string.text_invalid_project)
-                    .positiveText(R.string.text_ok)
+                    .positiveText(R.string.dialog_button_dismiss)
+                    .positiveColorRes(R.color.dialog_button_failure)
                     .dismissListener { finish() }
                     .show()
             }

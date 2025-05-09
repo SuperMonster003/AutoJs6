@@ -62,7 +62,10 @@ class ManageKeyStoreActivity : BaseActivity() {
         override fun onDeleteButtonClicked(keyStore: KeyStore) {
             MaterialDialog.Builder(this@ManageKeyStoreActivity)
                 .title(getString(R.string.text_confirm_to_delete))
-                .positiveText(R.string.text_ok).negativeText(R.string.text_cancel)
+                .negativeText(R.string.dialog_button_cancel)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.dialog_button_confirm)
+                .positiveColorRes(R.color.dialog_button_caution)
                 .onPositive { _: MaterialDialog, _: DialogAction ->
                     deleteKeyStore(keyStore)
                 }.show()
@@ -128,7 +131,10 @@ class ManageKeyStoreActivity : BaseActivity() {
             R.id.action_delete_all -> {
                 MaterialDialog.Builder(this@ManageKeyStoreActivity)
                     .title(getString(R.string.text_delete_all))
-                    .positiveText(R.string.text_ok).negativeText(R.string.text_cancel)
+                    .negativeText(R.string.dialog_button_cancel)
+                    .negativeColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_caution)
                     .onPositive { _: MaterialDialog, _: DialogAction ->
                         deleteAllKeyStores()
                     }.show()

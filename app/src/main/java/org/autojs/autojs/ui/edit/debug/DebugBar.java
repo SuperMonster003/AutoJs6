@@ -117,10 +117,12 @@ public class DebugBar extends FrameLayout {
         new MaterialDialog.Builder(getContext())
                 .title(variable.getDisplayName())
                 .content(variable.getValue())
+                .neutralText(R.string.text_copy_value)
+                .neutralColorRes(R.color.dialog_button_hint)
+                .onNeutral((dialog, which) -> ClipboardUtils.setClip(getContext(), variable.getValue()))
                 .positiveText(R.string.text_ok)
-                .negativeText(R.string.text_copy_value)
+                .positiveColorRes(R.color.dialog_button_default)
                 .autoDismiss(true)
-                .onNegative((dialog, which) -> ClipboardUtils.setClip(getContext(), variable.getValue()))
                 .show();
     }
 

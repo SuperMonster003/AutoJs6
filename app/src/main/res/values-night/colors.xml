@@ -43,7 +43,7 @@
 
     <color name="about_app_function_buttons">#A9A9A9</color>
     <color name="about_app_version_info">@color/about_app_function_buttons</color>
-    <color name="about_app_dev_info_dialog_background">#DE102027</color>
+    <color name="about_app_dev_info_dialog_background">#DE191919</color>
     <color name="github_avatar_border">#26E2E5EA</color>
     <color name="github_color_fg_default">@color/prefTextColorPrimary</color>
     <color name="github_color_fg_muted">@color/prefTextColorSecondary</color>

@@ -109,6 +109,7 @@
     <string name="dialog_button_update_now">Update</string>
     <string name="dialog_button_use_default">Use default</string>
     <string name="dialog_button_use_palette">Use palette</string>
+    <string name="dialog_button_version_histories">Histories</string>
     <string name="dialog_button_view_file">View File</string>
     <string name="dialog_title_color_details">Color details</string>
     <string name="dialog_title_color_palette">Color palette</string>
@@ -364,6 +365,7 @@
     <string name="text_all_files_access_is_needed">\"All files access\" is needed to access script files on the phone</string>
     <string name="text_all_histories">All histories</string>
     <string name="text_all_histories_cleared">All histories have been cleared</string>
+    <string name="text_all_items_cleared">All items have been cleared</string>
     <string name="text_already_copied_to_clip">Copied to clipboard</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">Already copied to clipboard (only latest %d items)</string>
     <string name="text_already_created">Created</string>
@@ -466,6 +468,7 @@
     <string name="text_compatibility">Compatibility</string>
     <string name="text_config">Config</string>
     <string name="text_confirm_to_clear_all_histories">Are you sure to clear all histories?</string>
+    <string name="text_confirm_to_clear_all_items">Are you sure to clear all items?</string>
     <string name="text_confirm_to_clear_histories_of">All histories below will be cleared\n\n[ %1$s ]\n\nAre you sure to clear them all?</string>
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">All histories below will be cleared\n\n[ All color libraries ]\n\nAre you sure to clear them all?</string>
     <string name="text_confirm_to_delete">Are you sure to delete?</string>
@@ -515,6 +518,7 @@
     <string name="text_device_model">Device model</string>
     <string name="text_device_name">Device name</string>
     <string name="text_device_product_name">Device product name</string>
+    <string name="text_device_screen_resolution">Device screen resolution</string>
     <string name="text_directly_download">Download now</string>
     <string name="text_directory">Directory</string>
     <string name="text_display_over_other_app">Display over other apps</string>
@@ -834,6 +838,7 @@
     <string name="text_please_choose_a_script">Choose a script</string>
     <string name="text_please_input_name">Input name</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">Please wait...</string>
+    <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">Please wait a moment before trying again...</string>
     <string name="text_pointer_location">Pointer location</string>
     <string name="text_pointer_location_toggle_failed_with_hint">Toggle \"pointer location\" failed.\nRoot access is required.</string>
     <string name="text_post_notifications_permission">Post notifications</string>

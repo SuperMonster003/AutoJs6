@@ -2,6 +2,7 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="about_item_avatar_side_length">50dp</dimen>
     <dimen name="about_item_avatar_side_length_land">60dp</dimen>
+    <dimen name="about_item_avatar_side_length_land_compact">57dp</dimen>
     <dimen name="content_inset">16dp</dimen>
     <dimen name="divider_drawer_menu_group">6dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
@@ -10,7 +11,9 @@
     <dimen name="github_font_size_full_name">18sp</dimen>
     <dimen name="github_font_size_nickname">15sp</dimen>
     <dimen name="icon_developer_identifier_image_padding">5dp</dimen>
+    <dimen name="icon_developer_identifier_image_padding_compact">4dp</dimen>
     <dimen name="icon_developer_identifier_image_side_length">48dp</dimen>
+    <dimen name="icon_developer_identifier_image_side_length_compact">40dp</dimen>
     <dimen name="level_beam_view_line_offset">3dp</dimen>
     <dimen name="level_beam_view_line_width">2dp</dimen>
     <dimen name="level_beam_view_padding_left">2dp</dimen>

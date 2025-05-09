@@ -5,6 +5,7 @@ plugins {
 
 android {
     namespace = 'com.jaredrummler.android.colorpicker'
+
     compileSdk = project.ext.compileSdk
 
     resourcePrefix "cpv_"

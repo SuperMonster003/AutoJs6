@@ -75,10 +75,11 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
     private fun onLoadFileError(message: String?) {
         MaterialDialog.Builder(this)
             .title(getString(R.string.text_cannot_read_file))
-            .content(message ?: "")
+            .apply { message?.let(::content) }
             .positiveText(R.string.text_exit)
-            .cancelable(false)
+            .positiveColorRes(R.color.dialog_button_failure)
             .onPositive { _, _ -> finish() }
+            .cancelable(false)
             .show()
     }
 

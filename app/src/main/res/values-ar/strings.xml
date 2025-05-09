@@ -114,6 +114,7 @@
     <string name="dialog_button_update_now">تحديث</string>
     <string name="dialog_button_use_default">استخدم الافتراضي</string>
     <string name="dialog_button_use_palette">ستخدام اللوحة</string>
+    <string name="dialog_button_version_histories">السجل</string>
     <string name="dialog_button_view_file">استعراض الملف</string>
     <string name="dialog_title_color_details">تفاصيل اللون</string>
     <string name="dialog_title_color_palette">لوحة الألوان</string>
@@ -369,6 +370,7 @@
     <string name="text_all_files_access_is_needed">هناك حاجة إلى \"All Files Access\" للوصول إلى ملفات البرنامج النصي على الهاتف</string>
     <string name="text_all_histories">جميع السجلات</string>
     <string name="text_all_histories_cleared">تم مسح جميع السجلات</string>
+    <string name="text_all_items_cleared">تم مسح جميع العناصر</string>
     <string name="text_already_copied_to_clip">نسخ إلى الحافظة</string>
     <string name="text_already_copied_to_clip_but_only_latest_few_items">تم النسخ بالفعل إلى الحافظة (فقط أحدث %d عنصر)</string>
     <string name="text_already_created">مخلوق</string>
@@ -471,6 +473,7 @@
     <string name="text_compatibility">التوافق</string>
     <string name="text_config">تكوين</string>
     <string name="text_confirm_to_clear_all_histories">هل أنت متأكد من مسح جميع السجلات؟</string>
+    <string name="text_confirm_to_clear_all_items">هل أنت متأكد من مسح جميع العناصر؟</string>
     <string name="text_confirm_to_clear_histories_of">سيتم مسح السجلات التالية\n\n[ %1$s ]\n\nهل أنت متأكد من المسح؟</string>
     <string name="text_confirm_to_clear_histories_of_all_color_libraries">سيتم مسح السجلات التالية\n\n[ جميع مكتبات الألوان ]\n\nهل أنت متأكد من المسح؟</string>
     <string name="text_confirm_to_delete">هل انت متأكد من الحذف؟</string>
@@ -520,6 +523,7 @@
     <string name="text_device_model">طراز الجهاز</string>
     <string name="text_device_name">اسم الجهاز</string>
     <string name="text_device_product_name">اسم منتج الجهاز</string>
+    <string name="text_device_screen_resolution">دقّة شاشة الجهاز</string>
     <string name="text_directly_download">التحميل الان</string>
     <string name="text_directory">الدليل</string>
     <string name="text_display_over_other_app">عرض على تطبيقات أخرى</string>
@@ -839,6 +843,7 @@
     <string name="text_please_choose_a_script">اختر نصًا</string>
     <string name="text_please_input_name">اسم الإدخال</string>
     <string name="text_please_wait" tools:ignore="TypographyEllipsis">الرجاء الانتظار...</string>
+    <string name="text_please_wait_a_moment_before_trying_again" tools:ignore="TypographyEllipsis">يرجى المحاولة مرة أخرى لاحقًا...</string>
     <string name="text_pointer_location">موقع المؤشر</string>
     <string name="text_pointer_location_toggle_failed_with_hint">فشل تبديل \"موقع المؤشر\".\nالوصول إلى الجذر مطلوب.</string>
     <string name="text_post_notifications_permission">نشر الإخطارات</string>

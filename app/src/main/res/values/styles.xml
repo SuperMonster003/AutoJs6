@@ -183,6 +183,16 @@
         <item name="android:tint">@color/night_full</item>
     </style>
 
+    <style name="PopupMenu.HideIndicator" parent="@style/ThemeOverlay.AppCompat.DayNight">
+        <item name="android:radioButtonStyle">@style/PopupMenu.Radio.Null</item>
+        <item name="android:checkboxStyle">@style/PopupMenu.Radio.Null</item>
+        <item name="android:textColor">@color/day_night</item>
+    </style>
+
+    <style name="PopupMenu.Radio.Null" parent="@style/Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:button">@null</item>
+    </style>
+
     <style name="SearchViewActionBar" parent="@style/Widget.AppCompat.SearchView.ActionBar" />
 
     <style name="Material3DarkTheme" parent="@style/Theme.Material3.Dark" />

@@ -7,7 +7,6 @@ import android.view.View
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
-import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -18,9 +17,11 @@ object ThemeColorManager {
 
     @JvmField
     var defaultThemeColor = when {
-        isInrt -> R.color.md_blue_gray_900
-        else -> R.color.theme_color_default
-    }.let { ThemeColor(ColorUtils.fromResources(it)) }
+        // R.color.md_blue_gray_900
+        isInrt -> "#263238"
+        // R.color.theme_color_default
+        else -> "#00695C"
+    }.let { ThemeColor(ColorUtils.parseColor(it)) }
 
     @JvmStatic
     lateinit var currentThemeColor: ThemeColor
@@ -29,7 +30,7 @@ object ThemeColorManager {
     val colorPrimary: Int
         get() = currentThemeColor.colorPrimary
 
-    init {
+    fun init() {
         ThemeColor.fromPreferences()?.let { currentThemeColor = it } ?: setThemeColor(defaultThemeColor)
     }
 

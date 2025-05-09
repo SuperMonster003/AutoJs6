@@ -23,7 +23,9 @@
         <attr name="neutralText" format="string" />
         <attr name="neutralTextShort" format="string" />
         <attr name="negativeText" format="string" />
+        <attr name="negativeColor" format="color" />
         <attr name="positiveText" format="string" />
+        <attr name="positiveColor" format="color" />
         <attr name="onConfirmPrompt" format="string" />
     </declare-styleable>
 
@@ -37,7 +39,9 @@
         <attr name="dialogContent" />
         <attr name="neutralText" />
         <attr name="negativeText" />
+        <attr name="negativeColor" />
         <attr name="positiveText" />
+        <attr name="positiveColor" />
         <attr name="onConfirmPrompt" />
         <attr name="itemKeys" format="reference" />
         <attr name="itemValues" format="reference" />
