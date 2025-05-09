@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.text.InputFilter
 import android.view.KeyEvent
+import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.extension.MaterialDialogExtensions.widgetThemeColor
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.main.drawer.DrawerMenuDisposableItem
 import org.autojs.autojs.util.Observers
@@ -98,20 +100,47 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
                                         it.remove(text)
                                         dHistories.notifyItemsChanged()
                                         DialogUtils.toggleContentViewByItems(dHistories)
+                                        DialogUtils.toggleActionButtonAbilityByItems(dHistories, DialogAction.NEUTRAL)
                                     }
                                 }
                                 .show()
                         }
                     }
-                    .negativeText(R.string.dialog_button_cancel)
-                    .negativeColorRes(R.color.dialog_button_default)
-                    .onNegative { dHistories, _ -> dHistories.dismiss() }
+                    .neutralText(R.string.dialog_button_clear_items)
+                    .neutralColorRes(R.color.dialog_button_warn)
+                    .onNeutral { dHistories, _ ->
+                        MaterialDialog.Builder(context)
+                            .title(R.string.text_prompt)
+                            .content(R.string.text_confirm_to_clear_all_histories)
+                            .negativeText(R.string.dialog_button_cancel)
+                            .negativeColorRes(R.color.dialog_button_default)
+                            .positiveText(R.string.dialog_button_confirm)
+                            .positiveColorRes(R.color.dialog_button_caution)
+                            .onPositive { _, _ ->
+                                JsonSocketClient.clearAllHistories()
+                                dHistories.items?.let {
+                                    it.clear()
+                                    dHistories.notifyItemsChanged()
+                                    DialogUtils.toggleContentViewByItems(dHistories)
+                                    DialogUtils.toggleActionButtonAbilityByItems(dHistories, DialogAction.NEUTRAL)
+                                }
+                                ViewUtils.showSnack(dHistories.view, R.string.text_all_histories_cleared)
+                            }
+                            .show()
+                    }
+                    .positiveText(R.string.dialog_button_back)
+                    .positiveColorRes(R.color.dialog_button_default)
+                    .onPositive { dHistories, _ -> dHistories.dismiss() }
                     .autoDismiss(false)
                     .show()
-                    .also { DialogUtils.toggleContentViewByItems(it) }
+                    .also {
+                        DialogUtils.toggleContentViewByItems(it)
+                        DialogUtils.toggleActionButtonAbilityByItems(it, DialogAction.NEUTRAL)
+                    }
             }
             .negativeText(R.string.text_cancel)
             .onNegative { dialog, _ -> dialog.dismiss() }
+            .positiveText(R.string.dialog_button_confirm)
             .autoDismiss(false)
             .dismissListener(onConnectionDialogDismissed)
             .show()
