@@ -1,119 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="288dp"
-        android:layout_height="match_parent"
-        android:background="?android:windowBackground"
-        android:clickable="true"
-        android:fitsSystemWindows="true"
-        android:importantForAccessibility="no"
-        android:orientation="vertical"
-        android:focusable="true">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_menu_container"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="?android:windowBackground"
+    android:clickable="true"
+    android:fitsSystemWindows="true"
+    android:focusable="true"
+    android:importantForAccessibility="no"
+    android:orientation="vertical">
 
     <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/drawer_menu"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+        android:id="@+id/drawer_menu"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:divider" />
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:divider" />
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="41dp"
-            android:layout_gravity="center_horizontal"
-            android:baselineAligned="false">
+        android:layout_width="match_parent"
+        android:layout_height="41dp"
+        android:layout_gravity="center_horizontal"
+        android:baselineAligned="false">
 
         <LinearLayout
-                android:id="@+id/settings"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="?selectableItemBackground"
-                android:gravity="center"
-                android:orientation="horizontal">
+            android:id="@+id/settings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?selectableItemBackground"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="10dp"
-                    android:src="@drawable/ic_ali_settings"
-                    app:tint="?android:textColorPrimary"
-                    tools:ignore="ContentDescription" />
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="10dp"
+                android:src="@drawable/ic_ali_settings"
+                app:tint="?android:textColorPrimary"
+                tools:ignore="ContentDescription" />
 
             <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="4dp"
-                    android:gravity="center"
-                    android:text="@string/text_settings"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="15sp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="4dp"
+                android:gravity="center"
+                android:text="@string/text_settings"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="15sp" />
         </LinearLayout>
 
         <LinearLayout
-                android:id="@+id/restart"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="?selectableItemBackground"
-                android:gravity="center"
-                android:orientation="horizontal">
+            android:id="@+id/restart"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?selectableItemBackground"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="10dp"
-                    android:src="@drawable/ic_refresh_white_24dp"
-                    app:tint="?android:textColorPrimary"
-                    tools:ignore="ContentDescription" />
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="10dp"
+                android:src="@drawable/ic_refresh_white_24dp"
+                app:tint="?android:textColorPrimary"
+                tools:ignore="ContentDescription" />
 
             <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="4dp"
-                    android:gravity="center"
-                    android:text="@string/text_restart_app"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="15sp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="4dp"
+                android:gravity="center"
+                android:text="@string/text_restart_app"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="15sp" />
 
         </LinearLayout>
 
         <LinearLayout
-                android:id="@+id/exit"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="?selectableItemBackground"
-                android:gravity="center"
-                android:orientation="horizontal">
+            android:id="@+id/exit"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?selectableItemBackground"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="10dp"
-                    android:src="@drawable/ic_ali_exit"
-                    app:tint="?android:textColorPrimary"
-                    tools:ignore="ContentDescription" />
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="10dp"
+                android:src="@drawable/ic_ali_exit"
+                app:tint="?android:textColorPrimary"
+                tools:ignore="ContentDescription" />
 
             <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="4dp"
-                    android:textColor="?android:textColorPrimary"
-                    android:gravity="center"
-                    android:text="@string/text_exit"
-                    android:textSize="15sp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="4dp"
+                android:textColor="?android:textColorPrimary"
+                android:gravity="center"
+                android:text="@string/text_exit"
+                android:textSize="15sp" />
         </LinearLayout>
 
     </LinearLayout>
