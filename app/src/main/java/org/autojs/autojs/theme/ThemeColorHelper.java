@@ -16,8 +16,11 @@ import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.CheckBox;
 import android.widget.Switch;
+import androidx.annotation.ColorInt;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 import org.autojs.autojs.theme.internal.ScrollingViewEdgeGlowColorHelper;
 import org.autojs.autojs.util.ColorUtils;
 import org.autojs.autojs.util.ViewUtils;
@@ -55,6 +58,28 @@ public class ThemeColorHelper {
         for (int i = 0; i < viewGroup.getChildCount(); i++) {
             setColorPrimary(viewGroup.getChildAt(i), themeColor);
         }
+    }
+
+    public static void setThemeColorPrimary(TimePickerDialog timePickerDialog, Context context, boolean contrastMatters) {
+        setThemeColorPrimary(timePickerDialog, context, ThemeColorManager.getColorPrimary(), contrastMatters);
+    }
+
+    public static void setThemeColorPrimary(TimePickerDialog timePickerDialog, Context context, @ColorInt int color, boolean contrastMatters) {
+        if (contrastMatters) {
+            color = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), color, 2.3);
+        }
+        timePickerDialog.setAccentColor(color);
+    }
+
+    public static void setThemeColorPrimary(DatePickerDialog datePickerDialog, Context context, boolean contrastMatters) {
+        setThemeColorPrimary(datePickerDialog, context, ThemeColorManager.getColorPrimary(), contrastMatters);
+    }
+
+    public static void setThemeColorPrimary(DatePickerDialog datePickerDialog, Context context, @ColorInt int color, boolean contrastMatters) {
+        if (contrastMatters) {
+            color = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), color, 2.3);
+        }
+        datePickerDialog.setAccentColor(color);
     }
 
     public static void setColorPrimary(SwitchCompat switchCompat, int color) {

@@ -1,13 +1,9 @@
 package org.autojs.autojs.ui.timing
 
 import android.annotation.SuppressLint
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
@@ -26,6 +22,11 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.TimePicker
 import androidx.appcompat.widget.Toolbar
+import androidx.core.graphics.Insets
+import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.forEach
 import com.github.aakira.expandablelayout.ExpandableRelativeLayout
 import org.autojs.autojs.core.ui.BiMaps
 import org.autojs.autojs.execution.ExecutionConfig
@@ -33,6 +34,7 @@ import org.autojs.autojs.execution.ExecutionConfig.CREATOR.default
 import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.model.script.ScriptFile
+import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.timing.IntentTask
 import org.autojs.autojs.timing.TaskReceiver
 import org.autojs.autojs.timing.TimedTask
@@ -44,6 +46,7 @@ import org.autojs.autojs.timing.TimedTaskManager.updateTask
 import org.autojs.autojs.tool.MapBuilder
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityTimedTaskSettingBinding
@@ -51,6 +54,8 @@ import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog as MaterialDatePickerDialog
+import com.wdullaer.materialdatetimepicker.time.TimePickerDialog as MaterialTimePickerDialog
 
 /**
  * Created by Stardust on Nov 28, 2017.
@@ -64,8 +69,8 @@ class TimedTaskSettingActivity : BaseActivity() {
     private lateinit var mDailyTaskRadio: RadioButton
     private lateinit var mWeeklyTaskRadio: RadioButton
     private lateinit var mRunOnBroadcastRadio: RadioButton
-    private lateinit var mRunOnOtherBroadcast: RadioButton
-    private lateinit var mOtherBroadcastAction: EditText
+    private lateinit var mRunOnCustomBroadcast: RadioButton
+    private lateinit var mCustomBroadcastAction: EditText
     private lateinit var mBroadcastGroup: RadioGroup
     private lateinit var mDisposableTaskTime: TextView
     private lateinit var mDisposableTaskDate: TextView
@@ -74,9 +79,10 @@ class TimedTaskSettingActivity : BaseActivity() {
     private lateinit var mWeeklyTaskContainer: LinearLayout
 
     private val mDayOfWeekCheckBoxes: MutableList<CheckBox> = ArrayList()
-    private var mScriptFile: ScriptFile? = null
+
     private var mTimedTask: TimedTask? = null
     private var mIntentTask: IntentTask? = null
+    private lateinit var mScriptFile: ScriptFile
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,129 +92,179 @@ class TimedTaskSettingActivity : BaseActivity() {
 
         mToolbar = binding.toolbar
         mTimingGroup = binding.timingGroup
-        mRunOnOtherBroadcast = binding.runOnOtherBroadcast
-        mOtherBroadcastAction = binding.action
-        mBroadcastGroup = binding.broadcastGroup
-        mDailyTaskTimePicker = binding.dailyTaskTimePicker
-        mWeeklyTaskTimePicker = binding.weeklyTaskTimePicker
-        mWeeklyTaskContainer = binding.weeklyTaskContainer
+        mRunOnCustomBroadcast = binding.runOnCustomBroadcast
+        mCustomBroadcastAction = binding.action.apply {
+            setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) {
+                    mRunOnCustomBroadcast.isChecked = true
+                }
+            }
+        }
+        mBroadcastGroup = binding.broadcastGroup.apply {
+            setUpRadioButtonListeners()
+        }
+        mWeeklyTaskContainer = binding.weeklyTaskContainer.apply {
+            setUpDayOfWeekCheckBoxes()
+        }
+        mWeeklyTaskTimePicker = binding.weeklyTaskTimePicker.apply {
+            setIs24HourView(true)
+        }
+        mDailyTaskTimePicker = binding.dailyTaskTimePicker.apply {
+            setIs24HourView(true)
+        }
         mDailyTaskRadio = binding.dailyTaskRadio.apply {
-            setOnCheckedChangeListener { buttonView, _ -> onCheckedChanged(buttonView) }
+            setUpRadioButton()
         }
         mWeeklyTaskRadio = binding.weeklyTaskRadio.apply {
-            setOnCheckedChangeListener { buttonView, _ -> onCheckedChanged(buttonView) }
+            setUpRadioButton()
         }
         mDisposableTaskRadio = binding.disposableTaskRadio.apply {
-            setOnCheckedChangeListener { buttonView, _ -> onCheckedChanged(buttonView) }
+            setUpRadioButton()
         }
         mRunOnBroadcastRadio = binding.runOnBroadcast.apply {
-            setOnCheckedChangeListener { buttonView, _ -> onCheckedChanged(buttonView) }
+            setUpRadioButton()
         }
         mDisposableTaskTime = binding.disposableTaskTime.apply {
+            text = TIME_FORMATTER.print(LocalTime.now())
             setOnClickListener { showDisposableTaskTimePicker() }
         }
         mDisposableTaskDate = binding.disposableTaskDate.apply {
+            text = DATE_FORMATTER.print(LocalDate.now())
             setOnClickListener { showDisposableTaskDatePicker() }
         }
 
-        val taskId = intent.getLongExtra(EXTRA_TASK_ID, -1)
-        if (taskId != -1L) {
-            mTimedTask = getTimedTask(taskId)
-            if (mTimedTask != null) {
-                mScriptFile = ScriptFile(mTimedTask!!.scriptPath)
-            }
-        } else {
-            val intentTaskId = intent.getLongExtra(EXTRA_INTENT_TASK_ID, -1)
-            if (intentTaskId != -1L) {
-                mIntentTask = getIntentTask(intentTaskId)
-                if (mIntentTask != null) {
-                    mScriptFile = ScriptFile(mIntentTask!!.scriptPath)
-                }
-            } else {
-                val path = intent.getStringExtra(ScriptIntents.EXTRA_KEY_PATH)
-                if (TextUtils.isEmpty(path)) {
-                    finish()
-                }
-                mScriptFile = ScriptFile(path)
-            }
-        }
-
+        loadTaskFromIntent()
         setToolbarAsBack(R.string.text_timed_task)
-        mToolbar.subtitle = mScriptFile!!.name
-        mDailyTaskTimePicker.setIs24HourView(true)
-        mWeeklyTaskTimePicker.setIs24HourView(true)
-        findDayOfWeekCheckBoxes(mWeeklyTaskContainer)
-        setUpTaskSettings(this)
+        mToolbar.subtitle = mScriptFile.name
+
+        setUpTaskSettings()
 
         ViewUtils.excludePaddingClippableViewFromNavigationBar(binding.scrollView)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+            val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+
+            v.setPadding(0, 0, 0, maxOf(sysBars.bottom, ime.bottom))
+
+            // 只把 IME 的 inset 标记为已消费, 其余继续下传
+            val outInsets = WindowInsetsCompat.Builder(insets)
+                .setInsets(WindowInsetsCompat.Type.ime(), Insets.NONE)
+                .build()
+
+            outInsets
+        }
     }
 
-    private fun findDayOfWeekCheckBoxes(parent: ViewGroup) {
-        for (i in 0 until parent.childCount) {
-            val child = parent.getChildAt(i)
+    private fun loadTaskFromIntent() {
+        when (val taskId = intent.getLongExtra(EXTRA_TASK_ID, -1)) {
+            -1L -> when (val intentTaskId = intent.getLongExtra(EXTRA_INTENT_TASK_ID, -1)) {
+                -1L -> {
+                    val path = intent.getStringExtra(ScriptIntents.EXTRA_KEY_PATH)
+                    if (TextUtils.isEmpty(path)) {
+                        finish()
+                    }
+                    mScriptFile = ScriptFile(path)
+                }
+                else -> mIntentTask = getIntentTask(intentTaskId)?.also {
+                    mScriptFile = ScriptFile(it.scriptPath)
+                }
+            }
+            else -> mTimedTask = getTimedTask(taskId)?.also {
+                mScriptFile = ScriptFile(it.scriptPath)
+            }
+        }
+    }
+
+    private fun RadioGroup.setUpRadioButtonListeners() {
+        forEach { view ->
+            if (view !is RadioButton) {
+                return@forEach
+            }
+            view.setOnClickListener {
+                mCustomBroadcastAction.apply {
+                    if (view == mRunOnCustomBroadcast) {
+                        requestFocus()
+                        setSelection(length())
+                        ViewUtils.showSoftInput(this)
+                    } else {
+                        clearFocus()
+                        ViewUtils.hideSoftInput(this)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun RadioButton.setUpRadioButton() {
+        setOnCheckedChangeListener { buttonView, _ -> onCheckedChanged(buttonView) }
+    }
+
+    private fun ViewGroup.setUpDayOfWeekCheckBoxes() {
+        for (i in 0 until this.childCount) {
+            val child = this.getChildAt(i)
             if (child is CheckBox) {
                 mDayOfWeekCheckBoxes.add(child)
             } else if (child is ViewGroup) {
-                findDayOfWeekCheckBoxes(child)
+                child.setUpDayOfWeekCheckBoxes()
             }
             if (mDayOfWeekCheckBoxes.size >= 7) break
         }
     }
 
-    private fun setUpTaskSettings(context: Context) {
-        mDisposableTaskDate.text = DATE_FORMATTER.print(LocalDate.now())
-        mDisposableTaskTime.text = TIME_FORMATTER.print(LocalTime.now())
-        if (mTimedTask != null) {
-            setupTime(context)
+    private fun setUpTaskSettings() {
+        mTimedTask?.let {
+            setUpTime(it)
             return
         }
-        if (mIntentTask != null) {
-            setupAction()
+        mIntentTask?.let {
+            setUpAction(it)
             return
         }
         mDailyTaskRadio.isChecked = true
     }
 
-    private fun setupAction() {
+    private fun setUpTime(timedTask: TimedTask) {
+        if (timedTask.isDisposable) {
+            mDisposableTaskRadio.isChecked = true
+            mDisposableTaskTime.text = TIME_FORMATTER.print(timedTask.millis)
+            mDisposableTaskDate.text = DATE_FORMATTER.print(timedTask.millis)
+            return
+        }
+        val time = LocalTime.fromMillisOfDay(timedTask.millis)
+        mDailyTaskTimePicker.hour = time.hourOfDay
+        mDailyTaskTimePicker.minute = time.minuteOfHour
+        mWeeklyTaskTimePicker.hour = time.hourOfDay
+        mWeeklyTaskTimePicker.minute = time.minuteOfHour
+        if (timedTask.isDaily) {
+            mDailyTaskRadio.isChecked = true
+        } else {
+            mWeeklyTaskRadio.isChecked = true
+            for (i in mDayOfWeekCheckBoxes.indices) {
+                mDayOfWeekCheckBoxes[i].isChecked = timedTask.hasDayOfWeek(this, i + 1)
+            }
+        }
+    }
+
+    private fun setUpAction(intentTask: IntentTask) {
         mRunOnBroadcastRadio.isChecked = true
-        val buttonId = ACTIONS.getKey(mIntentTask!!.action)
+        val buttonId = ACTIONS.getKey(intentTask.action)
         if (buttonId == null) {
-            mRunOnOtherBroadcast.isChecked = true
-            mOtherBroadcastAction.setText(mIntentTask!!.action)
+            mRunOnCustomBroadcast.isChecked = true
+            mCustomBroadcastAction.setText(intentTask.action)
         } else {
             (findViewById<View>(buttonId) as RadioButton).isChecked = true
         }
     }
 
-    private fun setupTime(context: Context) {
-        if (mTimedTask!!.isDisposable) {
-            mDisposableTaskRadio.isChecked = true
-            mDisposableTaskTime.text = TIME_FORMATTER.print(mTimedTask!!.millis)
-            mDisposableTaskDate.text = DATE_FORMATTER.print(mTimedTask!!.millis)
-            return
-        }
-        val time = LocalTime.fromMillisOfDay(mTimedTask!!.millis)
-        mDailyTaskTimePicker.hour = time.hourOfDay
-        mDailyTaskTimePicker.minute = time.minuteOfHour
-        mWeeklyTaskTimePicker.hour = time.hourOfDay
-        mWeeklyTaskTimePicker.minute = time.minuteOfHour
-        if (mTimedTask!!.isDaily) {
-            mDailyTaskRadio.isChecked = true
-        } else {
-            mWeeklyTaskRadio.isChecked = true
-            for (i in mDayOfWeekCheckBoxes.indices) {
-                mDayOfWeekCheckBoxes[i].isChecked = mTimedTask!!.hasDayOfWeek(context, i + 1)
+    fun onCheckedChanged(button: CompoundButton) {
+        findExpandableLayoutOf(button).run {
+            when (button.isChecked) {
+                true -> post { expand() }
+                else -> post { collapse() }
             }
         }
-    }
-
-    fun onCheckedChanged(button: CompoundButton) {
-        val relativeLayout = findExpandableLayoutOf(button)
-        if (button.isChecked) {
-            relativeLayout.post { relativeLayout.expand() }
-        } else {
-            relativeLayout.collapse()
-        }
+        ViewUtils.hideSoftInput(mCustomBroadcastAction)
     }
 
     private fun findExpandableLayoutOf(button: CompoundButton): ExpandableRelativeLayout {
@@ -223,29 +279,36 @@ class TimedTaskSettingActivity : BaseActivity() {
 
     private fun showDisposableTaskTimePicker() {
         val time = TIME_FORMATTER.parseLocalTime(mDisposableTaskTime.text.toString())
-        TimePickerDialog(this, { _, hourOfDay, minute -> mDisposableTaskTime.text = TIME_FORMATTER.print(LocalTime(hourOfDay, minute)) }, time.hourOfDay, time.minuteOfHour, true)
-            .show()
+        MaterialTimePickerDialog.newInstance(
+            /* callback = */ { _, hourOfDay, minute, _ -> mDisposableTaskTime.text = TIME_FORMATTER.print(LocalTime(hourOfDay, minute)) },
+            /* hourOfDay = */ time.hourOfDay,
+            /* minute = */ time.minuteOfHour,
+            /* is24HourMode = */ true,
+        ).apply {
+            version = MaterialTimePickerDialog.Version.VERSION_2
+            ThemeColorHelper.setThemeColorPrimary(this, this@TimedTaskSettingActivity, true)
+            isThemeDark = ViewUtils.isNightModeYes(this@TimedTaskSettingActivity)
+        }.show(supportFragmentManager, "TimedTaskTimePickerDialog")
     }
 
     private fun showDisposableTaskDatePicker() {
         val date = DATE_FORMATTER.parseLocalDate(mDisposableTaskDate.text.toString())
-        DatePickerDialog(
-            this,
-            { _, year, month, dayOfMonth -> mDisposableTaskDate.text = DATE_FORMATTER.print(LocalDate(year, month + 1, dayOfMonth)) },
-            date.year,
-            date.monthOfYear - 1,
-            date.dayOfMonth
-        ).show()
+        MaterialDatePickerDialog.newInstance(
+            /* callBack = */ { _, year, month, dayOfMonth -> mDisposableTaskDate.text = DATE_FORMATTER.print(LocalDate(year, month + 1, dayOfMonth)) },
+            /* year = */ date.year,
+            /* monthOfYear = */ date.monthOfYear - 1,
+            /* dayOfMonth = */ date.dayOfMonth,
+        ).apply {
+            version = MaterialDatePickerDialog.Version.VERSION_2
+            ThemeColorHelper.setThemeColorPrimary(this, this@TimedTaskSettingActivity, true)
+            isThemeDark = ViewUtils.isNightModeYes(this@TimedTaskSettingActivity)
+        }.show(supportFragmentManager, "TimedTaskDatePickerDialog")
     }
 
-    private fun createTimedTask(): TimedTask? {
-        return if (mDisposableTaskRadio.isChecked) {
-            createDisposableTask()
-        } else if (mDailyTaskRadio.isChecked) {
-            createDailyTask()
-        } else {
-            createWeeklyTask()
-        }
+    private fun createTimedTask(): TimedTask? = when {
+        mDisposableTaskRadio.isChecked -> createDisposableTask()
+        mDailyTaskRadio.isChecked -> createDailyTask()
+        else -> createWeeklyTask()
     }
 
     private fun createWeeklyTask(): TimedTask? {
@@ -260,12 +323,12 @@ class TimedTaskSettingActivity : BaseActivity() {
             return null
         }
         val time = LocalTime(mWeeklyTaskTimePicker.hour, mWeeklyTaskTimePicker.minute)
-        return TimedTask.weeklyTask(time, timeFlag, mScriptFile!!.path, default)
+        return TimedTask.weeklyTask(time, timeFlag, mScriptFile.path, default)
     }
 
     private fun createDailyTask(): TimedTask {
         val time = LocalTime(mDailyTaskTimePicker.hour, mDailyTaskTimePicker.minute)
-        return TimedTask.dailyTask(time, mScriptFile!!.path, ExecutionConfig())
+        return TimedTask.dailyTask(time, mScriptFile.path, ExecutionConfig())
     }
 
     private fun createDisposableTask(): TimedTask? {
@@ -279,11 +342,12 @@ class TimedTaskSettingActivity : BaseActivity() {
             showToast(this, R.string.text_disposable_task_time_before_now)
             return null
         }
-        return TimedTask.disposableTask(dateTime, mScriptFile!!.path, default)
+        return TimedTask.disposableTask(dateTime, mScriptFile.path, default)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_timed_task_setting, menu)
+        mToolbar.setMenuIconsColorByThemeColorLuminance(this)
         return true
     }
 
@@ -291,17 +355,18 @@ class TimedTaskSettingActivity : BaseActivity() {
         if (item.itemId == R.id.action_done) {
             if ((getSystemService(POWER_SERVICE) as PowerManager).isIgnoringBatteryOptimizations(packageName)) {
                 createOrUpdateTask()
-            } else {
-                try {
-                    @SuppressLint("BatteryLife") val intent = Intent()
-                        .setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                        .setData(Uri.parse("package:$packageName"))
-                    @Suppress("DEPRECATION")
-                    startActivityForResult(intent, REQUEST_CODE_IGNORE_BATTERY)
-                } catch (e: ActivityNotFoundException) {
-                    e.printStackTrace()
-                    createOrUpdateTask()
-                }
+                return true
+            }
+            try {
+                @SuppressLint("BatteryLife")
+                val intent = Intent()
+                    .setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                    .setData("package:$packageName".toUri())
+                @Suppress("DEPRECATION")
+                startActivityForResult(intent, REQUEST_CODE_IGNORE_BATTERY)
+            } catch (e: ActivityNotFoundException) {
+                e.printStackTrace()
+                createOrUpdateTask()
             }
             return true
         }
@@ -339,41 +404,46 @@ class TimedTaskSettingActivity : BaseActivity() {
     private fun createOrUpdateIntentTask() {
         val buttonId = mBroadcastGroup.checkedRadioButtonId
         if (buttonId == -1) {
-            showToast(this, R.string.error_empty_broadcast_selection)
+            showToast(this, R.string.error_empty_broadcast_selection, true)
             return
         }
-        val action: String?
-        if (buttonId == R.id.run_on_other_broadcast) {
-            action = mOtherBroadcastAction.text.toString()
-            if (action.isEmpty()) {
-                mOtherBroadcastAction.error = getString(R.string.text_should_not_be_empty)
+        val actionString: String?
+        if (buttonId == R.id.run_on_custom_broadcast) {
+            actionString = mCustomBroadcastAction.text.toString()
+            if (actionString.isEmpty()) {
+                mCustomBroadcastAction.error = getString(R.string.text_should_not_be_empty)
                 return
             }
         } else {
-            action = ACTIONS[buttonId]
+            actionString = ACTIONS[buttonId]
         }
-        val task = IntentTask()
-        task.action = action
-        task.scriptPath = mScriptFile!!.path
-        task.isLocal = action != null && action == DynamicBroadcastReceivers.ACTION_STARTUP
-        if (mIntentTask != null) {
-            task.id = mIntentTask!!.id
-            updateTask(task)
-            showToast(this, R.string.text_already_created)
-        } else {
-            addTask(task)
-            if (mTimedTask != null) {
-                removeTask(mTimedTask!!)
+        val task = IntentTask().apply {
+            action = actionString
+            scriptPath = mScriptFile.path
+            isLocal = actionString == DynamicBroadcastReceivers.ACTION_STARTUP
+        }
+        when (val intentTask = mIntentTask) {
+            null -> {
+                addTask(task)
+                mTimedTask?.let { removeTask(it) }
+            }
+            else -> {
+                task.id = intentTask.id
+                updateTask(task)
             }
         }
+        showToast(this, R.string.text_already_created)
         finish()
     }
 
     companion object {
+
         const val EXTRA_INTENT_TASK_ID = "intent_task_id"
         const val EXTRA_TASK_ID = TaskReceiver.EXTRA_TASK_ID
+
         private val TIME_FORMATTER = DateTimeFormat.forPattern("HH:mm")
         private val DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
+
         private const val REQUEST_CODE_IGNORE_BATTERY = 27101
         private const val LOG_TAG = "TimedTaskSettings"
 
@@ -415,6 +485,7 @@ class TimedTaskSettingActivity : BaseActivity() {
             .put(R.id.run_on_config_change, Intent.ACTION_CONFIGURATION_CHANGED)
             .put(R.id.run_on_time_tick, Intent.ACTION_TIME_TICK)
             .build()
+
     }
 
 }
