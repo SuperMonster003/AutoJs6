@@ -32,7 +32,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="4dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="4dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -116,7 +117,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="62dp"
-                    android:layout_marginHorizontal="10dp"
+                    android:layout_marginHorizontal="16dp"
                     android:layout_marginVertical="4dp"
                     android:background="?selectableItemBackground"
                     android:gravity="center_vertical"
@@ -159,8 +160,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textStyle="bold"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
                             android:text="@string/original_developer_full_name"
                             android:textColor="@color/github_color_fg_default"
                             android:textSize="@dimen/github_font_size_full_name" />
@@ -168,8 +167,6 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
                             android:text="@string/original_developer_nickname"
                             android:textColor="@color/github_color_fg_muted"
                             android:textSize="@dimen/github_font_size_nickname" />
@@ -202,7 +199,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="62dp"
-                    android:layout_marginHorizontal="10dp"
+                    android:layout_marginHorizontal="16dp"
                     android:layout_marginVertical="4dp"
                     android:background="?selectableItemBackground"
                     android:gravity="center_vertical"
@@ -245,8 +242,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textStyle="bold"
-                            android:maxLines="1"
-                            android:ellipsize="middle"
                             android:text="@string/developer_full_name"
                             android:textColor="@color/github_color_fg_default"
                             android:textSize="@dimen/github_font_size_full_name" />
@@ -254,8 +249,6 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:ellipsize="middle"
-                            android:maxLines="1"
                             android:text="@string/developer_nickname"
                             android:textColor="@color/github_color_fg_muted"
                             android:textSize="@dimen/github_font_size_nickname" />
@@ -302,9 +295,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:layout_marginTop="16dp"
-                        android:ellipsize="middle"
-                        android:maxLines="1"
+                        android:layout_marginTop="4dp"
                         tools:text="@string/text_copyright_sample"
                         android:textColor="@color/prefTextColorPrimary"
                         android:textSize="13sp" />

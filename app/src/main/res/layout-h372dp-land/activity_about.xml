@@ -32,7 +32,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="4dp"
+            android:layout_margin="8dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -63,9 +63,9 @@
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:layout_width="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:layout_height="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:padding="@dimen/icon_developer_identifier_image_padding_compact"
+                            android:layout_width="@dimen/icon_developer_identifier_image_side_length"
+                            android:layout_height="@dimen/icon_developer_identifier_image_side_length"
+                            android:padding="@dimen/icon_developer_identifier_image_padding"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_looks_1_black_48dp"
                             app:tint="@color/tint_1st_developer_identifier"
@@ -84,8 +84,8 @@
                         android:orientation="horizontal">
 
                         <de.hdodenhof.circleimageview.CircleImageView
-                            android:layout_width="@dimen/about_item_avatar_side_length_land_compact"
-                            android:layout_height="@dimen/about_item_avatar_side_length_land_compact"
+                            android:layout_width="@dimen/about_item_avatar_side_length_land"
+                            android:layout_height="@dimen/about_item_avatar_side_length_land"
                             android:src="@drawable/avatar_original_developer"
                             android:contentDescription="avatar_original_developer"
                             app:civ_border_width="@dimen/github_avatar_border_width"
@@ -144,10 +144,10 @@
 
                         <com.jaredrummler.android.widget.AnimatedSvgView
                             android:id="@+id/icon_about_app_svg_view"
-                            android:layout_width="86dp"
-                            android:layout_height="86dp"
+                            android:layout_width="91dp"
+                            android:layout_height="91dp"
                             android:layout_gravity="center"
-                            android:layout_margin="9dp"
+                            android:layout_margin="10dp"
                             app:animatedSvgFillColors="@array/icon_about_app_svg_view_fill_colors"
                             app:animatedSvgGlyphStrings="@array/icon_about_app_svg_view_paths"
                             app:animatedSvgTraceColors="@array/icon_about_app_svg_view_trace_colors"
@@ -163,9 +163,9 @@
                             android:id="@+id/icon_about_app"
                             android:visibility="invisible"
                             tools:visibility="visible"
-                            android:layout_width="86dp"
-                            android:layout_height="86dp"
-                            android:layout_margin="9dp"
+                            android:layout_width="91dp"
+                            android:layout_height="91dp"
+                            android:layout_margin="10dp"
                             android:src="@drawable/autojs6_material"
                             tools:ignore="ContentDescription,ImageContrastCheck" />
 
@@ -173,7 +173,7 @@
 
                     <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="47dp"
+                        android:layout_height="50dp"
                         android:orientation="vertical"
                         android:gravity="center">
 
@@ -222,9 +222,9 @@
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:layout_width="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:layout_height="@dimen/icon_developer_identifier_image_side_length_compact"
-                            android:padding="@dimen/icon_developer_identifier_image_padding_compact"
+                            android:layout_width="@dimen/icon_developer_identifier_image_side_length"
+                            android:layout_height="@dimen/icon_developer_identifier_image_side_length"
+                            android:padding="@dimen/icon_developer_identifier_image_padding"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_looks_2_black_48dp"
                             app:tint="@color/tint_2nd_developer_identifier"
@@ -243,8 +243,8 @@
                         android:orientation="horizontal">
 
                         <de.hdodenhof.circleimageview.CircleImageView
-                            android:layout_width="@dimen/about_item_avatar_side_length_land_compact"
-                            android:layout_height="@dimen/about_item_avatar_side_length_land_compact"
+                            android:layout_width="@dimen/about_item_avatar_side_length_land"
+                            android:layout_height="@dimen/about_item_avatar_side_length_land"
                             android:src="@drawable/avatar_developer"
                             android:contentDescription="avatar_developer"
                             app:civ_border_width="@dimen/github_avatar_border_width"
@@ -307,10 +307,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:layout_marginVertical="2dp"
+                    android:layout_marginTop="9dp"
                     tools:text="@string/text_copyright_sample"
                     android:textColor="@color/prefTextColorPrimary"
-                    android:textSize="13sp" />
+                    android:textSize="14sp" />
 
             </LinearLayout>
 

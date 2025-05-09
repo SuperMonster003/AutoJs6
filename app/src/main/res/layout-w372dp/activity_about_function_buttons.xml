@@ -17,11 +17,12 @@
 
         <LinearLayout
             android:id="@+id/about_functions_button_licenses"
-            android:layout_width="72dp"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:background="?selectableItemBackground"
             android:gravity="top|center"
+            android:layout_marginHorizontal="3dp"
             android:focusable="true"
             android:clickable="true">
 
@@ -47,11 +48,12 @@
 
         <LinearLayout
             android:id="@+id/about_functions_button_update"
-            android:layout_width="72dp"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:background="?selectableItemBackground"
             android:gravity="top|center"
+            android:layout_marginHorizontal="3dp"
             android:focusable="true"
             android:clickable="true">
 
@@ -77,11 +79,12 @@
 
         <LinearLayout
             android:id="@+id/about_functions_button_version_histories"
-            android:layout_width="72dp"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:background="?selectableItemBackground"
             android:gravity="top|center"
+            android:layout_marginHorizontal="3dp"
             android:focusable="true"
             android:clickable="true">
 
@@ -107,11 +110,12 @@
 
         <LinearLayout
             android:id="@+id/about_functions_button_feedback"
-            android:layout_width="72dp"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:background="?selectableItemBackground"
             android:gravity="top|center"
+            android:layout_marginHorizontal="3dp"
             android:focusable="true"
             android:clickable="true">
 
