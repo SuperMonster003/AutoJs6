@@ -38,6 +38,7 @@ import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.settings.AboutActivity
 import org.autojs.autojs.ui.settings.PreferencesActivity
+import org.autojs.autojs.util.DisplayUtils
 import org.autojs.autojs.util.NetworkUtils
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.ViewUtils.MODE
@@ -47,6 +48,7 @@ import org.autojs.autojs6.databinding.FragmentDrawerBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.lang.ref.WeakReference
+import kotlin.math.roundToInt
 
 /**
  * Created by Stardust on Jan 30, 2017.
@@ -390,9 +392,19 @@ open class DrawerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mDrawerMenu = binding.drawerMenu
+        configureDrawerWidth()
         initMenuItems()
         initMenuItemStates()
         setupListeners()
+    }
+
+    private fun configureDrawerWidth() {
+        val screenWidthDp = resources.configuration.screenWidthDp
+        val targetWidthPx = 288f.coerceIn(
+            screenWidthDp * 0.4f,
+            screenWidthDp * 0.9f,
+        ).let { DisplayUtils.dpToPx(it) }.roundToInt()
+        binding.drawerMenuContainer.layoutParams.width = targetWidthPx
     }
 
     private fun setupListeners() {
