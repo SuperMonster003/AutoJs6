@@ -106,7 +106,8 @@ class ExplorerFragment : ViewPagerFragment(0), OnFloatingActionButtonClickListen
     private fun viewFile(item: ExplorerItem) = IntentUtils.viewFile(GlobalAppContext.get(), item.path)
 
     override fun onFabClick(fab: FloatingActionButton) {
-        initFloatingActionMenuIfNeeded(fab).run { if (isExpanded) collapse() else expand() }
+        // initFloatingActionMenuIfNeeded(fab).run { if (isExpanded) collapse() else expand() }
+        initFloatingActionMenuIfNeeded(fab).run { if (shouldCheckExpanded() && !isExpanded) expand() }
     }
 
     private fun initFloatingActionMenuIfNeeded(fab: FloatingActionButton): FloatingActionMenu {
