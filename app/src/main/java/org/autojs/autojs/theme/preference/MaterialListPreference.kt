@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.AttributeSet
-import androidx.preference.Preference.SummaryProvider
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.common.NotAskAgainDialog
@@ -32,6 +31,12 @@ open class MaterialListPreference : MaterialDialogPreference {
     protected val entry: CharSequence?
         get() = mItemValues.takeIf { it.isNotEmpty() }?.toList()?.get(itemPrefIndex ?: mItemDefaultIndex)
 
+    protected val defaultEntry: CharSequence?
+        get() {
+            val keyIndex = getKeyIndex(mItemDefaultKey) ?: return null
+            return mItemValues.takeIf { it.isNotEmpty() }?.toList()?.get(keyIndex)
+        }
+
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int, bundle: Bundle) : super(context, attrs, defStyleAttr, defStyleRes) {
         init(context, attrs, defStyleAttr, defStyleRes, bundle)
     }
@@ -53,7 +58,13 @@ open class MaterialListPreference : MaterialDialogPreference {
             .let { a ->
                 getAttrString(a, R.styleable.MaterialListPreference_dialogTitle)?.also { dialogTitle = it }
                 getAttrString(a, R.styleable.MaterialListPreference_dialogContent)?.also { dialogContent = it }
+                getAttrColor(a, R.styleable.MaterialListPreference_negativeColor)?.takeIf { it != -1 }?.let {
+                    negativeColor = it
+                }
                 positiveText = getAttrString(a, R.styleable.MaterialListPreference_positiveText) ?: context.getString(R.string.dialog_button_confirm)
+                getAttrColor(a, R.styleable.MaterialListPreference_positiveColor)?.takeIf { it != -1 }?.let {
+                    positiveColor = it
+                }
                 negativeText = getAttrString(a, R.styleable.MaterialListPreference_negativeText) ?: context.getString(R.string.dialog_button_cancel)
                 getAttrTextArray(a, R.styleable.MaterialListPreference_itemKeys)?.also { mItemKeys = it.toList() }
                 getAttrTextArray(a, R.styleable.MaterialListPreference_itemValues)?.also { mItemValues = it.toList() }
@@ -87,6 +98,15 @@ open class MaterialListPreference : MaterialDialogPreference {
                     d.dismiss()
                 }
                 return@itemsCallbackSingleChoice true
+            }
+            if (defaultEntry != null) {
+                builder.options(
+                    listOf(
+                        MaterialDialog.OptionMenuItemSpec(context.getString(R.string.dialog_button_use_default)) { dialog ->
+                            dialog.selectedIndex = mItemDefaultIndex
+                        },
+                    )
+                )
             }
         }
     }
