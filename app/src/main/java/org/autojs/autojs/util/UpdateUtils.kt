@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.app.DialogUtils
 import org.autojs.autojs.core.pref.Pref
@@ -85,16 +86,42 @@ object UpdateUtils {
                     .onNeutral { dVersionInfo, _ ->
                         showRemoveIgnoredVersionPrompt(context, dialog, dVersionInfo, text)
                     }
-                    .positiveText(R.string.dialog_button_cancel)
+                    .positiveText(R.string.dialog_button_back)
                     .onPositive { dVersionInfo, _ -> dVersionInfo.dismiss() }
                     .autoDismiss(false)
                     .show()
             }
+            .neutralText(R.string.dialog_button_clear_items)
+            .neutralColorRes(R.color.dialog_button_warn)
+            .onNeutral { dialogParent, _ ->
+                MaterialDialog.Builder(context)
+                    .title(R.string.text_prompt)
+                    .content(R.string.text_confirm_to_clear_all_items)
+                    .negativeText(R.string.dialog_button_cancel)
+                    .negativeColorRes(R.color.dialog_button_default)
+                    .positiveText(R.string.dialog_button_confirm)
+                    .positiveColorRes(R.color.dialog_button_caution)
+                    .onPositive { _, _ ->
+                        clearIgnoredVersions()
+                        dialogParent.items?.let {
+                            it.clear()
+                            dialogParent.notifyItemsChanged()
+                            DialogUtils.toggleContentViewByItems(dialogParent)
+                            DialogUtils.toggleActionButtonAbilityByItems(dialogParent, DialogAction.NEUTRAL)
+                        }
+                        ViewUtils.showSnack(dialogParent.view, R.string.text_all_items_cleared)
+                    }
+                    .show()
+            }
             .positiveText(R.string.dialog_button_dismiss)
+            .positiveColorRes(R.color.dialog_button_default)
             .onPositive { dialog, _ -> dialog.dismiss() }
             .autoDismiss(false)
             .build()
-            .also { DialogUtils.toggleContentViewByItems(it) }
+            .also {
+                DialogUtils.toggleContentViewByItems(it)
+                DialogUtils.toggleActionButtonAbilityByItems(it, DialogAction.NEUTRAL)
+            }
             .show()
     }
 
@@ -128,6 +155,11 @@ object UpdateUtils {
 
     private fun removeIgnoredVersion(versionSummary: CharSequence) {
         ignoredVersions.remove(versionSummary.toString())
+        Pref.putLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
+    }
+
+    private fun clearIgnoredVersions() {
+        ignoredVersions.clear()
         Pref.putLinkedHashSet(R.string.key_ignored_updates, ignoredVersions)
     }
 

@@ -12,6 +12,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.CheckBox
 import androidx.preference.PreferenceViewHolder
+import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.theme.preference.LongClickablePreferenceLike
 import org.autojs.autojs.ui.explorer.ExplorerView
@@ -30,12 +31,11 @@ object DialogUtils {
         val context = dialog.context
         if (!isActivityContext(context)) {
             val window = dialog.window
-            val type = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                true -> WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                else -> {
-                    @Suppress("DEPRECATION")
-                    WindowManager.LayoutParams.TYPE_PHONE
-                }
+            val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            } else {
+                @Suppress("DEPRECATION")
+                WindowManager.LayoutParams.TYPE_PHONE
             }
             window?.setType(type)
         }
@@ -62,6 +62,10 @@ object DialogUtils {
             dialog.items.isNullOrEmpty() -> View.VISIBLE
             else -> View.GONE
         }
+    }
+
+    fun toggleActionButtonAbilityByItems(dialog: MaterialDialog, actionButton: DialogAction) {
+        dialog.getActionButton(actionButton)?.isEnabled = !dialog.items.isNullOrEmpty()
     }
 
     @JvmStatic
