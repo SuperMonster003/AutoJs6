@@ -29,7 +29,9 @@ import com.legacy.android.dx.command.dexer.Main as LegacyMain
  * @param parent   the parent
  * @param cacheDir the cache directory
  */
-open class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: File) : ClassLoader(), GeneratedClassLoader {
+class AndroidClassLoader(private val parent: ClassLoader, private val cacheDir: File) : ClassLoader(), GeneratedClassLoader {
+
+    private val mDexClassLoaders = HashMap<String, DexClassLoader>()
 
     init {
         if (cacheDir.exists()) {
@@ -78,7 +80,7 @@ open class AndroidClassLoader(private val parent: ClassLoader, private val cache
         }
 
         return DexClassLoader(safeDexFile.path, cacheDir.path, null, parent).also {
-            dexClassLoaders[safeDexFile.path] = it
+            mDexClassLoaders[safeDexFile.path] = it
         }
     }
 
@@ -125,7 +127,7 @@ open class AndroidClassLoader(private val parent: ClassLoader, private val cache
     @Throws(ClassNotFoundException::class)
     public override fun loadClass(name: String, resolve: Boolean): Class<*> {
         findLoadedClass(name)?.let { return it }
-        for (dex in dexClassLoaders.values) try {
+        for (dex in mDexClassLoaders.values) try {
             dex.loadClass(name)?.let { return it }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -216,7 +218,6 @@ open class AndroidClassLoader(private val parent: ClassLoader, private val cache
     companion object {
 
         private val TAG = AndroidClassLoader::class.java.simpleName
-        private val dexClassLoaders = HashMap<String, DexClassLoader>()
 
     }
 

@@ -16,6 +16,7 @@
         "APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题",
         "Android 15 部分页面状态栏背景颜色可能无法动态跟随主题色的问题",
         "dialogs 模块无法正常使用 customView 属性的问题 _[`issue #364`](http://issues.autojs6.com/364)_",
+        "使用 JavaAdapter 时导致 ClassLoader 调用栈溢出的问题 _[`issue #376`](http://issues.autojs6.com/376)_",
         "console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_",
         "README.md 中部分语言日期格式不正确的问题"
       ],
