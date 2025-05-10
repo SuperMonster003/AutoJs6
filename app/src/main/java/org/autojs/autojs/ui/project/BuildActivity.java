@@ -539,6 +539,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             checkBox.setAlpha(0.87f);
             checkBox.setText(permission + "\n" + getString(descriptionResId));
             checkBox.setButtonDrawable(R.drawable.round_checkbox);
+            checkBox.setBackground(null);
             checkBox.setGravity(Gravity.CENTER_VERTICAL);
             checkBox.setTextSize(12);
             int marginInPixels = (int) (8 * getResources().getDisplayMetrics().density);
