@@ -40,8 +40,8 @@ public class RhinoColorFinder extends ColorFinder {
             return new Rect(x, y, width, height);
         }
         throw new IllegalArgumentException("out of region: " +
-                "region = [" + Arrays.toString(new Integer[]{x, y, width, height}) + "], " +
-                "image.size = [" + imageWrapper.getWidth() + ", " + imageWrapper.getHeight() + ']');
+                                           "region = [" + Arrays.toString(new Integer[]{x, y, width, height}) + "], " +
+                                           "image.size = [" + imageWrapper.getWidth() + ", " + imageWrapper.getHeight() + ']');
     }
 
     private Object getOrNull(NativeArray nativeArray, int index) {

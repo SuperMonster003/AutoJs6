@@ -613,7 +613,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             initOpenCvIfNeeded()
             scriptRuntime.images.flip(image, horizontal, vertical)
         }
-        
+
         private fun parseFlipOrientations(o: Any?): Pair<Boolean, Boolean> = when {
             o.isJsNullish() -> false to false
             o is Boolean -> o to false
@@ -677,13 +677,28 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             detectColor(scriptRuntime, it)
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on May 10. 2025.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun detectMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 5..6) {
-
-            TODO("detectMultiColors 尚未实现")
-
+            val (o, x, y, firstColor, paths, options) = it
+            val image = if (o is String) read(scriptRuntime, arrayOf<Any>(o, true)) else o
+            require(image is ImageWrapper) { "Argument image for images.detectMultiColors must be a ImageWrapper" }
+            require(paths is NativeArray) { "Argument paths for images.detectMultiColors must be a JavaScript Array" }
+            initOpenCvIfNeeded()
+            val opt = options as? NativeObject ?: newNativeObject()
+            scriptRuntime.images.colorFinder.detectMultiColors(
+                image,
+                coerceIntNumber(x),
+                coerceIntNumber(y),
+                Colors.toIntRhino(firstColor),
+                parseThreshold(opt).roundToInt(),
+                opt.inquire("region") { region -> buildRegionInternal(image, region) },
+                paths.flatMap { path ->
+                    val (px, py, color) = path as NativeArray
+                    listOf(coerceIntNumber(px), coerceIntNumber(py), Colors.toIntRhino(color))
+                }.toIntArray(),
+            )
         }
 
         @Deprecated("Deprecated in Java", ReplaceWith("detectMultiColors(image, x, y, firstColor, paths, options)"))
