@@ -1,30 +1,5 @@
 @file:Suppress("SpellCheckingInspection")
 
-// @Hint by SuperMonster003 on May 3, 2023.
-//  ! To download archives of Android Studio,
-//  ! visit https://developer.android.com/studio/archive?hl=en.
-//  ! zh-CN:
-//  ! 下载 Android Studio 档案,
-//  ! 可访问 https://developer.android.com/studio/archive?hl=en.
-//  !
-//  ! To check the releases for AGP (Android Gradle Plugin),
-//  ! visit https://developer.android.com/reference/tools/gradle-api.
-//  ! zh-CN:
-//  ! 查看 AGP (Android Gradle Plugin) 发行版本,
-//  ! 可访问 https://developer.android.com/reference/tools/gradle-api.
-//  !
-//  ! To check the compatibility and released date of kotlin plugins,
-//  ! visit https://plugins.jetbrains.com/plugin/6954-kotlin/versions/eap.
-//  ! zh-CN:
-//  ! 查看 kotlin 插件的兼容性及其发行版本,
-//  ! 可访问 https://plugins.jetbrains.com/plugin/6954-kotlin/versions/eap.
-//  !
-//  ! To check the releases for KSP (Kotlin Symbol Processing) plugin,
-//  ! visit https://github.com/google/ksp/releases.
-//  ! zh-CN:
-//  ! 查看 KSP (Kotlin Symbol Processing) 插件的发行版本,
-//  ! 可访问 https://github.com/google/ksp/releases.
-
 private val modules = listOf(
     "jieba-analysis",
     "apk-signer",
@@ -67,9 +42,103 @@ modules.forEach {
 
 pluginManagement {
 
+    // @Hint by SuperMonster003 on May 13, 2025.
+    //  ! Change the null value to specify a version (instead of auto-selection), e.g. 23 or "8.3.0-beta02".
+    //  ! zh-CN: 如需指定版本 (而非自动选择版本), 可修改相应的 null 值, 如 23 或 "8.3.0-beta02".
+    //  !
+    //  ! Gradle JVM
+    val overriddenJavaVersion: Int? = null
+    //  ! classpath("com.android.tools.build:gradle")
+    val overriddenAgpVersion: String? = null
+    //  ! classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+    val overriddenKotlinVersion: String? = null
+    //  ! plugin("com.google.devtools.ksp")
+    val overriddenKspVersion: String? = null
+
+    // @Signature Pair<Gradle Version, Embedded Compatible Kotlin Version>
+    // @Reference gradle-<version>-src.zip\gradle\dependency-management\kotlin-version.properties
+    // @Reference https://docs.gradle.org/current/userguide/compatibility.html#kotlin
+    // @Updated by SuperMonster003 on May 12, 2025.
+    val embeddedKotlin: List<Pair<String, String>> = listOf(
+
+        /* Unofficial. */
+
+        "9.0" to "2.1.20",
+        "8.14" to "2.1.10",
+        "8.13" to "2.1.10",
+
+        /* Official. */
+
+        "8.12" to "2.0.21",
+        "8.11" to "2.0.20",
+        "8.10" to "1.9.24",
+        "8.9" to "1.9.23",
+        "8.7" to "1.9.22",
+        "8.5" to "1.9.20",
+        "8.4" to "1.9.10",
+        "8.3" to "1.9.0",
+        "8.2" to "1.8.20",
+        "8.0" to "1.8.10",
+    )
+
+    // @Signature Pair<Supported Java Version, Min Required Gradle Version>
+    // @Reference https://docs.gradle.org/current/userguide/compatibility.html#java_runtime
+    // @Updated by SuperMonster003 on May 12, 2025.
+    val javaGradleCompatibility = listOf(
+
+        /* Unofficial. */
+
+        25 to "9.0",
+
+        /* Official. */
+
+        24 to "8.14",
+        23 to "8.10",
+        22 to "8.8",
+        21 to "8.5",
+        20 to "8.3",
+        19 to "7.6",
+        18 to "7.5",
+        17 to "7.3",
+    )
+
+    // @Signature Pair<Android Gradle Plugin Version, Min Required Gradle Version>
+    // @Reference https://developer.android.com/build/releases/gradle-plugin#updating-gradle
+    // @Updated by SuperMonster003 on May 13, 2025.
+    val agpGradleCompatibility: List<Pair<String, String>> = listOf(
+        "8.9" to "8.11.1",
+        "8.8" to "8.10.2",
+        "8.7" to "8.9",
+        "8.6" to "8.7",
+        "8.5" to "8.7",
+        "8.4" to "8.6",
+        "8.3" to "8.4",
+        "8.2" to "8.2",
+        "8.1" to "8.0",
+        "8.0" to "8.0",
+        "7.4" to "7.5",
+        "7.3" to "7.4",
+    )
+
+    // @Reference https://developer.android.com/reference/tools/gradle-api
+    // @Updated by SuperMonster003 on May 13, 2025.
+    val agpReleases: List<String> = listOf(
+        "8.11.0-alpha10",
+        "8.10.0",
+        "8.9.2",
+        "8.8.2",
+        "8.7.3",
+        "8.6.1",
+        "8.5.2",
+        "8.4.2",
+        "8.3.2",
+        "8.2.2",
+        "8.1.4",
+        "8.0.2",
+        "7.4.2",
+    )
+
     val consts = object {
-        val IDENTIFIER_FALLBACK = "fallback"
-        val IDENTIFIER_UNKNOWN = "unknown"
         val DEFAULT_VERSION = "0"
     }
 
@@ -134,41 +203,36 @@ pluginManagement {
         /* Print concerned info by `System.getProperties()`. */
         val isShowConcernedSystemProperties = true
 
-        /* https://docs.gradle.org/current/userguide/compatibility.html . */
-        val isJavaVersionCoercedByGradleVersion = true
-
         val isCleanupPaddleOcr = false
         val isCleanupRapidOcr = false
 
-        val fallbackGradleVersion = "8.0.2"
-        val fallbackKotlinVersion = "1.9.22"
-        val recommendedMinGradleVersion = "8.5.2"
-        val recommendedMinKotlinVersion = "1.9.24"
+        val fallbackAgpVersion = "7.4.2"
+        val fallbackKotlinVersion = "1.7.10"
 
         @Suppress("unused")
         val platforms = object {
 
             val androidStudio = object : Platform(
                 name = "AndroidStudio", vendor = "Google",
-                androidVersionMap = mapOf(
-                    "2025.1" to "8.10.0-rc02", /* Apr 11, 2025. */
-                    "2024.3" to "8.9.1", /* Apr 11, 2025. */
-                    "2024.2" to "8.8.0", /* Jan 13, 2025. */
-                    "2024.1" to "8.6.0", /* Aug 30, 2024. */
-                    "2023.3" to "8.5.0-alpha02", /* Mar 28, 2024. */
-                    "2023.2" to "8.3.0-rc02", /* Feb 14, 2024. */
+                // @Reference https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
+                // @Updated by SuperMonster003 on May 13, 2025.
+                agpVersionMap = mapOf(
+                    "2025.1" to "8.10.0", /* May 13, 2025. */
+                    "2024.3" to "8.9.2", /* Apr 11, 2025. */
+                    "2024.2" to "8.7.3", /* Jan 13, 2025. */
+                    "2024.1" to "8.5.2", /* Aug 30, 2024. */
+                    "2023.3" to "8.4.2", /* Mar 28, 2024. */
+                    "2023.2" to "8.3.2", /* Feb 14, 2024. */
                     "2023.1" to "8.2.2", /* Feb 6, 2024. */
                     "2022.3" to "8.1.4", /* Mar 31, 2024. */
                     "2022.2" to "8.0.2", /* May 26, 2023. */
                     "2022.1" to "7.4.2", /* Mar 25, 2023. */
-                    consts.IDENTIFIER_FALLBACK to fallbackGradleVersion,
                 ),
+                // @Updated by SuperMonster003 on May 13, 2025.
                 kotlinVersionMap = mapOf(
-                    "2025.1" to "2.1.20", /* Apr 11, 2025. */
                     "2024.3" to "2.1.20", /* Apr 11, 2024. */
                     "2024.2" to "2.1.0", /* Nov 29, 2024. */
                     "2024.1" to "2.0.0", /* Aug 13, 2024. */
-                    consts.IDENTIFIER_FALLBACK to fallbackKotlinVersion,
                 ),
                 codenameVersionMap = mapOf(
                     "2025.1" to "N", /* Apr 11, 2025. */
@@ -196,9 +260,11 @@ pluginManagement {
                     "D" to "Dolphin", /* Born on Jan 31, 2022. */
                     "C" to "Chipmunk", /* Born on Oct 13, 2021. */
                     "B" to "Bumblebee", /* Born on May 18, 2021. */
-                    "A" to "Arctic Fox", /* Born on Jan 26, 2021. */
+                    "A" to "Arctic Fox",
+                    /* Born on Jan 26, 2021. */
 
-                    /* Codenames below were predicted on Oct 18, 2023. */
+                    // @Hint by SuperMonster003 on Oct 18, 2023.
+                    //  ! The codenames below were predicted but not official.
 
                     "O" to "Ostrich", "P" to "Penguin", "Q" to "Quail",
                     "R" to "Rhino", "S" to "Snail", "T" to "Tiger",
@@ -220,7 +286,8 @@ pluginManagement {
 
             val intelliJIdea = object : Platform(
                 name = "IntelliJIdea", vendor = "Jetbrains",
-                androidVersionMap = mapOf(
+                // @Updated by SuperMonster003 on Apr 23, 2025.
+                agpVersionMap = mapOf(
                     "2025.1" to "8.9.2", /* Apr 23, 2025. */
                     "2024.3.1" to "8.7.3", /* Dec 10, 2024. */
                     "2024.3" to "8.7.0-rc01", /* Nov 15, 2024. */
@@ -229,8 +296,8 @@ pluginManagement {
                     "2023.3" to "8.2.2", /* Jan 19, 2024. */
                     "2023.1" to "7.4.2", /* May 26, 2023. */
                     "2022.3" to "7.4.0-beta02", /* Mar 25, 2023. */
-                    consts.IDENTIFIER_FALLBACK to fallbackGradleVersion,
                 ),
+                // @Updated by SuperMonster003 on Apr 23, 2025.
                 kotlinVersionMap = mapOf(
                     "2025.1" to "2.1.20", /* Apr 12, 2025. */
                     "2024.3.4" to "2.1.10", /* Feb 28, 2025. */
@@ -238,7 +305,6 @@ pluginManagement {
                     "2024.2" to "2.0.21-RC", /* Sep 27, 2024. */
                     "2024.1" to "1.9.24", /* Dec 3, 2024. */
                     "2023.3" to "1.9.23", /* Mar 29, 2024. */
-                    consts.IDENTIFIER_FALLBACK to fallbackKotlinVersion,
                 ),
             ) {
                 override val weight = 10
@@ -248,15 +314,13 @@ pluginManagement {
 
             val temurin = object : Platform(
                 name = "Temurin", vendor = "temurin",  /* More common as "Eclipse Adoptium". */
-                androidVersionMap = mapOf(
+                agpVersionMap = mapOf(
                     "21.0.6+7" to "8.7.3", /* Apr 16, 2025. */
                     "20.0.2+9" to "8.2.2", /* Dec 2, 2024. */
-                    consts.IDENTIFIER_FALLBACK to recommendedMinGradleVersion,
                 ),
                 kotlinVersionMap = mapOf(
                     "21.0.6+7" to "2.1.10", /* Apr 16, 2025. */
                     "20.0.2+9" to "1.9.24", /* Dec 2, 2024. */
-                    consts.IDENTIFIER_FALLBACK to recommendedMinKotlinVersion,
                 ),
             ) {
                 override val weight = 5
@@ -264,13 +328,7 @@ pluginManagement {
             }
 
             val unknown = object : Platform(
-                name = "Unknown", vendor = consts.IDENTIFIER_UNKNOWN,
-                androidVersionMap = mapOf(
-                    consts.IDENTIFIER_FALLBACK to recommendedMinGradleVersion,
-                ),
-                kotlinVersionMap = mapOf(
-                    consts.IDENTIFIER_FALLBACK to recommendedMinKotlinVersion,
-                ),
+                name = "Unknown", vendor = "unknown",
             ) {
                 fun declare() = systemProperties.platform?.let {
                     println("Unexpected platform: $it")
@@ -310,17 +368,20 @@ pluginManagement {
 
         }
 
-        /* Change "version" argument to specify a version, e.g. "8.3.0-beta02". */
         val libs = listOf(
-            Classpath(id = "com.android.tools.build:gradle", version = "auto:android"),
-            Classpath(id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "auto:kotlin"),
-            Plugin(id = "com.google.devtools.ksp", version = "auto:ksp"),
+            Classpath(id = "com.android.tools.build:gradle", version = overriddenAgpVersion ?: "auto:agp"),
+            Classpath(id = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = overriddenKotlinVersion ?: "auto:kotlin"),
+            Plugin(id = "com.google.devtools.ksp", version = overriddenKspVersion ?: "auto:ksp"),
         )
 
+        // @Reference https://github.com/google/ksp/releases
+        // @Updated by SuperMonster003 on May 13, 2025.
         val kspVersionMap = mapOf(
+            "2.2.0-Beta2" to "2.0.1", /* May 2, 2025. */
             "2.2.0-Beta1" to "2.0.0", /* Apr 17, 2025. */
+            "2.1.21-RC2" to "2.0.1", /* May 2, 2025. */
             "2.1.21-RC" to "2.0.0", /* Apr 18, 2025. */
-            "2.1.20" to "2.0.0", /* Apr 9, 2025. */
+            "2.1.20" to "2.0.1", /* May 1, 2025. */
             "2.1.20-RC3" to "1.0.31", /* Mar 15, 2025. */
             "2.1.20-RC2" to "1.0.31", /* Mar 7, 2025. */
             "2.1.20-RC" to "1.0.31", /* Feb 28, 2025. */
@@ -369,14 +430,13 @@ pluginManagement {
             "1.8.20-RC2" to "1.0.9", /* Aug 16, 2023. */
             "1.8.0" to "1.0.9", /* Aug 16, 2023. */
             "1.8.0-RC2" to "1.0.8", /* Aug 16, 2023. */
-            consts.IDENTIFIER_FALLBACK to "1.9.24-1.0.20", /* Dec 3, 2024. */
         )
 
         abstract inner class Platform(
             var name: String,
             val vendor: String,
-            val androidVersionMap: Map<String, String>,
-            val kotlinVersionMap: Map<String, String>,
+            val agpVersionMap: Map<String, String> = emptyMap(),
+            val kotlinVersionMap: Map<String, String> = emptyMap(),
             val codenameVersionMap: Map<String, String>? = null,
             val codenameMap: Map<String, String>? = null,
         ) {
@@ -438,16 +498,21 @@ pluginManagement {
         //  ! zh-CN:
         //  ! Fallback (回退) 是一种临时或替代的解决方法, 用于应对功能不可用的特定情况.
         //  ! Compatibility (兼容) 是一种更广泛的设计原则, 确保新版本能兼容并继续支持旧版本的操作和数据.
-        val fallback = consts.IDENTIFIER_FALLBACK
-        val compatible = "compatible"
+        val fallback = "fallback"
+
+        val upgraded = "upgraded"
+        val downgraded = "downgraded"
+        val nearestLowerMatched = "nearest-lower-matched"
 
         val specified = "specified"
         val auto = "auto"
 
         val fallbackSuffix = " [$fallback]"
-        val compatibleSuffix = " [$compatible]"
-        val specifiedSuffix = " [$specified]"
+        val upgradedSuffix = " [$upgraded]"
+        val downgradedSuffix = " [$downgraded]"
+        val nearestLowerMatchedSuffix = " [$nearestLowerMatched]"
         val autoSpecifiedSuffix = " [$auto-$specified]"
+        val userSpecifiedSuffix = " [user-$specified]"
 
     }
 
@@ -474,7 +539,69 @@ pluginManagement {
 
     val notations = object {
 
-        private val kotlinVersionMap = platform.kotlinVersionMap
+        private val versions = object {
+
+            val agp = object : Version(platform.agpVersionMap, platform.version, config.fallbackAgpVersion) {
+
+                override fun refinedBestMatchingValue(bestMatchingValue: String?): String? {
+                    val currentGradleVersion = gradle.gradleVersion.toGradleVersion()
+                    val sorted = agpGradleCompatibility.sortedByDescending { it.second.toGradleVersion() }
+                    var maxSupporedAgpVersionPrefix: String? = null
+                    for (pair in sorted) {
+                        maxSupporedAgpVersionPrefix = pair.first
+                        if (currentGradleVersion >= pair.second.toGradleVersion()) {
+                            break
+                        }
+                    }
+                    val maxSupporedAgpVersion = maxSupporedAgpVersionPrefix?.let { getAgpReleasedVersion(it) }
+                    return when {
+                        maxSupporedAgpVersion == null -> bestMatchingValue
+                        bestMatchingValue == null -> {
+                            bestMatchingOperationHintSuffix = identifier.autoSpecifiedSuffix
+                            maxSupporedAgpVersion
+                        }
+                        compareVersionStrings(bestMatchingValue, maxSupporedAgpVersion) > 0 -> {
+                            bestMatchingOperationHintSuffix = identifier.downgradedSuffix
+                            maxSupporedAgpVersion
+                        }
+                        else -> bestMatchingValue
+                    }
+                }
+
+                private fun getAgpReleasedVersion(referenceAgpVersion: String): String? {
+                    return agpReleases.find { it.startsWith(referenceAgpVersion) && !it.contains("-") }
+                }
+
+            }
+
+            val kotlin = object : Version(platform.kotlinVersionMap, platform.version, config.fallbackKotlinVersion) {
+
+                override fun refinedBestMatchingValue(bestMatchingValue: String?): String? {
+                    val currentGradleVersion = gradle.gradleVersion.toGradleVersion()
+                    val embeddedMin = embeddedKotlin
+                        .filter { (gradleMin, _) -> currentGradleVersion >= gradleMin.toGradleVersion() }
+                        .maxByOrNull { it.first.toGradleVersion() }
+                        ?.second
+                    return when {
+                        embeddedMin == null -> bestMatchingValue
+                        bestMatchingValue == null -> {
+                            bestMatchingOperationHintSuffix = identifier.autoSpecifiedSuffix
+                            embeddedMin
+                        }
+                        bestMatchingValue.toGradleVersion() < embeddedMin.toGradleVersion() -> {
+                            bestMatchingOperationHintSuffix = identifier.upgradedSuffix
+                            embeddedMin
+                        }
+                        bestMatchingValue.toGradleVersion() > embeddedMin.toGradleVersion() -> {
+                            bestMatchingOperationHintSuffix = identifier.downgradedSuffix
+                            embeddedMin
+                        }
+                        else -> bestMatchingValue
+                    }
+                }
+            }
+
+        }
 
         private val pluginVersionAutomatorMap: Map<String, (Map<String, String>) -> Map<String, String?>> = mapOf(
             "ksp" to { versionMap: Map<String, String> ->
@@ -484,94 +611,90 @@ pluginManagement {
                     .find { it.id.contains("kotlin-gradle-plugin", true) }
                     ?.takeIf { !it.version.startsWith("${identifier.auto}:") }
                     ?.version?.let { kt ->
-                        suffix += identifier.autoSpecifiedSuffix
                         versionMap[kt]?.let { kt }
                     }
-                    ?: Version(kotlinVersionMap, platform.version).bestMatchingValue
-                    ?: kotlinVersionMap[identifier.fallback]?.let { kt ->
+                    ?: versions.kotlin.bestMatchingValue?.also {
+                        suffix += identifier.autoSpecifiedSuffix
+                    }
+                    ?: versions.kotlin.fallbackVersion?.let { kt ->
                         suffix += identifier.fallbackSuffix
                         versionMap[kt]?.let { kt }
                     }
 
                 val kspVersion = kotlinVersion?.let { kt ->
                     val ver = Version(config.kspVersionMap, kt)
-                    ver.bestMatchingKey?.let { key ->
-                        if (ver.isBestMatchingOperated) suffix += identifier.compatibleSuffix
-                        "$key-${ver.bestMatchingValue}"
-                    }
+                    val key = ver.bestMatchingKey ?: return@let null
+                    val value = ver.bestMatchingValue ?: return@let null
+                    ver.bestMatchingOperationHintSuffix?.let { suffix += it }
+                    "$key-$value"
                 }
 
                 mapOf("version" to kspVersion, "suffix" to suffix)
             },
         )
 
-        val classpath = config.libs.filterIsInstance<Classpath>().map {
+        val classpath = config.libs.filterIsInstance<Classpath>().map { lib ->
             var suffix = ""
             val version: String = when {
-                it.version.startsWith("${identifier.auto}:") -> {
-                    val mapType = it.version.substring("${identifier.auto}:".length)
-                    val map = when (mapType) {
-                        "android" -> platform.androidVersionMap
-                        "kotlin" -> platform.kotlinVersionMap
-                        else -> throw Exception("Unknown version ${it.version} for classpath ${it.id}")
+                lib.version.startsWith("${identifier.auto}:") -> {
+                    val mapType = lib.version.substring("${identifier.auto}:".length)
+                    val ver = when (mapType) {
+                        "agp" -> versions.agp
+                        "kotlin" -> versions.kotlin
+                        else -> throw Exception("Unknown version ${lib.version} for classpath ${lib.id}")
                     }
-                    val ver = Version(map, platform.version)
-                    ver.bestMatchingKey?.let {
-                        if (ver.isBestMatchingOperated) suffix += identifier.compatibleSuffix
-                        ver.bestMatchingValue
-                    } ?: map[identifier.fallback]?.also {
+                    ver.bestMatchingValue?.also {
+                        ver.bestMatchingOperationHintSuffix?.let { s -> suffix += s }
+                    } ?: ver.fallbackVersion?.also {
                         suffix += identifier.fallbackSuffix
                     } ?: consts.DEFAULT_VERSION
                 }
-                else -> it.version.also {
-                    suffix += identifier.specifiedSuffix
+                else -> lib.version.also {
+                    suffix += identifier.userSpecifiedSuffix
                 }
             }
-            if (config.isJavaVersionCoercedByGradleVersion && it.id == "com.android.tools.build:gradle") {
-                gradle.extra.set("gradleVersionToCoerceJavaVersion", version)
+            if (lib.id == "com.android.tools.build:gradle") {
+                gradle.extra.set("javaVersionCoercedByGradle", getMaxSupportedJavaVersion(version))
+                gradle.extra.set("javaVersionOverriddenByUser", overriddenJavaVersion)
             }
-            "${it.id}:$version".also { notation ->
+            "${lib.id}:$version".also { notation ->
                 console.versionInfo += "Classpath: \"$notation\"$suffix"
             }
         }
 
-        val plugins = config.libs.filterIsInstance<Plugin>().map {
+        val plugins = config.libs.filterIsInstance<Plugin>().map { lib ->
             var suffix = ""
             val version: String = when {
-                it.version.startsWith("${identifier.auto}:") -> {
-                    val automator = pluginVersionAutomatorMap[it.version.substring("${identifier.auto}:".length)]!!
+                lib.version.startsWith("${identifier.auto}:") -> {
+                    val automator = pluginVersionAutomatorMap[lib.version.substring("${identifier.auto}:".length)]!!
                     val result = automator.invoke(config.kspVersionMap)
                     result["suffix"]?.let { s -> suffix += s }
-                    result["version"] ?: throw Exception("Unknown version for plugin ${it.id}")
+                    result["version"] ?: throw Exception("Unknown version for plugin ${lib.id}")
                 }
                 else -> {
-                    suffix += identifier.specifiedSuffix
-                    it.version
+                    suffix += identifier.userSpecifiedSuffix
+                    lib.version
                 }
             }
-            console.versionInfo += "Plugin: \"${it.id}:$version\"$suffix"
-            mapOf("id" to it.id, "version" to version, "isApply" to it.isApply)
+            console.versionInfo += "Plugin: \"${lib.id}:$version\"$suffix"
+            mapOf("id" to lib.id, "version" to version, "isApply" to lib.isApply)
         }
 
-        private inner class Version(private val map: Map<String, String>, platformVersion: String) {
+        private open inner class Version(val map: Map<String, String>, platformVersion: String, val fallbackVersion: String? = null) {
 
-            val bestMatchingKey: String?
-            val bestMatchingValue: String?
-            val isBestMatchingOperated: Boolean
+            val bestMatchingKey: String? = findBestMatchingMapKey(platformVersion)
 
-            init {
-                bestMatchingKey = findBestMatchingMapKey(platformVersion)
-                bestMatchingValue = bestMatchingKey?.let { map[it] }
-                isBestMatchingOperated = bestMatchingKey != null && bestMatchingKey != platformVersion
+            var bestMatchingOperationHintSuffix: String? = identifier.nearestLowerMatchedSuffix.takeIf {
+                bestMatchingKey != null && bestMatchingKey != platformVersion
             }
 
-            private fun findBestMatchingMapKey(platformVersion: String): String? {
+            val bestMatchingValue: String? = refinedBestMatchingValue(bestMatchingKey?.let { map[it] })
+
+            open fun refinedBestMatchingValue(bestMatchingValue: String?) = bestMatchingValue
+
+            fun findBestMatchingMapKey(platformVersion: String): String? {
                 val (platformVersionNumbers, platformVersionSuffix) = toVersionParts(platformVersion)
-                val sortedVersions = map.keys.filter { it != identifier.fallback }.sortedWith { v1, v2 ->
-                    val (ver1Numbers, ver1Suffix) = toVersionParts(v1)
-                    val (ver2Numbers, ver2Suffix) = toVersionParts(v2)
-                    compareVersionParts(ver2Numbers, ver1Numbers).takeIf { it != 0 } ?: compareSuffix(ver2Suffix, ver1Suffix)
-                }
+                val sortedVersions = map.keys.filter { it != identifier.fallback }.sortedWith(::compareVersionStrings).reversed()
                 for (version in sortedVersions) {
                     val (versionNumbers, versionSuffix) = toVersionParts(version)
                     val versionComparisonScore = compareVersionParts(versionNumbers, platformVersionNumbers)
@@ -583,6 +706,14 @@ pluginManagement {
                     }
                 }
                 return null
+            }
+
+            fun compareVersionStrings(v1: String, v2: String): Int {
+                val (ver1Numbers, ver1Suffix) = toVersionParts(v1)
+                val (ver2Numbers, ver2Suffix) = toVersionParts(v2)
+                return compareVersionParts(ver1Numbers, ver2Numbers)
+                    .takeIf { it != 0 }
+                    ?: compareSuffix(ver1Suffix, ver2Suffix)
             }
 
             private fun compareVersionParts(parts1: List<Int>, parts2: List<Int>): Int {
@@ -618,6 +749,42 @@ pluginManagement {
                 return numberParts to (suffixName to suffixNumber)
             }
 
+        }
+
+        private fun String.toGradleVersion() = GradleVersion.version(this)
+
+        private fun getMaxSupportedJavaVersion(gradleVersion: String): Int {
+
+            fun parseVersion(version: String) = version.split(Regex("[.-]")).map { it.toIntOrNull() ?: 0 }
+
+            val inputGradleVersionInts = parseVersion(gradleVersion)
+            val sortedJavaGradleCompatibility = javaGradleCompatibility.sortedBy { it.first }
+
+            var maxJavaVersion: Int = sortedJavaGradleCompatibility.first().first
+
+            for ((presetJavaVersion, presetGradleVersion) in sortedJavaGradleCompatibility) {
+                val presetGradleVersionInts: List<Int> = parseVersion(presetGradleVersion)
+
+                for (i in presetGradleVersionInts.indices) {
+                    when {
+                        i > inputGradleVersionInts.lastIndex -> {
+                            break
+                        }
+                        inputGradleVersionInts[i] > presetGradleVersionInts[i] -> {
+                            maxJavaVersion = presetJavaVersion
+                            break
+                        }
+                        inputGradleVersionInts[i] < presetGradleVersionInts[i] -> {
+                            break
+                        }
+                        i == presetGradleVersionInts.lastIndex -> {
+                            maxJavaVersion = presetJavaVersion
+                        }
+                    }
+                }
+            }
+
+            return maxJavaVersion
         }
 
     }

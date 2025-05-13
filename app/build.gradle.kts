@@ -732,7 +732,7 @@ android {
         // Configures multiple APKs based on ABI.
         abi {
             // Enables building multiple APKs per ABI.
-            isEnable = /* isNotAssembleInrt */ !gradle.startParameter.taskNames.any {
+            isEnable = /* isNotAssembleInrt */ gradle.startParameter.taskNames.none {
                 it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble$flavorNameInrt", IGNORE_CASE))
             }
             // By default, all ABIs are included, so use reset() and include to specify that we only
@@ -847,14 +847,29 @@ class Versions(filePath: String) {
     private var javaVersionInfoSuffix = ""
 
     val javaVersion: JavaVersion by lazy {
-        var niceVersionInt = javaVersionRaw.toInt()
+        var javaVersionInt = determineJavaVersion()
+        gradle.beforeProject {
+            extensions.extraProperties["javaVersion"] = javaVersionInt
+        }
+        JavaVersion.toVersion(javaVersionInt)
+    }
+
+    private fun determineJavaVersion(): Int {
+        if (gradle.extra.has("javaVersionOverriddenByUser")) {
+            (gradle.extra.get("javaVersionOverriddenByUser") as? Int)?.let {
+                javaVersionInfoSuffix += " [user-specified]"
+                return it
+            }
+        }
+
+        var versionInt = javaVersionRaw.toInt()
         var isFallback = false
 
-        while (niceVersionInt > javaVersionMinSupported) {
-            if (JvmTarget.values().any { it.name.contains(Regex("_$niceVersionInt$")) }) {
+        while (versionInt > javaVersionMinSupported) {
+            if (JvmTarget.values().any { it.name.contains(Regex("_$versionInt$")) }) {
                 break
             }
-            niceVersionInt -= 1
+            versionInt -= 1
             isFallback = true
         }
 
@@ -862,26 +877,20 @@ class Versions(filePath: String) {
             javaVersionInfoSuffix += " [fallback]"
         }
 
-        if (gradle.extra.has("gradleVersionToCoerceJavaVersion")) {
-            (gradle.extra["gradleVersionToCoerceJavaVersion"] as? String)?.let {
-                val maxGradleVersion = getMaxSupportedJavaVersion(it)
-                if (niceVersionInt > maxGradleVersion) {
-                    niceVersionInt = maxGradleVersion
-                    javaVersionInfoSuffix += " [coerced]"
+        if (versionInt > currentVersionInt) {
+            versionInt = currentVersionInt
+            javaVersionInfoSuffix += " [consistent-downgraded]"
+        }
+
+        if (gradle.extra.has("javaVersionCoercedByGradle")) {
+            (gradle.extra["javaVersionCoercedByGradle"] as? Int)?.let {
+                if (versionInt > it) {
+                    versionInt = it
+                    javaVersionInfoSuffix += " [coercive-gradle-downgraded]"
                 }
             }
         }
-
-        if (niceVersionInt > currentVersionInt) {
-            niceVersionInt = currentVersionInt
-            javaVersionInfoSuffix += " [consistent]"
-        }
-
-        gradle.beforeProject {
-            extensions.extraProperties["javaVersion"] = niceVersionInt
-        }
-
-        JavaVersion.toVersion(niceVersionInt)
+        return versionInt
     }
 
     private var isBuildNumberAutoIncremented = false
@@ -960,51 +969,6 @@ class Versions(filePath: String) {
         }
         properties["BUILD_TIME"] = "${Date().time}"
         properties.store(file.writer(), null)
-    }
-
-    private fun getMaxSupportedJavaVersion(gradleVersion: String): Int {
-
-        /* https://docs.gradle.org/current/userguide/compatibility.html . */
-        val presetVersionMap = listOf(
-            17 to "7.3",
-            18 to "7.5",
-            19 to "7.6",
-            20 to "8.3",
-            21 to "8.5",
-            22 to "8.8",
-            23 to "8.10",
-            24 to "8.11", /* Unofficial as of Mar 19, 2025. */
-        )
-
-        fun parseVersion(version: String) = version.split(Regex("[.-]")).map { it.toIntOrNull() ?: 0 }
-
-        val inputGradleVersionInts = parseVersion(gradleVersion)
-
-        var maxJavaVersion: Int = presetVersionMap.first().first
-
-        for ((presetJavaVersion, presetGradleVersion) in presetVersionMap) {
-            val presetGradleVersionInts: List<Int> = parseVersion(presetGradleVersion)
-
-            for (i in presetGradleVersionInts.indices) {
-                when {
-                    i > inputGradleVersionInts.lastIndex -> {
-                        break
-                    }
-                    inputGradleVersionInts[i] > presetGradleVersionInts[i] -> {
-                        maxJavaVersion = presetJavaVersion
-                        break
-                    }
-                    inputGradleVersionInts[i] < presetGradleVersionInts[i] -> {
-                        break
-                    }
-                    i == presetGradleVersionInts.lastIndex -> {
-                        maxJavaVersion = presetJavaVersion
-                    }
-                }
-            }
-        }
-
-        return maxJavaVersion
     }
 
 }
