@@ -16,6 +16,7 @@ import org.autojs.autojs.core.accessibility.WindowInfo.Companion.WindowInfoRootN
 import org.autojs.autojs.core.accessibility.WindowInfo.Companion.parseWindowType
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsFloatyWindow
+import org.autojs.autojs.ui.floating.layoutinspector.LayoutBoundsView
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyFloatyWindow
 import org.autojs.autojs.ui.floating.layoutinspector.NodeInfoView
 import org.autojs.autojs.ui.widget.BubblePopupMenu
@@ -128,4 +129,18 @@ abstract class LayoutFloatyWindow(
         }
     }
 
+
+    protected fun excludeNode() {
+        mLayoutSelectedNode?.let {
+            it.hidden = true
+            mLayoutSelectedNode = null
+        }
+    }
+
+    protected fun excludeAllBoundsSameNode(layoutBoundsView: LayoutBoundsView ) {
+        mLayoutSelectedNode?.let {
+            layoutBoundsView.hideAllBoundsSameNode(it)
+            mLayoutSelectedNode = null
+        }
+    }
 }
