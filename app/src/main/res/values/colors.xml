@@ -117,6 +117,8 @@
     <color name="item_background_dark">#FAFAFA</color>
 
     <color name="divider">#F2F3F5</color>
+    <color name="divider_night_day">#191919</color>
+    <color name="divider_lighter_night_day">#999999</color>
     <color name="divider_functions_keyboard">#F0F0F0</color>
     <color name="divider_app_settings_list">#F3F5F9</color>
 

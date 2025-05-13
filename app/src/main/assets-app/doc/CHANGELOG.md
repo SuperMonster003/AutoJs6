@@ -24,6 +24,8 @@
 * `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
 * `修复` console.setContentBackgroundColor 方法无法接受颜色名称参数的问题 _[`issue #384`](http://issues.autojs6.com/384)_
 * `修复` README.md 中部分语言日期格式不正确的问题
+* `优化` 布局分析支持控件隐藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `优化` 布局分析菜单使用渐变分隔线实现一定程度的功能分组
 * `优化` 主题色扩充适配范围并支持更多控件类型
 * `优化` 主页抽屉在横向屏幕或超宽屏幕的宽度适应性
 * `优化` 关于应用与开发者页面增加水平布局及小屏布局适配

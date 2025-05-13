@@ -22,10 +22,11 @@ open class LayoutHierarchyFloatyWindow @JvmOverloads constructor(
 
     private lateinit var mLayoutHierarchyView: LayoutHierarchyView
 
-    override val popMenuActions = linkedMapOf(
+    override val popMenuActions = listOf(
         R.string.text_show_widget_information to ::showNodeInfo,
         R.string.text_show_layout_bounds to ::showLayoutBounds,
         R.string.text_generate_code to ::generateCode,
+        SPLIT_LINE,
         R.string.text_switch_window to ::switchWindow,
         R.string.text_exit to ::close,
     )
