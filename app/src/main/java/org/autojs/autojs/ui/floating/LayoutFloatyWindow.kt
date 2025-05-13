@@ -29,7 +29,7 @@ abstract class LayoutFloatyWindow(
     private val isServiceRelied: Boolean,
 ) : FullScreenFloatyWindow() {
 
-    protected abstract val popMenuActions: LinkedHashMap<Int, KFunction0<Unit>>
+    protected abstract val popMenuActions: List<Pair<Int, KFunction0<Unit>>?>
 
     private lateinit var mServiceContext: Context
 
@@ -68,11 +68,21 @@ abstract class LayoutFloatyWindow(
     protected fun getLayoutSelectedNode() = mLayoutSelectedNode
 
     protected fun getBubblePopMenu(): BubblePopupMenu {
-        return BubblePopupMenu(mServiceContext, popMenuActions.keys.map { context.getString(it) })
+        val (keys, values) = popMenuActions.filterNotNull().unzip()
+        val dividerPositions = mutableListOf<Int>()
+        var realIndex = -1
+        for (pair in popMenuActions) {
+            if (pair != null) {
+                realIndex += 1
+                continue
+            }
+            dividerPositions.add(realIndex)
+        }
+        return BubblePopupMenu(mServiceContext, keys.map { context.getString(it) }, dividerPositions)
             .apply {
                 setOnItemClickListener { _: View?, position: Int ->
                     dismiss()
-                    popMenuActions.values.elementAtOrNull(position)?.invoke()
+                    values.elementAtOrNull(position)?.invoke()
                 }
                 width = ViewGroup.LayoutParams.WRAP_CONTENT
                 height = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -107,7 +117,8 @@ abstract class LayoutFloatyWindow(
     protected fun switchWindow() {
         val windows = capture.windows
         val windowInfoList = windows.map { win: WindowInfo ->
-            WindowInfoDataSummary(win,
+            WindowInfoDataSummary(
+                win,
                 title = WindowInfoDataItem(context.getString(R.string.text_captured_window_info_title), win.title, context.getString(R.string.text_captured_window_info_title_null)),
                 order = WindowInfoOrderDataItem(context.getString(R.string.text_captured_window_info_order), win.order),
                 type = WindowInfoDataItem(context.getString(R.string.text_captured_window_info_type), parseWindowType(context, win.type), context.getString(R.string.text_captured_window_info_type_unknown)),
@@ -129,7 +140,6 @@ abstract class LayoutFloatyWindow(
         }
     }
 
-
     protected fun excludeNode() {
         mLayoutSelectedNode?.let {
             it.hidden = true
@@ -137,10 +147,18 @@ abstract class LayoutFloatyWindow(
         }
     }
 
-    protected fun excludeAllBoundsSameNode(layoutBoundsView: LayoutBoundsView ) {
+    protected fun excludeAllBoundsSameNode(layoutBoundsView: LayoutBoundsView) {
         mLayoutSelectedNode?.let {
             layoutBoundsView.hideAllBoundsSameNode(it)
             mLayoutSelectedNode = null
         }
     }
+
+    companion object {
+
+        @JvmStatic
+        protected val SPLIT_LINE: Nothing? = null
+
+    }
+
 }

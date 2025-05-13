@@ -38,6 +38,8 @@
     <color name="item_background_dark">@color/dawn_full</color>
 
     <color name="divider">#191919</color>
+    <color name="divider_night_day">#F2F3F5</color>
+    <color name="divider_lighter_night_day">#808080</color>
     <color name="divider_functions_keyboard">#303030</color>
     <color name="divider_app_settings_list">#737B8A</color>
 
