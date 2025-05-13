@@ -107,6 +107,7 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         ::setContentTextSize.name,
         ::setContentTextColor.name,
         ::setContentTextColors.name,
+        ::setContentBackgroundColor.name,
         ::setContentBackgroundTint.name,
         ::setContentBackgroundAlpha.name,
         ::setTextSize.name,
@@ -436,6 +437,13 @@ class Console(scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setContentTextColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = setContentTextColor(scriptRuntime, args)
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun setContentBackgroundColor(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ProxyObject = ensureArgumentsOnlyOne(args) {
+            scriptRuntime.console.setContentBackgroundColor(S13n.color(arrayOf(it)))
+            scriptRuntime.consoleProxyObject
+        }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface

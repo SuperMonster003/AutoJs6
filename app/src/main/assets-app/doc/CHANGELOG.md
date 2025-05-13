@@ -22,6 +22,7 @@
 * `修复` dialogs 模块无法正常使用 customView 属性的问题 _[`issue #364`](http://issues.autojs6.com/364)_
 * `修复` 使用 JavaAdapter 时导致 ClassLoader 调用栈溢出的问题 _[`issue #376`](http://issues.autojs6.com/376)_
 * `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
+* `修复` console.setContentBackgroundColor 方法无法接受颜色名称参数的问题 _[`issue #384`](http://issues.autojs6.com/384)_
 * `修复` README.md 中部分语言日期格式不正确的问题
 * `优化` 主题色扩充适配范围并支持更多控件类型
 * `优化` 主页抽屉在横向屏幕或超宽屏幕的宽度适应性
