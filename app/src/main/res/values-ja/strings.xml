@@ -1039,5 +1039,7 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
+    <string name="text_hide_node">このノードを隠す</string>
+    <string name="text_hide_same_frame_nodes">同じフレームのノードを隠す</string>
 
 </resources>
