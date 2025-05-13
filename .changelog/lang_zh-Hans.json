@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.3": {
-      "released_date": "2025/05/09",
+      "released_date": "2025/05/13",
       "feature": [
         "版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据",
         "timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态",
@@ -30,7 +30,8 @@
         "打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_",
         "已忽略更新记录及客户端模式连接地址记录支持清空操作",
         "版本更新信息支持多语言显示 (与当前显示语言同步)",
-        "使用异步加载方式一定程度提升文件管理器列表滑动流畅性"
+        "使用异步加载方式一定程度提升文件管理器列表滑动流畅性",
+        "Gradle 构建脚本提升版本自适应能力 _[`discussion #369`](http://discussions.autojs6.com/369)_"
       ],
       "dependency": [
         "本地化 Material Dialogs 版本 0.9.6.0",
@@ -38,7 +39,7 @@
         "附加 Jsoup 版本 1.19.1",
         "附加 Material Progressbar 版本 1.4.2",
         "附加 Flexmark Java HTML to Markdown 版本 0.64.8",
-        "升级 Gradle 版本 8.14-rc-1 -> 8.14-rc-2",
+        "升级 Gradle 版本 8.14-rc-1 -> 8.14",
         "升级 Androidx Room 版本 2.7.0 -> 2.7.1"
       ]
     },

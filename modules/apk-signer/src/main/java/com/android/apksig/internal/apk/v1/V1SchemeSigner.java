@@ -386,9 +386,7 @@ public abstract class V1SchemeSigner {
             checkEntryNameValid(entryName);
             byte[] entryDigest = jarEntryDigests.get(entryName);
             Attributes entryAttrs = new Attributes();
-            String encodedEntryDigest = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                    ? Base64.getEncoder().encodeToString(entryDigest)
-                    : com.mcal.apksigner.utils.Base64.encode(entryDigest);
+            String encodedEntryDigest = base64EncodeCompat(entryDigest);
             entryAttrs.putValue(entryDigestAttributeName, encodedEntryDigest);
             ByteArrayOutputStream sectionOut = new ByteArrayOutputStream();
             byte[] sectionBytes;
@@ -407,6 +405,18 @@ public abstract class V1SchemeSigner {
         result.mainSectionAttributes = mainAttrs;
         result.individualSectionsContents = invidualSectionsContents;
         return result;
+    }
+
+    public static String base64EncodeCompat(byte[] entryDigest) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                ? Base64.getEncoder().encodeToString(entryDigest)
+                : com.mcal.apksigner.utils.Base64.encode(entryDigest);
+    }
+
+    public static byte[] base64DecodeCompat(String src) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                ? Base64.getDecoder().decode(src)
+                : com.mcal.apksigner.utils.Base64.decode(src);
     }
 
     private static void checkEntryNameValid(String name) throws ApkFormatException {
@@ -460,9 +470,7 @@ public abstract class V1SchemeSigner {
 
         // Add main attribute containing the digest of MANIFEST.MF.
         MessageDigest md = getMessageDigestInstance(manifestDigestAlgorithm);
-        String encodedManifestDigest = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                ? Base64.getEncoder().encodeToString(md.digest(manifest.contents))
-                : com.mcal.apksigner.utils.Base64.encode(md.digest(manifest.contents));
+        String encodedManifestDigest = base64EncodeCompat(md.digest(manifest.contents));
         mainAttrs.putValue(getManifestDigestAttributeName(manifestDigestAlgorithm), encodedManifestDigest);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
@@ -477,9 +485,7 @@ public abstract class V1SchemeSigner {
             byte[] sectionContents = manifestSection.getValue();
             byte[] sectionDigest = md.digest(sectionContents);
             Attributes attrs = new Attributes();
-            String encodedSectionDigest = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                    ? Base64.getEncoder().encodeToString(sectionDigest)
-                    : com.mcal.apksigner.utils.Base64.encode(sectionDigest);
+            String encodedSectionDigest = base64EncodeCompat(sectionDigest);
             attrs.putValue(entryDigestAttributeName, encodedSectionDigest);
 
             try {

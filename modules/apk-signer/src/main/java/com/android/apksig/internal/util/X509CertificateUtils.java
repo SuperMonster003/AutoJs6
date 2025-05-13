@@ -16,6 +16,8 @@
 
 package com.android.apksig.internal.util;
 
+import static com.android.apksig.internal.apk.v1.V1SchemeSigner.base64DecodeCompat;
+
 import com.android.apksig.internal.asn1.Asn1BerParser;
 import com.android.apksig.internal.asn1.Asn1DecodingException;
 import com.android.apksig.internal.asn1.Asn1DerEncoder;
@@ -30,7 +32,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 
 /**
@@ -265,7 +266,7 @@ public class X509CertificateUtils {
                                 + "valid certificate footer");
             }
         }
-        byte[] derEncoding = Base64.getDecoder().decode(pemEncoding.toString());
+        byte[] derEncoding = base64DecodeCompat(pemEncoding.toString());
         // consume any trailing whitespace in the byte buffer
         int nextEncodedChar = certificateBuffer.position();
         while (certificateBuffer.hasRemaining()) {

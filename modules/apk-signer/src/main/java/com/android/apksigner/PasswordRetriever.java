@@ -16,6 +16,8 @@
 
 package com.android.apksigner;
 
+import android.annotation.SuppressLint;
+
 import java.io.ByteArrayOutputStream;
 import java.io.Console;
 import java.io.File;
@@ -86,7 +88,7 @@ public class PasswordRetriever implements AutoCloseable {
         return encoded;
     }
 
-    private static char[] decodePassword(byte[] pwdBytes,  Charset encoding) throws IOException {
+    private static char[] decodePassword(byte[] pwdBytes, Charset encoding) throws IOException {
         CharBuffer pwdChars =
                 encoding.newDecoder()
                         .onMalformedInput(CodingErrorAction.REPLACE)
@@ -140,6 +142,7 @@ public class PasswordRetriever implements AutoCloseable {
         }
         String consoleCharsetName = null;
         try {
+            @SuppressLint("SoonBlockedPrivateApi")
             Method encodingMethod = Console.class.getDeclaredMethod("encoding");
             encodingMethod.setAccessible(true);
             consoleCharsetName = (String) encodingMethod.invoke(null);
@@ -314,7 +317,7 @@ public class PasswordRetriever implements AutoCloseable {
             if (value == null) {
                 throw new IOException(
                         "Failed to read " + description + ": environment variable " + value
-                                + " not specified");
+                        + " not specified");
             }
             return getPasswords(value.toCharArray(), additionalPwdEncodings);
         } else {
