@@ -1040,5 +1040,7 @@
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
+    <string name="text_hide_node">إخفاء هذه العقدة</string>
+    <string name="text_hide_same_frame_nodes">إخفاء العقدة ذات الإطار المماثل</string>
 
 </resources>

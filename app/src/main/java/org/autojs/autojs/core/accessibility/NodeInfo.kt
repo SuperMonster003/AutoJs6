@@ -63,6 +63,7 @@ class NodeInfo(private val resources: Resources?, private val node: UiObject, va
     val columnSpan = node.columnSpan()
     val drawingOrder = node.drawingOrder
     val actionNames = node.actionNames()
+    var hidden = false
 
     val children = ArrayList<NodeInfo>()
 

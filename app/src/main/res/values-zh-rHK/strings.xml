@@ -1036,5 +1036,7 @@
     <string name="text_write_secure_settings">修改安全設置</string>
     <string name="text_write_secure_settings_description">安全設置包含應用程序可讀但不可寫入的設置選項, 這些選項只能由 UI 或系統級別應用修改.\n被授予 \"修改安全設置權限\" 後, 普通應用可直接修改上述安全設置 (例如無障礙服務).</string>
     <string name="text_write_system_settings">修改系統設置</string>
+    <string name="text_hide_node">隱藏此節點</string>
+    <string name="text_hide_same_frame_nodes">隱藏同框節點</string>
 
 </resources>

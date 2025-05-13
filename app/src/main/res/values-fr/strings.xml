@@ -1038,5 +1038,7 @@
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité</string>.
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
+    <string name="text_hide_node">Masquer ce nœud</string>
+    <string name="text_hide_same_frame_nodes">Masquer le nœud du même cadre</string>
 
 </resources>
