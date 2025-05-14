@@ -48,9 +48,9 @@
 
 [Auto.js](https://github.com/hyb1996/Auto.js) Android 플랫폼에서 [접근성 서비스](https://developer.android.com/guide/topics/ui/accessibility/service?hl=zh-cn)를 지원하는 JavaScript 자동화 도구 소프트웨어입니다.
 
-Auto.js는 [hyb1996](https://github.com/hyb1996)에 의해 `2017/01/27` 처음 출시되었으며, `2020/03/13` 에 유지보수가 중단되었고, 최종 버전 이름은 `4.1.1 Alpha2`, 빌드 버전 번호는 `461`입니다.
+Auto.js는 [hyb1996](https://github.com/hyb1996)에 의해 `2017/01/27` 처음 출시되었으며, `2020/03/13` 에 유지보수가 중단되었고, 최종 버전 이름은 `4.1.1 Alpha2`, 빌드 버전 번호는 `461` 입니다.
 
-AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01`에 다시 개발되어 계속해서 오픈 소스로 무료로 유지됩니다.
+AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01` 에 다시 개발되어 계속해서 오픈 소스로 무료로 유지됩니다.
 
 다음 표는 일부 Auto.js 관련 프로젝트를 나열한 것입니다 (개발 날짜 순으로 정렬됨):
 
@@ -116,7 +116,7 @@ AutoJs6는 Auto.js 최종 프로젝트를 기반으로 `2021/12/01`에 다시 �
 
 ******
 
-Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2`와 비교하여 AutoJs6는 주요한 다음과 같은 업그레이드 및 변동사항이 있습니다:
+Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 주요한 다음과 같은 업그레이드 및 변동사항이 있습니다:
 
 * [Shizuku](https://shizuku.rikka.app/introduction/)를 통해 ADB 특권을 얻고 시스템 API 사용 지원
 * [WebSocket](https://docs.autojs6.com/#/webSocketType) 인스턴스를 생성하여 [WebSocket 프로토콜](https://zh.wikipedia.org/wiki/WebSocket)에 기반한 네트워크 요청 지원
@@ -361,12 +361,12 @@ System Settings (시스템 설정) ->
 Android SDK (안드로이드 소프트웨어 개발 키트)
 ```
 
-`Android SDK Location`(안드로이드 소프트웨어 개발 키트 위치) 필드가 비어 있는 경우, 오른쪽의 `Edit`(편집) 버튼을 클릭하고, 팝업 창에서 여러 번 `Next`(다음)를 클릭합니다.
+`Android SDK Location` (안드로이드 소프트웨어 개발 키트 위치) 필드가 비어 있는 경우, 오른쪽의 `Edit` (편집) 버튼을 클릭하고, 팝업 창에서 여러 번 `Next` (다음)를 클릭합니다.
 
 > 메모: 과정 중 하나 이상의 관련 계약을 동의해야 계속 진행할 수 있습니다.
 
-관련 리소스가 다운로드 및 설치를 완료하면, `Finish`(완료) 버튼을 클릭합니다.  
-위의 `Android SDK Location`(안드로이드 소프트웨어 개발 키트 위치) 필드에 경로가 자동으로 작성되고, SDK 준비 작업이 완료됩니다.
+관련 리소스가 다운로드 및 설치를 완료하면, `Finish` (완료) 버튼을 클릭합니다.  
+위의 `Android SDK Location` (안드로이드 소프트웨어 개발 키트 위치) 필드에 경로가 자동으로 작성되고, SDK 준비 작업이 완료됩니다.
 
 #### Android SDK 도구 준비
 
@@ -389,7 +389,7 @@ SDK Tools (SDK 도구) (오른쪽 창에 위치)
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다.
 
-2025 년 5 월 13 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24`입니다.
+2025 년 5 월 14 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
@@ -406,14 +406,14 @@ Gradle
 `Gradle JDK` 에서 다양한 버전의 JDK를 선택하거나 추가할 수 있습니다.
 
 목록에 적합한 버전의 JDK(>= `17`)가 있는 경우, 직접 선택하십시오.  
-그렇지 않으면 `Download JDK (JDK 다운로드)`를 선택하여 적절한 JDK를 다운로드하고, `Download (다운로드)` 버튼을 클릭하여 완료될 때까지 기다립니다.  
-`Add JDK (JDK 추가)`를 선택하여 이미 존재하는 로컬 JDK를 추가하고 디렉토리를 지정하여 JDK 추가를 완료할 수 있습니다.
+그렇지 않으면 `Download JDK (JDK 다운로드)` 를 선택하여 적절한 JDK를 다운로드하고, `Download (다운로드)` 버튼을 클릭하여 완료될 때까지 기다립니다.  
+`Add JDK (JDK 추가)` 를 선택하여 이미 존재하는 로컬 JDK를 추가하고 디렉토리를 지정하여 JDK 추가를 완료할 수 있습니다.
 
 #### AutoJs6 자원 복제
 
 Android Studio 메인 화면에서 `Get from VCS (버전 관리 시스템에서 가져오기)` 버튼을 클릭합니다.  
-`URL (통합 자원 위치)`에 `https://github.com/SuperMonster003/AutoJs6.git`을 입력합니다,  
-`Directory (디렉토리)`에서 필요한 경우 특정 경로로 수정할 수 있습니다.  
+`URL (통합 자원 위치)` 에 `https://github.com/SuperMonster003/AutoJs6.git` 을 입력합니다,  
+`Directory (디렉토리)` 에서 필요한 경우 특정 경로로 수정할 수 있습니다.  
 `Clone (복제)` 버튼을 클릭하고 AutoJs6 프로젝트 리소스를 장치에 로컬로 복제될 때까지 기다립니다.
 
 > 메모: 과정 중 [Git (분산 버전 관리 시스템)](https://git-scm.com/download)을 설치해야 할 수도 있습니다.
@@ -426,7 +426,7 @@ Android Studio 메인 화면에서 `Get from VCS (버전 관리 시스템에서 
 
 빌드가 자동으로 진행되지 않거나 프로젝트를 다시 빌드해야 하는 경우, 다음 단계를 따르십시오:
 
-- 툴바의 `Run/Debug Configurations` 메뉴에서 `app`을 선택합니다. 이는 AutoJs6의 메인 앱입니다
+- 툴바의 `Run/Debug Configurations` 메뉴에서 `app` 을 선택합니다. 이는 AutoJs6의 메인 앱입니다
 - 좌측의 `Build Project` (망치 아이콘) 버튼을 클릭하여 프로젝트 빌드를 시작합니다. 기본 단축키는 CTRL + F9입니다
 - 빌드가 완료될 때까지 기다립니다. `Builder Output` 탭에 "BUILD SUCCESSFUL in 1h 17m 34s"와 같은 메시지가 표시됩니다
 
@@ -438,9 +438,9 @@ Android Studio 메인 화면에서 `Get from VCS (버전 관리 시스템에서 
 
 프로젝트가 성공적으로 빌드된 후, 이를 실제 디바이스(예: 휴대폰/태블릿)나 가상 디바이스(예: Android 에뮬레이터)에 앱으로 배포할 수 있습니다.
 
-- 툴바에서 `Run/Debug Configurations` 메뉴의 `app`을 선택합니다. 이는 AutoJs6의 메인 앱입니다
+- 툴바에서 `Run/Debug Configurations` 메뉴의 `app` 을 선택합니다. 이는 AutoJs6의 메인 앱입니다
 - 우측의 `Available Devices` 드롭다운 목록에서 프로젝트 앱을 실행할 디바이스(실제 또는 가상)를 선택합니다
-- 우측의 `Run` (삼각형 아이콘) 버튼을 클릭하여 앱을 실행합니다. 기본 단축키는 `F10`입니다
+- 우측의 `Run` (삼각형 아이콘) 버튼을 클릭하여 앱을 실행합니다. 기본 단축키는 `F10` 입니다
 - 배포가 완료될 때까지 기다리면 선택된 디바이스가 자동으로 앱을 설치하고 실행합니다
 
 #### AutoJs6 프로젝트 배포 (APK 생성)

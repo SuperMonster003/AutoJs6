@@ -389,7 +389,7 @@ Cochez `Show Package Details (afficher les détails du package)`, puis cliquez r
 
 La version de JDK (Kit de développement Java) requise pour le projet AutoJs6 doit être au moins `17`, mais il est recommandé d'avoir au moins `19`.
 
-À partir du 13 May 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
+À partir du 14 May 2025, AutoJs6 prend en charge la version maximale de JDK `24`.
 
 > Note : Si le JDK est déjà installé sur le système informatique et que la version répond aux exigences ci-dessus, vous pouvez ignorer cette section.
 

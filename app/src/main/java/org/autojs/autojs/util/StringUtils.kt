@@ -5,6 +5,8 @@ import android.text.TextUtils
 import org.autojs.autojs.annotation.LocaleNonRelated
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.extension.NumberExtensions.roundToString
+import org.opencv.core.Point
 import java.util.Locale
 import kotlin.math.min
 import kotlin.math.pow
@@ -203,5 +205,29 @@ object StringUtils {
     @JvmStatic
     @Deprecated("Deprecated since v6.6.0", ReplaceWith("uppercaseFirstChar(s)"))
     fun toUpperCaseFirst(s: String) = uppercaseFirstChar(s)
+
+    @JvmStatic
+    fun toFormattedSummary(dataList: List<Pair<String, () -> Any?>>): String {
+        val separatorLv0 = "\n"
+        val separatorLv1 = "$separatorLv0  "
+        val separatorLv2 = "$separatorLv1  "
+
+        return dataList.joinToString(prefix = "{$separatorLv1", separator = separatorLv1, postfix = "$separatorLv0}") { (name, action) ->
+            val value = when (val actionResult = action()) {
+                is CharSequence -> "\"$actionResult\""
+                is Iterable<*> -> actionResult.joinToString(prefix = "[$separatorLv2", separator = separatorLv2, postfix = "$separatorLv1]")
+                is Array<*> -> actionResult.joinToString(prefix = "[$separatorLv2", separator = separatorLv2, postfix = "$separatorLv1]")
+                is Point -> actionResult.toFormattedPointString(0)
+                else -> actionResult
+            }
+            "$name=$value"
+        }
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun Point.toFormattedPointString(scale: Int = 0): String {
+        return "{${x.roundToString(scale)}, ${y.roundToString(scale)}}"
+    }
 
 }

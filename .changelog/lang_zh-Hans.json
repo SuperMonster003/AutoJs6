@@ -1,12 +1,13 @@
 {
   "$data": {
     "v6.6.3": {
-      "released_date": "2025/05/13",
+      "released_date": "2025/05/14",
       "feature": [
         "版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据",
         "timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态",
         "engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件",
-        "images.detectMultiColors 方法, 用于多点颜色校验 _[`issue #374`](http://issues.autojs6.com/374)_"
+        "images.detectMultiColors 方法, 用于多点颜色校验 _[`issue #374`](http://issues.autojs6.com/374)_",
+        "images.matchFeatures/detectAndComputeFeatures 方法, 支持全分辨率找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_"
       ],
       "fix": [
         "主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题",

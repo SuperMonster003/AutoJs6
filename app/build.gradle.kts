@@ -863,18 +863,18 @@ class Versions(filePath: String) {
         }
 
         var versionInt = javaVersionRaw.toInt()
-        var isFallback = false
+        var isJvmCoercive = false
 
         while (versionInt > javaVersionMinSupported) {
             if (JvmTarget.values().any { it.name.contains(Regex("_$versionInt$")) }) {
                 break
             }
             versionInt -= 1
-            isFallback = true
+            isJvmCoercive = true
         }
 
-        if (isFallback) {
-            javaVersionInfoSuffix += " [fallback]"
+        if (isJvmCoercive) {
+            javaVersionInfoSuffix += " [coercive-jvm-downgraded]"
         }
 
         if (versionInt > currentVersionInt) {

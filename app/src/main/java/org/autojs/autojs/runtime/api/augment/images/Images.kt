@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.augment.images
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import android.view.Gravity
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.image.ColorDetector
@@ -43,6 +44,7 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
+import org.opencv.core.CvType
 import org.opencv.features2d.DescriptorMatcher
 import org.opencv.imgproc.Imgproc
 import java.io.ByteArrayOutputStream
@@ -52,9 +54,12 @@ import kotlin.collections.component3
 import kotlin.collections.contains
 import kotlin.math.floor
 import kotlin.math.ln
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 import android.graphics.Rect as AndroidRect
 import org.autojs.autojs.core.opencv.Mat as AutoJsMat
 import org.autojs.autojs.runtime.api.Images as ApiImages
@@ -146,6 +151,8 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
     @Suppress("MayBeConstant")
     companion object {
+
+        private val TAG = Images::class.java.simpleName
 
         @JvmField
         val DEFAULT_COLOR_THRESHOLD = 4
@@ -1014,19 +1021,28 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             require(objectFeatures is ImageFeatures) {
                 "Argument objectFeatures ${objectFeatures.jsBrief()} for images.matchFeatures must be a ImageFeatures"
             }
-            val matcher = opt.inquire("matcher") {
-                coerceIntNumber(DescriptorMatcher::class.java.getField(coerceString(it)).get(null))
-            } ?: DescriptorMatcher.FLANNBASED
+            val isObjectOrbAlike = objectFeatures.javaObject.descriptors.type() == CvType.CV_8U
+            val matcherType = opt.inquire("matcher") {
+                DescriptorMatcher::class.java.getField(coerceString(it)).get(null) as? Int
+            } ?: when (isObjectOrbAlike) {
+                /* For ORB, BRISK, AKAZE, etc. */
+                true -> DescriptorMatcher.BRUTEFORCE_HAMMING
+                /* For SIFT, SURF, etc. */
+                else -> DescriptorMatcher.FLANNBASED
+            }
             val drawMatches = opt.inquire("drawMatches") { scriptRuntime.files.nonNullPath(coerceString(it)) }
-            val threshold = opt.inquire("threshold", ::coerceFloatNumber, 0.7f)
+            val threshold = opt.inquire("threshold", ::coerceFloatNumber, if (isObjectOrbAlike) 0.8f else 0.7f)
 
-            val result = ImageFeatureMatching.featureMatching(sceneFeatures.javaObject, objectFeatures.javaObject, matcher, drawMatches, threshold) ?: return@ensureArgumentsLengthInRange null
-
-            val javaMatchesImage = result.matches
-            val points = result.points
+            val result = ImageFeatureMatching.featureMatching(
+                /* sceneDesc = */ sceneFeatures.javaObject,
+                /* objectDesc = */ objectFeatures.javaObject,
+                /* matcherType = */ matcherType,
+                /* debugMatchesImagePath = */ drawMatches,
+                /* threshold = */ threshold,
+            ) ?: return@ensureArgumentsLengthInRange null
 
             if (!drawMatches.isJsNullish()) {
-                val matchesImage = javaMatchesImage?.let { matToImage(scriptRuntime, arrayOf(it)) }
+                val matchesImage = result.matches?.let { matToImage(scriptRuntime, arrayOf(it)) }
                 if (matchesImage != null) {
                     save(scriptRuntime, arrayOf(matchesImage, drawMatches, "jpg", 100))
                     matchesImage.recycle()
@@ -1035,17 +1051,16 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
             val region = sceneFeatures.region
             val scale = sceneFeatures.scale
-            val size = points.size
             val offsetX = region.x
             val offsetY = region.y
 
-            (0 until size).forEach { i ->
-                val point = points[i]
-                point.x = offsetX + point.x / scale
-                point.y = offsetY + point.y / scale
-            }
+            val quad = result.quad ?: return@ensureArgumentsLengthInRange null
+            require(quad.size == 4) { "Quad size of feature matching result must be 4 instead of ${quad.size}" }
 
-            ObjectFrame(points[0], points[1], points[3], points[2])
+            val (tl, tr, br, bl) = quad.map { p ->
+                OpencvPoint(p.x / scale + offsetX, p.y / scale + offsetY)
+            }
+            ObjectFrame(tl, tr, bl, br)
         }
 
         @JvmStatic
@@ -1439,10 +1454,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
         private fun fillDetectAndComputeFeaturesOptions(rows: Int, cols: Int, options: NativeObject): DetectAndComputeFeaturesOptions {
-            val scale = options.inquire("scale") { coerceFloatNumber(it) } ?: when {
-                rows * cols >= 1e6 -> 0.5f
-                else -> 1.0f
-            }
+            val scale = options.inquire("scale") { coerceFloatNumber(it) } ?: calcScale(rows, cols)
             val cvtColor = when {
                 options.inquire("grayscale", ::coerceBoolean, false) -> Imgproc.COLOR_RGBA2GRAY
                 else -> -1
@@ -1450,7 +1462,17 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             val method = getDetectFeatureMethod(options.inquire("method", ::coerceString, "SIFT"))
             val region = buildRegionInternal(options.prop("region"), cols, rows)
 
-            return DetectAndComputeFeaturesOptions(scale, cvtColor, method, region)
+            return DetectAndComputeFeaturesOptions(scale.coerceIn(0f, 1f), cvtColor, method, region)
+        }
+
+        private fun calcScale(rows: Int, cols: Int, targetArea: Int = 1_000_000, maxSide: Int = 1600): Float {
+            val total = rows * cols
+            if (total < targetArea) return 1f
+            val scaleByArea = sqrt(targetArea.toDouble() / total).toFloat()
+            val scaleBySide = maxSide.toFloat() / max(rows, cols)
+            return min(scaleByArea, scaleBySide).also {
+                Log.d(TAG, "Calculated scale: $it")
+            }
         }
 
         private fun extractMatPair(scriptRuntime: ScriptRuntime, argList: Array<Any?>, funcName: String): Pair<OpencvMat, OpencvMat> {
