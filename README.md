@@ -157,12 +157,13 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.6.3
 
-###### 2025/05/13
+###### 2025/05/14
 
 * `新增` 版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据
 * `新增` timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态
 * `新增` engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件
 * `新增` images.detectMultiColors 方法, 用于多点颜色校验 _[`issue #374`](http://issues.autojs6.com/374)_
+* `新增` images.matchFeatures/detectAndComputeFeatures 方法, 支持全分辨率找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
 * `修复` 主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题
 * `修复` 部分设备代码编辑器空行显示方框字符的问题
 * `修复` 主题色设置页面调色盘对话框可能无限叠加的问题
@@ -176,7 +177,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `修复` console.setContentBackgroundColor 方法无法接受颜色名称参数的问题 _[`issue #384`](http://issues.autojs6.com/384)_
 * `修复` README.md 中部分语言日期格式不正确的问题
 * `优化` 布局分析支持控件隐藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
-* `优化` 布局分析菜单使用渐变分隔线实现一定程度的功能分组
+* `优化` 布局分析菜单添加渐变分隔线实现一定程度的功能分组
 * `优化` 主题色扩充适配范围并支持更多控件类型
 * `优化` 主页抽屉在横向屏幕或超宽屏幕的宽度适应性
 * `优化` 关于应用与开发者页面增加水平布局及小屏布局适配
@@ -333,7 +334,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2025 年 5 月 13 日, AutoJs6 可支持 JDK 最高版本为 `24`.
+截至 2025 年 5 月 14 日, AutoJs6 可支持 JDK 最高版本为 `24`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 

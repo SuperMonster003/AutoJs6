@@ -435,8 +435,13 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                     val message = globalContext.getString(R.string.error_failed_to_invoke_method_with_description, methodDescription)
                     val niceMessage = when (val errMsg = e.message) {
                         null -> message
-                        else -> "$message. ${errMsg.replaceFirst(Regex("^(Wrapped )?\\w*(\\.\\w+)*(Exception|Error): "), "")}"
+                        else -> {
+                            val refined = errMsg.replaceFirst(Regex("^(Wrapped )?\\w*(\\.\\w+)*(Exception|Error): "), "")
+                            val trailingDot = if (refined.endsWith(".")) "" else "."
+                            "$message. $refined$trailingDot\n$e"
+                        }
                     }
+                    e.printStackTrace()
                     when (e) {
                         is WrappedIllegalArgumentException -> {
                             // @Hint by SuperMonster003 on Oct 31, 2024.

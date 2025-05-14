@@ -19,6 +19,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.DisplayUtils.toRoundIntX
 import org.autojs.autojs.util.DisplayUtils.toRoundIntY
 import org.autojs.autojs.util.RhinoUtils
+import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
@@ -436,70 +437,55 @@ open class UiObject(
         }
     }
 
-    fun summary(): String {
-        val separatorLv0 = "\n"
-        val separatorLv1 = "$separatorLv0  "
-        val separatorLv2 = "$separatorLv1  "
-        
-        val dataList = listOf<Pair<String, () -> Any?>>(
+    fun summary(): String = listOf(
 
-            /* Common */
+        /* Common */
 
-            "packageName" to { packageName() },
-            "parent" to { parent?.className },
-            "id" to { id() },
-            "fullId" to { fullId() },
-            "idHex" to { idHex() },
-            "desc" to { desc() },
-            "text" to { text() },
-            "bounds" to { bounds() },
-            "center" to { center() },
-            "className" to { className() },
-            "clickable" to { clickable() },
-            "longClickable" to { longClickable() },
-            "scrollable" to { scrollable() },
-            "indexInParent" to { indexInParent() },
-            "childCount" to { childCount() },
-            "depth" to { depth() },
+        "packageName" to { packageName() },
+        "parent" to { parent?.className },
+        "id" to { id() },
+        "fullId" to { fullId() },
+        "idHex" to { idHex() },
+        "desc" to { desc() },
+        "text" to { text() },
+        "bounds" to { bounds() },
+        "center" to { center() },
+        "className" to { className() },
+        "clickable" to { clickable() },
+        "longClickable" to { longClickable() },
+        "scrollable" to { scrollable() },
+        "indexInParent" to { indexInParent() },
+        "childCount" to { childCount() },
+        "depth" to { depth() },
 
-            /* Regular */
+        /* Regular */
 
-            "checked" to { checked() },
-            "enabled" to { enabled() },
-            "editable" to { editable() },
-            "focusable" to { focusable() },
-            "checkable" to { checkable() },
-            "selected" to { selected() },
-            "dismissable" to { isDismissable },
-            "visibleToUser" to { visibleToUser() },
+        "checked" to { checked() },
+        "enabled" to { enabled() },
+        "editable" to { editable() },
+        "focusable" to { focusable() },
+        "checkable" to { checkable() },
+        "selected" to { selected() },
+        "dismissable" to { isDismissable },
+        "visibleToUser" to { visibleToUser() },
 
-            /* Rare */
+        /* Rare */
 
-            "contextClickable" to { isContextClickable },
-            "focused" to { focused() },
-            "accessibilityFocused" to { isAccessibilityFocused },
-            "rowCount" to { rowCount() },
-            "columnCount" to { columnCount() },
-            "row" to { row() },
-            "column" to { column() },
-            "rowSpan" to { rowSpan() },
-            "columnSpan" to { columnSpan() },
-            "drawingOrder" to { drawingOrder },
+        "contextClickable" to { isContextClickable },
+        "focused" to { focused() },
+        "accessibilityFocused" to { isAccessibilityFocused },
+        "rowCount" to { rowCount() },
+        "columnCount" to { columnCount() },
+        "row" to { row() },
+        "column" to { column() },
+        "rowSpan" to { rowSpan() },
+        "columnSpan" to { columnSpan() },
+        "drawingOrder" to { drawingOrder },
 
-            /* List */
+        /* List */
 
-            "actions" to { actionNames() },
-        )
-        return dataList.joinToString(prefix = "{$separatorLv1", separator = separatorLv1, postfix = "$separatorLv0}") { (name, action) ->
-            val value = when (val actionResult = action()) {
-                is CharSequence -> "\"$actionResult\""
-                is Iterable<*> -> actionResult.joinToString(prefix = "[$separatorLv2", separator = separatorLv2, postfix = "$separatorLv1]")
-                is Array<*> -> actionResult.joinToString(prefix = "[$separatorLv2", separator = separatorLv2, postfix = "$separatorLv1]")
-                else -> actionResult
-            }
-            "$name=$value"
-        }
-    }
+        "actions" to { actionNames() },
+    ).let { StringUtils.toFormattedSummary(it) }
 
     override fun toString(): String {
         val simpledClassName = "$className".substringAfterLast(".")
