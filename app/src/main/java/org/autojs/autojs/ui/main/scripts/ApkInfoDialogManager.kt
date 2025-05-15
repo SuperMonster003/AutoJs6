@@ -20,9 +20,11 @@ import net.dongliu.apk.parser.ApkFile
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeSettingsLaunchable
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
 import org.autojs.autojs.extension.MaterialDialogExtensions.setCopyableTextIfAbsent
+import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.AppUtils
 import org.autojs.autojs.util.IntentUtils
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ApkFileInfoDialogListItemBinding
 import java.io.File
@@ -49,7 +51,12 @@ object ApkInfoDialogManager {
             .positiveColorRes(R.color.dialog_button_attraction)
             .onPositive { materialDialog, _ ->
                 materialDialog.dismiss()
-                IntentUtils.installApk(context, apkFilePath)
+                IntentUtils.installApk(
+                    context = context,
+                    path = apkFilePath,
+                    fileProviderAuthority = AppFileProvider.AUTHORITY,
+                    exceptionHolder = ToastExceptionHolder(context),
+                )
             }
             .negativeText(R.string.text_cancel)
             .negativeColorRes(R.color.dialog_button_default)

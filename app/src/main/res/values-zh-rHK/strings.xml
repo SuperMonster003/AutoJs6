@@ -1038,5 +1038,11 @@
     <string name="text_write_system_settings">修改系統設置</string>
     <string name="text_hide_node">隱藏此節點</string>
     <string name="text_hide_same_frame_nodes">隱藏同框節點</string>
+    <string name="error_no_applications_available_for_editing_this_file">未找到用於編輯該文件的應用</string>
+    <string name="error_no_applications_available_for_browsing_this_link">未找到用於瀏覽該鏈接的應用</string>
+    <string name="error_no_applications_available_for_installing_this_file">未找到用於安裝該文件的應用</string>
+    <string name="error_no_applications_available_for_viewing_this_file">未找到用於查看該文件的應用</string>
+    <string name="error_no_applications_available_for_sending_this_file">未找到用於發送該文件的應用</string>
+    <string name="error_no_applications_available_for_playing_this_file">未找到用於播放該文件的應用</string>
 
 </resources>

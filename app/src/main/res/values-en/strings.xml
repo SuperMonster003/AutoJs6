@@ -1037,5 +1037,11 @@
     <string name="text_write_system_settings">Write system settings</string>
     <string name="text_hide_node">Hide this node</string>
     <string name="text_hide_same_frame_nodes">Hide same frame nodes</string>
+    <string name="error_no_applications_available_for_editing_this_file">No applications available for editing this file</string>
+    <string name="error_no_applications_available_for_browsing_this_link">No applications available for browsing this link</string>
+    <string name="error_no_applications_available_for_installing_this_file">No applications available for installing this file</string>
+    <string name="error_no_applications_available_for_viewing_this_file">No applications available for viewing this file</string>
+    <string name="error_no_applications_available_for_sending_this_file">No applications available for sending this file</string>
+    <string name="error_no_applications_available_for_playing_this_file">No applications available for playing this file</string>
 
 </resources>

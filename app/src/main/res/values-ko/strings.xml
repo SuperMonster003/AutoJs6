@@ -1042,5 +1042,11 @@
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
     <string name="text_hide_node">이 노드를 숨기기</string>
     <string name="text_hide_same_frame_nodes">동일 프레임의 노드를 숨기기</string>
+    <string name="error_no_applications_available_for_editing_this_file">이 파일을 편집할 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_browsing_this_link">이 링크를 탐색할 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_installing_this_file">이 파일을 설치할 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_viewing_this_file">이 파일을 볼 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_sending_this_file">이 파일을 전송할 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_playing_this_file">이 파일을 재생할 수 있는 앱이 없습니다</string>
 
 </resources>

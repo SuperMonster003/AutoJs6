@@ -1040,5 +1040,11 @@
     <string name="text_write_system_settings">Écrire les paramètres système</string>
     <string name="text_hide_node">Masquer ce nœud</string>
     <string name="text_hide_same_frame_nodes">Masquer le nœud du même cadre</string>
+    <string name="error_no_applications_available_for_editing_this_file">Aucune application disponible pour modifier ce fichier</string>
+    <string name="error_no_applications_available_for_browsing_this_link">Aucune application disponible pour parcourir ce lien</string>
+    <string name="error_no_applications_available_for_installing_this_file">Aucune application disponible pour installer ce fichier</string>
+    <string name="error_no_applications_available_for_viewing_this_file">Aucune application disponible pour afficher ce fichier</string>
+    <string name="error_no_applications_available_for_sending_this_file">Aucune application disponible pour envoyer ce fichier</string>
+    <string name="error_no_applications_available_for_playing_this_file">Aucune application disponible pour lire ce fichier</string>
 
 </resources>

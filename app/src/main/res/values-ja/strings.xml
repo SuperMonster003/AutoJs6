@@ -1041,5 +1041,11 @@
     <string name="text_write_system_settings">システム設定の書き込み</string>
     <string name="text_hide_node">このノードを隠す</string>
     <string name="text_hide_same_frame_nodes">同じフレームのノードを隠す</string>
+    <string name="error_no_applications_available_for_editing_this_file">このファイルを編集できるアプリがありません</string>
+    <string name="error_no_applications_available_for_browsing_this_link">このリンクを閲覧できるアプリがありません</string>
+    <string name="error_no_applications_available_for_installing_this_file">このファイルをインストールできるアプリがありません</string>
+    <string name="error_no_applications_available_for_viewing_this_file">このファイルを表示できるアプリがありません</string>
+    <string name="error_no_applications_available_for_sending_this_file">このファイルを送信できるアプリがありません</string>
+    <string name="error_no_applications_available_for_playing_this_file">このファイルを再生できるアプリがありません</string>
 
 </resources>

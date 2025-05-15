@@ -5,11 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.*
+import android.content.pm.PackageManager.ApplicationInfoFlags
+import android.content.pm.PackageManager.GET_META_DATA
+import android.content.pm.PackageManager.NameNotFoundException
+import android.content.pm.PackageManager.PackageInfoFlags
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.core.net.toUri
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.external.fileprovider.AppFileProvider
@@ -33,7 +36,7 @@ import org.autojs.autojs.runtime.api.augment.app.App as AugmentableApp
  * Created by Stardust on Apr 2, 2017.
  * Modified by SuperMonster003 as of Jul 13, 2022.
  */
-class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority: String? = AppFileProvider.AUTHORITY) {
+class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority: String = AppFileProvider.AUTHORITY) {
 
     private val mContext: Context = context
     private val mPackageManager = mContext.packageManager
@@ -155,16 +158,27 @@ class AppUtils(context: Context, @get:ScriptInterface val fileProviderAuthority:
 
     @ScriptInterface
     fun uninstall(packageName: String) {
-        Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName"))
+        Intent(Intent.ACTION_DELETE, "package:$packageName".toUri())
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .let { mContext.startActivity(it) }
     }
 
     @ScriptInterface
-    fun viewFile(path: String) = IntentUtils.viewFile(mContext, path, fileProviderAuthority)
+    fun viewFile(path: String) = IntentUtils.viewFile(
+        context = mContext,
+        path = path,
+        mimeType = null,
+        fileProviderAuthority = fileProviderAuthority,
+        exceptionHolder = IntentUtils.ToastExceptionHolder(mContext),
+    )
 
     @ScriptInterface
-    fun editFile(path: String) = IntentUtils.editFile(mContext, path, fileProviderAuthority)
+    fun editFile(path: String) = IntentUtils.editFile(
+        context = mContext,
+        path = path,
+        fileProviderAuthority = fileProviderAuthority,
+        exceptionHolder = IntentUtils.ToastExceptionHolder(mContext),
+    )
 
     @ScriptInterface
     fun openUrl(url: String) {

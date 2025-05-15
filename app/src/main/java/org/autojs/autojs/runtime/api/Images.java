@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.media.Image;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
@@ -190,7 +191,7 @@ public class Images {
     public ScriptPromiseAdapter requestScreenCapture(int orientation, int width, int height, boolean isAsync) {
         ScriptPromiseAdapter promiseAdapter = new ScriptPromiseAdapter();
         if (mScreenCapturer == null) {
-            Handler handler = isAsync ? new Handler() : new Handler(mScriptRuntime.loopers.getServantLooper());
+            Handler handler = isAsync ? new Handler(Looper.getMainLooper()) : new Handler(mScriptRuntime.loopers.getServantLooper());
             Context contextForRequest = mScriptRuntime.app.getCurrentActivity();
             if (contextForRequest == null) contextForRequest = mContext;
             mScreenCaptureRequester = new ScreenCaptureRequester();
