@@ -36,6 +36,7 @@ import org.autojs.autojs.apkbuilder.ApkBuilder;
 import org.autojs.autojs.apkbuilder.keystore.KeyStore;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.extension.MaterialDialogExtensions;
+import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.project.ProjectConfig;
@@ -56,6 +57,7 @@ import org.autojs.autojs.util.AndroidUtils.Abi;
 import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs.util.EnvironmentUtils;
 import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs.util.WorkingDirectoryUtils;
 import org.autojs.autojs6.R;
@@ -987,7 +989,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                 .content(getString(R.string.format_build_succeeded, outApk.getPath()))
                 .positiveText(R.string.text_install)
                 .positiveColorRes(R.color.dialog_button_attraction)
-                .onPositive((dialog, which) -> IntentUtils.installApk(BuildActivity.this, outApk.getPath()))
+                .onPositive((dialog, which) -> IntentUtils.installApk(
+                        BuildActivity.this,
+                        outApk.getPath(),
+                        AppFileProvider.AUTHORITY,
+                        new ToastExceptionHolder(BuildActivity.this)
+                ))
                 .negativeText(R.string.text_cancel)
                 .negativeColorRes(R.color.dialog_button_default)
                 .neutralText(R.string.dialog_button_file_information)

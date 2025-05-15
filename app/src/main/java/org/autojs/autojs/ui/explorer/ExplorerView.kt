@@ -21,7 +21,6 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Pref.getInt
 import org.autojs.autojs.core.pref.Pref.getLinkedList
 import org.autojs.autojs.core.pref.Pref.getStringOrNull
@@ -30,7 +29,6 @@ import org.autojs.autojs.core.pref.Pref.putLinkedList
 import org.autojs.autojs.core.pref.Pref.putString
 import org.autojs.autojs.core.pref.Pref.remove
 import org.autojs.autojs.extension.ViewExtensions.setForceShowIconCompat
-import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.groundwork.WrapContentGridLayoutManger
 import org.autojs.autojs.model.explorer.Explorer
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent
@@ -65,7 +63,6 @@ import org.autojs.autojs.ui.widget.FirstCharView
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
 import org.autojs.autojs.util.FileUtils
-import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.WorkingDirectoryUtils
@@ -669,8 +666,6 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
 
     internal inner class ExplorerItemViewHolder(itemView: View) : BindableViewHolder<Any>(itemView) {
 
-        private val globalAppContext by lazy { GlobalAppContext.get() }
-
         private val mFirstChar: FirstCharView
 
         private val mName: TextView
@@ -841,7 +836,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     notifyItemOperated()
                 }
                 mExplorerItem.isMediaPlayable -> {
-                    mExplorerItem.play(context)
+                    mExplorerItem.play(this@ExplorerView)
                     notifyItemOperated()
                 }
             }
@@ -854,7 +849,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     notifyItemOperated()
                 }
                 mExplorerItem.isExternalEditable -> {
-                    IntentUtils.editFile(globalAppContext, mExplorerItem.path, AppFileProvider.AUTHORITY)
+                    mExplorerItem.edit(this@ExplorerView)
                     notifyItemOperated()
                 }
             }
@@ -876,11 +871,11 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
         private fun install() {
             when {
                 mExplorerItem.isInstallable -> {
-                    mExplorerItem.install(context)
+                    mExplorerItem.install(this@ExplorerView)
                     notifyItemOperated()
                 }
                 else -> {
-                    IntentUtils.viewFile(globalAppContext, mExplorerItem.path)
+                    mExplorerItem.view(this@ExplorerView)
                     notifyItemOperated()
                 }
             }

@@ -1040,5 +1040,11 @@
     <string name="text_write_system_settings">Запись системных настроек</string>
     <string name="text_hide_node">Скрыть этот узел</string>
     <string name="text_hide_same_frame_nodes">Скрыть узел того же фрейма</string>
+    <string name="error_no_applications_available_for_editing_this_file">Нет приложений для редактирования этого файла</string>
+    <string name="error_no_applications_available_for_browsing_this_link">Нет приложений для просмотра этой ссылки</string>
+    <string name="error_no_applications_available_for_installing_this_file">Нет приложений для установки этого файла</string>
+    <string name="error_no_applications_available_for_viewing_this_file">Нет приложений для просмотра этого файла</string>
+    <string name="error_no_applications_available_for_sending_this_file">Нет приложений для отправки этого файла</string>
+    <string name="error_no_applications_available_for_playing_this_file">Нет приложений для воспроизведения этого файла</string>
 
 </resources>

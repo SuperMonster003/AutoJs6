@@ -1042,5 +1042,11 @@
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
     <string name="text_hide_node">إخفاء هذه العقدة</string>
     <string name="text_hide_same_frame_nodes">إخفاء العقدة ذات الإطار المماثل</string>
+    <string name="error_no_applications_available_for_editing_this_file">لا توجد تطبيقات متاحة لتحرير هذا الملف</string>
+    <string name="error_no_applications_available_for_browsing_this_link">لا توجد تطبيقات متاحة لاستعراض هذا الرابط</string>
+    <string name="error_no_applications_available_for_installing_this_file">لا توجد تطبيقات متاحة لتثبيت هذا الملف</string>
+    <string name="error_no_applications_available_for_viewing_this_file">لا توجد تطبيقات متاحة لعرض هذا الملف</string>
+    <string name="error_no_applications_available_for_sending_this_file">لا توجد تطبيقات متاحة لإرسال هذا الملف</string>
+    <string name="error_no_applications_available_for_playing_this_file">لا توجد تطبيقات متاحة لتشغيل هذا الملف</string>
 
 </resources>

@@ -1040,5 +1040,11 @@
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
     <string name="text_hide_node">Ocultar este nodo</string>
     <string name="text_hide_same_frame_nodes">Ocultar nodo del mismo marco</string>
+    <string name="error_no_applications_available_for_editing_this_file">No hay aplicaciones disponibles para editar este archivo</string>
+    <string name="error_no_applications_available_for_browsing_this_link">No hay aplicaciones disponibles para abrir este enlace</string>
+    <string name="error_no_applications_available_for_installing_this_file">No hay aplicaciones disponibles para instalar este archivo</string>
+    <string name="error_no_applications_available_for_viewing_this_file">No hay aplicaciones disponibles para ver este archivo</string>
+    <string name="error_no_applications_available_for_sending_this_file">No hay aplicaciones disponibles para enviar este archivo</string>
+    <string name="error_no_applications_available_for_playing_this_file">No hay aplicaciones disponibles para reproducir este archivo</string>
 
 </resources>

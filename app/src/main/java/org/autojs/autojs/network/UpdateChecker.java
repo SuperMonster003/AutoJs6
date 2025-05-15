@@ -23,6 +23,7 @@ import org.autojs.autojs.annotation.Lazy;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.ui.widget.CustomSnackbar;
+import org.autojs.autojs.external.fileprovider.AppFileProvider;
 import org.autojs.autojs.network.api.StreamingUrlApi;
 import org.autojs.autojs.network.download.DownloadManager;
 import org.autojs.autojs.network.entity.ExtendedVersionInfo;
@@ -31,6 +32,7 @@ import org.autojs.autojs.tool.SimpleObserver;
 import org.autojs.autojs.ui.settings.DisplayVersionHistoriesActivity;
 import org.autojs.autojs.util.AndroidUtils;
 import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.TextUtils;
 import org.autojs.autojs.util.UpdateUtils;
 import org.autojs.autojs.util.ViewUtils;
@@ -241,7 +243,12 @@ public class UpdateChecker {
     private void download(Context context, VersionInfo versionInfo) {
         Consumer<File> onNext = file -> {
             mUpdateDialog = null;
-            IntentUtils.installApk(context, file.getPath());
+            IntentUtils.installApk(
+                    context,
+                    file.getPath(),
+                    AppFileProvider.AUTHORITY,
+                    new ToastExceptionHolder(context)
+            );
         };
 
         Consumer<Throwable> onError = e -> {

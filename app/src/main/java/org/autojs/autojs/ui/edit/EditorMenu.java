@@ -23,6 +23,7 @@ import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.ConsoleUtils;
 import org.autojs.autojs.util.IntentUtils;
+import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
@@ -198,7 +199,11 @@ public class EditorMenu {
                     var executionInfo = JavaScriptFileSource.parseExecutionMode(mEditor.getText());
                     mEditor.insert(executionInfo.getLineno(), item.getImportText() + ";\n");
                 })
-                .onNeutral((ignored, which) -> IntentUtils.browse(mContext, item.getUrl()))
+                .onNeutral((ignored, which) -> IntentUtils.browse(
+                        mContext,
+                        item.getUrl(),
+                        new ToastExceptionHolder(mContext)
+                ))
                 .onAny((ignored, which) -> dialog.dismiss())
                 .show();
     }
