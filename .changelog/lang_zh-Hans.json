@@ -21,7 +21,8 @@
         "使用 JavaAdapter 时导致 ClassLoader 调用栈溢出的问题 _[`issue #376`](http://issues.autojs6.com/376)_",
         "console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_",
         "console.setContentBackgroundColor 方法无法接受颜色名称参数的问题 _[`issue #384`](http://issues.autojs6.com/384)_",
-        "README.md 中部分语言日期格式不正确的问题"
+        "README.md 中部分语言日期格式不正确的问题",
+        "Gradle 构建脚本可能因获取到无效库档案文件长度而导致构建失败的问题 _[`issue #389`](http://issues.autojs6.com/389)_"
       ],
       "improvement": [
         "布局分析支持控件隐藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_",

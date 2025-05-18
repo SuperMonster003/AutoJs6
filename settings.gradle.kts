@@ -204,8 +204,8 @@ pluginManagement {
         /* Print concerned info by `System.getProperties()`. */
         val isShowConcernedSystemProperties = true
 
-        val isCleanupPaddleOcr = false
-        val isCleanupRapidOcr = false
+        val isCleanupPaddleOcr = true
+        val isCleanupRapidOcr = true
 
         val fallbackAgpVersion = "7.4.2"
         val fallbackKotlinVersion = "1.7.10"

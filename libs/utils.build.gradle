@@ -393,6 +393,7 @@ class Utils {
             final int MAX_RETRIES = 3
             int attempt = 0
             boolean success = false
+            boolean shouldPrintProgress = project.ext["platform"]["shouldPrintProgress"] == true
 
             while (attempt < MAX_RETRIES && !success) {
                 try {
@@ -411,22 +412,34 @@ class Utils {
                             long downloadedSize = 0
                             int bytesRead
 
+                            if (shouldPrintProgress && fileSize <= 0) {
+                                println "\rDownloading..."
+                            }
+
                             while ((bytesRead = inputStream.read(buffer)) != -1) {
                                 outputStream.write(buffer, 0, bytesRead)
                                 downloadedSize += bytesRead
-                                if (project.ext["platform"]["shouldPrintProgress"] == true) {
-                                    double progress = (downloadedSize * 100.0 / fileSize)
-                                    String progressBar = generateProgressBar(progress)
-                                    print String.format("\rDownloading... [ %s ] %.2f%%", progressBar, progress)
-                                    System.out.flush()
+                                if (shouldPrintProgress && fileSize > 0) {
+                                    try {
+                                        double progress = (downloadedSize * 100.0 / fileSize)
+                                        String progressBar = generateProgressBar(progress)
+                                        print String.format("\rDownloading... [ %s ] %.2f%%", progressBar, progress)
+                                        System.out.flush()
+                                    } catch (Exception ignored) {
+                                        /* Ignored. */
+                                    }
                                 }
                             }
                         }
                     }
 
                     String downloadPath = cacheFile.absolutePath
-                    String formattedFileSize = formatFileSize(fileSize)
-                    print String.format("\rDownload complete [ %s | %s ]\n", downloadPath, formattedFileSize)
+                    if (fileSize > 0) {
+                        String formattedFileSize = formatFileSize(fileSize)
+                        print String.format("\rDownload complete [ %s | %s ]\n", downloadPath, formattedFileSize)
+                    } else {
+                        print String.format("\rDownload complete [ %s ]\n", downloadPath)
+                    }
                     System.out.flush()
                     println()
 
@@ -445,6 +458,8 @@ class Utils {
         }
 
         private void handleZip() {
+            def shouldPrintProgress = project.ext["platform"]["shouldPrintProgress"] == true
+
             def zipFileForTotalSize = new ZipFile(cacheFile)
             def zipEntriesForTotalSize = zipFileForTotalSize.entries()
             def entries = []
@@ -490,7 +505,7 @@ class Utils {
                         }
                     }
 
-                    if (project.ext["platform"]["shouldPrintProgress"] == true) {
+                    if (shouldPrintProgress) {
                         double progress = (processedEntries * 100.0 / totalEntries)
                         String progressBar = generateProgressBar(progress)
                         print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
@@ -515,6 +530,8 @@ class Utils {
         }
 
         private void handleSevenZip() {
+            def shouldPrintProgress = project.ext["platform"]["shouldPrintProgress"] == true
+
             def sevenZFileForTotalSize = new SevenZFile.Builder().setFile(cacheFile).get()
             def entry
             def entries = []
@@ -557,7 +574,7 @@ class Utils {
                         }
                     }
 
-                    if (project.ext["platform"]["shouldPrintProgress"] == true) {
+                    if (shouldPrintProgress) {
                         double progress = (processedEntries * 100.0 / totalEntries)
                         String progressBar = generateProgressBar(progress)
                         print String.format("\rExtracting... [ %s ] %.2f%%", progressBar, progress)
