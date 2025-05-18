@@ -34,4 +34,28 @@ object BitmapUtils {
             .also { drawable.draw(Canvas(it)) }
     }
 
+    @JvmStatic
+    fun bitmapToRgba(bmp: Bitmap): ByteArray {
+        val w = bmp.getWidth()
+        val h = bmp.getHeight()
+
+        require(w > 0 && h > 0) { "bitmap size is 0" }
+
+        val pixelCount = w * h
+        val byteCount = pixelCount * 4
+
+        val rgba = ByteArray(byteCount)
+        val argb = IntArray(pixelCount)
+        bmp.getPixels(argb, 0, w, 0, 0, w, h)
+
+        var i4 = 0
+        for (p in argb) {
+            rgba[i4++] = ((p shr 16) and 0xFF).toByte() // R
+            rgba[i4++] = ((p shr 8) and 0xFF).toByte() // G
+            rgba[i4++] = (p and 0xFF).toByte() // B
+            rgba[i4++] = ((p shr 24) and 0xFF).toByte() // A
+        }
+        return rgba
+    }
+
 }

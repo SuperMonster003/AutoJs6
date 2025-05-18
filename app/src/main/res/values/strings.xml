@@ -1274,5 +1274,6 @@
     <string name="error_no_applications_available_for_viewing_this_file">No applications available for viewing this file</string>
     <string name="error_no_applications_available_for_sending_this_file">No applications available for sending this file</string>
     <string name="error_no_applications_available_for_playing_this_file">No applications available for playing this file</string>
+    <string name="error_webp_lossless_quality_not_supported">Format WebP-Lossless cannot be compressed with a quality parameter, use JPEG/PNG/WebP-Lossy instead</string>
 
 </resources>

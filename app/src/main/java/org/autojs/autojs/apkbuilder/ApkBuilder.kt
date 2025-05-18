@@ -546,10 +546,33 @@ open class ApkBuilder(apkInputStream: InputStream?, private val outApkFile: File
         MLKIT_BARCODE(
             label = "MLKit Barcode",
             aliases = listOf("barcode", "mlkit-barcode", "mlkit_barcode"),
+            libsToInclude = listOf(
+                "libbarhopper_v3.so",
+            ),
             assetDirsToExclude = listOf(
                 "mlkit_barcode_models",
             ),
-        );
+        ),
+
+        MEDIA_INFO(
+            label = "MediaInfo",
+            aliases = listOf("mediainfo", "media-info", "media_info"),
+            libsToInclude = listOf(
+                "libmediainfo.so",
+            ),
+        ),
+
+        IMAGE_QUANT(
+            label = "Image Quantization",
+            aliases = listOf("imagequant", "image-quant", "image-quantization", "image_quant", "image_quantization"),
+            libsToInclude = listOf(
+                "libpng.so",
+                "libpng16d.so",
+                "libpngquant_bridge.so",
+            ),
+        ),
+
+        ;
 
         fun ensureLibFiles(moduleName: String = label) {
             if (!isInrt) return

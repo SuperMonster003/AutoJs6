@@ -1046,5 +1046,6 @@
     <string name="error_no_applications_available_for_viewing_this_file">Нет приложений для просмотра этого файла</string>
     <string name="error_no_applications_available_for_sending_this_file">Нет приложений для отправки этого файла</string>
     <string name="error_no_applications_available_for_playing_this_file">Нет приложений для воспроизведения этого файла</string>
+    <string name="error_webp_lossless_quality_not_supported">Формат WebP-Lossless нельзя сжать с параметром качества; используйте вместо этого JPEG/PNG/WebP-Lossy</string>
 
 </resources>

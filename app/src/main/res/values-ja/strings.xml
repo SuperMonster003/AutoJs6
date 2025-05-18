@@ -1047,5 +1047,6 @@
     <string name="error_no_applications_available_for_viewing_this_file">このファイルを表示できるアプリがありません</string>
     <string name="error_no_applications_available_for_sending_this_file">このファイルを送信できるアプリがありません</string>
     <string name="error_no_applications_available_for_playing_this_file">このファイルを再生できるアプリがありません</string>
+    <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 形式は品質パラメータで圧縮できません, 代わりに JPEG/PNG/WebP-Lossy を使用してください</string>
 
 </resources>

@@ -33,6 +33,7 @@
         "文件管理器浮动按钮展开后点击其他区域可自动隐藏",
         "打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_",
         "意图相关操作 (编辑/查看/安装/发送/播放等) 增加操作异常提示",
+        "images.save 方法使用 quality 参数时支持 png 格式的文件体积压缩 _[`issue #367`](http://issues.autojs6.com/367)_",
         "已忽略更新记录及客户端模式连接地址记录支持清空操作",
         "版本更新信息支持多语言显示 (与当前显示语言同步)",
         "使用异步加载方式一定程度提升文件管理器列表滑动流畅性",
@@ -41,6 +42,8 @@
       "dependency": [
         "本地化 Material Dialogs 版本 0.9.6.0",
         "本地化 Material Date Time Picker 版本 4.2.3",
+        "本地化 libimagequant 版本 2.17.0",
+        "本地化 libpng 版本 1.6.49",
         "附加 Jsoup 版本 1.19.1",
         "附加 Material Progressbar 版本 1.4.2",
         "附加 Flexmark Java HTML to Markdown 版本 0.64.8",
