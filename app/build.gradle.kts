@@ -163,6 +163,9 @@ dependencies /* Unclassified */ {
     // RapidOCR
     implementation(project(":libs:rapidocr"))
 
+    // Image Quantization
+    implementation(project(":libs:imagequant"))
+
     // Android Job
     implementation(project(":libs:android-job-simplified-1.4.3"))
 
@@ -623,6 +626,7 @@ android {
             "junit/**/*",
             "LICENSE-junit.txt",
             "spec.txt",
+            "EmojiReference.txt",
         ).let { resources.excludes.addAll(it) }
 
         if (gradle.startParameter.taskNames.any { it.contains(flavorNameInrt, true) }) {

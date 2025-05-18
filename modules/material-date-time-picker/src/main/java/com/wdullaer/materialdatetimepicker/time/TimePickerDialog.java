@@ -791,7 +791,7 @@ public class TimePickerDialog extends AppCompatDialogFragment implements OnValue
             dismiss();
         });
         mOkButton.setOnKeyListener(keyboardListener);
-        mOkButton.setTypeface(ResourcesCompat.getFont(context, R.font.robotomedium));
+        // mOkButton.setTypeface(ResourcesCompat.getFont(context, R.font.robotomedium));
         if (mOkString != null) mOkButton.setText(mOkString);
         else mOkButton.setText(mOkResid);
 
@@ -800,7 +800,7 @@ public class TimePickerDialog extends AppCompatDialogFragment implements OnValue
             tryVibrate();
             if (getDialog() != null) getDialog().cancel();
         });
-        mCancelButton.setTypeface(ResourcesCompat.getFont(context, R.font.robotomedium));
+        // mCancelButton.setTypeface(ResourcesCompat.getFont(context, R.font.robotomedium));
         if (mCancelString != null) mCancelButton.setText(mCancelString);
         else mCancelButton.setText(mCancelResid);
         mCancelButton.setVisibility(isCancelable() ? View.VISIBLE : View.GONE);

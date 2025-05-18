@@ -415,7 +415,7 @@ public class DatePickerDialog extends AppCompatDialogFragment implements
             notifyOnDateListener();
             dismiss();
         });
-        okButton.setTypeface(ResourcesCompat.getFont(activity, R.font.robotomedium));
+        // okButton.setTypeface(ResourcesCompat.getFont(activity, R.font.robotomedium));
         if (mOkString != null) okButton.setText(mOkString);
         else okButton.setText(mOkResid);
 
@@ -424,7 +424,7 @@ public class DatePickerDialog extends AppCompatDialogFragment implements
             tryVibrate();
             if (getDialog() != null) getDialog().cancel();
         });
-        cancelButton.setTypeface(ResourcesCompat.getFont(activity, R.font.robotomedium));
+        // cancelButton.setTypeface(ResourcesCompat.getFont(activity, R.font.robotomedium));
         if (mCancelString != null) cancelButton.setText(mCancelString);
         else cancelButton.setText(mCancelResid);
         cancelButton.setVisibility(isCancelable() ? View.VISIBLE : View.GONE);

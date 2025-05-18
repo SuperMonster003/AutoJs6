@@ -177,12 +177,12 @@
     <string name="error_excessive_height_for_template_n_region">高度超限: 模板影象 [%1$d] > 限定區域 [%2$d]</string>
     <string name="error_excessive_width_for_template_n_region">寬度超限: 模板影象 [%1$d] > 限定區域 [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">應用當前歷史顏色失敗</string>
-    <string name="error_failed_to_call_method">呼叫方法 \"%s\" 失敗</string>
-    <string name="error_failed_to_call_method_with_cause"><![CDATA[呼叫方法 \"%1$s\" 失敗: [ %2$s ]]]></string>
+    <string name="error_failed_to_call_method">方法 \"%s\" 呼叫失敗</string>
+    <string name="error_failed_to_call_method_with_cause"><![CDATA[方法 \"%1$s\" 呼叫失敗: [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">無法將值 %s 轉換為 Drawable 例項</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 許可權授予失敗</string>
-    <string name="error_failed_to_instantiate">建立例項 \"%s\" 失敗</string>
-    <string name="error_failed_to_instantiate_with_cause"><![CDATA[建立例項 \"%1$s\" 失敗: [ %2$s ]]]></string>
+    <string name="error_failed_to_instantiate">例項 \"%s\" 建立失敗</string>
+    <string name="error_failed_to_instantiate_with_cause"><![CDATA[例項 \"%1$s\" 建立失敗: [ %2$s ]]]></string>
     <string name="error_failed_to_invoke_method_with_description">方法 %1$s 呼叫失敗</string>
     <string name="error_failed_to_render_content">內容渲染失敗</string>
     <string name="error_failed_to_retrieve_released_notes">獲取版本資訊失敗</string>
@@ -1044,5 +1044,6 @@
     <string name="error_no_applications_available_for_viewing_this_file">未找到用於檢視該檔案的應用</string>
     <string name="error_no_applications_available_for_sending_this_file">未找到用於傳送該檔案的應用</string>
     <string name="error_no_applications_available_for_playing_this_file">未找到用於播放該檔案的應用</string>
+    <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 格式無法使用 quality 質量引數進行壓縮, 可改用 JPEG/PNG/WebP-Lossy</string>
 
 </resources>

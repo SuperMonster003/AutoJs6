@@ -61,7 +61,7 @@ public final class ImageFeatureMatching {
      *       reused later by {@link #featureMatching}</li>
      * </ol></p>
      *
-     * <p><b>zh-CN</b><br>
+     * <p><b>zh-CN:</b><br>
      *
      * 创建 (预计算) 特征匹配描述符.<br>
      * 典型流程: <pre>
@@ -168,7 +168,7 @@ public final class ImageFeatureMatching {
      *   <li>If caller sets {@code debugMatchesImagePath}, save visualization of match lines to that path</li>
      * </ol></p>
      * 
-     * <p><b>zh-CN</b><br>
+     * <p><b>zh-CN:</b><br>
      * 
      * 在两张图的特征描述符之间执行匹配, 并 (可选) 估算单应矩阵以获得被 object 图在 scene 图中的投影区域.<br>
      * <p>内部流程: <br>

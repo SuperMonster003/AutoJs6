@@ -182,7 +182,7 @@
     <string name="error_excessive_width_for_template_n_region">너비 초과: 템플릿 [%1$d] > 영역 [%2$d]</string>
     <string name="error_failed_to_apply_current_color_history">현재 색상 기록 적용에 실패했습니다</string>
     <string name="error_failed_to_call_method">메서드 \"%s\"를 호출하지 못했습니다</string>
-    <string name="error_failed_to_call_method_with_cause"><![CDATA[메서드 \"%1$s\"를 호출하지 못했습니다: [ %2$s ]]]></string>
+    <string name="error_failed_to_call_method_with_cause"><![CDATA[메서드 \"%1$s\" 를 호출하지 못했습니다: [ %2$s ]]]></string>
     <string name="error_failed_to_convert_into_drawable">%s 값을 Drawable 로 변환하지 못했습니다</string>
     <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
     <string name="error_failed_to_instantiate">\"%s\" 인스턴스 생성에 실패했습니다</string>
@@ -1048,5 +1048,6 @@
     <string name="error_no_applications_available_for_viewing_this_file">이 파일을 볼 수 있는 앱이 없습니다</string>
     <string name="error_no_applications_available_for_sending_this_file">이 파일을 전송할 수 있는 앱이 없습니다</string>
     <string name="error_no_applications_available_for_playing_this_file">이 파일을 재생할 수 있는 앱이 없습니다</string>
+    <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 형식은 품질 파라미터로 압축할 수 없습니다, 대신 JPEG/PNG/WebP-Lossy를 사용하세요</string>
 
 </resources>

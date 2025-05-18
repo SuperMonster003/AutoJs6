@@ -1334,8 +1334,11 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
 
         private fun parseImageFormat(o: Any?): String = when {
             o.isJsNullish() -> "png"
-            else -> when (val format = coerceString(o).lowercase()) {
+            else -> when (val format = coerceString(o).lowercase().trim()) {
+                "" -> "png"
                 "png", "jpg", "jpeg", "webp" -> format
+                "webp_lossless", "webp-lossless" -> format
+                "webp_lossy", "webp-lossy" -> format
                 else -> throw WrappedIllegalArgumentException("Unknown image format: $format")
             }
         }

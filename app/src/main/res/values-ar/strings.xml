@@ -1048,5 +1048,6 @@
     <string name="error_no_applications_available_for_viewing_this_file">لا توجد تطبيقات متاحة لعرض هذا الملف</string>
     <string name="error_no_applications_available_for_sending_this_file">لا توجد تطبيقات متاحة لإرسال هذا الملف</string>
     <string name="error_no_applications_available_for_playing_this_file">لا توجد تطبيقات متاحة لتشغيل هذا الملف</string>
+    <string name="error_webp_lossless_quality_not_supported">لا يمكن ضغط تنسيق WebP-Lossless باستخدام معامل الجودة؛ استخدم JPEG/PNG/WebP-Lossy بدلاً من ذلك</string>
 
 </resources>

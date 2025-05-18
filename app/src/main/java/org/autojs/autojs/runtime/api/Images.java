@@ -35,6 +35,8 @@ import org.autojs.autojs.core.ui.inflater.util.Drawables;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.ImageFeatureMatching.FeatureMatchingDescriptor;
+import org.autojs.autojs.runtime.exception.WrappedRuntimeException;
+import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs6.R;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -254,13 +256,38 @@ public class Images {
         return imageWrapper;
     }
 
-    public boolean save(@NonNull ImageWrapper image, String path, String format, int quality) throws IOException {
-        Bitmap.CompressFormat compressFormat = parseImageFormat(format);
+    public boolean save(@NonNull ImageWrapper image,
+                        @NonNull String path,
+                        @NonNull String format,
+                        int quality) throws IOException {
+
         Bitmap bitmap = image.getBitmap();
-        FileOutputStream outputStream = new FileOutputStream(path);
-        boolean b = bitmap.compress(compressFormat, quality, outputStream);
-        image.shoot();
-        return b;
+        Bitmap.CompressFormat compressFormat = parseImageFormat(format);
+
+        if (compressFormat == Bitmap.CompressFormat.PNG && quality != 100) {
+            // ARGB_8888 -> RGBA[]
+            byte[] rgba = BitmapUtils.bitmapToRgba(bitmap);
+            byte[] compressed = PngQuantBridge.quantize(rgba, bitmap.getWidth(), bitmap.getHeight(), quality);
+            if (compressed != null) {
+                try (FileOutputStream fos = new FileOutputStream(path)) {
+                    fos.write(compressed);
+                    return true;
+                }
+            }
+            throw new WrappedRuntimeException("PNG quantization failed");
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (compressFormat == Bitmap.CompressFormat.WEBP_LOSSLESS && quality != 100) {
+                throw new IllegalArgumentException(mContext.getString(R.string.error_webp_lossless_quality_not_supported));
+            }
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(path)) {
+            boolean b = bitmap.compress(compressFormat, quality, fos);
+            image.shoot();
+            return b;
+        }
     }
 
     // public EventEmitter select() {
@@ -357,13 +384,13 @@ public class Images {
             case "png" -> Bitmap.CompressFormat.PNG;
             case "jpeg", "jpg" -> Bitmap.CompressFormat.JPEG;
             case "webp" -> Bitmap.CompressFormat.WEBP;
-            case "webp_lossy" -> {
+            case "webp_lossy", "webp-lossy" -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     yield Bitmap.CompressFormat.WEBP_LOSSY;
                 }
                 throw new IllegalArgumentException("Image format \"WEBP_LOSSY\" only supports on Android API Level 30 (11) [R] and above");
             }
-            case "webp_lossless" -> {
+            case "webp_lossless", "webp-lossless" -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     yield Bitmap.CompressFormat.WEBP_LOSSLESS;
                 }

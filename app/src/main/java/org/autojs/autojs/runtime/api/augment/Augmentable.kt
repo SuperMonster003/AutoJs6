@@ -143,8 +143,19 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
             try {
                 (this as Invokable).invoke(*args)
             } catch (e: Exception) {
-                val message = e.message?.let {
-                    globalContext.getString(R.string.error_failed_to_call_method_with_cause, key, it)
+                val message = e.message?.let { msg ->
+                    when {
+                        msg.contains("\n") -> {
+                            msg.split("\n").let { split ->
+                                globalContext.getString(R.string.error_failed_to_call_method_with_cause, key, split.first()).let { result ->
+                                    split.slice(1..split.lastIndex).joinToString("\n").takeUnless { it.isBlank() }?.let {
+                                        "$result\n$it"
+                                    } ?: result
+                                }
+                            }
+                        }
+                        else -> globalContext.getString(R.string.error_failed_to_call_method_with_cause, key, msg)
+                    }
                 } ?: globalContext.getString(R.string.error_failed_to_call_method, key)
                 throw WrappedRuntimeException(message, e)
             }

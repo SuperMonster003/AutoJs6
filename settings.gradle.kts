@@ -17,6 +17,7 @@ private val libs = listOf(
     "org.opencv-4.8.0",
     "paddleocr",
     "rapidocr",
+    "imagequant",
 
     "jackpal.androidterm-1.0.70",
     "jackpal.androidterm.emulatorview-1.0.42",
@@ -63,7 +64,7 @@ pluginManagement {
 
         /* Unofficial. */
 
-        "9.0" to "2.1.20",
+        "9.0" to "2.1.21", /* May 17, 2025. */
         "8.14" to "2.1.10",
         "8.13" to "2.1.10",
 
@@ -121,11 +122,11 @@ pluginManagement {
     )
 
     // @Reference https://developer.android.com/reference/tools/gradle-api
-    // @Updated by SuperMonster003 on May 13, 2025.
+    // @Updated by SuperMonster003 on May 17, 2025.
     val agpReleases: List<String> = listOf(
         "8.11.0-alpha10",
         "8.10.0",
-        "8.9.2",
+        "8.9.3", /* May 17, 2025. */
         "8.8.2",
         "8.7.3",
         "8.6.1",
@@ -218,7 +219,7 @@ pluginManagement {
                 // @Updated by SuperMonster003 on May 13, 2025.
                 agpVersionMap = mapOf(
                     "2025.1" to "8.10.0", /* May 13, 2025. */
-                    "2024.3" to "8.9.2", /* Apr 11, 2025. */
+                    "2024.3" to "8.9.3", /* May 17, 2025. */
                     "2024.2" to "8.7.3", /* Jan 13, 2025. */
                     "2024.1" to "8.5.2", /* Aug 30, 2024. */
                     "2023.3" to "8.4.2", /* Mar 28, 2024. */
@@ -230,7 +231,7 @@ pluginManagement {
                 ),
                 // @Updated by SuperMonster003 on May 13, 2025.
                 kotlinVersionMap = mapOf(
-                    "2024.3" to "2.1.20", /* Apr 11, 2024. */
+                    "2024.3" to "2.1.21", /* May 17, 2025. */
                     "2024.2" to "2.1.0", /* Nov 29, 2024. */
                     "2024.1" to "2.0.0", /* Aug 13, 2024. */
                 ),
@@ -260,16 +261,7 @@ pluginManagement {
                     "D" to "Dolphin", /* Born on Jan 31, 2022. */
                     "C" to "Chipmunk", /* Born on Oct 13, 2021. */
                     "B" to "Bumblebee", /* Born on May 18, 2021. */
-                    "A" to "Arctic Fox",
-                    /* Born on Jan 26, 2021. */
-
-                    // @Hint by SuperMonster003 on Oct 18, 2023.
-                    //  ! The codenames below were predicted but not official.
-
-                    "O" to "Ostrich", "P" to "Penguin", "Q" to "Quail",
-                    "R" to "Rhino", "S" to "Snail", "T" to "Tiger",
-                    "U" to "Unicorn", "V" to "Vicuna", "W" to "Walrus",
-                    "X" to "Xiphias", "Y" to "Yeti", "Z" to "Zebra",
+                    "A" to "Arctic Fox", /* Born on Jan 26, 2021. */
                 ),
             ) {
                 override val weight = Int.MAX_VALUE
@@ -288,7 +280,7 @@ pluginManagement {
                 name = "IntelliJIdea", vendor = "Jetbrains",
                 // @Updated by SuperMonster003 on Apr 23, 2025.
                 agpVersionMap = mapOf(
-                    "2025.1" to "8.9.2", /* Apr 23, 2025. */
+                    "2025.1" to "8.9.3", /* May 17, 2025. */
                     "2024.3.1" to "8.7.3", /* Dec 10, 2024. */
                     "2024.3" to "8.7.0-rc01", /* Nov 15, 2024. */
                     "2024.2" to "8.5.2", /* Aug 13, 2024. */
@@ -299,7 +291,7 @@ pluginManagement {
                 ),
                 // @Updated by SuperMonster003 on Apr 23, 2025.
                 kotlinVersionMap = mapOf(
-                    "2025.1" to "2.1.20", /* Apr 12, 2025. */
+                    "2025.1" to "2.1.21", /* May 17, 2025. */
                     "2024.3.4" to "2.1.10", /* Feb 28, 2025. */
                     "2024.2.3" to "2.0.21", /* Oct 17, 2024. */
                     "2024.2" to "2.0.21-RC", /* Sep 27, 2024. */
@@ -377,8 +369,10 @@ pluginManagement {
         // @Reference https://github.com/google/ksp/releases
         // @Updated by SuperMonster003 on May 13, 2025.
         val kspVersionMap = mapOf(
+            "2.2.0-RC" to "2.0.1", /* May 17, 2025. */
             "2.2.0-Beta2" to "2.0.1", /* May 2, 2025. */
             "2.2.0-Beta1" to "2.0.0", /* Apr 17, 2025. */
+            "2.1.21" to "2.0.1", /* May 17, 2025. */
             "2.1.21-RC2" to "2.0.1", /* May 2, 2025. */
             "2.1.21-RC" to "2.0.0", /* Apr 18, 2025. */
             "2.1.20" to "2.0.1", /* May 1, 2025. */
