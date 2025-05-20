@@ -1,35 +1,11 @@
 package org.autojs.autojs.util
 
-import android.graphics.BitmapFactory
 import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.imgproc.Imgproc
 
 object ImageUtils {
-
-    @JvmStatic
-    fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-
-        // Raw height and width of image (zh-CN: 图像的原始高度和宽度)
-        val height = options.outHeight
-        val width = options.outWidth
-
-        var inSampleSize = 1
-
-        if (height > reqHeight || width > reqWidth) {
-            val halfHeight = height / 2
-            val halfWidth = width / 2
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            // zh-CN: 计算满足所需高度和宽度的2的幂次方的最大采样率.
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                inSampleSize *= 2
-            }
-        }
-        return inSampleSize
-    }
 
     @JvmStatic
     fun Mat.to8UC3(): Mat {

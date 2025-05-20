@@ -11,11 +11,10 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import org.autojs.autojs.core.image.ImageWrapper;
+import org.autojs.autojs.runtime.ScriptRuntime;
 
 /**
  * Created by Stardust on Mar 22, 2018.
@@ -23,24 +22,27 @@ import org.autojs.autojs.core.image.ImageWrapper;
 @SuppressWarnings("unused")
 public class ScriptCanvas {
 
+    private final ScriptRuntime mScriptRuntime;
+
     private Canvas mCanvas;
     private Bitmap mBitmap;
 
-    public ScriptCanvas(int width, int height) {
-        this(Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888));
+    public ScriptCanvas(ScriptRuntime scriptRuntime, int width, int height) {
+        this(scriptRuntime, Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888));
     }
 
-    public ScriptCanvas(@NonNull Bitmap bitmap) {
+    public ScriptCanvas(ScriptRuntime scriptRuntime, @NonNull Bitmap bitmap) {
+        mScriptRuntime = scriptRuntime;
         mCanvas = new Canvas(bitmap);
         mBitmap = bitmap;
     }
 
-    public ScriptCanvas(@NonNull ImageWrapper image) {
-        this(image.getBitmap().copy(image.getBitmap().getConfig(), true));
+    public ScriptCanvas(ScriptRuntime scriptRuntime, @NonNull ImageWrapper image) {
+        this(scriptRuntime, image.getBitmap().copy(image.getBitmap().getConfig(), true));
     }
 
-    public ScriptCanvas() {
-        /* Empty body. */
+    public ScriptCanvas(ScriptRuntime scriptRuntime) {
+        mScriptRuntime = scriptRuntime;
     }
 
     public Canvas getAndroidCanvas() {
@@ -52,7 +54,7 @@ public class ScriptCanvas {
     }
 
     public ImageWrapper toImage() {
-        return ImageWrapper.ofBitmap(mBitmap.copy(mBitmap.getConfig(), true));
+        return ImageWrapper.ofBitmap(mScriptRuntime, mBitmap.copy(mBitmap.getConfig(), true));
     }
 
     public boolean isHardwareAccelerated() {
