@@ -62,7 +62,7 @@ class JsCanvasView : TextureView, TextureView.SurfaceTextureListener {
             execute {
                 var canvas: Canvas? = null
                 var time = SystemClock.uptimeMillis()
-                val scriptCanvas = ScriptCanvas()
+                val scriptCanvas = ScriptCanvas(mScriptRuntime)
                 try {
                     while (mDrawing) {
                         canvas = lockCanvas()

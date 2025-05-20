@@ -1,13 +1,15 @@
 {
   "$data": {
     "v6.6.3": {
-      "released_date": "2025/05/14",
+      "released_date": "2025/05/21",
       "feature": [
         "版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据",
         "timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态",
         "engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件",
         "images.detectMultiColors 方法, 用于多点颜色校验 _[`issue #374`](http://issues.autojs6.com/374)_",
-        "images.matchFeatures/detectAndComputeFeatures 方法, 支持全分辨率找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_"
+        "images.matchFeatures/detectAndComputeFeatures 方法, 支持全分辨率找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_",
+        "images.compressToBytes 方法, 用于压缩图像并生成字节数组",
+        "images.downsample 方法, 用于像素降采样并生成新的 ImageWrapper"
       ],
       "fix": [
         "主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题",
@@ -21,6 +23,8 @@
         "使用 JavaAdapter 时导致 ClassLoader 调用栈溢出的问题 _[`issue #376`](http://issues.autojs6.com/376)_",
         "console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_",
         "console.setContentBackgroundColor 方法无法接受颜色名称参数的问题 _[`issue #384`](http://issues.autojs6.com/384)_",
+        "images.compress 方法实现原理由像素降采样修正为编码质量变化",
+        "images.resize 方法无法正常使用的问题",
         "README.md 中部分语言日期格式不正确的问题",
         "Gradle 构建脚本可能因获取到无效库档案文件长度而导致构建失败的问题 _[`issue #389`](http://issues.autojs6.com/389)_"
       ],
@@ -34,6 +38,7 @@
         "文件管理器浮动按钮展开后点击其他区域可自动隐藏",
         "打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_",
         "意图相关操作 (编辑/查看/安装/发送/播放等) 增加操作异常提示",
+        "ImageWrapper#saveTo 方法的路径参数支持相对路径",
         "images.save 方法使用 quality 参数时支持 png 格式的文件体积压缩 _[`issue #367`](http://issues.autojs6.com/367)_",
         "已忽略更新记录及客户端模式连接地址记录支持清空操作",
         "版本更新信息支持多语言显示 (与当前显示语言同步)",

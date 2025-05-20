@@ -62,9 +62,37 @@ import static org.autojs.autojs.util.RhinoUtils.isMainThread;
 import static org.autojs.autojs.util.StringUtils.str;
 
 /**
+ * Quick Reference – Image Size / Quality Helpers<br>
+ * zh-CN: 快速参考 – 图像尺寸 / 质量相关辅助方法
+ * <hr>
+ * <b>scale</b><br>
+ * Multiply both width and height of an <b>already-decoded</b> Bitmap by
+ * the given scale factor(s).<br>
+ * zh-CN: 在 <b>已解码</b> 的 Bitmap 上, 按照给定比例同时缩放宽高.
+ * <p>
+ * <b>resize</b><br>
+ * Force an <b>already-decoded</b> Bitmap to the specified width/height.
+ * Aspect ratio may be kept or ignored depending on the overload.<br>
+ * zh-CN: 将 <b>已解码</b> Bitmap 调整为指定宽高; 可选择保持或忽略纵横比.
+ * <p>
+ * <b>downsample</b><br>
+ * Shrink <b>before decoding</b> by setting <code>inSampleSize</code>; pixels are
+ * skipped while reading, dramatically reducing memory.<br>
+ * zh-CN: <b>解码前</b> 通过设置 <code>inSampleSize</code> 跳读像素, 显著降低解码分辨率与内存.
+ * <p>
+ * <b>compress</b><br>
+ * Re-encode an existing Bitmap (or byte stream) into JPEG/PNG/WebP
+ * with the given format & quality to reduce <b>disk</b> footprint.<br>
+ * zh-CN: 使用指定格式与质量重新编码 Bitmap (或字节流), 以减小 <b>磁盘</b> 体积.
+ * <p>
+ * <b>save</b><br>
+ * Convenience wrapper that internally invokes <code>compress</code> (with
+ * default or user-supplied options) and then writes to storage.<br>
+ * zh-CN: 便捷封装, 内部调用 <code>compress</code> (默认或自定义参数) 后写入存储.
+ * <hr>
  * Created by Stardust on May 20, 2017.
+ * Modified by SuperMonster003 as of Dec 1, 2021.
  */
-@SuppressWarnings("unused")
 public class Images {
 
     private static final String TAG = Images.class.getSimpleName();
@@ -130,7 +158,7 @@ public class Images {
         return pixel;
     }
 
-    public static ImageWrapper concat(ImageWrapper imgA, ImageWrapper imgB, int direction) {
+    public static ImageWrapper concat(ScriptRuntime scriptRuntime, ImageWrapper imgA, ImageWrapper imgB, int direction) {
         if (!Arrays.asList(Gravity.START, Gravity.END, Gravity.TOP, Gravity.BOTTOM).contains(direction)) {
             throw new IllegalArgumentException(str(R.string.error_illegal_argument, "direction", direction));
         }
@@ -160,7 +188,7 @@ public class Images {
         }
         imgA.shoot();
         imgB.shoot();
-        return ImageWrapper.ofBitmap(bitmap);
+        return ImageWrapper.ofBitmap(scriptRuntime, bitmap);
     }
 
     public static void saveBitmap(@NonNull Bitmap bitmap, String path) {
@@ -184,8 +212,8 @@ public class Images {
         return Bitmap.createBitmap(origin, 0, 0, width, height, matrix, false);
     }
 
-    protected static void setImageCaptureCallback(OnScreenCaptureAvailableListener onScreenCaptureAvailableListener, Image image) {
-        ImageWrapper ofImage = ImageWrapper.ofImage(image);
+    protected static void setImageCaptureCallback(ScriptRuntime scriptRuntime, OnScreenCaptureAvailableListener onScreenCaptureAvailableListener, Image image) {
+        ImageWrapper ofImage = ImageWrapper.ofImage(scriptRuntime, image);
         onScreenCaptureAvailableListener.onCaptureAvailable(ofImage);
         // ofImage.recycle();
     }
@@ -238,7 +266,7 @@ public class Images {
                     mPreCaptureImage.recycleInternal();
                 }
                 if (capture != null) {
-                    mPreCaptureImage = new CapturedImage(capture);
+                    mPreCaptureImage = new CapturedImage(mScriptRuntime, capture);
                 }
             }
             return mPreCaptureImage;
@@ -247,7 +275,7 @@ public class Images {
 
     public boolean captureScreen(String path) {
         ImageWrapper image = captureScreen();
-        return image != null && image.saveTo(mScriptRuntime.files.nonNullPath(path));
+        return image != null && image.saveTo(path);
     }
 
     public ImageWrapper copy(@NonNull ImageWrapper image) {
@@ -256,18 +284,12 @@ public class Images {
         return imageWrapper;
     }
 
-    public boolean save(@NonNull ImageWrapper image,
-                        @NonNull String path,
-                        @NonNull String format,
-                        int quality) throws IOException {
-
+    public boolean save(@NonNull ImageWrapper image, @NonNull String path, @NonNull String format, int quality) throws IOException {
         Bitmap bitmap = image.getBitmap();
         Bitmap.CompressFormat compressFormat = parseImageFormat(format);
 
         if (compressFormat == Bitmap.CompressFormat.PNG && quality != 100) {
-            // ARGB_8888 -> RGBA[]
-            byte[] rgba = BitmapUtils.bitmapToRgba(bitmap);
-            byte[] compressed = PngQuantBridge.quantize(rgba, bitmap.getWidth(), bitmap.getHeight(), quality);
+            byte[] compressed = PngQuantBridge.quantize(bitmap, quality);
             if (compressed != null) {
                 try (FileOutputStream fos = new FileOutputStream(path)) {
                     fos.write(compressed);
@@ -290,6 +312,36 @@ public class Images {
         }
     }
 
+    public byte[] compressToBytes(@NotNull ImageWrapper image, @NotNull String format, int quality) {
+        Bitmap bitmap = image.getBitmap();
+        Bitmap.CompressFormat compressFormat = parseImageFormat(format);
+
+        if (compressFormat == Bitmap.CompressFormat.PNG && quality != 100) {
+            byte[] compressed = PngQuantBridge.quantize(bitmap, quality);
+            image.shoot();
+            if (compressed != null) {
+                return compressed;
+            }
+            throw new WrappedRuntimeException("PNG quantization failed");
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (compressFormat == Bitmap.CompressFormat.WEBP_LOSSLESS && quality != 100) {
+                image.shoot();
+                throw new IllegalArgumentException(mContext.getString(R.string.error_webp_lossless_quality_not_supported));
+            }
+        }
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(compressFormat, quality, outputStream);
+        image.shoot();
+        return outputStream.toByteArray();
+    }
+
+    public ImageWrapper compress(@NotNull ImageWrapper image, @NotNull String format, int quality) throws BitmapUtils.DecodeException {
+        return fromBytes(compressToBytes(image, format, quality));
+    }
+
     // public EventEmitter select() {
     //     EventEmitter eventEmitter = new EventEmitter(scriptRuntime.bridges, scriptRuntime.timers.getTimerForCurrentThread());
     //     StartForResultActivity.start(mContext, new SelectImageCallback(this, eventEmitter, mContext, mContext.getString(R.string.text_select_image)));
@@ -303,7 +355,7 @@ public class Images {
     public ImageWrapper rotate(@NonNull ImageWrapper img, float x, float y, float degree) {
         Matrix matrix = new Matrix();
         matrix.postRotate(degree, x, y);
-        ImageWrapper imageWrapper = ImageWrapper.ofBitmap(Bitmap.createBitmap(img.getBitmap(), 0, 0, img.getWidth(), img.getHeight(), matrix, true));
+        ImageWrapper imageWrapper = ImageWrapper.ofBitmap(mScriptRuntime, Bitmap.createBitmap(img.getBitmap(), 0, 0, img.getWidth(), img.getHeight(), matrix, true));
         img.shoot();
         return imageWrapper;
     }
@@ -313,23 +365,27 @@ public class Images {
         Bitmap original = img.getBitmap();
         Matrix matrix = new Matrix();
 
-        // 根据传入参数设置缩放比例
+        // Set scaling ratio according to input parameters.
+        // zh-CN: 根据传入参数设置缩放比例.
         float sx = horizontal ? -1.0f : 1.0f;
         float sy = vertical ? -1.0f : 1.0f;
         matrix.preScale(sx, sy);
 
-        // 水平方向翻转后, 平移到图像宽度的位置
+        // After horizontal flip, translate to image width position.
+        // zh-CN: 水平方向翻转后, 平移到图像宽度的位置.
         if (horizontal) matrix.postTranslate(original.getWidth(), 0);
-        // 垂直方向翻转后, 平移到图像高度的位置
+
+        // After vertical flip, translate to image height position.
+        // zh-CN: 垂直方向翻转后, 平移到图像高度的位置.
         if (vertical) matrix.postTranslate(0, original.getHeight());
 
         Bitmap flipped = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
         img.shoot();
-        return ImageWrapper.ofBitmap(flipped);
+        return ImageWrapper.ofBitmap(mScriptRuntime, flipped);
     }
 
     public ImageWrapper clip(@NonNull ImageWrapper img, int x, int y, int w, int h) {
-        ImageWrapper imageWrapper = ImageWrapper.ofBitmap(Bitmap.createBitmap(img.getBitmap(), x, y, w, h));
+        ImageWrapper imageWrapper = ImageWrapper.ofBitmap(mScriptRuntime, Bitmap.createBitmap(img.getBitmap(), x, y, w, h));
         img.shoot();
         return imageWrapper;
     }
@@ -346,7 +402,7 @@ public class Images {
             if (!isStrict) return null;
             throw new RuntimeException(mContext.getString(R.string.error_file_in_path_does_not_exist, fullPath));
         }
-        return ImageWrapper.ofBitmap(bitmap);
+        return ImageWrapper.ofBitmap(mScriptRuntime, bitmap);
     }
 
     @NotNull
@@ -357,7 +413,7 @@ public class Images {
     }
 
     public ImageWrapper fromBase64(String data) {
-        return ImageWrapper.ofBitmap(Drawables.loadBase64Data(data));
+        return ImageWrapper.ofBitmap(mScriptRuntime, Drawables.loadBase64Data(data));
     }
 
     public String toBase64(ImageWrapper img, String format, int quality) {
@@ -375,8 +431,8 @@ public class Images {
         return outputStream.toByteArray();
     }
 
-    public ImageWrapper fromBytes(byte[] bytes) {
-        return ImageWrapper.ofBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+    public ImageWrapper fromBytes(byte[] bytes) throws BitmapUtils.DecodeException {
+        return ImageWrapper.ofBitmap(mScriptRuntime, BitmapUtils.bitmapFromByteArrayOrThrow(bytes));
     }
 
     private Bitmap.CompressFormat parseImageFormat(String format) {
@@ -405,7 +461,7 @@ public class Images {
             HttpURLConnection connection = (HttpURLConnection) new URL(src).openConnection();
             connection.setDoInput(true);
             connection.connect();
-            return ImageWrapper.ofBitmap(BitmapFactory.decodeStream(connection.getInputStream()));
+            return ImageWrapper.ofBitmap(mScriptRuntime, BitmapFactory.decodeStream(connection.getInputStream()));
         } catch (IOException e) {
             return null;
         }
@@ -441,7 +497,7 @@ public class Images {
         channels.add(3, alphaChannel); // 将原来的 alpha 通道放回最后一个位置
 
         org.opencv.core.Mat destMat = new org.opencv.core.Mat();
-        Core.merge(channels, destMat); // 合并 4 个通道（BGR + 原始 alpha）
+        Core.merge(channels, destMat); // 合并 4 个通道 (BGR + 原始 alpha)
 
         // 转换反色后的 Mat 回 Bitmap
         Bitmap invertedBitmap = Bitmap.createBitmap(originalWidth, originalHeight, Bitmap.Config.ARGB_8888);
@@ -449,7 +505,7 @@ public class Images {
 
         image.shoot();
 
-        return ImageWrapper.ofBitmap(invertedBitmap);
+        return ImageWrapper.ofBitmap(mScriptRuntime, invertedBitmap);
     }
 
     public void releaseScreenCapturer() {
@@ -521,18 +577,20 @@ public class Images {
             shouldReleaseMat = true;
         }
         @Nullable
-        org.opencv.core.Point point = TemplateMatching.singleTemplateMatching(
-                src,
-                template.getMat(),
-                new TemplateMatching.Options(-1, weakThreshold, strictThreshold, maxLevel)
-        );
-
-        if (shouldReleaseMat) {
-            OpenCVHelper.release(src);
+        org.opencv.core.Point point;
+        try {
+            point = TemplateMatching.singleTemplateMatching(
+                    src,
+                    template.getMat(),
+                    new TemplateMatching.Options(-1, weakThreshold, strictThreshold, maxLevel)
+            );
+        } finally {
+            if (shouldReleaseMat) {
+                OpenCVHelper.release(src);
+            }
+            image.shoot();
+            template.shoot();
         }
-        image.shoot();
-        template.shoot();
-
         if (point != null) {
             if (rect != null) {
                 point.x += rect.x;
@@ -605,7 +663,7 @@ public class Images {
     }
 
     public void setImageCaptureCallback(OnScreenCaptureAvailableListener onScreenCaptureAvailableListener) {
-        mOnScreenCaptureAvailableListener = new ScreenCaptureAvailableHandler(onScreenCaptureAvailableListener);
+        mOnScreenCaptureAvailableListener = new ScreenCaptureAvailableHandler(mScriptRuntime, onScreenCaptureAvailableListener);
         if (mScreenCapturer != null) {
             mScreenCapturer.setImageCaptureCallback(mOnScreenCaptureAvailableListener);
         }

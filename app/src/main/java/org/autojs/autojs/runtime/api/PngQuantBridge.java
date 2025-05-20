@@ -1,5 +1,7 @@
 package org.autojs.autojs.runtime.api;
 
+import android.graphics.Bitmap;
+
 public class PngQuantBridge {
 
     static {
@@ -35,12 +37,8 @@ public class PngQuantBridge {
      *     <li>PNG 规范不支持在压缩阶段引入有损处理, 因此不会像 JPEG 那样再出现马赛克等失真.</li>
      * </ul>
      *
-     * @param rgba    contiguous RGBA8888 buffer; length must equal {@code width * height * 4}
-     * @param width   image width in pixels
-     * @param height  image height in pixels
-     * @param quality libimagequant quality (0–100, lower = smaller file &amp; potentially higher error)
      * @return palette-based PNG bytes (may contain transparency)
      */
-    public static native byte[] quantize(byte[] rgba, int width, int height, int quality);
+    public static native byte[] quantize(Bitmap bitmap, int quality);
 
 }

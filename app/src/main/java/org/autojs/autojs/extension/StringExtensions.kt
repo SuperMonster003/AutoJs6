@@ -1,5 +1,6 @@
 package org.autojs.autojs.extension
 
+import androidx.core.net.toUri
 import java.text.Normalizer
 
 object StringExtensions {
@@ -57,6 +58,14 @@ object StringExtensions {
         in 0x1F300..0x1FAFF -> true
         // East Asian Fullwidth, Wide 等范围, 可参考 EastAsianWidth.txt
         else -> false
+    }
+
+    @JvmStatic
+    fun String.isUri(): Boolean {
+        if (isBlank()) return false
+        val uri = runCatching { this.toUri() }.getOrNull() ?: return false
+        uri.scheme?.lowercase() ?: return false
+        return true
     }
 
 }
