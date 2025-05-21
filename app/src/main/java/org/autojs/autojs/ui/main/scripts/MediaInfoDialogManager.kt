@@ -11,8 +11,9 @@ import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.extension.MaterialDialogExtensions.makeTextCopyable
@@ -35,6 +36,10 @@ object MediaInfoDialogManager {
     fun showMediaInfoDialog(context: Context, explorerItem: ExplorerItem) {
         val binding = MediaFileInfoDialogListItemBinding.inflate(LayoutInflater.from(context))
 
+        // Create an independent Scope for the Dialog, bind its lifecycle with the Dialog.
+        // zh-CN: 针对 Dialog 独立创建一个 Scope, 生命周期与 Dialog 绑定.
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
         val dialog = MaterialDialog.Builder(context)
             .title(explorerItem.name)
             .customView(binding.root, false)
@@ -48,60 +53,42 @@ object MediaInfoDialogManager {
             .neutralText(R.string.ellipsis_six)
             .neutralColorRes(R.color.dialog_button_unavailable)
             .show()
+            .apply { setOnDismissListener { scope.cancel() } }
 
-        CoroutineScope(Dispatchers.Main).launch {
+        scope.launch {
             val mediaInfo = MediaInfo()
             val filePath = explorerItem.path
 
-            val deferredVideoFormat = async(Dispatchers.IO) { mediaInfo(filePath, VIDEO, "Format") }
-            val deferredAudioFormat = async(Dispatchers.IO) { mediaInfo(filePath, AUDIO, "Format") }
-            val deferredContainerFormat = async(Dispatchers.IO) { mediaInfo(filePath, GENERAL, "Format") }
-            val deferredMediaInfoTrimmed = async(Dispatchers.IO) { mediaInfo.getMediaInfoTrimmed(explorerItem.path) }
+            val videoFormatDeferred = async(Dispatchers.IO) { mediaInfo(filePath, VIDEO, "Format") }
+            val audioFormatDeferred = async(Dispatchers.IO) { mediaInfo(filePath, AUDIO, "Format") }
+            val containerFormatDeferred = async(Dispatchers.IO) { mediaInfo(filePath, GENERAL, "Format") }
+            val mediaInfoTrimmedDeferred = async(Dispatchers.IO) { mediaInfo.getMediaInfoTrimmed(explorerItem.path) }
 
             launch(Dispatchers.IO) {
-                mediaInfo(filePath, GENERAL, "FileSize/String").let {
-                    binding.fileSizeValue.bindWith(dialog, it)
-                }
-            }
-            launch(Dispatchers.IO) {
+                mediaInfo(filePath, GENERAL, "FileSize/String").let { binding.fileSizeValue.bindWith(dialog, it) }
                 mediaInfo(filePath, GENERAL, "Duration/String").let { binding.durationValue.bindWith(dialog, it) }
-            }
-            launch(Dispatchers.IO) {
-                mediaInfo(filePath, GENERAL, "Album").let { binding.albumValue.bindWith(dialog, it) }
-            }
-            launch(Dispatchers.IO) {
-                mediaInfo(filePath, GENERAL, "Track").let { binding.trackNameValue.bindWith(dialog, it) }
-            }
-            launch(Dispatchers.IO) {
-                mediaInfo(filePath, GENERAL, "Performer").let { binding.performerValue.bindWith(dialog, it) }
-            }
-            launch(Dispatchers.IO) {
                 mediaInfo(filePath, AUDIO, "BitRate/String").let { binding.bitRateForAudioValue.bindWith(dialog, it) }
-            }
-            launch(Dispatchers.IO) {
                 mediaInfo(filePath, VIDEO, "BitRate/String").let { binding.bitRateForVideoValue.bindWith(dialog, it) }
-            }
-            launch(Dispatchers.IO) {
+                mediaInfo(filePath, GENERAL, "Track").let { binding.trackNameValue.bindWith(dialog, it) }
+                mediaInfo(filePath, GENERAL, "Performer").let { binding.performerValue.bindWith(dialog, it) }
+                mediaInfo(filePath, GENERAL, "Album").let { binding.albumValue.bindWith(dialog, it) }
+                run {
+                    val width = mediaInfo(filePath, VIDEO, "Width")
+                    val height = mediaInfo(filePath, VIDEO, "Height")
+                    binding.resolutionValue.bindWith(dialog, if (width.isNotEmpty() && height.isNotEmpty()) "$width × $height" else "")
+                }
                 mediaInfo(filePath, VIDEO, "DisplayAspectRatio/String").let { binding.aspectRatioValue.bindWith(dialog, it) }
-            }
-            launch(Dispatchers.IO) {
                 mediaInfo(filePath, VIDEO, "FrameRate").let { binding.frameRateValue.bindWith(dialog, it) }
-            }
-            launch(Dispatchers.IO) {
-                val deferredVideoWidth = async(Dispatchers.IO) { mediaInfo(filePath, VIDEO, "Width") }
-                val deferredVideoHeight = async(Dispatchers.IO) { mediaInfo(filePath, VIDEO, "Height") }
-                val (width, height) = awaitAll(deferredVideoWidth, deferredVideoHeight)
-                binding.resolutionValue.bindWith(dialog, if (width.isNotEmpty() && height.isNotEmpty()) "$width × $height" else "")
             }
 
             when {
-                deferredVideoFormat.await().isNotEmpty() -> {
+                videoFormatDeferred.await().isNotEmpty() -> {
                     setViewsAsVideoPlaceholder(binding)
                     dialog.setIcon(R.drawable.ic_movie)
                     dialog.getActionButton(DialogAction.POSITIVE)
                     setDialogPlayable(dialog, context, explorerItem)
                 }
-                deferredAudioFormat.await().isNotEmpty() -> {
+                audioFormatDeferred.await().isNotEmpty() -> {
                     setViewsAsMediaPlaceholder(binding)
                     dialog.setIcon(R.drawable.ic_voice_note)
                     setDialogPlayable(dialog, context, explorerItem)
@@ -126,7 +113,7 @@ object MediaInfoDialogManager {
                 dialog.makeTextCopyable { it.titleView }
             }
 
-            when (val containerFormat = deferredContainerFormat.await()) {
+            when (val containerFormat = containerFormatDeferred.await()) {
                 MEDIA_INFO_ERROR_OPENING_FILE -> {
                     dialog.setContent(MEDIA_INFO_ERROR_OPENING_FILE)
                     dialog.getActionButton(DialogAction.NEUTRAL).let {
@@ -136,12 +123,12 @@ object MediaInfoDialogManager {
                 }
                 else -> {
                     containerFormat.let { binding.containerFormatValue.bindWith(dialog, it) }
-                    deferredAudioFormat.await().let { binding.audioFormatValue.bindWith(dialog, it) }
-                    deferredVideoFormat.await().let { binding.videoFormatValue.bindWith(dialog, it) }
+                    audioFormatDeferred.await().let { binding.audioFormatValue.bindWith(dialog, it) }
+                    videoFormatDeferred.await().let { binding.videoFormatValue.bindWith(dialog, it) }
                 }
             }
 
-            updateDialogNeutralButton(dialog, context, deferredMediaInfoTrimmed.await())
+            updateDialogNeutralButton(dialog, context, mediaInfoTrimmedDeferred.await())
         }
     }
 
@@ -255,7 +242,7 @@ object MediaInfoDialogManager {
 
     private suspend fun TextView.bindWith(dialog: MaterialDialog, text: String) {
         withContext(Dispatchers.Main) {
-            dialog.setCopyableText(this@bindWith) { text }
+            dialog.setCopyableText(this@bindWith, text)
         }
     }
 
