@@ -100,7 +100,6 @@ abstract class BaseDisplayContentActivity : BaseActivity() {
                         //  ! zh-CN: 事实上, 此处依然存疑.
                         //  ! Reference: https://stackoverflow.com/questions/3866499/two-directional-scroll-view
                         //  !
-
                         super.onTouchEvent(event) or view.onTouchEvent(event)
                     }
                     else -> super.onTouchEvent(event)

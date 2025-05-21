@@ -109,7 +109,7 @@ object ColorInfoDialogManager {
 
     private suspend fun TextView.bindWith(dialog: MaterialDialog, text: String) {
         withContext(Dispatchers.Main) {
-            dialog.setCopyableText(this@bindWith) { text }
+            dialog.setCopyableText(this@bindWith, text)
         }
     }
 
