@@ -6,13 +6,15 @@
 
 # v6.6.3
 
-###### 2025/05/14
+###### 2025/05/21
 
 * `新增` 版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据
 * `新增` timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态
 * `新增` engines.on('start/stop/error', callback) 等事件监听方法, 用于监听脚本引擎全局事件
 * `新增` images.detectMultiColors 方法, 用于多点颜色校验 _[`issue #374`](http://issues.autojs6.com/374)_
 * `新增` images.matchFeatures/detectAndComputeFeatures 方法, 支持全分辨率找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `新增` images.compressToBytes 方法, 用于压缩图像并生成字节数组
+* `新增` images.downsample 方法, 用于像素降采样并生成新的 ImageWrapper
 * `修复` 主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题
 * `修复` 部分设备代码编辑器空行显示方框字符的问题
 * `修复` 主题色设置页面调色盘对话框可能无限叠加的问题
@@ -24,7 +26,10 @@
 * `修复` 使用 JavaAdapter 时导致 ClassLoader 调用栈溢出的问题 _[`issue #376`](http://issues.autojs6.com/376)_
 * `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
 * `修复` console.setContentBackgroundColor 方法无法接受颜色名称参数的问题 _[`issue #384`](http://issues.autojs6.com/384)_
+* `修复` images.compress 方法实现原理由像素降采样修正为编码质量变化
+* `修复` images.resize 方法无法正常使用的问题
 * `修复` README.md 中部分语言日期格式不正确的问题
+* `修复` Gradle 构建脚本可能因获取到无效库档案文件长度而导致构建失败的问题 _[`issue #389`](http://issues.autojs6.com/389)_
 * `优化` 布局分析支持控件隐藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `优化` 布局分析菜单添加渐变分隔线实现一定程度的功能分组
 * `优化` 主题色扩充适配范围并支持更多控件类型
@@ -34,12 +39,16 @@
 * `优化` 文件管理器浮动按钮展开后点击其他区域可自动隐藏
 * `优化` 打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_
 * `优化` 意图相关操作 (编辑/查看/安装/发送/播放等) 增加操作异常提示
+* `优化` ImageWrapper#saveTo 方法的路径参数支持相对路径
+* `优化` images.save 方法使用 quality 参数时支持 png 格式的文件体积压缩 _[`issue #367`](http://issues.autojs6.com/367)_
 * `优化` 已忽略更新记录及客户端模式连接地址记录支持清空操作
 * `优化` 版本更新信息支持多语言显示 (与当前显示语言同步)
 * `优化` 使用异步加载方式一定程度提升文件管理器列表滑动流畅性
 * `优化` Gradle 构建脚本提升版本自适应能力 _[`discussion #369`](http://discussions.autojs6.com/369)_
 * `依赖` 本地化 Material Dialogs 版本 0.9.6.0
 * `依赖` 本地化 Material Date Time Picker 版本 4.2.3
+* `依赖` 本地化 libimagequant 版本 2.17.0
+* `依赖` 本地化 libpng 版本 1.6.49
 * `依赖` 附加 Jsoup 版本 1.19.1
 * `依赖` 附加 Material Progressbar 版本 1.4.2
 * `依赖` 附加 Flexmark Java HTML to Markdown 版本 0.64.8

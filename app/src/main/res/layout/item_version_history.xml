@@ -77,6 +77,41 @@
                 android:gravity="end">
 
                 <LinearLayout
+                    android:id="@+id/tvHintCountContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/changelog_label_hint" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="2dp"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/symbol_colon" />
+
+                    <TextView
+                        android:id="@+id/tvHintCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="1"
+                        android:gravity="end"
+                        android:maxEms="2"
+                        android:maxLines="1"
+                        android:minEms="1"
+                        android:text="@string/num_zero"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/tvFeatureCountContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
@@ -168,6 +203,41 @@
 
                     <TextView
                         android:id="@+id/tvImprovementCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="1"
+                        android:gravity="end"
+                        android:maxEms="2"
+                        android:maxLines="1"
+                        android:minEms="1"
+                        android:text="@string/num_zero"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/tvDependencyCountContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/changelog_label_dependency" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="2dp"
+                        android:textSize="12sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:text="@string/symbol_colon" />
+
+                    <TextView
+                        android:id="@+id/tvDependencyCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="1"

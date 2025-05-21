@@ -6,6 +6,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.noties.markwon.Markwon
 import org.autojs.autojs.ui.settings.VersionHistoryAdapter.VersionHistoryViewHolder
@@ -119,13 +122,17 @@ class VersionHistoryAdapter(private val context: Context, private val markwon: M
         private val tvDate = binding.tvDate
         private val tvLines = binding.tvLines
 
+        private val tvHintCount = binding.tvHintCount
         private val tvFeatureCount = binding.tvFeatureCount
         private val tvFixCount = binding.tvFixCount
         private val tvImprovementCount = binding.tvImprovementCount
+        private val tvDependencyCount = binding.tvDependencyCount
 
+        private val tvHintCountContainer = binding.tvHintCountContainer
         private val tvFeatureCountContainer = binding.tvFeatureCountContainer
         private val tvFixCountContainer = binding.tvFixCountContainer
         private val tvImprovementCountContainer = binding.tvImprovementCountContainer
+        private val tvDependencyCountContainer = binding.tvDependencyCountContainer
 
         private val changelogLabelHint = "`${context.getString(R.string.changelog_label_hint)}`"
         private val changelogLabelFeature = "`${context.getString(R.string.changelog_label_feature)}`"
@@ -148,38 +155,39 @@ class VersionHistoryAdapter(private val context: Context, private val markwon: M
                 visibility = if (item.expanded) View.VISIBLE else View.GONE
             }
 
-            when {
-                mCategoryFilter.contains(Category.FEATURE) -> {
-                    tvFeatureCount.text = item.lines.count { it.contains(changelogLabelFeature) }.toString()
-                    tvFeatureCountContainer.visibility = View.VISIBLE
+            Category.entries
+                .filter { category ->
+                    val (count, label) = resolveCategoryView(category)
+
+                    val (tvCount, tvCountContainer) = count
+                    when {
+                        mCategoryFilter.contains(category) -> {
+                            tvCount.text = item.lines.count { it.contains(label) }.toString()
+                            true
+                        }
+                        else -> false
+                    }.also { tvCountContainer.isVisible = it }
                 }
-                else -> {
-                    tvFeatureCountContainer.visibility = View.GONE
+                .sortedByDescending { it.priority }
+                .drop(3)
+                .forEach {
+                    val (count, _) = resolveCategoryView(it)
+                    val (_, tvCountContainer) = count
+                    tvCountContainer.isVisible = false
                 }
-            }
-            when {
-                mCategoryFilter.contains(Category.FIX) -> {
-                    tvFixCount.text = item.lines.count { it.contains(changelogLabelFix) }.toString()
-                    tvFixCountContainer.visibility = View.VISIBLE
-                }
-                else -> {
-                    tvFixCountContainer.visibility = View.GONE
-                }
-            }
-            when {
-                mCategoryFilter.contains(Category.IMPROVEMENT) -> {
-                    tvImprovementCount.text = item.lines.count { it.contains(changelogLabelImprovement) }.toString()
-                    tvImprovementCountContainer.visibility = View.VISIBLE
-                }
-                else -> {
-                    tvImprovementCountContainer.visibility = View.GONE
-                }
-            }
 
             itemView.setOnClickListener {
                 item.expanded = !item.expanded
                 notifyItemChanged(absoluteAdapterPosition, PAYLOAD_EXPAND_STATE_CHANGED)
             }
+        }
+
+        private fun resolveCategoryView(category: Category): Pair<Pair<TextView, LinearLayout>, String> = when (category) {
+            Category.HINT -> Pair(tvHintCount to tvHintCountContainer, changelogLabelHint)
+            Category.FEATURE -> Pair(tvFeatureCount to tvFeatureCountContainer, changelogLabelFeature)
+            Category.FIX -> Pair(tvFixCount to tvFixCountContainer, changelogLabelFix)
+            Category.IMPROVEMENT -> Pair(tvImprovementCount to tvImprovementCountContainer, changelogLabelImprovement)
+            Category.DEPENDENCY -> Pair(tvDependencyCount to tvDependencyCountContainer, changelogLabelDependency)
         }
 
         private fun applyCategoryFilter(lines: List<String>) = lines.filter {
