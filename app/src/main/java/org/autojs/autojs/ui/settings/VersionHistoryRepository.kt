@@ -88,17 +88,16 @@ class VersionHistoryRepository {
 
         private val regexValidMarkdownVersion = Regex("""^#\s+v[\d.]+\S*""")
 
-        enum class Category(@StringRes val labelRes: Int) {
-            HINT(R.string.changelog_label_hint),
-            FEATURE(R.string.changelog_label_feature),
-            FIX(R.string.changelog_label_fix),
-            IMPROVEMENT(R.string.changelog_label_improvement),
-            DEPENDENCY(R.string.changelog_label_dependency);
+        enum class Category(@StringRes val labelRes: Int, val priority: Int) {
+            HINT(R.string.changelog_label_hint, -2),
+            FEATURE(R.string.changelog_label_feature, 3),
+            FIX(R.string.changelog_label_fix, 2),
+            IMPROVEMENT(R.string.changelog_label_improvement, 1),
+            DEPENDENCY(R.string.changelog_label_dependency, -1);
         }
 
-        /* 默认显示: 除 HINT 及 DEPENDENCY 以外的全部类别. */
         val DEFAULT_FILTER: EnumSet<Category> =
-            EnumSet.complementOf(EnumSet.of(Category.HINT, Category.DEPENDENCY))
+            EnumSet.of(Category.FEATURE, Category.FIX, Category.IMPROVEMENT)
 
         private fun String.toChangelogMarkdownFile(): String {
             return "CHANGELOG-$this.md"
