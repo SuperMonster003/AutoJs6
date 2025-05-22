@@ -13,7 +13,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import com.android.apksig.ApkVerifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,8 +33,6 @@ import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ApkFileInfoDialogListItemBinding
 import java.io.File
-import java.util.jar.JarEntry
-import java.util.jar.JarFile
 
 object ApkInfoDialogManager {
 
@@ -229,36 +226,16 @@ object ApkInfoDialogManager {
     }
 
     private fun getApkSignatureInfo(apkFile: File): String? = runCatching {
-        ApkVerifier.Builder(apkFile).build().verify().run {
-            listOfNotNull(
-                "V1".takeIf { isVerifiedUsingV1Scheme || hasV1Signature(apkFile) },
-                "V2".takeIf { isVerifiedUsingV2Scheme },
-                "V3".takeIf { isVerifiedUsingV3Scheme },
-                "V4".takeIf { isVerifiedUsingV4Scheme },
-            ).takeUnless { it.isEmpty() }?.joinToString(" + ")
-        }
+        // ApkVerifier.Builder(apkFile).build().verify().run {
+        //     listOfNotNull(
+        //         "V1".takeIf { isVerifiedUsingV1Scheme || hasV1Signature(apkFile) },
+        //         "V2".takeIf { isVerifiedUsingV2Scheme },
+        //         "V3".takeIf { isVerifiedUsingV3Scheme },
+        //         "V4".takeIf { isVerifiedUsingV4Scheme },
+        //     ).takeUnless { it.isEmpty() }?.joinToString(" + ")
+        // }
+        ApkSignatureDetector.detectSchemes(apkFile)
     }.getOrNull()
-
-    private fun hasV1Signature(apkFile: File): Boolean {
-        if (!apkFile.isFile) return false
-        JarFile(apkFile).use { jar ->
-            var hasManifest = false
-            var hasSF = false
-            var hasRSA = false
-            for (entry: JarEntry in jar.entries()) {
-                val name = entry.name.uppercase()
-                when {
-                    name == "META-INF/MANIFEST.MF" -> hasManifest = true
-                    name.endsWith(".SF") && name.startsWith("META-INF/") -> hasSF = true
-                    name.endsWith(".RSA") && name.startsWith("META-INF/") -> hasRSA = true
-                }
-                if (hasManifest && hasSF && hasRSA) {
-                    return true
-                }
-            }
-            return false
-        }
-    }
 
     private data class ApkInfo(
         val label: String?,
