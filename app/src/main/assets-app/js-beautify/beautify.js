@@ -1440,7 +1440,7 @@ function Beautifier(js_source_text, options) {
             return;
         }
 
-        if (current_token.text === '::') {
+        if (current_token.text === '::' || current_token.text === '?.') {
             // no spaces around exotic namespacing syntax operator
             print_token();
             return;
@@ -2250,7 +2250,7 @@ function Tokenizer(input_string, opts) {
     var digit_oct = /[01234567]/;
     var digit_hex = /[0123456789abcdefABCDEF]/;
 
-    this.positionable_operators = '!= !== % & && * ** + - / : < << <= == === > >= >> >>> ? ^ | ||'.split(' ');
+    this.positionable_operators = '!= !== % & && &&= * ** + - / : < << <= == === > >= >> >>> ? ?? ??= ^ | |> || ||='.split(' ');
     var punct = this.positionable_operators.concat(
         // non-positionable operators - these do not follow operator position settings
         '! %= &= *= **= ++ += , -- -= /= :: <<= = => >>= >>>= ^= |= ~ ...'.split(' '));
@@ -2455,6 +2455,13 @@ function Tokenizer(input_string, opts) {
             }
 
             return [c, 'TK_WORD'];
+        }
+
+        if (c === '?') {
+            if (input.peek() === '.' && !input.peek(1).match(/\d/)) {
+                c += input.next();
+                return [c, 'TK_OPERATOR'];
+            }
         }
 
         if (c === '(' || c === '[') {
