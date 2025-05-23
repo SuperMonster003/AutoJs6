@@ -61,7 +61,7 @@ open class TaskManagerFragment : ViewPagerFragment(45), ViewStatesManageable {
     }
 
     override fun onFabClick(fab: FloatingActionButton) {
-        AutoJs.instance.scriptEngineService.stopAll()
+        AutoJs.instance.scriptEngineService.stopAllAndToast()
     }
 
     override fun onBackPressed(activity: Activity) = false

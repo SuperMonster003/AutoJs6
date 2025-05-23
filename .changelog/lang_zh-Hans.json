@@ -25,6 +25,7 @@
         "console.setContentBackgroundColor 方法无法接受颜色名称参数的问题 _[`issue #384`](http://issues.autojs6.com/384)_",
         "images.compress 方法实现原理由像素降采样修正为编码质量变化",
         "images.resize 方法无法正常使用的问题",
+        "engines.all 方法可能触发 ConcurrentModificationException 的问题 _[`issue #394`](http://issues.autojs6.com/394)_",
         "README.md 中部分语言日期格式不正确的问题",
         "Gradle 构建脚本可能因获取到无效库档案文件长度而导致构建失败的问题 _[`issue #389`](http://issues.autojs6.com/389)_"
       ],
