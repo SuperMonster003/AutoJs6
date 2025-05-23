@@ -413,7 +413,6 @@
     <string name="error_failed_to_grant_shizuku_access">Failed to grant Shizuku access</string>
     <string name="error_failed_to_instantiate">Failed to instantiate "%s"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Failed to instantiate "%1$s": [ %2$s ]]]></string>
-    <string name="error_failed_to_invoke_method_with_description">Failed to invoke method %1$s</string>
     <string name="error_failed_to_render_content">Failed to render content</string>
     <string name="error_failed_to_retrieve_released_notes">Failed to retrieve release notes</string>
     <string name="error_failed_to_retrieve_version_histories">Failed to retrieve version histories</string>

@@ -183,7 +183,6 @@
     <string name="error_failed_to_grant_shizuku_access">Shizuku 權限授予失敗</string>
     <string name="error_failed_to_instantiate">實例 \"%s\" 創建失敗</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[實例 \"%1$s\" 創建失敗: [ %2$s ]]]></string>
-    <string name="error_failed_to_invoke_method_with_description">方法 %1$s 調用失敗</string>
     <string name="error_failed_to_render_content">內容渲染失敗</string>
     <string name="error_failed_to_retrieve_released_notes">獲取版本信息失敗</string>
     <string name="error_failed_to_retrieve_version_histories">獲取版本歷史失敗</string>

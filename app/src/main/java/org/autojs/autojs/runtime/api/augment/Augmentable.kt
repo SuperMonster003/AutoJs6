@@ -14,6 +14,7 @@ import org.autojs.autojs.runtime.api.augment.events.Events
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException.Companion.getRefinedStackTrace
 import org.autojs.autojs.runtime.exception.WrappedRuntimeException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.DEFAULT_CALLER
@@ -437,38 +438,28 @@ abstract class Augmentable(private val scriptRuntime: ScriptRuntime? = null) : F
                             else -> targetEx
                         }
                         else -> t
-                    }
+                    }.also { it.printStackTrace() }
+
                     if (ScriptInterruptedException.causedByInterrupt(e)) {
                         throw e
                     }
                     val funcNameSuffix = if (funcName != funcNameAlias) " (${globalContext.getString(R.string.text_alias)}: $funcNameAlias)" else ""
                     val methodDescription = "$key.$funcName$funcNameSuffix"
-                    val message = globalContext.getString(R.string.error_failed_to_invoke_method_with_description, methodDescription)
+                    val message = globalContext.getString(R.string.error_failed_to_call_method, methodDescription)
                     val niceMessage = when (val errMsg = e.message) {
-                        null -> message
+                        null -> e.takeUnless { it is WrappedIllegalArgumentException }?.stackTraceToString()?.let {
+                            getRefinedStackTrace(message, it)
+                        } ?: message
                         else -> {
                             val refined = errMsg.replaceFirst(Regex("^(Wrapped )?\\w*(\\.\\w+)*(Exception|Error): "), "")
                             val trailingDot = if (refined.endsWith(".")) "" else "."
-                            "$message. $refined$trailingDot\n$e"
+                            when (e is WrappedIllegalArgumentException) {
+                                true -> "$message. $refined$trailingDot"
+                                else -> "$message. $refined$trailingDot\n$e"
+                            }
                         }
                     }
-                    e.printStackTrace()
-                    when (e) {
-                        is WrappedIllegalArgumentException -> {
-                            // @Hint by SuperMonster003 on Oct 31, 2024.
-                            //  ! Here we force WrappedIllegalArgumentException to be converted to RuntimeException
-                            //  ! to prevent Rhino JavaScript code's try..catch blocks from catching this important exception.
-                            //  ! Additionally, WrappedIllegalArgumentException itself inherits from WrappedException,
-                            //  ! so the exception's code line number will be included when printing the error stack trace.
-                            //  ! zh-CN:
-                            //  ! 这里强制将 WrappedIllegalArgumentException 转换为 RuntimeException,
-                            //  ! 是为了让 Rhino JavaScript 代码的 try..catch 块无法捕获这个重要异常.
-                            //  ! 另外 WrappedIllegalArgumentException 本身继承了 WrappedException,
-                            //  ! 因此在打印错误堆栈信息时会包含异常所在的 code line number (代码行号).
-                            throw RuntimeException(niceMessage, e)
-                        }
-                        else -> throw WrappedRuntimeException(niceMessage, e)
-                    }
+                    throw WrappedRuntimeException(niceMessage)
                 }
             }, NOT_CONSTRUCTABLE)
             destination.defineProperty(funcNameAlias, f, attributes)

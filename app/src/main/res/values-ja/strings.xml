@@ -186,7 +186,6 @@
     <string name="error_failed_to_grant_shizuku_access">Shizuku の権限付与に失敗しました</string>
     <string name="error_failed_to_instantiate">\"%s\" のインスタンス化に失敗しました</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[インスタンス化 \"%1$s\" に失敗しました: [ %2$s ]]]></string>
-    <string name="error_failed_to_invoke_method_with_description">メソッド %1$s の呼び出しに失敗しました</string>
     <string name="error_failed_to_render_content">コンテンツの表示に失敗しました</string>
     <string name="error_failed_to_retrieve_released_notes">バージョン情報の取得に失敗しました</string>
     <string name="error_failed_to_retrieve_version_histories">バージョン履歴を取得できません</string>

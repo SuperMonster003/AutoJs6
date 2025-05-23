@@ -185,7 +185,6 @@
     <string name="error_failed_to_grant_shizuku_access">Fallo en la concesión de permisos Shizuku</string>
     <string name="error_failed_to_instantiate">Error al instanciar \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Error al instanciar \"%1$s\": [ %2$s ]]]></string>
-    <string name="error_failed_to_invoke_method_with_description">Error al invocar el método %1$s</string>
     <string name="error_failed_to_render_content">Error al renderizar el contenido</string>
     <string name="error_failed_to_retrieve_released_notes">No se pudo obtener la información de la versión</string>
     <string name="error_failed_to_retrieve_version_histories">No se pudo obtener el historial de versiones</string>
