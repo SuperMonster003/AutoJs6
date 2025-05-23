@@ -187,7 +187,6 @@
     <string name="error_failed_to_grant_shizuku_access">Shizuku 권한을 부여하지 못했습니다</string>
     <string name="error_failed_to_instantiate">\"%s\" 인스턴스 생성에 실패했습니다</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[인스턴스 생성 \"%1$s\" 에 실패했습니다: [ %2$s ]]]></string>
-    <string name="error_failed_to_invoke_method_with_description">메소드 %1$s 호출에 실패했습니다</string>
     <string name="error_failed_to_render_content">콘텐츠 렌더링에 실패했습니다</string>
     <string name="error_failed_to_retrieve_released_notes">버전 정보를 가져오지 못했습니다</string>
     <string name="error_failed_to_retrieve_version_histories">버전 기록을 가져올 수 없습니다</string>

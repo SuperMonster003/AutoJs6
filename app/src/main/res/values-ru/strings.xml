@@ -185,7 +185,6 @@
     <string name="error_failed_to_grant_shizuku_access">Не удалось предоставить права на использование Shizuku</string>
     <string name="error_failed_to_instantiate">Ошибка создания экземпляра \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[Ошибка создания экземпляра \"%1$s\": [ %2$s ]]]></string>
-    <string name="error_failed_to_invoke_method_with_description">Ошибка вызова метода %1$s</string>
     <string name="error_failed_to_render_content">Не удалось отобразить содержимое</string>
     <string name="error_failed_to_retrieve_released_notes">Не удалось получить информацию о версии</string>
     <string name="error_failed_to_retrieve_version_histories">Не удалось получить историю версий</string>

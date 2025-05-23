@@ -187,7 +187,6 @@
     <string name="error_failed_to_grant_shizuku_access">فشل منح Shizuku حق الوصول</string>
     <string name="error_failed_to_instantiate">فشل إنشاء المثيل \"%s\"</string>
     <string name="error_failed_to_instantiate_with_cause"><![CDATA[فشل إنشاء المثيل \"%1$s\": [ %2$s ]]]></string>
-    <string name="error_failed_to_invoke_method_with_description">فشل في استدعاء الطريقة %1$s</string>
     <string name="error_failed_to_render_content">فشل في عرض المحتوى</string>
     <string name="error_failed_to_retrieve_released_notes">فشل في استرداد معلومات الإصدار</string>
     <string name="error_failed_to_retrieve_version_histories">تعذّر جلب سجل الإصدارات</string>
