@@ -281,21 +281,29 @@ object PFiles {
     }
 
     @JvmStatic
+    @JvmOverloads
     @Throws(IOException::class)
-    fun copyAssetDir(manager: AssetManager, assetsDir: String, toDir: String, list: Array<String?>?) {
+    fun copyAssetDir(manager: AssetManager, assetsDir: String, toDir: String, list: Array<String?>? = null) {
         File(toDir).mkdirs()
         val ls = list ?: manager.list(assetsDir) ?: throw IOException("Not a directory: $assetsDir")
         ls.forEach { file ->
             if (!TextUtils.isEmpty(file)) {
                 val fullAssetsPath = join(assetsDir, file)
                 val children = manager.list(fullAssetsPath)
+                val toPath = join(toDir, file)
                 if (children.isNullOrEmpty()) {
-                    manager.open(fullAssetsPath).use { stream -> copyStream(stream, join(toDir, file)) }
+                    copyAssetFile(manager, fullAssetsPath, toPath)
                 } else {
-                    copyAssetDir(manager, fullAssetsPath, join(toDir, file), children)
+                    copyAssetDir(manager, fullAssetsPath, toPath, children)
                 }
             }
         }
+    }
+
+    @JvmStatic
+    @Throws(IOException::class)
+    fun copyAssetFile(manager: AssetManager, assetFile: String, toPath: String) {
+        manager.open(assetFile).use { stream -> copyStream(stream, toPath) }
     }
 
     fun renameWithoutExtensionAndReturnNewPath(path: String, newName: String): String {

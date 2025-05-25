@@ -43,7 +43,7 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
             try {
                 val plugin = Plugin.load(context, packageContext, runtime, runtime.topLevelScope)
                 val scriptCacheDir = getScriptCacheDir(packageName)
-                copyAssetDir(packageContext.context.assets, plugin.assetsScriptDir, scriptCacheDir.path, null)
+                copyAssetDir(packageContext.context.assets, plugin.assetsScriptDir, scriptCacheDir.path)
                 plugin.mainScriptPath = File(scriptCacheDir, "index.js").path
                 bindService(plugin)
                 mPlugins[packageName] = plugin
