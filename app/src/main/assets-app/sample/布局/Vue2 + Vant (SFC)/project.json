@@ -1,0 +1,16 @@
+{
+  "assets": [],
+  "useFeatures": [],
+  "launchConfig": {
+    "displaySplash": true,
+    "hideLogs": true,
+    "splashText": "Powered by AutoJs6",
+    "stableMode": false
+  },
+  "main": "main.js",
+  "name": "Vue2 + Vant (SFC)",
+  "packageName": "org.example.vue2_vant",
+  "scripts": {},
+  "versionCode": 1,
+  "versionName": "1.0.0"
+}

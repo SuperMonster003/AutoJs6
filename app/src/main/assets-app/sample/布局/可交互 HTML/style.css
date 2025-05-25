@@ -1,0 +1,25 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f5f5;
+}
+
+#testButton {
+    padding: 12px 24px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #006400;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#testButton:hover {
+    background-color: #008000;
+}

@@ -11,7 +11,8 @@
         "images.compressToBytes 方法, 用于压缩图像并生成字节数组",
         "images.downsample 方法, 用于像素降采样并生成新的 ImageWrapper",
         "ui.keepScreenOn 方法, 用于 UI 页面获取焦点时保持设备屏幕常亮",
-        "ui.root 属性 (getter), 用于获取 UI 页面布局的 \"窗口内容根容器\" 节点"
+        "ui.root 属性 (getter), 用于获取 UI 页面布局的 \"窗口内容根容器\" 节点",
+        "webview 元素支持基于 JsBridge 的 Web 页面布局 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [参阅 示例代码 > 布局 > 可交互 HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_"
       ],
       "fix": [
         "主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题",
@@ -19,6 +20,7 @@
         "主题色设置页面调色盘对话框可能无限叠加的问题",
         "无障碍服务关闭时音量加键停止所有脚本功能失效的问题",
         "定时任务页面编辑自定义广播内容时出现的输入法遮挡问题",
+        "webview 元素中的控件无法正常激活输入法软键盘的问题",
         "APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题",
         "文件管理器示例代码进入项目目录时可能无法自动加载子目录文件内容的问题",
         "Android 15 UI 模式顶部内容被状态栏覆盖的问题",
@@ -45,6 +47,7 @@
         "代码编辑器格式化代码支持 `??`, `?.`, `??=` 等运算符",
         "打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_",
         "意图相关操作 (编辑/查看/安装/发送/播放等) 增加操作异常提示",
+        "webview 元素的 url 属性支持相对路径",
         "ImageWrapper#saveTo 方法的路径参数支持相对路径",
         "images.save 方法使用 quality 参数时支持 png 格式的文件体积压缩 _[`issue #367`](http://issues.autojs6.com/367)_",
         "已忽略更新记录及客户端模式连接地址记录支持清空操作",

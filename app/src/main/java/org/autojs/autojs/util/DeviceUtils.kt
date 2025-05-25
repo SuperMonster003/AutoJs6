@@ -25,6 +25,7 @@ object DeviceUtils {
     @JvmStatic
     fun getDeviceSummary(context: Context) = DeviceInfo(context).toString()
 
+    @JvmStatic
     fun getDeviceSummaryWithSimpleAppInfo(context: Context) = DeviceInfo(context).toStringWithSimpleAppInfo()
 
     // @Reference to com.heinrichreimersoftware.androidissuereporter.model.DeviceInfo

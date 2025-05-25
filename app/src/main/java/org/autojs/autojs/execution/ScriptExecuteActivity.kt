@@ -44,12 +44,14 @@ import org.mozilla.javascript.ContinuationPending
  * Created by Stardust on Feb 5, 2017.
  * Modified by SuperMonster003 as of Nov 15, 2023.
  */
-class ScriptExecuteActivity : AppCompatActivity() {
+class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.DelegateHost {
 
     private var mRuntime: ScriptRuntime? = null
     private var mExecutionListener: ScriptExecutionListener? = null
     private var mScriptSource: ScriptSource? = null
     private var mResult: Any? = null
+
+    private val mMediator = OnActivityResultDelegate.Mediator()
 
     private lateinit var mScriptEngine: ScriptEngine<*>
     private lateinit var mScriptExecution: ActivityScriptExecution
@@ -235,6 +237,7 @@ class ScriptExecuteActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         emit("activity_result", requestCode, resultCode, data)
+        mMediator.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -256,6 +259,10 @@ class ScriptExecuteActivity : AppCompatActivity() {
         } catch (e: Exception) {
             mRuntime?.exit(e)
         }
+    }
+
+    override fun getOnActivityResultDelegateMediator(): OnActivityResultDelegate.Mediator {
+        return mMediator
     }
 
     class ActivityScriptExecution internal constructor(

@@ -18,6 +18,7 @@ import org.autojs.autojs.core.ui.inflater.inflaters.ViewGroupInflater
 import org.autojs.autojs.core.ui.inflater.inflaters.ViewInflater
 import org.autojs.autojs.core.ui.nativeview.NativeView
 import org.autojs.autojs.core.ui.widget.JsListView
+import org.autojs.autojs.core.ui.widget.JsWebView
 import org.autojs.autojs.execution.ScriptExecuteActivity
 import org.autojs.autojs.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.extension.AnyExtensions.jsBrief
@@ -228,8 +229,9 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         }
 
         override fun afterCreateView(inflateContext: InflateContext, view: View, node: Node?, viewName: String, parent: ViewGroup?): View {
-            if (view is JsListView) {
-                initListView(scriptRuntime, view)
+            when (view) {
+                is JsListView -> initListView(scriptRuntime, view)
+                is JsWebView -> initWebView(scriptRuntime, view)
             }
             val widget = inflateContext.get("widget")
             if (widget is NativeObject) {
@@ -833,6 +835,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                     }
                 }
             })
+        }
+
+        private fun initWebView(scriptRuntime: ScriptRuntime, webView: JsWebView) {
+            callFunction(scriptRuntime.js_UiExt, scriptRuntime.topLevelScope, null, arrayOf(webView))
         }
 
         private fun wrapUiAction(scriptRuntime: ScriptRuntime, action: BaseFunction) = Runnable {
