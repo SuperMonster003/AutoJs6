@@ -12,12 +12,18 @@ import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isNotEmpty
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.ScriptInterface
+import org.autojs.autojs.app.OnActivityResultDelegate
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.eventloop.SimpleEvent
 import org.autojs.autojs.engine.JavaScriptEngine
@@ -80,6 +86,17 @@ class ScriptExecuteActivity : AppCompatActivity() {
         }
 
         ViewUtils.addWindowFlags(this, WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+
+        @Suppress("DEPRECATION")
+        ViewUtils.appendSystemUiVisibility(this, SYSTEM_UI_FLAG_LAYOUT_STABLE or SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+            val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, sysBars.top, 0, sysBars.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            ViewUtils.setNavigationBarBackgroundColor(this, getColor(R.color.black_alpha_44))
+        }
 
         val executionId = intent.getIntExtra(EXTRA_EXECUTION_ID, ScriptExecution.NO_ID)
         if (executionId == ScriptExecution.NO_ID) {

@@ -38,8 +38,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
         if (handleNavigationBarContrastEnforcedAutomatically) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                @Suppress("DEPRECATION")
-                window.navigationBarColor = getColor(R.color.black_alpha_44)
+                ViewUtils.setNavigationBarBackgroundColor(this, getColor(R.color.black_alpha_44))
             }
         }
 
