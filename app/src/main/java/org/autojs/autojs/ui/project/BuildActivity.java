@@ -72,7 +72,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -124,6 +126,11 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         add(new Pair<>("V2 + V3", "Android 7.0+"));
         add(new Pair<>("V2", "Android 7.0+"));
         add(new Pair<>("V3", "Android 9.0+"));
+    }};
+
+    private final Map<String, String> PERMISSION_ALIAS = new HashMap<>() {{
+        put("shizuku", "moe.shizuku.manager.permission.API_V23");
+        put("termux", "com.termux.permission.RUN_COMMAND");
     }};
 
     private final Map<String, Integer> SUPPORTED_PERMISSIONS = new TreeMap<>() {{
@@ -193,8 +200,8 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
         put("com.android.launcher.permission.INSTALL_SHORTCUT", R.string.text_permission_desc_install_shortcut);
         put("com.android.launcher.permission.UNINSTALL_SHORTCUT", R.string.text_permission_desc_uninstall_shortcut);
         put("com.android.vending.BILLING", R.string.text_permission_desc_billing);
-        put("com.termux.permission.RUN_COMMAND", R.string.text_permission_desc_termux_run_command);
-        put("moe.shizuku.manager.permission.API_V23", R.string.text_permission_desc_shizuku);
+        put(PERMISSION_ALIAS.get("termux"), R.string.text_permission_desc_termux_run_command);
+        put(PERMISSION_ALIAS.get("shizuku"), R.string.text_permission_desc_shizuku);
     }};
 
     EditText mSourcePathView;
@@ -547,7 +554,21 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             int marginInPixels = (int) (8 * getResources().getDisplayMetrics().density);
             checkBox.setPadding(marginInPixels, 0, 0, 0);
             if (mProjectConfig != null) {
-                boolean checked = mProjectConfig.getPermissions().stream().anyMatch(p -> ("android.permission." + p.toUpperCase()).equals(permission));
+                boolean checked = mProjectConfig.getPermissions().stream().anyMatch(p -> {
+                    var lc = p.toLowerCase(Locale.ROOT);
+                    var uc = p.toUpperCase(Locale.ROOT);
+                    if (p.equalsIgnoreCase(permission)) {
+                        return true;
+                    }
+                    if (permission.contains("android")) {
+                        String refined = uc.substring(uc.lastIndexOf(".") + 1).replaceAll("\\W", "_");
+                        return Objects.equals(refined, permission.substring(permission.lastIndexOf(".") + 1));
+                    }
+                    if (PERMISSION_ALIAS.containsKey(lc)) {
+                        return Objects.equals(permission, PERMISSION_ALIAS.get(lc));
+                    }
+                    return false;
+                });
                 checkBox.setChecked(checked);
             } else {
                 checkBox.setChecked(false);
