@@ -4,6 +4,7 @@ import android.os.Build
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.core.graphics.drawable.toDrawable
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
@@ -122,18 +123,23 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         ::findByStringId.name,
         ::findView.name,
         ::finish.name,
+        ::keepScreenOn.name,
     )
 
     override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
         "R" to Supplier { scriptRuntime.topLevelScope.prop("R").jsUnwrapped() },
         "__widgets__" to Supplier { scriptRuntime.ui.widgets },
+        "root" to Supplier {
+            val activity = getActivity(scriptRuntime)
+            (activity as? ScriptExecuteActivity)?.findViewById(android.R.id.content)
+        },
         "emitter" to Supplier {
             val activity = getActivity(scriptRuntime)
             (activity as? ScriptExecuteActivity)?.eventEmitter
         },
         "statusBarHeight" to Supplier {
             ViewUtils.getStatusBarHeightByDimen(globalContext)
-        }
+        },
     )
 
     init {
@@ -674,6 +680,15 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 runRhinoRuntime(scriptRuntime, newBaseFunction("action", {
                     activity.finish()
                 }, NOT_CONSTRUCTABLE))
+            }
+            UNDEFINED
+        }
+
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun keepScreenOn(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsIsEmpty(args) {
+            ensureActivity(scriptRuntime) { activity ->
+                activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
             UNDEFINED
         }
