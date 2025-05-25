@@ -536,7 +536,12 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
             checkBox.setTextSize(12);
             int marginInPixels = (int) (8 * getResources().getDisplayMetrics().density);
             checkBox.setPadding(marginInPixels, 0, 0, 0);
-            checkBox.setChecked(false);
+            if (mProjectConfig != null) {
+                boolean checked = mProjectConfig.getPermissions().stream().anyMatch(p -> ("android.permission." + p.toUpperCase()).equals(permission));
+                checkBox.setChecked(checked);
+            } else {
+                checkBox.setChecked(false);
+            }
             mFlexboxPermissionsView.addView(checkBox);
         });
     }
