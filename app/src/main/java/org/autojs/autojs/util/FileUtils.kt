@@ -182,6 +182,9 @@ object FileUtils {
         /** Embedded JavaScript templating file, used for HTML templates. */
         EJS("ejs", TypeDataHolder.CODE),
 
+        /** Vue.js code file. */
+        VUE("vue", TypeDataHolder.CODE),
+
         /** NFEX code file. */
         NFEX("nfex", TypeDataHolder.CODE),
 

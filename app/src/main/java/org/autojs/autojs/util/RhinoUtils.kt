@@ -3,6 +3,7 @@
 package org.autojs.autojs.util
 
 import android.content.Intent
+import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
 import android.util.Log
@@ -326,6 +327,14 @@ object RhinoUtils {
 
     @JvmStatic
     fun isBackgroundThread() = !isMainThread()
+
+    @JvmStatic
+    fun dispatchToMainThread(r: Runnable) = dispatchToMainThread(Handler(Looper.getMainLooper()), r)
+
+    @JvmStatic
+    fun dispatchToMainThread(handler: Handler, r: Runnable) {
+        if (isMainThread()) r.run() else handler.post(r)
+    }
 
     @JvmStatic
     fun encodeURI(str: String): String = encodeURI(null, str)

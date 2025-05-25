@@ -420,6 +420,8 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     val js_ResultAdapter by lazy { rhinoRequire("result-adapter") as BaseFunction }
 
+    val js_UiExt by lazy { rhinoRequire("ui-ext") as BaseFunction }
+
     private val js_object_observe_lite_min by lazy { rhinoRequire("object-observe-lite.min") as BaseFunction }
 
     private val js_array_observe_min by lazy { rhinoRequire("array-observe.min") as BaseFunction }

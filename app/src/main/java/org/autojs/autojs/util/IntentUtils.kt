@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.provider.Settings
 import android.view.View
 import androidx.core.content.FileProvider
@@ -223,6 +224,29 @@ object IntentUtils {
     } catch (e: ActivityNotFoundException) {
         exceptionHolder?.show(R.string.error_no_applications_available_for_sending_this_file)
         false.also { e.printStackTrace() }
+    }
+
+    @JvmStatic
+    fun getFileName(context: Context, uri: Uri): String {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            context.contentResolver.query(uri, null, null, null, null).use { cursor ->
+                if (cursor != null && cursor.moveToFirst()) {
+                    val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (index >= 0) {
+                        result = cursor.getString(index)
+                    }
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.path
+            val cut = result!!.lastIndexOf('/')
+            if (cut != -1) {
+                result = result.substring(cut + 1)
+            }
+        }
+        return result
     }
 
     fun requestAppUsagePermission(context: Context) = try {

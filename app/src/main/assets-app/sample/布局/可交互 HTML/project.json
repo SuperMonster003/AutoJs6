@@ -1,0 +1,16 @@
+{
+  "assets": [],
+  "useFeatures": [],
+  "launchConfig": {
+    "displaySplash": true,
+    "hideLogs": true,
+    "splashText": "Powered by AutoJs6",
+    "stableMode": false
+  },
+  "main": "main.js",
+  "name": "可交互 HTML",
+  "packageName": "org.example.interactive_html",
+  "scripts": {},
+  "versionCode": 1,
+  "versionName": "1.0.0"
+}

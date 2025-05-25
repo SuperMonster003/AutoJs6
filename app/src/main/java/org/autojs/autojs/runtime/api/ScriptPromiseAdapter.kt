@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api
 
-class ScriptPromiseAdapter {
+class ScriptPromiseAdapter : Resolvable {
 
     interface Callback {
         fun call(arg: Any?)
@@ -31,7 +31,7 @@ class ScriptPromiseAdapter {
         return this
     }
 
-    fun resolve(result: Any?) {
+    override fun resolve(result: Any?) {
         mResult = result
         mResolveCallback?.call(result)
     }
@@ -44,4 +44,5 @@ class ScriptPromiseAdapter {
     companion object {
         private val UNSET = Object()
     }
+
 }
