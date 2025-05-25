@@ -545,7 +545,7 @@ public class UpdateChecker {
     }
 
     private String assembleDependenciesInReleaseNotesListMarkdown(String fullReleaseNotes) {
-        // TODO by SuperMonster003 on Apr 24. 2025.
+        // TODO by SuperMonster003 on Apr 24, 2025.
         //  ! Remove all dependency items and append a summary item as improvement.
         //  ! Reference to `generate_markdown.py`.
         return fullReleaseNotes;

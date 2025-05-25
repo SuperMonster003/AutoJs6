@@ -248,7 +248,7 @@ public class Shell extends AbstractShell {
         }
 
         private void onOutput(String str) {
-            if (!str.isEmpty()) {
+            if (!str.isEmpty() && !str.contains("/dev/input/event")) {
                 logDebug("onOutput: " + str);
             }
             if (!mInitialized) {
