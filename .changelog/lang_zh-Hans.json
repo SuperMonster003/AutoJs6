@@ -9,7 +9,9 @@
         "images.detectMultiColors 方法, 用于多点颜色校验 _[`issue #374`](http://issues.autojs6.com/374)_",
         "images.matchFeatures/detectAndComputeFeatures 方法, 支持全分辨率找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_",
         "images.compressToBytes 方法, 用于压缩图像并生成字节数组",
-        "images.downsample 方法, 用于像素降采样并生成新的 ImageWrapper"
+        "images.downsample 方法, 用于像素降采样并生成新的 ImageWrapper",
+        "ui.keepScreenOn 方法, 用于 UI 页面获取焦点时保持设备屏幕常亮",
+        "ui.root 属性 (getter), 用于获取 UI 页面布局的 \"窗口内容根容器\" 节点",
       ],
       "fix": [
         "主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题",
