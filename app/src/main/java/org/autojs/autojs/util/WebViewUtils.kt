@@ -81,6 +81,10 @@ class WebViewUtils {
             excludeWebViewFromSystemBars(webViewWrapper, webView, excludeStatusBar = true, excludeNavigationBar = true)
         }
 
+        fun excludeWebViewFromStatusBarAndNavigationBar(webViewWrapper: View, webView: WebView, excludeNavigationBarInjectCode: (systemBarInsetsBottom: Int) -> String) {
+            excludeWebViewFromSystemBars(webViewWrapper, webView, excludeStatusBar = true, excludeNavigationBarInjectCode = excludeNavigationBarInjectCode)
+        }
+
         private fun excludeWebViewFromSystemBars(webViewWrapper: View, webView: WebView, excludeStatusBar: Boolean, excludeNavigationBarInjectCode: (systemBarInsetsBottom: Int) -> String) {
             var mSystemBarInsets: Insets? = null
             ViewCompat.setOnApplyWindowInsetsListener(webViewWrapper) { v, insets ->

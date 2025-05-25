@@ -9,6 +9,7 @@ import android.webkit.WebView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import org.autojs.autojs.event.BackPressedHandler
+import org.autojs.autojs.ui.doc.DocumentationActivity.Companion.generateInjectCodeForBottomInsets
 import org.autojs.autojs.ui.fragment.BindingDelegates.viewBinding
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.ui.main.QueryEvent
@@ -21,7 +22,6 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.FragmentOnlineDocsBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
-import org.intellij.lang.annotations.Language
 
 /**
  * Created by Stardust on Aug 22, 2017.
@@ -60,24 +60,8 @@ class DocumentationFragment : ViewPagerFragment(ROTATION_GONE), BackPressedHandl
                 if (ViewUtils.isNightModeYes(requireContext())) {
                     WebViewUtils.adaptDarkMode(webView)
                 }
-                WebViewUtils.excludeWebViewFromNavigationBar(ewebView, webView) { systemBarInsetsBottom ->
-                    @Language("JavaScript")
-                    val injectCode = """
-                        (function() {
-                            let mainElements = document.querySelectorAll('main > *');
-                            if (mainElements.length > 0) {
-                                // Online docs (zh-CN: 在线文档)
-                                mainElements.forEach(ele => {
-                                    let basePaddingBottom = ele.className === 'sidebar-toggle' ? 10 : 0;
-                                    ele.style.paddingBottom = (basePaddingBottom + ${systemBarInsetsBottom}) / window.devicePixelRatio + 'px';
-                                });
-                            } else {
-                                // Local docs (zh-CN: 本地文档)
-                                document.body.style.paddingBottom = '${systemBarInsetsBottom}px';
-                            }
-                        })();
-                    """.trimIndent()
-                    injectCode
+                WebViewUtils.excludeWebViewFromNavigationBar(ewebView, webView) {
+                    generateInjectCodeForBottomInsets(it)
                 }
             }
         }

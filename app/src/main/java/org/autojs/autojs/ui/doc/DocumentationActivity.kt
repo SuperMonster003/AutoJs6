@@ -8,6 +8,7 @@ import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs.util.WebViewUtils
 import org.autojs.autojs6.databinding.ActivityDocumentationBinding
+import org.intellij.lang.annotations.Language
 
 /**
  * Created by Stardust on Oct 24, 2017.
@@ -31,7 +32,9 @@ class DocumentationActivity : BaseActivity() {
                     if (ViewUtils.isNightModeYes(this)) {
                         WebViewUtils.adaptDarkMode(webView)
                     }
-                    WebViewUtils.excludeWebViewFromStatusBarAndNavigationBar(ewebView, webView)
+                    WebViewUtils.excludeWebViewFromStatusBarAndNavigationBar(ewebView, webView) {
+                        generateInjectCodeForBottomInsets(it)
+                    }
                     webView.loadUrl(intent.getStringExtra(EXTRA_URL) ?: getUrl("index.html"))
                 }
             }
@@ -56,6 +59,26 @@ class DocumentationActivity : BaseActivity() {
     companion object {
 
         const val EXTRA_URL = "url"
+
+        fun generateInjectCodeForBottomInsets(systemBarInsetsBottom: Int): String {
+            @Language("JavaScript")
+            val injectCode = """
+                (function() {
+                    let mainElements = document.querySelectorAll('main > *');
+                    if (mainElements.length > 0) {
+                        // Online docs (zh-CN: 在线文档)
+                        mainElements.forEach(ele => {
+                            let basePaddingBottom = ele.className === 'sidebar-toggle' ? 10 : 0;
+                            ele.style.paddingBottom = (basePaddingBottom + ${systemBarInsetsBottom}) / window.devicePixelRatio + 'px';
+                        });
+                    } else {
+                        // Local docs (zh-CN: 本地文档)
+                        document.body.style.paddingBottom = '${systemBarInsetsBottom}px';
+                    }
+                })();
+            """.trimIndent()
+            return injectCode
+        }
 
     }
 
