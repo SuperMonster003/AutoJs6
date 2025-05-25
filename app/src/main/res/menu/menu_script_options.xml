@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
-            android:id="@+id/rename"
-            android:title="@string/text_rename" />
+        android:id="@+id/rename"
+        android:title="@string/text_rename" />
     <item
-            android:id="@+id/delete"
-            android:title="@string/text_delete" />
+        android:id="@+id/delete"
+        android:title="@string/text_delete" />
     <item
-            android:id="@+id/timed_task"
-            android:title="@string/text_timed_task" />
+        android:id="@+id/timed_task"
+        android:title="@string/text_timed_task" />
     <item
-            android:id="@+id/create_shortcut"
-            android:title="@string/text_send_shortcut" />
+        android:id="@+id/create_shortcut"
+        android:title="@string/text_send_shortcut" />
     <item
-            android:id="@+id/action_build_apk"
-            android:title="@string/text_build_apk" />
+        android:id="@+id/action_build_apk"
+        android:title="@string/text_build_apk" />
     <item
-            android:id="@+id/reset"
-            android:title="@string/text_reset_to_initial_content" />
+        android:id="@+id/reset"
+        android:title="@string/text_reset_to_initial_content" />
     <item
-            android:id="@+id/send"
-            android:title="@string/text_send" />
+        android:id="@+id/send"
+        android:title="@string/text_send" />
     <item
-            android:id="@+id/open_by_other_apps"
-            android:title="@string/text_open_by_other_apps" />
+        android:id="@+id/open_by_other_apps"
+        android:title="@string/text_open_by_other_apps" />
     <item
-            android:id="@+id/run_repeatedly"
-            android:title="@string/text_run_repeatedly" />
+        android:id="@+id/run_repeatedly"
+        android:title="@string/text_run_repeatedly" />
 
 </menu>

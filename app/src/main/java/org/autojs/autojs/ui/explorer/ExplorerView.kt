@@ -904,7 +904,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                 menu.removeItem(R.id.action_set_as_working_dir)
             }
             val samplePath = PFile(context.filesDir, WorkspaceFileProvider.SAMPLE_PATH).path
-            if (!(mExplorerItem.path.startsWith(samplePath))) {
+            if (!mExplorerItem.path.startsWith(samplePath)) {
                 menu.removeItem(R.id.reset)
             }
             popupMenu.setOnMenuItemClickListener(this@ExplorerView)
@@ -961,6 +961,10 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
             if (!mExplorerPage!!.canBuildApk()) {
                 menu.removeItem(R.id.action_build_apk)
             }
+            val samplePath = PFile(context.filesDir, WorkspaceFileProvider.SAMPLE_PATH).path
+            if (!mExplorerPage!!.path.startsWith(samplePath)) {
+                menu.removeItem(R.id.reset)
+            }
             popupMenu.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.action_rename -> {
@@ -978,6 +982,22 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout, SwipeRefreshLayout.OnRef
                     }
                     R.id.action_build_apk -> {
                         BuildActivity.launch(context, selectedItem!!.path)
+                    }
+                    R.id.reset -> {
+                        val o = Explorers.Providers.workspace()
+                            .resetSample(selectedItem!!.toScriptFile())
+                        if (o == null) {
+                            resetFailed()
+                        } else {
+                            o.observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({ file: ScriptFile ->
+                                    if (file.exists()) {
+                                        resetSucceeded()
+                                    } else {
+                                        resetFailed()
+                                    }
+                                }, Observers.toastMessage())
+                        }
                     }
                     else -> null
                 } != null
