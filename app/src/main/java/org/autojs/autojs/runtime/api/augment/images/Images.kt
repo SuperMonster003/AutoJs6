@@ -258,7 +258,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             }
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun requestScreenCapture(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsAtMost(args, 2) { argList ->
@@ -280,7 +280,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             }
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun requestScreenCaptureAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsAtMost(args, 2) { argList ->
@@ -290,14 +290,14 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             })) as NativeObject
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun stopScreenCapture(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsIsEmpty(args) {
             scriptRuntime.images.stopScreenCapture()
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun getScreenCaptureOptions(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ScreenCapturer.Options? = ensureArgumentsIsEmpty(args) {
@@ -697,7 +697,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             detectColor(scriptRuntime, it)
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on May 10. 2025.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on May 10, 2025.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun detectMultiColors(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsLengthInRange(args, 5..6) {
@@ -1007,7 +1007,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             }
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun detectAndComputeFeatures(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ImageFeatures = ensureArgumentsLengthInRange(args, 1..2) {
@@ -1022,7 +1022,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             ImageFeatures(result, opt.scale, rect)
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun matchFeatures(scriptRuntime: ScriptRuntime, args: Array<out Any?>): ObjectFrame? = ensureArgumentsLengthInRange(args, 2..3) { argList ->
@@ -1508,7 +1508,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             }
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         private fun getDetectFeatureMethod(method: Any?): Int = when (method) {
             is Number -> method.toInt()
             is String -> {
@@ -1521,7 +1521,7 @@ class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitt
             else -> throw Error("Non-recognized method: $method")
         }
 
-        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+        // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         private fun fillDetectAndComputeFeaturesOptions(rows: Int, cols: Int, options: NativeObject): DetectAndComputeFeaturesOptions {
             val scale = options.inquire("scale") { coerceFloatNumber(it) } ?: calcScale(rows, cols)
             val cvtColor = when {

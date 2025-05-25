@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.6.3": {
-      "released_date": "2025/05/21",
+      "released_date": "2025/05/25",
       "feature": [
         "版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据",
         "timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态",
@@ -20,6 +20,7 @@
         "APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题",
         "Android 15 部分页面状态栏背景颜色可能无法动态跟随主题色的问题",
         "dialogs 模块无法正常使用 customView 属性的问题 _[`issue #364`](http://issues.autojs6.com/364)_",
+        "dialogs.input 方法的表达式参数可能无法获得执行结果的问题",
         "使用 JavaAdapter 时导致 ClassLoader 调用栈溢出的问题 _[`issue #376`](http://issues.autojs6.com/376)_",
         "console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_",
         "console.setContentBackgroundColor 方法无法接受颜色名称参数的问题 _[`issue #384`](http://issues.autojs6.com/384)_",

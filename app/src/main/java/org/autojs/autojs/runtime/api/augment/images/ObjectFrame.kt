@@ -3,7 +3,7 @@ package org.autojs.autojs.runtime.api.augment.images
 import org.autojs.autojs.util.StringUtils
 import org.opencv.core.Point
 
-// @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19. 2023.
+// @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
 /**
  * Created by SuperMonster003 on Aug 9, 2024.
  */
