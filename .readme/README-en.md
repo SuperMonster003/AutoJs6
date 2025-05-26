@@ -155,6 +155,67 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 
 ******
 
+# v6.6.3
+
+###### 2025/05/27
+
+* `Feature` Version history feature: view multi-language release changelogs and statistics
+* `Feature` timers.keepAlive method (now global) for keeping the script alive
+* `Feature` Event listeners such as engines.on('start/stop/error', callback) for global engine events
+* `Feature` images.detectMultiColors method for multi-point color verification _[`issue #374`](http://issues.autojs6.com/374)_
+* `Feature` images.matchFeatures / detectAndComputeFeatures methods: full-resolution image matching (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `Feature` images.compressToBytes method to compress an image and generate a byte array
+* `Feature` images.downsample method for pixel down-sampling and creating a new ImageWrapper
+* `Feature` ui.keepScreenOn method to keep the device screen on while a UI page is focused
+* `Feature` ui.root property (getter) to obtain the "window content root container" node of the UI layout
+* `Feature` webview element now supports JsBridge-based web page layouts (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [see Sample Code > Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Fix` Online docs in the Home > Docs tab and Docs activity may be covered by the system navigation bar
+* `Fix` Clicking Toolbar buttons on some pages could accidentally trigger the title click event
+* `Fix` Blank lines in the code editor showed box glyphs on some devices
+* `Fix` Color-picker dialog in the theme-color settings page could stack infinitely
+* `Fix` Volume-up key failed to stop all scripts when the accessibility service was disabled
+* `Fix` IME overlay issue when editing custom broadcast content in the Scheduled Tasks page
+* `Fix` Controls inside webview elements could not activate the soft keyboard properly
+* `Fix` APK file info dialog might fail to obtain app name and SDK info
+* `Fix` File-manager sample code might fail to auto-load child directory contents when entering a project folder
+* `Fix` Top content of UI mode on Android 15 was covered by the status bar
+* `Fix` Status-bar background color on some Android 15 pages could not follow the theme color dynamically
+* `Fix` dialogs module could not use the customView property _[`issue #364`](http://issues.autojs6.com/364)_
+* `Fix` Expression parameter of dialogs.input might not return the execution result
+* `Fix` Using JavaAdapter led to a ClassLoader stack overflow _[`issue #376`](http://issues.autojs6.com/376)_
+* `Fix` console.setContentTextColor caused log text color to lose its default value _[`issue #346`](http://issues.autojs6.com/346)_
+* `Fix` console.setContentBackgroundColor could not accept color-name arguments _[`issue #384`](http://issues.autojs6.com/384)_
+* `Fix` images.compress implementation corrected: now changes encoding quality instead of pixel down-sampling
+* `Fix` images.resize method did not work properly
+* `Fix` engines.all could trigger ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
+* `Fix` Incorrect date formats in some languages within README.md
+* `Fix` Gradle build could fail due to invalid library archive length _[`issue #389`](http://issues.autojs6.com/389)_
+* `Improvement` Layout Inspector supports hiding controls (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `Improvement` Added gradient separators to the Layout Inspector menu for lightweight grouping
+* `Improvement` project.json now supports a permissions option for script projects (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `Improvement` Automatically read and check declared permissions of installed apps when packaging a single file _[`issue #362`](http://issues.autojs6.com/362)_
+* `Improvement` Expanded theme-color adaptation scope; supports more widget types
+* `Improvement` Adaptive drawer width on the Home page for landscape / ultra-wide screens
+* `Improvement` Added horizontal and small-screen layouts for About App & Developer pages
+* `Improvement` Settings-page dialogs now offer a "Use default value" menu option
+* `Improvement` Floating Action Button in File Manager auto-hides when tapping elsewhere
+* `Improvement` Code formatter now supports operators such as `??`, `?.`, `??=`
+* `Improvement` Code editor supports reading and writing files encoded in GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.
+* `Improvement` Code editor supports displaying detailed file information (path/encoding/line break format/total bytes and characters, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
+* `Improvement` Added operation-error prompts for intent actions (edit / view / install / send / play, etc.)
+* `Improvement` webview element's url attribute supports relative paths
+* `Improvement` ImageWrapper#saveTo path parameter supports relative paths
+* `Improvement` images.save supports PNG file-size compression when using the quality parameter _[`issue #367`](http://issues.autojs6.com/367)_
+* `Improvement` Clearing ignored update records and client-mode connection addresses is now supported
+* `Improvement` Version-update information supports multi-language display (in sync with current UI language)
+* `Improvement` Asynchronous loading significantly improves File Manager list scrolling smoothness
+* `Improvement` Improved content and formatting of script exception messages in the console
+* `Improvement` Sample code now supports resetting a folder to its initial contents
+* `Improvement` Increased efficiency when checking APK signature information
+* `Improvement` Optimized dialog display efficiency and information presentation for APK/media file type info
+* `Improvement` Gradle build script now better adapts to newer versions _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
+
 # v6.6.2
 
 ###### 2025/04/16
@@ -234,96 +295,6 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Improvement` Synchronize with the latest upstream code of the Rhino engine and adapt it to the existing project
 * `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
-# v6.6.0
-
-###### 2024/12/02 - Built-in module rewrite, upgrade cautiously
-
-* `Hint` The built-in modules are rewritten in Kotlin to enhance script execution efficiency, but iterative improvements are needed.
-* `Hint` The built-in init.js file is empty by default, allowing developers to extend built-in modules or mount external modules.
-* `Feature` Axios module / Cheerio module (Ref to [AutoX](https://github.com/kkevsekk1/AutoX))
-* `Feature` SQLite module for simple operations on SQLite databases (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (See project documentation > [SQLite](https://docs.autojs6.com/#/sqlite))
-* `Feature` MIME module for processing and parsing MIME type strings (See project documentation > [MIME](https://docs.autojs6.com/#/mime))
-* `Feature` Nanoid module for string ID generation (Ref to [ai/nanoid](https://github.com/ai/nanoid))
-* `Feature` Sysprops module for obtaining runtime environment configuration data (See project documentation > [System Properties](https://docs.autojs6.com/#/sysprops))
-* `Feature` OCR module supports [Rapid OCR](https://github.com/RapidAI/RapidOCR) engine
-* `Feature` Layout analysis supports window switching (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` auto.clearCache method supports clearing control caches (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` threads.pool method supports simple application of thread pools (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` images.matchTemplate method adds useTransparentMask option parameter to support transparent image search (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` images.requestScreenCaptureAsync method for asynchronously requesting screenshot permissions in UI mode (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` images.requestScreenCapture method adds isAsync option parameter to support asynchronous screenshot capture (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` images.on('screen_capture', callback) and other event listener methods support listening for screen capture availability events (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` images.stopScreenCapture method supports actively releasing resources related to screenshot applications (Ref to [Auto.js Pro](https://g.pro.autojs.org/))
-* `Feature` Images.psnr/mse/ssim/mssim/hist/ncc and images.getSimilarity methods for obtaining image similarity metrics
-* `Feature` images.isGrayscale method for determining whether an image is grayscale
-* `Feature` images.invert method for negative image conversion
-* `Feature` s13n.point/time methods for standardizing point objects and duration objects (See project documentation > [Normalization](https://docs.autojs6.com/#/s13n))
-* `Feature` console module's gravity, touchThrough, backgroundTint methods (See project documentation > [Console](https://docs.autojs6.com/#/console))
-* `Feature` Mathx.randomInt/Mathx.randomFloat methods for returning random integers or random floating-point numbers within a specified range
-* `Feature` app.launchDual/startDualActivity methods for handling dual app launch (Requires Shizuku or Root permissions) (Experimental)
-* `Feature` app.kill method for forcefully stopping an app (Requires Shizuku or Root permissions)
-* `Feature` floaty.getClip method for indirectly obtaining clipboard content using a floating window
-* `Fix` Memory leak in View Binding of Fragment subclasses (e.g., [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48))
-* `Fix` Instance memory leak in classes such as [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21)
-* `Fix` Issue causing app crash when requesting screenshot permissions on Android 14 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `Fix` Issue causing app crash when starting foreground service on Android 14
-* `Fix` Issue with run button in code editor not lighting up properly on Android 14
-* `Fix` App may not run properly after packaging due to missing necessary library files _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
-* `Fix` App crash when editing project due to missing specified icon resources _[`issue #203`](http://issues.autojs6.com/203)_
-* `Fix` Unable to use parameters properly to obtain screenshot resources of specified screen orientation when requesting screenshot permissions
-* `Fix` Issue with some devices unable to add script shortcuts properly (Trial fix) _[`issue #221`](http://issues.autojs6.com/221)_
-* `Fix` Cumulative request sending delay issue with methods related to sending requests in http module _[`issue #192`](http://issues.autojs6.com/192)_
-* `Fix` Shizuku service may not work properly before AutoJs6 enters the main activity page (Trial fix) _[`issue #255`](http://issues.autojs6.com/255)_
-* `Fix` random(min, max) method may have out-of-bounds results
-* `Fix` Issue where result type parameter of pickup methods cannot be properly passed empty arrays
-* `Fix` Issue where control rectangle obtained by UiObject#bounds() may be inadvertently modified, breaking its immutability
-* `Fix` Issue with text/button/input elements where text containing half-width double quotes cannot be parsed properly
-* `Fix` Issue with text/textswitcher elements where autoLink attribute functionality fails
-* `Fix` Issue with different scripts erroneously sharing the same ScriptRuntime object
-* `Fix` Issue with global variables HEIGHT and WIDTH losing dynamically-generated Getter properties
-* `Fix` Issue with potential high-latency startup caused by RootShell loading on script startup
-* `Fix` Issue with floating console window background color setting leading to loss of rectangular rounding style
-* `Fix` Access service auto-start may encounter abnormal service issues (Trial fix)
-* `Fix` Issue with triggering ViewPager switch when swiping left or right on WebView control on homepage document page
-* `Fix` Issue with file manager unable to recognize file extensions containing uppercase letters
-* `Fix` File manager may not automatically recognize project when first entering project directory
-* `Fix` Issue with file manager page unable to refresh automatically after deleting folder
-* `Fix` Issue with file manager sorting files and folders where ASCII initial letter names are put back
-* `Fix` FAILED ASSERTION exception in code editor debug function
-* `Fix` Issue with unable to debug again properly after closing editor during code editor debug process
-* `Fix` Issue with potentially omitting end characters when jumping to line end in code editor
-* `Fix` Issue with flickering screen when starting log activity page on main activity page
-* `Fix` Issue with packaged app unable to use opencc module properly
-* `Improvement` Click prompt experience for 'Unavailable ABI' control on package page
-* `Improvement` Supports using Shizuku to control 'Pointer Location' display switch
-* `Improvement` Supports using Shizuku to control 'Projection Media' and 'Modify Secure Settings' permission switches
-* `Improvement` Automator.gestureAsync/gesturesAsync supports callback function parameters
-* `Improvement` tasks module uses synchronous way for database operations to avoid potential data access inconsistencies
-* `Improvement` Script execution mode supports pipeline symbol separation mode parameters (e.g., starting with `"ui|auto";`)
-* `Improvement` Script execution mode supports single quotes and backticks and allows omitting semicolons (e.g., starting with `'ui';` or `'ui'`)
-* `Improvement` Script execution mode supports quick import of built-in extension modules such as axios, cheerio, and dayjs (e.g., starting with `"axios";`)
-* `Improvement` Script execution mode supports x or jsox mode parameters for quick enabling of JavaScript built-in object extension modules (e.g., starting with `"x";`)
-* `Improvement` img element src and path attributes support local relative paths (e.g., `<img src="a.png"` />)
-* `Improvement` Code editor supports intelligently determining insertion location when importing Java classes and package names
-* `Improvement` images module supports using paths directly as image parameters
-* `Improvement` importPackage supports string parameters
-* `Improvement` Server mode IP address supports clipboard import with intelligent recognition and smart conversion with space key
-* `Improvement` File manager supports default prefix selection when creating new files and automatically generates appropriate numeric suffix
-* `Improvement` File manager specifically informs on exception message when running project _[`issue #268`](http://issues.autojs6.com/268)_
-* `Improvement` File manager supports more types and displays corresponding icon symbols (supports over 800 file types)
-* `Improvement` Editable file types (jpg/doc/pdf, etc.) in file manager have added edit buttons
-* `Improvement` APK files in file manager support viewing basic information, Manifest information, and permissions list
-* `Improvement` Audio/video media files in file manager support viewing basic information and MediaInfo information
-* `Improvement` Package single file support auto-fill appropriate standardized package name and invalid character filter prompt
-* `Improvement` Package single file support automatically sets icon and auto-increments version number and version name based on installed same package name application
-* `Improvement` Package configuration file supports abis/libs option to specify default included ABI architecture and libraries
-* `Improvement` Support relevant message prompts when abis/libs options of package configuration file are invalid or unavailable
-* `Improvement` LeakCanary is excluded from official release version to avoid unnecessary growth
-* `Improvement` All English comments in project source code are accompanied by Simplified Chinese translations to enhance readability
-* `Improvement` README and CHANGELOG support multi-language (Automatically generated by script)
-* `Improvement` Enhance Gradle build script's version adaptability
-* `Improvement` Some dependency or local library version adjustments _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v660)_
-
 ##### For more version history, refer to
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-en.md)
@@ -340,12 +311,12 @@ This section introduces the compilation and build methods of the AutoJs6 open-so
 
 #### Android Studio Preparation
 
-Download `Android Studio Meerkat | 2024.3.1 Patch 2` version (choose one as needed):
+Download `Android Studio Meerkat Feature Drop | 2024.3.2` version (choose one as needed):
 
-- [android-studio-2024.3.1.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.15/android-studio-2024.3.1.15-windows.exe) (1.22 GB)
-- [android-studio-2024.3.1.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.15/android-studio-2024.3.1.15-windows.zip) (1.23 GB)
+- [android-studio-2024.3.2.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.14/android-studio-2024.3.2.14-windows.exe) (1.23 GB)
+- [android-studio-2024.3.2.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.14/android-studio-2024.3.2.14-windows.zip) (1.23 GB)
 
-> Note: The release date for the above version is Apr 21, 2025. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is May 6, 2025. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 
@@ -389,7 +360,7 @@ Check `Show Package Details`, click NDK and CMake respectively to ensure the cor
 
 The `JDK (Java Development Kit)` version required for the AutoJs6 project should be at least `17`, but `19` or higher is recommended.
 
-As of May 22, 2025, AutoJs6 supports up to version `24` of the JDK.
+As of May 27, 2025, AutoJs6 supports up to version `24` of the JDK.
 
 > Note: If the JDK is already installed on the computer system and the version meets the above requirements, this section can be skipped.
 
@@ -540,6 +511,7 @@ Thank you to everyone who contributed to the AutoJs6 project development.
 
 |         <span style="word-break:keep-all;white-space:nowrap">Contributors</span>          |                   <span style="word-break:keep-all;white-space:nowrap">Number of Commits</span>                    | <span style="word-break:keep-all;white-space:nowrap">Recent Submissions</span> |
 |:-------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|             <span style="word-break:keep-all;white-space:nowrap">[wirsnow](https://github.com/wirsnow)</span>             |         <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=wirsnow)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2025/05/19`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span>         |       <span style="word-break:keep-all;white-space:nowrap">[5](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)</span>       |                    <span style="word-break:keep-all;white-space:nowrap">`2025/04/24`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>          |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |                <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>                |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
@@ -549,7 +521,7 @@ Thank you to everyone who contributed to the AutoJs6 project development.
 |              <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>              |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86) `(Lin)`</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-Data updated on May 13, 2025.
+Data updated on May 27, 2025.
 
 Data entries sorted in descending order by `recent submissions`.
 
@@ -561,24 +533,29 @@ Some contributors do not appear correctly in the [GitHub Contributors](https://g
     # --------------------------------------------------------------#
     # Before committing and pushing to the remote GitHub repository #
     # --------------------------------------------------------------#
-    - CHANGELOG.md
-        - Update entries for AutoJs6 by checking all changed files
-        - Update entries for Gradle plugins [ implementation ]
-        - Update version name and released date
-        - Append related GitHub issues to changelog entries
-    - README.md
+    - IDE
         - The summary of the latest changelog for committing to Git [ DO NOT commit or push ]
+    - $projectDir/version.properties
+        - Remove the part like [ alpha / beta / ... ] of VERSION_NAME
+    - $projectDir/.changelog/lang_zh-Hans.json
+        - Update version name and released date
+        - Translate into other languages
+        - Update TypeScript declarations according to section `dependency` if needed
+    - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
+        - Update contribution section: Contribution
+    - $projectDir/.readme/common.json
         - Update android studio download links and version names
-        - Update contribution section
-    - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
-    - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation/markdown by running the python script
-    - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
-    - Run Gradle task "app:assembleInrtRelease"
-    - Build APK to determine the final VERSION_BUILD field
-    - Run Gradle task "app:appendDigestToReleasedFiles"
-    - Check VERSION_BUILD in version.properties with released apks
-    - Commit and push to GitHub
-    - Publish the latest release with signed APKs
+        - Update contribution section: var_date_contribution_table_data_updated
+    - $projectDir/.python/generate_markdown.py
+        - Re-generate markdown by running the python script [ link: aj6mdgen ]
+    - Others
+        - Re-generate documentation by running the python script [ link: aj6docgen ]
+        - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft if needed
+        - Run Gradle task "app:assembleInrtRelease" [ shortcut: C+A+0#- ]
+        - Build APK to determine the final VERSION_BUILD field [ shortcut: C+A+0#A ]
+        - Run Gradle task "app:appendDigestToReleasedFiles" [ shortcut: C+A+0#= ]
+        - Check VERSION_BUILD in version.properties with released apks
+        - Commit and push to GitHub
+        - Publish the latest release with signed APKs
 )

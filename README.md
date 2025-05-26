@@ -157,7 +157,7 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 # v6.6.3
 
-###### 2025/05/21
+###### 2025/05/27
 
 * `新增` 版本历史功能, 可查看发行版本历史更新记录 (多语言) 与统计数据
 * `新增` timers.keepAlive 方法 (已全局化), 用于保持脚本活跃状态
@@ -166,35 +166,51 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 * `新增` images.matchFeatures/detectAndComputeFeatures 方法, 支持全分辨率找图 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
 * `新增` images.compressToBytes 方法, 用于压缩图像并生成字节数组
 * `新增` images.downsample 方法, 用于像素降采样并生成新的 ImageWrapper
-* `修复` 主页文档标签显示在线文档时部分内容被系统导航栏遮挡的问题
+* `新增` ui.keepScreenOn 方法, 用于 UI 页面获取焦点时保持设备屏幕常亮
+* `新增` ui.root 属性 (getter), 用于获取 UI 页面布局的 "窗口内容根容器" 节点
+* `新增` webview 元素支持基于 JsBridge 的 Web 页面布局 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [参阅 示例代码 > 布局 > 可交互 HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `修复` 主页文档标签及文档活动页面显示在线文档时部分内容被系统导航栏遮挡的问题
+* `修复` 部分页面 Toolbar 点击按钮时可能导致标题点击事件误触发的问题
 * `修复` 部分设备代码编辑器空行显示方框字符的问题
 * `修复` 主题色设置页面调色盘对话框可能无限叠加的问题
 * `修复` 无障碍服务关闭时音量加键停止所有脚本功能失效的问题
 * `修复` 定时任务页面编辑自定义广播内容时出现的输入法遮挡问题
+* `修复` webview 元素中的控件无法正常激活输入法软键盘的问题
 * `修复` APK 文件类型信息对话框可能无法获取应用名称及 SDK 信息的问题
+* `修复` 文件管理器示例代码进入项目目录时可能无法自动加载子目录文件内容的问题
+* `修复` Android 15 UI 模式顶部内容被状态栏覆盖的问题
 * `修复` Android 15 部分页面状态栏背景颜色可能无法动态跟随主题色的问题
 * `修复` dialogs 模块无法正常使用 customView 属性的问题 _[`issue #364`](http://issues.autojs6.com/364)_
+* `修复` dialogs.input 方法的表达式参数可能无法获得执行结果的问题
 * `修复` 使用 JavaAdapter 时导致 ClassLoader 调用栈溢出的问题 _[`issue #376`](http://issues.autojs6.com/376)_
 * `修复` console.setContentTextColor 方法导致日志字体颜色丢失默认值的问题 _[`issue #346`](http://issues.autojs6.com/346)_
 * `修复` console.setContentBackgroundColor 方法无法接受颜色名称参数的问题 _[`issue #384`](http://issues.autojs6.com/384)_
 * `修复` images.compress 方法实现原理由像素降采样修正为编码质量变化
 * `修复` images.resize 方法无法正常使用的问题
+* `修复` engines.all 方法可能触发 ConcurrentModificationException 的问题 _[`issue #394`](http://issues.autojs6.com/394)_
 * `修复` README.md 中部分语言日期格式不正确的问题
 * `修复` Gradle 构建脚本可能因获取到无效库档案文件长度而导致构建失败的问题 _[`issue #389`](http://issues.autojs6.com/389)_
 * `优化` 布局分析支持控件隐藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
 * `优化` 布局分析菜单添加渐变分隔线实现一定程度的功能分组
+* `优化` 脚本项目配置文件 project.json 支持 permissions 选项 (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `优化` 打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_
 * `优化` 主题色扩充适配范围并支持更多控件类型
 * `优化` 主页抽屉在横向屏幕或超宽屏幕的宽度适应性
 * `优化` 关于应用与开发者页面增加水平布局及小屏布局适配
 * `优化` 设置页面对话框相关设置支持 "使用默认值" 菜单选项
 * `优化` 文件管理器浮动按钮展开后点击其他区域可自动隐藏
-* `优化` 打包单文件时自动读取并勾选已安装应用的声明权限 _[`issue #362`](http://issues.autojs6.com/362)_
+* `优化` 代码编辑器格式化代码支持 `??`, `?.`, `??=` 等运算符
+* `优化` 代码编辑器支持 GB18030 / UTF-16 (LE/BE) / Shift_JIS 等编码的文件读写
+* `优化` 代码编辑器支持显示文件详细信息 (路径/编码/换行符/字节及字符总数等) _[`issue #395`](http://issues.autojs6.com/395)_
 * `优化` 意图相关操作 (编辑/查看/安装/发送/播放等) 增加操作异常提示
+* `优化` webview 元素的 url 属性支持相对路径
 * `优化` ImageWrapper#saveTo 方法的路径参数支持相对路径
 * `优化` images.save 方法使用 quality 参数时支持 png 格式的文件体积压缩 _[`issue #367`](http://issues.autojs6.com/367)_
 * `优化` 已忽略更新记录及客户端模式连接地址记录支持清空操作
 * `优化` 版本更新信息支持多语言显示 (与当前显示语言同步)
 * `优化` 使用异步加载方式一定程度提升文件管理器列表滑动流畅性
+* `优化` 脚本异常消息在控制台的显示内容与格式
+* `优化` 示例代码支持将文件夹重置为初始内容
 * `优化` APK 文件签名信息提升检测效率
 * `优化` APK 文件类型信息及媒体文件类型信息优化对话框显示效率及信息展示逻辑
 * `优化` Gradle 构建脚本提升版本自适应能力 _[`discussion #369`](http://discussions.autojs6.com/369)_
@@ -295,12 +311,12 @@ AutoJs6 在 Auto.js 最终项目的基础上, 于 `2021/12/01` 进行二次开�
 
 #### Android Studio 准备
 
-下载 `Android Studio Meerkat | 2024.3.1 Patch 2` 版本 (按需选择其一):
+下载 `Android Studio Meerkat Feature Drop | 2024.3.2` 版本 (按需选择其一):
 
-- [android-studio-2024.3.1.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.15/android-studio-2024.3.1.15-windows.exe) (1.22 GB)
-- [android-studio-2024.3.1.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.15/android-studio-2024.3.1.15-windows.zip) (1.23 GB)
+- [android-studio-2024.3.2.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.14/android-studio-2024.3.2.14-windows.exe) (1.23 GB)
+- [android-studio-2024.3.2.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.14/android-studio-2024.3.2.14-windows.zip) (1.23 GB)
 
-> 注: 上述版本发布时间为 2025 年 4 月 21 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2025 年 5 月 6 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 
@@ -344,7 +360,7 @@ SDK Tools (SDK 工具) (位于右侧窗口)
 
 AutoJs6 项目依赖的 `JDK (Java 开发工具包)` 发行版本不低于 `17`, 但建议不低于 `19`.
 
-截至 2025 年 5 月 22 日, AutoJs6 可支持 JDK 最高版本为 `24`.
+截至 2025 年 5 月 27 日, AutoJs6 可支持 JDK 最高版本为 `24`.
 
 > 注: 如果计算机系统已安装 JDK 且版本满足上述要求, 则可跳过此小节内容.
 
@@ -495,6 +511,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 
 |         <span style="word-break:keep-all;white-space:nowrap">贡献人员</span>          |                   <span style="word-break:keep-all;white-space:nowrap">提交数</span>                    | <span style="word-break:keep-all;white-space:nowrap">最近提交</span> |
 |:-------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|             <span style="word-break:keep-all;white-space:nowrap">[wirsnow](https://github.com/wirsnow)</span>             |         <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=wirsnow)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2025/05/19`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span>         |       <span style="word-break:keep-all;white-space:nowrap">[5](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)</span>       |                    <span style="word-break:keep-all;white-space:nowrap">`2025/04/24`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>          |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |                <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>                |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
@@ -504,7 +521,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 |              <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>              |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86) `(Lin)`</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-数据更新于 2025 年 5 月 13 日.
+数据更新于 2025 年 5 月 27 日.
 
 数据条目按 `最近提交` 降序排序.
 
@@ -516,24 +533,29 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
     # --------------------------------------------------------------#
     # Before committing and pushing to the remote GitHub repository #
     # --------------------------------------------------------------#
-    - CHANGELOG.md
-        - Update entries for AutoJs6 by checking all changed files
-        - Update entries for Gradle plugins [ implementation ]
-        - Update version name and released date
-        - Append related GitHub issues to changelog entries
-    - README.md
+    - IDE
         - The summary of the latest changelog for committing to Git [ DO NOT commit or push ]
+    - $projectDir/version.properties
+        - Remove the part like [ alpha / beta / ... ] of VERSION_NAME
+    - $projectDir/.changelog/lang_zh-Hans.json
+        - Update version name and released date
+        - Translate into other languages
+        - Update TypeScript declarations according to section `dependency` if needed
+    - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
+        - Update contribution section: 贡献参与
+    - $projectDir/.readme/common.json
         - Update android studio download links and version names
-        - Update contribution section
-    - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
-    - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation/markdown by running the python script
-    - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
-    - Run Gradle task "app:assembleInrtRelease"
-    - Build APK to determine the final VERSION_BUILD field
-    - Run Gradle task "app:appendDigestToReleasedFiles"
-    - Check VERSION_BUILD in version.properties with released apks
-    - Commit and push to GitHub
-    - Publish the latest release with signed APKs
+        - Update contribution section: var_date_contribution_table_data_updated
+    - $projectDir/.python/generate_markdown.py
+        - Re-generate markdown by running the python script [ link: aj6mdgen ]
+    - Others
+        - Re-generate documentation by running the python script [ link: aj6docgen ]
+        - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft if needed
+        - Run Gradle task "app:assembleInrtRelease" [ shortcut: C+A+0#- ]
+        - Build APK to determine the final VERSION_BUILD field [ shortcut: C+A+0#A ]
+        - Run Gradle task "app:appendDigestToReleasedFiles" [ shortcut: C+A+0#= ]
+        - Check VERSION_BUILD in version.properties with released apks
+        - Commit and push to GitHub
+        - Publish the latest release with signed APKs
 )

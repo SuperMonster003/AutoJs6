@@ -364,6 +364,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 
 |         <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_contributors }}</span>          |                   <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_number_of_commits }}</span>                    | <span style="word-break:keep-all;white-space:nowrap">{{ table_header_contribution_recent_submissions }}</span> |
 |:-------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|             <span style="word-break:keep-all;white-space:nowrap">[wirsnow](https://github.com/wirsnow)</span>             |         <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=wirsnow)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2025/05/19`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span>         |       <span style="word-break:keep-all;white-space:nowrap">[5](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)</span>       |                    <span style="word-break:keep-all;white-space:nowrap">`2025/04/24`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>          |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |                <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>                |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
@@ -385,24 +386,29 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
     # --------------------------------------------------------------#
     # Before committing and pushing to the remote GitHub repository #
     # --------------------------------------------------------------#
-    - CHANGELOG.md
-        - Update entries for AutoJs6 by checking all changed files
-        - Update entries for Gradle plugins [ implementation ]
-        - Update version name and released date
-        - Append related GitHub issues to changelog entries
-    - README.md
+    - IDE
         - The summary of the latest changelog for committing to Git [ DO NOT commit or push ]
+    - $projectDir/version.properties
+        - Remove the part like [ alpha / beta / ... ] of VERSION_NAME
+    - $projectDir/.changelog/lang_zh-Hans.json
+        - Update version name and released date
+        - Translate into other languages
+        - Update TypeScript declarations according to section `dependency` if needed
+    - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
+        - Update contribution section: {{ h3_contribution }}
+    - $projectDir/.readme/common.json
         - Update android studio download links and version names
-        - Update contribution section
-    - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
-    - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation/markdown by running the python script
-    - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
-    - Run Gradle task "app:assembleInrtRelease"
-    - Build APK to determine the final VERSION_BUILD field
-    - Run Gradle task "app:appendDigestToReleasedFiles"
-    - Check VERSION_BUILD in version.properties with released apks
-    - Commit and push to GitHub
-    - Publish the latest release with signed APKs
+        - Update contribution section: var_date_contribution_table_data_updated
+    - $projectDir/.python/generate_markdown.py
+        - Re-generate markdown by running the python script [ link: aj6mdgen ]
+    - Others
+        - Re-generate documentation by running the python script [ link: aj6docgen ]
+        - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft if needed
+        - Run Gradle task "app:assembleInrtRelease" [ shortcut: C+A+0#- ]
+        - Build APK to determine the final VERSION_BUILD field [ shortcut: C+A+0#A ]
+        - Run Gradle task "app:appendDigestToReleasedFiles" [ shortcut: C+A+0#= ]
+        - Check VERSION_BUILD in version.properties with released apks
+        - Commit and push to GitHub
+        - Publish the latest release with signed APKs
 )

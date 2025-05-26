@@ -4,6 +4,76 @@
 
 ******
 
+# v6.6.3
+
+###### 2025/05/27
+
+* `Nuevo` Función de historial de versiones: ver registros de cambios multilenguaje y estadísticas
+* `Nuevo` Método timers.keepAlive (ahora global) para mantener activo el script
+* `Nuevo` Métodos de escucha de eventos como engines.on('start/stop/error', callback) para eventos globales del motor
+* `Nuevo` Método images.detectMultiColors para verificación de colores multipunto _[`issue #374`](http://issues.autojs6.com/374)_
+* `Nuevo` Métodos images.matchFeatures/detectAndComputeFeatures: búsqueda de imágenes a resolución completa (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `Nuevo` Método images.compressToBytes para comprimir una imagen y generar un arreglo de bytes
+* `Nuevo` Método images.downsample para submuestreo de píxeles y creación de un nuevo ImageWrapper
+* `Nuevo` Método ui.keepScreenOn para mantener la pantalla encendida cuando la página UI está en foco
+* `Nuevo` Propiedad ui.root (getter) para obtener el nodo "contenedor raíz del contenido de la ventana" del layout UI
+* `Nuevo` El elemento webview admite diseños de páginas web basados en JsBridge (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) [ver Código de ejemplo > Diseño > HTML interactivo / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Corrección` El contenido de la documentación en línea en la pestaña Documentos y la actividad Documentos podía quedar cubierto por la barra de navegación del sistema
+* `Corrección` En algunas páginas, al pulsar botones de la Toolbar se podía activar por error el evento de clic en el título
+* `Corrección` Las líneas en blanco del editor de código mostraban caracteres de cuadro en ciertos dispositivos
+* `Corrección` El cuadro de diálogo del selector de colores en los ajustes de color de tema podía apilarse infinitamente
+* `Corrección` La tecla de subir volumen no detenía todos los scripts cuando el servicio de accesibilidad estaba desactivado
+* `Corrección` Superposición del teclado IME al editar contenido de difusión personalizado en la página de tareas programadas
+* `Corrección` Los controles dentro de elementos webview no podían activar correctamente el teclado en pantalla
+* `Corrección` El diálogo de información de APK podía no obtener el nombre de la app ni la información del SDK
+* `Corrección` El ejemplo del administrador de archivos podía no cargar automáticamente el contenido de subcarpetas al acceder a un directorio de proyecto
+* `Corrección` El contenido superior en modo UI de Android 15 quedaba cubierto por la barra de estado
+* `Corrección` El color de fondo de la barra de estado en algunas páginas de Android 15 no seguía el color de tema de forma dinámica
+* `Corrección` El módulo dialogs no podía usar la propiedad customView _[`issue #364`](http://issues.autojs6.com/364)_
+* `Corrección` El parámetro de expresión de dialogs.input podía no devolver el resultado de ejecución
+* `Corrección` El uso de JavaAdapter provocaba desbordamiento de pila de ClassLoader _[`issue #376`](http://issues.autojs6.com/376)_
+* `Corrección` console.setContentTextColor hacía perder el color de texto por defecto _[`issue #346`](http://issues.autojs6.com/346)_
+* `Corrección` console.setContentBackgroundColor no aceptaba nombres de color _[`issue #384`](http://issues.autojs6.com/384)_
+* `Corrección` images.compress ahora ajusta la calidad de codificación en lugar de reducir píxeles
+* `Corrección` El método images.resize no funcionaba correctamente
+* `Corrección` engines.all podía lanzar ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
+* `Corrección` Formato de fecha incorrecto en algunos idiomas de README.md
+* `Corrección` La compilación Gradle podía fallar por longitud inválida de archivo de biblioteca _[`issue #389`](http://issues.autojs6.com/389)_
+* `Mejora` El inspector de diseño permite ocultar controles (por [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `Mejora` Añadidos separadores degradados en el menú del inspector de diseño para agrupar funciones
+* `Mejora` project.json admite la opción permissions para proyectos de scripts (por [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `Mejora` Al empaquetar un solo archivo se leen y seleccionan automáticamente los permisos declarados por la app instalada _[`issue #362`](http://issues.autojs6.com/362)_
+* `Mejora` Ampliado el soporte de adaptación del color de tema y más tipos de controles
+* `Mejora` Adaptabilidad de la anchura del cajón en la pantalla principal para modo horizontal o pantallas ultra-anchas
+* `Mejora` Nuevos diseños horizontal y de pantalla pequeña para las páginas Acerca de la app y Desarrollador
+* `Mejora` Las páginas de ajustes ofrecen la opción "Usar valor predeterminado" en los diálogos
+* `Mejora` El botón flotante del administrador de archivos se oculta automáticamente al pulsar fuera
+* `Mejora` El formateador de código admite operadores `??`, `?.`, `??=`
+* `Mejora` El editor de código admite la lectura y escritura de archivos con codificaciones GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.
+* `Mejora` El editor de código ahora muestra información detallada del archivo (ruta/codificación/salto de línea/total de bytes y caracteres, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
+* `Mejora` Se añaden mensajes de error para acciones de intent (editar / ver / instalar / enviar / reproducir, etc.)
+* `Mejora` El atributo url de webview admite rutas relativas
+* `Mejora` El parámetro ruta de ImageWrapper#saveTo admite rutas relativas
+* `Mejora` images.save permite comprimir archivos PNG al usar el parámetro quality _[`issue #367`](http://issues.autojs6.com/367)_
+* `Mejora` Se permite limpiar registros de actualizaciones ignoradas y direcciones de conexión en modo cliente
+* `Mejora` La información de actualización de versión se muestra en varios idiomas según el idioma actual
+* `Mejora` La carga asíncrona mejora la fluidez de la lista en el administrador de archivos
+* `Mejora` Mejorado el contenido y formato de los mensajes de excepción de scripts en la consola
+* `Mejora` El código de ejemplo puede restablecer carpetas a su contenido inicial
+* `Mejora` Mayor eficiencia al comprobar la firma de APK
+* `Mejora` Optimizada la eficiencia y presentación de diálogos de información de archivos APK y multimedia
+* `Mejora` El script de compilación Gradle mejora su capacidad de adaptación de versiones _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `Dependencia` Incluido Material Dialogs versión 0.9.6.0 (localizado)
+* `Dependencia` Incluido Material Date Time Picker versión 4.2.3 (localizado)
+* `Dependencia` Incluido libimagequant versión 2.17.0 (localizado)
+* `Dependencia` Incluido libpng versión 1.6.49 (localizado)
+* `Dependencia` Añadido ICU4J versión 77.1
+* `Dependencia` Añadido Jsoup versión 1.19.1
+* `Dependencia` Añadido Material Progressbar versión 1.4.2
+* `Dependencia` Añadido Flexmark Java HTML to Markdown versión 0.64.8
+* `Dependencia` Actualizado Gradle 8.14-rc-1 -> 8.14
+* `Dependencia` Actualizado Androidx Room 2.7.0 -> 2.7.1
+
 # v6.6.2
 
 ###### 2025/04/16
@@ -312,6 +382,7 @@
 * `Corrección` Problema de fuente pequeña del título de la toolbar al rotar la pantalla a modo horizontal
 * `Corrección` Problema de disposición apretada de pestañas en la página principal en modo horizontal
 * `Corrección` Problema de desbordamiento de botón flotante al rotar la pantalla múltiples veces _[`issue #90`](http://issues.autojs6.com/90)_
+* `Corrección` Problema de que, tras múltiples rotaciones de pantalla, no se restauran las coordenadas del botón flotante ni la orientación del borde de la pantalla
 * `Corrección` Problema de visualización faltante o repetida de mensajes en el marco flotante en ciertos dispositivos
 * `Corrección` Problema de mensajes flotantes ocultos cuando múltiples scripts se ejecutan simultáneamente _[`issue #67`](http://issues.autojs6.com/67)_
 * `Corrección` Problema de cierre inesperado de la aplicación al hacer clic en el menú de análisis de diseño con broadcast

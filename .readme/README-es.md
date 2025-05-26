@@ -155,6 +155,67 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 ******
 
+# v6.6.3
+
+###### 2025/05/27
+
+* `Nuevo` Función de historial de versiones: ver registros de cambios multilenguaje y estadísticas
+* `Nuevo` Método timers.keepAlive (ahora global) para mantener activo el script
+* `Nuevo` Métodos de escucha de eventos como engines.on('start/stop/error', callback) para eventos globales del motor
+* `Nuevo` Método images.detectMultiColors para verificación de colores multipunto _[`issue #374`](http://issues.autojs6.com/374)_
+* `Nuevo` Métodos images.matchFeatures/detectAndComputeFeatures: búsqueda de imágenes a resolución completa (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `Nuevo` Método images.compressToBytes para comprimir una imagen y generar un arreglo de bytes
+* `Nuevo` Método images.downsample para submuestreo de píxeles y creación de un nuevo ImageWrapper
+* `Nuevo` Método ui.keepScreenOn para mantener la pantalla encendida cuando la página UI está en foco
+* `Nuevo` Propiedad ui.root (getter) para obtener el nodo "contenedor raíz del contenido de la ventana" del layout UI
+* `Nuevo` El elemento webview admite diseños de páginas web basados en JsBridge (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) [ver Código de ejemplo > Diseño > HTML interactivo / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Corrección` El contenido de la documentación en línea en la pestaña Documentos y la actividad Documentos podía quedar cubierto por la barra de navegación del sistema
+* `Corrección` En algunas páginas, al pulsar botones de la Toolbar se podía activar por error el evento de clic en el título
+* `Corrección` Las líneas en blanco del editor de código mostraban caracteres de cuadro en ciertos dispositivos
+* `Corrección` El cuadro de diálogo del selector de colores en los ajustes de color de tema podía apilarse infinitamente
+* `Corrección` La tecla de subir volumen no detenía todos los scripts cuando el servicio de accesibilidad estaba desactivado
+* `Corrección` Superposición del teclado IME al editar contenido de difusión personalizado en la página de tareas programadas
+* `Corrección` Los controles dentro de elementos webview no podían activar correctamente el teclado en pantalla
+* `Corrección` El diálogo de información de APK podía no obtener el nombre de la app ni la información del SDK
+* `Corrección` El ejemplo del administrador de archivos podía no cargar automáticamente el contenido de subcarpetas al acceder a un directorio de proyecto
+* `Corrección` El contenido superior en modo UI de Android 15 quedaba cubierto por la barra de estado
+* `Corrección` El color de fondo de la barra de estado en algunas páginas de Android 15 no seguía el color de tema de forma dinámica
+* `Corrección` El módulo dialogs no podía usar la propiedad customView _[`issue #364`](http://issues.autojs6.com/364)_
+* `Corrección` El parámetro de expresión de dialogs.input podía no devolver el resultado de ejecución
+* `Corrección` El uso de JavaAdapter provocaba desbordamiento de pila de ClassLoader _[`issue #376`](http://issues.autojs6.com/376)_
+* `Corrección` console.setContentTextColor hacía perder el color de texto por defecto _[`issue #346`](http://issues.autojs6.com/346)_
+* `Corrección` console.setContentBackgroundColor no aceptaba nombres de color _[`issue #384`](http://issues.autojs6.com/384)_
+* `Corrección` images.compress ahora ajusta la calidad de codificación en lugar de reducir píxeles
+* `Corrección` El método images.resize no funcionaba correctamente
+* `Corrección` engines.all podía lanzar ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
+* `Corrección` Formato de fecha incorrecto en algunos idiomas de README.md
+* `Corrección` La compilación Gradle podía fallar por longitud inválida de archivo de biblioteca _[`issue #389`](http://issues.autojs6.com/389)_
+* `Mejora` El inspector de diseño permite ocultar controles (por [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `Mejora` Añadidos separadores degradados en el menú del inspector de diseño para agrupar funciones
+* `Mejora` project.json admite la opción permissions para proyectos de scripts (por [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `Mejora` Al empaquetar un solo archivo se leen y seleccionan automáticamente los permisos declarados por la app instalada _[`issue #362`](http://issues.autojs6.com/362)_
+* `Mejora` Ampliado el soporte de adaptación del color de tema y más tipos de controles
+* `Mejora` Adaptabilidad de la anchura del cajón en la pantalla principal para modo horizontal o pantallas ultra-anchas
+* `Mejora` Nuevos diseños horizontal y de pantalla pequeña para las páginas Acerca de la app y Desarrollador
+* `Mejora` Las páginas de ajustes ofrecen la opción "Usar valor predeterminado" en los diálogos
+* `Mejora` El botón flotante del administrador de archivos se oculta automáticamente al pulsar fuera
+* `Mejora` El formateador de código admite operadores `??`, `?.`, `??=`
+* `Mejora` El editor de código admite la lectura y escritura de archivos con codificaciones GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.
+* `Mejora` El editor de código ahora muestra información detallada del archivo (ruta/codificación/salto de línea/total de bytes y caracteres, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
+* `Mejora` Se añaden mensajes de error para acciones de intent (editar / ver / instalar / enviar / reproducir, etc.)
+* `Mejora` El atributo url de webview admite rutas relativas
+* `Mejora` El parámetro ruta de ImageWrapper#saveTo admite rutas relativas
+* `Mejora` images.save permite comprimir archivos PNG al usar el parámetro quality _[`issue #367`](http://issues.autojs6.com/367)_
+* `Mejora` Se permite limpiar registros de actualizaciones ignoradas y direcciones de conexión en modo cliente
+* `Mejora` La información de actualización de versión se muestra en varios idiomas según el idioma actual
+* `Mejora` La carga asíncrona mejora la fluidez de la lista en el administrador de archivos
+* `Mejora` Mejorado el contenido y formato de los mensajes de excepción de scripts en la consola
+* `Mejora` El código de ejemplo puede restablecer carpetas a su contenido inicial
+* `Mejora` Mayor eficiencia al comprobar la firma de APK
+* `Mejora` Optimizada la eficiencia y presentación de diálogos de información de archivos APK y multimedia
+* `Mejora` El script de compilación Gradle mejora su capacidad de adaptación de versiones _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
+
 # v6.6.2
 
 ###### 2025/04/16
@@ -234,96 +295,6 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Mejora` Sincronizar el código más reciente del upstream del motor Rhino y adaptarlo al proyecto existente
 * `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
-# v6.6.0
-
-###### 2024/12/02 - Reescritura de módulos integrados, actualización con precaución
-
-* `Sugerencia` Los módulos integrados se reescriben en Kotlin para mejorar la eficiencia de ejecución del script, pero se necesitan mejoras iterativas.
-* `Sugerencia` El archivo init.js integrado está vacío por defecto, lo que permite a los desarrolladores ampliar los módulos integrados o montar módulos externos.
-* `Nuevo` Módulo Axios / Módulo Cheerio (Ref a [AutoX](https://github.com/kkevsekk1/AutoX))
-* `Nuevo` Módulo SQLite para operaciones simples en bases de datos SQLite (Ref a [Auto.js Pro](https://g.pro.autojs.org/)) (Consulte la documentación del proyecto > [SQLite](https://docs.autojs6.com/#/sqlite))
-* `Nuevo` Módulo MIME para procesamiento y análisis de cadenas de tipos MIME (Consulte la documentación del proyecto > [MIME](https://docs.autojs6.com/#/mime))
-* `Nuevo` Módulo Nanoid para generación de ID de cadenas (Ref a [ai/nanoid](https://github.com/ai/nanoid))
-* `Nuevo` Módulo Sysprops para obtener datos de configuración del entorno de ejecución (Consulte la documentación del proyecto > [Propiedades del sistema](https://docs.autojs6.com/#/sysprops))
-* `Nuevo` El módulo OCR admite el motor [Rapid OCR](https://github.com/RapidAI/RapidOCR)
-* `Nuevo` El análisis de diseño admite el cambio de ventanas (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método auto.clearCache admite la limpieza de cachés de control (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método threads.pool admite la aplicación simple de grupos de hilos (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método images.matchTemplate agrega el parámetro de opción useTransparentMask para soportar la búsqueda de imágenes transparentes (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método images.requestScreenCaptureAsync se usa para solicitar permisos de captura de pantalla de manera asíncrona en el modo UI (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método images.requestScreenCapture agrega el parámetro de opción isAsync para soportar la captura de pantalla de manera asíncrona (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` images.on('screen_capture', callback) y otros métodos de escucha de eventos admiten la escucha de eventos de disponibilidad de captura de pantalla (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` El método images.stopScreenCapture soporta la liberación activa de recursos relacionados con la aplicación de captura de pantalla (Ref a [Auto.js Pro](https://g.pro.autojs.org/))
-* `Nuevo` Los métodos Images.psnr/mse/ssim/mssim/hist/ncc y images.getSimilarity se utilizan para obtener métricas de similitud de imágenes
-* `Nuevo` El método images.isGrayscale se utiliza para determinar si una imagen es en escala de grises
-* `Nuevo` El método images.invert se utiliza para la conversión de imagen en negativo
-* `Nuevo` Los métodos s13n.point/time se utilizan para estandarizar objetos de punto y objetos de duración (Consulte la documentación del proyecto > [Normalización](https://docs.autojs6.com/#/s13n))
-* `Nuevo` Los métodos gravity, touchThrough, backgroundTint del módulo console (Consulte la documentación del proyecto > [Consola](https://docs.autojs6.com/#/console))
-* `Nuevo` Los métodos Mathx.randomInt/Mathx.randomFloat se utilizan para devolver enteros aleatorios o números de coma flotante aleatorios dentro de un rango especificado
-* `Nuevo` Los métodos app.launchDual/startDualActivity se utilizan para manejar el lanzamiento dual de aplicaciones (Requiere permisos de Shizuku o Root) (Experimental)
-* `Nuevo` El método app.kill se utiliza para detener forzosamente una aplicación (Requiere permisos de Shizuku o Root)
-* `Nuevo` El método floaty.getClip se utiliza para obtener indirectamente el contenido del portapapeles mediante una ventana flotante
-* `Corrección` Fuga de memoria en el View Binding de subclases de Fragment (por ejemplo, [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48))
-* `Corrección` Fuga de memoria de instancia en clases como [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21)
-* `Corrección` Problema que causa que la aplicación se bloquee al solicitar permisos de captura de pantalla en Android 14 (por [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `Corrección` Problema que causa que la aplicación se bloquee al iniciar el servicio en primer plano en Android 14
-* `Corrección` Problema con el botón de ejecución en el editor de código que no se enciende correctamente en Android 14
-* `Corrección` La aplicación puede no funcionar correctamente después de empaquetar debido a la falta de archivos de biblioteca necesarios _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
-* `Corrección` Bloqueo de la aplicación cuando se edita el proyecto debido a recursos de icono especificados que faltan _[`issue #203`](http://issues.autojs6.com/203)_
-* `Corrección` Incapacidad para usar parámetros adecuadamente para obtener recursos de captura de pantalla de orientación de pantalla especificada al solicitar permisos de captura de pantalla
-* `Corrección` Problema con algunos dispositivos que no pueden agregar accesos directos de script correctamente (Reparación de prueba) _[`issue #221`](http://issues.autojs6.com/221)_
-* `Corrección` Problema de retraso acumulativo en el envío de solicitudes con métodos relacionados con el envío de solicitudes en el módulo http _[`issue #192`](http://issues.autojs6.com/192)_
-* `Corrección` El servicio Shizuku puede no funcionar correctamente antes de que AutoJs6 entre en la página de actividad principal (Reparación de prueba) _[`issue #255`](http://issues.autojs6.com/255)_
-* `Corrección` El método random(min, max) puede tener resultados fuera de límites
-* `Corrección` Problema donde el tipo de parámetro de resultado de los métodos pickup no puede pasar adecuadamente matrices vacías
-* `Corrección` Problema donde el rectángulo de control obtenido por UiObject#bounds() puede ser modificado inadvertidamente, rompiendo su inmutabilidad
-* `Corrección` Problema con elementos de texto/botón/entrada donde el texto que contiene comillas dobles de ancho medio no puede ser analizado correctamente
-* `Corrección` Problema con elementos de text/textswitcher donde la funcionalidad del atributo autoLink falla
-* `Corrección` Problema con diferentes scripts que comparten erróneamente el mismo objeto ScriptRuntime
-* `Corrección` Problema con variables globales HEIGHT y WIDTH perdiendo propiedades Getter generadas dinámicamente
-* `Corrección` Problema con un alto tiempo de inicio potencial causado por la carga de RootShell al iniciar un script
-* `Corrección` Problema con la configuración del color de fondo de la ventana flotante de la consola que conduce a la pérdida del estilo de redondeo rectangular
-* `Corrección` El inicio automático del servicio de accesibilidad puede encontrar problemas de servicio anormales (Reparación de prueba)
-* `Corrección` Problema con el desencadenante de ViewPager al deslizar el control WebView a la izquierda o derecha en la página de documentos de la página principal
-* `Corrección` Problema donde el administrador de archivos no puede reconocer extensiones de archivo que contienen letras mayúsculas
-* `Corrección` El administrador de archivos puede no reconocer automáticamente el proyecto al ingresar por primera vez al directorio del proyecto
-* `Corrección` Problema donde la página del administrador de archivos no puede refrescarse automáticamente después de eliminar la carpeta
-* `Corrección` Problema con la clasificación de archivos y carpetas en el administrador de archivos donde los nombres de letra inicial ASCII se colocan detrás
-* `Corrección` Excepción 'FAILED ASSERTION' en la función de depuración del editor de código
-* `Corrección` Problema con la imposibilidad de volver a depurar adecuadamente después de cerrar el editor durante el proceso de depuración del editor de código
-* `Corrección` Problema de omisión potencial de caracteres finales al saltar al final de la línea en el editor de código
-* `Corrección` Problema con la pantalla parpadeante al iniciar la página de actividad de registro en la página de actividad principal
-* `Corrección` Problema con la aplicación empaquetada que no puede utilizar adecuadamente el módulo opencc
-* `Mejora` Experiencia de aviso de clic para el control 'ABI no disponible' en la página de paquete
-* `Mejora` Admite el uso de Shizuku para controlar el interruptor de visualización 'Ubicación del puntero'
-* `Mejora` Admite el uso de Shizuku para controlar los interruptores de permisos 'Medios de proyección' y 'Modificar configuraciones seguras'
-* `Mejora` Automator.gestureAsync/gesturesAsync admite parámetros de función de devolución de llamada
-* `Mejora` El módulo tasks utiliza una forma síncrona para las operaciones de base de datos para evitar inconsistencias potenciales de acceso a datos
-* `Mejora` El modo de ejecución de script admite parámetros de separación de modo con símbolo de tubería (por ejemplo, comenzando con `"ui|auto";`)
-* `Mejora` El modo de ejecución de script admite comillas simples y comillas invertidas y permite omitir puntos y comas (por ejemplo, comenzando con `'ui';` o `'ui'`)
-* `Mejora` El modo de ejecución de script admite la importación rápida de módulos de extensión integrados como axios, cheerio y dayjs (por ejemplo, comenzando con `"axios";`)
-* `Mejora` El modo de ejecución de script admite parámetros de modo x o jsox para habilitar rápidamente los módulos de extensión de objetos integrados de JavaScript (por ejemplo, comenzando con `"x";`)
-* `Mejora` Los atributos src y path del elemento img admiten rutas relativas locales (por ejemplo, `<img src="a.png"` />)
-* `Mejora` El editor de código admite la determinación inteligente de la ubicación de inserción al importar clases Java y nombres de paquetes
-* `Mejora` El módulo images admite el uso de rutas directamente como parámetros de imagen
-* `Mejora` importPackage admite parámetros de cadena
-* `Mejora` La dirección IP del modo servidor admite la importación del portapapeles con reconocimiento inteligente y conversión inteligente con la tecla de espacio
-* `Mejora` El administrador de archivos admite la selección de prefijos predeterminados al crear nuevos archivos y genera automáticamente el sufijo numérico apropiado
-* `Mejora` El administrador de archivos informa específicamente sobre el mensaje de excepción al ejecutar el proyecto _[`issue #268`](http://issues.autojs6.com/268)_
-* `Mejora` El administrador de archivos admite más tipos y muestra símbolos de icono correspondientes (admite más de 800 tipos de archivos)
-* `Mejora` Los tipos de archivos editables (jpg/doc/pdf, etc.) en el administrador de archivos han añadido botones de edición
-* `Mejora` Los archivos APK en el administrador de archivos admiten la visualización de información básica, información de Manifesto y lista de permisos
-* `Mejora` Los archivos de medios de audio/video en el administrador de archivos admiten la visualización de información básica e información de MediaInfo
-* `Mejora` El paquete de archivo único admite el autocompletado de nombre de paquete estandarizado apropiado y el aviso de filtro de caracteres no válidos
-* `Mejora` El paquete de archivo único admite la configuración automática del ícono y el incremento automático del número de versión y del nombre de versión basado en la misma aplicación de nombre de paquete instalada
-* `Mejora` El archivo de configuración del paquete admite la opción abis/libs para especificar la arquitectura ABI incluidos por defecto y las bibliotecas
-* `Mejora` Admite avisos de mensajes relevantes cuando las opciones abis/libs del archivo de configuración del paquete son inválidas o no están disponibles
-* `Mejora` LeakCanary se excluye de la versión oficial para evitar un crecimiento innecesario
-* `Mejora` Todos los comentarios en inglés en el código fuente del proyecto vienen acompañados de traducciones al chino simplificado para mejorar la legibilidad
-* `Mejora` README y CHANGELOG admiten varios idiomas (Generado automáticamente por el script)
-* `Mejora` Mejorar la adaptabilidad de la versión del script de construcción de Gradle
-* `Mejora` Ajustes en algunas dependencias o versiones de bibliotecas locales _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v660)_
-
 ##### Para más historial de versiones, consulte
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-es.md)
@@ -340,12 +311,12 @@ Esta sección toma como ejemplo Android Studio para presentar los métodos de co
 
 #### Preparación de Android Studio
 
-Descarga la versión `Android Studio Meerkat | 2024.3.1 Patch 2` (elige una según tus necesidades):
+Descarga la versión `Android Studio Meerkat Feature Drop | 2024.3.2` (elige una según tus necesidades):
 
-- [android-studio-2024.3.1.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.15/android-studio-2024.3.1.15-windows.exe) (1.22 GB)
-- [android-studio-2024.3.1.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.15/android-studio-2024.3.1.15-windows.zip) (1.23 GB)
+- [android-studio-2024.3.2.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.14/android-studio-2024.3.2.14-windows.exe) (1.23 GB)
+- [android-studio-2024.3.2.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.14/android-studio-2024.3.2.14-windows.zip) (1.23 GB)
 
-> Nota: La fecha de lanzamiento de la versión anterior es el 21 de April de 2025. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Nota: La fecha de lanzamiento de la versión anterior es el 6 de May de 2025. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Instala o descomprime los archivos mencionados anteriormente y ejecuta el software Android Studio (por ejemplo, `"D:\android-studio\bin\studio64.exe"`).
 
@@ -389,7 +360,7 @@ Marca `Show Package Details (Mostrar detalles del paquete)`, haz clic en NDK y C
 
 La versión mínima requerida del `JDK (Kit de Desarrollo de Java)` para el proyecto AutoJs6 es `17`, pero se recomienda usar una versión no inferior a `19`.
 
-Hasta el 22 de May de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
+Hasta el 27 de May de 2025, AutoJs6 soporta hasta la versión `24` de JDK.
 
 > Nota: Si el sistema ya tiene instalado JDK y cumple con los requisitos anteriores, puedes omitir esta sección.
 
@@ -540,6 +511,7 @@ Agradecemos a todos los que han contribuido al desarrollo del proyecto AutoJs6.
 
 |         <span style="word-break:keep-all;white-space:nowrap">Contribuyentes</span>          |                   <span style="word-break:keep-all;white-space:nowrap">Número de commits</span>                    | <span style="word-break:keep-all;white-space:nowrap">Últimas presentaciones</span> |
 |:-------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|             <span style="word-break:keep-all;white-space:nowrap">[wirsnow](https://github.com/wirsnow)</span>             |         <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=wirsnow)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2025/05/19`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span>         |       <span style="word-break:keep-all;white-space:nowrap">[5](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)</span>       |                    <span style="word-break:keep-all;white-space:nowrap">`2025/04/24`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>          |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |                <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>                |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
@@ -549,7 +521,7 @@ Agradecemos a todos los que han contribuido al desarrollo del proyecto AutoJs6.
 |              <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>              |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86) `(Lin)`</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-Datos actualizados el 13 de May de 2025.
+Datos actualizados el 27 de May de 2025.
 
 Las entradas de datos están ordenadas en orden descendente por `últimas presentaciones`.
 
@@ -561,24 +533,29 @@ Algunos contribuyentes no aparecen en [GitHub Contributors](https://github.com/S
     # --------------------------------------------------------------#
     # Before committing and pushing to the remote GitHub repository #
     # --------------------------------------------------------------#
-    - CHANGELOG.md
-        - Update entries for AutoJs6 by checking all changed files
-        - Update entries for Gradle plugins [ implementation ]
-        - Update version name and released date
-        - Append related GitHub issues to changelog entries
-    - README.md
+    - IDE
         - The summary of the latest changelog for committing to Git [ DO NOT commit or push ]
+    - $projectDir/version.properties
+        - Remove the part like [ alpha / beta / ... ] of VERSION_NAME
+    - $projectDir/.changelog/lang_zh-Hans.json
+        - Update version name and released date
+        - Translate into other languages
+        - Update TypeScript declarations according to section `dependency` if needed
+    - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
+        - Update contribution section: Contribución
+    - $projectDir/.readme/common.json
         - Update android studio download links and version names
-        - Update contribution section
-    - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
-    - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation/markdown by running the python script
-    - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
-    - Run Gradle task "app:assembleInrtRelease"
-    - Build APK to determine the final VERSION_BUILD field
-    - Run Gradle task "app:appendDigestToReleasedFiles"
-    - Check VERSION_BUILD in version.properties with released apks
-    - Commit and push to GitHub
-    - Publish the latest release with signed APKs
+        - Update contribution section: var_date_contribution_table_data_updated
+    - $projectDir/.python/generate_markdown.py
+        - Re-generate markdown by running the python script [ link: aj6mdgen ]
+    - Others
+        - Re-generate documentation by running the python script [ link: aj6docgen ]
+        - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft if needed
+        - Run Gradle task "app:assembleInrtRelease" [ shortcut: C+A+0#- ]
+        - Build APK to determine the final VERSION_BUILD field [ shortcut: C+A+0#A ]
+        - Run Gradle task "app:appendDigestToReleasedFiles" [ shortcut: C+A+0#= ]
+        - Check VERSION_BUILD in version.properties with released apks
+        - Commit and push to GitHub
+        - Publish the latest release with signed APKs
 )
