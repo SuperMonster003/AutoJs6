@@ -4,6 +4,76 @@
 
 ******
 
+# v6.6.3
+
+###### 2025/05/27
+
+* `Fonctionnalité` Fonction historique des versions : consulter les journaux de mise à jour multilingues et les statistiques
+* `Fonctionnalité` Méthode timers.keepAlive (désormais globale) pour maintenir le script actif
+* `Fonctionnalité` Méthodes d'écoute d'événements telles que engines.on('start/stop/error', callback) pour les événements globaux du moteur
+* `Fonctionnalité` Méthode images.detectMultiColors pour la vérification de couleurs multipoints _[`issue #374`](http://issues.autojs6.com/374)_
+* `Fonctionnalité` Méthodes images.matchFeatures/detectAndComputeFeatures : recherche d'image en pleine résolution (Réf. [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `Fonctionnalité` Méthode images.compressToBytes pour compresser une image et générer un tableau d'octets
+* `Fonctionnalité` Méthode images.downsample pour l'échantillonnage de pixels et la création d'un nouveau ImageWrapper
+* `Fonctionnalité` Méthode ui.keepScreenOn pour garder l'écran allumé lorsque la page UI a le focus
+* `Fonctionnalité` Propriété ui.root (getter) pour obtenir le nœud « conteneur racine du contenu de fenêtre » du layout UI
+* `Fonctionnalité` L'élément webview prend en charge les layouts de pages Web basés sur JsBridge (Réf. [Auto.js Pro](https://g.pro.autojs.org/)) [voir Code d'exemple > Layout > HTML interactif / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Correction` Le contenu de la documentation en ligne dans l'onglet Docs et l'activité Docs pouvait être recouvert par la barre de navigation système
+* `Correction` Sur certaines pages, cliquer sur les boutons de la Toolbar pouvait déclencher par erreur l'événement de clic sur le titre
+* `Correction` Les lignes vides dans l'éditeur de code affichaient des carrés sur certains appareils
+* `Correction` La boîte de dialogue du sélecteur de couleurs dans les paramètres de couleur du thème pouvait se superposer indéfiniment
+* `Correction` La touche volume + ne stoppait pas tous les scripts lorsque le service d'accessibilité était désactivé
+* `Correction` Chevauchement du clavier IME lors de l'édition d'un contenu de diffusion personnalisé dans la page des tâches planifiées
+* `Correction` Les contrôles dans les éléments webview ne pouvaient pas activer correctement le clavier virtuel
+* `Correction` La boîte de dialogue d'information APK pouvait ne pas récupérer le nom de l'application ni les informations SDK
+* `Correction` Le code d'exemple du gestionnaire de fichiers pouvait ne pas charger automatiquement le contenu des sous-dossiers à l'entrée d'un répertoire de projet
+* `Correction` Le contenu supérieur du mode UI sous Android 15 était recouvert par la barre d'état
+* `Correction` La couleur d'arrière-plan de la barre d'état sur certaines pages Android 15 ne suivait pas dynamiquement la couleur du thème
+* `Correction` Le module dialogs ne pouvait pas utiliser la propriété customView _[`issue #364`](http://issues.autojs6.com/364)_
+* `Correction` Le paramètre d'expression de dialogs.input pouvait ne pas retourner le résultat d'exécution
+* `Correction` L'utilisation de JavaAdapter provoquait un débordement de pile ClassLoader _[`issue #376`](http://issues.autojs6.com/376)_
+* `Correction` console.setContentTextColor entraînait la perte de la couleur de texte par défaut _[`issue #346`](http://issues.autojs6.com/346)_
+* `Correction` console.setContentBackgroundColor n'acceptait pas les noms de couleur _[`issue #384`](http://issues.autojs6.com/384)_
+* `Correction` images.compress ajuste désormais la qualité d'encodage au lieu de réduire les pixels
+* `Correction` La méthode images.resize ne fonctionnait pas correctement
+* `Correction` engines.all pouvait déclencher ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
+* `Correction` Formats de date incorrects dans certaines langues du README.md
+* `Correction` La compilation Gradle pouvait échouer à cause d'une longueur invalide d'archive de bibliothèque _[`issue #389`](http://issues.autojs6.com/389)_
+* `Amélioration` L'inspecteur de layout permet de masquer des contrôles (par [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `Amélioration` Ajout de séparateurs dégradés dans le menu de l'inspecteur de layout pour regrouper les fonctions
+* `Amélioration` project.json prend désormais en charge l'option permissions pour les projets de script (par [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `Amélioration` Lors de l'empaquetage d'un fichier unique, les permissions déclarées par l'application installée sont lues et cochées automatiquement _[`issue #362`](http://issues.autojs6.com/362)_
+* `Amélioration` Portée d'adaptation de la couleur de thème élargie et prise en charge de plus de types de widgets
+* `Amélioration` Largeur du tiroir d'accueil adaptée aux écrans paysage ou ultra-larges
+* `Amélioration` Ajout de layouts horizontaux et petit écran pour les pages À propos de l'application et Développeur
+* `Amélioration` Les boîtes de dialogue de la page Paramètres proposent l'option « Utiliser la valeur par défaut »
+* `Amélioration` Le bouton flottant du gestionnaire de fichiers se masque automatiquement lorsqu'on touche en dehors
+* `Amélioration` Le formateur de code prend désormais en charge les opérateurs `??`, `?.`, `??=`
+* `Amélioration` L'éditeur de code prend en charge la lecture et l'écriture de fichiers aux encodages GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.
+* `Amélioration` L'éditeur de code prend en charge l'affichage des informations détaillées du fichier (chemin/encodage/retour à la ligne/nombre total d'octets et de caractères, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
+* `Amélioration` Ajout de messages d'erreur pour les actions d'intent (éditer / voir / installer / envoyer / lire, etc.)
+* `Amélioration` L'attribut url de webview prend en charge les chemins relatifs
+* `Amélioration` Le paramètre path de ImageWrapper#saveTo prend en charge les chemins relatifs
+* `Amélioration` images.save permet la compression de fichiers PNG lors de l'utilisation du paramètre quality _[`issue #367`](http://issues.autojs6.com/367)_
+* `Amélioration` Possibilité de vider les enregistrements de mises à jour ignorées et les adresses de connexion en mode client
+* `Amélioration` Les informations de mise à jour de version sont affichées dans la langue de l'interface
+* `Amélioration` Le chargement asynchrone améliore la fluidité de défilement du gestionnaire de fichiers
+* `Amélioration` Contenu et format des messages d'exception de script améliorés dans la console
+* `Amélioration` Le code d'exemple permet de réinitialiser un dossier à son contenu initial
+* `Amélioration` Efficacité accrue lors de la vérification des informations de signature APK
+* `Amélioration` Optimisation de l'efficacité d'affichage et de présentation des informations pour les fichiers APK/médias
+* `Amélioration` Le script de build Gradle améliore sa capacité d'adaptation aux nouvelles versions _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `Dépendance` Inclus Material Dialogs version 0.9.6.0 (localisé)
+* `Dépendance` Inclus Material Date Time Picker version 4.2.3 (localisé)
+* `Dépendance` Inclus libimagequant version 2.17.0 (localisé)
+* `Dépendance` Inclus libpng version 1.6.49 (localisé)
+* `Dépendance` Ajouté ICU4J version 77.1
+* `Dépendance` Ajouté Jsoup version 1.19.1
+* `Dépendance` Ajouté Material Progressbar version 1.4.2
+* `Dépendance` Ajouté Flexmark Java HTML to Markdown version 0.64.8
+* `Dépendance` Mise à jour Gradle 8.14-rc-1 -> 8.14
+* `Dépendance` Mise à jour Androidx Room 2.7.0 -> 2.7.1
+
 # v6.6.2
 
 ###### 2025/04/16

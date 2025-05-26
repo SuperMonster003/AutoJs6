@@ -4,6 +4,76 @@
 
 ******
 
+# v6.6.3
+
+###### 2025/05/27
+
+* `Feature` Version history feature: view multi-language release changelogs and statistics
+* `Feature` timers.keepAlive method (now global) for keeping the script alive
+* `Feature` Event listeners such as engines.on('start/stop/error', callback) for global engine events
+* `Feature` images.detectMultiColors method for multi-point color verification _[`issue #374`](http://issues.autojs6.com/374)_
+* `Feature` images.matchFeatures / detectAndComputeFeatures methods: full-resolution image matching (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `Feature` images.compressToBytes method to compress an image and generate a byte array
+* `Feature` images.downsample method for pixel down-sampling and creating a new ImageWrapper
+* `Feature` ui.keepScreenOn method to keep the device screen on while a UI page is focused
+* `Feature` ui.root property (getter) to obtain the "window content root container" node of the UI layout
+* `Feature` webview element now supports JsBridge-based web page layouts (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [see Sample Code > Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `Fix` Online docs in the Home > Docs tab and Docs activity may be covered by the system navigation bar
+* `Fix` Clicking Toolbar buttons on some pages could accidentally trigger the title click event
+* `Fix` Blank lines in the code editor showed box glyphs on some devices
+* `Fix` Color-picker dialog in the theme-color settings page could stack infinitely
+* `Fix` Volume-up key failed to stop all scripts when the accessibility service was disabled
+* `Fix` IME overlay issue when editing custom broadcast content in the Scheduled Tasks page
+* `Fix` Controls inside webview elements could not activate the soft keyboard properly
+* `Fix` APK file info dialog might fail to obtain app name and SDK info
+* `Fix` File-manager sample code might fail to auto-load child directory contents when entering a project folder
+* `Fix` Top content of UI mode on Android 15 was covered by the status bar
+* `Fix` Status-bar background color on some Android 15 pages could not follow the theme color dynamically
+* `Fix` dialogs module could not use the customView property _[`issue #364`](http://issues.autojs6.com/364)_
+* `Fix` Expression parameter of dialogs.input might not return the execution result
+* `Fix` Using JavaAdapter led to a ClassLoader stack overflow _[`issue #376`](http://issues.autojs6.com/376)_
+* `Fix` console.setContentTextColor caused log text color to lose its default value _[`issue #346`](http://issues.autojs6.com/346)_
+* `Fix` console.setContentBackgroundColor could not accept color-name arguments _[`issue #384`](http://issues.autojs6.com/384)_
+* `Fix` images.compress implementation corrected: now changes encoding quality instead of pixel down-sampling
+* `Fix` images.resize method did not work properly
+* `Fix` engines.all could trigger ConcurrentModificationException _[`issue #394`](http://issues.autojs6.com/394)_
+* `Fix` Incorrect date formats in some languages within README.md
+* `Fix` Gradle build could fail due to invalid library archive length _[`issue #389`](http://issues.autojs6.com/389)_
+* `Improvement` Layout Inspector supports hiding controls (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `Improvement` Added gradient separators to the Layout Inspector menu for lightweight grouping
+* `Improvement` project.json now supports a permissions option for script projects (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `Improvement` Automatically read and check declared permissions of installed apps when packaging a single file _[`issue #362`](http://issues.autojs6.com/362)_
+* `Improvement` Expanded theme-color adaptation scope; supports more widget types
+* `Improvement` Adaptive drawer width on the Home page for landscape / ultra-wide screens
+* `Improvement` Added horizontal and small-screen layouts for About App & Developer pages
+* `Improvement` Settings-page dialogs now offer a "Use default value" menu option
+* `Improvement` Floating Action Button in File Manager auto-hides when tapping elsewhere
+* `Improvement` Code formatter now supports operators such as `??`, `?.`, `??=`
+* `Improvement` Code editor supports reading and writing files encoded in GB18030 / UTF-16 (LE/BE) / Shift_JIS, etc.
+* `Improvement` Code editor supports displaying detailed file information (path/encoding/line break format/total bytes and characters, etc.) _[`issue #395`](http://issues.autojs6.com/395)_
+* `Improvement` Added operation-error prompts for intent actions (edit / view / install / send / play, etc.)
+* `Improvement` webview element's url attribute supports relative paths
+* `Improvement` ImageWrapper#saveTo path parameter supports relative paths
+* `Improvement` images.save supports PNG file-size compression when using the quality parameter _[`issue #367`](http://issues.autojs6.com/367)_
+* `Improvement` Clearing ignored update records and client-mode connection addresses is now supported
+* `Improvement` Version-update information supports multi-language display (in sync with current UI language)
+* `Improvement` Asynchronous loading significantly improves File Manager list scrolling smoothness
+* `Improvement` Improved content and formatting of script exception messages in the console
+* `Improvement` Sample code now supports resetting a folder to its initial contents
+* `Improvement` Increased efficiency when checking APK signature information
+* `Improvement` Optimized dialog display efficiency and information presentation for APK/media file type info
+* `Improvement` Gradle build script now better adapts to newer versions _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `Dependency` Bundled Material Dialogs 0.9.6.0 (localized)
+* `Dependency` Bundled Material Date Time Picker 4.2.3 (localized)
+* `Dependency` Bundled libimagequant 2.17.0 (localized)
+* `Dependency` Bundled libpng 1.6.49 (localized)
+* `Dependency` Added ICU4J 77.1
+* `Dependency` Added Jsoup 1.19.1
+* `Dependency` Added Material Progressbar 1.4.2
+* `Dependency` Added Flexmark Java HTML to Markdown 0.64.8
+* `Dependency` Upgraded Gradle 8.14-rc-1 -> 8.14
+* `Dependency` Upgraded Androidx Room 2.7.0 -> 2.7.1
+
 # v6.6.2
 
 ###### 2025/04/16

@@ -155,6 +155,67 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 
 ******
 
+# v6.6.3
+
+###### 2025/05/27
+
+* `추가` 버전 히스토리 기능: 다국어 변경 로그 및 통계 보기
+* `추가` timers.keepAlive 메서드 (전역으로 승격) 로 스크립트 활성 유지
+* `추가` engines.on('start/stop/error', callback) 등의 이벤트 리스너로 엔진 전역 이벤트 수신
+* `추가` images.detectMultiColors 메서드로 여러 지점 색상 검사 _[`issue #374`](http://issues.autojs6.com/374)_
+* `추가` images.matchFeatures/detectAndComputeFeatures: 풀 해상도 이미지 검색 (참조 [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `추가` images.compressToBytes 메서드로 이미지를 압축하여 바이트 배열 반환
+* `추가` images.downsample 메서드로 해상도를 낮추고 새로운 ImageWrapper 생성
+* `추가` ui.keepScreenOn 메서드로 UI 페이지가 포커스될 때 화면 켜짐 유지
+* `추가` ui.root 프로퍼티 (getter) 로 UI 레이아웃 내 '윈도우 콘텐츠 루트 컨테이너' 노드를 가져옴
+* `추가` webview 요소가 JsBridge 기반 웹 페이지 레이아웃 지원 (참조 [Auto.js Pro](https://g.pro.autojs.org/)) [예: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `수정` Docs 탭 및 Docs 액티비티의 온라인 문서가 시스템 네비게이션 바에 가려질 수 있는 문제 수정
+* `수정` 일부 페이지에서 Toolbar 버튼을 누르면 제목 클릭 이벤트가 잘못 발생하는 문제 수정
+* `수정` 코드 편집기 빈 줄이 일부 기기에서 사각형으로 보이는 문제 수정
+* `수정` 테마 색상 설정의 컬러 피커 대화상자가 무한 중첩되는 문제 수정
+* `수정` 접근성 서비스가 꺼진 상태에서 볼륨 업 키가 모든 스크립트를 중지하지 않는 문제 수정
+* `수정` 예약 작업에서 사용자 정의 브로드캐스트 메시지를 편집할 때 IME가 입력 영역을 덮는 문제 수정
+* `수정` webview 내부 컨트롤이 소프트 키보드를 정상적으로 호출하지 못하는 문제 수정
+* `수정` APK 정보 대화상자가 앱 이름이나 SDK 정보를 가져오지 못하는 문제 수정
+* `수정` 파일 관리자 예제에서 프로젝트 폴더 진입 시 하위 폴더 내용이 로드되지 않는 문제 수정
+* `수정` Android 15 UI 모드에서 상태 표시줄이 상단 콘텐츠를 가리는 문제 수정
+* `수정` Android 15 일부 페이지에서 상태 표시줄 배경색이 테마 색상과 동기화되지 않는 문제 수정
+* `수정` dialogs 모듈이 customView 프로퍼티를 지원하지 않는 문제 수정 _[`issue #364`](http://issues.autojs6.com/364)_
+* `수정` dialogs.input 의 expression 매개변수가 실행 결과를 반환하지 않는 문제 수정
+* `수정` JavaAdapter 사용 시 ClassLoader 스택 오버플로우가 발생하는 문제 수정 _[`issue #376`](http://issues.autojs6.com/376)_
+* `수정` console.setContentTextColor 가 기본 텍스트 색상을 리셋하는 문제 수정 _[`issue #346`](http://issues.autojs6.com/346)_
+* `수정` console.setContentBackgroundColor 가 색상 이름을 허용하지 않는 문제 수정 _[`issue #384`](http://issues.autojs6.com/384)_
+* `수정` images.compress 구현 수정: 다운샘플링 대신 인코딩 품질을 변경
+* `수정` images.resize 메서드가 올바르게 동작하지 않는 문제 수정
+* `수정` engines.all 이 ConcurrentModificationException 을 발생시킬 수 있는 문제 수정 _[`issue #394`](http://issues.autojs6.com/394)_
+* `수정` README.md 일부 언어의 날짜 형식 오류 수정
+* `수정` Gradle 빌드가 라이브러리 아카이브 크기 오류로 실패할 수 있는 문제 수정 _[`issue #389`](http://issues.autojs6.com/389)_
+* `개선` 레이아웃 인스펙터가 요소 숨기기 지원 (기여 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `개선` 레이아웃 인스펙터 메뉴에 기능 그룹화를 위한 그라데이션 구분선 추가
+* `개선` project.json 이 스크립트 프로젝트 permissions 옵션 지원 (기여 [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `개선` 단일 파일 패키징 시 설치된 앱의 선언 권한을 자동 읽어 표시 _[`issue #362`](http://issues.autojs6.com/362)_
+* `개선` 테마 색상 적용 범위 확대, 더 많은 위젯 지원
+* `개선` 메인 페이지 드로어 폭이 가로 및 초광폭 화면에 적응
+* `개선` ‘앱 정보’ 및 ‘개발자 정보’ 페이지에 가로 및 컴팩트 레이아웃 추가
+* `개선` 설정 대화상자에 '기본값 사용' 메뉴 추가
+* `개선` 파일 관리자 FAB가 영역 밖을 터치하면 자동으로 숨김
+* `개선` 코드 포매터가 `??`, `?.`, `??=` 연산자 지원
+* `개선` 코드 편집기가 GB18030 / UTF-16 (LE/BE) / Shift_JIS 등 인코딩의 파일 읽기·쓰기를 지원
+* `개선` 코드 편집기가 파일 상세 정보(경로/인코딩/줄바꿈 형식/총 바이트 및 문자 수 등) 표시를 지원 _[`issue #395`](http://issues.autojs6.com/395)_
+* `개선` Intent 작업(편집/보기/설치/전송/재생 등)의 오류 메시지 추가
+* `개선` webview 요소의 url 속성이 상대 경로 지원
+* `개선` ImageWrapper#saveTo 의 path 매개변수가 상대 경로 지원
+* `개선` images.save 가 PNG 압축을 quality 매개변수로 지원 _[`issue #367`](http://issues.autojs6.com/367)_
+* `개선` 무시한 업데이트 목록 및 클라이언트 모드 주소 초기화 기능 추가
+* `개선` 버전 업데이트 정보가 현재 UI 언어로 표시
+* `개선` 비동기 로드로 파일 관리자 리스트 스크롤 부드러움 향상
+* `개선` 콘솔 스크립트 예외 메시지 내용 및 형식 개선
+* `개선` 샘플 코드 폴더를 초기 내용으로 재설정 기능
+* `개선` APK 서명 검증 속도 향상
+* `개선` APK/미디어 파일 정보 대화상자 속도 및 표시 로직 최적화
+* `개선` Gradle 빌드 스크립트가 최신 버전에 더 유연하게 대응 _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v663)_
+
 # v6.6.2
 
 ###### 2025/04/16
@@ -234,96 +295,6 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `개선` Rhino 엔진의 최신 업스트림 코드를 동기화하고 기존 프로젝트에 맞게 조정합니다
 * `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v661)_
 
-# v6.6.0
-
-###### 2024/12/02 - 내장 모듈 재작성, 신중한 업그레이드 필요
-
-* `힌트` 기존 모듈이 스크립트 실행 효율성을 높이기 위해 Kotlin 으로 재작성되었으나, 개선을 위한 몇 가지 반복이 필요합니다
-* `힌트` 내장된 init.js 파일은 기본적으로 비어 있지만, 개발자가 사용자 정의를 위해 모듈을 마운트할 수 있습니다
-* `추가` axios 모듈 / cheerio 모듈 ([AutoX](https://github.com/kkevsekk1/AutoX) 참조)
-* `추가` sqlite 모듈, SQLite 데이터베이스 간단 조작에 사용됩니다 ([Auto.js Pro](https://g.pro.autojs.org/) 참조) (프로젝트 문서 > [SQLite](https://docs.autojs6.com/#/sqlite) 참조)
-* `추가` mime 모듈, MIME 유형 문자열을 처리하고 구문 분석하는 데 사용됩니다 (프로젝트 문서 > [MIME](https://docs.autojs6.com/#/mime) 참조)
-* `추가` nanoid 모듈, 문자열 ID 생성기로 사용할 수 있습니다 ([ai/nanoid](https://github.com/ai/nanoid) 참조)
-* `추가` sysprops 모듈, 런타임 환경의 구성 데이터를 얻는 데 사용됩니다 (프로젝트 문서 > [시스템 속성](https://docs.autojs6.com/#/sysprops) 참조)
-* `추가` ocr 모듈은 [Rapid OCR](https://github.com/RapidAI/RapidOCR) 엔진을 지원합니다
-* `추가` 레이아웃 분석은 창 전환을 지원합니다 (Auto.js Pro
-* `추가` auto.clearCache 메소드는 제어 캐시를 지우는 것을 지원합니다 (Auto.js Pro
-* `추가` threads.pool 메소드는 간단한 스레드 풀 응용 프로그램을 지원합니다 (Auto.js Pro
-* `추가` images.matchTemplate 메소드는 useTransparentMask 옵션 매개변수를 추가하여 투명 이미지 검색을 지원합니다 (Auto.js Pro
-* `추가` images.requestScreenCaptureAsync 메소드는 UI 모드에서 비동기적으로 스크린 캡처 권한을 요청하는 데 사용됩니다  (Auto.js Pro
-* `추가` images.requestScreenCapture 메소드는 isAsync 옵션 매개변수를 추가하여 비동기적으로 스크린 캡처를 획득하는 것을 지원합니다 (Auto.js Pro
-* `추가` images.on('screen_capture', callback) 등의 이벤트 리스닝 메소드는 스크린 캡처가 사용 가능 이벤트를 모니터링하는 것을 지원합니다 (Auto.js Pro
-* `추가` images.stopScreenCapture 메소드는 스크린 캡처 요청과 관련된 리소스를 적극 해제하는 것을 지원합니다 (Auto.js Pro
-* `추가` images.psnr/mse/ssim/mssim/hist/ncc 및 images.getSimilarity 메소드는 이미지 유사성 측정값을 얻는 데 사용됩니다
-* `추가` images.isGrayscale 메소드는 이미지가 그레이스케일인지 여부를 결정하는 데 사용됩니다
-* `추가` images.invert 메소드는 이미지의 색상을 반전하는 데 사용됩니다
-* `추가` s13n.point/time 메소드는 포인트 객체와 시간 객체를 정규화하는 데 사용됩니다 (프로젝트 문서 > [정규화](https://docs.autojs6.com/#/s13n) 참조)
-* `추가` console 모듈의 gravity (중력), touchThrough (터치 스루), backgroundTint (배경 색조) 등의 관련 메소드 (프로젝트 문서 > [콘솔](https://docs.autojs6.com/#/console) 참조)
-* `추가` Mathx.randomInt/Mathx.randomFloat 메소드는 주어진 범위 내의 난수 또는 랜덤 부동 소수점을 반환하는 데 사용됩니다
-* `추가` app.launchDual/startDualActivity 등의 메소드는 듀얼 실행 애플리케이션 처리를 위해 사용됩니다 (Shizuku 또는 Root 권한이 필요) (실험적)
-* `추가` app.kill 메소드는 애플리케이션을 강제로 종료하는 데 사용됩니다 (Shizuku 또는 Root 권한이 필요)
-* `추가` floaty.getClip 메소드는 플로팅 창의 포커스를 통해 클립보드 내용을 간접적으로 얻는 데 사용됩니다
-* `수정` Fragment 하위 클래스 (예: [DrawerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/drawer/DrawerFragment.kt#L369) / [ExplorerFragment](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/ui/main/scripts/ExplorerFragment.kt#L48) 등) 내의 View Binding 메모리 누수
-* `수정` [ScreenCapture](https://github.com/SuperMonster003/AutoJs6/blob/17616504ab0bba93b30ab7abc67108ee5253f39a/app/src/main/java/org/autojs/autojs/core/image/capture/ScreenCapturer.java#L70) / [ThemeColorPreference](https://github.com/SuperMonster003/AutoJs6/blob/10960ddbee71f75ef80907ad5b6ab42f3e1bf31e/app/src/main/java/org/autojs/autojs/ui/settings/ThemeColorPreference.kt#L21) 등의 클래스 내의 인스턴스 메모리 누수
-* `수정` Android 14 에서 스크린 캡처 권한을 요청할 때 앱이 충돌하는 문제 (by [chenguangming](https://github.com/chenguangming)) _[`pr #242`](http://pr.autojs6.com/242)_
-* `수정` Android 14 에서 포어그라운드 서비스를 시작할 때 앱이 충돌하는 문제
-* `수정` Android 14 에서 코드 에디터에서 실행 버튼을 클릭해도 점등되지 않는 문제
-* `수정` 프로젝트 패키징 후 필요한 라이브러리 파일이 부족하여 앱이 정상적으로 실행되지 않을 수 있는 문제 _[`issue #202`](http://issues.autojs6.com/202)_ _[`issue #223`](http://issues.autojs6.com/223)_ _[`pr #264`](http://pr.autojs6.com/264)_
-* `수정` 프로젝트 편집 시 지정된 아이콘 리소스가 없는 경우 앱이 충돌하는 문제 _[`issue #203`](http://issues.autojs6.com/203)_
-* `수정` 스크린 캡처 권한 획득 시 지정된 화면 방향의 스크린샷 리소스를 매개변수로 얻지 못할 수 있는 문제
-* `수정` 일부 기기에서 스크립트 바로가기를 정상적으로 추가할 수 없는 문제 (시도 수정) _[`issue #221`](http://issues.autojs6.com/221)_
-* `수정` http 모듈 및 관련 메소드를 호출할 때 축적된 요청으로 인해 전송 지연이 발생하는 문제 _[`issue #192`](http://issues.autojs6.com/192)_
-* `수정` AutoJs6 가 메인 액티비티 페이지에 들어가기 전에 Shizuku 서비스가 정상적으로 사용할 수 없는 문제 (시도 수정) _[`issue #255`](http://issues.autojs6.com/255)_
-* `수정` random(min, max) 메소드에서 결과가 오버플로우할 가능성이 있는 문제
-* `수정` pickup 메소드의 결과형 매개변수가 빈 배열을 올바르게 전달할 수 없는 문제
-* `수정` UiObject#bounds() 에서 얻은 컨트롤 경계가 의도와 다르게 변경될 수 있는 문제
-* `수정` text/button/input 요소의 텍스트 내용에 하프 사이즈의 이중 따옴표가 포함된 경우 올바르게 구문 분석되지 않는 문제
-* `수정` text/textswitcher 요소의 autoLink 속성이 작동하지 않는 문제
-* `수정` 다른 스크립트가 동일한 ScriptRuntime 객체를 잘못 공유할 가능성이 있는 문제
-* `수정` 전역 변수 HEIGHT 및 WIDTH 가 Getter 동적 속성을 잃는 문제
-* `수정` 스크립트 시작 시 RootShell 이 즉시 로드되어 시작이 느려지는 문제
-* `수정` 콘솔 플로팅 창에서 배경색을 설정하면 사각형의 모서리가 사라지는 문제
-* `수정` 서비스 이상 문제를 일으킬 수 있는 접근성 서비스의 자동 시작 (시도 수정)
-* `수정` 홈페이지의 문서 페이지에서 왼쪽 또는 오른쪽으로 이동할 때 WebView 컨트롤이 ViewPager 전환을 유발할 수 있는 문제
-* `수정` 파일 확장명이 대문자를 포함하는 경우 파일 관리자에서 인식하지 않는 문제
-* `수정` 파일 관리자가 프로젝트 디렉토리에 처음 들어갔을 때 프로젝트를 자동으로 인식하지 못할 수 있는 문제
-* `수정` 파일 관리자에서 폴더를 삭제 후 페이지가 자동 갱신되지 않는 문제
-* `수정` 파일 관리자에서 파일 및 폴더를 정렬할 때 ASCII 의 선행 문자명을 멀리 두는 문제
-* `수정` 코드 편집기의 디버그 기능에서 FAILED ASSERTION 예외 발생
-* `수정` 코드 편집기에서 디버그 중 편집기를 닫은 후 다시 정상적으로 디버그할 수 없는 문제
-* `수정` 코드 편집기에서 행의 끝으로 이동할 때 끝 문자 누락 가능성 있는 문제
-* `수정` 메인 액티비티 페이지에서 로그 액티비티 페이지를 실행할 때 플래시 스크린 문제 발생 가능성
-* `수정` 앱 패키지가 opencc 모듈을 정상적으로 사용할 수 없는 문제
-* `개선` 패키지 페이지 내 '사용 불가 ABI' 컨트롤의 클릭 힌트 사용자 경험
-* `개선` Shizuku 를 사용하여 '포인터 위치' 디스플레이 스위치를 제어하는 것을 지원
-* `개선` Shizuku 를 사용하여 '미디어 프로젝션' 및 '보안 설정 수정' 권한 스위치를 제어하는 것을 지원
-* `개선` automator.gestureAsync/gesturesAsync 가 콜백 함수 매개변수를 지원
-* `개선` tasks 모듈이 동기화 방식으로 데이터베이스 작업을 수행하는 것을 지원, 데이터 액세스의 불일치 문제 방지
-* `개선` 스크립트 실행 모드가 파이프 기호로 구분된 모드 매개변수 (예: 'ui|auto';처럼 시작) 를 지원
-* `개선` 스크립트 실행 모드가 싱글 쿼테이션 및 백틱을 지원하여 세미콜론 생략 (예: 'ui'; 또는 'ui'처럼 시작) 가능
-* `개선` 스크립트 실행 모드가 axios, cheerio, dayjs 등의 모드 매개변수로 내장 확장 모듈의 빠른 가져오기를 지원 (예: 'axios';처럼 시작)
-* `개선` 스크립트 실행 모드가 x 또는 jsox 모드 매개변수로 JavaScript 내장 객체 확장 모듈의 빠른 활성화를 지원 (예: 'x';처럼 시작)
-* `개선` img 요소의 src 및 path 속성이 로컬 상대 경로를 지원 (예: '<img src="a.png" />'처럼)
-* `개선` 코드 편집기에서 Java 클래스나 패키지명을 가져오는 위치의 지능형 판단을 지원
-* `개선` images 모듈이 이미지 매개변수로 경로의 직접 사용을 지원
-* `개선` importPackage 가 문자열 매개변수를 지원
-* `개선` 서버 모드의 IP 주소가 클립보드 가져오기를 스마트하게 인식하고, 스페이스 키 스마트 변환을 지원
-* `개선` 파일 관리자가 새 파일을 생성할 때 기본 접두사 선택 및 적절한 숫자 접미사의 자동 생성을 지원
-* `개선` 파일 관리 프로젝트 실행 시 예외 메시지 구체화 _[`issue #268`](http://issues.autojs6.com/268)_
-* `개선` 파일 관리자가 더 많은 유형을 지원하고, 해당 아이콘 심볼을 표시 (800 이상의 파일 타입 지원)
-* `개선` 파일 관리자에서 편집 가능한 파일 타입 (jpg/doc/pdf...) 에 편집 버튼 추가
-* `개선` 파일 관리자가 APK 파일의 기본 정보, Manifest 정보 및 권한 목록을 표시하는 것을 지원
-* `개선` 파일 관리자가 오디오 및 비디오 같은 미디어 파일의 기본 정보 및 MediaInfo 정보를 표시하는 것을 지원
-* `개선` 단일 파일 패키징 시 적절한 정규화 이름 패키지를 자동 입력하며, 유효하지 않은 문자 필터링을 권장
-* `개선` 단일 파일 패키징 시 동일한 패키지 이름의 앱이 설치된 경우 아이콘을 자동 설정하고, 버전 번호와 버전명을 증가시키는 것을 지원
-* `개선` 패키지 프로젝트 설정 파일이 abis/libs 옵션을 지원하고, 기본적으로 포함되는 ABI 아키텍처와 확장 라이브러리를 지정
-* `개선` 패키지 프로젝트 설정 파일의 abis/libs 옵션이 무효하거나 사용할 수 없을 때 관련 메시지를 지원
-* `개선` 불필요한 증가 방지를 위해 릭 캐너리를 릴리스 버전에서 제외
-* `개선` 프로젝트 소스 코드 내 모든 영어 주석에 한국어 번역 추가하여 읽기 쉬운 주석 개선
-* `개선` README 및 CHANGELOG 에 여러 언어 지원 (스크립트를 통한 자동 생성)
-* `개선` Gradle 빌드 스크립트의 버전 적응 능력을 개선
-* `개선` 일부 의존성 또는 로컬 라이브러리 버전 조정 _[`CHANGELOG.md`](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG.md#v660)_
-
 ##### 더 많은 버전 기록은 참조하십시오
 
 * [CHANGELOG.md](http://project.autojs6.com/blob/master/app/src/main/assets-app/doc/CHANGELOG-ko.md)
@@ -340,12 +311,12 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 
 #### Android Studio 준비
 
-`Android Studio Meerkat | 2024.3.1 Patch 2` 버전을 다운로드하십시오 (필요에 따라 선택):
+`Android Studio Meerkat Feature Drop | 2024.3.2` 버전을 다운로드하십시오 (필요에 따라 선택):
 
-- [android-studio-2024.3.1.15-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.1.15/android-studio-2024.3.1.15-windows.exe) (1.22 GB)
-- [android-studio-2024.3.1.15-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.1.15/android-studio-2024.3.1.15-windows.zip) (1.23 GB)
+- [android-studio-2024.3.2.14-windows.exe](https://redirector.gvt1.com/edgedl/android/studio/install/2024.3.2.14/android-studio-2024.3.2.14-windows.exe) (1.23 GB)
+- [android-studio-2024.3.2.14-windows.zip](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2024.3.2.14/android-studio-2024.3.2.14-windows.zip) (1.23 GB)
 
-> 메모: 상기 버전 출시 날짜는 2025 년 4 월 21 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
+> 메모: 상기 버전 출시 날짜는 2025 년 5 월 6 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
@@ -389,7 +360,7 @@ SDK Tools (SDK 도구) (오른쪽 창에 위치)
 
 AutoJs6 프로젝트는 `JDK (Java 개발 도구 키트)` 버전이 `17` 이상이어야 하지만, `19` 이상을 권장합니다.
 
-2025 년 5 월 22 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24` 입니다.
+2025 년 5 월 27 일 기준으로, AutoJs6이 지원하는 최대 JDK 버전은 `24` 입니다.
 
 > 메모: 시스템에 JDK가 설치되어 있고, 버전이 위의 요구 사항을 충족하는 경우, 이 섹션을 건너뛸 수 있습니다.
 
@@ -540,6 +511,7 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
 
 |         <span style="word-break:keep-all;white-space:nowrap">기여자</span>          |                   <span style="word-break:keep-all;white-space:nowrap">커밋 수</span>                    | <span style="word-break:keep-all;white-space:nowrap">최근 제출</span> |
 |:-------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
+|             <span style="word-break:keep-all;white-space:nowrap">[wirsnow](https://github.com/wirsnow)</span>             |         <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=wirsnow)</span>         |                    <span style="word-break:keep-all;white-space:nowrap">`2025/05/19`</span>                    |
 |         <span style="word-break:keep-all;white-space:nowrap">[TonyJiangWJ](https://github.com/TonyJiangWJ)</span>         |       <span style="word-break:keep-all;white-space:nowrap">[5](https://github.com/SuperMonster003/AutoJs6/commits?author=TonyJiangWJ)</span>       |                    <span style="word-break:keep-all;white-space:nowrap">`2025/04/24`</span>                    |
 |          <span style="word-break:keep-all;white-space:nowrap">[luckyloogn](https://github.com/luckyloogn)</span>          |       <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/commits?author=luckyloogn)</span>        |                    <span style="word-break:keep-all;white-space:nowrap">`2025/01/01`</span>                    |
 |                <span style="word-break:keep-all;white-space:nowrap">[kvii](https://github.com/kvii)</span>                |          <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/commits?author=kvii)</span>           |                    <span style="word-break:keep-all;white-space:nowrap">`2024/10/16`</span>                    |
@@ -549,7 +521,7 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
 |              <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span>              |    <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Aaiselp)</span>     |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span>                    |
 |           <span style="word-break:keep-all;white-space:nowrap">[LYS86](https://github.com/LYS86) `(Lin)`</span>           |          <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/commits?author=LYS86)</span>          |                    <span style="word-break:keep-all;white-space:nowrap">`2023/06/03`</span>                    |
 
-데이터 갱신일: 2025 년 5 월 13 일.
+데이터 갱신일: 2025 년 5 월 27 일.
 
 데이터 항목은 `최근 제출` 순으로 내림차순 정렬됩니다.
 
@@ -561,24 +533,29 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
     # --------------------------------------------------------------#
     # Before committing and pushing to the remote GitHub repository #
     # --------------------------------------------------------------#
-    - CHANGELOG.md
-        - Update entries for AutoJs6 by checking all changed files
-        - Update entries for Gradle plugins [ implementation ]
-        - Update version name and released date
-        - Append related GitHub issues to changelog entries
-    - README.md
+    - IDE
         - The summary of the latest changelog for committing to Git [ DO NOT commit or push ]
+    - $projectDir/version.properties
+        - Remove the part like [ alpha / beta / ... ] of VERSION_NAME
+    - $projectDir/.changelog/lang_zh-Hans.json
+        - Update version name and released date
+        - Translate into other languages
+        - Update TypeScript declarations according to section `dependency` if needed
+    - $projectDir/.readme/template_readme.md
         - Update badges like [ android studio / rhino / ... ]
+        - Update contribution section: 기여 참여
+    - $projectDir/.readme/common.json
         - Update android studio download links and version names
-        - Update contribution section
-    - Remove the part like [ alpha / beta / ... ] of VERSION_NAME in version.properties
-    - Update dependencies TypeScript declarations if needed.
-    - Re-generate documentation/markdown by running the python script
-    - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft
-    - Run Gradle task "app:assembleInrtRelease"
-    - Build APK to determine the final VERSION_BUILD field
-    - Run Gradle task "app:appendDigestToReleasedFiles"
-    - Check VERSION_BUILD in version.properties with released apks
-    - Commit and push to GitHub
-    - Publish the latest release with signed APKs
+        - Update contribution section: var_date_contribution_table_data_updated
+    - $projectDir/.python/generate_markdown.py
+        - Re-generate markdown by running the python script [ link: aj6mdgen ]
+    - Others
+        - Re-generate documentation by running the python script [ link: aj6docgen ]
+        - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft if needed
+        - Run Gradle task "app:assembleInrtRelease" [ shortcut: C+A+0#- ]
+        - Build APK to determine the final VERSION_BUILD field [ shortcut: C+A+0#A ]
+        - Run Gradle task "app:appendDigestToReleasedFiles" [ shortcut: C+A+0#= ]
+        - Check VERSION_BUILD in version.properties with released apks
+        - Commit and push to GitHub
+        - Publish the latest release with signed APKs
 )

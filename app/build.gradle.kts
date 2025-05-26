@@ -971,8 +971,13 @@ class Versions(filePath: String) {
 
     private fun updateProperties() {
         if (isBuildGapEnough) {
-            properties["VERSION_BUILD"] = "${appVersionCode + 1}"
-            isBuildNumberAutoIncremented = true
+            val isBuildAppRelease = gradle.startParameter.taskNames.any {
+                it.contains(Regex("^(:?$flavorNameApp:)?$buildActionAssemble($flavorNameApp|$flavorNameInrt)$buildTypeRelease", IGNORE_CASE))
+            }
+            if (!isBuildAppRelease) {
+                properties["VERSION_BUILD"] = "${appVersionCode + 1}"
+                isBuildNumberAutoIncremented = true
+            }
         }
         properties["BUILD_TIME"] = "${Date().time}"
         properties.store(file.writer(), null)

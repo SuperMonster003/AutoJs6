@@ -4,6 +4,76 @@
 
 ******
 
+# v6.6.3
+
+###### 2025/05/27
+
+* `新增` 版本歷史功能, 可查看發行版本歷史更新記錄 (多語言) 與統計數據
+* `新增` timers.keepAlive 方法 (已全局化), 用於保持腳本活躍狀態
+* `新增` engines.on('start/stop/error', callback) 等事件監聽方法, 用於監聽腳本引擎全局事件
+* `新增` images.detectMultiColors 方法, 用於多點顏色校驗 _[`issue #374`](http://issues.autojs6.com/374)_
+* `新增` images.matchFeatures/detectAndComputeFeatures 方法, 支持全分辨率找圖 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `新增` images.compressToBytes 方法, 用於壓縮圖像並生成字節數組
+* `新增` images.downsample 方法, 用於像素降採樣並生成新的 ImageWrapper
+* `新增` ui.keepScreenOn 方法, 用於 UI 頁面獲取焦點時保持設備屏幕常亮
+* `新增` ui.root 屬性 (getter), 用於獲取 UI 頁面佈局的 "窗口內容根容器" 節點
+* `新增` webview 元素支持基於 JsBridge 的 Web 頁面佈局 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) [參閱 示例代碼 > 佈局 > 可交互 HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `修復` 主頁文檔標籤及文檔活動頁面顯示在線文檔時部分內容被系統導航欄遮擋的問題
+* `修復` 部分頁面 Toolbar 點擊按鈕時可能導致標題點擊事件誤觸發的問題
+* `修復` 部分設備代碼編輯器空行顯示方框字符的問題
+* `修復` 主題色設置頁面調色盤對話框可能無限疊加的問題
+* `修復` 無障礙服務關閉時音量加鍵停止所有腳本功能失效的問題
+* `修復` 定時任務頁面編輯自定義廣播內容時出現的輸入法遮擋問題
+* `修復` webview 元素中的控件無法正常激活輸入法軟鍵盤的問題
+* `修復` APK 文件類型信息對話框可能無法獲取應用名稱及 SDK 信息的問題
+* `修復` 文件管理器示例代碼進入項目目錄時可能無法自動加載子目錄文件內容的問題
+* `修復` Android 15 UI 模式頂部內容被狀態欄覆蓋的問題
+* `修復` Android 15 部分頁面狀態欄背景顏色可能無法動態跟隨主題色的問題
+* `修復` dialogs 模塊無法正常使用 customView 屬性的問題 _[`issue #364`](http://issues.autojs6.com/364)_
+* `修復` dialogs.input 方法的表達式參數可能無法獲得執行結果的問題
+* `修復` 使用 JavaAdapter 時導致 ClassLoader 調用棧溢出的問題 _[`issue #376`](http://issues.autojs6.com/376)_
+* `修復` console.setContentTextColor 方法導致日誌字體顏色丟失默認值的問題 _[`issue #346`](http://issues.autojs6.com/346)_
+* `修復` console.setContentBackgroundColor 方法無法接受顏色名稱參數的問題 _[`issue #384`](http://issues.autojs6.com/384)_
+* `修復` images.compress 方法實現原理由像素降採樣修正爲編碼質量變化
+* `修復` images.resize 方法無法正常使用的問題
+* `修復` engines.all 方法可能觸發 ConcurrentModificationException 的問題 _[`issue #394`](http://issues.autojs6.com/394)_
+* `修復` README.md 中部分語言日期格式不正確的問題
+* `修復` Gradle 構建腳本可能因獲取到無效庫檔案文件長度而導致構建失敗的問題 _[`issue #389`](http://issues.autojs6.com/389)_
+* `優化` 佈局分析支持控件隱藏 (by [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `優化` 佈局分析菜單添加漸變分隔線實現一定程度的功能分組
+* `優化` 腳本項目配置文件 project.json 支持 permissions 選項 (by [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `優化` 打包單文件時自動讀取並勾選已安裝應用的聲明權限 _[`issue #362`](http://issues.autojs6.com/362)_
+* `優化` 主題色擴充適配範圍並支持更多控件類型
+* `優化` 主頁抽屜在橫向屏幕或超寬屏幕的寬度適應性
+* `優化` 關於應用與開發者頁面增加水平佈局及小屏佈局適配
+* `優化` 設置頁面對話框相關設置支持 "使用默認值" 菜單選項
+* `優化` 文件管理器浮動按鈕展開後點擊其他區域可自動隱藏
+* `優化` 代碼編輯器格式化代碼支持 `??`, `?.`, `??=` 等運算符
+* `優化` 代碼編輯器支持 GB18030 / UTF-16 (LE/BE) / Shift_JIS 等編碼的文件讀寫
+* `優化` 代碼編輯器支持顯示文件詳細信息 (路徑/編碼/換行符/字節及字符總數等) _[`issue #395`](http://issues.autojs6.com/395)_
+* `優化` 意圖相關操作 (編輯/查看/安裝/發送/播放等) 增加操作異常提示
+* `優化` webview 元素的 url 屬性支持相對路徑
+* `優化` ImageWrapper#saveTo 方法的路徑參數支持相對路徑
+* `優化` images.save 方法使用 quality 參數時支持 png 格式的文件體積壓縮 _[`issue #367`](http://issues.autojs6.com/367)_
+* `優化` 已忽略更新記錄及客戶端模式連接地址記錄支持清空操作
+* `優化` 版本更新信息支持多語言顯示 (與當前顯示語言同步)
+* `優化` 使用異步加載方式一定程度提升文件管理器列表滑動流暢性
+* `優化` 腳本異常消息在控制檯的顯示內容與格式
+* `優化` 示例代碼支持將文件夾重置爲初始內容
+* `優化` APK 文件簽名信息提升檢測效率
+* `優化` APK 文件類型信息及媒體文件類型信息優化對話框顯示效率及信息展示邏輯
+* `優化` Gradle 構建腳本提升版本自適應能力 _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `依賴` 本地化 Material Dialogs 版本 0.9.6.0
+* `依賴` 本地化 Material Date Time Picker 版本 4.2.3
+* `依賴` 本地化 libimagequant 版本 2.17.0
+* `依賴` 本地化 libpng 版本 1.6.49
+* `依賴` 附加 ICU4J 版本 77.1
+* `依賴` 附加 Jsoup 版本 1.19.1
+* `依賴` 附加 Material Progressbar 版本 1.4.2
+* `依賴` 附加 Flexmark Java HTML to Markdown 版本 0.64.8
+* `依賴` 升級 Gradle 版本 8.14-rc-1 -> 8.14
+* `依賴` 升級 Androidx Room 版本 2.7.0 -> 2.7.1
+
 # v6.6.2
 
 ###### 2025/04/16

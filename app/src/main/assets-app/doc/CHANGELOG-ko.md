@@ -4,6 +4,76 @@
 
 ******
 
+# v6.6.3
+
+###### 2025/05/27
+
+* `추가` 버전 히스토리 기능: 다국어 변경 로그 및 통계 보기
+* `추가` timers.keepAlive 메서드 (전역으로 승격) 로 스크립트 활성 유지
+* `추가` engines.on('start/stop/error', callback) 등의 이벤트 리스너로 엔진 전역 이벤트 수신
+* `추가` images.detectMultiColors 메서드로 여러 지점 색상 검사 _[`issue #374`](http://issues.autojs6.com/374)_
+* `추가` images.matchFeatures/detectAndComputeFeatures: 풀 해상도 이미지 검색 (참조 [Auto.js Pro](https://g.pro.autojs.org/)) _[`issue #366`](http://issues.autojs6.com/366)_
+* `추가` images.compressToBytes 메서드로 이미지를 압축하여 바이트 배열 반환
+* `추가` images.downsample 메서드로 해상도를 낮추고 새로운 ImageWrapper 생성
+* `추가` ui.keepScreenOn 메서드로 UI 페이지가 포커스될 때 화면 켜짐 유지
+* `추가` ui.root 프로퍼티 (getter) 로 UI 레이아웃 내 '윈도우 콘텐츠 루트 컨테이너' 노드를 가져옴
+* `추가` webview 요소가 JsBridge 기반 웹 페이지 레이아웃 지원 (참조 [Auto.js Pro](https://g.pro.autojs.org/)) [예: Layout > Interactive HTML / Vue2 + Vant (SFC)] _[`issue #281`](http://issues.autojs6.com/281)_
+* `수정` Docs 탭 및 Docs 액티비티의 온라인 문서가 시스템 네비게이션 바에 가려질 수 있는 문제 수정
+* `수정` 일부 페이지에서 Toolbar 버튼을 누르면 제목 클릭 이벤트가 잘못 발생하는 문제 수정
+* `수정` 코드 편집기 빈 줄이 일부 기기에서 사각형으로 보이는 문제 수정
+* `수정` 테마 색상 설정의 컬러 피커 대화상자가 무한 중첩되는 문제 수정
+* `수정` 접근성 서비스가 꺼진 상태에서 볼륨 업 키가 모든 스크립트를 중지하지 않는 문제 수정
+* `수정` 예약 작업에서 사용자 정의 브로드캐스트 메시지를 편집할 때 IME가 입력 영역을 덮는 문제 수정
+* `수정` webview 내부 컨트롤이 소프트 키보드를 정상적으로 호출하지 못하는 문제 수정
+* `수정` APK 정보 대화상자가 앱 이름이나 SDK 정보를 가져오지 못하는 문제 수정
+* `수정` 파일 관리자 예제에서 프로젝트 폴더 진입 시 하위 폴더 내용이 로드되지 않는 문제 수정
+* `수정` Android 15 UI 모드에서 상태 표시줄이 상단 콘텐츠를 가리는 문제 수정
+* `수정` Android 15 일부 페이지에서 상태 표시줄 배경색이 테마 색상과 동기화되지 않는 문제 수정
+* `수정` dialogs 모듈이 customView 프로퍼티를 지원하지 않는 문제 수정 _[`issue #364`](http://issues.autojs6.com/364)_
+* `수정` dialogs.input 의 expression 매개변수가 실행 결과를 반환하지 않는 문제 수정
+* `수정` JavaAdapter 사용 시 ClassLoader 스택 오버플로우가 발생하는 문제 수정 _[`issue #376`](http://issues.autojs6.com/376)_
+* `수정` console.setContentTextColor 가 기본 텍스트 색상을 리셋하는 문제 수정 _[`issue #346`](http://issues.autojs6.com/346)_
+* `수정` console.setContentBackgroundColor 가 색상 이름을 허용하지 않는 문제 수정 _[`issue #384`](http://issues.autojs6.com/384)_
+* `수정` images.compress 구현 수정: 다운샘플링 대신 인코딩 품질을 변경
+* `수정` images.resize 메서드가 올바르게 동작하지 않는 문제 수정
+* `수정` engines.all 이 ConcurrentModificationException 을 발생시킬 수 있는 문제 수정 _[`issue #394`](http://issues.autojs6.com/394)_
+* `수정` README.md 일부 언어의 날짜 형식 오류 수정
+* `수정` Gradle 빌드가 라이브러리 아카이브 크기 오류로 실패할 수 있는 문제 수정 _[`issue #389`](http://issues.autojs6.com/389)_
+* `개선` 레이아웃 인스펙터가 요소 숨기기 지원 (기여 [TonyJiangWJ](https://github.com/TonyJiangWJ)) _[`pr #371`](http://pr.autojs6.com/371)_ _[`issue #355`](http://issues.autojs6.com/355)_
+* `개선` 레이아웃 인스펙터 메뉴에 기능 그룹화를 위한 그라데이션 구분선 추가
+* `개선` project.json 이 스크립트 프로젝트 permissions 옵션 지원 (기여 [wirsnow](https://github.com/wirsnow)) _[`pr #391`](http://pr.autojs6.com/391)_ _[`issue #362`](http://issues.autojs6.com/362)_
+* `개선` 단일 파일 패키징 시 설치된 앱의 선언 권한을 자동 읽어 표시 _[`issue #362`](http://issues.autojs6.com/362)_
+* `개선` 테마 색상 적용 범위 확대, 더 많은 위젯 지원
+* `개선` 메인 페이지 드로어 폭이 가로 및 초광폭 화면에 적응
+* `개선` ‘앱 정보’ 및 ‘개발자 정보’ 페이지에 가로 및 컴팩트 레이아웃 추가
+* `개선` 설정 대화상자에 '기본값 사용' 메뉴 추가
+* `개선` 파일 관리자 FAB가 영역 밖을 터치하면 자동으로 숨김
+* `개선` 코드 포매터가 `??`, `?.`, `??=` 연산자 지원
+* `개선` 코드 편집기가 GB18030 / UTF-16 (LE/BE) / Shift_JIS 등 인코딩의 파일 읽기·쓰기를 지원
+* `개선` 코드 편집기가 파일 상세 정보(경로/인코딩/줄바꿈 형식/총 바이트 및 문자 수 등) 표시를 지원 _[`issue #395`](http://issues.autojs6.com/395)_
+* `개선` Intent 작업(편집/보기/설치/전송/재생 등)의 오류 메시지 추가
+* `개선` webview 요소의 url 속성이 상대 경로 지원
+* `개선` ImageWrapper#saveTo 의 path 매개변수가 상대 경로 지원
+* `개선` images.save 가 PNG 압축을 quality 매개변수로 지원 _[`issue #367`](http://issues.autojs6.com/367)_
+* `개선` 무시한 업데이트 목록 및 클라이언트 모드 주소 초기화 기능 추가
+* `개선` 버전 업데이트 정보가 현재 UI 언어로 표시
+* `개선` 비동기 로드로 파일 관리자 리스트 스크롤 부드러움 향상
+* `개선` 콘솔 스크립트 예외 메시지 내용 및 형식 개선
+* `개선` 샘플 코드 폴더를 초기 내용으로 재설정 기능
+* `개선` APK 서명 검증 속도 향상
+* `개선` APK/미디어 파일 정보 대화상자 속도 및 표시 로직 최적화
+* `개선` Gradle 빌드 스크립트가 최신 버전에 더 유연하게 대응 _[`discussion #369`](http://discussions.autojs6.com/369)_
+* `의존성` 내장 Material Dialogs 버전 0.9.6.0 (현지화)
+* `의존성` 내장 Material Date Time Picker 버전 4.2.3 (현지화)
+* `의존성` 내장 libimagequant 버전 2.17.0 (현지화)
+* `의존성` 내장 libpng 버전 1.6.49 (현지화)
+* `의존성` 추가 ICU4J 버전 77.1
+* `의존성` 추가 Jsoup 버전 1.19.1
+* `의존성` 추가 Material Progressbar 버전 1.4.2
+* `의존성` 추가 Flexmark Java HTML to Markdown 버전 0.64.8
+* `의존성` 업데이트 Gradle 8.14-rc-1 -> 8.14
+* `의존성` 업데이트 Androidx Room 2.7.0 -> 2.7.1
+
 # v6.6.2
 
 ###### 2025/04/16
