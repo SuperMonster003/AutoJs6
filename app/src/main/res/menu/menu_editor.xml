@@ -141,8 +141,8 @@
                 app:showAsAction="never" />
 
             <item
-                android:id="@+id/action_info"
-                android:title="@string/text_info"
+                android:id="@+id/action_file_details"
+                android:title="@string/text_file_details"
                 app:showAsAction="never" />
 
             <item

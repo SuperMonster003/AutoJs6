@@ -2,23 +2,21 @@ package org.autojs.autojs.ui.edit;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.net.Uri;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.MaterialDialog;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.extension.MaterialDialogExtensions;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
-import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.CodeEditor;
+import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager;
 import org.autojs.autojs.ui.project.BuildActivity;
 import org.autojs.autojs.util.ClipboardUtils;
 import org.autojs.autojs.util.ConsoleUtils;
@@ -27,6 +25,7 @@ import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -138,8 +137,8 @@ public class EditorMenu {
         if (itemId == R.id.action_open_by_other_apps) {
             return tryDoing(mEditorView::openByOtherApps);
         }
-        if (itemId == R.id.action_info) {
-            showInfo();
+        if (itemId == R.id.action_file_details) {
+            showFileDetails();
             return true;
         }
         if (itemId == R.id.action_build_apk) {
@@ -209,10 +208,7 @@ public class EditorMenu {
     }
 
     private void startBuildApkActivity() {
-        Uri uri = mEditorView.uri;
-        if (uri != null) {
-            BuildActivity.launch(mContext, uri.getPath());
-        }
+        BuildActivity.launch(mContext, mEditorView.uri.getPath());
     }
 
     private void setPinchToZoomStrategy() {
@@ -338,24 +334,9 @@ public class EditorMenu {
         builder.show();
     }
 
-    @SuppressLint("StringFormatMatches")
-    private void showInfo() {
-        Observable
-                .zip(Observable.just(mEditor.getText()), mEditor.getLineCount(), (text, lineCount) -> {
-                    String size = PFiles.getHumanReadableSize(text.length());
-                    return String.format(Language.getPrefLanguage().getLocale(), mContext.getString(R.string.format_editor_info),
-                            text.length(), lineCount, size);
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showInfo);
-
-    }
-
-    private void showInfo(String info) {
-        new MaterialDialog.Builder(mContext)
-                .title(R.string.text_info)
-                .content(info)
-                .show();
+    private void showFileDetails() {
+        var path = mEditorView.uri.getPath();
+        EditableFileInfoDialogManager.showEditableFileInfoDialog(mContext, new File(path), mEditor::getText);
     }
 
     protected boolean copyLine() {

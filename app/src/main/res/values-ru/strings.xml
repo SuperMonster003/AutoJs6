@@ -119,6 +119,13 @@
     <string name="dialog_title_theme_color_details">Детали цвета темы</string>
     <string name="edit_and_run_handle_intent_error">Невозможно обработать файл</string>
     <string name="edit_exit_without_save_warn">Содержимое не было сохранено, вы уверены в выходе?</string>
+    <string name="editable_file_info_byte_count_label">Байты</string>
+    <string name="editable_file_info_char_count_label">Символы</string>
+    <string name="editable_file_info_file_charset_label">Кодировка</string>
+    <string name="editable_file_info_file_path_label">Путь</string>
+    <string name="editable_file_info_file_size_label">Размер</string>
+    <string name="editable_file_info_line_break_label">Перенос</string>
+    <string name="editable_file_info_line_count_label">Строки</string>
     <string name="entry_app_language_auto">Следовать за системой</string>
     <string name="entry_documentation_source_local">Локальные документы</string>
     <string name="entry_documentation_source_online">Онлайн-документы</string>
@@ -221,6 +228,12 @@
     <string name="error_no_accessibility_permission">Служба доступности отключена, и сценарий остановлен</string>
     <string name="error_no_accessibility_permission_to_capture">Служба доступности не активирована</string>
     <string name="error_no_accessibility_service">Нет службы доступности</string>
+    <string name="error_no_applications_available_for_browsing_this_link">Нет приложений для просмотра этой ссылки</string>
+    <string name="error_no_applications_available_for_editing_this_file">Нет приложений для редактирования этого файла</string>
+    <string name="error_no_applications_available_for_installing_this_file">Нет приложений для установки этого файла</string>
+    <string name="error_no_applications_available_for_playing_this_file">Нет приложений для воспроизведения этого файла</string>
+    <string name="error_no_applications_available_for_sending_this_file">Нет приложений для отправки этого файла</string>
+    <string name="error_no_applications_available_for_viewing_this_file">Нет приложений для просмотра этого файла</string>
     <string name="error_no_display_over_other_apps_permission">Нет разрешения \"отображать поверх других приложений\"</string>
     <string name="error_no_permission_to_access_shizuku">Нет разрешения на доступ к Shizuku</string>
     <string name="error_no_post_notifications_permission">Нет разрешения на \"уведомления о сообщениях\"</string>
@@ -263,6 +276,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Неизвестный тип результата {имя: %s, params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">Неизвестный селектор {имя: %s, тип: %s}</string>
     <string name="error_unknown_type">Неизвестный тип: %s</string>
+    <string name="error_webp_lossless_quality_not_supported">Формат WebP-Lossless нельзя сжать с параметром качества; используйте вместо этого JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">\"Файл не существует или не доступен для чтения: %s\".</string>
     <string name="foreground_notification_channel_name">Служба AutoJs6 в фоновом режиме</string>
     <string name="foreground_notification_text">Нажмите для запуска AutoJs6</string>
@@ -468,6 +482,7 @@
     <string name="text_command_already_copied_to_clip">Команда скопирована в буфер обмена</string>
     <string name="text_comment">Комментарий</string>
     <string name="text_compatibility">Совместимость</string>
+    <string name="text_confidence_level">Доверие</string>
     <string name="text_config">Конфигурация</string>
     <string name="text_confirm_to_clear_all_histories">Вы уверены, что хотите очистить всю историю?</string>
     <string name="text_confirm_to_clear_all_items">Вы уверены, что хотите удалить все элементы?</string>
@@ -558,6 +573,7 @@
     <string name="text_error">Ошибка</string>
     <string name="text_error_copy_file" formatted="true">Не удалось скопировать файл: %s</string>
     <string name="text_error_report">Отчет об ошибке</string>
+    <string name="text_estimated">Оценка</string>
     <string name="text_execute">Выполнить</string>
     <string name="text_execute_code">Код выполнения</string>
     <string name="text_execution_finished" formatted="false">[%s] завершилось через %s секунд.\n</string>
@@ -592,6 +608,7 @@
     <string name="text_failed_to_send_log_entries">Не удалось отправить записи журнала</string>
     <string name="text_failed_to_write_file">Не удалось записать файл</string>
     <string name="text_file">Файл</string>
+    <string name="text_file_details">Сведения о файле</string>
     <string name="text_file_exists">Файл уже существует</string>
     <string name="text_file_explorer">Проводник файлов</string>
     <string name="text_file_extensions_title">Расширения файлов</string>
@@ -630,6 +647,8 @@
     <string name="text_hidden_files_title">Скрытые файлы и папки</string>
     <string name="text_hide">Скрыть</string>
     <string name="text_hide_button">Кнопка скрытия</string>
+    <string name="text_hide_node">Скрыть этот узел</string>
+    <string name="text_hide_same_frame_nodes">Скрыть узел того же фрейма</string>
     <string name="text_histories">Истории</string>
     <string name="text_icon">Значок</string>
     <string name="text_ignore_battery_optimizations">Игнорировать оптимизацию батареи</string>
@@ -1037,14 +1056,5 @@
     <string name="text_write_secure_settings">Параметры безопасности записи</string>
     <string name="text_write_secure_settings_description">Настройки безопасности системы, содержащие системные предпочтения, которые приложения могут читать, но не имеют права записывать.\nОни предназначены для параметров, которые пользователь должен явно изменить через пользовательский интерфейс системного приложения.\nПри наличии разрешения на безопасные системные настройки обычные приложения могут напрямую изменять безопасные настройки (например, служба доступности).</string>
     <string name="text_write_system_settings">Запись системных настроек</string>
-    <string name="text_hide_node">Скрыть этот узел</string>
-    <string name="text_hide_same_frame_nodes">Скрыть узел того же фрейма</string>
-    <string name="error_no_applications_available_for_editing_this_file">Нет приложений для редактирования этого файла</string>
-    <string name="error_no_applications_available_for_browsing_this_link">Нет приложений для просмотра этой ссылки</string>
-    <string name="error_no_applications_available_for_installing_this_file">Нет приложений для установки этого файла</string>
-    <string name="error_no_applications_available_for_viewing_this_file">Нет приложений для просмотра этого файла</string>
-    <string name="error_no_applications_available_for_sending_this_file">Нет приложений для отправки этого файла</string>
-    <string name="error_no_applications_available_for_playing_this_file">Нет приложений для воспроизведения этого файла</string>
-    <string name="error_webp_lossless_quality_not_supported">Формат WebP-Lossless нельзя сжать с параметром качества; используйте вместо этого JPEG/PNG/WebP-Lossy</string>
 
 </resources>

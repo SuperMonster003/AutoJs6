@@ -123,8 +123,8 @@ open class MaterialListPreference : MaterialDialogPreference {
             .title(R.string.text_prompt)
             .content(content)
             .widgetThemeColor()
-            .positiveText(R.string.dialog_button_dismiss)
-            .positiveColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_hint)
             .dismissListener { onChangeConfirmed(getDialog()) }
             .show()
     }

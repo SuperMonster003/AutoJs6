@@ -62,8 +62,8 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
 
         title(R.string.text_find_or_replace)
         customView(binding.root, true)
-        positiveText(R.string.text_ok)
-        negativeText(R.string.text_cancel)
+        positiveText(R.string.dialog_button_confirm)
+        negativeText(R.string.dialog_button_cancel)
     }
 
     private fun storeState() {

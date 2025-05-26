@@ -36,6 +36,7 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.event.BackPressedHandler
 import org.autojs.autojs.event.BackPressedHandler.DoublePressExit
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
+import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewLongClickListener
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.permission.ManageAllFilesPermission
@@ -178,7 +179,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         val toolbar = mToolbar.also {
             setSupportActionBar(it)
             it.setTitle(R.string.app_name)
-            it.setOnLongClickListener { true.also { PreferencesActivity.launch(this) } }
+            it.setOnTitleViewLongClickListener { true.also { PreferencesActivity.launch(this) } }
         }
 
         mActionBarDrawerToggle = object : ActionBarDrawerToggle(

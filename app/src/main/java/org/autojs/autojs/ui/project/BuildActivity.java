@@ -420,7 +420,7 @@ public class BuildActivity extends BaseActivity implements ApkBuilder.ProgressCa
                         "- " + getString(R.string.text_download_and_install_autojs6_including_all_abis) + " [" + getString(R.string.text_recommended) + "]\n\n" +
                         getString(R.string.text_download_link_for_autojs6) + ":\n" +
                         getString(R.string.uri_autojs6_download_link));
-        builder.positiveText(R.string.text_ok);
+        builder.positiveText(R.string.dialog_button_dismiss);
         builder.positiveColorRes(R.color.dialog_button_hint);
         MaterialDialogExtensions.widgetThemeColor(builder);
         MaterialDialog dialog = builder.show();

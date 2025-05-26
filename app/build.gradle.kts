@@ -237,6 +237,9 @@ dependencies /* Unclassified */ {
 
     // Material Date Time Picker
     implementation(project(":modules:material-date-time-picker"))
+
+    // ICU4J
+    implementation("com.ibm.icu:icu4j:77.1")
 }
 
 dependencies /* MIME */ {

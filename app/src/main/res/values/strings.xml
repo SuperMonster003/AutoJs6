@@ -347,6 +347,13 @@
     <string name="dialog_title_theme_color_details">Theme color details</string>
     <string name="edit_and_run_handle_intent_error">Cannot process file</string>
     <string name="edit_exit_without_save_warn">The content has not been saved, are you sure to exit?</string>
+    <string name="editable_file_info_byte_count_label">Bytes</string>
+    <string name="editable_file_info_char_count_label">Chars</string>
+    <string name="editable_file_info_file_charset_label">Charset</string>
+    <string name="editable_file_info_file_path_label">Path</string>
+    <string name="editable_file_info_file_size_label">Size</string>
+    <string name="editable_file_info_line_break_label">EOL</string>
+    <string name="editable_file_info_line_count_label">Lines</string>
     <string name="entry_app_language_auto">Follow system</string>
     <string name="entry_documentation_source_local">Local docs</string>
     <string name="entry_documentation_source_online">Online docs</string>
@@ -449,6 +456,12 @@
     <string name="error_no_accessibility_permission">Accessibility service is disabled and the script has stopped</string>
     <string name="error_no_accessibility_permission_to_capture">Accessibility service is not activated</string>
     <string name="error_no_accessibility_service">No accessibility service</string>
+    <string name="error_no_applications_available_for_browsing_this_link">No applications available for browsing this link</string>
+    <string name="error_no_applications_available_for_editing_this_file">No applications available for editing this file</string>
+    <string name="error_no_applications_available_for_installing_this_file">No applications available for installing this file</string>
+    <string name="error_no_applications_available_for_playing_this_file">No applications available for playing this file</string>
+    <string name="error_no_applications_available_for_sending_this_file">No applications available for sending this file</string>
+    <string name="error_no_applications_available_for_viewing_this_file">No applications available for viewing this file</string>
     <string name="error_no_display_over_other_apps_permission">No \"display over other apps\" permission</string>
     <string name="error_no_permission_to_access_shizuku">No permission to access Shizuku</string>
     <string name="error_no_post_notifications_permission">No \"post notifications\" permission</string>
@@ -491,6 +504,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Unknown result type {name: %s, params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">Unknown selector {name: %s, type: %s}</string>
     <string name="error_unknown_type">Unknown type: %s</string>
+    <string name="error_webp_lossless_quality_not_supported">Format WebP-Lossless cannot be compressed with a quality parameter, use JPEG/PNG/WebP-Lossy instead</string>
     <string name="file_not_exist_or_readable">File does not exist or readable: %s</string>
     <string name="foreground_notification_channel_name">AutoJs6 foreground service</string>
     <string name="foreground_notification_text">Click to launch AutoJs6</string>
@@ -696,6 +710,7 @@
     <string name="text_command_already_copied_to_clip">Command copied to clipboard</string>
     <string name="text_comment">Comment</string>
     <string name="text_compatibility">Compatibility</string>
+    <string name="text_confidence_level">Confidence</string>
     <string name="text_config">Config</string>
     <string name="text_confirm_to_clear_all_histories">Are you sure to clear all histories?</string>
     <string name="text_confirm_to_clear_all_items">Are you sure to clear all items?</string>
@@ -786,6 +801,7 @@
     <string name="text_error">Error</string>
     <string name="text_error_copy_file" formatted="true">Failed to copy file: %s</string>
     <string name="text_error_report">Bug report</string>
+    <string name="text_estimated">Estimated</string>
     <string name="text_execute">Execute</string>
     <string name="text_execute_code">Execute code</string>
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
@@ -820,6 +836,7 @@
     <string name="text_failed_to_send_log_entries">Failed to send log entries</string>
     <string name="text_failed_to_write_file">Failed to write file</string>
     <string name="text_file">File</string>
+    <string name="text_file_details">File details</string>
     <string name="text_file_exists">File already exists</string>
     <string name="text_file_explorer">File explorer</string>
     <string name="text_file_extensions_title">File extensions</string>
@@ -858,6 +875,8 @@
     <string name="text_hidden_files_title">Hidden files and folders</string>
     <string name="text_hide">Hide</string>
     <string name="text_hide_button">Hide button</string>
+    <string name="text_hide_node">Hide this node</string>
+    <string name="text_hide_same_frame_nodes">Hide same frame nodes</string>
     <string name="text_histories">Histories</string>
     <string name="text_icon">Icon</string>
     <string name="text_ignore_battery_optimizations">Ignore battery optimizations</string>
@@ -1265,14 +1284,5 @@
     <string name="text_write_secure_settings">Write security settings</string>
     <string name="text_write_secure_settings_description">Secure system settings, containing system preferences that applications can read but are not allowed to write.\nThese are for preferences that the user must explicitly modify through the UI of a system app.\nWith secure system settings permission, normal applications can directly modify the secure settings (such as accessibility service).</string>
     <string name="text_write_system_settings">Write system settings</string>
-    <string name="text_hide_node">Hide this node</string>
-    <string name="text_hide_same_frame_nodes">Hide same frame nodes</string>
-    <string name="error_no_applications_available_for_editing_this_file">No applications available for editing this file</string>
-    <string name="error_no_applications_available_for_browsing_this_link">No applications available for browsing this link</string>
-    <string name="error_no_applications_available_for_installing_this_file">No applications available for installing this file</string>
-    <string name="error_no_applications_available_for_viewing_this_file">No applications available for viewing this file</string>
-    <string name="error_no_applications_available_for_sending_this_file">No applications available for sending this file</string>
-    <string name="error_no_applications_available_for_playing_this_file">No applications available for playing this file</string>
-    <string name="error_webp_lossless_quality_not_supported">Format WebP-Lossless cannot be compressed with a quality parameter, use JPEG/PNG/WebP-Lossy instead</string>
 
 </resources>

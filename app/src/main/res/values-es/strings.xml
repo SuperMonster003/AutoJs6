@@ -119,6 +119,13 @@
     <string name="dialog_title_theme_color_details">Detalles del color del tema</string>
     <string name="edit_and_run_handle_intent_error">No se puede procesar el archivo</string>
     <string name="edit_exit_without_save_warn">El contenido no se ha guardado, ¿está seguro de salir?</string>
+    <string name="editable_file_info_byte_count_label">Bytes</string>
+    <string name="editable_file_info_char_count_label">Caracteres</string>
+    <string name="editable_file_info_file_charset_label">Charset</string>
+    <string name="editable_file_info_file_path_label">Ruta</string>
+    <string name="editable_file_info_file_size_label">Tamaño</string>
+    <string name="editable_file_info_line_break_label">Salto</string>
+    <string name="editable_file_info_line_count_label">Líneas</string>
     <string name="entry_app_language_auto">Siga el sistema</string>
     <string name="entry_documentation_source_local">Documentos locales</string>
     <string name="entry_documentation_source_online">Documentos en línea</string>
@@ -221,6 +228,12 @@
     <string name="error_no_accessibility_permission">El servicio de accesibilidad está desactivado y el script se ha detenido</string>
     <string name="error_no_accessibility_permission_to_capture">El servicio de accesibilidad no está activado</string>
     <string name="error_no_accessibility_service">No hay servicio de accesibilidad</string>
+    <string name="error_no_applications_available_for_browsing_this_link">No hay aplicaciones disponibles para abrir este enlace</string>
+    <string name="error_no_applications_available_for_editing_this_file">No hay aplicaciones disponibles para editar este archivo</string>
+    <string name="error_no_applications_available_for_installing_this_file">No hay aplicaciones disponibles para instalar este archivo</string>
+    <string name="error_no_applications_available_for_playing_this_file">No hay aplicaciones disponibles para reproducir este archivo</string>
+    <string name="error_no_applications_available_for_sending_this_file">No hay aplicaciones disponibles para enviar este archivo</string>
+    <string name="error_no_applications_available_for_viewing_this_file">No hay aplicaciones disponibles para ver este archivo</string>
     <string name="error_no_display_over_other_apps_permission">No hay permiso de \"mostrar sobre otras aplicaciones\".</string>
     <string name="error_no_permission_to_access_shizuku">No hay permiso para acceder a Shizuku</string>
     <string name="error_no_post_notifications_permission">Sin permiso para \"enviar notificaciones\"</string>
@@ -263,6 +276,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Tipo de resultado desconocido {nombre: %s, parámetro: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">Selector desconocido {nombre: %s, tipo: %s}</string>
     <string name="error_unknown_type">Tipo desconocido: %s</string>
+    <string name="error_webp_lossless_quality_not_supported">El formato WebP-Lossless no se puede comprimir con un parámetro de calidad; usa JPEG/PNG/WebP-Lossy en su lugar</string>
     <string name="file_not_exist_or_readable">El archivo no existe o no se puede leer: %s</string>
     <string name="foreground_notification_channel_name">Servicio de primer plano de AutoJs6</string>
     <string name="foreground_notification_text">Haga clic para iniciar AutoJs6</string>
@@ -468,6 +482,7 @@
     <string name="text_command_already_copied_to_clip">Comando copiado en el portapapeles</string>
     <string name="text_comment">Comente</string>
     <string name="text_compatibility">Compatibilidad</string>
+    <string name="text_confidence_level">Confianza</string>
     <string name="text_config">Configuración</string>
     <string name="text_confirm_to_clear_all_histories">¿Está seguro de borrar todos los historiales?</string>
     <string name="text_confirm_to_clear_all_items">¿Seguro que desea borrar todos los elementos?</string>
@@ -558,6 +573,7 @@
     <string name="text_error">Error</string>
     <string name="text_error_copy_file" formatted="true">No se ha podido copiar el archivo: %s</string>
     <string name="text_error_report">Informe de error</string>
+    <string name="text_estimated">Estimado</string>
     <string name="text_execute">Ejecutar</string>
     <string name="text_execute_code">Ejecutar código</string>
     <string name="text_execution_finished" formatted="false">[%s] terminó en %s segundos.\n</string>
@@ -592,6 +608,7 @@
     <string name="text_failed_to_send_log_entries">Error al enviar entradas de registro</string>
     <string name="text_failed_to_write_file">Fallo al escribir el archivo</string>
     <string name="text_file">Archivo</string>
+    <string name="text_file_details">Detalles del archivo</string>
     <string name="text_file_exists">El archivo ya existe</string>
     <string name="text_file_explorer">Explorador de archivos</string>
     <string name="text_file_extensions_title">Extensiones de archivo</string>
@@ -630,6 +647,8 @@
     <string name="text_hidden_files_title">Archivos y carpetas ocultos</string>
     <string name="text_hide">Ocultar</string>
     <string name="text_hide_button">Botón de ocultar</string>
+    <string name="text_hide_node">Ocultar este nodo</string>
+    <string name="text_hide_same_frame_nodes">Ocultar nodo del mismo marco</string>
     <string name="text_histories">Historiales</string>
     <string name="text_icon">Icono</string>
     <string name="text_ignore_battery_optimizations">Ignorar las optimizaciones de la batería</string>
@@ -1037,14 +1056,5 @@
     <string name="text_write_secure_settings">Escribir la configuración de seguridad</string>
     <string name="text_write_secure_settings_description">Ajustes de seguridad del sistema, que contienen preferencias del sistema que las aplicaciones pueden leer pero no pueden escribir.\nSe trata de preferencias que el usuario debe modificar explícitamente a través de la interfaz de usuario de una aplicación del sistema.\nCon el permiso de configuración segura del sistema, las aplicaciones normales pueden modificar directamente la configuración segura (como el servicio de accesibilidad).</string>
     <string name="text_write_system_settings">Escribir la configuración del sistema</string>
-    <string name="text_hide_node">Ocultar este nodo</string>
-    <string name="text_hide_same_frame_nodes">Ocultar nodo del mismo marco</string>
-    <string name="error_no_applications_available_for_editing_this_file">No hay aplicaciones disponibles para editar este archivo</string>
-    <string name="error_no_applications_available_for_browsing_this_link">No hay aplicaciones disponibles para abrir este enlace</string>
-    <string name="error_no_applications_available_for_installing_this_file">No hay aplicaciones disponibles para instalar este archivo</string>
-    <string name="error_no_applications_available_for_viewing_this_file">No hay aplicaciones disponibles para ver este archivo</string>
-    <string name="error_no_applications_available_for_sending_this_file">No hay aplicaciones disponibles para enviar este archivo</string>
-    <string name="error_no_applications_available_for_playing_this_file">No hay aplicaciones disponibles para reproducir este archivo</string>
-    <string name="error_webp_lossless_quality_not_supported">El formato WebP-Lossless no se puede comprimir con un parámetro de calidad; usa JPEG/PNG/WebP-Lossy en su lugar</string>
 
 </resources>

@@ -121,6 +121,13 @@
     <string name="dialog_title_theme_color_details">تفاصيل لون الثيم</string>
     <string name="edit_and_run_handle_intent_error">لا يمكن معالجة الملف</string>
     <string name="edit_exit_without_save_warn">لم يتم حفظ المحتوى ، هل أنت متأكد من الخروج؟</string>
+    <string name="editable_file_info_byte_count_label">بايت</string>
+    <string name="editable_file_info_char_count_label">حروف</string>
+    <string name="editable_file_info_file_charset_label">ترميز</string>
+    <string name="editable_file_info_file_path_label">مسار</string>
+    <string name="editable_file_info_file_size_label">حجم</string>
+    <string name="editable_file_info_line_break_label">سطر</string>
+    <string name="editable_file_info_line_count_label">أسطر</string>
     <string name="entry_app_language_auto">اتبع النظام</string>
     <string name="entry_documentation_source_local">مستندات محلية</string>
     <string name="entry_documentation_source_online">مستندات عبر الإنترنت</string>
@@ -223,6 +230,12 @@
     <string name="error_no_accessibility_permission">يتم تعطيل خدمة إمكانية الوصول وتوقف البرنامج النصي</string>
     <string name="error_no_accessibility_permission_to_capture">لم يتم تنشيط خدمة إمكانية الوصول</string>
     <string name="error_no_accessibility_service">لا توجد خدمة إمكانية الوصول</string>
+    <string name="error_no_applications_available_for_browsing_this_link">لا توجد تطبيقات متاحة لاستعراض هذا الرابط</string>
+    <string name="error_no_applications_available_for_editing_this_file">لا توجد تطبيقات متاحة لتحرير هذا الملف</string>
+    <string name="error_no_applications_available_for_installing_this_file">لا توجد تطبيقات متاحة لتثبيت هذا الملف</string>
+    <string name="error_no_applications_available_for_playing_this_file">لا توجد تطبيقات متاحة لتشغيل هذا الملف</string>
+    <string name="error_no_applications_available_for_sending_this_file">لا توجد تطبيقات متاحة لإرسال هذا الملف</string>
+    <string name="error_no_applications_available_for_viewing_this_file">لا توجد تطبيقات متاحة لعرض هذا الملف</string>
     <string name="error_no_display_over_other_apps_permission">لا يوجد إذن \"عرض عبر التطبيقات الأخرى\"</string>
     <string name="error_no_permission_to_access_shizuku">لا يوجد إذن للوصول إلى Shizuku</string>
     <string name="error_no_post_notifications_permission">لا يوجد إذن \"نشر الإخطارات\"</string>
@@ -265,6 +278,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">نوع نتيجة غير معروف {name: %s ، params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">محدد غير معروف {الاسم: %s ، اكتب: %s}</string>
     <string name="error_unknown_type">نوع غير معروف: %s</string>
+    <string name="error_webp_lossless_quality_not_supported">لا يمكن ضغط تنسيق WebP-Lossless باستخدام معامل الجودة؛ استخدم JPEG/PNG/WebP-Lossy بدلاً من ذلك</string>
     <string name="file_not_exist_or_readable">الملف غير موجود أو قابلاً للقراءة: %s</string>
     <string name="foreground_notification_channel_name">خدمة مقدمة AutoJs6</string>
     <string name="foreground_notification_text">انقر لإطلاق AutoJs6</string>
@@ -470,6 +484,7 @@
     <string name="text_command_already_copied_to_clip">تم نسخ الأمر إلى الحافظة</string>
     <string name="text_comment">تعليق</string>
     <string name="text_compatibility">التوافق</string>
+    <string name="text_confidence_level">ثقة</string>
     <string name="text_config">تكوين</string>
     <string name="text_confirm_to_clear_all_histories">هل أنت متأكد من مسح جميع السجلات؟</string>
     <string name="text_confirm_to_clear_all_items">هل أنت متأكد من مسح جميع العناصر؟</string>
@@ -560,6 +575,7 @@
     <string name="text_error">خطأ</string>
     <string name="text_error_copy_file" formatted="true">فشل نسخ الملف: %s</string>
     <string name="text_error_report">تقرير الشوائب</string>
+    <string name="text_estimated">تقديري</string>
     <string name="text_execute">نفذ - اعدم</string>
     <string name="text_execute_code">تنفيذ الرمز</string>
     <string name="text_execution_finished" formatted="false">[%s] انتهى في %s.\n</string>
@@ -594,6 +610,7 @@
     <string name="text_failed_to_send_log_entries">فشل في إرسال إدخالات السجل</string>
     <string name="text_failed_to_write_file">فشل في كتابة الملف</string>
     <string name="text_file">ملف</string>
+    <string name="text_file_details">تفاصيل الملف</string>
     <string name="text_file_exists">ملف موجود بالفعل</string>
     <string name="text_file_explorer">مستكشف الملفات</string>
     <string name="text_file_extensions_title">امتدادات الملف</string>
@@ -632,6 +649,8 @@
     <string name="text_hidden_files_title">الملفات والمجلدات المخفية</string>
     <string name="text_hide">إخفاء</string>
     <string name="text_hide_button">زر الإخفاء</string>
+    <string name="text_hide_node">إخفاء هذه العقدة</string>
+    <string name="text_hide_same_frame_nodes">إخفاء العقدة ذات الإطار المماثل</string>
     <string name="text_histories">التاريخ</string>
     <string name="text_icon">أيقونة</string>
     <string name="text_ignore_battery_optimizations">تجاهل تحسينات البطارية</string>
@@ -1039,14 +1058,5 @@
     <string name="text_write_secure_settings">اكتب إعدادات الأمان</string>
     <string name="text_write_secure_settings_description">إعدادات النظام الآمنة ، التي تحتوي على تفضيلات النظام التي يمكن أن تقرأها التطبيقات ولكن لا يُسمح لها بالكتابة.\nهذه هي لتفضيلات يجب على المستخدم تعديلها بشكل صريح من خلال واجهة المستخدم لتطبيق النظام.\nمع إذن إعدادات النظام الآمن ، يمكن للتطبيقات العادية تعديل الإعدادات الآمنة مباشرة (مثل خدمة إمكانية الوصول).</string>
     <string name="text_write_system_settings">كتابة إعدادات النظام</string>
-    <string name="text_hide_node">إخفاء هذه العقدة</string>
-    <string name="text_hide_same_frame_nodes">إخفاء العقدة ذات الإطار المماثل</string>
-    <string name="error_no_applications_available_for_editing_this_file">لا توجد تطبيقات متاحة لتحرير هذا الملف</string>
-    <string name="error_no_applications_available_for_browsing_this_link">لا توجد تطبيقات متاحة لاستعراض هذا الرابط</string>
-    <string name="error_no_applications_available_for_installing_this_file">لا توجد تطبيقات متاحة لتثبيت هذا الملف</string>
-    <string name="error_no_applications_available_for_viewing_this_file">لا توجد تطبيقات متاحة لعرض هذا الملف</string>
-    <string name="error_no_applications_available_for_sending_this_file">لا توجد تطبيقات متاحة لإرسال هذا الملف</string>
-    <string name="error_no_applications_available_for_playing_this_file">لا توجد تطبيقات متاحة لتشغيل هذا الملف</string>
-    <string name="error_webp_lossless_quality_not_supported">لا يمكن ضغط تنسيق WebP-Lossless باستخدام معامل الجودة؛ استخدم JPEG/PNG/WebP-Lossy بدلاً من ذلك</string>
 
 </resources>

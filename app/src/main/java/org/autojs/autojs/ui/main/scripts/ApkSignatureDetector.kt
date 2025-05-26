@@ -48,7 +48,7 @@ object ApkSignatureDetector {
         ApkSigningBlockUtils.findApkSignatureSchemeBlock(buf, id, null)
     }.isSuccess
 
-    private fun hasV1Signature(apkFile: File): Boolean {
+    fun hasV1Signature(apkFile: File): Boolean {
         JarFile(apkFile).use { jar ->
             var hasManifest = false
             var hasSF = false

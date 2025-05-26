@@ -68,10 +68,8 @@ object ColorInfoDialogManager {
                 Colors.toHsvStringRhino(colorWithoutAlpha).let { binding.colorHsvValue.bindWith(dialog, it) }
                 ColorUtils.toInt(colorWithoutAlpha).let { binding.colorIntValue.bindWith(dialog, it.toString()) }
             }
-            withContext(Dispatchers.Main) {
-                restoreEssentialViews(binding)
-                updateGuidelines(binding)
-            }
+            restoreEssentialViews(binding)
+            updateGuidelines(binding)
         }
     }
 

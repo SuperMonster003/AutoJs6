@@ -27,10 +27,13 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.pref.Pref.getEditorTextSize
+import org.autojs.autojs.core.pref.Pref.setEditorTextSize
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
 import org.autojs.autojs.execution.ScriptExecution
+import org.autojs.autojs.extension.MaterialDialogExtensions.choiceWidgetThemeColor
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.model.autocomplete.CodeCompletions
 import org.autojs.autojs.model.autocomplete.Symbols
@@ -44,11 +47,7 @@ import org.autojs.autojs.model.script.Scripts.openByOtherApps
 import org.autojs.autojs.model.script.Scripts.runWithBroadcastSender
 import org.autojs.autojs.pio.PFiles.getNameWithoutExtension
 import org.autojs.autojs.pio.PFiles.move
-import org.autojs.autojs.pio.PFiles.read
 import org.autojs.autojs.pio.PFiles.write
-import org.autojs.autojs.core.pref.Pref.getEditorTextSize
-import org.autojs.autojs.core.pref.Pref.setEditorTextSize
-import org.autojs.autojs.extension.MaterialDialogExtensions.choiceWidgetThemeColor
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.tool.Callback
 import org.autojs.autojs.ui.doc.ManualDialog
@@ -72,11 +71,15 @@ import org.autojs.autojs.ui.widget.SimpleTextWatcher
 import org.autojs.autojs.util.DisplayUtils.pxToSp
 import org.autojs.autojs.util.DocsUtils.getUrl
 import org.autojs.autojs.util.Observers
+import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs.util.ViewUtils.showSnack
 import org.autojs.autojs.util.ViewUtils.showToast
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.EditorViewBinding
 import java.io.File
+import java.io.IOException
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
 /**
  * Created by Stardust on Sep 28, 2017.
@@ -94,11 +97,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     @JvmField
     val debugBar: DebugBar = binding.debugBar
 
-    @JvmField
-    var name: String? = null
+    lateinit var name: String
 
-    @JvmField
-    var uri: Uri? = null
+    lateinit var uri: Uri
 
     var scriptExecutionId = 0
         private set
@@ -126,6 +127,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mDocsWebView: EWebView = binding.docs
     private val mDrawerLayout: DrawerLayout = binding.drawerLayout
 
+    private var mCurrentCharset: Charset = StandardCharsets.UTF_8
+    private var mHadBom = false
     private var mReadOnly = false
     private var mAutoCompletion: AutoCompletion? = null
     private var mEditorTheme: Theme? = null
@@ -193,7 +196,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun handleIntent(intent: Intent): Observable<String> {
-        name = intent.getStringExtra(EXTRA_NAME)
+        intent.getStringExtra(EXTRA_NAME)?.let { name = it }
         return handleText(intent)
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
@@ -228,15 +231,28 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         } else {
             Uri.fromFile(File(path))
         }
-        if (name == null) {
-            name = getNameWithoutExtension(uri!!.path!!)
+        if (!::name.isInitialized) {
+            name = getNameWithoutExtension(uri.path!!)
         }
         return loadUri(uri)
     }
 
     @SuppressLint("CheckResult")
-    private fun loadUri(uri: Uri?): Observable<String> {
-        return Observable.fromCallable { read(context.contentResolver.openInputStream(uri!!)!!) }
+    private fun loadUri(uri: Uri): Observable<String> {
+        return Observable
+            .fromCallable {
+                val resolver = context.contentResolver
+                val rawBytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: ByteArray(0)
+
+                mCurrentCharset = StringUtils.detectCharset(rawBytes).charsetOrDefault()
+                mHadBom = StringUtils.hasBom(rawBytes, mCurrentCharset)
+
+                val effectiveBytes = if (mHadBom) {
+                    StringUtils.dropBom(rawBytes, mCurrentCharset)
+                } else rawBytes
+
+                String(effectiveBytes, mCurrentCharset)
+            }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { text: String -> setInitialText(text) }
@@ -386,7 +402,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     @JvmOverloads
-    fun run(showMessage: Boolean, file: File? = uri!!.path?.let { File(it) }, overriddenFullPath: String? = null): ScriptExecution? {
+    fun run(showMessage: Boolean, file: File? = uri.path?.let { File(it) }, overriddenFullPath: String? = null): ScriptExecution? {
         file ?: return null
         if (showMessage) {
             showSnack(this, R.string.text_start_running)
@@ -394,7 +410,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         // TODO by Stardust on Oct 24, 2018.
         val execution = runWithBroadcastSender(
             file,
-            workingDirectory = uri!!.path?.let { File(it).parent },
+            workingDirectory = uri.path?.let { File(it).parent },
             overriddenFullPath,
         ) ?: return null
         scriptExecutionId = execution.id
@@ -402,8 +418,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         return execution
     }
 
-    private fun runTmpFile(file: File? = uri!!.path?.let { File(it) }): ScriptExecution? {
-        return run(true, file, uri!!.path)
+    private fun runTmpFile(file: File? = uri.path?.let { File(it) }): ScriptExecution? {
+        return run(true, file, uri.path)
     }
 
     private fun undo() = editor.undo()
@@ -411,12 +427,16 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private fun redo() = editor.redo()
 
     fun save(): Observable<String> {
-        val path = uri!!.path
+        val path = uri.path!!
         val backPath = "$path.save"
-        move(path!!, backPath)
-        return Observable.just(editor.text)
+        move(path, backPath)
+        return Observable
+            .fromCallable {
+                editor.text.apply {
+                    writeTextWithCharset(uri, this)
+                }
+            }
             .observeOn(Schedulers.io())
-            .doOnNext { s: String? -> write(context.contentResolver.openOutputStream(uri!!)!!, s!!) }
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
                 editor.markTextAsSaved()
@@ -427,6 +447,13 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     Log.e(TAG, "save: failed")
                 }
             }
+    }
+
+    private fun writeTextWithCharset(uri: Uri, text: String) {
+        context.contentResolver.openOutputStream(uri, "rwt")?.use { out ->
+            if (mHadBom) out.write(StringUtils.bomBytes(mCurrentCharset))
+            out.write(text.toByteArray(mCurrentCharset))
+        } ?: throw IOException("Cannot open output stream for $uri")
     }
 
     fun forceStop() {
@@ -468,9 +495,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun openByOtherApps() {
-        if (uri != null) {
-            openByOtherApps(uri!!)
-        }
+        openByOtherApps(uri)
     }
 
     fun beautifyCode() {

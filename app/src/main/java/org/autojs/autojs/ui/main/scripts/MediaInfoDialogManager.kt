@@ -53,7 +53,10 @@ object MediaInfoDialogManager {
             .neutralText(R.string.ellipsis_six)
             .neutralColorRes(R.color.dialog_button_unavailable)
             .show()
-            .apply { setOnDismissListener { scope.cancel() } }
+            .apply {
+                makeTextCopyable { titleView }
+                setOnDismissListener { scope.cancel() }
+            }
 
         scope.launch {
             val mediaInfo = MediaInfo()
@@ -106,12 +109,9 @@ object MediaInfoDialogManager {
                 }
             }
 
-            withContext(Dispatchers.Main) {
-                restoreEssentialViews(binding, context)
-                updateGuidelines(binding)
-                updateSplitLineVisibility(binding)
-                dialog.makeTextCopyable { it.titleView }
-            }
+            restoreEssentialViews(binding, context)
+            updateGuidelines(binding)
+            updateSplitLineVisibility(binding)
 
             when (val containerFormat = containerFormatDeferred.await()) {
                 MEDIA_INFO_ERROR_OPENING_FILE -> {
