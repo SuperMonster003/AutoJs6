@@ -392,7 +392,7 @@ public class ScriptOperations {
                 .title(mContext.getString(R.string.text_confirm_to_delete))
                 .content(scriptFile.getName())
                 .negativeText(R.string.text_cancel)
-                .positiveText(R.string.text_ok)
+                .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_caution)
                 .onPositive((dialog, which) -> deleteWithoutConfirm(scriptFile))
                 .build()
@@ -413,7 +413,7 @@ public class ScriptOperations {
                 .content(content)
                 .negativeText(R.string.text_cancel)
                 .negativeColorRes(R.color.dialog_button_default)
-                .positiveText(R.string.text_ok)
+                .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_warn)
                 .onPositive((dialog, which) -> setAsWorkingDirNow(scriptFile))
                 .build()
@@ -491,7 +491,7 @@ public class ScriptOperations {
                 .justScriptFile()
                 .singleChoice(file -> importFile(file.getPath()).subscribe())
                 .title(R.string.text_select_file_to_import)
-                .positiveText(R.string.text_ok)
+                .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .show();
     }

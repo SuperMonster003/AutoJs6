@@ -117,6 +117,13 @@
     <string name="dialog_title_theme_color_details">主题色详情</string>
     <string name="edit_and_run_handle_intent_error">无法处理文件</string>
     <string name="edit_exit_without_save_warn">内容尚未保存, 确定要退出吗</string>
+    <string name="editable_file_info_byte_count_label">字节数</string>
+    <string name="editable_file_info_char_count_label">字符数</string>
+    <string name="editable_file_info_file_charset_label">编码</string>
+    <string name="editable_file_info_file_path_label">路径</string>
+    <string name="editable_file_info_file_size_label">大小</string>
+    <string name="editable_file_info_line_break_label">换行</string>
+    <string name="editable_file_info_line_count_label">总行数</string>
     <string name="entry_app_language_auto">跟随系统</string>
     <string name="entry_documentation_source_local">本地文档</string>
     <string name="entry_documentation_source_online">在线文档</string>
@@ -219,6 +226,12 @@
     <string name="error_no_accessibility_permission">无障碍服务未启用</string>
     <string name="error_no_accessibility_permission_to_capture">无障碍服务未启用</string>
     <string name="error_no_accessibility_service">没有无障碍服务</string>
+    <string name="error_no_applications_available_for_browsing_this_link">未找到用于浏览该链接的应用</string>
+    <string name="error_no_applications_available_for_editing_this_file">未找到用于编辑该文件的应用</string>
+    <string name="error_no_applications_available_for_installing_this_file">未找到用于安装该文件的应用</string>
+    <string name="error_no_applications_available_for_playing_this_file">未找到用于播放该文件的应用</string>
+    <string name="error_no_applications_available_for_sending_this_file">未找到用于发送该文件的应用</string>
+    <string name="error_no_applications_available_for_viewing_this_file">未找到用于查看该文件的应用</string>
     <string name="error_no_display_over_other_apps_permission">缺少 \"显示在其他应用上层\" 权限</string>
     <string name="error_no_permission_to_access_shizuku">缺少 Shizuku 访问权限</string>
     <string name="error_no_post_notifications_permission">缺少 \"发布通知\" 权限</string>
@@ -261,6 +274,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">未知结果类型 {名称: %s, 参数: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">未知选择器 {名称: %s, 类型: %s}</string>
     <string name="error_unknown_type">未知类型: %s</string>
+    <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 格式无法使用 quality 质量参数进行压缩, 可改用 JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">文件不存在或不可读: %s</string>
     <string name="foreground_notification_channel_name">AutoJs6 前台服务</string>
     <string name="foreground_notification_text">点击返回 AutoJs6 主界面</string>
@@ -466,6 +480,7 @@
     <string name="text_command_already_copied_to_clip">指令已复制到剪贴板</string>
     <string name="text_comment">注释</string>
     <string name="text_compatibility">兼容性</string>
+    <string name="text_confidence_level">置信度</string>
     <string name="text_config">配置</string>
     <string name="text_confirm_to_clear_all_histories">是否确定清空历史记录</string>
     <string name="text_confirm_to_clear_all_items">是否确定清空全部记录</string>
@@ -556,6 +571,7 @@
     <string name="text_error">错误</string>
     <string name="text_error_copy_file">文件复制失败: %s</string>
     <string name="text_error_report">错误报告</string>
+    <string name="text_estimated">预估</string>
     <string name="text_execute">执行</string>
     <string name="text_execute_code">执行代码</string>
     <string name="text_execution_finished" formatted="false">[%s] 运行结束 (用时 %s 秒)\n</string>
@@ -590,6 +606,7 @@
     <string name="text_failed_to_send_log_entries">日志条目发送失败</string>
     <string name="text_failed_to_write_file">文件写入失败</string>
     <string name="text_file">文件</string>
+    <string name="text_file_details">文件详情</string>
     <string name="text_file_exists">文件已存在</string>
     <string name="text_file_explorer">文件管理器</string>
     <string name="text_file_extensions_title">文件扩展名</string>
@@ -628,6 +645,8 @@
     <string name="text_hidden_files_title">隐藏文件和文件夹</string>
     <string name="text_hide">隐藏</string>
     <string name="text_hide_button">隐藏按钮</string>
+    <string name="text_hide_node">隐藏此节点</string>
+    <string name="text_hide_same_frame_nodes">隐藏同框节点</string>
     <string name="text_histories">历史记录</string>
     <string name="text_icon">图标</string>
     <string name="text_ignore_battery_optimizations">忽略电池优化</string>
@@ -1035,14 +1054,5 @@
     <string name="text_write_secure_settings">修改安全设置</string>
     <string name="text_write_secure_settings_description">安全设置包含应用程序可读但不可写入的设置选项, 这些选项只能由 UI 或系统级别应用修改.\n被授予 \"修改安全设置权限\" 后, 普通应用可直接修改上述安全设置 (例如无障碍服务).</string>
     <string name="text_write_system_settings">修改系统设置</string>
-    <string name="text_hide_node">隐藏此节点</string>
-    <string name="text_hide_same_frame_nodes">隐藏同框节点</string>
-    <string name="error_no_applications_available_for_editing_this_file">未找到用于编辑该文件的应用</string>
-    <string name="error_no_applications_available_for_browsing_this_link">未找到用于浏览该链接的应用</string>
-    <string name="error_no_applications_available_for_installing_this_file">未找到用于安装该文件的应用</string>
-    <string name="error_no_applications_available_for_viewing_this_file">未找到用于查看该文件的应用</string>
-    <string name="error_no_applications_available_for_sending_this_file">未找到用于发送该文件的应用</string>
-    <string name="error_no_applications_available_for_playing_this_file">未找到用于播放该文件的应用</string>
-    <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 格式无法使用 quality 质量参数进行压缩, 可改用 JPEG/PNG/WebP-Lossy</string>
 
 </resources>

@@ -40,18 +40,26 @@ object MaterialDialogExtensions {
         }
     }
 
-    fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, textValue: String?) {
+    fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, textValuePair: Pair<String?, String?>) {
+        setCopyableTextIfAbsent(textView, textValuePair.first, textValuePair.second)
+    }
+
+    fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, textValue: String?, suffix: String? = null) {
         if (textView.text == context.getString(R.string.ellipsis_six)) {
-            textView.text = textValue.takeUnless { it.isNullOrBlank() } ?: context.getString(R.string.text_unknown)
+            textView.text = textValue.takeUnless { it.isNullOrBlank() }?.let { it + (suffix ?: "") } ?: context.getString(R.string.text_unknown)
         }
         this.makeTextCopyable(textView, textValue)
     }
 
     fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, scope: CoroutineScope, f: () -> String?) {
+        setCopyableTextIfAbsent(textView, scope, f, suffix = null)
+    }
+
+    fun MaterialDialog.setCopyableTextIfAbsent(textView: TextView, scope: CoroutineScope, f: () -> String?, suffix: String?) {
         scope.launch(Dispatchers.IO) {
             val textValue = f.invoke()
             withContext(Dispatchers.Main) {
-                setCopyableTextIfAbsent(textView, textValue)
+                setCopyableTextIfAbsent(textView, textValue, suffix)
             }
         }
     }

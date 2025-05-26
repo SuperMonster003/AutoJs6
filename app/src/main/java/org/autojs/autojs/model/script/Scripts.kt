@@ -12,6 +12,7 @@ import org.autojs.autojs.external.ScriptIntents
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.external.shortcut.Shortcut
 import org.autojs.autojs.external.shortcut.ShortcutActivity
+import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.ui.edit.EditActivity
@@ -81,7 +82,7 @@ object Scripts {
         IntentUtils.viewFile(
             globalAppContext,
             uri,
-            "text/plain",
+            Mime.TEXT_PLAIN,
             AppFileProvider.AUTHORITY,
             ToastExceptionHolder(globalAppContext),
         )

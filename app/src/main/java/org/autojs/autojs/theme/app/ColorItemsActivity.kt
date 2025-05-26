@@ -23,6 +23,8 @@ import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
 import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.extension.ViewExtensions.setOnSubtitleViewClickListener
+import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewClickListener
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
@@ -105,7 +107,10 @@ class ColorItemsActivity : ColorSelectBaseActivity() {
                 showColorDetails(ThemeColorManager.colorPrimary, getSubtitle(false))
             }
             else -> null
-        }.let { toolbar.setOnClickListener(it) }
+        }.let {
+            toolbar.setOnTitleViewClickListener(it)
+            toolbar.setOnSubtitleViewClickListener(it)
+        }
     }
 
     override fun getSubtitle(withHexSuffix: Boolean): String? = when (mLibrary.id) {

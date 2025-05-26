@@ -121,6 +121,13 @@
     <string name="dialog_title_theme_color_details">테마 색상 세부정보</string>
     <string name="edit_and_run_handle_intent_error">파일을 처리 할 수 없습니다</string>
     <string name="edit_exit_without_save_warn">콘텐츠가 저장되지 않았습니다. 나가시겠습니까?</string>
+    <string name="editable_file_info_byte_count_label">바이트수</string>
+    <string name="editable_file_info_char_count_label">문자수</string>
+    <string name="editable_file_info_file_charset_label">문자셋</string>
+    <string name="editable_file_info_file_path_label">경로</string>
+    <string name="editable_file_info_file_size_label">크기</string>
+    <string name="editable_file_info_line_break_label">줄바꿈</string>
+    <string name="editable_file_info_line_count_label">줄수</string>
     <string name="entry_app_language_auto">시스템을 따르십시오</string>
     <string name="entry_documentation_source_local">현지 문서</string>
     <string name="entry_documentation_source_online">온라인 문서</string>
@@ -223,6 +230,12 @@
     <string name="error_no_accessibility_permission">접근성 서비스가 비활성화되고 스크립트가 중지되었습니다</string>
     <string name="error_no_accessibility_permission_to_capture">접근성 서비스는 활성화되지 않습니다</string>
     <string name="error_no_accessibility_service">접근성 서비스가 없습니다</string>
+    <string name="error_no_applications_available_for_browsing_this_link">이 링크를 탐색할 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_editing_this_file">이 파일을 편집할 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_installing_this_file">이 파일을 설치할 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_playing_this_file">이 파일을 재생할 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_sending_this_file">이 파일을 전송할 수 있는 앱이 없습니다</string>
+    <string name="error_no_applications_available_for_viewing_this_file">이 파일을 볼 수 있는 앱이 없습니다</string>
     <string name="error_no_display_over_other_apps_permission">\"다른 앱 위에 표시\"권한이 없습니다</string>
     <string name="error_no_permission_to_access_shizuku">Shizuku 에 액세스할 수 있는 권한이 없습니다</string>
     <string name="error_no_post_notifications_permission">\"게시물 알림\" 권한 없음</string>
@@ -265,6 +278,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">알 수없는 결과 유형 {이름: %s, 매개 변수: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">알 수없는 선택기 {이름: %s, 유형: %s}</string>
     <string name="error_unknown_type">알 수없는 유형: %s</string>
+    <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 형식은 품질 파라미터로 압축할 수 없습니다, 대신 JPEG/PNG/WebP-Lossy를 사용하세요</string>
     <string name="file_not_exist_or_readable">파일이 존재하지 않거나 읽을 수 없습니다: %s</string>
     <string name="foreground_notification_channel_name">AutoJs6 전경 서비스</string>
     <string name="foreground_notification_text">AutoJs6 을 시작하려면 클릭하십시오</string>
@@ -470,6 +484,7 @@
     <string name="text_command_already_copied_to_clip">클립 보드에 복사 된 명령</string>
     <string name="text_comment">논평</string>
     <string name="text_compatibility">호환성</string>
+    <string name="text_confidence_level">신뢰도</string>
     <string name="text_config">구성</string>
     <string name="text_confirm_to_clear_all_histories">모든 기록을 삭제하시겠습니까?</string>
     <string name="text_confirm_to_clear_all_items">모든 항목을 삭제하시겠습니까?</string>
@@ -560,6 +575,7 @@
     <string name="text_error">오류</string>
     <string name="text_error_copy_file" formatted="true">파일을 복사하지 못했습니다: %s</string>
     <string name="text_error_report">버그 보고서</string>
+    <string name="text_estimated">추정</string>
     <string name="text_execute">실행하다</string>
     <string name="text_execute_code">코드를 실행하십시오</string>
     <string name="text_execution_finished" formatted="false">[%s] 는 %s 초 만에 완료되었습니다.\n</string>
@@ -594,6 +610,7 @@
     <string name="text_failed_to_send_log_entries">로그 항목을 보내지 못했습니다</string>
     <string name="text_failed_to_write_file">파일을 쓰지 못했습니다</string>
     <string name="text_file">파일</string>
+    <string name="text_file_details">파일 세부정보</string>
     <string name="text_file_exists">존재하는 파일입니다</string>
     <string name="text_file_explorer">파일 탐색기</string>
     <string name="text_file_extensions_title">파일 확장자</string>
@@ -632,6 +649,8 @@
     <string name="text_hidden_files_title">숨겨진 파일과 폴더</string>
     <string name="text_hide">숨기기</string>
     <string name="text_hide_button">버튼 숨기기</string>
+    <string name="text_hide_node">이 노드를 숨기기</string>
+    <string name="text_hide_same_frame_nodes">동일 프레임의 노드를 숨기기</string>
     <string name="text_histories">역사</string>
     <string name="text_icon">상</string>
     <string name="text_ignore_battery_optimizations">배터리 최적화를 무시합니다</string>
@@ -1039,14 +1058,5 @@
     <string name="text_write_secure_settings">보안 설정을 작성하십시오</string>
     <string name="text_write_secure_settings_description">애플리케이션이 읽을 수 있지만 쓸 수없는 시스템 환경 설정을 포함하는 보안 시스템 설정.\n이들은 사용자가 시스템 앱의 UI 를 통해 명시 적으로 수정 해야하는 선호도입니다.\n보안 시스템 설정 권한을 사용하면 일반 애플리케이션이 보안 설정 (예: 접근성 서비스)을 직접 수정할 수 있습니다.</string>
     <string name="text_write_system_settings">시스템 설정을 작성하십시오</string>
-    <string name="text_hide_node">이 노드를 숨기기</string>
-    <string name="text_hide_same_frame_nodes">동일 프레임의 노드를 숨기기</string>
-    <string name="error_no_applications_available_for_editing_this_file">이 파일을 편집할 수 있는 앱이 없습니다</string>
-    <string name="error_no_applications_available_for_browsing_this_link">이 링크를 탐색할 수 있는 앱이 없습니다</string>
-    <string name="error_no_applications_available_for_installing_this_file">이 파일을 설치할 수 있는 앱이 없습니다</string>
-    <string name="error_no_applications_available_for_viewing_this_file">이 파일을 볼 수 있는 앱이 없습니다</string>
-    <string name="error_no_applications_available_for_sending_this_file">이 파일을 전송할 수 있는 앱이 없습니다</string>
-    <string name="error_no_applications_available_for_playing_this_file">이 파일을 재생할 수 있는 앱이 없습니다</string>
-    <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 형식은 품질 파라미터로 압축할 수 없습니다, 대신 JPEG/PNG/WebP-Lossy를 사용하세요</string>
 
 </resources>

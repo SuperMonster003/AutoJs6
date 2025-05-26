@@ -90,7 +90,7 @@ public class ShortcutCreateActivity extends AppCompatActivity {
                 .title(R.string.text_send_shortcut)
                 .negativeText(R.string.dialog_button_cancel)
                 .negativeColorRes(R.color.dialog_button_default)
-                .positiveText(R.string.text_ok)
+                .positiveText(R.string.dialog_button_confirm)
                 .positiveColorRes(R.color.dialog_button_attraction)
                 .onPositive((dialog, which) -> {
                     createShortcut();

@@ -13,6 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
+import com.android.apksig.ApkVerifier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -71,8 +72,8 @@ object ApkInfoDialogManager {
             .onNegative { materialDialog, _ -> materialDialog.dismiss() }
             .show()
             .apply {
+                makeTextCopyable { titleView }
                 setOnDismissListener { scope.cancel() }
-                makeTextCopyable { it.titleView }
             }
 
         scope.launch {
@@ -226,15 +227,32 @@ object ApkInfoDialogManager {
     }
 
     private fun getApkSignatureInfo(apkFile: File): String? = runCatching {
-        // ApkVerifier.Builder(apkFile).build().verify().run {
-        //     listOfNotNull(
-        //         "V1".takeIf { isVerifiedUsingV1Scheme || hasV1Signature(apkFile) },
-        //         "V2".takeIf { isVerifiedUsingV2Scheme },
-        //         "V3".takeIf { isVerifiedUsingV3Scheme },
-        //         "V4".takeIf { isVerifiedUsingV4Scheme },
-        //     ).takeUnless { it.isEmpty() }?.joinToString(" + ")
-        // }
+        // @Hint by JetBrains AI Assistant on May 21, 2025.
+        //  ! APK (Zip) has an "APK Signing Block" at the end,
+        //  ! storing <ID/Data> pairs for V2/V3/V4 sequentially.
+        //  ! Only need to locate and check for corresponding ID to determine signature data existence.
+        //  ! zh-CN:
+        //  ! APK (Zip) 末尾有一段 "APK Signing Block", 依次存放 V2/V3/V4 的 <ID/数据> 对.
+        //  ! 只需定位并查看其中是否存在对应 ID, 即可判断是否存在签名数据.
         ApkSignatureDetector.detectSchemes(apkFile)
+    }.getOrNull() ?: getApkSignatureInfoLegacy(apkFile)
+
+    private fun getApkSignatureInfoLegacy(apkFile: File): String? = runCatching {
+        // @Hint by JetBrains AI Assistant on May 21, 2025.
+        //  ! `ApkVerifier.verify()` parses ZIP structure to find V2/V3/V4 Signing Block,
+        //  ! calculates hash values (SHA-256/512) for each signature scheme segment,
+        //  ! requiring re-traversal of files for each signature.
+        //  ! zh-CN:
+        //  ! `ApkVerifier.verify()` 解析 ZIP 结构找到 V2/V3/V4 Signing Block,
+        //  ! 对每一种签名方案逐段计算哈希值 (SHA-256/512), 每种签名都需要重新遍历文件.
+        ApkVerifier.Builder(apkFile).build().verify().run {
+            listOfNotNull(
+                "V1".takeIf { isVerifiedUsingV1Scheme || ApkSignatureDetector.hasV1Signature(apkFile) },
+                "V2".takeIf { isVerifiedUsingV2Scheme },
+                "V3".takeIf { isVerifiedUsingV3Scheme },
+                "V4".takeIf { isVerifiedUsingV4Scheme },
+            ).takeUnless { it.isEmpty() }?.joinToString(" + ")
+        }
     }.getOrNull()
 
     private data class ApkInfo(

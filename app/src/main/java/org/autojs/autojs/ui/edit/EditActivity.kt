@@ -16,7 +16,6 @@ import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -26,11 +25,14 @@ import org.autojs.autojs.app.OnActivityResultDelegate.DelegateHost
 import org.autojs.autojs.core.permission.OnRequestPermissionsResultCallback
 import org.autojs.autojs.core.permission.PermissionRequestProxyActivity
 import org.autojs.autojs.core.permission.RequestPermissionCallbacks
+import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewClickListener
+import org.autojs.autojs.extension.ViewExtensions.titleView
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.theme.widget.ThemeColorToolbar
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.ui.main.scripts.EditableFileInfoDialogManager
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils.onceGlobalLayout
 import org.autojs.autojs.util.ViewUtils.setMenuIconsColorByThemeColorLuminance
@@ -38,6 +40,8 @@ import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.ActivityEditBinding
 import java.io.File
 import java.io.IOException
+import androidx.core.view.get
+import androidx.core.view.size
 
 /**
  * Created by Stardust on Jan 29, 2017.
@@ -61,6 +65,11 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         val binding = ActivityEditBinding.inflate(layoutInflater).also { setContentView(it.root) }
         mToolbar = findViewById<ThemeColorToolbar>(R.id.toolbar).apply {
             setTitleTextAppearance(this@EditActivity, R.style.TextAppearanceEditorTitle)
+            setOnTitleViewClickListener {
+                EditableFileInfoDialogManager.showEditableFileInfoDialog(this@EditActivity, mEditorView.uri.path?.let { File(it) }) {
+                    mEditorView.editor.text
+                }
+            }
         }
         mEditorView = binding.editorView.apply {
             handleIntent(intent)
@@ -91,27 +100,24 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         menuInflater.inflate(R.menu.menu_editor, menu)
         mToolbar?.let { toolbar ->
             toolbar.setMenuIconsColorByThemeColorLuminance(this)
-            toolbar.onceGlobalLayout {
-                val titleView = toolbar.findViewById(com.google.android.material.R.id.action_bar_title) ?: run {
-                    Toolbar::class.java.getDeclaredField("mTitleTextView").apply { isAccessible = true }.get(toolbar) as TextView?
-                }
-                titleView?.adjustTitleTextView()
-            }
+            toolbar.onceGlobalLayout { toolbar.titleView?.adjustTitleTextView() }
         }
         return true
     }
 
     private fun TextView.adjustTitleTextView() = this.post {
-        ValueAnimator.ofFloat(this.textSize, calculatedTextSize(this) ?: return@post).let {
-            it.duration = 120L
-            it.addUpdateListener { this.setTextSize(TypedValue.COMPLEX_UNIT_PX, it.animatedValue as Float) }
-            it.start()
+        ValueAnimator.ofFloat(this.textSize, calculatedTextSize(this) ?: return@post).let { animator ->
+            animator.duration = 120L
+            animator.addUpdateListener { this.setTextSize(TypedValue.COMPLEX_UNIT_PX, it.animatedValue as Float) }
+            animator.start()
         }
     }
 
     // @Created by JetBrains AI Assistant on Mar 24, 2025.
     private fun calculatedTextSize(textView: TextView): Float? {
-        // 可用宽度, 排除内边距
+
+        // Available width excluding padding.
+        // zh-CN: 可用宽度, 排除内边距.
         val availableWidth = textView.width - textView.paddingLeft - textView.paddingRight
         if (availableWidth <= 0) return null
 
@@ -120,7 +126,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         val paint: TextPaint = textView.paint
         val step = resources.getDimension(R.dimen.editor_title_text_size_step)
 
-        /* ---------- 尝试一行显示 (单行) ---------- */
+        /* Try single line display.
+         * zh-CN: 尝试一行显示 (单行). */
 
         textView.isSingleLine = true
         textView.maxLines = 1
@@ -128,27 +135,32 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         var oneLineTextSizePx = textView.textSize
         val minOneLineSizePx = resources.getDimension(R.dimen.editor_title_min_text_size_single_line)
 
-        // 测量一行文字宽度
+        // Measure single line text width.
+        // zh-CN: 测量一行文字宽度.
         paint.textSize = oneLineTextSizePx
         var measuredWidth = paint.measureText(textStr)
-        // 当文字宽度超出可用宽度并且字号还高于下限的时候逐步降低字号
+        // Gradually decrease text size when width exceeds and size is above minimum.
+        // zh-CN: 当文字宽度超出可用宽度并且字号还高于下限的时候逐步降低字号.
         while (measuredWidth > availableWidth && oneLineTextSizePx > minOneLineSizePx) {
             oneLineTextSizePx -= step
             paint.textSize = oneLineTextSizePx
             measuredWidth = paint.measureText(textStr)
         }
 
-        // 如果一行能够显示文字, 则直接应用修改
+        // If text fits in one line, apply changes directly.
+        // zh-CN: 如果一行能够显示文字, 则直接应用修改.
         if (measuredWidth <= availableWidth) {
             return oneLineTextSizePx
         }
 
-        /* ---------- 切换为两行显示 ---------- */
+        /* Switch to double line display.
+         * zh-CN: 切换为两行显示. */
 
         textView.isSingleLine = false
         textView.maxLines = 2
 
-        // 重置字号
+        // Reset text size.
+        // zh-CN: 重置字号.
         var twoLineTextSize = when (isNonAscii) {
             true -> resources.getDimension(R.dimen.editor_title_text_size_double_line_non_ascii)
             else -> resources.getDimension(R.dimen.editor_title_text_size_double_line_ascii)
@@ -157,7 +169,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         val minTwoLineSize = resources.getDimension(R.dimen.editor_title_min_text_size_double_line)
         paint.textSize = twoLineTextSize
 
-        // 检查两行显示是否足够: 利用 StaticLayout 测量文字显示效果
+        // Check if two lines are sufficient using StaticLayout to measure text display.
+        // zh-CN: 检查两行显示是否足够: 利用 StaticLayout 测量文字显示效果.
         fun createStaticLayout(textSize: Float): StaticLayout {
             paint.textSize = textSize
             return StaticLayout.Builder
@@ -168,7 +181,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         }
 
         var layout = createStaticLayout(twoLineTextSize)
-        // 当行数超出了两行且字号尚未到达最低要求, 则逐步降低字号
+        // When line count exceeds 2 and text size is above minimum, decrease size gradually.
+        // zh-CN: 当行数超出了两行且字号尚未到达最低要求, 则逐步降低字号.
         while (layout.lineCount > 2 && twoLineTextSize > minTwoLineSize) {
             twoLineTextSize -= step
             layout = createStaticLayout(twoLineTextSize)
@@ -177,7 +191,8 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
             return twoLineTextSize
         }
 
-        /* ---------- 切换为三行显示 ---------- */
+        /* Switch to triple line display.
+         * zh-CN: 切换为三行显示. */
 
         textView.maxLines = 3
 
@@ -205,7 +220,7 @@ open class EditActivity : BaseActivity(), DelegateHost, PermissionRequestProxyAc
         Log.d(LOG_TAG, "onActionModeStarted: $mode")
 
         val menu = mode.menu
-        val item = menu.getItem(menu.size() - 1)
+        val item = menu[menu.size - 1]
 
         addMenuItem(menu, item.groupId, R.id.action_delete_line, 10000, R.string.text_delete_line) { mEditorMenu.deleteLine() }
         addMenuItem(menu, item.groupId, R.id.action_copy_line, 20000, R.string.text_copy_line) { mEditorMenu.copyLine() }

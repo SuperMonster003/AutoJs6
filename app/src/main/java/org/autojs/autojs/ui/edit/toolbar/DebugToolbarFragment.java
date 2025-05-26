@@ -93,7 +93,7 @@ public class DebugToolbarFragment extends ToolbarFragment<FragmentDebugToolbarBi
         mDebugger = DebuggerSingleton.get();
         mDebugger.setWeakDebugCallback(new WeakReference<>(this));
         setInterrupted(false);
-        mCurrentEditorSourceUrl = mInitialEditorSourceUrl = mEditorView.uri != null ? mEditorView.uri.toString() : null;
+        mCurrentEditorSourceUrl = mInitialEditorSourceUrl = mEditorView.uri.toString();
         mInitialEditorSource = mEditorView.editor.getText();
         setupEditor();
         ScriptExecution execution = mEditorView.run(false);

@@ -119,6 +119,13 @@
     <string name="dialog_title_theme_color_details">Détails de la couleur du thème</string>
     <string name="edit_and_run_handle_intent_error">Cannot process file</string>
     <string name="edit_exit_without_save_warn">Le contenu n\'a pas été enregistré, êtes-vous sûr de vouloir quitter ?</string>
+    <string name="editable_file_info_byte_count_label">Octets</string>
+    <string name="editable_file_info_char_count_label">Caractères</string>
+    <string name="editable_file_info_file_charset_label">Encodage</string>
+    <string name="editable_file_info_file_path_label">Chemin</string>
+    <string name="editable_file_info_file_size_label">Taille</string>
+    <string name="editable_file_info_line_break_label">Saut</string>
+    <string name="editable_file_info_line_count_label">Lignes</string>
     <string name="entry_app_language_auto">Suivre le système</string>
     <string name="entry_documentation_source_local">Documents locaux</string>
     <string name="entry_documentation_source_online">Documents en ligne</string>
@@ -221,6 +228,12 @@
     <string name="error_no_accessibility_permission">Le service d\'accessibilité est désactivé et le script s\'est arrêté</string>.
     <string name="error_no_accessibility_permission_to_capture">Le service d\'accessibilité n\'est pas activé</string>.
     <string name="error_no_accessibility_service">No accessibility service</string>
+    <string name="error_no_applications_available_for_browsing_this_link">Aucune application disponible pour parcourir ce lien</string>
+    <string name="error_no_applications_available_for_editing_this_file">Aucune application disponible pour modifier ce fichier</string>
+    <string name="error_no_applications_available_for_installing_this_file">Aucune application disponible pour installer ce fichier</string>
+    <string name="error_no_applications_available_for_playing_this_file">Aucune application disponible pour lire ce fichier</string>
+    <string name="error_no_applications_available_for_sending_this_file">Aucune application disponible pour envoyer ce fichier</string>
+    <string name="error_no_applications_available_for_viewing_this_file">Aucune application disponible pour afficher ce fichier</string>
     <string name="error_no_display_over_other_apps_permission">Aucune permission \"display over other apps\"</string>
     <string name="error_no_permission_to_access_shizuku">Pas de permission pour accéder à Shizuku</string>
     <string name="error_no_post_notifications_permission">Pas d\'autorisation pour les \"notifications d\'envoi\"</string>
@@ -263,6 +276,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">Type de résultat inconnu {nom : %s, params : %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">Sélecteur inconnu {nom : %s, type : %s}</string>
     <string name="error_unknown_type">Type inconnu : %s</string>
+    <string name="error_webp_lossless_quality_not_supported">Le format WebP-Lossless ne peut pas être compressé avec un paramètre de qualité ; utilisez plutôt JPEG/PNG/WebP-Lossy</string>
     <string name="file_not_exist_or_readable">Le fichier n\'existe pas ou n\'est pas lisible : %s</string>
     <string name="foreground_notification_channel_name">Service d\'avant-plan AutoJs6</string>
     <string name="foreground_notification_text">Cliquez pour lancer AutoJs6</string>
@@ -468,6 +482,7 @@
     <string name="text_command_already_copied_to_clip">Commande copiée dans le presse-papiers</string>
     <string name="text_comment">Commentaire</string>
     <string name="text_compatibility">Compatibilité</string>
+    <string name="text_confidence_level">Confiance</string>
     <string name="text_config">Configuration</string>
     <string name="text_confirm_to_clear_all_histories">Êtes-vous sûr de vouloir effacer tous les historiques ?</string>
     <string name="text_confirm_to_clear_all_items">Voulez-vous vraiment effacer tous les éléments ?</string>
@@ -558,6 +573,7 @@
     <string name="text_error">Erreur</string>
     <string name="text_error_copy_file" formatted="true">Failed to copy file : %s</string>
     <string name="text_error_report">Rapport de bug</string>
+    <string name="text_estimated">Estimé</string>
     <string name="text_execute">Exécuter</string>
     <string name="text_execute_code">Exécuter le code</string>
     <string name="text_execution_finished" formatted="false">[%s] finished in %s seconds.\n</string>
@@ -592,6 +608,7 @@
     <string name="text_failed_to_send_log_entries">Échec de l\'envoi des entrées de journal</string>
     <string name="text_failed_to_write_file">Fail to write file</string>
     <string name="text_file">Fichier</string>
+    <string name="text_file_details">Détails du fichier</string>
     <string name="text_file_exists">Fichier déjà existant</string>
     <string name="text_file_explorer">Explorateur de fichiers</string>
     <string name="text_file_extensions_title">Extensions de fichier</string>
@@ -630,6 +647,8 @@
     <string name="text_hidden_files_title">Fichiers et dossiers cachés</string>
     <string name="text_hide">Cacher</string>
     <string name="text_hide_button">Bouton de cacher</string>
+    <string name="text_hide_node">Masquer ce nœud</string>
+    <string name="text_hide_same_frame_nodes">Masquer le nœud du même cadre</string>
     <string name="text_histories">Histoires</string>
     <string name="text_icon">Icône</string>
     <string name="text_ignore_battery_optimizations">Ignorer les optimisations de la batterie</string>.
@@ -1037,14 +1056,5 @@
     <string name="text_write_secure_settings">Écrire les paramètres de sécurité</string>.
     <string name="text_write_secure_settings_description">Paramètres de sécurité du système, contenant les préférences du système que les applications peuvent lire mais ne sont pas autorisées à écrire.\nIl s\'agit des préférences que l\'utilisateur doit explicitement modifier par le biais de l\'interface utilisateur d\'une application système.\nAvec l\'autorisation de paramètres de sécurité du système, les applications normales peuvent directement modifier les paramètres de sécurité (comme le service d\'accessibilité).</string>
     <string name="text_write_system_settings">Écrire les paramètres système</string>
-    <string name="text_hide_node">Masquer ce nœud</string>
-    <string name="text_hide_same_frame_nodes">Masquer le nœud du même cadre</string>
-    <string name="error_no_applications_available_for_editing_this_file">Aucune application disponible pour modifier ce fichier</string>
-    <string name="error_no_applications_available_for_browsing_this_link">Aucune application disponible pour parcourir ce lien</string>
-    <string name="error_no_applications_available_for_installing_this_file">Aucune application disponible pour installer ce fichier</string>
-    <string name="error_no_applications_available_for_viewing_this_file">Aucune application disponible pour afficher ce fichier</string>
-    <string name="error_no_applications_available_for_sending_this_file">Aucune application disponible pour envoyer ce fichier</string>
-    <string name="error_no_applications_available_for_playing_this_file">Aucune application disponible pour lire ce fichier</string>
-    <string name="error_webp_lossless_quality_not_supported">Le format WebP-Lossless ne peut pas être compressé avec un paramètre de qualité ; utilisez plutôt JPEG/PNG/WebP-Lossy</string>
 
 </resources>

@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import androidx.recyclerview.widget.ThemeColorRecyclerView
 import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.extension.ViewExtensions.setOnSubtitleViewClickListener
+import org.autojs.autojs.extension.ViewExtensions.setOnTitleViewClickListener
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ViewUtils
@@ -52,7 +54,8 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             setUpAppBar(it.appBar, it.appBarContainer)
             it.toolbar.let { toolbar ->
                 setUpToolbar(toolbar)
-                toolbar.setOnClickListener { true.also { showThemeColorDetails() } }
+                toolbar.setOnTitleViewClickListener { showThemeColorDetails() }
+                toolbar.setOnSubtitleViewClickListener { showThemeColorDetails() }
                 toolbar.setOnLongClickListener { true.also { /* toggleFabVisibility() */ } }
             }
         }

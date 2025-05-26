@@ -120,6 +120,13 @@
     <string name="dialog_title_theme_color_details">テーマカラー詳細</string>
     <string name="edit_and_run_handle_intent_error">ファイルを処理できません</string>
     <string name="edit_exit_without_save_warn">内容が保存されていませんので, 本当に終了しますか?</string>
+    <string name="editable_file_info_byte_count_label">バイト数</string>
+    <string name="editable_file_info_char_count_label">文字数</string>
+    <string name="editable_file_info_file_charset_label">文字コード</string>
+    <string name="editable_file_info_file_path_label">パス</string>
+    <string name="editable_file_info_file_size_label">サイズ</string>
+    <string name="editable_file_info_line_break_label">改行</string>
+    <string name="editable_file_info_line_count_label">行数</string>
     <string name="entry_app_language_auto">システムに従ってください</string>
     <string name="entry_documentation_source_local">ローカルドキュメント</string>
     <string name="entry_documentation_source_online">オンラインドキュメント</string>
@@ -222,6 +229,12 @@
     <string name="error_no_accessibility_permission">アクセシビリティサービスが無効で, スクリプトが停止しています</string>
     <string name="error_no_accessibility_permission_to_capture">アクセシビリティサービスが有効になっていない</string>
     <string name="error_no_accessibility_service">アクセシビリティ・サービスがありません</string>
+    <string name="error_no_applications_available_for_browsing_this_link">このリンクを閲覧できるアプリがありません</string>
+    <string name="error_no_applications_available_for_editing_this_file">このファイルを編集できるアプリがありません</string>
+    <string name="error_no_applications_available_for_installing_this_file">このファイルをインストールできるアプリがありません</string>
+    <string name="error_no_applications_available_for_playing_this_file">このファイルを再生できるアプリがありません</string>
+    <string name="error_no_applications_available_for_sending_this_file">このファイルを送信できるアプリがありません</string>
+    <string name="error_no_applications_available_for_viewing_this_file">このファイルを表示できるアプリがありません</string>
     <string name="error_no_display_over_other_apps_permission">他のアプリの上に表示する」権限がない</string>
     <string name="error_no_permission_to_access_shizuku">Shizuku にアクセスする権限がありません</string>
     <string name="error_no_post_notifications_permission">\"投稿通知\" 許可なし</string>
@@ -264,6 +277,7 @@
     <string name="error_unknown_picker_result_type_with_params" formatted="false">不明な結果タイプ {name: %s, params: %s}</string>
     <string name="error_unknown_picker_selector_type" formatted="false">不明なセレクタ {name: %s, type: %s} です</string>
     <string name="error_unknown_type">不明なタイプ: %s</string>
+    <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 形式は品質パラメータで圧縮できません, 代わりに JPEG/PNG/WebP-Lossy を使用してください</string>
     <string name="file_not_exist_or_readable">ファイルが存在しないか, 読み取り可能でない: %s</string>
     <string name="foreground_notification_channel_name">AutoJs6 のフォアグラウンド サービス</string>
     <string name="foreground_notification_text">クリックすると, AutoJs6 が起動します</string>
@@ -469,6 +483,7 @@
     <string name="text_command_already_copied_to_clip">クリップボードにコピーされたコマンド</string>
     <string name="text_comment">コメント</string>
     <string name="text_compatibility">互換性</string>
+    <string name="text_confidence_level">信頼度</string>
     <string name="text_config">設定</string>
     <string name="text_confirm_to_clear_all_histories">すべての履歴をクリアしてもよろしいですか?</string>
     <string name="text_confirm_to_clear_all_items">すべての項目を削除しますか?</string>
@@ -559,6 +574,7 @@
     <string name="text_error">エラー</string>
     <string name="text_error_copy_file" formatted="true">ファイルのコピーに失敗しました. %s</string>
     <string name="text_error_report">バグレポート</string>
+    <string name="text_estimated">推定</string>
     <string name="text_execute">実行</string>
     <string name="text_execute_code">実行コード</string>
     <string name="text_execution_finished" formatted="false">[%s] は %s 秒で終了しました</string>
@@ -593,6 +609,7 @@
     <string name="text_failed_to_send_log_entries">ログ・エントリの送信に失敗しました</string>
     <string name="text_failed_to_write_file">ファイルの書き込みに失敗しました</string>
     <string name="text_file">ファイル</string>
+    <string name="text_file_details">ファイルの詳細</string>
     <string name="text_file_exists">ファイルは既に存在しています</string>
     <string name="text_file_explorer">ファイルエクスプローラー</string>
     <string name="text_file_extensions_title">ファイル拡張子</string>
@@ -631,6 +648,8 @@
     <string name="text_hidden_files_title">隠しファイル・隠しフォルダー</string>
     <string name="text_hide">隠す</string>
     <string name="text_hide_button">隠しボタン</string>
+    <string name="text_hide_node">このノードを隠す</string>
+    <string name="text_hide_same_frame_nodes">同じフレームのノードを隠す</string>
     <string name="text_histories">ヒストリー</string>
     <string name="text_icon">アイコン</string>
     <string name="text_ignore_battery_optimizations">バッテリーの最適化を無視する</string>
@@ -1038,14 +1057,5 @@
     <string name="text_write_secure_settings">セキュリティ設定の書き込み</string>
     <string name="text_write_secure_settings_description">アプリケーションが読み取ることはできるが, 書き込むことはできないシステム環境設定を含む, 安全なシステム設定です.\nこれは, ユーザーがシステムアプリの UI を通じて明示的に変更する必要がある環境設定のためのものです.\nセキュアなシステム設定を許可すると, 通常のアプリケーションはセキュアな設定 (アクセシビリティサービスなど) を直接変更できるようになります</string>
     <string name="text_write_system_settings">システム設定の書き込み</string>
-    <string name="text_hide_node">このノードを隠す</string>
-    <string name="text_hide_same_frame_nodes">同じフレームのノードを隠す</string>
-    <string name="error_no_applications_available_for_editing_this_file">このファイルを編集できるアプリがありません</string>
-    <string name="error_no_applications_available_for_browsing_this_link">このリンクを閲覧できるアプリがありません</string>
-    <string name="error_no_applications_available_for_installing_this_file">このファイルをインストールできるアプリがありません</string>
-    <string name="error_no_applications_available_for_viewing_this_file">このファイルを表示できるアプリがありません</string>
-    <string name="error_no_applications_available_for_sending_this_file">このファイルを送信できるアプリがありません</string>
-    <string name="error_no_applications_available_for_playing_this_file">このファイルを再生できるアプリがありません</string>
-    <string name="error_webp_lossless_quality_not_supported">WebP-Lossless 形式は品質パラメータで圧縮できません, 代わりに JPEG/PNG/WebP-Lossy を使用してください</string>
 
 </resources>
