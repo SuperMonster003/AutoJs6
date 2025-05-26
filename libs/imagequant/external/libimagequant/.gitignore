@@ -24,4 +24,3 @@ msvc-dist/configure
 msvc-dist/.gitignore
 quantized_example.png
 example
-lodepng.?
